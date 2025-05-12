@@ -1,4 +1,4 @@
-# khubus_front
+# Raspy (mobile)
 
 ## Project setup
 ```

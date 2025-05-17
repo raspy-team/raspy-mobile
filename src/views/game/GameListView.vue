@@ -1,38 +1,117 @@
 <template>
-  <div class="pt-20 pb-8 bg-white min-h-screen flex flex-col">
-    <Header />
+  <div class="min-h-screen bg-gray-50 flex flex-col">
+    <HeaderComp />
 
-    <h2 class="text-xl font-semibold mb-6 text-center">게임 목록</h2>
+    <div class="bg-white shadow-sm z-10 px-4 md:px-8 pt-20">
+<!-- 지역 선택 박스 -->
+      <div class="bg-white shadow-sm z-10 px-4 md:px-8 py-4">
+        <div class="max-w-4xl mx-auto w-full">
+          <label class="block text-sm text-gray-700 font-medium mb-2">📍 지역 선택</label>
+          <div class="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0">
+            <!-- 1차 지역 -->
+            <select v-model="selectedPrimary" @change="handlePrimaryChange"
+                    class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-indigo-200">
+              <option value="" disabled selected>시/도 선택</option>
+              <option v-for="(districts, primary) in regionMap" :key="primary" :value="primary">
+                {{ primary }}
+              </option>
+            </select>
 
-    <div v-if="loading" class="text-center text-gray-500">불러오는 중...</div>
-    <div v-else-if="games.length === 0" class="text-center text-gray-400">표시할 게임이 없습니다</div>
+            <!-- 2차 지역 -->
+            <select v-model="selectedSecondary" :disabled="!selectedPrimary" @change="fetchGames"
+                    class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-indigo-200 disabled:bg-gray-100 disabled:text-gray-400">
+              <option value="" disabled selected>시/군/구 선택</option>
+              <option v-for="sub in regionMap[selectedPrimary] || []" :key="sub" :value="sub">
+                {{ sub }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="justify-between flex text-sm mt-3">
+          <!-- 필터 버튼 -->
+          <div class="relative w-[30%]">
+            <button @click="showFilterMenu = !showFilterMenu" class="border w-full text-center items-center py-4 rounded hover:bg-gray-100">
+              필터
+            </button>
+            <div v-if="showFilterMenu" class="absolute right-0 mt-2 bg-white border rounded shadow-md z-20 text-left">
+              <button @click="setSort('popular')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
+                인기순
+              </button>
+              <button @click="setSort('latest')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
+                최신순
+              </button>
+            </div>
+          </div>
 
-    <div v-else class="space-y-4 flex-1">
-      <div v-for="game in games" :key="game.id" class="p-4 border rounded-lg shadow-sm">
-        <h3 class="text-lg font-bold mb-1">{{ game.title }}</h3>
-        <p class="text-sm text-gray-500">{{ game.majorCategory }} > {{ game.minorCategory }}</p>
-        <p class="text-sm text-gray-700 mt-1">{{ game.description }}</p>
-        <p class="text-sm text-gray-500 mt-2">
-          인원: {{ game.currentParticipantCounts }} / {{ game.maxPlayers }}
-        </p>
-        <p class="text-sm text-gray-500">일시: {{ formatDate(game.matchDate) }}</p>
-        <p class="text-sm text-gray-500">장소: {{ game.matchLocation || '미정' }}</p>
-        <button
-          class="mt-3 px-4 py-2 rounded text-white text-sm font-medium"
-          :class="game.applied ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'"
-          :disabled="game.applied"
-          @click="() => !game.applied && confirmApply(game)"
-        >
-          {{ game.applied ? '신청 완료' : '신청하기' }}
-        </button>
+          <!-- 인박스 / 생성 -->
+          <router-link to="/inbox" class="border w-[30%] text-center items-center py-4 rounded hover:bg-gray-100">인박스</router-link>
+          <router-link to="/create-game" class="border w-[30%] text-center items-center py-4 rounded hover:bg-gray-100">생성</router-link>
+        </div>
       </div>
     </div>
 
-    <footer class="mt-8 py-4 border-t text-center text-sm text-gray-500">
-      <router-link to="/inbox" class="text-blue-600 hover:underline mr-4">📥 인박스 바로가기</router-link>
-      <router-link to="/create-game" class="text-blue-600 hover:underline">🎮 게임 생성하기</router-link>
-      <router-link to="/upcoming-games" class="text-blue-600 hover:underline">📥 나의 예정된 게임</router-link>
-    </footer>
+    <main class="flex-1 pt-6 pb-16 px-4 md:px-8 max-w-4xl mx-0">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">📋 현재 모집 중인 경기</h2>
+
+      <div v-if="loading" class="text-center text-gray-500">불러오는 중...</div>
+      <div v-else-if="games.length === 0" class="text-center text-gray-400">표시할 경기가 없습니다</div>
+
+      <div v-else class="space-y-6">
+        <div v-for="game in games" :key="game.id" class="bg-white border rounded-lg shadow-sm p-6">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-xl font-bold text-gray-900">{{ game.title }}</h3>
+            <p class="text-sm text-gray-400">생성: {{ formatDate(game.createdAt) }}</p>
+          </div>
+
+          <!-- 참가자 -->
+          <div class="flex items-center space-x-3 mb-3">
+            <img :src="game.ownerProfileUrl" alt="profile" class="w-9 h-9 rounded-full object-cover" />
+            <p class="text-sm text-gray-700 font-medium">{{ game.ownerNickname }}</p>
+          </div>
+
+          <!-- 카테고리 -->
+          <div class="text-sm text-gray-600 mb-2">
+            카테고리: <span class="font-semibold">{{ game.majorCategory }}</span> / {{ game.minorCategory }}
+          </div>
+
+          <!-- 일정, 장소 -->
+          <div class="text-sm text-gray-700 mb-3">
+            🕒 {{ formatDate(game.matchDate) }}<br />
+            📍 {{ game.matchLocation || '장소 미정' }}
+          </div>
+
+          <!-- 룰 정보 -->
+          <div class="bg-gray-100 p-4 rounded mb-3">
+            <p class="text-sm text-gray-500 mb-1">룰 제목</p>
+            <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
+            <p class="text-sm text-gray-700 mt-1">{{ game.ruleDescription }}</p>
+            <p class="text-sm text-gray-600 mt-2"><strong>승리 조건:</strong> {{ game.winCondition }}</p>
+          </div>
+
+          <!-- 포맷 -->
+          <div class="text-sm text-gray-600 mb-2">
+            포인트: {{ game.points }} / 세트: {{ game.sets }} / 듀레이션: {{ game.duration }}
+          </div>
+
+          <!-- 하단: 인원 + 버튼 -->
+          <div class="flex justify-between items-center mt-4">
+            <p class="text-sm text-gray-500">
+              인원: {{ game.currentParticipantCounts }} / {{ game.maxPlayers }}
+            </p>
+            <button
+              class="px-4 py-2 rounded text-white text-sm font-medium"
+              :class="game.applied ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600'"
+              :disabled="game.applied"
+              @click="() => !game.applied && confirmApply(game)"
+            >
+              {{ game.applied ? '신청 완료' : '참가' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <FooterNav />
 
     <CustomAlert v-if="alertMsg" :message="alertMsg" @confirm="applyConfirmed" @cancel="() => alertMsg = ''" />
     <CustomToast />
@@ -42,10 +121,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '../../api/api'
-import Header from '../../components/HeaderComp.vue'
-import { useToast } from '../../composable/useToast'
+import HeaderComp from '../../components/HeaderComp.vue'
+import FooterNav from '../../components/FooterNav.vue'
 import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
+import { useToast } from '../../composable/useToast'
 
 const { showToast } = useToast()
 
@@ -54,10 +134,39 @@ const loading = ref(true)
 const alertMsg = ref('')
 const selectedGame = ref(null)
 
+const sortOption = ref('latest')
+const showFilterMenu = ref(false)
+
+const regionMap = {
+  '서울시': ['강남구', '마포구', '송파구'],
+  '경기도': ['수원시', '성남시', '고양시'],
+  '부산시': ['해운대구', '금정구'],
+  '대구시': ['수성구', '중구']
+}
+
+const selectedPrimary = ref('')
+const selectedSecondary = ref('')
+
+const handlePrimaryChange = () => {
+  selectedSecondary.value = ''
+}
+
+
 const fetchGames = async () => {
+  loading.value = true
   try {
-    const res = await api.get('/api/games/list')
-    games.value = res.data.map(game => ({ ...game, applied: false }))
+    const res = await api.get('/api/games/list', {
+      params: {
+      region: selectedPrimary.value && selectedSecondary.value
+            ? `${selectedPrimary.value} ${selectedSecondary.value}`
+            : null,       
+       sort: sortOption.value,
+      },
+    })
+    games.value = res.data.map(game => ({
+      ...game,
+      applied: false
+    }))
   } catch (err) {
     console.error('게임 목록 로드 실패', err)
   } finally {
@@ -65,7 +174,13 @@ const fetchGames = async () => {
   }
 }
 
-const formatDate = dateStr => {
+const setSort = (option) => {
+  sortOption.value = option
+  showFilterMenu.value = false
+  fetchGames()
+}
+
+const formatDate = (dateStr) => {
   if (!dateStr) return '미정'
   const date = new Date(dateStr)
   return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
@@ -73,7 +188,7 @@ const formatDate = dateStr => {
 
 const confirmApply = (game) => {
   selectedGame.value = game
-  alertMsg.value = `정말로 ${game.title} 게임에 신청하시겠습니까?`
+  alertMsg.value = `${game.ownerNickname}님의 경기에 신청하시겠습니까?`
 }
 
 const applyConfirmed = async () => {
@@ -82,7 +197,6 @@ const applyConfirmed = async () => {
     await api.post(`/api/games/${selectedGame.value.id}/apply`)
     showToast('신청이 완료되었습니다!')
   } catch (err) {
-    console.error('신청 실패', err.response?.data?.message)
     showToast(err.response?.data?.message || '신청 실패. 다시 시도해주세요.')
   } finally {
     alertMsg.value = ''
@@ -92,13 +206,3 @@ const applyConfirmed = async () => {
 
 onMounted(fetchGames)
 </script>
-
-<style>
-@keyframes fadein {
-  0% { opacity: 0; transform: translate(-50%, 10px); }
-  100% { opacity: 1; transform: translate(-50%, 0); }
-}
-.animate-fadein {
-  animation: fadein 0.3s ease-out;
-}
-</style>

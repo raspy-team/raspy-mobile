@@ -91,7 +91,7 @@ const handleLogin = async () => {
       password: password.value,
     })
     localStorage.setItem('accessToken', res.data.token)
-    router.push('/game-list')
+    router.push('/set-profile?init=1')
   } catch (err) {
     submitError.value = '로그인 실패: 이메일 또는 비밀번호를 확인하세요'
   }

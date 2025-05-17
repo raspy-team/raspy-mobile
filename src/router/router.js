@@ -8,6 +8,7 @@ import Inbox from "../views/InboxView.vue"
 import UpcomingGames from "../views/game/UpcomingGameListView.vue"
 import GameChatView from "../views/game/ChatView.vue"
 import CreateGame from "../views/game/CreateGameView.vue"
+import SettingProfile from "../views/profile/SettingProfileView.vue"
 
 const routes = [
   {
@@ -21,6 +22,10 @@ const routes = [
   {
     path: '/register',
     component: Register
+  },
+  {
+    path: '/set-profile',
+    component: SettingProfile
   },
   {
     path: '/inbox',

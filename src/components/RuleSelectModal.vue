@@ -8,10 +8,20 @@
 
       <ul class="space-y-4 max-h-96 overflow-y-auto">
         <li v-for="rule in rules" :key="rule.id"
-            class="border p-4 rounded hover:bg-gray-50 cursor-pointer transition"
-            @click="selectRule(rule)">
+            class="border p-4 rounded hover:bg-gray-50 transition space-y-2">
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-gray-800">{{ rule.ruleTitle }}</h3>
+              <p class="text-xs text-gray-500 mt-1">{{ rule.majorCategory }} / {{ rule.minorCategory }}</p>
+            </div>
+            <button
+              @click="selectRule(rule)"
+              class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
+              선택
+            </button>
+          </div>
           <p class="text-sm text-gray-700 whitespace-pre-line">{{ rule.ruleDescription }}</p>
-          <p class="text-xs text-gray-500 mt-1">
+          <p class="text-xs text-gray-500">
             점수: {{ rule.pointsToWin }} / 세트: {{ rule.setsToWin }} / 시간: {{ rule.duration }}초 / 승리 조건: {{ rule.winBy }}
           </p>
         </li>
@@ -25,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted , defineEmits} from 'vue'
+import { ref, onMounted , defineEmits } from 'vue'
 import api from '../api/api'
 
 const rules = ref([])
@@ -46,9 +56,15 @@ const fetchRules = async () => {
 
 const selectRule = (rule) => {
   emit('select', {
-    referencedRuleId: rule.id
+    referencedRuleId: rule.id,
+    ruleDescription: rule.ruleDescription,
+    pointsToWin: rule.pointsToWin,
+    setsToWin: rule.setsToWin,
+    duration: rule.duration,
+    winBy: rule.winBy
   })
 }
+
 
 onMounted(fetchRules)
 </script>

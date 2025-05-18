@@ -1,7 +1,7 @@
 <template>
   <header class="fixed top-0 left-0 w-full bg-white shadow z-50">
     <div class="max-w-4xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-      <router-link to="/" class="text-xl font-bold text-indigo-600">GameMatch</router-link>
+      <router-link to="/" class="text-xl font-bold text-indigo-600">Raspy</router-link>
 
       <div class="flex items-center space-x-4">
         <router-link to="/notifications" class="text-gray-500 hover:text-indigo-500">

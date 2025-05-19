@@ -1,4 +1,5 @@
 <template>
+  <Header></Header>
   <div class="pt-20 pb-6 px-4 max-w-3xl mx-auto">
     <div class="flex justify-center space-x-4 mb-6">
       <button @click="activeTab = 'sent'" :class="tabClass('sent')">보낸 요청</button>
@@ -7,10 +8,13 @@
     <MyRequestsTab v-if="activeTab === 'sent'" />
     <ApplicantsTab v-else />
   </div>
+  <Footer tab="inbox"></Footer>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import Header from "../components/HeaderComp.vue"
+import Footer from "../components/FooterNav.vue"
 import MyRequestsTab from '../components/Inbox/MyRequestsTab.vue'
 import ApplicantsTab from '../components/Inbox/ApplicantsTab.vue'
 

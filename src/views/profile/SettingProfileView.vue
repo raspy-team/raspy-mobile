@@ -1,6 +1,7 @@
 <template>
   <div class="pt-10 pb-12 px-6 max-w-xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6 text-center">프로필 설정</h2>
+    <h2 v-if="showSkip" class="text-xl font-semibold mb-6">환영합니다! 당신을 알려주세요</h2>
+    <h2 v-else class="text-2xl font-bold mb-6 text-center">프로필 설정</h2>
 
     <form @submit.prevent="submitProfile" class="space-y-6">
       <!-- 나이 -->

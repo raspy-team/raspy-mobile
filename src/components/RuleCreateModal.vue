@@ -32,8 +32,8 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">승리 판정 기준</label>
           <select v-model="form.winBy" class="input" required>
             <option disabled value="">승리 조건 선택</option>
-            <option value="SETS_HALF_WIN">세트 과반 승리</option>
-            <option value="MOST_SETS_AND_POINTS">최다 세트 + 점수</option>
+            <option value="SETS_HALF_WIN">과반 세트 승리</option>
+            <option value="MOST_SETS_AND_POINTS">최다 세트/점수 획득</option>
           </select>
           <p class="text-xs text-gray-400 mt-1">게임 종료 시점의 승패 판정 기준을 설정합니다.</p>
         </div>

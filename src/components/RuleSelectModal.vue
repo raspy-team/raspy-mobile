@@ -22,7 +22,7 @@
           </div>
           <p class="text-sm text-gray-700 whitespace-pre-line">{{ rule.ruleDescription }}</p>
           <p class="text-xs text-gray-500">
-            점수: {{ rule.pointsToWin }} / 세트: {{ rule.setsToWin }} / 시간: {{ rule.duration }}초 / 승리 조건: {{ rule.winBy }}
+            점수: {{ rule.pointsToWin }} / 세트: {{ rule.setsToWin }} / 시간: {{ rule.duration }}초 / 승리 조건: {{ winBy=='SETS_HALF_WIN' ? '과반 세트 승리' : '최다 세트/점수 획득' }}
           </p>
         </li>
       </ul>

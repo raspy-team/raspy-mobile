@@ -1,4 +1,5 @@
 <template>
+  <Header></Header>
   <div class="pt-20 pb-8 px-5 max-w-xl mx-auto">
     <h2 class="text-2xl font-bold mb-6 text-center">게임 생성</h2>
 
@@ -10,7 +11,7 @@
         <p class="text-sm text-gray-600 whitespace-pre-line">{{ selectedRule.ruleDescription }}</p>
         <p class="text-xs text-gray-500 mt-2">
           점수: {{ selectedRule.pointsToWin }} / 세트: {{ selectedRule.setsToWin }} /
-          시간: {{ selectedRule.duration }}초 / 승리 조건: {{ selectedRule.winBy }}
+          시간: {{ selectedRule.duration }}초 / 승리 조건: {{ selectedRule.winBy=='SETS_HALF_WIN' ? '과반 세트 승리' : '최다 세트/점수 획득' }}
         </p>
         <button @click="removeRule" class="mt-2 text-xs text-red-500 hover:underline">선택 취소</button>
       </div>
@@ -67,6 +68,8 @@
 
     <CustomToast />
   </div>
+
+  <Footer tab="create-game" />
 </template>
 
 <script setup>
@@ -77,7 +80,8 @@ import { useRouter } from 'vue-router'
 import CustomToast from '../../components/CustomToast.vue'
 import RuleSelectModal from '../../components/RuleSelectModal.vue'
 import RuleCreateModal from '../../components/RuleCreateModal.vue'
-
+import Header from "../../components/HeaderComp.vue"
+import Footer from "../../components/FooterNav.vue"
 const router = useRouter()
 const { showToast } = useToast()
 

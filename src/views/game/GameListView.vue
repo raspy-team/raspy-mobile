@@ -1,8 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col">
-    <HeaderComp />
+      <HeaderComp />
 
-    <div class="bg-white shadow-sm z-10 px-4 md:px-8 pt-20">
+  <div class="min-h-screen bg-gray-50 flex flex-col mb-20">
+
+    <div class="bg-white shadow-sm z-10 px-4 md:px-8 pt-20 mb-2">
 <!-- 지역 선택 박스 -->
       <div class="bg-white shadow-sm z-10 px-4 md:px-8 py-4">
         <div class="max-w-4xl mx-auto w-full">
@@ -25,15 +26,48 @@
                 {{ sub }}
               </option>
             </select>
+            
+
+            
           </div>
+
+                 
         </div>
-        <div class="justify-between flex text-sm mt-3">
+ 
+      </div>
+    </div>
+    <div class="fixed bottom-20 left-5 text-center"> 
+            <router-link to="/create-game" >
+              <div class="bg-blue-500 inline-block text-white w-full md:mx-8 py-3 px-3 mt-3 rounded-[30px] text-center text-sm font-semibold">
+                <div class="flex items-center justify-center gap-2">
+                    <span>
+                    <svg width="14" height="14" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 3.5H1" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3.5 1V6" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    </span>
+                    <span>
+                      게임 만들기
+                    </span>
+                  </div>
+                </div>
+            </router-link>
+    </div>
+    <main class="flex-1 pt-6 pb-16 px-4 md:px-8 max-w-4xl mx-0">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center flex justify-between items-center">
+        <span>
+          모집 중인 경기
+        </span>
+        <div class="text-left">
+          <button @click="showFilterMenu = !showFilterMenu" class=" text-[0.7rem] border bg-blue-500 text-white px-5  text-center items-center py-0 rounded">
+                  필터
+          </button>
+        </div>
+      </h2>
+        <div class="text-sm mt-[-0.6rem]">
           <!-- 필터 버튼 -->
-          <div class="relative w-[30%]">
-            <button @click="showFilterMenu = !showFilterMenu" class="border w-full text-center items-center py-4 rounded hover:bg-gray-100">
-              필터
-            </button>
-            <div v-if="showFilterMenu" class="absolute right-0 mt-2 bg-white border rounded shadow-md z-20 text-left">
+          <div class="relative w-[100%]">
+            <div v-if="showFilterMenu" class="absolute right-0 mt-0 bg-white border rounded shadow-md z-20 text-right">
               <button @click="setSort('popular')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
                 인기순
               </button>
@@ -42,17 +76,7 @@
               </button>
             </div>
           </div>
-
-          <!-- 인박스 / 생성 -->
-          <router-link to="/inbox" class="border w-[30%] text-center items-center py-4 rounded hover:bg-gray-100">인박스</router-link>
-          <router-link to="/create-game" class="border w-[30%] text-center items-center py-4 rounded hover:bg-gray-100">생성</router-link>
         </div>
-      </div>
-    </div>
-
-    <main class="flex-1 pt-6 pb-16 px-4 md:px-8 max-w-4xl mx-0">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">📋 현재 모집 중인 경기</h2>
-
       <div v-if="loading" class="text-center text-gray-500">불러오는 중...</div>
       <div v-else-if="games.length === 0" class="text-center text-gray-400">표시할 경기가 없습니다</div>
 
@@ -85,7 +109,7 @@
             <p class="text-sm text-gray-500 mb-1">룰 제목</p>
             <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
             <p class="text-sm text-gray-700 mt-1">{{ game.ruleDescription }}</p>
-            <p class="text-sm text-gray-600 mt-2"><strong>승리 조건:</strong> {{ game.winCondition }}</p>
+            <p class="text-sm text-gray-600 mt-2"><strong>승리 조건:</strong>  {{ game.winCondition=='SETS_HALF_WIN' ? '과반 세트 승리' : '최다 세트/점수 획득' }}</p>
           </div>
 
           <!-- 포맷 -->
@@ -111,11 +135,12 @@
       </div>
     </main>
 
-    <FooterNav />
 
+
+  </div>
+      <FooterNav tab="home" />
     <CustomAlert v-if="alertMsg" :message="alertMsg" @confirm="applyConfirmed" @cancel="() => alertMsg = ''" />
     <CustomToast />
-  </div>
 </template>
 
 <script setup>

@@ -5,7 +5,7 @@ import Register from "../views/auth/RegisterView.vue"
 
 import GameList from "../views/game/GameListView.vue"
 import Inbox from "../views/InboxView.vue"
-import UpcomingGames from "../views/game/UpcomingGameListView.vue"
+import MyGameList from "../views/game/MyGameListView.vue"
 import GameChatView from "../views/game/ChatView.vue"
 import CreateGame from "../views/game/CreateGameView.vue"
 import SettingProfile from "../views/profile/SettingProfileView.vue"
@@ -15,6 +15,11 @@ const routes = [
     path: '/game-list',
     component: GameList
   },
+  {
+    path: '/',
+    component: GameList
+  },
+
   {
     path: '/login',
     component: Login
@@ -32,8 +37,8 @@ const routes = [
     component: Inbox
   },
   {
-    path: '/upcoming-games',
-    component: UpcomingGames
+    path: '/my-games',
+    component: MyGameList
   },
   {
     path: '/chat/:gameId',

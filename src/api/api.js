@@ -2,7 +2,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080', // 백엔드 주소
+  baseURL: '', // 백엔드 주소 (프록시 처리)
   withCredentials: true, // 필요시 쿠키도 함께 보낼 수 있음
 })
 

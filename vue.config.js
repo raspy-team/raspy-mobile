@@ -1,16 +1,22 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
+
   devServer: {
-    port: 8081, 
+    port: 8081,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        ws: true // WebSocket 프록시
+      }
+    }
   },
-    pages: {
+    
+  pages: {
     index: {
-      // main entry point
-      entry: 'src/main.js', // 또는 main.ts
-      // HTML template 위치 명시
+      entry: 'src/main.js',
       template: 'public/index.html',
-      // 빌드될 파일명
       filename: 'index.html'
     }
   }

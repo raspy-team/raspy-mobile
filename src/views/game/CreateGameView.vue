@@ -1,5 +1,5 @@
 <template>
-  <Header></Header>
+  <Header title="게임 생성" hasReferer="1"></Header>
   <div class="pt-20 pb-8 px-5 max-w-xl mx-auto">
     <h2 class="text-2xl font-bold mb-6 text-center">게임 생성</h2>
 

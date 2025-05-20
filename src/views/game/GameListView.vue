@@ -4,6 +4,26 @@
   <div class="min-h-screen bg-gray-50 flex flex-col mb-20">
 
     <div class="bg-white shadow-sm z-10 px-4 md:px-8 pt-20 mb-2">
+
+      <router-link to="/inbox">
+        <div class="text-[#6B7280] bg-blue-200 flex justify-center p-4 items-center gap-1 font-[600] rounded-2xl my-2  w-full">
+          <span>
+             <svg width="20" height="20" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#bell)">
+                <path d="M13.5 8H10C9.73478 8 9.48043 8.10536 9.29289 8.29289C9.10536 8.48043 9 8.73478 9 9C9 9.53043 8.78929 10.0391 8.41421 10.4142C8.03914 10.7893 7.53043 11 7 11C6.46957 11 5.96086 10.7893 5.58579 10.4142C5.21071 10.0391 5 9.53043 5 9C5 8.73478 4.89464 8.48043 4.70711 8.29289C4.51957 8.10536 4.26522 8 4 8H0.5V12.5C0.5 12.7652 0.605357 13.0196 0.792893 13.2071C0.98043 13.3946 1.23478 13.5 1.5 13.5H12.5C12.7652 13.5 13.0196 13.3946 13.2071 13.2071C13.3946 13.0196 13.5 12.7652 13.5 12.5V8Z"
+                  :stroke="'#6B7280'" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M4.5 4L7 6.5L9.5 4" :stroke="'#6B7280'" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M7 0.5V6.5" :stroke="'#6B7280'" stroke-linecap="round" stroke-linejoin="round" />
+              </g>
+              <defs><clipPath id="bell"><rect width="14" height="14" fill="white" /></clipPath></defs>
+            </svg>
+          </span>
+          <span>
+            Inbox
+          </span>
+        </div>
+      </router-link>
+
 <!-- 지역 선택 박스 -->
       <div class="bg-white shadow-sm z-10 px-4 md:px-8 py-4">
         <div class="max-w-4xl mx-auto w-full">
@@ -38,7 +58,7 @@
     </div>
     <div class="fixed bottom-20 left-5 text-center"> 
             <router-link to="/create-game" >
-              <div class="bg-blue-500 inline-block text-white w-full md:mx-8 py-3 px-3 mt-3 rounded-[30px] text-center text-sm font-semibold">
+              <div class="bg-blue-500 inline-block text-white w-full md:mx-8 py-3 px-5 mt-3 rounded-[30px] text-center text-sm font-semibold">
                 <div class="flex items-center justify-center gap-2">
                     <span>
                     <svg width="14" height="14" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">

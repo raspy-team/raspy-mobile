@@ -13,15 +13,15 @@ function isActive(pathPrefix) {
   switch (pathPrefix) {
     case('/') : return props.tab=='home'
     case('/my-games') : return props.tab=='my-game'
-    case('/create-game') : return props.tab=='create-game'
-    case('/inbox') : return props.tab=='inbox'
+    // case('/create-game') : return props.tab=='create-game'
+    // case('/inbox') : return props.tab=='inbox'
     case('/profile') : return props.tab=='profile'
   }
 }
 </script>
 
 <template>
-  <nav class="fixed bottom-0 left-0 w-full bg-white border-t py-1 z-10">
+  <nav class="fixed bottom-0 left-0 px-10 w-full bg-white border-t py-1 z-10">
     <div class="max-w-4xl mx-auto h-14 px-6 flex justify-between items-center text-[0.72rem]">
       <!-- 홈 -->
       <router-link to="/" class="flex flex-col gap-y-2 items-center" :class="isActive('/') ? 'text-indigo-600' : 'text-gray-500'">
@@ -51,11 +51,11 @@ function isActive(pathPrefix) {
           </g>
           <defs><clipPath id="calendar"><rect width="14" height="14" fill="white" /></clipPath></defs>
         </svg>
-        <span>내 경기</span>
+        <span>진행</span>
       </router-link>
 
       <!-- 생성 -->
-      <router-link to="/create-game" class="flex flex-col gap-y-2 items-center" :class="isActive('/create-game') ? 'text-indigo-600' : 'text-gray-500'">
+      <!-- <router-link to="/create-game" class="flex flex-col gap-y-2 items-center" :class="isActive('/create-game') ? 'text-indigo-600' : 'text-gray-500'">
         <svg width="20" height="20" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#plus)">
             <path d="M12.5 0.5H1.5C0.947715 0.5 0.5 0.947715 0.5 1.5V12.5C0.5 13.0523 0.947715 13.5 1.5 13.5H12.5C13.0523 13.5 13.5 13.0523 13.5 12.5V1.5C13.5 0.947715 13.0523 0.5 12.5 0.5Z"
@@ -67,10 +67,10 @@ function isActive(pathPrefix) {
           <defs><clipPath id="plus"><rect width="14" height="14" fill="white" /></clipPath></defs>
         </svg>
         <span>생성</span>
-      </router-link>
+      </router-link> -->
 
       <!-- 인박스 -->
-      <router-link to="/inbox" class="flex flex-col gap-y-2 items-center" :class="isActive('/inbox') ? 'text-indigo-600' : 'text-gray-500'">
+      <!-- <router-link to="/inbox" class="flex flex-col gap-y-2 items-center" :class="isActive('/inbox') ? 'text-indigo-600' : 'text-gray-500'">
         <svg width="20" height="20" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#bell)">
             <path d="M13.5 8H10C9.73478 8 9.48043 8.10536 9.29289 8.29289C9.10536 8.48043 9 8.73478 9 9C9 9.53043 8.78929 10.0391 8.41421 10.4142C8.03914 10.7893 7.53043 11 7 11C6.46957 11 5.96086 10.7893 5.58579 10.4142C5.21071 10.0391 5 9.53043 5 9C5 8.73478 4.89464 8.48043 4.70711 8.29289C4.51957 8.10536 4.26522 8 4 8H0.5V12.5C0.5 12.7652 0.605357 13.0196 0.792893 13.2071C0.98043 13.3946 1.23478 13.5 1.5 13.5H12.5C12.7652 13.5 13.0196 13.3946 13.2071 13.2071C13.3946 13.0196 13.5 12.7652 13.5 12.5V8Z"
@@ -81,7 +81,7 @@ function isActive(pathPrefix) {
           <defs><clipPath id="bell"><rect width="14" height="14" fill="white" /></clipPath></defs>
         </svg>
         <span>인박스</span>
-      </router-link>
+      </router-link> -->
 
       <!-- 프로필 -->
       <router-link to="/profile" class="flex flex-col gap-y-2 items-center" :class="isActive('/profile') ? 'text-indigo-600' : 'text-gray-500'">

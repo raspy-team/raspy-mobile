@@ -1,4 +1,5 @@
 <template>
+  <Header :has-referer="true" title="채팅"/>
   <div class="flex flex-col h-screen bg-gray-50">
     <!-- Header -->
     <div class="flex items-center p-4 bg-white shadow">
@@ -61,6 +62,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '../../api/api'
+import Header from "../../components/HeaderComp.vue"
 import { useChat } from '../../composable/useChat'
 
 const route = useRoute()

@@ -1,5 +1,4 @@
 <template>
-  <HeaderComp />
   <div>
     <h2 class="font-semibold mb-4 text-lg">내 신청 내역</h2>
     <div v-if="games.length" class="space-y-6">
@@ -40,14 +39,11 @@
     </div>
     <div v-else class="text-center text-sm text-gray-400">신청한 게임이 없습니다.</div>
   </div>
-  <FooterNav />
 </template> 
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import client from '../../api/api'
-import HeaderComp from '../HeaderComp.vue'
-import FooterNav from '../FooterNav.vue'
 
 const games = ref([])
 

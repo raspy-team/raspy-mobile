@@ -1,5 +1,5 @@
 <template>
-  <Header></Header>
+  <Header :has-referer="true" title="인박스"></Header>
   <div class="pt-20 pb-6 px-4 max-w-3xl mx-auto">
     <div class="flex justify-center space-x-4 mb-6">
       <button @click="activeTab = 'sent'" :class="tabClass('sent')">보낸 요청</button>

@@ -1,6 +1,4 @@
 <template>
-  <HeaderComp />
-
   <div>
     <h2 class="font-semibold mb-4 text-lg">받은 요청</h2>
     <div v-if="groups.length" class="space-y-6">
@@ -45,15 +43,12 @@
     <div v-else class="text-center text-sm text-gray-400">받은 요청이 없습니다.</div>
   </div>
 
-  <FooterNav />
   <CustomToast />
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import client from '../../api/api'
-import HeaderComp from '../HeaderComp.vue'
-import FooterNav from '../FooterNav.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 const { showToast } = useToast()

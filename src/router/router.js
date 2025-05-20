@@ -10,6 +10,8 @@ import GameChatView from "../views/game/ChatView.vue"
 import CreateGame from "../views/game/CreateGameView.vue"
 import SettingProfile from "../views/profile/SettingProfileView.vue"
 import GameComment from "../views/GameCommentView.vue"
+import GamePlay from "../views/game/GamePlayView.vue"
+import GameResult from "../views/game/GameResultView.vue"
 
 const routes = [
   {
@@ -54,6 +56,16 @@ const routes = [
     path: '/games/:gameId/comments',
     name: 'GameComments',
     component: GameComment,
+    props: true
+  },
+    {
+    path: '/games/:gameId/play',
+    component: GamePlay,
+    props: true
+  },
+    {
+    path: '/games/:gameId/result',
+    component: GameResult,
     props: true
   }
 ]

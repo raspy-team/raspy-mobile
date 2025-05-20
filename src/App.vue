@@ -12,7 +12,7 @@
           · {{ activeGame.endsAt ? `종료까지 ${countdown}` : '제한 없음' }}
         </span>
         <router-link
-          :to="`/game/progress/${activeGame.id}`"
+          :to="`/games/${activeGame.id}/play`"
           class="bg-white text-green-700 px-2 py-2 rounded hover:bg-gray-100 text-xs"
         >
           게임방 이동

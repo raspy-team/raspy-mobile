@@ -85,6 +85,8 @@ import { onMounted, ref } from 'vue'
 import client from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import FooterNav from '../../components/FooterNav.vue'
+import {useRouter} from 'vue-router' 
+const router = useRouter()
 
 const games = ref([])
 
@@ -95,8 +97,7 @@ onMounted(async () => {
 
 const startGame = async (gameId) => {
   await client.post(`/api/games/${gameId}/start`)
-  alert('경기를 시작했습니다.')
-  location.reload()
+  router.push(`/games/${gameId}/play`)
 }
 
 function formatDate(dateStr) {

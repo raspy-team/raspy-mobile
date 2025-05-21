@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+  <div v-if="game" class="max-w-2xl mx-auto px-4 py-6 space-y-6">
     <!-- 제한 시간 상단 표시 -->
     <div class="fixed top-0 left-0 w-full bg-gray-900 text-white py-2 px-4 text-sm z-50 flex justify-between items-center">
       <span>⏱ 제한 시간: {{ timeLeft }}</span>
@@ -60,7 +60,7 @@ const route = useRoute()
 const router = useRouter()
 const gameId = route.params.gameId
 
-const game = ref({})
+const game = ref()
 const currentSet = ref(0)
 const score1 = ref(0)
 const score2 = ref(0)
@@ -69,6 +69,9 @@ const timeLeft = ref('')
 onMounted(async () => {
   const res = await api.get(`/api/games/${gameId}/detail`)
   game.value = res.data
+console.log(res.data)
+  console.log(game.value)
+
   score1.value = res.data.score1
   score2.value = res.data.score2
   currentSet.value = res.data.currentSet || 0

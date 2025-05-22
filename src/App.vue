@@ -32,15 +32,17 @@ const countdown = ref('')
 let interval = null
 
 onMounted(async () => {
-  const res = await api.get('/api/games/in-progress')
-  console.log(res.data)
-  if (res.data) {
-    activeGame.value = res.data
-    if (activeGame.value.endsAt) {
-      updateCountdown()
-      interval = setInterval(updateCountdown, 1000)
-    }
-  }
+  try{
+    const res = await api.get('/api/games/in-progress')
+    console.log(res.data)
+    if (res.data) {
+      activeGame.value = res.data
+      if (activeGame.value.endsAt) {
+        updateCountdown()
+        interval = setInterval(updateCountdown, 1000)
+      }
+    } 
+  } catch(e) {console.log("로그인이 안되어있어서")}
 })
 
 onBeforeUnmount(() => {

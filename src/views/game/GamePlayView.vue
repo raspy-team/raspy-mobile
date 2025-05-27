@@ -20,8 +20,8 @@
           <p class="text-2xl font-bold">{{ currentScore1 }}</p>
           <div class="text-xs text-gray-500">세트 승리: {{ user1SetsWon }}/{{ game.setsToWin }}</div>
           <div class="flex gap-1 mt-1">
-            <button @click="addScore(1, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
-            <button @click="addScore(1, -1)" :disabled="isSetOver || isGameOver || currentScore1<=0" class="px-2 rounded bg-gray-100">➖</button>
+            <button @click="sendScore(1, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
+            <button @click="sendScore(1, -1)" :disabled="isSetOver || isGameOver || currentScore1<=0" class="px-2 rounded bg-gray-100">➖</button>
           </div>
         </div>
         <p class="text-3xl font-bold text-gray-700">VS</p>
@@ -31,24 +31,20 @@
           <p class="text-2xl font-bold">{{ currentScore2 }}</p>
           <div class="text-xs text-gray-500">세트 승리: {{ user2SetsWon }}/{{ game.setsToWin }}</div>
           <div class="flex gap-1 mt-1">
-            <button @click="addScore(2, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
-            <button @click="addScore(2, -1)" :disabled="isSetOver || isGameOver || currentScore2<=0" class="px-2 rounded bg-gray-100">➖</button>
+            <button @click="sendScore(2, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
+            <button @click="sendScore(2, -1)" :disabled="isSetOver || isGameOver || currentScore2<=0" class="px-2 rounded bg-gray-100">➖</button>
           </div>
         </div>
       </div>
 
       <!-- 게임 정보 -->
       <div class="text-center text-sm text-gray-600">
-        <p>현재 세트: {{ currentSet + 1 }}</p>
+        <p>현재 세트: {{ currentSet }}</p>
         <p class="mt-2">{{ game.majorCategory }} - {{ game.minorCategory }} / {{ game.ruleTitle }}</p>
         <p class="mt-1">{{ game.place }} · {{ formatDate(game.matchDate) }}</p>
         <p class="mt-1">한 세트 승리 조건: {{ game.pointsToWin }}점</p>
       </div>
 
-      <!-- 테스트용: 세트 넘어가는 버튼 (아무데나 배치) -->
-      <div class="flex justify-center mt-4">
-        <button @click="forceNextSet" class="bg-gray-500 text-white px-3 py-1 rounded-full">[테스트] 세트 강제 넘기기</button>
-      </div>
 
       <!-- 세트 종료 시: 다음 세트 버튼 -->
       <div v-if="isSetOver && !isGameOver" class="flex justify-center mt-4">
@@ -98,6 +94,11 @@ const elapsedTimeStr = ref('0분 0초')
 const limitTimeStr = ref('')
 const timerRef = ref(null)
 
+const user1 = ref(null)
+const user2 = ref(null)
+
+const delta = 1; // fixed score delta value
+
 const formatDate = (dateStr) => {
   if (!dateStr) return ''
   const d = new Date(dateStr)
@@ -114,36 +115,42 @@ function startSet() {
   startTimer()
 }
 
-function addScore(userIdx, delta) {
+function addScore(userIdx) {
   if (isSetOver.value || isGameOver.value) return
-  if (userIdx === 1) {
+
+  if (userIdx == user1.value.id) {
     currentScore1.value = Math.max(0, currentScore1.value + delta)
   } else {
     currentScore2.value = Math.max(0, currentScore2.value + delta)
   }
+
   checkSetOver()
 }
 
 function checkSetOver() {
   if (currentScore1.value >= game.value.pointsToWin) {
     user1SetsWon.value++
+    currentSet.value ++
     finishSet(1)
     return
-  } else if (currentScore2.value >= game.value.pointsToWin) {
+  }  if (currentScore2.value >= game.value.pointsToWin) {
     user2SetsWon.value++
+    currentSet.value ++
     finishSet(2)
     return
   }
   if (game.value.limitSeconds !== -1 && elapsedSeconds.value >= game.value.limitSeconds) {
     if (currentScore1.value > currentScore2.value) {
       user1SetsWon.value++
+      currentSet.value ++
       finishSet(1)
     } else if (currentScore2.value > currentScore1.value) {
       user2SetsWon.value++
+      currentSet.value ++
       finishSet(2)
     } else {
-      finishSet(0)
-    }
+      finishSet(0) // 무승부 (기획상 무승부로 동작하진 않음)
+    } 
     return
   }
 }
@@ -151,17 +158,29 @@ function checkSetOver() {
 function finishSet(who) {
   isSetOver.value = true
   clearInterval(timerRef.value)
-  if (who === 1) winner.value = game.value.user1.nickname
-  else if (who === 2) winner.value = game.value.user2.nickname
-  else winner.value = '무승부'
+  if (who === 1) {
+    winner.value = game.value.user1.nickname
+    nextSet(game.value.user1.id)
+  }
+  else if (who === 2) { 
+    winner.value = game.value.user2.nickname
+    nextSet(game.value.user2.id)
+  }
+  // else winner.value = '무승부'
   showFinishModal.value = true
   if (
     user1SetsWon.value >= game.value.setsToWin ||
     user2SetsWon.value >= game.value.setsToWin
   ) {
+  /**
+   * 조건 세트 수가 채워져, 게임이 종료됨.
+   */
     isGameOver.value = true
     isSetOver.value = false
+
+    finishGame()
   }
+
 }
 
 function closeFinishModal() {
@@ -169,15 +188,16 @@ function closeFinishModal() {
 }
 
 function startTimer() {
+  if(isGameOver.value) return
   clearInterval(timerRef.value)
   updateElapsed()
   timerRef.value = setInterval(updateElapsed, 1000)
 }
 
 function updateElapsed() {
-  // 경과 시간: startedAt 기준으로 현 시각에서 1초씩 증가
-  if (!game.value?.startedAt) return
-  const startedAt = new Date(game.value.startedAt)
+  // 경과 시간: setStartedAt 기준으로 현 시각에서 1초씩 증가
+  if (!game.value?.setStartedAt) return
+  const startedAt = new Date(game.value.setStartedAt)
   const now = new Date()
   elapsedSeconds.value = Math.floor((now - startedAt) / 1000)
   elapsedTimeStr.value = getTimeStr(elapsedSeconds.value)
@@ -216,28 +236,32 @@ function handleVisibilityChange() {
   }
 }
 
-function forceNextSet() {
-  // 테스트 용도로 세트 강제 종료 후 다음 세트로 이동
-  if (!isGameOver.value) {
-    finishSet(0)
-  }
-}
 
 onMounted(async () => {
   const res = await api.get(`/api/games/${gameId}/detail`)
   game.value = res.data
   chatRoomId.value = res.data.chatRoomId
-  currentSet.value = res.data.currentSet || 0
-  user1SetsWon.value = 0
-  user2SetsWon.value = 0
+
+  currentScore1.value = res.data.score1
+  currentScore2.value = res.data.score2
+
+
+  currentSet.value = res.data.set1  + res.data.set2 || 0
+  user1SetsWon.value = res.data.set1
+  user2SetsWon.value = res.data.set2
+  user1.value = res.data.user1
+  user2.value = res.data.user2
+
   isSetOver.value = false
   isGameOver.value = false
+  console.log(game.value)
   startSet()
   socket.connect(chatRoomId.value, () => {
     socket.subscribe(`${chatRoomId.value}`)
     socket.onMessage((payload) => {
+      console.log(payload)
       if (payload.type === 'SCORE') {
-        addScore(payload.userIdx, payload.delta)
+        addScore(payload.userId, payload.score)
       } else if (payload.type === 'SET') {
         startSet()
       } else if (payload.type === 'FINISH') {
@@ -247,6 +271,36 @@ onMounted(async () => {
   })
   document.addEventListener('visibilitychange', handleVisibilityChange)
 })
+
+const sendScore = (userId, scoreDelta) => {
+  socket.sendGameEvent(chatRoomId.value, {
+    type: 'SCORE',
+    userId: userId==1 ? user1.value.id : user2.value.id, // 점수 변화하는 사람 
+    setIndex: currentSet.value,
+    scoreDelta: scoreDelta
+  })
+}
+
+ const nextSet = () => {
+  console.log("세트 증가함")
+  socket.sendGameEvent(chatRoomId.value, {
+    type: 'SET',
+    setIndex: currentSet.value,
+        
+
+    /**
+     * no-valuable
+     */
+    userId: 0,
+    scoreDelta: 0
+  })
+}
+
+const finishGame = () => {
+  socket.sendGameEvent(chatRoomId.value, {
+    type: 'FINISH'
+  })
+}
 
 onUnmounted(() => {
   clearInterval(timerRef.value)

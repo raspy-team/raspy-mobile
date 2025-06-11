@@ -20,8 +20,8 @@
           <p class="text-2xl font-bold">{{ currentScore1 }}</p>
           <div class="text-xs text-gray-500">세트 승리: {{ user1SetsWon }}/{{ game.setsToWin }}</div>
           <div class="flex gap-1 mt-1">
-            <button @click="sendScore(1, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
-            <button @click="sendScore(1, -1)" :disabled="isSetOver || isGameOver || currentScore1<=0" class="px-2 rounded bg-gray-100">➖</button>
+            <button @click="socket_sendScore(1, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
+            <button @click="socket_sendScore(1, -1)" :disabled="isSetOver || isGameOver || currentScore1<=0" class="px-2 rounded bg-gray-100">➖</button>
           </div>
         </div>
         <p class="text-3xl font-bold text-gray-700">VS</p>
@@ -31,8 +31,8 @@
           <p class="text-2xl font-bold">{{ currentScore2 }}</p>
           <div class="text-xs text-gray-500">세트 승리: {{ user2SetsWon }}/{{ game.setsToWin }}</div>
           <div class="flex gap-1 mt-1">
-            <button @click="sendScore(2, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
-            <button @click="sendScore(2, -1)" :disabled="isSetOver || isGameOver || currentScore2<=0" class="px-2 rounded bg-gray-100">➖</button>
+            <button @click="socket_sendScore(2, 1)" :disabled="isSetOver || isGameOver" class="px-2 rounded bg-gray-100">➕</button>
+            <button @click="socket_sendScore(2, -1)" :disabled="isSetOver || isGameOver || currentScore2<=0" class="px-2 rounded bg-gray-100">➖</button>
           </div>
         </div>
       </div>
@@ -48,7 +48,7 @@
 
       <!-- 세트 종료 시: 다음 세트 버튼 -->
       <div v-if="isSetOver && !isGameOver" class="flex justify-center mt-4">
-        <button @click="startSet" class="bg-blue-500 text-white px-4 py-2 rounded-full">다음 세트</button>
+        <button @click="socket_nextSet" class="bg-blue-500 text-white px-4 py-2 rounded-full">다음 세트</button>
       </div>
 
       <!-- 게임 종료 시: 통계/결과 페이지 이동 -->
@@ -64,6 +64,12 @@
         <h2 class="text-lg font-bold">세트가 종료되었습니다! 승자 : {{ winner }}</h2>
         <button @click="closeFinishModal" class="bg-blue-500 text-white px-4 py-2 rounded-full">확인</button>
       </div>
+    </div>
+  </div>
+
+  <div class="p-5">
+    <div @click="resetGame" class="bg-red-400 text-white text-center ">
+      게임 리셋하기
     </div>
   </div>
 </template>
@@ -127,6 +133,12 @@ function addScore(userIdx) {
   checkSetOver()
 }
 
+const resetGame = () => {
+  if(!confirm("정말로 게임을 재시작 하겠습니까?")) return;
+  
+  socket_resetGame()
+}
+
 function checkSetOver() {
   if (currentScore1.value >= game.value.pointsToWin) {
     user1SetsWon.value++
@@ -149,8 +161,12 @@ function checkSetOver() {
       currentSet.value ++
       finishSet(2)
     } else {
-      finishSet(0) // 무승부 (기획상 무승부로 동작하진 않음)
+      finishSet(0) // 무승부 (점수가 동일한 경우 무승부일것임)
+      currentSet.value ++
     } 
+
+    elapsedSeconds.value = 0;
+
     return
   }
 }
@@ -160,13 +176,11 @@ function finishSet(who) {
   clearInterval(timerRef.value)
   if (who === 1) {
     winner.value = game.value.user1.nickname
-    nextSet(game.value.user1.id)
   }
   else if (who === 2) { 
     winner.value = game.value.user2.nickname
-    nextSet(game.value.user2.id)
   }
-  // else winner.value = '무승부'
+
   showFinishModal.value = true
   if (
     user1SetsWon.value >= game.value.setsToWin ||
@@ -178,7 +192,7 @@ function finishSet(who) {
     isGameOver.value = true
     isSetOver.value = false
 
-    finishGame()
+    socket_finishGame()
   }
 
 }
@@ -267,12 +281,15 @@ onMounted(async () => {
       } else if (payload.type === 'FINISH') {
         isGameOver.value = true
       }
+      else if (payload.type === 'RESET') {
+        router.replace({ path: route.fullPath, query: route.query })
+      }
     })
   })
   document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
-const sendScore = (userId, scoreDelta) => {
+const socket_sendScore = (userId, scoreDelta) => {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SCORE',
     userId: userId==1 ? user1.value.id : user2.value.id, // 점수 변화하는 사람 
@@ -281,7 +298,7 @@ const sendScore = (userId, scoreDelta) => {
   })
 }
 
- const nextSet = () => {
+ const socket_nextSet = () => {
   console.log("세트 증가함")
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SET',
@@ -296,9 +313,15 @@ const sendScore = (userId, scoreDelta) => {
   })
 }
 
-const finishGame = () => {
+const socket_finishGame = () => {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'FINISH'
+  })
+}
+
+const socket_resetGame = () => {
+  socket.sendGameEvent(chatRoomId.value, {
+    type: 'RESET'
   })
 }
 

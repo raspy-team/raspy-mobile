@@ -1,0 +1,24 @@
+name: Mirror to xhae000's perosnal Repo
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout from this repo (org repo)
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 전체 히스토리 가져오기
+
+      - name: Push to personal repo (mirror)
+        run: |
+          git config --global user.email "xhae000@gmail.com"
+          git config --global user.name "xhae000"
+
+          # 기존 원격을 나의 personal repo로 설정
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/xhae000/raspy-mobile-mirror.git
+
+          git push --mirror

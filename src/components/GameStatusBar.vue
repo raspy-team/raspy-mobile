@@ -4,7 +4,7 @@
       <span>
         🟢 진행 중인 게임:<br>
         {{ activeGame.myNickname }} vs {{ activeGame.opponentNickname }}
-        · {{ activeGame.endsAt ? `종료까지 ${countdown}` : '제한 없음' }}
+        · {{ activeGame.startAt ? `${countdown}` : '제한 없음' }}
       </span>
       <router-link
         :to="`/games/${activeGame.id}/play`"

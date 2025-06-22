@@ -96,8 +96,14 @@ onMounted(async () => {
 })
 
 const startGame = async (gameId) => {
-  await client.post(`/api/games/${gameId}/start`)
-  router.push(`/games/${gameId}/play`)
+  try{ 
+    await client.post(`/api/games/${gameId}/start`)
+    router.push(`/games/${gameId}/play`)
+  } catch(e) {
+     if (e.response.data.message == "playing game") {
+      alert("이미 진행 중인 게임이 존재합니다.")
+    } 
+  }
 }
 
 function formatDate(dateStr) {

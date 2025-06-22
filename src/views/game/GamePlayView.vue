@@ -86,7 +86,7 @@ const gameId = route.params.gameId
 
 const game = ref(null)
 const chatRoomId = ref(null)
-const currentSet = ref(0)
+const currentSet = ref(1)
 const currentScore1 = ref(0)
 const currentScore2 = ref(0)
 const user1SetsWon = ref(0)
@@ -183,7 +183,7 @@ function finishSet(who) {
 
   showFinishModal.value = true
   if (
-    user1SetsWon.value >= game.value.setsToWin ||
+    user1SetsWon.value >= game.value.setsToWin || 
     user2SetsWon.value >= game.value.setsToWin
   ) {
   /**
@@ -210,10 +210,10 @@ function startTimer() {
 
 function updateElapsed() {
   // 경과 시간: setStartedAt 기준으로 현 시각에서 1초씩 증가
-  if (!game.value?.setStartedAt) return
+  if (!game.value?.setStartedAt ||isSetOver.value) return
   const startedAt = new Date(game.value.setStartedAt)
   const now = new Date()
-  elapsedSeconds.value = Math.floor((now - startedAt) / 1000)
+  elapsedSeconds.value = Math.floor((now - startedAt) / 1000) > game.value.limitSeconds ? game.value.limitSeconds : Math.floor((now - startedAt) / 1000) 
   elapsedTimeStr.value = getTimeStr(elapsedSeconds.value)
 
   // 제한 시간 표시(최초 1회만)
@@ -260,16 +260,37 @@ onMounted(async () => {
   currentScore2.value = res.data.score2
 
 
-  currentSet.value = res.data.set1  + res.data.set2 || 0
+  currentSet.value = res.data.set1  + res.data.set2 + 1 || 0
   user1SetsWon.value = res.data.set1
   user2SetsWon.value = res.data.set2
   user1.value = res.data.user1
   user2.value = res.data.user2
 
-  isSetOver.value = false
-  isGameOver.value = false
-  console.log(game.value)
-  startSet()
+  if (currentScore1.value >= game.value.pointsToWin) {
+    
+    /**
+     * 체크 종료되었다고 표시
+     */
+  }  
+  else if (currentScore2.value >= game.value.pointsToWin) {
+        
+    /**
+     * 체크 종료되었다고 표시
+     */
+  }
+  else if (game.value.limitSeconds !== -1 && elapsedSeconds.value >= game.value.limitSeconds) {
+      
+    /**
+     * 체크 종료되었다고 표시
+     */
+  }
+
+  else {
+    isSetOver.value = false
+    isGameOver.value = false
+    console.log(game.value)
+  }
+  // startSet()
   socket.connect(chatRoomId.value, () => {
     socket.subscribe(`${chatRoomId.value}`)
     socket.onMessage((payload) => {
@@ -277,6 +298,7 @@ onMounted(async () => {
       if (payload.type === 'SCORE') {
         addScore(payload.userId, payload.score)
       } else if (payload.type === 'SET') {
+        game.value.setStartedAt = new Date()
         startSet()
       } else if (payload.type === 'FINISH') {
         isGameOver.value = true

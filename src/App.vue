@@ -43,7 +43,7 @@ async function fetchActiveGame() {
 const router = useRouter()
 
 router.afterEach((to, from) => {
-  console.log(`route move ${to.path} -> ${from.path}`)
+  console.log(`route move ${to.path} <- ${from.path}`)
   const isGamePlayRoute = /^\/games\/\d+\/play$/.test(to.path)
   console.log(isGamePlayRoute)
   if (!isGamePlayRoute) {

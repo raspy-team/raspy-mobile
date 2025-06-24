@@ -140,29 +140,28 @@ const resetGame = () => {
 }
 
 function checkSetOver() {
-  if (currentScore1.value >= game.value.pointsToWin) {
+  if (game.value.pointsToWin != -1 && currentScore1.value >= game.value.pointsToWin) {
     user1SetsWon.value++
-    currentSet.value ++
     finishSet(1)
     return
-  }  if (currentScore2.value >= game.value.pointsToWin) {
+  }  
+  if (game.value.pointsToWin != -1 && currentScore2.value >= game.value.pointsToWin) {
     user2SetsWon.value++
-    currentSet.value ++
     finishSet(2)
     return
   }
   if (game.value.limitSeconds !== -1 && elapsedSeconds.value >= game.value.limitSeconds) {
-    if (currentScore1.value > currentScore2.value) {
+    if (game.value.winBy=='MOST_SETS_AND_POINTS' && currentScore1.value > currentScore2.value) {
       user1SetsWon.value++
-      currentSet.value ++
+
       finishSet(1)
-    } else if (currentScore2.value > currentScore1.value) {
+    } else if (game.value.winBy=='MOST_SETS_AND_POINTS' && currentScore2.value > currentScore1.value) {
       user2SetsWon.value++
-      currentSet.value ++
+
       finishSet(2)
     } else {
       finishSet(0) // 무승부 (점수가 동일한 경우 무승부일것임)
-      currentSet.value ++
+
     } 
 
     elapsedSeconds.value = 0;
@@ -193,6 +192,8 @@ function finishSet(who) {
     isSetOver.value = false
 
     socket_finishGame()
+  } else {
+     currentSet.value ++
   }
 
 }
@@ -260,35 +261,65 @@ onMounted(async () => {
   currentScore2.value = res.data.score2
 
 
-  currentSet.value = res.data.set1  + res.data.set2 + 1 || 0
+  currentSet.value = res.data.currentSet|| 0
   user1SetsWon.value = res.data.set1
   user2SetsWon.value = res.data.set2
   user1.value = res.data.user1
   user2.value = res.data.user2
 
-  if (currentScore1.value >= game.value.pointsToWin) {
+  if (game.value.pointsToWin != -1 && currentScore1.value >= game.value.pointsToWin) {
     
     /**
-     * 체크 종료되었다고 표시
+     * 체크 종료되었다고 표시 
      */
+      
+    isSetOver.value = true
+    isGameOver.value = false
+
+    user1SetsWon.value += 1
+    currentSet.value += 1
+
   }  
-  else if (currentScore2.value >= game.value.pointsToWin) {
+  else if (game.value.pointsToWin != -1 && currentScore2.value >= game.value.pointsToWin) {
         
     /**
      * 체크 종료되었다고 표시
      */
+    isSetOver.value = true
+    isGameOver.value = false
+
+    user2SetsWon.value += 1
+    currentSet.value += 1
+
   }
   else if (game.value.limitSeconds !== -1 && elapsedSeconds.value >= game.value.limitSeconds) {
       
     /**
      * 체크 종료되었다고 표시
      */
+
+    isSetOver.value = true
+    isGameOver.value = false
+
+    if(game.value.winBy == 'MOST_SETS_AND_POINTS') {
+      if(currentScore1.value > currentScore2.value) {
+            user1SetsWon.value += 1
+            currentSet.value += 1
+      } else if(currentScore2.value > currentScore1.value) {
+            user2SetsWon.value += 1
+            currentSet.value += 1
+      }
+    }
+
   }
 
   else {
     isSetOver.value = false
     isGameOver.value = false
     console.log(game.value)
+
+    updateElapsed()
+    startTimer()
   }
   // startSet()
   socket.connect(chatRoomId.value, () => {
@@ -350,5 +381,7 @@ const socket_resetGame = () => {
 onUnmounted(() => {
   clearInterval(timerRef.value)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+  socket.disconnect()
+
 })
 </script>

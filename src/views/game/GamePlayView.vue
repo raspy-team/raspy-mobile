@@ -72,6 +72,59 @@
       게임 리셋하기
     </div>
   </div>
+
+
+    <button @click="openModal = true" class="bg-blue-500 text-white w-full px-4 py-2 rounded">
+      로그 보기
+    </button>
+
+    <!-- 로그 모달 -->
+    <div v-if="openModal && logs.length > 0" class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
+      
+      <!-- 로그창 (아래서 위로 등장) -->
+      <div 
+        class="bg-white w-full max-w-md p-6 rounded-t-2xl transition-transform duration-300 space-y-4"
+        :class="{ 'translate-y-0': openModal, 'translate-y-full': !openModal }"
+      >
+        <h2 class="text-xl font-bold mb-2 text-center">게임 로그</h2>
+
+        <ul class="space-y-3 max-h-96 overflow-y-auto">
+          <li 
+            v-for="(item, idx) in logs" 
+            :key="idx" 
+            class="flex items-start space-x-3 p-3 border rounded-lg bg-gray-50"
+          >
+            <!-- 유저 프로필 이미지 -->
+            <img 
+              v-if="item.user.profileUrl" 
+              :src="item.user.profileUrl" 
+              alt="프로필" 
+              class="w-8 h-8 rounded-full object-cover"
+            />
+            <div v-else class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs text-white">
+              {{ item.user.nickname.slice(0, 1) }}
+            </div>
+
+            <!-- 메시지 내용 -->
+            <div class="flex-1">
+              <div class="text-sm text-gray-600">
+                [{{ item.elapsed }}] 
+                <span class="font-semibold">{{ item.user.nickname }}</span>
+              </div>
+              <div class="text-base">
+                {{ item.message }}
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <!-- 닫기 버튼 -->
+        <button @click="openModal = false" class="mt-4 w-full bg-red-500 text-white py-2 rounded">
+          닫기
+        </button>
+      </div>
+</div>
+
 </template>
 
 <script setup>
@@ -83,7 +136,7 @@ import { socket } from '../../websocket'
 const route = useRoute()
 const router = useRouter()
 const gameId = route.params.gameId
-
+const openModal = ref(false)
 const game = ref(null)
 const chatRoomId = ref(null)
 const currentSet = ref(1)
@@ -99,6 +152,7 @@ const elapsedSeconds = ref(0)
 const elapsedTimeStr = ref('0분 0초')
 const limitTimeStr = ref('')
 const timerRef = ref(null)
+const logs = ref([])
 
 const user1 = ref(null)
 const user2 = ref(null)
@@ -251,10 +305,51 @@ function handleVisibilityChange() {
   }
 }
 
+const addLog = (log) => {
+      // 시간 차이 (분:초 포맷)
+      const start = new Date(game.value.totalGameStartedAt)
+      const current = new Date(log.time)
+      const diffSec = Math.floor((current - start) / 1000)
+      const minutes = String(Math.floor(diffSec / 60)).padStart(2, '0')
+      const seconds = String(diffSec % 60).padStart(2, '0')
+      const elapsed = `${minutes}:${seconds}`
+
+      // 메시지 내용 생성
+      let message = ''
+      if (log.type === 'SCORE') {
+        message = `${log.targetId == user1.value.id?user1.value.nickname : user2.value.nickname}님이 ${log.delta}점 ${log.delta>0?"득점":"실점"} (변경자 - ${log.userSummary.nickname})`
+      } else if (log.type === 'SET') {
+        message = `${log.userSummary.nickname}님이 세트를 증가시킴`
+      } else if (log.type === 'RESET') {
+        message = `${log.userSummary.nickname}님이 게임을 리셋함`
+      } else if (log.type === 'FINISH') {
+        message = `게임이 종료되었습니다!`
+      } else {
+        message = '알 수 없는 이벤트'
+      }
+    
+        logs.value.push({
+          elapsed,
+          message,
+          type: log.type,
+          user: log.userSummary,
+        })
+}
 
 onMounted(async () => {
   const res = await api.get(`/api/games/${gameId}/detail`)
+  
+  /**
+   * 진행 중인 게임이 아니라면, 이 페이지에 잘못 들어선 것임
+   */
+  if(res.data.gameStatus != 'IN_PROGRESS') {
+    alert("잘못된 접근입니다. 진행 중인 게임이 아닙니다.")
+    router.go(-1)
+  }
+
+  
   game.value = res.data
+
   chatRoomId.value = res.data.chatRoomId
 
   currentScore1.value = res.data.score1
@@ -321,22 +416,36 @@ onMounted(async () => {
     updateElapsed()
     startTimer()
   }
+
+  const logResponse = await api.get(`/api/games/${gameId}/game-logs`)
+  const rawLogs = logResponse.data  
+
+  rawLogs.forEach(log => addLog(log)) // 기록된 모든 로그 추가
+
   // startSet()
   socket.connect(chatRoomId.value, () => {
     socket.subscribe(`${chatRoomId.value}`)
     socket.onMessage((payload) => {
       console.log(payload)
       if (payload.type === 'SCORE') {
-        addScore(payload.userId, payload.score)
+        addScore(payload.targetId, payload.score)
+        addLog(payload)
+
       } else if (payload.type === 'SET') {
         game.value.setStartedAt = new Date()
         startSet()
+        addLog(payload)
+
       } else if (payload.type === 'FINISH') {
         isGameOver.value = true
+        addLog(payload)
+
       }
       else if (payload.type === 'RESET') {
         router.replace({ path: route.fullPath, query: route.query })
-      }
+        addLog(payload)
+
+      } 
     })
   })
   document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -355,14 +464,14 @@ const socket_sendScore = (userId, scoreDelta) => {
   console.log("세트 증가함")
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SET',
-    setIndex: currentSet.value,
-        
 
     /**
-     * no-valuable
+     * these are no-valuable
      */
+    setIndex: currentSet.value,
     userId: 0,
     scoreDelta: 0
+    /***********************/
   })
 }
 

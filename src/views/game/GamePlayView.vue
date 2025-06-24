@@ -67,16 +67,20 @@
     </div>
   </div>
 
-  <div class="p-5">
-    <div @click="resetGame" class="bg-red-400 text-white text-center ">
+  <div class="p-5 flex justify-between">
+    <button @click="resetGame" class="bg-red-700 text-white text-center px-4 py-2 rounded">
       게임 리셋하기
-    </div>
+    </button>
+    <button @click="confirm('정말 게임을 종료합니까?') ? socket_finishGame() : null" class="bg-red-700 text-white text-center px-4 py-2 rounded">
+      게임 종료하기
+    </button>
+        <button @click="openModal = true" class="bg-blue-500 text-white px-4 py-2 rounded">
+      로그 보기
+    </button>
   </div>
 
 
-    <button @click="openModal = true" class="bg-blue-500 text-white w-full px-4 py-2 rounded">
-      로그 보기
-    </button>
+
 
     <!-- 로그 모달 -->
     <div v-if="openModal && logs.length > 0" class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
@@ -217,11 +221,11 @@ function checkSetOver() {
       finishSet(0) // 무승부 (점수가 동일한 경우 무승부일것임)
 
     } 
+    return
+  }
 
     elapsedSeconds.value = 0;
 
-    return
-  }
 }
 
 function finishSet(who) {
@@ -442,9 +446,12 @@ onMounted(async () => {
 
       }
       else if (payload.type === 'RESET') {
-        router.replace({ path: route.fullPath, query: route.query })
+        router.replace({
+              path: route.fullPath,
+              query: { ...route.query, reload: Date.now() }
+        })
+        
         addLog(payload)
-
       } 
     })
   })

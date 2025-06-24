@@ -1,7 +1,7 @@
 <template>
   <div>
     <GameStatusBar v-if="activeGame" :activeGame="activeGame" :countdown="countdown" />
-    <router-view />
+     <RouterView :key="route.fullPath" />
   </div>
 </template>
 
@@ -10,7 +10,9 @@ import { ref, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import api from './api/api'
 import GameStatusBar from './components/GameStatusBar.vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const activeGame = ref(null)
 const countdown = ref('')
 let interval = null

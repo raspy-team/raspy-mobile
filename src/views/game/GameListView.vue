@@ -1,33 +1,90 @@
 <template>
       <HeaderComp />
-
-  <div class="min-h-screen bg-gray-50 flex flex-col mb-20">
-
-    <div class="bg-white shadow-sm z-10 px-4 md:px-8 pt-20 mb-2">
-
-      <router-link to="/inbox">
-        <div class="text-[#6B7280] bg-blue-200 flex justify-center p-4 items-center gap-1 font-[600] rounded-2xl my-2  w-full">
-          <span>
-             <svg width="20" height="20" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g clip-path="url(#bell)">
-                <path d="M13.5 8H10C9.73478 8 9.48043 8.10536 9.29289 8.29289C9.10536 8.48043 9 8.73478 9 9C9 9.53043 8.78929 10.0391 8.41421 10.4142C8.03914 10.7893 7.53043 11 7 11C6.46957 11 5.96086 10.7893 5.58579 10.4142C5.21071 10.0391 5 9.53043 5 9C5 8.73478 4.89464 8.48043 4.70711 8.29289C4.51957 8.10536 4.26522 8 4 8H0.5V12.5C0.5 12.7652 0.605357 13.0196 0.792893 13.2071C0.98043 13.3946 1.23478 13.5 1.5 13.5H12.5C12.7652 13.5 13.0196 13.3946 13.2071 13.2071C13.3946 13.0196 13.5 12.7652 13.5 12.5V8Z"
-                  :stroke="'#6B7280'" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M4.5 4L7 6.5L9.5 4" :stroke="'#6B7280'" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7 0.5V6.5" :stroke="'#6B7280'" stroke-linecap="round" stroke-linejoin="round" />
-              </g>
-              <defs><clipPath id="bell"><rect width="14" height="14" fill="white" /></clipPath></defs>
-            </svg>
-          </span>
-          <span>
-            Inbox
-          </span>
+    <div class="min-h-screen bg-gray-50 pb-16">
+    <!-- Status Bar -->
+    <div class="bg-white h-6 w-full"></div>
+    
+    <!-- Header with Logo and Actions -->
+    <header class="bg-white px-4 py-3 shadow-sm mt-5 ">
+      
+      <!-- User Info -->
+      <div class="mt-4 bg-white rounded-xl p-3 shadow-sm">
+        <div class="flex items-center">
+          <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-orange-500">
+            <img :src="userAvatar" alt="Profile" class="w-full h-full object-cover" />
+          </div>
+          <div class="ml-3 flex-1">
+            <h2 class="text-lg font-semibold text-gray-800">{{ userName }}</h2>
+            <div class="flex items-center mt-1 space-x-3">
+              <div class="flex items-center">
+                <span class="text-sm text-gray-500">총 경기: </span>
+                <span class="ml-1 text-sm font-medium text-orange-500">{{ userStats.matches }}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-sm text-gray-500">승/패/무: </span>
+                <span class="ml-1 text-sm font-medium text-orange-500">{{ userStats.wins }}/{{ userStats.losses }}/{{ userStats.draws }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </router-link>
+      </div>
+      
+      <!-- Navigation Tabs 
+      <div class="flex mt-4">
+        <button
+          v-for="(tab, index) in tabs"
+          :key="index"
+          @click="activeTab = tab.id"
+          class="flex-1 py-2 text-center relative cursor-pointer"
+          :class="activeTab === tab.id ? 'text-orange-500 font-medium' : 'text-gray-500'"
+        >
+          {{ tab.name }}
+          <div
+            v-if="activeTab === tab.id"
+            class="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-orange-500 rounded-full"
+          ></div>
+        </button>
+      </div>-->
+    </header>
+    
+    <!-- Main Content -->
+    <main class="pt-3 px-4 pb-4">
+      <!-- Menu Items -->
+      <div class="grid grid-cols-4 gap-3 mb-6">
+        <div v-for="(action, index) in menuItems" :key="index" @click="router.push(action.link)"
+          class="bg-white rounded-xl shadow-sm p-3 flex flex-col items-center cursor-pointer hover:shadow-md transition relative">
+          <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-2">
+            <i :class="`${action.icon} text-orange-500 text-lg`"></i>
+          </div>
+          <span class="text-xs text-gray-700 font-medium text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">{{ action.name }}</span>
+          <div v-if="action.badge" class="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+            <span class="text-xs text-white font-medium">{{ action.badge }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 필터 버튼 -->
+          <div class="relative w-[100%]">
+            <div v-if="showFilterMenu" class="absolute right-0 mt-0 bg-white border rounded shadow-md z-20 text-right">
+              <button @click="setSort('popular')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
+                인기순
+              </button>
+              <button @click="setSort('latest')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
+                최신순
+              </button>
+            </div>
+          </div>
 
-<!-- 지역 선택 박스 -->
+      <!-- 게임리스트 -->
+      <div v-if="activeTab === 'available'" class="space-y-4">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-lg font-semibold text-gray-800">참여 가능한 경기</h2>
+        </div>
+        
+      <!-- 지역 선택 박스 -->
       <div class="bg-white shadow-sm z-10 px-4 md:px-8 py-4">
         <div class="max-w-4xl mx-auto w-full">
-          <label class="block text-sm text-gray-700 font-medium mb-2">📍 지역 선택</label>
+          <label class="block text-sm text-gray-700 font-medium mb-2"><span class="fas fa-map-marker-alt text-[#f97316]"></span> 지역 선택</label>
           <div class="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0">
             <!-- 1차 지역 -->
             <select v-model="selectedPrimary" @change="handlePrimaryChange"
@@ -46,119 +103,228 @@
                 {{ sub }}
               </option>
             </select>
-            
-
-            
-          </div>
-
-                 
+          </div>   
         </div>
- 
       </div>
-    </div>
-    <div class="fixed bottom-20 left-5 text-center"> 
-            <router-link to="/create-game" >
-              <div class="bg-blue-500 inline-block text-white w-full md:mx-8 py-3 px-5 mt-3 rounded-[30px] text-center text-sm font-semibold">
-                <div class="flex items-center justify-center gap-2">
-                    <span>
-                    <svg width="14" height="14" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 3.5H1" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M3.5 1V6" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    </span>
-                    <span>
-                      게임 만들기
-                    </span>
-                  </div>
-                </div>
-            </router-link>
-    </div>
-    <main class="flex-1 pt-6 pb-16 px-4 md:px-8 max-w-4xl mx-0">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center flex justify-between items-center">
-        <span>
-          모집 중인 경기
-        </span>
-        <div class="text-left">
-          <button @click="showFilterMenu = !showFilterMenu" class=" text-[0.7rem] border bg-blue-500 text-white px-5  text-center items-center py-0 rounded">
-                  필터
-          </button>
-        </div>
-      </h2>
-        <div class="text-sm mt-[-0.6rem]">
-          <!-- 필터 버튼 -->
-          <div class="relative w-[100%]">
-            <div v-if="showFilterMenu" class="absolute right-0 mt-0 bg-white border rounded shadow-md z-20 text-right">
-              <button @click="setSort('popular')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
-                인기순
-              </button>
-              <button @click="setSort('latest')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
-                최신순
-              </button>
+        <div v-for="(game, index) in games" :key="index" class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-4">
+            <div class="flex justify-between g items-start">
+              <div>
+                <h3 class="font-medium text-lg text-gray-800">{{ game.title }}</h3>
+                <span class="font-semibold">{{ game.majorCategory }}</span> / {{ game.minorCategory }}
+              </div>
+              <span class="bg-orange-100 text-orange-600 text-xs px-3 py-1 rounded-full font-medium">1v1</span>
             </div>
-          </div>
-        </div>
-      <div v-if="loading" class="text-center text-gray-500">불러오는 중...</div>
-      <div v-else-if="games.length === 0" class="text-center text-gray-400">표시할 경기가 없습니다</div>
+            <div class="mt-3 flex items-center text-sm text-gray-500">
+              <i class="fas fa-map-marker-alt mr-2 text-orange-500"></i>
+              <span>{{ game.matchLocation || '미정' }}</span>
+            </div>
+            <div class="mt-2 flex items-center text-sm text-gray-500 mb-3">
+              <i class="far fa-calendar mr-2 text-orange-500"></i>
+              <span>{{ formatDate(game.matchDate) }}</span>
+            </div>
 
-      <div v-else class="space-y-6">
-        <div v-for="game in games" :key="game.id" class="bg-white border rounded-lg shadow-sm p-6">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xl font-bold text-gray-900">{{ game.title }}</h3>
-            <p class="text-sm text-gray-400">생성: {{ formatDate(game.createdAt) }}</p>
-          </div>
 
-          <!-- 참가자 -->
-          <div class="flex items-center space-x-3 mb-3">
-            <img :src="game.ownerProfileUrl" alt="profile" class="w-9 h-9 rounded-full object-cover" />
-            <p class="text-sm text-gray-700 font-medium">{{ game.ownerNickname }}</p>
-          </div>
 
-          <!-- 카테고리 -->
-          <div class="text-sm text-gray-600 mb-2">
-            카테고리: <span class="font-semibold">{{ game.majorCategory }}</span> / {{ game.minorCategory }}
-          </div>
+              <!-- 룰 정보 -->
+              <div class="border border-gray-200 p-4 rounded-[5px] mb-3 flex flex-col gap-1 relative">
+                <span class="absolute right-0 top-0 bg-[#f97316] text-white font-bold text-[0.8rem] px-4 py-1" style="border-radius :0px 0px 0px 8px">
+                  규칙
+                </span>
+                <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
+                <p class="text-sm text-gray-700 mt-1">{{ game.ruleDescription }}</p>
+            
+                <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
+                  <div class="flex items-center mb-2">
+                    <i class="fas fa-trophy text-[#f97316] w-4 mr-2"></i>
+                    <div class="w-[30dvw] font-light text-gray-500">
+                      승리 조건
+                    </div>
+                    <div>
+                      {{ game.winCondition=='SETS_HALF_WIN' ? '과반 세트 승리' : '최다 세트/점수 획득' }}
+                    </div>
+                  </div>
 
-          <!-- 일정, 장소 -->
-          <div class="text-sm text-gray-700 mb-3">
-            🕒 {{ formatDate(game.matchDate) }}<br />
-            📍 {{ game.matchLocation || '장소 미정' }}
-          </div>
+                  <div class="flex items-center mb-2">
+                    <i class="fas fa-star text-[#f97316] w-4 mr-2"></i>
+                    <div class="w-[30dvw] font-light text-gray-500">
+                      1세트 승리 점수
+                    </div>
+                    <div>
+                      {{ game.points }}점
+                    </div>
+                  </div>
 
-          <!-- 룰 정보 -->
-          <div class="bg-gray-100 p-4 rounded mb-3">
-            <p class="text-sm text-gray-500 mb-1">룰 제목</p>
-            <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
-            <p class="text-sm text-gray-700 mt-1">{{ game.ruleDescription }}</p>
-            <p class="text-sm text-gray-600 mt-2"><strong>승리 조건:</strong>  {{ game.winCondition=='SETS_HALF_WIN' ? '과반 세트 승리' : '최다 세트/점수 획득' }}</p>
-          </div>
+                  <div class="flex items-center mb-2">
+                    <i class="fas fa-layer-group text-[#f97316] w-4 mr-2"></i>
+                    <div class="w-[30dvw] font-light text-gray-500">
+                      승리 조건 세트
+                    </div>
+                    <div>
+                      {{ game.sets }}세트
+                    </div>
+                  </div>
 
-          <!-- 포맷 -->
-          <div class="text-sm text-gray-600 mb-2">
-            포인트: {{ game.points }} / 세트: {{ game.sets }} / 듀레이션: {{ game.duration }}
-          </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-clock text-[#f97316] w-4 mr-2"></i>
+                    <div class="w-[30dvw] font-light text-gray-500">
+                      세트 제한시간
+                    </div>
+                    <div>
+                      {{ game.duration >= 60 ? Math.floor(game.duration / 60) + '분 ' + (game.duration % 60) + '초' : game.duration + '초' }}
+                    </div>
+                  </div>
 
-          <!-- 하단: 인원 + 버튼 -->
-          <div class="flex justify-between items-center mt-4">
-            <p class="text-sm text-gray-500">
-              인원: {{ game.currentParticipantCounts }} / {{ game.maxPlayers }}
-            </p>
-            <button
-              class="px-4 py-2 rounded text-white text-sm font-medium"
-              :class="game.applied ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600'"
-              :disabled="game.applied"
-              @click="() => !game.applied && confirmApply(game)"
-            >
-              {{ game.applied ? '신청 완료' : '참가' }}
+   
+                </div>
+              </div>
+
+            <div class="mt-3 flex items-center">
+              <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
+                <img :src="game.ownerProfileUrl||''" alt="Opponent" class="w-full h-full object-cover" />
+              </div>
+              <div class="ml-2">
+                <p class="text-sm font-medium text-gray-800">{{ game.ownerNickname }}</p>
+              </div>
+            </div>
+
+
+            <button 
+                :disabled="game.applied"
+                @click="() => !game.applied && confirmApply(game)"
+                :class="game.applied ? 'bg-gray-400 cursor-not-allowed font-semibold' : 'mt-3 font-semibold w-full py-2.5 bg-orange-500 text-white rounded-full font-medium !rounded-button cursor-pointer hover:bg-orange-600 transition'">
+              {{ game.applied ? '신청 완료' : '참가하기' }}
             </button>
           </div>
         </div>
       </div>
+      
+      <!-- My Games 
+      <div v-if="activeTab === 'my'" class="space-y-4">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-lg font-semibold text-gray-800">My Matches</h2>
+          <button class="text-orange-500 text-sm font-medium cursor-pointer">History</button>
+        </div>
+        <div v-for="(game, index) in myGames" :key="index" class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-medium text-lg text-gray-800">{{ game.title }}</h3>
+                <p class="text-gray-500 text-sm mt-1">{{ game.type }}</p>
+              </div>
+              <span :class="`text-xs px-3 py-1 rounded-full font-medium ${game.status === 'Active' ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-600'}`">
+                {{ game.status }}
+              </span>
+            </div>
+            <div class="mt-3 flex items-center text-sm text-gray-500">
+              <i class="fas fa-map-marker-alt mr-2 text-orange-500"></i>
+              <span>{{ game.location }}</span>
+            </div>
+            <div class="mt-2 flex items-center text-sm text-gray-500">
+              <i class="far fa-calendar mr-2 text-orange-500"></i>
+              <span>{{ game.date }} • {{ game.time }}</span>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
+                  <img :src="userAvatar" alt="You" class="w-full h-full object-cover" />
+                </div>
+                <div class="mx-2 text-gray-400 font-medium">VS</div>
+                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
+                  <img :src="game.opponent.avatar" alt="Opponent" class="w-full h-full object-cover" />
+                </div>
+              </div>
+            </div>
+            <button @click="openGameDetails(game)" class="mt-3 w-full py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium !rounded-button cursor-pointer hover:bg-gray-200 transition">
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>-->
     </main>
-
-
-
+    
+    <!-- Bottom Tab Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white shadow-md px-2 py-2 grid grid-cols-3 z-10">
+      <div
+        v-for="(item, index) in navItems"
+        :key="index"
+        @click="currentTab = item.id"
+        class="flex flex-col items-center cursor-pointer"
+      >
+        <i :class="`${item.icon} ${currentTab === item.id ? 'text-orange-500' : 'text-gray-400'} text-xl`"></i>
+        <span class="text-xs mt-1" :class="currentTab === item.id ? 'text-orange-500' : 'text-gray-500'">{{ item.label }}</span>
+      </div>
+    </div>
+    
+    <!-- FAB -->
+    <button class="fixed right-5 bottom-20 w-14 h-14 bg-orange-500 rounded-full shadow-lg flex items-center justify-center cursor-pointer !rounded-button hover:bg-orange-600 transition z-20">
+      <i class="fas fa-plus text-white text-xl"></i>
+    </button>
+    
+    <!-- Game Details Modal -->
+    <div v-if="showGameDetails" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+      <div class="bg-white rounded-xl w-11/12 max-h-[80vh] overflow-y-auto">
+        <div class="p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">{{ selectedGame.title }}</h3>
+            <button @click="showGameDetails = false" class="text-gray-500 cursor-pointer">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="bg-orange-50 p-3 rounded-lg">
+              <p class="text-sm text-gray-700"><span class="font-medium">Category:</span> {{ selectedGame.type }}</p>
+              <p class="text-sm text-gray-700 mt-1"><span class="font-medium">Status:</span> {{ selectedGame.status }}</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-gray-800 mb-2">Match Details</h4>
+              <p class="text-sm text-gray-700 mb-1"><i class="fas fa-map-marker-alt mr-2 text-orange-500"></i> {{ selectedGame.location }}</p>
+              <p class="text-sm text-gray-700"><i class="far fa-calendar mr-2 text-orange-500"></i> {{ selectedGame.date }} • {{ selectedGame.time }}</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-gray-800 mb-2">Opponent</h4>
+              <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                  <img :src="selectedGame.opponent.avatar" alt="Opponent" class="w-full h-full object-cover" />
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-gray-800">{{ selectedGame.opponent.name }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-gray-800 mb-2">Rules & Description</h4>
+              <p class="text-sm text-gray-700">{{ selectedGame.description }}</p>
+            </div>
+            
+            <div>
+              <h4 class="font-medium text-gray-800 mb-2">References</h4>
+              <ul class="text-sm text-gray-700 list-disc pl-5">
+                <li v-for="(ref, index) in selectedGame.references" :key="index" class="mb-1">
+                  {{ ref }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="mt-6 flex space-x-3">
+            <button class="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium !rounded-button cursor-pointer hover:bg-gray-200 transition">
+              Cancel Match
+            </button>
+            <button class="flex-1 py-2.5 bg-orange-500 text-white rounded-full font-medium !rounded-button cursor-pointer hover:bg-orange-600 transition">
+              Contact Opponent
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-      <FooterNav tab="home" />
+
+  <FooterNav tab="home" />
     <CustomAlert v-if="alertMsg" :message="alertMsg" @confirm="applyConfirmed" @cancel="() => alertMsg = ''" />
     <CustomToast />
 </template>
@@ -171,8 +337,31 @@ import FooterNav from '../../components/FooterNav.vue'
 import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
+import {useRouter} from "vue-router"
+
+const router = useRouter()
 
 const { showToast } = useToast()
+
+// User profile data
+const userAvatar = 'https://gdimg.gmarket.co.kr/4261780491/more/00/800?ver=175072';
+const userName = ref('몸짱무패 고병연');
+const userStats = {
+  matches: 24,
+  wins: 22,
+  losses: 0,
+  draws: 2
+};
+// Menu items
+const menuItems = [
+  { name: '경기 찾기', icon: 'fas fa-search', link: '/find-match' },
+  { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
+  { name: '리더보드', icon: 'fas fa-trophy', link: '/leader-board' },
+  { name: '인박스', icon: 'fas fa-envelope', badge: '2', link: '/inbox' }
+];
+const showGameDetails = ref(false);
+const activeTab = ref('available');
+
 
 const games = ref([])
 const loading = ref(true)
@@ -192,9 +381,9 @@ const regionMap = {
 const selectedPrimary = ref('')
 const selectedSecondary = ref('')
 
-const handlePrimaryChange = () => {
-  selectedSecondary.value = ''
-}
+// const handlePrimaryChange = () => {
+//   selectedSecondary.value = ''
+// }
 
 
 const fetchGames = async () => {
@@ -249,5 +438,32 @@ const applyConfirmed = async () => {
   }
 }
 
+// const openGameDetails = (game) => {
+//   selectedGame.value = game;
+//   showGameDetails.value = true;
+// };
+
 onMounted(fetchGames)
 </script>
+
+<style scoped>
+  .fa-search {
+  font-size: 14px;
+}
+
+input:focus {
+  outline: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.text-overflow-ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+</style>

@@ -29,7 +29,7 @@
       </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 조건 점수</label>
+          <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 점수</label>
           <div class="relative flex items-center" >
             <input :value="pointsUnlimited ? '제한 없음' : form.pointsToWin" @input="handlePointsInput" type="text" class="modern-input pr-28 text-xs " :disabled="pointsUnlimited" placeholder="점수를 입력하세요" />
             <button type="button" @click="togglePointsUnlimited" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 rounded-full text-xs font-semibold transition" :class="pointsUnlimited ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'">
@@ -42,12 +42,12 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">필요 세트 수</label>
+          <label class="block text-sm font-medium text-gray-600 mb-1">총 세트</label>
           <input v-model.number="form.setsToWin" type="number" class="modern-input text-xs" min="1" placeholder="세트 수 입력" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">세트당 시간 (초)</label>
+          <label class="block text-sm font-medium text-gray-600 mb-1">세트 제한시간 (초)</label>
           <div class="relative flex items-center">
             <input :value="timeUnlimited ? '제한 없음' : form.duration" @input="handleTimeInput" type="text" class="modern-input pr-28 text-xs" :disabled="timeUnlimited" placeholder="시간을 입력하세요" />
             <button type="button" @click="toggleTimeUnlimited" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 rounded-full text-xs font-semibold transition" :class="timeUnlimited ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'">
@@ -60,8 +60,8 @@
           <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 기준</label>
           <select v-model="form.winBy" class="modern-input text-xs">
             <option disabled value="">기준 선택</option>
-            <option value="SETS_HALF_WIN" :disabled="disableHalfWin">점수 달성 (미달성시 무승부)</option>
-            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints">더 많은 점수 획득 (무승부 가능)</option>
+            <option value="SETS_HALF_WIN" :disabled="disableHalfWin">승리 점수 달성 (미달성 시 무승부)</option>
+            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints">제한 시간동안 더 많은 점수 획득 (동점 시 무승부)</option>
           </select>
             <div class="text-gray-400 font-[400] text-[0.7rem] mt-2">
             -1(제한 없음)은 세트 승리 조건 점수에 도달할 때까지 세트가 진행됩니다.

@@ -71,7 +71,7 @@
                   <div class="flex items-center mb-2">
                     <i class="fas fa-star text-[#f97316] w-4 mr-2"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
-                      1세트 승리 점수
+                      세트 승리 점수
                     </div>
                     <div>
                       {{ selectedRule.pointsToWin }}점
@@ -81,7 +81,7 @@
                   <div class="flex items-center mb-2">
                     <i class="fas fa-layer-group text-[#f97316] w-4 mr-2"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
-                      승리 조건 세트
+                      총 세트
                     </div>
                     <div>
                       {{ selectedRule.setsToWin }}세트

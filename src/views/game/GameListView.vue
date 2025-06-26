@@ -6,28 +6,7 @@
     
     <!-- Header with Logo and Actions -->
     <header class="px-4 py-3 mt-5 ">
-      
-      <!-- User Info -->
-      <div class="mt-4 bg-white rounded-xl p-3 shadow-sm">
-        <div class="flex items-center">
-          <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-orange-500">
-            <img :src="userAvatar" alt="Profile" class="w-full h-full object-cover" />
-          </div>
-          <div class="ml-3 flex-1">
-            <h2 class="text-lg font-semibold text-gray-800">{{ userName }}</h2>
-            <div class="flex items-center mt-1 space-x-3">
-              <div class="flex items-center">
-                <span class="text-sm text-gray-500">총 경기: </span>
-                <span class="ml-1 text-sm font-medium text-orange-500">{{ userStats.matches }}</span>
-              </div>
-              <div class="flex items-center">
-                <span class="text-sm text-gray-500">승/패/무: </span>
-                <span class="ml-1 text-sm font-medium text-orange-500">{{ userStats.wins }}/{{ userStats.losses }}/{{ userStats.draws }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- -->
       
       <!-- Navigation Tabs 
       <div class="flex mt-4">
@@ -52,11 +31,11 @@
       <!-- Menu Items -->
       <div class="grid grid-cols-2 gap-3 mb-6">
         <div v-for="(action, index) in menuItems" :key="index" @click="router.push(action.link)"
-          class="bg-white rounded-xl shadow-sm p-3 flex flex-col items-center cursor-pointer hover:shadow-md transition relative">
-          <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-2">
-            <i :class="`${action.icon} text-orange-500 text-lg`"></i>
+          class="bg-white rounded-xl shadow-sm py-2 px-4 flex flex-row gap-2 items-center justify-left cursor-pointer hover:shadow-md transition relative">
+          <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center ">
+            <i :class="`${action.icon} text-orange-500 text-md`"></i>
           </div>
-          <span class="text-xs text-gray-700 font-medium text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">{{ action.name }}</span>
+          <span class="text-[0.86rem] text-gray-700 font-[500] text-center text-gray-500 whitespace-nowrap overflow-hidden text-overflow-ellipsis">{{ action.name }}</span>
           <div v-if="action.badge" class="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
             <span class="text-xs text-white font-medium">{{ action.badge }}</span>
           </div>
@@ -66,36 +45,15 @@
       <!-- 게임리스트 -->
       <div v-if="activeTab === 'available'" class="space-y-4">
         
-      <!-- 지역 선택 박스 -->
-      <div class="bg-white shadow-sm z-10 px-4 md:px-8 py-4">
-        <div class="max-w-4xl mx-auto w-full">
-          <label class="block text-sm text-gray-700 font-medium mb-2"><span class="fas fa-map-marker-alt text-[#f97316]"></span> 지역 선택</label>
-          <div class="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0">
-            <!-- 1차 지역 -->
-            <select v-model="selectedPrimary" @change="handlePrimaryChange"
-                    class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-indigo-200">
-              <option value="" disabled selected>시/도 선택</option>
-              <option v-for="(districts, primary) in regionMap" :key="primary" :value="primary">
-                {{ primary }}
-              </option>
-            </select>
-
-            <!-- 2차 지역 -->
-            <select v-model="selectedSecondary" :disabled="!selectedPrimary" @change="fetchGames"
-                    class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-indigo-200 disabled:bg-gray-100 disabled:text-gray-400">
-              <option value="" disabled selected>시/군/구 선택</option>
-              <option v-for="sub in regionMap[selectedPrimary] || []" :key="sub" :value="sub">
-                {{ sub }}
-              </option>
-            </select>
-          </div>   
-        </div>
-      </div>
-
+    
       <!-- 필터 버튼 -->
       <div class="relative flex justify-between itemw-full pt-3  border-t">
-        <div class="text-gray-700 font-[700] pt-2 pl-1 ">
-          총 113건
+        <div class="text-gray-700 font-[500]  pl-1 ">
+                <button @click="showRegionModal = true" class="flex items-center border rounded px-4 py-2 text-sm hover:bg-gray-50 bg-white">
+                  <i class="fas fa-map-marker-alt text-orange-500 mr-2"></i>
+                  <span>{{ selectedSecondary || '지역 선택' }}</span>
+                  <i class="fas fa-chevron-down ml-3 text-gray-500 text-xs"></i>
+                </button>
         </div>
         <div class="text-right">
                 <!-- 선택된 필터 표시 버튼 -->
@@ -171,15 +129,15 @@
                   <div class="flex items-start mb-2">
                     <i class="fas fa-trophy text-[#f97316] w-4 mr-2 mt-1"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
-                      승리 조건
+                      세트 승리 조건
                     </div>
                     <div class="text-[0.88rem] w-[40dvw] ">
-                      {{ game.winCondition=='SETS_HALF_WIN' ? '승리 점수 달성' : '제한 시간동안 더 많은 점수 획득' }}
+                      {{ game.winCondition=='SETS_HALF_WIN' ? '승리 점수 달성' : '시간 도달' }}
                     </div>
                   </div>
 
                   <div class="flex items-center mb-2">
-                    <i class="fas fa-star text-[#f97316] w-4 mr-2"></i>
+                    <i class="fas fa-star text-[#f97316] w-4 mr-2"></i> 
                     <div class="w-[30dvw] font-light text-gray-500">
                       세트 승리 점수
                     </div>
@@ -221,7 +179,7 @@
 
                 <div class="ml-2 flex items-center space-x-1">
                   <!-- 닉네임 -->
-                  <p class="text-sm font-medium text-gray-800">{{ game.ownerNickname }}</p>
+                  <p class="text-sm font-medium text-gray-800">@{{ game.ownerNickname }}</p>
 
                   <!-- 매너점수 -->
                   <div 
@@ -416,9 +374,30 @@
     </div>
   </div>
 
+  <!-- 지역 선택 모달 -->
+  <div v-if="showRegionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white rounded-xl w-11/12 max-w-md p-5 space-y-4">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">지역 선택</h3>
+      <select v-model="selectedPrimary" @change="selectedSecondary = ''" class="w-full border rounded px-3 py-2 text-sm">
+        <option value="" disabled selected>시/도 선택</option>
+        <option v-for="(districts, primary) in regionMap" :key="primary" :value="primary">{{ primary }}</option>
+      </select>
+      <select v-model="selectedSecondary" :disabled="!selectedPrimary" class="w-full border rounded px-3 py-2 text-sm">
+        <option value="" disabled selected>시/군/구 선택</option>
+        <option v-for="sub in regionMap[selectedPrimary] || []" :key="sub" :value="sub">{{ sub }}</option>
+      </select>
+      <div class="flex justify-end space-x-2 pt-3">
+        <button @click="showRegionModal = false" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 text-sm">취소</button>
+        <button :disabled="!selectedSecondary" @click="applyRegionFilter" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm disabled:opacity-50">적용</button>
+      </div>
+    </div>
+  </div>
+
   <FooterNav tab="home" />
     <CustomAlert v-if="alertMsg" :message="alertMsg" @confirm="applyConfirmed" @cancel="() => alertMsg = ''" />
     <CustomToast />
+
+  
 </template>
 
 <script setup>
@@ -455,24 +434,21 @@ const router = useRouter()
 
 const { showToast } = useToast()
 
-// User profile data
-const userAvatar = 'https://gdimg.gmarket.co.kr/4261780491/more/00/800?ver=175072';
-const userName = ref('@koh');
-const userStats = {
-  matches: 24,
-  wins: 22,
-  losses: 0,
-  draws: 2
-};
 // Menu items
 const menuItems = [
  // { name: '경기 찾기', icon: 'fas fa-search', link: '/find-match' },
   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
  // { name: '리더보드', icon: 'fas fa-trophy', link: '/leader-board' },
-  { name: '인박스', icon: 'fas fa-envelope', badge: '2', link: '/inbox' }
+  { name: '경기 요청', icon: 'fas fa-envelope', badge: '2', link: '/inbox' }
 ];
 const showGameDetails = ref(false);
 const activeTab = ref('available');
+const showRegionModal = ref(false)
+
+const applyRegionFilter = () => {
+  showRegionModal.value = false
+  fetchGames()
+}
 
 
 const games = ref([])
@@ -484,6 +460,7 @@ const sortOption = ref('latest')
 const showFilterMenu = ref(false)
 
 const regionMap = {
+  '전국' : ['전국'],
   '서울시': ['강남구', '마포구', '송파구'],
   '경기도': ['수원시', '성남시', '고양시'],
   '부산시': ['해운대구', '금정구'],

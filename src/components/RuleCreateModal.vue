@@ -37,12 +37,12 @@
             </button>
           </div>
           <div class="text-gray-400 font-[400] text-[0.7rem] mt-2">
-            -1(제한 없음)은 세트 시간이 종료될 때까지 세트가 진행합니다.
+            ‘제한없음’으로 설정된 경우 세트 시간 종료시까지 세트가 진행됩니다.
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">총 세트</label>
+          <label class="block text-sm font-medium text-gray-600 mb-1">총 세트(과반 세트 승리 시 경기 승리)</label>
           <input v-model.number="form.setsToWin" type="number" class="modern-input text-xs" min="1" placeholder="세트 수 입력" />
         </div>
 
@@ -54,6 +54,9 @@
               {{ timeUnlimited ? '제한 없음' : '직접 입력' }}
             </button>
           </div>
+          <div class="text-gray-400 font-[400] text-[0.7rem] mt-2">
+            ‘제한없음’으로 설정된 경우 세트 승리 점수 도달시까지 세트가 진행됩니다.
+          </div>
         </div>
 
         <div>
@@ -61,11 +64,9 @@
           <select v-model="form.winBy" class="modern-input text-xs">
             <option disabled value="">기준 선택</option>
             <option value="SETS_HALF_WIN" :disabled="disableHalfWin">승리 점수 달성 (미달성 시 무승부)</option>
-            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints">제한 시간동안 더 많은 점수 획득 (동점 시 무승부)</option>
+            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints">시간 도달 (동점 시 무승부)</option>
           </select>
-            <div class="text-gray-400 font-[400] text-[0.7rem] mt-2">
-            -1(제한 없음)은 세트 승리 조건 점수에 도달할 때까지 세트가 진행됩니다.
-          </div>
+
         </div>
 
         <div v-if="invalidMessage" class="mt-2 px-3 py-4 bg-red-100 text-red-600 text-xs rounded-md border border-red-300">

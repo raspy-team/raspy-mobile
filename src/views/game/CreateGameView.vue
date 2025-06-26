@@ -51,20 +51,20 @@
         </div>
       </div>
               <!-- 룰 정보 -->
-              <div v-if="selectedRule" class="border bg-white border-gray-200 p-4 rounded-[5px] mb-3 flex flex-col gap-1 relative">
+              <div v-if="selectedRule" class="border bg-white border-gray-200 p-4 rounded-[5px] mb-3 pt-8 flex flex-col gap-1 relative">
                 <span class="absolute right-0 top-0 bg-[#f97316] text-white font-bold text-[0.8rem] px-4 py-1" style="border-radius :0px 0px 0px 8px">
                   게임 규칙
                 </span>
                 <p class="text-sm text-gray-700 mt-1">{{ selectedRule.ruleDescription }}</p>
             
-                <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-trophy text-[#f97316] w-4 mr-2"></i>
+                  <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
+                  <div class="flex items-start mb-2">
+                    <i class="fas fa-trophy text-[#f97316] w-4 mr-2 mt-1"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
                       승리 조건
                     </div>
-                    <div>
-                      {{ selectedRule.winBy=='SETS_HALF_WIN' ? '과반 세트 승리' : '최다 세트/점수 획득' }}
+                    <div class="text-[0.88rem] w-[40dvw] ">
+                      {{ selectedRule.winBy=='SETS_HALF_WIN' ? '승리 점수 달성' : '제한 시간동안 더 많은 점수 획득' }}
                     </div>
                   </div>
 
@@ -74,7 +74,7 @@
                       세트 승리 점수
                     </div>
                     <div>
-                      {{ selectedRule.pointsToWin }}점
+                      {{ selectedRule.pointsToWin == -1 ? '제한 없음' : selectRule.pointsToWin +'점' }}
                     </div>
                   </div>
 

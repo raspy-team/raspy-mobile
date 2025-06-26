@@ -16,7 +16,7 @@
           <button
             class="flex-1 py-3 rounded-xl border-2 transition-all !rounded-button"
             :class="'border-gray-200 bg-white'"
-            @click="openRuleSelect" :disabled="selectedRule"
+            @click="openRuleSelect" 
           >
             <div class="flex flex-col items-center">
               <i
@@ -33,7 +33,7 @@
           <button
             class="flex-1 py-3 rounded-xl border-2 transition-all !rounded-button"
             :class="'border-gray-200 bg-white'"
-            @click="openRuleCreate" :disabled="selectedRule"
+            @click="openRuleCreate" 
           >
             <div class="flex flex-col items-center">
               <i
@@ -43,7 +43,7 @@
               <span
                 class="text-sm font-medium"
                 :class="selectedType === 'custom' ? 'text-orange-500' : 'text-gray-600'"
-                >규칙 생성하기</span
+                >새로운 규칙</span
               >
 
             </div>
@@ -51,7 +51,7 @@
         </div>
       </div>
               <!-- 룰 정보 -->
-              <div v-if="selectedRule" class="border border-gray-200 p-4 rounded-[5px] mb-3 flex flex-col gap-1 relative">
+              <div v-if="selectedRule" class="border bg-white border-gray-200 p-4 rounded-[5px] mb-3 flex flex-col gap-1 relative">
                 <span class="absolute right-0 top-0 bg-[#f97316] text-white font-bold text-[0.8rem] px-4 py-1" style="border-radius :0px 0px 0px 8px">
                   게임 규칙
                 </span>
@@ -144,7 +144,7 @@
                 >상세주소</label
               >
               <div class=" rounded-xl border p-3 "                  
-              :class="!form.placeRoad ? 'bg-gray-200 text-[#ededed] cursor-not-allowed':'bg-white  border-gray-200'">
+              :class="!form.placeRoad ? 'bg-gray-100 text-[#ededed] cursor-not-allowed':'bg-white  border-gray-200'">
                 <input
                   v-model="form.placeDetail"
                   placeholder="상세주소 입력"

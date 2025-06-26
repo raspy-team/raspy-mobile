@@ -1,72 +1,96 @@
 <template>
-  <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white w-full max-w-md rounded-lg p-6 shadow-lg">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">🛠 규칙 생성</h2>
+  <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center ">
+    <div class="bg-white w-[90%] max-h-[95%] overflow-auto max-w-md rounded-2xl p-6 shadow-2xl animate-fade-in space-y-6 relative pt-8">
+      <button @click="$emit('close')" class="absolute top-4 right-4 text-gray-600 hover:text-black text-[2rem] font-bold">×</button>
+      <span class="text-xl font-light text-center text-gray-800 mt-4">규칙 만들기</span>
 
-      <form @submit.prevent="emitRule" class="space-y-5">
+      <form @submit.prevent="emitRule" class="space-y-4">
+
+      <div>
+        <label class="block text-sm font-medium text-gray-600 mb-1">규칙 설명</label>
+        
+        <textarea 
+          v-model="form.ruleDescription" 
+          class="modern-input text-sm" 
+          rows="3" 
+          maxlength="500"
+          placeholder="게임 규칙을 입력하세요" 
+        />
+
+        <div class="flex justify-between  items-center">
+          <div class="text-gray-400 font-[400] text-[0.7rem]">
+            규칙 설명은 최대한 구체적으로 작성해주세요.
+          </div>
+
+          <div class="text-xs text-gray-500 text-right mt-1">
+            {{ form.ruleDescription.length }} / 500
+          </div>
+        </div>
+      </div>
+
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">규칙 설명</label>
-          <textarea v-model="form.ruleDescription" class="input" rows="3" required />
-          <p class="text-xs text-gray-400 mt-1">게임의 규칙 내용을 간단하고 명확하게 작성해주세요.</p>
+          <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 조건 점수</label>
+          <div class="relative flex items-center" >
+            <input :value="pointsUnlimited ? '제한 없음' : form.pointsToWin" @input="handlePointsInput" type="text" class="modern-input pr-28 text-xs " :disabled="pointsUnlimited" placeholder="점수를 입력하세요" />
+            <button type="button" @click="togglePointsUnlimited" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 rounded-full text-xs font-semibold transition" :class="pointsUnlimited ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'">
+              {{ pointsUnlimited ? '제한 없음' : '직접 입력' }}
+            </button>
+          </div>
+          <div class="text-gray-400 font-[400] text-[0.7rem] mt-2">
+            -1(제한 없음)은 세트 시간이 종료될 때까지 세트가 진행합니다.
+          </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">승리 조건 점수</label>
-          <input v-model.number="form.pointsToWin" type="number" class="input" required min="-1" @input="validateRuleOptions" />
-          <p class="text-xs text-gray-400 mt-1">-1을 입력하면 점수 제한 없이 진행됩니다.</p>
+          <label class="block text-sm font-medium text-gray-600 mb-1">필요 세트 수</label>
+          <input v-model.number="form.setsToWin" type="number" class="modern-input text-xs" min="1" placeholder="세트 수 입력" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">필요 세트 수</label>
-          <input v-model.number="form.setsToWin" type="number" class="input" required min="1" />
-          <p class="text-xs text-gray-400 mt-1">최소 1 이상이어야 합니다.</p>
+          <label class="block text-sm font-medium text-gray-600 mb-1">세트당 시간 (초)</label>
+          <div class="relative flex items-center">
+            <input :value="timeUnlimited ? '제한 없음' : form.duration" @input="handleTimeInput" type="text" class="modern-input pr-28 text-xs" :disabled="timeUnlimited" placeholder="시간을 입력하세요" />
+            <button type="button" @click="toggleTimeUnlimited" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 rounded-full text-xs font-semibold transition" :class="timeUnlimited ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'">
+              {{ timeUnlimited ? '제한 없음' : '직접 입력' }}
+            </button>
+          </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">게임 시간</label>
-          <input v-model.number="form.duration" type="number" class="input" required min="-1" @input="validateRuleOptions" />
-          <p class="text-xs text-gray-400 mt-1">-1 입력 시 시간 제한 없이 진행됩니다.</p>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">세트 승리 기준</label>
-          <select v-model="form.winBy" class="input" required>
-            <option disabled value="">승리 기준 선택</option>
-            <option value="SETS_HALF_WIN" :disabled="disableHalfWin" :class="{ 'text-gray-400': disableHalfWin }">
-              승리 조건 점수 달성 (미달성 시 무승부)
-            </option>
-            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints" :class="{ 'text-gray-400': disableMostPoints }">
-              제한 시간동안 더 많은 점수 획득 (동점 시 무승부)
-            </option>
+          <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 기준</label>
+          <select v-model="form.winBy" class="modern-input text-xs">
+            <option disabled value="">기준 선택</option>
+            <option value="SETS_HALF_WIN" :disabled="disableHalfWin">점수 달성 (미달성시 무승부)</option>
+            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints">더 많은 점수 획득 (무승부 가능)</option>
           </select>
-          <p class="text-xs text-gray-400 mt-1">게임 종료 시점의 승패 판정 기준을 설정합니다.</p>
+            <div class="text-gray-400 font-[400] text-[0.7rem] mt-2">
+            -1(제한 없음)은 세트 승리 조건 점수에 도달할 때까지 세트가 진행됩니다.
+          </div>
         </div>
 
-        <div class="text-red-500 text-sm mt-2" v-if="invalidMessage">
+        <div v-if="invalidMessage" class="mt-2 px-3 py-4 bg-red-100 text-red-600 text-xs rounded-md border border-red-300">
           ⚠️ {{ invalidMessage }}
         </div>
 
-        <p class="text-xs text-gray-400 mt-4 text-center">
-          ⚠️ 규칙 제목과 카테고리는 AI가 자동으로 분석하여 배정됩니다.
-        </p>
 
-        <div class="flex justify-between items-center mt-4">
-          <button type="submit"
-                  :disabled="!isValid"
-                  class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
+
+        <div class="">
+
+          <div class="pb-3 font-sm text-gray-600 text-[0.73rem]">
+            [규칙 제목]과 [카테고리]는 입력한 설명을 바탕으로 AI로 자동생성 됩니다.
+          </div>
+          <button type="submit" :disabled="!isValid" class="w-full bg-orange-500 text-white py-2 rounded-[5px] font-semibold shadow hover:brightness-110 transition disabled:opacity-50">
             생성하기
           </button>
-          <button type="button" @click="$emit('close')" class="text-sm text-gray-500 hover:underline">
-            닫기
-          </button>
         </div>
+
       </form>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch, defineEmits } from 'vue'
+import { ref, computed, watch, defineEmits } from 'vue'
 
 const emit = defineEmits(['created', 'close'])
 
@@ -78,50 +102,54 @@ const form = ref({
   winBy: ''
 })
 
+const pointsUnlimited = ref(true)
+const timeUnlimited = ref(true)
 const disableHalfWin = ref(false)
 const disableMostPoints = ref(false)
+
+const togglePointsUnlimited = () => {
+  pointsUnlimited.value = !pointsUnlimited.value
+  if (pointsUnlimited.value) form.value.pointsToWin = -1
+  validateRuleOptions()
+}
+
+const toggleTimeUnlimited = () => {
+  timeUnlimited.value = !timeUnlimited.value
+  if (timeUnlimited.value) form.value.duration = -1  
+  validateRuleOptions()
+}
+
+const handlePointsInput = (e) => {
+  form.value.pointsToWin = parseInt(e.target.value) || 0
+  validateRuleOptions()
+}
+
+const handleTimeInput = (e) => {
+  form.value.duration = parseInt(e.target.value) || 0
+  validateRuleOptions()
+}
 
 const validateRuleOptions = () => {
   const points = form.value.pointsToWin
   const time = form.value.duration
 
-  if ((points === -1 && time === -1) || points === 0 || time === 0) {
-    disableHalfWin.value = true
-    disableMostPoints.value = true
-    form.value.winBy = ''
-    return
-  }
+  disableHalfWin.value = points === -1
+  disableMostPoints.value = time === -1
 
-  if (points === -1) {
-    disableHalfWin.value = true
-    disableMostPoints.value = false
-    form.value.winBy = 'MOST_SETS_AND_POINTS'
-  } else if (time === -1) {
-    disableHalfWin.value = false
-    disableMostPoints.value = true
-    form.value.winBy = 'SETS_HALF_WIN'
-  } else {
-    disableHalfWin.value = false
-    disableMostPoints.value = false
-  }
+  if (points === -1 && time !== -1) form.value.winBy = 'MOST_SETS_AND_POINTS'
+  if (time === -1 && points !== -1) form.value.winBy = 'SETS_HALF_WIN'
+  if (points === -1 && time === -1) form.value.winBy = ''
 }
 
 watch(() => form.value.pointsToWin, validateRuleOptions)
 watch(() => form.value.duration, validateRuleOptions)
 
 const invalidMessage = computed(() => {
-  const descLen = form.value.ruleDescription.length
-  const points = form.value.pointsToWin
-  const time = form.value.duration
-  const sets = form.value.setsToWin
-  const winBy = form.value.winBy
-
-  if (descLen < 1 || descLen > 500) return '규칙 설명은 1자 이상 500자 이하여야 합니다.'
-  if (sets < 1) return '필요 세트 수는 최소 1 이상이어야 합니다.'
-  if (points === 0 || time === 0) return '승리 조건 점수와 게임 시간은 0일 수 없습니다.'
-  if (points === -1 && time === -1) return '승리 조건 점수와 게임 시간은 동시에 -1일 수 없습니다.'
-  if (!winBy) return '세트 승리 기준을 선택해야 합니다.'
-
+  if (form.value.ruleDescription.length < 1) return '규칙 설명을 입력하세요.'
+  if (form.value.setsToWin < 1) return '세트 수는 1 이상이어야 합니다.'
+  if (form.value.pointsToWin === 0 || form.value.duration === 0) return '점수 및 시간은 0일 수 없습니다.'
+  if (form.value.pointsToWin === -1 && form.value.duration === -1) return '점수와 시간을 동시에 -1로 설정할 수 없습니다.'
+  if (!form.value.winBy) return '세트 승리 기준을 선택하세요.'
   return ''
 })
 
@@ -129,16 +157,20 @@ const isValid = computed(() => invalidMessage.value === '')
 
 const emitRule = () => {
   if (isValid.value) {
-    emit('created', {
-      referencedRuleId: null,
-      ...form.value
-    })
+    emit('created', { referencedRuleId: null, ...form.value })
   }
 }
 </script>
 
 <style scoped>
-.input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+@keyframes fade-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease forwards;
+}
+.modern-input {
+  @apply w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400;
 }
 </style>

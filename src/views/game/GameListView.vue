@@ -5,7 +5,7 @@
     <div class="bg-white h-6 w-full"></div>
     
     <!-- Header with Logo and Actions -->
-    <header class="bg-white px-4 py-3 shadow-sm mt-5 ">
+    <header class="px-4 py-3 mt-5 ">
       
       <!-- User Info -->
       <div class="mt-4 bg-white rounded-xl p-3 shadow-sm">
@@ -50,7 +50,7 @@
     <!-- Main Content -->
     <main class="pt-3 px-4 pb-4">
       <!-- Menu Items -->
-      <div class="grid grid-cols-4 gap-3 mb-6">
+      <div class="grid grid-cols-2 gap-3 mb-6">
         <div v-for="(action, index) in menuItems" :key="index" @click="router.push(action.link)"
           class="bg-white rounded-xl shadow-sm p-3 flex flex-col items-center cursor-pointer hover:shadow-md transition relative">
           <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-2">
@@ -63,23 +63,8 @@
         </div>
       </div>
       
-      <!-- 필터 버튼 -->
-          <div class="relative w-[100%]">
-            <div v-if="showFilterMenu" class="absolute right-0 mt-0 bg-white border rounded shadow-md z-20 text-right">
-              <button @click="setSort('popular')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
-                인기순
-              </button>
-              <button @click="setSort('latest')" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
-                최신순
-              </button>
-            </div>
-          </div>
-
       <!-- 게임리스트 -->
       <div v-if="activeTab === 'available'" class="space-y-4">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-lg font-semibold text-gray-800">참여 가능한 경기</h2>
-        </div>
         
       <!-- 지역 선택 박스 -->
       <div class="bg-white shadow-sm z-10 px-4 md:px-8 py-4">
@@ -106,15 +91,63 @@
           </div>   
         </div>
       </div>
+
+      <!-- 필터 버튼 -->
+      <div class="relative flex justify-between itemw-full pt-3  border-t">
+        <div class="text-gray-700 font-[700] pt-2 pl-1 ">
+          총 113건
+        </div>
+        <div class="text-right">
+                <!-- 선택된 필터 표시 버튼 -->
+                <button 
+                  @click="showFilterMenu = !showFilterMenu"
+                  class="flex items-center absolute right-0 justify-between w-[30%] bg-white px-4 py-2 border rounded text-sm bg-white hover:bg-gray-50">
+                  <span>
+                    {{ sortOption === 'popular' ? '인기순' : sortOption === 'latest' ? '최신순' : '필터 선택' }}
+                  </span>
+                  <i class="fas fa-chevron-down ml-2 text-gray-500"></i>
+                </button>
+
+                <!-- 필터 드롭다운 메뉴 -->
+                <div v-if="showFilterMenu" class="absolute right-0 mt-1 bg-white border rounded shadow-md z-20 text-left w-full">
+                  <button @click="setSort('popular'); showFilterMenu = false" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
+                    인기순
+                  </button>
+                  <button @click="setSort('latest'); showFilterMenu = false" class="block px-4 py-2 hover:bg-gray-50 w-full text-left">
+                    최신순
+                  </button>
+                </div>
+        </div>
+      </div>
+
+
         <div v-for="(game, index) in games" :key="index" class="bg-white rounded-xl shadow-sm overflow-hidden">
           <div class="p-4">
-            <div class="flex justify-between g items-start">
+            <div class="flex justify-between items-start">
+
+              <!-- 좌측: 타이틀, 카테고리, 1vs1 표시 -->
               <div>
                 <h3 class="font-medium text-lg text-gray-800">{{ game.title }}</h3>
-                <span class="font-semibold">{{ game.majorCategory }}</span> / {{ game.minorCategory }}
+
+                <div class="flex items-center space-x-1 mt-0.5">
+                  <span class="font-semibold">{{ game.majorCategory }}</span>
+                  <span class="">/ {{ game.minorCategory }}</span>
+
+                  <div class="pl-2">
+                    <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5  rounded-full font-medium">
+                      1vs1
+                    </span>
+                  </div>
+                </div>
               </div>
-              <span class="bg-orange-100 text-orange-600 text-xs px-3 py-1 rounded-full font-medium">1v1</span>
+
+              <!-- 우측: 더보기 버튼 -->
+              <button @click="alert('준비 중')" class="text-gray-400 ">
+                <i class="fas fa-ellipsis-h"></i>
+              </button>
+
             </div>
+
             <div class="mt-3 flex items-center text-sm text-gray-500">
               <i class="fas fa-map-marker-alt mr-2 text-orange-500"></i>
               <span>{{ game.matchLocation || '미정' }}</span>
@@ -129,36 +162,36 @@
               <!-- 룰 정보 -->
               <div class="border border-gray-200 p-4 rounded-[5px] mb-3 flex flex-col gap-1 relative">
                 <span class="absolute right-0 top-0 bg-[#f97316] text-white font-bold text-[0.8rem] px-4 py-1" style="border-radius :0px 0px 0px 8px">
-                  규칙
+                  게임 규칙
                 </span>
                 <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
-                <p class="text-sm text-gray-700 mt-1">{{ game.ruleDescription }}</p>
+                <p class="text-sm text-gray-700 mt-1 py-2">{{ game.ruleDescription }}</p>
             
                 <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-trophy text-[#f97316] w-4 mr-2"></i>
+                  <div class="flex items-start mb-2">
+                    <i class="fas fa-trophy text-[#f97316] w-4 mr-2 mt-1"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
                       승리 조건
                     </div>
-                    <div>
-                      {{ game.winCondition=='SETS_HALF_WIN' ? '과반 세트 승리' : '최다 세트/점수 획득' }}
+                    <div class="text-[0.88rem] w-[40dvw] ">
+                      {{ game.winCondition=='SETS_HALF_WIN' ? '승리 점수 달성' : '제한 시간동안 더 많은 점수 획득' }}
                     </div>
                   </div>
 
                   <div class="flex items-center mb-2">
                     <i class="fas fa-star text-[#f97316] w-4 mr-2"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
-                      1세트 승리 점수
+                      세트 승리 점수
                     </div>
                     <div>
-                      {{ game.points }}점
+                      {{ game.points == -1  ?'제한 없음' : game.points + '점'}}
                     </div>
                   </div>
 
                   <div class="flex items-center mb-2">
                     <i class="fas fa-layer-group text-[#f97316] w-4 mr-2"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
-                      승리 조건 세트
+                      총 세트
                     </div>
                     <div>
                       {{ game.sets }}세트
@@ -179,22 +212,81 @@
                 </div>
               </div>
 
-            <div class="mt-3 flex items-center">
-              <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
-                <img :src="game.ownerProfileUrl||''" alt="Opponent" class="w-full h-full object-cover" />
+            <div class="mt-5 flex items-center justify-between">
+
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
+                  <img :src="game.ownerProfileUrl || 'https://chelseafc360blog.files.wordpress.com/2013/03/mario-gomez.jpg'" alt="프로필" class="w-full h-full object-cover" />
+                </div>
+
+                <div class="ml-2 flex items-center space-x-1">
+                  <!-- 닉네임 -->
+                  <p class="text-sm font-medium text-gray-800">{{ game.ownerNickname }}</p>
+
+                  <!-- 매너점수 -->
+                  <div 
+                    class="flex items-center text-xs font-semibold pl-2"
+                    :class="[
+                      game.mannerScore >= 4 ? 'text-green-500' : 
+                      game.mannerScore >= 2 ? 'text-orange-500' : 
+                      game.mannerScore > 0 ? 'text-red-500' : 
+                      'text-gray-400'
+                    ]"
+                  >
+                            <i 
+                          :class="[
+                            game.mannerScore >= 4 ? 'fas fa-face-smile' : 
+                            game.mannerScore >= 2 ? 'fas fa-face-meh' : 
+                            game.mannerScore > 0 ? 'fas fa-face-frown' : 
+                            'fas fa-user-slash'
+                          ]" 
+                          class="mr-1"
+                        ></i>
+                        {{  game.mannerScore.toFixed(1)}}
+                  </div>
+                </div>
               </div>
-              <div class="ml-2">
-                <p class="text-sm font-medium text-gray-800">{{ game.ownerNickname }}</p>
+
+              <!-- 우측: 생성 시각 -->
+              <div class="text-xs text-gray-500">
+                {{ formatTimeAgo(game.createdAt) }}
               </div>
+
             </div>
 
 
-            <button 
+            <div class="flex items-center mt-3 space-x-2">
+
+              <!-- 참가하기 버튼 (70%) -->
+              <button 
                 :disabled="game.applied"
                 @click="() => !game.applied && confirmApply(game)"
-                :class="game.applied ? 'bg-gray-400 cursor-not-allowed font-semibold' : 'mt-3 font-semibold w-full py-2.5 bg-orange-500 text-white rounded-full font-medium !rounded-button cursor-pointer hover:bg-orange-600 transition'">
-              {{ game.applied ? '신청 완료' : '참가하기' }}
-            </button>
+                :class="[
+                  'h-12 flex-grow py-2.5 font-semibold rounded-full transition text-white',
+                  game.applied 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
+                ]">
+                {{ game.applied ? '신청 완료' : '참가하기' }}
+              </button>
+
+              <!-- 댓글 버튼 -->
+              <button 
+                @click="goToComments(game)"
+                class="w-12 h-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+                <i class="fas text-gray-500 fa-comment"></i>
+              </button>
+
+              <!-- 공유 버튼 -->
+              <button 
+                @click="shareGame(game)"
+                class="w-12 h-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+                <i class="fas text-gray-500 fa-share"></i>
+              </button>
+
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -257,9 +349,9 @@
     </div>
     
     <!-- FAB -->
-    <button class="fixed right-5 bottom-20 w-14 h-14 bg-orange-500 rounded-full shadow-lg flex items-center justify-center cursor-pointer !rounded-button hover:bg-orange-600 transition z-20">
+    <!-- <button class="fixed right-5 bottom-20 w-14 h-14 bg-orange-500 rounded-full shadow-lg flex items-center justify-center cursor-pointer !rounded-button hover:bg-orange-600 transition z-20">
       <i class="fas fa-plus text-white text-xl"></i>
-    </button>
+    </button> -->
     
     <!-- Game Details Modal -->
     <div v-if="showGameDetails" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
@@ -339,13 +431,33 @@ import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 import {useRouter} from "vue-router"
 
+function formatTimeAgo(dateString) {
+    const now = new Date();
+    const createdAt = new Date(dateString);
+    const diff = (now - createdAt) / 1000; // 초 단위
+
+    if (diff < 60) {
+      return `${Math.floor(diff)}초 전`;
+    } else if (diff < 3600) {
+      return `${Math.floor(diff / 60)}분 전`;
+    } else if (diff < 86400) {
+      return `${Math.floor(diff / 3600)}시간 전`;
+    } else if (diff < 2592000) {
+      return `${Math.floor(diff / 86400)}일 전`;
+    } else if (diff < 31104000) {
+      return `${Math.floor(diff / 2592000)}개월 전`;
+    } else {
+      return `${Math.floor(diff / 31104000)}년 전`;
+    }
+  }
+
 const router = useRouter()
 
 const { showToast } = useToast()
 
 // User profile data
 const userAvatar = 'https://gdimg.gmarket.co.kr/4261780491/more/00/800?ver=175072';
-const userName = ref('몸짱무패 고병연');
+const userName = ref('@koh');
 const userStats = {
   matches: 24,
   wins: 22,
@@ -354,9 +466,9 @@ const userStats = {
 };
 // Menu items
 const menuItems = [
-  { name: '경기 찾기', icon: 'fas fa-search', link: '/find-match' },
+ // { name: '경기 찾기', icon: 'fas fa-search', link: '/find-match' },
   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
-  { name: '리더보드', icon: 'fas fa-trophy', link: '/leader-board' },
+ // { name: '리더보드', icon: 'fas fa-trophy', link: '/leader-board' },
   { name: '인박스', icon: 'fas fa-envelope', badge: '2', link: '/inbox' }
 ];
 const showGameDetails = ref(false);

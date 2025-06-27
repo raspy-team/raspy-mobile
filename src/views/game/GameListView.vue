@@ -108,7 +108,7 @@
 
             <div class="mt-3 flex items-center text-sm text-gray-500">
               <i class="fas fa-map-marker-alt mr-2 text-orange-500"></i>
-              <span>{{ game.matchLocation || '미정' }}</span>
+              <span>{{ game.matchLocation != ' ' ? game.matchLocation :  '미정' }}</span>
             </div>
             <div class="mt-2 flex items-center text-sm text-gray-500 mb-3">
               <i class="far fa-calendar mr-2 text-orange-500"></i>

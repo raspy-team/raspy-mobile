@@ -1,24 +1,28 @@
 <template>
   <Header :has-referer="true" title="인박스"></Header>
-  <div class="pt-20 pb-6 px-4 max-w-3xl mx-auto">
-    <div class="flex justify-center space-x-4 mb-6">
-      <button @click="activeTab = 'sent'" :class="tabClass('sent')">보낸 요청</button>
-      <button @click="activeTab = 'received'" :class="tabClass('received')">받은 요청</button>
+  <div class="min-h-screen w-screen flex flex-col mt-[80px]">
+    <div class="flex justify-center sticky top-0 bg-white z-10 py-3">
+      <button @click="activeTab = 'sent'"  class="flex-1 py-2 text-sm font-semibold" :class="activeTab === 'sent' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-500'">
+        보낸 요청
+      </button>
+      <button @click="activeTab = 'received'" class="flex-1 py-2 text-sm font-semibold" :class="activeTab === 'received' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-500'">
+        받은 요청
+      </button>
     </div>
-    <MyRequestsTab v-if="activeTab === 'sent'" />
-    <ApplicantsTab v-else />
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <MyRequestsTab v-if="activeTab === 'sent'" />
+      <ApplicantsTab v-else />
+    </div>
   </div>
-  <Footer tab="inbox"></Footer>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import Header from "../components/HeaderComp.vue"
-import Footer from "../components/FooterNav.vue"
 import MyRequestsTab from '../components/Inbox/MyRequestsTab.vue'
 import ApplicantsTab from '../components/Inbox/ApplicantsTab.vue'
 
 const activeTab = ref('sent')
-const tabClass = (tab) =>
-  `px-4 py-2 rounded-full font-semibold border ${activeTab.value === tab ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`
+
 </script>

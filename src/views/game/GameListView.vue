@@ -409,6 +409,7 @@ import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 import {useRouter} from "vue-router"
+import regionMap from "../../assets/regionMap.json"
 
 function formatTimeAgo(dateString) {
     const now = new Date();
@@ -459,16 +460,9 @@ const selectedGame = ref(null)
 const sortOption = ref('latest')
 const showFilterMenu = ref(false)
 
-const regionMap = {
-  '전국' : ['전국'],
-  '서울시': ['강남구', '마포구', '송파구'],
-  '경기도': ['수원시', '성남시', '고양시'],
-  '부산시': ['해운대구', '금정구'],
-  '대구시': ['수성구', '중구']
-}
 
-const selectedPrimary = ref('')
-const selectedSecondary = ref('')
+const selectedPrimary = ref('전국')
+const selectedSecondary = ref('전국')
 
 // const handlePrimaryChange = () => {
 //   selectedSecondary.value = ''

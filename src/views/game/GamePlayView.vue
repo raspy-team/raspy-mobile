@@ -21,8 +21,8 @@
 
     <div class="grid grid-cols-2 gap-2 mb-4">
       <div class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center">
-        <div class="text-xs font-semibold mb-1">세트 승리 조건</div>
-        <div class="text-lg font-extrabold">{{ game.pointsToWin }}점</div>
+        <div class="text-xs font-semibold mb-1">세트 승리 점수</div>
+        <div class="text-lg font-extrabold">{{ game.pointsToWin  == -1 ? "제한 없음" : game.pointsToWin+'점'}}</div>
       </div>
       <div class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center">
         <div class="text-xs font-semibold mb-1">총 세트</div>
@@ -36,7 +36,7 @@
       <div class="flex flex-col items-center mx-2 animate-fade-in">
         <img :src="game.user1.profileUrl ? game.user1.profileUrl : DefaultImage" class="w-20 aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1" />
         <div class="font-bold text-sm">@{{ game.user1.nickname }}</div>
-        <div class="text-3xl font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
+        <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user1SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">
           <button @click="socket_sendScore(1, 1)" :disabled="isSetOver || isGameOver" class="bg-orange-500 text-white w-14 py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold">+1</button>
@@ -47,7 +47,7 @@
       <div class="flex flex-col items-center mx-2 animate-fade-in">
         <img :src="game.user2.profileUrl ? game.user2.profileUrl : DefaultImage" class="w-20 h-20 rounded-full border-4 border-orange-500 shadow-lg mb-1" />
         <div class="font-bold text-sm">@{{ game.user2.nickname }}</div>
-        <div class="text-3xl font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>
+        <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user2SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">
           <button @click="socket_sendScore(2, 1)" :disabled="isSetOver || isGameOver" class="bg-orange-500 text-white w-14 py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold">+1</button>
@@ -69,27 +69,28 @@
 
 <div class="mt-auto relative">
   
-  <div class="relative max-h-44 overflow-hidden flex flex-col space-y-1 mb-10 px-1">
-    
-    <div v-for="(log, index) in logs" :key="index" 
-         class="text-xs bg-orange-50 border border-orange-200 rounded-md px-2 py-1 shadow-sm flex items-center justify-between text-gray-700">
-
-      <div class="flex-1 truncate">
-        <span class="text-[11px] text-gray-500 mr-1">[{{ log.elapsed }}]</span>
-        {{ log.message }}
-      </div>
-    </div>
-
-    <!-- 상단 반투명 + 중앙 더보기 버튼 -->
-    <div v-if="logs.length > 5" 
-         class="absolute top-[-5px] left-0 w-full h-10 bg-gradient-to-b from-white/80 to-transparent flex justify-center items-start z-10">
-      
-      <button @click="showLogModal = true" class="text-orange-500 text-[12px] font-[600] border-[1px] border-orange-500 bg-white rounded-full shadow px-8 py-[7px] flex items-center space-x-1 hover:brightness-110 transition mt-1">
-        <span>모두 보기</span>
-      </button>
-
+<div class="relative max-h-28 overflow-hidden flex flex-col justify-end space-y-1 mb-10 px-1">
+  
+  <div v-for="(log, index) in logs" :key="index" 
+       class="text-xs bg-orange-50 border border-orange-200 rounded-md px-2 py-1 shadow-sm flex items-center justify-between text-gray-700">
+    <div class="flex-1 truncate">
+      <span class="text-[11px] text-gray-500 mr-1">[{{ log.elapsed }}]</span>
+      {{ log.message }}
     </div>
   </div>
+
+  <!-- 상단 반투명 + 중앙 더보기 버튼 -->
+  <div v-if="logs.length > 5" 
+       class="absolute top-0 left-0 w-full h-10 bg-gradient-to-b from-white/80 to-transparent flex justify-center items-start z-10">
+    
+    <button @click="showLogModal = true" 
+            class="text-orange-500 text-[12px] font-[600] border border-orange-500 bg-white rounded-full shadow px-8 py-[7px] flex items-center space-x-1 hover:brightness-110 transition mt-1">
+      <span>모두 보기</span>
+    </button>
+  </div>
+
+</div>
+
 
   <div class="grid grid-cols-2 gap-3 mb-4">
     <button @click="resetGame" 

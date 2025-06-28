@@ -5,7 +5,7 @@
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center">
         <router-link v-if="props.hasReferer != true" to="/" class="text-xl font-bold text-[#f97316]">
-          <span>RASPY</span>
+          <span class="RASPY">RASPY</span>
         </router-link>
         <button v-else @click="goBack" class="text-black text-lg">
           <i class="fas fa-chevron-left"></i>

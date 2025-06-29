@@ -417,7 +417,7 @@ function formatTimeAgo(dateString) {
     const diff = (now - createdAt) / 1000; // 초 단위
 
     if (diff < 60) {
-      return `${Math.floor(diff)}초 전`;
+      return `방금 전`;
     } else if (diff < 3600) {
       return `${Math.floor(diff / 60)}분 전`;
     } else if (diff < 86400) {

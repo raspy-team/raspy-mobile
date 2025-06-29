@@ -120,7 +120,7 @@
               <!-- 룰 정보 -->
               <div class="border border-gray-200 p-4 rounded-[5px] mb-3 flex flex-col gap-1 relative">
                 <span class="absolute right-0 top-0 bg-[#f97316] text-white font-bold text-[0.8rem] px-4 py-1" style="border-radius :0px 0px 0px 8px">
-                  게임 규칙
+                  경기 규칙
                 </span>
                 <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
                 <p class="text-sm text-gray-700 mt-1 py-2">{{ game.ruleDescription }}</p>

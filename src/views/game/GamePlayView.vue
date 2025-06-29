@@ -10,30 +10,31 @@
           </svg>
         </button>
 
-      <div :class="['px-4 py-1 text-sm font-semibold rounded-full shadow transition flex items-center space-x-1 bg-orange-500 text-white']">
-        <span class="text-xs">⏱</span><span>{{ elapsedTimeStr }} / {{ limitTimeStr }}</span>
-      </div>
     </div>
 
     <div class="text-xs text-gray-700 text-center mb-3">
       경기 시작: {{ formatDate(game.totalGameStartedAt) }} | 현재 세트 시작: {{ formatDate(game.setStartedAt) }}
     </div>
 
-    <div class="grid grid-cols-2 gap-2 mb-4">
+    <div class="grid grid-cols-3 gap-2 mb-4">
       <div class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center">
         <div class="text-xs font-semibold mb-1">세트 승리 점수</div>
-        <div class="text-lg font-extrabold">{{ game.pointsToWin  == -1 ? "제한 없음" : game.pointsToWin+'점'}}</div>
+        <div class="text-md font-extrabold">{{ game.pointsToWin  == -1 ? "제한 없음" : game.pointsToWin+'점'}}</div>
+      </div>
+      <div class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center">
+        <div class="text-xs font-semibold mb-1">세트 제한 시간</div>
+        <div class="text-md font-extrabold">{{ limitTimeStr }}</div>
       </div>
       <div class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center">
         <div class="text-xs font-semibold mb-1">총 세트</div>
-        <div class="text-lg font-extrabold">{{ game.setsToWin }}세트</div>
+        <div class="text-md font-extrabold">{{ game.setsToWin }}세트</div>
       </div>
     </div>
 
     <div class="text-center text-orange-600 text-lg font-bold animate-pulse mb-3">현재 세트: {{ currentSet }}</div>
 
-    <div class="flex items-center justify-center mb-6 relative">
-      <div class="flex flex-col items-center mx-2 animate-fade-in">
+    <div class="flex items-start justify-between mb-6 relative">
+      <div class="flex flex-col items-center mr-2 animate-fade-in">
         <img :src="game.user1.profileUrl ? game.user1.profileUrl : DefaultImage" class="w-20 aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1" />
         <div class="font-bold text-sm">@{{ game.user1.nickname }}</div>
         <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
@@ -43,8 +44,12 @@
           <button @click="socket_sendScore(1, -1)" :disabled="isSetOver || isGameOver || currentScore1<=0" c class="bg-gray-200 text-gray-800 w-14 py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold">-1</button>
         </div>
       </div>
-      <div class="text-4xl font-extrabold text-orange-500 mx-4 vs-jump-blink">VS</div>
-      <div class="flex flex-col items-center mx-2 animate-fade-in">
+      <div>
+        
+     <div class="w-24 text-center text-xl font-[600] mt-8 text-orange-500 ">{{ elapsedTimeStr }} </div>
+
+      </div>
+      <div class="flex flex-col items-center ml-2 animate-fade-in">
         <img :src="game.user2.profileUrl ? game.user2.profileUrl : DefaultImage" class="w-20 h-20 rounded-full border-4 border-orange-500 shadow-lg mb-1" />
         <div class="font-bold text-sm">@{{ game.user2.nickname }}</div>
         <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>

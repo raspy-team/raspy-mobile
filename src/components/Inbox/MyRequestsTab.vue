@@ -71,7 +71,7 @@
 
         <div class="grid grid-cols-2 gap-3 pt-1">
           <button v-if="game.status === 'REQUESTED'" @click="cancelRequest(game.id)"
-            class="flex items-center justify-center gap-2 text-red-400  text-sm text-white border-[1px] border-red-400 py-3 rounded-[8px]">
+            class="flex items-center justify-center gap-2 text-red-400  text-sm text-red-400 border-[1px] border-red-400 py-3 rounded-[8px]">
             <i class="fas fa-xmark "></i> 신청 취소
           </button>
           <button v-else-if="game.status === 'APPROVED'"

@@ -440,7 +440,9 @@ const menuItems = [
  // { name: '경기 찾기', icon: 'fas fa-search', link: '/find-match' },
   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
  // { name: '리더보드', icon: 'fas fa-trophy', link: '/leader-board' },
-  { name: '경기 요청', icon: 'fas fa-envelope', badge: '2', link: '/inbox' }
+  { name: '경기 요청', icon: 'fas fa-envelope'
+  // , badge: '2'
+  , link: '/inbox' }
 ];
 const showGameDetails = ref(false);
 const activeTab = ref('available');

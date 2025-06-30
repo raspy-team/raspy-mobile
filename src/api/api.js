@@ -31,7 +31,7 @@ const excludeLoginRedirectURLs = [
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && error.response.status === 401) {  
       const requestURL = error.config.url
 
       const isExcluded = excludeLoginRedirectURLs.some(excludedPath =>

@@ -84,7 +84,7 @@ function isActive(pathPrefix) {
       </router-link> -->
 
       <!-- 프로필 -->
-      <router-link to="/profile" class="flex flex-col gap-y-2 items-center" :class="isActive('/profile') ? 'text-[#f97316]' : 'text-gray-500'">
+      <router-link to="/profile/0" class="flex flex-col gap-y-2 items-center" :class="isActive('/profile') ? 'text-[#f97316]' : 'text-gray-500'">
         <svg width="20" height="20" viewBox="0 0 11 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M5.5 6C6.88071 6 8 4.88071 8 3.5C8 2.11929 6.88071 1 5.5 1C4.11929 1 3 2.11929 3 3.5C3 4.88071 4.11929 6 5.5 6Z"
             :stroke="isActive('/profile') ? '#f97316' : '#6B7280'" stroke-linecap="round" stroke-linejoin="round" />

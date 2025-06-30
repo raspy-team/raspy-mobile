@@ -143,10 +143,21 @@ onMounted(async () => {
 })
 
 const submitReview = async () => {
-  await api.post(`/api/games/${gameId}/review`, review.value)
-  alert('리뷰가 등록되었습니다.')
-  router.push('/my-games')
+  if (review.value.manner === 0 || review.value.performance === 0) {
+    alert('매너와 퍼포먼스 평점을 모두 입력해 주세요.')
+    return
+  }
+
+  try {
+    await api.post(`/api/games/${gameId}/review`, review.value)
+    alert('리뷰가 등록되었습니다.')
+    router.push('/my-games')
+  } catch (err) {
+    console.error(err)
+    alert('리뷰 등록에 실패했습니다.')
+  }
 }
+
 
 const goHome =()=>{ router.push("/") }
 

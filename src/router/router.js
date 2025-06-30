@@ -12,6 +12,7 @@ import SettingProfile from "../views/profile/SettingProfileView.vue"
 import GameComment from "../views/GameCommentView.vue"
 import GamePlay from "../views/game/GamePlayView.vue"
 import GameResult from "../views/game/GameResultView.vue"
+import Profile from "../views/profile/ProfileView.vue"
 
 const routes = [
   {
@@ -67,7 +68,9 @@ const routes = [
     path: '/games/:gameId/result',
     component: GameResult,
     props: true
-  }
+  },
+  { path: '/profile/:id', component: Profile },
+  
 ]
 
 const router = createRouter({

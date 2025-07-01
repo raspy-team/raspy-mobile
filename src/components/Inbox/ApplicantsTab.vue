@@ -59,14 +59,14 @@
               <div class="space-y-1">
                 <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
                   {{ user.applicantNickname }}
-                  <span class="text-xs flex items-center gap-1">
+                  <!-- <span class="text-xs flex items-center gap-1">
                     <i :class="[
                       user.applicantGameStatisticsDTO.manner >= 4 ? 'fas fa-face-smile text-green-500' :
                       user.applicantGameStatisticsDTO.manner >= 2 ? 'fas fa-face-meh text-orange-500' :
                       'fas fa-face-frown text-red-500'
                     ]"></i>
                     {{ user.applicantGameStatisticsDTO.manner.toFixed(1) }}
-                  </span>
+                  </span> -->
                 </p>
                 <p class="text-xs text-gray-500">
                   {{ user.applicantGameStatisticsDTO.wins }}승 {{ user.applicantGameStatisticsDTO.draws }}무 {{ user.applicantGameStatisticsDTO.losses }}패 · 승률 {{ getWinRate(user.applicantGameStatisticsDTO) }}%

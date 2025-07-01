@@ -100,12 +100,12 @@
       </div>
     </div>
     <!-- 경기 리뷰 및 매너점수 -->
-    <div v-if="game.review || game.mannerScore || game.performanceScore" class="bg-gray-50 rounded-xl mt-5 p-4 flex flex-col gap-2 border border-gray-100">
+    <div v-if="game.review || game.mannerScore || game.performanceScore" class="bg-gray-50 rounded-xl mt-5 p-4 flex flex-col gap-0 border border-gray-100">
       <div v-if="game.review" class="flex items-start gap-2">
         <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
         <span class="text-sm text-gray-700 font-medium leading-snug">{{ game.review }}</span>
       </div>
-      <div v-if="game.mannerScore !== undefined" class="flex items-center gap-2 mt-1">
+      <div v-if="game.mannerScore !== undefined" class="flex items-center gap-2 mt-4">
         <span class="text-xs text-gray-500">상대가 남긴 매너 점수:</span>
         <span class="text-base font-bold"
           :class="[
@@ -119,7 +119,7 @@
           ]"
         >{{ game.mannerScore?.toFixed(1) ?? '-' }}</span>
       </div>
-      <div v-if="game.performanceScore !== undefined" class="flex items-center gap-2 mt-1">
+      <div v-if="game.performanceScore !== undefined" class="flex items-center gap-2 mt-0">
         <span class="text-xs text-gray-500">상대가 남긴 퍼포먼스 점수:</span>
         <span class="text-base font-bold"
           :class="[

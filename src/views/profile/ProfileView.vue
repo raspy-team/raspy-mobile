@@ -94,14 +94,14 @@
   <div v-if="!user.isMe" class="flex gap-3 mt-1">
     <button
       v-if="!sent"
-      class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 w-full rounded-xl shadow transition"
+      class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 border-[0.1px] border-orange-500 text-white font-bold py-3 w-full rounded-xl shadow transition"
       @click="sendFriendRequest"
     >
       <i class="fas fa-user-plus mr-2"></i> 친구추가
     </button>
     <button
       v-else
-      class="flex justify-center items-center bg-white border-2 border-orange-500 text-orange-500 font-bold py-3 w-full rounded-xl shadow transition"
+      class="flex justify-center items-center bg-white border-[0.1px] border-orange-500 text-orange-500 font-bold py-3 w-full rounded-xl shadow transition"
       @click="sendFriendCancelRequest"
     >
       <i class="fas fa-check mr-2"></i> 요청됨
@@ -336,6 +336,16 @@ const subCategoryOptions = computed(() =>
 const selectedRule = computed(() =>
   playedRules.value.find(r => r.id === selectedRuleId.value)
 )
+
+const sent = ref(false)
+
+function sendFriendRequest() {
+  sent.value = true  
+}
+
+function sendFriendCancelRequest() {
+  sent.value = false
+}
 
 const stat = computed(() => {
   if (!user.value) return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }

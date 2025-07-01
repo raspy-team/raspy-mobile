@@ -26,7 +26,7 @@
             alt="프로필"
           />
           <div>
-            <p class="text-sm font-semibold text-gray-800">{{ comment.authorNickname }}</p>
+            <p class="text-sm font-semibold text-gray-800">@{{ comment.authorNickname }}</p>
             <p class="text-xs text-gray-500">{{ formatDate(comment.createdAt) }}</p>
           </div>
         </div>

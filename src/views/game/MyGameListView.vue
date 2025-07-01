@@ -147,7 +147,7 @@
             @click="inviteOpponent(game)"
           ><i class="fas fa-user-plus mr-2"></i>상대 초대하기</button>
 
-          <div v-else class="text-center text-gray-400 text-sm py-3">대기 중...</div>
+          <div v-else class="text-center text-gray-400 text-sm py-3">경기 시작 대기 중</div>
 
           <!-- <button
             class="w-full border-[0.1px] border-red-300 text-red-400 bg-white font-bold rounded-xl py-2 mt-1 shadow-sm hover:bg-red-50 transition active:scale-95"

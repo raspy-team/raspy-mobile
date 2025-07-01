@@ -43,7 +43,7 @@
       </div>
       
       <!-- 게임리스트 -->
-      <div v-if="activeTab === 'available'" class="space-y-4">
+      <div class="space-y-4">
         
     
       <!-- 필터 버튼 -->
@@ -79,6 +79,7 @@
       </div>
 
 
+      <div v-if="games.length > 0">
         <div v-for="(game, index) in games" :key="index" class="bg-white rounded-xl shadow-sm overflow-hidden">
           <div class="p-4">
             <div class="flex justify-between items-start">
@@ -291,6 +292,10 @@
           </div>
         </div>
       </div>-->
+      <div v-else class="text-center mt-10 text-gray-600 text-sm">
+        표시할 게임이 없습니다
+      </div>
+      </div>
     </main>
     
     <!-- Bottom Tab Bar -->
@@ -374,6 +379,7 @@
     </div>
   </div>
 
+
   <!-- 지역 선택 모달 -->
   <div v-if="showRegionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
     <div class="bg-white rounded-xl w-11/12 max-w-md p-5 space-y-4">
@@ -445,7 +451,6 @@ const menuItems = [
   , link: '/inbox' }
 ];
 const showGameDetails = ref(false);
-const activeTab = ref('available');
 const showRegionModal = ref(false)
 
 const applyRegionFilter = () => {
@@ -507,7 +512,7 @@ const formatDate = (dateStr) => {
 
 const confirmApply = (game) => {
   selectedGame.value = game
-  alertMsg.value = `${game.ownerNickname}님의 경기에 신청하시겠습니까?`
+  alertMsg.value = `@${game.ownerNickname}님의 경기에 신청하시겠습니까?`
 }
 
 const applyConfirmed = async () => {

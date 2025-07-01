@@ -58,7 +58,7 @@
               <img :src="user.applicantProfileUrl ? user.applicantProfileUrl:Default" class="w-10 h-10 rounded-full object-cover" />
               <div class="space-y-1">
                 <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                  {{ user.applicantNickname }}
+                  @{{ user.applicantNickname }}
                   <!-- <span class="text-xs flex items-center gap-1">
                     <i :class="[
                       user.applicantGameStatisticsDTO.manner >= 4 ? 'fas fa-face-smile text-green-500' :
@@ -127,7 +127,7 @@ async function approve(gameId, userId) {
     const user = group?.applicants?.find(a => a.userId === userId)
     if (user) user.approved = true
     if (group) group.gameStatus = 'SCHEDULED' 
-    showToast(`${user.applicantNickname}님을 승인했습니다!`)
+    showToast(`@${user.applicantNickname}님을 승인했습니다!`)
   } catch (err) {
     if (err.response?.data?.message?.includes('한 명만 승인 가능')) {
       alert('이미 다른 사용자가 승인되었습니다.')
@@ -144,7 +144,7 @@ async function cancelApproval(gameId, userId) {
   const user = group?.applicants?.find(a => a.userId === userId)
   if (user) user.approved = false
   if (group) group.gameStatus = 'MATCHING' 
-  showToast(`${user.applicantNickname}님의 참여를 취소했습니다!`)
+  showToast(`@${user.applicantNickname}님의 참여를 취소했습니다!`)
 }
 
 

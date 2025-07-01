@@ -279,7 +279,7 @@
                   class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl transition border border-transparent hover:border-orange-200">
             <img :src="user.avatar" class="w-10 h-10 rounded-full border object-cover" />
             <div class="flex-1 text-left">
-              <div class="font-bold text-gray-800 text-sm">{{ user.nickname }}</div>
+              <div class="font-bold text-gray-800 text-sm">@{{ user.nickname }}</div>
               <div class="text-xs text-gray-500">{{ user.intro }}</div>
             </div>
           </button>

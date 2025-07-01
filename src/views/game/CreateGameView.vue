@@ -74,7 +74,7 @@
                       세트 승리 점수
                     </div>
                     <div>
-                      {{ selectedRule.pointsToWin == -1 ? '제한 없음' : selectRule.pointsToWin +'점' }}
+                      {{ selectedRule.pointsToWin == -1 ? '제한 없음' : selectedRule.pointsToWin +'점' }}
                     </div>
                   </div>
 
@@ -94,7 +94,7 @@
                       세트 제한시간
                     </div>
                     <div>
-                      {{ selectedRule.duration >= 60 ? Math.floor(selectedRule.duration / 60) + '분 ' + (selectedRule.duration % 60) + '초' : selectedRule.duration + '초' }}
+                      {{ selectedRule.duration == -1 ? '제한 없음' : (selectedRule.duration >= 60 ? Math.floor(selectedRule.duration / 60) + '분 ' + (selectedRule.duration % 60) + '초' : selectedRule.duration + '초') }}
                     </div>
                   </div>
                 </div>

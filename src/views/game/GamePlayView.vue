@@ -298,12 +298,15 @@ function updateElapsed() {
   if (!game.value?.setStartedAt ||isSetOver.value) return
   const startedAt = new Date(game.value.setStartedAt)
   const now = new Date()
-  elapsedSeconds.value = Math.floor((now - startedAt) / 1000) > game.value.limitSeconds ? game.value.limitSeconds : Math.floor((now - startedAt) / 1000) 
+  const elapsed = Math.floor((now - startedAt) / 1000)
+  elapsedSeconds.value = game.value.limitSeconds === -1 ? elapsed : Math.min(elapsed, game.value.limitSeconds)
   elapsedTimeStr.value = getTimeStr(elapsedSeconds.value)
 
   // 제한 시간 표시(최초 1회만)
   if (game.value.limitSeconds !== -1) {
     limitTimeStr.value = getTimeStr(game.value.limitSeconds)
+  } else {
+    limitTimeStr.value = "제한 없음"
   }
   // 세트 종료 자동 감지
   if (!isSetOver.value && !isGameOver.value) {

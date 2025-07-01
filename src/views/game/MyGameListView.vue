@@ -158,7 +158,7 @@
     </template>
 
     <div v-else class="text-center text-gray-400 py-0 space-y-6">
-      <div><i class="fas fa-info-circle mr-1"></i>참여한 게임이 없습니다.</div>
+      <div class="text-sm"><i class="fas fa-info-circle mr-1"></i>표시할 게임이 없습니다.</div>
       <router-link to="/create-game" class="block w-fit mx-auto px-7 py-3 mt-10 bg-orange-500 text-white font-bold rounded-xl shadow hover:bg-orange-400">+ 새 경기 만들기</router-link>
     </div>
   </div>

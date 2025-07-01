@@ -218,7 +218,7 @@
           :isDraw="game.result === 'draw'"
         />
       </div>
-      <div v-else class="text-center text-gray-400 py-16">조건에 맞는 경기가 없습니다.</div>
+      <div v-else class="text-center text-gray-400 py-6 text-sm">표시할 경기가 없습니다.</div>
     </section>
 
     <!-- 경기규칙 모달 -->

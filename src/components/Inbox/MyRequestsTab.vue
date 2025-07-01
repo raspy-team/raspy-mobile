@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="games.length" class="space-y-5">
-      <div v-for="game in games" :key="game.id" class="p-5 bg-white rounded-2xl shadow space-y-5">
+      <div v-for="game in games" :key="game.id" class="p-5 border bg-white rounded-2xl shadow space-y-5">
 
         <div class="flex justify-between items-start">
           <div class="space-y-2">
@@ -43,7 +43,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">세트 제한 시간</span>
-                <span>{{ game.rule.duration >= 60 ? Math.floor(game.rule.duration / 60) + '분 ' + (game.rule.duration % 60) + '초' : game.rule.duration + '초' }}</span>
+                <span>{{ game.rule.duration == -1 ? '제한 없음' :  game.rule.duration >= 60 ? Math.floor(game.rule.duration / 60) + '분 ' + (game.rule.duration % 60) + '초' : game.rule.duration + '초' }}</span>
               </div>
             </div>
           </div>

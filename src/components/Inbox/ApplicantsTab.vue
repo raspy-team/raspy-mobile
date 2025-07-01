@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen flex flex-col">
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-5">
-      <div v-for="group in groups" :key="group.gameId" class="p-5 bg-white rounded-2xl shadow space-y-5">
+    <div class="flex-1 overflow-y-auto space-y-5">
+      <div v-for="group in groups" :key="group.gameId" class="p-5 border bg-white rounded-2xl shadow space-y-5">
 
         <div class="flex justify-between items-start">
           <div class="space-y-2">
@@ -44,7 +44,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">세트 제한 시간</span>
-                <span>{{ group.rule.duration >= 60 ? Math.floor(group.rule.duration / 60) + '분 ' + (group.rule.duration % 60) + '초' : group.rule.duration + '초' }}</span>
+                <span>{{ group.rule.duration == -1 ? '제한 없음' : group.rule.duration >= 60 ? Math.floor(group.rule.duration / 60) + '분 ' + (group.rule.duration % 60) + '초' : group.rule.duration + '초' }}</span>
               </div>
             </div>
           </div>

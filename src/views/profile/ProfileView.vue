@@ -113,7 +113,8 @@
 
     <!-- Stat Tabs Selector & Graph -->
     <section class="max-w-lg mx-auto px-4">
-      <div class="flex items-center gap-2 mb-4 mt-2">
+      <!-- no use at demo -->
+      <div v-if="false" class="flex items-center gap-2 mb-4 mt-2">
         <button
           v-for="item in statTabs"
           :key="item.id"

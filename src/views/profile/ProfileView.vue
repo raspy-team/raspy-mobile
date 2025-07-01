@@ -28,11 +28,13 @@
       alt="avatar"
       class="w-20 h-20 rounded-full object-cover border-2 border-orange-400 shadow"
     />
-    <div class="flex-1 flex flex-col gap-0.5">
-      <div class="flex items-center gap-2">
+    <div class="flex-1 flex flex-col ">
+      <div class="flex flex-col items-start gap-2">
         <h2 class="text-xl font-bold text-gray-900">@{{ user.nickname }}</h2>
-        <span class="inline-block bg-orange-100 text-orange-600 text-xs px-2.5 py-0.5 rounded font-bold">{{ user.age ? user.age + '세': '연령 미등록'}}</span>
-        <span class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold">{{ user.gender ? user.gender : '성별 미등록' }}</span>
+        <div>
+          <span class="inline-block bg-orange-100 text-orange-600 text-xs px-2.5 py-0.5 rounded font-bold">{{ user.age ? user.age + '세': '연령 미등록'}}</span>
+          <span class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold">{{ user.gender ? user.gender : '성별 미등록' }}</span>
+        </div>
       </div>
       <div class="text-xs text-gray-400 mt-0.5">{{ user.location }}</div>
       <div class="text-sm text-gray-500 mt-2 line-clamp-2">{{ user.intro }}</div>
@@ -173,7 +175,7 @@
         </div>
         <div class="w-full h-[120px] flex items-center justify-center my-5 -ml-2">
           <canvas
-            v-if="chartData.length > 1"
+            v-if="chartData.length > 0"
             ref="chartRef"
             height="flex-1"
             class="flex-1"
@@ -184,7 +186,7 @@
         </div>
         <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-[0.97rem]">
           <div class="font-semibold text-gray-500">퍼포먼스 평균</div>
-          <div class="text-right font-bold text-gray-900">{{ stat.performance }}</div>
+          <div class="text-right font-bold text-gray-900">{{ stat.performance.toFixed(1) }}</div>
           <div class="font-semibold text-gray-500">승/무/패</div>
           <div class="text-right text-gray-600">{{ stat.wins }}승 {{ stat.draws }}무 {{ stat.losses }}패</div>
           <div class="font-semibold text-gray-500">승률</div>
@@ -422,7 +424,7 @@ const updateChart = async () => {
   await nextTick()
   if (!chartRef.value) return
   if (chartInstance) chartInstance.destroy()
-  if (chartData.value.length <= 1) return
+  if (chartData.value.length < 1) return
 
   chartInstance = new Chart(chartRef.value, {
     type: 'line',

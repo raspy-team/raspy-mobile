@@ -29,9 +29,14 @@
     </div>
     <!-- 상단: 프로필/닉네임/경기일시장소 -->
     <div class="flex items-center gap-3">
-      <img :src="game.opponent.avatar" class="w-11 h-11 rounded-full border-2 border-orange-400 shadow" />
+      <router-link :to="'/profile/'+game.opponent.id">
+        <img :src="game.opponent.avatar" class="w-11 h-11 rounded-full border-2 border-orange-400 shadow" />
+      </router-link>
+
       <div>
-        <div class="flex items-center gap-1 font-bold text-gray-900 text-[1.08rem]">@{{ game.opponent.nickname }}</div>
+        <router-link :to="'/profile/'+game.opponent.id">
+          <div class="flex items-center gap-1 font-bold text-gray-900 text-[1.08rem]">@{{ game.opponent.nickname }}</div>
+        </router-link>
         <div class="flex gap-2 text-xs text-gray-500 mt-1">
           <span><i class="far fa-calendar"></i> {{ formatDate(game.date) }}</span>
           <span class="mx-1 text-gray-300">·</span>
@@ -95,7 +100,7 @@
       </div>
     </div>
     <!-- 경기 리뷰 및 매너점수 -->
-    <div v-if="game.review || game.mannerScore" class="bg-gray-50 rounded-xl mt-5 p-4 flex flex-col gap-2 border border-gray-100">
+    <div v-if="game.review || game.mannerScore || game.performanceScore" class="bg-gray-50 rounded-xl mt-5 p-4 flex flex-col gap-2 border border-gray-100">
       <div v-if="game.review" class="flex items-start gap-2">
         <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
         <span class="text-sm text-gray-700 font-medium leading-snug">{{ game.review }}</span>

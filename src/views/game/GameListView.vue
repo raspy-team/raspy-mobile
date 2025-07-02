@@ -124,7 +124,7 @@
                   경기 규칙
                 </span>
                 <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
-                <p class="text-sm text-gray-700 mt-1 py-2">{{ game.ruleDescription }}</p>
+                <p class="text-sm text-gray-700 mt-3 py-0">{{ game.ruleDescription }}</p>
             
                 <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
                   <div class="flex items-start mb-2">
@@ -160,10 +160,10 @@
                   <div class="flex items-center">
                     <i class="fas fa-clock text-[#f97316] w-4 mr-2"></i>
                     <div class="w-[30dvw] font-light text-gray-500">
-                      세트 제한시간
+                      세트 제한 시간
                     </div>
                     <div>
-                      {{ game.duration >= 60 ? Math.floor(game.duration / 60) + '분 ' + (game.duration % 60) + '초' : game.duration + '초' }}
+                      {{ game.duration == -1 ? "제한 없음" : game.duration >= 60 ? Math.floor(game.duration / 60) + '분 ' + (game.duration % 60) + '초' : game.duration + '초' }}
                     </div>
                   </div>
 

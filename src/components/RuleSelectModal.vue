@@ -41,7 +41,7 @@
           </button>
           <button
             @click="onSubmitSearch"
-            class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg py-2 shadow transition active:scale-95"
+            class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-[500] rounded-lg py-2 shadow transition active:scale-95"
           >
             <i class="fas fa-magnifying-glass mr-1"></i> 검색하기
           </button>

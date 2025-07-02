@@ -13,6 +13,7 @@ import GameComment from "../views/GameCommentView.vue"
 import GamePlay from "../views/game/GamePlayView.vue"
 import GameResult from "../views/game/GameResultView.vue"
 import Profile from "../views/profile/ProfileView.vue"
+import InstagramShare from "../components/InstagramShare.vue"
 
 const routes = [
   {
@@ -53,6 +54,12 @@ const routes = [
     path: '/create-game',
     component: CreateGame,
   },
+  // temp
+  {
+    path: '/insta',
+    component: InstagramShare,
+  },
+  //
     {
     path: '/games/:gameId/comments',
     name: 'GameComments',

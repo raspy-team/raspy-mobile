@@ -18,11 +18,11 @@
               <div class="flex flex-col items-center">
                 <i
                   class="fas fa-book-open text-xl mb-2"
-                  :class="selectedType === 'rules' ? 'text-orange-500' : 'text-gray-400'"
+                  :class="'text-gray-400'"
                 ></i>
                 <span
                   class="text-sm font-medium"
-                  :class="selectedType === 'rules' ? 'text-orange-500' : 'text-gray-600'"
+                  :class="'text-gray-600'"
                   >규칙 선택하기</span
                 >
               </div>

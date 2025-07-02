@@ -13,6 +13,7 @@ import GameComment from "../views/GameCommentView.vue"
 import GamePlay from "../views/game/GamePlayView.vue"
 import GameResult from "../views/game/GameResultView.vue"
 import Profile from "../views/profile/ProfileView.vue"
+import NotFoundView from "../views/NotFoundView.vue"
 import InstagramShare from "../components/InstagramShare.vue"
 
 const routes = [
@@ -77,7 +78,15 @@ const routes = [
     props: true
   },
   { path: '/profile/:id', component: Profile },
+
+
+
   
+  /**
+   * not found view
+   */
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFoundView }
+
 ]
 
 const router = createRouter({

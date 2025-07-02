@@ -3,7 +3,7 @@ module.exports = defineConfig({
   transpileDependencies: true,
 
 
-  devServer: {
+ devServer: {
     port: 8081,
     proxy: {
       '/api': {
@@ -13,20 +13,11 @@ module.exports = defineConfig({
         ws: true
       },
     },
+    client: {
+      overlay: false // default 에러 오버레이 끄기
+    }, 
   },
 
-  
-  // devServer: {
-  //  // port: 8081,
-  //   proxy: {
-  //     '/api': {
-  //       target: 'http://localhost:8080',
-  //       changeOrigin: true,
-  //       ws: true // WebSocket 프록시
-  //     }
-  //   }
-  // },
-    
   pages: {
     index: {
       entry: 'src/main.js',

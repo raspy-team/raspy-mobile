@@ -8,14 +8,14 @@
       <h2 class="text-3xl font-extrabold" :class="winnerIdx == 1 ? 'text-orange-500' : 'text-gray-500'">
         {{ winnerIdx == 1 ? '승리!' : '패배' }}
       </h2>
-      <p class="text-gray-600" v-if="winnerIdx == 1">🎉 축하합니다 {{ user1.nickname }}님!</p>
+      <p class="text-orange-600 mt-2 " v-if="winnerIdx == 1">축하합니다 {{ user1.nickname }}님!</p>
     </div>
     <div v-else-if="user2.id == currentUserId">
       <i :class="winnerIdx == 2 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'" class="text-5xl mb-2"></i>
       <h2 class="text-3xl font-extrabold" :class="winnerIdx == 2 ? 'text-orange-500' : 'text-gray-500'">
         {{ winnerIdx == 2 ? '승리!' : '패배' }}
       </h2>
-      <p class="text-gray-600" v-if="winnerIdx == 2">🎉 축하합니다 {{ user2.nickname }}님!</p>
+      <p class="text-orange-600 mt-2 " v-if="winnerIdx == 2">축하합니다 {{ user2.nickname }}님!</p>
     </div>
   </div>
 
@@ -23,6 +23,34 @@
     <i class="fas fa-handshake text-5xl text-gray-400 mb-2"></i>
     <h2 class="text-3xl font-bold text-gray-500">무승부</h2>
   </div>
+
+
+  <div
+  v-if="(championIdx == 1 && currentUserId == user1.id) || (championIdx == 2 && currentUserId == user2.id)"
+  class="relative max-w-md mx-auto my-8 px-6 py-10 rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center champion-card-glow"
+>
+  <!-- 화려한 빛나는 애니메이션 배경 -->
+  <div class="absolute inset-0 z-0 pointer-events-none champion-card-bg"></div>
+  <!-- Soft outer 테두리 (glass 느낌) -->
+  <div class="absolute inset-0 rounded-2xl border-2 border-white border-opacity-50 z-10" style="backdrop-filter: blur(2px);"></div>
+  <!-- 중앙 컨텐츠 -->
+  <div class="relative z-20 flex flex-col items-center">
+    <i class="fas fa-crown text-5xl mb-3 text-white drop-shadow champion-glow-anim"></i>
+    <h2 class="text-2xl font-extrabold text-white mb-1 drop-shadow champion-glow-anim">CHAMPION</h2>
+    <span class="text-lg font-semibold text-white mb-2">축하합니다, {{ currentUserId == user1.id ? user1.nickname : user2.nickname }}님!</span>
+    <span class="text-base text-white/90">새로운 챔피언 타이틀을 획득하셨습니다.</span>
+  </div>
+</div>
+
+<div
+  v-if="championIdx == 1 && currentUserId == user2.id || championIdx == 2 && currentUserId == user1.id"
+  class="relative max-w-md mx-auto my-8 px-6 py-8 rounded-2xl bg-gray-100 flex flex-col items-center border border-gray-200 shadow"
+>
+  <i class="fas fa-frown text-2xl text-gray-400 mb-2"></i>
+  <span class="text-base font-bold text-gray-700 mb-1">타이틀을 빼앗겼습니다</span>
+  <span class="text-xs text-gray-400">다음 기회를 노려보세요!</span>
+</div>
+
 
   <!-- 게임 정보 카드 -->
   <div class="bg-white p-5 rounded-2xl shadow space-y-4 text-left border">
@@ -122,6 +150,7 @@ const matchPlace = ref('')
 const startDate = ref('')
 const winnerIdx = ref(0)
 const currentUserId = ref(0)
+const championIdx = ref(0)
 
 const review = ref({ manner: 0, performance: 0, text: '' })
 
@@ -137,7 +166,7 @@ onMounted(async () => {
   user2SetCount.value = res.data.user2SetCount
   winnerIdx.value = res.data.winnerIdx
   startDate.value = res.data.startDate
-
+  championIdx.value = res.data.newChampionIdx
   const myId = await api.get(`/api/auth/current-user-id`)
   currentUserId.value = myId.data
 })
@@ -166,3 +195,43 @@ function formatDate(dateStr) {
   return d.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }
 </script>
+
+<style scoped>
+.champion-card-bg {
+  background: linear-gradient(135deg, #fdba74 10%, #fb923c 70%, #f59e42 100%);
+  filter: blur(0px) brightness(1.05) saturate(1.2);
+  opacity: 0.98;
+  animation: champion-bg-move 7s ease-in-out infinite alternate;
+}
+
+@keyframes champion-bg-move {
+  0% {
+    background-position: 0% 50%;
+    filter: blur(0px) brightness(1.1) saturate(1.3);
+  }
+  50% {
+    background-position: 100% 60%;
+    filter: blur(2px) brightness(1.18) saturate(1.6);
+  }
+  100% {
+    background-position: 0% 40%;
+    filter: blur(0px) brightness(1.1) saturate(1.2);
+  }
+}
+
+.champion-card-glow {
+  box-shadow: 0 0 64px 8px #fdba7477, 0 0 0 4px #fb923c55 inset;
+  position: relative;
+}
+
+.champion-glow-anim {
+  filter: drop-shadow(0 0 12px #fff7) drop-shadow(0 0 16px #fdba74bb);
+  animation: champion-glow-anim 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes champion-glow-anim {
+  0% { filter: drop-shadow(0 0 16px #fff9) drop-shadow(0 0 8px #fdba74cc);}
+  100% { filter: drop-shadow(0 0 28px #fff) drop-shadow(0 0 18px #fdba74);}
+}
+
+</style>

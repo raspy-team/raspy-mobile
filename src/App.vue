@@ -11,6 +11,10 @@
 // import api from './api/api'
 // import GameStatusBar from './components/GameStatusBar.vue'
 import { useRoute } from 'vue-router'
+window.addEventListener('error', (event) => {
+  console.error('Uncaught Error:', event.error)
+  alert(`준비 중입니다.`)
+})
 
 const route = useRoute()
 // const activeGame = ref(null)

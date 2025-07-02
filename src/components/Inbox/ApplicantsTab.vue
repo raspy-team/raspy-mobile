@@ -7,8 +7,16 @@
         <div class="flex justify-between items-start">
           <div class="space-y-2">
             <p class="text-xs text-gray-400">{{ group.matchLocation || '장소 미정' }} · {{ formatDate(group.matchDate) }}</p>
-            <h3 class="text-lg font-bold text-gray-800">{{ group.rule.ruleTitle }}</h3>
-            <p class="text-sm text-gray-500">{{ group.rule.majorCategory }} > {{ group.rule.minorCategory }}</p>
+            <h3 class="text-lg font-bold text-gray-800 flex">{{ group.rule.ruleTitle }}
+   
+            </h3>
+            <div class="flex items-center">
+              <p class="text-sm text-gray-500">{{ group.rule.majorCategory }} > {{ group.rule.minorCategory }} </p>
+
+              <div class="flex ml-3">
+                <champion-badge v-if="group.championId == group.myId"></champion-badge>
+              </div>
+            </div>
             <p class="text-sm text-gray-700 leading-snug">{{ group.rule.ruleDescription }}</p>
           </div>
           <span class="text-xs font-semibold px-2 py-2 rounded-full w-[50%] text-center" 
@@ -58,7 +66,9 @@
               <img :src="user.applicantProfileUrl ? user.applicantProfileUrl:Default" class="w-10 h-10 rounded-full object-cover" />
               <div class="space-y-1">
                 <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                  @{{ user.applicantNickname }}
+                  @{{ user.applicantNickname }}                
+                   <champion-badge v-if="group.championId == user.userId"></champion-badge>
+
                   <!-- <span class="text-xs flex items-center gap-1">
                     <i :class="[
                       user.applicantGameStatisticsDTO.manner >= 4 ? 'fas fa-face-smile text-green-500' :
@@ -101,6 +111,8 @@ import { ref, onMounted } from 'vue'
 import client from '../../api/api'
 import { useToast } from '../../composable/useToast'
 import Default from '../../assets/default.png'
+import ChampionBadge from '../../components/ChampionBadge.vue'
+
 const { showToast } = useToast()
 
 const groups = ref([])

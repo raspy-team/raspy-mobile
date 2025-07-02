@@ -10,9 +10,13 @@
         :key="game.id"
         class="mb-8 rounded-2xl border border-orange-100 shadow-xl bg-white/95 hover:shadow-2xl transition-shadow"
       >
+
         <!-- VS AREA -->
-        <div class="flex justify-between items-center px-7 pt-7 pb-4">
-          <div @click="router.push('/profile/0')" class="flex-1 flex flex-col items-center gap-2">
+        <div class="flex justify-between items-center  px-7 pt-1 pb-4">
+          <div @click="router.push('/profile/0')" class="flex-1 flex flex-col items-center gap-1">
+            <div class="h-8 flex items-end">
+                                   <champion-badge v-if="game.myId == game.championId" />
+            </div>
             <div class="relative">
               <img :src="game.myProfileUrl" class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white" />
               <span class="absolute bottom-0 right-0 bg-orange-400 text-xs text-white font-bold px-1.5 py-0.5 rounded-lg shadow">나</span>
@@ -20,6 +24,7 @@
             <div class="text-gray-700 font-[600] text-sm">
               @{{ game.myNickname }}
             </div>
+
             <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 tracking-wider">
               <div>
                 <span class="block text-gray-400 font-medium">승</span>
@@ -34,18 +39,24 @@
                 <span class="text-base text-red-400">{{ game.myStatistics.losses }}</span>
               </div>
             </div>
+
           </div>
           <div class="vs-area flex flex-col items-center justify-center mx-3 animate-pulse">
             <div class="text-lg font-black tracking-tight text-orange-500 mb-1">VS</div>
             <i class="fas fa-bolt text-yellow-400 text-lg"></i>
           </div>
-          <div @click="router.push('/profile/'+game.opponentId)" class="flex-1 flex flex-col items-center gap-2">
+          <div @click="router.push('/profile/'+game.opponentId)" class="flex-1 flex flex-col flex-start items-center gap-2">
             <template v-if="game.opponentNickname">
+                <div class="h-8 flex items-end">
+                    <champion-badge v-if="game.opponentId == game.championId" />
+                </div>
               <img :src="game.opponentProfileUrl" class="w-14 h-14 rounded-full border-2 border-gray-200 shadow bg-gradient-to-tr from-gray-100 to-blue-100" />
               <div class="text-gray-700 font-[600] text-sm">
                 @{{ game.opponentNickname }}
               </div>
-              <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 tracking-wider">
+                
+
+              <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 tracking-wider">
                 <div>
                   <span class="block text-gray-400 font-medium">승</span>
                   <span class="text-base text-orange-500">{{ game.opponentStatistics?.wins ?? '-' }}</span>
@@ -58,7 +69,9 @@
                   <span class="block text-gray-400 font-medium">패</span>
                   <span class="text-base text-red-400">{{ game.opponentStatistics?.losses ?? '-' }}</span>
                 </div>
+
               </div>
+
             </template>
             <template v-else>
               <div class="w-14 h-14 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-full border border-gray-200 flex items-center justify-center">
@@ -71,51 +84,48 @@
           </div>
         </div>
 
-   <!-- RULE BOX 개선 -->
-<div class="bg-gray-50 rounded-xl mx-4 mt-2 mb-3 p-5 border ">
-  <div class="flex justify-between items-start mb-3">
-    <div class="font-bold text-lg text-gray-900 leading-tight">
-      {{ game.rule.ruleTitle }}
-    </div>
-    <span class="badge bg-orange-100 text-orange-700 font-semibold text-xs px-2 py-1 rounded-xl">
-      {{ game.rule.majorCategory }} &gt; {{ game.rule.minorCategory }}
-    </span>
-  </div>
-  <div class="text-sm text-gray-600 mb-4 leading-relaxed">
-    {{ game.rule.ruleDescription }}
-  </div>
-  <div class="grid grid-cols-3 gap-x-4 gap-y-2 text-xs text-gray-700">
-    <div class="flex flex-col">
-      <span class="font-semibold">세트점수</span>
-      <span class="mt-1">{{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin + '점'}}</span>
-    </div>
-    <div class="flex flex-col">
-      <span class="font-semibold">총 세트</span>
-      <span class="mt-1">{{ game.rule.setsToWin }}세트</span>
-    </div>
-    <div class="flex flex-col">
-      <span class="font-semibold">세트 제한 시간</span>
-      <span class="mt-1">
-        
-          {{
-            (game.rule.duration >= 60 
-              ? Math.floor(game.rule.duration / 60) + '시간 ' : '') +
-            (game.rule.duration % 60 ? (game.rule.duration % 60) + '분' : '')
-          }}
-          
-      </span>
-    </div>
-    <div class="flex flex-col">
-      <span class="font-semibold">장소</span>
-      <span class="mt-1">{{ game.matchLocation || '미정' }}</span>
-    </div>
-    <div class="flex flex-col col-span-2">
-      <span class="font-semibold">일정</span>
-      <span class="mt-1">{{ formatDate(game.matchDate) }}</span>
-    </div>
-  </div>
-</div>
-
+        <!-- RULE BOX 개선 -->
+        <div class="bg-gray-50 rounded-xl mx-4 mt-2 mb-3 p-5 border ">
+          <div class="flex justify-between items-start mb-3">
+            <div class="font-bold text-lg text-gray-900 leading-tight">
+              {{ game.rule.ruleTitle }}
+            </div>
+            <span class="badge bg-orange-100 text-orange-700 font-semibold text-xs px-2 py-1 rounded-xl">
+              {{ game.rule.majorCategory }} &gt; {{ game.rule.minorCategory }}
+            </span>
+          </div>
+          <div class="text-sm text-gray-600 mb-4 leading-relaxed">
+            {{ game.rule.ruleDescription }}
+          </div>
+          <div class="grid grid-cols-3 gap-x-4 gap-y-2 text-xs text-gray-700">
+            <div class="flex flex-col">
+              <span class="font-semibold">세트점수</span>
+              <span class="mt-1">{{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin + '점'}}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-semibold">총 세트</span>
+              <span class="mt-1">{{ game.rule.setsToWin }}세트</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-semibold">세트 제한 시간</span>
+              <span class="mt-1">
+                {{
+                  (game.rule.duration >= 60 
+                    ? Math.floor(game.rule.duration / 60) + '시간 ' : '') +
+                  (game.rule.duration % 60 ? (game.rule.duration % 60) + '분' : '')
+                }}
+              </span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-semibold">장소</span>
+              <span class="mt-1">{{ game.matchLocation || '미정' }}</span>
+            </div>
+            <div class="flex flex-col col-span-2">
+              <span class="font-semibold">일정</span>
+              <span class="mt-1">{{ formatDate(game.matchDate) }}</span>
+            </div>
+          </div>
+        </div>
 
         <!-- 상태 및 액션 -->
         <div class="px-5 pb-5 space-y-2">
@@ -134,47 +144,143 @@
             class="w-full bg-orange-500 text-white font-bold rounded-xl py-3 shadow hover:bg-orange-400 transition active:scale-95"
             @click="joinGame(game.id)"
           ><i class="fas fa-sign-in-alt mr-2"></i>경기 참여</button>
-
           <button
             v-else-if="game.isOwner && canStart(game)"
             class="w-full bg-[#56b97b] text-white font-bold rounded-xl py-3 shadow  transition active:scale-95"
-            @click="startGame(game.id)"
+            @click="openStartModal(game)"
           ><i class="fas fa-play mr-2"></i>경기 시작</button>
-
           <button
             v-else-if="game.isOwner && !game.opponentNickname"
             class="w-full bg-blue-500 text-white font-bold rounded-xl py-3 shadow hover:bg-blue-400 transition active:scale-95"
             @click="inviteOpponent(game)"
           ><i class="fas fa-user-plus mr-2"></i>상대 초대하기</button>
-
           <div v-else class="text-center text-gray-400 text-sm py-3">경기 시작 대기 중</div>
-
-          <!-- <button
-            class="w-full border-[0.1px] border-red-300 text-red-400 bg-white font-bold rounded-xl py-2 mt-1 shadow-sm hover:bg-red-50 transition active:scale-95"
-            @click="deleteGame(game.id)"
-          ><i class="fas fa-trash-alt mr-1"></i>경기 삭제</button> -->
         </div>
       </div>
     </template>
-
     <div v-else class="text-center text-gray-400 py-0 space-y-6">
       <div class="text-sm"><i class="fas fa-info-circle mr-1"></i>표시할 게임이 없습니다.</div>
       <router-link to="/create-game" class="block w-fit mx-auto px-7 py-3 mt-10 bg-orange-500 text-white font-bold rounded-xl shadow hover:bg-orange-400">+ 새 경기 만들기</router-link>
     </div>
   </div>
   <FooterNav tab="my-game" />
+
+  <!-- 장소/진행 모달 추가 -->
+  <div v-if="showAddressModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg ">
+      <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
+      <!-- 도로명 주소 선택 -->
+      <div @click="openAddressSearch" class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">도로명 주소</label>
+        <div class="flex items-center p-3 bg-white rounded-xl border border-gray-200 cursor-pointer">
+          <input 
+            v-model="placeRoad" 
+            readonly 
+            class="text-sm flex-1 bg-white border-none outline-none cursor-not-allowed"
+            placeholder="도로명 주소 선택" 
+          />
+        </div>
+        <p class="text-xs text-gray-400 mt-1">도로명 주소를 입력하세요 (미입력 시 협의결정)</p>
+      </div>
+      <!-- 상세 주소 입력 -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">상세주소</label>
+        <div :class="[placeRoad ? 'bg-white border-gray-200' : 'bg-gray-100 text-gray-400 cursor-not-allowed']"
+             class="rounded-xl border p-3">
+          <input 
+            v-model="placeDetail" 
+            :disabled="!placeRoad"
+            class="w-full text-sm text-gray-700 outline-none bg-transparent"
+            placeholder="상세주소 입력" 
+          />
+        </div>
+        <p class="text-xs text-gray-500 mt-1">예: ○○빌딩 3층, ○○체육관</p>
+      </div>
+      <div class="mt-4 text-xs text-gray-500">
+        <template v-if="!placeRoad || placeRoad.trim() === ''">
+          도로명 주소를 반드시 입력해야 게임을 시작할 수 있습니다.
+        </template>
+        <template v-else>
+          현재 장소: {{ placeRoad + " " +placeDetail }}<br>
+          이 장소가 맞는지 확인하거나, 수정해주세요.
+        </template>
+      </div>
+      <!-- 버튼 -->
+      <div class="flex justify-end mt-6 space-x-2">
+        <button @click="closeModal" class="px-4 py-2 rounded-[5px] bg-gray-100 text-gray-700 text-sm">취소</button>
+        <button 
+          :disabled="!placeRoad || placeRoad.trim() === ''" 
+          class="px-5 py-2 rounded-[5px] bg-green-600 text-white text-sm disabled:opacity-50"
+          @click="submitAndStartGame"
+        >
+          경기 진행
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import client from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import FooterNav from '../../components/FooterNav.vue'
+import ChampionBadge from '../../components/ChampionBadge.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const games = ref([])
 const elapsedTimes = ref({})
+
+const showAddressModal = ref(false)
+const placeRoad = ref('')
+const placeDetail = ref('')
+const currentGameId = ref(null)
+
+const openAddressSearch = () => {
+  new window.daum.Postcode({
+    oncomplete: function (data) {
+      placeRoad.value = data.roadAddress || data.jibunAddress
+      nextTick(() => {
+        const detailInput = document.getElementById('place-detail')
+        if (detailInput) detailInput.focus()
+      })
+    }
+  }).open()
+}
+
+const openStartModal = (game) => {
+  showAddressModal.value = true
+  placeRoad.value = game.matchLocation || ''
+  placeDetail.value = ''
+  currentGameId.value = game.id
+}
+
+const submitAndStartGame = async () => {
+  if (!placeRoad.value || placeRoad.value.trim() === '') {
+    alert('도로명 주소를 반드시 입력해야 합니다.')
+    return
+  }
+  try {
+    await client.post(`/api/games/${currentGameId.value}/set-region`, {
+      roadAddress: placeRoad.value,
+      detailAddress: placeDetail.value
+    })
+    await client.post(`/api/games/${currentGameId.value}/start`)
+    router.push(`/games/${currentGameId.value}/play`)
+    showAddressModal.value = false
+  } catch (e) {
+    console.error(e)
+    alert('진행 중인 게임이 존재하거나, 잘못된 접근입니다.')
+  }
+}
+
+const closeModal = () => {
+  showAddressModal.value = false
+  placeRoad.value = ''
+  placeDetail.value = ''
+  currentGameId.value = null
+}
 
 let interval
 
@@ -218,15 +324,6 @@ function getElapsedTime(startedAt) {
 //   delete elapsedTimes.value[id]
 // }
 
-const startGame = async (id) => {
-  try {
-    await client.post(`/api/games/${id}/start`)
-    router.push(`/games/${id}/play`)
-  } catch (e) {
-    if (e.response?.data?.message === 'playing game') alert('이미 진행 중인 게임이 존재합니다.')
-  }
-}
-
 const joinGame = (id) => router.push(`/games/${id}/play`)
 function canStart(g) {
   return g.status === 'SCHEDULED' && !!g.opponentNickname
@@ -250,6 +347,7 @@ function statusColor(status) {
   return { MATCHING: 'text-orange-400', SCHEDULED: 'text-orange-500', IN_PROGRESS: 'text-green-500', COMPLETED: 'text-gray-400', CANCELED: 'text-red-400' }[status]
 }
 </script>
+
 
 <style>
 .game-card {

@@ -53,11 +53,11 @@ const goBack = () => {
   router.back()
 }
 
-const goAlert = () => {
-  router.push('/notifications')
-}
+// const goAlert = () => {
+//   router.push('/notifications')
+// }
 
-const goDM = () => {
-  router.push('/dm')
-}
+// const goDM = () => {
+//   router.push('/dm')
+// }
 </script>

@@ -80,7 +80,7 @@
 
 
       <div v-if="games.length > 0">
-        <div v-for="(game, index) in games" :key="index" class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div v-for="(game, index) in games" :key="index" class="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
           <div class="p-4">
             <div class="flex justify-between items-start">
 
@@ -92,10 +92,12 @@
                   <span class="font-semibold">{{ game.majorCategory }}</span>
                   <span class="">/ {{ game.minorCategory }}</span>
 
-                  <div class="pl-2">
+                  <div class="pl-2 flex items-center gap-2">
                     <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5  rounded-full font-medium">
                       1vs1
                     </span>
+
+                    <champion-badge v-if="game.championId == game.ownerId"></champion-badge>
                   </div>
                 </div>
               </div>
@@ -175,7 +177,7 @@
 
               <div class="flex items-center">
                 <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
-                  <img :src="game.ownerProfileUrl || 'https://chelseafc360blog.files.wordpress.com/2013/03/mario-gomez.jpg'" alt="프로필" class="w-full h-full object-cover" />
+                  <img :src="game.ownerProfileUrl || Default" alt="프로필" class="w-full h-full object-cover" />
                 </div>
 
                 <div class="ml-2 flex items-center space-x-1">
@@ -416,6 +418,8 @@ import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 import {useRouter} from "vue-router"
 import regionMap from "../../assets/regionMap.json"
+import Default from "../../assets/default.png"
+import ChampionBadge from '../../components/ChampionBadge.vue'
 
 function formatTimeAgo(dateString) {
     const now = new Date();

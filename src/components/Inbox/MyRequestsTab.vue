@@ -1,5 +1,10 @@
+<!--
+TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표시.
+-->
+
 <template>
   <div>
+
     <div v-if="games.length" class="space-y-5">
       <div v-for="game in games" :key="game.id" class="p-5 border bg-white rounded-2xl shadow space-y-5">
 
@@ -67,6 +72,9 @@
               {{ game.ownerStatistics.wins }}승 {{ game.ownerStatistics.draws }}무 {{ game.ownerStatistics.losses }}패 · 승률 {{ getWinRate(game.ownerStatistics) }}%
             </p>
           </div>
+          <div>
+            <champion-badge v-if="game.championId == game.ownerId"></champion-badge>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3 pt-1">
@@ -98,6 +106,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import client from '../../api/api'
+import ChampionBadge from '../ChampionBadge.vue'
 
 const games = ref([])
 

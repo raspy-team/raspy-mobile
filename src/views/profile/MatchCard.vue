@@ -138,7 +138,7 @@
     <div class="flex justify-end gap-3 pt-2 mt-2 border-t border-gray-100">
       <button
         class="flex items-center gap-2 text-gray-500 hover:text-orange-500 font-md text-sm px-3 py-2 transition"
-        @click="$emit('comment', game)"
+        @click="goComment(game.id)"
         title="댓글"
       >
         <i class="far fa-comment-dots text-base"></i>
@@ -158,6 +158,13 @@
 
 <script setup>
 import {defineProps} from 'vue'
+import {useRouter} from 'vue-router'
+
+const router = useRouter()
+const goComment = (id) => {
+  router.push(`/games/${id}/comments`)
+}
+
 defineProps({
   game: Object,
   isWin: Boolean,

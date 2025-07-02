@@ -21,15 +21,14 @@
       <div class="flex items-center space-x-3">
         
 
-      <!-- DM 버튼 (주황 테두리) -->
+       <!--
       <button @click="goDM" class="w-9 h-9 flex items-center justify-center  border-orange-500 rounded-full bg-white hover:bg-orange-50 transition">
         <i class="fas fa-paper-plane text-orange-500 text-base"></i>
       </button>
-      <!-- 알림 버튼 (주황 테두리) -->
       <button @click="goAlert" class="w-9 h-9 flex items-center justify-center  border-orange-500 rounded-full bg-white hover:bg-orange-50 transition">
         <i class="fas fa-bell text-orange-500 text-base"></i>
       </button>
-
+    -->
 
 
 

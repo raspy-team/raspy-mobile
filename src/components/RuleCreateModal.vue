@@ -5,7 +5,7 @@
       <button @click="$emit('close')" class="absolute top-4 right-4 text-gray-600 hover:text-black text-[2rem] font-bold">×</button>
       <h2 class="text-lg font-md text-gray-900 tracking-tight mb-2 flex items-center gap-2">
         <i class="fas fa-bolt text-orange-500"></i>
-        규칙 선택하기
+        규칙 생성하기
       </h2>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>

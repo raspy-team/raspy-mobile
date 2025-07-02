@@ -437,7 +437,11 @@ function formatTimeAgo(dateString) {
     }
   }
 
+
 const router = useRouter()
+const goToComments = (game) => {
+  router.push("/games/"+game.id+"/comments")
+}
 
 const { showToast } = useToast()
 

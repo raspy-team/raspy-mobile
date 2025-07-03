@@ -36,11 +36,29 @@
           <span class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold">{{ user.gender ? user.gender : '성별 미등록' }}</span>
         </div>
       </div>
-      <div class="text-xs text-gray-400 mt-0.5">{{ user.location }}</div>
-      <div class="text-sm text-gray-500 mt-2 line-clamp-2">{{ user.intro }}</div>
-    </div>
-  </div>
+      <!-- 챔피언 뱃지 -->
+      <div v-if="user.myChampions && user.myChampions.length" class="flex mt-3 flex-wrap gap-2 mb-2">
+        <span
+          v-for="(champ, idx) in user.myChampions"
+          :key="idx"
+          class="relative flex items-center rounded-full shadow-md px-3 py-1 space-x-1 overflow-hidden"
+          title="챔피언"
+          style="min-width: 0;"
+        >
+          <!-- 변화하는 그라데이션 배경 -->
+          <span class="absolute inset-0 bg-gradient-animate"></span>
 
+          <!-- 아이콘 + 텍스트 -->
+          <i class="fas fa-crown text-white text-sm z-10"></i>
+          <span class="text-xs font-semibold text-white z-10 animate-pulse-slow truncate ">
+            {{ champ.region }} {{ champ.ruleTitle }} 챔피언
+          </span>
+        </span>
+      </div>
+
+    </div>
+
+  </div>
   <!-- 올인원 통계/부가정보 박스 -->
   <div class="rounded-xl bg-gray-50 p-0.5 w-full flex flex-col sm:flex-row gap-0 sm:gap-4 items-stretch shadow-sm">
     <!-- 승무패+승률 (좌측) -->
@@ -547,4 +565,25 @@ body { background: #f8f9fa !important; }
 .fade-enter-active, .fade-leave-active { transition: all 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 ::-webkit-scrollbar { display:none; }
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.bg-gradient-animate {
+  background: linear-gradient(90deg, #f97316, #fbbf24, #f97316 80%);
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease-in-out infinite;
+  opacity: 0.82;
+}
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+
+
 </style>

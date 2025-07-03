@@ -123,15 +123,15 @@
         <span class="text-xs text-gray-500">상대가 남긴 퍼포먼스 점수:</span>
         <span class="text-base font-bold"
           :class="[
-            game.mannerScore >= 4
+            game.performanceScore >= 4
               ? 'text-green-500'
-              : game.mannerScore >= 2
+              : game.performanceScore >= 2
                 ? 'text-yellow-500'
-                : game.mannerScore > 0
+                : game.performanceScore > 0
                   ? 'text-red-500'
                   : 'text-gray-400'
           ]"
-        >{{ game.mannerScore?.toFixed(1) ?? '-' }}</span>
+        >{{ game.performanceScore?.toFixed(1) ?? '-' }}</span>
       </div>
     </div>
     <!-- 하단 액션 버튼 -->

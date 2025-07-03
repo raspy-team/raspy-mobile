@@ -1,49 +1,55 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-200 px-4">
-    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md transition-all duration-300">
-      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">로그인</h2>
+  <div class="min-h-screen flex">
+    <!-- 왼쪽: 브랜드 타이틀 & 소개 -->
+    <div class="hidden lg:flex w-1/2 bg-[#191919] items-center justify-center">
+      <div class="text-center space-y-8 px-8">
+        <span class="raspy">RASPY</span>
+        <p class="brand-desc">익명으로 즐기는 <span class="text-[var(--point-color)] font-bold">스포츠 플랫폼</span></p>
+      </div>
+    </div>
+    <!-- 오른쪽: 로그인 폼 -->
+    <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-white px-6 lg:px-24">
+      <div class="w-full max-w-md space-y-6">
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-2">로그인</h2>
+        <form @submit.prevent="handleLogin" class="space-y-5">
+          <input
+            v-model="email"
+            type="email"
+            placeholder="이메일 주소"
+            class="w-full px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--point-color)] transition"
+            :class="{ 'border-red-500': emailError }"
+          />
+          <p v-if="emailError" class="text-red-500 text-sm">{{ emailError }}</p>
 
-      <form @submit.prevent="handleLogin" class="space-y-5">
-        <div>
-          <label class="block mb-1 text-sm font-medium text-gray-600">이메일</label>
-          <input v-model="email" type="email" placeholder="example@email.com"
-                 class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                 :class="{ 'border-red-500': emailError }" />
-          <p v-if="emailError" class="text-red-500 text-sm mt-1">{{ emailError }}</p>
-        </div>
-
-        <div>
-          <label class="block mb-1 text-sm font-medium text-gray-600">비밀번호</label>
           <div class="relative">
-            <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="비밀번호 입력"
-                   class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                   :class="{ 'border-red-500': passwordError }" />
-            <button type="button" @click="showPassword = !showPassword"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-500">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              placeholder="비밀번호"
+              class="w-full px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--point-color)] transition"
+              :class="{ 'border-red-500': passwordError }"
+            />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-[var(--point-color)]">
               {{ showPassword ? '숨기기' : '보기' }}
             </button>
           </div>
-          <p v-if="passwordError" class="text-red-500 text-sm mt-1">{{ passwordError }}</p>
-        </div>
+          <p v-if="passwordError" class="text-red-500 text-sm">{{ passwordError }}</p>
 
-        <div class="flex justify-between items-center text-sm text-gray-600">
-          <button type="button" @click="goToSignup" class="hover:underline text-indigo-500">
-            회원가입
+          <button
+            type="submit"
+            class="w-full py-3 bg-[var(--point-color)] text-white rounded-lg font-semibold hover:bg-opacity-90 transition">
+            로그인
           </button>
-          <button type="button" @click="recoverPassword" class="hover:underline text-indigo-500">
-            비밀번호 찾기
-          </button>
+          <p v-if="submitError" class="text-red-500 text-center text-sm">{{ submitError }}</p>
+        </form>
+        <div class="flex items-center justify-between text-sm text-gray-600 pt-4">
+          <button @click="goToSignup" class="hover:underline text-[var(--point-color)]">회원가입</button>
+          <button @click="recoverPassword" class="hover:underline text-[var(--point-color)]">비밀번호 찾기</button>
         </div>
-
-        <button type="submit"
-                class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg shadow-md transition duration-300">
-          로그인
-        </button>
-
-        <p v-if="submitError" class="text-center text-red-500 text-sm mt-3 animate-fade">
-          {{ submitError }}
-        </p>
-      </form>
+      </div>
     </div>
   </div>
 </template>
@@ -52,6 +58,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
+
+const pointColor = '#ff6f1f'
+document.documentElement.style.setProperty('--point-color', pointColor)
 
 const email = ref('')
 const password = ref('')
@@ -62,56 +71,46 @@ const submitError = ref('')
 const router = useRouter()
 
 const validate = () => {
-  emailError.value = ''
-  passwordError.value = ''
-  let valid = true
-
-  if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    emailError.value = '올바른 이메일 형식이 필요합니다'
-    valid = false
-  } else if (email.value.length > 50) {
-    emailError.value = '최대 50자까지 입력할 수 있습니다'
-    valid = false
-  }
-
-  if (!password.value || password.value.length < 8 || password.value.length > 20) {
-    passwordError.value = '비밀번호는 8~20자 사이여야 합니다'
-    valid = false
-  }
-
-  return valid
+  emailError.value = ''; passwordError.value = ''
+  let ok = true
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) { emailError.value = '이메일 형식이 아닙니다'; ok = false }
+  if (password.value.length < 8) { passwordError.value = '비밀번호를 8자 이상 입력하세요'; ok = false }
+  return ok
 }
 
 const handleLogin = async () => {
   if (!validate()) return
-
   try {
-    const res = await api.post('/api/auth/login', {
-      email: email.value,
-      password: password.value,
-    })
+    const res = await api.post('/api/auth/login', { email: email.value, password: password.value })
     localStorage.setItem('raspy_access_token', res.data.token)
     router.push('/set-profile?init=1')
-  } catch (err) {
-    submitError.value = '로그인 실패: 이메일 또는 비밀번호를 확인하세요'
+  } catch {
+    submitError.value = '로그인 실패: 아이디 또는 비밀번호를 확인하세요'
   }
 }
 
-const goToSignup = () => {
-  router.push('/register')
-}
-
-const recoverPassword = () => {
-  router.push('/recover-password')
-}
+const goToSignup = () => router.push('/register')
+const recoverPassword = () => router.push('/recover-password')
 </script>
 
-<style>
-@keyframes fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600&display=swap');
+
+.raspy {
+  font-family: 'Kanit', sans-serif;
+  font-weight: 700;
+  font-size: 4rem;
+  letter-spacing: 0.05em;
+  color: var(--point-color);
+  display: block;
 }
-.animate-fade {
-  animation: fade 0.5s ease-in-out;
+.brand-desc {
+  color: #fff;
+  font-family: 'Kanit', sans-serif;
+  font-size: 1.18rem;
+  letter-spacing: 0.01em;
+}
+.brand-desc .font-bold {
+  font-weight: 700;
 }
 </style>

@@ -191,12 +191,12 @@
             <span class="px-2 py-1 rounded-full bg-white text-orange-500 text-xs font-semibold border border-orange-400">상위 {{ stat.topPercent }}%</span> -->
           <!-- </div> -->
         </div>
-        <div class="w-full h-[120px] flex items-center justify-center my-5 -ml-2">
+        <div class="w-full flex items-center justify-center my-5 -ml-2">
           <canvas
             v-if="chartData.length > 0"
             ref="chartRef"
-            height="flex-1"
-            class="flex-1"
+            height="auto"
+            class="flex-1 "
           ></canvas>
           <div v-else class="w-full text-center text-gray-400 text-sm py-8">
             경기 횟수가 부족하여<br> 퍼포먼스 그래프를 표시할 수 없습니다.

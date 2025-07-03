@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import Init from "../views/InitView.vue"
 import Login from '../views/auth/LoginView.vue'
 import Register from "../views/auth/RegisterView.vue"
 
@@ -15,8 +16,13 @@ import GameResult from "../views/game/GameResultView.vue"
 import Profile from "../views/profile/ProfileView.vue"
 import NotFoundView from "../views/NotFoundView.vue"
 import InstagramShare from "../components/InstagramShare.vue"
+import Setting from "../views/SettingView.vue"
 
 const routes = [
+  {
+    path: '/init',
+    component: Init
+  },
   {
     path: '/game-list',
     component: GameList
@@ -78,6 +84,8 @@ const routes = [
     props: true
   },
   { path: '/profile/:id', component: Profile },
+
+  { path: '/settings', component:  Setting},
 
 
 

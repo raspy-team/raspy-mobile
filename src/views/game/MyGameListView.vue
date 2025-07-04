@@ -302,42 +302,20 @@ function updateElapsed() {
     }
   })
 }
+
 function getElapsedTime(startedAt) {
-  console.log('[getElapsedTime] called with startedAt:', startedAt);
-
-  if (!startedAt) {
-    console.log('[getElapsedTime] startedAt is falsy, returning empty string');
-    return '';
-  }
-
-  const start = new Date(startedAt);
-  console.log('[getElapsedTime] parsed start:', start, 'isValid:', !isNaN(start));
-
-  const now = new Date();
-  console.log('[getElapsedTime] now:', now);
-
-  let diff = now - start;
-  console.log('[getElapsedTime] diff (now - start):', diff);
-
-  diff = Math.max(0, diff);
-  console.log('[getElapsedTime] diff after Math.max(0, diff):', diff);
-
-  const hours = Math.floor(diff / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  const secs = Math.floor((diff % 60000) / 1000);
-
-  console.log('[getElapsedTime] hours:', hours, 'mins:', mins, 'secs:', secs);
-
-  let result = '';
-  if (hours > 0) result = `${hours}시간 ${mins}분 ${secs}초 경과`;
-  else if (mins > 0) result = `${mins}분 ${secs}초 경과`;
-  else result = `${secs}초 경과`;
-
-  console.log('[getElapsedTime] result:', result);
-
-  return result;
+  if (!startedAt) return ''
+  const start = new Date(startedAt)
+  const now = new Date()
+  let diff = Math.max(0, now - start)
+  const hours = Math.floor(diff / 3600000)
+  diff = diff % 3600000
+  const min = Math.floor(diff / 60000)
+  const sec = Math.floor((diff % 60000) / 1000)
+  if (hours > 0) return `${hours}시간 ${min}분 ${sec}초 경과`
+  else if (min > 0) return `${min}분 ${sec}초 경과`
+  else return `${sec}초 경과`
 }
-
 
 // const deleteGame = async (id) => {
 //   if (!confirm('정말 삭제하시겠습니까?')) return

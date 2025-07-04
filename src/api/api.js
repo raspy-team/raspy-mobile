@@ -29,6 +29,7 @@ api.interceptors.request.use(config => {
 
 const excludeLoginRedirectURLs = [
   '/api/games/in-progress',
+  '/api/auth/login',
 ]
 
 

@@ -206,7 +206,7 @@ const submitProfile = async () => {
       formData.append('profile_picture', profilePicture.value)
     }
 
-    await api.patch('/user-profile/save', formData, {
+    await api.patch('/api/user-profile/save', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
 

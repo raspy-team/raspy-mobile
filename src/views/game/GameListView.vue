@@ -295,7 +295,7 @@
         </div>
       </div>-->
       <div v-else class="text-center mt-10 text-gray-600 text-sm">
-        표시할 게임이 없습니다
+        {{ timerDone ? '표시할 게임이 없습니다' : '로딩 중입니다...' }}
       </div>
       </div>
     </main>
@@ -483,6 +483,7 @@ const selectedSecondary = ref('전국')
 //   selectedSecondary.value = ''
 // }
 
+const timerDone = ref(false)
 
 const fetchGames = async () => {
   loading.value = true
@@ -499,8 +500,13 @@ const fetchGames = async () => {
       ...game,
       applied: false
     }))
+
+    setTimeout(() => timerDone.value = true, 2500)
+
   } catch (err) {
     console.error('게임 목록 로드 실패', err)
+        setTimeout(() => timerDone.value = true, 2500)
+
   } finally {
     loading.value = false
   }

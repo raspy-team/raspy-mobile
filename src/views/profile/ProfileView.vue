@@ -182,11 +182,11 @@
         </template>
       </div>
       <div class="rounded-2xl bg-white shadow p-5 mb-8">
-        <div class="flex justify-start items-center mb-3">
+        <div class="flex justify-between items-center mb-3 ">
           <span class="font-bold text-gray-900 text-base flex items-center gap-2">
             <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
           </span>
-          <div class="flex items-center gap-2">  
+          <div class="flex items-center gap-2 ">  
             <span class="px-3 py-1 rounded-full bg-orange-500 text-white font-black text-xs shadow">랭킹 -위</span>
             <span class="px-2 py-1 rounded-full bg-white text-orange-500 text-xs font-semibold border border-orange-400">상위 -%</span>
            </div>

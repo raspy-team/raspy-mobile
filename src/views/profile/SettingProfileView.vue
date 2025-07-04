@@ -1,78 +1,124 @@
 <template>
-  <div class="pt-10 pb-12 px-6 max-w-xl mx-auto">
-    <h2 v-if="showSkip" class="text-xl font-semibold mb-6">환영합니다! 당신을 알려주세요</h2>
-    <h2 v-else class="text-2xl font-bold mb-6 text-center">프로필 설정</h2>
+  <div class="pt-12 pb-16 px-8 max-w-md mx-auto bg-white rounded-2xl shadow-lg">
+    <!-- Header -->
+    <h2 v-if="showSkip" class="text-2xl font-semibold mb-8 text-gray-800">환영합니다! 당신을 알려주세요</h2>
+    <h2 v-else class="text-3xl font-bold mb-8 text-center text-gray-900">프로필 설정</h2>
 
-    <form @submit.prevent="submitProfile" class="space-y-6">
+    <form @submit.prevent="submitProfile" class="space-y-8">
       <!-- 나이 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">나이</label>
-        <input v-model.number="form.age" type="number" min="0" max="150" required class="input" />
-        <p class="text-xs text-red-500 mt-1" v-if="errors.age">{{ errors.age }}</p>
-        <p class="text-xs text-gray-400 mt-1" v-else>0~150세 사이의 숫자를 입력하세요</p>
+        <label class="block text-sm font-medium text-gray-700 mb-2">나이</label>
+        <input
+          v-model.number="form.age"
+          type="number"
+          min="0"
+          max="150"
+          required
+          class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+          placeholder="나이를 입력하세요"
+        />
+        <p v-if="errors.age" class="mt-1 text-xs text-red-600">{{ errors.age }}</p>
+        <p v-else class="mt-1 text-xs text-gray-400">0~150세 사이의 숫자를 입력하세요</p>
       </div>
 
       <!-- 성별 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">성별</label>
-        <div class="grid grid-cols-3 gap-2">
-          <div
+        <label class="block text-sm font-medium text-gray-700 mb-2">성별</label>
+        <div class="flex space-x-4">
+          <button
             v-for="g in genders"
             :key="g.value"
+            type="button"
             @click="form.gender = g.value"
-            class="border rounded px-3 py-2 text-center cursor-pointer"
-            :class="form.gender === g.value ? 'bg-indigo-500 text-white border-indigo-500' : 'text-gray-700 hover:bg-gray-50'"
+            :class="[
+              'flex-1 py-3 rounded-lg border transition',
+              form.gender === g.value
+                ? 'bg-orange-500 border-orange-500 text-white'
+                : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+            ]"
           >
             {{ g.label }}
-          </div>
+          </button>
         </div>
-        <p class="text-xs text-red-500 mt-1" v-if="errors.gender">{{ errors.gender }}</p>
+        <p v-if="errors.gender" class="mt-1 text-xs text-red-600">{{ errors.gender }}</p>
       </div>
 
       <!-- 지역 선택 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">지역</label>
-        <div class="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0">
-          <select v-model="selectedPrimary" @change="handlePrimaryChange" class="input">
+        <label class="block text-sm font-medium text-gray-700 mb-2">지역</label>
+        <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+          <select
+            v-model="selectedPrimary"
+            @change="handlePrimaryChange"
+            class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+          >
             <option value="" disabled>시/도 선택</option>
             <option v-for="(subs, primary) in regionMap" :key="primary" :value="primary">{{ primary }}</option>
           </select>
 
-          <select v-model="selectedSecondary" :disabled="!selectedPrimary" class="input">
+          <select
+            v-model="selectedSecondary"
+            :disabled="!selectedPrimary"
+            class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition disabled:opacity-50"
+          >
             <option value="" disabled>시/군/구 선택</option>
             <option v-for="sub in regionMap[selectedPrimary]" :key="sub" :value="sub">{{ sub }}</option>
           </select>
         </div>
-        <p class="text-xs text-red-500 mt-1" v-if="errors.region">{{ errors.region }}</p>
+        <p v-if="errors.region" class="mt-1 text-xs text-red-600">{{ errors.region }}</p>
       </div>
 
       <!-- 자기소개 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">자기소개 <span class="text-gray-400 text-xs">(선택)</span></label>
-        <textarea v-model="form.bio" class="input" rows="4" maxlength="500" placeholder="자신에 대해 소개해 주세요"></textarea>
-        <p class="text-xs text-gray-400 mt-1">{{ form.bio.length }} / 500자</p>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          자기소개 <span class="text-gray-400 text-xs">(선택)</span>
+        </label>
+        <textarea
+          v-model="form.bio"
+          class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+          rows="4"
+          maxlength="500"
+          placeholder="자신에 대해 소개해 주세요"
+        ></textarea>
+        <p class="mt-1 text-xs text-gray-400">{{ form.bio.length }} / 500자</p>
       </div>
 
       <!-- 프로필 사진 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">프로필 사진</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">프로필 사진</label>
         <div class="flex items-center space-x-4">
-          <label class="inline-block bg-gray-100 text-gray-700 px-4 py-2 rounded cursor-pointer hover:bg-gray-200 border border-gray-300">
-            이미지 선택
+          <label
+            class="inline-flex items-center px-5 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition"
+          >
+            <span class="text-gray-700">이미지 선택</span>
             <input type="file" class="hidden" accept="image/*" @change="onImageChange" />
           </label>
-          <img v-if="previewImage" :src="previewImage" class="w-16 h-16 rounded-full object-cover border" />
+          <img
+            v-if="previewImage"
+            :src="previewImage"
+            class="w-20 h-20 rounded-full object-cover border-2 border-orange-500"
+            alt="Preview"
+          />
         </div>
       </div>
 
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+      <!-- 저장 버튼 -->
+      <button
+        type="submit"
+        class="w-full py-3 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-500"
+      >
         저장하기
       </button>
     </form>
 
     <!-- 건너뛰기 버튼 -->
-    <div v-if="showSkip" class="text-center mt-4">
-      <button @click="router.push('/game-list')" class="text-sm text-gray-500 hover:underline">건너뛰기</button>
+    <div v-if="showSkip" class="text-center mt-6">
+      <button
+        @click="router.push('/game-list')"
+        class="text-sm text-gray-500 hover:underline"
+      >
+        건너뛰기
+      </button>
     </div>
 
     <CustomToast />
@@ -91,32 +137,19 @@ const router = useRouter()
 const route = useRoute()
 const showSkip = computed(() => route.query.init === '1')
 
-const form = ref({
-  age: 0,
-  gender: '',
-  region: '',
-  bio: ''
-})
-
-const errors = ref({
-  age: '',
-  gender: '',
-  region: ''
-})
-
+const form = ref({ age: 0, gender: '', region: '', bio: '' })
+const errors = ref({ age: '', gender: '', region: '' })
 const genders = [
   { value: 'M', label: '남성' },
   { value: 'F', label: '여성' },
   { value: 'O', label: '기타' }
 ]
-
 const regionMap = {
   '서울시': ['강남구', '서초구', '마포구'],
   '경기도': ['수원시', '성남시', '고양시'],
   '부산시': ['해운대구', '금정구'],
   '대구시': ['수성구', '중구']
 }
-
 const selectedPrimary = ref('')
 const selectedSecondary = ref('')
 const profilePicture = ref(null)
@@ -135,7 +168,7 @@ const onImageChange = (e) => {
   }
   profilePicture.value = file
   const reader = new FileReader()
-  reader.onload = () => previewImage.value = reader.result
+  reader.onload = () => (previewImage.value = reader.result)
   reader.readAsDataURL(file)
 }
 
@@ -187,7 +220,10 @@ const submitProfile = async () => {
 </script>
 
 <style scoped>
-.input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+/* 기본 input 스타일 */
+input,
+select,
+textarea {
+  @apply font-sans;
 }
 </style>

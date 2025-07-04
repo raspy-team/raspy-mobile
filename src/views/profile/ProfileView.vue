@@ -186,10 +186,10 @@
           <span class="font-bold text-gray-900 text-base flex items-center gap-2">
             <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
           </span>
-          <!-- <div class="flex items-center gap-2"> 랭킹시스템 
-            <span class="px-3 py-1 rounded-full bg-orange-500 text-white font-black text-xs shadow">랭킹 {{ stat.rank }}위</span>
-            <span class="px-2 py-1 rounded-full bg-white text-orange-500 text-xs font-semibold border border-orange-400">상위 {{ stat.topPercent }}%</span> -->
-          <!-- </div> -->
+          <div class="flex items-center gap-2">  
+            <span class="px-3 py-1 rounded-full bg-orange-500 text-white font-black text-xs shadow">랭킹 -위</span>
+            <span class="px-2 py-1 rounded-full bg-white text-orange-500 text-xs font-semibold border border-orange-400">상위 -%</span>
+           </div>
         </div>
         <div class="w-full flex items-center justify-center my-5 -ml-2">
           <canvas

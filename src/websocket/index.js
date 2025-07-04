@@ -21,7 +21,7 @@ export const socket = {
     }
     ,
     connect(roomId, onConnected) {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('raspy_access_token')
       currentRoomId = roomId
       console.log('Connecting to room:', currentRoomId)
 

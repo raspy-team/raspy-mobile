@@ -1,7 +1,14 @@
 import { Client } from '@stomp/stompjs'
 
-const WS_URL = `wss://raspy-be.shop/ws`
-let stompClient = null
+const hostname = window.location.hostname
+const isVercel = hostname.endsWith('.vercel.app')
+
+// 환경별 WS URL 분기
+const WS_URL = isVercel
+  ? 'wss://raspy-be.shop/ws'        // 프로덕션
+  : 'ws://localhost:8080/ws'        // 로컬 개발
+
+  let stompClient = null
 let currentRoomId = null
 
 export const socket = {
@@ -16,7 +23,7 @@ export const socket = {
     connect(roomId, onConnected) {
       const token = localStorage.getItem('accessToken')
       currentRoomId = roomId
-      console.log('📡 Connecting to room:', currentRoomId)
+      console.log('Connecting to room:', currentRoomId)
 
       stompClient = new Client({
         brokerURL: WS_URL,
@@ -28,7 +35,7 @@ export const socket = {
         },
 
         onStompError: frame => {
-          console.error('🔥 STOMP error:', frame.headers['message'], frame.body)
+          console.error('STOMP error:', frame.headers['message'], frame.body)
         }
       })
 

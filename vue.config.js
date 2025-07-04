@@ -7,7 +7,7 @@ module.exports = defineConfig({
     port: 8081,
     proxy: {
       '/api': {
-        target: 'https://raspy-be.shop',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         pathRewrite: { '^/api': '/api' },
         ws: true

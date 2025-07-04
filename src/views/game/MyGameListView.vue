@@ -109,10 +109,10 @@
             <div class="flex flex-col">
               <span class="font-semibold">세트 제한 시간</span>
               <span class="mt-1">
-                {{
+                {{ game.rule.duration ? 
                   (game.rule.duration >= 60 
                     ? Math.floor(game.rule.duration / 60) + '시간 ' : '') +
-                  (game.rule.duration % 60 ? (game.rule.duration % 60) + '분' : '')
+                  (game.rule.duration % 60 ? (game.rule.duration % 60) + '분' : '') : "제한 없음"
                 }}
               </span>
             </div>

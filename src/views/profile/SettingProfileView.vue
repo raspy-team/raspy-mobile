@@ -1,8 +1,9 @@
 <template>
-  <div class="pt-12 pb-16 px-8 max-w-md mx-auto bg-white rounded-2xl shadow-lg">
+    <Header :hasReferer="true" title="프로필 설정"></Header>
+
+  <div class="pt-20 pb-16 px-8 max-w-md mx-auto bg-white rounded-2xl shadow-lg">
     <!-- Header -->
-    <h2 v-if="showSkip" class="text-2xl font-semibold mb-8 text-gray-800">환영합니다! 당신을 알려주세요</h2>
-    <h2 v-else class="text-3xl font-bold mb-8 text-center text-gray-900">프로필 설정</h2>
+    <h2 v-if="afterLogin" class="text-2xl font-semibold mb-8 text-gray-800">환영합니다! 당신을 알려주세요</h2>
 
     <form @submit.prevent="submitProfile" class="space-y-8">
       <!-- 나이 -->
@@ -112,7 +113,7 @@
     </form>
 
     <!-- 건너뛰기 버튼 -->
-    <div v-if="showSkip" class="text-center mt-6">
+    <div v-if="afterLogin" class="text-center mt-6">
       <button
         @click="router.push('/game-list')"
         class="text-sm text-gray-500 hover:underline"
@@ -126,16 +127,25 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed , onMounted} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
 import CustomToast from '../../components/CustomToast.vue'
+import fullRegionMap from '../../assets/regionMap.json'
+import Header from "../../components/HeaderComp.vue"
+
+const regionMap = {}
+Object.entries(fullRegionMap).forEach(([primary, subs]) => {
+  if (primary !== '전국') {
+    regionMap[primary] = subs
+  }
+})
 
 const { showToast } = useToast()
 const router = useRouter()
 const route = useRoute()
-const showSkip = computed(() => route.query.init === '1')
+const afterLogin = computed(() => route.query.init === '1')
 
 const form = ref({ age: 0, gender: '', region: '', bio: '' })
 const errors = ref({ age: '', gender: '', region: '' })
@@ -144,12 +154,7 @@ const genders = [
   { value: 'F', label: '여성' },
   { value: 'O', label: '기타' }
 ]
-const regionMap = {
-  '서울시': ['강남구', '서초구', '마포구'],
-  '경기도': ['수원시', '성남시', '고양시'],
-  '부산시': ['해운대구', '금정구'],
-  '대구시': ['수성구', '중구']
-}
+
 const selectedPrimary = ref('')
 const selectedSecondary = ref('')
 const profilePicture = ref(null)
@@ -162,8 +167,8 @@ const handlePrimaryChange = () => {
 const onImageChange = (e) => {
   const file = e.target.files[0]
   if (!file) return
-  if (file.size > 1 * 1024 * 1024) {
-    alert('파일은 1MB 이하여야 합니다.')
+  if (file.size > 5 * 1024 * 1024) {
+    alert('파일은 5MB 이하여야 합니다.')
     return
   }
   profilePicture.value = file
@@ -217,6 +222,14 @@ const submitProfile = async () => {
     showToast('입력값을 다시 확인해주세요.')
   }
 }
+
+onMounted(()=> {
+    if(afterLogin.value && localStorage.getItem("hello-raspy")) {
+        router.push("/")
+    } else {
+      localStorage.setItem("hello-raspy", true)
+    }
+})
 </script>
 
 <style scoped>

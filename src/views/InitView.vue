@@ -11,6 +11,13 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const goToLogin = () => router.push('/login')
 
+if(localStorage.getItem("raspy_access_token") != undefined) {
+  /**
+   * 로그인 되어있다면 홈으로
+   */
+  router.push("/")
+}
+
 const pointColor = '#ff6f1f'
 document.documentElement.style.setProperty('--point-color', pointColor)
 </script>

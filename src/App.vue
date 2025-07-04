@@ -2,14 +2,14 @@
   <div>
     <!-- Splash 화면 -->
     <transition name="fade">
-      <div v-if="showSplash" class="fixed inset-0 flex items-center justify-center bg-white z-50 ">
+      <div v-if="showSplash" class="fixed inset-0 flex items-center justify-center bg-white z-[100] ">
         <span class="raspy text-5xl font-extrabold tracking-wider text-orange-500 font-kanit;
 ">RASPY</span>
       </div>
     </transition>
 
     <!-- 실제 라우터 뷰 -->
-    <RouterView v-if="!showSplash" :key="route.fullPath" />
+    <RouterView :key="route.fullPath" />
   </div>
 </template>
 

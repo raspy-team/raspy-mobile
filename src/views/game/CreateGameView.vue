@@ -232,17 +232,18 @@ const createGame = async () => {
     showToast('게임 생성 실패. 입력값을 확인해주세요.')
   }
 }
-
 const openAddressSearch = () => {
-  new window.daum.Postcode({
+  const postcode = new window.daum.Postcode({
     oncomplete: function (data) {
       form.value.placeRoad = data.roadAddress || data.jibunAddress
       nextTick(() => {
         const detailInput = document.getElementById('place-detail')
         if (detailInput) detailInput.focus()
       })
+      window.close() 
     }
-  }).open()
+  })
+  postcode.open()
 }
 </script>
 

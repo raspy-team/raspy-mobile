@@ -30,11 +30,19 @@
     />
     <div class="flex-1 flex flex-col ">
       <div class="flex flex-col items-start gap-2">
-        <h2 class="text-xl font-bold text-gray-900">@{{ user.nickname }}</h2>
-        <div>
+        <h2 class="flex gap-2 items-center">
+          <span class="text-xl font-bold mb-[2.7px] text-gray-900">@{{ user.nickname }}</span>
+          <span class="flex items-center gap-1" v-if="user.location">
+            <span>·</span><span class="text-[0.72rem] text-gray-600">{{ user.location }}</span>
+          </span>
+      </h2>
+        <div class="flex gap-1">
           <span class="inline-block bg-orange-100 text-orange-600 text-xs px-2.5 py-0.5 rounded font-bold">{{ user.age ? user.age + '세': '연령 미등록'}}</span>
           <span class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold">{{ user.gender ? user.gender : '성별 미등록' }}</span>
         </div>
+
+                      <div class="text-xs text-gray-600">{{ user.intro }}</div>
+
       </div>
       <!-- 챔피언 뱃지 -->
       <div v-if="user.myChampions && user.myChampions.length" class="flex mt-3 flex-wrap gap-2 mb-2">

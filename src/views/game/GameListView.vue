@@ -175,7 +175,7 @@
 
             <div class="mt-5 flex items-center justify-between">
 
-              <div class="flex items-center">
+              <div class="flex items-center" @click="router.push('/profile/'+game.ownerId)">
                 <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
                   <img :src="game.ownerProfileUrl || Default" alt="프로필" class="w-full h-full object-cover" />
                 </div>
@@ -386,14 +386,20 @@
   <div v-if="showRegionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
     <div class="bg-white rounded-xl w-11/12 max-w-md p-5 space-y-4">
       <h3 class="text-lg font-bold text-gray-800 mb-4">지역 선택</h3>
-      <select v-model="selectedPrimary" @change="selectedSecondary = ''" class="w-full border rounded px-3 py-2 text-sm">
+      <select v-model="selectedPrimary" 
+              @change="selectedSecondary = selectedPrimary === '전국' ? '전국' : ''" 
+              class="w-full border rounded px-3 py-2 text-sm">
         <option value="" disabled selected>시/도 선택</option>
         <option v-for="(districts, primary) in regionMap" :key="primary" :value="primary">{{ primary }}</option>
       </select>
-      <select v-model="selectedSecondary" :disabled="!selectedPrimary" class="w-full border rounded px-3 py-2 text-sm">
+
+      <select v-model="selectedSecondary" 
+              :disabled="!selectedPrimary || selectedPrimary === '전국'" 
+              class="w-full border rounded px-3 py-2 text-sm">
         <option value="" disabled selected>시/군/구 선택</option>
         <option v-for="sub in regionMap[selectedPrimary] || []" :key="sub" :value="sub">{{ sub }}</option>
       </select>
+
       <div class="flex justify-end space-x-2 pt-3">
         <button @click="showRegionModal = false" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 text-sm">취소</button>
         <button :disabled="!selectedSecondary" @click="applyRegionFilter" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm disabled:opacity-50">적용</button>

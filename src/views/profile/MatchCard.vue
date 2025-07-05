@@ -157,7 +157,7 @@
       </button>
       <button
         class="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-md text-sm px-3 py-2 transition"
-        @click="$emit('share', game)"
+        @click="openInstaModal"
         title="결과 공유"
       >
         <i class="fas fa-share-alt text-base"></i>
@@ -165,15 +165,29 @@
       </button>
     </div>
   </div>
-</template>
+
+  <!-- 인스타그램 공유 모달 -->
+  <InstagramModal
+    v-if="isOpenInsta"
+    :game="game"
+    :me="game.me"
+    @close="isOpenInsta = false"
+  /></template>
 
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps , ref} from 'vue'
 import { useRouter } from 'vue-router'
+import InstagramModal from "../../components/InstagramShare.vue"
 
 const router = useRouter()
 const goComment = (id) => {
   router.push(`/games/${id}/comments`)
+}
+
+const isOpenInsta = ref(false)
+
+const openInstaModal = () => {
+  isOpenInsta.value = true
 }
 
 defineProps({

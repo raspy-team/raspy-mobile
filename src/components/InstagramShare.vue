@@ -46,16 +46,29 @@
 
       <!-- 액션 바: 저장 / 공유 -->
       <div class="flex justify-around items-center p-3 bg-white border-t">
-        <button @click="downloadImage" :disabled="downloading || !imageReady"
-                class="flex items-center gap-1 text-sm text-orange-500 hover:text-orange-600">
-          <i class="fas fa-download"></i>
-          <span class="font-bold">저장</span>
-        </button>
-        <button @click="goToInstagram" :disabled="loading || !imageReady"
-                class="flex items-center gap-1 text-sm text-orange-500 hover:text-orange-600">
-              <i class="fab font-extrabold  fa-instagram"></i>
-          <span class="font-bold "> 스토리 공유하기</span>
-        </button>
+        <div v-if="!saved">
+          <button @click="downloadImage" :disabled="downloading || !imageReady"
+                  class="flex items-center gap-1 text-sm text-orange-500 hover:text-orange-600">
+            <i class="fas fa-download"></i>
+            <span class="font-bold">저장</span>
+          </button>
+        </div>
+        <div v-else>
+          <button
+            disabled
+                  class="flex items-center gap-1 text-sm text-green-500 hover:text-orange-600">
+          
+            <i class="fas fa-check font-extrabold"></i>
+            <span class="font-extrabold">저장됨</span>
+          </button>
+        </div>
+        <div>
+          <button @click="goToInstagram" :disabled="loading || !imageReady"
+                  class="flex items-center gap-1 text-sm text-orange-500 hover:text-orange-600">
+                <i class="fab font-extrabold  fa-instagram"></i>
+            <span class="font-bold "> 스토리 공유하기</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -74,6 +87,7 @@ const palette = [
   { color: "#dee2e6", name: "그레이" },        // Gray: 중간톤, 세련됨
 ]
 
+const saved = ref(false)
 
 const props = defineProps({
   game: Object,
@@ -96,6 +110,7 @@ function selectPalette(color) {
   bgColor.value = color
   usingPhoto.value = false
   drawFinalImage()
+  saved.value = false
 }
 
 const triggerCamera = () => cameraInput.value?.click()
@@ -110,6 +125,7 @@ const onImageSelected = async (e) => {
     usingPhoto.value = true
     await nextTick()
     drawFinalImage()
+    saved.value = false
   }
   reader.readAsDataURL(file)
 }
@@ -307,6 +323,8 @@ function downloadImage() {
   link.download = 'story.png'
   link.click()
   downloading.value = false
+
+  saved.value = true
 }
 
 // 공유

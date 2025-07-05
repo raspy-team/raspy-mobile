@@ -22,7 +22,7 @@
 <!-- User Card Section (UI/UX 개선) -->
 <section  class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-8 flex flex-col gap-5 relative">
   <!-- 프로필/닉네임/기본정보 -->
-  <div class="flex gap-5 items-center mb-2">
+  <div class="flex gap-5 items-start mb-2">
     <img
       :src="user.avatar ? user.avatar : Default"
       alt="avatar"
@@ -59,7 +59,7 @@
           <!-- 아이콘 + 텍스트 -->
           <i class="fas fa-crown text-white text-sm z-10"></i>
           <span class="text-xs font-semibold text-white z-10 animate-pulse-slow truncate ">
-            {{ champ.region }} {{ champ.ruleTitle }} 챔피언
+            {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
           </span>
         </span>
       </div>

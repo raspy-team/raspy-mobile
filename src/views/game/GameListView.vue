@@ -329,7 +329,7 @@
             </div>
             <div class="flex items-center gap-2">
               <i class="fas fa-map-marker-alt text-orange-400"></i>
-              {{ inviteGame.matchLocation || '미정' }}
+              {{ inviteGame.matchLocation==' ' ? '미정'  : inviteGame.matchLocation}}
             </div>
           </div>
           <!-- Rule Summary -->
@@ -463,6 +463,13 @@ const copyInviteCode = async () => {
     setTimeout(() => { copied.value = false }, 2000)
   } catch (e) {
     copied.value = false
+    // clipboard API 실패 시
+    if (window.AndroidApp?.copyTextToClipboard) {
+      window.AndroidApp.copyTextToClipboard(inviteCode.value)
+      copied.value = true
+      setTimeout(() => { copied.value = false }, 2000)
+      return
+    }
   }
 }
 const { showToast } = useToast()

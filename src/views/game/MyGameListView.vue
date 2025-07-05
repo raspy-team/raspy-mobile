@@ -315,6 +315,25 @@ const openAddressSearch = () => {
   }).open()
 }
 
+const copied = ref(false)
+
+const copyInviteCode = async () => {
+  try {
+    await navigator.clipboard.writeText(inviteCode.value)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch (e) {
+    copied.value = false
+    // clipboard API 실패 시
+    if (window.AndroidApp?.copyTextToClipboard) {
+      window.AndroidApp.copyTextToClipboard(inviteCode.value)
+      copied.value = true
+      setTimeout(() => { copied.value = false }, 2000)
+      return
+    }
+  }
+}
+
 const openStartModal = (game) => {
   showAddressModal.value = true
   placeRoad.value = game.matchLocation || ''

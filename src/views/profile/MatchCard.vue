@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="[ 
+    :class="[
       'relative rounded-2xl shadow-lg px-6 py-7 flex flex-col gap-3 bg-white border-l-4',
       isWin
         ? 'border-orange-400'
@@ -28,19 +28,28 @@
         >패배</span>
     </div>
     <!-- 상단: 프로필/닉네임/경기일시장소 -->
-    <div class="flex items-center gap-3">
-      <router-link :to="'/profile/'+game.opponent.id">
+    <div class="flex items-center gap-3 min-w-0">
+      <router-link :to="'/profile/'+game.opponent.id" class="shrink-0">
         <img :src="game.opponent.avatar" class="w-11 h-11 rounded-full border-2 border-orange-400 shadow" />
       </router-link>
 
-      <div>
+      <!-- 텍스트 컨테이너 min-w-0로 flex 줄바꿈/말줄임 방지 -->
+      <div class="min-w-0 flex flex-col justify-center">
         <router-link :to="'/profile/'+game.opponent.id">
-          <div class="flex items-center gap-1 font-bold text-gray-900 text-[1.08rem]">@{{ game.opponent.nickname }}</div>
+          <div class="font-bold text-gray-900 text-[1.08rem] truncate max-w-[160px]">
+            @{{ game.opponent.nickname }}
+          </div>
         </router-link>
-        <div class="flex gap-2 text-xs text-gray-500 mt-1">
-          <span><i class="far fa-calendar"></i> {{ formatDate(game.date) }}</span>
-          <span class="mx-1 text-gray-300">·</span>
-          <span><i class="fas fa-map-marker-alt"></i> {{ game.location ? game.location : "미정"}}</span>
+        <!-- 시간/장소: 세로배치 -->
+        <div class="flex flex-col gap-0.5 text-xs text-gray-500 mt-1 min-w-0">
+          <span class="flex items-center gap-1 min-w-0">
+            <i class="far fa-calendar"></i>
+            <span class="truncate">{{ formatDate(game.date) }}</span>
+          </span>
+          <span class="flex items-center gap-1 min-w-0">
+            <i class="fas fa-map-marker-alt"></i>
+            <span class="truncate">{{ game.location ? game.location : "미정"}}</span>
+          </span>
         </div>
       </div>
     </div>
@@ -50,7 +59,9 @@
         <span class="bg-orange-100 text-orange-700 px-4 py-2 rounded-full text-xs font-bold">
           {{ game.ruleTitle }}
         </span>
-        <span class="font-semibold text-gray-500 flex items-center gap-1 text-xs mt-2"><i class="fas fa-tag"></i> {{ game.mainCategory + ' > ' + game.subCategory }}</span>
+        <span class="font-semibold text-gray-500 flex items-center gap-1 text-xs mt-2">
+          <i class="fas fa-tag"></i> {{ game.mainCategory + ' > ' + game.subCategory }}
+        </span>
       </div>
       <span class="text-xs text-gray-400 font-medium">진행 세트: {{ game.setCount }}</span>
     </div>
@@ -157,8 +168,8 @@
 </template>
 
 <script setup>
-import {defineProps} from 'vue'
-import {useRouter} from 'vue-router'
+import { defineProps } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const goComment = (id) => {

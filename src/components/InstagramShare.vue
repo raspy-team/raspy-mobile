@@ -205,6 +205,8 @@ const groupTopY = groupCenterY - groupHeight / 2
 const meAvatarCenterX = boxX + padX + avatarSize / 2
 const meNicknameX = boxX + padX + avatarSize / 2 // (닉네임을 아바타와 정확히 정렬하려면 이 좌표)
 const meImg = new window.Image()
+meImg.crossOrigin = "anonymous"
+
 meImg.onload = () => {
   // 아바타
   ctx.save()
@@ -233,6 +235,8 @@ meImg.src = props.me?.avatar || defaultAvatar
 const oppAvatarCenterX = boxX + boxSize - padX - avatarSize / 2
 const oppNicknameX = boxX + boxSize - padX - avatarSize / 2
 const oppImg = new window.Image()
+oppImg.crossOrigin = "anonymous"
+
 oppImg.onload = () => {
   ctx.save()
   ctx.beginPath()

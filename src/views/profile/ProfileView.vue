@@ -33,7 +33,7 @@
         <h2 class="flex gap-2 items-center">
           <span class="text-xl font-bold mb-[2.7px] text-gray-900">@{{ user.nickname }}</span>
           <span class="flex items-center gap-1" v-if="user.location">
-            <span>·</span><span class="text-[0.72rem] text-gray-600">{{ user.location }}</span>
+            <span>·</span><span class="text-[0.72rem] text-gray-600">{{ user.location?.split(' ').slice(-1)[0] || '' }}</span>
           </span>
       </h2>
         <div class="flex gap-1">

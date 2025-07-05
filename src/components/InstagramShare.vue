@@ -312,6 +312,9 @@ oppImg.src = props.game.opponent?.avatar || defaultAvatar
 function downloadImage() {
   if (!imageReady.value) return
   downloading.value = true
+  
+  saved.value = true
+
   const base64 = finalCanvas.value.toDataURL('image/png')
   if (window.AndroidApp?.saveImageToGalleryWithBase64) {
     window.AndroidApp.saveImageToGalleryWithBase64(base64)
@@ -324,7 +327,6 @@ function downloadImage() {
   link.click()
   downloading.value = false
 
-  saved.value = true
 }
 
 // 공유
@@ -346,4 +348,3 @@ function goToInstagram() {
 import { onMounted } from 'vue'
 onMounted(() => drawFinalImage())
 </script>
-ㅋ

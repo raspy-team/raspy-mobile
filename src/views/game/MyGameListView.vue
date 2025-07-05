@@ -152,7 +152,7 @@
           <button
             v-else-if="game.isOwner && !game.opponentNickname"
             class="w-full bg-blue-500 text-white font-bold rounded-xl py-3 shadow hover:bg-blue-400 transition active:scale-95"
-            @click="inviteOpponent(game)"
+            @click="shareGame(game)"
           ><i class="fas fa-user-plus mr-2"></i>상대 초대하기</button>
           <div v-else class="text-center text-gray-400 text-sm py-3">경기 시작 대기 중</div>
         </div>
@@ -218,6 +218,72 @@
       </div>
     </div>
   </div>
+  
+<!-- 리디자인된 초대코드 공유 모달 (shareModal, 코드만 대체/추가) -->
+<div
+  v-if="shareModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+  style="backdrop-filter: blur(2px);"
+>
+  <div
+    class="relative bg-white rounded-3xl shadow-2xl w-[95%] max-w-[380px] px-7 py-8 flex flex-col items-center gap-2"
+    style="box-shadow:0 8px 32px 0 rgba(0,0,0,0.15);"
+  >
+    <!-- X 버튼 -->
+    <button
+      @click="shareModal = false"
+      aria-label="닫기"
+      class="absolute right-4 top-4 w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition text-gray-500 hover:text-gray-900 z-10"
+      style="box-shadow:0 2px 8px rgba(0,0,0,0.04);"
+    >
+      <i class="fas fa-times text-xl"></i>
+    </button>
+
+    <!-- 아이콘 및 타이틀 -->
+    <div class="mb-3 flex flex-col items-center w-full">
+      <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+        <i class="fas fa-link text-orange-500 text-2xl"></i>
+      </div>
+      <div class="text-lg font-bold text-gray-900 tracking-tight text-center mb-1">
+        친구에게 초대 코드 보내기
+      </div>
+      <div class="text-gray-500 text-xs text-center">
+        아래 코드를 복사해서 공유하세요
+      </div>
+    </div>
+
+    <!-- 코드 카드 -->
+    <div class="w-full my-5 flex flex-col items-center">
+      <div
+        class="rounded-2xl bg-gray-50 border border-orange-100 px-0 py-5 w-full flex flex-col items-center gap-2 shadow-sm"
+      >
+        <div class="text-3xl font-extrabold text-orange-600 tracking-widest select-all font-mono">
+          {{ inviteCode }}
+        </div>
+        <div class="mt-1 text-xs text-gray-400 text-center">4자리 숫자 코드</div>
+      </div>
+    </div>
+
+    <!-- 복사 버튼 -->
+    <button
+      @click="copyInviteCode"
+      class="w-full mb-2 py-3 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 text-white rounded-full font-bold transition text-base shadow-md flex items-center justify-center gap-2"
+    >
+      <i class="fas fa-copy"></i> 코드 복사하기
+    </button>
+    <transition name="fade">
+      <div v-if="copied" class="text-orange-500 text-xs font-medium text-center mb-2">복사 완료!</div>
+    </transition>
+    <!-- 닫기 버튼 -->
+    <button
+      @click="shareModal = false"
+      class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-semibold transition text-sm mt-1"
+    >
+      닫기
+    </button>
+  </div>
+</div>
+
 </template>
 
 <script setup>
@@ -328,10 +394,38 @@ const joinGame = (id) => router.push(`/games/${id}/play`)
 function canStart(g) {
   return g.status === 'SCHEDULED' && !!g.opponentNickname
 }
-function inviteOpponent(game) {
-  const url = `${window.location.origin}/games/${game.id}/invite`
-  navigator.clipboard.writeText(url).then(() => alert('초대 링크가 복사되었습니다!'))
+
+// Share modal state & invite code
+const shareModal = ref(false)
+const inviteCode = ref('')
+
+// 상수 설정 (10000과 서로소)
+const OFFSET         = 538;   // 임의의 시프트 값
+const MULTIPLIER     = 7;     // 10000과 서로소여야 함
+
+// 초대코드 생성 (4자리 숫자 문자열)
+function generateInviteCode(id) {
+  // (id + OFFSET) * MULTIPLIER mod 10000 → 4자리 패딩
+  const ob = ((id + OFFSET) * MULTIPLIER) % 10000;
+  return ob.toString().padStart(4, '0');
 }
+// const INV_MULTIPLIER = 7143;  // MULTIPLIER의 모듈러 역원 (7*7143 %10000 = 1)
+
+// // 복호화: 원래 ID 복원
+// function decodeInviteCode(code) {
+//   const num = parseInt(code, 10);
+//   // 곱셈 역원 적용 → OFFSET 빼기 → 음수 보정
+//   const x  = (num * INV_MULTIPLIER) % 10000;
+//   return ((x - OFFSET) + 10000) % 10000;
+// }
+
+
+// shareGame 함수
+const shareGame = (game) => {
+  inviteCode.value = generateInviteCode(game.id)
+  shareModal.value = true
+}
+
 function formatDate(s) {
   if (!s) return '미정'
   return new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })

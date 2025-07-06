@@ -334,8 +334,8 @@ function goToInstagram() {
   if (!imageReady.value) return
   loading.value = true
   const base64 = finalCanvas.value.toDataURL('image/png')
-  if (window.AndroidApp?.shareToInstagramStoryWithBase64) {
-    window.AndroidApp.shareToInstagramStoryWithBase64(base64)
+   if (window.AndroidApp?.shareToInstagramFeedWithBase64) {
+    window.AndroidApp.shareToInstagramFeedWithBase64(base64)
   } else if (window.webkit?.messageHandlers?.instagram) {
     window.webkit.messageHandlers.instagram.postMessage(base64)
   } else {

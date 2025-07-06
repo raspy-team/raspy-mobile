@@ -44,7 +44,6 @@ api.interceptors.response.use(
       )
 
       if (!isExcluded) {
-        alert("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.")
         localStorage.removeItem('raspy_access_token')
         if (routerInstance) {
           routerInstance.push('/login')

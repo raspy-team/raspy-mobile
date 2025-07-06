@@ -29,7 +29,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 점수</label>
           <div class="relative flex items-center" >
-            <input :value="pointsUnlimited ? '제한 없음' : form.pointsToWin" @input="handlePointsInput" type="text" class="modern-input pr-28 text-xs " :disabled="pointsUnlimited" placeholder="점수를 입력하세요" />
+            <input :value="pointsUnlimited ? '제한 없음' : form.pointsToWin" @input="handlePointsInput" type="number" class="modern-input pr-28 text-xs " :disabled="pointsUnlimited" placeholder="점수를 입력하세요" />
             <button type="button" @click="togglePointsUnlimited" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 rounded-full text-xs font-semibold transition" :class="pointsUnlimited ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'">
               {{ pointsUnlimited ? '제한 없음' : '직접 입력' }}
             </button>
@@ -45,7 +45,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">세트 제한시간 (초)</label>
           <div class="relative flex items-center">
-            <input :value="timeUnlimited ? '제한 없음' : form.duration" @input="handleTimeInput" type="text" class="modern-input pr-28 text-xs" :disabled="timeUnlimited" placeholder="시간을 입력하세요" />
+            <input :value="timeUnlimited ? '제한 없음' : form.duration" @input="handleTimeInput" type="number" class="modern-input pr-28 text-xs" :disabled="timeUnlimited" placeholder="시간을 입력하세요" />
             <button type="button" @click="toggleTimeUnlimited" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-2 rounded-full text-xs font-semibold transition" :class="timeUnlimited ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'">
               {{ timeUnlimited ? '제한 없음' : '직접 입력' }}
             </button>
@@ -101,12 +101,15 @@ const loading = ref(false)
 const togglePointsUnlimited = () => {
   pointsUnlimited.value = !pointsUnlimited.value
   if (pointsUnlimited.value) form.value.pointsToWin = -1
+  else form.value.pointsToWin = 1
+
   validateRuleOptions()
 }
 
 const toggleTimeUnlimited = () => {
   timeUnlimited.value = !timeUnlimited.value
   if (timeUnlimited.value) form.value.duration = -1  
+  else form.value.duration = 1
   validateRuleOptions()
 }
 

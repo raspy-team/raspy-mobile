@@ -17,7 +17,7 @@
                 <champion-badge v-if="group.championId == group.myId"></champion-badge>
               </div>
             </div>
-            <p class="text-sm text-gray-700 leading-snug">{{ group.rule.ruleDescription }}</p>
+            <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed">{{ group.rule.ruleDescription }}</p>
           </div>
           <span class="text-xs font-semibold px-2 py-2 rounded-full w-[50%] text-center" 
             :class="{

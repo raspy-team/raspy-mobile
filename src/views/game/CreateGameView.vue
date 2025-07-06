@@ -54,7 +54,7 @@
           <div class="mb-3">
             {{ selectedRule.ruleTitle }}
           </div>
-          <p class="text-sm text-gray-700 mt-1">{{ selectedRule.ruleDescription }}</p>
+          <p class="text-sm text-gray-700 mt-1 whitespace-pre-line leading-relaxed">{{ selectedRule.ruleDescription }}</p>
           <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
             <div class="flex items-start mb-2">
               <i class="fas fa-trophy text-[#f97316] w-4 mr-2 mt-1"></i>

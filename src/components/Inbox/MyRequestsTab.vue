@@ -13,7 +13,7 @@ TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표�
             <p class="text-xs text-gray-400">{{ game.matchLocation || '장소 미정' }} · {{ formatDate(game.matchDate) }}</p>
             <h3 class="text-lg font-bold text-gray-800">{{ game.rule.ruleTitle }}</h3>
             <p class="text-sm text-gray-500">{{ game.rule.majorCategory }} > {{ game.rule.minorCategory }}</p>
-            <p class="text-sm text-gray-700 leading-snug">{{ game.rule.ruleDescription }}</p>
+            <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed">{{ game.rule.ruleDescription }}</p>
 
           </div>
 

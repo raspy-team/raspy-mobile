@@ -24,8 +24,8 @@
           <span class="text-base text-gray-700 font-semibold whitespace-nowrap overflow-hidden text-overflow-ellipsis">
             {{ action.name }}
           </span>
-          <div v-if="action.badge" class="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-            <span class="text-xs text-white font-medium">{{ action.badge }}</span>
+          <div v-if="requestCount > 0 && action.name == '경기 요청'" class="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+            <span class="text-xs text-white font-medium">{{ requestCount }}</span>
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@
                   경기 규칙
                 </span>
                 <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
-                <p class="text-sm text-gray-700 mt-3 py-0">{{ game.ruleDescription }}</p>
+                <p class="text-sm text-gray-700 mt-3 py-0 whitespace-pre-line leading-relaxed" >{{ game.ruleDescription }}</p>
                 <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
                   <div class="flex items-start mb-2">
                     <i class="fas fa-trophy text-[#f97316] w-4 mr-2 mt-1"></i>
@@ -305,7 +305,7 @@
           </div>
 
           <!-- Description (최대 2줄) -->
-          <div class="text-sm text-gray-600 font-medium leading-snug mb-1 line-clamp-2" :title="inviteGame.description">
+          <div class="text-sm text-gray-600 font-medium whitespace-pre-line leading-relaxed  mb-1 line-clamp-2" :title="inviteGame.description">
             {{ inviteGame.description || inviteGame.ruleDescription }}
           </div>
 
@@ -547,6 +547,9 @@ const applyInviteGame = async (id) => {
     showToast(e.response?.data?.message || '신청에 실패했습니다.')
   }
 }
+
+const requestCount  = ref(0)
+
 const menuItems = [
   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
   { name: '경기 요청', icon: 'fas fa-envelope', link: '/inbox' }
@@ -568,6 +571,9 @@ const timerDone = ref(false)
 const fetchGames = async () => {
   loading.value = true
   try {
+    const requestCountRes = await api.get("/api/games/request-count")
+    requestCount.value = requestCountRes.data
+
     const res = await api.get('/api/games/list', {
       params: {
         region: selectedPrimary.value && selectedSecondary.value
@@ -607,6 +613,7 @@ const applyConfirmed = async () => {
   try {
     await api.post(`/api/games/${selectedGame.value.id}/apply`)
     showToast('신청이 완료되었습니다!')
+    requestCount.value += 1
   } catch (err) {
     showToast(err.response?.data?.message || '신청 실패. 다시 시도해주세요.')
   } finally {

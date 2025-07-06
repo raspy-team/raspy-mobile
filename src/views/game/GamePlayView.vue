@@ -64,7 +64,7 @@
     <div class="text-left mb-5">
       <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-5 shadow-md animate-fade-in">
         <div class="text-xs font-semibold mb-1">{{ game.majorCategory }} - {{ game.minorCategory }}</div>
-        <div class="text-xs text-gray-600">{{ game.ruleDescription }}</div>
+        <div class="text-xs text-gray-600 whitespace-pre-line leading-relaxed line-clmap-2 ">{{ game.ruleDescription }}</div>
       </div>
     </div>
 

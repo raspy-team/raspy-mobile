@@ -272,7 +272,7 @@
                 <span class="font-bold text-base">{{ rule.ruleTitle }}</span>
                 <span class="text-xs px-2 py-0.5 bg-gray-200 rounded">{{ rule.majorCategory }} > {{ rule.minorCategory }}</span>
               </div>
-              <div class="text-xs text-gray-600">{{ rule.ruleDescription }}</div>
+              <div class="text-xs text-gray-600 whitespace-pre-line leading-relaxed">{{ rule.ruleDescription }}</div>
             </button>
 
           </div>

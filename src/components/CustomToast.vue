@@ -1,8 +1,8 @@
-<!-- CustomToast.vue -->
+<!-- ModernToast.vue -->
 <template>
   <div
     v-if="toastMsg"
-    class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded shadow z-50 animate-fadein w-[93vw] max-w-md text-center"
+    class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-5 py-3 rounded-xl shadow-md z-50 animate-toast-in w-[92vw] max-w-sm text-base font-semibold text-center"
   >
     {{ toastMsg }}
   </div>
@@ -13,11 +13,11 @@ import { toastMsg } from '../composable/useToast'
 </script>
 
 <style>
-@keyframes fadein {
-  0% { opacity: 0; transform: translate(-50%, 10px); }
-  100% { opacity: 1; transform: translate(-50%, 0); }
+@keyframes toast-in {
+  0% { opacity: 0; transform: translate(-50%, 30px) scale(0.98);}
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1);}
 }
-.animate-fadein {
-  animation: fadein 0.3s ease-out;
+.animate-toast-in {
+  animation: toast-in 0.35s cubic-bezier(.37,.32,.29,1.22);
 }
 </style>

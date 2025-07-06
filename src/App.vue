@@ -1,8 +1,8 @@
 <template>
   <div>
-    <!-- Splash 화면 -->
+    <!-- Splash 화면 (네이티브 위임) -->
     <transition name="fade">
-      <div v-if="showSplash" class="fixed inset-0 flex items-center justify-center bg-white z-[100] ">
+      <div v-if="showSplash || false" class="fixed inset-0 flex items-center justify-center bg-white z-[100] ">
         <span class="raspy text-5xl font-extrabold tracking-wider text-orange-500 font-kanit;
 ">RASPY</span>
       </div>

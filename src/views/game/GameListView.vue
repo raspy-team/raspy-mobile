@@ -413,10 +413,22 @@
       </div>
     </div>
   </div>
+
+  <!-- 맨 위로 버튼 (스크롤 시에만) -->
+<button
+  v-if="showScrollTop"
+  @click="scrollToTop"
+  class="fixed z-[99] bottom-20 right-6 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-xl w-12 h-12 flex items-center justify-center transition"
+  aria-label="맨 위로"
+  style="box-shadow:0 6px 18px 0 rgba(255,115,0,0.12);"
+>
+  <i class="fas fa-arrow-up text-xl"></i>
+</button>
+
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted , onUnmounted} from 'vue'
 import api from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import FooterNav from '../../components/FooterNav.vue'
@@ -427,6 +439,21 @@ import { useRouter } from "vue-router"
 import regionMap from "../../assets/regionMap.json"
 import Default from "../../assets/default.png"
 import ChampionBadge from '../../components/ChampionBadge.vue'
+
+const showScrollTop = ref(false)
+const handleScroll = () => {
+  showScrollTop.value = window.scrollY > 120 // 120px 넘게 스크롤 시 노출
+}
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 
 function formatTimeAgo(dateString) {
   const now = new Date();

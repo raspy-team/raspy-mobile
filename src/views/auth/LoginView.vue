@@ -84,6 +84,7 @@ const handleLogin = async () => {
     const res = await api.post('/api/auth/login', { email: email.value, password: password.value })
     localStorage.setItem('raspy_access_token', res.data.token)
     router.push('/set-profile?init=1')
+    window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token"));
   } catch {
     submitError.value = '로그인 실패: 아이디 또는 비밀번호를 확인하세요'
   }

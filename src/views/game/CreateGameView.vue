@@ -54,6 +54,9 @@
           <div class="mb-3">
             {{ selectedRule.ruleTitle }}
           </div>
+          <div>
+            <span>{{ selectedRule.majorCategory }}</span> > {{ selectedRule.minorCategory }}
+          </div>
           <p class="text-sm text-gray-700 mt-1 whitespace-pre-line leading-relaxed">{{ selectedRule.ruleDescription }}</p>
           <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
             <div class="flex items-start mb-2">

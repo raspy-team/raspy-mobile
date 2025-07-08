@@ -30,10 +30,18 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import Header from "../components/HeaderComp.vue"
+import api from '../api/api'
+
 const router = useRouter()
-const logout = () => {
-  localStorage.removeItem('raspy_access_token')
+const logout = async() => {
   router.replace('/init')
+
+  try {
+    await api.post('/api/push/remove-device')
+    localStorage.removeItem('raspy_access_token')
+  } catch (err) {
+    console.log(err)
+  }
 }
 // /set-profile로 이동하는 함수
 const goToSetProfile = () => {

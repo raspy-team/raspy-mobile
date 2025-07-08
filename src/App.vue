@@ -25,8 +25,11 @@ onMounted(() => {
     showSplash.value = false
   }, 2000) //
 
-
-  window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token"));
+  try{
+    window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token"));
+  } catch(e) {
+    console.log("welcome [web] user")
+  }
 })
 
 window.addEventListener('error', (event) => {

@@ -350,7 +350,7 @@ const addLog = (log) => {
       // 메시지 내용 생성
       let message = ''
       if (log.type === 'SCORE') {
-        message = `@${log.targetId == user1.value.id?user1.value.nickname : user2.value.nickname} ${log.delta}점 ${log.delta>0?"득점":"실점"} (변경자 - @${log.userSummary.nickname})`
+          message = `@${log.targetId == user1.value.id ? user1.value.nickname : user2.value.nickname} ${log.delta}점 ${log.delta>0 ? "득점" : "실점"} (변경자 - @${log.userSummary.nickname})`
       } else if (log.type === 'SET') {
         message = `@${log.userSummary.nickname} 세트를 증가시킴`
       } else if (log.type === 'RESET') {
@@ -370,30 +370,30 @@ const addLog = (log) => {
 }
 
 onMounted(async () => {
+  const userRes = await api.get("/api/auth/current-user-id")
+  const currentUserId = userRes.data
+
   const res = await api.get(`/api/games/${gameId}/detail`)
-  
-  /**
-   * 진행 중인 게임이 아니라면, 이 페이지에 잘못 들어선 것임
-   */
   if(res.data.gameStatus != 'IN_PROGRESS') {
     alert("잘못된 접근입니다. 진행 중인 게임이 아닙니다.")
     router.go(-1)
   }
 
-  
   game.value = res.data
-
   chatRoomId.value = res.data.chatRoomId
 
-  currentScore1.value = res.data.score1
-  currentScore2.value = res.data.score2
+  //  유저1/2 먼저 할당 후 비교하여 좌우 배치 결정
+  const g = res.data
+  const isLeftUser1 = g.user1.id === currentUserId
+  user1.value = isLeftUser1 ? g.user1 : g.user2
+  user2.value = isLeftUser1 ? g.user2 : g.user1
 
+  currentScore1.value = isLeftUser1 ? g.score1 : g.score2
+  currentScore2.value = isLeftUser1 ? g.score2 : g.score1
 
-  currentSet.value = res.data.currentSet|| 0
-  user1SetsWon.value = res.data.set1
-  user2SetsWon.value = res.data.set2
-  user1.value = res.data.user1
-  user2.value = res.data.user2
+  user1SetsWon.value = isLeftUser1 ? g.set1 : g.set2
+  user2SetsWon.value = isLeftUser1 ? g.set2 : g.set1
+  currentSet.value = g.currentSet || 0
 
   if (game.value.pointsToWin != -1 && currentScore1.value >= game.value.pointsToWin) {
     
@@ -508,10 +508,10 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
-const socket_sendScore = (userId, scoreDelta) => {
+const socket_sendScore = (userIndex, scoreDelta) => {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SCORE',
-    userId: userId==1 ? user1.value.id : user2.value.id, // 점수 변화하는 사람 
+    userId: userIndex === 1 ? user1.value.id : user2.value.id,
     setIndex: currentSet.value,
     scoreDelta: scoreDelta
   })

@@ -154,10 +154,31 @@ const championIdx = ref(0)
 const review = ref({ manner: 0, performance: 0, text: '' })
 
 onMounted(async () => {
+  const myIdRes = await api.get(`/api/auth/current-user-id`)
+  currentUserId.value = myIdRes.data
+
   const res = await api.get(`/api/games/${gameId}/result`)
   game.value = res.data.gameSummary
-  user1.value = res.data.user1
-  user2.value = res.data.user2
+  startDate.value = res.data.startDate
+  setResults.value = res.data.setResults
+  totalSetCount.value = res.data.totalSetCount
+  drawCount.value = res.data.drawCount
+  winnerIdx.value = res.data.winnerIdx
+  championIdx.value = res.data.newChampionIdx
+
+  // user1 / user2 동적 정렬
+  if (res.data.user1.id === currentUserId.value) {
+    user1.value = res.data.user1
+    user2.value = res.data.user2
+    user1SetCount.value = res.data.user1SetCount
+    user2SetCount.value = res.data.user2SetCount
+  } else {
+    user1.value = res.data.user2
+    user2.value = res.data.user1
+    user1SetCount.value = res.data.user2SetCount
+    user2SetCount.value = res.data.user1SetCount
+  }
+
   setResults.value = res.data.setResults
   totalSetCount.value = res.data.totalSetCount
   drawCount.value = res.data.drawCount

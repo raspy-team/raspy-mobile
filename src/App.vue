@@ -24,6 +24,9 @@ onMounted(() => {
   setTimeout(() => {
     showSplash.value = false
   }, 2000) //
+
+
+  window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token"));
 })
 
 window.addEventListener('error', (event) => {

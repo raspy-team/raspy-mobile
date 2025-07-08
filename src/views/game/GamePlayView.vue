@@ -35,8 +35,8 @@
 
     <div class="flex items-start justify-between mb-6 relative">
       <div class="flex flex-col items-center mr-2 animate-fade-in">
-        <img :src="game.user1.profileUrl ? game.user1.profileUrl : DefaultImage" class="w-20 aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1" />
-        <div class="font-bold text-sm">@{{ game.user1.nickname }}</div>
+        <img :src="user1.profileUrl ? user1.profileUrl : DefaultImage" class="w-20 aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1" />
+        <div class="font-bold text-sm">@{{ user1.nickname }}</div>
         <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user1SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">
@@ -50,8 +50,8 @@
 
       </div>
       <div class="flex flex-col items-center ml-2 animate-fade-in">
-        <img :src="game.user2.profileUrl ? game.user2.profileUrl : DefaultImage" class="w-20 h-20 rounded-full border-4 border-orange-500 shadow-lg mb-1" />
-        <div class="font-bold text-sm">@{{ game.user2.nickname }}</div>
+        <img :src="user2.profileUrl ? user2.profileUrl : DefaultImage" class="w-20 h-20 rounded-full border-4 border-orange-500 shadow-lg mb-1" />
+        <div class="font-bold text-sm">@{{ user2.nickname }}</div>
         <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user2SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">
@@ -256,10 +256,10 @@ function finishSet(who) {
   isSetOver.value = true
   clearInterval(timerRef.value)
   if (who === 1) {
-    winner.value = game.value.user1.nickname
+    winner.value = user1.value.nickname
   }
   else if (who === 2) { 
-    winner.value = game.value.user2.nickname
+    winner.value =user2.value.nickname
   }
  
   showFinishModal.value = true
@@ -384,7 +384,8 @@ onMounted(async () => {
 
   //  유저1/2 먼저 할당 후 비교하여 좌우 배치 결정
   const g = res.data
-  const isLeftUser1 = g.user1.id === currentUserId
+  
+  const isLeftUser1 = g.user1.id == currentUserId
   user1.value = isLeftUser1 ? g.user1 : g.user2
   user2.value = isLeftUser1 ? g.user2 : g.user1
 
@@ -485,10 +486,10 @@ onMounted(async () => {
         }
 
         if(user1SetsWon.value >user2SetsWon.value) {
-          gameWinner.value = '@' + game.value.user1.nickname
+          gameWinner.value = '@' + user1.value.nickname
         }
         else if(user2SetsWon.value >user1SetsWon.value) {
-          gameWinner.value = '@' + game.value.user2.nickname
+          gameWinner.value = '@' + user2.value.nickname
         }
         else  {
           gameWinner.value = '무승부'

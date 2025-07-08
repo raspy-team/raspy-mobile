@@ -19,7 +19,7 @@
             </div>
             <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed">{{ group.rule.ruleDescription }}</p>
           </div>
-          <span class="text-xs font-semibold px-2 py-2 rounded-full w-[50%] text-center" 
+          <span class="text-xs font-semibold px-2 py-2 rounded-full w-[5rem] text-center" 
             :class="{
               'bg-blue-100 text-blue-600': group.gameStatus === 'SCHEDULED',
               'bg-gray-100 text-gray-500': group.gameStatus === 'MATCHING',

@@ -17,7 +17,7 @@ TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표�
 
           </div>
 
-          <span class="text-xs font-semibold px-1 w-[40%] text-center py-2 rounded-full"
+          <span class="text-xs font-semibold px-1 w-[5rem] text-center py-2 rounded-full"
             :class="{
               'bg-blue-100 text-blue-600': game.status === 'APPROVED',
               'bg-gray-100 text-gray-500': game.status === 'REQUESTED',

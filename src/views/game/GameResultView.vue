@@ -26,7 +26,7 @@
 
 
   <div
-  v-if="(championIdx == 1 && currentUserId == user1.id) || (championIdx == 2 && currentUserId == user2.id)"
+  v-if="(championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect)"
   class="relative max-w-md mx-auto my-8 px-6 py-10 rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center champion-card-glow"
 >
   <!-- 화려한 빛나는 애니메이션 배경 -->
@@ -37,13 +37,13 @@
   <div class="relative z-20 flex flex-col items-center">
     <i class="fas fa-crown text-5xl mb-3 text-white drop-shadow champion-glow-anim"></i>
     <h2 class="text-2xl font-extrabold text-white mb-1 drop-shadow champion-glow-anim">CHAMPION</h2>
-    <span class="text-lg font-semibold text-white mb-2">축하합니다, {{ currentUserId == user1.id ? user1.nickname : user2.nickname }}님!</span>
+    <span class="text-lg font-semibold text-white mb-2">축하합니다, {{ user1.nickname}}님!</span>
     <span class="text-base text-white/90">새로운 챔피언 타이틀을 획득하셨습니다.</span>
   </div>
 </div>
 
 <div
-  v-if="championIdx == 1 && currentUserId == user2.id || championIdx == 2 && currentUserId == user1.id"
+  v-if="(championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
   class="relative max-w-md mx-auto my-8 px-6 py-8 rounded-2xl bg-gray-100 flex flex-col items-center border border-gray-200 shadow"
 >
   <i class="fas fa-frown text-2xl text-gray-400 mb-2"></i>
@@ -85,9 +85,13 @@
     <ul class="space-y-2">
       <li v-for="set in setResults" :key="set.setIdx" class="flex justify-between items-center bg-white p-3 rounded-lg shadow border text-sm">
         <span>{{ set.setIdx }}세트</span>
-        <span>
+        <span v-if="idxCorrect">
           {{ set.user1Score }} : {{ set.user2SCore }}
           <i :class="set.winnerIdx == 1 ? 'fas fa-check-circle text-orange-500 ml-1' : set.winnerIdx == 2 ? 'fas fa-check-circle text-orange-500 ml-1' : 'fas fa-minus-circle text-gray-400 ml-1'"></i>
+        </span>
+        <span v-else>
+          {{ set.user2SCore }} : {{ set.user1Score }} 
+          <i :class="set.winnerIdx == 2 ? 'fas fa-check-circle text-orange-500 ml-1' : set.winnerIdx == 1 ? 'fas fa-check-circle text-orange-500 ml-1' : 'fas fa-minus-circle text-gray-400 ml-1'"></i>
         </span>
       </li>
     </ul>
@@ -150,6 +154,7 @@ const startDate = ref('')
 const winnerIdx = ref(0)
 const currentUserId = ref(0)
 const championIdx = ref(0)
+const idxCorrect = ref(true)
 
 const review = ref({ manner: 0, performance: 0, text: '' })
 
@@ -165,26 +170,31 @@ onMounted(async () => {
   drawCount.value = res.data.drawCount
   winnerIdx.value = res.data.winnerIdx
   championIdx.value = res.data.newChampionIdx
+  idxCorrect.value = res.data.user1.id === currentUserId.value
 
   // user1 / user2 동적 정렬
-  if (res.data.user1.id === currentUserId.value) {
+  if (idxCorrect.value) {
     user1.value = res.data.user1
     user2.value = res.data.user2
     user1SetCount.value = res.data.user1SetCount
     user2SetCount.value = res.data.user2SetCount
+    
+    winnerIdx.value = res.data.winnerIdx
+
   } else {
     user1.value = res.data.user2
     user2.value = res.data.user1
     user1SetCount.value = res.data.user2SetCount
     user2SetCount.value = res.data.user1SetCount
+
+    if(res.data.winnerIdx == 2) winnerIdx.value = 1
+    else if(res.data.winnerIdx == 1) winnerIdx.value = 2
+    else winnerIdx.value = 0
   }
 
   setResults.value = res.data.setResults
   totalSetCount.value = res.data.totalSetCount
   drawCount.value = res.data.drawCount
-  user1SetCount.value = res.data.user1SetCount
-  user2SetCount.value = res.data.user2SetCount
-  winnerIdx.value = res.data.winnerIdx
   startDate.value = res.data.startDate
   championIdx.value = res.data.newChampionIdx
   const myId = await api.get(`/api/auth/current-user-id`)

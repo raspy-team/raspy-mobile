@@ -78,7 +78,7 @@ const routes = [
     component: GamePlay,
     props: true
   },
-    {
+  {
     path: '/games/:gameId/result',
     component: GameResult,
     props: true

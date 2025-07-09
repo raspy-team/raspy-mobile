@@ -42,7 +42,7 @@
                 <span>{{ group.rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달' }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-500">한 세트를 승리하기 위해 필요한 점수</span>
+                <span class="text-gray-500">한세트 승리에 필요한 점수</span>
                 <span>{{ group.rule.pointsToWin === -1 ? '제한 없음' : group.rule.pointsToWin + '점' }}</span>
               </div>
               <div class="flex justify-between">

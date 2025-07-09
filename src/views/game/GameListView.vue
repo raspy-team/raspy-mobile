@@ -136,7 +136,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <i class="fas fa-star text-orange-400"></i>
-                  <span class="w-36 font-light">한 세트를 승리하기 위해 필요한 점수</span>
+                  <span class="w-36 font-light">한세트 승리에 필요한 점수</span>
                   <span>{{ game.points == -1 ? '제한 없음' : game.points + '점' }}</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -317,7 +317,7 @@
             </div>
             <div class="flex items-center gap-1">
               <i class="fas fa-trophy text-orange-400"></i>
-              <span class="font-semibold">한 세트를 승리하기 위해 필요한 점수:</span>
+              <span class="font-semibold">한세트 승리에 필요한 점수:</span>
               <span>{{ inviteGame.points == -1 ? '제한 없음' : inviteGame.points + '점' }}</span>
             </div>
             <div class="flex items-center gap-1">

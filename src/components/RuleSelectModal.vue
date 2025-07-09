@@ -80,7 +80,7 @@
               <div class="flex flex-col gap-1 mt-2 text-[13px]">
               <div class="flex items-center gap-2 p-2 rounded-lg">
                 <i class="fas fa-trophy text-orange-400 text-base"></i>
-                <span class="text-gray-500 font-light w-28 shrink-0">한 세트를 승리하기 위해 필요한 점수</span>
+                <span class="text-gray-500 font-light w-28 shrink-0">한세트 승리에 필요한 점수</span>
                 <span class="text-gray-500 font-normal flex-1">
                   <template v-if="rule.pointsToWin === -1">제한 없음</template>
                   <template v-else>{{ rule.pointsToWin }}<span class="text-gray-400">점</span></template>

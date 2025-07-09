@@ -69,14 +69,16 @@
         </div>
       </form>
 
-      <transition name="fade">
+
+    </div>
+  </div>
+
+        <transition name="fade">
         <div v-if="showAIGenerating" class="ai-effect-overlay">
           <div class="ai-circle-loader"></div>
           <p class="ai-shimmer-text">AI가 규칙의 제목과 카테고리를 생성 중입니다…</p>
         </div>
       </transition>
-    </div>
-  </div>
 </template>
 
 <script setup>

@@ -310,4 +310,42 @@ function formatDate(dateStr) {
     transform: rotate(360deg);
   }
 }
+
+.champion-card-bg {
+  background: linear-gradient(135deg, #fdba74 10%, #fb923c 70%, #f59e42 100%);
+  filter: blur(0px) brightness(1.05) saturate(1.2);
+  opacity: 0.98;
+  animation: champion-bg-move 7s ease-in-out infinite alternate;
+}
+
+@keyframes champion-bg-move {
+  0% {
+    background-position: 0% 50%;
+    filter: blur(0px) brightness(1.1) saturate(1.3);
+  }
+  50% {
+    background-position: 100% 60%;
+    filter: blur(2px) brightness(1.18) saturate(1.6);
+  }
+  100% {
+    background-position: 0% 40%;
+    filter: blur(0px) brightness(1.1) saturate(1.2);
+  }
+}
+
+.champion-card-glow {
+  box-shadow: 0 0 64px 8px #fdba7477, 0 0 0 4px #fb923c55 inset;
+  position: relative;
+}
+
+.champion-glow-anim {
+  filter: drop-shadow(0 0 12px #fff7) drop-shadow(0 0 16px #fdba74bb);
+  animation: champion-glow-anim 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes champion-glow-anim {
+  0% { filter: drop-shadow(0 0 16px #fff9) drop-shadow(0 0 8px #fdba74cc);}
+  100% { filter: drop-shadow(0 0 28px #fff) drop-shadow(0 0 18px #fdba74);}
+}
+
 </style>

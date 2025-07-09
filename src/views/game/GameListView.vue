@@ -101,7 +101,7 @@
             <!-- 장소 & 날짜 -->
             <div class="mt-1 flex items-center text-sm text-gray-500 gap-3">
               <i class="fas fa-map-marker-alt text-orange-500"></i>
-              <span>{{ game.matchLocation != ' ' ? game.matchLocation : '미정' }}</span>
+              <span>{{ (game.matchLocation == ' ' || game.matchLocation=="") ? "미정" : game.matchLocation  }}</span>
               <i class="far fa-calendar ml-4 text-orange-500"></i>
               <span>{{ formatDate(game.matchDate) }}</span>
             </div>
@@ -301,11 +301,11 @@
           <div class="flex flex-col gap-3 my-2 text-xs">
             <div class="flex items-center gap-2">
               <i class="far fa-calendar text-orange-400"></i>
-              {{ formatTimeAgo(inviteGame.matchDate) }}
+              {{ formatDate(inviteGame.matchDate) }}
             </div>
             <div class="flex items-center gap-2">
               <i class="fas fa-map-marker-alt text-orange-400"></i>
-              {{ inviteGame.matchLocation==' ' ? '미정'  : inviteGame.matchLocation}}
+              {{ (inviteGame.matchLocation==' ' || inviteGame.matchLocation=="") ? '미정'  : inviteGame.matchLocation}}
             </div>
           </div>
           <!-- Rule Summary -->
@@ -438,17 +438,17 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-function formatTimeAgo(dateString) {
-  const now = new Date();
-  const createdAt = new Date(dateString);
-  const diff = (now - createdAt) / 1000;
-  if (diff < 60) return `방금 전`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
-  if (diff < 31104000) return `${Math.floor(diff / 2592000)}개월 전`;
-  return `${Math.floor(diff / 31104000)}년 전`;
-}
+// function formatTimeAgo(dateString) {
+//   const now = new Date();
+//   const createdAt = new Date(dateString);
+//   const diff = (now - createdAt) / 1000;
+//   if (diff < 60) return `방금 전`;
+//   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+//   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+//   if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
+//   if (diff < 31104000) return `${Math.floor(diff / 2592000)}개월 전`;
+//   return `${Math.floor(diff / 31104000)}년 전`;
+// }
 const router = useRouter()
 const goToComments = (game) => router.push("/games/" + game.id + "/comments")
 

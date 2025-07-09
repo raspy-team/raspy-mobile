@@ -57,18 +57,27 @@
         <ul v-else-if="rules.length" class="flex flex-col gap-3">
           <li v-for="rule in rules" :key="rule.id"
               class="bg-gray-50 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-0.5 px-4 py-4 active:bg-orange-50 transition">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-base font-semibold text-gray-900 truncate">{{ rule.ruleTitle }}</span>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-base font-extrabold text-gray-900 truncate">{{ rule.ruleTitle }}</span>
               <button @click="selectRule(rule)"
                 class="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-1 text-xs font-semibold shadow">
                 선택
               </button>
             </div>
-            <div class="text-xs text-orange-500 font-medium mb-1 flex gap-1 items-center">
-              {{ rule.majorCategory }} <span class="mx-1 text-gray-300">&gt;</span> {{ rule.minorCategory }}
+            <div class="text-xs text-orange-500 font-medium mb-2 flex gap-1 items-center">
+              {{ rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ rule.minorCategory }}
             </div>
-            <div class="text-gray-500 text-sm mb-2 whitespace-pre-line leading-relaxed">{{ rule.ruleDescription }}</div>
-            <div class="flex flex-col gap-1 mt-2 text-[13px]">
+              <div class="relative mb-2">
+                <p :class="['text-gray-500 text-sm whitespace-pre-line leading-relaxed transition-all', expandedRules.includes(rule.id) ? '' : 'line-clamp-2']">
+                  {{ rule.ruleDescription }}
+                </p>
+                <div class="flex justify-end">
+                  <button @click="toggleExpand(rule.id)" class="text-xs text-orange-400 mt-1 hover:underline">
+                    {{ expandedRules.includes(rule.id) ? '접기' : '펼치기' }}
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-col gap-1 mt-2 text-[13px]">
               <div class="flex items-center gap-2 p-2 rounded-lg">
                 <i class="fas fa-trophy text-orange-400 text-base"></i>
                 <span class="text-gray-500 font-light w-28 shrink-0">한 세트를 승리하기 위해 필요한 점수</span>
@@ -139,6 +148,16 @@ const sortOptions = [
   { label: '최신순', value: 'recent' },
   { label: '인기순', value: 'popular' }
 ]
+
+const expandedRules = ref([])
+
+const toggleExpand = (id) => {
+  if (expandedRules.value.includes(id)) {
+    expandedRules.value = expandedRules.value.filter(r => r !== id)
+  } else {
+    expandedRules.value.push(id)
+  }
+}
 
 const fetchMajors = async () => {
   const res = await api.get('/api/rules/categories')
@@ -215,4 +234,12 @@ button, select, input { outline: none !important; }
 @media (max-width: 640px) {
   .sm\:max-w-md { max-width: 100vw !important; }
 }
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 </style>

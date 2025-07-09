@@ -1,5 +1,5 @@
 <template>
-    <Header :hasReferer="true" title="프로필 설정"></Header>
+    <Header v-if="!afterLogin" :hasReferer="true" title="프로필 설정"></Header>
 
   <div class="pt-20 pb-16 px-8 max-w-md mx-auto bg-white rounded-2xl shadow-lg">
     <!-- Header -->

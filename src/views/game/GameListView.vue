@@ -74,125 +74,101 @@
           </div>
         </div>
         <div v-if="games.length > 0">
-          <div v-for="(game, index) in games" :key="index" class="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
-            <div class="p-4">
-              <div class="flex justify-between items-start">
-                <div>
-                  <h3 class="font-medium text-lg text-gray-800">{{ game.title }}</h3>
-                  <div class="flex items-center space-x-1 mt-0.5">
-                    <span class="font-semibold">{{ game.majorCategory }}</span>
-                    <span class="">/ {{ game.minorCategory }}</span>
-                    <div class="pl-2 flex items-center gap-2">
-                      <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-medium">
-                        1vs1
-                      </span>
-                      <ChampionBadge v-if="game.championId == game.ownerId" />
-                    </div>
-                  </div>
+          <div v-for="(game, index) in games" :key="index" class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4 p-4">
+            <!-- 타이틀과 생성자 정보(우측 상단) -->
+            <div class="flex justify-between items-center mb-2">
+              <!-- 생성자 프로필 + 매너점수 -->
+              <div class="flex flex-col items-start text-left">
+                <div class="flex items-center gap-2" @click="router.push('/profile/'+game.ownerId)">
+                  <img :src="game.ownerProfileUrl || Default" class="w-8 h-8 rounded-full object-cover border" />
+                  <span class="text-sm font-medium text-gray-800">@{{ game.ownerNickname }}</span>
                 </div>
-                <button @click="alert('준비 중')" class="text-gray-400 ">
-                  <i class="fas fa-ellipsis-h"></i>
-                </button>
+  
               </div>
-              <div class="mt-3 flex items-center text-sm text-gray-500">
-                <i class="fas fa-map-marker-alt mr-2 text-orange-500"></i>
-                <span>{{ game.matchLocation != ' ' ? game.matchLocation :  '미정' }}</span>
-              </div>
-              <div class="mt-2 flex items-center text-sm text-gray-500 mb-3">
-                <i class="far fa-calendar mr-2 text-orange-500"></i>
-                <span>{{ formatDate(game.matchDate) }}</span>
-              </div>
-              <div class="border border-gray-200 p-4 rounded-[5px] mb-3 flex flex-col gap-1 relative">
-                <span class="absolute right-0 top-0 bg-[#f97316] text-white font-bold text-[0.8rem] px-4 py-1" style="border-radius :0px 0px 0px 8px">
-                  경기 규칙
-                </span>
-                <h4 class="text-md font-semibold text-gray-800">{{ game.ruleTitle }}</h4>
-                <p class="text-sm text-gray-700 mt-3 py-0 whitespace-pre-line leading-relaxed" >{{ game.ruleDescription }}</p>
-                <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
-                  <div class="flex items-start mb-2">
-                    <i class="fas fa-trophy text-[#f97316] w-4 mr-2 mt-1"></i>
-                    <div class="w-[30dvw] font-light text-gray-500">
-                      세트 승리 조건
-                    </div>
-                    <div class="text-[0.88rem] w-[40dvw] ">
-                      {{ game.winCondition=='SETS_HALF_WIN' ? '점수 달성' : '제한시간동안 더 많은 점수 획득' }}
-                    </div>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-star text-[#f97316] w-4 mr-2"></i> 
-                    <div class="w-[30dvw] font-light text-gray-500">
-                      한 세트를 승리하기 위해 필요한 점수
-                    </div>
-                    <div>
-                      {{ game.points == -1  ?'제한 없음' : game.points + '점'}}
-                    </div>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <i class="fas fa-layer-group text-[#f97316] w-4 mr-2"></i>
-                    <div class="w-[30dvw] font-light text-gray-500">
-                      총 세트
-                    </div>
-                    <div>
-                      {{ game.sets }}세트
-                    </div>
-                  </div>
-                  <div class="flex items-center">
-                    <i class="fas fa-clock text-[#f97316] w-4 mr-2"></i>
-                    <div class="w-[30dvw] font-light text-gray-500">
-                      세트 제한 시간
-                    </div>
-                    <div>
-                      {{ game.duration == -1 ? "제한 없음" : game.duration >= 60 ? Math.floor(game.duration / 60) + '분 ' + (game.duration % 60) + '초' : game.duration + '초' }}
-                    </div>
-                  </div>
+
+               <div class="flex-1">
+                <div class="flex items-center text-sm mt-1 ml-1 gap-1">        
+                 <div class="text-xs font-semibold flex mr-2 items-center justify-end pr-2" :class="[game.mannerScore >= 4 ? 'text-orange-500' : game.mannerScore >= 2 ? 'text-orange-500' : game.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']">
+                  <i :class="[game.mannerScore >= 4 ? 'fas fa-face-smile' : game.mannerScore >= 2 ? 'fas fa-face-meh' : game.mannerScore > 0 ? 'fas fa-face-frown' : 'fas fa-user-slash']" class="mr-1"></i>
+                  {{ game.mannerScore.toFixed(1) }}
+                </div>       
+                  <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-medium">1vs1</span>
+                  <ChampionBadge v-if="game.championId == game.ownerId" />
                 </div>
               </div>
-              <div class="mt-5 flex items-center justify-between">
-                <div class="flex items-center" @click="router.push('/profile/'+game.ownerId)">
-                  <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-white">
-                    <img :src="game.ownerProfileUrl || Default" alt="프로필" class="w-full h-full object-cover" />
-                  </div>
-                  <div class="ml-2 flex items-center space-x-1">
-                    <p class="text-sm font-medium text-gray-800">@{{ game.ownerNickname }}</p>
-                    <div 
-                      class="flex items-center text-xs font-semibold pl-2"
-                      :class="[game.mannerScore >= 4 ? 'text-orange-500' : game.mannerScore >= 2 ? 'text-orange-500' : game.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']"
-                    >
-                      <i 
-                        :class="[game.mannerScore >= 4 ? 'fas fa-face-smile' : game.mannerScore >= 2 ? 'fas fa-face-meh' : game.mannerScore > 0 ? 'fas fa-face-frown' : 'fas fa-user-slash']" 
-                        class="mr-1"
-                      ></i>
-                      {{  game.mannerScore.toFixed(1)}}
-                    </div>
-                  </div>
-                </div>
-                <div class="text-xs text-gray-500">
-                  {{ formatTimeAgo(game.createdAt) }}
+            </div>
+
+            <!-- 장소 & 날짜 -->
+            <div class="mt-1 flex items-center text-sm text-gray-500 gap-3">
+              <i class="fas fa-map-marker-alt text-orange-500"></i>
+              <span>{{ game.matchLocation != ' ' ? game.matchLocation : '미정' }}</span>
+              <i class="far fa-calendar ml-4 text-orange-500"></i>
+              <span>{{ formatDate(game.matchDate) }}</span>
+            </div>
+
+            <!-- 경기 규칙 박스 -->
+            <div class="mt-3 relative border border-gray-200 rounded-xl p-4 bg-gray-50 text-sm">
+              <span class="absolute top-0 right-0 text-xs bg-orange-500 text-white font-bold px-3 py-1 rounded-bl-xl">
+                경기 규칙
+              </span>
+              <h4 class="text-lg font-extrabold text-gray-800 mb-1">{{ game.ruleTitle }}</h4>
+            <div class="text-xs text-orange-500 font-medium mb-2 flex gap-1 items-center">
+              {{ game.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ game.minorCategory }}
+            </div>
+              <!-- 접기/펼치기 텍스트 -->
+              <div class="relative mb-6">
+                <p :class="['text-gray-700 leading-relaxed whitespace-pre-line transition-all', expanded.includes(game.id) ? '' : 'line-clamp-2']">
+                  {{ game.ruleDescription }}
+                </p>
+                <div class="flex justify-end mt-1">
+                  <button @click="toggleExpand(game.id)"  class="text-xs text-orange-400 mt-1 hover:underline">
+                    {{ expanded.includes(game.id) ? '접기' : '더보기' }}
+                  </button>
                 </div>
               </div>
-              <div class="flex items-center mt-3 space-x-2">
-                <button 
-                  :disabled="game.applied"
-                  @click="() => !game.applied && confirmApply(game)"
-                  :class="[
-                    'h-12 flex-grow py-2.5 font-semibold rounded-full transition text-white',
-                    game.applied 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
-                  ]">
-                  {{ game.applied ? '신청 완료' : '참가하기' }}
-                </button>
-                <button 
-                  @click="goToComments(game)"
-                  class="w-12 h-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
-                  <i class="fas text-gray-500 fa-comment"></i>
-                </button>
-                <button 
-                  @click="shareGame(game)"
-                  class="w-12 h-12 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
-                  <i class="fas text-gray-500 fa-share"></i>
-                </button>
+
+              <!-- 룰 상세 -->
+              <div class="text-sm text-gray-600 flex flex-col gap-2 mt-2">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-trophy text-orange-400"></i>
+                  <span class="w-36 font-light">세트 승리 조건</span>
+                  <span>{{ game.winCondition=='SETS_HALF_WIN' ? '점수 달성' : '제한시간동안 더 많은 점수 획득' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-star text-orange-400"></i>
+                  <span class="w-36 font-light">한 세트를 승리하기 위해 필요한 점수</span>
+                  <span>{{ game.points == -1 ? '제한 없음' : game.points + '점' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-layer-group text-orange-400"></i>
+                  <span class="w-36 font-light">총 세트</span>
+                  <span>{{ game.sets }}세트</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-clock text-orange-400"></i>
+                  <span class="w-36 font-light">제한 시간</span>
+                  <span>{{ game.duration == -1 ? '제한 없음' : game.duration >= 60 ? Math.floor(game.duration / 60) + '분 ' + (game.duration % 60) + '초' : game.duration + '초' }}</span>
+                </div>
               </div>
+            </div>
+
+            <!-- 참가 버튼들 -->
+            <div class="mt-4 flex items-center gap-2">
+              <button 
+                :disabled="game.applied"
+                @click="() => !game.applied && confirmApply(game)"
+                :class="[
+                  'h-11 flex-grow font-semibold rounded-full transition text-white',
+                  game.applied ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
+                ]">
+                {{ game.applied ? '신청 완료' : '참가하기' }}
+              </button>
+              <button @click="goToComments(game)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+                <i class="fas fa-comment"></i>
+              </button>
+              <button @click="shareGame(game)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+                <i class="fas fa-share"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -325,7 +301,7 @@
           <div class="flex flex-col gap-3 my-2 text-xs">
             <div class="flex items-center gap-2">
               <i class="far fa-calendar text-orange-400"></i>
-              {{ formatDate(inviteGame.matchDate) }}
+              {{ formatTimeAgo(inviteGame.matchDate) }}
             </div>
             <div class="flex items-center gap-2">
               <i class="fas fa-map-marker-alt text-orange-400"></i>
@@ -439,7 +415,14 @@ import { useRouter } from "vue-router"
 import regionMap from "../../assets/regionMap.json"
 import Default from "../../assets/default.png"
 import ChampionBadge from '../../components/ChampionBadge.vue'
-
+const expanded = ref([])
+const toggleExpand = (id) => {
+  if (expanded.value.includes(id)) {
+    expanded.value = expanded.value.filter(x => x !== id)
+  } else {
+    expanded.value.push(id)
+  }
+}
 const showScrollTop = ref(false)
 const handleScroll = () => {
   showScrollTop.value = window.scrollY > 120 // 120px 넘게 스크롤 시 노출
@@ -636,6 +619,13 @@ input[type="number"]::-webkit-outer-spin-button {
 .text-overflow-ellipsis {
   text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="bg-white w-[90%] max-h-[95%] overflow-auto max-w-md rounded-2xl p-6 shadow-2xl animate-fade-in relative pt-8">
+    <div class="bg-white w-[90%] max-h-[95%] overflow-auto max-w-md rounded-2xl p-6 shadow-2xl animate-fade-in pt-8">
       <button @click="$emit('close')" class="absolute top-4 right-4 text-gray-600 hover:text-black text-[2rem] font-bold">×</button>
       <h2 class="text-lg font-md text-gray-900 tracking-tight mb-4 flex items-center gap-2">
         <i class="fas fa-bolt text-orange-500"></i>
@@ -169,6 +169,10 @@ const handleSubmit = async () => {
 
 .ai-effect-overlay {
   position: fixed; inset:0; z-index:1000;
+  left:0;
+  top:0;
+  width: 100dvw;
+  height: 100dvh;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   background:rgba(255,255,255,0.9);
 }

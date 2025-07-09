@@ -10,38 +10,47 @@
     <!-- Main Content -->
     <main class="pt-3 px-4 pb-4">
       <!-- Menu Items -->
-      <div class="grid grid-cols-2 gap-3 mb-2">
-        <div
-          v-for="(action, index) in menuItems"
-          :key="index"
-          @click="router.push(action.link)"
-          class="bg-white rounded-xl shadow-sm py-2.5 px-4 flex flex-row gap-2 items-center justify-center cursor-pointer hover:shadow-md transition relative"
-          style="min-width:0"
-        >
-          <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center">
-            <i :class="`${action.icon} text-orange-500 text-lg`"></i>
+      <div class="grid grid-cols-1 gap-3 mb-2">
+        <div class="flex flex-row gap-6 justify-center mb-4">
+          <div
+            v-for="(action, index) in menuItems"
+            :key="index"
+            @click="router.push(action.link)"
+            class="flex flex-col items-center cursor-pointer relative group"
+            style="min-width: 64px;"
+          >
+            <div class="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all border border-gray-100 group-hover:bg-orange-50">
+              <i :class="`${action.icon} text-orange-500 text-2xl`"></i>
+            </div>
+            <span class="mt-2 text-sm text-gray-700 font-[400] text-[0.8rem] whitespace-nowrap overflow-hidden text-overflow-ellipsis text-center max-w-[80px]">
+              {{ action.name }}
+            </span>
+            <div
+              v-if="requestCount > 0 && action.name == '경기 요청'"
+              class="absolute top-0 right-2 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white"
+              style="transform: translateY(-25%);"
+            >
+              <span class="text-xs text-white font-medium">{{ requestCount }}</span>
+            </div>
           </div>
-          <span class="text-base text-gray-700 font-semibold whitespace-nowrap overflow-hidden text-overflow-ellipsis">
-            {{ action.name }}
-          </span>
-          <div v-if="requestCount > 0 && action.name == '경기 요청'" class="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-            <span class="text-xs text-white font-medium">{{ requestCount }}</span>
+          <div
+            @click="showInviteModal=true"
+            class="flex flex-col items-center cursor-pointer relative group"
+            style="min-width: 64px;"
+          >
+            <div class="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all border border-gray-100 group-hover:bg-orange-50">
+              <i :class="`fas fa-user-plus  text-orange-500 text-2xl`"></i>
+            </div>
+            <span class="mt-2 text-sm text-gray-700 font-[400] text-[0.8rem] whitespace-nowrap overflow-hidden text-overflow-ellipsis text-center max-w-[80px]">
+              초대 참여
+            </span>
+
           </div>
         </div>
+  
       </div>
 
-      <!-- 초대 번호로 참여하기 버튼 -->
-      <div class="mb-4">
-        <div
-          @click="showInviteModal = true"
-          class="bg-white rounded-xl shadow-sm py-2.5 px-4 flex flex-row gap-2 items-center justify-center cursor-pointer hover:shadow-md transition relative w-full"
-        >
-          <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center">
-            <i class="fas fa-user-plus text-orange-500 text-lg"></i>
-          </div>
-          <span class="text-base text-gray-700 font-semibold whitespace-nowrap">초대 번호로 참여하기</span>
-        </div>
-      </div>
+
 
       <!-- 게임리스트 (동일) -->
       <div class="space-y-4">
@@ -89,12 +98,11 @@
                 </div>
 
                 <div class="flex-1">
-                  <div class="flex items-center text-sm mt-1 ml-1 gap-1">        
+                  <div class="flex items-center text-sm mt-1 ml-0 gap-1">        
                   <div class="text-xs font-semibold flex mr-2 items-center justify-end pr-2" :class="[game.mannerScore >= 4 ? 'text-orange-500' : game.mannerScore >= 2 ? 'text-orange-500' : game.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']">
                     <i :class="[game.mannerScore >= 4 ? 'fas fa-face-smile' : game.mannerScore >= 2 ? 'fas fa-face-meh' : game.mannerScore > 0 ? 'fas fa-face-frown' : 'fas fa-user-slash']" class="mr-1"></i>
                     {{ game.mannerScore.toFixed(1) }}
                   </div>       
-                    <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-medium">1vs1</span>
                     <ChampionBadge v-if="game.championId == game.ownerId" />
                   </div>
                 </div>
@@ -105,11 +113,15 @@
               </div>
             </div>
             <!-- 장소 & 날짜 -->
-            <div class="mt-1 flex items-center text-sm text-gray-500 gap-3">
-              <i class="fas fa-map-marker-alt text-orange-500"></i>
-              <span>{{ (game.matchLocation == ' ' || game.matchLocation=="") ? "미정" : game.matchLocation  }}</span>
-              <i class="far fa-calendar ml-4 text-orange-500"></i>
-              <span>{{ formatDate(game.matchDate) }}</span>
+            <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
+              <div class="flex gap-2">
+                <i class="fas fa-map-marker-alt text-orange-500"></i>
+                <span>{{ (game.matchLocation == ' ' || game.matchLocation=="") ? "미정" : game.matchLocation  }}</span>
+              </div>
+              <div class="flex gap-2">
+                <i class="far fa-calendar text-orange-500"></i>
+                <span>{{ formatDate(game.matchDate) }}</span>
+              </div>
             </div>
 
             <!-- 경기 규칙 박스 -->
@@ -541,7 +553,8 @@ const requestCount  = ref(0)
 
 const menuItems = [
   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
-  { name: '경기 요청', icon: 'fas fa-envelope', link: '/inbox' }
+  { name: '경기 요청', icon: 'fas fa-envelope', link: '/inbox' },
+  { name: '규칙 탐색', icon: 'fas fa-book-open', link: '/rules' }
 ]
 const showRegionModal = ref(false)
 const applyRegionFilter = () => {

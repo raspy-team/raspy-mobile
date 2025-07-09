@@ -17,6 +17,7 @@ import Profile from "../views/profile/ProfileView.vue"
 import NotFoundView from "../views/NotFoundView.vue"
 import InstagramShare from "../components/InstagramShare.vue"
 import Setting from "../views/SettingView.vue"
+import Rule from "../views/RuleView.vue"
 
 const routes = [
   {
@@ -86,6 +87,7 @@ const routes = [
   { path: '/profile/:id', component: Profile },
 
   { path: '/settings', component:  Setting},
+  { path: '/rules', component:  Rule},
 
 
 

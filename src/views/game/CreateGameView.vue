@@ -32,7 +32,7 @@
             <span class="absolute right-0 top-0 bg-orange-500 text-white font-bold text-xs px-4 py-1 rounded-bl-xl">게임 규칙</span>
             <div class="mb-1 font-semibold text-gray-700 text-lg">{{ selectedRule.ruleTitle }}</div>
             <div class="mb-2 text-gray-500 text-sm">{{ selectedRule.majorCategory }} &gt; {{ selectedRule.minorCategory }}</div>
-            <p class="text-sm text-gray-700 mb-2 leading-relaxed">{{ selectedRule.ruleDescription }}</p>
+            <p class="text-sm text-gray-700 mb-2 leading-relaxed whitespace-pre-line ">{{ selectedRule.ruleDescription }}</p>
             <div class="text-sm text-gray-600 flex flex-col gap-2">
               <div class="flex items-center">
                 <i class="fas fa-trophy text-orange-400 mr-2"></i>
@@ -143,10 +143,10 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import CustomToast from '../../components/CustomToast.vue'
 import RuleSelectModal from '../../components/RuleSelectModal.vue'
 import RuleCreateModal from '../../components/RuleCreateModal.vue'
@@ -154,6 +154,8 @@ import Header from "../../components/HeaderComp.vue"
 
 const router = useRouter()
 const { showToast } = useToast()
+
+const route = useRoute()
 
 const confirmRemove = () => {
   if (confirm('규칙 선택을 취소하시겠습니까?')) {
@@ -240,6 +242,24 @@ const openAddressSearch = () => {
   })
   postcode.open()
 }
+
+onMounted(async () => {
+  // 만약 ruleId 쿼리가 있으면 해당 규칙을 찾아 selectedRule에 할당
+  const ruleId = route.query.ruleId
+  if (ruleId) {
+    // 이미 ruleList를 갖고 있다면 아래처럼 id로 할당
+    // (없다면 api에서 규칙 단건 조회)
+    let found = null
+    // 1. ruleList에서 찾기
+    // found = ruleList.value.find(r => r.id === Number(ruleId))
+    // 2. 또는 API 호출
+    try {
+      const res = await api.get(`/api/rules/${ruleId}`)
+      found = res.data
+    } catch {console.log("룰조회실패")}
+    if (found) selectedRule.value = found
+  }
+})
 </script>
 
 <style scoped>

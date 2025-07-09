@@ -1,14 +1,19 @@
-// useToast.js
 import { ref } from 'vue'
 
 const toastMsg = ref('')
+const toastGoTo = ref('')
 
 export function useToast() {
-  const showToast = (msg) => {
+  const showToast = (msg, goTo = '') => {
     toastMsg.value = msg
-    setTimeout(() => (toastMsg.value = ''), 2000)
+    toastGoTo.value = goTo
+    const duration = goTo ? 4000 : 2000
+    setTimeout(() => {
+      toastMsg.value = ''
+      toastGoTo.value = ''
+    }, duration)
   }
-  return { toastMsg, showToast }
+  return { toastMsg, toastGoTo, showToast }
 }
 
-export { toastMsg }
+export { toastMsg, toastGoTo }

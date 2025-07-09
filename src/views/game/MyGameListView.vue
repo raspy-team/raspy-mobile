@@ -1,6 +1,6 @@
 <template>
   <HeaderComp />
-  <div class="pt-24 pb-28 px-5 max-w-md mx-auto space-y-6">
+  <div ref="container" class="pt-24 pb-28 px-5 max-w-md mx-auto space-y-6">
     <h1 class="text-xl font-black text-left mb-7 tracking-tight text-neutral-900">
       진행 예정된 게임
     </h1>
@@ -8,14 +8,15 @@
       <div
         v-for="game in games"
         :key="game.id"
+        :ref="setGameRef"
+        :id="`game-${game.id}`"
         class="mb-8 rounded-2xl border border-orange-100 shadow-xl bg-white/95 hover:shadow-2xl transition-shadow"
       >
-
         <!-- VS AREA -->
         <div class="flex justify-between items-center  px-7 pt-1 pb-4">
           <div @click="router.push('/profile/0')" class="flex-1 flex flex-col items-center gap-1">
             <div class="h-8 flex items-end">
-                                   <champion-badge v-if="game.myId == game.championId" />
+              <champion-badge v-if="game.myId == game.championId" />
             </div>
             <div class="relative">
               <img :src="game.myProfileUrl" class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white" />
@@ -24,7 +25,6 @@
             <div class="text-gray-700 font-[600] text-sm">
               @{{ game.myNickname }}
             </div>
-
             <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 tracking-wider">
               <div>
                 <span class="block text-gray-400 font-medium">승</span>
@@ -39,7 +39,6 @@
                 <span class="text-base text-red-400">{{ game.myStatistics.losses }}</span>
               </div>
             </div>
-
           </div>
           <div class="vs-area flex flex-col items-center justify-center mx-3 animate-pulse">
             <div class="text-lg font-black tracking-tight text-orange-500 mb-1">VS</div>
@@ -47,15 +46,13 @@
           </div>
           <div @click="router.push('/profile/'+game.opponentId)" class="flex-1 flex flex-col flex-start items-center gap-2">
             <template v-if="game.opponentNickname">
-                <div class="h-8 flex items-end">
-                    <champion-badge v-if="game.opponentId == game.championId" />
-                </div>
+              <div class="h-8 flex items-end">
+                <champion-badge v-if="game.opponentId == game.championId" />
+              </div>
               <img :src="game.opponentProfileUrl" class="w-14 h-14 rounded-full border-2 border-gray-200 shadow bg-gradient-to-tr from-gray-100 to-blue-100" />
               <div class="text-gray-700 font-[600] text-sm">
                 @{{ game.opponentNickname }}
               </div>
-                
-
               <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 tracking-wider">
                 <div>
                   <span class="block text-gray-400 font-medium">승</span>
@@ -69,9 +66,7 @@
                   <span class="block text-gray-400 font-medium">패</span>
                   <span class="text-base text-red-400">{{ game.opponentStatistics?.losses ?? '-' }}</span>
                 </div>
-
               </div>
-
             </template>
             <template v-else>
               <div class="w-14 h-14 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-full border border-gray-200 flex items-center justify-center">
@@ -109,7 +104,7 @@
             <div class="flex flex-col">
               <span class="font-semibold">세트 제한 시간</span>
               <span class="mt-1">
-                {{ game.rule.duration ? 
+                {{ game.rule.duration!=-1 ? 
                   (game.rule.duration >= 60 
                     ? Math.floor(game.rule.duration / 60) + '시간 ' : '') +
                   (game.rule.duration % 60 ? (game.rule.duration % 60) + '분' : '') : "제한 없음"
@@ -165,11 +160,10 @@
   </div>
   <FooterNav tab="my-game" />
 
-  <!-- 장소/진행 모달 추가 -->
+  <!-- 장소/진행 모달 -->
   <div v-if="showAddressModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg ">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
-      <!-- 도로명 주소 선택 -->
       <div @click="openAddressSearch" class="mb-4">
         <label class="block text-sm font-medium text-gray-700 mb-2">도로명 주소</label>
         <div class="flex items-center p-3 bg-white rounded-xl border border-gray-200 cursor-pointer">
@@ -182,7 +176,6 @@
         </div>
         <p class="text-xs text-gray-400 mt-1">도로명 주소를 입력하세요 (미입력 시 협의결정)</p>
       </div>
-      <!-- 상세 주소 입력 -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">상세주소</label>
         <div :class="[placeRoad ? 'bg-white border-gray-200' : 'bg-gray-100 text-gray-400 cursor-not-allowed']"
@@ -201,11 +194,10 @@
           도로명 주소를 반드시 입력해야 게임을 시작할 수 있습니다.
         </template>
         <template v-else>
-          현재 장소: {{ placeRoad + " " +placeDetail }}<br>
+          현재 장소: {{ placeRoad + " " + placeDetail }}<br>
           이 장소가 맞는지 확인하거나, 수정해주세요.
         </template>
       </div>
-      <!-- 버튼 -->
       <div class="flex justify-end mt-6 space-x-2">
         <button @click="closeModal" class="px-4 py-2 rounded-[5px] bg-gray-100 text-gray-700 text-sm">취소</button>
         <button 
@@ -219,119 +211,172 @@
     </div>
   </div>
   
-<!-- 리디자인된 초대코드 공유 모달 (shareModal, 코드만 대체/추가) -->
-<div
-  v-if="shareModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
-  style="backdrop-filter: blur(2px);"
->
+  <!-- 초대코드 공유 모달 -->
   <div
-    class="relative bg-white rounded-3xl shadow-2xl w-[95%] max-w-[380px] px-7 py-8 flex flex-col items-center gap-2"
-    style="box-shadow:0 8px 32px 0 rgba(0,0,0,0.15);"
+    v-if="shareModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+    style="backdrop-filter: blur(2px);"
   >
-    <!-- X 버튼 -->
-    <button
-      @click="shareModal = false"
-      aria-label="닫기"
-      class="absolute right-4 top-4 w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition text-gray-500 hover:text-gray-900 z-10"
-      style="box-shadow:0 2px 8px rgba(0,0,0,0.04);"
+    <div
+      class="relative bg-white rounded-3xl shadow-2xl w-[95%] max-w-[380px] px-7 py-8 flex flex-col items-center gap-2"
+      style="box-shadow:0 8px 32px 0 rgba(0,0,0,0.15);"
     >
-      <i class="fas fa-times text-xl"></i>
-    </button>
-
-    <!-- 아이콘 및 타이틀 -->
-    <div class="mb-3 flex flex-col items-center w-full">
-      <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-2">
-        <i class="fas fa-link text-orange-500 text-2xl"></i>
-      </div>
-      <div class="text-lg font-bold text-gray-900 tracking-tight text-center mb-1">
-        친구에게 초대 코드 보내기
-      </div>
-      <div class="text-gray-500 text-xs text-center">
-        아래 코드를 복사해서 공유하세요
-      </div>
-    </div>
-
-    <!-- 코드 카드 -->
-    <div class="w-full my-5 flex flex-col items-center">
-      <div
-        class="rounded-2xl bg-gray-50 border border-orange-100 px-0 py-5 w-full flex flex-col items-center gap-2 shadow-sm"
+      <button
+        @click="shareModal = false"
+        aria-label="닫기"
+        class="absolute right-4 top-4 w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition text-gray-500 hover:text-gray-900 z-10"
+        style="box-shadow:0 2px 8px rgba(0,0,0,0.04);"
       >
-        <div class="text-3xl font-extrabold text-orange-600 tracking-widest select-all font-mono">
-          {{ inviteCode }}
-        </div>
-        <div class="mt-1 text-xs text-gray-400 text-center">4자리 숫자 코드</div>
-      </div>
-    </div>
+        <i class="fas fa-times text-xl"></i>
+      </button>
 
-    <!-- 복사 버튼 -->
-    <button
-      @click="copyInviteCode"
-      class="w-full mb-2 py-3 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 text-white rounded-full font-bold transition text-base shadow-md flex items-center justify-center gap-2"
+      <div class="mb-3 flex flex-col items-center w-full">
+        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+          <i class="fas fa-link text-orange-500 text-2xl"></i>
+        </div>
+        <div class="text-lg font-bold text-gray-900 tracking-tight text-center mb-1">
+          친구에게 초대 코드 보내기
+        </div>
+        <div class="text-gray-500 text-xs text-center">
+          아래 코드를 복사해서 공유하세요
+        </div>
+      </div>
+
+  <!-- 공유 모달 이하 이어짐 -->
+  <!-- 코드 카드 -->
+  <div class="w-full my-5 flex flex-col items-center">
+    <div
+      class="rounded-2xl bg-gray-50 border border-orange-100 px-0 py-5 w-full flex flex-col items-center gap-2 shadow-sm"
     >
-      <i class="fas fa-copy"></i> 코드 복사하기
-    </button>
-    <transition name="fade">
-      <div v-if="copied" class="text-orange-500 text-xs font-medium text-center mb-2">복사 완료!</div>
-    </transition>
-    <!-- 닫기 버튼 -->
-    <button
-      @click="shareModal = false"
-      class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-semibold transition text-sm mt-1"
-    >
-      닫기
-    </button>
+      <div class="text-3xl font-extrabold text-orange-600 tracking-widest select-all font-mono">
+        {{ inviteCode }}
+      </div>
+      <div class="mt-1 text-xs text-gray-400 text-center">4자리 숫자 코드</div>
+    </div>
   </div>
+
+  <!-- 복사 및 닫기 버튼 -->
+  <button
+    @click="copyInviteCode"
+    class="w-full mb-2 py-3 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 text-white rounded-full font-bold transition text-base shadow-md flex items-center justify-center gap-2"
+  >
+    <i class="fas fa-copy"></i> 코드 복사하기
+  </button>
+  <transition name="fade">
+    <div v-if="copied" class="text-orange-500 text-xs font-medium text-center mb-2">복사 완료!</div>
+  </transition>
+  <button
+    @click="shareModal = false"
+    class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-semibold transition text-sm mt-1"
+  >
+    닫기
+  </button>
+</div>
 </div>
 
 </template>
 
 <script setup>
+// 기존 import + ref 설정 유지
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import client from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import FooterNav from '../../components/FooterNav.vue'
 import ChampionBadge from '../../components/ChampionBadge.vue'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const games = ref([])
 const elapsedTimes = ref({})
-
 const showAddressModal = ref(false)
 const placeRoad = ref('')
 const placeDetail = ref('')
 const currentGameId = ref(null)
+const copied = ref(false)
+const shareModal = ref(false)
+const inviteCode = ref('')
+const gameRefs = ref({})
+let interval
 
+function setGameRef(el) {
+  if (el && el.id?.startsWith('game-')) {
+    const num = Number(el.id.replace('game-', ''))
+    gameRefs.value[num] = el
+  }
+}
+
+function updateElapsed() {
+  games.value.forEach(game => {
+    if (game.status === 'IN_PROGRESS' && game.startedAt) {
+      const now = new Date()
+      const start = new Date(game.startedAt)
+      let diff = Math.max(0, now - start)
+      const h = Math.floor(diff / 3600000); diff %= 3600000
+      const m = Math.floor(diff / 60000); diff %= 60000
+      const s = Math.floor(diff / 1000)
+      elapsedTimes.value[game.id] = h > 0
+        ? `${h}시간 ${m}분 ${s}초 경과`
+        : m > 0
+          ? `${m}분 ${s}초 경과`
+          : `${s}초 경과`
+    }
+  })
+}
+function scrollToParamId() {
+  const pid = Number(route.query.id)
+  if (!isNaN(pid) && gameRefs.value[pid]) {
+    const el = gameRefs.value[pid]
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setTimeout(() => {
+      el.classList.add('highlight-orange')
+    }, 100)  // 1초 후 강조
+  }
+}
+
+onMounted(async () => {
+  const res = await client.get('/api/games/my-games')
+  games.value = res.data
+  updateElapsed()
+  interval = setInterval(updateElapsed, 2000)
+  await nextTick()
+  scrollToParamId()
+})
+
+
+onUnmounted(() => clearInterval(interval))
+
+// 주소 검색
 const openAddressSearch = () => {
   new window.daum.Postcode({
-    oncomplete: function (data) {
+    oncomplete(data) {
       placeRoad.value = data.roadAddress || data.jibunAddress
       nextTick(() => {
-        const detailInput = document.getElementById('place-detail')
-        if (detailInput) detailInput.focus()
+        const el = document.getElementById('place-detail')
+        if (el) el.focus()
       })
     }
   }).open()
 }
 
-const copied = ref(false)
-
 const copyInviteCode = async () => {
   try {
     await navigator.clipboard.writeText(inviteCode.value)
     copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
+    setTimeout(() => (copied.value = false), 2000)
   } catch (e) {
-    copied.value = false
-    // clipboard API 실패 시
     if (window.AndroidApp?.copyTextToClipboard) {
       window.AndroidApp.copyTextToClipboard(inviteCode.value)
       copied.value = true
-      setTimeout(() => { copied.value = false }, 2000)
-      return
+      setTimeout(() => (copied.value = false), 2000)
     }
   }
+}
+
+function generateInviteCode(id) {
+  const OFFSET = 538, MULTIPLIER = 7
+  const ob = ((id + OFFSET) * MULTIPLIER) % 10000
+  return ob.toString().padStart(4, '0')
 }
 
 const openStartModal = (game) => {
@@ -342,22 +387,13 @@ const openStartModal = (game) => {
 }
 
 const submitAndStartGame = async () => {
-  if (!placeRoad.value || placeRoad.value.trim() === '') {
-    alert('도로명 주소를 반드시 입력해야 합니다.')
-    return
-  }
-  try {
-    await client.post(`/api/games/${currentGameId.value}/set-region`, {
-      roadAddress: placeRoad.value,
-      detailAddress: placeDetail.value
-    })
-    await client.post(`/api/games/${currentGameId.value}/start`)
-    router.push(`/games/${currentGameId.value}/play`)
-    showAddressModal.value = false
-  } catch (e) {
-    console.error(e)
-    alert('진행 중인 게임이 존재하거나, 잘못된 접근입니다.')
-  }
+  if (!placeRoad.value.trim()) return alert('도로명 주소를 반드시 입력해야 합니다.')
+  await client.post(`/api/games/${currentGameId.value}/set-region`, {
+    roadAddress: placeRoad.value, detailAddress: placeDetail.value
+  })
+  await client.post(`/api/games/${currentGameId.value}/start`)
+  router.push(`/games/${currentGameId.value}/play`)
+  showAddressModal.value = false
 }
 
 const closeModal = () => {
@@ -367,102 +403,55 @@ const closeModal = () => {
   currentGameId.value = null
 }
 
-let interval
-
-onMounted(async () => {
-  const res = await client.get('/api/games/my-games')
-  games.value = res.data
-  updateElapsed()
-  interval = setInterval(updateElapsed, 1000)
-})
-
-onUnmounted(() => {
-  clearInterval(interval)
-})
-
-function updateElapsed() {
-  games.value.forEach(game => {
-    if (game.status === 'IN_PROGRESS' && game.startedAt) {
-      elapsedTimes.value[game.id] = getElapsedTime(game.startedAt)
-    }
-  })
-}
-
-function getElapsedTime(startedAt) {
-  if (!startedAt) return ''
-  const start = new Date(startedAt)
-  const now = new Date()
-  let diff = Math.max(0, now - start)
-  const hours = Math.floor(diff / 3600000)
-  diff = diff % 3600000
-  const min = Math.floor(diff / 60000)
-  const sec = Math.floor((diff % 60000) / 1000)
-  if (hours > 0) return `${hours}시간 ${min}분 ${sec}초 경과`
-  else if (min > 0) return `${min}분 ${sec}초 경과`
-  else return `${sec}초 경과`
-}
-
-// const deleteGame = async (id) => {
-//   if (!confirm('정말 삭제하시겠습니까?')) return
-//   await client.delete(`/api/games/${id}`)
-//   games.value = games.value.filter(g => g.id !== id)
-//   delete elapsedTimes.value[id]
-// }
-
 const joinGame = (id) => router.push(`/games/${id}/play`)
-function canStart(g) {
-  return g.status === 'SCHEDULED' && !!g.opponentNickname
-}
+const canStart = (g) => g.status === 'SCHEDULED' && !!g.opponentNickname
 
-// Share modal state & invite code
-const shareModal = ref(false)
-const inviteCode = ref('')
-
-// 상수 설정 (10000과 서로소)
-const OFFSET         = 538;   // 임의의 시프트 값
-const MULTIPLIER     = 7;     // 10000과 서로소여야 함
-
-// 초대코드 생성 (4자리 숫자 문자열)
-function generateInviteCode(id) {
-  // (id + OFFSET) * MULTIPLIER mod 10000 → 4자리 패딩
-  const ob = ((id + OFFSET) * MULTIPLIER) % 10000;
-  return ob.toString().padStart(4, '0');
-}
-// const INV_MULTIPLIER = 7143;  // MULTIPLIER의 모듈러 역원 (7*7143 %10000 = 1)
-
-// // 복호화: 원래 ID 복원
-// function decodeInviteCode(code) {
-//   const num = parseInt(code, 10);
-//   // 곱셈 역원 적용 → OFFSET 빼기 → 음수 보정
-//   const x  = (num * INV_MULTIPLIER) % 10000;
-//   return ((x - OFFSET) + 10000) % 10000;
-// }
-
-
-// shareGame 함수
 const shareGame = (game) => {
   inviteCode.value = generateInviteCode(game.id)
   shareModal.value = true
 }
 
 function formatDate(s) {
-  if (!s) return '미정'
-  return new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
+  return s ? new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' }) : '미정'
 }
 
-function translateStatus(status) {
-  return { MATCHING: '매칭 중', SCHEDULED: '진행 예정', IN_PROGRESS: '진행 중', COMPLETED: '완료됨', CANCELED: '취소됨' }[status] || status
+function translateStatus(s) {
+  return { MATCHING:'매칭 중', SCHEDULED:'진행 예정', IN_PROGRESS:'진행 중',
+    COMPLETED:'완료됨', CANCELED:'취소됨' }[s] || s
 }
-function statusIcon(status) {
-  return { MATCHING:'fas fa-search', SCHEDULED:'fas fa-calendar-alt', IN_PROGRESS:'fas fa-play-circle', COMPLETED:'fas fa-flag-checkered', CANCELED:'fas fa-times-circle' }[status]
+function statusIcon(s) {
+  return { MATCHING:'fas fa-search', SCHEDULED:'fas fa-calendar-alt',
+    IN_PROGRESS:'fas fa-play-circle', COMPLETED:'fas fa-flag-checkered',
+    CANCELED:'fas fa-times-circle' }[s]
 }
-function statusColor(status) {
-  return { MATCHING: 'text-orange-400', SCHEDULED: 'text-orange-500', IN_PROGRESS: 'text-green-500', COMPLETED: 'text-gray-400', CANCELED: 'text-red-400' }[status]
+function statusColor(s) {
+  return { MATCHING:'text-orange-400', SCHEDULED:'text-orange-500',
+    IN_PROGRESS:'text-green-500', COMPLETED:'text-gray-400',
+    CANCELED:'text-red-400' }[s]
 }
 </script>
 
+<style scoped>
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
 
-<style>
+.fade-enter-active, .fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.highlight-orange {
+  animation: highlight-orange-fade 1s cubic-bezier(.49,.38,.27,1.18);
+}
+@keyframes highlight-orange-fade {
+  0%   { background: #ffe4ba; }
+  40%  { background: #ffa565; }
+  70%  { background: #ffa565; }
+  100% { background: white; }
+}
+
 .game-card {
   margin-bottom: 24px;
   box-shadow: 0 7px 22px 0 rgba(251,146,60,0.08), 0 0px 0px #fff;

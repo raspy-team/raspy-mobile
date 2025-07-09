@@ -283,7 +283,7 @@ const submitReview = async () => {
 
   try {
     await api.post(`/api/games/${gameId}/review`, review.value)
-    showToast('리뷰가 등록되었습니다!')
+    showToast('리뷰가 등록되었습니다!', `/profile/0?id=${gameId}`)
     reviewSubmitted.value = true
   } catch (err) {
     console.error(err)

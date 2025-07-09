@@ -99,9 +99,9 @@
 
   <div class="grid grid-cols-2 gap-3 mb-4">
     <button @click="resetGame" 
-            class="border border-orange-500 text-orange-500 px-3 py-2 rounded-full text-xs hover:bg-orange-50 transition">초기화</button>
+            class="border border-orange-500 text-orange-500 px-3 py-3 rounded-[8.2px] text-xs hover:bg-orange-50 transition">초기화</button>
     <button @click="forced_finishGame" 
-            class="bg-orange-500 text-white px-3 py-2 rounded-full text-xs shadow hover:brightness-110 transition">게임 종료</button>
+            class="bg-orange-500 text-white px-3 py-3 rounded-[8.2px] text-xs shadow hover:brightness-110 transition">게임 종료</button>
   </div>
 </div>
 

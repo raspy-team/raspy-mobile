@@ -1,18 +1,19 @@
 <template>
   <div class="min-h-screen flex flex-col">
-
     <div class="flex-1 overflow-y-auto space-y-5">
-      <div v-for="group in groups" :key="group.gameId" class="p-5 border bg-white rounded-2xl shadow space-y-5">
-
+      <div
+        v-for="group in groups"
+        :key="group.gameId"
+        :id="'game-' + group.gameId"
+        class="p-5 border bg-white rounded-2xl shadow space-y-5"
+      >
+        <!-- ...생략: 그룹 카드 내용 동일... -->
         <div class="flex justify-between items-start">
           <div class="space-y-2">
             <p class="text-xs text-gray-400">{{ group.matchLocation || '장소 미정' }} · {{ formatDate(group.matchDate) }}</p>
-            <h3 class="text-lg font-bold text-gray-800 flex">{{ group.rule.ruleTitle }}
-   
-            </h3>
+            <h3 class="text-lg font-bold text-gray-800 flex">{{ group.rule.ruleTitle }}</h3>
             <div class="flex items-center">
               <p class="text-sm text-gray-500">{{ group.rule.majorCategory }} > {{ group.rule.minorCategory }} </p>
-
               <div class="flex ml-3">
                 <champion-badge v-if="group.championId == group.myId"></champion-badge>
               </div>
@@ -28,12 +29,10 @@
             {{ translateGameStatus(group.gameStatus) }}
           </span>
         </div>
-
         <button @click="group.showRuleDetail = !group.showRuleDetail" class="mt-2 w-full py-3 text-xs bg-gray-100 rounded-[5px] text-gray-600 flex items-center justify-center gap-2">
           <i :class="group.showRuleDetail ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
           {{ group.showRuleDetail ? '간략히 보기' : '상세 보기' }}
         </button>
-
         <transition name="fade">
           <div v-if="group.showRuleDetail" class="mt-3 space-y-3 p-4 rounded-xl bg-gray-50 border border-gray-200">
             <h4 class="text-base font-bold text-gray-600">세부 규칙</h4>
@@ -57,71 +56,91 @@
             </div>
           </div>
         </transition>
-
         <div class=" border-t border-gray-300 pt-5 space-y-3">
           <h4 class="text-sm font-semibold text-gray-700">신청자 목록</h4>
-
-          <div v-for="user in group.applicants" :key="user.userId" class="p-3 bg-white rounded-xl flex items-center justify-between shadow">
+          <div
+            v-for="user in group.applicants"
+            :key="user.userId"
+            class="p-3 bg-white rounded-xl flex items-center justify-between shadow"
+          >
             <div class="flex items-center gap-3">
               <img :src="user.applicantProfileUrl ? user.applicantProfileUrl:Default" class="w-10 h-10 rounded-full object-cover" />
               <div class="space-y-1">
                 <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                  @{{ user.applicantNickname }}                
-                   <champion-badge v-if="group.championId == user.userId"></champion-badge>
-
-                  <!-- <span class="text-xs flex items-center gap-1">
-                    <i :class="[
-                      user.applicantGameStatisticsDTO.manner >= 4 ? 'fas fa-face-smile text-green-500' :
-                      user.applicantGameStatisticsDTO.manner >= 2 ? 'fas fa-face-meh text-orange-500' :
-                      'fas fa-face-frown text-red-500'
-                    ]"></i>
-                    {{ user.applicantGameStatisticsDTO.manner.toFixed(1) }}
-                  </span> -->
+                  @{{ user.applicantNickname }}
+                  <champion-badge v-if="group.championId == user.userId"></champion-badge>
                 </p>
                 <p class="text-xs text-gray-500">
                   {{ user.applicantGameStatisticsDTO.wins }}승 {{ user.applicantGameStatisticsDTO.draws }}무 {{ user.applicantGameStatisticsDTO.losses }}패 · 승률 {{ getWinRate(user.applicantGameStatisticsDTO) }}%
                 </p>
               </div>
             </div>
-
             <div class="flex flex-col gap-2">
-              <button v-if="!user.approved" @click="approve(group.gameId, user.userId)"
+              <button
+                v-if="!user.approved"
+                @click="approve(group.gameId, user.userId)"
                 :disabled="approvedExists(group.applicants)"
                 class="px-4 py-3 text-xs rounded-[3px] text-white font-[600]"
-                :class="approvedExists(group.applicants) ? 'bg-gray-300' : 'bg-orange-500'">
+                :class="approvedExists(group.applicants) ? 'bg-gray-300' : 'bg-orange-500'"
+              >
                 승인
               </button>
-              <button v-else @click="cancelApproval(group.gameId, user.userId)"
-                class="px-4 py-3 text-xs rounded-[3px] e bg-red-100 text-red-400 font-[600]">
+              <button
+                v-else
+                @click="cancelApproval(group.gameId, user.userId)"
+                class="px-4 py-3 text-xs rounded-[3px] e bg-red-100 text-red-400 font-[600]"
+              >
                 취소
               </button>
             </div>
           </div>
-
         </div>
       </div>
-
       <div v-if="!groups.length" class="text-center text-gray-400 text-sm py-10">받은 요청이 없습니다.</div>
     </div>
   </div>
+
+  <CustomToast />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick, defineProps } from 'vue'
 import client from '../../api/api'
 import { useToast } from '../../composable/useToast'
 import Default from '../../assets/default.png'
 import ChampionBadge from '../../components/ChampionBadge.vue'
+import CustomToast from '../CustomToast.vue'
+const props = defineProps({
+  scrollToId: {
+    type: String,
+    default: null
+  }
+})
 
 const { showToast } = useToast()
-
 const groups = ref([])
 
 onMounted(async () => {
   const res = await client.get('/api/games/my-games/applicants')
   groups.value = res.data.map(g => ({ ...g, showRuleDetail: false }))
+  if (props.scrollToId) nextTick(() => scrollToGame(props.scrollToId))
 })
 
+watch(
+  () => props.scrollToId,
+  id => {
+    if (id) nextTick(() => scrollToGame(id))
+  }
+)
+
+function scrollToGame(id) {
+  const el = document.getElementById('game-' + id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.classList.add('highlight-orange')
+    setTimeout(() => el.classList.remove('highlight-orange'), 2000)
+  }
+}
 function getWinRate(stats) {
   const total = stats.wins + stats.draws + stats.losses
   if (total === 0) return 0
@@ -139,7 +158,7 @@ async function approve(gameId, userId) {
     const user = group?.applicants?.find(a => a.userId === userId)
     if (user) user.approved = true
     if (group) group.gameStatus = 'SCHEDULED' 
-    showToast(`@${user.applicantNickname}님을 승인했습니다!`)
+    showToast(`@${user.applicantNickname}님을 승인했습니다!`, `/my-games?id=${gameId}`)
   } catch (err) {
     if (err.response?.data?.message?.includes('한 명만 승인 가능')) {
       alert('이미 다른 사용자가 승인되었습니다.')
@@ -158,7 +177,6 @@ async function cancelApproval(gameId, userId) {
   if (group) group.gameStatus = 'MATCHING' 
   showToast(`@${user.applicantNickname}님의 참여를 취소했습니다!`)
 }
-
 
 function formatDate(dateStr) {
   if (!dateStr) return '시간 미정'
@@ -185,5 +203,15 @@ function translateGameStatus(status) {
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+.highlight-orange {
+  animation: highlight-orange-fade 1s cubic-bezier(.49,.38,.27,1.18);
+}
+@keyframes highlight-orange-fade {
+  0%   { background: #ffe4ba; }
+  40%  { background: #ffa565; }
+  70%  { background: #ffa565; }
+  100% { background: white; }
 }
 </style>

@@ -236,13 +236,18 @@
   <!-- ... 나머지 카드리스트 ... -->
 </section>
       <div v-if="filteredGames.length" class="space-y-6">
-        <MatchCard
+          <div
           v-for="game in filteredGames"
           :key="game.id"
-          :game="game"
-          :isWin="game.result === 'win'"
-          :isDraw="game.result === 'draw'"
-        />
+          :ref="el => setMatchRef(el, game.id)"
+          :id="'match-' + game.id"
+        >
+          <MatchCard
+            :game="game"
+            :isWin="game.result === 'win'"
+            :isDraw="game.result === 'draw'"
+          />
+        </div>
       </div>
       <div v-else class="text-center text-gray-400 py-6 text-sm">표시할 경기가 없습니다.</div>
     </section>
@@ -332,6 +337,12 @@ let chartInstance = null
 const router = useRouter()
 const route = useRoute()
 let userId = route.params.id 
+
+const matchRefs = ref({})
+
+function setMatchRef(el, id) {
+  if (el) matchRefs.value[id] = el
+}
 
 
 const user = ref(null)
@@ -549,9 +560,25 @@ onMounted(async () => {
     const res2 = await api.get(`/api/user-profile/${userId}/games`)
     allGames.value = res2.data
 
+    await nextTick()
+
+    const matchId = Number(route.query.id)
+
+    console.log('matchRefs:', matchRefs.value)
+console.log('matchId:', matchId)  
+
+
+const el = matchRefs.value[matchId]
+if (el && typeof el.scrollIntoView === 'function') {
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+  console.log("hello")
+}
+
     updateChart()
   } catch (e) {
     alert('존재하지 않는 유저입니다.')
+    console.log(e)
     router.push('/')
   }
 })
@@ -592,6 +619,5 @@ body { background: #f8f9fa !important; }
 .animate-pulse-slow {
   animation: pulse-slow 2s ease-in-out infinite;
 }
-
 
 </style>

@@ -1,22 +1,20 @@
-<!--
-TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표시.
--->
-
 <template>
   <div>
-
     <div v-if="games.length" class="space-y-5">
-      <div v-for="game in games" :key="game.id" class="p-5 border bg-white rounded-2xl shadow space-y-5">
-
+      <div
+        v-for="game in games"
+        :key="game.id"
+        :id="'game-' + game.id"
+        class="p-5 border bg-white rounded-2xl shadow space-y-5"
+      >
+        <!-- ...생략: 게임 카드 내용 동일... -->
         <div class="flex justify-between items-start">
           <div class="space-y-2">
             <p class="text-xs text-gray-400">{{ game.matchLocation || '장소 미정' }} · {{ formatDate(game.matchDate) }}</p>
             <h3 class="text-lg font-bold text-gray-800">{{ game.rule.ruleTitle }}</h3>
             <p class="text-sm text-gray-500">{{ game.rule.majorCategory }} > {{ game.rule.minorCategory }}</p>
             <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed">{{ game.rule.ruleDescription }}</p>
-
           </div>
-
           <span class="text-xs font-semibold px-1 w-[5rem] text-center py-2 rounded-full"
             :class="{
               'bg-blue-100 text-blue-600': game.status === 'APPROVED',
@@ -27,8 +25,8 @@ TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표�
           </span>
         </div>
         <button @click="game.showRuleDetail = !game.showRuleDetail" class="mt-2 w-full py-3 text-xs bg-gray-100 rounded-[5px] text-gray-600 flex items-center justify-center gap-2">
-              <i :class="game.showRuleDetail ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
-              {{ game.showRuleDetail ? '간략히 보기' : '상세 보기' }}
+          <i :class="game.showRuleDetail ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+          {{ game.showRuleDetail ? '간략히 보기' : '상세 보기' }}
         </button>
         <transition name="fade">
           <div v-if="game.showRuleDetail" class="mt-3 space-y-3 p-4 rounded-xl bg-gray-50 border border-gray-200">
@@ -53,7 +51,6 @@ TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표�
             </div>
           </div>
         </transition>
-
         <div class="flex justify-between items-center pt-3 border-t">
           <div>
             <p class="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -76,7 +73,6 @@ TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표�
             <champion-badge v-if="game.championId == game.ownerId"></champion-badge>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3 pt-1">
           <button v-if="game.status === 'REQUESTED'" @click="cancelRequest(game.id)"
             class="flex items-center justify-center gap-2 text-red-400  text-sm text-red-400 border-[1px] border-red-400 py-3 rounded-[8px]">
@@ -90,30 +86,51 @@ TODO: Game 상태에 따라 다른 승인자나타남, 게임 진행됨 등 표�
             class="flex items-center justify-center gap-2 bg-[#afafaf] text-sm text-white border-[1px]  py-3 rounded-[8px]">
             승인 거부
           </button>
-
           <button class="flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 rounded-[8px]">
             <i class="fas fa-paper-plane"></i> DM
           </button>
         </div>
-
       </div>
     </div>
-
     <div v-else class="text-center text-gray-400 text-sm py-10">신청한 게임이 없습니다.</div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick, defineProps } from 'vue'
 import client from '../../api/api'
 import ChampionBadge from '../ChampionBadge.vue'
+
+const props = defineProps({
+  scrollToId: {
+    type: String,
+    default: null
+  }
+})
 
 const games = ref([])
 
 onMounted(async () => {
   const res = await client.get('/api/games/my-requests')
   games.value = res.data.map(g => ({ ...g, showRuleDetail: false }))
+  if (props.scrollToId) nextTick(() => scrollToGame(props.scrollToId))
 })
+
+watch(
+  () => props.scrollToId,
+  id => {
+    if (id) nextTick(() => scrollToGame(id))
+  }
+)
+
+function scrollToGame(id) {
+  const el = document.getElementById('game-' + id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.classList.add('highlight-orange')
+    setTimeout(() => el.classList.remove('highlight-orange'), 1200)
+  }
+}
 
 function formatDate(dateStr) {
   if (!dateStr) return '일정 미정'
@@ -151,5 +168,16 @@ async function cancelRequest(gameId) {
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+
+.highlight-orange {
+  animation: highlight-orange-fade 0.7s cubic-bezier(.49,.38,.27,1.18);
+}
+@keyframes highlight-orange-fade {
+  0%   { background: #ffe4ba; }
+  40%  { background: #f97316; }
+  70%  { background: #f97316; }
+  100% { background: white; }
 }
 </style>

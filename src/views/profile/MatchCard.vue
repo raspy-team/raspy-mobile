@@ -32,15 +32,12 @@
       <router-link :to="'/profile/'+game.opponent.id" class="shrink-0">
         <img :src="game.opponent.avatar" class="w-11 h-11 rounded-full border-2 border-orange-400 shadow" />
       </router-link>
-
-      <!-- 텍스트 컨테이너 min-w-0로 flex 줄바꿈/말줄임 방지 -->
       <div class="min-w-0 flex flex-col justify-center">
         <router-link :to="'/profile/'+game.opponent.id">
           <div class="font-bold text-gray-900 text-[1.08rem] truncate max-w-[160px]">
             @{{ game.opponent.nickname }}
           </div>
         </router-link>
-        <!-- 시간/장소: 세로배치 -->
         <div class="flex flex-col gap-0.5 text-xs text-gray-500 mt-1 min-w-0">
           <span class="flex items-center gap-1 min-w-0">
             <i class="far fa-calendar"></i>
@@ -53,18 +50,38 @@
         </div>
       </div>
     </div>
-    <!-- 룰/카테고리 -->
-    <div class="flex items-center justify-between mt-2 mb-3">
-      <div class="flex flex-col items-start gap-1">
-        <span class="bg-orange-100 text-orange-700 px-4 py-2 rounded-full text-xs font-bold">
+
+    <div class="flex items-center justify-between mt-0 mb-0">
+      <div class="flex flex-row items-center gap-3">
+        <span class="text-xl text-gray-800 font-bold">
           {{ game.ruleTitle }}
         </span>
-        <span class="font-semibold text-gray-500 flex items-center gap-1 text-xs mt-2">
+        <span class="font-semibold text-gray-500 flex items-center gap-1 text-xs ">
           <i class="fas fa-tag"></i> {{ game.mainCategory + ' > ' + game.subCategory }}
         </span>
       </div>
-      <span class="text-xs text-gray-400 font-medium">진행 세트: {{ game.setCount }}</span>
     </div>
+
+    <!-- 게임 설명 (접기/펼치기) -->
+    <div v-if="game.ruleDescription" class="relative">
+      <p
+        :class="[
+          'text-gray-700 text-sm leading-relaxed transition-all whitespace-pre-line',
+          expandedDescription ? '' : 'line-clamp-2'
+        ]"
+      >
+        {{ game.ruleDescription }}
+      </p>
+      <div class="flex justify-end mt-1">
+        <button @click="toggleExpand" class="text-xs text-orange-400 hover:underline px-1">
+          {{ expandedDescription ? '접기' : '펼치기' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- 룰/카테고리 -->
+      <span class="text-xs text-gray-400 font-medium">진행 세트: {{ game.setCount }}</span>
+
     <!-- 총 점수 -->
     <div class="flex flex-col items-center mt-2">
       <div
@@ -172,10 +189,11 @@
     :game="game"
     :me="game.me"
     @close="isOpenInsta = false"
-  /></template>
+  />
+</template>
 
 <script setup>
-import { defineProps , ref} from 'vue'
+import { defineProps, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import InstagramModal from "../../components/InstagramShare.vue"
 
@@ -185,19 +203,31 @@ const goComment = (id) => {
 }
 
 const isOpenInsta = ref(false)
-
-const openInstaModal = () => {
-  isOpenInsta.value = true
-}
+const openInstaModal = () => { isOpenInsta.value = true }
 
 defineProps({
   game: Object,
   isWin: Boolean,
   isDraw: Boolean,
 })
+
+const expandedDescription = ref(false)
+const toggleExpand = () => {
+  expandedDescription.value = !expandedDescription.value
+}
+
 function formatDate(str) {
   if (!str) return "미정"
   const d = new Date(str)
   return d.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

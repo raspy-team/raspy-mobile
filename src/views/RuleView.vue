@@ -1,5 +1,5 @@
 <template>
-        <HeaderComp title="규칙 탐색" />
+        <HeaderComp :has-referer="true" title="규칙 탐색" />
 
   <main class="bg-gray-50 min-h-screen pb-14">
     <!-- 필터 바 -->

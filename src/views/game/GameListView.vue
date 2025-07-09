@@ -11,7 +11,7 @@
     <main class="pt-3 px-4 pb-4">
       <!-- Menu Items -->
       <div class="grid grid-cols-1 gap-3 mb-2">
-        <div class="flex flex-row gap-6 justify-center mb-4">
+        <div class="flex flex-row gap-6 justify-between mb-4">
           <div
             v-for="(action, index) in menuItems"
             :key="index"
@@ -27,7 +27,7 @@
             </span>
             <div
               v-if="requestCount > 0 && action.name == '경기 요청'"
-              class="absolute top-0 right-2 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white"
+              class="absolute top-0 right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white"
               style="transform: translateY(-25%);"
             >
               <span class="text-xs text-white font-medium">{{ requestCount }}</span>

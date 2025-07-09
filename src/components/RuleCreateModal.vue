@@ -23,7 +23,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 점수</label>
+          <label class="block text-sm font-medium text-gray-600 mb-1">한 세트를 승리하기 위해 필요한 점수</label>
           <div class="flex gap-2 mt-1 mb-3">
             <button type="button" @click="setPointsUnlimited" :class="pointsUnlimited ? activeTab : inactiveTab">제한 없음</button>
             <button type="button" @click="setPointsCustom" :class="!pointsUnlimited ? activeTab : inactiveTab">직접 입력</button>
@@ -44,15 +44,15 @@
             <button type="button" @click="setTimeCustom" :class="!timeUnlimited ? activeTab : inactiveTab">직접 입력</button>
           </div>
           <input v-if="!timeUnlimited" v-model.number="form.duration" type="number" class="modern-input text-xs" placeholder="시간을 입력하세요" />
-          <div class="text-gray-400 text-xs mt-2">‘제한없음’으로 설정된 경우 세트 승리 점수 도달시까지 세트가 진행됩니다.</div>
+          <div class="text-gray-400 text-xs mt-2">‘제한없음’으로 설정된 경우 한 세트를 승리하기 위해 필요한 점수 도달시까지 세트가 진행됩니다.</div>
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 기준</label>
           <select v-model="form.winBy" class="modern-input text-xs">
             <option disabled value="">기준 선택</option>
-            <option value="SETS_HALF_WIN" :disabled="disableHalfWin">승리 점수 달성 (미달성 시 무승부)</option>
-            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints">시간 도달 (동점 시 무승부)</option>
+            <option value="SETS_HALF_WIN" :disabled="disableHalfWin">점수 달성 (미달성 시 무승부)</option>
+            <option value="MOST_SETS_AND_POINTS" :disabled="disableMostPoints">제한시간 도달 (동점 시 무승부)</option>
           </select>
         </div>
 

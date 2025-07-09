@@ -71,7 +71,7 @@
             <div class="flex items-center mb-2">
               <i class="fas fa-star text-[#f97316] w-4 mr-2"></i>
               <div class="w-[30dvw] font-light text-gray-500">
-                세트 승리 점수
+                한 세트를 승리하기 위해 필요한 점수
               </div>
               <div>
                 {{ selectedRule.pointsToWin == -1 ? '제한 없음' : selectedRule.pointsToWin +'점' }}

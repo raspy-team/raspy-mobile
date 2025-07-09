@@ -71,7 +71,7 @@
             <div class="flex flex-col gap-1 mt-2 text-[13px]">
               <div class="flex items-center gap-2 p-2 rounded-lg">
                 <i class="fas fa-trophy text-orange-400 text-base"></i>
-                <span class="text-gray-500 font-light w-28 shrink-0">세트 승리 점수</span>
+                <span class="text-gray-500 font-light w-28 shrink-0">한 세트를 승리하기 위해 필요한 점수</span>
                 <span class="text-gray-500 font-normal flex-1">
                   <template v-if="rule.pointsToWin === -1">제한 없음</template>
                   <template v-else>{{ rule.pointsToWin }}<span class="text-gray-400">점</span></template>
@@ -94,7 +94,7 @@
                 </span>
               </div>
               <div class="flex items-center gap-2 p-2 rounded-lg">
-                <i class="fas fa-crown text-orange-400 text-base"></i>
+                <i class="fas fa-crown text-orange-400 text-base text-[0.85rem]"></i>
                 <span class="text-gray-500 font-light w-28 shrink-0">승리 조건</span>
                 <span class="text-gray-500 font-normal flex-1">{{ formatWinBy(rule.winBy) }}</span>
               </div>
@@ -182,7 +182,7 @@ const formatDuration = (duration) => {
   return out.join(' ')
 }
 const formatWinBy = (winBy) => {
-  if (winBy === 'SETS_HALF_WIN') return '승리 점수 달성'
+  if (winBy === 'SETS_HALF_WIN') return '점수 달성'
   return '제한 시간동안 더 많은 점수 획득'
 }
 

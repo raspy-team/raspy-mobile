@@ -18,7 +18,7 @@
 
     <div class="grid grid-cols-3 gap-2 mb-4">
       <div class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center">
-        <div class="text-xs font-semibold mb-1">세트 승리 점수</div>
+        <div class="text-xs font-semibold mb-1">한 세트를 승리하기 위해 필요한 점수</div>
         <div class="text-md font-extrabold">{{ game.pointsToWin  == -1 ? "제한 없음" : game.pointsToWin+'점'}}</div>
       </div>
       <div class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center">

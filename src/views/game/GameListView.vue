@@ -115,13 +115,13 @@
                       세트 승리 조건
                     </div>
                     <div class="text-[0.88rem] w-[40dvw] ">
-                      {{ game.winCondition=='SETS_HALF_WIN' ? '승리 점수 달성' : '시간 도달' }}
+                      {{ game.winCondition=='SETS_HALF_WIN' ? '점수 달성' : '제한시간동안 더 많은 점수 획득' }}
                     </div>
                   </div>
                   <div class="flex items-center mb-2">
                     <i class="fas fa-star text-[#f97316] w-4 mr-2"></i> 
                     <div class="w-[30dvw] font-light text-gray-500">
-                      세트 승리 점수
+                      한 세트를 승리하기 위해 필요한 점수
                     </div>
                     <div>
                       {{ game.points == -1  ?'제한 없음' : game.points + '점'}}
@@ -337,11 +337,11 @@
             <div class="flex items-center gap-1">
               <i class="fas fa-star text-orange-400"></i>
               <span class="font-semibold">세트 승리 조건:</span>
-              <span>{{ inviteGame.winCondition === 'SETS_HALF_WIN' ? '승리 점수 달성' : '시간 도달' }}</span>
+              <span>{{ inviteGame.winCondition === 'SETS_HALF_WIN' ? '점수 달성' : '제한시간동안 더 많은 점수 획득' }}</span>
             </div>
             <div class="flex items-center gap-1">
               <i class="fas fa-trophy text-orange-400"></i>
-              <span class="font-semibold">세트 승리 점수:</span>
+              <span class="font-semibold">한 세트를 승리하기 위해 필요한 점수:</span>
               <span>{{ inviteGame.points == -1 ? '제한 없음' : inviteGame.points + '점' }}</span>
             </div>
             <div class="flex items-center gap-1">

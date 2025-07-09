@@ -1,166 +1,145 @@
 <template>
-  <Header title="게임 생성" hasReferer="1"></Header>
-  <div class="pb-8 max-w-xl mx-auto">
-    <div class="min-h-screen bg-gray-50 pt-4">
-      <!-- Status Bar -->
-      <div class="bg-white h-6 w-full"></div>
-      <!-- Main Form -->
-      <main class="pt-6 px-6 pb-24">
-        <!-- Game Type Selection -->
-        <div class="mb-6 mt-8">
-          <label class="block text-sm font-medium text-gray-700 mb-2">경기 규칙</label>
-          <div class="flex space-x-3 mb-4">
-            <button
-              class="flex-1 py-3 rounded-xl border-2 transition-all !rounded-button"
-              :class="'border-gray-200 bg-white'"
-              @click="openRuleSelect" 
-            >
+  <div class="min-h-screen bg-gradient-to-b from-white to-gray-50 p-5 py-20">
+    <Header title="게임 생성" hasReferer="1" />
+    <div class="max-w-xl mx-auto">
+      <!-- 메인 카드 컨테이너 -->
+      <main class="space-y-8 mt-2">
+        <!-- 규칙 선택 -->
+        <section class="rounded-2xl shadow-lg bg-white p-6">
+          <div class="flex items-center mb-4">
+            <i class="fas fa-sliders-h text-orange-500 text-xl mr-2"></i>
+            <span class="text-base font-semibold tracking-tight text-gray-800">경기 규칙</span>
+          </div>
+          <div class="flex space-x-3 mb-2">
+            <button class="flex-1 py-3 rounded-xl border-2 border-gray-200 transition-all bg-white hover:border-orange-400 active:scale-95"
+              @click="openRuleSelect">
               <div class="flex flex-col items-center">
-                <i
-                  class="fas fa-book-open text-xl mb-2"
-                  :class="'text-gray-400'"
-                ></i>
-                <span
-                  class="text-sm font-medium"
-                  :class="'text-gray-600'"
-                  >규칙 선택하기</span
-                >
+                <i class="fas fa-book-open text-xl mb-1 text-gray-400"></i>
+                <span class="text-sm font-medium text-gray-600">규칙 선택하기</span>
               </div>
             </button>
-            <button
-              class="flex-1 py-3 rounded-xl border-2 transition-all !rounded-button"
-              :class="'border-gray-200 bg-white'"
-              @click="openRuleCreate" 
-            >
+            <button class="flex-1 py-3 rounded-xl border-2 border-gray-200 transition-all bg-white hover:border-orange-400 active:scale-95"
+              @click="openRuleCreate">
               <div class="flex flex-col items-center">
-                <i
-                  class="fas fa-plus text-xl mb-2"
-                  :class="selectedType === 'custom' ? 'text-orange-500' : 'text-gray-400'"
-                ></i>
-                <span
-                  class="text-sm font-medium"
-                  :class="selectedType === 'custom' ? 'text-orange-500' : 'text-gray-600'"
-                  >새로운 규칙</span
-                >
+                <i class="fas fa-plus text-xl mb-1" :class="selectedType === 'custom' ? 'text-orange-500' : 'text-gray-400'"></i>
+                <span class="text-sm font-medium" :class="selectedType === 'custom' ? 'text-orange-500' : 'text-gray-600'">새로운 규칙</span>
               </div>
             </button>
           </div>
-        </div>
-        <!-- 룰 정보 -->
-        <div v-if="selectedRule" class="border bg-white border-gray-200 p-4 rounded-[5px] mb-3 pt-4 flex flex-col gap-1 relative">
-          <span class="absolute right-0 top-0 bg-[#f97316] text-white font-bold text-[0.8rem] px-4 py-1" style="border-radius :0px 0px 0px 8px">
-            게임 규칙
-          </span>
-          <div class="mb-3">
-            {{ selectedRule.ruleTitle }}
-          </div>
-          <div>
-            <span>{{ selectedRule.majorCategory }}</span> > {{ selectedRule.minorCategory }}
-          </div>
-          <p class="text-sm text-gray-700 mt-1 whitespace-pre-line leading-relaxed">{{ selectedRule.ruleDescription }}</p>
-          <div class="text-sm text-gray-600 mb-2 mt-2 flex flex-col gap-1 mt-5">
-            <div class="flex items-start mb-2">
-              <i class="fas fa-trophy text-[#f97316] w-4 mr-2 mt-1"></i>
-              <div class="w-[30dvw] font-light text-gray-500">
-                승리 조건
+          <!-- 룰 정보 -->
+          <transition name="fade">
+          <div v-if="selectedRule" class="border bg-white border-gray-100 p-4 rounded-xl mb-3 mt-4 flex flex-col gap-1 relative shadow-sm">
+            <span class="absolute right-0 top-0 bg-orange-500 text-white font-bold text-xs px-4 py-1 rounded-bl-xl">게임 규칙</span>
+            <div class="mb-1 font-semibold text-gray-700 text-lg">{{ selectedRule.ruleTitle }}</div>
+            <div class="mb-2 text-gray-500 text-sm">{{ selectedRule.majorCategory }} &gt; {{ selectedRule.minorCategory }}</div>
+            <p class="text-sm text-gray-700 mb-2 leading-relaxed">{{ selectedRule.ruleDescription }}</p>
+            <div class="text-sm text-gray-600 flex flex-col gap-2">
+              <div class="flex items-center">
+                <i class="fas fa-trophy text-orange-400 mr-2"></i>
+                <span class="text-gray-500 w-28 shrink-0">승리 조건</span>
+                <span class="font-medium">{{ selectedRule.winBy=='SETS_HALF_WIN' ? '승리 점수 달성' : '제한 시간동안 더 많은 점수 획득' }}</span>
               </div>
-              <div class="text-[0.88rem] w-[40dvw] ">
-                {{ selectedRule.winBy=='SETS_HALF_WIN' ? '승리 점수 달성' : '제한 시간동안 더 많은 점수 획득' }}
+              <div class="flex items-center">
+                <i class="fas fa-star text-orange-400 mr-2"></i>
+                <span class="text-gray-500 w-28 shrink-0">세트당 점수</span>
+                <span>{{ selectedRule.pointsToWin == -1 ? '제한 없음' : selectedRule.pointsToWin +'점' }}</span>
               </div>
-            </div>
-            <div class="flex items-center mb-2">
-              <i class="fas fa-star text-[#f97316] w-4 mr-2"></i>
-              <div class="w-[30dvw] font-light text-gray-500">
-                한 세트를 승리하기 위해 필요한 점수
+              <div class="flex items-center">
+                <i class="fas fa-layer-group text-orange-400 mr-2"></i>
+                <span class="text-gray-500 w-28 shrink-0">총 세트</span>
+                <span>{{ selectedRule.setsToWin }}세트</span>
               </div>
-              <div>
-                {{ selectedRule.pointsToWin == -1 ? '제한 없음' : selectedRule.pointsToWin +'점' }}
-              </div>
-            </div>
-            <div class="flex items-center mb-2">
-              <i class="fas fa-layer-group text-[#f97316] w-4 mr-2"></i>
-              <div class="w-[30dvw] font-light text-gray-500">
-                총 세트
-              </div>
-              <div>
-                {{ selectedRule.setsToWin }}세트
+              <div class="flex items-center">
+                <i class="fas fa-clock text-orange-400 mr-2"></i>
+                <span class="text-gray-500 w-28 shrink-0">세트 제한시간</span>
+                <span>
+                  {{ selectedRule.duration == -1 ? '제한 없음' : (selectedRule.duration >= 60 ? Math.floor(selectedRule.duration / 60) + '분 ' + (selectedRule.duration % 60) + '초' : selectedRule.duration + '초') }}
+                </span>
               </div>
             </div>
-            <div class="flex items-center">
-              <i class="fas fa-clock text-[#f97316] w-4 mr-2"></i>
-              <div class="w-[30dvw] font-light text-gray-500">
-                세트 제한시간
-              </div>
-              <div>
-                {{ selectedRule.duration == -1 ? '제한 없음' : (selectedRule.duration >= 60 ? Math.floor(selectedRule.duration / 60) + '분 ' + (selectedRule.duration % 60) + '초' : selectedRule.duration + '초') }}
-              </div>
+            <div class="text-right">
+              <button @click="confirmRemove" class="mt-2 text-xs text-red-500 hover:underline font-medium">선택 취소</button>
             </div>
           </div>
-          <div class="text-right">
-            <button @click="confirmRemove" class="mt-2 text-xs text-red-500 hover:underline">선택 취소</button>
-          </div>
-        </div>
+          </transition>
+        </section>
 
-        <form @submit.prevent="createGame">
-          <!-- Match Details -->
-          <div class="space-y-6">
-            <!-- Date & Time -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">경기 일시</label>
-              <div class="bg-white rounded-xl border border-gray-200 p-3">
-                <div class="flex items-center">
-                  <i class="far fa-calendar text-orange-500 mr-3"></i>
-                  <input
-                    v-model="form.matchDate"
-                    type="datetime-local"
-                    class="flex-1 text-gray-700 text-sm"
-                  />
-                </div>
-              </div>
+        <form @submit.prevent="createGame" class="space-y-8">
+          <!-- 경기 일시 -->
+          <section class="rounded-2xl shadow-lg bg-white p-6 space-y-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-base font-semibold text-gray-800 flex items-center">
+                <i class="far fa-calendar-alt mr-2 text-orange-500"></i>경기 일시
+              </span>
+              <button type="button"
+                @click="toggleUnset('date')"
+                :class="form.matchDate === null ? 'bg-orange-100 text-orange-500 border border-orange-300' : 'bg-gray-100 text-gray-400 border border-gray-200'"
+                class="rounded-full px-4 py-1 text-xs font-semibold shadow-sm transition hover:scale-105"
+              >미정</button>
+            </div>
+            <transition name="fade">
+            <div v-if="form.matchDate !== null">
+              <input
+                v-model="form.matchDate"
+                type="datetime-local"
+                class="w-full text-gray-700 text-base rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-orange-400 transition"
+              />
               <p class="text-xs text-gray-400 mt-1">경기 시작 시간을 설정하세요 (미입력 시 협의결정)</p>
             </div>
-            <!-- Location -->
-            <div @click="openAddressSearch">
-              <label class="block text-sm font-medium text-gray-700 mb-2">경기 장소</label>
-              <div class="flex items-center p-3 bg-white rounded-xl border border-gray-200">
-                <i class="far fa-calendar text-orange-500"></i>
-                <input v-model="form.placeRoad" readonly style="box-shadow:none" class=" text-sm input flex-1 bg-white border-none shadow-[0px] outline-none cursor-not-allowed"
-                  placeholder="도로명 주소 입력" />
-              </div>
-              <p class="text-xs text-gray-400 mt-1">도로명 주소를 입력하세요 (미입력 시 협의결정)</p>
+
+                        <div v-else class="text-gray-400 text-sm">미정으로 설정됨</div>
+
+            </transition>
+          </section>
+
+          <!-- 경기 장소 -->
+          <section class="rounded-2xl shadow-lg bg-white p-6 space-y-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-base font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-map-marker-alt mr-2 text-orange-500"></i>경기 장소
+              </span>
+              <button type="button"
+                @click="toggleUnset('place')"
+                :class="form.placeRoad === null ? 'bg-orange-100 text-orange-500 border border-orange-300' : 'bg-gray-100 text-gray-400 border border-gray-200'"
+                class="rounded-full px-4 py-1 text-xs font-semibold shadow-sm transition hover:scale-105"
+              >미정</button>
             </div>
-            <!-- Detailed Address -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">상세주소</label>
-              <div class=" rounded-xl border p-3 "
-                :class="!form.placeRoad ? 'bg-gray-100 text-[#ededed] cursor-not-allowed':'bg-white  border-gray-200'">
-                <input
-                  v-model="form.placeDetail"
-                  placeholder="상세주소 입력"
-                  :disabled="!form.placeRoad"
-                  class="w-full text-sm text-gray-700 resize-none py-1 outline-none"
-                />
-              </div>
-              <p class="text-xs text-gray-500 mt-1">
-                예: ○○빌딩 3층, ○○체육관
-              </p>
+            <transition name="fade">
+            <div v-if="form.placeRoad !== null">
+              <button type="button" @click="openAddressSearch"
+                class="flex items-center w-full border border-gray-200 rounded-xl p-3 text-left bg-gray-50 hover:bg-orange-50 transition mb-3">
+                <i class="far fa-building text-orange-400 mr-3"></i>
+                <span class="flex-1 text-base text-gray-700">{{ form.placeRoad || '도로명 주소 입력' }}</span>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+              </button>
+              <input
+                v-model="form.placeDetail"
+                placeholder="상세주소 입력"
+                class="w-full text-gray-700 text-base rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-orange-400 transition"
+              />
+              <p class="text-xs text-gray-500 mt-1">예: ○○빌딩 3층, ○○체육관</p>
             </div>
-          </div>
-          <div class="fixed bottom-4 w-dvw left-0 p-5">
+            <div v-else class="text-gray-400 text-sm">미정으로 설정됨</div>
+
+            </transition>
+          </section>
+
+          <!-- 제출 -->
+          <div class="pt-2 pb-6">
             <button type="submit"
               :disabled="!selectedRule"
-              class="w-full bg-orange-500 text-white py-3 rounded hover:bg-blue-700 disabled:opacity-50">
+              class="w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white text-lg font-semibold py-4 rounded-2xl shadow-md hover:scale-105 transition disabled:opacity-40">
               게임 생성
             </button>
           </div>
         </form>
       </main>
     </div>
+    <!-- 모달들 -->
+    <RuleSelectModal v-if="showSelectModal" @select="selectRule" @close="showSelectModal = false" />
+    <RuleCreateModal v-if="showCreateModal" @created="handleCreatedRule" @close="showCreateModal = false" />
+    <CustomToast />
   </div>
-  <!-- 모달들 -->
-  <RuleSelectModal v-if="showSelectModal" @select="selectRule" @close="showSelectModal = false" />
-  <RuleCreateModal v-if="showCreateModal" @created="handleCreatedRule" @close="showCreateModal = false" />
-  <CustomToast />
 </template>
 
 <script setup>
@@ -188,10 +167,20 @@ const form = ref({
   placeDetail: ''
 })
 
+const toggleUnset = (field) => {
+  if (field === 'date') {
+    form.value.matchDate = form.value.matchDate === null ? '' : null
+  }
+  if (field === 'place') {
+    form.value.placeRoad = form.value.placeRoad === null ? '' : null
+    form.value.placeDetail = ''
+  }
+}
+
 const selectedRule = ref(null)
 const showSelectModal = ref(false)
 const showCreateModal = ref(false)
-const selectedType = ref('rules') // 'rules' | 'custom'
+const selectedType = ref('rules')
 
 const openRuleSelect = () => {
   selectedType.value = 'rules'
@@ -225,7 +214,9 @@ const createGame = async () => {
     const payload = {
       ...form.value,
       matchDate: form.value.matchDate || null,
-      referencedRuleId: selectedRule.value.id, // 반드시 백엔드에서 RuleEntity.id로 저장
+      placeRoad: form.value.placeRoad || null,
+      placeDetail: form.value.placeDetail || null,
+      referencedRuleId: selectedRule.value.id,
     }
     await api.post('/api/games/create', payload)
     showToast('게임이 생성되었습니다!')
@@ -235,6 +226,7 @@ const createGame = async () => {
     showToast('게임 생성 실패. 입력값을 확인해주세요.')
   }
 }
+
 const openAddressSearch = () => {
   const postcode = new window.daum.Postcode({
     oncomplete: function (data) {
@@ -243,7 +235,7 @@ const openAddressSearch = () => {
         const detailInput = document.getElementById('place-detail')
         if (detailInput) detailInput.focus()
       })
-      window.close() 
+      window.close()
     }
   })
   postcode.open()
@@ -251,7 +243,10 @@ const openAddressSearch = () => {
 </script>
 
 <style scoped>
-.input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.25s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>

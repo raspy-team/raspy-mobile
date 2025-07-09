@@ -24,7 +24,7 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">한 세트를 승리하기 위해 필요한 점수</label>
-          <div class="flex gap-2 mt-1 mb-3">
+          <div class="flex gap-2 mt-2 mb-3">
             <button type="button" @click="setPointsUnlimited" :class="pointsUnlimited ? activeTab : inactiveTab">제한 없음</button>
             <button type="button" @click="setPointsCustom" :class="!pointsUnlimited ? activeTab : inactiveTab">직접 입력</button>
           </div>
@@ -39,7 +39,7 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">세트 제한시간 (초)</label>
-          <div class="flex gap-2 mt-1 mb-3">
+          <div class="flex gap-2 mt-2 mb-3">
             <button type="button" @click="setTimeUnlimited" :class="timeUnlimited ? activeTab : inactiveTab">제한 없음</button>
             <button type="button" @click="setTimeCustom" :class="!timeUnlimited ? activeTab : inactiveTab">직접 입력</button>
           </div>

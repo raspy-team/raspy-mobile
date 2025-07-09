@@ -30,29 +30,23 @@
           placeholder="키워드로 검색"
           class="mt-2 w-full bg-gray-100 border-none rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition outline-none"
         />
-        <div class="flex gap-2 mt-2">
+        <div class="mt-2">
           <button
             @click="toggleSort"
-            class="flex-1 flex items-center text-sm justify-center bg-white border border-gray-200 rounded-lg py-2 font-[400] text-gray-500 shadow-sm active:bg-gray-50"
+            class="w-full flex items-center text-sm justify-center bg-white border border-gray-200 rounded-lg py-2 font-[400] text-gray-500 shadow-sm active:bg-gray-50"
           >
             <i class="fas fa-sort text-orange-400 mr-2"></i>
             {{ sortOptions.find(o => o.value === sort)?.label || '정렬' }}
             <i class="fas fa-chevron-down text-xs ml-1"></i>
           </button>
-          <button
-            @click="onSubmitSearch"
-            class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-[500] rounded-lg py-2 shadow transition active:scale-95"
-          >
-            <i class="fas fa-magnifying-glass mr-1"></i> 검색하기
-          </button>
+          <ul v-if="showSortOptions" class="absolute left-5 right-5 z-20 mt-1 bg-white border rounded-lg shadow-lg text-sm">
+            <li v-for="o in sortOptions" :key="o.value"
+                @click="selectSort(o.value)"
+                class="px-4 py-2 hover:bg-orange-50 cursor-pointer text-gray-500">
+              {{ o.label }}
+            </li>
+          </ul>
         </div>
-        <ul v-if="showSortOptions" class="absolute left-6 right-6 top-[110px] z-20 bg-white border border-gray-100 rounded-xl shadow-lg text-sm font-medium py-1">
-          <li v-for="o in sortOptions" :key="o.value"
-              @click="selectSort(o.value)"
-              class="cursor-pointer px-4 py-2 hover:bg-orange-50 text-gray-500">
-            {{ o.label }}
-          </li>
-        </ul>
       </div>
 
       <!-- 룰 리스트 -->
@@ -74,48 +68,47 @@
               {{ rule.majorCategory }} <span class="mx-1 text-gray-300">&gt;</span> {{ rule.minorCategory }}
             </div>
             <div class="text-gray-500 text-sm mb-2 whitespace-pre-line leading-relaxed">{{ rule.ruleDescription }}</div>
-<div class="flex flex-col gap-1 mt-2 text-[13px]">
-  <div class="flex items-center gap-2 p-2 rounded-lg">
-    <i class="fas fa-trophy text-orange-400 text-base"></i>
-    <span class="text-gray-500 font-light w-28 shrink-0">세트 승리 점수</span>
-    <span class="text-gray-500 font-normal flex-1">
-      <template v-if="rule.pointsToWin === -1">제한 없음</template>
-      <template v-else>{{ rule.pointsToWin }}<span class="text-gray-400">점</span></template>
-    </span>
-  </div>
-  <div class="flex items-center gap-2 p-2 rounded-lg">
-    <i class="fas fa-th-large text-orange-400 text-base"></i>
-    <span class="text-gray-500 font-light w-28 shrink-0">총 세트</span>
-    <span class="text-gray-500 font-normal flex-1">
-      <template v-if="rule.setsToWin === -1">제한 없음</template>
-      <template v-else>{{ rule.setsToWin }}<span class="text-gray-400">세트</span></template>
-    </span>
-  </div>
-  <div class="flex items-center gap-2 p-2 rounded-lg">
-    <i class="fas fa-clock text-orange-400 text-base"></i>
-    <span class="text-gray-500 font-light w-28 shrink-0">제한 시간</span>
-    <span class="text-gray-500 font-normal flex-1">
-      <template v-if="rule.duration === -1">제한 없음</template>
-      <template v-else>{{ formatDuration(rule.duration) }}</template>
-    </span>
-  </div>
-  <div class="flex items-center gap-2 p-2 rounded-lg">
-    <i class="fas fa-crown text-orange-400 text-base"></i>
-    <span class="text-gray-500 font-light w-28 shrink-0">승리 조건</span>
-    <span class="text-gray-500 font-normal flex-1">{{ formatWinBy(rule.winBy) }}</span>
-  </div>
-  <div class="flex items-center gap-2 p-2 rounded-lg">
-    <i class="fas fa-fire text-orange-400 text-base"></i>
-    <span class="text-gray-500 font-light w-28 shrink-0">사용됨</span>
-    <span class="text-gray-500 font-normal flex-1">{{ rule.useCount }}<span class="text-gray-400">회</span></span>
-  </div>
-  <div class="flex items-center gap-2 p-2 rounded-lg">
-    <i class="fas fa-user text-orange-400 text-base"></i>
-    <span class="text-gray-500 font-light w-28 shrink-0">등록자</span>
-    <span class="text-gray-500 font-normal flex-1 text-ellipsis overflow-hidden">@{{ rule.createdBy.nickname }}</span>
-  </div>
-</div>
-
+            <div class="flex flex-col gap-1 mt-2 text-[13px]">
+              <div class="flex items-center gap-2 p-2 rounded-lg">
+                <i class="fas fa-trophy text-orange-400 text-base"></i>
+                <span class="text-gray-500 font-light w-28 shrink-0">세트 승리 점수</span>
+                <span class="text-gray-500 font-normal flex-1">
+                  <template v-if="rule.pointsToWin === -1">제한 없음</template>
+                  <template v-else>{{ rule.pointsToWin }}<span class="text-gray-400">점</span></template>
+                </span>
+              </div>
+              <div class="flex items-center gap-2 p-2 rounded-lg">
+                <i class="fas fa-th-large text-orange-400 text-base"></i>
+                <span class="text-gray-500 font-light w-28 shrink-0">총 세트</span>
+                <span class="text-gray-500 font-normal flex-1">
+                  <template v-if="rule.setsToWin === -1">제한 없음</template>
+                  <template v-else>{{ rule.setsToWin }}<span class="text-gray-400">세트</span></template>
+                </span>
+              </div>
+              <div class="flex items-center gap-2 p-2 rounded-lg">
+                <i class="fas fa-clock text-orange-400 text-base"></i>
+                <span class="text-gray-500 font-light w-28 shrink-0">제한 시간</span>
+                <span class="text-gray-500 font-normal flex-1">
+                  <template v-if="rule.duration === -1">제한 없음</template>
+                  <template v-else>{{ formatDuration(rule.duration) }}</template>
+                </span>
+              </div>
+              <div class="flex items-center gap-2 p-2 rounded-lg">
+                <i class="fas fa-crown text-orange-400 text-base"></i>
+                <span class="text-gray-500 font-light w-28 shrink-0">승리 조건</span>
+                <span class="text-gray-500 font-normal flex-1">{{ formatWinBy(rule.winBy) }}</span>
+              </div>
+              <div class="flex items-center gap-2 p-2 rounded-lg">
+                <i class="fas fa-fire text-orange-400 text-base"></i>
+                <span class="text-gray-500 font-light w-28 shrink-0">사용됨</span>
+                <span class="text-gray-500 font-normal flex-1">{{ rule.useCount }}<span class="text-gray-400">회</span></span>
+              </div>
+              <div class="flex items-center gap-2 p-2 rounded-lg">
+                <i class="fas fa-user text-orange-400 text-base"></i>
+                <span class="text-gray-500 font-light w-28 shrink-0">등록자</span>
+                <span class="text-gray-500 font-normal flex-1 text-ellipsis overflow-hidden">@{{ rule.createdBy.nickname }}</span>
+              </div>
+            </div>
           </li>
         </ul>
         <div v-else class="py-14 text-center text-gray-400 text-base">
@@ -127,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits } from 'vue'
+import { ref, onMounted, defineEmits, watch } from 'vue'
 import api from '../api/api'
 
 const emit = defineEmits(['select', 'close'])
@@ -196,6 +189,21 @@ const formatWinBy = (winBy) => {
 onMounted(() => {
   fetchMajors()
   onSubmitSearch()
+})
+
+watch(major, async () => {
+  await fetchMinors()
+  onSubmitSearch()
+})
+watch(minor, onSubmitSearch)
+watch(sort, onSubmitSearch)
+
+let searchTimeout = null
+watch(search, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    onSubmitSearch()
+  }, 300)
 })
 </script>
 

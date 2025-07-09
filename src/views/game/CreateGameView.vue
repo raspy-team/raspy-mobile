@@ -158,9 +158,8 @@ const { showToast } = useToast()
 const route = useRoute()
 
 const confirmRemove = () => {
-  if (confirm('규칙 선택을 취소하시겠습니까?')) {
     removeRule()
-  }
+
 }
 
 const form = ref({

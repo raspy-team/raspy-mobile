@@ -11,7 +11,7 @@
     <main class="pt-3 px-4 pb-4">
       <!-- Menu Items -->
       <div class="grid grid-cols-1 gap-3 mb-2">
-        <div class="flex flex-row gap-6 justify-between mb-4">
+        <div class="flex flex-row gap-6 justify-between mb-4 px-2">
           <div
             v-for="(action, index) in menuItems"
             :key="index"
@@ -98,7 +98,7 @@
                 </div>
 
                 <div class="flex-1">
-                  <div class="flex items-center text-sm mt-1 ml-0 gap-1">        
+                  <div class="flex items-center text-sm mt-1 ml-1 gap-1">        
                   <div class="text-xs font-semibold flex mr-2 items-center justify-end pr-2" :class="[game.mannerScore >= 4 ? 'text-orange-500' : game.mannerScore >= 2 ? 'text-orange-500' : game.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']">
                     <i :class="[game.mannerScore >= 4 ? 'fas fa-face-smile' : game.mannerScore >= 2 ? 'fas fa-face-meh' : game.mannerScore > 0 ? 'fas fa-face-frown' : 'fas fa-user-slash']" class="mr-1"></i>
                     {{ game.mannerScore.toFixed(1) }}
@@ -149,22 +149,22 @@
               <div class="text-sm text-gray-600 flex flex-col gap-2 mt-2">
                 <div class="flex items-center gap-2">
                   <i class="fas fa-trophy text-orange-400"></i>
-                  <span class="w-36 font-light">세트 승리 조건</span>
+                  <span class="w-40 font-light">세트 승리 조건</span>
                   <span>{{ game.winCondition=='SETS_HALF_WIN' ? '점수 달성' : '제한시간동안 더 많은 점수 획득' }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <i class="fas fa-star text-orange-400"></i>
-                  <span class="w-36 font-light">한세트 승리에 필요한 점수</span>
+                  <span class="w-40 font-light">한세트 승리에 필요한 점수</span>
                   <span>{{ game.points == -1 ? '제한 없음' : game.points + '점' }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <i class="fas fa-layer-group text-orange-400"></i>
-                  <span class="w-36 font-light">총 세트</span>
+                  <span class="w-40 font-light">총 세트</span>
                   <span>{{ game.sets }}세트</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <i class="fas fa-clock text-orange-400"></i>
-                  <span class="w-36 font-light">제한 시간</span>
+                  <span class="w-40 font-light">제한 시간</span>
                   <span>{{ game.duration == -1 ? '제한 없음' : game.duration >= 60 ? Math.floor(game.duration / 60) + '분 ' + (game.duration % 60) + '초' : game.duration + '초' }}</span>
                 </div>
               </div>

@@ -76,28 +76,34 @@
         <div v-if="games.length > 0">
           <div v-for="(game, index) in games" :key="index" class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4 p-4">
             <!-- 타이틀과 생성자 정보(우측 상단) -->
-            <div class="flex justify-between items-center mb-2">
-              <!-- 생성자 프로필 + 매너점수 -->
-              <div class="flex flex-col items-start text-left">
-                <div class="flex items-center gap-2" @click="router.push('/profile/'+game.ownerId)">
-                  <img :src="game.ownerProfileUrl || Default" class="w-8 h-8 rounded-full object-cover border" />
-                  <span class="text-sm font-medium text-gray-800">@{{ game.ownerNickname }}</span>
+
+            <div class="flex justify-between items-center">
+              <div class="flex justify-between items-center mb-2">
+                <!-- 생성자 프로필 + 매너점수 -->
+                <div class="flex flex-col items-start text-left">
+                  <div class="flex items-center gap-2" @click="router.push('/profile/'+game.ownerId)">
+                    <img :src="game.ownerProfileUrl || Default" class="w-8 h-8 rounded-full object-cover border" />
+                    <span class="text-sm font-medium text-gray-800">@{{ game.ownerNickname }}</span>
+                  </div>
+    
                 </div>
-  
+
+                <div class="flex-1">
+                  <div class="flex items-center text-sm mt-1 ml-1 gap-1">        
+                  <div class="text-xs font-semibold flex mr-2 items-center justify-end pr-2" :class="[game.mannerScore >= 4 ? 'text-orange-500' : game.mannerScore >= 2 ? 'text-orange-500' : game.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']">
+                    <i :class="[game.mannerScore >= 4 ? 'fas fa-face-smile' : game.mannerScore >= 2 ? 'fas fa-face-meh' : game.mannerScore > 0 ? 'fas fa-face-frown' : 'fas fa-user-slash']" class="mr-1"></i>
+                    {{ game.mannerScore.toFixed(1) }}
+                  </div>       
+                    <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-medium">1vs1</span>
+                    <ChampionBadge v-if="game.championId == game.ownerId" />
+                  </div>
+                </div>
               </div>
 
-               <div class="flex-1">
-                <div class="flex items-center text-sm mt-1 ml-1 gap-1">        
-                 <div class="text-xs font-semibold flex mr-2 items-center justify-end pr-2" :class="[game.mannerScore >= 4 ? 'text-orange-500' : game.mannerScore >= 2 ? 'text-orange-500' : game.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']">
-                  <i :class="[game.mannerScore >= 4 ? 'fas fa-face-smile' : game.mannerScore >= 2 ? 'fas fa-face-meh' : game.mannerScore > 0 ? 'fas fa-face-frown' : 'fas fa-user-slash']" class="mr-1"></i>
-                  {{ game.mannerScore.toFixed(1) }}
-                </div>       
-                  <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-medium">1vs1</span>
-                  <ChampionBadge v-if="game.championId == game.ownerId" />
-                </div>
+              <div class="text-gray-600 text-[0.79rem]">
+                {{ formatTimeAgo(game.createdAt) }}
               </div>
             </div>
-
             <!-- 장소 & 날짜 -->
             <div class="mt-1 flex items-center text-sm text-gray-500 gap-3">
               <i class="fas fa-map-marker-alt text-orange-500"></i>
@@ -438,17 +444,17 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-// function formatTimeAgo(dateString) {
-//   const now = new Date();
-//   const createdAt = new Date(dateString);
-//   const diff = (now - createdAt) / 1000;
-//   if (diff < 60) return `방금 전`;
-//   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-//   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-//   if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
-//   if (diff < 31104000) return `${Math.floor(diff / 2592000)}개월 전`;
-//   return `${Math.floor(diff / 31104000)}년 전`;
-// }
+ function formatTimeAgo(dateString) {
+   const now = new Date();
+   const createdAt = new Date(dateString);
+   const diff = (now - createdAt) / 1000;
+   if (diff < 60) return `방금 전`;
+   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+   if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`;
+   if (diff < 31104000) return `${Math.floor(diff / 2592000)}개월 전`;
+   return `${Math.floor(diff / 31104000)}년 전`;
+ }
 const router = useRouter()
 const goToComments = (game) => router.push("/games/" + game.id + "/comments")
 

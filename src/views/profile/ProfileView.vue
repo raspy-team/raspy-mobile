@@ -203,8 +203,8 @@
           <canvas
             v-if="chartData.length > 0"
             ref="chartRef"
-            height="auto"
-            class="flex-1 "
+            height=""
+            class=" "
           ></canvas>
           <div v-else class="w-full text-center text-gray-400 text-sm py-8">
             경기 횟수가 부족하여<br> 퍼포먼스 그래프를 표시할 수 없습니다.
@@ -482,7 +482,7 @@ const updateChart = async () => {
         data: chartData.value,
         borderColor: "#fd7e14",
         backgroundColor: "rgba(253,126,20,0.06)",
-        pointRadius: 5,
+        pointRadius: 2,
         pointHoverRadius: 6,
         borderWidth: 3,
         fill: true,
@@ -490,6 +490,7 @@ const updateChart = async () => {
       }]
     },
     options: {
+    
       responsive: false,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },

@@ -63,8 +63,7 @@
     <!-- 총 점수 -->
     <div class="flex flex-col items-center mt-0">
       <div
-        class="flex flex-col items-center justify-center rounded-xl bg-white px-6 shadow-sm"
-        :class="isWin ? 'border-orange-400' : isDraw ? 'border-gray-400' : 'border-blue-400'"
+        class="flex flex-col items-center justify-center  px-6 "
       >
         <span
           class="text-4xl font-black"
@@ -84,7 +83,7 @@
               </router-link>
             </div>
 
-            <div class="font-extrabold ml-7">
+            <div class="font-extrabold ml-[4.8dvw]">
               {{ game.myScore }}
             </div>
           </div>
@@ -92,7 +91,7 @@
             :
           </div>
           <div class="flex items-center gap-3  ">
-            <div class="font-extrabold mr-7">
+            <div class="font-extrabold mr-[4.8dvw]">
               {{ game.opponentScore }}
             </div>
             <div class="flex flex-col items-center pt-7">

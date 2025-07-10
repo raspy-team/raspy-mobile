@@ -63,18 +63,20 @@
             :key="user.userId"
             class="p-3 bg-white rounded-xl flex items-center justify-between shadow"
           >
-            <div class="flex items-center gap-3">
-              <img :src="user.applicantProfileUrl ? user.applicantProfileUrl:Default" class="w-10 h-10 rounded-full object-cover" />
-              <div class="space-y-1">
-                <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                  @{{ user.applicantNickname }}
-                  <champion-badge v-if="group.championId == user.userId"></champion-badge>
-                </p>
-                <p class="text-xs text-gray-500">
-                  {{ user.applicantGameStatisticsDTO.wins }}승 {{ user.applicantGameStatisticsDTO.draws }}무 {{ user.applicantGameStatisticsDTO.losses }}패 · 승률 {{ getWinRate(user.applicantGameStatisticsDTO) }}%
-                </p>
+            <router-link :to="'/profile/'+user.userId">
+              <div class="flex items-center gap-3" >
+                <img :src="user.applicantProfileUrl ? user.applicantProfileUrl:Default" class="w-10 h-10 rounded-full object-cover" />
+                <div class="space-y-1">
+                  <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    @{{ user.applicantNickname }}
+                    <champion-badge v-if="group.championId == user.userId"></champion-badge>
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    {{ user.applicantGameStatisticsDTO.wins }}승 {{ user.applicantGameStatisticsDTO.draws }}무 {{ user.applicantGameStatisticsDTO.losses }}패 · 승률 {{ getWinRate(user.applicantGameStatisticsDTO) }}%
+                  </p>
+                </div>
               </div>
-            </div>
+            </router-link>
             <div class="flex flex-col gap-2">
               <button
                 v-if="!user.approved"

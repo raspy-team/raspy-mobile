@@ -27,30 +27,8 @@
         style="letter-spacing:0.05em;"
         >패배</span>
     </div>
-    <!-- 상단: 프로필/닉네임/경기일시장소 -->
+    <!-- 상단: 룰정보/경기일시장소 -->
     <div class="flex items-center gap-3 min-w-0">
-      <router-link :to="'/profile/'+game.opponent.id" class="shrink-0">
-        <img :src="game.opponent.avatar" class="w-11 h-11 rounded-full border-2 border-orange-400 shadow" />
-      </router-link>
-      <div class="min-w-0 flex flex-col justify-center">
-        <router-link :to="'/profile/'+game.opponent.id">
-          <div class="font-bold text-gray-900 text-[1.08rem] truncate max-w-[160px]">
-            @{{ game.opponent.nickname }}
-          </div>
-        </router-link>
-        <div class="flex flex-col gap-0.5 text-xs text-gray-500 mt-1 min-w-0">
-          <span class="flex items-center gap-1 min-w-0">
-            <i class="far fa-calendar"></i>
-            <span class="truncate">{{ formatDate(game.date) }}</span>
-          </span>
-          <span class="flex items-center gap-1 min-w-0">
-            <i class="fas fa-map-marker-alt"></i>
-            <span class="truncate">{{ game.location ? game.location : "미정"}}</span>
-          </span>
-        </div>
-      </div>
-    </div>
-
     <div class="flex items-center justify-between mt-0 mb-0">
       <div class="flex flex-row items-center gap-3">
         <span class="text-xl text-gray-800 font-bold">
@@ -61,6 +39,8 @@
         </span>
       </div>
     </div>
+    </div>
+
 
     <!-- 게임 설명 (접기/펼치기) -->
     <div v-if="game.ruleDescription" class="relative">
@@ -78,29 +58,67 @@
         </button>
       </div>
     </div>
-
     <!-- 룰/카테고리 -->
-      <span class="text-xs text-gray-400 font-medium">진행 세트: {{ game.setCount }}</span>
 
     <!-- 총 점수 -->
-    <div class="flex flex-col items-center mt-2">
+    <div class="flex flex-col items-center mt-0">
       <div
-        class="flex flex-col items-center justify-center border-2 border-dashed rounded-xl bg-white px-6 py-3 shadow-sm"
+        class="flex flex-col items-center justify-center rounded-xl bg-white px-6 shadow-sm"
         :class="isWin ? 'border-orange-400' : isDraw ? 'border-gray-400' : 'border-blue-400'"
       >
         <span
-          class="text-4xl font-black tracking-widest"
+          class="text-4xl font-black"
           :class="isWin ? 'text-orange-500' : isDraw ? 'text-gray-500' : 'text-blue-500'"
         >
-          {{ game.myScore }} : {{ game.opponentScore }}
+
+        <div class="flex justify-between items-center gap-4">
+          <div class="flex items-center gap-3 ">
+            <div class="flex flex-col items-center pt-7 ">
+              <router-link :to="'/profile/'+game.opponent.id" class="shrink-0">
+                <img :src="game.me.avatar==null ? Default : game.me.avatar" class="w-12 h-12 rounded-full border-2 border-orange-400 shadow" />
+              </router-link>
+              <router-link :to="'/profile/'+game.opponent.id">
+                  <div class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]">
+                    @{{ game.me.nickname }}
+                  </div>
+              </router-link>
+            </div>
+
+            <div class="font-extrabold ml-3">
+              {{ game.myScore }}
+            </div>
+          </div>
+          <div class="font-extrabold">
+            :
+          </div>
+          <div class="flex items-center gap-3  ">
+            <div class="font-extrabold mr-3">
+              {{ game.opponentScore }}
+            </div>
+            <div class="flex flex-col items-center pt-7">
+              <router-link :to="'/profile/'+game.opponent.id" class="shrink-0">
+                <img :src="game.opponent.avatar==null ? Deafult : game.opponent.avatar " class="w-12 h-12 rounded-full border-2 border-orange-400 shadow" />
+              </router-link>
+              <router-link :to="'/profile/'+game.opponent.id">
+                  <div class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]">
+                    @{{ game.opponent.nickname }}
+                  </div>
+              </router-link>
+            </div>
+
+
+          </div>
+        </div>
         </span>
-        <span class="text-xs text-gray-500 mt-1 font-bold">최종 세트 스코어</span>
       </div>
     </div>
+
+    <div class="text-xs mt-4 text-right text-gray-400 font-medium">총 진행 세트: {{ game.setCount }}</div>
+
     <!-- 세트별 결과 세로 리스트 -->
-    <div class="max-h-64 overflow-y-auto mt-4 flex flex-col gap-2">
+    <div class="max-h-64 overflow-y-auto flex flex-col gap-2">
       <div
-        v-for="(set, i) in game.setResults"
+        v-for="(set, i) in setResults"
         :key="i"
         class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-50 font-semibold shadow-sm"
         :class="set.winnerIdx === 1 ? 'border-orange-200' : set.winnerIdx === 2 ? 'border-blue-200' : 'border-gray-200'"
@@ -129,11 +147,11 @@
     </div>
     <!-- 경기 리뷰 및 매너점수 -->
     <div v-if="game.review || game.mannerScore || game.performanceScore" class="bg-gray-50 rounded-xl mt-5 p-4 flex flex-col gap-0 border border-gray-100">
-      <div v-if="game.review" class="flex items-start gap-2">
+      <div v-if="game.review" class="flex items-start gap-2 mb-4">
         <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
         <span class="text-sm text-gray-700 font-medium leading-snug">{{ game.review }}</span>
       </div>
-      <div v-if="game.mannerScore !== undefined" class="flex items-center gap-2 mt-4">
+      <div v-if="game.mannerScore !== undefined" class="flex items-center gap-2">
         <span class="text-xs text-gray-500">상대가 남긴 매너 점수:</span>
         <span class="text-base font-bold"
           :class="[
@@ -162,6 +180,23 @@
         >{{ game.performanceScore?.toFixed(1) ?? '-' }}</span>
       </div>
     </div>
+
+        
+      <div class="min-w-0 flex flex-col justify-center">
+
+        <div class="flex flex-col gap-2 text-xs text-gray-500 mt-1 min-w-0">
+          <span class="flex items-center gap-1 min-w-0">
+            <i class="far fa-calendar"></i>
+            <span class="truncate">{{ formatDate(game.date) }}</span>
+          </span>
+          <span class="flex items-center gap-1 min-w-0">
+            <i class="fas fa-map-marker-alt"></i>
+            <span class="truncate">{{ game.location ? game.location : "미정"}}</span>
+          </span>
+        </div>
+      </div>
+
+
     <!-- 하단 액션 버튼 -->
     <div class="flex justify-end gap-3 pt-2 mt-2 border-t border-gray-100">
       <button
@@ -193,9 +228,12 @@
 </template>
 
 <script setup>
-import { defineProps, ref } from 'vue'
+import { defineProps, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import InstagramModal from "../../components/InstagramShare.vue"
+import Deafult from "../../assets/default.png"
+
+const setResults = ref([])
 
 const router = useRouter()
 const goComment = (id) => {
@@ -205,7 +243,7 @@ const goComment = (id) => {
 const isOpenInsta = ref(false)
 const openInstaModal = () => { isOpenInsta.value = true }
 
-defineProps({
+const props = defineProps({
   game: Object,
   isWin: Boolean,
   isDraw: Boolean,
@@ -221,6 +259,52 @@ function formatDate(str) {
   const d = new Date(str)
   return d.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }
+
+function isWinner1More(results) {
+  let winner1 = 0, winner2 = 0;
+  for (const r of results) {
+    if (r.winnerIdx === 1) winner1++;
+    else if (r.winnerIdx === 2) winner2++;
+  }
+  return winner1 > winner2;
+}
+
+onMounted(()=>{
+  if(props.game.myScore >= props.game.opponentScore) { // 내 점수가 더 높음
+    if(isWinner1More(props.game.setResults)) { // 내가 유저 1임 (미변화)
+      setResults.value = props.game.setResults
+    } else { 
+      props.game.setResults.forEach(item => { // 내가 유저 2임 (재졍렬)
+        setResults.value.push({
+          setIdx: item.setIdx,
+          user1Score: item.user2SCore,
+          user2SCore: item.user1Score,
+          winnerIdx: item.winnerIdx === 1 ? 2 : item.winnerIdx === 2 ? 1 : item.winnerIdx
+        });
+      });
+    }
+  } else { // 내가 점수가 더 적음.
+      if(isWinner1More(props.game.setResults)) { // 상대가 유저 1임 (재정렬)
+          props.game.setResults.forEach(item => { 
+            setResults.value.push({
+              setIdx: item.setIdx,
+              user1Score: item.user2SCore,
+              user2SCore: item.user1Score,
+              winnerIdx: item.winnerIdx === 1 ? 2 : item.winnerIdx === 2 ? 1 : item.winnerIdx
+            });
+
+            console.log(item)
+          })
+      } 
+      else { // 내가 유저 2임 (미변화)
+          setResults.value = props.game.setResults
+        }
+  }
+
+
+})
+
+
 </script>
 
 <style scoped>

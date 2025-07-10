@@ -84,7 +84,7 @@
               </router-link>
             </div>
 
-            <div class="font-extrabold ml-3">
+            <div class="font-extrabold ml-7">
               {{ game.myScore }}
             </div>
           </div>
@@ -92,7 +92,7 @@
             :
           </div>
           <div class="flex items-center gap-3  ">
-            <div class="font-extrabold mr-3">
+            <div class="font-extrabold mr-7">
               {{ game.opponentScore }}
             </div>
             <div class="flex flex-col items-center pt-7">

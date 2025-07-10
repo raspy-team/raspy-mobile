@@ -114,11 +114,11 @@
             </div>
             <!-- 장소 & 날짜 -->
             <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
-              <div class="flex gap-2">
+              <div class="flex items-center gap-2">
                 <i class="fas fa-map-marker-alt text-orange-500"></i>
                 <span>{{ (game.matchLocation == ' ' || game.matchLocation=="") ? "미정" : game.matchLocation  }}</span>
               </div>
-              <div class="flex gap-2">
+              <div class="flex items-center gap-2">
                 <i class="far fa-calendar text-orange-500"></i>
                 <span>{{ formatDate(game.matchDate) }}</span>
               </div>
@@ -181,7 +181,7 @@
                 ]">
                 {{ game.applied ? '신청 완료' : '참가하기' }}
               </button>
-              <button @click="goToComments(game)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+              <button @click="toggleComment(game.id)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
                 <i class="fas fa-comment"></i>
               </button>
               <button @click="shareGame(game)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
@@ -200,6 +200,7 @@
   v-if="showInviteModal"
   class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
   style="backdrop-filter: blur(2px);"
+  @click.self="closeInviteModal"
 >
   <div
     class="relative bg-white rounded-3xl shadow-2xl w-[95%] max-w-[400px] px-7 py-8 flex flex-col items-center gap-2"
@@ -392,20 +393,25 @@
     <CustomAlert v-if="alertMsg" :message="alertMsg" @confirm="applyConfirmed" @cancel="() => alertMsg = ''" />
     <CustomToast />
     <!-- Share Game Modal -->
-    <div v-if="shareModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
-      <div class="bg-white rounded-xl shadow-lg p-6 w-80 mx-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">초대 코드</h3>
-        <div class="text-3xl font-bold text-orange-600 mb-2 tracking-widest text-center">{{ inviteCode }}</div>
-        <div class="text-xs text-gray-400 text-center mb-4">친구에게 코드를 복사해서 공유하세요</div>
-        <button @click="copyInviteCode" class="w-full mb-2 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition">
-          복사하기
-        </button>
-        <div v-if="copied" class="text-orange-500 text-xs text-center mb-2">복사 완료!</div>
-        <button @click="shareModal = false" class="w-full py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition">
-          닫기
-        </button>
-      </div>
-    </div>
+<div
+  v-if="shareModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[30000]"
+  @click.self="shareModal = false"
+>
+  <div class="bg-white rounded-xl shadow-lg p-6 w-80 mx-4">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">초대 코드</h3>
+    <div class="text-3xl font-bold text-orange-600 mb-2 tracking-widest text-center">{{ inviteCode }}</div>
+    <div class="text-xs text-gray-400 text-center mb-4">친구에게 코드를 복사해서 공유하세요</div>
+    <button @click="copyInviteCode" class="w-full mb-2 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition">
+      복사하기
+    </button>
+    <div v-if="copied" class="text-orange-500 text-xs text-center mb-2">복사 완료!</div>
+    <button @click="shareModal = false" class="w-full py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition">
+      닫기
+    </button>
+  </div>
+</div>
+
   </div>
 
   <!-- 맨 위로 버튼 (스크롤 시에만) -->
@@ -419,6 +425,8 @@
   <i class="fas fa-arrow-up text-xl"></i>
 </button>
 
+
+<Comment v-if='commentId!=0' :id="commentId" @close="commentId = 0" />
 </template>
 
 <script setup>
@@ -433,6 +441,7 @@ import { useRouter } from "vue-router"
 import regionMap from "../../assets/regionMap.json"
 import Default from "../../assets/default.png"
 import ChampionBadge from '../../components/ChampionBadge.vue'
+import Comment from "../GameCommentView.vue"
 const expanded = ref([])
 const toggleExpand = (id) => {
   if (expanded.value.includes(id)) {
@@ -468,8 +477,11 @@ onUnmounted(() => {
    return `${Math.floor(diff / 31104000)}년 전`;
  }
 const router = useRouter()
-const goToComments = (game) => router.push("/games/" + game.id + "/comments")
 
+const commentId = ref(0)
+const toggleComment = (id)=>{
+  commentId.value = id;
+}
 const shareModal = ref(false)
 const inviteCode = ref('')
 const copied = ref(false)

@@ -153,7 +153,7 @@
       </div>
 
     <!-- 리뷰 남기기 -->
-      <div v-if="!reviewSubmitted" class="bg-white p-5 rounded-xl shadow space-y-4 text-left border">
+      <div  v-if="!reviewSubmitted" class="bg-white p-5 rounded-xl shadow space-y-4 text-left border">
         <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
           <i class="fas fa-comment-dots"></i> 상대 리뷰 남기기
         </h3>
@@ -198,14 +198,14 @@
           리뷰 등록
         </button>
 
+
+      </div>
         <button
           @click="goHome"
           class="w-full text-gray-800 border py-2 rounded-full font-light shadow hover:brightness-110 transition"
         >
           나가기
         </button>
-      </div>
-
       <CustomToast />
     </div>
   </div>

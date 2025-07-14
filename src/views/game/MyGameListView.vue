@@ -77,7 +77,7 @@
               </div>
             </template>
           </div>
-        </div>
+        </div> 
 
         <!-- RULE BOX 개선 -->
         <div class="bg-gray-50 rounded-xl mx-4 mt-2 mb-3 p-5 border ">

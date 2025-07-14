@@ -10,9 +10,21 @@
         <!-- ...생략: 게임 카드 내용 동일... -->
         <div class="flex justify-between items-start">
           <div class="space-y-2">
-            <p class="text-xs text-gray-400">{{ game.matchLocation || '장소 미정' }} · {{ formatDate(game.matchDate) }}</p>
-            <h3 class="text-lg font-bold text-gray-800">{{ game.rule.ruleTitle }}</h3>
-            <p class="text-sm text-gray-500">{{ game.rule.majorCategory }} > {{ game.rule.minorCategory }}</p>
+                  <div class="">
+                    <div class=" mb-1 flex">
+                      <span class="font-semibold text-gray-700">
+                       {{ game.rule.ruleTitle }}
+
+                      </span>
+                      <span class="flex ml-3">
+                        <champion-badge v-if="game.championId == game.myId"></champion-badge>
+                      </span>
+                    </div>
+
+                  </div>
+                  <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
+                      {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ game.rule.minorCategory }}
+                  </div>  
             <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed">{{ game.rule.ruleDescription }}</p>
           </div>
           <span class="text-xs font-semibold px-1 w-[5rem] text-center py-2 rounded-full"
@@ -24,14 +36,31 @@
             {{ translateStatus(game.status) }}
           </span>
         </div>
+
+            <!-- 장소 & 날짜 -->
+            <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
+              <div class="flex items-center gap-2">
+                <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
+                  <span>{{ (game.matchLocation == ' ' || game.matchLocation=="" || game.matchLocation==null) ? "장소 미정" : game.matchLocation  }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="far w-3 fa-calendar text-orange-500"></i>
+                <span>{{ formatDate(game.matchDate) }}</span>
+              </div>
+            </div>
         <button @click="game.showRuleDetail = !game.showRuleDetail" class="mt-2 w-full py-3 text-xs bg-gray-100 rounded-[5px] text-gray-600 flex items-center justify-center gap-2">
           <i :class="game.showRuleDetail ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
           {{ game.showRuleDetail ? '간략히 보기' : '상세 보기' }}
         </button>
-        <transition name="fade">
+      <transition name="fade">
           <div v-if="game.showRuleDetail" class="mt-3 space-y-3 p-4 rounded-xl bg-gray-50 border border-gray-200">
-            <h4 class="text-base font-bold text-gray-600">세부 규칙</h4>
+            <h4 class="text-base font-bold text-gray-600">규칙</h4>
             <div class="text-sm text-gray-700 space-y-2">
+              <div>
+              
+                <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed border-b pb-4 mb-4">{{ game.rule.ruleDescription }}</p>
+
+              </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">세트 승리 기준</span>
                 <span>{{ game.rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달' }}</span>
@@ -46,7 +75,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">세트 제한 시간</span>
-                <span>{{ game.rule.duration == -1 ? '제한 없음' :  game.rule.duration >= 60 ? Math.floor(game.rule.duration / 60) + '분 ' + (game.rule.duration % 60) + '초' : game.rule.duration + '초' }}</span>
+                <span>{{ game.rule.duration == -1 ? '제한 없음' : game.rule.duration >= 60 ? Math.floor(game.rule.duration / 60) + '분 ' + (game.rule.duration % 60) + '초' : game.rule.duration + '초' }}</span>
               </div>
             </div>
           </div>

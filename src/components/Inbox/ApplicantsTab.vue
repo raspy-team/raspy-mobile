@@ -7,18 +7,24 @@
         :id="'game-' + group.gameId"
         class="p-5 border bg-white rounded-2xl shadow space-y-5"
       >
-        <!-- ...생략: 그룹 카드 내용 동일... -->
         <div class="flex justify-between items-start">
-          <div class="space-y-2">
-            <p class="text-xs text-gray-400">{{ group.matchLocation || '장소 미정' }} · {{ formatDate(group.matchDate) }}</p>
-            <h3 class="text-lg font-bold text-gray-800 flex">{{ group.rule.ruleTitle }}</h3>
-            <div class="flex items-center">
-              <p class="text-sm text-gray-500">{{ group.rule.majorCategory }} > {{ group.rule.minorCategory }} </p>
-              <div class="flex ml-3">
-                <champion-badge v-if="group.championId == group.myId"></champion-badge>
-              </div>
-            </div>
-            <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed">{{ group.rule.ruleDescription }}</p>
+          <div>
+
+                  <div class="">
+                    <div class=" mb-1 flex">
+                      <span class="font-semibold text-gray-700">
+                       {{ group.rule.ruleTitle }}
+
+                      </span>
+                      <span class="flex ml-3">
+                        <champion-badge v-if="group.championId == group.myId"></champion-badge>
+                      </span>
+                    </div>
+
+                  </div>
+                  <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
+                      {{ group.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ group.rule.minorCategory }}
+                  </div>  
           </div>
           <span class="text-xs font-semibold px-2 py-2 rounded-full w-[5rem] text-center" 
             :class="{
@@ -29,14 +35,30 @@
             {{ translateGameStatus(group.gameStatus) }}
           </span>
         </div>
+            <!-- 장소 & 날짜 -->
+            <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
+              <div class="flex items-center gap-2">
+                <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
+                  <span>{{ (group.matchLocation == ' ' || group.matchLocation=="" || group.matchLocation==null) ? "장소 미정" : group.matchLocation  }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="far w-3 fa-calendar text-orange-500"></i>
+                <span>{{ formatDate(group.matchDate) }}</span>
+              </div>
+            </div>
         <button @click="group.showRuleDetail = !group.showRuleDetail" class="mt-2 w-full py-3 text-xs bg-gray-100 rounded-[5px] text-gray-600 flex items-center justify-center gap-2">
           <i :class="group.showRuleDetail ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
           {{ group.showRuleDetail ? '간략히 보기' : '상세 보기' }}
         </button>
         <transition name="fade">
           <div v-if="group.showRuleDetail" class="mt-3 space-y-3 p-4 rounded-xl bg-gray-50 border border-gray-200">
-            <h4 class="text-base font-bold text-gray-600">세부 규칙</h4>
+            <h4 class="text-base font-bold text-gray-600">규칙</h4>
             <div class="text-sm text-gray-700 space-y-2">
+              <div>
+              
+                <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed border-b pb-4 mb-4">{{ group.rule.ruleDescription }}</p>
+
+              </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">세트 승리 기준</span>
                 <span>{{ group.rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달' }}</span>

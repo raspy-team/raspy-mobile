@@ -104,9 +104,9 @@ function drawFinalImage() {
   ctx.fillStyle = textColor
   ctx.textAlign = 'left'
   ctx.textBaseline = 'top'
-  ctx.fillText(props.game.mainCategory || '', padX, padX)
+  ctx.fillText(props.game.rule.majorCategory || '', padX, padX)
   ctx.font = `bold ${SIZE*0.038}px Pretendard, Arial`
-  ctx.fillText(props.game.subCategory || '', padX, padX + SIZE*0.07)
+  ctx.fillText(props.game.rule.minorCategory || '', padX, padX + SIZE*0.07)
 
   // 날짜/시간
   ctx.textAlign = 'right'
@@ -120,7 +120,7 @@ function drawFinalImage() {
   // 룰 타이틀
   ctx.textAlign = 'center'
   ctx.font = `bold ${SIZE*0.08}px Pretendard, Arial`
-  ctx.fillText(props.game.ruleTitle || '', SIZE/2, SIZE*0.23)
+  ctx.fillText(props.game.rule.ruleTitle || '', SIZE/2, SIZE*0.23)
 
   // 장소
   ctx.font = ` ${SIZE*0.042}px Pretendard, Arial`

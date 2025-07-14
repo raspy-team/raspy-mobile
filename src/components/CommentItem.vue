@@ -17,7 +17,7 @@
       />
     </router-link>
     <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-1/2">
+      <div class="flex items-center gap-2">
         <router-link
           :to="`/profile/${comment.author.id}`"
           class="font-semibold text-[15px] hover:underline focus:underline focus:outline-none"
@@ -46,7 +46,7 @@
           @click="emitImgClick(comment.imageUrl)"
         />
       </div>
-      <div class="flex items-center gap-1/2 mt-2 text-gray-500 text-[14px]">
+      <div class="flex items-center gap-2 mt-2 text-gray-500 text-[14px]">
         <button
           class="focus:outline-none  transition flex items-center justify-center"
           style="height:26px;width:26px"

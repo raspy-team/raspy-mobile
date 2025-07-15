@@ -21,6 +21,7 @@
         </div>
       </button> -->
 
+      <div class="fixed  w-[90%] bottom-10 left-[5%]">
       <!-- Kakao Login -->
       <button class="oauth-btn kakao" @click="loginWith('kakao')">
         <div class="icon-text">
@@ -36,6 +37,7 @@
           <span>Apple로 시작하기</span>
         </div>
       </button>
+      </div>
     </div>
   </div>
 </template>

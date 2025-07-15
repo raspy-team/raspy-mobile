@@ -39,7 +39,7 @@
               @{{ user.username }}
             </div>
           </span>
-          <span class="flex items-center gap-1" v-if="user.location.length > 2">
+          <span class="flex items-center gap-1" v-if="user.location != null && user.location.length > 2">
             <span>·</span><span class="text-[0.72rem] text-gray-600">{{ user.location?.split(' ').slice(-1)[0] || '' }}</span>
           </span>
       </h2>

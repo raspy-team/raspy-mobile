@@ -29,24 +29,27 @@ const excludeLoginRedirectURLs = [
   '/api/auth/login',
 ]
 
-// 응답 인터셉터: 401 처리 + 503 재시도
 api.interceptors.response.use(
   response => response,
   async error => {
-    const { config, response } = error
+    const config = error.config
 
-    // 503 재시도 로직
-    if (response?.status === 503) {
-      config.__retryCount = config.__retryCount || 0
-      if (config.__retryCount < 3) {
-        config.__retryCount += 1
-        await new Promise(resolve => setTimeout(resolve, 500))  // 0.5초 대기
-        return api(config)  // 재요청
-      }
+    // 재시도 횟수 제한
+    config.__retryCount = config.__retryCount || 0
+    const maxRetries = 3
+
+    const isRetryable503 =
+      (error.response && error.response.status === 503) ||
+      (error.code === 'ERR_FAILED' && error.message.includes('503'))
+
+    if (isRetryable503 && config.__retryCount < maxRetries) {
+      config.__retryCount += 1
+      await new Promise(resolve => setTimeout(resolve, 500))
+      return api(config)
     }
 
-    // 401 로그인 처리
-    if (response?.status === 401) {
+    // 401 처리
+    if (error.response && error.response.status === 401) {
       const requestURL = config.url
       const isExcluded = excludeLoginRedirectURLs.some(excludedPath =>
         requestURL.includes(excludedPath)
@@ -65,5 +68,6 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
 
 export default api

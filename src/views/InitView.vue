@@ -9,7 +9,7 @@
     </div>
     <div class="oauth-container flex flex-col gap-2 pb-10 w-full max-w-sm">
       <!-- Google Login -->
-      <button class="oauth-btn google" @click="loginWith('google')">
+      <!-- <button class="oauth-btn google" @click="loginWith('google')">
         <div class="icon-text">
           <svg width="24" height="24" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M12 11.99v2.98h4.21c-.18 1.12-.83 2.07-1.78 2.71v2.26h2.88c1.69-1.56 2.67-3.86 2.67-6.61 0-.55-.05-1.09-.14-1.61H12z"/>
@@ -19,7 +19,7 @@
           </svg>
           <span>Google로 시작하기</span>
         </div>
-      </button>
+      </button> -->
 
       <!-- Kakao Login -->
       <button class="oauth-btn kakao" @click="loginWith('kakao')">

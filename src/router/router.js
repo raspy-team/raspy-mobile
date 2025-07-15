@@ -18,6 +18,7 @@ import NotFoundView from "../views/NotFoundView.vue"
 import InstagramShare from "../components/InstagramShare.vue"
 import Setting from "../views/SettingView.vue"
 import Rule from "../views/RuleView.vue"
+import DmRoomList from '../views/DmRoomList.vue'
 
 const routes = [
   {
@@ -57,6 +58,10 @@ const routes = [
     path: '/chat/:targetUserId',
     component: GameChatView,
     props: true
+  },
+  {
+    path: '/dm',
+    component: DmRoomList,  
   },
   {
     path: '/create-game',

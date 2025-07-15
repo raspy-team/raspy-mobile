@@ -306,6 +306,7 @@
         <h3  class="font-bold text-lg mb-4 text-gray-800">유저 찾기</h3>
         <input v-model="userSearch"
                @input="onUserSearch"
+               ref="userinput"
                type="text"
                class="w-full border rounded-[10px] px-4 py-3 mb-4 text-sm focus:ring-2 focus:ring-orange-200 outline-none"
                placeholder="유저의 이름을 입력하세요" />
@@ -317,7 +318,7 @@
                   class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl transition border border-transparent hover:border-orange-200">
             <img :src="user.avatar" class="w-10 h-10 rounded-full border object-cover" />
             <div class="flex-1 text-left">
-              <div class=" flex gap-2">
+              <div class=" flex flex-col gap-0">
                 <div class="font-bold text-gray-800 text-sm ">  
                   {{ user.nickname }}
                 </div>
@@ -527,11 +528,15 @@ const userSearching = ref(false)
 const userSearchResult = ref([])
 let searchTimeout
 
+const userinput = ref(null)
+
 function searchUsers() {
   showUserModal.value = true
   userSearch.value = ''
   userSearchResult.value = []
-}
+  nextTick(() => {
+    userinput.value?.focus()
+  })}
 function closeUserModal() {
   showUserModal.value = false
 }

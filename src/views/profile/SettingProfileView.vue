@@ -1,10 +1,7 @@
 <template>
-    <Header v-if="!afterLogin" :hasReferer="true" title="프로필 설정"></Header>
-
+  <Header v-if="!afterLogin" :hasReferer="true" title="프로필 설정"></Header>
   <div class="pt-20 pb-16 px-8 max-w-md mx-auto bg-white rounded-2xl shadow-lg">
-    <!-- Header -->
-    <h2 v-if="afterLogin" class="text-2xl font-semibold mb-8 text-gray-800">환영합니다! 당신을 알려주세요</h2>
-
+    <h2 v-if="afterLogin" class="text-2xl font-semibold mb-8 text-gray-800 text-center">환영합니다! 당신을 알려주세요</h2>
     <form @submit.prevent="submitProfile" class="space-y-8">
       <!-- 나이 -->
       <div>
@@ -15,13 +12,12 @@
           min="0"
           max="150"
           required
-          class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+          class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-lg"
           placeholder="나이를 입력하세요"
         />
         <p v-if="errors.age" class="mt-1 text-xs text-red-600">{{ errors.age }}</p>
         <p v-else class="mt-1 text-xs text-gray-400">0~150세 사이의 숫자를 입력하세요</p>
       </div>
-
       <!-- 성별 -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">성별</label>
@@ -32,7 +28,7 @@
             type="button"
             @click="form.gender = g.value"
             :class="[
-              'flex-1 py-3 rounded-lg border transition',
+              'flex-1 py-3 rounded-lg border transition font-medium text-lg',
               form.gender === g.value
                 ? 'bg-orange-500 border-orange-500 text-white'
                 : 'border-gray-200 text-gray-700 hover:bg-gray-50'
@@ -43,7 +39,6 @@
         </div>
         <p v-if="errors.gender" class="mt-1 text-xs text-red-600">{{ errors.gender }}</p>
       </div>
-
       <!-- 지역 선택 -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">지역</label>
@@ -51,16 +46,15 @@
           <select
             v-model="selectedPrimary"
             @change="handlePrimaryChange"
-            class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+            class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-lg"
           >
             <option value="" disabled>시/도 선택</option>
             <option v-for="(subs, primary) in regionMap" :key="primary" :value="primary">{{ primary }}</option>
           </select>
-
           <select
             v-model="selectedSecondary"
             :disabled="!selectedPrimary"
-            class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition disabled:opacity-50"
+            class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition disabled:opacity-50 text-lg"
           >
             <option value="" disabled>시/군/구 선택</option>
             <option v-for="sub in regionMap[selectedPrimary]" :key="sub" :value="sub">{{ sub }}</option>
@@ -68,7 +62,6 @@
         </div>
         <p v-if="errors.region" class="mt-1 text-xs text-red-600">{{ errors.region }}</p>
       </div>
-
       <!-- 자기소개 -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -76,14 +69,13 @@
         </label>
         <textarea
           v-model="form.bio"
-          class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+          class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-lg"
           rows="4"
-          maxlength="500"
+          maxlength="100"
           placeholder="자신에 대해 소개해 주세요"
         ></textarea>
-        <p class="mt-1 text-xs text-gray-400">{{ form.bio.length }} / 500자</p>
+        <p class="mt-1 text-xs text-gray-400">{{ form.bio.length }} / 100자</p>
       </div>
-
       <!-- 프로필 사진 -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">프로필 사진</label>
@@ -100,19 +92,22 @@
             class="w-20 h-20 rounded-full object-cover border-2 border-orange-500"
             alt="Preview"
           />
+          <img
+            v-else-if="form.profilePictureUrl"
+            :src="form.profilePictureUrl"
+            class="w-20 h-20 rounded-full object-cover border-2 border-orange-500"
+            alt="프로필"
+          />
         </div>
       </div>
-
       <!-- 저장 버튼 -->
       <button
         type="submit"
-        class="w-full py-3 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-500"
+        class="w-full py-3 rounded-lg bg-orange-500 text-white font-medium text-lg hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-500"
       >
         저장하기
       </button>
     </form>
-
-    <!-- 건너뛰기 버튼 -->
     <div v-if="afterLogin" class="text-center mt-6">
       <button
         @click="router.push('/game-list')"
@@ -121,13 +116,12 @@
         건너뛰기
       </button>
     </div>
-
     <CustomToast />
   </div>
 </template>
 
 <script setup>
-import { ref, computed , onMounted} from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
@@ -147,14 +141,19 @@ const router = useRouter()
 const route = useRoute()
 const afterLogin = computed(() => route.query.init === '1')
 
-const form = ref({ age: 0, gender: '', region: '', bio: '' })
+const form = ref({
+  age: '',
+  gender: '',
+  region: '',
+  bio: '',
+  profilePictureUrl: '' // 서버에서 URL 내려올 경우
+})
 const errors = ref({ age: '', gender: '', region: '' })
 const genders = [
   { value: 'M', label: '남성' },
   { value: 'F', label: '여성' },
   { value: 'O', label: '기타' }
 ]
-
 const selectedPrimary = ref('')
 const selectedSecondary = ref('')
 const profilePicture = ref(null)
@@ -163,6 +162,31 @@ const previewImage = ref(null)
 const handlePrimaryChange = () => {
   selectedSecondary.value = ''
 }
+
+// **서버에서 내 프로필 조회 (마운트시)**
+onMounted(async () => {
+  try {
+    const { data } = await api.get('/api/user-profile/my/profile')
+    if (data) {
+      form.value.age = data.age || ''
+      form.value.gender = data.gender || ''
+      form.value.bio = data.bio || ''
+      if (data.region) {
+        const [primary = '', secondary = ''] = data.region.split(' ')
+        selectedPrimary.value = primary
+        selectedSecondary.value = secondary
+      }
+      form.value.profilePictureUrl = data.profilePicture || ''
+    }
+  } catch (err) {
+    // ignore or toast
+  }
+  if(afterLogin.value && localStorage.getItem("hello-raspy")) {
+    router.push("/")
+  } else {
+    localStorage.setItem("hello-raspy", true)
+  }
+})
 
 const onImageChange = (e) => {
   const file = e.target.files[0]
@@ -210,33 +234,19 @@ const submitProfile = async () => {
     if (profilePicture.value) {
       formData.append('profile_picture', profilePicture.value)
     }
-
     await api.patch('/api/user-profile/save', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
-
     showToast('프로필이 저장되었습니다!')
     router.push('/game-list')
   } catch (err) {
-    console.error('프로필 저장 실패', err)
     showToast('입력값을 다시 확인해주세요.')
   }
 }
-
-onMounted(()=> {
-    if(afterLogin.value && localStorage.getItem("hello-raspy")) {
-        router.push("/")
-    } else {
-      localStorage.setItem("hello-raspy", true)
-    }
-})
 </script>
 
 <style scoped>
-/* 기본 input 스타일 */
-input,
-select,
-textarea {
+input, select, textarea {
   @apply font-sans;
 }
 </style>

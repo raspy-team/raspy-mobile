@@ -1,9 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import Init from "../views/InitView.vue"
-import Login from '../views/auth/LoginView.vue'
-import Register from "../views/auth/RegisterView.vue"
-
 import GameList from "../views/game/GameListView.vue"
 import Inbox from "../views/InboxView.vue"
 import MyGameList from "../views/game/MyGameListView.vue"
@@ -19,6 +16,7 @@ import InstagramShare from "../components/InstagramShare.vue"
 import Setting from "../views/SettingView.vue"
 import Rule from "../views/RuleView.vue"
 import DmRoomList from '../views/DmRoomList.vue'
+import OauthCallback from '../views/OauthCallBack.vue'
 
 const routes = [
   {
@@ -35,12 +33,8 @@ const routes = [
   },
 
   {
-    path: '/login',
-    component: Login
-  },
-  {
-    path: '/register',
-    component: Register
+    path: '/oauth/callback',
+    component: OauthCallback
   },
   {
     path: '/set-profile',

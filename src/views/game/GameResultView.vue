@@ -102,7 +102,7 @@
               :src="user1.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
-            <p class="text-sm font-semibold">@{{ user1.nickname }}</p>
+            <p class="text-sm font-semibold">{{ user1.nickname }}</p>
             <p class="text-2xl font-bold text-orange-500">{{ user1SetCount }}</p>
           </div>
           <div class="text-center text-xs text-gray-500">
@@ -114,7 +114,7 @@
               :src="user2.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
-            <p class="text-sm font-semibold">@{{ user2.nickname }}</p>
+            <p class="text-sm font-semibold">{{ user2.nickname }}</p>
             <p class="text-2xl font-bold text-orange-500">{{ user2SetCount }}</p>
           </div>
         </div>

@@ -31,8 +31,15 @@
     <div class="flex-1 flex flex-col ">
       <div class="flex flex-col items-start gap-2">
         <h2 class="flex gap-2 items-center">
-          <span class="text-xl font-bold mb-[2.7px] text-gray-900">@{{ user.nickname }}</span>
-          <span class="flex items-center gap-1" v-if="user.location">
+          <span class=" mb-[2.7px] text-gray-900 flex items-center gap-2">
+            <div class="text-xl font-bold">  
+              {{ user.nickname }}
+            </div>
+            <div class="text-sm font-semibold text-gray-600">
+              @{{ user.username }}
+            </div>
+          </span>
+          <span class="flex items-center gap-1" v-if="user.location.length > 2">
             <span>·</span><span class="text-[0.72rem] text-gray-600">{{ user.location?.split(' ').slice(-1)[0] || '' }}</span>
           </span>
       </h2>
@@ -310,7 +317,14 @@
                   class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl transition border border-transparent hover:border-orange-200">
             <img :src="user.avatar" class="w-10 h-10 rounded-full border object-cover" />
             <div class="flex-1 text-left">
-              <div class="font-bold text-gray-800 text-sm">@{{ user.nickname }}</div>
+              <div class=" flex gap-2">
+                <div class="font-bold text-gray-800 text-sm ">  
+                  {{ user.nickname }}
+                </div>
+                <div class="text-[0.8rem]">
+                  @{{ user.username }}
+                </div>
+              </div>
               <div class="text-xs text-gray-500">{{ user.intro }}</div>
             </div>
           </button>

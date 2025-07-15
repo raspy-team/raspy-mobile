@@ -15,7 +15,7 @@ const api = axios.create({
 
 // 요청 인터셉터: 토큰 자동 포함
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem('raspy_access_token')
+  const token = localStorage.getItem('raspy_access_token2')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -56,11 +56,11 @@ api.interceptors.response.use(
       )
 
       if (!isExcluded) {
-        localStorage.removeItem('raspy_access_token')
+        localStorage.removeItem('raspy_access_token2')
         if (routerInstance) {
-          routerInstance.push('/login')
+          routerInstance.push('/init')
         } else {
-          window.location.href = '/login'
+          window.location.href = '/init'
         }
       }
     }

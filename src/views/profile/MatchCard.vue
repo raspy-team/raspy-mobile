@@ -62,7 +62,7 @@
       </router-link>
       <router-link :to="'/profile/' + game.me.id">
         <div class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]">
-          @{{ game.me.nickname }}
+          {{ game.me.nickname }}
         </div>
       </router-link>
     </div>
@@ -87,7 +87,7 @@
       </router-link>
       <router-link :to="'/profile/' + game.opponent.id">
         <div class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]">
-          @{{ game.opponent.nickname }}
+          {{ game.opponent.nickname }}
         </div>
       </router-link>
     </div>

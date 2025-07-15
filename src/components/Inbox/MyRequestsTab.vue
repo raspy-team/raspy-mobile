@@ -83,7 +83,7 @@
         <div class="flex justify-between items-center pt-3 border-t">
           <div>
             <p class="text-sm font-semibold text-gray-800 flex items-center gap-2">
-              @{{ game.ownerNickname }}
+              {{ game.ownerNickname }}
               <span class="text-xs flex items-center gap-1">
                 <i :class="[
                   (game.ownerStatistics.manner || 4.5) >= 4 ? 'fas fa-face-smile text-green-500' : 

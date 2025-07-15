@@ -90,7 +90,7 @@
                 <img :src="user.applicantProfileUrl ? user.applicantProfileUrl:Default" class="w-10 h-10 rounded-full object-cover" />
                 <div class="space-y-1">
                   <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                    @{{ user.applicantNickname }}
+                    {{ user.applicantNickname }}
                     <champion-badge v-if="group.championId == user.userId"></champion-badge>
                   </p>
                   <p class="text-xs text-gray-500">

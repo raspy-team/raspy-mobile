@@ -113,7 +113,7 @@
                     <img :src="game.ownerProfileUrl || Default" class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white" />
                   </div>
                   <div class="text-gray-700 font-[600] text-sm">
-                    @{{ game.ownerNickname }}
+                    {{ game.ownerNickname }}
                   </div>
                   <div>
                      <div class="text-xs font-semibold flex mr-2 items-center justify-end pr-2" :class="[game.mannerScore >= 4 ? 'text-orange-500' : game.mannerScore >= 2 ? 'text-orange-500' : game.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']">
@@ -336,7 +336,7 @@
                     <img :src="inviteGame.ownerProfileUrl || Default" class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white" />
                   </div>
                   <div class="text-gray-700 font-[600] text-sm">
-                    @{{ inviteGame.ownerNickname }}
+                    {{ inviteGame.ownerNickname }}
                   </div>
                   <div>
                      <div class="text-xs font-semibold flex mr-2 items-center justify-end pr-2" :class="[inviteGame.mannerScore >= 4 ? 'text-orange-500' : inviteGame.mannerScore >= 2 ? 'text-orange-500' : inviteGame.mannerScore > 0 ? 'text-red-500' : 'text-gray-400']">

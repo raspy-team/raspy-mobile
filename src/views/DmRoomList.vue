@@ -26,7 +26,7 @@
           />
           <div class="flex-1 min-w-0 ml-5 flex flex-col">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-gray-900 text-lg tracking-tight truncate">@{{ dm.targetUserNickname }}</span>
+              <span class="font-bold text-gray-900 text-lg tracking-tight truncate">{{ dm.targetUserNickname }}</span>
             </div>
             <div class="flex items-center mt-2 gap-2">
               <span class="text-sm text-gray-700 truncate font-medium"

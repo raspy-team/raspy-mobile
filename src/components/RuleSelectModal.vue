@@ -115,7 +115,7 @@
               <div class="flex items-center gap-2 p-2 rounded-lg">
                 <i class="fas fa-user text-orange-400 text-base"></i>
                 <span class="text-gray-500 font-light w-28 shrink-0">등록자</span>
-                <span class="text-gray-500 font-normal flex-1 text-ellipsis overflow-hidden">@{{ rule.createdBy.nickname }}</span>
+                <span class="text-gray-500 font-normal flex-1 text-ellipsis overflow-hidden">{{ rule.createdBy.nickname }}</span>
               </div>
             </div>
           </li>

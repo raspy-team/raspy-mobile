@@ -16,7 +16,7 @@
           class="w-7 h-7 rounded-full border border-orange-100 object-cover"
           :alt="rule.createdBy.nickname"
         />
-        <span class="text-xs text-gray-500 font-medium max-w-[60px] truncate">@{{ rule.createdBy.nickname }}</span>
+        <span class="text-xs text-gray-500 font-medium max-w-[60px] truncate">{{ rule.createdBy.nickname }}</span>
       </div>
     </div>
     <!-- 설명 & 펼치기 & 복사 -->

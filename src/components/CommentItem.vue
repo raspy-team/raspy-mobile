@@ -35,7 +35,7 @@
           v-if="comment.mentionUserNickname"
           class="inline-block px-2 py-0.5 bg-blue-100 text-blue-600 font-semibold rounded-full mr-1 text-[14px] align-middle"
         >
-          @{{ comment.mentionUserNickname }}
+          {{ comment.mentionUserNickname }}
         </span>
         <span v-html="autoLink(comment.content)" />
       </div>

@@ -11,7 +11,7 @@ export function useChat(gameId) {
   const roomId = ref(null)
 
   // JWT 토큰 로컬스토리지에서 읽기
-  const token = localStorage.getItem('raspy_access_token')
+  const token = localStorage.getItem('raspy_access_token2')
 
   // 1) roomId 조회
   const initRoom = async () => {

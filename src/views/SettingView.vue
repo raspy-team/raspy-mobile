@@ -38,7 +38,7 @@ const logout = async() => {
 
   try {
     await api.post('/api/push/remove-device')
-    localStorage.removeItem('raspy_access_token')
+    localStorage.removeItem('raspy_access_token2')
   } catch (err) {
     console.log(err)
   }

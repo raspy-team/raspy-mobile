@@ -36,7 +36,7 @@
     <div class="flex items-start justify-between mb-6 relative">
       <div class="flex flex-col items-center mr-2 animate-fade-in">
         <img :src="user1.profileUrl ? user1.profileUrl : DefaultImage" class="w-20 aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1" />
-        <div class="font-bold text-sm">@{{ user1.nickname }}</div>
+        <div class="font-bold text-sm">{{ user1.nickname }}</div>
         <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user1SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">
@@ -51,7 +51,7 @@
       </div>
       <div class="flex flex-col items-center ml-2 animate-fade-in">
         <img :src="user2.profileUrl ? user2.profileUrl : DefaultImage" class="w-20 h-20 rounded-full border-4 border-orange-500 shadow-lg mb-1" />
-        <div class="font-bold text-sm">@{{ user2.nickname }}</div>
+        <div class="font-bold text-sm">{{ user2.nickname }}</div>
         <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user2SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">

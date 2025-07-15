@@ -23,7 +23,7 @@
               <span class="absolute bottom-0 right-0 bg-orange-400 text-xs text-white font-bold px-1.5 py-0.5 rounded-lg shadow">나</span>
             </div>
             <div class="text-gray-700 font-[600] text-sm">
-              @{{ game.myNickname }}
+              {{ game.myNickname }}
             </div>
             <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 tracking-wider">
               <div>
@@ -51,7 +51,7 @@
               </div>
               <img :src="game.opponentProfileUrl" class="w-14 h-14 rounded-full border-2 border-gray-200 shadow bg-gradient-to-tr from-gray-100 to-blue-100" />
               <div class="text-gray-700 font-[600] text-sm">
-                @{{ game.opponentNickname }}
+                {{ game.opponentNickname }}
               </div>
               <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 tracking-wider">
                 <div>

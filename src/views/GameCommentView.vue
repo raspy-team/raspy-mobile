@@ -61,7 +61,7 @@
     class="inline-block px-2 py-0.5 mr-2 bg-blue-100 text-blue-600 font-semibold rounded-full text-[14px] whitespace-nowrap cursor-pointer select-none"
     @click="resetInput"
   >
-    @{{ replyNickname }}
+    {{ replyNickname }}
     <i class="fas fa-times ml-1 text-xs" />
   </span>
   <input

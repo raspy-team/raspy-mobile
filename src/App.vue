@@ -26,7 +26,7 @@ onMounted(() => {
   }, 2000) //
 
   try{
-    window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token"));
+    window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token2"));
   } catch(e) {
     console.log("welcome [web] user")
   }

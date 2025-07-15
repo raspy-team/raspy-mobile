@@ -525,6 +525,9 @@ import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 import { useRouter } from "vue-router"
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
 import regionMap from "../../assets/regionMap.json"
 import Default from "../../assets/default.png"
 import ChampionBadge from '../../components/ChampionBadge.vue'
@@ -549,6 +552,7 @@ const scrollToTop = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
+  
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
@@ -738,7 +742,13 @@ const applyConfirmed = async () => {
   }
 }
 
-onMounted(fetchGames)
+onMounted(()=>{
+  fetchGames()
+    const commentQueryId = route.query.commentId
+    if (commentQueryId && !isNaN(Number(commentQueryId))) {
+      commentId.value = Number(commentQueryId)
+    }
+  })
 </script>
 <style scoped>
 input:focus {

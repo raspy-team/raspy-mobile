@@ -132,9 +132,9 @@
     >
       <i class="fas fa-check mr-2"></i> 요청됨
     </button>
-    <button class="flex justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
-      <i class="fas fa-paper-plane mr-2"></i> DM
-    </button>
+      <button @click="goChat" class="flex justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
+        <i class="fas fa-paper-plane mr-2"></i> DM
+      </button>
   </div>
 </section>
 
@@ -373,6 +373,10 @@ const subCategoryOptions = computed(() =>
 const selectedRule = computed(() =>
   playedRules.value.find(r => r.id === selectedRuleId.value)
 )
+
+const goChat = () => {
+  router.push("/chat/"+userId)
+}
 
 const sent = ref(false)
 

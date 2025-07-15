@@ -54,7 +54,7 @@ const routes = [
     component: MyGameList
   },
   {
-    path: '/chat/:gameId',
+    path: '/chat/:targetUserId',
     component: GameChatView,
     props: true
   },

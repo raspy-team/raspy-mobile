@@ -316,11 +316,13 @@ async function onProfileNext() {
 }
 function onImageChange(e) {
   const file = e.target.files[0]
-  if (file && file.size <= 5 * 1024 * 1024) {
+  if (file && file.size <= 1 * 1024 * 1024) {
     avatar.value = file
     const reader = new FileReader()
     reader.onload = () => (preview.value = reader.result)
     reader.readAsDataURL(file)
+  } else {
+    alert("파일은 1MB 이하여야합니다")
   }
 }
 function toHome() { router.push('/') }

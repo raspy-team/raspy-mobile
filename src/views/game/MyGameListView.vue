@@ -274,6 +274,44 @@
 </div>
 </div>
 
+
+<!-- 시작 전 확인 모달 -->
+<div
+  v-if="showCountdownModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+>
+  <div class="bg-white p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
+    <h2 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">
+      경기 시작 전 확인
+    </h2>
+
+    <p class="text-sm text-gray-500 mb-1">이 경기는 다음 시간 동안 진행됩니다:</p>
+    
+    <div class="text-4xl font-black text-orange-500 py-2 mb-4">
+      {{ countdownDurationText }}
+    </div>
+
+    <p class="text-xs text-gray-400 mb-5">
+      아래 <span class="font-semibold text-orange-500">"바로 시작하기"</span> 버튼을 누르면 즉시 경기가 시작되고 상대방에게도 표시됩니다.
+    </p>
+
+    <div class="flex justify-end gap-2">
+      <button
+        @click="showCountdownModal = false"
+        class="px-4 py-2 rounded bg-gray-100 text-gray-600 text-sm"
+      >
+        취소
+      </button>
+      <button
+        @click="confirmStartGame"
+        class="px-5 py-2 rounded bg-orange-500 text-white text-sm font-semibold shadow hover:bg-orange-400 transition active:scale-95"
+      >
+        바로 시작하기
+      </button>
+    </div>
+  </div>
+</div>
+
 </template>
 
 <script setup>
@@ -296,6 +334,9 @@ const currentGameId = ref(null)
 const copied = ref(false)
 const shareModal = ref(false)
 const inviteCode = ref('')
+const showCountdownModal = ref(false)
+const countdownDurationText = ref('')
+
 const gameRefs = ref({})
 let interval
 
@@ -391,10 +432,31 @@ const submitAndStartGame = async () => {
   await client.post(`/api/games/${currentGameId.value}/set-region`, {
     roadAddress: placeRoad.value, detailAddress: placeDetail.value
   })
+
+  showAddressModal.value = false
+  // 시작 전 확인용 모달 열기
+  const game = games.value.find(g => g.id === currentGameId.value)
+  const dur = game?.rule?.duration
+
+    if (dur === -1) {
+    countdownDurationText.value = '제한 없음'
+  } else {
+    const min = Math.floor(dur / 60)
+    const sec = dur % 60
+    countdownDurationText.value = 
+      (min ? `${min}분 ` : '') + (sec ? `${sec}초` : '')
+  }
+  showAddressModal.value = false
+  showCountdownModal.value = true
+
+}
+
+const confirmStartGame = async () => {
   await client.post(`/api/games/${currentGameId.value}/start`)
   router.push(`/games/${currentGameId.value}/play`)
-  showAddressModal.value = false
+  showCountdownModal.value = false
 }
+
 
 const closeModal = () => {
   showAddressModal.value = false

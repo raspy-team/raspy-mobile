@@ -18,6 +18,9 @@ import Rule from "../views/RuleView.vue"
 import DmRoomList from '../views/DmRoomList.vue'
 import OauthCallback from '../views/OauthCallBack.vue'
 
+import GroupUserLogin from "../views/auth/LoginView.vue"
+import GroupUserRegister from "../views/admin/GroupUserRegister.vue"
+
 const routes = [
   {
     path: '/init',
@@ -87,6 +90,8 @@ const routes = [
 
   { path: '/settings', component:  Setting},
   { path: '/rules', component:  Rule},
+  { path: '/group/register', component:  GroupUserRegister},
+  { path: '/group/login', component: GroupUserLogin},
 
 
 

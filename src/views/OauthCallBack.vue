@@ -195,7 +195,8 @@ const route = useRoute()
 const router = useRouter()
 
 onMounted(()=> {
-    localStorage.setItem('raspy_access_token2', route.query.token)
+    if(route.query.token)
+        localStorage.setItem('raspy_access_token2', route.query.token)
 
     if(route.query.isNewUser=='false') {
         router.push("/")
@@ -212,7 +213,7 @@ const step = ref(0)
 const username = ref(''), dupError = ref(''), dupTimer = ref(null), validating = ref(false)
 const nickname = ref(decodeURIComponent(route.query.nickname || ''))
 const nickError = ref(''), nickValidating = ref(false)
-const age = ref(0), ageError = ref('')
+const age = ref(0), ageError = ref('')  
 const gender = ref(''), genderError = ref('')
 const regionP = ref(''), regionS = ref(''), regionError = ref('')
 const bio = ref(''), avatar = ref(null), preview = ref('')

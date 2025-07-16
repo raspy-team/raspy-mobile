@@ -37,6 +37,13 @@
           <span>Apple로 시작하기</span>
         </div>
       </button>
+      <!-- Group Login -->
+      <button class="oauth-btn bg-orange-500 text-white" @click="loginGroup">
+        <div class="icon-text">
+          <i class="fas fa-building w-6"></i>
+          <span>그룹 계정으로 시작하기</span>
+        </div>
+      </button>
       </div>
     </div>
   </div>
@@ -66,6 +73,10 @@ const loginWith = (provider) => {
     : 'http://localhost:8080'
 
   window.location.href = `${apiBase}/oauth2/authorization/${provider}`
+}
+
+const loginGroup = () => {
+  router.push("/group/login")
 }
 </script>
 
@@ -101,7 +112,7 @@ const loginWith = (provider) => {
   border-radius: 8px;
   font-size: 1rem;
   width: 90%;
-  margin:0% 5%;
+  margin:2% 5%;
   transition: background-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
   border: none;
@@ -145,4 +156,6 @@ const loginWith = (provider) => {
 .apple:hover {
   background: #222;
 }
+
+
 </style>

@@ -30,7 +30,7 @@
       <!-- Step 1: 사용자 ID (건너뛰기 없음) -->
       <div v-else-if="step === 1" class="screen-inner">
         <div class="question-box">
-          <h1 class="heading">사용자 ID 생성</h1>
+          <h1 class="heading">사용자 이름 생성</h1>
           <p class="subtext">영문 소문자+숫자 1~12자</p>
         </div>
         <div class="content center">

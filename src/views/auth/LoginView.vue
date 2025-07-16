@@ -23,7 +23,7 @@
             <input
               v-model="email"
               type="text"
-              placeholder="아이디(이메일)"
+              placeholder="아이디"
               class="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-50"
               :class="{ 'border-red-500': emailError }"
             />

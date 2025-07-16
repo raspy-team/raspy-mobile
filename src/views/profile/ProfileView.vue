@@ -35,7 +35,7 @@
             <div class="text-xl font-bold">  
               {{ user.nickname }}
             </div>
-            <div class="text-sm font-semibold text-gray-600">
+            <div class="text-[0.77rem] font-semibold text-gray-600">
               @{{ user.username }}
             </div>
           </span>
@@ -97,7 +97,7 @@
     </div>
     <!-- 부가 정보(친구/매너/시간, 우측) -->
     <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0">
-      <div class="flex flex-col items-center gap-0.5">
+      <div @click = "openFriendModal" class="flex flex-col items-center gap-0.5">
         <span class="text-base font-extrabold text-gray-900">{{ user.stats.friends }}</span>
         <span class="text-xs text-gray-500 font-semibold">친구</span>
       </div>
@@ -125,21 +125,58 @@
 
   <!-- 액션 버튼 (좌/우) -->
   <div v-if="!user.isMe" class="flex gap-3 mt-1">
+
+  <!-- 친구 아님 & 아무 요청 없음 -->
+  <button
+    v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
+    class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 border-[0.1px] border-orange-500 text-white font-bold py-3 w-full rounded-xl shadow transition"
+    @click="sendFriendRequest"
+  >
+    <i class="fas fa-user-plus mr-2"></i> 친구추가
+  </button>
+
+  <!-- 내가 친구 요청을 보낸 상태 -->
+  <button
+    v-else-if="friendStatus.sent && !friendStatus.isFriend"
+    class="flex justify-center items-center bg-white border-[0.1px] border-orange-400 text-orange-500 font-bold py-3 w-full rounded-xl shadow transition"
+    @click="sendFriendCancelRequest"
+  >
+    <i class="fas fa-hourglass-half mr-2"></i> 요청취소
+  </button>
+
+  <!-- 상대가 나에게 친구 요청을 보낸 상태 (아직 수락 안함) -->
+  <div v-else-if="friendStatus.received && !friendStatus.isFriend" class="flex flex-col gap-2 w-full">
+    <div class="flex gap-3 mb-2">
     <button
-      v-if="!sent"
-      class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 border-[0.1px] border-orange-500 text-white font-bold py-3 w-full rounded-xl shadow transition"
-      @click="sendFriendRequest"
+      class="flex-1 flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow transition"
+      @click="acceptFriendRequest"
     >
-      <i class="fas fa-user-plus mr-2"></i> 친구추가
+      <i class="fas fa-user-check mr-2"></i>  승인
     </button>
     <button
-      v-else
-      class="flex justify-center items-center bg-white border-[0.1px] border-orange-500 text-orange-500 font-bold py-3 w-full rounded-xl shadow transition"
-      @click="sendFriendCancelRequest"
+      class="flex-1 flex justify-center items-center bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl shadow transition border border-gray-300"
+      @click="rejectFriendRequest"
     >
-      <i class="fas fa-check mr-2"></i> 요청됨
+      <i class="fas fa-user-times mr-2"></i> 거부
     </button>
-      <button @click="goChat" class="flex justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
+</div>
+<div>
+          <button @click="goChat" class="flex w-[100%] justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
+        <i class="fas fa-paper-plane mr-2"></i> DM
+      </button>
+      </div>
+  </div>
+
+  <!-- 이미 친구 상태 -->
+  <button
+    v-else-if="friendStatus.isFriend"
+    class="flex justify-center items-center bg-green-100 border-[0.1px]  text-green-700 font-bold py-3 w-full rounded-xl shadow transition cursor-default"
+    disabled
+  >
+    <i class="fas fa-check mr-2"></i> 나의 친구
+  </button>
+
+      <button v-if="!(friendStatus.received && !friendStatus.isFriend)" @click="goChat" class="flex justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
         <i class="fas fa-paper-plane mr-2"></i> DM
       </button>
   </div>
@@ -335,6 +372,97 @@
   </transition>
 
   <Footer tab="profile" />
+
+<transition name="fade">
+  <div v-if="showFriendModal" class="fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center">
+    <div class="bg-white h-[60dvh] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
+         style="max-height:60dvh;padding:2rem 1.2rem 2.2rem 1.2rem;overflow-y:auto;">
+      <button class="absolute right-5 top-4 text-xl text-gray-400 hover:text-orange-500" @click="closeFriendModal"><i class="fas fa-times"></i></button>
+      <div class="flex gap-2 mb-5 mt-2">
+        <button
+          :class="friendTab === 'friends' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
+          class="flex-1 py-2 text-base transition"
+          @click="friendTab = 'friends'">친구</button>
+        <button
+          v-if="user?.isMe"
+          :class="friendTab === 'sent' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
+          class="flex-1 py-2 text-base transition"
+          @click="friendTab = 'sent'">요청됨</button>
+        <button
+          v-if="user?.isMe"
+          :class="friendTab === 'received' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
+          class="flex-1 py-2 text-base transition"
+          @click="friendTab = 'received'">요청받음</button>
+      </div>
+      <div v-if="friendTab==='friends'">
+        <div v-if="friends.length" class="flex flex-col gap-3 max-h-[45dvh] overflow-y-auto">
+          <button
+            v-for="f in friends"
+            :key="f.id"
+            class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
+            @click="gotoUser(f.id)">
+            <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
+            <div class="flex-1 text-left min-w-0">
+              <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+              <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+              <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+            </div>
+          </button>
+        </div>
+        <div v-else class="text-gray-400 text-center py-8">친구가 없습니다.</div>
+      </div>
+      <div v-if="friendTab==='sent' && user?.isMe">
+        <div v-if="friendRequestsSent.length" class="flex flex-col gap-3 max-h-[45dvh] overflow-y-auto">
+          <button
+            v-for="f in friendRequestsSent"
+            :key="f.id"
+            class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
+            @click="gotoUser(f.id)">
+            <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
+            <div class="flex-1 text-left min-w-0">
+              <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+              <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+              <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+            </div>
+          </button>
+        </div>
+        <div v-else class="text-gray-400 text-center py-8">요청한 친구가 없습니다.</div>
+      </div>
+      <div v-if="friendTab==='received' && user?.isMe">
+        <div v-if="friendRequestsReceived.length" class="flex flex-col gap-3 max-h-[45dvh] overflow-y-auto">
+          <div
+            v-for="f in friendRequestsReceived"
+            :key="f.id"
+                        @click="gotoUser(f.id)"
+            class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition">
+            <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
+            <div class="flex-1 text-left min-w-0">
+              <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+              <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+              <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+            </div>
+            <div class="flex gap-1 ml-2">
+              <button
+                class="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold shadow"
+                @click="onAcceptRequest(f.id)">
+                승인
+              </button>
+              <button
+                class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-bold shadow border border-gray-300"
+                @click="onRejectRequest(f.id)">
+                거부
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-gray-400 text-center py-8">받은 친구 요청이 없습니다.</div>
+      </div>
+    </div>
+  </div>
+</transition>
+  <CustomToast />
+
+
 </template>
 
 <script setup>
@@ -346,6 +474,15 @@ import CustomSelect from './CustomSelect.vue'
 import MatchCard from './MatchCard.vue'
 import Default from "../../assets/default.png"
 import api from "../../api/api"
+import CustomToast from '../../components/CustomToast.vue'
+import { useToast } from '../../composable/useToast'
+const { showToast } = useToast()
+
+const showFriendModal = ref(false)
+const friendTab = ref('friends') // friends | sent | received
+const friends = ref([])
+const friendRequestsSent = ref([])
+const friendRequestsReceived = ref([])
 
 const chartRef = ref(null)
 let chartInstance = null
@@ -395,13 +532,71 @@ const goChat = () => {
 
 const sent = ref(false)
 
-function sendFriendRequest() {
-  sent.value = true  
+async function onAcceptRequest(friendId) {
+  try {
+    await api.post(`/api/friends/accept/${friendId}`)
+    showToast('친구 요청을 승인했습니다!')
+    // 바로 리스트 갱신
+    loadFriends()
+      fetchFriendStatus()
+
+  } catch (e) {
+    showToast('승인에 실패했습니다.')
+  }
+}
+async function onRejectRequest(friendId) {
+  try {
+    await api.post(`/api/friends/reject/${friendId}`)
+    showToast('친구 요청을 거부했습니다.')
+    loadFriends()
+      fetchFriendStatus()
+
+  } catch (e) {
+    showToast('거부에 실패했습니다.')
+  }
 }
 
-function sendFriendCancelRequest() {
-  sent.value = false
+async function sendFriendRequest() {
+  try {
+    await api.post(`/api/friends/request/${userId}`)
+    sent.value = true
+    showToast('친구 요청을 보냈습니다!')
+      fetchFriendStatus()
+
+  } catch(e) {
+    if (e?.response?.data?.message) showToast(e.response.data.message)
+    else showToast('이미 요청했거나 친구 상태입니다.')
+  }
 }
+async function sendFriendCancelRequest() {
+  try {
+    await api.delete(`/api/friends/cancel/${userId}`)
+    sent.value = false
+    showToast('친구 요청을 취소했습니다.')
+      fetchFriendStatus()
+
+  } catch(e) {
+    showToast('요청 취소에 실패했습니다.')
+  }
+}
+async function acceptFriendRequest() {
+  await api.post(`/api/friends/accept/${userId}`)
+  await fetchFriendStatus()
+}
+async function rejectFriendRequest() {
+  await api.post(`/api/friends/reject/${userId}`)
+  await fetchFriendStatus()
+}
+const friendStatus = ref({ sent: false, isFriend: false, received: false })
+
+async function fetchFriendStatus() {
+  const res = await api.get(`/api/friends/status/${userId}`)
+  friendStatus.value = res.data
+  sent.value = friendStatus.value.sent
+}
+onMounted(() => {
+  fetchFriendStatus()
+})
 
 const stat = computed(() => {
   if (!user.value) return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
@@ -442,6 +637,30 @@ const filteredGames = computed(() => {
   }
   return []
 })
+async function loadFriends() {
+  try {
+    // 내 친구 목록
+    const res = await api.get('/api/friends/my')
+    friends.value = res.data
+    // 요청 보냄/받음 (본인 프로필인 경우에만)
+    if (user.value?.isMe) {
+      const res2 = await api.get('/api/friends/my/sent')
+      friendRequestsSent.value = res2.data
+      const res3 = await api.get('/api/friends/my/received')
+      friendRequestsReceived.value = res3.data
+    }
+  } catch(e) {
+    showToast('친구 목록을 불러오지 못했습니다.')
+  }
+}
+function openFriendModal() {
+  friendTab.value = 'friends'
+  showFriendModal.value = true
+  loadFriends()
+}
+function closeFriendModal() {
+  showFriendModal.value = false
+}
 
 function onTabChange(item) {
   statMode.value = item.id

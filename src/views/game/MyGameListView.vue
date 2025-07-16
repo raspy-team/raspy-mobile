@@ -287,7 +287,7 @@
 
     <p class="text-sm text-gray-500 mb-1">이 경기는 다음 시간 동안 진행됩니다:</p>
     
-    <div class="text-4xl font-black text-orange-500 py-2 mb-4">
+    <div class="text-4xl font-black text-orange-500 py-4 mb-4 mt-3">
       {{ countdownDurationText }}
     </div>
 

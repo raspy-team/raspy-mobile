@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 bg-black/30 flex items-end sm:items-center justify-center">
-    <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-lg pb-safe flex flex-col relative overflow-hidden">
+    <div class="bg-white w-full h-[90dvh] sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-lg pb-safe flex flex-col relative overflow-hidden">
       <!-- 헤더 -->
       <button @click="$emit('close')" class="absolute right-4 top-4 text-gray-400 hover:text-gray-500">
         <i class="fas fa-xmark text-2xl"></i>
@@ -11,20 +11,53 @@
           규칙 선택하기
         </h2>
         <div class="flex gap-2">
-          <div class="flex-1">
-            <select v-model="major" @change="fetchMinors"
-              class="w-full bg-gray-100 border-none rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition">
-              <option value="">주 카테고리</option>
-              <option v-for="m in majors" :key="m">{{m}}</option>
-            </select>
-          </div>
-          <div class="flex-1">
-            <select v-model="minor" :disabled="!major"
-              class="w-full bg-gray-100 border-none rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition disabled:opacity-40">
-              <option value="">보조 카테고리</option>
-              <option v-for="n in minors" :key="n">{{n}}</option>
-            </select>
-          </div>
+<div class="flex-1">
+  <div class="relative">
+    <details ref="majorDropdown" class="group w-full bg-gray-100 rounded-lg" :open="false">
+      <summary
+        class="list-none px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer rounded-lg flex justify-between items-center"
+      >
+        {{ major || '주 카테고리' }}
+        <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+      </summary>
+      <ul class="mt-1 bg-white shadow-lg rounded-lg border absolute z-10 w-full max-h-[240px] overflow-y-auto">
+        <li
+          v-for="m in majors"
+          :key="m"
+          @click="selectMajor(m)"
+          class="px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer"
+        >
+          {{ m }}
+        </li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+<div class="flex-1">
+  <div class="relative">
+    <!-- 대체된 보조카테고리 드롭다운 -->
+    <details ref="minorDropdown" class="group w-full bg-gray-100 rounded-lg" :open="false">
+      <summary
+        class="list-none px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer rounded-lg flex justify-between items-center"
+      >
+        {{ minor || '보조 카테고리' }}
+        <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+      </summary>
+      <ul class="mt-1 bg-white shadow-lg rounded-lg border absolute z-10 w-full">
+        <li
+          v-for="n in minors"
+          :key="n"
+          @click="selectMinor(n)"
+          class="px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer"
+        >
+          {{ n }}
+        </li>
+      </ul>
+    </details>
+  </div>
+</div>
+
         </div>
         <input v-model="search"
           placeholder="키워드로 검색"
@@ -129,7 +162,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits, watch } from 'vue'
+import { ref, onMounted, defineEmits, watch , nextTick} from 'vue'
 import api from '../api/api'
 
 const emit = defineEmits(['select', 'close'])
@@ -139,7 +172,6 @@ const minors = ref([])
 const rules = ref([])
 const loading = ref(false)
 const showSortOptions = ref(false)
-
 const major = ref('')
 const minor = ref('')
 const search = ref('')
@@ -148,7 +180,22 @@ const sortOptions = [
   { label: '최신순', value: 'recent' },
   { label: '인기순', value: 'popular' }
 ]
+const majorDropdown = ref(null)
 
+const selectMajor = async (value) => {
+  major.value = value
+  majorDropdown.value.open = false
+  await fetchMinors()   // 기존과 동일하게 minors 불러옴
+  onSubmitSearch()       // 바로 검색 필터링도 수행
+}
+
+const minorDropdown = ref(null)
+
+const selectMinor = (value) => {
+  minor.value = value
+  minorDropdown.value.open = false
+  onSubmitSearch()
+}
 const expandedRules = ref([])
 
 const toggleExpand = (id) => {
@@ -171,6 +218,12 @@ const fetchMinors = async () => {
   }
   const res = await api.get(`/api/rules/categories/${major.value}`)
   minors.value = res.data
+  minor.value = ''
+
+  await nextTick()
+  if (minorDropdown.value) {
+    minorDropdown.value.open = true
+  }
 }
 const onSubmitSearch = async () => {
   loading.value = true

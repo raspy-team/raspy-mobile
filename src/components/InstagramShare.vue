@@ -163,7 +163,7 @@ function drawFinalImage() {
     ctx.fillStyle = textColor
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
-    ctx.fillText('@' + (props.me?.nickname || ''), meNicknameX, groupTopY*1.06  + avatarSize + margin)
+    ctx.fillText((props.me?.nickname || ''), meNicknameX, groupTopY*1.06  + avatarSize + margin)
   }
    meImg.src = props.me?.avatar || defaultAvatar
 
@@ -191,7 +191,7 @@ function drawFinalImage() {
     ctx.fillStyle = textColor
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
-    ctx.fillText('@' + (props.game.opponent?.nickname || ''), oppNicknameX, groupTopY*1.06 + avatarSize + margin)
+    ctx.fillText((props.game.opponent?.nickname || ''), oppNicknameX, groupTopY*1.06 + avatarSize + margin)
   }
   oppImg.src = props.game.opponent?.avatar || defaultAvatar
  

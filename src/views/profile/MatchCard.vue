@@ -45,18 +45,18 @@
     <!-- 총 점수 -->
     <div class="flex flex-col items-center mt-0">
       <div
-        class="flex flex-col items-center justify-center  px-6 "
+        class="flex flex-col items-center w-full justify-center "
       >
         <span
-          class="text-4xl font-black"
+          class="text-4xl font-black w-full"
           :class="isWin ? 'text-orange-500' : isDraw ? 'text-gray-500' : 'text-blue-500'"
         >
 
-    <div class="flex items-center gap-4">
+    <div class="flex justify-between items-center">
   <!-- 왼쪽 영역 (1) -->
-  <div class="flex items-center gap-3 flex-[1]">
+  <div class="flex items-center gap-3  w-[42%]">
     <!-- 유저 정보 및 점수 -->
-    <div class="flex flex-col items-center pt-7">
+    <div class="flex flex-col items-center pt-7 w-[80%]">
       <router-link :to="'/profile/' + game.me.id" class="shrink-0">
         <img :src="game.me.avatar == null ? Default : game.me.avatar" class="w-12 h-12 rounded-full border-2 border-orange-400 shadow" />
       </router-link>
@@ -66,28 +66,28 @@
         </div>
       </router-link>
     </div>
-    <div class="font-extrabold ml-[4.8dvw]">
+    <div class="font-extrabold  w-[20%]">
       {{ game.myScore }}
     </div>
   </div>
 
   <!-- 가운데 콜론 (2) -->
-  <div class="flex justify-center flex-[2] font-extrabold text-xl">
+  <div class="flex justify-center  font-extrabold text-2xl w-[16%]">
     :
   </div>
 
   <!-- 오른쪽 영역 (1) -->
-  <div class="flex items-center gap-3 justify-end flex-[1]">
-    <div class="font-extrabold mr-[4.8dvw]">
+  <div class="flex items-center gap-3 justify-end w-[42%]">
+    <div class="font-extrabold w-[20%]">
       {{ game.opponentScore }}
     </div>
-    <div class="flex flex-col items-center pt-7">
+    <div class="flex flex-col items-center pt-7 w-[80%]">
       <router-link :to="'/profile/' + game.opponent.id" class="shrink-0">
         <img :src="game.opponent.avatar == null ? Default : game.opponent.avatar" class="w-12 h-12 rounded-full border-2 border-orange-400 shadow" />
       </router-link>
       <router-link :to="'/profile/' + game.opponent.id">
         <div class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]">
-          {{ game.opponent.nickname }}
+          {{game.opponent.nickname}}
         </div>
       </router-link>
     </div>

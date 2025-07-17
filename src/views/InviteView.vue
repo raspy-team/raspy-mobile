@@ -55,7 +55,8 @@
           </div>
         </div>
         <!-- 👇 종료된 경기일 때 결과 보기 버튼 노출 -->
-         <div class="text-center font-light text-orange-500 text-[0.85rem] py-2">
+         <div           v-if="game.status === 'COMPLETED'"
+ class="text-center font-light text-orange-500 text-[0.85rem] py-2">
             경기가 종료되었어요!
          </div>
         <button

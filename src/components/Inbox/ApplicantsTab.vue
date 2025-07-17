@@ -199,7 +199,7 @@ async function cancelApproval(gameId, userId) {
   const user = group?.applicants?.find(a => a.userId === userId)
   if (user) user.approved = false
   if (group) group.gameStatus = 'MATCHING' 
-  showToast(`@${user.applicantNickname}님의 참여를 취소했습니다!`)
+  showToast(`${user.applicantNickname}님의 참여를 취소했습니다!`)
 }
 
 function formatDate(dateStr) {

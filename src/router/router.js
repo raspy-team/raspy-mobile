@@ -20,6 +20,7 @@ import OauthCallback from '../views/OauthCallBack.vue'
 
 import GroupUserLogin from "../views/auth/LoginView.vue"
 import GroupUserRegister from "../views/admin/GroupUserRegister.vue"
+import InviteView from "../views/InviteView.vue"
 
 const routes = [
   {
@@ -85,6 +86,10 @@ const routes = [
     path: '/games/:gameId/result',
     component: GameResult,
     props: true
+  },
+  {
+    path: '/invite/:gameId',
+    component: InviteView,
   },
   { path: '/profile/:id', component: Profile },
 

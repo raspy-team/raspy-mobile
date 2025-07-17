@@ -822,7 +822,7 @@ if (el && typeof el.scrollIntoView === 'function') {
   } catch (e) {
     alert('존재하지 않는 유저입니다.')
     console.log(e)
-    router.push('/')
+    router.back()
   }
 })
 

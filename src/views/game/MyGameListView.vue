@@ -146,9 +146,9 @@
           ><i class="fas fa-play mr-2"></i>경기 시작</button>
           <button
             v-else-if="game.isOwner && !game.opponentNickname"
-            class="w-full bg-blue-500 text-white font-bold rounded-xl py-3 shadow hover:bg-blue-400 transition active:scale-95"
-            @click="shareGame(game)"
-          ><i class="fas fa-user-plus mr-2"></i>상대 초대하기</button>
+            class="w-full bg-orange-500 text-white font-bold rounded-xl py-3 shadow transition active:scale-95"
+            @click="shareGame(game.id)"
+          ><i class="fas fa-share mr-2"></i>경기 공유하기</button>
           <div v-else class="text-center text-gray-400 text-sm py-3">경기 시작 대기 중</div>
         </div>
       </div>
@@ -311,6 +311,7 @@
     </div>
   </div>
 </div>
+    <CustomToast />
 
 </template>
 
@@ -413,12 +414,16 @@ const copyInviteCode = async () => {
     }
   }
 }
+import CustomToast from '../../components/CustomToast.vue'
+import { useToast } from '../../composable/useToast'
+const { showToast } = useToast()
 
-function generateInviteCode(id) {
-  const OFFSET = 538, MULTIPLIER = 7
-  const ob = ((id + OFFSET) * MULTIPLIER) % 10000
-  return ob.toString().padStart(4, '0')
-}
+
+// function generateInviteCode(id) {
+//   const OFFSET = 538, MULTIPLIER = 7
+//   const ob = ((id + OFFSET) * MULTIPLIER) % 10000
+//   return ob.toString().padStart(4, '0')
+// }
 
 const openStartModal = (game) => {
   showAddressModal.value = true
@@ -468,11 +473,12 @@ const closeModal = () => {
 const joinGame = (id) => router.push(`/games/${id}/play`)
 const canStart = (g) => g.status === 'SCHEDULED' && !!g.opponentNickname
 
-const shareGame = (game) => {
-  inviteCode.value = generateInviteCode(game.id)
-  shareModal.value = true
+// 초대 딥링크 복사
+async function shareGame(gameId) {
+  const res = await client.post('/api/invite', null, { params: { gameId } })
+  await navigator.clipboard.writeText(res.data.url)
+  showToast('공유 링크가 복사되었습니다!')
 }
-
 function formatDate(s) {
   return s ? new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' }) : '미정'
 }

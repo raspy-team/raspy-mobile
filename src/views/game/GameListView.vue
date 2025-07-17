@@ -11,7 +11,7 @@
     <main class="pt-3 px-4 pb-4">
       <!-- Menu Items -->
       <div class="grid grid-cols-1 gap-3 mb-2">
-        <div class="flex flex-row gap-6 justify-between mb-4 px-2">
+        <div class="flex flex-row gap-6 justify-between mb-4 px-8">
           <div
             v-for="(action, index) in menuItems"
             :key="index"
@@ -34,6 +34,7 @@
             </div>
           </div>
           <div
+            v-if="false"
             @click="showInviteModal=true"
             class="flex flex-col items-center cursor-pointer relative group"
             style="min-width: 64px;"
@@ -219,7 +220,7 @@
               <button @click.stop="toggleComment(game.id)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
                 <i class="fas fa-comment"></i>
               </button>
-              <button @click.stop="shareGame(game)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+              <button @click.stop="shareGame(game.id)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
                 <i class="fas fa-share"></i>
               </button>
             </div>
@@ -579,16 +580,14 @@ const shareModal = ref(false)
 const inviteCode = ref('')
 const copied = ref(false)
 const OFFSET = 538
-const MULTIPLIER = 7
-function generateInviteCode(id) {
-  const ob = ((id + OFFSET) * MULTIPLIER) % 10000;
-  return ob.toString().padStart(4, '0');
+
+// 초대 딥링크 복사
+async function shareGame(gameId) {
+  const res = await api.post('/api/invite', null, { params: { gameId } })
+  await navigator.clipboard.writeText(res.data.url)
+  showToast('공유 링크가 복사되었습니다!')
 }
-const shareGame = (game) => {
-  inviteCode.value = generateInviteCode(game.id)
-  shareModal.value = true
-  copied.value = false
-}
+
 const copyInviteCode = async () => {
   try {
     await navigator.clipboard.writeText(inviteCode.value)

@@ -105,9 +105,16 @@
   const notifications = ref([])
   const unreadCount = ref(0)
 
-  const goBack = () => {
+const goBack = () => {
+  const { origin } = window.location
+  // referrer가 없거나, 우리 서비스가 아니면 메인으로
+  if (!document.referrer || !document.referrer.startsWith(origin)) {
+    router.replace('/')  // replace로 기록 남기지 않음 (권장)
+  } else {
     router.back()
   }
+}
+
 
   const fetchNotifications = async () => {
     const res = await api.get('/api/notifications')

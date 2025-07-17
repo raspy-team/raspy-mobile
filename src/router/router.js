@@ -98,7 +98,7 @@ const routes = [
   { path: '/rules', component:  Rule},
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/group/login', component: GroupUserLogin},
-  {path:'/invite-deep', component : InviteDeep}, 
+  {path:'/invite-fall-back/:gameId', component : InviteDeep}, 
 
 
   

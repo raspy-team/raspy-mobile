@@ -21,6 +21,7 @@ import OauthCallback from '../views/OauthCallBack.vue'
 import GroupUserLogin from "../views/auth/LoginView.vue"
 import GroupUserRegister from "../views/admin/GroupUserRegister.vue"
 import InviteView from "../views/InviteView.vue"
+import InviteDeep from "../views/InviteDeep.vue"
 
 const routes = [
   {
@@ -97,7 +98,7 @@ const routes = [
   { path: '/rules', component:  Rule},
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/group/login', component: GroupUserLogin},
-
+  {path:'/invite-deep', component : InviteDeep}, 
 
 
   

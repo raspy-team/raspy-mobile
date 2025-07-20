@@ -212,7 +212,6 @@ if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
   });
 }
 
-    }
 })
 
 

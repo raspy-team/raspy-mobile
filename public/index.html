@@ -1,97 +1,102 @@
 <!DOCTYPE html>
 <html lang="">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+
   <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- or black -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- or black -->
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <title>
+    Raspy
+  </title>
+
+  <script>
+    // 터치 기반 확대(핀치줌, 더블탭) 완전 차단
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+    document.addEventListener('gesturechange', function (e) {
+      e.preventDefault();
+    });
+    document.addEventListener('gestureend', function (e) {
+      e.preventDefault();
+    });
+
+
+    let initialVh = window.innerHeight * 0.01
+    document.documentElement.style.setProperty('--real-vh', `${initialVh}px`)
+
+    window.addEventListener('setRealVh', (e) => {
+      document.documentElement.style.setProperty('--real-vh', `${e.detail}px`);
+      // 필요하면: document.body.style.height = `${e.detail}px`
+    });
     
-    <script>
-      // 터치 기반 확대(핀치줌, 더블탭) 완전 차단
-      document.addEventListener('gesturestart', function (e) {
-        e.preventDefault();
-      });
-      document.addEventListener('gesturechange', function (e) {
-        e.preventDefault();
-      });
-      document.addEventListener('gestureend', function (e) {
-        e.preventDefault();
-        });
+    const ua = navigator.userAgent.toLowerCase()
+    if (ua.includes('raspy-ios')) {
+      document.documentElement.classList.add('ios-app')
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+KR:wght@100..900&family=Noto+Serif+KR:wght@200..900&display=swap');
 
+    * {
+      font-family: "Noto Sans KR", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 400;
+      font-style: normal;
+    }
 
-        let initialVh = window.innerHeight * 0.01
-        document.documentElement.style.setProperty('--real-vh', `${initialVh}px`)
+    .ios-app .raspy-top {
+      padding-top: 32px;
+    }
 
-        window.addEventListener('setRealVh', (e) => {
-          document.documentElement.style.setProperty('--real-vh', `${e.detail}px`);
-          // 필요하면: document.body.style.height = `${e.detail}px`
-        });
+    .ios-app body {
+      padding-top: 39px;
+    }
 
-      setRealViewportHeight();
-      window.addEventListener('resize', setRealViewportHeight);
+    .ios-app .raspy-bot {
+      padding-bottom: 24px;
+    }
 
-            
-      const ua = navigator.userAgent.toLowerCase()
-      if (ua.includes('raspy-ios')) {  
-        document.documentElement.classList.add('ios-app')
-      }
-    </script>
-    <style>
-@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+KR:wght@100..900&family=Noto+Serif+KR:wght@200..900&display=swap');
-      * {
-            font-family: "Noto Sans KR", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: 400;
-            font-style: normal;
-      }
+    .RASPY {
+      font-family: "Kanit", sans-serif;
+      font-weight: 600;
+      font-style: normal;
+      font-size: 1.7rem;
+      letter-spacing: 0.05em;
 
-        .ios-app .raspy-top {
-          padding-top: 32px;
-        }
+    }
 
-        .ios-app body {
-          padding-top:39px;
-        }
+    html, body {
+      overscroll-behavior: none;
+      /* 최신 브라우저용 */
+      margin: 0;
+      background-color: white;
+    }
 
-        .ios-app .raspy-bot{
-          padding-bottom : 24px;
-        }
-
-      .RASPY {
-          font-family: "Kanit", sans-serif;
-          font-weight: 600;
-          font-style: normal;
-          font-size : 1.7rem;
-          letter-spacing: 0.05em;
-        
-      }
-
-      html, body {
-        overscroll-behavior: none; /* 최신 브라우저용 */
-        margin: 0;
-        background-color: white;
-      }
-  
-      body {
+    body {
       user-select: none;
       -webkit-user-select: none;
       -ms-user-select: none;
     }
-    </style>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+  </style>
+</head>
+
+<body>
+  <noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+        Please enable it to continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
 </html>

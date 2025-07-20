@@ -1,5 +1,5 @@
 <template>
-  <div v-if="user" class="h-dvh bg-[#f8f9fa] pb-24 relative">
+  <div v-if="user" style="min-height: calc(var(--real-vh, 1vh) * 100)" class="bg-[#f8f9fa] pb-24 relative">
 
     <!-- Fixed Top Bar -->
     <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 py-3 border-b border-gray-100">
@@ -335,7 +335,7 @@
 
     <transition name="fade">
     <div v-if="showUserModal" class="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-center items-center">
-      <div class="bg-white  w-dvw h-dvh  w-full p-6 relative">
+      <div class="bg-white  w-dvw   w-full p-6 relative" style="min-height: calc(var(--real-vh, 1vh) * 100)">
         <button class="absolute top-4  right-7 text-gray-400 hover:text-orange-500 text-xl"
                 @click="closeUserModal">
           <i class="fas fa-times"></i>

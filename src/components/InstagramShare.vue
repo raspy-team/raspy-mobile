@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center h-dvh z-[10000]">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000]" style="min-height: calc(var(--real-vh, 1vh) * 100)">
     <div class="bg-white w-[90dvw] max-w-[400px] rounded-2xl shadow-lg flex flex-col items-center p-4">
       <!-- 헤더 -->
       <div class="flex items-center justify-between w-full mb-3">

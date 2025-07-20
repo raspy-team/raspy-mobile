@@ -1,6 +1,6 @@
 <template>
   <HeaderComp />
-  <div class="h-dvh bg-gray-50 pb-16">
+  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="bg-gray-50 pb-16">
     <!-- Status Bar -->
     <div class="bg-white h-6 w-full"></div>
     

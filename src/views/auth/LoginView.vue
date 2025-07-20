@@ -2,7 +2,7 @@
   <button @click="goBack" class="text-black text-lg fixed top-5 left-5">
     <i class="fas fa-chevron-left"></i>
   </button>
-  <div class="h-dvh flex">
+  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="flex">
     <!-- Left: Brand -->
     <div class="hidden lg:flex w-1/2 bg-[#191919] items-center justify-center">
       <div class="text-center space-y-8 px-8">

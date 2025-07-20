@@ -1,5 +1,5 @@
 <template>
-  <div class="h-dvh flex flex-col">
+  <div class="flex flex-col">
     <div class="flex-1 overflow-y-auto space-y-5">
       <div
         v-for="group in groups"

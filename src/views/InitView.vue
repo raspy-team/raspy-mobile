@@ -1,5 +1,12 @@
 <template>
-  <div class="h-dvh flex flex-col justify-between items-center bg-white px-6">
+  <div v-if="isLoading" class="loading-overlay">
+  <div class="loader">
+    <span class="loading-text">로딩중...</span>
+  </div>
+</div>
+
+
+  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class=" flex flex-col justify-between items-center bg-white px-6">
     <div></div>
     <div class="text-center flex-2 mt-20 fixed left-0 w-full text-center top-[30dvh]">
       <span class="raspy mb-4">RASPY</span>
@@ -52,6 +59,8 @@
 <script setup>
 import { useRouter } from 'vue-router'
 const router = useRouter()
+import { ref } from 'vue'
+const isLoading = ref(false)
 
 const goHomeIfLoggedIn = () => {
   if (localStorage.getItem("raspy_access_token2") != undefined) {
@@ -69,6 +78,7 @@ const isIosApp = userAgent.includes('raspy-ios')
 
 const loginWith = (provider) => {
   const isLocalhostClient = window.location.hostname === 'localhost' && window.location.port === '8081'
+  isLoading.value = true // 로딩 시작
 
 const apiBase = isLocalhostClient
   ? 'http://localhost:8080'
@@ -89,9 +99,7 @@ const loginGroup = () => {
   router.push("/group/login")
 }
 
-window.onKakaoLoginSuccess = function({ token }) {
-  console.log("✅ 카카오 로그인 성공! 토큰:", token)
-
+window.onKakaoLoginSuccess = function({ token }) { 
   // 토큰 저장
   localStorage.setItem("raspy_access_token2", token)
 
@@ -178,5 +186,42 @@ window.onKakaoLoginSuccess = function({ token }) {
   background: #222;
 }
 
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  transition: background 0.2s;
+}
+.loader {
+  background: rgba(255,255,255,0.7);
+  padding: 24px 36px;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pop-in 0.23s cubic-bezier(.47,1.64,.41,.8);
+}
+.loading-text {
+  font-size: 1.2rem;
+  color: var(--point-color, #ff6f1f);
+  font-family: 'Kanit', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  animation: blink 1.3s infinite alternate;
+}
+@keyframes pop-in {
+  0% { transform: scale(0.7); opacity:0; }
+  100% { transform: scale(1); opacity:1; }
+}
+@keyframes blink {
+  0% { opacity:1; }
+  100% { opacity:0.55; }
+}
 
 </style>

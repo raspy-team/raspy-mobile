@@ -1,5 +1,5 @@
 <template>
-  <div class="h-dvh bg-gradient-to-b from-white to-gray-50 p-5 py-20">
+  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class=" bg-gradient-to-b from-white to-gray-50 p-5 py-20">
     <Header title="게임 생성" hasReferer="1" />
     <div class="max-w-xl mx-auto">
       <!-- 메인 카드 컨테이너 -->

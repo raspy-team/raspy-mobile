@@ -1,5 +1,5 @@
 <template>
-  <div class="h-dvh flex flex-col justify-center items-center bg-gradient-to-b from-orange-50 to-white px-5 py-8 relative">
+  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class=" flex flex-col justify-center items-center bg-gradient-to-b from-orange-50 to-white px-5 py-8 relative">
     <!-- Raspy 브랜드 -->
     <div class="flex flex-col items-center mb-12">
       <span class="text-4xl font-extrabold tracking-tight text-orange-500 mb-2">RASPY</span>

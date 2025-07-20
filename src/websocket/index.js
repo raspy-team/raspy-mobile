@@ -1,6 +1,6 @@
 import { Client } from '@stomp/stompjs'
 
-const hostname = window.location.hostname
+  const isLocalhostClient = window.location.hostname === 'localhost' && window.location.port === '8081'
 
 
 // 환경별 WS URL 분기

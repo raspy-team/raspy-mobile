@@ -24,10 +24,6 @@ api.interceptors.request.use(config => {
   return Promise.reject(error)
 })
 
-const excludeLoginRedirectURLs = [
-  '/api/games/in-progress',
-  '/api/auth/login',
-]
 
 api.interceptors.response.use(
   response => response,

@@ -50,19 +50,14 @@ api.interceptors.response.use(
 
     // 401 처리
     if (error.response && error.response.status === 401) {
-      const requestURL = config.url
-      const isExcluded = excludeLoginRedirectURLs.some(excludedPath =>
-        requestURL.includes(excludedPath)
-      )
 
-      if (!isExcluded) {
         localStorage.removeItem('raspy_access_token2')
         if (routerInstance) {
           routerInstance.push('/init')
         } else {
           window.location.href = '/init'
         }
-      }
+      
     }
 
     return Promise.reject(error)

@@ -72,7 +72,16 @@ const loginWith = (provider) => {
     ? 'https://raspy-be.shop'
     : 'http://localhost:8080'
 
-  window.location.href = `${apiBase}/oauth2/authorization/${provider}`
+
+  if(provider == 'kakao')
+    if (userAgent.includes("raspy-ios")) {
+      window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: "kakaoLogin" })
+    } else {
+      window.location.href = `${apiBase}/oauth2/authorization/kakao`
+    }
+  
+  else 
+    window.location.href = `${apiBase}/oauth2/authorization/${provider}`
 }
 
 const loginGroup = () => {

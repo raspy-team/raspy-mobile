@@ -21,7 +21,7 @@ function isActive(pathPrefix) {
 </script>
 
 <template>
-<nav class="sticky bottom-0 left-0 w-full bg-white border-t z-10">
+<nav class="fixed bottom-0 left-0 w-full bg-white border-t z-10">
     <div class="max-w-4xl mx-auto h-14 px-6 flex justify-between items-center text-[0.72rem]">
       <!-- 홈 -->
       <router-link to="/" class="flex flex-col gap-y-2 items-center" :class="isActive('/') ? 'text-[#f97316]' : 'text-gray-500'">

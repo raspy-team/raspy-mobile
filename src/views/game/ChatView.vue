@@ -17,7 +17,7 @@
       </div>
     </div>
 </div>
-<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[90px] pb-[10dvh] px-1">
+<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[90px] pb-[10%] px-1">
     <!-- 메시지 목록 -->
     <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
       <div v-if="messages.length > 0" class="flex justify-center my-3">

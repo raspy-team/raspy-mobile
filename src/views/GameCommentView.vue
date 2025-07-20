@@ -97,7 +97,6 @@
     accept="image/*"
     @change="onImageChange"
     class="hidden"
-    capture="environment"
   />
 </form>
 

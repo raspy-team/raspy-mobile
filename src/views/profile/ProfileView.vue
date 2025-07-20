@@ -373,10 +373,10 @@
 
   <Footer tab="profile" />
 
-<transition name="fade">
-  <div v-if="showFriendModal" class="fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center">
-    <div class="bg-white h-[60dvh] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
-         style="max-height:60dvh;padding:2rem 1.2rem 2.2rem 1.2rem;overflow-y:auto;">
+<transition name="fade h-full">
+  <div v-if="showFriendModal" class="h-full fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center">
+    <div class="bg-white h-[60%] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
+         style="padding:2rem 1.2rem 2.2rem 1.2rem;overflow-y:auto;">
       <button class="absolute right-5 top-4 text-xl text-gray-400 hover:text-orange-500" @click="closeFriendModal"><i class="fas fa-times"></i></button>
       <div class="flex gap-2 mb-5 mt-2">
         <button
@@ -395,7 +395,7 @@
           @click="friendTab = 'received'">요청받음</button>
       </div>
       <div v-if="friendTab==='friends'">
-        <div v-if="friends.length" class="flex flex-col gap-3 max-h-[45dvh] overflow-y-auto">
+        <div v-if="friends.length" class="flex flex-col gap-3  overflow-y-auto">
           <button
             v-for="f in friends"
             :key="f.id"
@@ -412,7 +412,7 @@
         <div v-else class="text-gray-400 text-center py-8">친구가 없습니다.</div>
       </div>
       <div v-if="friendTab==='sent' && user?.isMe">
-        <div v-if="friendRequestsSent.length" class="flex flex-col gap-3 max-h-[45dvh] overflow-y-auto">
+        <div v-if="friendRequestsSent.length" class="flex flex-col gap-3  overflow-y-auto">
           <button
             v-for="f in friendRequestsSent"
             :key="f.id"
@@ -429,7 +429,7 @@
         <div v-else class="text-gray-400 text-center py-8">요청한 친구가 없습니다.</div>
       </div>
       <div v-if="friendTab==='received' && user?.isMe">
-        <div v-if="friendRequestsReceived.length" class="flex flex-col gap-3 max-h-[45dvh] overflow-y-auto">
+        <div v-if="friendRequestsReceived.length" class="flex flex-col gap-3  overflow-y-auto">
           <div
             v-for="f in friendRequestsReceived"
             :key="f.id"

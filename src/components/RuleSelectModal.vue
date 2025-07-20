@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 z-50 bg-black/30 flex items-end sm:items-center justify-center">
-    <div class="bg-white w-full h-[90dvh] sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-lg pb-safe flex flex-col relative overflow-hidden">
+  <div class="fixed h-full inset-0 z-50 bg-black/30 flex items-end sm:items-center justify-center">
+    <div class="bg-white w-full h-[90%] sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-lg pb-safe flex flex-col relative overflow-hidden">
       <!-- 헤더 -->
       <button @click="$emit('close')" class="absolute right-4 top-4 text-gray-400 hover:text-gray-500">
         <i class="fas fa-xmark text-2xl"></i>

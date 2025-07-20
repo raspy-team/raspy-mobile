@@ -68,10 +68,6 @@
       </div>
     </div>
 
-    <!-- <div class="fixed top-[26dvh] left-1/2 -translate-x-1/2">
-       <button @click="nextSet" class=" bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 text-white w-[70dvw] py-4 rounded-full text-base font-bold shadow-xl hover:scale-110 transition animate-bounce-pulse z-50">다음 세트로</button>
-    </div> -->
-
 <div class="mt-auto relative">
   
 <div class="relative max-h-28 overflow-hidden flex flex-col justify-end space-y-1 mb-10 px-1">

@@ -307,7 +307,7 @@
     <!-- 게임 정보 카드 -->
     <transition name="fade">
       <div v-if="inviteGame">
-            <div  class="bg-white overflow-auto  mb-4 w-[86dvw] max-h-[68dvh]  p-4 ">
+            <div  class="bg-white overflow-auto  mb-4 w-[86dvw] max-h-[68%]  p-4 ">
             <!-- 타이틀과 생성자 정보(우측 상단) -->
 
             <div class="flex justify-between items-start">

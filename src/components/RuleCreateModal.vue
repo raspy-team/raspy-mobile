@@ -73,8 +73,8 @@
     </div>
   </div>
 
-        <transition name="fade">
-        <div v-if="showAIGenerating" class="ai-effect-overlay">
+        <transition name="fade" class="h-full">
+        <div v-if="showAIGenerating" class="ai-effect-overlay h-full">
           <div class="ai-circle-loader"></div>
           <p class="ai-shimmer-text">AI가 규칙의 제목과 카테고리를 생성 중입니다…</p>
         </div>
@@ -174,7 +174,7 @@ const handleSubmit = async () => {
   left:0;
   top:0;
   width: 100dvw;
-  height: 100dvh;
+  height: 100%;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   background:rgba(255,255,255,0.9);
 }

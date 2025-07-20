@@ -24,16 +24,30 @@
       });
       document.addEventListener('gestureend', function (e) {
         e.preventDefault();
-      });
+        });
+
+
+      let initialVh = window.innerHeight * 0.01
+      document.documentElement.style.setProperty('--real-vh', `${initialVh}px`)
 
       function setRealViewportHeight() {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--real-vh', `${vh}px`);
+        // 키보드 올라오면 window.innerHeight 줄어듬
+        const newVh = window.innerHeight * 0.01
+        // 최소값 기준으로만 갱신 (키보드 떴을 땐 줄어들지 않게)
+        if (newVh > initialVh * 0.95) {
+          initialVh = newVh
+          document.documentElement.style.setProperty('--real-vh', `${initialVh}px`)
+        }
       }
 
       setRealViewportHeight();
       window.addEventListener('resize', setRealViewportHeight);
 
+            
+      const ua = navigator.userAgent.toLowerCase()
+      if (ua.includes('raspy-ios')) {  
+        document.documentElement.classList.add('ios-app')
+      }
     </script>
     <style>
 @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+KR:wght@100..900&family=Noto+Serif+KR:wght@200..900&display=swap');
@@ -44,9 +58,9 @@
             font-style: normal;
       }
 
-      body {
-  padding-top: env(safe-area-inset-top); /* 세이프티존 고려 */
-}
+        .ios-app body {
+          padding-top: 28px; /* 원하는 만큼 조절 */
+        }
 
       .RASPY {
           font-family: "Kanit", sans-serif;
@@ -62,8 +76,7 @@
         height: 100%;
         margin: 0;
       }
-
-
+  
       body {
       user-select: none;
       -webkit-user-select: none;

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="modalVisible"
-    class="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
+    class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 raspy-top raspy-bot"
     @click.self="closeModal"
   >
 <transition name="slide-up" @after-leave="afterLeave">

@@ -138,7 +138,7 @@
           <div  class="fixed bottom-0 w-full left-0 ">
             <button type="submit"
               :disabled="!selectedRule"
-              class="w-full bg-gradient-to-r  raspy-bot from-orange-400 to-orange-500 text-white text-lg font-semibold pt-4 shadow-md disabled:opacity-40">
+              class="w-full bg-gradient-to-r  pb-4 raspy-bot from-orange-400 to-orange-500 text-white text-lg font-semibold pt-4 shadow-md disabled:opacity-40">
               게임 생성
             </button>
           </div>

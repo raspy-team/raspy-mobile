@@ -1,6 +1,6 @@
 <template>
   <Header :has-referer="true" title="인박스" />
-  <div class="min-h-screen w-screen flex flex-col mt-[4rem]">
+  <div class="h-dvh w-dvw flex flex-col mt-[4rem]">
     <div class="flex justify-center sticky top-0 bg-white z-10 py-3">
       <button
         @click="setTab('sent')"

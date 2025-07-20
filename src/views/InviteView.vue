@@ -1,6 +1,6 @@
 <template>
   <Header :has-referer="true" title="경기 정보" />
-  <div class="min-h-screen bg-gray-50 flex flex-col items-center py-20 px-5">
+  <div class="h-dvh bg-gray-50 flex flex-col items-center py-20 px-5">
     <div v-if="loading" class="flex justify-center items-center h-[50vh]">
       <i class="fas fa-spinner fa-spin text-3xl text-orange-400"></i>
     </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col justify-between items-center bg-white px-6">
+  <div class="h-dvh flex flex-col justify-between items-center bg-white px-6">
     <div></div>
     <div class="text-center flex-2 mt-20 fixed left-0 w-full text-center top-[30dvh]">
       <span class="raspy mb-4">RASPY</span>
@@ -65,7 +65,7 @@ document.documentElement.style.setProperty('--point-color', pointColor)
 
 // 플랫폼 감지 (iOS 웹뷰)
 const userAgent = navigator.userAgent.toLowerCase()
-const isIosApp = userAgent.includes('iphone') && userAgent.includes('raspy-ios') // TODO: swift에서 agent setting 필요
+const isIosApp = userAgent.includes('raspy-ios')
 
 const loginWith = (provider) => {
   const apiBase = window.location.hostname.endsWith('.vercel.app')

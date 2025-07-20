@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-between min-h-screen bg-gray-50 p-6 text-center">
+  <div class="flex flex-col items-center justify-between h-dvh bg-gray-50 p-6 text-center">
     <i class="fas fa-arrow-left self-start text-xl text-gray-600 mb-4" @click="goBack"></i>
 
 

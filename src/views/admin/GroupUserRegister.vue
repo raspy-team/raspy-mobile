@@ -1,6 +1,6 @@
 <template>
     <Header :has-referer="true" title="그룹 계정 생성" />
-  <div class="min-h-screen flex">
+  <div class="h-dvh flex">
     <!-- 왼쪽: 브랜드 타이틀 & 소개 -->
     <div class="hidden lg:flex w-1/2 bg-[#191919] items-center justify-center">
       <div class="text-center space-y-8 px-8">

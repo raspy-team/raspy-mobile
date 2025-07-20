@@ -1,5 +1,5 @@
 <template>
-  <div v-if="user" class="min-h-screen bg-[#f8f9fa] pb-24 relative">
+  <div v-if="user" class="h-dvh bg-[#f8f9fa] pb-24 relative">
 
     <!-- Fixed Top Bar -->
     <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 py-3 border-b border-gray-100">

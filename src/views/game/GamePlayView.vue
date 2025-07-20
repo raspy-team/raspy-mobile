@@ -1,5 +1,5 @@
 <template>
-  <div v-if="game" class="min-h-screen w-screen flex flex-col px-4 py-3 relative text-black overflow-hidden">
+  <div v-if="game" class="h-dvh w-dvw flex flex-col px-4 py-3 relative text-black overflow-hidden">
     <div class="absolute inset-0 bg-white -z-10"></div>
 
     <div class="flex items-center justify-between mb-4">

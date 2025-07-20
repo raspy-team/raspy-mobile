@@ -1,8 +1,7 @@
 <template>
   <Header title="설정" :has-referer="true"/>
-  <div class="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+  <div class="h-dvh bg-white flex flex-col items-center justify-center px-4">
     <div class="w-full max-w-xs space-y-3">
-      <!-- 기존 내용... -->
       <div class="pt-4 flex flex-col items-center mb-8">
         <i class="fas fa-tools text-2xl text-gray-300 mb-2"></i>
         <p class="text-gray-400 text-sm">다른 기능은 <span class="font-semibold text-[var(--point-color)]">준비 중</span>입니다</p>
@@ -87,7 +86,10 @@ const showModal = ref(false)
 const router = useRouter()
 const logout = async() => {
   try {
-    await api.post('/api/push/remove-device')
+    try {
+      await api.post('/api/push/remove-device')
+    } catch(e) {console.log(e)}
+
     localStorage.removeItem('raspy_access_token2')
     router.push("/init")
   } catch (err) {

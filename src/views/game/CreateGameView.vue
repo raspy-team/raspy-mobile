@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-white to-gray-50 p-5 py-20">
+  <div class="h-dvh bg-gradient-to-b from-white to-gray-50 p-5 py-20">
     <Header title="게임 생성" hasReferer="1" />
     <div class="max-w-xl mx-auto">
       <!-- 메인 카드 컨테이너 -->

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-screen bg-gray-50">
+  <div class="flex flex-col h-dvh bg-gray-50">
 
     <!-- 상단: 상대방 프로필/닉네임 고정 -->
     <div class="flex items-center p-4 bg-white shadow gap-2">

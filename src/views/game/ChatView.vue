@@ -1,8 +1,6 @@
 <template>
-  <div class="h-full flex-col bg-gray-50 raspy-top">
-
     <!-- 상단: 상대방 프로필/닉네임 고정 -->
-     <div  class="fixed top-0 w-full h-[70px]">
+     <div  class="fixed top-0 w-full h-[70px] raspy-top">
     <div class="h-full flex items-center p-4 bg-white shadow gap-2">
       <button @click="$router.back()" class="mr-2 text-gray-600 hover:text-gray-800">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -19,7 +17,7 @@
       </div>
     </div>
 </div>
-<div  style="height: calc( (var(--real-vh, 1vh) * 100) - 120px)" class="mt-[70px] overflow-auto">
+<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[70px] pb-[50px] overflow-auto">
     <!-- 메시지 목록 -->
     <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
       <div v-if="messages.length > 0" class="flex justify-center my-3">
@@ -51,7 +49,7 @@
     </div>
 </div>
 
-<div class="h-[50px]">
+<div class="fixed bottom-0 w-full h-[50px]">
     <!-- 입력창 -->
     <div class="p-[5px] bg-white flex items-center">
       <textarea
@@ -72,7 +70,6 @@
         </svg>
       </button>
     </div>
-  </div>
   </div>
 </template>
 

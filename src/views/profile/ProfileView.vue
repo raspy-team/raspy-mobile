@@ -2,8 +2,8 @@
   <div v-if="user" style="min-height: calc(var(--real-vh, 1vh) * 100)" class="bg-[#f8f9fa] pb-24 relative raspy-top">
 
     <!-- Fixed Top Bar -->
-    <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 py-3 border-b border-gray-100 raspy-top">
-        <div class="relative flex-1 mr-2 sm:w-48">
+    <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 pb-3 border-b border-gray-100 raspy-top">
+        <div class="relative flex-1 mr-2 sm:w-48 pt-3">
           <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
           <input
             type="text"
@@ -14,7 +14,7 @@
           />
         </div>
 
-      <button @click="goSettings" class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500">
+      <button @click="goSettings" class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3">
         <i class="fas fa-cog text-lg"></i>
         <span class="font-semibold text-sm hidden sm:inline">설정</span>
       </button>

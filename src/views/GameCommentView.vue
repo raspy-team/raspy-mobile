@@ -8,7 +8,7 @@
   <div
     v-show="showModal"
     ref="sheet"
-    class="w-full max-w-md h-[88%] min-h-[60%] flex flex-col rounded-t-2xl bg-white shadow-xl"
+    class="w-full max-w-md h-[100%] min-h-[60%] flex flex-col rounded-t-2xl bg-white shadow-xl"
     style="display:flex; flex-direction:column;"
     @touchstart="onTouchStart"
     @touchmove="onTouchMove"

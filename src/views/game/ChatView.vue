@@ -1,8 +1,9 @@
 <template>
-  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="flex flex-col bg-gray-50">
+  <div class="h-full flex-col bg-gray-50 raspy-top">
 
     <!-- 상단: 상대방 프로필/닉네임 고정 -->
-    <div class="flex items-center p-4 bg-white shadow gap-2">
+     <div  style="height: calc(var(--real-vh, 1vh) * 10)">
+    <div class="h-full flex items-center p-4 bg-white shadow gap-2">
       <button @click="$router.back()" class="mr-2 text-gray-600 hover:text-gray-800">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -17,10 +18,11 @@
         <span class="font-bold text-lg text-gray-900">{{ targetUserNickname }}</span>
       </div>
     </div>
-
+</div>
+<div  style="height: calc(var(--real-vh, 1vh) * 75)" class=" overflow-auto">
     <!-- 메시지 목록 -->
-    <div ref="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4">
-      <div v-if="messages.length > 0" class="flex justify-center mb-3">
+    <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
+      <div v-if="messages.length > 0" class="flex justify-center my-3">
         <div class="bg-gradient-to-r from-orange-100 to-yellow-50 text-orange-600 rounded-full px-4 py-1 text-xs font-bold shadow border border-orange-200 animate-fadein">
           대화의 첫 부분입니다
         </div>
@@ -47,7 +49,9 @@
         </div>
       </div>
     </div>
+</div>
 
+<div  style="height: calc(var(--real-vh, 1vh) * 10)">
     <!-- 입력창 -->
     <div class="p-4 bg-white flex items-center">
       <textarea
@@ -68,6 +72,7 @@
         </svg>
       </button>
     </div>
+  </div>
   </div>
 </template>
 
@@ -160,7 +165,7 @@ const formatTime = ts =>
 </script>
 
 <style scoped>
-textarea {
-  overflow: hidden;
-}
+  textarea {
+    overflow: hidden;
+  }
 </style>

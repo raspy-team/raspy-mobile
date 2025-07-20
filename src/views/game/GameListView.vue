@@ -1,6 +1,6 @@
 <template>
   <HeaderComp />
-  <div class="bg-gray-50 pb-16">
+  <div class="bg-white pb-16">
     <!-- Status Bar -->
     <div class="bg-white h-6 w-full"></div>
     

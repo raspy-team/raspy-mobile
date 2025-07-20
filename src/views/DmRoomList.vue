@@ -1,6 +1,6 @@
 <template>
   <Header :has-referer="true" title="DM" />
-  <div class=" bg-gradient-to-br from-[#f8fafc] to-[#f1f5f9] pb-24">
+  <div class=" bg-white pb-24">
     <div class="max-w-lg mx-auto pt-20 px-4">
       <!-- 로딩 상태 -->
       <div v-if="loading" class="flex justify-center items-center py-40">

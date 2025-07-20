@@ -68,10 +68,11 @@ const userAgent = navigator.userAgent.toLowerCase()
 const isIosApp = userAgent.includes('raspy-ios')
 
 const loginWith = (provider) => {
-  const apiBase = window.location.hostname.endsWith('.vercel.app')
-    ? 'https://raspy-be.shop'
-    : 'http://localhost:8080'
+  const isLocalhostClient = window.location.hostname === 'localhost' && window.location.port === '8081'
 
+const apiBase = isLocalhostClient
+  ? 'http://localhost:8080'
+  : 'https://raspy-be.shop'
 
   if(provider == 'kakao')
     if (userAgent.includes("raspy-ios")) {

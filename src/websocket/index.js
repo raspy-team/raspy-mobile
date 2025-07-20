@@ -1,12 +1,12 @@
 import { Client } from '@stomp/stompjs'
 
 const hostname = window.location.hostname
-const isVercel = hostname.endsWith('.vercel.app')
+
 
 // 환경별 WS URL 분기
-const WS_URL = isVercel
-  ? 'wss://raspy-be.shop/ws'        // 프로덕션
-  : 'ws://localhost:8080/ws'        // 로컬 개발
+const WS_URL = isLocalhostClient
+  ? 'ws://localhost:8080/ws'        // 로컬 개발
+  : 'wss://raspy-be.shop/ws'        // 프로덕션
 
   let stompClient = null
 let currentRoomId = null

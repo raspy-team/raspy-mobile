@@ -1,14 +1,14 @@
 <template>
   <div
     v-if="modalVisible"
-    class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 raspy-top raspy-bot"
+    class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 raspy-top"
     @click.self="closeModal"
   >
 <transition name="slide-up" @after-leave="afterLeave">
   <div
     v-show="showModal"
     ref="sheet"
-    class="w-full max-w-md h-[100%] min-h-[60%] flex flex-col rounded-t-2xl bg-white shadow-xl"
+    class="w-full max-w-md h-[100%] min-h-[60%]  raspy-bot flex flex-col rounded-t-2xl bg-white shadow-xl"
     style="display:flex; flex-direction:column;"
     @touchstart="onTouchStart"
     @touchmove="onTouchMove"

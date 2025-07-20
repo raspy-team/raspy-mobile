@@ -3,7 +3,7 @@
 
   <main style="min-height: calc(var(--real-vh, 1vh) * 100)" class="bg-gray-50  pb-14">
     <!-- 필터 바 -->
-    <nav class="sticky top-0 z-30 bg-white/95   pt-20 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex flex-wrap gap-2 sm:gap-4">
+    <nav class="fixed top-0 z-30 bg-white/95 pt-20 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex flex-wrap gap-2 sm:gap-4">
       <select
         v-model="major"
         @change="fetchMinors"

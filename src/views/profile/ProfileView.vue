@@ -335,8 +335,8 @@
 
     <transition name="fade">
     <div v-if="showUserModal" class="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-center items-center">
-      <div class="bg-white  w-dvw   w-full p-6 raspy-top relative" style="min-height: calc(var(--real-vh, 1vh) * 100)">
-        <button class="absolute top-4  right-7 text-gray-400 hover:text-orange-500 text-xl"
+      <div class="bg-white  w-dvw   w-full p-6 pt-10 relative" style="min-height: calc(var(--real-vh, 1vh) * 100)">
+        <button class="absolute top-10  right-7 text-gray-400 hover:text-orange-500 text-xl"
                 @click="closeUserModal">
           <i class="fas fa-times"></i>
         </button>

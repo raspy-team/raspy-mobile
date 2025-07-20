@@ -1,6 +1,6 @@
 <template>
  
-     <Header title="게임 생성" hasReferer="1" />
+  <Header title="게임 생성" hasReferer="1" />
 
  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class=" bg-gradient-to-b from-white to-gray-50 p-5 py-20">
     <div class="max-w-xl mx-auto">
@@ -126,22 +126,26 @@
             </transition>
           </section>
 
-          <!-- 제출 -->
-          <div class="pt-2 pb-6">
-            <button type="submit"
-              :disabled="!selectedRule"
-              class="w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white text-lg font-semibold py-4 rounded-2xl shadow-md hover:scale-105 transition disabled:opacity-40">
-              게임 생성
-            </button>
-          </div>
+
         </form>
       </main>
     </div>
+
     <!-- 모달들 -->
     <RuleSelectModal v-if="showSelectModal" @select="selectRule" @close="showSelectModal = false" />
     <RuleCreateModal v-if="showCreateModal" @created="handleCreatedRule" @close="showCreateModal = false" />
     <CustomToast />
   </div>
+
+  
+              <!-- 제출 -->
+          <div  class="fixed bottom-0 w-full left-0 ">
+            <button type="submit"
+              :disabled="!selectedRule"
+              class="w-full bg-gradient-to-r  raspy-bot from-orange-400 to-orange-500 text-white text-lg font-semibold py-4 shadow-md disabled:opacity-40">
+              게임 생성
+            </button>
+          </div>
 </template>
 
 <script setup>

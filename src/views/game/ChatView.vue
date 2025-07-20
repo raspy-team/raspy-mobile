@@ -1,7 +1,7 @@
 <template>
     <!-- 상단: 상대방 프로필/닉네임 고정 -->
-     <div  class="fixed top-0 w-full h-[70px] raspy-top">
-    <div class="h-full flex items-center p-4 bg-white shadow gap-2">
+     <div  class="fixed top-0 w-full h-[8dvh] raspy-top">
+    <div class="h-full flex items-center p-4 bg-white shadow gap-2 ">
       <button @click="$router.back()" class="mr-2 text-gray-600 hover:text-gray-800">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -17,7 +17,7 @@
       </div>
     </div>
 </div>
-<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[70px] pb-[50px] overflow-auto">
+<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[8dvh] pb-[10dvh] px-1">
     <!-- 메시지 목록 -->
     <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
       <div v-if="messages.length > 0" class="flex justify-center my-3">
@@ -49,13 +49,13 @@
     </div>
 </div>
 
-<div class="fixed bottom-0 w-full h-[50px]">
+<div class="fixed bottom-0 w-full h-[10dvh] pb-[24px]">
     <!-- 입력창 -->
     <div class="p-[5px] bg-white flex items-center">
       <textarea
         v-model="newMsg"
         rows="1"
-        class="flex-1 resize-none border border-gray-300 rounded-full px-4 py-[5px] focus:outline-none focus:ring-2 focus:ring-blue-400"
+        class="flex-1 resize-none border border-gray-300 rounded-full px-4 py-[10px] focus:outline-none focus:ring-2 focus:ring-blue-400"
         placeholder="메시지 입력..."
         @keyup.enter.exact.prevent="sendMsg"
       />
@@ -65,7 +65,7 @@
         class="ml-2 p-[5px] bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-full shadow hover:scale-105 transition disabled:opacity-50"
       >
         <!-- send 아이콘 -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-[19x] w-[19px] transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-[24px] w-[24px] transform rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" />
         </svg>
       </button>

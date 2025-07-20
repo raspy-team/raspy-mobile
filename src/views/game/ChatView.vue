@@ -20,7 +20,7 @@
 <div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[125px] pb-[10dvh] px-1">
     <!-- 메시지 목록 -->
     <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
-      <div v-if="messages.length > 0" class="flex justify-center my-3">
+      <div v-if="messages.length > 0" class="flex justify-center py-3">
         <div class="bg-gradient-to-r from-orange-100 to-yellow-50 text-orange-600 rounded-full px-4 py-1 text-xs font-bold shadow border border-orange-200 animate-fadein">
           대화의 첫 부분입니다
         </div>

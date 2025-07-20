@@ -52,7 +52,7 @@
 <form
   @submit.prevent="submitInput"
   class="flex gap-2 items-center border-t pt-2 px-3 bg-white"
-  style="min-height:60px"
+  style="min-height:40px"
 >
 <!-- 입력창 영역 -->
 <div class="flex items-center flex-1 min-w-0 bg-gray-100 rounded-full px-3 py-2 focus-within:bg-white focus-within:border-gray-300 transition border">

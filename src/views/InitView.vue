@@ -6,7 +6,7 @@
 </div>
 
 
-  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class=" flex flex-col justify-between items-center bg-white px-6">
+  <div class=" flex flex-col justify-between items-center bg-white px-6">
     <div></div>
     <div class="text-center flex-2 mt-20 fixed left-0 w-full text-center top-[30dvh]">
       <span class="raspy mb-4">RASPY</span>

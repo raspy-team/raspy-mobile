@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="modalVisible"
-    class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 raspy-top"
+    class="fixed inset-0 z-[123123912] flex items-end justify-center bg-black/50 raspy-top"
     @click.self="closeModal"
   >
 <transition name="slide-up" @after-leave="afterLeave">
@@ -51,7 +51,7 @@
         <!-- 댓글 입력창 -->
 <form
   @submit.prevent="submitInput"
-  class="flex gap-2 items-center border-t pt-2 px-3 pb-1 bg-white"
+  class="flex gap-2 items-center border-t pt-2 px-3 bg-white"
   style="min-height:60px"
 >
 <!-- 입력창 영역 -->

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="user" style="min-height: calc(var(--real-vh, 1vh) * 100)" class="bg-[#f8f9fa] pb-24 relative raspy-top">
+  <div v-if="user" class="bg-[#f8f9fa] pb-24 relative raspy-top">
 
     <!-- Fixed Top Bar -->
     <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 pb-3 border-b border-gray-100 raspy-top">
@@ -433,10 +433,9 @@
           <div
             v-for="f in friendRequestsReceived"
             :key="f.id"
-                        @click="gotoUser(f.id)"
             class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition">
             <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
-            <div class="flex-1 text-left min-w-0">
+            <div @click="gotoUser(f.id)"  class="flex-1 text-left min-w-0">
               <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
               <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
               <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>

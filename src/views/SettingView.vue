@@ -1,6 +1,6 @@
 <template>
   <Header title="설정" :has-referer="true"/>
-  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="bg-white flex flex-col items-center justify-center px-4">
+  <div  class="bg-white flex flex-col items-center justify-center px-4">
     <div class="w-full max-w-xs space-y-3">
       <div class="pt-4 flex flex-col items-center mb-8">
         <i class="fas fa-tools text-2xl text-gray-300 mb-2"></i>

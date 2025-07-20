@@ -88,6 +88,17 @@ const apiBase = isLocalhostClient
 const loginGroup = () => {
   router.push("/group/login")
 }
+
+window.onKakaoLoginSuccess = function({ token }) {
+  console.log("✅ 카카오 로그인 성공! 토큰:", token)
+
+  // 토큰 저장
+  localStorage.setItem("raspy_access_token2", token)
+
+  // 홈으로 이동
+  window.location.href = "/"
+}
+
 </script>
 
 <style scoped>

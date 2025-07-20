@@ -42,7 +42,7 @@
       <transition name="slide">
         <aside
           v-if="showNotificationPanel"
-          class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white border-l z-[100] shadow-lg flex flex-col"
+          class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
         >
           <div class="flex items-center justify-between px-6 h-16 border-b">
             <span class="text-base font-bold text-gray-800">알림</span>

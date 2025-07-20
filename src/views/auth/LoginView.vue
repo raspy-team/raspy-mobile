@@ -111,7 +111,15 @@ const handleLogin = async () => {
     } else {
       router.push("/")
     }
-    window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token2"));
+const token = localStorage.getItem("raspy_access_token2");
+if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
+  window.AndroidApp.registerFcmToken(token);
+} else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge) {
+  window.webkit.messageHandlers.iosBridge.postMessage({
+    action: "registerFcmToken",
+    jwt: token
+  });
+}
   } catch {
     submitError.value = '로그인 실패: 아이디 또는 비밀번호를 확인하세요'
   }

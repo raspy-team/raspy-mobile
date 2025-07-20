@@ -211,11 +211,28 @@ function downloadImage() {
   downloading.value = true
   saved.value = true
   const base64 = finalCanvas.value.toDataURL('image/png')
+  
+  // 안드로이드 네이티브 브릿지
   if (window.AndroidApp?.saveImageToGalleryWithBase64) {
     window.AndroidApp.saveImageToGalleryWithBase64(base64)
     setTimeout(() => downloading.value = false, 1000)
     return
   }
+  // iOS WKWebView 네이티브 브릿지
+  else if (
+    window.webkit &&
+    window.webkit.messageHandlers &&
+    window.webkit.messageHandlers.iosBridge
+  ) {
+    window.webkit.messageHandlers.iosBridge.postMessage({
+      action: "saveImageToGalleryWithBase64",
+      base64
+    });
+    setTimeout(() => downloading.value = false, 1000)
+    return
+  }
+
+  // 데스크탑/모바일 웹(일반 다운로드)
   const link = document.createElement('a')
   link.href = base64
   link.download = 'story.png'

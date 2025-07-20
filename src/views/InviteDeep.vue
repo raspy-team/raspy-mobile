@@ -1,5 +1,5 @@
 <template>
-  <div class=" flex flex-col justify-center items-center bg-gradient-to-b from-orange-50 to-white px-5 py-8 relative">
+  <div class="flex flex-col justify-center items-center bg-gradient-to-b from-orange-50 to-white px-5 py-8 relative">
     <!-- Raspy 브랜드 -->
     <div class="flex flex-col items-center mb-12">
       <span class="text-4xl font-extrabold tracking-tight text-orange-500 mb-2">RASPY</span>
@@ -27,7 +27,7 @@
         Raspy 앱에서 열기
       </button>
       <button
-        @click="goToPlayStore"
+        @click="goToStore"
         class="w-full py-2 rounded-xl border border-orange-200 text-orange-500 font-medium text-sm hover:bg-orange-50 mt-1 transition"
       >
         앱이 설치되지 않았나요?
@@ -51,10 +51,9 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const gameId = route.params.gameId || ''
-
 const showTip = ref(false)
 
-// 자동 앱 열기 시도 (0.6초 후)
+// 자동 앱 열기 (0.6초 뒤 시도, 0.9초 뒤 안내)
 onMounted(() => {
   setTimeout(() => {
     openApp()
@@ -63,16 +62,40 @@ onMounted(() => {
 })
 
 function openApp() {
-  // Android Intent 스킴으로 앱 열기 시도
-  const intentUrl =
-    `intent://invite/${gameId}#Intent;scheme=raspy;package=com.xhadl.raspy_android;end`
-  window.location.href = intentUrl
+  const ua = navigator.userAgent || navigator.vendor || window.opera
+  const isAndroid = /android/i.test(ua)
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream
+
+  if (isAndroid) {
+    // 안드로이드 intent 딥링크
+    window.location.href = `intent://invite/${gameId}#Intent;scheme=raspy;package=com.xhadl.raspy_android;end`
+  } else if (isIOS) {
+    // iOS: 우선 커스텀스킴(앱에 raspy:// 세팅되어 있어야 동작)
+    window.location.href = `raspy://invite/${gameId}`
+
+    // 유니버설 링크도 세팅했다면, 아래 코드로 더 확실한 fallback 가능:
+    // window.location.href = `https://raspy-mobile-fork.vercel.app/invite/${gameId}`
+    // (단, 유니버설링크 연동을 앱에서 완료해야 위 방식이 동작)
+  } else {
+    // 기타: PC 등은 안내
+    alert('Raspy 앱은 모바일 기기에서만 열 수 있습니다.')
+  }
 }
 
-function goToPlayStore() {
-  // 앱이 설치 안되어 있을 경우 플레이스토어 이동 (패키지명 꼭 확인!)
-  window.location.href =
-    'https://play.google.com/store/apps/details?id=com.xhadl.raspy_android'
+// 안드로이드/아이폰 앱스토어로 이동
+function goToStore() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera
+  const isAndroid = /android/i.test(ua)
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream
+
+  if (isAndroid) {
+    window.location.href = 'https://play.google.com/store/apps/details?id=com.xhadl.raspy_android'
+  } else if (isIOS) {
+    window.location.href = 'https://apps.apple.com/app/idYOUR_IOS_APP_ID'
+    // 위의 idYOUR_IOS_APP_ID 부분을 실제 App Store 앱 ID로 todo 
+  } else {
+    alert('앱 설치는 모바일에서 가능합니다.')
+  }
 }
 </script>
 

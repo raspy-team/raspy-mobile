@@ -27,18 +27,13 @@
         });
 
 
-      let initialVh = window.innerHeight * 0.01
-      document.documentElement.style.setProperty('--real-vh', `${initialVh}px`)
+        let initialVh = window.innerHeight * 0.01
+        document.documentElement.style.setProperty('--real-vh', `${initialVh}px`)
 
-      function setRealViewportHeight() {
-        // 키보드 올라오면 window.innerHeight 줄어듬
-        const newVh = window.innerHeight * 0.01
-        // 최소값 기준으로만 갱신 (키보드 떴을 땐 줄어들지 않게)
-        if (newVh > initialVh * 0.95) {
-          initialVh = newVh
-          document.documentElement.style.setProperty('--real-vh', `${initialVh}px`)
-        }
-      }
+        window.addEventListener('setRealVh', (e) => {
+          document.documentElement.style.setProperty('--real-vh', `${e.detail}px`);
+          // 필요하면: document.body.style.height = `${e.detail}px`
+        });
 
       setRealViewportHeight();
       window.addEventListener('resize', setRealViewportHeight);

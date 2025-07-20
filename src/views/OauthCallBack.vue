@@ -202,9 +202,16 @@ onMounted(()=> {
         router.push("/")
     }
 
+const token = localStorage.getItem("raspy_access_token2");
+if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
+  window.AndroidApp.registerFcmToken(token);
+} else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge) {
+  window.webkit.messageHandlers.iosBridge.postMessage({
+    action: "registerFcmToken",
+    jwt: token
+  });
+}
 
-    if (window.AndroidApp && typeof window.AndroidApp.registerFcmToken === 'function') {
-    window.AndroidApp.registerFcmToken(localStorage.getItem("raspy_access_token2"))
     }
 })
 

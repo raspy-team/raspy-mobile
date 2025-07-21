@@ -2,7 +2,7 @@
   <div class="flex flex-col justify-center items-center bg-gradient-to-b from-orange-50 to-white px-5 py-8 relative">
     <!-- Raspy 브랜드 -->
     <div class="flex flex-col items-center mb-12">
-      <span class="text-4xl font-extrabold tracking-tight text-orange-500 mb-2">RASPY</span>
+      <span class="text-4xl font-extrabold tracking-tight text-orange-500 mb-2">Match</span>
       <span class="text-base text-gray-500 font-semibold">스포츠로 연결되는 순간</span>
     </div>
 
@@ -19,12 +19,12 @@
 
     <!-- 안내 및 앱 이동 -->
     <div class="w-full max-w-xs bg-white/90 rounded-2xl shadow-xl flex flex-col items-center py-8 px-6 mb-5 border border-orange-100">
-      <p class="text-lg font-bold mb-2 text-gray-900">Raspy에서 경기 정보를 확인하세요</p>
+      <p class="text-lg font-bold mb-2 text-gray-900">Match 경기 정보를 확인하세요</p>
       <button
         @click="openApp"
         class="w-full py-3 mb-2 rounded-xl bg-orange-500 text-white font-semibold text-base shadow hover:bg-orange-600 transition"
       >
-        Raspy 앱에서 열기
+        Match 앱에서 열기
       </button>
       <button
         @click="goToStore"
@@ -40,7 +40,7 @@
 
     <!-- 하단: 카피라이트 -->
     <span class="absolute bottom-5 left-0 right-0 text-center text-gray-300 text-xs tracking-wide">
-      © 2025 Raspy
+      © 2025 Match
     </span>
   </div>
 </template>
@@ -78,7 +78,7 @@ function openApp() {
     // (단, 유니버설링크 연동을 앱에서 완료해야 위 방식이 동작)
   } else {
     // 기타: PC 등은 안내
-    alert('Raspy 앱은 모바일 기기에서만 열 수 있습니다.')
+    alert('Match 앱은 모바일 기기에서만 열 수 있습니다.')
   }
 }
 

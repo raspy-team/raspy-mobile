@@ -4,7 +4,12 @@
         <!-- 좌측: 로고 또는 뒤로가기 -->
         <div class="flex items-center">
           <router-link v-if="props.hasReferer != true" to="/" class="text-xl font-bold text-[#f97316]">
-            <span class="RASPY">RASPY</span>
+            <span class="flex items-center gap-1/2">
+              <img class="w-10 pt-2" :src="MatchLogo" />
+              <span class="RASPY ">
+                Match
+              </span>
+            </span>
           </router-link>
           <button v-else @click="goBack" class="text-black text-lg">
             <i class="fas fa-chevron-left"></i>
@@ -93,6 +98,7 @@
   import { ref, defineProps, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import api from '../api/api'
+  import MatchLogo from "../assets/Match.png"
 
   // 실제로는 pinia, useUser 등에서 user 정보 받아올 것.
   const router = useRouter()

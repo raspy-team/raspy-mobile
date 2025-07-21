@@ -174,7 +174,7 @@
           <i class="fas fa-circle-check icon-large"></i>
           <h1 class="text-center font-extrabold text-orange-500 mt-2 text-2xl">설정 완료!</h1>
           <div class="text-orange-500 mt-3 font-[300]">
-            지금부터 Raspy를 이용하실 수 있습니다
+            지금부터 Match를 이용하실 수 있습니다
           </div>
         </div>
         <div class="p-5 " >

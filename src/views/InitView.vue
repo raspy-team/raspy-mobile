@@ -9,7 +9,7 @@
   <div class=" flex flex-col justify-between items-center bg-white px-6">
     <div></div>
     <div class="text-center flex-2 mt-20 fixed left-0 w-full text-center top-[30dvh]">
-      <span class="raspy mb-4">RASPY</span>
+      <span class="raspy mb-4">Match</span>
       <p class="tagline mb-0">
         즐기고 경쟁하는, <span class="text-[var(--point-color)] font-bold">스포츠 플랫폼</span>
       </p>

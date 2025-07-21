@@ -6,7 +6,7 @@
     <!-- Left: Brand -->
     <div class="hidden lg:flex w-1/2 bg-[#191919] items-center justify-center">
       <div class="text-center space-y-8 px-8">
-        <span class="raspy">RASPY</span>
+        <span class="raspy">Match</span>
         <p class="brand-desc">
           즐기고, 경쟁하는 <span class="text-[var(--point-color)] font-bold">스포츠 플랫폼</span>
         </p>

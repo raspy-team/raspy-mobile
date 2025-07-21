@@ -201,7 +201,7 @@ function drawFinalImage() {
   ctx.textAlign = 'right'
   ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = textColor === '#222' ? '#ff7300' : textColor
-  ctx.fillText('RASPY', SIZE - padX*0.7, SIZE - padX*0.7)
+  ctx.fillText('Match', SIZE - padX*0.7, SIZE - padX*0.7)
 
   imageReady.value = true
 }

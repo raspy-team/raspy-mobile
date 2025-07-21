@@ -43,14 +43,14 @@
           ]"
         >
           <!-- TALK 메시지에는 닉네임 X -->
-          <p>{{ msg.content }}</p>
+          <p class="whitespace-pre-line leading-relaxed ">{{ msg.content }}</p>
           <p class="text-[10px] mt-1 text-right" :class="msg.senderId===currentUserId?' text-gray-100 ':' text-gray-400 '">{{ formatTime(msg.timestamp) }}</p>
         </div>
       </div>
     </div>
 </div>
 
-<div class="fixed bottom-0 w-full h-[81px] bg-white">
+<div class="fixed bottom-0 w-full h-[81px] bg-white z-20">
     <!-- 입력창 -->
     <div class="p-[5px] bg-white flex items-center">
       <textarea
@@ -58,7 +58,6 @@
         rows="1"
         class="flex-1 resize-none border border-gray-300 rounded-full px-4 py-[10px] focus:outline-none focus:ring-2 focus:ring-blue-400"
         placeholder="메시지 입력..."
-        @keyup.enter.exact.prevent="sendMsg"
       />
       <button
         @click="sendMsg"

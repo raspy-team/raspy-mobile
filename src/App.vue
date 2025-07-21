@@ -31,9 +31,9 @@ const isIos = ref(false)
         isIos.value = true;
     }
 onMounted(() => {
-  // setTimeout(() => {
-  //   showSplash.value = false
-  // }, 2000) //
+  setTimeout(() => {
+    showSplash.value = false
+  }, 2000) //
 
   try{
 const token = localStorage.getItem("raspy_access_token2");

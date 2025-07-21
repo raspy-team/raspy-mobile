@@ -54,7 +54,7 @@
         </ul>
       </div>
     </nav>
-  <main class=" pb-14 h-full">
+  <main class=" pb-14 h-full raspy-top">
 
     <!-- 카드 리스트 -->
     <div class="max-w-2xl mx-auto  h-full px-2 pt-[13rem] flex flex-col gap-8">

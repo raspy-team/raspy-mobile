@@ -2,8 +2,9 @@
   <div class="bg-[#f8f9fa] relative raspy-top">
     <!-- Fixed Top Bar -->
     <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 pb-3 border-b border-gray-100 raspy-top">
-      <div class="relative flex-1 mr-2 sm:w-48 pt-3">
-        <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+      <div class="relative flex-1 flex items-center mr-2 sm:w-48 pt-3">
+        
+        <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 pt-3 -translate-y-1/2 pointer-events-none"></i>
         <input
           type="text"
           readonly
@@ -118,7 +119,7 @@
 
     <!-- USER 정보: 로딩 후 노출 -->
     <template v-else>
-      <section class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-18 flex flex-col gap-5 relative">
+      <section class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7  pb-5 flex flex-col gap-5 relative">
         <div class="flex gap-5 items-start mb-2">
           <img
             :src="user.avatar ? user.avatar : Default"
@@ -208,7 +209,7 @@
             </div>
           </div>
         </div>
-        <div v-if="!user.isMe" class="flex gap-3 mt-1">
+        <div v-if="!user.isMe" class="flex gap-3 mt-1 pb-3">
           <button
             v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
             class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 border-[0.1px] border-orange-500 text-white font-bold py-3 w-full rounded-xl shadow transition"
@@ -325,7 +326,7 @@
           </div>
         </div>
       </section>
-      <section class="max-w-lg mx-auto px-4">
+      <section class="w-full mx-auto  px-4 pb-24 bg-[#f8f9fa] ">
         <div class="flex items-center gap-2 mb-4">
           <h3 class="text-xl font-bold text-gray-900">
             플레이한 경기

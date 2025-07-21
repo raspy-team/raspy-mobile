@@ -340,7 +340,6 @@ function toHome() { router.push('/') }
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: env(safe-area-inset-top);
 }
 .top-bar-global {
   width: 100vw;

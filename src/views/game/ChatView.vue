@@ -1,9 +1,9 @@
 <template>
     <!-- 상단: 상대방 프로필/닉네임 고정 -->
-<div class="">
+<div style="height: calc( (var(--real-vh, 1vh) * 100))" >
      <div  class="fixed top-0 w-full h-[110px] ">
-    <div class="h-full flex items-end p-4 bg-white shadow gap-2 ">
-      <button @click="$router.back()" class="mr-2 text-gray-600 hover:text-gray-800">
+    <div class="h-full flex items-end p-4 bg-white shadow gap-2 z-[100000]">
+      <button @click="goBack()" class="mr-2 pb-2 text-gray-600 hover:text-gray-800">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -18,7 +18,7 @@
       </div>
     </div>
 </div>
-<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="fixed pt-[110px] w-full pb-[81px] px-1">
+<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="fixed top-0 left-0 pt-[110px] w-full pb-[81px] px-1">
     <!-- 메시지 목록 -->
     <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
       <div v-if="messages.length > 0" class="flex justify-center py-3">
@@ -77,7 +77,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 // import Header from '../../components/HeaderComp.vue'
 import { socket } from '../../websocket'
@@ -136,13 +136,16 @@ onMounted(async () => {
   }
 })
 
-import {useRouter} from 'vue-router'
 const router = useRouter()
 function goToProfile() {
   // /profile/:userId로 이동 (Number 변환 or String 그대로)
   router.push(`/profile/${targetUserId}`)
 }
 
+
+function goBack() {
+  router.go(-1)
+}
 onBeforeUnmount(() => {
   socket.disconnect()
 })

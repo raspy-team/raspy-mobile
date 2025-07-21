@@ -1,302 +1,357 @@
 <template>
-  <div v-if="user" class="bg-[#f8f9fa] pb-24 relative raspy-top">
-
+  <div class="bg-[#f8f9fa] pb-24 relative raspy-top">
     <!-- Fixed Top Bar -->
     <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 pb-3 border-b border-gray-100 raspy-top">
-        <div class="relative flex-1 mr-2 sm:w-48 pt-3">
-          <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-          <input
-            type="text"
-            readonly
-            placeholder="유저 찾기"
-            @click="searchUsers"
-            class="pl-9 pr-4 py-2 rounded-[5px] border border-gray-200 bg-white text-gray-700 text-sm font-semibold shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-100 transition w-full hover:border-orange-400"
-          />
-        </div>
-
+      <div class="relative flex-1 mr-2 sm:w-48 pt-3">
+        <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+        <input
+          type="text"
+          readonly
+          placeholder="유저 찾기"
+          @click="searchUsers"
+          class="pl-9 pr-4 py-2 rounded-[5px] border border-gray-200 bg-white text-gray-700 text-sm font-semibold shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-100 transition w-full hover:border-orange-400"
+        />
+      </div>
       <button @click="goSettings" class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3">
         <i class="fas fa-cog text-lg"></i>
         <span class="font-semibold text-sm hidden sm:inline">설정</span>
       </button>
     </div>
-<!-- User Card Section (UI/UX 개선) -->
-<section  class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-8 flex flex-col gap-5 relative">
-  <!-- 프로필/닉네임/기본정보 -->
-  <div class="flex gap-5 items-start mb-2">
-    <img
-      :src="user.avatar ? user.avatar : Default"
-      alt="avatar"
-      class="w-20 h-20 rounded-full object-cover border-2 border-orange-400 shadow"
-    />
-    <div class="flex-1 flex flex-col ">
-      <div class="flex flex-col items-start gap-2">
-        <h2 class="flex gap-2 items-center">
-          <span class=" mb-[2.7px] text-gray-900 flex items-center gap-2">
-            <div class="text-xl font-bold">  
-              {{ user.nickname }}
+
+    <!-- SKELETON: 유저정보/통계/그래프/탭 -->
+    <template v-if="user == null">
+      <section class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-8 flex flex-col gap-5 relative animate-pulse">
+        <!-- 프로필 -->
+        <div class="flex gap-5 items-start mb-2">
+          <div class="w-20 h-20 rounded-full bg-gray-200"></div>
+          <div class="flex-1 flex flex-col gap-2">
+            <div class="w-28 h-6 bg-gray-200 rounded"></div>
+            <div class="flex gap-2">
+              <div class="w-16 h-5 bg-orange-100 rounded"></div>
+              <div class="w-16 h-5 bg-gray-100 rounded"></div>
             </div>
-            <div class="text-[0.77rem] font-semibold text-gray-600">
-              @{{ user.username }}
+            <div class="w-40 h-4 bg-gray-100 rounded"></div>
+            <div class="flex gap-2 mt-3 mb-2">
+              <div class="w-20 h-7 rounded-full bg-gradient-animate opacity-60"></div>
+              <div class="w-20 h-7 rounded-full bg-gradient-animate opacity-60"></div>
             </div>
-          </span>
-          <span class="flex items-center gap-1" v-if="user.location != null && user.location.length > 2">
-            <span>·</span><span class="text-[0.72rem] text-gray-600">{{ user.location?.split(' ').slice(-1)[0] || '' }}</span>
-          </span>
-      </h2>
-        <div class="flex gap-1">
-          <span class="inline-block bg-orange-100 text-orange-600 text-xs px-2.5 py-0.5 rounded font-bold">{{ user.age ? user.age + '세': '연령 미등록'}}</span>
-          <span class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold">{{ user.gender ? user.gender : '성별 미등록' }}</span>
-        </div>
-
-                      <div class="text-xs text-gray-600">{{ user.intro }}</div>
-
-      </div>
-      <!-- 챔피언 뱃지 -->
-      <div v-if="user.myChampions && user.myChampions.length" class="flex mt-3 flex-wrap gap-2 mb-2">
-        <span
-          v-for="(champ, idx) in user.myChampions"
-          :key="idx"
-          class="relative flex items-center rounded-full shadow-md px-3 py-1 space-x-1 overflow-hidden"
-          title="챔피언"
-          style="min-width: 0;"
-        >
-          <!-- 변화하는 그라데이션 배경 -->
-          <span class="absolute inset-0 bg-gradient-animate"></span>
-
-          <!-- 아이콘 + 텍스트 -->
-          <i class="fas fa-crown text-white text-sm z-10"></i>
-          <span class="text-xs font-semibold text-white z-10 animate-pulse-slow truncate ">
-            {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
-          </span>
-        </span>
-      </div>
-
-    </div>
-
-  </div>
-  <!-- 올인원 통계/부가정보 박스 -->
-  <div class="rounded-xl bg-gray-50 p-0.5 w-full flex flex-col sm:flex-row gap-0 sm:gap-4 items-stretch shadow-sm">
-    <!-- 승무패+승률 (좌측) -->
-    <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0 border-b sm:border-b-0 sm:border-r border-gray-200">
-      <div class="flex flex-col items-center gap-0.5">
-        <span class="text-lg font-extrabold text-gray-900">{{ user.stats.wins }}</span>
-        <span class="text-xs text-gray-500 font-semibold">승</span>
-      </div>
-      <div class="flex flex-col items-center gap-0.5">
-        <span class="text-lg font-extrabold text-gray-900">{{ user.stats.draws }}</span>
-        <span class="text-xs text-gray-500 font-semibold">무</span>
-      </div>
-      <div class="flex flex-col items-center gap-0.5">
-        <span class="text-lg font-extrabold text-gray-900">{{ user.stats.losses }}</span>
-        <span class="text-xs text-gray-500 font-semibold">패</span>
-      </div>
-      <div class="flex flex-col items-center gap-0.5">
-        <span class="text-lg font-extrabold text-orange-500">{{ user.stats.winRate }}%</span>
-        <span class="text-xs text-orange-500 font-bold">승률</span>
-      </div>
-    </div>
-    <!-- 부가 정보(친구/매너/시간, 우측) -->
-    <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0">
-      <div @click = "openFriendModal" class="flex flex-col items-center gap-0.5">
-        <span class="text-base font-extrabold text-gray-900">{{ user.stats.friends }}</span>
-        <span class="text-xs text-gray-500 font-semibold">친구</span>
-      </div>
-      <div class="flex flex-col items-center gap-0.5">
-        <span
-          class="text-base font-extrabold"
-          :class="[
-            user.mannerScore >= 4
-              ? 'text-green-500'
-              : user.mannerScore >= 2
-                ? 'text-yellow-500'
-                : user.mannerScore > 0
-                  ? 'text-red-500'
-                  : 'text-gray-400'
-          ]"
-        >{{ user.mannerScore.toFixed(1) }}</span>
-        <span class="text-xs text-gray-500 font-semibold">매너</span>
-      </div>
-      <div class="flex flex-col items-center gap-0.5">
-        <span class="text-base font-extrabold text-gray-900">{{ formattedPlayTime }}</span>
-        <span class="text-xs text-gray-500 font-semibold">플레이</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- 액션 버튼 (좌/우) -->
-  <div v-if="!user.isMe" class="flex gap-3 mt-1">
-
-  <!-- 친구 아님 & 아무 요청 없음 -->
-  <button
-    v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
-    class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 border-[0.1px] border-orange-500 text-white font-bold py-3 w-full rounded-xl shadow transition"
-    @click="sendFriendRequest"
-  >
-    <i class="fas fa-user-plus mr-2"></i> 친구추가
-  </button>
-
-  <!-- 내가 친구 요청을 보낸 상태 -->
-  <button
-    v-else-if="friendStatus.sent && !friendStatus.isFriend"
-    class="flex justify-center items-center bg-white border-[0.1px] border-orange-400 text-orange-500 font-bold py-3 w-full rounded-xl shadow transition"
-    @click="sendFriendCancelRequest"
-  >
-    <i class="fas fa-hourglass-half mr-2"></i> 요청취소
-  </button>
-
-  <!-- 상대가 나에게 친구 요청을 보낸 상태 (아직 수락 안함) -->
-  <div v-else-if="friendStatus.received && !friendStatus.isFriend" class="flex flex-col gap-2 w-full">
-    <div class="flex gap-3 mb-2">
-    <button
-      class="flex-1 flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow transition"
-      @click="acceptFriendRequest"
-    >
-      <i class="fas fa-user-check mr-2"></i>  승인
-    </button>
-    <button
-      class="flex-1 flex justify-center items-center bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl shadow transition border border-gray-300"
-      @click="rejectFriendRequest"
-    >
-      <i class="fas fa-user-times mr-2"></i> 거부
-    </button>
-</div>
-<div>
-          <button @click="goChat" class="flex w-[100%] justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
-        <i class="fas fa-paper-plane mr-2"></i> DM
-      </button>
-      </div>
-  </div>
-
-  <!-- 이미 친구 상태 -->
-  <button
-    v-else-if="friendStatus.isFriend"
-    class="flex justify-center items-center bg-green-100 border-[0.1px]  text-green-700 font-bold py-3 w-full rounded-xl shadow transition cursor-default"
-    disabled
-  >
-    <i class="fas fa-check mr-2"></i> 나의 친구
-  </button>
-
-      <button v-if="!(friendStatus.received && !friendStatus.isFriend)" @click="goChat" class="flex justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
-        <i class="fas fa-paper-plane mr-2"></i> DM
-      </button>
-  </div>
-</section>
-
-
-    <!-- Stat Tabs Selector & Graph -->
-    <section class="max-w-lg mx-auto px-4">
-      <!-- no use at demo -->
-      <div v-if="false" class="flex items-center gap-2 mb-4 mt-2">
-        <button
-          v-for="item in statTabs"
-          :key="item.id"
-          @click="onTabChange(item)"
-          :class="statMode === item.id
-            ? 'bg-orange-500 text-white font-bold shadow'
-            : 'bg-white text-gray-500 border border-gray-200'"
-          class="px-4 py-3 rounded-full flex-1 text-sm transition-all"
-        >{{ item.label }}</button>
-      </div>
-      <div v-if="statMode === 'rule'" class="mb-4">
-        <button
-          @click="showRuleModal = true"
-          class="w-full py-3 rounded-xl bg-orange-100 text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2"
-        >
-          <i class="fas fa-list-alt"></i>
-          {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
-        </button>
-      </div>
-      <div v-if="statMode === 'category'" class="mb-4 flex gap-2">
-         <CustomSelect
-           :options="Object.keys(playedCategoryMap).map(cat => ({ label: cat, value: cat }))"
-           v-model="selectedMainCategory"
-           placeholder="주 카테고리"
-         />
-         <CustomSelect
-           :options="subCategoryOptions"
-           v-model="selectedSubCategory"
-           :disabled="!selectedMainCategory"
-           placeholder="서브 카테고리"
-         />
-      </div>
-      <div class="mb-3 text-xs text-gray-500 px-2">
-        <template v-if="statMode === 'total'">
-          전체 기준 (플레이한 유저: <b>{{ user.totalPlayers }}</b>명)
-        </template>
-        <template v-if="statMode === 'rule' && selectedRule">
-          [{{ selectedRule.title }}] {{ selectedRule.description }}<br>
-          카테고리: {{ selectedRule.majorCategory }} > {{ selectedRule.minorCategory }}
-          <span class="block mt-1 text-gray-400">플레이 유저: <b>{{ selectedRule.players }}</b>명</span>
-        </template>
-        <template v-if="statMode === 'category' && selectedMainCategory && selectedSubCategory">
-          [{{ selectedMainCategory }} > {{ selectedSubCategory }}] 기준<br>
-          플레이 유저: <b>{{ filteredCategoryPlayers }}</b>명
-        </template>
-      </div>
-      <div class="rounded-2xl bg-white shadow p-5 mb-8">
-        <div class="flex justify-between items-center mb-3 ">
-          <span class="font-bold text-gray-900 text-base flex items-center gap-2">
-            <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
-          </span>
-          <div class="flex items-center gap-2 ">  
-            <span class="px-3 py-1 rounded-full bg-orange-500 text-white font-black text-xs shadow">랭킹 -위</span>
-            <span class="px-2 py-1 rounded-full bg-white text-orange-500 text-xs font-semibold border border-orange-400">상위 -%</span>
-           </div>
-        </div>
-        <div class="w-full flex items-center justify-center my-5 -ml-2">
-          <canvas
-            v-if="chartData.length > 0"
-            ref="chartRef"
-            height=""
-            class=" "
-          ></canvas>
-          <div v-else class="w-full text-center text-gray-400 text-sm py-8">
-            경기 횟수가 부족하여<br> 퍼포먼스 그래프를 표시할 수 없습니다.
           </div>
         </div>
-        <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-[0.97rem]">
-          <div class="font-semibold text-gray-500">퍼포먼스 평균</div>
-          <div class="text-right font-bold text-gray-900">{{ stat.performance.toFixed(1) }}</div>
-          <div class="font-semibold text-gray-500">승/무/패</div>
-          <div class="text-right text-gray-600">{{ stat.wins }}승 {{ stat.draws }}무 {{ stat.losses }}패</div>
-          <div class="font-semibold text-gray-500">승률</div>
-          <div class="text-right text-orange-500 font-bold">{{ stat.winRate }}%</div>
+        <div class="rounded-xl bg-gray-50 p-0.5 w-full flex flex-col sm:flex-row gap-0 sm:gap-4 items-stretch shadow-sm">
+          <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0 border-b sm:border-b-0 sm:border-r border-gray-200">
+            <div class="flex flex-col items-center gap-0.5">
+              <div class="w-8 h-5 bg-gray-200 rounded"></div>
+              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <div class="w-8 h-5 bg-gray-200 rounded"></div>
+              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <div class="w-8 h-5 bg-gray-200 rounded"></div>
+              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <div class="w-10 h-5 bg-orange-100 rounded"></div>
+              <div class="w-8 h-3 bg-orange-100 rounded mt-1"></div>
+            </div>
+          </div>
+          <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0">
+            <div class="flex flex-col items-center gap-0.5">
+              <div class="w-8 h-5 bg-gray-200 rounded"></div>
+              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <div class="w-8 h-5 bg-gray-200 rounded"></div>
+              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <div class="w-8 h-5 bg-gray-200 rounded"></div>
+              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+        <div class="flex gap-3 mt-1">
+          <div class="flex-1 h-12 bg-gray-100 rounded-xl"></div>
+          <div class="flex-1 h-12 bg-gray-100 rounded-xl"></div>
+        </div>
+      </section>
+      <section class="max-w-lg mx-auto px-4">
+        <div class="mb-4 flex gap-2">
+          <div class="w-24 h-8 bg-gray-200 rounded"></div>
+          <div class="w-20 h-8 bg-orange-100 rounded"></div>
+          <div class="w-24 h-8 bg-gray-100 rounded"></div>
+        </div>
+        <div class="rounded-2xl bg-white shadow p-5 mb-8">
+          <div class="flex justify-between items-center mb-3 ">
+            <div class="w-32 h-6 bg-gray-100 rounded"></div>
+            <div class="flex items-center gap-2 ">
+              <div class="w-14 h-6 bg-orange-100 rounded"></div>
+              <div class="w-14 h-6 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+          <div class="w-full flex items-center justify-center my-5 -ml-2">
+            <div class="w-full h-36 bg-gray-100 rounded-xl"></div>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-[0.97rem]">
+            <div class="w-24 h-5 bg-gray-100 rounded"></div>
+            <div class="w-12 h-5 bg-gray-100 rounded justify-self-end"></div>
+            <div class="w-24 h-5 bg-gray-100 rounded"></div>
+            <div class="w-20 h-5 bg-gray-100 rounded justify-self-end"></div>
+            <div class="w-24 h-5 bg-gray-100 rounded"></div>
+            <div class="w-16 h-5 bg-orange-100 rounded justify-self-end"></div>
+          </div>
+        </div>
+      </section>
+      <section class="max-w-lg mx-auto px-4">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-24 h-8 bg-gray-200 rounded"></div>
+          <div class="w-16 h-8 bg-orange-100 rounded"></div>
+        </div>
+        <div class="space-y-6">
+          <div class="h-20 bg-gray-100 rounded-xl"></div>
+          <div class="h-20 bg-gray-100 rounded-xl"></div>
+          <div class="h-20 bg-gray-100 rounded-xl"></div>
+        </div>
+      </section>
+    </template>
 
-    <!-- 경기 리스트 -->
-    <section class="max-w-lg mx-auto px-4">
-<!-- ... -->
-<section class="max-w-lg mx-auto px-4">
-  <div class="flex items-center gap-2 mb-4">
-    <h3 class="text-xl font-bold text-gray-900">
-      플레이한 경기
-    </h3>
-    <span v-if="statMode==='total'" class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold">전체 경기</span>
-    <span v-if="statMode==='rule' && selectedRule" class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold">{{ selectedRule.ruleTitle }}</span>
-    <span v-if="statMode==='category' && selectedMainCategory && selectedSubCategory" class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold">{{ selectedMainCategory }} > {{ selectedSubCategory }}</span>
-  </div>
-  <!-- ... 나머지 카드리스트 ... -->
-</section>
-      <div v-if="filteredGames.length" class="space-y-6">
-          <div
-          v-for="game in filteredGames"
-          :key="game.id"
-          :ref="el => setMatchRef(el, game.id)"
-          :id="'match-' + game.id"
-        >
-          <MatchCard
-            :game="game"
-            :isWin="game.result === 'win'"
-            :isDraw="game.result === 'draw'"
+    <!-- USER 정보: 로딩 후 노출 -->
+    <template v-else>
+      <section class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-8 flex flex-col gap-5 relative">
+        <div class="flex gap-5 items-start mb-2">
+          <img
+            :src="user.avatar ? user.avatar : Default"
+            alt="avatar"
+            class="w-20 h-20 rounded-full object-cover border-2 border-orange-400 shadow"
+          />
+          <div class="flex-1 flex flex-col ">
+            <div class="flex flex-col items-start gap-2">
+              <h2 class="flex gap-2 items-center">
+                <span class=" mb-[2.7px] text-gray-900 flex items-center gap-2">
+                  <div class="text-xl font-bold">
+                    {{ user.nickname }}
+                  </div>
+                  <div class="text-[0.77rem] font-semibold text-gray-600">
+                    @{{ user.username }}
+                  </div>
+                </span>
+                <span class="flex items-center gap-1" v-if="user.location != null && user.location.length > 2">
+                  <span>·</span><span class="text-[0.72rem] text-gray-600">{{ user.location?.split(' ').slice(-1)[0] || '' }}</span>
+                </span>
+              </h2>
+              <div class="flex gap-1">
+                <span class="inline-block bg-orange-100 text-orange-600 text-xs px-2.5 py-0.5 rounded font-bold">{{ user.age ? user.age + '세': '연령 미등록'}}</span>
+                <span class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold">{{ user.gender ? user.gender : '성별 미등록' }}</span>
+              </div>
+              <div class="text-xs text-gray-600">{{ user.intro }}</div>
+            </div>
+            <div v-if="user.myChampions && user.myChampions.length" class="flex mt-3 flex-wrap gap-2 mb-2">
+              <span
+                v-for="(champ, idx) in user.myChampions"
+                :key="idx"
+                class="relative flex items-center rounded-full shadow-md px-3 py-1 space-x-1 overflow-hidden"
+                title="챔피언"
+                style="min-width: 0;"
+              >
+                <span class="absolute inset-0 bg-gradient-animate"></span>
+                <i class="fas fa-crown text-white text-sm z-10"></i>
+                <span class="text-xs font-semibold text-white z-10 animate-pulse-slow truncate ">
+                  {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-xl bg-gray-50 p-0.5 w-full flex flex-col sm:flex-row gap-0 sm:gap-4 items-stretch shadow-sm">
+          <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0 border-b sm:border-b-0 sm:border-r border-gray-200">
+            <div class="flex flex-col items-center gap-0.5">
+              <span class="text-lg font-extrabold text-gray-900">{{ user.stats.wins }}</span>
+              <span class="text-xs text-gray-500 font-semibold">승</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <span class="text-lg font-extrabold text-gray-900">{{ user.stats.draws }}</span>
+              <span class="text-xs text-gray-500 font-semibold">무</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <span class="text-lg font-extrabold text-gray-900">{{ user.stats.losses }}</span>
+              <span class="text-xs text-gray-500 font-semibold">패</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <span class="text-lg font-extrabold text-orange-500">{{ user.stats.winRate }}%</span>
+              <span class="text-xs text-orange-500 font-bold">승률</span>
+            </div>
+          </div>
+          <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0">
+            <div @click = "openFriendModal" class="flex flex-col items-center gap-0.5">
+              <span class="text-base font-extrabold text-gray-900">{{ user.stats.friends }}</span>
+              <span class="text-xs text-gray-500 font-semibold">친구</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <span
+                class="text-base font-extrabold"
+                :class="[
+                  user.mannerScore >= 4
+                    ? 'text-green-500'
+                    : user.mannerScore >= 2
+                      ? 'text-yellow-500'
+                      : user.mannerScore > 0
+                        ? 'text-red-500'
+                        : 'text-gray-400'
+                ]"
+              >{{ user.mannerScore.toFixed(1) }}</span>
+              <span class="text-xs text-gray-500 font-semibold">매너</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+              <span class="text-base font-extrabold text-gray-900">{{ formattedPlayTime }}</span>
+              <span class="text-xs text-gray-500 font-semibold">플레이</span>
+            </div>
+          </div>
+        </div>
+        <div v-if="!user.isMe" class="flex gap-3 mt-1">
+          <button
+            v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
+            class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 border-[0.1px] border-orange-500 text-white font-bold py-3 w-full rounded-xl shadow transition"
+            @click="sendFriendRequest"
+          >
+            <i class="fas fa-user-plus mr-2"></i> 친구추가
+          </button>
+          <button
+            v-else-if="friendStatus.sent && !friendStatus.isFriend"
+            class="flex justify-center items-center bg-white border-[0.1px] border-orange-400 text-orange-500 font-bold py-3 w-full rounded-xl shadow transition"
+            @click="sendFriendCancelRequest"
+          >
+            <i class="fas fa-hourglass-half mr-2"></i> 요청취소
+          </button>
+          <div v-else-if="friendStatus.received && !friendStatus.isFriend" class="flex flex-col gap-2 w-full">
+            <div class="flex gap-3 mb-2">
+              <button
+                class="flex-1 flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow transition"
+                @click="acceptFriendRequest"
+              >
+                <i class="fas fa-user-check mr-2"></i>  승인
+              </button>
+              <button
+                class="flex-1 flex justify-center items-center bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl shadow transition border border-gray-300"
+                @click="rejectFriendRequest"
+              >
+                <i class="fas fa-user-times mr-2"></i> 거부
+              </button>
+            </div>
+            <div>
+              <button @click="goChat" class="flex w-[100%] justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
+                <i class="fas fa-paper-plane mr-2"></i> DM
+              </button>
+            </div>
+          </div>
+          <button
+            v-else-if="friendStatus.isFriend"
+            class="flex justify-center items-center bg-green-100 border-[0.1px]  text-green-700 font-bold py-3 w-full rounded-xl shadow transition cursor-default"
+            disabled
+          >
+            <i class="fas fa-check mr-2"></i> 나의 친구
+          </button>
+          <button v-if="!(friendStatus.received && !friendStatus.isFriend)" @click="goChat" class="flex justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition">
+            <i class="fas fa-paper-plane mr-2"></i> DM
+          </button>
+        </div>
+      </section>
+      <section class="max-w-lg mx-auto px-4">
+        <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
+        <div v-if="statMode === 'rule'" class="mb-4">
+          <button
+            @click="showRuleModal = true"
+            class="w-full py-3 rounded-xl bg-orange-100 text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2"
+          >
+            <i class="fas fa-list-alt"></i>
+            {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
+          </button>
+        </div>
+        <div v-if="statMode === 'category'" class="mb-4 flex gap-2">
+          <CustomSelect
+            :options="Object.keys(playedCategoryMap).map(cat => ({ label: cat, value: cat }))"
+            v-model="selectedMainCategory"
+            placeholder="주 카테고리"
+          />
+          <CustomSelect
+            :options="subCategoryOptions"
+            v-model="selectedSubCategory"
+            :disabled="!selectedMainCategory"
+            placeholder="서브 카테고리"
           />
         </div>
-      </div>
-      <div v-else class="text-center text-gray-400 py-6 text-sm">표시할 경기가 없습니다.</div>
-    </section>
+        <div class="mb-3 text-xs text-gray-500 px-2">
+          <template v-if="statMode === 'total'">
+            전체 기준 (플레이한 유저: <b>{{ user.totalPlayers }}</b>명)
+          </template>
+          <template v-if="statMode === 'rule' && selectedRule">
+            [{{ selectedRule.title }}] {{ selectedRule.description }}<br>
+            카테고리: {{ selectedRule.majorCategory }} > {{ selectedRule.minorCategory }}
+            <span class="block mt-1 text-gray-400">플레이 유저: <b>{{ selectedRule.players }}</b>명</span>
+          </template>
+          <template v-if="statMode === 'category' && selectedMainCategory && selectedSubCategory">
+            [{{ selectedMainCategory }} > {{ selectedSubCategory }}] 기준<br>
+            플레이 유저: <b>{{ filteredCategoryPlayers }}</b>명
+          </template>
+        </div>
+        <div class="rounded-2xl bg-white shadow p-5 mb-8">
+          <div class="flex justify-between items-center mb-3 ">
+            <span class="font-bold text-gray-900 text-base flex items-center gap-2">
+              <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
+            </span>
+            <div class="flex items-center gap-2 ">
+              <span class="px-3 py-1 rounded-full bg-orange-500 text-white font-black text-xs shadow">랭킹 -위</span>
+              <span class="px-2 py-1 rounded-full bg-white text-orange-500 text-xs font-semibold border border-orange-400">상위 -%</span>
+            </div>
+          </div>
+          <div class="w-full flex items-center justify-center my-5 -ml-2">
+            <canvas
+              v-if="chartData.length > 0"
+              ref="chartRef"
+              height=""
+              class=" "
+            ></canvas>
+            <div v-else class="w-full text-center text-gray-400 text-sm py-8">
+              경기 횟수가 부족하여<br> 퍼포먼스 그래프를 표시할 수 없습니다.
+            </div>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-[0.97rem]">
+            <div class="font-semibold text-gray-500">퍼포먼스 평균</div>
+            <div class="text-right font-bold text-gray-900">{{ stat.performance.toFixed(1) }}</div>
+            <div class="font-semibold text-gray-500">승/무/패</div>
+            <div class="text-right text-gray-600">{{ stat.wins }}승 {{ stat.draws }}무 {{ stat.losses }}패</div>
+            <div class="font-semibold text-gray-500">승률</div>
+            <div class="text-right text-orange-500 font-bold">{{ stat.winRate }}%</div>
+          </div>
+        </div>
+      </section>
+      <section class="max-w-lg mx-auto px-4">
+        <div class="flex items-center gap-2 mb-4">
+          <h3 class="text-xl font-bold text-gray-900">
+            플레이한 경기
+          </h3>
+          <span v-if="statMode==='total'" class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold">전체 경기</span>
+          <span v-if="statMode==='rule' && selectedRule" class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold">{{ selectedRule.ruleTitle }}</span>
+          <span v-if="statMode==='category' && selectedMainCategory && selectedSubCategory" class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold">{{ selectedMainCategory }} > {{ selectedSubCategory }}</span>
+        </div>
+        <div v-if="filteredGames.length" class="space-y-6">
+          <div
+            v-for="game in filteredGames"
+            :key="game.id"
+            :ref="el => setMatchRef(el, game.id)"
+            :id="'match-' + game.id"
+          >
+            <MatchCard
+              :game="game"
+              :isWin="game.result === 'win'"
+              :isDraw="game.result === 'draw'"
+            />
+          </div>
+        </div>
+        <div v-else class="text-center text-gray-400 py-6 text-sm">표시할 경기가 없습니다.</div>
+      </section>
 
-    <!-- 경기규칙 모달 -->
+    <!-- 모달/토스트/풋터 등 나머지 코드는 기존 그대로(생략) -->
     <transition name="fade">
       <div v-if="showRuleModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-end z-50">
         <div class="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl p-6">
@@ -323,7 +378,6 @@
               </div>
               <div class="text-xs text-gray-600 whitespace-pre-line leading-relaxed">{{ rule.ruleDescription }}</div>
             </button>
-
           </div>
           <div v-else>
             플레이한 게임이 없습니다.
@@ -331,138 +385,137 @@
         </div>
       </div>
     </transition>
-  </div>
-
     <transition name="fade">
-    <div v-if="showUserModal" class="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-center items-center">
-      <div class="bg-white  w-dvw   w-full p-6 pt-10 relative" style="min-height: calc(var(--real-vh, 1vh) * 100)">
-        <button class="absolute top-10  right-7 text-gray-400 hover:text-orange-500 text-xl"
-                @click="closeUserModal">
-          <i class="fas fa-times"></i>
-        </button>
-        <h3  class="font-bold text-lg mb-4 text-gray-800">유저 찾기</h3>
-        <input v-model="userSearch"
-               @input="onUserSearch"
-               ref="userinput"
-               type="text"
-               class="w-full border rounded-[10px] px-4 py-3 mb-4 text-sm focus:ring-2 focus:ring-orange-200 outline-none"
-               placeholder="유저의 이름을 입력하세요" />
-        <div v-if="userSearching" class="text-center text-gray-400 py-4 text-sm">검색 중...</div>
-        <div v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''" class="text-center text-gray-400 py-10 text-base">검색 결과가 없습니다.</div>
-        <div v-else class="flex flex-col gap-2 max-h-60 overflow-y-auto">
-          <button v-for="user in userSearchResult" :key="user.id"
-                  @click="gotoUser(user.id)"
-                  class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl transition border border-transparent hover:border-orange-200">
-            <img :src="user.avatar" class="w-10 h-10 rounded-full border object-cover" />
-            <div class="flex-1 text-left">
-              <div class=" flex flex-col gap-0">
-                <div class="font-bold text-gray-800 text-sm ">  
-                  {{ user.nickname }}
+      <div v-if="showUserModal" class="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-center items-center">
+        <div class="bg-white  w-dvw   w-full p-6 pt-10 relative" style="min-height: calc(var(--real-vh, 1vh) * 100)">
+          <button class="absolute top-10  right-7 text-gray-400 hover:text-orange-500 text-xl"
+                  @click="closeUserModal">
+            <i class="fas fa-times"></i>
+          </button>
+          <h3  class="font-bold text-lg mb-4 text-gray-800">유저 찾기</h3>
+          <input v-model="userSearch"
+                 @input="onUserSearch"
+                 ref="userinput"
+                 type="text"
+                 class="w-full border rounded-[10px] px-4 py-3 mb-4 text-sm focus:ring-2 focus:ring-orange-200 outline-none"
+                 placeholder="유저의 이름을 입력하세요" />
+          <div v-if="userSearching" class="text-center text-gray-400 py-4 text-sm">검색 중...</div>
+          <div v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''" class="text-center text-gray-400 py-10 text-base">검색 결과가 없습니다.</div>
+          <div v-else class="flex flex-col gap-2 max-h-60 overflow-y-auto">
+            <button v-for="user in userSearchResult" :key="user.id"
+                    @click="gotoUser(user.id)"
+                    class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl transition border border-transparent hover:border-orange-200">
+              <img :src="user.avatar ? user.avatar : Default " class="w-10 h-10 rounded-full border object-cover" />
+              <div class="flex-1 text-left">
+                <div class=" flex flex-col gap-0">
+                  <div class="font-bold text-gray-800 text-sm ">
+                    {{ user.nickname }}
+                  </div>
+                  <div class="text-[0.8rem]">
+                    @{{ user.username }}
+                  </div>
                 </div>
-                <div class="text-[0.8rem]">
-                  @{{ user.username }}
-                </div>
+                <div class="text-xs text-gray-500">{{ user.intro }}</div>
               </div>
-              <div class="text-xs text-gray-500">{{ user.intro }}</div>
-            </div>
-          </button>
-        </div>
-      </div>
-    </div>
-  </transition>
-
-  <Footer tab="profile" />
-
-<transition name="fade h-full">
-  <div v-if="showFriendModal" class="h-full fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center">
-    <div class="bg-white h-[60%] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
-         style="padding:2rem 1.2rem 2.2rem 1.2rem;overflow-y:auto;">
-      <button class="absolute right-5 top-4 text-xl text-gray-400 hover:text-orange-500" @click="closeFriendModal"><i class="fas fa-times"></i></button>
-      <div class="flex gap-2 mb-5 mt-2">
-        <button
-          :class="friendTab === 'friends' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
-          class="flex-1 py-2 text-base transition"
-          @click="friendTab = 'friends'">친구</button>
-        <button
-          v-if="user?.isMe"
-          :class="friendTab === 'sent' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
-          class="flex-1 py-2 text-base transition"
-          @click="friendTab = 'sent'">요청됨</button>
-        <button
-          v-if="user?.isMe"
-          :class="friendTab === 'received' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
-          class="flex-1 py-2 text-base transition"
-          @click="friendTab = 'received'">요청받음</button>
-      </div>
-      <div v-if="friendTab==='friends'">
-        <div v-if="friends.length" class="flex flex-col gap-3  overflow-y-auto">
-          <button
-            v-for="f in friends"
-            :key="f.id"
-            class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
-            @click="gotoUser(f.id)">
-            <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
-            <div class="flex-1 text-left min-w-0">
-              <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
-              <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
-              <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
-            </div>
-          </button>
-        </div>
-        <div v-else class="text-gray-400 text-center py-8">친구가 없습니다.</div>
-      </div>
-      <div v-if="friendTab==='sent' && user?.isMe">
-        <div v-if="friendRequestsSent.length" class="flex flex-col gap-3  overflow-y-auto">
-          <button
-            v-for="f in friendRequestsSent"
-            :key="f.id"
-            class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
-            @click="gotoUser(f.id)">
-            <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
-            <div class="flex-1 text-left min-w-0">
-              <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
-              <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
-              <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
-            </div>
-          </button>
-        </div>
-        <div v-else class="text-gray-400 text-center py-8">요청한 친구가 없습니다.</div>
-      </div>
-      <div v-if="friendTab==='received' && user?.isMe">
-        <div v-if="friendRequestsReceived.length" class="flex flex-col gap-3  overflow-y-auto">
-          <div
-            v-for="f in friendRequestsReceived"
-            :key="f.id"
-            class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition">
-            <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
-            <div @click="gotoUser(f.id)"  class="flex-1 text-left min-w-0">
-              <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
-              <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
-              <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
-            </div>
-            <div class="flex gap-1 ml-2">
-              <button
-                class="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold shadow"
-                @click="onAcceptRequest(f.id)">
-                승인
-              </button>
-              <button
-                class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-bold shadow border border-gray-300"
-                @click="onRejectRequest(f.id)">
-                거부
-              </button>
-            </div>
+            </button>
           </div>
         </div>
-        <div v-else class="text-gray-400 text-center py-8">받은 친구 요청이 없습니다.</div>
       </div>
-    </div>
+    </transition>
+    <Footer tab="profile" />
+    <transition name="fade h-full">
+      <div v-if="showFriendModal" class="h-full fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center">
+        <div class="bg-white h-[60%] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
+             style="padding:2rem 1.2rem 2.2rem 1.2rem;overflow-y:auto;">
+          <button class="absolute right-5 top-4 text-xl text-gray-400 hover:text-orange-500" @click="closeFriendModal"><i class="fas fa-times"></i></button>
+          <div class="flex gap-2 mb-5 mt-2">
+            <button
+              :class="friendTab === 'friends' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
+              class="flex-1 py-2 text-base transition"
+              @click="friendTab = 'friends'">친구</button>
+            <button
+              v-if="user?.isMe"
+              :class="friendTab === 'sent' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
+              class="flex-1 py-2 text-base transition"
+              @click="friendTab = 'sent'">요청됨</button>
+            <button
+              v-if="user?.isMe"
+              :class="friendTab === 'received' ? 'font-bold border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'"
+              class="flex-1 py-2 text-base transition"
+              @click="friendTab = 'received'">요청받음</button>
+          </div>
+          <div v-if="friendTab==='friends'">
+            <div v-if="friends.length" class="flex flex-col gap-3  overflow-y-auto">
+              <button
+                v-for="f in friends"
+                :key="f.id"
+                class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
+                @click="gotoUser(f.id)">
+                <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
+                <div class="flex-1 text-left min-w-0">
+                  <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+                  <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+                  <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+                </div>
+              </button>
+            </div>
+            <div v-else class="text-gray-400 text-center py-8">친구가 없습니다.</div>
+          </div>
+          <div v-if="friendTab==='sent' && user?.isMe">
+            <div v-if="friendRequestsSent.length" class="flex flex-col gap-3  overflow-y-auto">
+              <button
+                v-for="f in friendRequestsSent"
+                :key="f.id"
+                class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
+                @click="gotoUser(f.id)">
+                <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
+                <div class="flex-1 text-left min-w-0">
+                  <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+                  <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+                  <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+                </div>
+              </button>
+            </div>
+            <div v-else class="text-gray-400 text-center py-8">요청한 친구가 없습니다.</div>
+          </div>
+          <div v-if="friendTab==='received' && user?.isMe">
+            <div v-if="friendRequestsReceived.length" class="flex flex-col gap-3  overflow-y-auto">
+              <div
+                v-for="f in friendRequestsReceived"
+                :key="f.id"
+                class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition">
+                <img :src="f.avatar || Default" class="w-10 h-10 rounded-full object-cover border"/>
+                <div @click="gotoUser(f.id)"  class="flex-1 text-left min-w-0">
+                  <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+                  <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+                  <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+                </div>
+                <div class="flex gap-1 ml-2">
+                  <button
+                    class="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold shadow"
+                    @click="onAcceptRequest(f.id)">
+                    승인
+                  </button>
+                  <button
+                    class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-bold shadow border border-gray-300"
+                    @click="onRejectRequest(f.id)">
+                    거부
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-gray-400 text-center py-8">받은 친구 요청이 없습니다.</div>
+          </div>
+        </div>
+      </div>
+    </transition>
+        </template>
+
+    <CustomToast />
   </div>
-</transition>
-  <CustomToast />
-
-
+  
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
@@ -503,11 +556,11 @@ const allGames = ref([])
 const playedCategoryMap = ref({}) // { "신체": ["축구", "농구"], "보드": ["체스"] }
 const playedRules = ref([]) // 전체 플레이한 룰 배열
 
-const statTabs = [
-  { id: 'total', label: '전체' },
-  // { id: 'rule', label: '경기 규칙별' },
-  // { id: 'category', label: '카테고리별' },
-]
+// const statTabs = [
+//   { id: 'total', label: '전체' },
+//   // { id: 'rule', label: '경기 규칙별' },
+//   // { id: 'category', label: '카테고리별' },
+// ]
 const statMode = ref('total')
 const showRuleModal = ref(false)
 const ruleSearch = ref('')
@@ -661,16 +714,16 @@ function closeFriendModal() {
   showFriendModal.value = false
 }
 
-function onTabChange(item) {
-  statMode.value = item.id
-  if (item.id === 'rule' && playedRules.value.length && !selectedRule.value) {
-    selectedRuleId.value = playedRules.value[0].id
-  }
-  if (item.id === 'category') {
-    selectedMainCategory.value = Object.keys(playedCategoryMap.value)[0] || null
-    selectedSubCategory.value = playedCategoryMap.value[selectedMainCategory.value]?.[0] || null
-  }
-}
+// function onTabChange(item) {
+//   statMode.value = item.id
+//   if (item.id === 'rule' && playedRules.value.length && !selectedRule.value) {
+//     selectedRuleId.value = playedRules.value[0].id
+//   }
+//   if (item.id === 'category') {
+//     selectedMainCategory.value = Object.keys(playedCategoryMap.value)[0] || null
+//     selectedSubCategory.value = playedCategoryMap.value[selectedMainCategory.value]?.[0] || null
+//   }
+// }
 
 const chartData = computed(() => {
   if (statMode.value === 'total') return user.value?.stats?.performanceHistory ?? []
@@ -829,7 +882,6 @@ watch([statMode, selectedRuleId, selectedMainCategory, selectedSubCategory], upd
 
 </script>
 
-
 <style scoped>
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
 body { background: #f8f9fa !important; }
@@ -842,7 +894,6 @@ body { background: #f8f9fa !important; }
 .fade-enter-active, .fade-leave-active { transition: all 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 ::-webkit-scrollbar { display:none; }
-
 @keyframes gradientShift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -861,5 +912,4 @@ body { background: #f8f9fa !important; }
 .animate-pulse-slow {
   animation: pulse-slow 2s ease-in-out infinite;
 }
-
 </style>

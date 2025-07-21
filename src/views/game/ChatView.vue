@@ -18,7 +18,7 @@
       </div>
     </div>
 </div>
-<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[110px] pb-[10dvh] px-1">
+<div  style="height: calc( (var(--real-vh, 1vh) * 100))" class="pt-[110px] pb-[81px] px-1">
     <!-- 메시지 목록 -->
     <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
       <div v-if="messages.length > 0" class="flex justify-center py-3">
@@ -50,7 +50,7 @@
     </div>
 </div>
 
-<div class="fixed bottom-0 w-full h-[10dvh] bg-white">
+<div class="fixed bottom-0 w-full h-[81px] bg-white">
     <!-- 입력창 -->
     <div class="p-[5px] bg-white flex items-center">
       <textarea

@@ -1,7 +1,5 @@
 <template>
        <HeaderComp :has-referer="true" title="규칙 탐색" />
-
-  <main class=" pb-14 h-full raspy-top">
     <!-- 필터 바 -->
     <nav class="fixed z-30 bg-white/95 top-20 backdrop-blur-md border-b border-gray-100 px-4 pb-3 raspy-top flex flex-wrap gap-2 sm:gap-4">
       <select
@@ -56,8 +54,10 @@
         </ul>
       </div>
     </nav>
+  <main class=" pb-14 h-full">
+
     <!-- 카드 리스트 -->
-    <div class="max-w-2xl mx-auto  h-full px-2 pt-[13rem]  raspy-top flex flex-col gap-8">
+    <div class="max-w-2xl mx-auto  h-full px-2 pt-[13rem] flex flex-col gap-8">
       <div v-if="loading" class="py-32 text-center text-orange-500">
         <i class="fas fa-spinner fa-spin text-3xl"></i>
         <div class="mt-4 text-base">로딩 중입니다…</div>

@@ -47,26 +47,96 @@
       <button class="absolute top-3 right-3 text-gray-400 " @click="showModal = false" aria-label="닫기">
         <i class="fas fa-times"></i>
       </button>
-      <h2 class="text-xl font-bold mb-3">법적 고지사항</h2>
-      <div class="prose text-gray-700 text-sm max-h-80 overflow-auto">
-        <ul class="list-disc ml-5 space-y-2">
-          <li>
-            <b>개인정보 수집 및 이용:</b> 본 서비스는 회원가입 및 서비스 제공을 위하여 소셜 로그인(OAuth2 기반, 카카오/애플)을 통해 <b>이메일</b> 정보를 수집합니다. 그룹 계정의 경우, 이메일 신청을 기반으로 별도의 계정이 생성되며, 발급된 아이디/비밀번호로 로그인합니다.
-          </li>
-          <li>
-            <b>개인정보 국외 이전 고지:</b> 회원 정보 및 서비스 운영을 위한 데이터베이스와 서버는 <b>Amazon Web Services(AWS) 북미 리전(USA)</b>에 위치해 있습니다. 이에 따라 이용자의 개인정보가 대한민국 외 지역(미국)으로 이전·보관될 수 있습니다.
-          </li>
-          <li>
-            <b>커뮤니티 플랫폼 고지:</b> 본 서비스는 커뮤니티 플랫폼으로서, 사용자 간의 커뮤니케이션 및 게시물 작성이 가능합니다. 이용자는 게시물 작성 시 개인정보가 포함되지 않도록 주의해야 하며, 타인의 권리를 침해하는 게시물 작성 시 서비스 이용이 제한될 수 있습니다.
-          </li>
-          <li>
-            <b>저작권 안내:</b> 이용자가 서비스 내에 게시 및 업로드한 콘텐츠(텍스트, 이미지 등)는 저작권법 등 관련 법령에 따라 보호되며, 타인의 저작물을 무단 게시할 경우 법적 책임이 발생할 수 있습니다.
-          </li>
-          <li>
-            <b>기타 자세한 정보:</b> 자세한 내용은 <span class="underline text-blue-600">개인정보처리방침</span> 및 <span class="underline text-blue-600">이용약관</span>을 참조하시기 바랍니다.
-          </li>
-        </ul>
-      </div>
+<h2 class="text-xl font-bold mb-3">법적 고지 및 서비스 이용약관</h2>
+<div class="prose text-gray-700 text-sm max-h-[32rem] overflow-auto space-y-4">
+  <section>
+    <h3 class="font-semibold text-base">1. 개인정보 수집 및 이용</h3>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>
+        ‘Match’는 회원가입 및 서비스 제공을 위하여 카카오/애플 소셜 로그인(이메일 정보 수집), 그룹 계정 신청(이메일 기반)으로 최소한의 개인정보(이메일)를 수집합니다.
+      </li>
+      <li>
+        카메라/앨범 접근 권한은 게시물 작성 등 서비스 이용 목적에 한해 사용되며, 사진은 이용자 기기 또는 서비스 내 저장을 위해 접근됩니다.
+      </li>
+      <li>
+        알림 권한은 서비스 공지, 커뮤니티 알림 등 푸시알림 제공을 위해 사용됩니다.
+      </li>
+      <li>
+        수집된 정보는 회원관리, 서비스 제공, 문의 대응 등 목적 외로는 이용하지 않으며, 탈퇴 시 즉시 파기됩니다.
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="font-semibold text-base">2. 개인정보 국외 이전 안내</h3>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>
+        회원정보 및 서비스 운영 데이터는 Amazon Web Services(AWS) 북미(USA) 리전 서버에 보관·처리됩니다. 이에 따라, 개인정보가 대한민국 외 지역으로 이전될 수 있습니다.
+      </li>
+      <li>
+        개인정보 보호를 위하여 적절한 기술적·관리적 조치를 취하고 있습니다.
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="font-semibold text-base">3. 외부 서비스 이용 안내</h3>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>
+        본 서비스는 카카오, 애플 소셜 로그인 및 Firebase(알림 발송)와 연동되어 있으며, 해당 서비스의 정책에 따라 일부 정보가 연동·처리될 수 있습니다.
+      </li>
+      <li>
+        광고, 마케팅, 제3자 정보 제공은 일절 없습니다.
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="font-semibold text-base">4. 커뮤니티 이용 안내 및 금지행위</h3>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>
+        Match는 스포츠 커뮤니티 플랫폼으로, 회원 간 자유로운 소통과 게시물(글, 사진 등) 작성이 가능합니다.
+      </li>
+      <li>
+        게시물 작성 시 타인의 권리를 침해하거나 불법·유해·음란·도배 등 서비스 질서를 해치는 행위는 금지되며, 위반 시 사전 안내 없이 게시물 삭제 또는 서비스 이용이 제한될 수 있습니다.
+      </li>
+      <li>
+        회원 간 분쟁, 게시물 내용 등 커뮤니티 내 활동에 대한 책임은 해당 회원에게 있습니다.
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="font-semibold text-base">5. 저작권 및 콘텐츠 관리</h3>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>
+        회원이 서비스 내에 게시하거나 업로드한 모든 콘텐츠(텍스트, 이미지 등)는 해당 회원에게 저작권이 있습니다.
+      </li>
+      <li>
+        타인의 저작물을 무단으로 게시/복제할 경우 법적 책임이 발생할 수 있습니다.
+      </li>
+      <li>
+        서비스 운영상, 불법·권리침해 콘텐츠는 사전 통지 없이 삭제 또는 제한될 수 있습니다.
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="font-semibold text-base">6. 약관·정책의 변경</h3>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>
+        본 약관 및 정책은 2025 7월 21일 기준이며, 변경 시 서비스 내 공지 후 적용됩니다.
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="font-semibold text-base">7. 문의처</h3>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>
+        서비스 및 개인정보 관련 문의: <a href="mailto:admin@raspyapp.com" class="underline text-blue-600">admin@raspyapp.com</a>
+      </li>
+      <li>
+        운영사: 주식회사 래스피 (Raspy Inc.)
+      </li>
+    </ul>
+  </section>
+</div>
+
       <div class="mt-4 flex justify-end">
         <button class="px-4 py-2 bg-[var(--point-color)] text-white rounded " @click="showModal = false">
           닫기

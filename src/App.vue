@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="h-full">
     <!-- Splash 화면 (네이티브 위임) -->
-    <transition name="fade">
+    <transition name="fade" >
       <div v-if="showSplash && false" class="fixed inset-0 flex items-center justify-center bg-white z-[100] ">
         <span class="raspy text-5xl font-extrabold tracking-wider text-orange-500 font-kanit;
 ">RASPY</span>
@@ -9,7 +9,7 @@
     </transition>
 
     <!-- 실제 라우터 뷰 -->
-    <RouterView :key="route.fullPath" />
+    <RouterView class="h-full" :key="route.fullPath" />
   </div>
 </template>
 

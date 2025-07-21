@@ -1,7 +1,7 @@
 <template>
     <!-- 상단: 상대방 프로필/닉네임 고정 -->
 <div class="overflow-hidden" >
-     <div  class="fixed top-0 w-full h-[110px] z-20">
+     <div  class="sticky top-0 w-full h-[110px] z-20">
     <div class="h-full flex items-end p-4 bg-white shadow gap-2 z-20">
       <button @click="goBack()" class="mr-2 pb-2 text-gray-600 hover:text-gray-800">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

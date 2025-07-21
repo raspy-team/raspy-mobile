@@ -1,10 +1,14 @@
 <template>
   <div class="h-full">
-    <!-- Splash 화면 (네이티브 위임) -->
+    <!-- Splash 화면 (anroid는 네이티브 위임, ios일때만 보임.) -->
     <transition name="fade" >
-      <div v-if="showSplash && false" class="fixed inset-0 flex items-center justify-center bg-white z-[100] ">
-        <span class="raspy text-5xl font-extrabold tracking-wider text-orange-500 font-kanit;
-">RASPY</span>
+      <div class="overflow-hidden">
+        <div v-if=" isIos && showSplash" class="fixed overflow-hidden inset-0 flex items-center justify-center bg-black z-[100] ">
+          <span class="raspy text-5xl font-extrabold tracking-wider text-orange-500 font-kanit;
+  ">
+        <img class="w-[50dvw]" :src="MatchLogo" />
+        </span>
+        </div>
       </div>
     </transition>
 
@@ -16,14 +20,20 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import MatchLogo from "./assets/Match.png"
 
 const showSplash = ref(true)
 const route = useRoute()
-
+    
+const isIos = ref(false)
+    const ua = navigator.userAgent.toLowerCase()
+    if (ua.includes('raspy-ios')) {
+        isIos.value = true;
+    }
 onMounted(() => {
-  setTimeout(() => {
-    showSplash.value = false
-  }, 2000) //
+  // setTimeout(() => {
+  //   showSplash.value = false
+  // }, 2000) //
 
   try{
 const token = localStorage.getItem("raspy_access_token2");

@@ -8,7 +8,7 @@
       <div
         v-show="showModal"
         ref="sheet"
-        class="w-full max-w-md flex flex-col rounded-t-2xl bg-white shadow-xl"
+        class="w-full raspy-bot max-w-md flex flex-col rounded-t-2xl bg-white shadow-xl"
         :style="{
           height: `${sheetHeight}px`,
           display: 'flex',
@@ -64,7 +64,7 @@
         <!-- 입력창 (항상 바텀) -->
         <form
           @submit.prevent="submitInput"
-          class="flex gap-2 items-center border-t pt-2 px-3 bg-white"
+          class="flex gap-2 items-center border-t pt-2 pb-2 px-3 bg-white"
           ref="inputForm"
           :style="{
             minHeight: `${inputAreaHeight}px`,

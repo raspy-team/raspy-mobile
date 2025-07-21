@@ -5,9 +5,9 @@
         <div class="flex items-center">
           <router-link v-if="props.hasReferer != true" to="/" class="text-xl font-bold text-[#f97316]">
             <span class="flex items-center gap-1/2">
-              <img class="w-10 pt-2" :src="MatchLogo" />
-              <span class="RASPY ">
-                Match
+              <img class="w-14 pt-2" :src="MatchLogo" />
+              <span class="RASPY flex ">
+                <p class="text-red-500 RASPY">M</p><p class="text-orange-500 RASPY">atc</p><p class="text-yellow-500 RASPY">h</p>
               </span>
             </span>
           </router-link>

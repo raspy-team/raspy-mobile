@@ -2,7 +2,7 @@
   <div class="overflow-hidden">
     <!-- 헤더: visualViewport 반영 (fixed) -->
     <div
-      class="fixed left-0 w-full h-[110px] z-20 transition-all duration-100"
+      class="fixed left-0 w-full h-[110px] z-20"
       :style="{ top: `${headerTop}px` }"
     >
       <div class="h-full flex items-end p-4 bg-white shadow gap-2 z-20">

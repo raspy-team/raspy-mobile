@@ -125,15 +125,6 @@
 
             </transition>
           </section>
-
-
-        </form>
-      </main>
-    </div>
-
-  </div>
-
-  
               <!-- 제출 -->
           <div  class="fixed bottom-0 w-full left-0 ">
             <button type="submit"
@@ -142,6 +133,15 @@
               게임 생성
             </button>
           </div>
+
+        </form>
+      </main>
+    </div>
+
+  </div>
+
+  
+
         
     <!-- 모달들 -->
     <RuleSelectModal v-if="showSelectModal" @select="selectRule" @close="showSelectModal = false" />

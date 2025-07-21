@@ -8,7 +8,7 @@
   <div
     v-show="showModal"
     ref="sheet"
-    class="w-full max-w-md h-[100%] min-h-[60%]  raspy-bot flex flex-col rounded-t-2xl bg-white shadow-xl"
+    class="w-full max-w-md h-[100%] raspy-bot flex flex-col rounded-t-2xl bg-white shadow-xl"
     style="display:flex; flex-direction:column;"
     @touchstart="onTouchStart"
     @touchmove="onTouchMove"
@@ -19,7 +19,7 @@
     <div
       class="flex-1 overflow-y-auto px-4 pt-2 pb-4"
       ref="scrollContainer"
-      style="min-height:0px; max-height:calc(88vh - 65px); overscroll-behavior:contain; touch-action:pan-y; overflow-y:auto;"
+      style="min-height:0px; max-height:calc(90%); overscroll-behavior:contain; touch-action:pan-y; overflow-y:auto;"
     >
       <!-- 댓글 내용 -->  
           <template v-if="isLoading">

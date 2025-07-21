@@ -84,7 +84,7 @@
           </div>
         </div>
         <div v-if="games.length > 0">
-          <div  @click="openModal(game)"  v-for="(game, index) in games" :key="index" class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4 p-4">
+          <div  @click="openModal(game)"  v-for="(game, index) in games" :key="index" class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-4">
             <!-- 타이틀과 생성자 정보(우측 상단) -->
 
             <div class="flex justify-between items-start">

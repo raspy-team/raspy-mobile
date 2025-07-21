@@ -1,6 +1,7 @@
 <template>
     <!-- 상단: 상대방 프로필/닉네임 고정 -->
-     <div  class="fixed top-0 w-full h-[125px] raspy-top">
+<div class="raspy-top">
+     <div  class="fixed top-0 w-full h-[125px] ">
     <div class="h-full flex items-center p-4 bg-white shadow gap-2 ">
       <button @click="$router.back()" class="mr-2 text-gray-600 hover:text-gray-800">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,6 +71,7 @@
         </svg>
       </button>
     </div>
+  </div>
   </div>
 </template>
 

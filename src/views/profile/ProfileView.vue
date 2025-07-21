@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[#f8f9fa] pb-24 relative raspy-top">
+  <div class="bg-[#f8f9fa] relative raspy-top">
     <!-- Fixed Top Bar -->
     <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 pb-3 border-b border-gray-100 raspy-top">
       <div class="relative flex-1 mr-2 sm:w-48 pt-3">
@@ -118,7 +118,7 @@
 
     <!-- USER 정보: 로딩 후 노출 -->
     <template v-else>
-      <section class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-8 flex flex-col gap-5 relative">
+      <section class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-18 flex flex-col gap-5 relative">
         <div class="flex gap-5 items-start mb-2">
           <img
             :src="user.avatar ? user.avatar : Default"

@@ -222,15 +222,46 @@ function goToResult(ownerId, gameId) {
   router.push(`/profile/${ownerId}?id=${gameId}`)
 }
 
-const shareGame = async (gameId) => {
-  try {
-    const res = await api.post('/api/invite', null, { params: { gameId } })
-    await navigator.clipboard.writeText(res.data.url)
+async function shareGame(gameId) {
+  const res = await api.post('/api/invite', null, { params: { gameId } })
+  const url = res.data.url
+
+  // iOS WebView (WKWebView)
+  if (
+    window.webkit &&
+    window.webkit.messageHandlers &&
+    window.webkit.messageHandlers.clipboardCopy
+  ) {
+    window.webkit.messageHandlers.clipboardCopy.postMessage(url)
     showToast('공유 링크가 복사되었습니다!')
-  } catch {
-    showToast('링크 복사에 실패했습니다.')
+    return
+  }
+
+  // (Android WebView는 그대로. clipboard 잘 동작하니 아래 코드 유지)
+  try {
+    await navigator.clipboard.writeText(url)
+    showToast('공유 링크가 복사되었습니다!')
+    return
+  } catch (err) {
+    // Safari 등 일부 환경에서 clipboard API가 막힌 경우 fallback
+    try {
+      const input = document.createElement('input')
+      input.value = url
+      document.body.appendChild(input)
+      input.select()
+      const success = document.execCommand('copy')
+      document.body.removeChild(input)
+      if (success) {
+        showToast('공유 링크가 복사되었습니다!')
+      } else {
+        showToast('복사에 실패했습니다!')
+      }
+    } catch (err2) {
+      showToast('복사에 실패했습니다!')
+    }
   }
 }
+
 
 function toggleComment(id) {
   commentId.value = id

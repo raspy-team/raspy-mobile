@@ -474,7 +474,7 @@ const joinGame = (id) => router.push(`/games/${id}/play`)
 const canStart = (g) => g.status === 'SCHEDULED' && !!g.opponentNickname
 
 async function shareGame(gameId) {
-  const res = await api.post('/api/invite', null, { params: { gameId } })
+  const res = await client.post('/api/invite', null, { params: { gameId } })
   const url = res.data.url
 
   // iOS WebView (WKWebView)

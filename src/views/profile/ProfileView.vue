@@ -423,7 +423,6 @@
         </div>
       </div>
     </transition>
-    <Footer tab="profile" />
     <transition name="fade h-full">
       <div v-if="showFriendModal" class="h-full fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center">
         <div class="bg-white h-[60%] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
@@ -514,7 +513,8 @@
 
     <CustomToast />
   </div>
-  
+      <Footer tab="profile" />
+
 </template>
 
 

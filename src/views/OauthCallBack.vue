@@ -271,11 +271,7 @@ async function onNicknameSubmit() {
   }
   nickValidating.value = true
   try {
-    const res = await api.post('/api/auth/complete', { username: username.value, nickname: nickname.value })
-    if(res.data && res.data.token){
-      localStorage.setItem('raspy_access_token2', res.data.token)
-      window.AndroidApp?.registerFcmToken(res.data.token)
-    }
+    api.post('/api/auth/complete', { username: username.value, nickname: nickname.value })
     step.value++
   } catch {
     nickError.value = '서버 오류'

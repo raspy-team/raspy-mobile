@@ -240,22 +240,28 @@ const isIosApp = userAgent.includes('raspy-ios')
 
 const loginWith = (provider) => {
   const isLocalhostClient = window.location.hostname === 'localhost' && window.location.port === '8081'
-  isLoading.value = true // 로딩 시작
+  isLoading.value = true
+  const apiBase = isLocalhostClient
+    ? 'http://localhost:8080'
+    : 'https://raspy-be.shop'
 
-const apiBase = isLocalhostClient
-  ? 'http://localhost:8080'
-  : 'https://raspy-be.shop'
-
-  if(provider == 'kakao')
+  if (provider === 'kakao') {
     if (userAgent.includes("raspy-ios")) {
       window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: "kakaoLogin" })
     } else {
       window.location.href = `${apiBase}/oauth2/authorization/kakao`
     }
-  
-  else 
+  } else if (provider === 'apple') {
+    if (userAgent.includes("raspy-ios")) {
+      window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: "appleLogin" })
+    } else {
+      alert("Apple 로그인은 iOS 앱에서만 가능합니다.")
+    }
+  } else {
     window.location.href = `${apiBase}/oauth2/authorization/${provider}`
+  }
 }
+
 
 const loginGroup = () => {
   router.push("/group/login")

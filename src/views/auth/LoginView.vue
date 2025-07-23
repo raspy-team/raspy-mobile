@@ -1,4 +1,5 @@
 <template>
+  <div class="raspy-top">
   <button @click="goBack" class="text-black text-lg fixed top-5 left-5">
     <i class="fas fa-chevron-left"></i>
   </button>
@@ -15,7 +16,7 @@
     <!-- Right: Login -->
     <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-white px-6 lg:px-24">
       <div class="w-full max-w-md space-y-8">
-        <h2 class="text-2xl font-bold text-gray-900 text-left">그룹 유저 로그인</h2>
+        <h2 class="text-2xl font-bold text-gray-900 text-left">그룹 계정 로그인</h2>
         <form @submit.prevent="handleLogin" class="space-y-4">
           <!-- Email -->
           <div class="relative">
@@ -68,6 +69,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 

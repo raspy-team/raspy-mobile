@@ -3,7 +3,7 @@
     <!-- Splash 화면 (anroid는 네이티브 위임, ios일때만 보임.) -->
     <transition name="fade" >
       <div class="overflow-hidden">
-        <div v-if=" isIos && showSplash" class="fixed overflow-hidden inset-0 flex items-center justify-center bg-black z-[100] ">
+        <div v-if="false && isIos && showSplash" class="fixed overflow-hidden inset-0 flex items-center justify-center bg-black z-[100] ">
           <span class="raspy text-5xl font-extrabold tracking-wider text-orange-500 font-kanit;
   ">
         <img class="w-[50dvw]" :src="MatchLogo" />
@@ -36,16 +36,25 @@ onMounted(() => {
   }, 2000) //
 
   try{
-const token = localStorage.getItem("raspy_access_token2");
-if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
-  window.AndroidApp.registerFcmToken(token);
-} else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge) {
-  window.webkit.messageHandlers.iosBridge.postMessage({
-    action: "registerFcmToken",
-    jwt: token
-  });
-}
-  } catch(e) {
+    const token = localStorage.getItem("raspy_access_token2");
+      setTimeout(() => {
+        showSplash.value = false
+      }, 2000) //
+
+    setTimeout(()=>{
+      if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
+        window.AndroidApp.registerFcmToken(token);
+      } 
+      else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge) {
+          window.webkit.messageHandlers.iosBridge.postMessage({
+          action: "registerFcmToken",
+          jwt: token
+        })
+      }
+    }, 5000)
+     
+    }
+  catch(e) {
     console.log("welcome [web] user")
   }
 })

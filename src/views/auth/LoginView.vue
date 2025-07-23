@@ -1,9 +1,9 @@
 <template>
   <div class="raspy-top">
-  <button @click="goBack" class="text-black text-lg fixed top-5 left-5">
+  <button @click="goBack" class="text-black text-lg fixed top-5  left-5 raspy-top">
     <i class="fas fa-chevron-left"></i>
   </button>
-  <div class="flex">
+  <div class="flex pt-20">
     <!-- Left: Brand -->
     <div class="hidden lg:flex w-1/2 bg-[#191919] items-center justify-center">
       <div class="text-center space-y-8 px-8">

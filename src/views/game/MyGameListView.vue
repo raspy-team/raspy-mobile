@@ -4,7 +4,7 @@
     <h1 class="text-xl font-black text-left mb-7 tracking-tight text-neutral-900">
       진행 예정된 게임
     </h1>
-    <template v-if="games.length">
+    <template v-if="!isLoading">
       <div
         v-for="game in [...games].reverse()"
         :key="game.id"
@@ -467,12 +467,16 @@ function scrollToParamId() {
   }
 }
 
+const isLoading = ref(true)
+
 onMounted(async () => {
+  isLoading.value = true
   const res = await client.get('/api/games/my-games')
   games.value = res.data
   updateElapsed()
   interval = setInterval(updateElapsed, 2000)
   await nextTick()
+  isLoading.value = false
   scrollToParamId()
 })
 

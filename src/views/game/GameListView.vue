@@ -226,9 +226,63 @@
             </div>
           </div>
         </div>
-        <div v-else class="text-center mt-10 text-gray-600 text-sm">
-          {{ timerDone ? '표시할 게임이 없습니다' : '로딩 중입니다...' }}
+ <div v-else>
+      <!-- 스켈레톤 or 없음 표시 -->
+      <template v-if="!timerDone">
+        <!-- 스켈레톤 UI: 카드 3개 정도 반복 -->
+        <div v-for="n in 3" :key="n" class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 animate-pulse">
+          <div class="flex justify-between items-start">
+            <div class="flex flex-col w-full justify-between">
+              <div class="h-5 bg-gray-200 rounded w-2/3 mb-2"></div>
+              <div class="h-3 bg-gray-100 rounded w-1/3"></div>
+            </div>
+            <div class="h-4 bg-gray-100 rounded w-12"></div>
+          </div>
+          <div class="flex justify-between items-center px-7 pt-1 pb-4">
+            <div class="flex-1 flex flex-col items-center gap-1">
+              <div class="h-8"></div>
+              <div class="relative">
+                <div class="w-14 h-14 rounded-full bg-gray-100 border-2 border-gray-200"></div>
+              </div>
+              <div class="h-4 w-16 bg-gray-100 rounded mt-2"></div>
+              <div class="h-3 w-10 bg-gray-100 rounded"></div>
+            </div>
+            <div class="vs-area flex flex-col gap-1 items-center justify-center mx-3 mt-5">
+              <div class="h-6 w-8 bg-gray-200 rounded"></div>
+              <div class="h-4 w-10 bg-gray-100 rounded"></div>
+            </div>
+            <div class="flex-1 min-h-[60px] flex flex-col justify-center mt-6 items-center gap-2">
+              <div>
+                <div class="w-14 h-14 bg-gray-100 rounded-full border border-gray-200 flex items-center justify-center"></div>
+                <div class="flex justify-center gap-1 mt-2">
+                  <div class="w-3 h-3 bg-gray-100 rounded"></div>
+                  <div class="w-3 h-3 bg-gray-100 rounded"></div>
+                  <div class="w-3 h-3 bg-gray-100 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 bg-gray-100 rounded"></div>
+              <div class="h-3 w-16 bg-gray-100 rounded"></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 bg-gray-100 rounded"></div>
+              <div class="h-3 w-12 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+            <div class="h-11 flex-grow rounded-full bg-gray-200"></div>
+            <div class="w-11 h-11 bg-gray-200 rounded-full"></div>
+            <div class="w-11 h-11 bg-gray-200 rounded-full"></div>
+          </div>
         </div>
+      </template>
+      <div v-else class="text-center mt-10 text-gray-600 text-sm">
+        표시할 게임이 없습니다
+      </div>
+    </div>
       </div>
     </main>
 

@@ -1,11 +1,7 @@
 <template>
   <Header title="설정" :has-referer="true"/>
   <div  class="bg-white flex flex-col items-center justify-center px-4 pt-24">
-    <div class="w-full max-w-xs space-y-3">
-      <div class="pt-4 flex flex-col items-center mb-8">
-        <i class="fas fa-tools text-2xl text-gray-300 mb-2"></i>
-        <p class="text-gray-400 text-sm">다른 기능은 <span class="font-semibold text-[var(--point-color)]">준비 중</span>입니다</p>
-      </div>
+    <div class="w-full max-w-xs space-y-3 pt-5">
 
 
             <button
@@ -15,7 +11,13 @@
         <i class="fas fa-sign-out-alt"></i>
         로그아웃
       </button>
-
+      <button
+        @click="showDeleteModal = true"
+        class="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-red-500 text-white font-semibold text-base shadow transition"
+      >
+        <i class="fas fa-user-slash"></i>
+        계정 삭제하기
+      </button>
 
       <!-- 프로필 설정 버튼 -->
       <button
@@ -36,6 +38,7 @@
         법적 고지사항
       </button>
 
+      
     </div>
 
     
@@ -144,6 +147,28 @@
       </div>
     </div>
   </div>
+
+
+
+<!-- 계정 삭제 확인 모달 -->
+<div v-if="showDeleteModal" class="fixed inset-0 z-50 bg-black p-5 bg-opacity-30 flex items-center justify-center">
+  <div class="bg-white rounded-lg max-w-md w-full p-6 relative shadow-lg">
+    <button class="absolute top-3 right-3 text-gray-400" @click="showDeleteModal = false" aria-label="닫기">
+      <i class="fas fa-times"></i>
+    </button>
+    <h2 class="text-xl font-bold mb-3 text-red-500">계정 삭제 안내</h2>
+    <p class="text-gray-700 text-sm mb-4">
+      정말로 계정을 <span class="font-semibold text-red-500">삭제</span>하시겠습니까?<br />
+      이 작업은 되돌릴 수 없습니다. <br><br>
+      단, 언제든지 재가입 할 수 있습니다.
+    </p>
+    <div class="flex justify-end gap-2">
+      <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded" @click="showDeleteModal = false">취소</button>
+      <button class="px-4 py-2 bg-red-500 text-white rounded" @click="deleteAccount">영구 삭제</button>
+    </div>
+  </div>
+</div>
+
 </template>
 
 <script setup>
@@ -169,6 +194,20 @@ const logout = async() => {
 const goToSetProfile = () => {
   router.push('/set-profile')
 }
+
+// script setup 추가
+const showDeleteModal = ref(false)
+const deleteAccount = async () => {
+  try {
+    await api.post('/api/user/remove')
+    // 토큰 삭제, 라우팅 등 로그아웃 처리와 동일
+    localStorage.removeItem('raspy_access_token2')
+    router.push("/init")
+  } catch (err) {
+    alert('계정 삭제 중 오류가 발생했습니다.')
+  }
+}
+
 </script>
 
 <style scoped>

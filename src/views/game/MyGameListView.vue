@@ -6,7 +6,7 @@
     </h1>
     <template v-if="games.length">
       <div
-        v-for="game in games"
+        v-for="game in [...games].reverse()"
         :key="game.id"
         :ref="setGameRef"
         :id="`game-${game.id}`"
@@ -89,9 +89,27 @@
               {{ game.rule.majorCategory }} &gt; {{ game.rule.minorCategory }}
             </span>
           </div>
-          <div class="text-sm text-gray-600 mb-4 leading-relaxed whitespace-pre-line leading-relaxed">
-            {{ game.rule.ruleDescription }}
-          </div>
+<div>
+  <div
+    :class="[
+      'text-sm text-gray-600 mb-4 leading-relaxed whitespace-pre-line',
+      !descExpanded[game.id] ? 'line-clamp-2' : ''
+    ]"
+    style="position: relative;"
+  >
+    {{ game.rule.ruleDescription }}
+  </div>
+  <button
+    v-if="game.rule.ruleDescription && game.rule.ruleDescription.length "
+    @click="toggleDesc(game.id)"
+    class="text-xs text-blue-500 hover:underline pr-2"
+    style="margin-top: -18px; margin-bottom: 18px; background: white;"
+  >
+    {{ descExpanded[game.id] ? '접기' : '펼치기' }}
+  </button>
+</div>
+
+
           <div class="grid grid-cols-3 gap-x-4 gap-y-2 text-xs text-gray-700">
             <div class="flex flex-col">
               <span class="font-semibold">세트점수</span>
@@ -153,14 +171,82 @@
         </div>
       </div>
     </template>
-    <div v-else class="text-center text-gray-400 py-0 space-y-6">
-      <div class="text-sm"><i class="fas fa-info-circle mr-1"></i>표시할 게임이 없습니다.</div>
-      <router-link to="/create-game" class="block w-fit mx-auto px-7 py-3 mt-10 bg-orange-500 text-white font-bold rounded-xl shadow hover:bg-orange-400">+ 새 경기 만들기</router-link>
+    <div v-else class="py-2 space-y-8">
+      <!-- 스켈레톤 카드 2개 반복 -->
+      <div v-for="n in 2" :key="n" class="mb-8 rounded-2xl border border-orange-100 shadow-xl bg-white/90 animate-pulse">
+        <div class="flex justify-between items-center px-7 pt-1 pb-4">
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="h-8"></div>
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full border-2 border-orange-200 bg-gray-100"></div>
+              <span class="absolute bottom-0 right-0 bg-orange-200 w-7 h-4 rounded-lg"></span>
+            </div>
+            <div class="h-4 bg-gray-200 rounded w-16 mt-2"></div>
+            <div class="flex gap-2 mt-2">
+              <div class="w-6 h-4 bg-gray-100 rounded"></div>
+              <div class="w-6 h-4 bg-gray-100 rounded"></div>
+              <div class="w-6 h-4 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+          <div class="vs-area flex flex-col items-center justify-center mx-3">
+            <div class="h-6 w-10 bg-orange-100 rounded mb-2"></div>
+            <div class="h-4 w-7 bg-gray-100 rounded"></div>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-8"></div>
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full border border-gray-200 bg-gray-100"></div>
+            </div>
+            <div class="h-4 bg-gray-200 rounded w-16 mt-2"></div>
+            <div class="flex gap-2 mt-2">
+              <div class="w-6 h-4 bg-gray-100 rounded"></div>
+              <div class="w-6 h-4 bg-gray-100 rounded"></div>
+              <div class="w-6 h-4 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-xl mx-4 mt-2 mb-3 p-5 border">
+          <div class="flex justify-between items-center mb-3">
+            <div class="h-5 bg-gray-200 rounded w-2/3"></div>
+            <div class="h-5 bg-orange-100 rounded w-24"></div>
+          </div>
+          <div class="h-4 bg-gray-100 rounded w-full mb-2"></div>
+          <div class="h-4 bg-gray-100 rounded w-5/6 mb-2"></div>
+          <div class="h-4 bg-gray-100 rounded w-4/6 mb-2"></div>
+          <div class="grid grid-cols-3 gap-x-4 gap-y-2 mt-5">
+            <div class="flex flex-col">
+              <div class="h-4 bg-gray-200 rounded w-11 mb-1"></div>
+              <div class="h-4 bg-gray-100 rounded w-12"></div>
+            </div>
+            <div class="flex flex-col">
+              <div class="h-4 bg-gray-200 rounded w-11 mb-1"></div>
+              <div class="h-4 bg-gray-100 rounded w-12"></div>
+            </div>
+            <div class="flex flex-col">
+              <div class="h-4 bg-gray-200 rounded w-16 mb-1"></div>
+              <div class="h-4 bg-gray-100 rounded w-14"></div>
+            </div>
+            <div class="flex flex-col">
+              <div class="h-4 bg-gray-200 rounded w-11 mb-1"></div>
+              <div class="h-4 bg-gray-100 rounded w-12"></div>
+            </div>
+            <div class="flex flex-col col-span-2">
+              <div class="h-4 bg-gray-200 rounded w-11 mb-1"></div>
+              <div class="h-4 bg-gray-100 rounded w-36"></div>
+            </div>
+          </div>
+        </div>
+        <div class="px-5 pb-5">
+          <div class="h-7 bg-gray-100 rounded mb-4 w-2/5"></div>
+          <div class="h-11 bg-orange-100 rounded-xl mb-2"></div>
+          <div class="h-7 bg-gray-100 rounded w-full"></div>
+        </div>
+      </div>
     </div>
   </div>
   <FooterNav tab="my-game" />
 
-  <!-- 장소/진행 모달 -->
+<!-- 장소/진행 모달 -->
   <div v-if="showAddressModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg ">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
@@ -312,11 +398,10 @@
   </div>
 </div>
     <CustomToast />
-
 </template>
 
 <script setup>
-// 기존 import + ref 설정 유지
+// ... 기존 스크립트 전체 동일 ...
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import client from '../../api/api'
@@ -340,6 +425,12 @@ const countdownDurationText = ref('')
 
 const gameRefs = ref({})
 let interval
+
+const descExpanded = ref({}) // { [id]: true/false }
+
+function toggleDesc(id) {
+  descExpanded.value[id] = !descExpanded.value[id]
+}
 
 function setGameRef(el) {
   if (el && el.id?.startsWith('game-')) {
@@ -417,13 +508,6 @@ const copyInviteCode = async () => {
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 const { showToast } = useToast()
-
-
-// function generateInviteCode(id) {
-//   const OFFSET = 538, MULTIPLIER = 7
-//   const ob = ((id + OFFSET) * MULTIPLIER) % 10000
-//   return ob.toString().padStart(4, '0')
-// }
 
 const openStartModal = (game) => {
   showAddressModal.value = true
@@ -661,5 +745,12 @@ function statusColor(s) {
   .rule-box .rule-row { width: 100% !important; }
   .rule-box { padding: 13px 7px 9px 7px; }
   .stat-label, .stat-num { font-size: 11.4px; }
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

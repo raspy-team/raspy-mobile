@@ -152,7 +152,7 @@
               class="flex items-center justify-center gap-2 bg-[#afafaf] text-sm text-white border-[1px]  py-3 rounded-[8px]">
               승인 거부
             </button>
-            <button class="flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 rounded-[8px]">
+            <button @click="goDM(game.ownerId)" class="flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 rounded-[8px]">
               <i class="fas fa-paper-plane"></i> DM
             </button>
           </div>
@@ -167,6 +167,9 @@
 import { ref, onMounted, watch, nextTick, defineProps } from 'vue'
 import client from '../../api/api'
 import ChampionBadge from '../ChampionBadge.vue'
+import {useRouter} from 'vue-router'
+
+const router = useRouter()
 
 const props = defineProps({
   scrollToId: {
@@ -177,6 +180,8 @@ const props = defineProps({
 
 const games = ref([])
 const loading = ref(true)
+
+const goDM = (ownerId) => router.push("/chat/"+ownerId)
 
 onMounted(async () => {
   try {

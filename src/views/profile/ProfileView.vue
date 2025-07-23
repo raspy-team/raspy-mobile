@@ -296,7 +296,7 @@
           </div>
           <button
             v-else-if="friendStatus.isFriend"
-            class="flex justify-center items-center bg-green-100 border-[0.1px]  text-green-700 font-bold py-3 w-full rounded-xl shadow transition cursor-default"
+            class="flex justify-center items-center bg-white border-green-700 border-[0.1px]  text-green-700 font-[500] py-3 w-full rounded-xl shadow transition cursor-default"
             disabled
           >
             <i class="fas fa-check mr-2"></i> 나의 친구

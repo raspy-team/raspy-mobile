@@ -371,8 +371,7 @@ onMounted(async () => {
 
   const res = await api.get(`/api/games/${gameId}/detail`)
   if(res.data.gameStatus != 'IN_PROGRESS') {
-    alert("잘못된 접근입니다. 진행 중인 게임이 아닙니다.")
-    router.go(-1)
+    router.push(`/games/${gameId}/result`)
   }
 
   game.value = res.data

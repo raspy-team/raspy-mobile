@@ -241,16 +241,15 @@
           {{ user.nickname }}님이 획득한 챔피언
         </span>
       </div>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-col flex-wrap gap-2">
         <span
           v-for="(champ, idx) in user.myChampions"
           :key="idx"
-          class="relative flex items-center rounded-full shadow-md px-3 py-1 space-x-1 overflow-hidden bg-gradient-animate animate-pulse-slow"
-          style="min-width:90px;max-width:100%;"
+          class="p-5 relative flex items-center rounded-[25px] shadow-md px-6 py-3 space-x-1 overflow-hidden bg-gradient-animate animate-pulse-slow"
           title="챔피언"
         >
-          <i class="fas fa-crown text-white text-xs z-10"></i>
-          <span class="text-xs font-semibold text-white z-10 truncate">
+          <i class="fas fa-crown text-white text-sm z-10"></i>
+          <span class="text-md font-semibold text-white z-10 truncate">
             {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
           </span>
         </span>

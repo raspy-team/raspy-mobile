@@ -107,12 +107,17 @@ const handleLogin = async () => {
   try {
     const res = await api.post('/api/auth/login', { email: email.value, password: password.value })
     localStorage.setItem('raspy_access_token2', res.data.token)
-    if(res.data.isInitialGroup) {
-      
-      router.push("/oauth/callback?isNewUser=true")
-    } else {
-      router.push("/")
+    if(res.data.token == null || res.data.token == undefined) {
+          submitError.value = '로그인 실패: 아이디 또는 비밀번호를 확인하세요'
     }
+    else {
+      if(res.data.isInitialGroup) {
+        
+        router.push("/oauth/callback?isNewUser=true")
+      } else {
+        router.push("/")
+      }
+  }
 const token = localStorage.getItem("raspy_access_token2");
 if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
   window.AndroidApp.registerFcmToken(token);

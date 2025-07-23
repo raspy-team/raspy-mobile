@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[#f8f9fa] relative raspy-top">
+  <div class="bg-[#f8f9fa] min-h-full relative raspy-top">
     <!-- Fixed Top Bar -->
     <div class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 pb-3 border-b border-gray-100 raspy-top">
       <div class="relative flex-1 flex items-center mr-2 sm:w-48 pt-3">
@@ -257,9 +257,9 @@
           </button>
         </div>
       </section>
-      <section class="max-w-lg mx-auto px-4">
+      <section class="max-w-lg mx-auto px-4 bg-[#f8f9fa] pb-8">
         <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
-        <div v-if="statMode === 'rule'" class="mb-4">
+        <div v-if="statMode === 'rule'" class="pb-4">
           <button
             @click="showRuleModal = true"
             class="w-full py-3 rounded-xl bg-orange-100 text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2"
@@ -295,7 +295,7 @@
             플레이 유저: <b>{{ filteredCategoryPlayers }}</b>명
           </template>
         </div>
-        <div class="rounded-2xl bg-white shadow p-5 mb-8">
+        <div class="rounded-2xl bg-white shadow p-5 mb-0">
           <div class="flex justify-between items-center mb-3 ">
             <span class="font-bold text-gray-900 text-base flex items-center gap-2">
               <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프

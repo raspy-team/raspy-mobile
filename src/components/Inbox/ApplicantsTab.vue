@@ -1,6 +1,51 @@
 <template>
   <div class="flex flex-col">
-    <div class="flex-1 overflow-y-auto space-y-5">
+    <div v-if="loading" class="space-y-5">
+      <div v-for="i in 2" :key="i" class="p-5 border bg-white rounded-2xl shadow space-y-5 animate-pulse">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="mb-1 flex">
+              <span class="font-semibold text-gray-300 block w-32 h-5 bg-gray-200 rounded"></span>
+              <span class="flex ml-3 w-6 h-6 bg-gray-200 rounded-full"></span>
+            </div>
+            <div class="text-xs flex gap-1 items-center">
+              <span class="block w-16 h-3 bg-gray-200 rounded"></span>
+              <span class="mx-1 text-gray-200">&gt;</span>
+              <span class="block w-12 h-3 bg-gray-200 rounded"></span>
+            </div>
+          </div>
+          <span class="text-xs font-semibold px-2 py-2 rounded-full w-[5rem] text-center bg-gray-200"></span>
+        </div>
+        <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-gray-200 rounded-full"></span>
+            <span class="block w-20 h-4 bg-gray-200 rounded"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-gray-200 rounded-full"></span>
+            <span class="block w-24 h-4 bg-gray-200 rounded"></span>
+          </div>
+        </div>
+        <div class="w-full h-10 bg-gray-200 rounded-[5px]"></div>
+        <div class="border-t border-gray-300 pt-5 space-y-3">
+          <div class="h-4 bg-gray-200 w-24 rounded mb-2"></div>
+          <div v-for="j in 2" :key="j" class="p-3 bg-white rounded-xl flex items-center justify-between shadow">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 bg-gray-200 rounded-full block"></span>
+              <div class="space-y-1">
+                <div class="w-24 h-4 bg-gray-200 rounded"></div>
+                <div class="w-20 h-3 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div class="w-16 h-8 bg-gray-200 rounded"></div>
+              <div class="w-16 h-8 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else class="flex-1 overflow-y-auto space-y-5">
       <div
         v-for="group in groups"
         :key="group.gameId"
@@ -9,24 +54,21 @@
       >
         <div class="flex justify-between items-start">
           <div>
-
-                  <div class="">
-                    <div class=" mb-1 flex">
-                      <span class="font-semibold text-gray-700">
-                       {{ group.rule.ruleTitle }}
-
-                      </span>
-                      <span class="flex ml-3">
-                        <champion-badge v-if="group.championId == group.myId"></champion-badge>
-                      </span>
-                    </div>
-
-                  </div>
-                  <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
-                      {{ group.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ group.rule.minorCategory }}
-                  </div>  
+            <div class="">
+              <div class="mb-1 flex">
+                <span class="font-semibold text-gray-700">
+                  {{ group.rule.ruleTitle }}
+                </span>
+                <span class="flex ml-3">
+                  <champion-badge v-if="group.championId == group.myId"></champion-badge>
+                </span>
+              </div>
+            </div>
+            <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
+              {{ group.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ group.rule.minorCategory }}
+            </div>
           </div>
-          <span class="text-xs font-semibold px-2 py-2 rounded-full w-[5rem] text-center" 
+          <span class="text-xs font-semibold px-2 py-2 rounded-full w-[5rem] text-center"
             :class="{
               'bg-blue-100 text-blue-600': group.gameStatus === 'SCHEDULED',
               'bg-gray-100 text-gray-500': group.gameStatus === 'MATCHING',
@@ -35,17 +77,17 @@
             {{ translateGameStatus(group.gameStatus) }}
           </span>
         </div>
-            <!-- 장소 & 날짜 -->
-            <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
-              <div class="flex items-center gap-2">
-                <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
-                  <span>{{ (group.matchLocation == ' ' || group.matchLocation=="" || group.matchLocation==null) ? "장소 미정" : group.matchLocation  }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <i class="far w-3 fa-calendar text-orange-500"></i>
-                <span>{{ formatDate(group.matchDate) }}</span>
-              </div>
-            </div>
+        <!-- 장소 & 날짜 -->
+        <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
+            <span>{{ (group.matchLocation == ' ' || group.matchLocation=="" || group.matchLocation==null) ? "장소 미정" : group.matchLocation }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="far w-3 fa-calendar text-orange-500"></i>
+            <span>{{ formatDate(group.matchDate) }}</span>
+          </div>
+        </div>
         <button @click="group.showRuleDetail = !group.showRuleDetail" class="mt-2 w-full py-3 text-xs bg-gray-100 rounded-[5px] text-gray-600 flex items-center justify-center gap-2">
           <i :class="group.showRuleDetail ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
           {{ group.showRuleDetail ? '간략히 보기' : '상세 보기' }}
@@ -55,9 +97,7 @@
             <h4 class="text-base font-bold text-gray-600">규칙</h4>
             <div class="text-sm text-gray-700 space-y-2">
               <div>
-              
                 <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed border-b pb-4 mb-4">{{ group.rule.ruleDescription }}</p>
-
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">세트 승리 기준</span>
@@ -78,7 +118,7 @@
             </div>
           </div>
         </transition>
-        <div class=" border-t border-gray-300 pt-5 space-y-3">
+        <div class="border-t border-gray-300 pt-5 space-y-3">
           <h4 class="text-sm font-semibold text-gray-700">신청자 목록</h4>
           <div
             v-for="user in group.applicants"
@@ -86,7 +126,7 @@
             class="p-3 bg-white rounded-xl flex items-center justify-between shadow"
           >
             <router-link :to="'/profile/'+user.userId">
-              <div class="flex items-center gap-3" >
+              <div class="flex items-center gap-3">
                 <img :src="user.applicantProfileUrl ? user.applicantProfileUrl:Default" class="w-10 h-10 rounded-full object-cover" />
                 <div class="space-y-1">
                   <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
@@ -123,7 +163,6 @@
       <div v-if="!groups.length" class="text-center text-gray-400 text-sm py-10">받은 요청이 없습니다.</div>
     </div>
   </div>
-
   <CustomToast />
 </template>
 
@@ -143,10 +182,15 @@ const props = defineProps({
 
 const { showToast } = useToast()
 const groups = ref([])
+const loading = ref(true)
 
 onMounted(async () => {
-  const res = await client.get('/api/games/my-games/applicants')
-  groups.value = res.data.map(g => ({ ...g, showRuleDetail: false }))
+  try {
+    const res = await client.get('/api/games/my-games/applicants')
+    groups.value = res.data.map(g => ({ ...g, showRuleDetail: false }))
+  } finally {
+    loading.value = false
+  }
   if (props.scrollToId) nextTick(() => scrollToGame(props.scrollToId))
 })
 
@@ -181,7 +225,7 @@ async function approve(gameId, userId) {
     const group = groups.value.find(g => g.gameId === gameId)
     const user = group?.applicants?.find(a => a.userId === userId)
     if (user) user.approved = true
-    if (group) group.gameStatus = 'SCHEDULED' 
+    if (group) group.gameStatus = 'SCHEDULED'
     showToast(`@${user.applicantNickname}님을 승인했습니다!`, `/my-games?id=${gameId}`)
   } catch (err) {
     if (err.response?.data?.message?.includes('한 명만 승인 가능')) {
@@ -198,7 +242,7 @@ async function cancelApproval(gameId, userId) {
   const group = groups.value.find(g => g.gameId === gameId)
   const user = group?.applicants?.find(a => a.userId === userId)
   if (user) user.approved = false
-  if (group) group.gameStatus = 'MATCHING' 
+  if (group) group.gameStatus = 'MATCHING'
   showToast(`${user.applicantNickname}님의 참여를 취소했습니다!`)
 }
 

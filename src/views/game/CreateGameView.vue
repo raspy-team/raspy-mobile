@@ -128,7 +128,7 @@
               <!-- 제출 -->
           <div  class="fixed bottom-0 w-full left-0 ">
             <button type="submit"
-              :disabled="!selectedRule"
+              :disabled="!selectedRule || submitLoading"
               class="w-full bg-gradient-to-r  pb-4 raspy-bot from-orange-400 to-orange-500 text-white text-lg font-semibold pt-4 shadow-md disabled:opacity-40">
               게임 생성
             </button>
@@ -212,13 +212,15 @@ const handleCreatedRule = (rule) => {
 }
 
 const removeRule = () => selectedRule.value = null
-
+const submitLoading = ref(false)
 const createGame = async () => {
   try {
     if (!selectedRule.value) {
       showToast('경기 규칙을 선택하거나 생성해주세요.')
       return
     }
+    submitLoading.value = true
+
     const payload = {
       ...form.value,
       matchDate: form.value.matchDate || null,

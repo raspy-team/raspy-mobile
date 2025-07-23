@@ -44,17 +44,27 @@ api.interceptors.response.use(
       return api(config)
     }
 
-    // 401 처리
-    if (error.response && error.response.status === 401) {
+  // 401 처리
+  if (error.response && error.response.status === 401) {
+    // 요청 URL 추출
+    const requestUrl = error.config && error.config.url
 
-        localStorage.removeItem('raspy_access_token2')
-        if (routerInstance) {
-          routerInstance.push('/init')
-        } else {
-          window.location.href = '/init'
-        }
-      
+    // /api/auth/login 이면 라우터 변경하지 않음
+    if (requestUrl && requestUrl.includes('/api/auth/login')) {
+        // 로그인 API에서 401은 라우터 변경하지 않음
+        // 필요하다면 추가 처리만 여기에
+        localStorage.removeItem('raspy_access_token2') // 이건 해도 되고
+        return Promise.reject(error)
     }
+    
+    // 그 외 401은 기존대로 처리
+    localStorage.removeItem('raspy_access_token2')
+    if (routerInstance) {
+      routerInstance.push('/init')
+    } else {
+      window.location.href = '/init'
+    }
+}
 
     return Promise.reject(error)
   }

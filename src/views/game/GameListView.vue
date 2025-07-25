@@ -917,10 +917,10 @@ const fetchGames = async () => {
       applied: false,
     }))
 
-    setTimeout(() => (timerDone.value = true), 2500)
+    setTimeout(() => (timerDone.value = true), 1200)
   } catch (err) {
     console.error('게임 목록 로드 실패', err)
-    setTimeout(() => (timerDone.value = true), 2500)
+    setTimeout(() => (timerDone.value = true), 1200)
   } finally {
     loading.value = false
   }

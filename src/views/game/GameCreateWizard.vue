@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import GameIntro from '../../components/game-create/GameIntro.vue'
 import RuleIntro from '../../components/game-create/RuleIntro.vue'
 import RuleSelectPage from '../../components/game-create/RuleSelectPage.vue'
@@ -44,6 +44,8 @@ import PlaceSelectPage from '../../components/game-create/PlaceSelect.vue'
 import TimeSelectPage from '../../components/game-create/TimeSelect.vue'
 import GameFinalPage from '../../components/game-create/GameFinalPage.vue'
 import api from '../../api/api'
+import { useRoute } from 'vue-router'
+const route = useRoute()
 
 // 스텝 갯수 줄임 (14+6)
 const totalSteps = 20
@@ -71,6 +73,18 @@ const gameForm = reactive({
 })
 
 const progressWidth = computed(() => Math.max(5, Math.round((step.value / totalSteps) * 100)))
+onMounted(() => {
+  // 최초 마운트 시 쿼리 파라미터 체크
+  handleQueryRuleId(route)
+})
+
+function handleQueryRuleId(route) {
+  const ruleId = route.query.ruleId
+  if (ruleId && !isNaN(Number(ruleId))) {
+    gameForm.ruleId = Number(ruleId)
+    step.value = 17
+  }
+}
 
 function onRuleIntroSelect(type) {
   if (type === 'select') step.value = 3

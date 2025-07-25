@@ -1,7 +1,12 @@
 <template>
-  <div class="flex flex-col min-h-screen px-5 pt-10">
+  <div class="flex flex-col min-h-full px-5 pt-[20%]">
     <div class="flex items-center mb-4">
-      <button @click="$emit('back')" class="text-xl mr-2 text-gray-400">&lt;</button>
+      <button
+        @click="$emit('back')"
+        class="fixed w-full bottom-0 left-0 p-5 text-white bg-gray-400 text-xl mr-2 text-gray-400"
+      >
+        이전으로
+      </button>
       <span class="text-xl font-bold text-gray-900">기존 규칙 선택</span>
     </div>
     <input
@@ -14,6 +19,7 @@
     </div>
     <ul v-else>
       <li
+        @click="rule.showRuleDetail = true"
         v-for="rule in filteredRules"
         :key="rule.id"
         class="bg-white rounded-xl border p-4 mb-3 shadow-sm flex flex-col gap-1"
@@ -29,6 +35,8 @@
         >
           선택
         </button>
+
+        <MatchModal v-if="rule.showRuleDetail" :rule="rule" @close="rule.showRuleDetail = false" />
       </li>
     </ul>
   </div>
@@ -36,6 +44,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '../../api/api'
+import MatchModal from '../MatchModal.vue'
 const rules = ref([])
 const loading = ref(false)
 const search = ref('')
@@ -49,7 +58,10 @@ const filteredRules = computed(() =>
 onMounted(async () => {
   loading.value = true
   const res = await api.get('/api/rules/list')
-  rules.value = res.data
+  rules.value = res.data.map((rule) => ({
+    ...rule,
+    showRuleDetail: false,
+  }))
   loading.value = false
 })
 </script>

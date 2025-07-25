@@ -151,7 +151,7 @@
       <template v-if="selectedMinorLabel">
         <label class="flex items-center gap-3 mb-3 bg-gray-100 p-3 rounded-lg shadow-sm">
           <input
-            @check="validateStep10"
+            @change="validateStep10"
             type="checkbox"
             v-model="checkedFoulPreset"
             class="accent-orange-500 w-5 h-5"

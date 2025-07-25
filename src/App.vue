@@ -21,11 +21,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import MatchLogo from './assets/Match.png'
 
 const showSplash = ref(true)
 const route = useRoute()
+const router = useRouter()
 
 const isIos = ref(false)
 const ua = navigator.userAgent.toLowerCase()
@@ -36,6 +37,12 @@ onMounted(() => {
   setTimeout(() => {
     showSplash.value = false
   }, 2000) //
+
+  if (localStorage.getItem('250725update') != 1) {
+    localStorage.removeItem('raspy_access_token2')
+    localStorage.setItem('250725update', 1)
+    router.push('/')
+  }
 
   try {
     const token = localStorage.getItem('raspy_access_token2')

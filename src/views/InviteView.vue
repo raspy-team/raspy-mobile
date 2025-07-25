@@ -5,7 +5,7 @@
       <i class="fas fa-spinner fa-spin text-3xl text-orange-400"></i>
     </div>
     <div v-else-if="errorMsg" class="text-red-500 text-center my-10">
-      <i class="fas fa-times-circle text-2xl mb-2"></i><br>
+      <i class="fas fa-times-circle text-2xl mb-2"></i><br />
       {{ errorMsg }}
     </div>
     <div v-else-if="game" class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5">
@@ -16,20 +16,29 @@
             {{ game.rule.ruleTitle }}
           </h2>
           <div class="text-xs text-orange-500 font-medium mb-2 flex gap-1 items-center">
-            {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ game.rule.minorCategory }}
+            {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
+            {{ game.rule.minorCategory }}
           </div>
         </div>
-        <div class="text-gray-600 text-[0.82rem] text-right min-w-[64px]">{{ formatTimeAgo(game.createdAt ?? game.startedAt) }}</div>
+        <div class="text-gray-600 text-[0.82rem] text-right min-w-[64px]">
+          {{ formatTimeAgo(game.createdAt ?? game.startedAt) }}
+        </div>
       </div>
       <!-- VS AREA -->
       <div class="flex flex-col gap-2">
         <div class="flex justify-between items-center px-7 pt-1 pb-4">
           <!-- 생성자(왼쪽) -->
-          <div @click="router.push('/profile/' + game.ownerId)" class="flex-1 flex flex-col items-center gap-1 cursor-pointer">
+          <div
+            @click="router.push('/profile/' + game.ownerId)"
+            class="flex-1 flex flex-col items-center gap-1 cursor-pointer"
+          >
             <div class="h-7 flex items-end">
-              <ChampionBadge v-if="game.championId === game.ownerId"/>
+              <ChampionBadge v-if="game.championId === game.ownerId" />
             </div>
-            <img :src="game.ownerProfileUrl || Default" class="w-14 h-14 rounded-full border-2 border-orange-400 shadow bg-white" />
+            <img
+              :src="game.ownerProfileUrl || Default"
+              class="w-14 h-14 rounded-full border-2 border-orange-400 shadow bg-white"
+            />
             <div class="text-gray-700 font-semibold text-sm">{{ game.ownerNickname }}</div>
           </div>
           <!-- VS 중앙 -->
@@ -38,27 +47,42 @@
             <div class="text-sm font-semibold text-orange-400">{{ statusLabel(game.status) }}</div>
           </div>
           <!-- 상대방(오른쪽) -->
-          <div v-if="game.status !== 'MATCHING'" @click="goOpponentProfile" class="flex-1 flex flex-col items-center gap-1 cursor-pointer">
+          <div
+            v-if="game.status !== 'MATCHING'"
+            @click="goOpponentProfile"
+            class="flex-1 flex flex-col items-center gap-1 cursor-pointer"
+          >
             <div class="h-7 flex items-end">
-              <ChampionBadge v-if="game.championId === game.opponentId"/>
+              <ChampionBadge v-if="game.championId === game.opponentId" />
             </div>
-            <img :src="game.opponentProfileUrl || Default" class="w-14 h-14 rounded-full border-2 border-gray-300 shadow bg-white" />
-            <div class="text-gray-700 font-semibold text-sm">{{ game.opponentNickname || '-' }}</div>
+            <img
+              :src="game.opponentProfileUrl || Default"
+              class="w-14 h-14 rounded-full border-2 border-gray-300 shadow bg-white"
+            />
+            <div class="text-gray-700 font-semibold text-sm">
+              {{ game.opponentNickname || '-' }}
+            </div>
           </div>
           <div v-else class="flex-1 flex flex-col items-center gap-2 mt-6">
-            <div class="w-14 h-14 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-full border border-gray-200 flex items-center justify-center">
+            <div
+              class="w-14 h-14 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-full border border-gray-200 flex items-center justify-center"
+            >
               <i class="fas fa-user-clock text-2xl text-gray-400"></i>
             </div>
-            <div class="flex justify-center gap-1 mt-2 font-semibold text-xs text-gray-400 opacity-70">
+            <div
+              class="flex justify-center gap-1 mt-2 font-semibold text-xs text-gray-400 opacity-70"
+            >
               <span>-</span><span>-</span><span>-</span>
             </div>
           </div>
         </div>
         <!-- 👇 종료된 경기일 때 결과 보기 버튼 노출 -->
-         <div           v-if="game.status === 'COMPLETED'"
- class="text-center font-light text-orange-500 text-[0.85rem] py-2">
-            경기가 종료되었어요!
-         </div>
+        <div
+          v-if="game.status === 'COMPLETED'"
+          class="text-center font-light text-orange-500 text-[0.85rem] py-2"
+        >
+          경기가 종료되었어요!
+        </div>
         <button
           v-if="game.status === 'COMPLETED'"
           @click="goToResult(game.ownerId, game.id)"
@@ -72,49 +96,52 @@
         <div class="flex gap-3 mb-3 items-center">
           <div class="font-semibold text-gray-700">{{ game.rule.ruleTitle }}</div>
           <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
-            {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span> {{ game.rule.minorCategory }}
+            {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
+            {{ game.rule.minorCategory }}
           </div>
         </div>
         <div class="text-sm text-gray-700 space-y-4">
           <div>
             <!-- 규칙 설명 접기/펼치기 -->
             <div v-if="!expanded" class="relative text-right">
-              <p class="line-clamp-2 leading-relaxed text-left whitespace-pre-line border-b pb-4">
-                {{ game.rule.ruleDescription }}
-              </p>
-              <button @click="expanded = true" class="text-blue-600 text-sm hover:underline mt-1">
-                펼치기
-              </button>
+              <div
+                class="line-clamdiv-2 leading-relaxed text-left whitespace-pre-line border-b pb-4"
+              >
+                <!-- 내용 (스크롤) -->
+                <div class="flex-1 overflow-y-auto px-0 py-4 space-y-5">
+                  <ModalSection label="1. 경기 목표" :value="game.rule.ruleGoal" />
+                  <ModalSection label="2. 점수 정의" :value="game.rule.ruleScoreDefinition" />
+                  <ModalSection label="3. 경기 준비물" :value="game.rule.rulePreparation" />
+                  <ModalSection label="4. 경기 순서" :value="game.rule.ruleOrder" />
+                  <ModalSection label="5. 판정 방식" :value="game.rule.ruleDecision" />
+                  <ModalSection label="6. 반칙" :value="game.rule.ruleFoul" />
+                  <ModalSection label="7. 기타" :value="game.rule.ruleExtraInfo" />
+
+                  <div class="pt-1 space-y-2 text-[15px] text-gray-700 border-t">
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">세트 승리 기준</span>
+                      <span>{{
+                        game.rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달'
+                      }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">한 세트 승리 점수</span>
+                      <span>{{
+                        game.rule.pointsToWin === -1 ? '제한 없음' : game.rule.pointsToWin + '점'
+                      }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">총 세트 수</span>
+                      <span>{{ game.rule.setsToWin }}세트</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">세트 제한 시간</span>
+                      <span>{{ formatDuration(game.rule.duration) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div v-else class="relative text-right">
-              <p class="leading-relaxed whitespace-pre-line text-left border-b pb-4">
-                {{ game.rule.ruleDescription }}
-              </p>
-              <button @click="expanded = false" class="text-blue-600 text-sm hover:underline mt-1">
-                접기
-              </button>
-            </div>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">세트 승리 기준</span>
-            <span>{{ game.rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달' }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">한세트 승리에 필요한 점수</span>
-            <span>{{ game.rule.pointsToWin === -1 ? '제한 없음' : game.rule.pointsToWin + '점' }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">총 세트 수</span>
-            <span>{{ game.rule.setsToWin }}세트</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">세트 제한 시간</span>
-            <span>
-              {{ game.rule.duration === -1 ? '제한 없음' :
-                game.rule.duration >= 60
-                  ? Math.floor(game.rule.duration / 60) + '분 ' + (game.rule.duration % 60) + '초'
-                  : game.rule.duration + '초' }}
-            </span>
           </div>
         </div>
       </div>
@@ -122,7 +149,9 @@
       <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
         <div class="flex items-center gap-2">
           <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
-          <span>{{ (!game.matchLocation || game.matchLocation === ' ') ? '미정' : game.matchLocation }}</span>
+          <span>{{
+            !game.matchLocation || game.matchLocation === ' ' ? '미정' : game.matchLocation
+          }}</span>
         </div>
         <div class="flex items-center gap-2">
           <i class="far w-3 fa-calendar text-orange-500"></i>
@@ -132,27 +161,42 @@
       <!-- 참가/공유/댓글 버튼 -->
       <div class="mt-4 flex items-center gap-2">
         <template v-if="game.status === 'MATCHING'">
-          <button 
+          <button
             :disabled="game.applied"
             @click="applyGame(game.id)"
             :class="[
               'h-11 flex-grow font-semibold rounded-full transition text-white',
-              game.applied ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
-            ]">
+              game.applied
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-orange-500 hover:bg-orange-600 cursor-pointer',
+            ]"
+          >
             {{ game.applied ? '신청 완료' : '참가하기' }}
           </button>
-          <button @click="toggleComment(game.id)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+          <button
+            @click="toggleComment(game.id)"
+            class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+          >
             <i class="fas fa-comment"></i>
           </button>
-          <button @click="shareGame(game.id)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+          <button
+            @click="shareGame(game.id)"
+            class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+          >
             <i class="fas fa-share"></i>
           </button>
         </template>
         <template v-else>
-          <button @click="toggleComment(game.id)" class="h-11 flex-grow font-semibold rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition">
+          <button
+            @click="toggleComment(game.id)"
+            class="h-11 flex-grow font-semibold rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+          >
             <i class="fas fa-comment mr-2"></i> 댓글
           </button>
-          <button @click="shareGame(game.id)" class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition">
+          <button
+            @click="shareGame(game.id)"
+            class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+          >
             <i class="fas fa-share"></i>
           </button>
         </template>
@@ -160,16 +204,16 @@
     </div>
   </div>
   <!-- 댓글 모달 -->
-  <Comment v-if="commentId!==0" :id="commentId" @close="commentId=0" />
+  <Comment v-if="commentId !== 0" :id="commentId" @close="commentId = 0" />
   <!-- 공유 안내 토스트 -->
   <custom-toast />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineComponent, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/api'
-import Header from "@/components/HeaderComp.vue"
+import Header from '@/components/HeaderComp.vue'
 import ChampionBadge from '@/components/ChampionBadge.vue'
 import Comment from '@/views/GameCommentView.vue'
 import Default from '@/assets/default.png'
@@ -217,6 +261,36 @@ const goOpponentProfile = () => {
   }
 }
 
+function formatDuration(duration) {
+  if (duration === -1) return '제한 없음'
+  if (duration >= 60) return `${Math.floor(duration / 60)}분 ${duration % 60}초`
+  return `${duration}초`
+}
+// ModalSection (setup 내에서 바로 선언)
+const ModalSection = defineComponent({
+  props: {
+    label: String,
+    value: String,
+  },
+  setup(props) {
+    return () =>
+      props.value && props.value.trim() !== ''
+        ? h('div', [
+            h('div', { class: 'font-bold text-sm text-gray-800 mb-1' }, props.label),
+            h(
+              'pre',
+              {
+                class:
+                  'whitespace-pre-line text-[15px] text-gray-700 leading-snug bg-orange-50/60 rounded-lg p-3 border border-orange-50 mb-1 overflow-x-auto',
+                style: 'max-height:180px',
+              },
+              props.value,
+            ),
+          ])
+        : null
+  },
+})
+
 // 👇 결과보기 라우팅
 function goToResult(ownerId, gameId) {
   router.push(`/profile/${ownerId}?id=${gameId}`)
@@ -262,16 +336,15 @@ async function shareGame(gameId) {
   }
 }
 
-
 function toggleComment(id) {
   commentId.value = id
 }
 
 function formatTimeAgo(dateString) {
   if (!dateString) return ''
-  const now = new Date();
-  const createdAt = new Date(dateString);
-  const diff = (now - createdAt) / 1000;
+  const now = new Date()
+  const createdAt = new Date(dateString)
+  const diff = (now - createdAt) / 1000
   if (diff < 60) return `방금 전`
   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
@@ -288,12 +361,18 @@ function formatDate(dateStr) {
 
 function statusLabel(status) {
   switch (status) {
-    case 'MATCHING': return '경기 전'
-    case 'SCHEDULED': return '시작 예정'
-    case 'IN_PROGRESS': return '진행 중'
-    case 'COMPLETED': return '종료'
-    case 'CANCELED': return '취소됨'
-    default: return ''
+    case 'MATCHING':
+      return '경기 전'
+    case 'SCHEDULED':
+      return '시작 예정'
+    case 'IN_PROGRESS':
+      return '진행 중'
+    case 'COMPLETED':
+      return '종료'
+    case 'CANCELED':
+      return '취소됨'
+    default:
+      return ''
   }
 }
 </script>

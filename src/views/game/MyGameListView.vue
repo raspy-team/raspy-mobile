@@ -510,6 +510,8 @@ const joinGame = (id) => router.push(`/games/${id}/play`)
 const canStart = (g) => g.status === 'SCHEDULED' && !!g.opponentNickname
 
 async function shareGame(gameId) {
+  showToast('공유 링크가 복사되었습니다!')
+
   const res = await client.post('/api/invite', null, { params: { gameId } })
   const url = res.data.url
 
@@ -520,13 +522,11 @@ async function shareGame(gameId) {
     window.webkit.messageHandlers.clipboardCopy
   ) {
     window.webkit.messageHandlers.clipboardCopy.postMessage(url)
-    showToast('공유 링크가 복사되었습니다!')
     return
   }
 
   try {
     await navigator.clipboard.writeText(url)
-    showToast('공유 링크가 복사되었습니다!')
     return
   } catch (err) {
     try {
@@ -536,9 +536,7 @@ async function shareGame(gameId) {
       input.select()
       const success = document.execCommand('copy')
       document.body.removeChild(input)
-      if (success) {
-        showToast('공유 링크가 복사되었습니다!')
-      } else {
+      if (!success) {
         showToast('복사에 실패했습니다!')
       }
     } catch (err2) {

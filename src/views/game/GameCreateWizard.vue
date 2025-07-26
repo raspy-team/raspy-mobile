@@ -49,7 +49,7 @@ const route = useRoute()
 
 // 스텝 갯수 줄임 (14+6)
 const totalSteps = 20
-const step = ref(17)
+const step = ref(1)
 const ruleForm = reactive({
   ruleGoal: '',
   ruleScoreDefinition: '',

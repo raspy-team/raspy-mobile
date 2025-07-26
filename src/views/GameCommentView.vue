@@ -31,7 +31,7 @@
             maxHeight: `${commentAreaHeight}px`,
             overscrollBehavior: 'contain',
             touchAction: 'pan-y',
-            overflowY: 'auto'
+            overflowY: 'auto',
           }"
         >
           <!-- 댓글 내용 -->
@@ -46,6 +46,7 @@
           </template>
           <template v-else-if="threadedComments.length">
             <CommentItem
+              @click.stop
               v-for="comment in threadedComments"
               :key="comment.id"
               :comment="comment"
@@ -56,9 +57,7 @@
               @img-click="onImagePreview"
             />
           </template>
-          <p v-else class="text-gray-400 text-center text-[15px] mt-16">
-            아직 댓글이 없습니다.
-          </p>
+          <p v-else class="text-gray-400 text-center text-[15px] mt-16">아직 댓글이 없습니다.</p>
         </div>
 
         <!-- 입력창 (항상 바텀) -->
@@ -71,7 +70,9 @@
             height: `${inputAreaHeight}px`,
           }"
         >
-          <div class="flex items-center flex-1 min-w-0 bg-gray-100 rounded-full px-3 py-2 focus-within:bg-white focus-within:border-gray-300 transition border">
+          <div
+            class="flex items-center flex-1 min-w-0 bg-gray-100 rounded-full px-3 py-2 focus-within:bg-white focus-within:border-gray-300 transition border"
+          >
             <span
               v-if="replyingToId"
               class="inline-block px-2 py-0.5 mr-2 bg-blue-100 text-blue-600 font-semibold rounded-full text-[14px] whitespace-nowrap cursor-pointer select-none"
@@ -95,7 +96,7 @@
             type="button"
             @click="triggerImageInput"
             class="text-gray-500 px-2 flex items-center justify-center"
-            style="height:38px;width:38px"
+            style="height: 38px; width: 38px"
             title="사진첨부"
           >
             <i class="fas fa-camera text-lg"></i>
@@ -104,8 +105,10 @@
             type="submit"
             :disabled="!canSubmit || isLoading"
             class="px-4 py-2 rounded-full text-white bg-orange-500 disabled:bg-gray-300 font-semibold text-base transition flex items-center justify-center"
-            style="height:38px"
-          >게시</button>
+            style="height: 38px"
+          >
+            게시
+          </button>
           <input
             ref="imageInputRef"
             type="file"
@@ -120,15 +123,8 @@
           v-if="inputImagePreview"
           class="flex items-center gap-2 px-4 pt-1 pb-2 bg-white border-t"
         >
-          <img
-            :src="inputImagePreview"
-            class="w-14 h-14 rounded-lg object-cover border"
-          />
-          <button
-            @click="removeInputImage"
-            type="button"
-            class="text-gray-500 hover:text-red-400"
-          >
+          <img :src="inputImagePreview" class="w-14 h-14 rounded-lg object-cover border" />
+          <button @click="removeInputImage" type="button" class="text-gray-500 hover:text-red-400">
             <i class="fas fa-times text-lg"></i>
           </button>
         </div>
@@ -138,10 +134,7 @@
           class="fixed inset-0 z-[999] flex items-center justify-center bg-black/80"
           @click="previewImg = null"
         >
-          <img
-            :src="previewImg"
-            class="max-h-[80vh] max-w-full rounded-xl shadow-lg"
-          />
+          <img :src="previewImg" class="max-h-[80vh] max-w-full rounded-xl shadow-lg" />
         </div>
       </div>
     </transition>
@@ -149,7 +142,16 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, defineProps, defineEmits } from 'vue'
+import {
+  ref,
+  watch,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  computed,
+  defineProps,
+  defineEmits,
+} from 'vue'
 import api from '../api/api'
 import CommentItem from '../components/CommentItem.vue'
 
@@ -166,7 +168,7 @@ const imageInputRef = ref(null)
 const inputForm = ref(null)
 
 const inputAreaHeight = 56 // 입력창 높이(px)
-const SHEET_MARGIN = 0     // 바텀시트 상하 여백
+const SHEET_MARGIN = 0 // 바텀시트 상하 여백
 
 const sheetHeight = ref(window.innerHeight * 0.9)
 const commentAreaHeight = ref(0)
@@ -280,20 +282,29 @@ const removeInputImage = () => {
 const onImagePreview = (imgUrl) => {
   previewImg.value = imgUrl
 }
-watch(() => props.id, async (newId) => {
-  if (newId && newId !== 0) {
-    modalVisible.value = true
-    await nextTick()
-    showModal.value = true
-    await fetchComments()
-    resetInput()
-    nextTick(() => commentInputRef.value && commentInputRef.value.focus())
-  } else {
-    showModal.value = false
-  }
-}, { immediate: true })
-const closeModal = () => { showModal.value = false }
-const afterLeave = () => { modalVisible.value = false; emit('close') }
+watch(
+  () => props.id,
+  async (newId) => {
+    if (newId && newId !== 0) {
+      modalVisible.value = true
+      await nextTick()
+      showModal.value = true
+      await fetchComments()
+      resetInput()
+      nextTick(() => commentInputRef.value && commentInputRef.value.focus())
+    } else {
+      showModal.value = false
+    }
+  },
+  { immediate: true },
+)
+const closeModal = () => {
+  showModal.value = false
+}
+const afterLeave = () => {
+  modalVisible.value = false
+  emit('close')
+}
 
 // 바텀시트 드래그
 let dragging = ref(false)
@@ -358,11 +369,15 @@ function onMouseUp() {
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', onMouseUp)
 }
-watch(() => modalVisible.value, (visible) => {
-  document.body.style.overflow = visible ? 'hidden' : ''
+watch(
+  () => modalVisible.value,
+  (visible) => {
+    document.body.style.overflow = visible ? 'hidden' : ''
+  },
+)
+onBeforeUnmount(() => {
+  document.body.style.overflow = ''
 })
-onBeforeUnmount(() => { document.body.style.overflow = '' })
-
 </script>
 
 <style>
@@ -370,8 +385,8 @@ onBeforeUnmount(() => { document.body.style.overflow = '' })
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition:
-    transform 0.5s cubic-bezier(.4,0,.2,1),
-    opacity 0.22s cubic-bezier(.4,0,.2,1);
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .slide-up-enter-from,
 .slide-up-leave-to {

@@ -1,63 +1,57 @@
 <template>
-       <HeaderComp :has-referer="true" title="규칙 탐색" />
-    <!-- 필터 바 -->
-    <nav class="fixed z-30 bg-white/95 top-20 backdrop-blur-md border-b border-gray-100 px-4 pb-3 raspy-top flex flex-wrap gap-2 sm:gap-4">
-      <select
-        v-model="major"
-        @change="fetchMinors"
-        class="filter-select"
-        aria-label="주 카테고리 선택"
-      >
-        <option value="">주 카테고리</option>
-        <option v-for="m in majors" :key="m">{{ m }}</option>
-      </select>
-      <select
-        v-model="minor"
-        :disabled="!major"
-        class="filter-select"
-        aria-label="보조 카테고리 선택"
-      >
-        <option value="">보조 카테고리</option>
-        <option v-for="n in minors" :key="n">{{ n }}</option>
-      </select>
-      <input
-        v-model="search"
-        type="search"
-        placeholder="검색어"
-        class="filter-input"
-        aria-label="검색"
-        @keyup.enter="onSubmitSearch"
-        autocomplete="off"
-      />
-      <div class="relative">
-        <button
-          @click="toggleSort"
-          class="filter-sort"
-          :aria-expanded="showSortOptions"
+  <HeaderComp :has-referer="true" title="규칙 탐색" />
+  <!-- 필터 바 -->
+  <nav
+    class="fixed z-30 bg-white/95 top-20 backdrop-blur-md border-b border-gray-100 px-4 pb-3 raspy-top flex flex-wrap gap-2 sm:gap-4"
+  >
+    <select
+      v-model="major"
+      @change="fetchMinors"
+      class="filter-select"
+      aria-label="주 카테고리 선택"
+    >
+      <option value="">주 카테고리</option>
+      <option v-for="m in majors" :key="m">{{ m }}</option>
+    </select>
+    <select
+      v-model="minor"
+      :disabled="!major"
+      class="filter-select"
+      aria-label="보조 카테고리 선택"
+    >
+      <option value="">보조 카테고리</option>
+      <option v-for="n in minors" :key="n">{{ n }}</option>
+    </select>
+    <input
+      v-model="search"
+      type="search"
+      placeholder="검색어"
+      class="filter-input"
+      aria-label="검색"
+      @keyup.enter="onSubmitSearch"
+      autocomplete="off"
+    />
+    <div class="relative">
+      <button @click="toggleSort" class="filter-sort" :aria-expanded="showSortOptions">
+        <i class="fas fa-sort text-orange-400 mr-1"></i>
+        {{ selectedSortLabel }}
+      </button>
+      <ul v-if="showSortOptions" class="sort-menu">
+        <li
+          v-for="o in sortOptions"
+          :key="o.value"
+          @click="selectSort(o.value)"
+          class="sort-option"
+          :aria-selected="sort === o.value"
         >
-          <i class="fas fa-sort text-orange-400 mr-1"></i>
-          {{ selectedSortLabel }}
-        </button>
-        <ul
-          v-if="showSortOptions"
-          class="sort-menu"
-        >
-          <li
-            v-for="o in sortOptions"
-            :key="o.value"
-            @click="selectSort(o.value)"
-            class="sort-option"
-            :aria-selected="sort === o.value"
-          >
-            {{ o.label }}
-          </li>
-        </ul>
-      </div>
-    </nav>
-  <main class=" pb-14 h-full raspy-top">
-
+          {{ o.label }}
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <main class="pb-14 h-full raspy-top">
     <!-- 카드 리스트 -->
-    <div class="max-w-2xl mx-auto  h-full px-2 pt-[13rem] flex flex-col gap-8">
+    <div class="max-w-2xl mx-auto h-full px-5 pt-[13rem] flex flex-col gap-8">
       <div v-if="loading" class="py-32 text-center text-orange-500">
         <i class="fas fa-spinner fa-spin text-3xl"></i>
         <div class="mt-4 text-base">로딩 중입니다…</div>
@@ -76,9 +70,7 @@
           @openMenu="openMenu"
         />
       </template>
-      <div v-else class="py-32 text-center text-gray-400">
-        조건에 맞는 규칙이 없습니다 😥
-      </div>
+      <div v-else class="py-32 text-center text-gray-400">조건에 맞는 규칙이 없습니다 😥</div>
     </div>
     <!-- Toaster -->
     <transition name="fade">
@@ -111,14 +103,14 @@ const search = ref('')
 const sort = ref('popular')
 const sortOptions = [
   { label: '최신순', value: 'recent' },
-  { label: '인기순', value: 'popular' }
+  { label: '인기순', value: 'popular' },
 ]
 const copiedId = ref(null)
 const expanded = ref([])
 const toastMsg = ref('')
 
-const selectedSortLabel = computed(() =>
-  sortOptions.find(o => o.value === sort.value)?.label || '정렬'
+const selectedSortLabel = computed(
+  () => sortOptions.find((o) => o.value === sort.value)?.label || '정렬',
 )
 
 const fetchMajors = async () => {
@@ -147,7 +139,9 @@ const onSubmitSearch = async () => {
     loading.value = false
   }
 }
-const toggleSort = () => { showSortOptions.value = !showSortOptions.value }
+const toggleSort = () => {
+  showSortOptions.value = !showSortOptions.value
+}
 const selectSort = (v) => {
   sort.value = v
   showSortOptions.value = false
@@ -155,7 +149,9 @@ const selectSort = (v) => {
 }
 const showToast = (msg) => {
   toastMsg.value = msg
-  setTimeout(() => { toastMsg.value = '' }, 1200)
+  setTimeout(() => {
+    toastMsg.value = ''
+  }, 1200)
 }
 const copyDescription = async (rule) => {
   try {
@@ -168,7 +164,7 @@ const copyDescription = async (rule) => {
 }
 const toggleExpand = (id) => {
   if (expanded.value.includes(id)) {
-    expanded.value = expanded.value.filter(e => e !== id)
+    expanded.value = expanded.value.filter((e) => e !== id)
   } else {
     expanded.value.push(id)
   }
@@ -191,11 +187,12 @@ watch(search, onSubmitSearch)
   border-radius: 0.7rem;
   padding: 0.55rem 1.1rem;
   font-size: 16px;
-  width:45%;
+  width: 45%;
   transition: box-shadow 0.15s;
   outline: none;
 }
-.filter-select:focus, .filter-input:focus {
+.filter-select:focus,
+.filter-input:focus {
   box-shadow: 0 0 0 2px #fb923c33;
 }
 .filter-input {
@@ -226,7 +223,7 @@ watch(search, onSubmitSearch)
   background: #fff;
   border: 1px solid #f4f4f4;
   border-radius: 0.7rem;
-  box-shadow: 0 2px 16px 0 rgba(251,146,60,0.07);
+  box-shadow: 0 2px 16px 0 rgba(251, 146, 60, 0.07);
   padding: 0.3rem 0;
 }
 .sort-option {
@@ -235,14 +232,17 @@ watch(search, onSubmitSearch)
   transition: background 0.15s;
   border-radius: 0.6rem;
 }
-.sort-option:hover, .sort-option[aria-selected="true"] {
+.sort-option:hover,
+.sort-option[aria-selected='true'] {
   background: #fff7ed;
   color: #f97316;
 }
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.4s;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

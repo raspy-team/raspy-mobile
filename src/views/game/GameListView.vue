@@ -124,8 +124,11 @@
                 </div>
               </div>
 
-              <div class="text-gray-600 text-right text-[0.79rem] min-w-[60px]">
-                {{ formatTimeAgo(game.createdAt) }}
+              <div @click.stop="onClickReport(game.id)" class="text-right">
+                <div class="text-gray-600 text-right text-[0.79rem] min-w-[60px]">
+                  {{ formatTimeAgo(game.createdAt) }}
+                </div>
+                <div class="text-red-500 text-[0.7rem] py-2 pl-2">신고하기</div>
               </div>
             </div>
 
@@ -696,6 +699,74 @@
     <i class="fas fa-arrow-up text-xl"></i>
   </button>
 
+  <!-- 신고 입력 모달 -->
+  <div
+    v-if="showReportModal"
+    class="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center p-4"
+  >
+    <div class="bg-white rounded-lg max-w-sm w-full p-6 shadow-lg relative">
+      <button
+        class="absolute top-3 right-3 text-gray-400"
+        @click="showReportModal = false"
+        aria-label="닫기"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+      <h2 class="text-xl font-bold mb-3">신고하기</h2>
+      <p class="text-gray-700 mb-4">신고 사유를 입력해주세요:</p>
+      <textarea
+        v-model="reportReason"
+        class="w-full border rounded p-2 text-sm mb-4"
+        rows="4"
+        placeholder="신고 사유를 작성하세요"
+      ></textarea>
+      <div class="flex justify-end gap-2">
+        <button
+          @click="cancelReport"
+          class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+        >
+          취소
+        </button>
+        <button
+          @click="confirmReport"
+          :disabled="!reportReason.trim()"
+          class="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
+        >
+          신고하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 신고 완료 모달 -->
+  <div
+    v-if="showThankModal"
+    class="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center p-4"
+  >
+    <div class="bg-white rounded-lg max-w-sm w-full p-6 shadow-lg relative">
+      <button
+        class="absolute top-3 right-3 text-gray-400"
+        @click="showThankModal = false"
+        aria-label="닫기"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+      <h2 class="text-xl font-bold text-green-600 mb-3">신고 접수 완료</h2>
+      <p class="text-gray-700 mb-4">
+        신고해 주셔서 감사합니다.<br />
+        제출하신 내용은 24시간 이내에 처리됩니다.
+      </p>
+      <div class="text-right">
+        <button
+          @click="showThankModal = false"
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          확인
+        </button>
+      </div>
+    </div>
+  </div>
+
   <Comment v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
 </template>
 
@@ -954,6 +1025,38 @@ const applyConfirmed = async () => {
   } finally {
     alertMsg.value = ''
     selectedGame.value = null
+  }
+}
+
+const showReportModal = ref(false)
+const showThankModal = ref(false)
+const reportReason = ref('')
+let reportTarget = ref(null)
+
+function onClickReport(targetId) {
+  reportTarget.value = targetId
+  reportReason.value = ''
+  showReportModal.value = true
+}
+
+function cancelReport() {
+  showReportModal.value = false
+}
+
+async function confirmReport() {
+  if (!reportReason.value.trim()) return
+  try {
+    await api.post('/api/reports', {
+      targetType: 'GAME',
+      targetId: reportTarget.value,
+      reason: reportReason.value,
+    })
+    showReportModal.value = false
+    showThankModal.value = true
+  } catch (err) {
+    console.error('신고 실패', err)
+    showToast('신고 접수가 완료된 경기입니다.')
+    showReportModal.value = false
   }
 }
 

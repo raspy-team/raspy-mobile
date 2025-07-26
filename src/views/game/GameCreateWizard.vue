@@ -68,7 +68,8 @@ const showFriendModal = ref(false)
 const gameForm = reactive({
   ruleId: null,
   friendId: null,
-  place: '',
+  placeRoad: '',
+  placeDetail: '',
   time: '',
 })
 
@@ -129,8 +130,9 @@ function onFriendSelect(friend) {
   showFriendModal.value = false
   step.value = 18
 }
-function onPlaceSelect(place) {
-  gameForm.place = place
+function onPlaceSelect(data) {
+  gameForm.placeRoad = data.placeRoad
+  gameForm.placeDetail = data.placeDetail
   step.value = 19
 }
 
@@ -145,8 +147,9 @@ async function createGame() {
     const payload = {
       referencedRuleId: gameForm.ruleId,
       friendId: gameForm.friendId,
-      place: gameForm.place,
-      time: gameForm.time,
+      placeRoad: gameForm.placeRoad,
+      placeDetail: gameForm.placeDetail,
+      matchDate: gameForm.time,
     }
     await api.post('/api/games/create', payload)
   } catch (e) {

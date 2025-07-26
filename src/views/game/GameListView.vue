@@ -207,7 +207,7 @@
               <div class="flex items-center gap-2">
                 <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
                 <span>{{
-                  game.matchLocation == ' ' || game.matchLocation == ''
+                  game.matchLocation == undefined || game.matchLocation.trim() == ''
                     ? '미정'
                     : game.matchLocation
                 }}</span>

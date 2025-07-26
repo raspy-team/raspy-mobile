@@ -100,51 +100,52 @@
             {{ game.rule.minorCategory }}
           </div>
         </div>
-        <div class="text-sm text-gray-700 space-y-4">
-          <div>
-            <!-- 규칙 설명 접기/펼치기 -->
-            <div v-if="!expanded" class="relative text-right">
-              <div
-                class="line-clamdiv-2 leading-relaxed text-left whitespace-pre-line border-b pb-4"
-              >
-                <!-- 내용 (스크롤) -->
-                <div class="flex-1 overflow-y-auto px-0 py-4 space-y-5">
-                  <ModalSection label="1. 경기 목표" :value="game.rule.ruleGoal" />
-                  <ModalSection label="2. 점수 정의" :value="game.rule.ruleScoreDefinition" />
-                  <ModalSection label="3. 경기 준비물" :value="game.rule.rulePreparation" />
-                  <ModalSection label="4. 경기 순서" :value="game.rule.ruleOrder" />
-                  <ModalSection label="5. 판정 방식" :value="game.rule.ruleDecision" />
-                  <ModalSection label="6. 반칙" :value="game.rule.ruleFoul" />
-                  <ModalSection label="7. 기타" :value="game.rule.ruleExtraInfo" />
-
-                  <div class="pt-1 space-y-2 text-[15px] text-gray-700 border-t">
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">세트 승리 기준</span>
-                      <span>{{
-                        game.rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달'
-                      }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">한 세트 승리 점수</span>
-                      <span>{{
-                        game.rule.pointsToWin === -1 ? '제한 없음' : game.rule.pointsToWin + '점'
-                      }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">총 세트 수</span>
-                      <span>{{ game.rule.setsToWin }}세트</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">세트 제한 시간</span>
-                      <span>{{ formatDuration(game.rule.duration) }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div class="relative">
+          <div
+            ref="ruleContent"
+            :class="[
+              'overflow-hidden transition-[max-height] duration-300',
+              expanded ? 'max-h-none' : 'max-h-[250px]',
+            ]"
+          >
+            <template v-for="(label, key) in sectionMap" :key="key">
+              <ModalSection :label="label" :value="game.rule[key]" />
+            </template>
           </div>
+
+          <!-- 흐림 효과 -->
+          <div
+            v-if="!expanded && isOverflowing"
+            class="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+          >
+            <div class="w-full h-full bg-gradient-to-b from-transparent to-white opacity-90"></div>
+          </div>
+
+          <!-- ruleContent 하단 -->
+          <div
+            v-if="!expanded && isOverflowing"
+            class="absolute bottom-0 left-0 right-0 h-16 flex justify-center items-end pb-4 pointer-events-none"
+          >
+            <!-- 버튼은 실제 클릭 가능하게 pointer-events-auto 줘야함 -->
+            <button
+              @click="expanded = true"
+              class="pointer-events-auto px-5 py-2 text-orange-500 bg-white text-sm font-medium rounded-full shadow-md border border-orange-500"
+            >
+              전체보기
+            </button>
+          </div>
+
+          <!-- 접기 버튼은 아래에 일반 배치 -->
+          <button
+            v-if="expanded && isOverflowing"
+            @click="expanded = false"
+            class="mt-3 w-full text-center text-sm font-medium text-orange-500 hover:text-orange-600 transition"
+          >
+            접기
+          </button>
         </div>
       </div>
+
       <!-- 장소/날짜 -->
       <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
         <div class="flex items-center gap-2">
@@ -210,7 +211,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineComponent, h } from 'vue'
+import { ref, onMounted, defineComponent, h, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/api'
 import Header from '@/components/HeaderComp.vue'
@@ -227,7 +228,26 @@ const errorMsg = ref('')
 const commentId = ref(0)
 
 const gameId = route.params.gameId
+const isOverflowing = ref(true)
+const ruleContent = ref(null)
 
+const sectionMap = {
+  ruleGoal: '1. 경기 목표',
+  ruleScoreDefinition: '2. 점수 정의',
+  rulePreparation: '3. 경기 준비물',
+  ruleOrder: '4. 경기 순서',
+  ruleDecision: '5. 판정 방식',
+  ruleFoul: '6. 반칙',
+  ruleExtraInfo: '7. 기타',
+}
+
+onMounted(async () => {
+  await nextTick()
+  const el = ruleContent.value
+  if (el && el.scrollHeight > 250) {
+    isOverflowing.value = true
+  }
+})
 // 경기 정보 fetch
 onMounted(async () => {
   loading.value = true
@@ -261,11 +281,11 @@ const goOpponentProfile = () => {
   }
 }
 
-function formatDuration(duration) {
-  if (duration === -1) return '제한 없음'
-  if (duration >= 60) return `${Math.floor(duration / 60)}분 ${duration % 60}초`
-  return `${duration}초`
-}
+// function formatDuration(duration) {
+//   if (duration === -1) return '제한 없음'
+//   if (duration >= 60) return `${Math.floor(duration / 60)}분 ${duration % 60}초`
+//   return `${duration}초`
+// }
 // ModalSection (setup 내에서 바로 선언)
 const ModalSection = defineComponent({
   props: {

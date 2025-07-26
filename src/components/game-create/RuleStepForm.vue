@@ -382,6 +382,75 @@ const setsError = ref('')
 const localWinBy = ref(props.form.winBy ?? '')
 const winByError = ref('')
 
+// ====== 욕설 검사 함수 ======
+function containsProfanity(text) {
+  const bannedWords = [
+    // 영어 비속어
+    'fuck',
+    'shit',
+    'asshole',
+    'bitch',
+    'bastard',
+    'dick',
+    'fucking',
+    'fucker',
+    'cunt',
+    'nigger',
+    'slut',
+    'whore',
+    'sex',
+    'sexy',
+    'nazi',
+    'motherfucker',
+
+    // 한글 비속어 (변형 포함)
+    '씨발',
+    '시발',
+    '씨바',
+    'ㅆㅂ',
+    'ㅅㅂ',
+    'ㅂㅅ',
+    '병신',
+    '새끼',
+    '좆',
+    '애미',
+    '개새끼',
+    '지랄',
+    '염병',
+    '꺼져',
+    '죽어',
+    '멍청',
+    '저능',
+    '존나',
+    'ㅄ',
+    'ㄱㅐ',
+    'ㅈㄴ',
+    '개같',
+    '더럽',
+    '섹스',
+    '자지',
+    '보지',
+    '딸딸이',
+    '빨아',
+    '꼬추',
+    '보빨',
+    '조까',
+    '좇',
+    '애비',
+    '년놈',
+    '암캐',
+    '걸레',
+    '쓰레기',
+    '창녀',
+    '미친놈',
+    '미친년',
+  ]
+
+  const lower = text.toLowerCase()
+  const found = bannedWords.find((word) => lower.includes(word))
+  return found || null
+}
+
 // 커스텀 드롭다운
 onMounted(async () => {
   if (props.step === 5) {
@@ -415,82 +484,128 @@ function validateStep5() {
     val = `${selectedMinorLabel.value} 경기입니다.`
     if (localInput.value.trim()) val += '\n' + localInput.value.trim()
     valid = true
-    inputError.value = ''
   } else {
     val = localInput.value.trim()
     valid = !!val
-    inputError.value = valid ? '' : '경기 설명을 입력해주세요.'
   }
+
+  if (containsProfanity(val) != null) {
+    inputError.value = `"${containsProfanity(val)}"은 사용할 수 없는 단어입니다.`
+    emit('validation', false)
+    return
+  }
+
+  inputError.value = valid ? '' : '경기 설명을 입력해주세요.'
   emit('input', { ruleGoal: val })
   emit('validation', valid)
 }
+
 function validateStep6() {
   let val = ''
-
   if (selectedMinorLabel.value && checkedScorePreset.value) {
     val = `${selectedMinorLabel.value} 경기 규칙을 따릅니다.`
     if (localScoreInput.value.trim()) val += '\n' + localScoreInput.value.trim()
-    scoreInputError.value = ''
-    emit('validation', true)
   } else {
     val = localScoreInput.value.trim()
-    scoreInputError.value = !val ? '점수 획득 방법을 입력해주세요.' : ''
-    emit('validation', !!val)
   }
 
+  if (containsProfanity(val) != null) {
+    scoreInputError.value = `"${containsProfanity(val)}"은 사용할 수 없는 단어입니다.`
+    emit('validation', false)
+    return
+  }
+
+  scoreInputError.value = !val ? '점수 획득 방법을 입력해주세요.' : ''
   emit('input', { ruleScoreDefinition: val })
+  emit('validation', !!val)
 }
+
 function validateStep7() {
   const val = localReadyInput.value.trim()
+
+  if (containsProfanity(val) != null) {
+    readyInputError.value = `"${containsProfanity(val)}"은 사용할 수 없는 단어입니다.`
+    emit('validation', false)
+    return
+  }
+
   readyInputError.value = !val ? '경기 준비사항을 입력해주세요.' : ''
   emit('input', { rulePreparation: val })
   emit('validation', !!val)
 }
+
 function validateStep8() {
   let val = ''
   if (selectedMinorLabel.value && checkedOrderPreset.value) {
     val = `${selectedMinorLabel.value} 경기 규칙을 따릅니다.`
     if (localOrderInput.value.trim()) val += '\n' + localOrderInput.value.trim()
-    orderInputError.value = ''
-    emit('validation', true)
   } else {
     val = localOrderInput.value.trim()
-    orderInputError.value = !val ? '경기 진행 순서를 입력해주세요.' : ''
-    emit('validation', !!val)
   }
+
+  if (containsProfanity(val) != null) {
+    orderInputError.value = `"${containsProfanity(val)}"은 사용할 수 없는 단어입니다.`
+    emit('validation', false)
+    return
+  }
+
+  orderInputError.value = !val ? '경기 진행 순서를 입력해주세요.' : ''
   emit('input', { ruleOrder: val })
+  emit('validation', !!val)
 }
+
 function validateStep9() {
   let val = ''
   if (checkedJudge1.value) {
-    val = '상호 합의\n'
-    val += localJudgeInput.value.trim()
-  } else if (localJudgeInput.value.trim()) val = localJudgeInput.value.trim()
-  val = val.trim()
-  judgeInputError.value = !val.trim() ? '판정방식 설명을 입력해주세요.' : ''
+    val = '상호 합의\n' + localJudgeInput.value.trim()
+  } else {
+    val = localJudgeInput.value.trim()
+  }
+
+  if (containsProfanity(val) != null) {
+    judgeInputError.value = `"${containsProfanity(val)}"은 사용할 수 없는 단어입니다.`
+    emit('validation', false)
+    return
+  }
+
+  judgeInputError.value = !val ? '판정방식 설명을 입력해주세요.' : ''
   emit('input', { ruleDecision: val })
-  emit('validation', !!val.trim())
+  emit('validation', !!val)
 }
+
 function validateStep10() {
   let val = ''
   if (selectedMinorLabel.value && checkedFoulPreset.value) {
     val = `${selectedMinorLabel.value} 경기 규칙을 따릅니다.`
     if (localFoulInput.value.trim()) val += '\n' + localFoulInput.value.trim()
-    foulInputError.value = ''
-    emit('validation', true)
   } else {
     val = localFoulInput.value.trim()
-    foulInputError.value = !val ? '반칙 항목을 입력해주세요.' : ''
-    emit('validation', !!val)
   }
+
+  if (containsProfanity(val) != null) {
+    foulInputError.value = `"${containsProfanity(val)}"은 사용할 수 없는 단어입니다.`
+    emit('validation', false)
+    return
+  }
+
+  foulInputError.value = !val ? '반칙 항목을 입력해주세요.' : ''
   emit('input', { ruleFoul: val })
+  emit('validation', !!val)
 }
+
 function validateStep11() {
   const val = localExtraInput.value
-  // 선택 입력이므로 항상 valid
+
+  if (containsProfanity(val) != null) {
+    //`"${containsProfanity(val)}"은 사용할 수 없는 단어입니다.`
+    emit('validation', false)
+    return
+  }
+
   emit('input', { ruleExtraInfo: val })
   emit('validation', true)
 }
+
 function validateStep12() {
   let valid = true
   pointsTimeError.value = ''
@@ -549,6 +664,7 @@ function validateStep13() {
   const valid = !!val && val >= 1
   setsError.value = valid ? '' : '세트 수는 1 이상이어야 합니다.'
   emit('input', { setsToWin: Number(val) })
+  emit('validation', valid)
 }
 function validateStep14() {
   const val = localWinBy.value

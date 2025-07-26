@@ -10,12 +10,13 @@
 
     <!-- 🎉 게임 결과 화면 -->
     <div v-else class="max-w-xl mx-auto px-4 py-6 space-y-8 text-center">
-
       <!-- 승패 결과 -->
       <div v-if="winnerIdx != 0" class="space-y-2">
         <div v-if="user1.id == currentUserId">
           <i
-            :class="winnerIdx == 1 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'"
+            :class="
+              winnerIdx == 1 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'
+            "
             class="text-5xl mb-2"
           ></i>
           <h2
@@ -30,7 +31,9 @@
         </div>
         <div v-else-if="user2.id == currentUserId">
           <i
-            :class="winnerIdx == 2 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'"
+            :class="
+              winnerIdx == 2 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'
+            "
             class="text-5xl mb-2"
           ></i>
           <h2
@@ -58,7 +61,7 @@
         <div class="absolute inset-0 z-0 pointer-events-none champion-card-bg"></div>
         <div
           class="absolute inset-0 rounded-2xl border-2 border-white border-opacity-50 z-10"
-          style="backdrop-filter: blur(2px);"
+          style="backdrop-filter: blur(2px)"
         ></div>
         <div class="relative z-20 flex flex-col items-center">
           <i class="fas fa-crown text-5xl mb-3 text-white drop-shadow champion-glow-anim"></i>
@@ -135,25 +138,36 @@
             <span v-if="idxCorrect">
               {{ set.user1Score }} : {{ set.user2SCore }}
               <i
-                :class="set.winnerIdx == 1 ? 'fas fa-check-circle text-orange-500 ml-1' :
-                         set.winnerIdx == 2 ? 'fas fa-check-circle text-orange-500 ml-1' :
-                         'fas fa-minus-circle text-gray-400 ml-1'"
+                :class="
+                  set.winnerIdx == 1
+                    ? 'fas fa-check-circle text-orange-500 ml-1'
+                    : set.winnerIdx == 2
+                      ? 'fas fa-check-circle text-orange-500 ml-1'
+                      : 'fas fa-minus-circle text-gray-400 ml-1'
+                "
               ></i>
             </span>
             <span v-else>
               {{ set.user2SCore }} : {{ set.user1Score }}
               <i
-                :class="set.winnerIdx == 2 ? 'fas fa-check-circle text-orange-500 ml-1' :
-                         set.winnerIdx == 1 ? 'fas fa-check-circle text-orange-500 ml-1' :
-                         'fas fa-minus-circle text-gray-400 ml-1'"
+                :class="
+                  set.winnerIdx == 2
+                    ? 'fas fa-check-circle text-orange-500 ml-1'
+                    : set.winnerIdx == 1
+                      ? 'fas fa-check-circle text-orange-500 ml-1'
+                      : 'fas fa-minus-circle text-gray-400 ml-1'
+                "
               ></i>
             </span>
           </li>
         </ul>
       </div>
 
-    <!-- 리뷰 남기기 -->
-      <div  v-if="!reviewSubmitted" class="bg-white p-5 rounded-xl shadow space-y-4 text-left border">
+      <!-- 리뷰 남기기 -->
+      <div
+        v-if="!reviewSubmitted"
+        class="bg-white p-5 rounded-xl shadow space-y-4 text-left border"
+      >
         <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
           <i class="fas fa-comment-dots"></i> 상대 리뷰 남기기
         </h3>
@@ -165,7 +179,9 @@
               v-for="n in 5"
               :key="'manner' + n"
               @click="review.manner = n"
-              :class="n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-300'"
+              :class="
+                n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-300'
+              "
               class="text-xl cursor-pointer w-6"
             ></i>
           </div>
@@ -178,7 +194,11 @@
               v-for="n in 5"
               :key="'perf' + n"
               @click="review.performance = n"
-              :class="n <= review.performance ? 'fas fa-fire text-orange-400' : 'fas fa-fire text-gray-300'"
+              :class="
+                n <= review.performance
+                  ? 'fas fa-fire text-orange-400'
+                  : 'fas fa-fire text-gray-300'
+              "
               class="text-xl cursor-pointer w-6"
             ></i>
           </div>
@@ -197,15 +217,13 @@
         >
           리뷰 등록
         </button>
-
-
       </div>
-        <button
-          @click="goHome"
-          class="w-full text-gray-800 border py-2 rounded-full font-light shadow hover:brightness-110 transition"
-        >
-          나가기
-        </button>
+      <button
+        @click="goHome"
+        class="w-full text-gray-800 border py-2 rounded-full font-light shadow hover:brightness-110 transition"
+      >
+        나가기
+      </button>
       <CustomToast />
     </div>
   </div>
@@ -274,10 +292,76 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-
 const submitReview = async () => {
   if (review.value.manner === 0 || review.value.performance === 0) {
     showToast('매너와 퍼포먼스 평점을 모두 입력해 주세요.')
+    return
+  }
+
+  // ===== 비속어 검사 =====
+  const bannedWords = [
+    'fuck',
+    'shit',
+    'asshole',
+    'bitch',
+    'bastard',
+    'dick',
+    'fucking',
+    'fucker',
+    'cunt',
+    'nigger',
+    'slut',
+    'whore',
+    'sex',
+    'sexy',
+    'nazi',
+    'motherfucker',
+    '씨발',
+    '시발',
+    '씨바',
+    'ㅆㅂ',
+    'ㅅㅂ',
+    'ㅂㅅ',
+    '병신',
+    '새끼',
+    '좆',
+    '애미',
+    '개새끼',
+    '지랄',
+    '염병',
+    '꺼져',
+    '죽어',
+    '멍청',
+    '저능',
+    '존나',
+    'ㅄ',
+    'ㄱㅐ',
+    'ㅈㄴ',
+    '개같',
+    '더럽',
+    '섹스',
+    '자지',
+    '보지',
+    '딸딸이',
+    '빨아',
+    '꼬추',
+    '보빨',
+    '조까',
+    '좇',
+    '애비',
+    '년놈',
+    '암캐',
+    '걸레',
+    '쓰레기',
+    '창녀',
+    '미친놈',
+    '미친년',
+  ]
+
+  const lowerText = (review.value.comment || '').toLowerCase()
+  const found = bannedWords.find((word) => lowerText.includes(word))
+  if (found) {
+    showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`)
     return
   }
 
@@ -289,7 +373,6 @@ const submitReview = async () => {
     console.error(err)
     showToast('잘못된 접근입니다.')
     reviewSubmitted.value = true
-
   }
 }
 
@@ -334,7 +417,9 @@ function formatDate(dateStr) {
 }
 
 .champion-card-glow {
-  box-shadow: 0 0 64px 8px #fdba7477, 0 0 0 4px #fb923c55 inset;
+  box-shadow:
+    0 0 64px 8px #fdba7477,
+    0 0 0 4px #fb923c55 inset;
   position: relative;
 }
 
@@ -344,8 +429,11 @@ function formatDate(dateStr) {
 }
 
 @keyframes champion-glow-anim {
-  0% { filter: drop-shadow(0 0 16px #fff9) drop-shadow(0 0 8px #fdba74cc);}
-  100% { filter: drop-shadow(0 0 28px #fff) drop-shadow(0 0 18px #fdba74);}
+  0% {
+    filter: drop-shadow(0 0 16px #fff9) drop-shadow(0 0 8px #fdba74cc);
+  }
+  100% {
+    filter: drop-shadow(0 0 28px #fff) drop-shadow(0 0 18px #fdba74);
+  }
 }
-
 </style>

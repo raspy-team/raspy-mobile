@@ -15,20 +15,57 @@
       </div>
     </div>
     <div class="screen">
-      <!-- Step 0: 환영 -->
+      <!-- Step 0: 환영+약관 동의 -->
       <div v-if="step === 0" class="screen-inner">
-        <div class="content flex items-center w-full h-full justify-center text-center">
+        <div class="content flex flex-col items-center w-full h-full justify-center text-center">
           <div class="question-box center w-full">
-            <i class="fas fa-smile icon-large"></i>
+            <i class="fas fa-smile icon-large mb-3"></i>
             <h1 class="text-center text-2xl font-bold mb-3">환영합니다!</h1>
-            <p class="text-center">시작하려면 간단한 설정이 필요해요.</p>
+            <p class="text-center mb-5">시작하려면 간단한 설정이 필요해요.</p>
           </div>
+          <transition name="fade">
+            <div class="eula-box" v-if="!eulaComplete" key="eula">
+              <label v-if="false" class="checkbox-row all" @click="toggleAll">
+                <input type="checkbox" v-model="eulaAllChecked" />
+                <span class="fake-checkbox"></span>
+                <span class="all-label">전체 동의</span>
+              </label>
+              <div v-for="term in terms" :key="term.id" class="checkbox-row term py-2">
+                <label class="flex-1 flex items-center" @click.stop="toggleTerm(term.id)">
+                  <input
+                    type="checkbox"
+                    :checked="eulaChecked[term.id]"
+                    @change="toggleTerm(term.id)"
+                  />
+                  <span class="fake-checkbox"></span>
+                  <span class="ml-1.5">{{ term.title }}</span>
+                  <span class="required">*</span>
+                </label>
+                <button class="see-detail" @click.stop="openModal(term)">전체보기</button>
+              </div>
+              <div class="eula-desc mt-3 text-xs text-gray-400">
+                아래 약관을 모두 동의해야 가입을 시작할 수 있습니다.
+              </div>
+            </div>
+          </transition>
         </div>
         <div class="footer">
-          <button class="btn btn-primary" @click="next">시작하기</button>
+          <transition name="slide-fade">
+            <button
+              class="btn btn-primary"
+              :disabled="!allChecked"
+              @click="onEulaNext"
+              v-if="!eulaComplete"
+              key="eula-btn"
+            >
+              동의하고 시작하기
+            </button>
+            <button class="btn btn-primary" v-if="eulaComplete" @click="next" key="start-btn">
+              시작하기
+            </button>
+          </transition>
         </div>
       </div>
-
       <!-- Step 1: 사용자 ID (건너뛰기 없음) -->
       <div v-else-if="step === 1" class="screen-inner">
         <div class="question-box">
@@ -56,7 +93,6 @@
           </button>
         </div>
       </div>
-
       <!-- Step 2: 닉네임 (건너뛰기 없음) -->
       <div v-else-if="step === 2" class="screen-inner">
         <div class="question-box">
@@ -84,7 +120,6 @@
           </button>
         </div>
       </div>
-
       <!-- Step 3: 나이 -->
       <div v-else-if="step === 3" class="screen-inner">
         <div class="question-box">
@@ -109,7 +144,6 @@
           <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
-
       <!-- Step 4: 성별 -->
       <div v-else-if="step === 4" class="screen-inner">
         <div class="question-box">
@@ -135,7 +169,6 @@
           <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
-
       <!-- Step 5: 지역 -->
       <div v-else-if="step === 5" class="screen-inner">
         <div class="question-box">
@@ -159,7 +192,6 @@
           <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
-
       <!-- Step 6: 소개 -->
       <div v-else-if="step === 6" class="screen-inner">
         <div class="question-box">
@@ -183,7 +215,6 @@
           <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
-
       <!-- Step 7: 사진 -->
       <div v-else-if="step === 7" class="screen-inner">
         <div class="question-box">
@@ -208,7 +239,6 @@
           <button class="btn btn-outline" @click="onProfileNext">건너뛰기</button>
         </div>
       </div>
-
       <!-- Step 8: 완료 -->
       <div v-else-if="step === 8" class="screen-inner">
         <div class="content center">
@@ -221,6 +251,16 @@
         </div>
       </div>
     </div>
+    <!-- 약관 전체보기 모달 -->
+    <transition name="modal-fade">
+      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+        <div class="modal-content">
+          <div class="modal-title font-bold text-base mb-2">{{ modalTerm.title }}</div>
+          <div class="modal-body text-sm whitespace-pre-line" v-html="modalTerm.body"></div>
+          <button class="modal-close-btn mt-6" @click="closeModal">확인</button>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -235,11 +275,9 @@ const router = useRouter()
 
 onMounted(() => {
   if (route.query.token) localStorage.setItem('raspy_access_token2', route.query.token)
-
   if (route.query.isNewUser == 'false') {
     router.push('/')
   }
-
   const token = localStorage.getItem('raspy_access_token2')
   if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
     window.AndroidApp.registerFcmToken(token)
@@ -255,6 +293,141 @@ onMounted(() => {
   }
 })
 
+// ============ EULA / 약관 동의 ============
+
+const terms = [
+  {
+    id: 'eula',
+    title: '서비스 이용약관',
+    body: `
+제1조 (목적)
+본 약관은 주식회사 래스피(이하 "회사"라 함)가 제공하는 모든 서비스(이하 "서비스"라 함)의 이용조건 및 절차, 회사와 회원의 권리, 의무 및 책임사항 등 기타 필요한 사항을 규정함을 목적으로 합니다.
+
+제2조 (회원의 정의 및 가입조건)
+① "회원"이란 본 약관에 동의하고, 회사가 정한 절차에 따라 가입하여 서비스를 이용하는 자를 의미합니다.
+② 만 4세 미만은 회원 가입이 불가하며, 만 19세 미만은 일부 서비스 이용이 제한될 수 있습니다.
+
+제3조 (약관의 게시 및 개정)
+회사는 본 약관의 내용을 회원이 쉽게 알 수 있도록 서비스 내에 게시합니다. 약관의 개정 시 회사는 관련법에 따라 공지합니다.
+
+제4조 (서비스 이용계약의 성립)
+회원 가입 시 본 약관 및 개인정보 처리방침에 동의함으로써 서비스 이용계약이 성립됩니다.
+
+제5조 (회원의 의무)
+① 회원은 관계법령, 본 약관, 이용안내 및 서비스상에 공지한 주의사항 등을 준수하여야 하며, 다음 각 호의 행위를 해서는 안됩니다.
+  1. 타인의 개인정보, 계정도용, 사칭 등 허위정보 제공 행위
+  2. 회사 또는 제3자의 저작권 등 권리 침해 행위
+  3. 불법, 유해, 음란, 욕설, 차별, 혐오, 폭력, 불쾌, 선정적, 위협적, 불법광고 등
+     ("Objectionable Content" 포함)  
+     - 예: 불법촬영물, 음란물, 도박, 마약, 자살, 자해, 폭력, 증오/차별조장, 개인정보 노출, 불쾌한 언사 등 일체  
+     - 청소년유해매체, 법령 위반 게시물, 범죄 모의/방조/권유/유도성 내용, 기타 사회질서 해치는 행위
+  4. 서비스의 정상적 운영을 방해하거나 서버에 과도한 부담을 주는 행위
+  5. 기타 본 약관 및 관련법에 위반되는 일체의 행위
+② 회원의 위반행위로 인해 발생한 모든 민형사상 책임은 본인에게 있습니다.
+
+제6조 (서비스의 제공 및 중단)
+① 회사는 회원에게 안정적 서비스를 제공하기 위해 최선을 다합니다.
+② 회사는 다음 각 호에 해당하는 경우 서비스의 일부 또는 전부를 일시적으로 제한, 중지할 수 있습니다.
+  1. 시스템 정기/비정기 점검
+  2. 천재지변, 불가항력적 사유 등
+
+제7조 (게시물의 저작권 및 관리)
+① 회원이 서비스 내에 게시한 모든 게시물의 저작권은 회원에게 있습니다. 단, 회사는 서비스의 운영·홍보·연구를 위해 필요한 범위 내에서 이를 사용할 수 있습니다.
+② 회원의 게시물이 "Objectionable Content" 또는 관련법 위반 등 금지행위에 해당하는 경우, 회사는 사전통지 없이 삭제, 차단, 임시조치, 서비스 이용제한 등 조치를 할 수 있습니다.
+③ 회사는 수사기관, 사법당국의 요청이 있을 경우 관련 정보를 제공할 수 있습니다.
+
+제8조 (계약해지 및 서비스 이용제한)
+회원이 이용계약을 해지하고자 할 경우, 서비스 내 탈퇴기능을 통해 언제든지 해지할 수 있습니다.  
+회사는 회원의 위반행위 발생 시 즉시 서비스 이용을 제한하거나 계정을 삭제할 수 있습니다.
+
+제9조 (면책)
+회사는 천재지변, 불가항력적 사유, 회원의 고의·과실 등으로 인한 서비스 장애에 대해 책임을 지지 않습니다.
+
+제10조 (분쟁해결 및 관할)
+본 약관과 관련한 분쟁은 회사의 본사 소재지 법원을 관할법원으로 합니다.
+
+[부칙]
+본 약관은 2025년 7월 25일부터 시행합니다.
+    `,
+  },
+  {
+    id: 'privacy',
+    title: '개인정보 처리방침',
+    body: `
+1. 총칙
+회사는 이용자의 개인정보를 소중히 여기며, "정보통신망 이용촉진 및 정보보호 등에 관한 법률", "개인정보보호법" 등 관련 법령을 준수합니다.
+
+2. 수집하는 개인정보 항목
+- 회원가입 시: 이메일
+- 프로필 설정 시: 나이, 성별, 지역, 자기소개, 프로필사진 등
+
+3. 개인정보의 수집 및 이용 목적
+- 회원 가입, 본인확인, 서비스 제공 및 유지, 고객지원, 서비스 품질개선, 신규 서비스 개발, 부정이용 방지 등
+
+4. 개인정보의 보유 및 이용 기간
+- 회원 탈퇴 또는 개인정보 수집 및 이용 목적 달성 시까지 보유 및 이용
+- 단, 관련법령(전자상거래 등 소비자 보호법 등)에 따라 일정 기간 보관 필요 시 그에 따름
+
+5. 개인정보의 제3자 제공
+- 회사는 원칙적으로 이용자의 동의 없이 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음의 경우는 예외로 합니다.
+  1) 이용자가 사전에 동의한 경우
+  2) 법령에 근거하여 수사기관, 사법기관 등 국가기관의 요청이 있는 경우
+
+6. 개인정보의 파기절차 및 방법
+- 목적 달성, 보유기간 경과 등 파기사유 발생 시 지체 없이 복구 불가능한 방법으로 파기
+
+7. 이용자의 권리 및 행사 방법
+- 본인 및 법정대리인은 개인정보 열람, 정정, 삭제, 처리정지, 동의철회를 요구할 수 있습니다.
+
+8. 개인정보보호책임자
+- 개인정보보호책임자: 김우진 (xhae000y@gmail.com 또는 admin@raspy.app)
+- 기타 문의는 서비스 내 고객센터를 통해 문의하실 수 있습니다.
+
+[부칙]
+본 방침은 2025년 7월 25일부터 시행합니다.
+    `,
+  },
+]
+
+const eulaChecked = ref({
+  eula: false,
+  privacy: false,
+})
+const eulaAllChecked = ref(false)
+const allChecked = computed(() => Object.values(eulaChecked.value).every((v) => v))
+const showModal = ref(false)
+const modalTerm = ref({})
+const eulaComplete = ref(false)
+
+function toggleAll() {
+  const checked = !allChecked.value
+
+  eulaChecked.value.eula = checked
+  eulaChecked.value.privacy = checked
+
+  eulaAllChecked.value = checked
+}
+function toggleTerm(id) {
+  eulaChecked.value[id] = !eulaChecked.value[id]
+  // 전체 동의 상태 업데이트
+  eulaAllChecked.value = allChecked.value
+}
+function openModal(term) {
+  modalTerm.value = term
+  showModal.value = true
+}
+function closeModal() {
+  showModal.value = false
+}
+function onEulaNext() {
+  eulaComplete.value = true
+  setTimeout(() => {
+    step.value++
+    eulaComplete.value = false
+  }, 0)
+}
+
+// 기존 온보딩 스텝 로직 그대로
 const step = ref(0)
 const username = ref(''),
   dupError = ref(''),
@@ -292,7 +465,6 @@ const canProceedUsername = computed(
 const canProceedNickname = computed(() => {
   return nickname.value.trim().length > 0 && nickname.value.trim().length <= 9
 })
-
 function onUsernameInput() {
   clearTimeout(dupTimer.value)
   dupError.value = ''
@@ -400,6 +572,7 @@ function toHome() {
   router.push('/')
 }
 </script>
+
 <style scoped>
 .app-container {
   background: #fff;
@@ -599,5 +772,172 @@ function toHome() {
   box-shadow: 0 1px 8px #0001;
   cursor: pointer;
   z-index: 10;
+}
+
+/* === EULA 약관 동의 추가 스타일 === */
+.eula-box {
+  background: #f9f9fa;
+  border-radius: 16px;
+  padding: 24px 16px 16px 16px;
+  margin: 0 auto;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 3px 24px #0001;
+  transition: box-shadow 0.25s;
+}
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  padding: 8px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.checkbox-row input[type='checkbox'] {
+  display: none;
+}
+.fake-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #f77f00;
+  border-radius: 7px;
+  background: #fff;
+  display: inline-block;
+  margin-right: 8px;
+  position: relative;
+}
+.checkbox-row input[type='checkbox']:checked + .fake-checkbox {
+  background: #f77f00;
+  border-color: #f77f00;
+}
+.checkbox-row input[type='checkbox']:checked + .fake-checkbox::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1.5px;
+  width: 6px;
+  height: 12px;
+  border: solid #fff;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+.checkbox-row .all-label {
+  font-weight: 600;
+  color: #f77f00;
+  margin-left: 2px;
+}
+.checkbox-row.term .see-detail {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0 6px;
+}
+.checkbox-row .required {
+  color: #e63946;
+  font-size: 13px;
+  margin-left: 4px;
+}
+.divide {
+  border-top: 1px solid #eee;
+  margin: 8px 0 4px 0;
+}
+.eula-desc {
+  margin-top: 12px;
+  text-align: left;
+}
+
+/* === 약관 모달 === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10010;
+  background: rgba(24, 24, 24, 0.32);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: modal-in 0.16s;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 14px;
+  max-width: 90vw;
+  width: 370px;
+  max-height: 75vh;
+  overflow: auto;
+  box-shadow: 0 8px 32px #0003;
+  padding: 28px 20px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  animation: popin 0.22s cubic-bezier(0.44, 1.5, 0.71, 1);
+}
+.modal-title {
+  font-size: 19px;
+  color: #222;
+}
+.modal-body {
+  color: #555;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+.modal-close-btn {
+  width: 100%;
+  padding: 12px 0;
+  background: #f77f00;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+}
+@keyframes modal-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes popin {
+  0% {
+    transform: scale(0.97);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 약간의 페이드/슬라이드 애니메이션 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.slide-fade-enter-active {
+  transition: all 0.3s cubic-bezier(0.6, 0, 0, 1.4);
+}
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.slide-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.19s;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 </style>

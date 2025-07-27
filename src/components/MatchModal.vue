@@ -11,34 +11,43 @@
         @click.stop
       >
         <!-- 상단 헤더 + 만든이 심플표시 -->
-        <div class="px-6 pt-6 pb-3 border-b flex justify-between items-start">
-          <div class="min-w-0">
-            <div class="font-bold text-lg text-gray-900 mb-1 truncate">
-              {{ rule.ruleTitle }}
+        <div class="px-4 pt-6 pb-3 border-b flex justify-between items-start">
+          <div class="min-w-0 flex items-center justify-start gap-2">
+            <div>
+              <img
+                class="w-10"
+                :src="`/category-picture/${rule.minorCategory || '미분류'}.png`"
+                alt="카테고리 이미지"
+              />
             </div>
-            <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
-              {{ rule.majorCategory }}
-              <span class="mx-1 text-orange-500">&gt;</span>
-              {{ rule.minorCategory }}
+            <div>
+              <div class="font-bold text-lg text-gray-900 mb-1 truncate">
+                {{ rule.ruleTitle }}
+              </div>
+              <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
+                {{ rule.majorCategory }}
+                <span class="mx-1 text-orange-500">&gt;</span>
+                {{ rule.minorCategory }}
+              </div>
             </div>
           </div>
           <!-- 만든이: 심플 버전 -->
           <div
             v-if="rule.createdBy"
-            class="flex gap-1 flex-col items-start gap-1 ml-4 cursor-pointer mt-2"
+            class="flex gap-1 flex-col items-start cursor-pointer mt-2 mr-4"
             @click="goProfile(rule.createdBy.id)"
             title="만든이 프로필로 이동"
           >
-            <span class="text-[11px] text-gray-400 font-semibold mr-1">규칙 만든이</span>
             <div class="flex items-center">
               <img
                 :src="rule.createdBy.profile?.profilePicture || defaultProfile"
-                class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 object-cover"
+                class="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 object-cover"
                 alt="프로필"
                 loading="lazy"
               />
-              <span class="ml-1 text-xs font-semibold text-gray-700 max-w-[70px] truncate">
-                {{ rule.createdBy.nickname }}
+              <span class="ml-1 text-xs flex flex-col max-w-[70px] truncate">
+                <span class="text-[9px] text-gray-400 font-semibold mr-1">규칙 만든이</span>
+                <span class="font-semibold text-gray-700"> {{ rule.createdBy.nickname }}</span>
               </span>
             </div>
           </div>

@@ -10,33 +10,33 @@
     <!-- Main Content -->
     <main class="pt-3 px-4 pb-4">
       <!-- Menu Items -->
-      <div class="grid grid-cols-1 gap-3 mb-2">
+      <div class="grid grid-cols-1 gap-3 mb-1">
         <div class="flex flex-row gap-6 justify-between mb-4 px-8">
           <div
             v-for="(action, index) in menuItems"
             :key="index"
             @click="router.push(action.link)"
-            class="flex flex-col items-center cursor-pointer relative group"
-            style="min-width: 64px"
+            class="flex flex-col items-center justify-center gap-1 w-[64px] cursor-pointer group"
           >
             <div
-              class="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all border border-gray-100 group-hover:bg-orange-50"
+              class="w-14 mb-1 h-14 flex border border-gray-100 items-center justify-center rounded-xl bg-white shadow-sm transition-colors duration-200 group-hover:bg-orange-100"
             >
-              <i :class="`${action.icon} text-orange-500 text-2xl`"></i>
+              <i :class="`${action.icon} text-orange-500 text-[1.6em]`"></i>
             </div>
             <span
-              class="mt-2 text-sm text-gray-700 font-[400] text-[0.8rem] whitespace-nowrap overflow-hidden text-overflow-ellipsis text-center max-w-[80px]"
+              class="text-[0.75rem] text-gray-600 font-medium text-center truncate max-w-[72px]"
             >
               {{ action.name }}
             </span>
+
             <div
-              v-if="requestCount > 0 && action.name == '경기 요청'"
-              class="absolute top-0 right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white"
-              style="transform: translateY(-25%)"
+              v-if="requestCount > 0 && action.name === '경기 요청'"
+              class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white"
             >
-              <span class="text-xs text-white font-medium">{{ requestCount }}</span>
+              {{ requestCount }}
             </div>
           </div>
+
           <div
             v-if="false"
             @click="showInviteModal = true"
@@ -60,7 +60,7 @@
       <!-- 게임리스트 (동일) -->
       <div class="space-y-4">
         <!-- 필터 버튼 -->
-        <div class="relative flex justify-between itemw-full pt-3 border-t">
+        <div class="relative flex justify-between itemw-full pt-3 border-none">
           <div class="text-gray-700 font-[500] pl-1">
             <button
               @click="showRegionModal = true"
@@ -106,6 +106,8 @@
             </div>
           </div>
         </div>
+
+        <div class="font-extrabold text-xl text-gray-700 pt-3">추천 경기</div>
         <div v-if="games.length > 0">
           <div
             @click="openModal(game)"
@@ -116,11 +118,23 @@
             <!-- 타이틀과 생성자 정보(우측 상단) -->
 
             <div class="flex justify-between items-start">
-              <div class="flex flex-col w-full justify-between">
-                <h4 class="text-lg font-extrabold text-gray-800 mb-1">{{ game.rule.ruleTitle }}</h4>
-                <div class="text-xs text-orange-500 font-medium mb-2 flex gap-1 items-center">
-                  {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
-                  {{ game.rule.minorCategory }}
+              <div class="min-w-0 flex items-center gap-1">
+                <div>
+                  <img
+                    class="w-10"
+                    :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
+                    alt="카테고리 이미지"
+                  />
+                </div>
+                <div>
+                  <div class="font-bold text-lg text-gray-900 mb-1 truncate">
+                    {{ game.rule.ruleTitle }}
+                  </div>
+                  <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
+                    {{ game.rule.majorCategory }}
+                    <span class="mx-1 text-orange-500">&gt;</span>
+                    {{ game.rule.minorCategory }}
+                  </div>
                 </div>
               </div>
 

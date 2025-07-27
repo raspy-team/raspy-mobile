@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="raspy-top">
     <div v-if="loading" class="space-y-5">
       <div
         v-for="i in 2"

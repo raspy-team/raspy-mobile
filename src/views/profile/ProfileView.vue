@@ -566,10 +566,10 @@
       <transition name="fade">
         <div
           v-if="showUserModal"
-          class="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-center items-center"
+          class="fixed inset-0 top-0 h-full bg-black bg-opacity-30 z-50 flex justify-center items-center"
         >
           <div
-            class="bg-white w-dvw w-full p-6 pt-10 relative"
+            class="bg-white w-dvw w-full h-full p-6 pt-10 relative"
             style="min-height: calc(var(--real-vh, 1vh) * 100)"
           >
             <button

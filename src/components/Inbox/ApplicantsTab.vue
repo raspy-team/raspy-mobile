@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="raspy-top flex flex-col">
     <div v-if="loading" class="space-y-5">
       <div
         v-for="i in 2"

@@ -15,7 +15,7 @@
           class="mb-8 w-full rounded-2xl border border-orange-100 shadow-xl bg-white/95 hover:shadow-2xl transition-shadow"
         >
           <div class="flex justify-between items-center">
-            <div class="p-5 pb-0 flex flex-col w-full justify-between">
+            <div class="flex-1 p-5 pb-0 flex flex-col w-full justify-between">
               <h4 class="text-lg font-extrabold text-gray-800 mb-1">{{ game.rule.ruleTitle }}</h4>
               <div class="text-xs text-orange-500 font-medium mb-0 flex gap-1 items-center">
                 {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
@@ -23,20 +23,28 @@
               </div>
             </div>
 
-            <div class="flex justify-between items-center text-base font-bold mb-2 w-[35%]">
-              <div :class="['flex items-center', statusColor(game.status)]">
-                <i
-                  :class="statusIcon(game.status)"
-                  class="mr-2"
-                  v-if="game.status !== 'IN_PROGRESS'"
-                ></i>
-                <i :class="statusIcon(game.status)" class="mr-2 animate-spin-slow" v-else></i>
-                <span>{{ translateStatus(game.status) }}</span>
+            <div class="flex flex-1 justify-end items-center text-base font-bold mb-2 w-[35%]">
+              <div
+                :class="[
+                  'flex flex-col  items-end justify-center pr-6 pt-3',
+                  statusColor(game.status),
+                ]"
+              >
+                <div>
+                  <i
+                    :class="statusIcon(game.status)"
+                    class="mr-2"
+                    v-if="game.status !== 'IN_PROGRESS'"
+                  ></i>
+                  <i :class="statusIcon(game.status)" class="mr-2 animate-spin-slow" v-else></i>
+                  <span>{{ translateStatus(game.status) }}</span>
+                </div>
+
                 <span
                   v-if="game.status === 'IN_PROGRESS' && game.startedAt"
                   class="ml-3 text-orange-500 font-black animate-pulse text-sm"
                 >
-                  ({{ elapsedTimes[game.id] }})
+                  {{ elapsedTimes[game.id] }}
                 </span>
               </div>
             </div>
@@ -391,7 +399,7 @@ function updateElapsed() {
       diff %= 60000
       const s = Math.floor(diff / 1000)
       elapsedTimes.value[game.id] =
-        h > 0 ? `${h}시간 ${m}분 ${s}초 경과` : m > 0 ? `${m}분 ${s}초 경과` : `${s}초 경과`
+        h > 0 ? `${h}시간 ${m}분 ${s}초` : m > 0 ? `${m}분 ${s}초` : `${s}초`
     }
   })
 }
@@ -426,7 +434,7 @@ onMounted(async () => {
     res = await client.get('/api/games/my-games')
     games.value = res.data
     updateElapsed()
-    interval = setInterval(updateElapsed, 2000)
+    interval = setInterval(updateElapsed, 1000)
   } catch (e) {
     games.value = []
   }

@@ -51,18 +51,20 @@
         </div>
         <div class="footer">
           <transition name="slide-fade">
-            <button
-              class="btn btn-primary"
-              :disabled="!allChecked"
-              @click="onEulaNext"
-              v-if="!eulaComplete"
-              key="eula-btn"
-            >
-              동의하고 시작하기
-            </button>
-            <button class="btn btn-primary" v-if="eulaComplete" @click="next" key="start-btn">
-              시작하기
-            </button>
+            <div>
+              <button
+                class="btn btn-primary"
+                :disabled="!allChecked"
+                @click="onEulaNext"
+                v-if="!eulaComplete"
+                key="eula-btn"
+              >
+                동의하고 시작하기
+              </button>
+              <button class="btn btn-primary" v-if="eulaComplete" @click="next" key="start-btn">
+                시작하기
+              </button>
+            </div>
           </transition>
         </div>
       </div>

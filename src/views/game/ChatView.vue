@@ -26,6 +26,8 @@ function updateHeaderPosition() {
 updateHeaderPosition()
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', updateHeaderPosition)
+
+  window.visualViewport.addEventListener('scroll', updateHeaderPosition)
 }
 
 const visibleMessages = computed(() => {

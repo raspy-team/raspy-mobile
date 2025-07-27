@@ -65,57 +65,57 @@
       현재 세트: {{ currentSet }}
     </div>
 
-    <div class="flex items-start justify-between mb-6 relative">
-      <div class="flex flex-col items-center mr-2 animate-fade-in">
+    <div class="flex items-start justify-between mb-6 relative left-0">
+      <div class="flex flex-col items-center animate-fade-in">
         <img
           :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
-          class="w-20 aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1"
+          class="w-[20dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1"
         />
         <div class="font-bold text-sm">{{ user1.nickname }}</div>
-        <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
+        <div class="text-[10dvw] font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user1SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">
           <button
             @click="socket_sendScore(1, 1)"
             :disabled="isSetOver || isGameOver"
-            class="bg-orange-500 text-white w-14 py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
+            class="bg-orange-500 text-white w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
           >
             +1
           </button>
           <button
             @click="socket_sendScore(1, -1)"
             :disabled="isSetOver || isGameOver || currentScore1 <= 0"
-            class="bg-gray-200 text-gray-800 w-14 py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
+            class="bg-gray-200 text-gray-800 w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
           >
             -1
           </button>
         </div>
       </div>
       <div>
-        <div class="w-24 text-center text-xl font-[600] mt-8 text-orange-500">
+        <div class="w-[20dvw] text-center text-[5dvw] font-[600] mt-8 text-orange-500">
           {{ elapsedTimeStr }}
         </div>
       </div>
-      <div class="flex flex-col items-center ml-2 animate-fade-in">
+      <div class="flex flex-col items-center animate-fade-in">
         <img
           :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
-          class="w-20 h-20 rounded-full border-4 border-orange-500 shadow-lg mb-1"
+          class="w-[20dvw] rounded-full border-4 border-orange-500 shadow-lg mb-1"
         />
         <div class="font-bold text-sm">{{ user2.nickname }}</div>
-        <div class="text-[3.0rem] font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>
+        <div class="text-[10dvw] font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>
         <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user2SetsWon }}</div>
         <div class="flex space-x-2 mt-2 px-1">
           <button
             @click="socket_sendScore(2, 1)"
             :disabled="isSetOver || isGameOver"
-            class="bg-orange-500 text-white w-14 py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
+            class="bg-orange-500 text-white w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
           >
             +1
           </button>
           <button
             @click="socket_sendScore(2, -1)"
             :disabled="isSetOver || isGameOver || currentScore2 <= 0"
-            class="bg-gray-200 text-gray-800 w-14 py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
+            class="bg-gray-200 text-gray-800 w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
           >
             -1
           </button>
@@ -345,21 +345,24 @@ function addScore(userIdx, delta) {
 }
 
 function checkSetOver() {
-  if (game.pointsToWin != -1 && currentScore1.value >= game.pointsToWin) {
+  if (game.rule.pointsToWin != -1 && currentScore1.value >= game.rule.pointsToWin) {
     user1SetsWon.value++
     finishSet(1)
     return
   }
-  if (game.pointsToWin != -1 && currentScore2.value >= game.pointsToWin) {
+  if (game.rule.pointsToWin != -1 && currentScore2.value >= game.rule.pointsToWin) {
     user2SetsWon.value++
     finishSet(2)
     return
   }
   if (game.limitSeconds !== -1 && elapsedSeconds.value >= game.limitSeconds) {
-    if (game.winBy == 'MOST_SETS_AND_POINTS' && currentScore1.value > currentScore2.value) {
+    if (game.rule.winBy == 'MOST_SETS_AND_POINTS' && currentScore1.value > currentScore2.value) {
       user1SetsWon.value++
       finishSet(1)
-    } else if (game.winBy == 'MOST_SETS_AND_POINTS' && currentScore2.value > currentScore1.value) {
+    } else if (
+      game.rule.winBy == 'MOST_SETS_AND_POINTS' &&
+      currentScore2.value > currentScore1.value
+    ) {
       user2SetsWon.value++
       finishSet(2)
     } else {
@@ -379,7 +382,7 @@ function finishSet(who) {
     winner.value = user2.value.nickname
   }
   showFinishModal.value = true
-  const setsToWin = game.setsToWin
+  const setsToWin = game.rule.setsToWin
   const requiredWins = Math.ceil(setsToWin / 2)
   if (user1SetsWon.value >= requiredWins || user2SetsWon.value >= requiredWins) {
     isGameOver.value = true
@@ -498,12 +501,12 @@ onMounted(async () => {
   user2SetsWon.value = isLeftUser1 ? g.set2 : g.set1
   currentSet.value = g.currentSet || 0
 
-  if (game.pointsToWin != -1 && currentScore1.value >= game.pointsToWin) {
+  if (game.rule.pointsToWin != -1 && currentScore1.value >= game.rule.pointsToWin) {
     isSetOver.value = true
     isGameOver.value = false
     user1SetsWon.value += 1
     currentSet.value += 1
-  } else if (game.pointsToWin != -1 && currentScore2.value >= game.pointsToWin) {
+  } else if (game.rule.pointsToWin != -1 && currentScore2.value >= game.rule.pointsToWin) {
     isSetOver.value = true
     isGameOver.value = false
     user2SetsWon.value += 1
@@ -511,7 +514,7 @@ onMounted(async () => {
   } else if (game.limitSeconds !== -1 && elapsedSeconds.value >= game.limitSeconds) {
     isSetOver.value = true
     isGameOver.value = false
-    if (game.winBy == 'MOST_SETS_AND_POINTS') {
+    if (game.rule.winBy == 'MOST_SETS_AND_POINTS') {
       if (currentScore1.value > currentScore2.value) {
         user1SetsWon.value += 1
         currentSet.value += 1
@@ -544,10 +547,10 @@ onMounted(async () => {
       } else if (payload.type === 'FINISH') {
         isGameOver.value = true
         addLog(payload)
-        const setsToWin = game.setsToWin
+        const setsToWin = game.rule.setsToWin
         const requiredWins = Math.ceil(setsToWin / 2)
         if (user1SetsWon.value < requiredWins && user2SetsWon.value < requiredWins) {
-          if (game.winBy == 'MOST_SETS_AND_POINTS') {
+          if (game.rule.winBy == 'MOST_SETS_AND_POINTS') {
             if (currentScore1.value > currentScore2.value) user1SetsWon.value++
             else if (currentScore2.value > currentScore1.value) user2SetsWon.value++
           }

@@ -1,5 +1,5 @@
 <template>
-  <header class="fixed top-0 left-0 w-full z-[30] bg-[#fff] raspy-top">
+  <header class="fixed top-0 left-0 w-full z-[30] border border-gray-100 bg-[#fff] raspy-top">
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14">

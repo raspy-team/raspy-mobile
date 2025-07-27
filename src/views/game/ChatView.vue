@@ -17,6 +17,7 @@ function updateHeaderPosition() {
   // visualViewport를 지원하는 경우만 적용 (for iOS)
   if (window.visualViewport) {
     headerTop.value = window.visualViewport.offsetTop
+    scrollToBottom()
   } else {
     headerTop.value = 0
   }
@@ -25,7 +26,6 @@ function updateHeaderPosition() {
 updateHeaderPosition()
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', updateHeaderPosition)
-  window.visualViewport.addEventListener('scroll', updateHeaderPosition)
 }
 
 const visibleMessages = computed(() => {

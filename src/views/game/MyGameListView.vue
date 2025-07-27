@@ -15,7 +15,7 @@
           class="mb-8 w-full rounded-2xl border border-orange-100 shadow-xl bg-white/95 hover:shadow-2xl transition-shadow"
         >
           <div class="flex justify-between items-center">
-            <div class="flex-1 p-5 pb-0 flex flex-col w-full justify-between">
+            <div class="flex-[2] p-5 pb-0 flex flex-col w-full justify-between">
               <div class="flex justify-between items-center">
                 <div class="min-w-0 flex items-center gap-2">
                   <div>
@@ -41,7 +41,7 @@
               </div>
             </div>
 
-            <div class="flex flex-1 justify-end items-center text-base font-bold mb-2 w-[35%]">
+            <div class="flex flex-1 justify-end items-center text-base font-bold mb-2">
               <div
                 :class="[
                   'flex flex-col  items-end justify-center pr-6 pt-3',

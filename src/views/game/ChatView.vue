@@ -11,6 +11,22 @@ const chatBox = ref(null)
 const currentUserId = ref(null)
 const roomId = ref('')
 const messages = ref([])
+const headerTop = ref(0)
+
+function updateHeaderPosition() {
+  // visualViewport를 지원하는 경우만 적용 (for iOS)
+  if (window.visualViewport) {
+    headerTop.value = window.visualViewport.offsetTop
+  } else {
+    headerTop.value = 0
+  }
+}
+// 헤더 위치 실시간 업데이트
+updateHeaderPosition()
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateHeaderPosition)
+  window.visualViewport.addEventListener('scroll', updateHeaderPosition)
+}
 
 const visibleMessages = computed(() => {
   return messages.value
@@ -52,9 +68,12 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', updateHeaderPosition)
+    window.visualViewport.removeEventListener('scroll', updateHeaderPosition)
+  }
   socket.disconnect()
 })
-
 const router = useRouter()
 function goToProfile() {
   router.push(`/profile/${targetUserId}`)

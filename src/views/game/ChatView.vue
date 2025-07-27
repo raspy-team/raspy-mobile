@@ -83,10 +83,16 @@ function goToProfile() {
 function goBack() {
   router.go(-1)
 }
+
+const msgInput = ref(null)
+
 function sendMsg() {
   if (!newMsg.value.trim()) return
   socket.sendChat(roomId.value, newMsg.value)
   newMsg.value = ''
+  setTimeout(() => {
+    msgInput.value?.focus()
+  })
 }
 function scrollToBottom() {
   nextTick(() => {
@@ -200,10 +206,10 @@ const defaultProfileUrl = require('../../assets/default.png')
       <div class="p-[5px] bg-white flex items-center">
         <textarea
           v-model="newMsg"
+          ref="msgInput"
           rows="1"
           class="flex-1 resize-none border border-gray-300 rounded-full px-4 py-[10px] focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="메시지 입력..."
-          @keydown.enter.exact.prevent="sendMsg"
         />
         <button
           @click="sendMsg"

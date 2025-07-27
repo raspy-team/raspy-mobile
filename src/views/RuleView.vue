@@ -1,27 +1,83 @@
 <template>
   <HeaderComp v-if="showHeader" :has-referer="true" title="규칙 탐색" class="z-40" />
-  <!-- 필터 바 -->
   <nav
-    class="fixed z-30 bg-white/95 top-14 backdrop-blur-md border-b border-gray-100 px-4 pb-3 flex flex-wrap gap-2 sm:gap-4 pt-7 raspy-total-top"
+    class="z-10 bg-white border-b border-gray-100 px-4 pb-3 flex flex-wrap gap-2 sm:gap-4 pt-20 raspy-top"
   >
-    <select
-      v-model="major"
-      @change="fetchMinors"
-      class="filter-select"
-      aria-label="주 카테고리 선택"
-    >
-      <option value="">주 카테고리</option>
-      <option v-for="m in majors" :key="m">{{ m }}</option>
-    </select>
-    <select
-      v-model="minor"
-      :disabled="!major"
-      class="filter-select"
-      aria-label="보조 카테고리 선택"
-    >
-      <option value="">보조 카테고리</option>
-      <option v-for="n in minors" :key="n">{{ n }}</option>
-    </select>
+    <!-- Major Custom Select -->
+    <div class="flex w-full gap-3">
+      <div
+        class="custom-select flex-1"
+        @keydown.enter.prevent="toggleMajorDropdown"
+        tabindex="0"
+        :aria-expanded="majorDropdownOpen"
+      >
+        <button
+          class="select-btn"
+          :class="{ active: majorDropdownOpen }"
+          @click="toggleMajorDropdown"
+          aria-haspopup="listbox"
+          :aria-expanded="majorDropdownOpen"
+        >
+          <span>{{ majorLabel }}</span>
+          <i
+            class="fas fa-chevron-down text-sm ml-2 transition"
+            :class="{ 'rotate-180': majorDropdownOpen }"
+          ></i>
+        </button>
+        <ul v-show="majorDropdownOpen" class="select-list" role="listbox" @mousedown.prevent>
+          <li
+            v-for="m in majors"
+            :key="m"
+            @click="selectMajor(m)"
+            class="select-option"
+            :aria-selected="major === m"
+          >
+            {{ m }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Minor Custom Select -->
+      <div
+        class="custom-select flex-1"
+        :class="{ disabled: !major }"
+        tabindex="0"
+        :aria-expanded="minorDropdownOpen"
+      >
+        <button
+          class="select-btn"
+          :disabled="!major"
+          :class="{ active: minorDropdownOpen, disabled: !major }"
+          @click="toggleMinorDropdown"
+          aria-haspopup="listbox"
+          :aria-expanded="minorDropdownOpen"
+        >
+          <span>{{ minorLabel }}</span>
+          <i
+            class="fas fa-chevron-down text-sm ml-2 transition"
+            :class="{ 'rotate-180': minorDropdownOpen }"
+          ></i>
+        </button>
+        <ul
+          v-show="minorDropdownOpen && major"
+          class="select-list"
+          role="listbox"
+          @mousedown.prevent
+        >
+          <li
+            v-for="n in minors"
+            :key="n"
+            @click="selectMinor(n)"
+            class="select-option"
+            :aria-selected="minor === n"
+          >
+            {{ n }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 검색창 -->
     <input
       v-model="search"
       type="search"
@@ -31,7 +87,9 @@
       @keyup.enter="onSubmitSearch"
       autocomplete="off"
     />
-    <div class="relative">
+
+    <!-- 정렬버튼 -->
+    <div class="relative mt-2">
       <button @click="toggleSort" class="filter-sort" :aria-expanded="showSortOptions">
         <i class="fas fa-sort text-orange-400 mr-1"></i>
         {{ selectedSortLabel }}
@@ -49,9 +107,10 @@
       </ul>
     </div>
   </nav>
-  <main class="pb-14 h-full raspy-top">
-    <!-- 카드 리스트 -->
-    <div class="max-w-2xl mx-auto h-full px-5 pt-[max(15%,240px)] flex flex-col gap-0">
+
+  <main class="pb-14">
+    <!-- 이하 동일 -->
+    <div class="max-w-2xl mx-auto h-full px-5 mt-3 flex flex-col gap-0">
       <div v-if="loading" class="py-32 text-center text-orange-500">
         <i class="fas fa-spinner fa-spin text-3xl"></i>
         <div class="mt-4 text-base">로딩 중입니다…</div>
@@ -77,17 +136,28 @@
     <transition name="fade">
       <div
         v-if="toastMsg"
-        class="fixed left-1/2 bottom-10 z-[90] -translate-x-1/2 bg-orange-500 text-white px-6 py-2 rounded-xl shadow-lg font-semibold"
+        class="fixed left-1/2 bottom-10 z-[120] -translate-x-1/2 bg-orange-500 text-white px-6 py-2 rounded-xl shadow-lg font-semibold"
         aria-live="polite"
       >
         {{ toastMsg }}
       </div>
     </transition>
   </main>
+
+  <!-- 맨 위로 버튼 -->
+  <button
+    v-if="showScrollTop"
+    @click="scrollToTop"
+    class="fixed z-[99] bottom-20 right-6 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-xl w-12 h-12 flex items-center justify-center transition"
+    aria-label="맨 위로"
+    style="box-shadow: 0 6px 18px 0 rgba(255, 115, 0, 0.12)"
+  >
+    <i class="fas fa-arrow-up text-xl"></i>
+  </button>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import api from '../api/api'
 import HeaderComp from '../components/HeaderComp.vue'
 import RuleCard from '../components/RuleCard.vue'
@@ -96,7 +166,19 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 const showHeader = ref(true)
-
+const showScrollTop = ref(false)
+const handleScroll = () => {
+  showScrollTop.value = window.scrollY > 120
+}
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 const majors = ref([])
 const minors = ref([])
 const rules = ref([])
@@ -114,6 +196,12 @@ const sortOptions = [
 const copiedId = ref(null)
 const expanded = ref([])
 const toastMsg = ref('')
+
+const majorDropdownOpen = ref(false)
+const minorDropdownOpen = ref(false)
+
+const majorLabel = computed(() => (major.value ? major.value : '주 카테고리'))
+const minorLabel = computed(() => (minor.value ? minor.value : '보조 카테고리'))
 
 const selectedSortLabel = computed(
   () => sortOptions.find((o) => o.value === sort.value)?.label || '정렬',
@@ -178,32 +266,130 @@ const toggleExpand = (id) => {
 const openMenu = (id) => {
   menuOpen.value = menuOpen.value === id ? null : id
 }
+
+// --- Custom Select 관련 ---
+function toggleMajorDropdown() {
+  majorDropdownOpen.value = !majorDropdownOpen.value
+}
+function toggleMinorDropdown() {
+  if (!major.value) return
+  minorDropdownOpen.value = !minorDropdownOpen.value
+}
+async function selectMajor(m) {
+  major.value = m
+  minor.value = ''
+  majorDropdownOpen.value = false
+  await fetchMinors()
+  // UX: 메이저 선택시 자동 마이너 오픈
+  nextTick(() => {
+    if (minors.value.length > 0) minorDropdownOpen.value = true
+  })
+}
+function selectMinor(n) {
+  minor.value = n
+  minorDropdownOpen.value = false
+}
+function closeDropdowns(e) {
+  if (!e.target.closest('.custom-select')) {
+    majorDropdownOpen.value = false
+    minorDropdownOpen.value = false
+  }
+}
 onMounted(() => {
   fetchMajors()
   onSubmitSearch()
-
+  document.addEventListener('click', closeDropdowns)
   if (route.params?.creating === '1') {
     showHeader.value = false
   }
+})
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdowns)
 })
 watch([major, minor, sort], onSubmitSearch)
 watch(search, onSubmitSearch)
 </script>
 
 <style scoped>
-.filter-select {
+/* 커스텀 셀렉트 스타일 (트렌디/피그마 스타일 기반) */
+.custom-select {
+  position: relative;
+  min-width: 140px;
+  user-select: none;
+  outline: none;
+}
+.custom-select.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.select-btn {
   background: #f5f5f8;
   border: none;
   border-radius: 0.7rem;
   padding: 0.55rem 1.1rem;
   font-size: 16px;
-  width: 45%;
-  transition: box-shadow 0.15s;
+  min-width: 120px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  transition:
+    box-shadow 0.15s,
+    border 0.2s;
+  cursor: pointer;
   outline: none;
+  border: 1.5px solid transparent;
 }
-.filter-select:focus,
-.filter-input:focus {
+.select-btn.active,
+.select-btn:focus {
   box-shadow: 0 0 0 2px #fb923c33;
+  border-color: #fb923c77;
+}
+.select-btn.disabled {
+  cursor: not-allowed;
+  background: #f0f0f2;
+  color: #bbb;
+}
+.select-list {
+  position: absolute;
+  z-index: 50;
+  top: 110%;
+  left: 0;
+  min-width: 120px;
+  width: max-content;
+  background: #fff;
+  border: 1px solid #f4f4f4;
+  border-radius: 0.7rem;
+  box-shadow: 0 2px 16px 0 rgba(251, 146, 60, 0.1);
+  padding: 0.3rem 0;
+  margin-top: 2px;
+  max-height: 280px;
+  overflow-y: auto;
+  animation: dropdownFade 0.15s;
+}
+@keyframes dropdownFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.select-option {
+  padding: 0.8rem 1.1rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  font-size: 16px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  white-space: nowrap;
+}
+.select-option:hover,
+.select-option[aria-selected='true'] {
+  background: #fff7ed;
+  color: #f97316;
 }
 .filter-input {
   background: #f5f5f8;
@@ -212,6 +398,10 @@ watch(search, onSubmitSearch)
   padding: 0.55rem 1.1rem;
   font-size: 16px;
   min-width: 120px;
+  outline: none;
+}
+.filter-input:focus {
+  box-shadow: 0 0 0 2px #fb923c33;
 }
 .filter-sort {
   background: #fff;

@@ -1,8 +1,8 @@
 <template>
-  <HeaderComp v-if="showHeader" :has-referer="true" title="규칙 탐색" />
+  <HeaderComp v-if="showHeader" :has-referer="true" title="규칙 탐색" class="z-40" />
   <!-- 필터 바 -->
   <nav
-    class="fixed z-30 bg-white/95 top-14 backdrop-blur-md border-b border-gray-100 px-4 pb-3 flex flex-wrap gap-2 sm:gap-4 pt-[32px]"
+    class="fixed z-30 bg-white/95 top-14 backdrop-blur-md border-b border-gray-100 px-4 pb-3 flex flex-wrap gap-2 sm:gap-4 pt-7 raspy-total-top"
   >
     <select
       v-model="major"

@@ -1,8 +1,8 @@
 <template>
   <header class="fixed top-0 left-0 w-full bg-[#fff] shadow z-50 raspy-top">
-    <div class="max-w-4xl mx-auto px-4 md:px-8 py-1 flex items-center justify-between">
+    <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
       <!-- 좌측: 로고 또는 뒤로가기 -->
-      <div class="flex items-center">
+      <div class="flex items-center h-14">
         <router-link v-if="props.hasReferer != true" to="/" class="font-bold text-[#f97316]">
           <span class="RASPY mx-1">Match</span>
         </router-link>
@@ -13,7 +13,7 @@
       <!-- 중앙: 타이틀 (hasReferer일 때만 표시) -->
       <div
         v-if="props.hasReferer == true"
-        class="absolute left-1/2 transform -translate-x-1/2 text-black text-sm font-light"
+        class="absolute left-1/2 transform -translate-x-1/2 text-black text-sm py-[50px] font-light"
       >
         {{ props.title }}
       </div>

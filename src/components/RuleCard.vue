@@ -1,15 +1,26 @@
 <template>
   <div class="card-style group relative" @click.stop="showRuleDetail = true">
     <!-- 헤더 -->
-    <div class="flex items-center justify-between mb-2">
-      <div class="min-w-0">
-        <span class="text-base font-extrabold text-gray-900 truncate block">
-          {{ rule.ruleTitle }}
-        </span>
-        <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
-          {{ rule.majorCategory }}
-          <span v-if="rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
-          <span v-if="rule.minorCategory">{{ rule.minorCategory }}</span>
+    <div class="flex items-start justify-between mb-2">
+      <div class="min-w-0 flex items-center gap-2">
+        <div>
+          <div>
+            <img
+              class="w-10"
+              :src="`/category-picture/${rule.minorCategory || '미분류'}.png`"
+              alt="카테고리 이미지"
+            />
+          </div>
+        </div>
+        <div>
+          <span class="text-base font-extrabold text-gray-900 truncate block">
+            {{ rule.ruleTitle }}
+          </span>
+          <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+            {{ rule.majorCategory }}
+            <span v-if="rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+            <span v-if="rule.minorCategory">{{ rule.minorCategory }}</span>
+          </div>
         </div>
       </div>
       <div class="flex flex-col items-end min-w-0">

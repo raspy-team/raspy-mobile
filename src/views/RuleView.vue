@@ -2,7 +2,7 @@
   <HeaderComp v-if="showHeader" :has-referer="true" title="규칙 탐색" />
   <!-- 필터 바 -->
   <nav
-    class="fixed z-30 bg-white/95 top-14 pt-5 backdrop-blur-md border-b border-gray-100 px-4 pb-3 raspy-top flex flex-wrap gap-2 sm:gap-4"
+    class="fixed z-30 bg-white/95 top-14 backdrop-blur-md border-b border-gray-100 px-4 pb-3 flex flex-wrap gap-2 sm:gap-4 pt-[32px]"
   >
     <select
       v-model="major"

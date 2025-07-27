@@ -1,7 +1,7 @@
 <template>
   <HeaderComp v-if="showHeader" :has-referer="true" title="규칙 탐색" class="z-40" />
   <nav
-    class="z-10 bg-white border-b border-gray-100 px-4 pb-3 flex flex-wrap gap-2 sm:gap-4 pt-20 raspy-top"
+    class="bg-white border-b border-gray-100 px-4 pb-3 flex flex-wrap mt-14 pt-5 gap-3 raspy-top"
   >
     <!-- Major Custom Select -->
     <div class="flex w-full gap-3">
@@ -82,7 +82,7 @@
       v-model="search"
       type="search"
       placeholder="검색어"
-      class="filter-input"
+      class="filter-input w-full"
       aria-label="검색"
       @keyup.enter="onSubmitSearch"
       autocomplete="off"
@@ -109,7 +109,6 @@
   </nav>
 
   <main class="pb-14">
-    <!-- 이하 동일 -->
     <div class="max-w-2xl mx-auto h-full px-5 mt-3 flex flex-col gap-0">
       <div v-if="loading" class="py-32 text-center text-orange-500">
         <i class="fas fa-spinner fa-spin text-3xl"></i>

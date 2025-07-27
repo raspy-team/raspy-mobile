@@ -16,10 +16,28 @@
         >
           <div class="flex justify-between items-center">
             <div class="flex-1 p-5 pb-0 flex flex-col w-full justify-between">
-              <h4 class="text-lg font-extrabold text-gray-800 mb-1">{{ game.rule.ruleTitle }}</h4>
-              <div class="text-xs text-orange-500 font-medium mb-0 flex gap-1 items-center">
-                {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
-                {{ game.rule.minorCategory }}
+              <div class="flex justify-between items-center">
+                <div class="min-w-0 flex items-center gap-2">
+                  <div>
+                    <div>
+                      <img
+                        class="w-10"
+                        :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
+                        alt="카테고리 이미지"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <span class="text-base font-extrabold text-gray-900 truncate block">
+                      {{ game.rule.ruleTitle }}
+                    </span>
+                    <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+                      {{ game.rule.majorCategory }}
+                      <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+                      <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

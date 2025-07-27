@@ -1,5 +1,5 @@
 <template>
-  <HeaderComp :has-referer="true" title="규칙 탐색" />
+  <HeaderComp v-if="showHeader" :has-referer="true" title="규칙 탐색" />
   <!-- 필터 바 -->
   <nav
     class="fixed z-30 bg-white/95 top-14 pt-5 backdrop-blur-md border-b border-gray-100 px-4 pb-3 raspy-top flex flex-wrap gap-2 sm:gap-4"
@@ -91,6 +91,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import api from '../api/api'
 import HeaderComp from '../components/HeaderComp.vue'
 import RuleCard from '../components/RuleCard.vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const showHeader = ref(true)
 
 const majors = ref([])
 const minors = ref([])
@@ -176,6 +181,10 @@ const openMenu = (id) => {
 onMounted(() => {
   fetchMajors()
   onSubmitSearch()
+
+  if (route.params?.creating === '1') {
+    showHeader.value = false
+  }
 })
 watch([major, minor, sort], onSubmitSearch)
 watch(search, onSubmitSearch)

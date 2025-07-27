@@ -59,58 +59,59 @@
           class="p-5 border bg-white rounded-2xl shadow space-y-5"
         >
           <div class="flex justify-between items-start">
-            <MatchRuleModal
-              class=""
-              style="margin-top: 0px"
-              v-if="game.showRuleDetail"
-              :rule="game.rule"
-              @close="game.showRuleDetail = false"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <div class="">
-              <div class="mb-1 flex">
-                <span class="font-semibold text-gray-700">
+            <div class="min-w-0 flex items-center gap-2">
+              <div>
+                <div>
+                  <img
+                    class="w-10"
+                    :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
+                    alt="카테고리 이미지"
+                  />
+                </div>
+              </div>
+              <div>
+                <span class="text-base font-extrabold text-gray-900 truncate block">
                   {{ game.rule.ruleTitle }}
                 </span>
-                <span class="flex ml-3">
-                  <champion-badge v-if="game.championId == game.myId"></champion-badge>
-                </span>
+                <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+                  {{ game.rule.majorCategory }}
+                  <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+                  <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
+                </div>
               </div>
             </div>
-            <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
-              {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
-              {{ game.rule.minorCategory }}
-            </div>
-            <p class="text-sm text-gray-700 leading-snug whitespace-pre-line leading-relaxed">
-              {{ game.rule.ruleDescription }}
-            </p>
+            <span
+              class="text-xs font-semibold px-1 w-[5rem] text-center py-2 rounded-full"
+              :class="{
+                'bg-blue-100 text-blue-600': game.status === 'APPROVED',
+                'bg-gray-100 text-gray-500': game.status === 'REQUESTED',
+                'bg-red-100 text-red-500': game.status === 'REJECTED',
+              }"
+            >
+              {{ translateStatus(game.status) }}
+            </span>
           </div>
-          <span
-            class="text-xs font-semibold px-1 w-[5rem] text-center py-2 rounded-full"
-            :class="{
-              'bg-blue-100 text-blue-600': game.status === 'APPROVED',
-              'bg-gray-100 text-gray-500': game.status === 'REQUESTED',
-              'bg-red-100 text-red-500': game.status === 'REJECTED',
-            }"
+          <div
+            class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
           >
-            {{ translateStatus(game.status) }}
-          </span>
-        </div>
-        <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2">
-          <div class="flex items-center gap-2">
-            <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
-            <span>{{
-              game.matchLocation == ' ' || game.matchLocation == '' || game.matchLocation == null
-                ? '장소 미정'
-                : game.matchLocation
-            }}</span>
+            <div class="flex items-center gap-2">
+              <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
+              <span>{{
+                game.matchLocation == ' ' || game.matchLocation == '' || game.matchLocation == null
+                  ? '장소 미정'
+                  : game.matchLocation
+              }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="far w-3 fa-calendar text-orange-500"></i>
+              <span>{{ formatDate(game.matchDate) }}</span>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <i class="far w-3 fa-calendar text-orange-500"></i>
-            <span>{{ formatDate(game.matchDate) }}</span>
-          </div>
+          <MatchRuleModal
+            v-if="game.showRuleDetail"
+            :rule="game.rule"
+            @close="game.showRuleDetail = false"
+          />
           <div class="flex justify-between items-center pt-3 border-t">
             <div>
               <p class="text-sm font-semibold text-gray-800 flex items-center gap-2">

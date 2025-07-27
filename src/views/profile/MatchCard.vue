@@ -29,16 +29,24 @@
       >
     </div>
     <!-- 상단: 룰정보/경기일시장소 -->
-    <div class="flex items-center gap-3 min-w-0">
-      <div class="flex items-center justify-between mt-0 mb-0">
-        <div class="flex flex-col items-start gap-1">
-          <div class="font-bold text-xl text-gray-800">
-            {{ game.rule.ruleTitle }}
-          </div>
-          <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
-            {{ game.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
-            {{ game.rule.minorCategory }}
-          </div>
+    <div class="min-w-0 flex items-center gap-2">
+      <div>
+        <div>
+          <img
+            class="w-10"
+            :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
+            alt="카테고리 이미지"
+          />
+        </div>
+      </div>
+      <div>
+        <span class="text-base font-extrabold text-gray-900 truncate block">
+          {{ game.rule.ruleTitle }}
+        </span>
+        <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+          {{ game.rule.majorCategory }}
+          <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+          <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
         </div>
       </div>
     </div>

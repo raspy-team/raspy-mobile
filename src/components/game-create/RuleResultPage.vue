@@ -7,11 +7,26 @@
       <div class="mb-5 text-orange-600 text-[17px] font-semibold tracking-tight">
         ✓ 규칙 생성 완료
       </div>
-      <div class="mb-1 text-xl font-extrabold text-neutral-900 truncate">
-        {{ result.ruleTitle }}
-      </div>
-      <div class="mb-4 text-sm text-gray-500 font-medium">
-        {{ result.majorCategory }} &gt; {{ result.minorCategory }}
+      <div class="min-w-0 flex items-center gap-2 mb-5">
+        <div>
+          <div>
+            <img
+              class="w-10"
+              :src="`/category-picture/${result.minorCategory || '미분류'}.png`"
+              alt="카테고리 이미지"
+            />
+          </div>
+        </div>
+        <div>
+          <span class="text-base font-extrabold text-gray-900 truncate block">
+            {{ result.ruleTitle }}
+          </span>
+          <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+            {{ result.majorCategory }}
+            <span v-if="result.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+            <span v-if="result.minorCategory">{{ result.minorCategory }}</span>
+          </div>
+        </div>
       </div>
       <div class="flex flex-col gap-2 overflow-auto" style="max-height: 56dvh">
         <div v-for="item in ruleList" :key="item.label" class="py-1 px-2">

@@ -64,20 +64,27 @@
         class="p-5 border bg-white rounded-2xl shadow space-y-5"
       >
         <div class="flex justify-between items-start">
-          <div>
-            <div class="">
-              <div class="mb-1 flex">
-                <span class="font-semibold text-gray-700">
+          <div class="flex justify-between items-center">
+            <div class="min-w-0 flex items-center gap-2">
+              <div>
+                <div>
+                  <img
+                    class="w-10"
+                    :src="`/category-picture/${group.rule.minorCategory || '미분류'}.png`"
+                    alt="카테고리 이미지"
+                  />
+                </div>
+              </div>
+              <div>
+                <span class="text-base font-extrabold text-gray-900 truncate block">
                   {{ group.rule.ruleTitle }}
                 </span>
-                <span class="flex ml-3">
-                  <champion-badge v-if="group.championId == group.myId"></champion-badge>
-                </span>
+                <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+                  {{ group.rule.majorCategory }}
+                  <span v-if="group.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+                  <span v-if="group.rule.minorCategory">{{ group.rule.minorCategory }}</span>
+                </div>
               </div>
-            </div>
-            <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
-              {{ group.rule.majorCategory }} <span class="mx-1 text-orange-500">&gt;</span>
-              {{ group.rule.minorCategory }}
             </div>
           </div>
           <span

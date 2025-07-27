@@ -1,5 +1,5 @@
 <template>
-  <header class="fixed top-0 left-0 w-full bg-[#fff] shadow z-50 raspy-top">
+  <header class="fixed top-0 left-0 w-full z-[30] bg-[#fff] raspy-top">
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14">
@@ -25,7 +25,7 @@
           class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full bg-white hover:bg-orange-50 transition ml-1"
           title="DM"
         >
-          <i class="fas fa-paper-plane text-orange-500 text-2xl"></i>
+          <i class="fas fa-paper-plane text-orange-500 text-xl"></i>
         </router-link>
 
         <!-- 알림 버튼  -->
@@ -33,7 +33,7 @@
           class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full bg-white hover:bg-orange-50 transition"
           @click="toggleNotificationPanel"
         >
-          <i class="fas fa-bell text-orange-500 text-2xl"></i>
+          <i class="fas fa-bell text-orange-500 text-xl"></i>
           <span
             v-if="unreadCount > 0"
             class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"

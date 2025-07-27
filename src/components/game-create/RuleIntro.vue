@@ -15,7 +15,7 @@
         새로운 규칙 만들기
       </button>
       <button
-        @click="$emit('select', 'select')"
+        @click="router.push('/rules?creating')"
         class="w-full py-4 bg-white text-orange-500 text-lg font-bold rounded-xl border border-orange-300 active:scale-98 transition"
       >
         다른 유저가 생성한 규칙 선택하기

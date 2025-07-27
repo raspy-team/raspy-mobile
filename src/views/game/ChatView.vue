@@ -76,6 +76,12 @@ onBeforeUnmount(() => {
   }
   socket.disconnect()
 })
+
+const messageInput = ref(null)
+function keepFocus() {
+  // 마우스를 누르는 순간 바로 포커스 주기
+  messageInput.value.focus()
+}
 const router = useRouter()
 function goToProfile() {
   router.push(`/profile/${targetUserId}`)
@@ -84,15 +90,10 @@ function goBack() {
   router.go(-1)
 }
 
-const msgInput = ref(null)
-
 function sendMsg() {
   if (!newMsg.value.trim()) return
   socket.sendChat(roomId.value, newMsg.value)
   newMsg.value = ''
-  setTimeout(() => {
-    msgInput.value?.focus()
-  })
 }
 function scrollToBottom() {
   nextTick(() => {
@@ -204,33 +205,37 @@ const defaultProfileUrl = require('../../assets/default.png')
     </div>
     <div class="fixed bottom-0 w-full h-[81px] bg-white z-20">
       <div class="p-[5px] bg-white flex items-center">
-        <textarea
-          v-model="newMsg"
-          ref="msgInput"
-          rows="1"
-          class="flex-1 resize-none border border-gray-300 rounded-full px-4 py-[10px] focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="메시지 입력..."
-        />
-        <button
-          @click="sendMsg"
-          :disabled="!newMsg.trim()"
-          class="ml-2 p-[5px] bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-full shadow hover:scale-105 transition disabled:opacity-50"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-[24px] w-[24px] transform rotate-45"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        <form @submit.prevent="sendMsg" class="flex items-center w-full">
+          <textarea
+            ref="messageInput "
+            v-model="newMsg"
+            rows="1"
+            class="flex-1 resize-none border border-gray-300 rounded-full px-4 py-[10px] focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="메시지 입력..."
+          />
+          <button
+            type="submit"
+            @click="sendMsg"
+            @mousedown.prevent="keepFocus"
+            :disabled="!newMsg.trim()"
+            class="ml-2 p-[5px] bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-full shadow hover:scale-105 transition disabled:opacity-50"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 12h14M12 5l7 7-7 7"
-            />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-[24px] w-[24px] transform rotate-45"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 12h14M12 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </form>
       </div>
     </div>
   </div>

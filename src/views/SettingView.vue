@@ -43,10 +43,104 @@
   <!-- 법적 고지 모달 (기존 유지) -->
   <div
     v-if="showModal"
-    class="fixed inset-0 z-50 bg-black p-5 bg-opacity-30 flex items-center justify-center"
+    class="fixed inset-0 z-50 bg-black p-5 bg-opacity-30 flex items-center justify-center flex flex-col"
   >
-    <!-- 모달 내용 생략 가능 (위 코드 참고) -->
-    ...
+    <div
+      class="prose text-white p-5 text-sm max-h-[70dvh] rounded-[10px] bg-black overflow-auto space-y-4"
+    >
+      <section>
+        <h3 class="font-semibold text-base">1. 개인정보 수집 및 이용</h3>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>
+            ‘Match’는 회원가입 및 서비스 제공을 위해 카카오/애플 소셜 로그인(이메일) 또는 그룹 계정
+            신청(이메일 기반)으로 최소한의 개인정보(이메일)만 수집합니다.
+          </li>
+          <li>
+            카메라/앨범 접근 권한은 게시물 작성 등 서비스 이용 목적에 한해 사용되며, 사진은 이용자
+            기기 또는 서비스 내 저장을 위해서만 접근됩니다.
+          </li>
+          <li>알림 권한은 서비스 공지, 커뮤니티 알림 등 푸시알림 제공을 위해 사용됩니다.</li>
+          <li>
+            수집된 정보는 회원관리, 서비스 제공, 문의 대응 등 명시된 목적 외로는 이용하지 않으며,
+            탈퇴 시 즉시 안전하게 파기됩니다.
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="font-semibold text-base">2. 개인정보 국외 이전 안내</h3>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>
+            회원정보 및 서비스 운영 데이터는 Amazon Web Services(AWS) 북미(USA) 리전 서버에 안전하게
+            저장·처리됩니다. 이에 따라, 개인정보가 대한민국 외 지역으로 이전될 수 있습니다.
+          </li>
+          <li>
+            개인정보 보호를 위해 관련 법령 및 기준에 따라 적절한 기술적·관리적 조치를 취하고
+            있습니다.
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="font-semibold text-base">3. 외부 서비스 연동 안내</h3>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>
+            본 서비스는 카카오, 애플 소셜 로그인, Firebase(알림 서비스) 등 외부 서비스와 연동되어
+            있으며, 각 서비스 제공자의 정책에 따라 일부 정보가 연동·처리될 수 있습니다.
+          </li>
+          <li>광고, 마케팅, 제3자 정보 제공은 일절 없습니다.</li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="font-semibold text-base">4. 커뮤니티 이용 안내 및 금지행위</h3>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>
+            Match는 스포츠 커뮤니티 플랫폼으로, 회원 간 자유로운 소통과 게시물(글, 사진 등) 작성이
+            가능합니다.
+          </li>
+          <li>
+            타인의 권리 침해, 불법·유해·음란·도배 등 서비스 질서를 해치는 행위는 금지되며, 위반 시
+            사전 안내 없이 게시물 삭제 또는 서비스 이용이 제한될 수 있습니다.
+          </li>
+          <li>커뮤니티 내 게시물 및 활동에 대한 책임은 해당 회원에게 있습니다.</li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="font-semibold text-base">5. 저작권 및 콘텐츠 관리</h3>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>
+            회원이 서비스 내에 게시하거나 업로드한 모든 콘텐츠(텍스트, 이미지 등)는 해당 회원에게
+            저작권이 있습니다.
+          </li>
+          <li>타인 저작물을 무단 게시·복제할 경우 법적 책임이 발생할 수 있습니다.</li>
+          <li>
+            서비스 운영상, 불법 또는 권리침해 콘텐츠는 사전 통지 없이 삭제 또는 제한될 수 있습니다.
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="font-semibold text-base">6. 약관 및 정책의 변경</h3>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>본 약관 및 정책은 2025년 7월 25일 기준이며, 변경 시 서비스 내 공지 후 적용됩니다.</li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="font-semibold text-base">7. 문의처</h3>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>
+            서비스 및 개인정보 관련 문의:
+            <a href="mailto:admin@raspyapp.com" class="underline text-blue-600"
+              >admin@raspyapp.com</a
+            >
+          </li>
+          <li>운영사: 주식회사 래스피 (Raspy Inc.)</li>
+        </ul>
+      </section>
+
+      <div class="mt-4 flex justify-end">
+        <button class="px-5 py-2 bg-[#fff] w-full text-black rounded" @click="showModal = false">
+          닫기
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- 계정 삭제 확인 모달 -->

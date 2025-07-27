@@ -10,8 +10,8 @@
     <!-- Main Content -->
     <main class="pt-3 px-4 pb-4">
       <!-- Menu Items -->
-      <div class="grid grid-cols-1 gap-3 mb-1">
-        <div class="flex flex-row gap-6 justify-between mb-4 px-8">
+      <div class="grid grid-cols-1 gap-3 mb-0">
+        <div class="flex flex-row gap-6 justify-between mb-2 px-8">
           <div
             v-for="(action, index) in menuItems"
             :key="index"
@@ -107,7 +107,7 @@
           </div>
         </div>
 
-        <div class="font-extrabold text-xl text-gray-700 pt-3">추천 경기</div>
+        <div class="font-extrabold text-xl text-gray-700 pt-0">추천 경기</div>
         <div v-if="games.length > 0">
           <div
             @click="openModal(game)"
@@ -961,9 +961,10 @@ const applyInviteGame = async (id) => {
 const requestCount = ref(0)
 
 const menuItems = [
+  { name: '규칙 탐색', icon: 'fas fa-book-open', link: '/rules' },
+
   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
   { name: '경기 요청', icon: 'fas fa-envelope', link: '/inbox' },
-  { name: '규칙 탐색', icon: 'fas fa-book-open', link: '/rules' },
 ]
 const showRegionModal = ref(false)
 const applyRegionFilter = () => {

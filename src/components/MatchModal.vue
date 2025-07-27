@@ -2,6 +2,7 @@
   <transition name="fade">
     <div
       class="fixed h-full inset-0 bg-black bg-opacity-50 flex items-center justify-center p-5 z-[10000000]"
+      style="margin-top: 0px"
       @click.self="close"
     >
       <div
@@ -24,20 +25,22 @@
           <!-- 만든이: 심플 버전 -->
           <div
             v-if="rule.createdBy"
-            class="flex items-center gap-1 ml-4 cursor-pointer mt-4"
+            class="flex gap-1 flex-col items-start gap-1 ml-4 cursor-pointer mt-2"
             @click="goProfile(rule.createdBy.id)"
             title="만든이 프로필로 이동"
           >
             <span class="text-[11px] text-gray-400 font-semibold mr-1">규칙 만든이</span>
-            <img
-              :src="rule.createdBy.profile?.profilePicture || defaultProfile"
-              class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 object-cover"
-              alt="프로필"
-              loading="lazy"
-            />
-            <span class="ml-1 text-xs font-semibold text-gray-700 max-w-[70px] truncate">
-              {{ rule.createdBy.nickname }}
-            </span>
+            <div class="flex items-center">
+              <img
+                :src="rule.createdBy.profile?.profilePicture || defaultProfile"
+                class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 object-cover"
+                alt="프로필"
+                loading="lazy"
+              />
+              <span class="ml-1 text-xs font-semibold text-gray-700 max-w-[70px] truncate">
+                {{ rule.createdBy.nickname }}
+              </span>
+            </div>
           </div>
         </div>
 

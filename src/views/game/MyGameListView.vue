@@ -146,7 +146,9 @@
               <div class="flex items-center gap-2">
                 <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
                 <span>{{
-                  game.matchLocation == ' ' || game.matchLocation == null
+                  game.matchLocation == ' ' ||
+                  game.matchLocation == null ||
+                  game.matchLocation == ''
                     ? '미정'
                     : game.matchLocation
                 }}</span>

@@ -5,29 +5,38 @@
       <button
         @click="setTab('sent')"
         class="flex-1 py-2 text-sm font-semibold"
-        :class="activeTab === 'sent' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-500'"
+        :class="
+          activeTab === 'sent' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-500'
+        "
       >
         보낸 요청
       </button>
       <button
         @click="setTab('received')"
         class="flex-1 py-2 text-sm font-semibold"
-        :class="activeTab === 'received' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-500'"
+        :class="
+          activeTab === 'received'
+            ? 'text-orange-500 border-b-2 border-orange-500'
+            : 'text-gray-500'
+        "
       >
         받은 요청
       </button>
     </div>
-    <div class="flex-1 overflow-y-auto p-4 space-y-4">
-      <MyRequestsTab v-if="activeTab === 'sent'" :scroll-to-id="scrollToId" />
-      <ApplicantsTab v-else :scroll-to-id="scrollToId" />
-    </div>
+  </div>
+
+  <div
+    class="flex-1 fixed w-full top-[max(13%,120px)] overflow-y-auto p-4 space-y-4 z-[71732831281]"
+  >
+    <MyRequestsTab v-if="activeTab === 'sent'" :scroll-to-id="scrollToId" />
+    <ApplicantsTab v-else :scroll-to-id="scrollToId" />
   </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Header from "../components/HeaderComp.vue"
+import Header from '../components/HeaderComp.vue'
 import MyRequestsTab from '../components/Inbox/MyRequestsTab.vue'
 import ApplicantsTab from '../components/Inbox/ApplicantsTab.vue'
 
@@ -63,7 +72,10 @@ function setTab(tab) {
 onMounted(() => {
   initTabFromQuery()
 })
-watch(() => route.query, () => {
-  initTabFromQuery()
-})
+watch(
+  () => route.query,
+  () => {
+    initTabFromQuery()
+  },
+)
 </script>

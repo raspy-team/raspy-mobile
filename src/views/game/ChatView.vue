@@ -44,13 +44,15 @@ const visibleMessages = computed(() => {
 
 onMounted(async () => {
   try {
+    const { data } = await api.post('/api/chat-room/dm-room', null, {
+      params: { targetUserId },
+    })
+
     socket.connect(roomId.value, () => socket.subscribe(roomId.value))
 
     const res1 = await api.get('/api/auth/current-user-id')
     currentUserId.value = res1.data
-    const { data } = await api.post('/api/chat-room/dm-room', null, {
-      params: { targetUserId },
-    })
+
     roomId.value = data.roomId
     targetUserNickname.value = data.targetUserNickname
     targetUserProfileUrl.value = data.targetUserProfileUrl
@@ -140,8 +142,9 @@ const defaultProfileUrl = require('../../assets/default.png')
       </div>
     </div>
     <div
-      style="height: calc((var(--real-vh, 1vh) * 100))"
-      class="fixed top-0 left-0 pt-[110px] w-full pb-[81px] px-1 z-10"
+      style="height: 100%"
+      class="fixed top-0 left-0 w-full pb-[81px] px-1 z-10"
+      :style="{ paddingTop: `${headerTop + 110}px` }"
     >
       <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
         <div v-if="visibleMessages.length > 0" class="flex justify-center py-3">

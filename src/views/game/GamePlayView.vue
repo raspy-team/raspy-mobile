@@ -607,7 +607,6 @@ const socket_resetGame = () => {
 onUnmounted(() => {
   clearInterval(timerRef.value)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
-  socket.disconnect()
 })
 </script>
 

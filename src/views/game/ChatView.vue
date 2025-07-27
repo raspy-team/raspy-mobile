@@ -49,23 +49,23 @@ onMounted(async () => {
     const { data } = await api.post('/api/chat-room/dm-room', null, {
       params: { targetUserId },
     })
+    roomId.value = data.roomId
+    socket.onMessage((msg) => {
+      messages.value.push(msg)
+      scrollToBottom()
+    })
 
-    socket.connect(roomId.value, () => socket.subscribe(roomId.value))
+    socket.connect(roomId.value)
 
     const res1 = await api.get('/api/auth/current-user-id')
     currentUserId.value = res1.data
 
-    roomId.value = data.roomId
     targetUserNickname.value = data.targetUserNickname
     targetUserProfileUrl.value = data.targetUserProfileUrl
     const res = await api.get(`/api/chat-room/${roomId.value}/chat-messages`)
     messages.value = res.data
     await nextTick()
     scrollToBottom()
-    socket.onMessage((msg) => {
-      messages.value.push(msg)
-      scrollToBottom()
-    })
   } catch (e) {
     console.error(e)
   }
@@ -76,12 +76,12 @@ onBeforeUnmount(() => {
     window.visualViewport.removeEventListener('resize', updateHeaderPosition)
     window.visualViewport.removeEventListener('scroll', updateHeaderPosition)
   }
-  socket.disconnect()
 })
 
 const messageInput = ref(null)
 function keepFocus() {
   // 마우스를 누르는 순간 바로 포커스 주기
+  if (messageInput.value == null) return
   messageInput.value.focus()
 }
 const router = useRouter()

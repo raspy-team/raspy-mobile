@@ -20,9 +20,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MatchLogo from './assets/Match.png'
+import { socket } from './websocket'
 
 const showSplash = ref(true)
 const route = useRoute()
@@ -72,6 +73,36 @@ onMounted(() => {
 window.addEventListener('error', (event) => {
   console.error('Uncaught Error:', event.error)
   alert(`준비 중입니다.`)
+})
+
+function getRoomIdFromPath(path) {
+  // /chat/xxx 또는 /games/xxx/play 등 다양한 방 라우트 패턴 지원
+  const chatMatch = path.match(/^\/chat\/([^/]+)/)
+  const gameMatch = path.match(/^\/games\/([^/]+)\/play/)
+  if (chatMatch) return chatMatch[1]
+  if (gameMatch) return gameMatch[1]
+  return null
+}
+
+// 라우트가 바뀔 때마다 방 진입/이탈 감지
+watch(
+  () => route.fullPath,
+  (path) => {
+    const roomId = getRoomIdFromPath(path)
+    if (roomId) {
+      // 방에 들어왔을 때만 연결!
+      socket.connect(roomId)
+    } else {
+      // 방에서 나갔을 때 완전 해제!
+      socket.disconnect({ clearRoomId: true })
+      console.log('disconnect all sockets. bye.')
+    }
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(() => {
+  socket.disconnect({ clearRoomId: true })
 })
 </script>
 

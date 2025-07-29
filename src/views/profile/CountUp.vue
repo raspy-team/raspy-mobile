@@ -29,5 +29,5 @@ watch(
 )
 </script>
 <template>
-  {{ displayVal }}<span v-if="props.options?.suffix">{{ props.options.suffix }}</span>
+  {{ displayVal==0 ? "-" : displayVal }}<span v-if="props.options?.suffix">{{ props.options.suffix }}</span>
 </template>

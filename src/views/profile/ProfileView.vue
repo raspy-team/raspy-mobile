@@ -892,8 +892,12 @@
               <span
                 class="px-3 py-1 rounded-full font-semibold text-xs mt-1 shadow-sm bg-gradient-to-r from-orange-200 to-yellow-100 text-orange-700 animate-pop"
               >
-                상위 {{ rankingPercent }}%
+                상위 {{ rankingPercent == -98 ? "-" : rankingPercent }}%
               </span>
+
+              <div class="font-light text-[0.6rem] text-gray-500  pt-1 text-center">
+                25.7.29 이후 종료된 경기 결과만 적용됩니다.
+              </div>
             </template>
             <div v-else class="text-center text-gray-400 py-4 text-sm">
               랭킹 정보를 불러오는 중...

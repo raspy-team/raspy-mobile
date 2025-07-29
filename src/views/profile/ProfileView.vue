@@ -28,7 +28,7 @@
     <!-- SKELETON: 유저정보/통계/그래프/탭 -->
     <template v-if="user == null">
       <section
-        class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-8 flex flex-col gap-5 relative animate-pulse"
+        class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-0 px-6 pt-7 pb-8 flex flex-col gap-5 relative animate-pulse"
       >
         <!-- 프로필 -->
         <div class="flex gap-5 items-start mb-2">
@@ -185,6 +185,45 @@
             </div>
           </div>
         </div>
+
+        <div
+          class="flex items-center justify-between bg-white/90 rounded-xl px-4 py-3 mt-2 mb-[-5px] cursor-pointer hover:bg-orange-50 border border-gray-100 shadow-sm transition"
+          @click="showRankingModal = true"
+        >
+          <div class="flex items-center gap-2">
+            <i
+              class="fas fa-trophy text-lg"
+              :style="`color: ${
+                ranking.totalRank == 1
+                  ? '#FFB300'
+                  : ranking.totalRank >= 2 && ranking.totalRank <= 10
+                    ? '#5DB0FF'
+                    : ranking.totalRank >= 11 && ranking.totalRank <= 100
+                      ? '#23C97A'
+                      : '#FF7043'
+              }`"
+            ></i>
+            <span class="font-bold text-gray-800 text-sm">
+              전체 랭킹
+              <span
+                class="font-black"
+                :style="`color: ${
+                  ranking.totalRank == 1
+                    ? '#FFB300'
+                    : ranking.totalRank >= 2 && ranking.totalRank <= 10
+                      ? '#5DB0FF'
+                      : ranking.totalRank >= 11 && ranking.totalRank <= 100
+                        ? '#23C97A'
+                        : '#FF7043'
+                }`"
+              >
+                {{ ranking.totalRank }}위
+              </span>
+            </span>
+          </div>
+          <i class="fas fa-chevron-right text-gray-300 text-base"></i>
+        </div>
+
         <div class="rounded-xl bg-white w-full max-w-xl mx-auto shadow flex flex-col">
           <div class="grid grid-cols-4 border-b border-gray-200">
             <!-- 승 -->
@@ -402,7 +441,7 @@
           </button>
         </div>
       </section>
-      <section class="max-w-lg mx-auto px-4 bg-[#f8f9fa] pb-8">
+      <section class="max-w-lg mx-auto px-4 bg-[#f8f9fa] pb-0">
         <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
         <div v-if="statMode === 'rule'" class="pb-4">
           <button
@@ -427,25 +466,25 @@
           />
         </div>
         <div class="mb-3 text-xs text-gray-500 px-2">
-          <template v-if="statMode === 'total'">
+          <template v-if="statMode === 'total' && false">
             전체 기준 (플레이한 유저: <b>{{ user.totalPlayers }}</b
             >명)
           </template>
-          <template v-if="statMode === 'rule' && selectedRule">
+          <!-- <template v-if="statMode === 'rule' && selectedRule">
             [{{ selectedRule.title }}] {{ selectedRule.description }}<br />
             카테고리: {{ selectedRule.majorCategory }} > {{ selectedRule.minorCategory }}
             <span class="block mt-1 text-gray-400"
               >플레이 유저: <b>{{ selectedRule.players }}</b
               >명</span
             >
-          </template>
+          </template> -->
           <template v-if="statMode === 'category' && selectedMainCategory && selectedSubCategory">
             [{{ selectedMainCategory }} > {{ selectedSubCategory }}] 기준<br />
             플레이 유저: <b>{{ filteredCategoryPlayers }}</b
             >명
           </template>
         </div>
-        <div class="rounded-2xl bg-white shadow p-5 mb-0">
+        <!-- <div class="rounded-2xl bg-white shadow p-5 mb-0">
           <div class="flex justify-between items-center mb-3">
             <span class="font-bold text-gray-900 text-base flex items-center gap-2">
               <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
@@ -478,7 +517,7 @@
             <div class="font-semibold text-gray-500">승률</div>
             <div class="text-right text-orange-500 font-bold">{{ stat.winRate }}%</div>
           </div>
-        </div>
+        </div> -->
       </section>
       <section class="w-full mx-auto px-4 pb-24 bg-[#f8f9fa]">
         <div class="flex items-center gap-2 mb-4">
@@ -774,6 +813,96 @@
         </div>
       </div>
     </div>
+    <transition name="fade">
+      <div
+        v-if="showRankingModal"
+        class="fixed inset-0 bg-black/30 flex justify-center items-center z-50"
+        @click.self="showRankingModal = false"
+      >
+        <div
+          class="bg-white rounded-2xl p-7 shadow-2xl max-w-xs w-full relative overflow-visible animate-modalpop"
+        >
+          <!-- 닫기 -->
+          <button
+            @click="showRankingModal = false"
+            class="absolute right-6 top-6 text-gray-400 hover:text-orange-500 text-xl z-10"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+          <!-- 타이틀 -->
+          <div class="flex flex-col gap-2 items-center mb-5 mt-1">
+            <div class="relative">
+              <i
+                class="fas fa-trophy text-3xl animate-shine"
+                :style="`color: ${
+                  rankingValue === 1
+                    ? '#FFB300'
+                    : rankingValue >= 2 && rankingValue <= 3
+                      ? '#5DB0FF'
+                      : rankingValue <= 10
+                        ? '#23C97A'
+                        : '#FF7043'
+                }`"
+              ></i>
+              <span v-if="rankingValue <= 3" class="shine"></span>
+            </div>
+            <span class="text-base font-bold text-gray-800 text-center"
+              >{{ user.nickname }}님의 랭킹</span
+            >
+            <div class="text-xs text-gray-500 -mt-1">카테고리별 랭킹을 확인해보세요</div>
+          </div>
+          <!-- 카테고리 Chips -->
+          <div class="flex flex-wrap gap-2 justify-center mb-3">
+            <button
+              v-for="cat in minorCategories"
+              :key="cat"
+              @click="selectMinorCategory(cat)"
+              :class="[
+                'px-3 py-1.5 rounded-full border font-bold text-xs transition shadow-sm active:scale-95 duration-100',
+                selectedMinorCategory === cat
+                  ? 'bg-orange-100 border-orange-400 text-orange-600 animate-bounce-fast'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-orange-50',
+              ]"
+              style="transition: transform 0.15s cubic-bezier(0.42, 2, 0.58, 0.7)"
+            >
+              {{ cat }}
+            </button>
+          </div>
+          <!-- 랭킹 결과/애니메이션 -->
+          <div class="flex flex-col gap-2 items-center mt-2 min-h-[64px]">
+            <template v-if="ranking">
+              <span
+                class="text-3xl font-extrabold tracking-tight py-1"
+                :style="`color: ${
+                  rankingValue === 1
+                    ? '#FFB300'
+                    : rankingValue >= 2 && rankingValue <= 3
+                      ? '#5DB0FF'
+                      : rankingValue <= 10
+                        ? '#23C97A'
+                        : '#FF7043'
+                }`"
+              >
+                <CountUp
+                  :endVal="rankingValue"
+                  :duration="3"
+                  :options="{ separator: ',', decimal: '.', prefix: '', suffix: '위' }"
+                />
+              </span>
+              <span
+                class="px-3 py-1 rounded-full font-semibold text-xs mt-1 shadow-sm bg-gradient-to-r from-orange-200 to-yellow-100 text-orange-700 animate-pop"
+              >
+                상위 {{ rankingPercent }}%
+              </span>
+            </template>
+            <div v-else class="text-center text-gray-400 py-4 text-sm">
+              랭킹 정보를 불러오는 중...
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <CustomToast />
   </div>
   <Footer tab="profile" />
@@ -789,6 +918,7 @@ import MatchCard from './MatchCard.vue'
 import Default from '../../assets/default.png'
 import api from '../../api/api'
 import CustomToast from '../../components/CustomToast.vue'
+import CountUp from './CountUp.vue'
 import { useToast } from '../../composable/useToast'
 const { showToast } = useToast()
 
@@ -934,28 +1064,28 @@ onMounted(() => {
   fetchFriendStatus()
 })
 
-const stat = computed(() => {
-  if (!user.value) return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
-  if (statMode.value === 'total') {
-    return {
-      performance: user.value.stats.performance ?? 0,
-      wins: user.value.stats.wins,
-      draws: user.value.stats.draws,
-      losses: user.value.stats.losses,
-      winRate: user.value.stats.winRate,
-    }
-  } else if (statMode.value === 'rule' && selectedRule.value) {
-    return selectedRule.value.stat ?? { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
-  } else if (
-    statMode.value === 'category' &&
-    selectedMainCategory.value &&
-    selectedSubCategory.value
-  ) {
-    // 카테고리/서브카테고리 통계는 별도 API 필요하면 이곳에서 fetch하여 사용
-    return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
-  }
-  return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
-})
+// const stat = computed(() => {
+//   if (!user.value) return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
+//   if (statMode.value === 'total') {
+//     return {
+//       performance: user.value.stats.performance ?? 0,
+//       wins: user.value.stats.wins,
+//       draws: user.value.stats.draws,
+//       losses: user.value.stats.losses,
+//       winRate: user.value.stats.winRate,
+//     }
+//   } else if (statMode.value === 'rule' && selectedRule.value) {
+//     return selectedRule.value.stat ?? { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
+//   } else if (
+//     statMode.value === 'category' &&
+//     selectedMainCategory.value &&
+//     selectedSubCategory.value
+//   ) {
+//     // 카테고리/서브카테고리 통계는 별도 API 필요하면 이곳에서 fetch하여 사용
+//     return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
+//   }
+//   return { performance: 0, wins: 0, draws: 0, losses: 0, winRate: 0 }
+// })
 
 const filteredCategoryPlayers = computed(() => {
   if (statMode.value === 'category' && selectedMainCategory.value && selectedSubCategory.value) {
@@ -1186,6 +1316,60 @@ onMounted(async () => {
     router.back()
   }
 })
+const minorCategories = ref([])
+const selectedMinorCategory = ref('')
+const ranking = ref({})
+const loadingRanking = ref(false)
+const showRankingModal = ref(false)
+const rankingValue = ref(null)
+const rankingPercent = ref(null)
+
+onMounted(async () => {
+  // 1. 마운트될 때 최다플레이 마이너카테고리 fetch
+  const res = await api.get(`/api/rules/top-played-categories/${userId}`)
+  minorCategories.value = res.data || []
+  minorCategories.value.unshift('전체')
+
+  // 2. 첫 번째 카테고리로 자동 선택
+  selectedMinorCategory.value = minorCategories.value[0] || ''
+  // 3. 바로 해당 카테고리로 랭킹 조회
+  if (selectedMinorCategory.value) fetchRankingAll()
+})
+
+async function fetchRanking(minorCategory) {
+  loadingRanking.value = true
+  try {
+    const res = await api.get(`/api/rankings?userId=${userId}&minorCategory=${minorCategory}`)
+    console.log(minorCategory)
+    ranking.value = res.data
+  } finally {
+    loadingRanking.value = false
+    rankingValue.value = ranking.value.minorCategoryRank
+    rankingPercent.value = ranking.value.minorCategoryPercent
+  }
+}
+
+async function fetchRankingAll() {
+  loadingRanking.value = true
+  try {
+    const res = await api.get(`/api/rankings?userId=${userId}`)
+    ranking.value = res.data
+  } finally {
+    loadingRanking.value = false
+    rankingValue.value = ranking.value.totalRank
+    rankingPercent.value = ranking.value.totalPercent
+  }
+}
+
+async function selectMinorCategory(cat) {
+  selectedMinorCategory.value = cat
+
+  if (cat === '전체') {
+    await fetchRankingAll()
+  } else {
+    await fetchRanking(cat)
+  }
+}
 
 watch([statMode, selectedRuleId, selectedMainCategory, selectedSubCategory], updateChart, {
   deep: true,
@@ -1283,5 +1467,66 @@ body {
 .champ-card .fa-crown {
   /* 타이틀쪽 크라운만 컬러! */
   color: #f7c63a;
+}
+
+@keyframes shine {
+  0% {
+    filter: drop-shadow(0 0 0 #fff);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px #ffd700);
+  }
+  100% {
+    filter: drop-shadow(0 0 0 #fff);
+  }
+}
+.animate-shine {
+  animation: shine 1.7s ease-in-out infinite;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.8);
+  }
+  80% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-pop {
+  animation: pop 0.7s cubic-bezier(0.42, 2, 0.58, 0.7);
+}
+@keyframes modalpop {
+  0% {
+    transform: scale(0.8) translateY(50px);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.05) translateY(-6px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+.animate-modalpop {
+  animation: modalpop 0.5s cubic-bezier(0.42, 2, 0.58, 0.7);
+}
+@keyframes bounce-fast {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-bounce-fast {
+  animation: bounce-fast 0.25s;
 }
 </style>

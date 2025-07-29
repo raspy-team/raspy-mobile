@@ -534,43 +534,42 @@ onMounted(async () => {
   const rawLogs = logResponse.data
   rawLogs.forEach((log) => addLog(log))
 
-  socket.connect(chatRoomId.value, () => {
-    socket.subscribe(`${chatRoomId.value}`)
-    socket.onMessage((payload) => {
-      if (payload.type === 'SCORE') {
-        addScore(payload.targetId, payload.delta)
-        addLog(payload)
-      } else if (payload.type === 'SET') {
-        game.setStartedAt = new Date()
-        startSet()
-        addLog(payload)
-      } else if (payload.type === 'FINISH') {
-        isGameOver.value = true
-        addLog(payload)
-        const setsToWin = game.rule.setsToWin
-        const requiredWins = Math.ceil(setsToWin / 2)
-        if (user1SetsWon.value < requiredWins && user2SetsWon.value < requiredWins) {
-          if (game.rule.winBy == 'MOST_SETS_AND_POINTS') {
-            if (currentScore1.value > currentScore2.value) user1SetsWon.value++
-            else if (currentScore2.value > currentScore1.value) user2SetsWon.value++
-          }
+  socket.onMessage((payload) => {
+    if (payload.type === 'SCORE') {
+      addScore(payload.targetId, payload.delta)
+      addLog(payload)
+    } else if (payload.type === 'SET') {
+      game.setStartedAt = new Date()
+      startSet()
+      addLog(payload)
+    } else if (payload.type === 'FINISH') {
+      isGameOver.value = true
+      addLog(payload)
+      const setsToWin = game.rule.setsToWin
+      const requiredWins = Math.ceil(setsToWin / 2)
+      if (user1SetsWon.value < requiredWins && user2SetsWon.value < requiredWins) {
+        if (game.rule.winBy == 'MOST_SETS_AND_POINTS') {
+          if (currentScore1.value > currentScore2.value) user1SetsWon.value++
+          else if (currentScore2.value > currentScore1.value) user2SetsWon.value++
         }
-        if (user1SetsWon.value > user2SetsWon.value) {
-          gameWinner.value = '@' + user1.value.nickname
-        } else if (user2SetsWon.value > user1SetsWon.value) {
-          gameWinner.value = '@' + user2.value.nickname
-        } else {
-          gameWinner.value = '무승부'
-        }
-      } else if (payload.type === 'RESET') {
-        router.replace({
-          path: route.fullPath,
-          query: { ...route.query, reload: Date.now() },
-        })
-        addLog(payload)
       }
-    })
+      if (user1SetsWon.value > user2SetsWon.value) {
+        gameWinner.value = '@' + user1.value.nickname
+      } else if (user2SetsWon.value > user1SetsWon.value) {
+        gameWinner.value = '@' + user2.value.nickname
+      } else {
+        gameWinner.value = '무승부'
+      }
+    } else if (payload.type === 'RESET') {
+      router.replace({
+        path: route.fullPath,
+        query: { ...route.query, reload: Date.now() },
+      })
+      addLog(payload)
+    }
   })
+  socket.connect(chatRoomId.value)
+
   document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 

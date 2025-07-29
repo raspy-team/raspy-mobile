@@ -1,12 +1,12 @@
 <template>
   <transition name="fade">
     <div
-      class="fixed h-full inset-0 bg-black bg-opacity-50 flex items-center justify-center p-5 z-[10000000]"
+      class="fixed h-full top-0 inset-0 bg-black bg-opacity-50 flex items-center justify-center p-5 z-[100000]"
       style="margin-top: 0px"
       @click.self="close"
     >
       <div
-        class="bg-white rounded-xl p-0 max-w-lg w-full relative z-[1000000000] flex flex-col"
+        class="bg-white rounded-xl p-0 max-w-lg w-full top-0 relative z-[1000000000] flex flex-col"
         style="max-height: 90vh"
         @click.stop
       >

@@ -1,7 +1,7 @@
 <template>
-  <Header :has-referer="true" title="인박스" />
-  <div class="w-dvw flex flex-col pt-[4rem]">
-    <div class="flex justify-center sticky top-0 bg-white z-10 py-3">
+  <Header :has-referer="true" title="인박스" class="z-10" />
+  <div class="w-dvw z-[10000] flex flex-col pt-[4rem]">
+    <div class="flex justify-center bg-white py-3">
       <button
         @click="setTab('sent')"
         class="flex-1 py-2 text-sm font-semibold"
@@ -25,9 +25,7 @@
     </div>
   </div>
 
-  <div
-    class="flex-1 fixed w-full top-[max(13%,120px)] overflow-y-auto p-4 space-y-4 z-[71732831281]"
-  >
+  <div class="flex-1 w-full min-h-full p-4 space-y-4">
     <MyRequestsTab v-if="activeTab === 'sent'" :scroll-to-id="scrollToId" />
     <ApplicantsTab v-else :scroll-to-id="scrollToId" />
   </div>

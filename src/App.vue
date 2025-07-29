@@ -75,27 +75,54 @@ window.addEventListener('error', (event) => {
   alert(`준비 중입니다.`)
 })
 
-function getRoomIdFromPath(path) {
+function getChatUrlFromPath(path) {
   // /chat/xxx 또는 /games/xxx/play 등 다양한 방 라우트 패턴 지원
   const chatMatch = path.match(/^\/chat\/([^/]+)/)
-  const gameMatch = path.match(/^\/games\/([^/]+)\/play/)
-  if (chatMatch) return chatMatch[1]
-  if (gameMatch) return gameMatch[1]
+  if (chatMatch) return chatMatch
+
   return null
 }
+function getGameUrlFromPath(path) {
+  // /chat/xxx 또는 /games/xxx/play 등 다양한 방 라우트 패턴 지원
+  const gameMatch = path.match(/^\/games\/([^/]+)\/play/)
+  if (gameMatch) return gameMatch
+
+  return null
+}
+
+import api from './api/api'
 
 // 라우트가 바뀔 때마다 방 진입/이탈 감지
 watch(
   () => route.fullPath,
-  (path) => {
-    const roomId = getRoomIdFromPath(path)
+  async (path) => {
+    const chatUrl = getChatUrlFromPath(path)
+    const gameUrl = getGameUrlFromPath(path)
+
+    let roomId = false
+
+    if (chatUrl) {
+      const chatId = await chatUrl[1]
+      const { data } = await api.post('/api/chat-room/dm-room', null, {
+        params: { chatId },
+      })
+      roomId = data.roomId
+    } else if (gameUrl) {
+      const gameId = await gameUrl[1]
+      const res = await api.get(`/api/games/${gameId}/detail`)
+
+      roomId = res.data.chatRoomId
+    }
+
     if (roomId) {
-      // 방에 들어왔을 때만 연결!
-      socket.connect(roomId)
-    } else {
-      // 방에서 나갔을 때 완전 해제!
-      socket.disconnect({ clearRoomId: true })
-      console.log('disconnect all sockets. bye.')
+      if (roomId) {
+        // 방에 들어왔을 때만 연결!
+        socket.connect(roomId)
+      } else {
+        // 방에서 나갔을 때 완전 해제!
+        socket.disconnect({ clearRoomId: true })
+        console.log('disconnect all sockets. bye.')
+      }
     }
   },
   { immediate: true },

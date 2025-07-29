@@ -50,7 +50,7 @@
       </div>
     </div>
     <div v-else>
-      <div v-if="games.length" class="space-y-5">
+      <div v-if="games.length" class="space-y-5 z-[0]">
         <div
           @click="game.showRuleDetail = true"
           v-for="game in games"
@@ -111,6 +111,7 @@
             v-if="game.showRuleDetail"
             :rule="game.rule"
             @close="game.showRuleDetail = false"
+            class="z-30"
           />
           <div class="flex justify-between items-center pt-3 border-t">
             <div>

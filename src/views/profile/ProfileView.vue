@@ -217,7 +217,7 @@
                         : '#FF7043'
                 }`"
               >
-                {{ ranking.totalRank }}위
+                {{ ranking.totalRank == 0 ? "-" : ranking.totalRank}}위
               </span>
             </span>
           </div>
@@ -895,7 +895,7 @@
                 상위 {{ rankingPercent == -98 ? "-" : rankingPercent }}%
               </span>
 
-              <div class="font-light text-[0.6rem] text-gray-500  pt-1 text-center">
+              <div class="font-light text-[0.7rem] text-gray-500  pt-1 text-center">
                 25.7.29 이후 종료된 경기 결과만 적용됩니다.
               </div>
             </template>

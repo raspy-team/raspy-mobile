@@ -11,6 +11,11 @@ function easeOutExpo(x) {
 watch(
   () => props.endVal,
   (val) => {
+    if (val === 0) {
+      displayVal.value = 0 // 애니메이션 없이 "-" 출력에 사용됨
+      return
+    }
+
     let start = Math.max(val + 50, 50)
     const diff = start - val
     let startTime = null

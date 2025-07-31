@@ -165,7 +165,7 @@
 
     </div>
     <div class="mt-auto relative">
-      <div class="relative max-h-28 overflow-hidden flex flex-col justify-end space-y-1 mb-10 px-1">
+      <div class="relative max-h-28 pt-1 overflow-hidden flex flex-col justify-end space-y-1 mb-10 px-1">
         <div
           v-for="(log, index) in logs"
           :key="index"

@@ -2,27 +2,36 @@
   <div class="bg-[#f8f9fa] min-h-full relative raspy-top">
     <!-- Fixed Top Bar -->
     <div
-      class="fixed z-30 left-0 right-0 top-0 backdrop-blur flex justify-between items-center px-4 pb-3 border-b border-gray-100 raspy-top"
+      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white  border-b raspy-top"
     >
-      <div class="relative flex-1 flex items-center mr-2 sm:w-48 pt-3">
-        <i
-          class="fas fa-search text-gray-400 absolute left-3 top-1/2 pt-3 -translate-y-1/2 pointer-events-none"
-        ></i>
-        <input
-          type="text"
-          readonly
-          placeholder="유저 찾기"
-          @click="searchUsers"
-          class="pl-9 pr-4 py-2 rounded-[5px] border border-gray-200 bg-white text-gray-700 text-sm font-semibold shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-100 transition w-full hover:border-orange-400"
-        />
+
+          <div class="flex items-center h-14">
+        <router-link to="/" class="font-bold text-[#f97316]">
+          <span class="RASPY mx-1">Match</span>
+        </router-link>
+
       </div>
+      <div class="flex items-enter gap-3 mr-4" >
+        
+      <button
+        @click="searchUsers"
+        class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
+      >        <i @click="searchUsers"
+          class="fas fa-search  text-xl text-orange-500"
+        ></i>
+
+</button>
+
+
       <button
         @click="goSettings"
         class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
       >
-        <i class="fas fa-cog text-lg"></i>
-        <span class="font-semibold text-sm hidden sm:inline">설정</span>
+      
+        <i class="fas fa-cog text-xl text-orange-500"></i>
+        <span class="font-semibold text-sm hidden sm:inline ">설정</span>
       </button>
+    </div>
     </div>
 
     <!-- SKELETON: 유저정보/통계/그래프/탭 -->
@@ -161,25 +170,21 @@
                   </div>
                   <div class="text-[0.77rem] font-semibold text-gray-600">@{{ user.username }}</div>
                 </span>
-                <span
-                  class="flex items-center gap-1"
-                  v-if="user.location != null && user.location.length > 2"
-                >
-                  <span>·</span
-                  ><span class="text-[0.72rem] text-gray-600">{{
-                    user.location?.split(' ').slice(-1)[0] || ''
-                  }}</span>
-                </span>
+        
               </h2>
               <div class="flex gap-1">
                 <span
                   class="inline-block bg-orange-100 text-orange-600 text-xs px-2.5 py-0.5 rounded font-bold"
-                  >{{ user.age ? user.age + '세' : '연령 미등록' }}</span
+                  >{{ user.age ? user.age + '세' : '연령 -' }}</span
                 >
                 <span
                   class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold"
-                  >{{ user.gender ? user.gender : '성별 미등록' }}</span
+                  >{{ user.gender && user.gender != '비공개'? user.gender : '성별 -' }}</span
                 >
+            <span                   class="inline-block bg-blue-100 text-blue-500 text-xs px-2 py-0.5 rounded font-bold"
+>{{
+                   user.location != null && user.location.length > 2 ?  user.location?.split(' ').slice(-1)[0] || '' : "지역 -"
+                  }}</span>
               </div>
               <div class="text-xs text-gray-600">{{ user.intro }}</div>
             </div>

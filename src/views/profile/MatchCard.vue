@@ -110,71 +110,104 @@
         </span>
       </div>
     </div>
-    <!-- 세트별 결과 세로 리스트 -->
-    <div class="max-h-64 overflow-y-auto flex flex-col gap-2">
+<!-- 세트 결과 아코디언 -->
+<div class="my-0">
+<button
+  type="button"
+  @click.stop="showSetResults = !showSetResults"
+  class="
+    w-full flex items-center justify-between
+    px-5 py-3 rounded-2xl
+    bg-white border border-gray-200
+    shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)]
+    font-semibold text-[1.05rem] text-gray-900
+    transition
+    active:bg-gray-100
+    hover:bg-orange-50
+    select-none cursor-pointer
+    outline-none focus:outline-none
+    "
+  style="outline: none;"
+>
+  <span
+    :class="showSetResults ? 'text-orange-500' : 'text-gray-900'"
+    class="tracking-tight text-sm font-semibold"
+  >{{ showSetResults ? '세트 결과 접기' : '세트 결과 보기' }}</span>
+  <i
+    :class="[
+      'fas',
+      showSetResults ? 'fa-chevron-up' : 'fa-chevron-down',
+      showSetResults ? 'text-orange-400' : 'text-gray-400',
+      'text-[19px]',
+      'transition-transform'
+    ]"
+  ></i>
+</button>
+
+  <transition name="fade">
+    <div v-if="showSetResults">
       <div
         v-for="(set, i) in setResults"
         :key="i"
-        class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-50 font-semibold shadow-sm"
-        :class="
-          set.winnerIdx === 1
+        class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-50 font-semibold shadow-sm mt-2"
+        :class="set.winnerIdx === 1
             ? 'border-orange-200'
             : set.winnerIdx === 2
-              ? 'border-blue-200'
-              : 'border-gray-200'
-        "
+                ? 'border-blue-200'
+                : 'border-gray-200'"
       >
         <span class="text-xs font-bold text-gray-400 flex-1">{{ set.setIdx }}세트</span>
         <span
           class="text-lg font-extrabold"
-          :class="
-            set.winnerIdx === 1
+          :class="set.winnerIdx === 1
               ? 'text-orange-500'
               : set.winnerIdx === 2
-                ? 'text-blue-500'
-                : 'text-gray-400'
-          "
+                  ? 'text-blue-500'
+                  : 'text-gray-400'"
         >
           {{ set.user1Score }} : {{ set.user2SCore }}
         </span>
         <span class="flex items-center gap-1 font-semibold flex-1 justify-end">
           <i
-            :class="
-              set.winnerIdx === 1
-                ? 'fas fa-trophy text-orange-500'
-                : set.winnerIdx === 2
+            :class="set.winnerIdx === 1
+              ? 'fas fa-trophy text-orange-500'
+              : set.winnerIdx === 2
                   ? 'fas fa-times text-blue-500'
-                  : 'fas fa-handshake text-gray-400'
-            "
+                  : 'fas fa-handshake text-gray-400'"
           ></i>
           <span
             class="text-xs font-bold"
-            :class="
-              set.winnerIdx === 1
+            :class="set.winnerIdx === 1
                 ? 'text-orange-500'
                 : set.winnerIdx === 2
-                  ? 'text-blue-500'
-                  : 'text-gray-400'
-            "
+                    ? 'text-blue-500'
+                    : 'text-gray-400'"
           >
             {{ set.winnerIdx === 1 ? '승리' : set.winnerIdx === 2 ? '패배' : '무승부' }}
           </span>
         </span>
       </div>
     </div>
-    <!-- 경기 리뷰 및 매너점수 -->
-    <div
-      v-if="game.review || game.mannerScore || game.performanceScore"
-      class="bg-gray-50 rounded-xl mt-5 p-4 flex flex-col gap-0 border border-gray-100"
-    >
-      <div v-if="game.review" class="flex items-start gap-2 mb-4">
-        <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
-        <span class="text-sm text-gray-700 font-medium leading-snug">{{ game.review }}</span>
-      </div>
-      <div v-if="game.mannerScore !== undefined" class="flex items-center gap-2">
-        <span class="text-xs text-gray-500">상대가 남긴 매너 점수:</span>
-        <span
-          class="text-base font-bold"
+  </transition>
+</div>
+
+<!-- 리뷰/매너/퍼포먼스 -->
+<div class="bg-gray-50 rounded-xl p-4 mt-2 flex flex-col gap-2 border border-gray-100">
+  <template v-if="game.review || game.mannerScore !== undefined || game.performanceScore !== undefined">
+    <div class="text-xs text-gray-500 font-bold mb-1">
+      {{ game.opponent?.nickname ?? '상대' }}님의 리뷰
+    </div>
+    <div v-if="game.review" class="flex items-start gap-2 mb-2">
+      <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
+      <span class="text-sm text-gray-800 font-medium leading-snug">
+        "{{ game.review }}"
+      </span>
+    </div>
+    <div v-else class="text-sm text-gray-400 italic mb-2">등록된 텍스트 리뷰가 없습니다.</div>
+    <div class="flex gap-3">
+      <div class="flex items-center gap-1">
+        <span class="text-xs text-gray-500">매너 :</span>
+        <span class="font-bold text-base"
           :class="[
             game.mannerScore >= 4
               ? 'text-green-500'
@@ -182,15 +215,14 @@
                 ? 'text-yellow-500'
                 : game.mannerScore > 0
                   ? 'text-red-500'
-                  : 'text-gray-400',
-          ]"
-          >{{ game.mannerScore?.toFixed(1) ?? '-' }}</span
-        >
+                  : 'text-gray-400'
+          ]">
+          {{ game.mannerScore !== null ? game.mannerScore?.toFixed(1) : '-' }}
+        </span>
       </div>
-      <div v-if="game.performanceScore !== undefined" class="flex items-center gap-2 mt-0">
-        <span class="text-xs text-gray-500">상대가 남긴 퍼포먼스 점수:</span>
-        <span
-          class="text-base font-bold"
+      <div class="flex items-center gap-1">
+        <span class="text-xs text-gray-500">퍼포먼스 :</span>
+        <span class="font-bold text-base"
           :class="[
             game.performanceScore >= 4
               ? 'text-green-500'
@@ -198,12 +230,17 @@
                 ? 'text-yellow-500'
                 : game.performanceScore > 0
                   ? 'text-red-500'
-                  : 'text-gray-400',
-          ]"
-          >{{ game.performanceScore?.toFixed(1) ?? '-' }}</span
-        >
+                  : 'text-gray-400'
+          ]">
+          {{ game.performanceScore !== null ? game.performanceScore?.toFixed(1) : '-' }}
+        </span>
       </div>
     </div>
+  </template>
+  <template v-else>
+    <div class="text-sm text-gray-400 italic">상대가 아직 리뷰와 점수를 등록하지 않았어요.</div>
+  </template>
+</div>
 
     <div class="min-w-0 flex flex-col justify-center">
       <div class="flex flex-col gap-2 text-xs text-gray-500 mt-1 min-w-0">
@@ -220,24 +257,24 @@
 
     <!-- 하단 액션 버튼 -->
     <div class="flex justify-end gap-3 pt-2 mt-2 border-t border-gray-100">
-      <button
-        class="flex items-center gap-2 text-gray-500 hover:text-orange-500 font-md text-sm px-3 py-2 transition"
-        @click.self="toggleComment(game.id)"
-        @click.stop
-        title="댓글"
-      >
-        <i class="far fa-comment-dots text-base"></i>
-        댓글
-      </button>
-      <button
-        class="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-md text-sm px-3 py-2 transition"
-        @click.self="openInstaModal"
-        @click.stop
-        title="결과 공유"
-      >
-        <i class="fas fa-share-alt text-base"></i>
-        결과 공유
-      </button>
+<!-- 코멘트 버튼(기존) -->
+<button
+  @click.stop="toggleComment(game.id)"
+  class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+>
+  <i class="fas fa-comment"></i>
+</button>
+
+<!-- 이미지 저장 버튼 (아이콘만 변경) -->
+<button
+  @click.stop="openInstaModal"
+  class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+  title="이미지로 저장"
+>
+  <i class="far fa-image"></i>
+</button>
+
+
     </div>
   </div>
 
@@ -305,6 +342,9 @@ function isWinner1More(results) {
   return winner1 > winner2
 }
 
+const showSetResults = ref(false)
+
+
 onMounted(() => {
   if (props.game.myScore >= props.game.opponentScore) {
     // 내 점수가 더 높음
@@ -351,4 +391,6 @@ onMounted(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+
 </style>

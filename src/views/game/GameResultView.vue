@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pb-[200px]">
     <!-- 📌 로딩 오버레이 -->
     <div
       v-if="isLoading"
@@ -9,7 +9,7 @@
     </div>
 
     <!-- 🎉 게임 결과 화면 -->
-    <div v-else class="max-w-xl mx-auto px-4 py-6 space-y-8 text-center">
+    <div v-else class="max-w-xl pb-24 mx-auto px-4 py-6 space-y-8 text-center">
       <!-- 승패 결과 -->
       <div v-if="winnerIdx != 0" class="space-y-2">
         <div v-if="user1.id == currentUserId">
@@ -124,44 +124,62 @@
       </div>
 
       <!-- 세트 결과 -->
-      <div class="bg-gray-50 p-4 rounded-xl shadow space-y-3">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <i class="fas fa-list-ul"></i> 세트 결과
-        </h3>
-        <ul class="space-y-2">
-          <li
-            v-for="set in setResults"
-            :key="set.setIdx"
-            class="flex justify-between items-center bg-white p-3 rounded-lg shadow border text-sm"
-          >
-            <span>{{ set.setIdx }}세트</span>
-            <span v-if="idxCorrect">
-              {{ set.user1Score }} : {{ set.user2SCore }}
-              <i
-                :class="
-                  set.winnerIdx == 1
-                    ? 'fas fa-check-circle text-orange-500 ml-1'
-                    : set.winnerIdx == 2
-                      ? 'fas fa-check-circle text-orange-500 ml-1'
-                      : 'fas fa-minus-circle text-gray-400 ml-1'
-                "
-              ></i>
-            </span>
-            <span v-else>
-              {{ set.user2SCore }} : {{ set.user1Score }}
-              <i
-                :class="
-                  set.winnerIdx == 2
-                    ? 'fas fa-check-circle text-orange-500 ml-1'
-                    : set.winnerIdx == 1
-                      ? 'fas fa-check-circle text-orange-500 ml-1'
-                      : 'fas fa-minus-circle text-gray-400 ml-1'
-                "
-              ></i>
-            </span>
-          </li>
-        </ul>
-      </div>
+<div class="bg-gray-50 p-4 rounded-xl shadow space-y-3">
+  <div class="flex items-center justify-between">
+    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+      <i class="fas fa-list-ul"></i> 세트 결과
+    </h3>
+    <span
+      @click="showSetResults = !showSetResults"
+      class="flex items-center gap-1 select-none cursor-pointer text-orange-500 hover:text-orange-600 transition font-medium"
+      style="user-select: none;"
+    >
+      <span class="hidden sm:inline">{{ showSetResults ? '접기' : '펼치기' }}</span>
+      <i
+        :class="[
+          'fas transition-transform duration-200',
+          showSetResults ? 'fa-chevron-up' : 'fa-chevron-down'
+        ]"
+      ></i>
+    </span>
+  </div>
+  <transition name="fade">
+    <ul v-if="showSetResults" class="space-y-2">
+      <li
+        v-for="set in setResults"
+        :key="set.setIdx"
+        class="flex justify-between items-center bg-white p-3 rounded-lg shadow border text-sm"
+      >
+        <span>{{ set.setIdx }}세트</span>
+        <span v-if="idxCorrect">
+          {{ set.user1Score }} : {{ set.user2SCore }}
+          <i
+            :class="
+              set.winnerIdx == 1
+                ? 'fas fa-check-circle text-orange-500 ml-1'
+                : set.winnerIdx == 2
+                  ? 'fas fa-check-circle text-orange-500 ml-1'
+                  : 'fas fa-minus-circle text-gray-400 ml-1'
+            "
+          ></i>
+        </span>
+        <span v-else>
+          {{ set.user2SCore }} : {{ set.user1Score }}
+          <i
+            :class="
+              set.winnerIdx == 2
+                ? 'fas fa-check-circle text-orange-500 ml-1'
+                : set.winnerIdx == 1
+                  ? 'fas fa-check-circle text-orange-500 ml-1'
+                  : 'fas fa-minus-circle text-gray-400 ml-1'
+            "
+          ></i>
+        </span>
+      </li>
+    </ul>
+  </transition>
+</div>
+
 
       <!-- 리뷰 남기기 -->
       <div
@@ -213,14 +231,14 @@
 
         <button
           @click="submitReview"
-          class="w-full bg-orange-500 text-white py-2 rounded-full font-bold shadow hover:brightness-110 transition"
+          class="w-full bg-orange-500 text-white py-3 rounded-[7px] font-bold shadow hover:brightness-110 transition"
         >
           리뷰 등록
         </button>
       </div>
       <button
         @click="goHome"
-        class="w-full text-gray-800 border py-2 rounded-full font-light shadow hover:brightness-110 transition"
+        class="w-full fixed bottom-0 left-0 text-gray-800  py-2 py-[16px] raspy-bot font-light bg-orange-500 text-white"
       >
         나가기
       </button>
@@ -258,6 +276,7 @@ const winnerIdx = ref(0)
 const currentUserId = ref(0)
 const championIdx = ref(0)
 const idxCorrect = ref(true)
+const showSetResults = ref(false)
 
 onMounted(async () => {
   try {
@@ -367,7 +386,6 @@ const submitReview = async () => {
 
   try {
     await api.post(`/api/games/${gameId}/review`, review.value)
-    showToast('리뷰가 등록되었습니다!', `/profile/0?id=${gameId}`)
     reviewSubmitted.value = true
   } catch (err) {
     console.error(err)
@@ -376,7 +394,7 @@ const submitReview = async () => {
   }
 }
 
-const goHome = () => router.push('/')
+const goHome = () => router.push(`/profile/0?id=${gameId}`)
 
 function formatDate(dateStr) {
   const d = new Date(dateStr)
@@ -436,4 +454,19 @@ function formatDate(dateStr) {
     filter: drop-shadow(0 0 28px #fff) drop-shadow(0 0 18px #fdba74);
   }
 }
+
+.fade-enter-active, .fade-leave-active {
+  transition: max-height 0.3s, opacity 0.2s;
+  overflow: hidden;
+}
+.fade-enter-from, .fade-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.fade-enter-to, .fade-leave-from {
+  max-height: 600px; /* 충분히 크게 */
+  opacity: 1;
+}
+
+
 </style>

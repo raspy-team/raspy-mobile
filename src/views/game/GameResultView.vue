@@ -236,15 +236,18 @@
           리뷰 등록
         </button>
       </div>
-      <button
-        @click="goHome"
-        class="w-full fixed bottom-0 left-0 text-gray-800  py-2 py-[16px] raspy-bot font-light bg-orange-500 text-white"
-      >
-        나가기
-      </button>
+
       <CustomToast />
     </div>
   </div>
+  
+
+        <button
+        @click="goHome"
+        class="w-full fixed bottom-0 left-0 text-gray-800  py-2 py-[16px] raspy-bot  bg-orange-500 text-white"
+      >
+        나가기
+      </button>
 </template>
 
 <script setup>

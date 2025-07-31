@@ -29,100 +29,141 @@
       {{ formatDate(game.setStartedAt) }}
     </div>
 
-    <div class="grid grid-cols-3 gap-2 mb-4">
-      <div
-        class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center"
-      >
-        <div class="text-xs font-semibold mb-1">한세트 승리에 필요한 점수</div>
-        <div class="text-md font-extrabold">
-          {{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin + '점' }}
-        </div>
-      </div>
-      <div
-        class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center"
-      >
-        <div class="text-xs font-semibold mb-1">세트 제한 시간</div>
-        <div class="text-md font-extrabold">{{ limitTimeStr }}</div>
-      </div>
-      <div
-        class="bg-white border border-orange-500 text-orange-500 px-4 py-3 rounded-xl shadow text-center"
-      >
-        <div class="text-xs font-semibold mb-1">총 세트</div>
-        <div class="text-md font-extrabold">{{ game.rule.setsToWin }}세트</div>
-      </div>
-    </div>
 
-    <div class="flex justify-end mb-1">
-      <button
-        class="text-xs text-orange-500 border border-orange-200 rounded-full px-4 py-1 shadow-sm hover:bg-orange-50 transition font-semibold"
-        @click="game.showRuleDetail = true"
-      >
-        규칙 보기
-      </button>
-    </div>
 
-    <div class="text-center text-orange-600 text-lg font-bold animate-pulse mb-3">
-      현재 세트: {{ currentSet }}
-    </div>
+    <div class="flex justify-between items-center mb-8 mt-5">
+        <div class="flex-1"></div>
+              <div class="flex-1 text-center text-orange-600 text-lg font-bold">
+                {{ elapsedTimeStr }}, 세트 {{ currentSet }}
+              </div>
 
+          <div class="flex flex-1 justify-end">
+        <button
+          class="text-xs text-orange-500 border border-orange-200 rounded-full px-4 py-1 shadow-sm hover:bg-orange-50 transition font-semibold"
+          @click="game.showRuleDetail = true"
+        >
+          규칙 보기
+        </button>
+      </div>
+
+
+    </div>
     <div class="flex items-start justify-between mb-6 relative left-0">
       <div class="flex flex-col items-center animate-fade-in">
-        <img
-          :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
-          class="w-[20dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1"
-        />
-        <div class="font-bold text-sm">{{ user1.nickname }}</div>
-        <div class="text-[10dvw] font-extrabold text-orange-500 mt-1">{{ currentScore1 }}</div>
-        <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user1SetsWon }}</div>
-        <div class="flex space-x-2 mt-2 px-1">
-          <button
-            @click="socket_sendScore(1, 1)"
-            :disabled="isSetOver || isGameOver"
-            class="bg-orange-500 text-white w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
-          >
-            +1
-          </button>
-          <button
-            @click="socket_sendScore(1, -1)"
-            :disabled="isSetOver || isGameOver || currentScore1 <= 0"
-            class="bg-gray-200 text-gray-800 w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
-          >
-            -1
-          </button>
+        <div class="flex justify-between items-start w-full">
+          <div class="flex flex-col items-center">
+            <img
+              :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
+              class="w-[17dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1"
+            />
+            <div class="font-bold text-sm">{{ user1.nickname }}</div>
+                  <div class="text-base font-bold text-orange-500 mt-0">세트: {{ user1SetsWon }}</div>
+                    <div class="flex space-x-2 mt-5 px-1">
+                      <button
+                        @click="socket_sendScore(1, 1)"
+                        :disabled="isSetOver || isGameOver"
+                        class="bg-orange-500 text-white w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
+                      >
+                        +
+                      </button>
+                      <button
+                        @click="socket_sendScore(1, -1)"
+                        :disabled="isSetOver || isGameOver || currentScore1 <= 0"
+                        class="bg-gray-200 text-gray-800 w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+          <div>
+            <div class="text-[10dvw] flex  font-extrabold text-orange-500 mt-0">{{ currentScore1 }}</div>
+          </div>
         </div>
+
       </div>
       <div>
-        <div class="w-[20dvw] text-center text-[5dvw] font-[600] mt-8 text-orange-500">
-          {{ elapsedTimeStr }}
+        <div class="w-[5dvw] text-center text-[calc(10dvw-17px)] mt-4 font-[900] text-orange-500">
+          :
         </div>
       </div>
-      <div class="flex flex-col items-center animate-fade-in">
-        <img
-          :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
-          class="w-[20dvw] rounded-full border-4 border-orange-500 shadow-lg mb-1"
-        />
-        <div class="font-bold text-sm">{{ user2.nickname }}</div>
-        <div class="text-[10dvw] font-extrabold text-orange-500 mt-1">{{ currentScore2 }}</div>
-        <div class="text-base font-bold text-orange-500 mt-1">세트: {{ user2SetsWon }}</div>
-        <div class="flex space-x-2 mt-2 px-1">
-          <button
-            @click="socket_sendScore(2, 1)"
-            :disabled="isSetOver || isGameOver"
-            class="bg-orange-500 text-white w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
-          >
-            +1
-          </button>
-          <button
-            @click="socket_sendScore(2, -1)"
-            :disabled="isSetOver || isGameOver || currentScore2 <= 0"
-            class="bg-gray-200 text-gray-800 w-[15dvw] py-1.5 rounded-full shadow hover:scale-110 transition text-base font-bold"
-          >
-            -1
-          </button>
+   <div class="flex flex-col items-center animate-fade-in">
+        <div class="flex justify-between items-start w-full">
+                    <div>
+            <div class="text-[10dvw] flex  font-extrabold text-orange-500 mt-0">{{ currentScore2 }}</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <img
+              :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
+              class="w-[17dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1"
+            />
+            <div class="font-bold text-sm">{{ user2.nickname }}</div>
+                  <div class="text-base font-bold text-orange-500 mt-0">세트: {{ user2SetsWon }}</div>
+                    <div class="flex space-x-2 mt-5 px-1">
+                      <button
+                        @click="socket_sendScore(2, 1)"
+                        :disabled="isSetOver || isGameOver"
+                        class="bg-orange-500 text-white w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
+                      >
+                        +
+                      </button>
+                      <button
+                        @click="socket_sendScore(2, -1)"
+                        :disabled="isSetOver || isGameOver || currentScore2 <= 0"
+                        class="bg-gray-200 text-gray-800 w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+
         </div>
+
       </div>
     </div>
 
+    <div class="grid grid-cols-3 gap-0 mb-4 border shadow p-2 rounded-xl my-3">
+      <div
+        class="h-[140px] flex flex-col justfiy-between gap-2  bg-white  text-orange-500 px-4 py-3 rounded-xl text-center"
+      >
+        <div class="flex-1 text-xs font-semibold flex justify-center"><svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M64.5834 62.5002C63.4028 62.5002 62.4132 62.1009 61.6146 61.3022C60.816 60.5036 60.4167 59.514 60.4167 58.3335V41.6668C60.4167 40.4863 60.816 39.4967 61.6146 38.6981C62.4132 37.8995 63.4028 37.5002 64.5834 37.5002H75C76.1806 37.5002 77.1702 37.8995 77.9688 38.6981C78.7674 39.4967 79.1667 40.4863 79.1667 41.6668V58.3335C79.1667 59.514 78.7674 60.5036 77.9688 61.3022C77.1702 62.1009 76.1806 62.5002 75 62.5002H64.5834ZM66.6667 56.2502H72.9167V43.7502H66.6667V56.2502ZM20.8334 62.5002V52.0835C20.8334 50.9029 21.2327 49.9134 22.0313 49.1147C22.8299 48.3161 23.8195 47.9168 25 47.9168H33.3334V43.7502H20.8334V37.5002H35.4167C36.5973 37.5002 37.5868 37.8995 38.3855 38.6981C39.1841 39.4967 39.5834 40.4863 39.5834 41.6668V47.9168C39.5834 49.0974 39.1841 50.087 38.3855 50.8856C37.5868 51.6842 36.5973 52.0835 35.4167 52.0835H27.0834V56.2502H39.5834V62.5002H20.8334ZM46.875 45.8335V39.5835H53.125V45.8335H46.875ZM46.875 60.4168V54.1668H53.125V60.4168H46.875ZM16.6667 83.3335C14.375 83.3335 12.4132 82.5175 10.7813 80.8856C9.14935 79.2536 8.33337 77.2918 8.33337 75.0002V25.0002C8.33337 22.7085 9.14935 20.7467 10.7813 19.1147C12.4132 17.4828 14.375 16.6668 16.6667 16.6668H29.1667V8.3335H37.5V16.6668H62.5V8.3335H70.8334V16.6668H83.3334C85.625 16.6668 87.5869 17.4828 89.2188 19.1147C90.8507 20.7467 91.6667 22.7085 91.6667 25.0002V75.0002C91.6667 77.2918 90.8507 79.2536 89.2188 80.8856C87.5869 82.5175 85.625 83.3335 83.3334 83.3335H16.6667ZM16.6667 75.0002H46.875V68.7502H53.125V75.0002H83.3334V25.0002H53.125V31.2502H46.875V25.0002H16.6667V75.0002Z" fill="#808080"/>
+</svg>
+</div>
+        <div class=" flex-1 text-[2rem] text-orange-500 font-extrabold">
+          {{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin  }}
+        </div>
+        <div class="flex-1 flex items-end justify-center text-gray-800 text-sm">
+          세트 승점
+        </div>
+      </div>
+            <div
+        class="h-[140px] flex flex-col justfiy-between gap-2  bg-white  text-orange-500 px-4 py-3 rounded-xl text-center"
+      >
+        <div class="flex-1 text-xs font-semibold flex justify-center">
+          <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M29.1667 87.5V79.1667H45.8333V66.25C42.4306 65.4861 39.3924 64.0451 36.7188 61.9271C34.0451 59.809 32.0833 57.1528 30.8333 53.9583C25.625 53.3333 21.2674 51.059 17.7604 47.1354C14.2535 43.2118 12.5 38.6111 12.5 33.3333V29.1667C12.5 26.875 13.316 24.9132 14.9479 23.2812C16.5799 21.6493 18.5417 20.8333 20.8333 20.8333H29.1667V12.5H70.8333V20.8333H79.1667C81.4583 20.8333 83.4201 21.6493 85.0521 23.2812C86.684 24.9132 87.5 26.875 87.5 29.1667V33.3333C87.5 38.6111 85.7465 43.2118 82.2396 47.1354C78.7326 51.059 74.375 53.3333 69.1667 53.9583C67.9167 57.1528 65.9549 59.809 63.2812 61.9271C60.6076 64.0451 57.5694 65.4861 54.1667 66.25V79.1667H70.8333V87.5H29.1667ZM29.1667 45V29.1667H20.8333V33.3333C20.8333 35.9722 21.5972 38.3507 23.125 40.4688C24.6528 42.5868 26.6667 44.0972 29.1667 45ZM50 58.3333C53.4722 58.3333 56.4236 57.1181 58.8542 54.6875C61.2847 52.2569 62.5 49.3056 62.5 45.8333V20.8333H37.5V45.8333C37.5 49.3056 38.7153 52.2569 41.1458 54.6875C43.5764 57.1181 46.5278 58.3333 50 58.3333ZM70.8333 45C73.3333 44.0972 75.3472 42.5868 76.875 40.4688C78.4028 38.3507 79.1667 35.9722 79.1667 33.3333V29.1667H70.8333V45Z" fill="#808080"/>
+</svg>
+
+        </div>
+        <div class="flex-1 text-[2rem]  text-orange-500 font-extrabold ">{{ game.rule.setsToWin }}</div>
+                <div class="flex-1 flex justify-center items-end text-gray-800 text-sm">
+          세트 수
+        </div>
+      </div>
+      <div
+        class="h-[140px] flex flex-col justfiy-between gap-2  bg-white  text-orange-500 px-4 py-3 rounded-xl text-center"
+      >
+        <div class="flex-1 text-xs font-semibold mb-1 flex justify-center"><svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 45.8335C54.5834 45.8335 58.507 44.2016 61.7709 40.9377C65.0347 37.6738 66.6667 33.7502 66.6667 29.1668V16.6668H33.3334V29.1668C33.3334 33.7502 34.9653 37.6738 38.2292 40.9377C41.4931 44.2016 45.4167 45.8335 50 45.8335ZM16.6667 91.6668V83.3335H25V70.8335C25 66.5974 25.9896 62.6217 27.9688 58.9064C29.9479 55.1911 32.7084 52.2224 36.25 50.0002C32.7084 47.7779 29.9479 44.8092 27.9688 41.0939C25.9896 37.3786 25 33.4029 25 29.1668V16.6668H16.6667V8.3335H83.3334V16.6668H75V29.1668C75 33.4029 74.0104 37.3786 72.0313 41.0939C70.0521 44.8092 67.2917 47.7779 63.75 50.0002C67.2917 52.2224 70.0521 55.1911 72.0313 58.9064C74.0104 62.6217 75 66.5974 75 70.8335V83.3335H83.3334V91.6668H16.6667Z" fill="#808080"/>
+</svg>
+</div>
+        <div class="flex-1 flex items-center justify-center text-[1rem] text-orange-500 font-extrabold">{{ limitTimeStr }}</div>
+                        <div class="flex-1 flex items-end  justify-center text-gray-800 text-sm">
+          제한 시간
+        </div>
+      </div>
+
+    </div>
     <div class="mt-auto relative">
       <div class="relative max-h-28 overflow-hidden flex flex-col justify-end space-y-1 mb-10 px-1">
         <div
@@ -147,18 +188,18 @@
           </button>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="fixed  bottom-0  left-0  p-5 w-full grid grid-cols-2 gap-3 mb-7">
         <button
           @click="openConfirm('정말로 게임을 재시작 하겠습니까?', socket_resetGame)"
-          class="border border-orange-500 text-orange-500 px-3 py-3 rounded-[8.2px] text-xs hover:bg-orange-50 transition"
+          class="border text-orange-500 px-3 py-3 rounded-[8.2px] text-xs hover:bg-orange-50 transition"
         >
-          초기화
+          처음부터
         </button>
         <button
           @click="openConfirm('정말로 게임을 즉시 종료합니까?', socket_finishGame)"
           class="bg-orange-500 text-white px-3 py-3 rounded-[8.2px] text-xs shadow hover:brightness-110 transition"
         >
-          게임 종료
+          경기 끝내기
         </button>
       </div>
     </div>
@@ -289,7 +330,7 @@ const isGameOver = ref(false)
 const showFinishModal = ref(false)
 const winner = ref('-')
 const elapsedSeconds = ref(0)
-const elapsedTimeStr = ref('0분 0초')
+const elapsedTimeStr = ref('00:00')
 const limitTimeStr = ref('')
 const timerRef = ref(null)
 const logs = ref([])
@@ -422,10 +463,11 @@ function updateElapsed() {
 }
 
 function getTimeStr(seconds) {
-  if (seconds <= 0) return '0분 0초'
+  if (seconds <= 0) return '00:00'
   const min = Math.floor(seconds / 60)
   const sec = seconds % 60
-  return `${min}분 ${sec}초`
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${pad(min)}:${pad(sec)}`
 }
 
 function goToResult() {

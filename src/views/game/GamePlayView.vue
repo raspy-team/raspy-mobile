@@ -223,7 +223,7 @@
       <div class="bg-white rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
         <div class="text-lg font-bold mb-3">세트 종료</div>
         <div class="text-orange-500 font-extrabold text-xl mb-4">
-          {{ winner != '-' ? '@' + winner + ' 승리' : '무승부' }}
+          {{ winner != '-' ? winner + ' 승리' : '무승부' }}
         </div>
         <button
           @click="closeFinishModal"
@@ -497,11 +497,11 @@ const addLog = (log) => {
 
   let message = ''
   if (log.type === 'SCORE') {
-    message = `@${log.targetId == user1.value.id ? user1.value.nickname : user2.value.nickname} ${log.delta}점 ${log.delta > 0 ? '득점' : '실점'} (변경자 - @${log.userSummary.nickname})`
+    message = `${log.targetId == user1.value.id ? user1.value.nickname : user2.value.nickname} ${log.delta}점 ${log.delta > 0 ? '득점' : '실점'} (변경자 - ${log.userSummary.nickname})`
   } else if (log.type === 'SET') {
-    message = `@${log.userSummary.nickname} 세트를 증가시킴`
+    message = `${log.userSummary.nickname} 세트를 증가시킴`
   } else if (log.type === 'RESET') {
-    message = `@${log.userSummary.nickname} 게임을 리셋함`
+    message = `${log.userSummary.nickname} 게임을 리셋함`
   } else if (log.type === 'FINISH') {
     message = `게임이 종료되었습니다!`
   } else {

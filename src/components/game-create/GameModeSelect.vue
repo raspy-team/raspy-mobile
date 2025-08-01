@@ -24,4 +24,21 @@
       <div class="text-sm text-orange-500 text-left font-light mt-1">준비 중입니다</div>
     </div>
   </div>
+
+    <div class="fixed bottom-10 w-full p-5">
+    <button
+      @click="router.push('/rules')"
+      class="w-full py-4 bg-white text-gray-500 text-lg font-lg rounded-xl border shadow active:scale-98 transition"
+    >
+      규칙 다시 선택하기
+    </button>
+  </div>
 </template>
+
+<script setup>
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+</script>

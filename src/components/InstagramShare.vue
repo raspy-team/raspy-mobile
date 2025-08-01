@@ -52,14 +52,13 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, defineEmits, defineProps, onMounted } from 'vue'
 import defaultAvatar from '../assets/default.png'
-import winnerCrown from '../assets/winner-crown.png' 
-import winnerCrownBlack from '../assets/winner-crown-black.png' // 검정 왕관(밝은 배경용)
+import winnerCrown from '../assets/winner-crown.png'
+import winnerCrownBlack from '../assets/winner-crown-black.png'
+import matchLogo from '../assets/Match.png'
 
-// 팔레트: 이미지로만 구성
 const palette = [
   { image: require('../assets/result-cards/1.png') },
   { image: require('../assets/result-cards/2.png') },
@@ -92,13 +91,9 @@ function getTextColor(imgUrl) {
   const idx = palette.findIndex(p => p.image === imgUrl)
   return idx <= 4 ? '#fff' : '#222'
 }
-
-// 왕관 이미지 선택 함수
 function getCrownImg(imgUrl) {
-  // 텍스트 컬러가 '#222' (=흰/밝은 배경)이면 검은 왕관, 아니면 기존 왕관
   return getTextColor(imgUrl) === '#222' ? winnerCrownBlack : winnerCrown
 }
-
 
 function drawFinalImage() {
   const canvas = finalCanvas.value
@@ -109,150 +104,182 @@ function drawFinalImage() {
   canvas.width = SIZE
   canvas.height = SIZE
   ctx.clearRect(0, 0, SIZE, SIZE)
-  ctx.fillStyle = "#000" 
+  ctx.fillStyle = "#000"
 
-  // 배경 이미지 그리기
   const bgImg = new window.Image()
   bgImg.crossOrigin = "anonymous"
   bgImg.onload = () => {
     ctx.drawImage(bgImg, 0, 0, SIZE, SIZE)
 
-    // 텍스트 컬러
     const textColor = getTextColor(selectedImage.value)
     const padX = SIZE * 0.1
 
-    // 카테고리
-    ctx.font = `${SIZE*0.038}px Pretendard, Arial`
-    ctx.fillStyle = textColor
-    ctx.textAlign = 'left'
-    ctx.textBaseline = 'top'
-    ctx.fillText(props.game.rule.majorCategory || '', padX, padX)
-    ctx.font = `bold ${SIZE*0.038}px Pretendard, Arial`
-    ctx.fillText(props.game.rule.minorCategory || '', padX, padX + SIZE*0.07)
+    // ---- [카테고리 아이콘 그리기] ----
+    const minorCategoryName = props.game.rule.minorCategory || '미분류'
+    const isBright = textColor === '#222'
+    const categoryIconPath =
+      isBright
+        ? `/category-picture-black/${encodeURIComponent(minorCategoryName)}.png`
+        : `/category-picture-white/${encodeURIComponent(minorCategoryName)}.png`
 
-    // 날짜/시간
-    ctx.textAlign = 'right'
-    ctx.font = `${SIZE*0.036}px Pretendard, Arial`
-    const date = new Date(props.game.date)
-    const dateStr = `${date.getMonth()+1}.${date.getDate()}`
-    const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`
-    ctx.fillText(dateStr, SIZE - padX, padX + SIZE*0.01)
-    ctx.fillText(timeStr, SIZE - padX, padX + SIZE*0.07)
+    const iconSize = SIZE * 0.07
+    const iconX = padX - iconSize - SIZE * 0.03 + 69
+    const iconY = padX - 15
 
-    // 룰 타이틀
-    ctx.textAlign = 'center'
-    ctx.font = `bold ${SIZE*0.08}px Pretendard, Arial`
-    ctx.fillText(props.game.rule.ruleTitle || '', SIZE/2, SIZE*0.23)
+    function drawAll(ctx) {
+     const minorText = props.game.rule.minorCategory || ''
+  let fontSize = SIZE * 0.066
+  let yOffset = 0
+  if (minorText.length >= 6) {
+    fontSize = SIZE * 0.036
+    yOffset = 15
+  } else if (minorText.length >= 4) {
+    fontSize = SIZE * 0.048
+    yOffset = 8
+  }
+  ctx.font = `bold ${fontSize}px Pretendard, Arial`
+  ctx.fillStyle = textColor
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'top'
+  // x좌표는 고정, y좌표는 yOffset 더함
+  ctx.fillText(minorText, padX + 56, padX  + yOffset - 5)
 
-    // 장소
-    ctx.font = ` ${SIZE*0.042}px Pretendard, Arial`
-    ctx.fillText(props.game.location || '', SIZE/2, SIZE*0.33)
+  // ---- [날짜/시간: 중앙 정렬, 굵게, 줄바꿈] ----
+  const date = new Date(props.game.date)
+  const dateStr = `${date.getMonth()+1}월 ${date.getDate()}일`
+  const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`
 
-    // 점수
-    ctx.font = `bold ${SIZE*0.16}px Pretendard, Arial`
-    ctx.fillText(`${props.game.myScore}    ${props.game.opponentScore}`, SIZE/2, SIZE*0.5)
+  ctx.textAlign = 'center'
+  ctx.font = `bold ${SIZE*0.045}px Pretendard, Arial`
+  ctx.fillStyle = textColor
+  ctx.textBaseline = 'top'
+  // 카드 중앙 y좌표, 예: 룰 타이틀 아래쪽에 살짝 띄움
+  const dateY = SIZE * 0.08
+  ctx.fillText(dateStr, SIZE*0.85, dateY)
+    ctx.font = `bold ${SIZE*0.057}px Pretendard, Arial`
 
-    // --- 아바타/닉네임
-    const avatarSize = SIZE * 0.14
-    const nicknameFontSize = SIZE * 0.037
-    const nicknameFont = `bold ${nicknameFontSize}px Pretendard, Arial`
-    const margin = SIZE * 0.018
-    const groupHeight = avatarSize + margin + nicknameFontSize
-    const groupCenterY = SIZE * 0.6 - 20
-    const groupTopY = groupCenterY - groupHeight / 2
+  ctx.fillText(timeStr, SIZE*0.85, dateY + SIZE*0.062 ) // 줄바꿈
 
-    // 왕관 이미지 미리 생성
-    const crownImg = new window.Image()
-    crownImg.src = winnerCrown
+  // ---- [룰 타이틀 및 장소 위치 조정 (날짜 영역과 겹치지 않도록)] ----
+  ctx.font = `bold ${SIZE*0.08}px Pretendard, Arial`
+  ctx.fillText(props.game.rule.ruleTitle || '', SIZE/2, SIZE*0.21)
 
-    // 내 아바타 (왼쪽)
-    const meAvatarCenterX = padX + avatarSize / 2
-    const meNicknameX = padX + avatarSize / 2
-    const meImg = new window.Image()
-    meImg.crossOrigin = "anonymous"
-    meImg.onload = () => {
-      ctx.save()
-      ctx.beginPath()
-      ctx.arc(meAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2, 0, Math.PI*2)
-      ctx.closePath()
-      ctx.clip()
-      ctx.drawImage(meImg, meAvatarCenterX - avatarSize/2, groupTopY, avatarSize, avatarSize)
-      ctx.restore()
-      ctx.strokeStyle = "#fff"
-      ctx.lineWidth = avatarSize * 0.08
-      ctx.beginPath()
-      ctx.arc(meAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2 + avatarSize*0.04, 0, Math.PI*2)
-      ctx.stroke()
+  ctx.font = ` ${SIZE*0.042}px Pretendard, Arial`
+  ctx.fillText(props.game.location || '', SIZE/2, SIZE*0.32)
+      // 점수
+      ctx.font = `bold ${SIZE*0.16}px Pretendard, Arial`
+      ctx.fillText(`${props.game.myScore}    ${props.game.opponentScore}`, SIZE/2, SIZE*0.5)
 
-      if (props.game.myScore > props.game.opponentScore) {
-        const crownImg = new window.Image()
-        crownImg.src = getCrownImg(selectedImage.value)
-        crownImg.onload = () => {
-          const crownW = avatarSize * 0.4
-          const crownH = crownW * 0.9
-          const crownX = meAvatarCenterX - crownW/2
-          const crownY = groupTopY - crownH * 1.6
-          ctx.drawImage(crownImg, crownX, crownY, crownW, crownH)
+      // --- 아바타/닉네임
+      const avatarSize = SIZE * 0.14
+      const nicknameFontSize = SIZE * 0.037
+      const nicknameFont = `bold ${nicknameFontSize}px Pretendard, Arial`
+      const margin = SIZE * 0.018
+      const groupHeight = avatarSize + margin + nicknameFontSize
+      const groupCenterY = SIZE * 0.6 - 20
+      const groupTopY = groupCenterY - groupHeight / 2
+
+      // 내 아바타 (왼쪽)
+      const meAvatarCenterX = padX + avatarSize / 2
+      const meNicknameX = padX + avatarSize / 2
+      const meImg = new window.Image()
+      meImg.crossOrigin = "anonymous"
+      meImg.onload = () => {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(meAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2, 0, Math.PI*2)
+        ctx.closePath()
+        ctx.clip()
+        ctx.drawImage(meImg, meAvatarCenterX - avatarSize/2, groupTopY, avatarSize, avatarSize)
+        ctx.restore()
+        ctx.strokeStyle = "#fff"
+        ctx.lineWidth = avatarSize * 0.08
+        ctx.beginPath()
+        ctx.arc(meAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2 + avatarSize*0.04, 0, Math.PI*2)
+        ctx.stroke()
+
+        if (props.game.myScore > props.game.opponentScore) {
+          const crownImg = new window.Image()
+          crownImg.src = getCrownImg(selectedImage.value)
+          crownImg.onload = () => {
+            const crownW = avatarSize * 0.4
+            const crownH = crownW * 0.9
+            const crownX = meAvatarCenterX - crownW/2
+            const crownY = groupTopY - crownH * 1.6
+            ctx.drawImage(crownImg, crownX, crownY, crownW, crownH)
+          }
         }
+        ctx.font = nicknameFont
+        ctx.fillStyle = textColor
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.fillText((props.me?.nickname || ''), meNicknameX, groupTopY*1.06  + avatarSize + margin)
       }
+      meImg.src = props.me?.avatar || defaultAvatar
 
-      // 닉네임
-      ctx.font = nicknameFont
-      ctx.fillStyle = textColor
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'top'
-      ctx.fillText((props.me?.nickname || ''), meNicknameX, groupTopY*1.06  + avatarSize + margin)
-    }
-    meImg.src = props.me?.avatar || defaultAvatar
+      // 상대 아바타 (오른쪽)
+      const oppAvatarCenterX = SIZE - padX - avatarSize / 2
+      const oppNicknameX = SIZE - padX - avatarSize / 2
+      const oppImg = new window.Image()
+      oppImg.crossOrigin = "anonymous"
+      oppImg.onload = () => {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(oppAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2, 0, Math.PI*2)
+        ctx.closePath()
+        ctx.clip()
+        ctx.drawImage(oppImg, oppAvatarCenterX - avatarSize/2, groupTopY, avatarSize, avatarSize)
+        ctx.restore()
+        ctx.strokeStyle = "#fff"
+        ctx.lineWidth = avatarSize * 0.08
+        ctx.beginPath()
+        ctx.arc(oppAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2 + avatarSize*0.04, 0, Math.PI*2)
+        ctx.stroke()
 
-    // 상대 아바타 (오른쪽)
-    const oppAvatarCenterX = SIZE - padX - avatarSize / 2
-    const oppNicknameX = SIZE - padX - avatarSize / 2
-    const oppImg = new window.Image()
-    oppImg.crossOrigin = "anonymous"
-    oppImg.onload = () => {
-      ctx.save()
-      ctx.beginPath()
-      ctx.arc(oppAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2, 0, Math.PI*2)
-      ctx.closePath()
-      ctx.clip()
-      ctx.drawImage(oppImg, oppAvatarCenterX - avatarSize/2, groupTopY, avatarSize, avatarSize)
-      ctx.restore()
-      ctx.strokeStyle = "#fff"
-      ctx.lineWidth = avatarSize * 0.08
-      ctx.beginPath()
-      ctx.arc(oppAvatarCenterX, groupTopY + avatarSize/2, avatarSize/2 + avatarSize*0.04, 0, Math.PI*2)
-      ctx.stroke()
-
-      if (props.game.myScore < props.game.opponentScore) {
-        const crownImg = new window.Image()
-        crownImg.src = getCrownImg(selectedImage.value)
-        crownImg.onload = () => {
-          const crownW = avatarSize * 0.4
-          const crownH = crownW * 0.9
-          const crownX = oppAvatarCenterX - crownW/2
-          const crownY = groupTopY - crownH * 1.6
-          ctx.drawImage(crownImg, crownX, crownY, crownW, crownH)
+        if (props.game.myScore < props.game.opponentScore) {
+          const crownImg = new window.Image()
+          crownImg.src = getCrownImg(selectedImage.value)
+          crownImg.onload = () => {
+            const crownW = avatarSize * 0.4
+            const crownH = crownW * 0.9
+            const crownX = oppAvatarCenterX - crownW/2
+            const crownY = groupTopY - crownH * 1.6
+            ctx.drawImage(crownImg, crownX, crownY, crownW, crownH)
+          }
         }
+        ctx.font = nicknameFont
+        ctx.fillStyle = textColor
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.fillText((props.game.opponent?.nickname || ''), oppNicknameX, groupTopY*1.06 + avatarSize + margin)
       }
+      oppImg.src = props.game.opponent?.avatar || defaultAvatar
 
-      // 닉네임
-      ctx.font = nicknameFont
-      ctx.fillStyle = textColor
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'top'
-      ctx.fillText((props.game.opponent?.nickname || ''), oppNicknameX, groupTopY*1.06 + avatarSize + margin)
+      // --- 우측 하단 Match 로고
+      const logoW = SIZE * 0.16
+      const logoH = logoW * 1.0 // 비율 맞춰서 조정 (Match.png 비율)
+      const logoMargin = SIZE * 0.045
+      const logoX = SIZE - logoW - logoMargin - 17
+      const logoY = SIZE - logoH - logoMargin
+
+      const logoImg = new window.Image()
+      logoImg.onload = () => {
+        ctx.drawImage(logoImg, logoX, logoY, logoW, logoH)
+        imageReady.value = true
+      }
+      logoImg.src = matchLogo
+      // imageReady.value는 로고 그려진 후에만 true!
     }
-    oppImg.src = props.game.opponent?.avatar || defaultAvatar
 
-    // --- MATCH (우하단)
-    ctx.font = `bold ${SIZE*0.05}px Pretendard, Arial`
-    ctx.textAlign = 'right'
-    ctx.textBaseline = 'alphabetic'
-    ctx.fillStyle = '#ff7300'
-    ctx.fillText('Match', SIZE - padX*0.7, SIZE - padX*0.7)
-
-    imageReady.value = true
+    // [카테고리 아이콘 로드 후 drawAll 실행]
+    const catImg = new window.Image()
+    catImg.crossOrigin = 'anonymous'
+    catImg.onload = () => {
+      ctx.drawImage(catImg, iconX, iconY, iconSize, iconSize)
+      drawAll(ctx)
+    }
+    catImg.onerror = () => drawAll(ctx)
+    catImg.src = categoryIconPath
   }
   bgImg.src = selectedImage.value
 }
@@ -262,14 +289,11 @@ function downloadImage() {
   downloading.value = true
   saved.value = true
   const base64 = finalCanvas.value.toDataURL('image/png')
-
-  // 안드로이드 네이티브 브릿지
   if (window.AndroidApp?.saveImageToGalleryWithBase64) {
     window.AndroidApp.saveImageToGalleryWithBase64(base64)
     setTimeout(() => downloading.value = false, 1000)
     return
   }
-  // iOS WKWebView 네이티브 브릿지
   else if (
     window.webkit &&
     window.webkit.messageHandlers &&
@@ -282,8 +306,6 @@ function downloadImage() {
     setTimeout(() => downloading.value = false, 1000)
     return
   }
-
-  // 데스크탑/모바일 웹(일반 다운로드)
   const link = document.createElement('a')
   link.href = base64
   link.download = 'story.png'

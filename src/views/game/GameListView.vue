@@ -107,7 +107,27 @@
           </div>
         </div>
 
-        <div class="font-extrabold text-xl text-gray-700 pt-0">추천 경기</div>
+<!-- 추천 경기 타이틀 행 -->
+<div class="flex items-center justify-between pt-0 pb-0 px-1">
+  <div class="font-extrabold text-xl text-gray-700">추천 경기</div>
+  <button
+    @click="fetchGames"
+    aria-label="새로고침"
+    class="ml-2 px-4 py-2  rounded-[10px] flex items-center justify-center border border-gray-200 shadow-sm bg-white"
+  >
+    <i
+      v-if="!loading"
+      class="fas fa-rotate-right text-orange-500 text-sm"
+    ></i>
+    <i
+      v-else
+      class="fas fa-spinner fa-spin text-orange-500 text-sm"
+    ></i>
+    <span class="ml-2 text-sm font-semibold text-orange-600">
+    새로고침
+    </span>
+  </button>
+</div>
         <div v-if="games.length > 0">
           <div
             @click="openModal(game)"

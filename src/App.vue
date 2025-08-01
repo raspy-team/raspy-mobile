@@ -72,7 +72,6 @@ onMounted(() => {
 
 window.addEventListener('error', (event) => {
   console.error('Uncaught Error:', event.error)
-  alert(`준비 중입니다.`)
 })
 
 function getChatUrlFromPath(path) {

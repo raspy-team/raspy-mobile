@@ -2,36 +2,29 @@
   <div class="bg-[#f8f9fa] min-h-full relative raspy-top">
     <!-- Fixed Top Bar -->
     <div
-      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white  border-b raspy-top"
+      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white border-b raspy-top"
     >
-
-          <div class="flex items-center h-14">
+      <div class="flex items-center h-14">
         <router-link to="/" class="font-bold text-[#f97316]">
           <span class="RASPY mx-1">Match</span>
         </router-link>
-
       </div>
-      <div class="flex items-enter gap-3 mr-4" >
-        
-      <button
-        @click="searchUsers"
-        class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
-      >        <i @click="searchUsers"
-          class="fas fa-search  text-xl text-orange-500"
-        ></i>
+      <div class="flex items-enter gap-3 mr-4">
+        <button
+          @click="searchUsers"
+          class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
+        >
+          <i @click="searchUsers" class="fas fa-search text-xl text-orange-500"></i>
+        </button>
 
-</button>
-
-
-      <button
-        @click="goSettings"
-        class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
-      >
-      
-        <i class="fas fa-cog text-xl text-orange-500"></i>
-        <span class="font-semibold text-sm hidden sm:inline ">설정</span>
-      </button>
-    </div>
+        <button
+          @click="goSettings"
+          class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
+        >
+          <i class="fas fa-cog text-xl text-orange-500"></i>
+          <span class="font-semibold text-sm hidden sm:inline">설정</span>
+        </button>
+      </div>
     </div>
 
     <!-- SKELETON: 유저정보/통계/그래프/탭 -->
@@ -170,7 +163,6 @@
                   </div>
                   <div class="text-[0.77rem] font-semibold text-gray-600">@{{ user.username }}</div>
                 </span>
-        
               </h2>
               <div class="flex gap-1">
                 <span
@@ -179,12 +171,16 @@
                 >
                 <span
                   class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold"
-                  >{{ user.gender && user.gender != '비공개'? user.gender : '성별 -' }}</span
+                  >{{ user.gender && user.gender != '비공개' ? user.gender : '성별 -' }}</span
                 >
-            <span                   class="inline-block bg-blue-100 text-blue-500 text-xs px-2 py-0.5 rounded font-bold"
->{{
-                   user.location != null && user.location.length > 2 ?  user.location?.split(' ').slice(-1)[0] || '' : "지역 -"
-                  }}</span>
+                <span
+                  class="inline-block bg-blue-100 text-blue-500 text-xs px-2 py-0.5 rounded font-bold"
+                  >{{
+                    user.location != null && user.location.length > 2
+                      ? user.location?.split(' ').slice(-1)[0] || ''
+                      : '지역 -'
+                  }}</span
+                >
               </div>
               <div class="text-xs text-gray-600">{{ user.intro }}</div>
             </div>
@@ -222,7 +218,7 @@
                         : '#FF7043'
                 }`"
               >
-                {{ ranking.totalRank == 0 ? "-" : ranking.totalRank}}위
+                {{ ranking.totalRank == 0 ? '-' : ranking.totalRank }}위
               </span>
             </span>
           </div>
@@ -897,10 +893,10 @@
               <span
                 class="px-3 py-1 rounded-full font-semibold text-xs mt-1 shadow-sm bg-gradient-to-r from-orange-200 to-yellow-100 text-orange-700 animate-pop"
               >
-                상위 {{ rankingPercent == -98 ? "-" : rankingPercent }}%
+                상위 {{ rankingPercent == -98 ? '-' : rankingPercent }}%
               </span>
 
-              <div class="font-light text-[0.7rem] text-gray-500  pt-1 text-center">
+              <div class="font-light text-[0.7rem] text-gray-500 pt-1 text-center">
                 25.7.29 이후 종료된 경기 결과만 적용됩니다.
               </div>
             </template>
@@ -1121,7 +1117,7 @@ const filteredGames = computed(() => {
 async function loadFriends() {
   try {
     // 내 친구 목록
-    const res = await api.get('/api/friends/my')
+    const res = await api.get('/api/friends/my?userId=' + userId)
     friends.value = res.data
     // 요청 보냄/받음 (본인 프로필인 경우에만)
     if (user.value?.isMe) {

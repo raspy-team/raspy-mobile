@@ -23,15 +23,116 @@
     <RuleAIGenerating v-if="step === 15" />
     <RuleResultPage v-if="step === 16" :result="createdRule" @next="onFinishRule" />
     <GameModeSelect v-if="step === 17" @mode="onModeSelect" />
-    <FriendModal v-if="showFriendModal" @select="onFriendSelect" @close="showFriendModal = false" />
     <PlaceSelectPage v-if="step === 18" @select="onPlaceSelect" @back="step -= 1" />
     <TimeSelectPage v-if="step === 19" @select="onTimeSelect" @back="step -= 1" />
     <GameFinalPage v-if="step === 20" :game="gameForm" />
   </div>
+
+  <!-- 장소/진행 모달 -->
+  <div
+    v-if="showAddressModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[300000]"
+  >
+    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
+      <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
+      <div @click="openAddressSearch" class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">도로명 주소</label>
+        <div
+          class="flex items-center p-3 bg-white rounded-xl border border-gray-200 cursor-pointer"
+        >
+          <input
+            v-model="placeRoad"
+            readonly
+            class="text-sm flex-1 bg-white border-none outline-none cursor-not-allowed"
+            placeholder="도로명 주소 선택"
+          />
+        </div>
+        <p class="text-xs text-gray-400 mt-1">도로명 주소를 입력하세요 (미입력 시 협의결정)</p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">상세주소</label>
+        <div
+          :class="[
+            placeRoad ? 'bg-white border-gray-200' : 'bg-gray-100 text-gray-400 cursor-not-allowed',
+          ]"
+          class="rounded-xl border p-3"
+        >
+          <input
+            id="place-detail"
+            v-model="placeDetail"
+            :disabled="!placeRoad"
+            class="w-full text-sm text-gray-700 outline-none bg-transparent"
+            placeholder="상세주소 입력"
+          />
+        </div>
+        <p class="text-xs text-gray-500 mt-1">예: ○○빌딩 3층, ○○체육관</p>
+      </div>
+      <div class="mt-4 text-xs text-gray-500">
+        <template v-if="!placeRoad || placeRoad.trim() === ''">
+          도로명 주소를 반드시 입력해야 게임을 시작할 수 있습니다.
+        </template>
+        <template v-else>
+          현재 장소: {{ placeRoad + ' ' + placeDetail }}<br />
+          이 장소가 맞는지 확인하거나, 수정해주세요.
+        </template>
+      </div>
+      <div class="flex justify-end mt-6 space-x-2">
+        <button
+          @click="closeModal"
+          class="px-4 py-2 rounded-[5px] bg-gray-100 text-gray-700 text-sm"
+        >
+          취소
+        </button>
+        <button
+          :disabled="!placeRoad || placeRoad.trim() === ''"
+          class="px-5 py-2 rounded-[5px] bg-green-600 text-white text-sm disabled:opacity-50"
+          @click="submitAndStartGame"
+        >
+          경기 진행
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시작 전 확인 모달 -->
+  <div
+    v-if="showCountdownModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+  >
+    <div class="bg-white p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
+      <h2 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">경기 시작 전 확인</h2>
+
+      <p class="text-sm text-gray-500 mb-1">이 경기는 다음 시간 동안 진행됩니다:</p>
+
+      <div class="text-4xl font-black text-orange-500 py-4 mb-4 mt-3">
+        {{ countdownDurationText }}
+      </div>
+
+      <p class="text-xs text-gray-400 mb-5">
+        아래 <span class="font-semibold text-orange-500">"바로 시작하기"</span> 버튼을 누르면 즉시
+        경기가 시작되고 상대방에게도 표시됩니다.
+      </p>
+
+      <div class="flex justify-end gap-2">
+        <button
+          @click="showCountdownModal = false"
+          class="px-4 py-2 rounded bg-gray-100 text-gray-600 text-sm"
+        >
+          취소
+        </button>
+        <button
+          @click="confirmStartGame"
+          class="px-5 py-2 rounded bg-orange-500 text-white text-sm font-semibold shadow hover:bg-orange-400 transition active:scale-95"
+        >
+          바로 시작하기
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, nextTick } from 'vue'
 import GameIntro from '../../components/game-create/GameIntro.vue'
 import RuleIntro from '../../components/game-create/RuleIntro.vue'
 import RuleSelectPage from '../../components/game-create/RuleSelectPage.vue'
@@ -39,13 +140,13 @@ import RuleCreateWizard from '../../components/game-create/RuleCreateWizard.vue'
 import RuleAIGenerating from '../../components/game-create/RuleAIGenerating.vue'
 import RuleResultPage from '../../components/game-create/RuleResultPage.vue'
 import GameModeSelect from '../../components/game-create/GameModeSelect.vue'
-import FriendModal from '../../components/game-create/FriendModal.vue'
 import PlaceSelectPage from '../../components/game-create/PlaceSelect.vue'
 import TimeSelectPage from '../../components/game-create/TimeSelect.vue'
 import GameFinalPage from '../../components/game-create/GameFinalPage.vue'
 import api from '../../api/api'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
+const router = useRouter()
 
 // 스텝 갯수 줄임 (14+6)
 const totalSteps = 20
@@ -64,7 +165,7 @@ const ruleForm = reactive({
   winBy: '',
 })
 const createdRule = ref(null)
-const showFriendModal = ref(false)
+
 const gameForm = reactive({
   ruleId: null,
   friendId: null,
@@ -72,6 +173,18 @@ const gameForm = reactive({
   placeDetail: '',
   time: '',
 })
+
+// 장소/진행 모달 상태
+const showAddressModal = ref(false)
+const placeRoad = ref('')
+const placeDetail = ref('')
+
+// 시작 전 확인 모달 상태
+const showCountdownModal = ref(false)
+const countdownDurationText = ref('')
+
+// 생성된 게임 ID
+const currentGameId = ref(null)
 
 const progressWidth = computed(() => Math.max(5, Math.round((step.value / totalSteps) * 100)))
 onMounted(() => {
@@ -121,15 +234,28 @@ async function submitRuleForm(data) {
 function onFinishRule() {
   step.value = 17
 }
+
+/**
+ *
+ * @param mode friend game일 땐 friend의 userId가 넘어온다.
+ */
 function onModeSelect(mode) {
-  if (mode === 'friend') showFriendModal.value = true
-  else step.value = 18
+  if (mode != 'random') {
+    friendSelect(mode) // 이 경우 mode는 userId임
+  } else step.value = 18
 }
-function onFriendSelect(friend) {
-  gameForm.friendId = friend.id
-  showFriendModal.value = false
-  step.value = 18
+
+async function friendSelect(friendId) {
+  gameForm.friendId = friendId
+  // 바로 시작 플로우: 기본 경기 시각은 현재로 설정
+  gameForm.time = new Date()
+
+  // 장소 초기화 후 모달 오픈
+  placeRoad.value = ''
+  placeDetail.value = ''
+  showAddressModal.value = true
 }
+
 function onPlaceSelect(data) {
   gameForm.placeRoad = data.placeRoad
   gameForm.placeDetail = data.placeDetail
@@ -142,6 +268,25 @@ function onTimeSelect(time) {
   createGame()
 }
 
+/**
+ * createGame과 차이는, 참가자가 확정된 상태라는 것임.
+ */
+async function createFriendGame() {
+  try {
+    const payload = {
+      referencedRuleId: gameForm.ruleId,
+      friendId: gameForm.friendId,
+      placeRoad: gameForm.placeRoad,
+      placeDetail: gameForm.placeDetail,
+      matchDate: gameForm.time,
+    }
+    const gameIdRes = await api.post('/api/games/create-friend-game', payload)
+    return gameIdRes.data
+  } catch (e) {
+    alert('게임 생성 실패: ' + (e.response?.data?.message ?? e.message))
+  }
+}
+
 async function createGame() {
   try {
     const payload = {
@@ -151,10 +296,77 @@ async function createGame() {
       placeDetail: gameForm.placeDetail,
       matchDate: gameForm.time,
     }
-    await api.post('/api/games/create', payload)
+    const gameIdRes = await api.post('/api/games/create', payload)
+    return gameIdRes.data
   } catch (e) {
     alert('게임 생성 실패: ' + (e.response?.data?.message ?? e.message))
   }
+}
+
+function formatDurationText(durationSec) {
+  if (durationSec === -1) return '제한 없음'
+  const min = Math.floor(durationSec / 60)
+  const sec = durationSec % 60
+  return (min ? `${min}분 ` : '') + (sec ? `${sec}초` : min ? '' : '0초')
+}
+
+function openAddressSearch() {
+  new window.daum.Postcode({
+    oncomplete(data) {
+      placeRoad.value = data.roadAddress || data.jibunAddress
+      nextTick(() => {
+        document.getElementById('place-detail')?.focus()
+      })
+    },
+  }).open()
+}
+
+async function submitAndStartGame() {
+  if (!placeRoad.value || !placeRoad.value.trim()) {
+    alert('도로명 주소를 반드시 입력해야 합니다.')
+    return
+  }
+
+  // gameForm에 장소 반영
+  gameForm.placeRoad = placeRoad.value
+  gameForm.placeDetail = placeDetail.value
+
+  // 게임 생성
+  const gameId = await createFriendGame()
+  if (!gameId) return
+  currentGameId.value = gameId
+
+  // 규칙 duration 조회 (확인 모달 안내용)
+  let duration = -1
+  try {
+    const { data: rule } = await api.get(`/api/rules/${gameForm.ruleId}`)
+    duration = rule?.duration ?? -1
+  } catch (_) {
+    // ignore
+  }
+  countdownDurationText.value = formatDurationText(duration)
+
+  // 모달 전환
+  showAddressModal.value = false
+  showCountdownModal.value = true
+}
+
+async function confirmStartGame() {
+  if (!currentGameId.value) return
+  try {
+    await api.post(`/api/games/${currentGameId.value}/start`)
+    showCountdownModal.value = false
+    router.push(`/games/${currentGameId.value}/play`)
+  } catch (e) {
+    alert('게임 시작 실패: ' + (e.response?.data?.message ?? e.message))
+  }
+}
+
+function closeModal() {
+  showAddressModal.value = false
+  placeRoad.value = ''
+  placeDetail.value = ''
+  currentGameId.value = null
 }
 </script>
 

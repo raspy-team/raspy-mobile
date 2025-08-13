@@ -1,32 +1,263 @@
 <template>
-  <div class="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl relative">
-      <button @click="$emit('close')" class="absolute top-3 right-4 text-2xl text-gray-400">
-        ×
-      </button>
-      <div class="text-lg font-bold mb-4 text-gray-900">내 친구 선택</div>
-      <ul v-if="friends.length">
-        <li v-for="f in friends" :key="f.id" class="flex items-center gap-3 py-3 border-b">
-          <img :src="f.avatar" class="w-10 h-10 rounded-full bg-gray-100" v-if="f.avatar" />
-          <div class="flex-1">
-            <div class="text-base font-semibold">{{ f.nickname }}</div>
-            <div class="text-xs text-gray-400">{{ f.intro }}</div>
+  <div
+    class="fixed inset-0 z-[30000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+    @click.self="emit('close')"
+    aria-modal="true"
+    role="dialog"
+  >
+    <Transition name="fade-scale">
+      <div
+        class="bg-white min-h-[70%] w-full max-w-md rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden"
+        @click.stop
+      >
+        <!-- Header -->
+        <div class="px-6 pt-5 pb-4 border-b bg-gradient-to-b from-white to-gray-50">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900">내 친구 선택</h2>
+            <button
+              @click="emit('close')"
+              class="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
+              aria-label="닫기"
+            >
+              ×
+            </button>
           </div>
-          <button @click="$emit('select', f)" class="px-4 py-2 bg-orange-500 text-white rounded-lg">
-            선택
-          </button>
-        </li>
-      </ul>
-      <div v-else class="text-gray-400 py-12 text-center">친구가 없습니다</div>
-    </div>
+          <div class="mt-4 relative">
+            <input
+              ref="searchRef"
+              v-model="q"
+              type="text"
+              placeholder="닉네임/소개/아이디 검색"
+              class="w-full rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 px-4 py-2.5 text-sm outline-none transition"
+            />
+            <div v-if="filteredFriends.length" class="sr-only">{{ filteredFriends.length }}명</div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="max-h-[65svh] overflow-y-auto">
+          <!-- Loading skeleton -->
+          <ul v-if="loading" class="divide-y">
+            <li v-for="i in 6" :key="i" class="flex items-center gap-3 py-4 px-6 animate-pulse">
+              <div class="w-10 h-10 rounded-full bg-gray-200"></div>
+              <div class="flex-1">
+                <div class="h-3 w-32 bg-gray-200 rounded mb-2"></div>
+                <div class="h-3 w-48 bg-gray-100 rounded"></div>
+              </div>
+              <div class="h-9 w-20 rounded-lg bg-gray-200"></div>
+            </li>
+          </ul>
+
+          <!-- Error state -->
+          <div v-else-if="error" class="px-6 py-12 text-center">
+            <div class="text-gray-500 text-sm">친구 목록을 불러오지 못했어요.</div>
+            <button
+              @click="fetchFriends"
+              class="mt-4 px-4 py-2 rounded-lg border text-sm hover:bg-gray-50"
+            >
+              다시 시도
+            </button>
+          </div>
+
+          <!-- Empty state -->
+          <div v-else-if="!filteredFriends.length" class="px-6 py-14 text-center">
+            <div class="mx-auto mb-4 grid place-items-center w-16 h-16 rounded-2xl bg-orange-50">
+              🧑‍🤝‍🧑
+            </div>
+            <p class="text-gray-900 font-semibold mb-1">친구가 없습니다</p>
+            <p class="text-gray-500 text-sm">상단 검색을 확인하거나, 친구를 먼저 추가해보세요.</p>
+          </div>
+
+          <!-- List -->
+          <ul v-else class="divide-y">
+            <li
+              v-for="f in filteredFriends"
+              :key="f.id"
+              class="group flex items-center gap-3 py-3 px-6 hover:bg-orange-50/60 transition cursor-pointer"
+              @click="openConfirm(f)"
+            >
+              <div class="relative">
+                <img
+                  v-if="f.avatar"
+                  :src="f.avatar"
+                  alt=""
+                  class="w-10 h-10 rounded-full bg-gray-100 object-cover"
+                />
+                <img
+                  v-else
+                  :src="Default"
+                  alt=""
+                  class="w-10 h-10 border rounded-full bg-gray-100 object-cover"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-900 truncate">
+                  {{ f.nickname || f.username }}
+                </div>
+                <div class="text-xs text-gray-500 truncate">
+                  {{ f.intro || '@' + f.username }}
+                </div>
+              </div>
+              <button
+                class="px-3.5 py-2 rounded-lg border border-orange-300 text-orange-600 bg-white text-sm font-medium group-hover:bg-orange-100/60 group-active:scale-[.98] transition"
+              >
+                선택
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Confirm Bottom Sheet -->
+    <Transition name="sheet">
+      <div v-if="showConfirm" class="fixed inset-0 z-[31000]" @click.self="closeConfirm">
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div
+          class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl ring-1 ring-black/5 p-5 pb-6"
+        >
+          <div class="flex items-center gap-3 mb-3">
+            <img
+              v-if="selectedFriend?.avatar"
+              :src="selectedFriend.avatar"
+              alt=""
+              class="w-12 h-12 rounded-full object-cover bg-gray-100"
+            />
+            <img
+              v-else
+              :src="Default"
+              alt=""
+              class="w-12 h-12 rounded-full object-cover border bg-gray-50"
+            />
+            <div class="min-w-0">
+              <p class="text-base font-bold text-gray-900 truncate">
+                {{ selectedFriend?.nickname || selectedFriend?.username }}
+              </p>
+              <p class="text-xs text-gray-500 truncate">
+                {{ selectedFriend?.intro || '@' + (selectedFriend?.username || '') }}
+              </p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-700 leading-relaxed mb-4 py-2">
+            <strong>{{ selectedFriend?.nickname || selectedFriend?.username }}</strong> 님과 게임을
+            시작하시겠습니까?<br />
+            확인을 누르면 <span class="font-semibold">게임 진행 화면</span>으로 이동하며, 바로
+            <span class="font-semibold">“게임 시작”</span>을 누를 수 있어요.
+          </p>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              @click="closeConfirm"
+              class="h-12 rounded-xl border text-gray-700 active:scale-95 transition"
+            >
+              아니요
+            </button>
+            <button
+              @click="confirmProceed"
+              class="h-12 rounded-xl bg-orange-500 text-white font-semibold active:scale-95 transition shadow"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
+
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, defineEmits } from 'vue'
 import api from '../../api/api'
-const friends = ref([])
+import Default from '../../assets/default.png'
+
+const emit = defineEmits(['close', 'select'])
+
+const friends = ref([]) // Array<UserSearchResultDto>
+const loading = ref(true)
+const error = ref(false)
+const q = ref('')
+const searchRef = ref(null)
+
+const showConfirm = ref(false)
+const selectedFriend = ref(null)
+
+function openConfirm(friend) {
+  selectedFriend.value = friend
+  showConfirm.value = true
+}
+function closeConfirm() {
+  showConfirm.value = false
+}
+function confirmProceed() {
+  if (selectedFriend.value) {
+    emit('select', selectedFriend.value)
+  }
+  showConfirm.value = false
+  emit('close')
+}
+
+const fetchFriends = async () => {
+  loading.value = true
+  error.value = false
+  try {
+    const res = await api.get('/api/friends/my')
+    friends.value = Array.isArray(res.data) ? res.data : []
+  } catch (e) {
+    error.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+const filteredFriends = computed(() => {
+  const keyword = q.value.trim().toLowerCase()
+  if (!keyword) return friends.value
+  return friends.value.filter((f) => {
+    const nickname = (f.nickname || '').toLowerCase()
+    const username = (f.username || '').toLowerCase()
+    const intro = (f.intro || '').toLowerCase()
+    return nickname.includes(keyword) || username.includes(keyword) || intro.includes(keyword)
+  })
+})
+
 onMounted(async () => {
-  const res = await api.get('/api/friends/my')
-  friends.value = res.data
+  await fetchFriends()
+  await nextTick()
+  searchRef.value?.focus()
+
+  const onKeydown = (e) => {
+    if (e.key === 'Escape') {
+      if (showConfirm.value) return closeConfirm()
+      emit('close')
+    }
+    if (e.key === 'Enter' && showConfirm.value) {
+      e.preventDefault()
+      confirmProceed()
+    }
+  }
+  window.addEventListener('keydown', onKeydown)
+  onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 })
 </script>
+
+<style scoped>
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: all 160ms ease;
+}
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+}
+.sheet-enter-active,
+.sheet-leave-active {
+  transition:
+    transform 220ms ease,
+    opacity 220ms ease;
+}
+.sheet-enter-from,
+.sheet-leave-to {
+  transform: translateY(16px);
+  opacity: 0;
+}
+</style>

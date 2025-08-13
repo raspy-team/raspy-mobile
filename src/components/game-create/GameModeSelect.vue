@@ -16,16 +16,15 @@
     </div>
     <div class="w-full">
       <button
-        disabled
-        class="w-full py-4 bg-orange-200 text-white text-lg font-bold rounded-xl shadow cursor-not-allowed"
+        @click="showModal = true"
+        class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl shadow"
       >
         친구와 바로 시작하기
       </button>
-      <div class="text-sm text-orange-500 text-left font-light mt-1">준비 중입니다</div>
     </div>
   </div>
 
-    <div class="fixed bottom-10 w-full p-5">
+  <div class="fixed bottom-10 w-full p-5">
     <button
       @click="router.push('/rules')"
       class="w-full py-4 bg-white text-gray-500 text-lg font-lg rounded-xl border shadow active:scale-98 transition"
@@ -33,12 +32,22 @@
       규칙 다시 선택하기
     </button>
   </div>
+
+  <friend-modal v-if="showModal" @close="showModal = false" @select="handleFriendSelect" />
 </template>
 
 <script setup>
-
+import { ref, defineEmits } from 'vue'
+import FriendModal from './FriendModal.vue'
 import { useRouter } from 'vue-router'
 
+const showModal = ref(false)
 const router = useRouter()
 
+const emit = defineEmits(['mode']) // 부모가 또 상위로 이벤트 보낼 경우
+
+function handleFriendSelect(friend) {
+  showModal.value = false
+  emit('mode', friend.id)
+}
 </script>

@@ -23,6 +23,8 @@ import GroupUserRegister from "../views/admin/GroupUserRegister.vue"
 import InviteView from "../views/InviteView.vue"
 import InviteDeep from "../views/InviteDeep.vue"
 
+import Feed from "../views/feed/FeedView.vue"
+
 const routes = [
   {
     path: '/init',
@@ -99,6 +101,7 @@ const routes = [
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/group/login', component: GroupUserLogin},
   {path:'/invite-fall-back/:gameId', component : InviteDeep}, 
+  { path: '/feed', component: Feed},
 
 
   

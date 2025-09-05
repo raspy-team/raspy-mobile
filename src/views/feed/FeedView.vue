@@ -28,10 +28,14 @@
       @touchend.passive="onTouchEnd"
     >
       <div class="h-full flex" :style="wrapperStyle">
-        <!-- 1. 인증샷 -->
-        <section class="w-screen shrink-0 h-full relative">
+        <!-- 1. 인증샷들 (동적 개수) -->
+        <section
+          v-for="(img, pi) in post.proofImages"
+          :key="'proof-' + pi"
+          class="w-screen shrink-0 h-full relative"
+        >
           <img
-            :src="post.proofImage"
+            :src="img"
             alt="proof"
             class="absolute inset-0 w-full h-full object-cover"
             draggable="false"
@@ -40,9 +44,9 @@
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            1 / 4 · 인증샷
+            {{ pi + 1 }} / {{ totalSlides }} · 인증샷
           </div>
-          <!-- Content overlay for slide 1 -->
+          <!-- Content overlay for 인증샷 -->
           <div
             class="absolute bottom-[calc(140px+env(safe-area-inset-bottom))] left-0 right-0 px-4 z-10"
           >
@@ -131,7 +135,7 @@
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            2 / 4 · 경기 결과
+            {{ proofCount + 1 }} / {{ totalSlides }} · 경기 결과
           </div>
         </section>
 
@@ -221,7 +225,7 @@
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            3 / 4 · 플레이어 리뷰
+            {{ proofCount + 2 }} / {{ totalSlides }} · 플레이어 리뷰
           </div>
         </section>
 
@@ -261,7 +265,7 @@
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            4 / 4 · 규칙 설명
+            {{ proofCount + 3 }} / {{ totalSlides }} · 규칙 설명
           </div>
         </section>
       </div>
@@ -308,6 +312,20 @@
       </button>
     </div>
 
+    <!-- Skip to result button -->
+    <div
+      v-if="currentSlide < proofCount"
+      class="absolute top-0 right-0 z-40 p-4"
+      :style="{ paddingTop: 'calc(env(safe-area-inset-top) + 25px)' }"
+    >
+      <button
+        @click="goToResult"
+        class="text-xs bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5 backdrop-blur-md active:scale-95 transition"
+      >
+        결과로 건너뛰기
+      </button>
+    </div>
+
     <!-- Floating like hearts -->
     <div class="pointer-events-none absolute inset-0 z-30">
       <div
@@ -331,7 +349,11 @@ const router = useRouter()
 const post = reactive({
   id: 'demo-1',
   date: '2025-09-05',
-  proofImage: 'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
+  proofImages: [
+    'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
+    'https://images.unsplash.com/photo-1546484959-f9a53db84d8e?q=80&w=1200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1200&auto=format&fit=crop',
+  ],
   reviewBg: 'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
   caption: '경기도 수원시',
   meta: {
@@ -397,7 +419,16 @@ const post = reactive({
   },
 })
 
-const sections = ref(['인증샷', '경기 결과', '플레이어 리뷰', '규칙 설명'])
+const proofCount = computed(() =>
+  post.proofImages && post.proofImages.length ? post.proofImages.length : 0,
+)
+const sections = computed(() => {
+  const arr = []
+  for (let i = 0; i < proofCount.value; i++) arr.push('인증샷')
+  arr.push('경기 결과', '플레이어 리뷰', '규칙 설명')
+  return arr
+})
+const totalSlides = computed(() => sections.value.length)
 
 // Slides logic
 const currentSlide = ref(0)
@@ -410,7 +441,7 @@ let lastTapAt = 0
 const hearts = ref([])
 
 const wrapperStyle = computed(() => ({
-  width: sections.value.length * 100 + 'vw',
+  width: totalSlides.value * 100 + 'vw',
   transform: `translateX(calc(${-currentSlide.value * 100}vw + ${translateX.value}px))`,
   transition: animating.value ? 'transform 280ms ease' : 'none',
 }))
@@ -428,7 +459,7 @@ function onTouchMove(e) {
   endX.value = x
   // resist overscroll
   const atStart = currentSlide.value === 0 && deltaX.value > 0
-  const atEnd = currentSlide.value === sections.value.length - 1 && deltaX.value < 0
+  const atEnd = currentSlide.value === totalSlides.value - 1 && deltaX.value < 0
   translateX.value = atStart || atEnd ? deltaX.value * 0.35 : deltaX.value
 }
 
@@ -462,7 +493,7 @@ function onTouchEnd() {
 
 function nextSlide() {
   const before = currentSlide.value
-  currentSlide.value = Math.min(currentSlide.value + 1, sections.value.length - 1)
+  currentSlide.value = Math.min(currentSlide.value + 1, totalSlides.value - 1)
   if (currentSlide.value !== before) tryVibrate(10)
 }
 function prevSlide() {
@@ -496,6 +527,11 @@ async function onShare() {
   } catch (e) {
     console.log(e)
   }
+}
+
+function goToResult() {
+  currentSlide.value = proofCount.value
+  tryVibrate(15)
 }
 
 function tryVibrate(ms) {

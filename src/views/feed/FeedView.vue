@@ -114,11 +114,7 @@
             draggable="false"
           />
           <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-          <div
-            class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-          >
-            {{ idx('헤드라인 사진') + 1 }} / {{ totalSlides }} · 헤드라인 사진
-          </div>
+
           <!-- Content overlay for 헤드라인 사진 -->
           <div
             class="absolute bottom-[calc(140px+env(safe-area-inset-bottom))] left-0 right-0 px-4 z-10"
@@ -153,17 +149,30 @@
               <div class="text-xs text-white/60">{{ post.date }}</div>
             </div>
             <div class="grid grid-cols-3 items-center gap-3">
-              <div class="text-center">
+              <div class="text-center relative">
                 <img
                   :src="post.players[0].avatar"
-                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover"
+                  class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
+                  :class="
+                    post.result.winner === post.players[0].name
+                      ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
+                      : 'border-white/20'
+                  "
                 />
+                <div
+                  v-if="post.result.winner === post.players[0].name"
+                  class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1"
+                >
+                  <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
+                </div>
                 <div class="text-white font-semibold text-sm truncate">
                   {{ post.players[0].name }}
                 </div>
               </div>
               <div class="text-center">
-                <div class="text-5xl font-extrabold text-white tracking-wider">
+                <div
+                  class="font-extrabold text-white tracking-wide leading-none text-[12vw] sm:text-6xl"
+                >
                   {{ post.result.scoreA }}<span class="text-white/50"> : </span
                   >{{ post.result.scoreB }}
                 </div>
@@ -171,15 +180,23 @@
                   Winner · {{ post.result.winner }}
                 </div>
               </div>
-              <div class="text-center">
+              <div class="text-center relative">
                 <img
                   :src="post.players[1].avatar"
-                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover"
+                  class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
+                  :class="
+                    post.result.winner === post.players[1].name
+                      ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
+                      : 'border-white/20'
+                  "
                 />
                 <div class="text-white font-semibold text-sm truncate">
                   {{ post.players[1].name }}
                 </div>
               </div>
+            </div>
+            <div class="mt-2 text-center italic text-white/70 text-xs">
+              이 매치, 너라면 이길 수 있어?
             </div>
             <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80">
               <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
@@ -240,17 +257,12 @@
                 사진 보기
               </button>
               <button
-                class="px-3 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 active:scale-95"
+                class="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/30 text-amber-200 active:scale-95"
                 @click="onDoWithMe"
               >
-                리매치 제안
+                도전장 보내기
               </button>
             </div>
-          </div>
-          <div
-            class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-          >
-            {{ idx('경기 정보') + 1 }} / {{ totalSlides }} · 경기 정보
           </div>
         </section>
 
@@ -258,41 +270,19 @@
         <section class="w-screen shrink-0 h-full relative">
           <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
           <div class="relative z-10 h-full flex flex-col gap-3 px-4 py-12">
-            <!-- 리뷰 요약 카드 -->
             <div class="flex items-center justify-center">
               <div
-                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4"
-              >
-                <div class="flex items-center justify-between">
-                  <div class="font-semibold">평점 & 리뷰</div>
-                  <div class="text-xs text-white/70">{{ post.reviews.length }}개</div>
-                </div>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-white">
-                  <div class="bg-black/30 rounded-lg px-3 py-2 text-center">
-                    퍼포먼스 {{ avgPerformance.toFixed(1) }}/5
-                  </div>
-                  <div class="bg-black/30 rounded-lg px-3 py-2 text-center">
-                    매너 {{ avgManner.toFixed(1) }}/5
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center justify-center">
-              <div
-                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4"
+                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center"
               >
                 <div class="flex items-center gap-3">
                   <img :src="post.reviews[0].avatar" class="w-12 h-12 rounded-full object-cover" />
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
                       <div class="font-semibold truncate">{{ post.reviews[0].name }}</div>
-                      <div class="text-[10px] flex gap-2">
-                        <span class="px-2 py-1 rounded-full bg-black/30 border border-white/10"
+                      <div class="text-[11px] text-white/80">
+                        <span class="mr-2"
                           >퍼포먼스 {{ post.reviews[0].performance.toFixed(1) }}/5</span
-                        >
-                        <span class="px-2 py-1 rounded-full bg-black/30 border border-white/10"
-                          >매너 {{ post.reviews[0].manner.toFixed(1) }}/5</span
-                        >
+                        >· <span class="ml-2">매너 {{ post.reviews[0].manner.toFixed(1) }}/5</span>
                       </div>
                     </div>
                     <!-- progress bars removed -->
@@ -320,20 +310,17 @@
             </div>
             <div class="flex items-center justify-center">
               <div
-                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4"
+                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center"
               >
                 <div class="flex items-center gap-3">
                   <img :src="post.reviews[1].avatar" class="w-12 h-12 rounded-full object-cover" />
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
                       <div class="font-semibold truncate">{{ post.reviews[1].name }}</div>
-                      <div class="text-[10px] flex gap-2">
-                        <span class="px-2 py-1 rounded-full bg-black/30 border border-white/10"
+                      <div class="text-[11px] text-white/80">
+                        <span class="mr-2"
                           >퍼포먼스 {{ post.reviews[1].performance.toFixed(1) }}/5</span
-                        >
-                        <span class="px-2 py-1 rounded-full bg-black/30 border border-white/10"
-                          >매너 {{ post.reviews[1].manner.toFixed(1) }}/5</span
-                        >
+                        >· <span class="ml-2">매너 {{ post.reviews[1].manner.toFixed(1) }}/5</span>
                       </div>
                     </div>
                     <!-- progress bars removed -->
@@ -359,11 +346,6 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div
-            class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-          >
-            {{ idx('평점 & 리뷰') + 1 }} / {{ totalSlides }} · 평점 & 리뷰
           </div>
         </section>
         <!-- 4. 친구 랭킹 -->
@@ -409,11 +391,6 @@
               </div>
             </div>
           </div>
-          <div
-            class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-          >
-            {{ idx('친구 랭킹') + 1 }} / {{ totalSlides }} · 친구 랭킹
-          </div>
         </section>
 
         <!-- 5. 전체 사진 (헤드라인 제외, 각 1장씩 슬라이드) -->
@@ -445,17 +422,15 @@
       </div>
     </div>
 
-    <!-- Bottom left info (author/caption) -->
-    <div class="absolute z-30 left-0 right-0 bottom-[calc(16px+env(safe-area-inset-bottom))] px-4">
-      <div class="flex items-end justify-between gap-3 pr-16">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-3">
-            <img :src="post.author.avatar" class="w-10 h-10 rounded-full object-cover" />
-            <div class="min-w-0">
-              <div class="font-semibold truncate">{{ post.author.name }}</div>
-              <div class="text-xs text-white/70 truncate">{{ post.caption }}</div>
-            </div>
-          </div>
+    <!-- Global bottom progress badge (always on top) -->
+    <div
+      class="absolute z-[100] left-0 right-0 bottom-[calc(16px+env(safe-area-inset-bottom))] px-4 pointer-events-none"
+    >
+      <div class="flex justify-start">
+        <div
+          class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
+        >
+          {{ currentSlide + 1 }} / {{ totalSlides }} · {{ currentSectionLabel }}
         </div>
       </div>
     </div>
@@ -720,6 +695,7 @@ const totalSlides = computed(() => sections.value.length)
 function idx(label) {
   return sections.value.indexOf(label)
 }
+const currentSectionLabel = computed(() => sections.value[currentSlide.value] || '')
 
 // Slides logic
 const currentSlide = ref(0)
@@ -740,14 +716,6 @@ const hearts = ref([])
 // Reviews UX state
 const expandedReviews = reactive({ 0: false, 1: false })
 const helpfulCounts = reactive({ 0: 0, 1: 0 })
-const avgPerformance = computed(() => {
-  const arr = post.reviews.map((r) => r.performance || 0)
-  return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
-})
-const avgManner = computed(() => {
-  const arr = post.reviews.map((r) => r.manner || 0)
-  return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
-})
 
 function truncatedText(t) {
   const max = 60

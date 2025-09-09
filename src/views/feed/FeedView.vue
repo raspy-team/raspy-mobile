@@ -1,10 +1,87 @@
 <template>
+  <header class="fixed top-0 left-0 w-full h-20 z-[30] raspy-top">
+    <!-- 우측: 알림 + DM -->
+    <div class="flex items-center justify-end raspy-top mt-8 space-x-4 mr-3">
+      <!-- DM 버튼 -->
+      <router-link
+        to="/dm"
+        class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full transition ml-1"
+        title="DM"
+      >
+        <i class="fas fa-paper-plane text-orange-500 text-xl"></i>
+      </router-link>
+
+      <!-- 알림 버튼  -->
+      <button
+        class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full transition"
+        @click="toggleNotificationPanel"
+      >
+        <i class="fas fa-bell text-orange-500 text-xl"></i>
+        <span
+          v-if="unreadCount > 0"
+          class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"
+        ></span>
+      </button>
+    </div>
+
+    <!-- 알림 패널 (오른쪽 슬라이드) -->
+    <transition name="slide">
+      <aside
+        v-if="showNotificationPanel"
+        class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
+      >
+        <div class="flex items-center justify-between px-6 h-16 border-b">
+          <span class="text-base font-bold text-gray-800">알림</span>
+          <button
+            @click="toggleNotificationPanel"
+            class="text-gray-400 hover:text-gray-800 text-xl"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <template v-if="notifications.length > 0">
+            <ul>
+              <li
+                v-for="n in notifications"
+                :key="n.id"
+                class="flex px-5 py-4 border-b group cursor-pointer hover:bg-orange-50/70 transition relative"
+                @click="openNotification(n)"
+              >
+                <div
+                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-orange-50 mr-4"
+                >
+                  <i :class="notificationIcon(n.type)" class="text-xl" />
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-1">
+                    <span class="font-medium text-sm text-black">{{ n.title }}</span>
+                    <span
+                      v-if="!n.isRead"
+                      class="inline-block ml-1 w-2 h-2 rounded-full bg-orange-500 align-middle"
+                    ></span>
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1 truncate">
+                    {{ n.message }}
+                  </div>
+                  <div class="text-[10px] text-gray-400 mt-1">
+                    {{ formatDate(n.createdAt) }}
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </template>
+          <template v-else>
+            <div class="py-20 text-center text-gray-400 text-sm">알림이 없습니다.</div>
+          </template>
+        </div>
+      </aside>
+    </transition>
+  </header>
+
   <div class="relative h-[100dvh] w-full bg-black text-white overflow-hidden select-none">
     <!-- Slides progress (top) -->
-    <div
-      class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4"
-      :style="{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }"
-    >
+    <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
       <div
         v-for="(s, i) in sections"
         :key="'prog-' + i"
@@ -131,6 +208,27 @@
               <span>{{ post.meta.place }}</span>
               <span>{{ post.meta.time }}</span>
             </div>
+            <!-- 빠른 이동/행동 -->
+            <div class="mt-3 flex flex-wrap gap-2 justify-center text-xs">
+              <button
+                class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                @click="goToReviews"
+              >
+                리뷰 보기
+              </button>
+              <button
+                class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                @click="goToRules"
+              >
+                규칙 보기
+              </button>
+              <button
+                class="px-3 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 active:scale-95"
+                @click="onDoWithMe"
+              >
+                리매치 제안
+              </button>
+            </div>
           </div>
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
@@ -143,6 +241,27 @@
         <section class="w-screen shrink-0 h-full relative">
           <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
           <div class="relative z-10 h-full flex flex-col gap-3 px-4 py-12">
+            <!-- 리뷰 요약 카드 -->
+            <div class="flex items-center justify-center">
+              <div
+                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="font-semibold">플레이어 리뷰 요약</div>
+                  <div class="text-xs text-white/70">{{ post.reviews.length }}개</div>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-white">
+                  <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                    <span class="inline-block w-4 h-4" v-html="icons.starFill" />
+                    <span>퍼포먼스 {{ avgPerformance.toFixed(1) }}/5</span>
+                  </div>
+                  <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                    <span class="inline-block w-4 h-4" v-html="icons.starFill" />
+                    <span>매너 {{ avgManner.toFixed(1) }}/5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="flex items-center justify-center">
               <div
                 class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4"
@@ -178,7 +297,22 @@
                   </div>
                 </div>
                 <div class="mt-3 text-white/80 text-sm leading-snug">
-                  {{ post.reviews[0].text }}
+                  <span v-if="!expandedReviews[0]">{{ truncatedText(post.reviews[0].text) }}</span>
+                  <span v-else>{{ post.reviews[0].text }}</span>
+                </div>
+                <div class="mt-2 flex items-center justify-between text-xs text-white/70">
+                  <button
+                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                    @click="toggleExpand(0)"
+                  >
+                    {{ expandedReviews[0] ? '접기' : '더보기' }}
+                  </button>
+                  <button
+                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                    @click="toggleHelpful(0)"
+                  >
+                    도움이 됐어요 · {{ helpfulCounts[0] || 0 }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -217,7 +351,22 @@
                   </div>
                 </div>
                 <div class="mt-3 text-white/80 text-sm leading-snug">
-                  {{ post.reviews[1].text }}
+                  <span v-if="!expandedReviews[1]">{{ truncatedText(post.reviews[1].text) }}</span>
+                  <span v-else>{{ post.reviews[1].text }}</span>
+                </div>
+                <div class="mt-2 flex items-center justify-between text-xs text-white/70">
+                  <button
+                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                    @click="toggleExpand(1)"
+                  >
+                    {{ expandedReviews[1] ? '접기' : '더보기' }}
+                  </button>
+                  <button
+                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                    @click="toggleHelpful(1)"
+                  >
+                    도움이 됐어요 · {{ helpfulCounts[1] || 0 }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -239,24 +388,45 @@
               class="mt-4 bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar"
             >
               <div
-                class="sticky top-0 z-10 bg-black/30 backdrop-blur-md border-b border-white/10 px-4 py-2 text-xs text-white/80"
+                class="sticky top-0 z-10 bg-black/30 backdrop-blur-md border-b border-white/10 px-4 py-2 text-xs text-white/80 flex items-center justify-between"
               >
-                규칙 세부 내용 · 총 {{ post.rule.items.length }}개
+                <span
+                  >규칙 세부 내용 · 총 {{ post.rule.items.length }}개 · 약 {{ ruleReadSeconds }}초
+                  소요</span
+                >
+                <button
+                  class="px-2 py-1 bg-white/10 border border-white/15 rounded-full text-white/80 active:scale-95"
+                  @click="toggleAllRules"
+                >
+                  {{ allRulesOpen ? '모두 접기' : '모두 펼치기' }}
+                </button>
               </div>
-              <div class="p-4 space-y-4">
+              <div class="p-4 space-y-2">
                 <div
                   v-for="(it, idx) in post.rule.items"
                   :key="'rule-' + idx"
-                  class="flex items-start gap-3"
+                  class="border border-white/10 rounded-xl overflow-hidden"
                 >
-                  <div
-                    class="mt-1 w-6 h-6 flex items-center justify-center rounded-full bg-white/20 text-xs shrink-0"
+                  <button
+                    class="w-full flex items-center gap-3 px-3 py-2 bg-black/30 active:opacity-80"
+                    @click="toggleRule(idx)"
                   >
-                    {{ idx + 1 }}
-                  </div>
-                  <div class="min-w-0">
-                    <div class="font-semibold leading-tight">{{ it.title }}</div>
-                    <div class="text-white/80 text-sm leading-snug mt-1">{{ it.desc }}</div>
+                    <div
+                      class="w-6 h-6 flex items-center justify-center rounded-full bg-white/20 text-xs shrink-0"
+                    >
+                      {{ idx + 1 }}
+                    </div>
+                    <div class="flex-1 text-left font-semibold leading-tight truncate">
+                      {{ it.title }}
+                    </div>
+                    <span
+                      class="inline-block w-4 h-4"
+                      :class="{ 'rotate-180 transition': openRule[idx] }"
+                      v-html="icons.chevron"
+                    />
+                  </button>
+                  <div v-show="openRule[idx]" class="px-3 pb-3 text-white/80 text-sm leading-snug">
+                    {{ it.desc }}
                   </div>
                 </div>
               </div>
@@ -340,19 +510,78 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, onBeforeUnmount } from 'vue'
+import { computed, reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-
+import api from '../../api/api'
 const router = useRouter()
+const showNotificationPanel = ref(false)
+const notifications = ref([])
+const unreadCount = ref(0)
 
+const fetchNotifications = async () => {
+  const res = await api.get('/api/notifications')
+  notifications.value = res.data
+  console.log(res.data)
+  unreadCount.value = notifications.value.filter((n) => !n.isRead).length
+}
+
+const toggleNotificationPanel = async () => {
+  showNotificationPanel.value = !showNotificationPanel.value
+  if (showNotificationPanel.value && notifications.value.length === 0) {
+    await fetchNotifications()
+  }
+}
+
+const openNotification = async (n) => {
+  if (!n.isRead) {
+    await api.post(`/api/notifications/${n.id}/read`)
+    n.isRead = true
+    unreadCount.value = notifications.value.filter((x) => !x.isRead).length
+  }
+  // url 존재 시 해당 링크로 이동
+  if (n.url) {
+    try {
+      // 1. 완전한 URL이면, pathname + search + hash 만 추출
+      const parsed = new URL(n.url, window.location.origin)
+      const internalPath = parsed.pathname + parsed.search + parsed.hash
+      router.push(internalPath)
+    } catch (e) {
+      // 2. 이미 상대경로면 그대로 push
+      router.push(n.url)
+    }
+  }
+}
+
+const notificationIcon = (type) => {
+  switch (type) {
+    case 'GAME_START':
+      return 'fas fa-play-circle text-orange-400'
+    case 'GAME_END':
+      return 'fas fa-flag-checkered text-gray-500'
+    case 'GAME_COMMENT':
+      return 'fas fa-comment-dots text-blue-400'
+    case 'COMMENT_REPLY':
+      return 'fas fa-comment-dots text-blue-400'
+    case 'INBOX':
+      return 'fas fa-inbox text-pink-400'
+    case 'MY_GAME':
+      return 'fas fa-calendar-alt text-green-500'
+    default:
+      return 'fas fa-bell text-orange-400'
+  }
+}
+
+onMounted(() => {
+  fetchNotifications()
+})
 // Dummy post data
 const post = reactive({
   id: 'demo-1',
   date: '2025-09-05',
   proofImages: [
-    'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
-    'https://images.unsplash.com/photo-1546484959-f9a53db84d8e?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1200&auto=format&fit=crop',
+    //   'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
+    //   'https://images.unsplash.com/photo-1546484959-f9a53db84d8e?q=80&w=1200&auto=format&fit=crop',
+    //  'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1200&auto=format&fit=crop',
   ],
   reviewBg: 'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
   caption: '경기도 수원시',
@@ -439,6 +668,30 @@ const deltaX = ref(0)
 const endX = ref(0)
 let lastTapAt = 0
 const hearts = ref([])
+
+// Reviews UX state
+const expandedReviews = reactive({ 0: false, 1: false })
+const helpfulCounts = reactive({ 0: 0, 1: 0 })
+const avgPerformance = computed(() => {
+  const arr = post.reviews.map((r) => r.performance || 0)
+  return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
+})
+const avgManner = computed(() => {
+  const arr = post.reviews.map((r) => r.manner || 0)
+  return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
+})
+
+function truncatedText(t) {
+  const max = 60
+  return t && t.length > max ? t.slice(0, max) + '…' : t
+}
+function toggleExpand(i) {
+  expandedReviews[i] = !expandedReviews[i]
+}
+function toggleHelpful(i) {
+  helpfulCounts[i] = (helpfulCounts[i] || 0) + 1
+  tryVibrate(10)
+}
 
 const wrapperStyle = computed(() => ({
   width: totalSlides.value * 100 + 'vw',
@@ -569,9 +822,35 @@ const icons = {
     '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="M8 21h8M12 17a5 5 0 0 0 5-5V4H7v8a5 5 0 0 0 5 5Z"/><path d="M5 4H3v2a4 4 0 0 0 4 4"/><path d="M19 4h2v2a4 4 0 0 1-4 4"/></svg>',
   clock:
     '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  chevron:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"/></svg>',
 }
 
 onBeforeUnmount(() => {})
+
+// Rules accordion state
+const openRule = reactive({})
+const allRulesOpen = computed(
+  () => post.rule.items.length && post.rule.items.every((_, idx) => openRule[idx]),
+)
+const ruleReadSeconds = computed(() => Math.max(10, post.rule.items.length * 4))
+function toggleRule(idx) {
+  openRule[idx] = !openRule[idx]
+}
+function toggleAllRules() {
+  const to = !allRulesOpen.value
+  post.rule.items.forEach((_, idx) => (openRule[idx] = to))
+}
+
+// Quick nav from result
+function goToReviews() {
+  currentSlide.value = proofCount.value + 1
+  tryVibrate(12)
+}
+function goToRules() {
+  currentSlide.value = proofCount.value + 2
+  tryVibrate(12)
+}
 </script>
 
 <style scoped>

@@ -99,7 +99,10 @@
       @touchstart.passive="onTouchStart"
       @touchmove.passive="onTouchMove"
       @touchend.passive="onTouchEnd"
-      @click="onClick"
+      @mousedown.passive="onMouseDown"
+      @mousemove.passive="onMouseMove"
+      @mouseup.passive="onMouseUp"
+      @mouseleave.passive="onMouseUp"
     >
       <div class="h-full flex" :style="wrapperStyle">
         <!-- 1. 헤드라인 사진 (있을 때만) -->
@@ -508,7 +511,12 @@
         닫기
       </button>
     </div>
-    <div class="flex-1 overflow-auto p-4 space-y-2 touch-scroll" @touchstart.stop @touchmove.stop @touchend.stop>
+    <div
+      class="flex-1 overflow-auto p-4 space-y-2 touch-scroll"
+      @touchstart.stop
+      @touchmove.stop
+      @touchend.stop
+    >
       <div
         v-for="(it, idx) in post.rule.items"
         :key="'rm-' + idx"
@@ -723,9 +731,10 @@ const deltaX = ref(0)
 const deltaY = ref(0)
 const endX = ref(0)
 const isVerticalScroll = ref(false)
+const isPointerDown = ref(false)
+let gestureStartAt = 0
 let activeScrollEl = null
 let lastTapAt = 0
-let lastTouchAt = 0
 const hearts = ref([])
 
 // Reviews UX state
@@ -755,7 +764,8 @@ function toggleHelpful(i) {
 const wrapperStyle = computed(() => ({
   width: totalSlides.value * 100 + 'vw',
   transform: `translateX(calc(${-currentSlide.value * 100}vw + ${translateX.value}px))`,
-  transition: animating.value ? 'transform 280ms ease' : 'none',
+  transition: animating.value ? 'transform 380ms cubic-bezier(.22,1,.36,1)' : 'none',
+  willChange: 'transform',
 }))
 
 function onTouchStart(e) {
@@ -768,7 +778,8 @@ function onTouchStart(e) {
   isVerticalScroll.value = false
   animating.value = false
   activeScrollEl = findScrollable(e.target)
-  lastTouchAt = Date.now()
+  isPointerDown.value = true
+  gestureStartAt = Date.now()
 }
 
 function onTouchMove(e) {
@@ -781,7 +792,8 @@ function onTouchMove(e) {
 
   // lock to vertical if vertical movement dominates or inside scrollable
   if (!isVerticalScroll.value) {
-    const verticalDominant = Math.abs(deltaY.value) > Math.abs(deltaX.value) && Math.abs(deltaY.value) > 4
+    const verticalDominant =
+      Math.abs(deltaY.value) > Math.abs(deltaX.value) && Math.abs(deltaY.value) > 4
     if (verticalDominant || activeScrollEl) {
       isVerticalScroll.value = true
     }
@@ -798,13 +810,14 @@ function onTouchMove(e) {
 }
 
 function onTouchEnd() {
-  const threshold = 60
-  animating.value = true
+  const thresholdPx = Math.floor(window.innerWidth * 0.12)
+  const duration = Math.max(1, Date.now() - gestureStartAt)
+  const velocityX = deltaX.value / duration // px per ms
   if (isVerticalScroll.value) {
     // end of vertical scroll gesture: do nothing
-  } else if (Math.abs(deltaX.value) > threshold) {
-    if (deltaX.value < 0) nextSlide()
-    else prevSlide()
+  } else if (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25) {
+    // commit to next/prev and snap immediately without overshoot
+    commitSlide(deltaX.value < 0 ? 1 : -1)
   } else {
     // treat as tap/double-tap only (no navigation on single tap for mobile)
     const now = Date.now()
@@ -818,11 +831,14 @@ function onTouchEnd() {
     } else if (!movedX && !movedY) {
       lastTapAt = now
     }
+    // animate back to current slide smoothly
+    animating.value = true
+    translateX.value = 0
   }
   setTimeout(() => {
     animating.value = false
-    translateX.value = 0
-  }, 320)
+  }, 380)
+  isPointerDown.value = false
 }
 
 function findScrollable(el) {
@@ -830,7 +846,10 @@ function findScrollable(el) {
     let node = el
     while (node && node !== document.body) {
       const st = getComputedStyle(node)
-      if ((st.overflowY === 'auto' || st.overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+      if (
+        (st.overflowY === 'auto' || st.overflowY === 'scroll') &&
+        node.scrollHeight > node.clientHeight
+      ) {
         return node
       }
       node = node.parentElement
@@ -841,42 +860,88 @@ function findScrollable(el) {
   return null
 }
 
-// Click support for desktop/mouse
-function onClick(e) {
-  // ignore synthetic clicks from recent touch
-  if (Date.now() - lastTouchAt < 800) return
-  // avoid clicks on interactive elements
-  const target = e.target
+// Mouse drag support (desktop)
+function onMouseDown(e) {
+  // ignore if clicked interactive controls
   if (
-    target.closest &&
-    target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
+    e.target.closest &&
+    e.target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
   )
     return
-
-  const now = Date.now()
-  const tapGap = now - lastTapAt
-  if (tapGap < 260) {
-    toggleLike()
-    spawnHeart(e.clientX, e.clientY)
-    lastTapAt = 0
+  startX.value = e.clientX
+  startY.value = e.clientY
+  endX.value = startX.value
+  deltaX.value = 0
+  deltaY.value = 0
+  isVerticalScroll.value = false
+  animating.value = false
+  isPointerDown.value = true
+  gestureStartAt = Date.now()
+}
+function onMouseMove(e) {
+  if (!isPointerDown.value) return
+  const x = e.clientX
+  const y = e.clientY
+  deltaX.value = x - startX.value
+  deltaY.value = y - startY.value
+  endX.value = x
+  if (!isVerticalScroll.value) {
+    const verticalDominant =
+      Math.abs(deltaY.value) > Math.abs(deltaX.value) && Math.abs(deltaY.value) > 4
+    if (verticalDominant) isVerticalScroll.value = true
+  }
+  if (isVerticalScroll.value) {
+    translateX.value = 0
     return
   }
-  const half = window.innerWidth / 2
-  if (e.clientX > half) nextSlide()
-  else prevSlide()
-  lastTapAt = now
+  const atStart = currentSlide.value === 0 && deltaX.value > 0
+  const atEnd = currentSlide.value === totalSlides.value - 1 && deltaX.value < 0
+  translateX.value = atStart || atEnd ? deltaX.value * 0.35 : deltaX.value
+}
+function onMouseUp() {
+  if (!isPointerDown.value) return
+  const thresholdPx = Math.floor(window.innerWidth * 0.12)
+  const duration = Math.max(1, Date.now() - gestureStartAt)
+  const velocityX = deltaX.value / duration
+  if (
+    !isVerticalScroll.value &&
+    (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)
+  ) {
+    commitSlide(deltaX.value < 0 ? 1 : -1)
+  } else {
+    // animate back
+    animating.value = true
+    translateX.value = 0
+  }
+  setTimeout(() => {
+    animating.value = false
+  }, 380)
+  isPointerDown.value = false
 }
 
-function nextSlide() {
-  const before = currentSlide.value
-  currentSlide.value = Math.min(currentSlide.value + 1, totalSlides.value - 1)
-  if (currentSlide.value !== before) tryVibrate(10)
+function commitSlide(dir) {
+  animating.value = true
+  // reset drag offset so we don't overshoot
+  translateX.value = 0
+  // defer index change to next frame so CSS transition applies cleanly
+  requestAnimationFrame(() => {
+    const before = currentSlide.value
+    if (dir > 0) currentSlide.value = Math.min(currentSlide.value + 1, totalSlides.value - 1)
+    else currentSlide.value = Math.max(currentSlide.value - 1, 0)
+    if (currentSlide.value !== before) tryVibrate(10)
+  })
 }
-function prevSlide() {
-  const before = currentSlide.value
-  currentSlide.value = Math.max(currentSlide.value - 1, 0)
-  if (currentSlide.value !== before) tryVibrate(10)
-}
+
+// function nextSlide() {
+//   const before = currentSlide.value
+//   currentSlide.value = Math.min(currentSlide.value + 1, totalSlides.value - 1)
+//   if (currentSlide.value !== before) tryVibrate(10)
+// }
+// function prevSlide() {
+//   const before = currentSlide.value
+//   currentSlide.value = Math.max(currentSlide.value - 1, 0)
+//   if (currentSlide.value !== before) tryVibrate(10)
+// }
 
 // Actions
 const liked = ref(false)

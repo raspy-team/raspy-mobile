@@ -91,11 +91,7 @@
       </div>
     </div>
 
-    <!-- Left/Right tap zones for navigation -->
-    <div class="absolute inset-0 z-10 grid grid-cols-2">
-      <button class="w-full h-full" aria-label="Previous" @click="prevSlide" />
-      <button class="w-full h-full" aria-label="Next" @click="nextSlide" />
-    </div>
+    <!-- Tap zones removed to allow inner scroll and gestures only -->
 
     <!-- Slides Wrapper -->
     <div
@@ -103,17 +99,14 @@
       @touchstart.passive="onTouchStart"
       @touchmove.passive="onTouchMove"
       @touchend.passive="onTouchEnd"
+      @click="onClick"
     >
       <div class="h-full flex" :style="wrapperStyle">
-        <!-- 1. 인증샷들 (동적 개수) -->
-        <section
-          v-for="(img, pi) in post.proofImages"
-          :key="'proof-' + pi"
-          class="w-screen shrink-0 h-full relative"
-        >
+        <!-- 1. 헤드라인 사진 (있을 때만) -->
+        <section v-if="hasPhotos" class="w-screen shrink-0 h-full relative">
           <img
-            :src="img"
-            alt="proof"
+            :src="headlinePhoto.url"
+            alt="headline"
             class="absolute inset-0 w-full h-full object-cover"
             draggable="false"
           />
@@ -121,16 +114,16 @@
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            {{ pi + 1 }} / {{ totalSlides }} · 인증샷
+            {{ idx('헤드라인 사진') + 1 }} / {{ totalSlides }} · 헤드라인 사진
           </div>
-          <!-- Content overlay for 인증샷 -->
+          <!-- Content overlay for 헤드라인 사진 -->
           <div
             class="absolute bottom-[calc(140px+env(safe-area-inset-bottom))] left-0 right-0 px-4 z-10"
           >
             <div
               class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
             >
-              <div class="text-lg font-bold">어제 경기 인증샷</div>
+              <div class="text-lg font-bold">{{ post.author.name }}의 경기 하이라이트</div>
               <div class="mt-1 text-xs text-white/80">
                 {{ post.meta.place }} · {{ post.meta.time }}
               </div>
@@ -146,7 +139,7 @@
           </div>
         </section>
 
-        <!-- 2. 경기 결과 -->
+        <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
         <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
           <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
           <div
@@ -195,13 +188,27 @@
                 <span>총 시간 {{ post.result.duration }}</span>
               </div>
             </div>
-            <div class="mt-3 flex flex-wrap gap-2 justify-center">
+            <!-- 세트 결과: 세로 전체폭 -->
+            <div class="mt-4 space-y-2">
               <div
                 v-for="(sc, idx) in post.result.setScores"
                 :key="'set-' + idx"
-                class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-xs text-white/90"
+                class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
               >
-                {{ idx + 1 }}세트 · {{ sc.a }} : {{ sc.b }}
+                <div class="font-semibold">{{ idx + 1 }}세트</div>
+                <div class="font-bold">{{ sc.a }} : {{ sc.b }}</div>
+              </div>
+            </div>
+            <!-- 규칙: 모달로 자세히 보기 -->
+            <div class="mt-4">
+              <div class="flex items-center justify-between text-xs text-white/60 mb-2">
+                <span>규칙 · 총 {{ post.rule.items.length }}개 · 약 {{ ruleReadSeconds }}초</span>
+                <button
+                  class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                  @click="showRuleModal = true"
+                >
+                  자세히 보기
+                </button>
               </div>
             </div>
             <div class="mt-3 text-[11px] text-white/70 flex items-center justify-between">
@@ -218,9 +225,16 @@
               </button>
               <button
                 class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
-                @click="goToRules"
+                @click="goToRanking"
               >
-                규칙 보기
+                랭킹 보기
+              </button>
+              <button
+                v-if="idx('전체 사진') >= 0"
+                class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                @click="goToGallery"
+              >
+                사진 보기
               </button>
               <button
                 class="px-3 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 active:scale-95"
@@ -233,11 +247,11 @@
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            {{ proofCount + 1 }} / {{ totalSlides }} · 경기 결과
+            {{ idx('경기 정보') + 1 }} / {{ totalSlides }} · 경기 정보
           </div>
         </section>
 
-        <!-- 3. 플레이어 리뷰 -->
+        <!-- 3. 평점 & 리뷰 -->
         <section class="w-screen shrink-0 h-full relative">
           <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
           <div class="relative z-10 h-full flex flex-col gap-3 px-4 py-12">
@@ -247,17 +261,15 @@
                 class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4"
               >
                 <div class="flex items-center justify-between">
-                  <div class="font-semibold">플레이어 리뷰 요약</div>
+                  <div class="font-semibold">평점 & 리뷰</div>
                   <div class="text-xs text-white/70">{{ post.reviews.length }}개</div>
                 </div>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-white">
-                  <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                    <span class="inline-block w-4 h-4" v-html="icons.starFill" />
-                    <span>퍼포먼스 {{ avgPerformance.toFixed(1) }}/5</span>
+                  <div class="bg-black/30 rounded-lg px-3 py-2 text-center">
+                    퍼포먼스 {{ avgPerformance.toFixed(1) }}/5
                   </div>
-                  <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                    <span class="inline-block w-4 h-4" v-html="icons.starFill" />
-                    <span>매너 {{ avgManner.toFixed(1) }}/5</span>
+                  <div class="bg-black/30 rounded-lg px-3 py-2 text-center">
+                    매너 {{ avgManner.toFixed(1) }}/5
                   </div>
                 </div>
               </div>
@@ -280,20 +292,7 @@
                         >
                       </div>
                     </div>
-                    <div class="mt-2">
-                      <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-emerald-400"
-                          :style="{ width: (post.reviews[0].performance / 5) * 100 + '%' }"
-                        />
-                      </div>
-                      <div class="h-1.5 bg-white/10 rounded-full overflow-hidden mt-1">
-                        <div
-                          class="h-full bg-sky-400"
-                          :style="{ width: (post.reviews[0].manner / 5) * 100 + '%' }"
-                        />
-                      </div>
-                    </div>
+                    <!-- progress bars removed -->
                   </div>
                 </div>
                 <div class="mt-3 text-white/80 text-sm leading-snug">
@@ -334,20 +333,7 @@
                         >
                       </div>
                     </div>
-                    <div class="mt-2">
-                      <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-emerald-400"
-                          :style="{ width: (post.reviews[1].performance / 5) * 100 + '%' }"
-                        />
-                      </div>
-                      <div class="h-1.5 bg-white/10 rounded-full overflow-hidden mt-1">
-                        <div
-                          class="h-full bg-sky-400"
-                          :style="{ width: (post.reviews[1].manner / 5) * 100 + '%' }"
-                        />
-                      </div>
-                    </div>
+                    <!-- progress bars removed -->
                   </div>
                 </div>
                 <div class="mt-3 text-white/80 text-sm leading-snug">
@@ -374,68 +360,83 @@
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            {{ proofCount + 2 }} / {{ totalSlides }} · 플레이어 리뷰
+            {{ idx('평점 & 리뷰') + 1 }} / {{ totalSlides }} · 평점 & 리뷰
           </div>
         </section>
-
-        <!-- 4. 규칙 설명 -->
+        <!-- 4. 친구 랭킹 -->
         <section class="w-screen shrink-0 h-full relative p-5">
-          <div class="absolute inset-0 bg-gradient-to-b from-amber-900 via-black to-black" />
-          <div class="relative z-10 max-w-xl">
-            <div class="text-2xl font-extrabold">{{ post.rule.title }}</div>
-            <div class="text-white/70 mt-1 text-sm">작성자 · {{ post.author.name }}</div>
+          <div class="absolute inset-0 bg-gradient-to-b from-fuchsia-900 via-black to-black" />
+          <div class="relative z-10 max-w-xl mx-auto w-full">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-xl font-extrabold">친구 랭킹</div>
+              <div class="text-xs text-white/70">총 {{ friendsRanking.length }}명</div>
+            </div>
             <div
-              class="mt-4 bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar"
+              class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
+              @touchstart.stop
+              @touchmove.stop
+              @touchend.stop
             >
               <div
-                class="sticky top-0 z-10 bg-black/30 backdrop-blur-md border-b border-white/10 px-4 py-2 text-xs text-white/80 flex items-center justify-between"
+                v-for="(f, i) in friendsRanking"
+                :key="f.id"
+                class="flex items-center gap-3 px-4 py-2 border-b border-white/10 last:border-b-0"
               >
-                <span
-                  >규칙 세부 내용 · 총 {{ post.rule.items.length }}개 · 약 {{ ruleReadSeconds }}초
-                  소요</span
-                >
-                <button
-                  class="px-2 py-1 bg-white/10 border border-white/15 rounded-full text-white/80 active:scale-95"
-                  @click="toggleAllRules"
-                >
-                  {{ allRulesOpen ? '모두 접기' : '모두 펼치기' }}
-                </button>
-              </div>
-              <div class="p-4 space-y-2">
                 <div
-                  v-for="(it, idx) in post.rule.items"
-                  :key="'rule-' + idx"
-                  class="border border-white/10 rounded-xl overflow-hidden"
+                  class="w-8 text-center font-bold"
+                  :class="i < 3 ? 'text-amber-300' : 'text-white'"
                 >
-                  <button
-                    class="w-full flex items-center gap-3 px-3 py-2 bg-black/30 active:opacity-80"
-                    @click="toggleRule(idx)"
-                  >
-                    <div
-                      class="w-6 h-6 flex items-center justify-center rounded-full bg-white/20 text-xs shrink-0"
-                    >
-                      {{ idx + 1 }}
-                    </div>
-                    <div class="flex-1 text-left font-semibold leading-tight truncate">
-                      {{ it.title }}
-                    </div>
-                    <span
-                      class="inline-block w-4 h-4"
-                      :class="{ 'rotate-180 transition': openRule[idx] }"
-                      v-html="icons.chevron"
-                    />
-                  </button>
-                  <div v-show="openRule[idx]" class="px-3 pb-3 text-white/80 text-sm leading-snug">
-                    {{ it.desc }}
+                  {{ i + 1 }}
+                </div>
+                <img :src="f.avatar" class="w-8 h-8 rounded-full object-cover" />
+                <div class="flex-1 min-w-0">
+                  <div class="truncate">{{ f.name }}</div>
+                  <div class="text-[10px] text-white/70 truncate">
+                    최근 경기 {{ f.recentGames }} · 승률 {{ (f.winRate * 100).toFixed(0) }}%
                   </div>
                 </div>
+                <div v-if="f.isFriend" class="text-xs text-white/80">친구</div>
+                <button
+                  v-else
+                  class="px-2 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-xs active:scale-95"
+                  @click="makeFriend(i)"
+                >
+                  팔로우
+                </button>
               </div>
             </div>
           </div>
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            {{ proofCount + 3 }} / {{ totalSlides }} · 규칙 설명
+            {{ idx('친구 랭킹') + 1 }} / {{ totalSlides }} · 친구 랭킹
+          </div>
+        </section>
+
+        <!-- 5. 전체 사진 (헤드라인 제외, 각 1장씩 슬라이드) -->
+        <section
+          v-for="(p, gi) in galleryPhotos"
+          :key="'gal-' + p.id"
+          class="w-screen shrink-0 h-full relative"
+        >
+          <img
+            :src="p.url"
+            alt="photo"
+            class="absolute inset-0 w-full h-full object-cover"
+            draggable="false"
+          />
+          <div
+            class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
+          />
+          <div
+            class="absolute bottom-[calc(140px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
+          >
+            {{ formatTakenAt(p.takenAt) }}
+          </div>
+          <div
+            class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
+          >
+            {{ idx('전체 사진') + gi + 1 }} / {{ totalSlides }} · 사진
           </div>
         </section>
       </div>
@@ -482,19 +483,7 @@
       </button>
     </div>
 
-    <!-- Skip to result button -->
-    <div
-      v-if="currentSlide < proofCount"
-      class="absolute top-0 right-0 z-40 p-4"
-      :style="{ paddingTop: 'calc(env(safe-area-inset-top) + 25px)' }"
-    >
-      <button
-        @click="goToResult"
-        class="text-xs bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5 backdrop-blur-md active:scale-95 transition"
-      >
-        결과로 건너뛰기
-      </button>
-    </div>
+    <!-- Skip button removed per spec -->
 
     <!-- Floating like hearts -->
     <div class="pointer-events-none absolute inset-0 z-30">
@@ -505,6 +494,29 @@
         :style="{ left: h.x + 'px', top: h.y + 'px' }"
         v-html="icons.heartFill"
       />
+    </div>
+  </div>
+
+  <!-- Rules modal -->
+  <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/80 flex flex-col">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
+      <div class="text-lg font-bold">경기 규칙</div>
+      <button
+        class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 active:scale-95"
+        @click="showRuleModal = false"
+      >
+        닫기
+      </button>
+    </div>
+    <div class="flex-1 overflow-auto p-4 space-y-2 touch-scroll" @touchstart.stop @touchmove.stop @touchend.stop>
+      <div
+        v-for="(it, idx) in post.rule.items"
+        :key="'rm-' + idx"
+        class="bg-white/10 border border-white/10 rounded-xl"
+      >
+        <div class="px-4 py-3 font-semibold">{{ idx + 1 }}. {{ it.title }}</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">{{ it.desc }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -578,10 +590,34 @@ onMounted(() => {
 const post = reactive({
   id: 'demo-1',
   date: '2025-09-05',
-  proofImages: [
-    //   'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
-    //   'https://images.unsplash.com/photo-1546484959-f9a53db84d8e?q=80&w=1200&auto=format&fit=crop',
-    //  'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1200&auto=format&fit=crop',
+  // 전체 사진 (인증샷 포함). 첫 항목이 헤드라인 사진이라고 가정 (isHeadline: true)
+  photos: [
+    {
+      id: 'p1',
+      url: 'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
+      takenAt: '2025-09-05T20:05:00+09:00',
+      isHeadline: true,
+    },
+    {
+      id: 'p2',
+      url: 'https://images.unsplash.com/photo-1546484959-f9a53db84d8e?q=80&w=1200&auto=format&fit=crop',
+      takenAt: '2025-09-05T20:08:00+09:00',
+    },
+    {
+      id: 'p3',
+      url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1200&auto=format&fit=crop',
+      takenAt: '2025-09-05T20:12:00+09:00',
+    },
+    {
+      id: 'p4',
+      url: 'https://images.unsplash.com/photo-1574629173115-01d0f4e6e1a5?q=80&w=1200&auto=format&fit=crop',
+      takenAt: '2025-09-05T20:16:00+09:00',
+    },
+    {
+      id: 'p5',
+      url: 'https://images.unsplash.com/photo-1552074280-9f63f6f97130?q=80&w=1200&auto=format&fit=crop',
+      takenAt: '2025-09-05T20:20:00+09:00',
+    },
   ],
   reviewBg: 'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
   caption: '경기도 수원시',
@@ -648,25 +684,48 @@ const post = reactive({
   },
 })
 
-const proofCount = computed(() =>
-  post.proofImages && post.proofImages.length ? post.proofImages.length : 0,
-)
+// Photos computed
+const hasPhotos = computed(() => Array.isArray(post.photos) && post.photos.length > 0)
+// const photoCount = computed(() => (post.photos ? post.photos.length : 0))
+// const sortedPhotos = computed(() =>
+//   (post.photos || []).slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt)),
+// )
+const headlinePhoto = computed(() => {
+  const marked = (post.photos || []).find((p) => p.isHeadline)
+  return marked || (post.photos || [])[0] || null
+})
+const galleryPhotos = computed(() => {
+  const head = headlinePhoto.value
+  const rest = (post.photos || []).filter((p) => !head || p.id !== head.id)
+  return rest.slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt))
+})
+
+// Sections order
 const sections = computed(() => {
   const arr = []
-  for (let i = 0; i < proofCount.value; i++) arr.push('인증샷')
-  arr.push('경기 결과', '플레이어 리뷰', '규칙 설명')
+  if (hasPhotos.value) arr.push('헤드라인 사진')
+  arr.push('경기 정보', '평점 & 리뷰', '친구 랭킹')
+  for (let i = 0; i < galleryPhotos.value.length; i++) arr.push('전체 사진')
   return arr
 })
 const totalSlides = computed(() => sections.value.length)
+function idx(label) {
+  return sections.value.indexOf(label)
+}
 
 // Slides logic
 const currentSlide = ref(0)
 const translateX = ref(0)
 const animating = ref(false)
 const startX = ref(0)
+const startY = ref(0)
 const deltaX = ref(0)
+const deltaY = ref(0)
 const endX = ref(0)
+const isVerticalScroll = ref(false)
+let activeScrollEl = null
 let lastTapAt = 0
+let lastTouchAt = 0
 const hearts = ref([])
 
 // Reviews UX state
@@ -700,17 +759,39 @@ const wrapperStyle = computed(() => ({
 }))
 
 function onTouchStart(e) {
-  startX.value = e.touches[0].clientX
+  const t = e.touches[0]
+  startX.value = t.clientX
+  startY.value = t.clientY
   endX.value = startX.value
   deltaX.value = 0
+  deltaY.value = 0
+  isVerticalScroll.value = false
   animating.value = false
+  activeScrollEl = findScrollable(e.target)
+  lastTouchAt = Date.now()
 }
 
 function onTouchMove(e) {
-  const x = e.touches[0].clientX
+  const t = e.touches[0]
+  const x = t.clientX
+  const y = t.clientY
   deltaX.value = x - startX.value
+  deltaY.value = y - startY.value
   endX.value = x
-  // resist overscroll
+
+  // lock to vertical if vertical movement dominates or inside scrollable
+  if (!isVerticalScroll.value) {
+    const verticalDominant = Math.abs(deltaY.value) > Math.abs(deltaX.value) && Math.abs(deltaY.value) > 4
+    if (verticalDominant || activeScrollEl) {
+      isVerticalScroll.value = true
+    }
+  }
+  if (isVerticalScroll.value) {
+    translateX.value = 0
+    return
+  }
+
+  // horizontal swipe with overscroll resistance
   const atStart = currentSlide.value === 0 && deltaX.value > 0
   const atEnd = currentSlide.value === totalSlides.value - 1 && deltaX.value < 0
   translateX.value = atStart || atEnd ? deltaX.value * 0.35 : deltaX.value
@@ -719,22 +800,22 @@ function onTouchMove(e) {
 function onTouchEnd() {
   const threshold = 60
   animating.value = true
-  if (Math.abs(deltaX.value) > threshold) {
+  if (isVerticalScroll.value) {
+    // end of vertical scroll gesture: do nothing
+  } else if (Math.abs(deltaX.value) > threshold) {
     if (deltaX.value < 0) nextSlide()
     else prevSlide()
   } else {
-    // tap: left/right or double-like
+    // treat as tap/double-tap only (no navigation on single tap for mobile)
     const now = Date.now()
     const tapGap = now - lastTapAt
-    const moved = Math.abs(deltaX.value) > 10
-    if (!moved && tapGap < 260) {
+    const movedX = Math.abs(deltaX.value) > 10
+    const movedY = Math.abs(deltaY.value) > 10
+    if (!movedX && !movedY && tapGap < 260) {
       toggleLike()
       spawnHeart(endX.value, window.innerHeight * 0.45)
       lastTapAt = 0
-    } else {
-      const half = window.innerWidth / 2
-      if (endX.value > half) nextSlide()
-      else prevSlide()
+    } else if (!movedX && !movedY) {
       lastTapAt = now
     }
   }
@@ -742,6 +823,48 @@ function onTouchEnd() {
     animating.value = false
     translateX.value = 0
   }, 320)
+}
+
+function findScrollable(el) {
+  try {
+    let node = el
+    while (node && node !== document.body) {
+      const st = getComputedStyle(node)
+      if ((st.overflowY === 'auto' || st.overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+        return node
+      }
+      node = node.parentElement
+    }
+  } catch (e) {
+    // ignore
+  }
+  return null
+}
+
+// Click support for desktop/mouse
+function onClick(e) {
+  // ignore synthetic clicks from recent touch
+  if (Date.now() - lastTouchAt < 800) return
+  // avoid clicks on interactive elements
+  const target = e.target
+  if (
+    target.closest &&
+    target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
+  )
+    return
+
+  const now = Date.now()
+  const tapGap = now - lastTapAt
+  if (tapGap < 260) {
+    toggleLike()
+    spawnHeart(e.clientX, e.clientY)
+    lastTapAt = 0
+    return
+  }
+  const half = window.innerWidth / 2
+  if (e.clientX > half) nextSlide()
+  else prevSlide()
+  lastTapAt = now
 }
 
 function nextSlide() {
@@ -782,9 +905,23 @@ async function onShare() {
   }
 }
 
-function goToResult() {
-  currentSlide.value = proofCount.value
-  tryVibrate(15)
+// Quick navigation helpers
+// Rules modal state
+const showRuleModal = ref(false)
+function goToReviews() {
+  const i = idx('평점 & 리뷰')
+  if (i >= 0) currentSlide.value = i
+  tryVibrate(12)
+}
+function goToRanking() {
+  const i = idx('친구 랭킹')
+  if (i >= 0) currentSlide.value = i
+  tryVibrate(12)
+}
+function goToGallery() {
+  const i = idx('전체 사진')
+  if (i >= 0) currentSlide.value = i
+  tryVibrate(12)
 }
 
 function tryVibrate(ms) {
@@ -829,27 +966,56 @@ const icons = {
 onBeforeUnmount(() => {})
 
 // Rules accordion state
-const openRule = reactive({})
-const allRulesOpen = computed(
-  () => post.rule.items.length && post.rule.items.every((_, idx) => openRule[idx]),
-)
+// const openRule = reactive({})
+// const allRulesOpen = computed(
+//   () => post.rule.items.length && post.rule.items.every((_, idx) => openRule[idx]),
+// )
 const ruleReadSeconds = computed(() => Math.max(10, post.rule.items.length * 4))
-function toggleRule(idx) {
-  openRule[idx] = !openRule[idx]
-}
-function toggleAllRules() {
-  const to = !allRulesOpen.value
-  post.rule.items.forEach((_, idx) => (openRule[idx] = to))
+// function toggleRule(idx) {
+//   openRule[idx] = !openRule[idx]
+// }
+// function toggleAllRules() {
+//   const to = !allRulesOpen.value
+//   post.rule.items.forEach((_, idx) => (openRule[idx] = to))
+// }
+
+// Friends ranking (dummy 50 entries)
+const friendsRanking = ref(
+  Array.from({ length: 50 }, (_, i) => ({
+    id: 'f' + (i + 1),
+    name: '친구 ' + (i + 1),
+    avatar: `https://i.pravatar.cc/100?img=${(i % 70) + 1}`,
+    isFriend: i % 4 === 0,
+    recentGames: 8 + (i % 5),
+    winRate: 0.45 + ((50 - i) % 30) / 100,
+  })),
+)
+
+function makeFriend(i) {
+  const f = friendsRanking.value[i]
+  if (f && !f.isFriend) {
+    f.isFriend = true
+    tryVibrate(10)
+  }
 }
 
-// Quick nav from result
-function goToReviews() {
-  currentSlide.value = proofCount.value + 1
-  tryVibrate(12)
-}
-function goToRules() {
-  currentSlide.value = proofCount.value + 2
-  tryVibrate(12)
+function formatTakenAt(t) {
+  try {
+    const d = new Date(t)
+    return (
+      d.getFullYear() +
+      '.' +
+      String(d.getMonth() + 1).padStart(2, '0') +
+      '.' +
+      String(d.getDate()).padStart(2, '0') +
+      ' ' +
+      String(d.getHours()).padStart(2, '0') +
+      ':' +
+      String(d.getMinutes()).padStart(2, '0')
+    )
+  } catch (e) {
+    return ''
+  }
 }
 </script>
 
@@ -891,5 +1057,12 @@ function goToRules() {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* enable smooth touch scrolling inside nested scroll areas */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
 }
 </style>

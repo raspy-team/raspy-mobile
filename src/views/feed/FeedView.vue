@@ -79,7 +79,7 @@
     </transition>
   </header>
 
-  <div class="relative h-full w-full bg-black text-white overflow-hidden select-none">
+  <div class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
     <!-- Slides progress (top) -->
     <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
       <div
@@ -447,7 +447,7 @@
     </div>
 
     <!-- Global progress badge moved under top progress bar -->
-    <div class="absolute z-[100] left-4 top-[44px] raspy-top pointer-events-none">
+    <div class="absolute z-[100] left-4 top-[35px] raspy-top pointer-events-none">
       <div
         class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
       >

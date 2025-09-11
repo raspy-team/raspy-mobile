@@ -124,7 +124,7 @@
             >
               <div class="text-lg font-bold">{{ post.author.name }}의 경기 하이라이트</div>
               <div class="mt-1 text-xs text-white/80">
-                {{ post.meta.place }} · {{ post.meta.time }}
+                {{ post.meta.place }}
               </div>
               <div class="mt-2 flex flex-wrap gap-1.5">
                 <span
@@ -141,14 +141,16 @@
         <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
         <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
           <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
+
           <div
-            class="relative z-10 w-[86%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
+            class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
           >
-            <div class="flex items-center justify-between mb-3">
-              <div class="text-white/80 text-sm">Match Result</div>
+            <div class="flex items-center justify-between mb-5">
+              <div class="text-xl font-extrabold">경기 결과</div>
               <div class="text-xs text-white/60">{{ post.date }}</div>
             </div>
-            <div class="grid grid-cols-3 items-center gap-3">
+
+            <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
               <div class="text-center relative">
                 <img
                   :src="post.players[0].avatar"
@@ -171,7 +173,7 @@
               </div>
               <div class="text-center">
                 <div
-                  class="font-extrabold text-white tracking-wide leading-none text-[12vw] sm:text-6xl"
+                  class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
                 >
                   {{ post.result.scoreA }}<span class="text-white/50"> : </span
                   >{{ post.result.scoreB }}
@@ -235,32 +237,39 @@
               <span>{{ post.meta.place }}</span>
               <span>{{ post.meta.time }}</span>
             </div>
-            <!-- 빠른 이동/행동 -->
-            <div class="mt-3 flex flex-wrap gap-2 justify-center text-xs">
+            <!-- 빠른 이동/행동 (모바일 친화 타일) -->
+            <div class="mt-4 grid grid-cols-2 gap-2">
               <button
-                class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
                 @click="goToReviews"
               >
-                리뷰 보기
+                <span class="w-5 h-5" v-html="icons.star" />
+                <span class="text-sm font-medium">리뷰 보기</span>
               </button>
+
               <button
-                class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
                 @click="goToRanking"
               >
-                랭킹 보기
+                <span class="w-5 h-5" v-html="icons.trophy" />
+                <span class="text-sm font-medium">랭킹 보기</span>
               </button>
+
               <button
                 v-if="idx('전체 사진') >= 0"
-                class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
                 @click="goToGallery"
               >
-                사진 보기
+                <span class="w-5 h-5" v-html="icons.camera" />
+                <span class="text-sm font-medium">사진 보기</span>
               </button>
+
               <button
-                class="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/30 text-amber-200 active:scale-95"
+                class="h-12 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-200 active:scale-95 flex items-center justify-center gap-2"
                 @click="onDoWithMe"
               >
-                도전장 보내기
+                <span class="w-5 h-5" v-html="icons.handshake" />
+                <span class="text-sm font-medium">도전장 보내기</span>
               </button>
             </div>
           </div>
@@ -269,10 +278,17 @@
         <!-- 3. 평점 & 리뷰 -->
         <section class="w-screen shrink-0 h-full relative">
           <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
-          <div class="relative z-10 h-full flex flex-col gap-3 px-4 py-12">
+          <div class="relative z-10 h-full flex flex-col gap-3 px-4 pt-16 pb-12">
+            <!-- 섹션 타이틀 (박스 밖, 좌상단) -->
+            <div class="max-w-xl mx-auto w-full">
+              <div class="flex items-center justify-between mb-2">
+                <div class="text-xl font-extrabold">평점 & 리뷰</div>
+                <div class="text-xs text-white/70">총 {{ post.reviews.length }}개</div>
+              </div>
+            </div>
             <div class="flex items-center justify-center">
               <div
-                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center"
+                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
               >
                 <div class="flex items-center gap-3">
                   <img :src="post.reviews[0].avatar" class="w-12 h-12 rounded-full object-cover" />
@@ -310,7 +326,7 @@
             </div>
             <div class="flex items-center justify-center">
               <div
-                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center"
+                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
               >
                 <div class="flex items-center gap-3">
                   <img :src="post.reviews[1].avatar" class="w-12 h-12 rounded-full object-cover" />
@@ -349,9 +365,9 @@
           </div>
         </section>
         <!-- 4. 친구 랭킹 -->
-        <section class="w-screen shrink-0 h-full relative p-5">
+        <section class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center">
           <div class="absolute inset-0 bg-gradient-to-b from-fuchsia-900 via-black to-black" />
-          <div class="relative z-10 max-w-xl mx-auto w-full">
+          <div class="relative z-10 max-w-xl w-full">
             <div class="flex items-center justify-between mb-2">
               <div class="text-xl font-extrabold">친구 랭킹</div>
               <div class="text-xs text-white/70">총 {{ friendsRanking.length }}명</div>
@@ -365,7 +381,8 @@
               <div
                 v-for="(f, i) in friendsRanking"
                 :key="f.id"
-                class="flex items-center gap-3 px-4 py-2 border-b border-white/10 last:border-b-0"
+                class="flex items-center gap-3 px-4 py-2 border-b border-white/10 last:border-b-0 cursor-pointer active:scale-[0.98] transition"
+                @click="goFriendProfile(f)"
               >
                 <div
                   class="w-8 text-center font-bold"
@@ -380,11 +397,11 @@
                     최근 경기 {{ f.recentGames }} · 승률 {{ (f.winRate * 100).toFixed(0) }}%
                   </div>
                 </div>
-                <div v-if="f.isFriend" class="text-xs text-white/80">친구</div>
+                <div v-if="f.isFriend" class="text-xs text-white/80">팔로우 됨</div>
                 <button
                   v-else
                   class="px-2 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-xs active:scale-95"
-                  @click="makeFriend(i)"
+                  @click.stop="makeFriend(i)"
                 >
                   팔로우
                 </button>
@@ -408,11 +425,7 @@
           <div
             class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
           />
-          <div
-            class="absolute bottom-[calc(140px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-          >
-            {{ formatTakenAt(p.takenAt) }}
-          </div>
+
           <div
             class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
@@ -957,6 +970,12 @@ function goToGallery() {
   tryVibrate(12)
 }
 
+function goFriendProfile(f) {
+  if (!f || !f.id) return
+  // router.push(`/profile/0`)
+  alert('친구 페이지로 이동함')
+}
+
 function tryVibrate(ms) {
   try {
     if (navigator.vibrate) navigator.vibrate(ms)
@@ -985,6 +1004,8 @@ const icons = {
     '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0Z"/></svg>',
   share:
     '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6 12 2 8 6"/><path d="M12 2v14"/></svg>',
+  camera:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="M3 7h3l2-3h8l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="4"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="m12 3 2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9L12 3Z"/></svg>',
   starFill:
     '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="m12 3 2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9L12 3Z"/></svg>',
@@ -1029,25 +1050,6 @@ function makeFriend(i) {
   if (f && !f.isFriend) {
     f.isFriend = true
     tryVibrate(10)
-  }
-}
-
-function formatTakenAt(t) {
-  try {
-    const d = new Date(t)
-    return (
-      d.getFullYear() +
-      '.' +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      '.' +
-      String(d.getDate()).padStart(2, '0') +
-      ' ' +
-      String(d.getHours()).padStart(2, '0') +
-      ':' +
-      String(d.getMinutes()).padStart(2, '0')
-    )
-  } catch (e) {
-    return ''
   }
 }
 </script>

@@ -36,7 +36,7 @@ const routes = [
   },
   {
     path: '/',
-    component: GameList
+    component: Feed
   },
 
   {

@@ -79,7 +79,7 @@
     </transition>
   </header>
 
-  <div class="relative h-[100dvh] w-full bg-black text-white overflow-hidden select-none">
+  <div class="relative h-full w-full bg-black text-white overflow-hidden select-none">
     <!-- Slides progress (top) -->
     <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
       <div
@@ -120,9 +120,7 @@
           <div class="ambient-overlay" />
 
           <!-- Content overlay for 헤드라인 사진 -->
-          <div
-            class="absolute bottom-[calc(140px+env(safe-area-inset-bottom))] left-0 right-0 px-4 z-10"
-          >
+          <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
             <div
               class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
             >
@@ -458,10 +456,11 @@
     </div>
 
     <!-- Right action buttons column -->
-    <div
-      class="absolute z-40 right-4 bottom-[calc(22%+env(safe-area-inset-bottom))] flex flex-col items-center gap-4"
-    >
-      <button @click="toggleLike(true)" class="flex flex-col items-center active:scale-95 transition">
+    <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
+      <button
+        @click="toggleLike(true)"
+        class="flex flex-col items-center active:scale-95 transition"
+      >
         <span
           class="w-8 h-8"
           :class="[liked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
@@ -807,7 +806,10 @@ function onTouchEnd(e) {
   const duration = Math.max(1, Date.now() - gestureStartAt)
   const velocityX = deltaX.value / duration // px per ms
   // Horizontal swipe navigation
-  if (!isVerticalScroll.value && (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)) {
+  if (
+    !isVerticalScroll.value &&
+    (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)
+  ) {
     // commit to next/prev and snap immediately without overshoot
     commitSlide(deltaX.value < 0 ? 1 : -1)
   } else {
@@ -817,7 +819,11 @@ function onTouchEnd(e) {
     const movedX = Math.abs(deltaX.value) > 10
     const movedY = Math.abs(deltaY.value) > 10
     const target = e?.target
-    const onControl = !!(target && target.closest && target.closest('button, a, input, textarea, select, label, [data-stop-slide]'))
+    const onControl = !!(
+      target &&
+      target.closest &&
+      target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
+    )
     if (!onControl && !movedX && !movedY && tapGap < 260) {
       const ty = e?.changedTouches?.[0]?.clientY ?? window.innerHeight * 0.45
       toggleLike(true)
@@ -898,7 +904,10 @@ function onMouseUp(e) {
   const thresholdPx = Math.floor(window.innerWidth * 0.12)
   const duration = Math.max(1, Date.now() - gestureStartAt)
   const velocityX = deltaX.value / duration
-  if (!isVerticalScroll.value && (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)) {
+  if (
+    !isVerticalScroll.value &&
+    (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)
+  ) {
     commitSlide(deltaX.value < 0 ? 1 : -1)
   } else {
     // desktop double-click style
@@ -907,7 +916,11 @@ function onMouseUp(e) {
     const movedX = Math.abs(deltaX.value) > 6
     const movedY = Math.abs(deltaY.value) > 6
     const target = e?.target
-    const onControl = !!(target && target.closest && target.closest('button, a, input, textarea, select, label, [data-stop-slide]'))
+    const onControl = !!(
+      target &&
+      target.closest &&
+      target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
+    )
     if (!onControl && !movedX && !movedY && tapGap < 260) {
       toggleLike(true)
       const ty = e?.clientY ?? window.innerHeight * 0.45
@@ -1112,9 +1125,15 @@ function makeFriend(i) {
 }
 
 @keyframes like-bump-kf {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.12); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .like-bump {
   animation: like-bump-kf 240ms ease;

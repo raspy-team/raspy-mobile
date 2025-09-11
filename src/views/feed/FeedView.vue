@@ -85,9 +85,12 @@
       <div
         v-for="(s, i) in sections"
         :key="'prog-' + i"
-        class="h-1 flex-1 rounded-full bg-white/30 overflow-hidden"
+        class="h-1 flex-1 rounded-full bg-white/20 overflow-hidden"
       >
-        <div class="h-full bg-white" :style="{ width: i <= currentSlide ? '100%' : '0%' }" />
+        <div
+          class="h-full bg-gradient-to-r from-amber-400 to-pink-500"
+          :style="{ width: i <= currentSlide ? '100%' : '0%' }"
+        />
       </div>
     </div>
 
@@ -98,11 +101,11 @@
       class="absolute inset-0 z-0"
       @touchstart.passive="onTouchStart"
       @touchmove.passive="onTouchMove"
-      @touchend.passive="onTouchEnd"
+      @touchend.passive="onTouchEnd($event)"
       @mousedown.passive="onMouseDown"
       @mousemove.passive="onMouseMove"
-      @mouseup.passive="onMouseUp"
-      @mouseleave.passive="onMouseUp"
+      @mouseup.passive="onMouseUp($event)"
+      @mouseleave.passive="onMouseUp($event)"
     >
       <div class="h-full flex" :style="wrapperStyle">
         <!-- 1. 헤드라인 사진 (있을 때만) -->
@@ -114,6 +117,7 @@
             draggable="false"
           />
           <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
+          <div class="ambient-overlay" />
 
           <!-- Content overlay for 헤드라인 사진 -->
           <div
@@ -141,6 +145,7 @@
         <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
         <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
           <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
+          <div class="ambient-overlay" />
 
           <div
             class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
@@ -163,7 +168,7 @@
                 />
                 <div
                   v-if="post.result.winner === post.players[0].name"
-                  class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1"
+                  class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
                 >
                   <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
                 </div>
@@ -192,6 +197,12 @@
                       : 'border-white/20'
                   "
                 />
+                <div
+                  v-if="post.result.winner === post.players[1].name"
+                  class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
+                >
+                  <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
+                </div>
                 <div class="text-white font-semibold text-sm truncate">
                   {{ post.players[1].name }}
                 </div>
@@ -224,7 +235,7 @@
             <!-- 규칙: 모달로 자세히 보기 -->
             <div class="mt-4">
               <div class="flex items-center justify-between text-xs text-white/60 mb-2">
-                <span>규칙 · 총 {{ post.rule.items.length }}개 · 약 {{ ruleReadSeconds }}초</span>
+                <span>규칙 · {{ post.rule.title }}</span>
                 <button
                   class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
                   @click="showRuleModal = true"
@@ -278,13 +289,17 @@
         <!-- 3. 평점 & 리뷰 -->
         <section class="w-screen shrink-0 h-full relative">
           <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
-          <div class="relative z-10 h-full flex flex-col gap-3 px-4 pt-16 pb-12">
+          <div class="ambient-overlay" />
+          <div
+            class="relative z-10 h-full flex flex-col justify-center items-center gap-4 px-4 py-12"
+          >
             <!-- 섹션 타이틀 (박스 밖, 좌상단) -->
             <div class="max-w-xl mx-auto w-full">
-              <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center justify-between mb-1">
                 <div class="text-xl font-extrabold">평점 & 리뷰</div>
                 <div class="text-xs text-white/70">총 {{ post.reviews.length }}개</div>
               </div>
+              <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
             </div>
             <div class="flex items-center justify-center">
               <div
@@ -367,11 +382,13 @@
         <!-- 4. 친구 랭킹 -->
         <section class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center">
           <div class="absolute inset-0 bg-gradient-to-b from-fuchsia-900 via-black to-black" />
+          <div class="ambient-overlay" />
           <div class="relative z-10 max-w-xl w-full">
             <div class="flex items-center justify-between mb-2">
               <div class="text-xl font-extrabold">친구 랭킹</div>
               <div class="text-xs text-white/70">총 {{ friendsRanking.length }}명</div>
             </div>
+            <div class="text-[11px] text-white/60 mb-2">오늘은 누구를 제칠까?</div>
             <div
               class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
               @touchstart.stop
@@ -382,6 +399,7 @@
                 v-for="(f, i) in friendsRanking"
                 :key="f.id"
                 class="flex items-center gap-3 px-4 py-2 border-b border-white/10 last:border-b-0 cursor-pointer active:scale-[0.98] transition"
+                :class="i < 3 ? 'bg-amber-400/5' : ''"
                 @click="goFriendProfile(f)"
               >
                 <div
@@ -412,7 +430,7 @@
 
         <!-- 5. 전체 사진 (헤드라인 제외, 각 1장씩 슬라이드) -->
         <section
-          v-for="(p, gi) in galleryPhotos"
+          v-for="p in galleryPhotos"
           :key="'gal-' + p.id"
           class="w-screen shrink-0 h-full relative"
         >
@@ -424,27 +442,18 @@
           />
           <div
             class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
-          />
-
-          <div
-            class="absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-4 text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-          >
-            {{ idx('전체 사진') + gi + 1 }} / {{ totalSlides }} · 사진
-          </div>
+          ></div>
+          <div class="ambient-overlay"></div>
         </section>
       </div>
     </div>
 
-    <!-- Global bottom progress badge (always on top) -->
-    <div
-      class="absolute z-[100] left-0 right-0 bottom-[calc(16px+env(safe-area-inset-bottom))] px-4 pointer-events-none"
-    >
-      <div class="flex justify-start">
-        <div
-          class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-        >
-          {{ currentSlide + 1 }} / {{ totalSlides }} · {{ currentSectionLabel }}
-        </div>
+    <!-- Global progress badge moved under top progress bar -->
+    <div class="absolute z-[100] left-4 top-[44px] raspy-top pointer-events-none">
+      <div
+        class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
+      >
+        {{ currentSlide + 1 }} / {{ totalSlides }} · {{ currentSectionLabel }}
       </div>
     </div>
 
@@ -452,10 +461,10 @@
     <div
       class="absolute z-40 right-4 bottom-[calc(22%+env(safe-area-inset-bottom))] flex flex-col items-center gap-4"
     >
-      <button @click="toggleLike" class="flex flex-col items-center active:scale-95 transition">
+      <button @click="toggleLike(true)" class="flex flex-col items-center active:scale-95 transition">
         <span
           class="w-8 h-8"
-          :class="liked ? 'text-red-500' : ''"
+          :class="[liked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
           v-html="liked ? icons.heartFill : icons.heart"
         />
         <span class="text-[10px] mt-1">또 보고싶어</span>
@@ -515,11 +524,14 @@
       </div>
     </div>
   </div>
+
+  <Footer tab="feed" />
 </template>
 
 <script setup>
 import { computed, reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import Footer from '../../components/FooterNav.vue'
 import api from '../../api/api'
 const router = useRouter()
 const showNotificationPanel = ref(false)
@@ -670,7 +682,7 @@ const post = reactive({
     },
   ],
   rule: {
-    title: '3세트 승부 · 11점 선취',
+    title: '밥 빨리 먹기',
     items: [
       {
         title: '타이틀임',
@@ -790,26 +802,28 @@ function onTouchMove(e) {
   translateX.value = atStart || atEnd ? deltaX.value * 0.35 : deltaX.value
 }
 
-function onTouchEnd() {
+function onTouchEnd(e) {
   const thresholdPx = Math.floor(window.innerWidth * 0.12)
   const duration = Math.max(1, Date.now() - gestureStartAt)
   const velocityX = deltaX.value / duration // px per ms
-  if (isVerticalScroll.value) {
-    // end of vertical scroll gesture: do nothing
-  } else if (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25) {
+  // Horizontal swipe navigation
+  if (!isVerticalScroll.value && (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)) {
     // commit to next/prev and snap immediately without overshoot
     commitSlide(deltaX.value < 0 ? 1 : -1)
   } else {
-    // treat as tap/double-tap only (no navigation on single tap for mobile)
+    // treat as tap/double-tap (even inside scrollables if no movement)
     const now = Date.now()
     const tapGap = now - lastTapAt
     const movedX = Math.abs(deltaX.value) > 10
     const movedY = Math.abs(deltaY.value) > 10
-    if (!movedX && !movedY && tapGap < 260) {
-      toggleLike()
-      spawnHeart(endX.value, window.innerHeight * 0.45)
+    const target = e?.target
+    const onControl = !!(target && target.closest && target.closest('button, a, input, textarea, select, label, [data-stop-slide]'))
+    if (!onControl && !movedX && !movedY && tapGap < 260) {
+      const ty = e?.changedTouches?.[0]?.clientY ?? window.innerHeight * 0.45
+      toggleLike(true)
+      spawnHeart(endX.value, ty)
       lastTapAt = 0
-    } else if (!movedX && !movedY) {
+    } else if (!onControl && !movedX && !movedY) {
       lastTapAt = now
     }
     // animate back to current slide smoothly
@@ -879,17 +893,29 @@ function onMouseMove(e) {
   const atEnd = currentSlide.value === totalSlides.value - 1 && deltaX.value < 0
   translateX.value = atStart || atEnd ? deltaX.value * 0.35 : deltaX.value
 }
-function onMouseUp() {
+function onMouseUp(e) {
   if (!isPointerDown.value) return
   const thresholdPx = Math.floor(window.innerWidth * 0.12)
   const duration = Math.max(1, Date.now() - gestureStartAt)
   const velocityX = deltaX.value / duration
-  if (
-    !isVerticalScroll.value &&
-    (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)
-  ) {
+  if (!isVerticalScroll.value && (Math.abs(deltaX.value) > thresholdPx || Math.abs(velocityX) > 0.25)) {
     commitSlide(deltaX.value < 0 ? 1 : -1)
   } else {
+    // desktop double-click style
+    const now = Date.now()
+    const tapGap = now - lastTapAt
+    const movedX = Math.abs(deltaX.value) > 6
+    const movedY = Math.abs(deltaY.value) > 6
+    const target = e?.target
+    const onControl = !!(target && target.closest && target.closest('button, a, input, textarea, select, label, [data-stop-slide]'))
+    if (!onControl && !movedX && !movedY && tapGap < 260) {
+      toggleLike(true)
+      const ty = e?.clientY ?? window.innerHeight * 0.45
+      spawnHeart(endX.value, ty)
+      lastTapAt = 0
+    } else if (!onControl && !movedX && !movedY) {
+      lastTapAt = now
+    }
     // animate back
     animating.value = true
     translateX.value = 0
@@ -926,9 +952,17 @@ function commitSlide(dir) {
 
 // Actions
 const liked = ref(false)
-function toggleLike() {
+const likeBump = ref(false)
+function toggleLike(withBump = false) {
   liked.value = !liked.value
   tryVibrate(15)
+  if (withBump) {
+    likeBump.value = false
+    requestAnimationFrame(() => {
+      likeBump.value = true
+      setTimeout(() => (likeBump.value = false), 240)
+    })
+  }
 }
 function onDoWithMe() {
   router.push('/create-game')
@@ -1024,14 +1058,6 @@ onBeforeUnmount(() => {})
 // const allRulesOpen = computed(
 //   () => post.rule.items.length && post.rule.items.every((_, idx) => openRule[idx]),
 // )
-const ruleReadSeconds = computed(() => Math.max(10, post.rule.items.length * 4))
-// function toggleRule(idx) {
-//   openRule[idx] = !openRule[idx]
-// }
-// function toggleAllRules() {
-//   const to = !allRulesOpen.value
-//   post.rule.items.forEach((_, idx) => (openRule[idx] = to))
-// }
 
 // Friends ranking (dummy 50 entries)
 const friendsRanking = ref(
@@ -1083,6 +1109,58 @@ function makeFriend(i) {
   width: 32px;
   height: 32px;
   animation: heart-pop 650ms ease forwards;
+}
+
+@keyframes like-bump-kf {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.like-bump {
+  animation: like-bump-kf 240ms ease;
+}
+
+/* Ambient mood overlay for emotional impact */
+.ambient-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 600px at 20% 80%, rgba(255, 166, 0, 0.1), transparent 60%),
+    radial-gradient(1000px 500px at 85% 20%, rgba(236, 72, 153, 0.08), transparent 60%);
+  animation: ambient-move 12s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-move {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(0, -8px, 0) scale(1.02);
+    opacity: 1;
+  }
+}
+
+/* Winner label subtle glow */
+.winner-glow {
+  text-shadow:
+    0 0 6px rgba(251, 191, 36, 0.55),
+    0 0 12px rgba(251, 191, 36, 0.35);
+  filter: saturate(1.05);
+  animation: winner-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes winner-pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
 }
 
 /* hide scrollbars for rule box */

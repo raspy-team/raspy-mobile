@@ -79,459 +79,585 @@
     </transition>
   </header>
 
-  <div class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
-    <!-- Slides progress (top) -->
-    <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
-      <div
-        v-for="(s, i) in sections"
-        :key="'prog-' + i"
-        class="h-1 flex-1 rounded-full bg-white/20 overflow-hidden"
-      >
-        <div
-          class="h-full bg-gradient-to-r from-amber-400 to-pink-500"
-          :style="{ width: i <= currentSlide ? '100%' : '0%' }"
-        />
-      </div>
-    </div>
-
-    <!-- Tap zones removed to allow inner scroll and gestures only -->
-
-    <!-- Slides Wrapper -->
-    <div
-      class="absolute inset-0 z-0"
-      @touchstart.passive="onTouchStart"
-      @touchmove.passive="onTouchMove"
-      @touchend.passive="onTouchEnd($event)"
-      @mousedown.passive="onMouseDown"
-      @mousemove.passive="onMouseMove"
-      @mouseup.passive="onMouseUp($event)"
-      @mouseleave.passive="onMouseUp($event)"
-    >
-      <div class="h-full flex" :style="wrapperStyle">
-        <!-- 1. 헤드라인 사진 (있을 때만) -->
-        <section v-if="features.headline && hasPhotos" class="w-screen shrink-0 h-full relative">
-          <img
-            :src="headlinePhoto.url"
-            alt="headline"
-            class="absolute inset-0 w-full h-full object-cover"
-            draggable="false"
-          />
-          <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-          <div class="ambient-overlay" />
-
-          <!-- Content overlay for 헤드라인 사진 -->
-          <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
-            <div
-              class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
-            >
-              <div class="text-lg font-bold">{{ post.author.name }}의 경기 하이라이트</div>
-              <div class="mt-1 text-xs text-white/80">
-                {{ post.meta.place }}
-              </div>
-              <div class="mt-2 flex flex-wrap gap-1.5">
-                <span
-                  v-for="t in post.tags"
-                  :key="t"
-                  class="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10"
-                  >#{{ t }}</span
-                >
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
-        <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
-          <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
-          <div class="ambient-overlay" />
-
+  <div
+    class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none feed-viewport"
+    @touchstart.capture.passive="onFeedTouchStart"
+    @touchmove.capture.passive="onFeedTouchMove"
+    @touchend.capture.passive="onFeedTouchEnd($event)"
+    @mousedown.capture="onFeedMouseDown"
+    @mousemove.capture="onFeedMouseMove"
+    @mouseup.capture="onFeedMouseUp"
+    @mouseleave.capture="onFeedMouseUp"
+  >
+    <!-- Adjacent previews: show next/prev during vertical swipe -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <!-- Prev preview (appears when swiping down) -->
+      <div v-if="prevPost" class="absolute inset-0" :style="prevPreviewStyle">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black"></div>
+        <div class="ambient-overlay"></div>
+        <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
           <div
-            class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
+            class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
               <div class="text-xl font-extrabold">경기 결과</div>
-              <div class="text-xs text-white/60">{{ post.date }}</div>
+              <div class="text-xs text-white/70">{{ prevPost.date }}</div>
             </div>
-
             <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-              <div class="text-center relative">
+              <div class="text-center">
                 <img
-                  :src="post.players[0].avatar"
-                  class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
-                  :class="
-                    post.result.winner === post.players[0].name
-                      ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
-                      : 'border-white/20'
-                  "
+                  :src="prevPost.players[0].avatar"
+                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
                 />
-                <div
-                  v-if="post.result.winner === post.players[0].name"
-                  class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
-                >
-                  <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
-                </div>
-                <div class="text-white font-semibold text-sm truncate">
-                  {{ post.players[0].name }}
+                <div class="text-white font-semibold text-xs truncate">
+                  {{ prevPost.players[0].name }}
                 </div>
               </div>
               <div class="text-center">
                 <div
-                  class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
+                  class="font-extrabold text-white tracking-wide leading-none text-4xl sm:text-5xl"
                 >
-                  {{ post.result.scoreA }}<span class="text-white/50"> : </span
-                  >{{ post.result.scoreB }}
+                  {{ prevPost.result.scoreA }}<span class="text-white/50"> : </span
+                  >{{ prevPost.result.scoreB }}
                 </div>
                 <div class="mt-1 text-xs text-emerald-300 font-medium">
-                  Winner · {{ post.result.winner }}
+                  Winner · {{ prevPost.result.winner }}
                 </div>
               </div>
-              <div class="text-center relative">
+              <div class="text-center">
                 <img
-                  :src="post.players[1].avatar"
-                  class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
-                  :class="
-                    post.result.winner === post.players[1].name
-                      ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
-                      : 'border-white/20'
-                  "
+                  :src="prevPost.players[1].avatar"
+                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
+                />
+                <div class="text-white font-semibold text-xs truncate">
+                  {{ prevPost.players[1].name }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Next preview (appears when swiping up) -->
+      <div v-if="nextPost" class="absolute inset-0" :style="nextPreviewStyle">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black"></div>
+        <div class="ambient-overlay"></div>
+        <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
+          <div
+            class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
+          >
+            <div class="flex items-center justify-between mb-5">
+              <div class="text-xl font-extrabold">경기 결과</div>
+              <div class="text-xs text-white/70">{{ nextPost.date }}</div>
+            </div>
+            <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+              <div class="text-center">
+                <img
+                  :src="nextPost.players[0].avatar"
+                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
+                />
+                <div class="text-white font-semibold text-xs truncate">
+                  {{ nextPost.players[0].name }}
+                </div>
+              </div>
+              <div class="text-center">
+                <div
+                  class="font-extrabold text-white tracking-wide leading-none text-4xl sm:text-5xl"
+                >
+                  {{ nextPost.result.scoreA }}<span class="text-white/50"> : </span
+                  >{{ nextPost.result.scoreB }}
+                </div>
+                <div class="mt-1 text-xs text-emerald-300 font-medium">
+                  Winner · {{ nextPost.result.winner }}
+                </div>
+              </div>
+              <div class="text-center">
+                <img
+                  :src="nextPost.players[1].avatar"
+                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
+                />
+                <div class="text-white font-semibold text-xs truncate">
+                  {{ nextPost.players[1].name }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Slides progress (top) -->
+      <div
+        class="relative h-full w-full"
+        :style="feedWrapperStyle"
+        @transitionend="onFeedSnapTransitionEnd"
+      >
+        <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
+          <div
+            v-for="(s, i) in sections"
+            :key="'prog-' + i"
+            class="h-1 flex-1 rounded-full bg-white/20 overflow-hidden"
+          >
+            <div
+              class="h-full bg-gradient-to-r from-amber-400 to-pink-500"
+              :style="{ width: i <= currentSlide ? '100%' : '0%' }"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Tap zones removed to allow inner scroll and gestures only -->
+
+        <!-- Slides Wrapper -->
+        <div
+          class="absolute inset-0 z-0"
+          @touchstart.passive="onTouchStart"
+          @touchmove.passive="onTouchMove"
+          @touchend.passive="onTouchEnd($event)"
+          @mousedown.passive="onMouseDown"
+          @mousemove.passive="onMouseMove"
+          @mouseup.passive="onMouseUp($event)"
+          @mouseleave.passive="onMouseUp($event)"
+        >
+          <div class="h-full flex" :style="wrapperStyle">
+            <!-- 1. 헤드라인 사진 (있을 때만) -->
+            <section
+              v-if="features.headline && hasPhotos"
+              class="w-screen shrink-0 h-full relative"
+            >
+              <img
+                :src="headlinePhoto.url"
+                alt="headline"
+                class="absolute inset-0 w-full h-full object-cover"
+                draggable="false"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60"
+              />
+              <div class="ambient-overlay" />
+
+              <!-- Content overlay for 헤드라인 사진 -->
+              <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
+                <div
+                  class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
+                >
+                  <div class="text-lg font-bold">{{ post.author.name }}의 경기 하이라이트</div>
+                  <div class="mt-1 text-xs text-white/80">
+                    {{ post.meta.place }}
+                  </div>
+                  <div class="mt-2 flex flex-wrap gap-1.5">
+                    <span
+                      v-for="t in post.tags"
+                      :key="t"
+                      class="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10"
+                      >#{{ t }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
+            <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
+              <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
+              <div class="ambient-overlay" />
+
+              <div
+                class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
+              >
+                <div class="flex items-center justify-between mb-5">
+                  <div class="text-xl font-extrabold">경기 결과</div>
+                  <div class="text-xs text-white/60">{{ post.date }}</div>
+                </div>
+
+                <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                  <div class="text-center relative">
+                    <img
+                      :src="post.players[0].avatar"
+                      class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
+                      :class="
+                        post.result.winner === post.players[0].name
+                          ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
+                          : 'border-white/20'
+                      "
+                    />
+                    <div
+                      v-if="post.result.winner === post.players[0].name"
+                      class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
+                    >
+                      <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
+                    </div>
+                    <div class="text-white font-semibold text-sm truncate">
+                      {{ post.players[0].name }}
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <div
+                      class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
+                    >
+                      {{ post.result.scoreA }}<span class="text-white/50"> : </span
+                      >{{ post.result.scoreB }}
+                    </div>
+                    <div class="mt-1 text-xs text-emerald-300 font-medium">
+                      Winner · {{ post.result.winner }}
+                    </div>
+                  </div>
+                  <div class="text-center relative">
+                    <img
+                      :src="post.players[1].avatar"
+                      class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
+                      :class="
+                        post.result.winner === post.players[1].name
+                          ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
+                          : 'border-white/20'
+                      "
+                    />
+                    <div
+                      v-if="post.result.winner === post.players[1].name"
+                      class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
+                    >
+                      <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
+                    </div>
+                    <div class="text-white font-semibold text-sm truncate">
+                      {{ post.players[1].name }}
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 text-center italic text-white/70 text-xs">
+                  이 매치, 너라면 이길 수 있어?
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80">
+                  <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                    <span class="inline-block w-4 h-4" v-html="icons.trophy" />
+                    <span>세트수 {{ post.result.sets }}</span>
+                  </div>
+                  <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                    <span class="inline-block w-4 h-4" v-html="icons.clock" />
+                    <span>총 시간 {{ post.result.duration }}</span>
+                  </div>
+                </div>
+                <!-- 세트 결과: 세로 전체폭 -->
+                <div class="mt-4 space-y-2">
+                  <div
+                    v-for="(sc, idx) in post.result.setScores"
+                    :key="'set-' + idx"
+                    class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
+                  >
+                    <div class="font-semibold">{{ idx + 1 }}세트</div>
+                    <div class="font-bold">{{ sc.a }} : {{ sc.b }}</div>
+                  </div>
+                </div>
+                <!-- 규칙: 모달로 자세히 보기 -->
+                <div class="mt-4">
+                  <div class="flex items-center justify-between text-xs text-white/60 mb-2">
+                    <span>규칙 · {{ post.rule.title }}</span>
+                    <button
+                      class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                      @click="showRuleModal = true"
+                    >
+                      자세히 보기
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-3 text-[11px] text-white/70 flex items-center justify-between">
+                  <span>{{ post.meta.place }}</span>
+                  <span>{{ post.meta.time }}</span>
+                </div>
+                <!-- 빠른 이동/행동 (모바일 친화 타일) -->
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                  <button
+                    class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
+                    @click="goToReviews"
+                  >
+                    <span class="w-5 h-5" v-html="icons.star" />
+                    <span class="text-sm font-medium">리뷰 보기</span>
+                  </button>
+
+                  <button
+                    class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
+                    @click="goToRanking"
+                    v-if="features.friendRanking"
+                  >
+                    <span class="w-5 h-5" v-html="icons.trophy" />
+                    <span class="text-sm font-medium">랭킹 보기</span>
+                  </button>
+
+                  <button
+                    v-if="idx('전체 사진') >= 0"
+                    class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
+                    @click="goToGallery"
+                  >
+                    <span class="w-5 h-5" v-html="icons.camera" />
+                    <span class="text-sm font-medium">사진 보기</span>
+                  </button>
+
+                  <button
+                    class="h-12 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-200 active:scale-95 flex items-center justify-center gap-2"
+                    @click="onDoWithMeInfo"
+                  >
+                    <span class="w-5 h-5" v-html="icons.handshake" />
+                    <span class="text-sm font-medium">도전장 보내기</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- 3. 평점 & 리뷰 -->
+            <section v-if="features.reviews" class="w-screen shrink-0 h-full relative">
+              <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
+              <div class="ambient-overlay" />
+              <div
+                class="relative z-10 h-full flex flex-col justify-center items-center gap-4 px-4 py-12"
+              >
+                <!-- 섹션 타이틀 (박스 밖, 좌상단) -->
+                <div class="max-w-xl mx-auto w-full">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="text-xl font-extrabold">평점 & 리뷰</div>
+                    <div class="text-xs text-white/70">총 {{ post.reviews.length }}개</div>
+                  </div>
+                  <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
+                </div>
+                <div class="flex items-center justify-center">
+                  <div
+                    class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
+                  >
+                    <div class="flex items-center gap-3">
+                      <img
+                        :src="post.reviews[0].avatar"
+                        class="w-12 h-12 rounded-full object-cover"
+                      />
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                          <div class="font-semibold truncate">{{ post.reviews[0].name }}</div>
+                          <div class="text-[11px] text-white/80">
+                            <span class="mr-2"
+                              >퍼포먼스 {{ post.reviews[0].performance.toFixed(1) }}/5</span
+                            >·
+                            <span class="ml-2">매너 {{ post.reviews[0].manner.toFixed(1) }}/5</span>
+                          </div>
+                        </div>
+                        <!-- progress bars removed -->
+                      </div>
+                    </div>
+                    <div class="mt-3 text-white/80 text-sm leading-snug">
+                      <span v-if="!expandedReviews[0]">{{
+                        truncatedText(post.reviews[0].text)
+                      }}</span>
+                      <span v-else>{{ post.reviews[0].text }}</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-xs text-white/70">
+                      <button
+                        class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                        @click="toggleExpand(0)"
+                      >
+                        {{ expandedReviews[0] ? '접기' : '더보기' }}
+                      </button>
+                      <button
+                        class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                        @click="toggleHelpful(0)"
+                      >
+                        도움이 됐어요 · {{ helpfulCounts[0] || 0 }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-center">
+                  <div
+                    class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
+                  >
+                    <div class="flex items-center gap-3">
+                      <img
+                        :src="post.reviews[1].avatar"
+                        class="w-12 h-12 rounded-full object-cover"
+                      />
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                          <div class="font-semibold truncate">{{ post.reviews[1].name }}</div>
+                          <div class="text-[11px] text-white/80">
+                            <span class="mr-2"
+                              >퍼포먼스 {{ post.reviews[1].performance.toFixed(1) }}/5</span
+                            >·
+                            <span class="ml-2">매너 {{ post.reviews[1].manner.toFixed(1) }}/5</span>
+                          </div>
+                        </div>
+                        <!-- progress bars removed -->
+                      </div>
+                    </div>
+                    <div class="mt-3 text-white/80 text-sm leading-snug">
+                      <span v-if="!expandedReviews[1]">{{
+                        truncatedText(post.reviews[1].text)
+                      }}</span>
+                      <span v-else>{{ post.reviews[1].text }}</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-xs text-white/70">
+                      <button
+                        class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                        @click="toggleExpand(1)"
+                      >
+                        {{ expandedReviews[1] ? '접기' : '더보기' }}
+                      </button>
+                      <button
+                        class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
+                        @click="toggleHelpful(1)"
+                      >
+                        도움이 됐어요 · {{ helpfulCounts[1] || 0 }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <!-- 4. 친구 랭킹 -->
+            <section
+              v-if="features.friendRanking"
+              class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
+            >
+              <div class="absolute inset-0 bg-gradient-to-b from-fuchsia-900 via-black to-black" />
+              <div class="ambient-overlay" />
+              <div class="relative z-10 max-w-xl w-full">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-xl font-extrabold">친구 랭킹</div>
+                  <div class="text-xs text-white/70">총 {{ friendsRanking.length }}명</div>
+                </div>
+                <div class="text-[11px] text-white/60 mb-2">오늘은 누구를 제칠까?</div>
+                <div
+                  class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
+                  @touchstart.stop
+                  @touchmove.stop
+                  @touchend.stop
+                >
+                  <div
+                    v-for="(f, i) in friendsRanking"
+                    :key="f.id"
+                    class="flex items-center gap-3 px-4 py-2 border-b border-white/10 last:border-b-0 cursor-pointer active:scale-[0.98] transition"
+                    :class="i < 3 ? 'bg-amber-400/5' : ''"
+                    @click="goFriendProfile(f)"
+                  >
+                    <div
+                      class="w-8 text-center font-bold"
+                      :class="i < 3 ? 'text-amber-300' : 'text-white'"
+                    >
+                      {{ i + 1 }}
+                    </div>
+                    <img :src="f.avatar" class="w-8 h-8 rounded-full object-cover" />
+                    <div class="flex-1 min-w-0">
+                      <div class="truncate">{{ f.name }}</div>
+                      <div class="text-[10px] text-white/70 truncate">
+                        최근 경기 {{ f.recentGames }} · 승률 {{ (f.winRate * 100).toFixed(0) }}%
+                      </div>
+                    </div>
+                    <div v-if="f.isFriend" class="text-xs text-white/80">팔로우 됨</div>
+                    <button
+                      v-else
+                      class="px-2 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-xs active:scale-95"
+                      @click.stop="makeFriend(i)"
+                    >
+                      팔로우
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 5. 전체 사진 (헤드라인 제외, 각 1장씩 슬라이드) -->
+            <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
+              <section v-if="features.gallery" class="w-screen shrink-0 h-full relative">
+                <img
+                  :src="p.url"
+                  alt="photo"
+                  class="absolute inset-0 w-full h-full object-cover"
+                  draggable="false"
                 />
                 <div
-                  v-if="post.result.winner === post.players[1].name"
-                  class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
-                >
-                  <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
-                </div>
-                <div class="text-white font-semibold text-sm truncate">
-                  {{ post.players[1].name }}
-                </div>
-              </div>
-            </div>
-            <div class="mt-2 text-center italic text-white/70 text-xs">
-              이 매치, 너라면 이길 수 있어?
-            </div>
-            <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80">
-              <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                <span class="inline-block w-4 h-4" v-html="icons.trophy" />
-                <span>세트수 {{ post.result.sets }}</span>
-              </div>
-              <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                <span class="inline-block w-4 h-4" v-html="icons.clock" />
-                <span>총 시간 {{ post.result.duration }}</span>
-              </div>
-            </div>
-            <!-- 세트 결과: 세로 전체폭 -->
-            <div class="mt-4 space-y-2">
-              <div
-                v-for="(sc, idx) in post.result.setScores"
-                :key="'set-' + idx"
-                class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
-              >
-                <div class="font-semibold">{{ idx + 1 }}세트</div>
-                <div class="font-bold">{{ sc.a }} : {{ sc.b }}</div>
-              </div>
-            </div>
-            <!-- 규칙: 모달로 자세히 보기 -->
-            <div class="mt-4">
-              <div class="flex items-center justify-between text-xs text-white/60 mb-2">
-                <span>규칙 · {{ post.rule.title }}</span>
-                <button
-                  class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
-                  @click="showRuleModal = true"
-                >
-                  자세히 보기
-                </button>
-              </div>
-            </div>
-            <div class="mt-3 text-[11px] text-white/70 flex items-center justify-between">
-              <span>{{ post.meta.place }}</span>
-              <span>{{ post.meta.time }}</span>
-            </div>
-            <!-- 빠른 이동/행동 (모바일 친화 타일) -->
-            <div class="mt-4 grid grid-cols-2 gap-2">
-              <button
-                class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
-                @click="goToReviews"
-              >
-                <span class="w-5 h-5" v-html="icons.star" />
-                <span class="text-sm font-medium">리뷰 보기</span>
-              </button>
-
-              <button
-                class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
-                @click="goToRanking"
-                v-if="features.friendRanking"
-              >
-                <span class="w-5 h-5" v-html="icons.trophy" />
-                <span class="text-sm font-medium">랭킹 보기</span>
-              </button>
-
-              <button
-                v-if="idx('전체 사진') >= 0"
-                class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
-                @click="goToGallery"
-              >
-                <span class="w-5 h-5" v-html="icons.camera" />
-                <span class="text-sm font-medium">사진 보기</span>
-              </button>
-
-              <button
-                class="h-12 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-200 active:scale-95 flex items-center justify-center gap-2"
-                @click="onDoWithMeInfo"
-              >
-                <span class="w-5 h-5" v-html="icons.handshake" />
-                <span class="text-sm font-medium">도전장 보내기</span>
-              </button>
-            </div>
+                  class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
+                ></div>
+                <div class="ambient-overlay"></div>
+              </section>
+            </template>
           </div>
-        </section>
+        </div>
 
-        <!-- 3. 평점 & 리뷰 -->
-        <section v-if="features.reviews" class="w-screen shrink-0 h-full relative">
-          <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
-          <div class="ambient-overlay" />
+        <!-- Global progress badge moved under top progress bar -->
+        <div class="absolute z-[100] left-4 top-[35px] raspy-top pointer-events-none">
           <div
-            class="relative z-10 h-full flex flex-col justify-center items-center gap-4 px-4 py-12"
+            class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
           >
-            <!-- 섹션 타이틀 (박스 밖, 좌상단) -->
-            <div class="max-w-xl mx-auto w-full">
-              <div class="flex items-center justify-between mb-1">
-                <div class="text-xl font-extrabold">평점 & 리뷰</div>
-                <div class="text-xs text-white/70">총 {{ post.reviews.length }}개</div>
-              </div>
-              <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
-            </div>
-            <div class="flex items-center justify-center">
-              <div
-                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <img :src="post.reviews[0].avatar" class="w-12 h-12 rounded-full object-cover" />
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <div class="font-semibold truncate">{{ post.reviews[0].name }}</div>
-                      <div class="text-[11px] text-white/80">
-                        <span class="mr-2"
-                          >퍼포먼스 {{ post.reviews[0].performance.toFixed(1) }}/5</span
-                        >· <span class="ml-2">매너 {{ post.reviews[0].manner.toFixed(1) }}/5</span>
-                      </div>
-                    </div>
-                    <!-- progress bars removed -->
-                  </div>
-                </div>
-                <div class="mt-3 text-white/80 text-sm leading-snug">
-                  <span v-if="!expandedReviews[0]">{{ truncatedText(post.reviews[0].text) }}</span>
-                  <span v-else>{{ post.reviews[0].text }}</span>
-                </div>
-                <div class="mt-2 flex items-center justify-between text-xs text-white/70">
-                  <button
-                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                    @click="toggleExpand(0)"
-                  >
-                    {{ expandedReviews[0] ? '접기' : '더보기' }}
-                  </button>
-                  <button
-                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                    @click="toggleHelpful(0)"
-                  >
-                    도움이 됐어요 · {{ helpfulCounts[0] || 0 }}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center justify-center">
-              <div
-                class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <img :src="post.reviews[1].avatar" class="w-12 h-12 rounded-full object-cover" />
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <div class="font-semibold truncate">{{ post.reviews[1].name }}</div>
-                      <div class="text-[11px] text-white/80">
-                        <span class="mr-2"
-                          >퍼포먼스 {{ post.reviews[1].performance.toFixed(1) }}/5</span
-                        >· <span class="ml-2">매너 {{ post.reviews[1].manner.toFixed(1) }}/5</span>
-                      </div>
-                    </div>
-                    <!-- progress bars removed -->
-                  </div>
-                </div>
-                <div class="mt-3 text-white/80 text-sm leading-snug">
-                  <span v-if="!expandedReviews[1]">{{ truncatedText(post.reviews[1].text) }}</span>
-                  <span v-else>{{ post.reviews[1].text }}</span>
-                </div>
-                <div class="mt-2 flex items-center justify-between text-xs text-white/70">
-                  <button
-                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                    @click="toggleExpand(1)"
-                  >
-                    {{ expandedReviews[1] ? '접기' : '더보기' }}
-                  </button>
-                  <button
-                    class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                    @click="toggleHelpful(1)"
-                  >
-                    도움이 됐어요 · {{ helpfulCounts[1] || 0 }}
-                  </button>
-                </div>
-              </div>
-            </div>
+            {{ currentSlide + 1 }} / {{ totalSlides }} · {{ currentSectionLabel }}
           </div>
-        </section>
-        <!-- 4. 친구 랭킹 -->
-        <section
-          v-if="features.friendRanking"
-          class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
+        </div>
+
+        <!-- Right action buttons column -->
+        <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
+          <button
+            @click="toggleLike(true)"
+            class="flex flex-col items-center active:scale-95 transition"
+          >
+            <span
+              class="w-8 h-8"
+              :class="[liked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
+              v-html="liked ? icons.heartFill : icons.heart"
+            ></span>
+            <span class="text-[10px] mt-1">또 보고싶어</span>
+          </button>
+          <button @click="onDoWithMe" class="flex flex-col items-center active:scale-95 transition">
+            <span class="w-8 h-8" v-html="icons.handshake"></span>
+            <span class="text-[10px] mt-1">나랑도 해</span>
+          </button>
+          <button @click="onComment" class="flex flex-col items-center active:scale-95 transition">
+            <span class="w-8 h-8" v-html="icons.comment"></span>
+            <span class="text-[10px] mt-1">댓글</span>
+          </button>
+          <button @click="onShare" class="flex flex-col items-center active:scale-95 transition">
+            <span class="w-8 h-8" v-html="icons.share"></span>
+            <span class="text-[10px] mt-1">공유</span>
+          </button>
+        </div>
+
+        <!-- Skip button removed per spec -->
+
+        <!-- Floating like hearts -->
+        <div class="pointer-events-none absolute inset-0 z-30">
+          <div
+            v-for="h in hearts"
+            :key="h.id"
+            class="absolute text-red-500 animate-heart-pop"
+            :style="{ left: h.x + 'px', top: h.y + 'px' }"
+            v-html="icons.heartFill"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules modal -->
+    <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/80 flex flex-col">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
+        <div class="text-lg font-bold">경기 규칙</div>
+        <button
+          class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 active:scale-95"
+          @click="showRuleModal = false"
         >
-          <div class="absolute inset-0 bg-gradient-to-b from-fuchsia-900 via-black to-black" />
-          <div class="ambient-overlay" />
-          <div class="relative z-10 max-w-xl w-full">
-            <div class="flex items-center justify-between mb-2">
-              <div class="text-xl font-extrabold">친구 랭킹</div>
-              <div class="text-xs text-white/70">총 {{ friendsRanking.length }}명</div>
-            </div>
-            <div class="text-[11px] text-white/60 mb-2">오늘은 누구를 제칠까?</div>
-            <div
-              class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
-              @touchstart.stop
-              @touchmove.stop
-              @touchend.stop
-            >
-              <div
-                v-for="(f, i) in friendsRanking"
-                :key="f.id"
-                class="flex items-center gap-3 px-4 py-2 border-b border-white/10 last:border-b-0 cursor-pointer active:scale-[0.98] transition"
-                :class="i < 3 ? 'bg-amber-400/5' : ''"
-                @click="goFriendProfile(f)"
-              >
-                <div
-                  class="w-8 text-center font-bold"
-                  :class="i < 3 ? 'text-amber-300' : 'text-white'"
-                >
-                  {{ i + 1 }}
-                </div>
-                <img :src="f.avatar" class="w-8 h-8 rounded-full object-cover" />
-                <div class="flex-1 min-w-0">
-                  <div class="truncate">{{ f.name }}</div>
-                  <div class="text-[10px] text-white/70 truncate">
-                    최근 경기 {{ f.recentGames }} · 승률 {{ (f.winRate * 100).toFixed(0) }}%
-                  </div>
-                </div>
-                <div v-if="f.isFriend" class="text-xs text-white/80">팔로우 됨</div>
-                <button
-                  v-else
-                  class="px-2 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-xs active:scale-95"
-                  @click.stop="makeFriend(i)"
-                >
-                  팔로우
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 5. 전체 사진 (헤드라인 제외, 각 1장씩 슬라이드) -->
-        <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
-          <section v-if="features.gallery" class="w-screen shrink-0 h-full relative">
-            <img
-              :src="p.url"
-              alt="photo"
-              class="absolute inset-0 w-full h-full object-cover"
-              draggable="false"
-            />
-            <div
-              class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
-            ></div>
-            <div class="ambient-overlay"></div>
-          </section>
-        </template>
+          닫기
+        </button>
       </div>
-    </div>
-
-    <!-- Global progress badge moved under top progress bar -->
-    <div class="absolute z-[100] left-4 top-[35px] raspy-top pointer-events-none">
       <div
-        class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
+        class="flex-1 overflow-auto p-4 space-y-2 touch-scroll"
+        @touchstart.stop
+        @touchmove.stop
+        @touchend.stop
       >
-        {{ currentSlide + 1 }} / {{ totalSlides }} · {{ currentSectionLabel }}
-      </div>
-    </div>
-
-    <!-- Right action buttons column -->
-    <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
-      <button
-        @click="toggleLike(true)"
-        class="flex flex-col items-center active:scale-95 transition"
-      >
-        <span
-          class="w-8 h-8"
-          :class="[liked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
-          v-html="liked ? icons.heartFill : icons.heart"
-        />
-        <span class="text-[10px] mt-1">또 보고싶어</span>
-      </button>
-      <button @click="onDoWithMe" class="flex flex-col items-center active:scale-95 transition">
-        <span class="w-8 h-8" v-html="icons.handshake" />
-        <span class="text-[10px] mt-1">나랑도 해</span>
-      </button>
-      <button @click="onComment" class="flex flex-col items-center active:scale-95 transition">
-        <span class="w-8 h-8" v-html="icons.comment" />
-        <span class="text-[10px] mt-1">댓글</span>
-      </button>
-      <button @click="onShare" class="flex flex-col items-center active:scale-95 transition">
-        <span class="w-8 h-8" v-html="icons.share" />
-        <span class="text-[10px] mt-1">공유</span>
-      </button>
-    </div>
-
-    <!-- Skip button removed per spec -->
-
-    <!-- Floating like hearts -->
-    <div class="pointer-events-none absolute inset-0 z-30">
-      <div
-        v-for="h in hearts"
-        :key="h.id"
-        class="absolute text-red-500 animate-heart-pop"
-        :style="{ left: h.x + 'px', top: h.y + 'px' }"
-        v-html="icons.heartFill"
-      />
-    </div>
-  </div>
-
-  <!-- Rules modal -->
-  <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/80 flex flex-col">
-    <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-      <div class="text-lg font-bold">경기 규칙</div>
-      <button
-        class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 active:scale-95"
-        @click="showRuleModal = false"
-      >
-        닫기
-      </button>
-    </div>
-    <div
-      class="flex-1 overflow-auto p-4 space-y-2 touch-scroll"
-      @touchstart.stop
-      @touchmove.stop
-      @touchend.stop
-    >
-      <div
-        v-for="(it, idx) in post.rule.items"
-        :key="'rm-' + idx"
-        class="bg-white/10 border border-white/10 rounded-xl"
-      >
-        <div class="px-4 py-3 font-semibold">{{ idx + 1 }}. {{ it.title }}</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">{{ it.desc }}</div>
+        <div
+          v-for="(it, idx) in post.rule.items"
+          :key="'rm-' + idx"
+          class="bg-white/10 border border-white/10 rounded-xl"
+        >
+          <div class="px-4 py-3 font-semibold">{{ idx + 1 }}. {{ it.title }}</div>
+          <div class="px-4 pb-4 text-sm text-white/80 leading-snug">{{ it.desc }}</div>
+        </div>
       </div>
     </div>
   </div>
-
   <Footer tab="feed" />
   <CustomToast />
 </template>
 
 <script setup>
-import { computed, reactive, ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, reactive, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
 import api from '../../api/api'
@@ -602,7 +728,7 @@ const notificationIcon = (type) => {
 onMounted(() => {
   fetchNotifications()
 })
-// Dummy post data
+// The reactive post object for the currently visible feed item
 const post = reactive({
   id: 'demo-1',
   date: '2025-09-05',
@@ -699,6 +825,331 @@ const post = reactive({
     ],
   },
 })
+
+// ---------------------------
+// Vertical feed management
+// ---------------------------
+const feedList = ref([]) // 전체 피드 목록
+const currentFeedIndex = ref(0) // 현재 보고 있는 피드 인덱스
+const isLoadingMore = ref(false)
+let feedIdCursor = 1
+
+function makeDummyPost(idNum) {
+  const baseId = `demo-${idNum}`
+  // 간단한 더미 데이터 (실서버 연동 시 아래를 대체)
+  return {
+    id: baseId,
+    date: `2025-09-${String(5 + (idNum % 20)).padStart(2, '0')}`,
+    // 사진은 id마다 약간 다른 이미지를 사용하도록 변형
+    photos: (post.photos || []).map((p, idx) => ({
+      ...p,
+      // unsplash에 더미 파라미터를 붙여 서로 다른 이미지처럼 보이게 함
+      url: p.url + (p.url.includes('?') ? `&sig=${idNum}${idx}` : `?sig=${idNum}${idx}`),
+    })),
+    reviewBg:
+      (post.reviewBg || '') + (post.reviewBg?.includes('?') ? `&sig=${idNum}` : `?sig=${idNum}`),
+    caption: `더미 캡션 #${idNum}`,
+    meta: { place: `더미 장소 ${idNum}`, time: `오늘 · ${18 + (idNum % 5)}:00` },
+    tags: ['검도', idNum % 2 ? '친선전' : '연습', `${(idNum % 3) + 1}세트`],
+    author: { name: `사용자 ${idNum}`, avatar: post.author.avatar },
+    players: post.players.map((p) => ({ ...p })),
+    result: {
+      scoreA: post.result.scoreA,
+      scoreB: post.result.scoreB,
+      winner: post.result.winner,
+      sets: post.result.sets,
+      duration: post.result.duration,
+      setScores: post.result.setScores.map((s) => ({ ...s })),
+    },
+    reviews: post.reviews.map((r) => ({ ...r })),
+    rule: {
+      title: post.rule.title,
+      items: post.rule.items.map((it) => ({ ...it })),
+    },
+  }
+}
+
+async function fetchInitialFeed() {
+  // 서버 연동 예시 (주석)
+  // const res = await api.get('/api/feed?limit=10')
+  // feedList.value = res.data.items
+  feedList.value = Array.from({ length: 10 }, () => makeDummyPost(feedIdCursor++))
+  // 현재 포스트로 바인딩
+  if (feedList.value.length) Object.assign(post, feedList.value[0])
+}
+
+async function loadMoreFeed() {
+  if (isLoadingMore.value) return
+  isLoadingMore.value = true
+  try {
+    // 서버 연동 예시 (주석)
+    // const res = await api.get(`/api/feed?cursor=${cursor}&limit=10`)
+    // feedList.value.push(...res.data.items)
+    const more = Array.from({ length: 10 }, () => makeDummyPost(feedIdCursor++))
+    feedList.value.push(...more)
+  } finally {
+    isLoadingMore.value = false
+  }
+}
+
+// 남은 미시청 항목이 5개가 되면 추가 로드
+watch(currentFeedIndex, async (idx) => {
+  const remaining = feedList.value.length - idx - 1
+  if (remaining === 5) {
+    await loadMoreFeed()
+  }
+})
+
+onMounted(async () => {
+  await fetchInitialFeed()
+})
+
+function setCurrentFeed(i) {
+  const next = Math.max(0, Math.min(i, feedList.value.length - 1))
+  if (next === currentFeedIndex.value) return
+  currentFeedIndex.value = next
+  // 현재 포스트 상태 업데이트 (reactive 포인터 유지)
+  const src = feedList.value[next]
+  if (src) {
+    Object.assign(post, src)
+  }
+  // 포스트 단위 UX 상태 초기화
+  currentSlide.value = 0
+  hearts.value = []
+  expandedReviews[0] = false
+  expandedReviews[1] = false
+  helpfulCounts[0] = 0
+  helpfulCounts[1] = 0
+  tryVibrate(10)
+}
+
+// Feed-level vertical swipe handling
+const feedStartX = ref(0)
+const feedStartY = ref(0)
+const feedDeltaX = ref(0)
+const feedDeltaY = ref(0)
+const feedEndY = ref(0)
+const feedIsPointerDown = ref(false)
+const feedIsVertical = ref(false)
+let feedGestureStartAt = 0
+let feedActiveScrollEl = null
+const feedTranslateY = ref(0)
+const feedAnimating = ref(false)
+let feedSwipeDirection = 0 // -1: down(이전), 1: up(다음), 0: none
+
+const feedWrapperStyle = computed(() => ({
+  transform: `translateY(${feedTranslateY.value}px)`,
+  transition: feedAnimating.value ? 'transform 380ms cubic-bezier(.22,1,.36,1)' : 'none',
+  willChange: 'transform',
+}))
+
+// Adjacent post previews
+const nextPost = computed(() => feedList.value[currentFeedIndex.value + 1] || null)
+const prevPost = computed(() => feedList.value[currentFeedIndex.value - 1] || null)
+
+const nextPreviewStyle = computed(() => ({
+  transform: `translateY(${(typeof window !== 'undefined' ? window.innerHeight : 800) + feedTranslateY.value}px)`,
+  transition: feedAnimating.value ? 'transform 380ms cubic-bezier(.22,1,.36,1)' : 'none',
+  willChange: 'transform',
+}))
+const prevPreviewStyle = computed(() => ({
+  transform: `translateY(${-(typeof window !== 'undefined' ? window.innerHeight : 800) + feedTranslateY.value}px)`,
+  transition: feedAnimating.value ? 'transform 380ms cubic-bezier(.22,1,.36,1)' : 'none',
+  willChange: 'transform',
+}))
+
+function onFeedTouchStart(e) {
+  const t = e.touches?.[0]
+  if (!t) return
+  feedStartX.value = t.clientX
+  feedStartY.value = t.clientY
+  feedDeltaX.value = 0
+  feedDeltaY.value = 0
+  feedEndY.value = feedStartY.value
+  feedIsVertical.value = false
+  feedIsPointerDown.value = true
+  feedGestureStartAt = Date.now()
+  feedActiveScrollEl = findScrollable(e.target)
+  feedAnimating.value = false
+  feedSwipeDirection = 0
+  feedTranslateY.value = 0
+}
+
+function onFeedTouchMove(e) {
+  if (!feedIsPointerDown.value) return
+  const t = e.touches?.[0]
+  if (!t) return
+  const x = t.clientX
+  const y = t.clientY
+  feedDeltaX.value = x - feedStartX.value
+  feedDeltaY.value = y - feedStartY.value
+  feedEndY.value = y
+
+  // 수직 제스처 우선 판별 + 내부 스크롤 존재 시 무시
+  if (!feedIsVertical.value) {
+    const verticalDominant =
+      Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value) && Math.abs(feedDeltaY.value) > 6
+    if (verticalDominant && !feedActiveScrollEl) feedIsVertical.value = true
+  }
+  if (feedIsVertical.value && !feedActiveScrollEl) {
+    // 가장자리에서 저항
+    const atFirst = currentFeedIndex.value === 0 && feedDeltaY.value > 0
+    const atLast = currentFeedIndex.value === feedList.value.length - 1 && feedDeltaY.value < 0
+    const resist = atFirst || atLast
+    feedTranslateY.value = resist ? feedDeltaY.value * 0.35 : feedDeltaY.value
+  }
+}
+
+function onFeedTouchEnd(e) {
+  if (!feedIsPointerDown.value) return
+  const thresholdPx = Math.floor(window.innerHeight * 0.08) // 조금 더 관대하게
+  const duration = Math.max(1, Date.now() - feedGestureStartAt)
+  const velocityY = feedDeltaY.value / duration
+
+  const target = e?.target
+  const onControl = !!(
+    target &&
+    target.closest &&
+    target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
+  )
+  const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
+  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
+
+  if (verticalMove && !onControl && movedY) {
+    if (feedDeltaY.value < 0 && currentFeedIndex.value < feedList.value.length - 1) {
+      // 다음으로 스냅 아웃
+      feedAnimating.value = true
+      feedSwipeDirection = 1
+      requestAnimationFrame(() => {
+        feedTranslateY.value = -window.innerHeight
+      })
+    } else if (feedDeltaY.value > 0 && currentFeedIndex.value > 0) {
+      // 이전으로 스냅 아웃
+      feedAnimating.value = true
+      feedSwipeDirection = -1
+      requestAnimationFrame(() => {
+        feedTranslateY.value = window.innerHeight
+      })
+    } else {
+      // 경계: 원위치
+      feedAnimating.value = true
+      feedSwipeDirection = 0
+      requestAnimationFrame(() => {
+        feedTranslateY.value = 0
+      })
+    }
+  } else {
+    // 취소: 원위치 복귀
+    feedAnimating.value = true
+    feedSwipeDirection = 0
+    requestAnimationFrame(() => {
+      feedTranslateY.value = 0
+    })
+  }
+
+  feedIsPointerDown.value = false
+  feedIsVertical.value = false
+  feedActiveScrollEl = null
+}
+
+function onFeedSnapTransitionEnd(e) {
+  if (!feedAnimating.value) return
+  if (e && e.target !== e.currentTarget) return
+  if (feedSwipeDirection === 1) {
+    setCurrentFeed(currentFeedIndex.value + 1)
+  } else if (feedSwipeDirection === -1) {
+    setCurrentFeed(currentFeedIndex.value - 1)
+  }
+  // 스냅 종료 후 즉시 원위치로 되돌림 (애니메이션 없이)
+  feedAnimating.value = false
+  feedSwipeDirection = 0
+  feedTranslateY.value = 0
+}
+
+// Desktop mouse drag support for vertical feed
+function onFeedMouseDown(e) {
+  // 인터랙티브 요소는 무시
+  if (
+    e.target?.closest &&
+    e.target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
+  )
+    return
+  feedStartX.value = e.clientX
+  feedStartY.value = e.clientY
+  feedDeltaX.value = 0
+  feedDeltaY.value = 0
+  feedEndY.value = feedStartY.value
+  feedIsVertical.value = false
+  feedIsPointerDown.value = true
+  feedGestureStartAt = Date.now()
+  feedActiveScrollEl = findScrollable(e.target)
+  feedAnimating.value = false
+  feedSwipeDirection = 0
+  feedTranslateY.value = 0
+}
+function onFeedMouseMove(e) {
+  if (!feedIsPointerDown.value) return
+  const x = e.clientX
+  const y = e.clientY
+  feedDeltaX.value = x - feedStartX.value
+  feedDeltaY.value = y - feedStartY.value
+  feedEndY.value = y
+  if (!feedIsVertical.value) {
+    const verticalDominant =
+      Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value) && Math.abs(feedDeltaY.value) > 6
+    if (verticalDominant && !feedActiveScrollEl) feedIsVertical.value = true
+  }
+  if (feedIsVertical.value && !feedActiveScrollEl) {
+    const atFirst = currentFeedIndex.value === 0 && feedDeltaY.value > 0
+    const atLast = currentFeedIndex.value === feedList.value.length - 1 && feedDeltaY.value < 0
+    const resist = atFirst || atLast
+    feedTranslateY.value = resist ? feedDeltaY.value * 0.35 : feedDeltaY.value
+  }
+}
+function onFeedMouseUp(e) {
+  if (!feedIsPointerDown.value) return
+  const thresholdPx = Math.floor(window.innerHeight * 0.08)
+  const duration = Math.max(1, Date.now() - feedGestureStartAt)
+  const velocityY = feedDeltaY.value / duration
+  const target = e?.target
+  const onControl = !!(
+    target &&
+    target.closest &&
+    target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
+  )
+  const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
+  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
+  if (verticalMove && !onControl && movedY) {
+    if (feedDeltaY.value < 0 && currentFeedIndex.value < feedList.value.length - 1) {
+      feedAnimating.value = true
+      feedSwipeDirection = 1
+      requestAnimationFrame(() => {
+        feedTranslateY.value = -window.innerHeight
+      })
+    } else if (feedDeltaY.value > 0 && currentFeedIndex.value > 0) {
+      feedAnimating.value = true
+      feedSwipeDirection = -1
+      requestAnimationFrame(() => {
+        feedTranslateY.value = window.innerHeight
+      })
+    } else {
+      feedAnimating.value = true
+      feedSwipeDirection = 0
+      requestAnimationFrame(() => {
+        feedTranslateY.value = 0
+      })
+    }
+  } else {
+    feedAnimating.value = true
+    feedSwipeDirection = 0
+    requestAnimationFrame(() => {
+      feedTranslateY.value = 0
+    })
+  }
+  feedIsPointerDown.value = false
+  feedIsVertical.value = false
+  feedActiveScrollEl = null
+}
 
 // Photos computed
 const hasPhotos = computed(() => Array.isArray(post.photos) && post.photos.length > 0)
@@ -1212,5 +1663,10 @@ function makeFriend(i) {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   touch-action: pan-y;
+}
+
+.feed-viewport {
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
 }
 </style>

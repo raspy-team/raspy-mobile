@@ -109,7 +109,7 @@
     >
       <div class="h-full flex" :style="wrapperStyle">
         <!-- 1. 헤드라인 사진 (있을 때만) -->
-        <section v-if="hasPhotos" class="w-screen shrink-0 h-full relative">
+        <section v-if="features.headline && hasPhotos" class="w-screen shrink-0 h-full relative">
           <img
             :src="headlinePhoto.url"
             alt="headline"
@@ -259,6 +259,7 @@
               <button
                 class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
                 @click="goToRanking"
+                v-if="features.friendRanking"
               >
                 <span class="w-5 h-5" v-html="icons.trophy" />
                 <span class="text-sm font-medium">랭킹 보기</span>
@@ -275,7 +276,7 @@
 
               <button
                 class="h-12 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-200 active:scale-95 flex items-center justify-center gap-2"
-                @click="onDoWithMe"
+                @click="onDoWithMeInfo"
               >
                 <span class="w-5 h-5" v-html="icons.handshake" />
                 <span class="text-sm font-medium">도전장 보내기</span>
@@ -285,7 +286,7 @@
         </section>
 
         <!-- 3. 평점 & 리뷰 -->
-        <section class="w-screen shrink-0 h-full relative">
+        <section v-if="features.reviews" class="w-screen shrink-0 h-full relative">
           <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
           <div class="ambient-overlay" />
           <div
@@ -378,7 +379,10 @@
           </div>
         </section>
         <!-- 4. 친구 랭킹 -->
-        <section class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center">
+        <section
+          v-if="features.friendRanking"
+          class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
+        >
           <div class="absolute inset-0 bg-gradient-to-b from-fuchsia-900 via-black to-black" />
           <div class="ambient-overlay" />
           <div class="relative z-10 max-w-xl w-full">
@@ -427,22 +431,20 @@
         </section>
 
         <!-- 5. 전체 사진 (헤드라인 제외, 각 1장씩 슬라이드) -->
-        <section
-          v-for="p in galleryPhotos"
-          :key="'gal-' + p.id"
-          class="w-screen shrink-0 h-full relative"
-        >
-          <img
-            :src="p.url"
-            alt="photo"
-            class="absolute inset-0 w-full h-full object-cover"
-            draggable="false"
-          />
-          <div
-            class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
-          ></div>
-          <div class="ambient-overlay"></div>
-        </section>
+        <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
+          <section v-if="features.gallery" class="w-screen shrink-0 h-full relative">
+            <img
+              :src="p.url"
+              alt="photo"
+              class="absolute inset-0 w-full h-full object-cover"
+              draggable="false"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
+            ></div>
+            <div class="ambient-overlay"></div>
+          </section>
+        </template>
       </div>
     </div>
 
@@ -525,6 +527,7 @@
   </div>
 
   <Footer tab="feed" />
+  <CustomToast />
 </template>
 
 <script setup>
@@ -532,7 +535,13 @@ import { computed, reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
 import api from '../../api/api'
+import featureFlags from '../../config/features'
+import { useToast } from '../../composable/useToast'
+import CustomToast from '../../components/CustomToast.vue'
 const router = useRouter()
+// Currently available info flags for gating UI
+const features = featureFlags
+const { showToast } = useToast()
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
@@ -710,9 +719,13 @@ const galleryPhotos = computed(() => {
 // Sections order
 const sections = computed(() => {
   const arr = []
-  if (hasPhotos.value) arr.push('헤드라인 사진')
-  arr.push('경기 정보', '평점 & 리뷰', '친구 랭킹')
-  for (let i = 0; i < galleryPhotos.value.length; i++) arr.push('전체 사진')
+  if (features.headline && hasPhotos.value) arr.push('헤드라인 사진')
+  if (features.gameInfo) arr.push('경기 정보')
+  if (features.reviews) arr.push('평점 & 리뷰')
+  if (features.friendRanking) arr.push('친구 랭킹')
+  if (features.gallery) {
+    for (let i = 0; i < galleryPhotos.value.length; i++) arr.push('전체 사진')
+  }
   return arr
 })
 const totalSlides = computed(() => sections.value.length)
@@ -979,6 +992,9 @@ function toggleLike(withBump = false) {
 }
 function onDoWithMe() {
   router.push('/create-game')
+}
+function onDoWithMeInfo() {
+  showToast('준비 중인 기능입니다!')
 }
 function onComment() {
   router.push('/games/demo-game/comments')

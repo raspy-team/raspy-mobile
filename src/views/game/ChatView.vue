@@ -177,15 +177,6 @@ const headerInfo = computed(() => {
         showActions: false,
         isClickable: false,
       }
-    case 'game_pre_match':
-      return {
-        show: true,
-        type: 'game_pre_match',
-        title: '경기 준비중',
-        description: `${gameData.value.rule.ruleTitle} • ${gameData.value.location}`,
-        showActions: false,
-        isClickable: false,
-      }
     case 'no_relation':
     default:
       return {
@@ -282,7 +273,6 @@ const handleAddFriend = () => {
             class="h-1 w-full"
             :class="{
               'bg-gradient-to-r from-green-400 to-emerald-500': headerInfo.type === 'game_scheduled',
-              'bg-gradient-to-r from-blue-400 to-indigo-500': headerInfo.type === 'game_pre_match',
               'bg-gradient-to-r from-orange-400 to-red-500': headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
               'bg-gradient-to-r from-gray-300 to-gray-400': headerInfo.type === 'request_sent'
             }"
@@ -309,7 +299,6 @@ const handleAddFriend = () => {
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm"
                     :class="{
                       'bg-green-500': headerInfo.type === 'game_scheduled',
-                      'bg-blue-500': headerInfo.type === 'game_pre_match',
                       'bg-orange-500': headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
                       'bg-gray-400': headerInfo.type === 'request_sent'
                     }"
@@ -328,11 +317,11 @@ const handleAddFriend = () => {
 
                     <!-- 카테고리 -->
                     <div class="flex items-center gap-1 mb-2">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                        {{ gameData.rule.majorCategory }}
-                      </span>
+                      <span class="text-xs text-gray-600 font-medium">{{ gameData.rule.majorCategory }}</span>
                       <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                      <span class="text-xs text-gray-600 font-medium">{{ gameData.rule.minorCategory }}</span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                        {{ gameData.rule.minorCategory }}
+                      </span>
                     </div>
 
                     <!-- 상태 정보 -->
@@ -342,7 +331,6 @@ const handleAddFriend = () => {
                           class="w-2 h-2 rounded-full animate-pulse"
                           :class="{
                             'bg-green-500': headerInfo.type === 'game_scheduled',
-                            'bg-blue-500': headerInfo.type === 'game_pre_match',
                             'bg-orange-500': headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
                             'bg-gray-400': headerInfo.type === 'request_sent'
                           }"
@@ -459,7 +447,6 @@ const handleAddFriend = () => {
             request_sent: '요청보냄',
             challenge_received: '나랑도해',
             game_scheduled: '경기예정',
-            game_pre_match: '경기준비',
             no_relation: '관계없음',
           }"
           :key="case_key"

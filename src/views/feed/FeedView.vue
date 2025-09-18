@@ -217,37 +217,17 @@
         @mouseleave.passive="onMouseUp($event)"
       >
         <div class="h-full flex" :style="wrapperStyle">
-          <!-- 1. 헤드라인 사진 (있을 때만) -->
-          <section v-if="features.headline && hasPhotos" class="w-screen shrink-0 h-full relative">
-            <img
+            <!-- 1. 헤드라인 사진 (있을 때만) -->
+            <section v-if="features.headline && hasPhotos" class="w-screen shrink-0 h-full relative flex items-center justify-center">
+              <img
               :src="headlinePhoto.url"
               alt="headline"
-              class="absolute inset-0 w-full h-full object-cover"
+              class="max-w-[80vw] max-h-[70vh] rounded-2xl shadow-xl object-contain"
               draggable="false"
-            />
-            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-            <div class="ambient-overlay" />
-
-            <!-- Content overlay for 헤드라인 사진 -->
-            <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
-              <div
-                class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
-              >
-                <div class="text-lg font-bold">{{ post.author.name }}의 경기 하이라이트</div>
-                <div class="mt-1 text-xs text-white/80">
-                  {{ post.meta.place }}
-                </div>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  <span
-                    v-for="t in post.tags"
-                    :key="t"
-                    class="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10"
-                    >#{{ t }}</span
-                  >
-                </div>
-              </div>
-            </div>
-          </section>
+              />
+              <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
+              <div class="ambient-overlay" />
+            </section>
 
           <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
           <section class="w-screen shrink-0 h-full relative flex items-center justify-center">

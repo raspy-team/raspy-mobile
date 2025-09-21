@@ -79,7 +79,45 @@
     </transition>
   </header>
 
+  <!-- 로딩 상태 -->
+  <div v-if="loading" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+    <div class="flex items-center justify-center h-full">
+      <div class="text-center">
+        <!-- 스켈레톤 UI -->
+        <div class="space-y-4 max-w-sm mx-auto p-6">
+          <div class="h-4 bg-white/10 rounded animate-pulse"></div>
+          <div class="h-20 bg-white/10 rounded animate-pulse"></div>
+          <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
+          <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
+        </div>
+        <p class="mt-6 text-white/70 text-sm">피드를 불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 빈 상태 -->
+  <div v-else-if="!loading && sortedFeed.length === 0" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+    <div class="flex items-center justify-center h-full">
+      <div class="text-center max-w-sm mx-auto p-6">
+        <i class="fas fa-trophy text-4xl text-white/30 mb-4"></i>
+        <h3 class="text-lg font-semibold mb-2">아직 경기가 없어요</h3>
+        <p class="text-white/70 text-sm leading-relaxed">
+          친구들과 첫 경기를 시작해보세요!<br>
+          새로운 도전이 기다리고 있습니다.
+        </p>
+        <button
+          class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition-colors"
+          @click="$router.push('/games')"
+        >
+          경기 만들기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실제 피드 컨텐츠 -->
   <div
+    v-else
     class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none feed-viewport"
     @touchstart.passive="onFeedTouchStart"
     @touchmove.passive="onFeedTouchMove"
@@ -95,12 +133,12 @@
       <div v-if="prevPost" class="absolute inset-0" :style="prevPreviewStyle">
         <!-- Preview for completed game -->
         <div
-          v-if="prevPost.type === 'completed'"
+          v-if="prevPost.type === 'game' && prevPost.isCompleted"
           class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
         ></div>
         <!-- Preview for scheduled game -->
         <div
-          v-else-if="prevPost.type === 'scheduled'"
+          v-else-if="prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)"
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
         ></div>
         <!-- Preview for invite -->
@@ -124,7 +162,7 @@
 
           <!-- Completed game preview -->
           <div
-            v-else-if="prevPost.type === 'completed'"
+            v-else-if="prevPost.type === 'game' && prevPost.isCompleted"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -166,7 +204,7 @@
 
           <!-- Scheduled game preview -->
           <div
-            v-else-if="prevPost.type === 'scheduled'"
+            v-else-if="prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -203,12 +241,12 @@
       <div v-if="nextPost" class="absolute inset-0" :style="nextPreviewStyle">
         <!-- Preview for completed game -->
         <div
-          v-if="nextPost.type === 'completed'"
+          v-if="nextPost.type === 'game' && nextPost.isCompleted"
           class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
         ></div>
         <!-- Preview for scheduled game -->
         <div
-          v-else-if="nextPost.type === 'scheduled'"
+          v-else-if="nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)"
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
         ></div>
         <!-- Preview for invite -->
@@ -232,7 +270,7 @@
 
           <!-- Completed game preview -->
           <div
-            v-else-if="nextPost.type === 'completed'"
+            v-else-if="nextPost.type === 'game' && nextPost.isCompleted"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -274,7 +312,7 @@
 
           <!-- Scheduled game preview -->
           <div
-            v-else-if="nextPost.type === 'scheduled'"
+            v-else-if="nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -349,7 +387,7 @@
         <div class="h-full flex" :style="wrapperStyle">
           <!-- 1. 헤드라인 사진 (완료된 경기만) -->
           <section
-            v-if="post.type === 'completed' && features.headline && hasPhotos"
+            v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
             class="w-screen shrink-0 h-full relative"
           >
             <img
@@ -366,7 +404,7 @@
               <div
                 class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
               >
-                <div class="text-lg font-bold">{{ post.author.name }}의 경기 하이라이트</div>
+                <div class="text-lg font-bold">{{ post.players[0]?.name }}의 경기 하이라이트</div>
                 <div class="mt-1 text-xs text-white/80">
                   {{ post.meta.place }}
                 </div>
@@ -386,12 +424,12 @@
           <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
             <!-- Completed game background -->
             <div
-              v-if="post.type === 'completed'"
+              v-if="post.type === 'game' && post.isCompleted"
               class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-cyan-600 to-blue-700"
             />
             <!-- Scheduled game background -->
             <div
-              v-else-if="post.type === 'scheduled'"
+              v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)"
               class="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-700"
             />
             <div class="ambient-overlay" />
@@ -400,14 +438,14 @@
               class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
               <!-- Completed game header -->
-              <div v-if="post.type === 'completed'" class="flex items-center justify-between mb-5">
+              <div v-if="post.type === 'game' && post.isCompleted" class="flex items-center justify-between mb-5">
                 <div class="text-xl font-extrabold">경기 결과</div>
                 <div class="text-xs text-white/60">{{ post.date }}</div>
               </div>
 
               <!-- Scheduled game header -->
               <div
-                v-else-if="post.type === 'scheduled'"
+                v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)"
                 class="flex items-center justify-between mb-5"
               >
                 <div class="text-xl font-extrabold">예정된 경기</div>
@@ -415,7 +453,7 @@
               </div>
 
               <!-- Completed game content -->
-              <div v-if="post.type === 'completed'" class="space-y-6">
+              <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6">
                 <!-- 경기 결과 -->
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                   <div class="text-center relative">
@@ -501,7 +539,7 @@
               </div>
 
               <!-- Scheduled game content -->
-              <div v-else-if="post.type === 'scheduled'" class="space-y-6">
+              <div v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)" class="space-y-6">
                 <!-- 스포츠 종목 -->
                 <div class="flex items-center gap-4">
                   <img
@@ -549,10 +587,10 @@
                 <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
                   <div class="text-center">
                     <img
-                      :src="post.author.avatar"
+                      :src="post.players[0]?.avatar"
                       class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
                     />
-                    <div class="text-white font-semibold text-sm">{{ post.author.name }}</div>
+                    <div class="text-white font-semibold text-sm">{{ post.players[0]?.name }}</div>
                     <div class="text-blue-300 text-xs font-medium">주최자</div>
                   </div>
 
@@ -599,13 +637,13 @@
               </div>
 
               <div
-                v-if="post.type === 'completed'"
+                v-if="post.type === 'game' && post.isCompleted"
                 class="mt-2 text-center italic text-white/70 text-xs"
               >
                 이 매치, 너라면 이길 수 있어?
               </div>
               <div
-                v-if="post.type === 'completed'"
+                v-if="post.type === 'game' && post.isCompleted"
                 class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80"
               >
                 <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
@@ -618,7 +656,7 @@
                 </div>
               </div>
               <!-- 세트 결과: 세로 전체폭 -->
-              <div v-if="post.type === 'completed'" class="mt-4 space-y-2">
+              <div v-if="post.type === 'game' && post.isCompleted" class="mt-4 space-y-2">
                 <div
                   v-for="(sc, idx) in post.result.setScores"
                   :key="'set-' + idx"
@@ -629,7 +667,7 @@
                 </div>
               </div>
               <!-- 규칙: 모달로 자세히 보기 -->
-              <div v-if="post.type === 'completed'" class="mt-4">
+              <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">
                 <div class="flex items-center justify-between text-xs text-white/60 mb-2">
                   <span>규칙 · {{ post.rule.title }}</span>
                   <button
@@ -641,7 +679,7 @@
                 </div>
               </div>
               <div
-                v-if="post.type === 'completed'"
+                v-if="post.type === 'game' && post.isCompleted"
                 class="mt-3 text-[11px] text-white/70 flex items-center justify-between"
               >
                 <span>{{ post.meta.place }}</span>
@@ -652,7 +690,7 @@
 
           <!-- 3. 평점 & 리뷰 (완료된 경기만) -->
           <section
-            v-if="post.type === 'completed' && features.reviews"
+            v-if="post.type === 'game' && post.isCompleted && features.reviews"
             class="w-screen shrink-0 h-full relative"
           >
             <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
@@ -664,37 +702,36 @@
               <div class="max-w-xl mx-auto w-full">
                 <div class="flex items-center justify-between mb-1">
                   <div class="text-xl font-extrabold">평점 & 리뷰</div>
-                  <div class="text-xs text-white/70">총 {{ post.reviews.length }}개</div>
+                  <div class="text-xs text-white/70" v-if="post.reviews && post.reviews.length > 0">총 {{ post.reviews.length }}개</div>
                 </div>
                 <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
               </div>
-              <div class="flex items-center justify-center">
+              <!-- 리뷰가 있는 경우만 표시 -->
+              <div v-if="post.reviews?.length > 0 && post.reviews[0]?.author" class="flex items-center justify-center">
                 <div
                   class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
                 >
                   <div class="flex items-center gap-3">
                     <img
-                      :src="post.reviews[0].avatar"
+                      :src="post.reviews[0]?.author?.avatar || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
                       class="w-12 h-12 rounded-full object-cover"
                     />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">{{ post.reviews[0].name }}</div>
-                        <div class="text-[11px] text-white/80">
-                          <span class="mr-2"
-                            >퍼포먼스 {{ post.reviews[0].performance.toFixed(1) }}/5</span
-                          >·
-                          <span class="ml-2">매너 {{ post.reviews[0].manner.toFixed(1) }}/5</span>
-                        </div>
+                        <div class="font-semibold truncate">{{ post.reviews[0]?.author?.name || '익명' }}</div>
+                        <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
+                        <!-- <div class="text-[11px] text-white/80">
+                          <span class="mr-2">퍼포먼스 5.0/5</span>·
+                          <span class="ml-2">매너 5.0/5</span>
+                        </div> -->
                       </div>
-                      <!-- progress bars removed -->
                     </div>
                   </div>
                   <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[0]">{{
-                      truncatedText(post.reviews[0].text)
+                    <span v-if="!expandedReviews[0]">{{ post.reviews[0]?.text ?
+                      truncatedText(post.reviews[0].text) : ''
                     }}</span>
-                    <span v-else>{{ post.reviews[0].text }}</span>
+                    <span v-else>{{ post.reviews[0]?.text || '' }}</span>
                   </div>
                   <div class="mt-2 flex items-center justify-between text-xs text-white/70">
                     <button
@@ -712,33 +749,32 @@
                   </div>
                 </div>
               </div>
-              <div class="flex items-center justify-center">
+              <!-- 두 번째 리뷰가 있는 경우만 표시 -->
+              <div v-if="post.reviews?.length > 1 && post.reviews[1]?.author" class="flex items-center justify-center">
                 <div
                   class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
                 >
                   <div class="flex items-center gap-3">
                     <img
-                      :src="post.reviews[1].avatar"
+                      :src="post.reviews[1]?.author?.avatar || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
                       class="w-12 h-12 rounded-full object-cover"
                     />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">{{ post.reviews[1].name }}</div>
-                        <div class="text-[11px] text-white/80">
-                          <span class="mr-2"
-                            >퍼포먼스 {{ post.reviews[1].performance.toFixed(1) }}/5</span
-                          >·
-                          <span class="ml-2">매너 {{ post.reviews[1].manner.toFixed(1) }}/5</span>
-                        </div>
+                        <div class="font-semibold truncate">{{ post.reviews[1]?.author?.name || '익명' }}</div>
+                        <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
+                        <!-- <div class="text-[11px] text-white/80">
+                          <span class="mr-2">퍼포먼스 5.0/5</span>·
+                          <span class="ml-2">매너 5.0/5</span>
+                        </div> -->
                       </div>
-                      <!-- progress bars removed -->
                     </div>
                   </div>
                   <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[1]">{{
-                      truncatedText(post.reviews[1].text)
+                    <span v-if="!expandedReviews[1]">{{ post.reviews[1]?.text ?
+                      truncatedText(post.reviews[1].text) : ''
                     }}</span>
-                    <span v-else>{{ post.reviews[1].text }}</span>
+                    <span v-else>{{ post.reviews[1]?.text || '' }}</span>
                   </div>
                   <div class="mt-2 flex items-center justify-between text-xs text-white/70">
                     <button
@@ -753,6 +789,17 @@
                     >
                       도움이 됐어요 · {{ helpfulCounts[1] || 0 }}
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 리뷰가 없을 때 표시할 메시지 -->
+              <div v-if="!post.reviews || post.reviews.length === 0" class="flex items-center justify-center">
+                <div class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-8 text-center">
+                  <div class="text-white/70 text-sm">
+                    <i class="fas fa-comment-dots text-2xl mb-3 block"></i>
+                    아직 리뷰가 없습니다.<br>
+                    첫 번째 리뷰를 남겨보세요!
                   </div>
                 </div>
               </div>
@@ -815,7 +862,7 @@
           <!-- 5. 전체 사진 (완료된 경기만, 헤드라인 제외, 각 1장씩 슬라이드) -->
           <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
             <section
-              v-if="post.type === 'completed' && features.gallery"
+              v-if="post.type === 'game' && post.isCompleted && features.gallery"
               class="w-screen shrink-0 h-full relative"
             >
               <img
@@ -924,10 +971,18 @@ import featureFlags from '../../config/features'
 // import { useToast } from '../../composable/useToast'
 import CustomToast from '../../components/CustomToast.vue'
 import AppInvitePost from '../../components/feed/AppInvitePost.vue'
+import { useFeed } from '../../composables/useFeed.js'
 const router = useRouter()
 // Currently available info flags for gating UI
 const features = featureFlags
 // const { showToast } = useToast()
+
+// 피드 데이터 관리
+const {
+  loading,
+  sortedFeed,
+  loadFeed
+} = useFeed()
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
@@ -987,9 +1042,14 @@ const notificationIcon = (type) => {
 
 onMounted(() => {
   fetchNotifications()
+  loadFeed()
 })
-// The reactive post object for the currently visible feed item
-const post = reactive({
+// 현재 표시 중인 피드 인덱스
+const currentFeedIndex = ref(0)
+
+// 현재 표시 중인 포스트
+const post = computed(() => {
+  return sortedFeed.value[currentFeedIndex.value] || {
   id: 'demo-1',
   date: '2025-09-05',
   // 전체 사진 (인증샷 포함). 첫 항목이 헤드라인 사진이라고 가정 (isHeadline: true)
@@ -1084,145 +1144,24 @@ const post = reactive({
       },
     ],
   },
+  }
 })
 
 // ---------------------------
 // Vertical feed management
 // ---------------------------
-const feedList = ref([]) // 전체 피드 목록
-const currentFeedIndex = ref(0) // 현재 보고 있는 피드 인덱스
-const isLoadingMore = ref(false)
-let feedIdCursor = 1
+// 이전 피드 관리 변수들 제거됨 - useFeed 사용
 
-// 앱 초대 트리거 관리 - 특정 위치에 삽입
-const APP_INVITE_TRIGGER_POSITION = 3 // 3번째 위치에 삽입
-let inviteInserted = false
-
-function makeDummyPost(idNum) {
-  const baseId = `demo-${idNum}`
-
-  // 포스트 타입 정보 추가 (앱 초대 제거)
-  const types = ['friend-completed', 'friend-scheduled', 'all-completed', 'all-scheduled']
-  const postType = types[idNum % types.length]
-  const isFriend = postType.includes('friend')
-  const type = postType.includes('completed') ? 'completed' : 'scheduled'
-
-  // 간단한 더미 데이터 (실서버 연동 시 아래를 대체)
-  const baseData = {
-    id: baseId,
-    type,
-    postType,
-    isFriend,
-    date: `2025-09-${String(5 + (idNum % 20)).padStart(2, '0')}`,
-    caption: `더미 캡션 #${idNum}`,
-    meta: { place: `더미 장소 ${idNum}`, time: `오늘 · ${18 + (idNum % 5)}:00` },
-    tags: ['검도', idNum % 2 ? '친선전' : '연습', `${(idNum % 3) + 1}세트`],
-    author: { name: `사용자 ${idNum}`, avatar: post.author.avatar },
-    rule: {
-      title: type === 'scheduled' ? '예정된 경기' : post.rule.title,
-      majorCategory: '라켓 스포츠',
-      minorCategory: '탁구',
-      items: post.rule.items.map((it) => ({ ...it })),
-    },
-  }
-
-  if (type === 'completed') {
-    // 완료된 경기는 모든 데이터 포함
-    return {
-      ...baseData,
-      photos: (post.photos || []).map((p, idx) => ({
-        ...p,
-        url: p.url + (p.url.includes('?') ? `&sig=${idNum}${idx}` : `?sig=${idNum}${idx}`),
-      })),
-      reviewBg:
-        (post.reviewBg || '') + (post.reviewBg?.includes('?') ? `&sig=${idNum}` : `?sig=${idNum}`),
-      players: post.players.map((p) => ({ ...p })),
-      result: {
-        scoreA: post.result.scoreA,
-        scoreB: post.result.scoreB,
-        winner: post.result.winner,
-        sets: post.result.sets,
-        duration: post.result.duration,
-        setScores: post.result.setScores.map((s) => ({ ...s })),
-      },
-      reviews: post.reviews.map((r) => ({ ...r })),
-    }
-  } else {
-    // 예정된 경기는 사진, 결과, 리뷰 등 제외
-    return {
-      ...baseData,
-      scheduledDate: new Date(
-        Date.now() + (Math.random() * 7 + 1) * 24 * 60 * 60 * 1000,
-      ).toISOString(),
-      location: baseData.meta.place,
-      maxPlayers: 2,
-    }
-  }
-}
-
-async function fetchInitialFeed() {
-  // 서버 연동 예시 (주석)
-  // const res = await api.get('/api/feed?limit=10')
-  // feedList.value = res.data.items
-  feedList.value = Array.from({ length: 10 }, () => makeDummyPost(feedIdCursor++))
-
-  // 정렬: 친구 완료 → 친구 예정 → 전체 완료 → 전체 예정
-  feedList.value.sort((a, b) => {
-    if (a.isFriend && a.type === 'completed' && !(b.isFriend && b.type === 'completed')) return -1
-    if (b.isFriend && b.type === 'completed' && !(a.isFriend && a.type === 'completed')) return 1
-    if (
-      a.isFriend &&
-      a.type === 'scheduled' &&
-      !(b.isFriend && (b.type === 'completed' || b.type === 'scheduled'))
-    )
-      return -1
-    if (
-      b.isFriend &&
-      b.type === 'scheduled' &&
-      !(a.isFriend && (a.type === 'completed' || a.type === 'scheduled'))
-    )
-      return 1
-    if (a.type === 'completed' && b.type === 'scheduled' && !a.isFriend && !b.isFriend) return -1
-    if (b.type === 'completed' && a.type === 'scheduled' && !a.isFriend && !b.isFriend) return 1
-    return 0
-  })
-
-  // 앱 초대를 특정 위치에 삽입
-  insertAppInviteAtPosition()
-
-  // 현재 포스트로 바인딩
-  if (feedList.value.length) Object.assign(post, feedList.value[0])
-}
-
-function insertAppInviteAtPosition() {
-  if (!inviteInserted && feedList.value.length >= APP_INVITE_TRIGGER_POSITION) {
-    const invitePost = {
-      id: 'app-invite',
-      type: 'invite',
-      timestamp: Date.now(),
-    }
-    feedList.value.splice(APP_INVITE_TRIGGER_POSITION - 1, 0, invitePost)
-    inviteInserted = true
-  }
-}
+// 이전 더미 데이터 및 앱 초대 관련 함수들 제거됨
 
 async function loadMoreFeed() {
-  if (isLoadingMore.value) return
-  isLoadingMore.value = true
-  try {
-    // 서버 연동 예시 (주석)
-    // const res = await api.get(`/api/feed?cursor=${cursor}&limit=10`)
-    // feedList.value.push(...res.data.items)
-    const more = Array.from({ length: 10 }, () => makeDummyPost(feedIdCursor++))
-    feedList.value.push(...more)
-  } finally {
-    isLoadingMore.value = false
-  }
+  // 더 이상 사용하지 않음 - useFeed에서 페이지네이션 처리
+  console.log('loadMoreFeed called but not implemented')
 }
 
 // 남은 미시청 항목이 5개가 되면 추가 로드
 watch(currentFeedIndex, async (idx) => {
-  const remaining = feedList.value.length - idx - 1
+  const remaining = sortedFeed.value.length - idx - 1
   if (remaining === 5) {
     await loadMoreFeed()
   }
@@ -1233,7 +1172,7 @@ const handleInvite = () => {
   console.log('Invite clicked')
   // Add invite functionality
   // Move to next post
-  if (currentFeedIndex.value < feedList.value.length - 1) {
+  if (currentFeedIndex.value < sortedFeed.value.length - 1) {
     setCurrentFeed(currentFeedIndex.value + 1)
   }
 }
@@ -1241,7 +1180,7 @@ const handleInvite = () => {
 const handleSkipInvite = () => {
   console.log('Skip invite clicked')
   // Move to next post
-  if (currentFeedIndex.value < feedList.value.length - 1) {
+  if (currentFeedIndex.value < sortedFeed.value.length - 1) {
     setCurrentFeed(currentFeedIndex.value + 1)
   }
 }
@@ -1253,19 +1192,15 @@ const handleJoin = (postId) => {
 }
 
 onMounted(async () => {
-  await fetchInitialFeed()
+  // fetchInitialFeed는 더 이상 필요없음 - useFeed의 loadFeed 사용
 })
 
 function setCurrentFeed(i) {
-  const next = Math.max(0, Math.min(i, feedList.value.length - 1))
+  const next = Math.max(0, Math.min(i, sortedFeed.value.length - 1))
   if (next === currentFeedIndex.value) return
   currentFeedIndex.value = next
 
-  // 현재 포스트 상태 업데이트 (reactive 포인터 유지)
-  const src = feedList.value[next]
-  if (src) {
-    Object.assign(post, src)
-  }
+  // post는 computed이므로 자동으로 업데이트됨
   // 포스트 단위 UX 상태 초기화
   currentSlide.value = 0
   hearts.value = []
@@ -1297,8 +1232,8 @@ const feedWrapperStyle = computed(() => ({
 }))
 
 // Adjacent post previews
-const nextPost = computed(() => feedList.value[currentFeedIndex.value + 1] || null)
-const prevPost = computed(() => feedList.value[currentFeedIndex.value - 1] || null)
+const nextPost = computed(() => sortedFeed.value[currentFeedIndex.value + 1] || null)
+const prevPost = computed(() => sortedFeed.value[currentFeedIndex.value - 1] || null)
 
 const nextPreviewStyle = computed(() => ({
   transform: `translateY(${(typeof window !== 'undefined' ? window.innerHeight : 800) + feedTranslateY.value}px)`,
@@ -1355,7 +1290,7 @@ function onFeedTouchMove(e) {
   if (feedIsVertical.value && !feedActiveScrollEl) {
     // 가장자리에서 저항
     const atFirst = currentFeedIndex.value === 0 && feedDeltaY.value > 0
-    const atLast = currentFeedIndex.value === feedList.value.length - 1 && feedDeltaY.value < 0
+    const atLast = currentFeedIndex.value === sortedFeed.value.length - 1 && feedDeltaY.value < 0
     const resist = atFirst || atLast
     feedTranslateY.value = resist ? feedDeltaY.value * 0.35 : feedDeltaY.value
   }
@@ -1377,7 +1312,7 @@ function onFeedTouchEnd(e) {
   const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
 
   if (verticalMove && !onControl && movedY) {
-    if (feedDeltaY.value < 0 && currentFeedIndex.value < feedList.value.length - 1) {
+    if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
       // 다음으로 스냅 아웃
       feedAnimating.value = true
       feedSwipeDirection = 1
@@ -1469,7 +1404,7 @@ function onFeedMouseMove(e) {
   }
   if (feedIsVertical.value && !feedActiveScrollEl) {
     const atFirst = currentFeedIndex.value === 0 && feedDeltaY.value > 0
-    const atLast = currentFeedIndex.value === feedList.value.length - 1 && feedDeltaY.value < 0
+    const atLast = currentFeedIndex.value === sortedFeed.value.length - 1 && feedDeltaY.value < 0
     const resist = atFirst || atLast
     feedTranslateY.value = resist ? feedDeltaY.value * 0.35 : feedDeltaY.value
   }
@@ -1488,7 +1423,7 @@ function onFeedMouseUp(e) {
   const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
   const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
   if (verticalMove && !onControl && movedY) {
-    if (feedDeltaY.value < 0 && currentFeedIndex.value < feedList.value.length - 1) {
+    if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
       feedAnimating.value = true
       feedSwipeDirection = 1
       requestAnimationFrame(() => {
@@ -1520,19 +1455,26 @@ function onFeedMouseUp(e) {
 }
 
 // Photos computed
-const hasPhotos = computed(() => Array.isArray(post.photos) && post.photos.length > 0)
+const hasPhotos = computed(() => Array.isArray(post.value.photos) && post.value.photos.length > 0)
 // const photoCount = computed(() => (post.photos ? post.photos.length : 0))
 // const sortedPhotos = computed(() =>
 //   (post.photos || []).slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt)),
 // )
 const headlinePhoto = computed(() => {
-  const marked = (post.photos || []).find((p) => p.isHeadline)
-  return marked || (post.photos || [])[0] || null
+  // 새 API 구조: photos 배열의 첫 번째가 헤드라인 이미지
+  const photos = post.value.photos || []
+  if (photos.length === 0) return null
+
+  // 문자열 배열이므로 url 속성으로 감싸서 반환
+  return { url: photos[0] }
 })
 const galleryPhotos = computed(() => {
-  const head = headlinePhoto.value
-  const rest = (post.photos || []).filter((p) => !head || p.id !== head.id)
-  return rest.slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt))
+  // 새 API 구조: 첫 번째를 제외한 나머지가 갤러리 사진들
+  const photos = post.value.photos || []
+  if (photos.length <= 1) return []
+
+  // 나머지 사진들을 url 객체로 변환
+  return photos.slice(1).map(url => ({ url }))
 })
 
 // Sections order
@@ -1540,14 +1482,14 @@ const sections = computed(() => {
   const arr = []
 
   // 예정된 경기는 경기 정보와 친구 랭킹 표시
-  if (post.type === 'scheduled') {
+  if (post.value.type === 'upcoming_game' || (post.value.type === 'game' && !post.value.isCompleted)) {
     if (features.gameInfo) arr.push('경기 정보')
     if (features.friendRanking) arr.push('친구 랭킹')
     return arr
   }
 
   // 완료된 경기는 모든 섹션 표시
-  if (post.type === 'completed') {
+  if (post.value.type === 'game' && post.value.isCompleted) {
     if (features.headline && hasPhotos.value) arr.push('헤드라인 사진')
     if (features.gameInfo) arr.push('경기 정보')
     if (features.reviews) arr.push('평점 & 리뷰')
@@ -1830,7 +1772,7 @@ function onComment() {
 }
 async function onShare() {
   const url = window.location.origin + '/'
-  const text = `${post.author.name}의 경기 하이라이트 – Raspy`
+  const text = `${post.value.players[0]?.name}의 경기 하이라이트 – Raspy`
   try {
     if (navigator.share) {
       await navigator.share({ title: 'Raspy', text, url })

@@ -4,7 +4,7 @@
     <div class="absolute inset-0">
       <img
         v-if="post.photos?.length > 0"
-        :src="post.photos[0].url"
+        :src="post.photos[0]"
         class="w-full h-full object-cover"
         draggable="false"
       />
@@ -19,11 +19,11 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <img
-            :src="post.author.avatar"
+            :src="post.players[0]?.avatar"
             class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
           />
           <div>
-            <div class="text-white font-semibold text-sm">{{ post.author.name }}</div>
+            <div class="text-white font-semibold text-sm">{{ post.players[0]?.name }}</div>
             <div class="text-white/70 text-xs">{{ formatTimeAgo(post.date) }}</div>
           </div>
         </div>

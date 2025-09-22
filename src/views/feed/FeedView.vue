@@ -79,7 +79,45 @@
     </transition>
   </header>
 
+  <!-- 로딩 상태 -->
+  <div v-if="loading" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+    <div class="flex items-center justify-center h-full">
+      <div class="text-center">
+        <!-- 스켈레톤 UI -->
+        <div class="space-y-4 max-w-sm mx-auto p-6">
+          <div class="h-4 bg-white/10 rounded animate-pulse"></div>
+          <div class="h-20 bg-white/10 rounded animate-pulse"></div>
+          <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
+          <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
+        </div>
+        <p class="mt-6 text-white/70 text-sm">피드를 불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 빈 상태 -->
+  <div v-else-if="!loading && sortedFeed.length === 0" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+    <div class="flex items-center justify-center h-full">
+      <div class="text-center max-w-sm mx-auto p-6">
+        <i class="fas fa-trophy text-4xl text-white/30 mb-4"></i>
+        <h3 class="text-lg font-semibold mb-2">아직 경기가 없어요</h3>
+        <p class="text-white/70 text-sm leading-relaxed">
+          친구들과 첫 경기를 시작해보세요!<br>
+          새로운 도전이 기다리고 있습니다.
+        </p>
+        <button
+          class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition-colors"
+          @click="$router.push('/games')"
+        >
+          경기 만들기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실제 피드 컨텐츠 -->
   <div
+    v-else
     class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none feed-viewport"
     @touchstart.passive="onFeedTouchStart"
     @touchmove.passive="onFeedTouchMove"
@@ -93,10 +131,38 @@
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
       <!-- Prev preview (appears when swiping down) -->
       <div v-if="prevPost" class="absolute inset-0" :style="prevPreviewStyle">
-        <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black"></div>
+        <!-- Preview for completed game -->
+        <div
+          v-if="prevPost.type === 'game' && prevPost.isCompleted"
+          class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
+        ></div>
+        <!-- Preview for scheduled game -->
+        <div
+          v-else-if="prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)"
+          class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
+        ></div>
+        <!-- Preview for invite -->
+        <div
+          v-else-if="prevPost.type === 'invite'"
+          class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
+        ></div>
+
         <div class="ambient-overlay"></div>
         <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
+          <!-- App invite preview -->
+          <div v-if="prevPost.type === 'invite'" class="text-center text-white">
+            <div
+              class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
+            >
+              <i class="fas fa-user-friends text-white text-2xl"></i>
+            </div>
+            <div class="text-lg font-bold">친구 초대</div>
+            <div class="text-sm text-white/70">더 많은 컨텐츠를 확인하세요</div>
+          </div>
+
+          <!-- Completed game preview -->
           <div
+            v-else-if="prevPost.type === 'game' && prevPost.isCompleted"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -106,43 +172,105 @@
             <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
               <div class="text-center">
                 <img
-                  :src="prevPost.players[0].avatar"
+                  :src="prevPost.players?.[0]?.avatar || prevPost.author?.avatar"
                   class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
                 />
                 <div class="text-white font-semibold text-xs truncate">
-                  {{ prevPost.players[0].name }}
+                  {{ prevPost.players?.[0]?.name || prevPost.author?.name }}
                 </div>
               </div>
               <div class="text-center">
                 <div
                   class="font-extrabold text-white tracking-wide leading-none text-4xl sm:text-5xl"
                 >
-                  {{ prevPost.result.scoreA }}<span class="text-white/50"> : </span
-                  >{{ prevPost.result.scoreB }}
+                  {{ prevPost.result?.scoreA || 0 }}<span class="text-white/50"> : </span
+                  >{{ prevPost.result?.scoreB || 0 }}
                 </div>
                 <div class="mt-1 text-xs text-emerald-300 font-medium">
-                  Winner · {{ prevPost.result.winner }}
+                  Winner · {{ prevPost.result?.winner || '?' }}
                 </div>
               </div>
               <div class="text-center">
                 <img
-                  :src="prevPost.players[1].avatar"
+                  :src="prevPost.players?.[1]?.avatar || prevPost.author?.avatar"
                   class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
                 />
                 <div class="text-white font-semibold text-xs truncate">
-                  {{ prevPost.players[1].name }}
+                  {{ prevPost.players?.[1]?.name || '상대' }}
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scheduled game preview -->
+          <div
+            v-else-if="prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)"
+            class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
+          >
+            <div class="flex items-center justify-between mb-5">
+              <div class="text-xl font-extrabold">예정된 경기</div>
+              <div class="text-xs text-blue-300">{{ prevPost.date }}</div>
+            </div>
+            <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+              <div class="text-center">
+                <img
+                  :src="prevPost.author?.avatar"
+                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
+                />
+                <div class="text-white font-semibold text-xs">{{ prevPost.author?.name }}</div>
+                <div class="text-blue-300 text-xs">주최자</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-black text-white/90">VS</div>
+                <div class="text-xs text-white/60 mt-1">예정</div>
+              </div>
+              <div class="text-center">
+                <div
+                  class="w-14 h-14 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
+                >
+                  <i class="fas fa-user-plus text-gray-600 text-lg"></i>
+                </div>
+                <div class="text-white/70 text-xs">참가자 모집</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
       <!-- Next preview (appears when swiping up) -->
       <div v-if="nextPost" class="absolute inset-0" :style="nextPreviewStyle">
-        <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black"></div>
+        <!-- Preview for completed game -->
+        <div
+          v-if="nextPost.type === 'game' && nextPost.isCompleted"
+          class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
+        ></div>
+        <!-- Preview for scheduled game -->
+        <div
+          v-else-if="nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)"
+          class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
+        ></div>
+        <!-- Preview for invite -->
+        <div
+          v-else-if="nextPost.type === 'invite'"
+          class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
+        ></div>
+
         <div class="ambient-overlay"></div>
         <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
+          <!-- App invite preview -->
+          <div v-if="nextPost.type === 'invite'" class="text-center text-white">
+            <div
+              class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
+            >
+              <i class="fas fa-user-friends text-white text-2xl"></i>
+            </div>
+            <div class="text-lg font-bold">친구 초대</div>
+            <div class="text-sm text-white/70">더 많은 컨텐츠를 확인하세요</div>
+          </div>
+
+          <!-- Completed game preview -->
           <div
+            v-else-if="nextPost.type === 'game' && nextPost.isCompleted"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -152,44 +280,84 @@
             <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
               <div class="text-center">
                 <img
-                  :src="nextPost.players[0].avatar"
+                  :src="nextPost.players?.[0]?.avatar || nextPost.author?.avatar"
                   class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
                 />
                 <div class="text-white font-semibold text-xs truncate">
-                  {{ nextPost.players[0].name }}
+                  {{ nextPost.players?.[0]?.name || nextPost.author?.name }}
                 </div>
               </div>
               <div class="text-center">
                 <div
                   class="font-extrabold text-white tracking-wide leading-none text-4xl sm:text-5xl"
                 >
-                  {{ nextPost.result.scoreA }}<span class="text-white/50"> : </span
-                  >{{ nextPost.result.scoreB }}
+                  {{ nextPost.result?.scoreA || 0 }}<span class="text-white/50"> : </span
+                  >{{ nextPost.result?.scoreB || 0 }}
                 </div>
                 <div class="mt-1 text-xs text-emerald-300 font-medium">
-                  Winner · {{ nextPost.result.winner }}
+                  Winner · {{ nextPost.result?.winner || '?' }}
                 </div>
               </div>
               <div class="text-center">
                 <img
-                  :src="nextPost.players[1].avatar"
+                  :src="nextPost.players?.[1]?.avatar || nextPost.author?.avatar"
                   class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
                 />
                 <div class="text-white font-semibold text-xs truncate">
-                  {{ nextPost.players[1].name }}
+                  {{ nextPost.players?.[1]?.name || '상대' }}
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scheduled game preview -->
+          <div
+            v-else-if="nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)"
+            class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
+          >
+            <div class="flex items-center justify-between mb-5">
+              <div class="text-xl font-extrabold">예정된 경기</div>
+              <div class="text-xs text-blue-300">{{ nextPost.date }}</div>
+            </div>
+            <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+              <div class="text-center">
+                <img
+                  :src="nextPost.author?.avatar"
+                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
+                />
+                <div class="text-white font-semibold text-xs">{{ nextPost.author?.name }}</div>
+                <div class="text-blue-300 text-xs">주최자</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-black text-white/90">VS</div>
+                <div class="text-xs text-white/60 mt-1">예정</div>
+              </div>
+              <div class="text-center">
+                <div
+                  class="w-14 h-14 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
+                >
+                  <i class="fas fa-user-plus text-gray-600 text-lg"></i>
+                </div>
+                <div class="text-white/70 text-xs">참가자 모집</div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- Slides progress (top) -->
+    <!-- Original slides (all types) -->
     <div
       class="relative h-full w-full"
       :style="feedWrapperStyle"
       @transitionend="onFeedSnapTransitionEnd"
     >
+      <!-- App invite overlay (when current post is invite type) -->
+      <AppInvitePost
+        v-if="post.type === 'invite'"
+        @invite="handleInvite"
+        @skip="handleSkipInvite"
+        class="absolute inset-0 z-30"
+      />
       <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
         <div
           v-for="(s, i) in sections"
@@ -217,88 +385,267 @@
         @mouseleave.passive="onMouseUp($event)"
       >
         <div class="h-full flex" :style="wrapperStyle">
-            <!-- 1. 헤드라인 사진 (있을 때만) -->
-            <section v-if="features.headline && hasPhotos" class="w-screen shrink-0 h-full relative flex items-center justify-center">
-              <img
+          <!-- 1. 헤드라인 사진 (완료된 경기만) -->
+          <section
+            v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
+            class="w-screen shrink-0 h-full relative"
+          >
+            <img
               :src="headlinePhoto.url"
               alt="headline"
               class="max-w-[80vw] max-h-[70vh] rounded-2xl shadow-xl object-contain"
               draggable="false"
-              />
-              <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-              <div class="ambient-overlay" />
-            </section>
+            />
+            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
+            <div class="ambient-overlay" />
 
-          <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
+            <!-- Content overlay for 헤드라인 사진 -->
+            <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
+              <div
+                class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
+              >
+                <div class="text-lg font-bold">{{ post.players[0]?.name }}의 경기 하이라이트</div>
+                <div class="mt-1 text-xs text-white/80">
+                  {{ post.meta.place }}
+                </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  <span
+                    v-for="t in post.tags"
+                    :key="t"
+                    class="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10"
+                    >#{{ t }}</span
+                  >
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. 경기 정보 (결과 or 예정 경기) -->
           <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
-            <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
+            <!-- Completed game background -->
+            <div
+              v-if="post.type === 'game' && post.isCompleted"
+              class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-cyan-600 to-blue-700"
+            />
+            <!-- Scheduled game background -->
+            <div
+              v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)"
+              class="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-700"
+            />
             <div class="ambient-overlay" />
 
             <div
               class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
-              <div class="flex items-center justify-between mb-5">
+              <!-- Completed game header -->
+              <div v-if="post.type === 'game' && post.isCompleted" class="flex items-center justify-between mb-5">
                 <div class="text-xl font-extrabold">경기 결과</div>
                 <div class="text-xs text-white/60">{{ post.date }}</div>
               </div>
 
-              <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-                <div class="text-center relative">
-                  <img
-                    :src="post.players[0].avatar"
-                    class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
-                    :class="
-                      post.result.winner === post.players[0].name
-                        ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
-                        : 'border-white/20'
-                    "
-                  />
-                  <div
-                    v-if="post.result.winner === post.players[0].name"
-                    class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
-                  >
-                    <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
+              <!-- Scheduled game header -->
+              <div
+                v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)"
+                class="flex items-center justify-between mb-5"
+              >
+                <div class="text-xl font-extrabold">예정된 경기</div>
+                <div class="text-xs text-blue-300">{{ post.date }}</div>
+              </div>
+
+              <!-- Completed game content -->
+              <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6">
+                <!-- 경기 결과 -->
+                <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                  <div class="text-center relative">
+                    <img
+                      :src="post.players[0].avatar"
+                      class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
+                      :class="
+                        post.result.winner === post.players[0].name
+                          ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
+                          : 'border-white/20'
+                      "
+                    />
+                    <div
+                      v-if="post.result.winner === post.players[0].name"
+                      class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
+                    >
+                      <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
+                    </div>
+                    <div class="text-white font-semibold text-sm truncate">
+                      {{ post.players[0].name }}
+                    </div>
                   </div>
-                  <div class="text-white font-semibold text-sm truncate">
-                    {{ post.players[0].name }}
+                  <div class="text-center">
+                    <div
+                      class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
+                    >
+                      {{ post.result.scoreA }}<span class="text-white/50"> : </span
+                      >{{ post.result.scoreB }}
+                    </div>
+                    <div class="mt-1 text-xs text-emerald-300 font-medium">
+                      Winner · {{ post.result.winner }}
+                    </div>
+                  </div>
+                  <div class="text-center relative">
+                    <img
+                      :src="post.players[1].avatar"
+                      class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
+                      :class="
+                        post.result.winner === post.players[1].name
+                          ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
+                          : 'border-white/20'
+                      "
+                    />
+                    <div
+                      v-if="post.result.winner === post.players[1].name"
+                      class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
+                    >
+                      <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
+                    </div>
+                    <div class="text-white font-semibold text-sm truncate">
+                      {{ post.players[1].name }}
+                    </div>
                   </div>
                 </div>
-                <div class="text-center">
-                  <div
-                    class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
-                  >
-                    {{ post.result.scoreA }}<span class="text-white/50"> : </span
-                    >{{ post.result.scoreB }}
+
+                <!-- 경기 규칙 -->
+                <div
+                  @click="showRuleModal = true"
+                  class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200 group"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-10 h-10 bg-emerald-500/30 rounded-lg flex items-center justify-center"
+                      >
+                        <i class="fas fa-book text-emerald-400 text-lg"></i>
+                      </div>
+                      <div>
+                        <div class="text-white font-semibold text-sm">경기 규칙</div>
+                        <div class="text-white/70 text-xs">
+                          {{ post.rule?.ruleTitle || post.rule?.title }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-white/50 group-hover:text-white/80 transition-colors">
+                      <i class="fas fa-chevron-right text-sm"></i>
+                    </div>
                   </div>
-                  <div class="mt-1 text-xs text-emerald-300 font-medium">
-                    Winner · {{ post.result.winner }}
-                  </div>
-                </div>
-                <div class="text-center relative">
-                  <img
-                    :src="post.players[1].avatar"
-                    class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
-                    :class="
-                      post.result.winner === post.players[1].name
-                        ? 'border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
-                        : 'border-white/20'
-                    "
-                  />
-                  <div
-                    v-if="post.result.winner === post.players[1].name"
-                    class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
-                  >
-                    <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
-                  </div>
-                  <div class="text-white font-semibold text-sm truncate">
-                    {{ post.players[1].name }}
+                  <div class="mt-3 text-white/60 text-xs">
+                    {{ post.rule?.majorCategory }} • {{ post.rule?.minorCategory }} • 자세히 보기
                   </div>
                 </div>
               </div>
-              <div class="mt-2 text-center italic text-white/70 text-xs">
+
+              <!-- Scheduled game content -->
+              <div v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)" class="space-y-6">
+                <!-- 스포츠 종목 -->
+                <div class="flex items-center gap-4">
+                  <img
+                    class="w-14 h-14 rounded-xl border border-white/30"
+                    :src="`/category-picture/${post.rule?.minorCategory || '미분류'}.png`"
+                    :alt="post.rule?.minorCategory"
+                  />
+                  <div class="flex-1">
+                    <div class="text-white font-bold text-lg">{{ post.rule?.title || '경기' }}</div>
+                    <div class="text-white/70 text-sm">
+                      {{ post.rule?.majorCategory }} • {{ post.rule?.minorCategory }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 경기 규칙 -->
+                <div
+                  @click="showRuleModal = true"
+                  class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200 group"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-10 h-10 bg-blue-500/30 rounded-lg flex items-center justify-center"
+                      >
+                        <i class="fas fa-book text-blue-400 text-lg"></i>
+                      </div>
+                      <div>
+                        <div class="text-white font-semibold text-sm">경기 규칙</div>
+                        <div class="text-white/70 text-xs">
+                          {{ post.rule?.ruleTitle || post.rule?.title }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-white/50 group-hover:text-white/80 transition-colors">
+                      <i class="fas fa-chevron-right text-sm"></i>
+                    </div>
+                  </div>
+                  <div class="mt-3 text-white/60 text-xs">
+                    {{ post.rule?.majorCategory }} • {{ post.rule?.minorCategory }} • 자세히 보기
+                  </div>
+                </div>
+
+                <!-- 대전 정보 -->
+                <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                  <div class="text-center">
+                    <img
+                      :src="post.players[0]?.avatar"
+                      class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
+                    />
+                    <div class="text-white font-semibold text-sm">{{ post.players[0]?.name }}</div>
+                    <div class="text-blue-300 text-xs font-medium">주최자</div>
+                  </div>
+
+                  <div class="text-center">
+                    <div class="text-3xl font-black text-white/90">VS</div>
+                    <div class="text-xs text-white/60 mt-1">예정</div>
+                  </div>
+
+                  <div class="text-center">
+                    <div
+                      class="w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
+                    >
+                      <i class="fas fa-user-plus text-gray-600 text-xl"></i>
+                    </div>
+                    <div class="text-white/70 text-sm">참가자 모집</div>
+                  </div>
+                </div>
+
+                <!-- 경기 상세 정보 -->
+                <div class="space-y-3">
+                  <div class="flex items-center gap-3 text-white/90">
+                    <i class="fas fa-calendar text-blue-400 w-4"></i>
+                    <span class="text-sm">{{ post.date }} 예정</span>
+                  </div>
+                  <div class="flex items-center gap-3 text-white/90">
+                    <i class="fas fa-map-marker-alt text-blue-400 w-4"></i>
+                    <span class="text-sm">{{ post.meta?.place || '장소 미정' }}</span>
+                  </div>
+                  <div class="flex items-center gap-3 text-white/90">
+                    <i class="fas fa-users text-blue-400 w-4"></i>
+                    <span class="text-sm">2명 매치</span>
+                  </div>
+                </div>
+
+                <!-- 참가 버튼 -->
+                <div class="mt-6">
+                  <button
+                    @click="handleJoin(post.id)"
+                    class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  >
+                    경기 참가하기
+                  </button>
+                </div>
+              </div>
+
+              <div
+                v-if="post.type === 'game' && post.isCompleted"
+                class="mt-2 text-center italic text-white/70 text-xs"
+              >
                 이 매치, 너라면 이길 수 있어?
               </div>
-              <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80">
+              <div
+                v-if="post.type === 'game' && post.isCompleted"
+                class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80"
+              >
                 <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
                   <span class="inline-block w-4 h-4" v-html="icons.trophy" />
                   <span>세트수 {{ post.result.sets }}</span>
@@ -309,7 +656,7 @@
                 </div>
               </div>
               <!-- 세트 결과: 세로 전체폭 -->
-              <div class="mt-4 space-y-2">
+              <div v-if="post.type === 'game' && post.isCompleted" class="mt-4 space-y-2">
                 <div
                   v-for="(sc, idx) in post.result.setScores"
                   :key="'set-' + idx"
@@ -320,7 +667,7 @@
                 </div>
               </div>
               <!-- 규칙: 모달로 자세히 보기 -->
-              <div class="mt-4">
+              <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">
                 <div class="flex items-center justify-between text-xs text-white/60 mb-2">
                   <span>규칙 · {{ post.rule.title }}</span>
                   <button
@@ -331,51 +678,21 @@
                   </button>
                 </div>
               </div>
-              <div class="mt-3 text-[11px] text-white/70 flex items-center justify-between">
+              <div
+                v-if="post.type === 'game' && post.isCompleted"
+                class="mt-3 text-[11px] text-white/70 flex items-center justify-between"
+              >
                 <span>{{ post.meta.place }}</span>
                 <span>{{ post.meta.time }}</span>
-              </div>
-              <!-- 빠른 이동/행동 (모바일 친화 타일) -->
-              <div class="mt-4 grid grid-cols-2 gap-2">
-                <button
-                  class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
-                  @click="goToReviews"
-                >
-                  <span class="w-5 h-5" v-html="icons.star" />
-                  <span class="text-sm font-medium">리뷰 보기</span>
-                </button>
-
-                <button
-                  class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
-                  @click="goToRanking"
-                  v-if="features.friendRanking"
-                >
-                  <span class="w-5 h-5" v-html="icons.trophy" />
-                  <span class="text-sm font-medium">랭킹 보기</span>
-                </button>
-
-                <button
-                  v-if="idx('전체 사진') >= 0"
-                  class="h-12 rounded-xl bg-white/10 border border-white/15 text-white/90 active:scale-95 flex items-center justify-center gap-2"
-                  @click="goToGallery"
-                >
-                  <span class="w-5 h-5" v-html="icons.camera" />
-                  <span class="text-sm font-medium">사진 보기</span>
-                </button>
-
-                <button
-                  class="h-12 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-200 active:scale-95 flex items-center justify-center gap-2"
-                  @click="onDoWithMeInfo"
-                >
-                  <span class="w-5 h-5" v-html="icons.handshake" />
-                  <span class="text-sm font-medium">도전장 보내기</span>
-                </button>
               </div>
             </div>
           </section>
 
-          <!-- 3. 평점 & 리뷰 -->
-          <section v-if="features.reviews" class="w-screen shrink-0 h-full relative">
+          <!-- 3. 평점 & 리뷰 (완료된 경기만) -->
+          <section
+            v-if="post.type === 'game' && post.isCompleted && features.reviews"
+            class="w-screen shrink-0 h-full relative"
+          >
             <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
             <div class="ambient-overlay" />
             <div
@@ -385,37 +702,36 @@
               <div class="max-w-xl mx-auto w-full">
                 <div class="flex items-center justify-between mb-1">
                   <div class="text-xl font-extrabold">평점 & 리뷰</div>
-                  <div class="text-xs text-white/70">총 {{ post.reviews.length }}개</div>
+                  <div class="text-xs text-white/70" v-if="post.reviews && post.reviews.length > 0">총 {{ post.reviews.length }}개</div>
                 </div>
                 <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
               </div>
-              <div class="flex items-center justify-center">
+              <!-- 리뷰가 있는 경우만 표시 -->
+              <div v-if="post.reviews?.length > 0 && post.reviews[0]?.author" class="flex items-center justify-center">
                 <div
                   class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
                 >
                   <div class="flex items-center gap-3">
                     <img
-                      :src="post.reviews[0].avatar"
+                      :src="post.reviews[0]?.author?.avatar || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
                       class="w-12 h-12 rounded-full object-cover"
                     />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">{{ post.reviews[0].name }}</div>
-                        <div class="text-[11px] text-white/80">
-                          <span class="mr-2"
-                            >퍼포먼스 {{ post.reviews[0].performance.toFixed(1) }}/5</span
-                          >·
-                          <span class="ml-2">매너 {{ post.reviews[0].manner.toFixed(1) }}/5</span>
-                        </div>
+                        <div class="font-semibold truncate">{{ post.reviews[0]?.author?.name || '익명' }}</div>
+                        <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
+                        <!-- <div class="text-[11px] text-white/80">
+                          <span class="mr-2">퍼포먼스 5.0/5</span>·
+                          <span class="ml-2">매너 5.0/5</span>
+                        </div> -->
                       </div>
-                      <!-- progress bars removed -->
                     </div>
                   </div>
                   <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[0]">{{
-                      truncatedText(post.reviews[0].text)
+                    <span v-if="!expandedReviews[0]">{{ post.reviews[0]?.text ?
+                      truncatedText(post.reviews[0].text) : ''
                     }}</span>
-                    <span v-else>{{ post.reviews[0].text }}</span>
+                    <span v-else>{{ post.reviews[0]?.text || '' }}</span>
                   </div>
                   <div class="mt-2 flex items-center justify-between text-xs text-white/70">
                     <button
@@ -433,33 +749,32 @@
                   </div>
                 </div>
               </div>
-              <div class="flex items-center justify-center">
+              <!-- 두 번째 리뷰가 있는 경우만 표시 -->
+              <div v-if="post.reviews?.length > 1 && post.reviews[1]?.author" class="flex items-center justify-center">
                 <div
                   class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
                 >
                   <div class="flex items-center gap-3">
                     <img
-                      :src="post.reviews[1].avatar"
+                      :src="post.reviews[1]?.author?.avatar || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
                       class="w-12 h-12 rounded-full object-cover"
                     />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">{{ post.reviews[1].name }}</div>
-                        <div class="text-[11px] text-white/80">
-                          <span class="mr-2"
-                            >퍼포먼스 {{ post.reviews[1].performance.toFixed(1) }}/5</span
-                          >·
-                          <span class="ml-2">매너 {{ post.reviews[1].manner.toFixed(1) }}/5</span>
-                        </div>
+                        <div class="font-semibold truncate">{{ post.reviews[1]?.author?.name || '익명' }}</div>
+                        <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
+                        <!-- <div class="text-[11px] text-white/80">
+                          <span class="mr-2">퍼포먼스 5.0/5</span>·
+                          <span class="ml-2">매너 5.0/5</span>
+                        </div> -->
                       </div>
-                      <!-- progress bars removed -->
                     </div>
                   </div>
                   <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[1]">{{
-                      truncatedText(post.reviews[1].text)
+                    <span v-if="!expandedReviews[1]">{{ post.reviews[1]?.text ?
+                      truncatedText(post.reviews[1].text) : ''
                     }}</span>
-                    <span v-else>{{ post.reviews[1].text }}</span>
+                    <span v-else>{{ post.reviews[1]?.text || '' }}</span>
                   </div>
                   <div class="mt-2 flex items-center justify-between text-xs text-white/70">
                     <button
@@ -477,6 +792,17 @@
                   </div>
                 </div>
               </div>
+
+              <!-- 리뷰가 없을 때 표시할 메시지 -->
+              <div v-if="!post.reviews || post.reviews.length === 0" class="flex items-center justify-center">
+                <div class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-8 text-center">
+                  <div class="text-white/70 text-sm">
+                    <i class="fas fa-comment-dots text-2xl mb-3 block"></i>
+                    아직 리뷰가 없습니다.<br>
+                    첫 번째 리뷰를 남겨보세요!
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
           <!-- 4. 친구 랭킹 -->
@@ -484,7 +810,9 @@
             v-if="features.friendRanking"
             class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
           >
-            <div class="absolute inset-0 bg-gradient-to-b from-fuchsia-900 via-black to-black" />
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-pink-600 via-rose-600 to-orange-600"
+            />
             <div class="ambient-overlay" />
             <div class="relative z-10 max-w-xl w-full">
               <div class="flex items-center justify-between mb-2">
@@ -531,9 +859,12 @@
             </div>
           </section>
 
-          <!-- 5. 전체 사진 (헤드라인 제외, 각 1장씩 슬라이드) -->
+          <!-- 5. 전체 사진 (완료된 경기만, 헤드라인 제외, 각 1장씩 슬라이드) -->
           <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
-            <section v-if="features.gallery" class="w-screen shrink-0 h-full relative">
+            <section
+              v-if="post.type === 'game' && post.isCompleted && features.gallery"
+              class="w-screen shrink-0 h-full relative"
+            >
               <img
                 :src="p.url"
                 alt="photo"
@@ -637,12 +968,21 @@ import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
 import api from '../../api/api'
 import featureFlags from '../../config/features'
-import { useToast } from '../../composable/useToast'
+// import { useToast } from '../../composable/useToast'
 import CustomToast from '../../components/CustomToast.vue'
+import AppInvitePost from '../../components/feed/AppInvitePost.vue'
+import { useFeed } from '../../composables/useFeed.js'
 const router = useRouter()
 // Currently available info flags for gating UI
 const features = featureFlags
-const { showToast } = useToast()
+// const { showToast } = useToast()
+
+// 피드 데이터 관리
+const {
+  loading,
+  sortedFeed,
+  loadFeed
+} = useFeed()
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
@@ -702,9 +1042,14 @@ const notificationIcon = (type) => {
 
 onMounted(() => {
   fetchNotifications()
+  loadFeed()
 })
-// The reactive post object for the currently visible feed item
-const post = reactive({
+// 현재 표시 중인 피드 인덱스
+const currentFeedIndex = ref(0)
+
+// 현재 표시 중인 포스트
+const post = computed(() => {
+  return sortedFeed.value[currentFeedIndex.value] || {
   id: 'demo-1',
   date: '2025-09-05',
   // 전체 사진 (인증샷 포함). 첫 항목이 헤드라인 사진이라고 가정 (isHeadline: true)
@@ -799,95 +1144,63 @@ const post = reactive({
       },
     ],
   },
+  }
 })
 
 // ---------------------------
 // Vertical feed management
 // ---------------------------
-const feedList = ref([]) // 전체 피드 목록
-const currentFeedIndex = ref(0) // 현재 보고 있는 피드 인덱스
-const isLoadingMore = ref(false)
-let feedIdCursor = 1
+// 이전 피드 관리 변수들 제거됨 - useFeed 사용
 
-function makeDummyPost(idNum) {
-  const baseId = `demo-${idNum}`
-  // 간단한 더미 데이터 (실서버 연동 시 아래를 대체)
-  return {
-    id: baseId,
-    date: `2025-09-${String(5 + (idNum % 20)).padStart(2, '0')}`,
-    // 사진은 id마다 약간 다른 이미지를 사용하도록 변형
-    photos: (post.photos || []).map((p, idx) => ({
-      ...p,
-      // unsplash에 더미 파라미터를 붙여 서로 다른 이미지처럼 보이게 함
-      url: p.url + (p.url.includes('?') ? `&sig=${idNum}${idx}` : `?sig=${idNum}${idx}`),
-    })),
-    reviewBg:
-      (post.reviewBg || '') + (post.reviewBg?.includes('?') ? `&sig=${idNum}` : `?sig=${idNum}`),
-    caption: `더미 캡션 #${idNum}`,
-    meta: { place: `더미 장소 ${idNum}`, time: `오늘 · ${18 + (idNum % 5)}:00` },
-    tags: ['검도', idNum % 2 ? '친선전' : '연습', `${(idNum % 3) + 1}세트`],
-    author: { name: `사용자 ${idNum}`, avatar: post.author.avatar },
-    players: post.players.map((p) => ({ ...p })),
-    result: {
-      scoreA: post.result.scoreA,
-      scoreB: post.result.scoreB,
-      winner: post.result.winner,
-      sets: post.result.sets,
-      duration: post.result.duration,
-      setScores: post.result.setScores.map((s) => ({ ...s })),
-    },
-    reviews: post.reviews.map((r) => ({ ...r })),
-    rule: {
-      title: post.rule.title,
-      items: post.rule.items.map((it) => ({ ...it })),
-    },
-  }
-}
-
-async function fetchInitialFeed() {
-  // 서버 연동 예시 (주석)
-  // const res = await api.get('/api/feed?limit=10')
-  // feedList.value = res.data.items
-  feedList.value = Array.from({ length: 10 }, () => makeDummyPost(feedIdCursor++))
-  // 현재 포스트로 바인딩
-  if (feedList.value.length) Object.assign(post, feedList.value[0])
-}
+// 이전 더미 데이터 및 앱 초대 관련 함수들 제거됨
 
 async function loadMoreFeed() {
-  if (isLoadingMore.value) return
-  isLoadingMore.value = true
-  try {
-    // 서버 연동 예시 (주석)
-    // const res = await api.get(`/api/feed?cursor=${cursor}&limit=10`)
-    // feedList.value.push(...res.data.items)
-    const more = Array.from({ length: 10 }, () => makeDummyPost(feedIdCursor++))
-    feedList.value.push(...more)
-  } finally {
-    isLoadingMore.value = false
-  }
+  // 더 이상 사용하지 않음 - useFeed에서 페이지네이션 처리
+  console.log('loadMoreFeed called but not implemented')
 }
 
 // 남은 미시청 항목이 5개가 되면 추가 로드
 watch(currentFeedIndex, async (idx) => {
-  const remaining = feedList.value.length - idx - 1
+  const remaining = sortedFeed.value.length - idx - 1
   if (remaining === 5) {
     await loadMoreFeed()
   }
 })
 
+// Event handlers for app invite
+const handleInvite = () => {
+  console.log('Invite clicked')
+  // Add invite functionality
+  // Move to next post
+  if (currentFeedIndex.value < sortedFeed.value.length - 1) {
+    setCurrentFeed(currentFeedIndex.value + 1)
+  }
+}
+
+const handleSkipInvite = () => {
+  console.log('Skip invite clicked')
+  // Move to next post
+  if (currentFeedIndex.value < sortedFeed.value.length - 1) {
+    setCurrentFeed(currentFeedIndex.value + 1)
+  }
+}
+
+// Event handler for scheduled game join
+const handleJoin = (postId) => {
+  console.log('Join clicked:', postId)
+  // Add join functionality
+}
+
 onMounted(async () => {
-  await fetchInitialFeed()
+  // fetchInitialFeed는 더 이상 필요없음 - useFeed의 loadFeed 사용
 })
 
 function setCurrentFeed(i) {
-  const next = Math.max(0, Math.min(i, feedList.value.length - 1))
+  const next = Math.max(0, Math.min(i, sortedFeed.value.length - 1))
   if (next === currentFeedIndex.value) return
   currentFeedIndex.value = next
-  // 현재 포스트 상태 업데이트 (reactive 포인터 유지)
-  const src = feedList.value[next]
-  if (src) {
-    Object.assign(post, src)
-  }
+
+  // post는 computed이므로 자동으로 업데이트됨
   // 포스트 단위 UX 상태 초기화
   currentSlide.value = 0
   hearts.value = []
@@ -919,8 +1232,8 @@ const feedWrapperStyle = computed(() => ({
 }))
 
 // Adjacent post previews
-const nextPost = computed(() => feedList.value[currentFeedIndex.value + 1] || null)
-const prevPost = computed(() => feedList.value[currentFeedIndex.value - 1] || null)
+const nextPost = computed(() => sortedFeed.value[currentFeedIndex.value + 1] || null)
+const prevPost = computed(() => sortedFeed.value[currentFeedIndex.value - 1] || null)
 
 const nextPreviewStyle = computed(() => ({
   transform: `translateY(${(typeof window !== 'undefined' ? window.innerHeight : 800) + feedTranslateY.value}px)`,
@@ -977,7 +1290,7 @@ function onFeedTouchMove(e) {
   if (feedIsVertical.value && !feedActiveScrollEl) {
     // 가장자리에서 저항
     const atFirst = currentFeedIndex.value === 0 && feedDeltaY.value > 0
-    const atLast = currentFeedIndex.value === feedList.value.length - 1 && feedDeltaY.value < 0
+    const atLast = currentFeedIndex.value === sortedFeed.value.length - 1 && feedDeltaY.value < 0
     const resist = atFirst || atLast
     feedTranslateY.value = resist ? feedDeltaY.value * 0.35 : feedDeltaY.value
   }
@@ -999,7 +1312,7 @@ function onFeedTouchEnd(e) {
   const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
 
   if (verticalMove && !onControl && movedY) {
-    if (feedDeltaY.value < 0 && currentFeedIndex.value < feedList.value.length - 1) {
+    if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
       // 다음으로 스냅 아웃
       feedAnimating.value = true
       feedSwipeDirection = 1
@@ -1091,7 +1404,7 @@ function onFeedMouseMove(e) {
   }
   if (feedIsVertical.value && !feedActiveScrollEl) {
     const atFirst = currentFeedIndex.value === 0 && feedDeltaY.value > 0
-    const atLast = currentFeedIndex.value === feedList.value.length - 1 && feedDeltaY.value < 0
+    const atLast = currentFeedIndex.value === sortedFeed.value.length - 1 && feedDeltaY.value < 0
     const resist = atFirst || atLast
     feedTranslateY.value = resist ? feedDeltaY.value * 0.35 : feedDeltaY.value
   }
@@ -1110,7 +1423,7 @@ function onFeedMouseUp(e) {
   const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
   const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
   if (verticalMove && !onControl && movedY) {
-    if (feedDeltaY.value < 0 && currentFeedIndex.value < feedList.value.length - 1) {
+    if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
       feedAnimating.value = true
       feedSwipeDirection = 1
       requestAnimationFrame(() => {
@@ -1142,37 +1455,56 @@ function onFeedMouseUp(e) {
 }
 
 // Photos computed
-const hasPhotos = computed(() => Array.isArray(post.photos) && post.photos.length > 0)
+const hasPhotos = computed(() => Array.isArray(post.value.photos) && post.value.photos.length > 0)
 // const photoCount = computed(() => (post.photos ? post.photos.length : 0))
 // const sortedPhotos = computed(() =>
 //   (post.photos || []).slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt)),
 // )
 const headlinePhoto = computed(() => {
-  const marked = (post.photos || []).find((p) => p.isHeadline)
-  return marked || (post.photos || [])[0] || null
+  // 새 API 구조: photos 배열의 첫 번째가 헤드라인 이미지
+  const photos = post.value.photos || []
+  if (photos.length === 0) return null
+
+  // 문자열 배열이므로 url 속성으로 감싸서 반환
+  return { url: photos[0] }
 })
 const galleryPhotos = computed(() => {
-  const head = headlinePhoto.value
-  const rest = (post.photos || []).filter((p) => !head || p.id !== head.id)
-  return rest.slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt))
+  // 새 API 구조: 첫 번째를 제외한 나머지가 갤러리 사진들
+  const photos = post.value.photos || []
+  if (photos.length <= 1) return []
+
+  // 나머지 사진들을 url 객체로 변환
+  return photos.slice(1).map(url => ({ url }))
 })
 
 // Sections order
 const sections = computed(() => {
   const arr = []
-  if (features.headline && hasPhotos.value) arr.push('헤드라인 사진')
-  if (features.gameInfo) arr.push('경기 정보')
-  if (features.reviews) arr.push('평점 & 리뷰')
-  if (features.friendRanking) arr.push('친구 랭킹')
-  if (features.gallery) {
-    for (let i = 0; i < galleryPhotos.value.length; i++) arr.push('전체 사진')
+
+  // 예정된 경기는 경기 정보와 친구 랭킹 표시
+  if (post.value.type === 'upcoming_game' || (post.value.type === 'game' && !post.value.isCompleted)) {
+    if (features.gameInfo) arr.push('경기 정보')
+    if (features.friendRanking) arr.push('친구 랭킹')
+    return arr
   }
+
+  // 완료된 경기는 모든 섹션 표시
+  if (post.value.type === 'game' && post.value.isCompleted) {
+    if (features.headline && hasPhotos.value) arr.push('헤드라인 사진')
+    if (features.gameInfo) arr.push('경기 정보')
+    if (features.reviews) arr.push('평점 & 리뷰')
+    if (features.friendRanking) arr.push('친구 랭킹')
+    if (features.gallery) {
+      for (let i = 0; i < galleryPhotos.value.length; i++) arr.push('전체 사진')
+    }
+  }
+
   return arr
 })
 const totalSlides = computed(() => sections.value.length)
-function idx(label) {
-  return sections.value.indexOf(label)
-}
+// function idx(label) {
+//   return sections.value.indexOf(label)
+// }
 const currentSectionLabel = computed(() => sections.value[currentSlide.value] || '')
 
 // Slides logic
@@ -1434,15 +1766,13 @@ function toggleLike(withBump = false) {
 function onDoWithMe() {
   router.push('/create-game')
 }
-function onDoWithMeInfo() {
-  showToast('준비 중인 기능입니다!')
-}
+
 function onComment() {
   router.push('/games/demo-game/comments')
 }
 async function onShare() {
   const url = window.location.origin + '/'
-  const text = `${post.author.name}의 경기 하이라이트 – Raspy`
+  const text = `${post.value.players[0]?.name}의 경기 하이라이트 – Raspy`
   try {
     if (navigator.share) {
       await navigator.share({ title: 'Raspy', text, url })
@@ -1457,22 +1787,22 @@ async function onShare() {
 
 // Quick navigation helpers
 // Rules modal state
-const showRuleModal = ref(false)
-function goToReviews() {
-  const i = idx('평점 & 리뷰')
-  if (i >= 0) currentSlide.value = i
-  tryVibrate(12)
-}
-function goToRanking() {
-  const i = idx('친구 랭킹')
-  if (i >= 0) currentSlide.value = i
-  tryVibrate(12)
-}
-function goToGallery() {
-  const i = idx('전체 사진')
-  if (i >= 0) currentSlide.value = i
-  tryVibrate(12)
-}
+// const showRuleModal = ref(false)
+// function goToReviews() {
+//   const i = idx('평점 & 리뷰')
+//   if (i >= 0) currentSlide.value = i
+//   tryVibrate(12)
+// }
+// function goToRanking() {
+//   const i = idx('친구 랭킹')
+//   if (i >= 0) currentSlide.value = i
+//   tryVibrate(12)
+// }
+// function goToGallery() {
+//   const i = idx('전체 사진')
+//   if (i >= 0) currentSlide.value = i
+//   tryVibrate(12)
+// }
 
 function goFriendProfile(f) {
   if (!f || !f.id) return

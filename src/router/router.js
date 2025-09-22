@@ -22,6 +22,14 @@ import GroupUserLogin from "../views/auth/LoginView.vue"
 import GroupUserRegister from "../views/admin/GroupUserRegister.vue"
 import InviteView from "../views/InviteView.vue"
 import InviteDeep from "../views/InviteDeep.vue"
+import { isAdmin } from '../utils/auth'
+
+// Admin views (PC 전용 레이아웃/리스트 스켈레톤)
+const AdminLayout = () => import('../views/admin/AdminLayout.vue')
+const AdminDashboard = () => import('../views/admin/AdminDashboard.vue')
+const AdminUsers = () => import('../views/admin/AdminUsers.vue')
+const AdminReports = () => import('../views/admin/AdminReports.vue')
+const AdminGames = () => import('../views/admin/AdminGames.vue')
 
 const routes = [
   {
@@ -100,6 +108,19 @@ const routes = [
   { path: '/group/login', component: GroupUserLogin},
   {path:'/invite-fall-back/:gameId', component : InviteDeep}, 
 
+  // admin routes
+  {
+    path: '/admin',
+    component: AdminLayout,
+    meta: { requiresAdmin: true },
+    children: [
+      { path: '', component: AdminDashboard, meta: { requiresAdmin: true } },
+      { path: 'users', component: AdminUsers, meta: { requiresAdmin: true } },
+      { path: 'reports', component: AdminReports, meta: { requiresAdmin: true } },
+      { path: 'games', component: AdminGames, meta: { requiresAdmin: true } }
+    ]
+  },
+
 
   
   /**
@@ -112,6 +133,15 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// admin guard
+router.beforeEach((to, from, next) => {
+  if (to.meta && to.meta.requiresAdmin) {
+    if (isAdmin()) return next()
+    return next('/')
+  }
+  return next()
 })
 
 export default router

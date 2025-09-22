@@ -413,27 +413,7 @@
               draggable="false"
             />
             <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-            <div class="ambient-overlay" />
-
-            <!-- Content overlay for 헤드라인 사진 -->
-            <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
-              <div
-                class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
-              >
-                <div class="text-lg font-bold">{{ post.players[0]?.name }}의 경기 하이라이트</div>
-                <div class="mt-1 text-xs text-white/80">
-                  {{ post.meta.place }}
-                </div>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  <span
-                    v-for="t in post.tags"
-                    :key="t"
-                    class="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10"
-                    >#{{ t }}</span
-                  >
-                </div>
-              </div>
-            </div>
+            <div class="ambient-overlay" />            
           </section>
 
           <!-- 2. 경기 정보 (결과 or 예정 경기) -->

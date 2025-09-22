@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import api from '@/api/api.js'
 
 // 테스트/프로덕션 모드 설정 (코드로 수정 가능)
-const FEED_MODE = 'test' // 'test' 또는 'prod'
+const FEED_MODE = 'prod' // 'test' 또는 'prod'
 
 // 테스트용 더미 데이터
 const DUMMY_FEED_DATA = {
@@ -172,7 +172,7 @@ export function useFeed() {
   // 시간 기반 필터링 - API에서 온 모든 데이터 표시
   const isPostValid = (post) => {
     // 초대 포스트는 항상 유효
-    if (post.type === 'invite') {
+    if (post.type === 'invite' || post.type === 'friend-invite') {
       return true
     }
 
@@ -224,11 +224,11 @@ export function useFeed() {
     ]
 
     // 친구 포스트와 일반 포스트 사이에 친구 초대 포스트 삽입
-    if ((friendsCompleted.length > 0 || friendsScheduled.length > 0) &&
-        (allCompleted.length > 0 || allScheduled.length > 0)) {
+    // 친구 포스트가 있으면 친구 포스트 뒤에, 없으면 일반 포스트 앞에 삽입
+    if (allCompleted.length > 0 || allScheduled.length > 0) {
       result.push({
-        type: 'invite',
-        id: 'friend-invite',
+        type: 'friend-invite',
+        id: 'friend-invite-section',
         caption: '친구를 초대해보세요!'
       })
     }
@@ -300,8 +300,8 @@ export function useFeed() {
 
   const handleSkipInvite = () => {
     console.log('초대 건너뛰기')
-    // 초대 포스트 제거
-    posts.value = posts.value.filter(p => p.type !== 'invite')
+    // 초대 포스트 제거 (API 초대와 친구 초대 모두)
+    posts.value = posts.value.filter(p => p.type !== 'invite' && p.type !== 'friend-invite')
   }
 
   return {

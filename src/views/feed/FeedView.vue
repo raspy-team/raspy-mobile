@@ -369,12 +369,15 @@
     >
       <!-- App invite overlay (when current post is invite type) -->
       <AppInvitePost
-        v-if="post.type === 'invite'"
+        v-if="post.type === 'invite' || post.type === 'friend-invite'"
         @invite="handleInvite"
         @skip="handleSkipInvite"
         class="absolute inset-0 z-30"
       />
-      <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
+      <div
+        v-if="post.type !== 'friend-invite'"
+        class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top"
+      >
         <div
           v-for="(section, i) in sections"
           :key="'prog-' + i"
@@ -988,71 +991,145 @@
   </div>
 
   <!-- Rules modal -->
-  <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/80 flex flex-col">
-    <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-      <div class="text-lg font-bold">경기 규칙</div>
-      <button
-        class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 active:scale-95"
-        @click="showRuleModal = false"
-      >
-        닫기
-      </button>
-    </div>
-    <div
-      class="flex-1 overflow-auto p-4 space-y-4 touch-scroll"
-      @touchstart.stop
-      @touchmove.stop
-      @touchend.stop
-    >
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">경기 목표</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.ruleGoal || '목표 정보 없음' }}
+  <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm">
+    <!-- Modal container with improved layout -->
+    <div class="h-full flex flex-col">
+      <!-- Header with better styling -->
+      <div class="flex-shrink-0 px-6 py-4 bg-gradient-to-r from-slate-900/95 to-gray-900/95 border-b border-white/10">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <i class="fas fa-book text-blue-400 text-sm"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">경기 규칙</h2>
+              <p class="text-sm text-white/60">{{ post?.rule?.ruleTitle || '규칙 제목 없음' }}</p>
+            </div>
+          </div>
+          <button
+            class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white/80 flex items-center justify-center transition-all duration-200 active:scale-95"
+            @click="showRuleModal = false"
+          >
+            <i class="fas fa-times text-sm"></i>
+          </button>
         </div>
       </div>
 
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">점수 계산</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.ruleScoreDefinition || '점수 정보 없음' }}
-        </div>
-      </div>
+      <!-- Scrollable content with enhanced UX -->
+      <div class="flex-1 overflow-hidden">
+        <div class="h-full overflow-y-auto scrollbar-hidden" style="scroll-behavior: smooth;">
+          <div class="px-6 py-6 space-y-6">
+            <!-- Rule goal -->
+            <div class="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl overflow-hidden">
+              <div class="px-5 py-4 bg-blue-500/10 border-b border-blue-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-target text-blue-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">경기 목표</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">{{ post?.rule?.ruleGoal || '목표 정보 없음' }}</p>
+              </div>
+            </div>
 
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">경기 준비</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.rulePreparation || '준비 정보 없음' }}
-        </div>
-      </div>
+            <!-- Score definition -->
+            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl overflow-hidden">
+              <div class="px-5 py-4 bg-emerald-500/10 border-b border-emerald-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calculator text-emerald-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">점수 계산</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">{{ post?.rule?.ruleScoreDefinition || '점수 정보 없음' }}</p>
+              </div>
+            </div>
 
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">경기 순서</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug whitespace-pre-line">
-          {{ post.value.rule?.ruleOrder || '순서 정보 없음' }}
-        </div>
-      </div>
+            <!-- Preparation -->
+            <div class="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl overflow-hidden">
+              <div class="px-5 py-4 bg-orange-500/10 border-b border-orange-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tools text-orange-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">경기 준비</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">{{ post?.rule?.rulePreparation || '준비 정보 없음' }}</p>
+              </div>
+            </div>
 
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">판정 기준</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.ruleDecision || '판정 정보 없음' }}
-        </div>
-      </div>
+            <!-- Game order -->
+            <div class="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl overflow-hidden">
+              <div class="px-5 py-4 bg-purple-500/10 border-b border-purple-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-list-ol text-purple-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">경기 순서</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">{{ post?.rule?.ruleOrder || '순서 정보 없음' }}</p>
+              </div>
+            </div>
 
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">반칙</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug whitespace-pre-line">
-          {{ post.value.rule?.ruleFoul || '반칙 정보 없음' }}
-        </div>
-      </div>
+            <!-- Decision criteria -->
+            <div class="bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl overflow-hidden">
+              <div class="px-5 py-4 bg-indigo-500/10 border-b border-indigo-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-gavel text-indigo-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">판정 기준</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">{{ post?.rule?.ruleDecision || '판정 정보 없음' }}</p>
+              </div>
+            </div>
 
-      <div
-        v-if="post.value.rule?.ruleExtraInfo"
-        class="bg-white/10 border border-white/10 rounded-xl"
-      >
-        <div class="px-4 py-3 font-semibold">추가 정보</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule.ruleExtraInfo }}
+            <!-- Fouls -->
+            <div class="bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-2xl overflow-hidden">
+              <div class="px-5 py-4 bg-red-500/10 border-b border-red-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-red-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">반칙</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">{{ post?.rule?.ruleFoul || '반칙 정보 없음' }}</p>
+              </div>
+            </div>
+
+            <!-- Extra info (if exists) -->
+            <div
+              v-if="post?.rule?.ruleExtraInfo"
+              class="bg-gradient-to-br from-gray-500/10 to-slate-500/10 border border-gray-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-gray-500/10 border-b border-gray-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-gray-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-info-circle text-gray-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">추가 정보</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">{{ post?.rule?.ruleExtraInfo }}</p>
+              </div>
+            </div>
+
+            <!-- Bottom padding for better scrolling -->
+            <div class="h-4"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -2015,5 +2092,15 @@ function makeFriend(i) {
 .feed-viewport {
   touch-action: none;
   overscroll-behavior-y: contain;
+}
+
+/* Hide scrollbar for better UX */
+.scrollbar-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 </style>

@@ -80,7 +80,10 @@
   </header>
 
   <!-- 로딩 상태 -->
-  <div v-if="loading" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+  <div
+    v-if="loading"
+    class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none"
+  >
     <div class="flex items-center justify-center h-full">
       <div class="text-center">
         <!-- 스켈레톤 UI -->
@@ -96,13 +99,16 @@
   </div>
 
   <!-- 빈 상태 -->
-  <div v-else-if="!loading && sortedFeed.length === 0" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+  <div
+    v-else-if="!loading && sortedFeed.length === 0"
+    class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none"
+  >
     <div class="flex items-center justify-center h-full">
       <div class="text-center max-w-sm mx-auto p-6">
         <i class="fas fa-trophy text-4xl text-white/30 mb-4"></i>
         <h3 class="text-lg font-semibold mb-2">아직 경기가 없어요</h3>
         <p class="text-white/70 text-sm leading-relaxed">
-          친구들과 첫 경기를 시작해보세요!<br>
+          친구들과 첫 경기를 시작해보세요!<br />
           새로운 도전이 기다리고 있습니다.
         </p>
         <button
@@ -117,7 +123,7 @@
 
   <!-- 실제 피드 컨텐츠 -->
   <div
-    v-else
+    v-else-if="!loading && sortedFeed.length > 0 && post"
     class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none feed-viewport"
     @touchstart.passive="onFeedTouchStart"
     @touchmove.passive="onFeedTouchMove"
@@ -138,7 +144,9 @@
         ></div>
         <!-- Preview for scheduled game -->
         <div
-          v-else-if="prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)"
+          v-else-if="
+            prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)
+          "
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
         ></div>
         <!-- Preview for invite -->
@@ -204,7 +212,10 @@
 
           <!-- Scheduled game preview -->
           <div
-            v-else-if="prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)"
+            v-else-if="
+              prevPost.type === 'upcoming_game' ||
+              (prevPost.type === 'game' && !prevPost.isCompleted)
+            "
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -246,7 +257,9 @@
         ></div>
         <!-- Preview for scheduled game -->
         <div
-          v-else-if="nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)"
+          v-else-if="
+            nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)
+          "
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
         ></div>
         <!-- Preview for invite -->
@@ -312,7 +325,10 @@
 
           <!-- Scheduled game preview -->
           <div
-            v-else-if="nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)"
+            v-else-if="
+              nextPost.type === 'upcoming_game' ||
+              (nextPost.type === 'game' && !nextPost.isCompleted)
+            "
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
@@ -360,7 +376,7 @@
       />
       <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
         <div
-          v-for="(s, i) in sections"
+          v-for="(section, i) in sections"
           :key="'prog-' + i"
           class="h-1 flex-1 rounded-full bg-white/20 overflow-hidden"
         >
@@ -429,7 +445,9 @@
             />
             <!-- Scheduled game background -->
             <div
-              v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)"
+              v-else-if="
+                post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
+              "
               class="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-700"
             />
             <div class="ambient-overlay" />
@@ -438,14 +456,19 @@
               class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
               <!-- Completed game header -->
-              <div v-if="post.type === 'game' && post.isCompleted" class="flex items-center justify-between mb-5">
+              <div
+                v-if="post.type === 'game' && post.isCompleted"
+                class="flex items-center justify-between mb-5"
+              >
                 <div class="text-xl font-extrabold">경기 결과</div>
                 <div class="text-xs text-white/60">{{ post.date }}</div>
               </div>
 
               <!-- Scheduled game header -->
               <div
-                v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)"
+                v-else-if="
+                  post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
+                "
                 class="flex items-center justify-between mb-5"
               >
                 <div class="text-xl font-extrabold">예정된 경기</div>
@@ -539,7 +562,12 @@
               </div>
 
               <!-- Scheduled game content -->
-              <div v-else-if="post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)" class="space-y-6">
+              <div
+                v-else-if="
+                  post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
+                "
+                class="space-y-6"
+              >
                 <!-- 스포츠 종목 -->
                 <div class="flex items-center gap-4">
                   <img
@@ -688,9 +716,14 @@
             </div>
           </section>
 
-          <!-- 3. 평점 & 리뷰 (완료된 경기만) -->
+          <!-- 3. 평점 & 리뷰 (완료된 경기이고 리뷰가 있는 경우만) -->
           <section
-            v-if="post.type === 'game' && post.isCompleted && features.reviews"
+            v-if="
+              post?.type === 'game' &&
+              post?.isCompleted &&
+              features.reviews &&
+              post?.reviews?.length > 0
+            "
             class="w-screen shrink-0 h-full relative"
           >
             <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
@@ -702,23 +735,33 @@
               <div class="max-w-xl mx-auto w-full">
                 <div class="flex items-center justify-between mb-1">
                   <div class="text-xl font-extrabold">평점 & 리뷰</div>
-                  <div class="text-xs text-white/70" v-if="post.reviews && post.reviews.length > 0">총 {{ post.reviews.length }}개</div>
+                  <div class="text-xs text-white/70" v-if="post.reviews && post.reviews.length > 0">
+                    총 {{ post.reviews.length }}개
+                  </div>
                 </div>
                 <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
               </div>
               <!-- 리뷰가 있는 경우만 표시 -->
-              <div v-if="post.reviews?.length > 0 && post.reviews[0]?.author" class="flex items-center justify-center">
+              <div
+                v-if="post.reviews?.length > 0 && post.reviews[0]?.author"
+                class="flex items-center justify-center"
+              >
                 <div
                   class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
                 >
                   <div class="flex items-center gap-3">
                     <img
-                      :src="post.reviews[0]?.author?.avatar || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
+                      :src="
+                        post.reviews[0]?.author?.avatar ||
+                        'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'
+                      "
                       class="w-12 h-12 rounded-full object-cover"
                     />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">{{ post.reviews[0]?.author?.name || '익명' }}</div>
+                        <div class="font-semibold truncate">
+                          {{ post.reviews[0]?.author?.name || '익명' }}
+                        </div>
                         <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
                         <!-- <div class="text-[11px] text-white/80">
                           <span class="mr-2">퍼포먼스 5.0/5</span>·
@@ -728,8 +771,8 @@
                     </div>
                   </div>
                   <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[0]">{{ post.reviews[0]?.text ?
-                      truncatedText(post.reviews[0].text) : ''
+                    <span v-if="!expandedReviews[0]">{{
+                      post.reviews[0]?.text ? truncatedText(post.reviews[0].text) : ''
                     }}</span>
                     <span v-else>{{ post.reviews[0]?.text || '' }}</span>
                   </div>
@@ -750,18 +793,26 @@
                 </div>
               </div>
               <!-- 두 번째 리뷰가 있는 경우만 표시 -->
-              <div v-if="post.reviews?.length > 1 && post.reviews[1]?.author" class="flex items-center justify-center">
+              <div
+                v-if="post.reviews?.length > 1 && post.reviews[1]?.author"
+                class="flex items-center justify-center"
+              >
                 <div
                   class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
                 >
                   <div class="flex items-center gap-3">
                     <img
-                      :src="post.reviews[1]?.author?.avatar || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
+                      :src="
+                        post.reviews[1]?.author?.avatar ||
+                        'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'
+                      "
                       class="w-12 h-12 rounded-full object-cover"
                     />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">{{ post.reviews[1]?.author?.name || '익명' }}</div>
+                        <div class="font-semibold truncate">
+                          {{ post.reviews[1]?.author?.name || '익명' }}
+                        </div>
                         <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
                         <!-- <div class="text-[11px] text-white/80">
                           <span class="mr-2">퍼포먼스 5.0/5</span>·
@@ -771,8 +822,8 @@
                     </div>
                   </div>
                   <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[1]">{{ post.reviews[1]?.text ?
-                      truncatedText(post.reviews[1].text) : ''
+                    <span v-if="!expandedReviews[1]">{{
+                      post.reviews[1]?.text ? truncatedText(post.reviews[1].text) : ''
                     }}</span>
                     <span v-else>{{ post.reviews[1]?.text || '' }}</span>
                   </div>
@@ -794,11 +845,16 @@
               </div>
 
               <!-- 리뷰가 없을 때 표시할 메시지 -->
-              <div v-if="!post.reviews || post.reviews.length === 0" class="flex items-center justify-center">
-                <div class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-8 text-center">
+              <div
+                v-if="!post.reviews || post.reviews.length === 0"
+                class="flex items-center justify-center"
+              >
+                <div
+                  class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-8 text-center"
+                >
                   <div class="text-white/70 text-sm">
                     <i class="fas fa-comment-dots text-2xl mb-3 block"></i>
-                    아직 리뷰가 없습니다.<br>
+                    아직 리뷰가 없습니다.<br />
                     첫 번째 리뷰를 남겨보세요!
                   </div>
                 </div>
@@ -943,21 +999,84 @@
       </button>
     </div>
     <div
-      class="flex-1 overflow-auto p-4 space-y-2 touch-scroll"
+      class="flex-1 overflow-auto p-4 space-y-4 touch-scroll"
       @touchstart.stop
       @touchmove.stop
       @touchend.stop
     >
+      <div class="bg-white/10 border border-white/10 rounded-xl">
+        <div class="px-4 py-3 font-semibold">경기 목표</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
+          {{ post.value.rule?.ruleGoal || '목표 정보 없음' }}
+        </div>
+      </div>
+
+      <div class="bg-white/10 border border-white/10 rounded-xl">
+        <div class="px-4 py-3 font-semibold">점수 계산</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
+          {{ post.value.rule?.ruleScoreDefinition || '점수 정보 없음' }}
+        </div>
+      </div>
+
+      <div class="bg-white/10 border border-white/10 rounded-xl">
+        <div class="px-4 py-3 font-semibold">경기 준비</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
+          {{ post.value.rule?.rulePreparation || '준비 정보 없음' }}
+        </div>
+      </div>
+
+      <div class="bg-white/10 border border-white/10 rounded-xl">
+        <div class="px-4 py-3 font-semibold">경기 순서</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug whitespace-pre-line">
+          {{ post.value.rule?.ruleOrder || '순서 정보 없음' }}
+        </div>
+      </div>
+
+      <div class="bg-white/10 border border-white/10 rounded-xl">
+        <div class="px-4 py-3 font-semibold">판정 기준</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
+          {{ post.value.rule?.ruleDecision || '판정 정보 없음' }}
+        </div>
+      </div>
+
+      <div class="bg-white/10 border border-white/10 rounded-xl">
+        <div class="px-4 py-3 font-semibold">반칙</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug whitespace-pre-line">
+          {{ post.value.rule?.ruleFoul || '반칙 정보 없음' }}
+        </div>
+      </div>
+
       <div
-        v-for="(it, idx) in post.rule.items"
-        :key="'rm-' + idx"
+        v-if="post.value.rule?.ruleExtraInfo"
         class="bg-white/10 border border-white/10 rounded-xl"
       >
-        <div class="px-4 py-3 font-semibold">{{ idx + 1 }}. {{ it.title }}</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">{{ it.desc }}</div>
+        <div class="px-4 py-3 font-semibold">추가 정보</div>
+        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
+          {{ post.value.rule.ruleExtraInfo }}
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- 로딩 완료했지만 post가 없는 경우 -->
+  <div v-else-if="!loading && (!sortedFeed.length || !post)" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+    <div class="flex items-center justify-center h-full">
+      <div class="text-center max-w-sm mx-auto p-6">
+        <i class="fas fa-trophy text-4xl text-white/30 mb-4"></i>
+        <h3 class="text-lg font-semibold mb-2">아직 경기가 없어요</h3>
+        <p class="text-white/70 text-sm leading-relaxed">
+          첫 번째 경기를 만들어보세요!
+        </p>
+        <button
+          class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition-colors"
+          @click="$router.push('/games')"
+        >
+          경기 만들기
+        </button>
+      </div>
+    </div>
+  </div>
+
   <Footer tab="feed" />
   <CustomToast />
 </template>
@@ -978,11 +1097,7 @@ const features = featureFlags
 // const { showToast } = useToast()
 
 // 피드 데이터 관리
-const {
-  loading,
-  sortedFeed,
-  loadFeed
-} = useFeed()
+const { loading, sortedFeed, loadFeed } = useFeed()
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
@@ -1041,7 +1156,9 @@ const notificationIcon = (type) => {
 }
 
 onMounted(() => {
+  console.log('FeedView onMounted 실행')
   fetchNotifications()
+  console.log('loadFeed 호출 예정')
   loadFeed()
 })
 // 현재 표시 중인 피드 인덱스
@@ -1049,102 +1166,7 @@ const currentFeedIndex = ref(0)
 
 // 현재 표시 중인 포스트
 const post = computed(() => {
-  return sortedFeed.value[currentFeedIndex.value] || {
-  id: 'demo-1',
-  date: '2025-09-05',
-  // 전체 사진 (인증샷 포함). 첫 항목이 헤드라인 사진이라고 가정 (isHeadline: true)
-  photos: [
-    {
-      id: 'p1',
-      url: 'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
-      takenAt: '2025-09-05T20:05:00+09:00',
-      isHeadline: true,
-    },
-    {
-      id: 'p2',
-      url: 'https://images.unsplash.com/photo-1546484959-f9a53db84d8e?q=80&w=1200&auto=format&fit=crop',
-      takenAt: '2025-09-05T20:08:00+09:00',
-    },
-    {
-      id: 'p3',
-      url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1200&auto=format&fit=crop',
-      takenAt: '2025-09-05T20:12:00+09:00',
-    },
-    {
-      id: 'p4',
-      url: 'https://images.unsplash.com/photo-1574629173115-01d0f4e6e1a5?q=80&w=1200&auto=format&fit=crop',
-      takenAt: '2025-09-05T20:16:00+09:00',
-    },
-    {
-      id: 'p5',
-      url: 'https://images.unsplash.com/photo-1552074280-9f63f6f97130?q=80&w=1200&auto=format&fit=crop',
-      takenAt: '2025-09-05T20:20:00+09:00',
-    },
-  ],
-  reviewBg: 'https://prodigits.co.uk/content4/wallpapers/2024/p2/29/f4te4054.jpg',
-  caption: '경기도 수원시',
-  meta: {
-    place: '수원시청 체육관',
-    time: '어제 · 20:00',
-  },
-  tags: ['검도', '친선전', '3세트'],
-  author: {
-    name: '김우진',
-    avatar:
-      'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=200&auto=format&fit=crop',
-  },
-  players: [
-    {
-      name: '현수',
-      avatar:
-        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop',
-    },
-    {
-      name: '민재',
-      avatar:
-        'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=200&auto=format&fit=crop',
-    },
-  ],
-  result: {
-    scoreA: 2,
-    scoreB: 1,
-    winner: '현수',
-    sets: 3,
-    duration: '34분',
-    setScores: [
-      { a: 11, b: 9 },
-      { a: 8, b: 11 },
-      { a: 11, b: 7 },
-    ],
-  },
-  reviews: [
-    {
-      name: '현수',
-      avatar:
-        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop',
-      performance: 4.8,
-      manner: 4.9,
-      text: '상대가 잘 받아냈어요! 마지막 랠리는 아직도 짜릿🤩 다음엔 드라이브 템포를 조금 더 올려볼게요.',
-    },
-    {
-      name: '민재',
-      avatar:
-        'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=200&auto=format&fit=crop',
-      performance: 4.2,
-      manner: 5.0,
-      text: '규칙이 깔끔해서 몰입감 최고. 리시브 포지션을 다듬으면 더 좋아질 듯!',
-    },
-  ],
-  rule: {
-    title: '밥 빨리 먹기',
-    items: [
-      {
-        title: '타이틀임',
-        desc: '내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임내용임 ',
-      },
-    ],
-  },
-  }
+  return sortedFeed.value[currentFeedIndex.value] || null
 })
 
 // ---------------------------
@@ -1191,9 +1213,7 @@ const handleJoin = (postId) => {
   // Add join functionality
 }
 
-onMounted(async () => {
-  // fetchInitialFeed는 더 이상 필요없음 - useFeed의 loadFeed 사용
-})
+// fetchInitialFeed는 더 이상 필요없음 - useFeed의 loadFeed 사용
 
 function setCurrentFeed(i) {
   const next = Math.max(0, Math.min(i, sortedFeed.value.length - 1))
@@ -1455,13 +1475,14 @@ function onFeedMouseUp(e) {
 }
 
 // Photos computed
-const hasPhotos = computed(() => Array.isArray(post.value.photos) && post.value.photos.length > 0)
+const hasPhotos = computed(() => post.value && Array.isArray(post.value.photos) && post.value.photos.length > 0)
 // const photoCount = computed(() => (post.photos ? post.photos.length : 0))
 // const sortedPhotos = computed(() =>
 //   (post.photos || []).slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt)),
 // )
 const headlinePhoto = computed(() => {
   // 새 API 구조: photos 배열의 첫 번째가 헤드라인 이미지
+  if (!post.value) return null
   const photos = post.value.photos || []
   if (photos.length === 0) return null
 
@@ -1470,19 +1491,25 @@ const headlinePhoto = computed(() => {
 })
 const galleryPhotos = computed(() => {
   // 새 API 구조: 첫 번째를 제외한 나머지가 갤러리 사진들
+  if (!post.value) return []
   const photos = post.value.photos || []
   if (photos.length <= 1) return []
 
   // 나머지 사진들을 url 객체로 변환
-  return photos.slice(1).map(url => ({ url }))
+  return photos.slice(1).map((url) => ({ url }))
 })
 
 // Sections order
 const sections = computed(() => {
   const arr = []
 
+  if (!post.value) return arr
+
   // 예정된 경기는 경기 정보와 친구 랭킹 표시
-  if (post.value.type === 'upcoming_game' || (post.value.type === 'game' && !post.value.isCompleted)) {
+  if (
+    post.value.type === 'upcoming_game' ||
+    (post.value.type === 'game' && !post.value.isCompleted)
+  ) {
     if (features.gameInfo) arr.push('경기 정보')
     if (features.friendRanking) arr.push('친구 랭킹')
     return arr
@@ -1492,7 +1519,7 @@ const sections = computed(() => {
   if (post.value.type === 'game' && post.value.isCompleted) {
     if (features.headline && hasPhotos.value) arr.push('헤드라인 사진')
     if (features.gameInfo) arr.push('경기 정보')
-    if (features.reviews) arr.push('평점 & 리뷰')
+    if (features.reviews && post.value.reviews?.length > 0) arr.push('평점 & 리뷰')
     if (features.friendRanking) arr.push('친구 랭킹')
     if (features.gallery) {
       for (let i = 0; i < galleryPhotos.value.length; i++) arr.push('전체 사진')
@@ -1787,7 +1814,7 @@ async function onShare() {
 
 // Quick navigation helpers
 // Rules modal state
-// const showRuleModal = ref(false)
+const showRuleModal = ref(false)
 // function goToReviews() {
 //   const i = idx('평점 & 리뷰')
 //   if (i >= 0) currentSlide.value = i

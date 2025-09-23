@@ -961,9 +961,21 @@
           ></span>
           <span class="text-[10px] mt-1">또 보고싶어</span>
         </button>
-        <button @click="onDoWithMe" class="flex flex-col items-center active:scale-95 transition">
-          <span class="w-8 h-8" v-html="icons.handshake"></span>
-          <span class="text-[10px] mt-1">나랑도 해</span>
+        <button
+          @click="onDoWithMe"
+          :class="[
+            'flex flex-col items-center active:scale-95 transition',
+            currentPlayWithMeStatus ? 'text-orange-500' : ''
+          ]"
+        >
+          <span
+            class="w-8 h-8"
+            :class="currentPlayWithMeStatus ? 'text-orange-500' : ''"
+            v-html="icons.handshake"
+          ></span>
+          <span class="text-[10px] mt-1">
+            {{ currentPlayWithMeStatus ? '요청됨' : '나랑도 해' }}
+          </span>
         </button>
         <button @click="onComment" class="flex flex-col items-center active:scale-95 transition">
           <span class="w-8 h-8" v-html="icons.comment"></span>
@@ -1156,28 +1168,90 @@
 
   <Footer tab="feed" />
   <CustomToast />
+
+  <!-- 플레이어 선택 모달 -->
+  <div
+    v-if="showPlayerSelectModal"
+    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    @click="closePlayerSelectModal"
+  >
+    <div
+      class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto"
+      @click.stop
+    >
+      <!-- 모달 헤더 -->
+      <div class="flex items-center justify-between p-6 border-b">
+        <h3 class="text-lg font-bold text-gray-900">플레이어 선택</h3>
+        <button
+          @click="closePlayerSelectModal"
+          class="text-gray-400 hover:text-gray-600 transition"
+        >
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <!-- 플레이어 목록 -->
+      <div class="p-6">
+        <p class="text-sm text-gray-600 mb-4">
+          누구에게 나랑도해 요청을 보낼까요?
+        </p>
+        <div class="space-y-3">
+          <button
+            v-for="player in post?.players || []"
+            :key="player.id"
+            @click="sendPlayWithMeRequest(player)"
+            class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 hover:border-orange-300 hover:bg-orange-50 transition group"
+          >
+            <img
+              :src="player.avatar || '/assets/default.png'"
+              :alt="player.name"
+              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 group-hover:border-orange-300 transition"
+            />
+            <div class="flex-1 text-left">
+              <div class="font-semibold text-gray-900 group-hover:text-orange-600 transition">
+                {{ player.name }}
+              </div>
+              <div class="text-sm text-gray-500">
+                플레이어
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500 transition"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { computed, reactive, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
-import api from '../../api/api'
+import api, { playWithMeTooAPI } from '../../api/api'
 import featureFlags from '../../config/features'
-// import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composable/useToast'
 import CustomToast from '../../components/CustomToast.vue'
 import AppInvitePost from '../../components/feed/AppInvitePost.vue'
 import { useFeed } from '../../composables/useFeed.js'
 const router = useRouter()
 // Currently available info flags for gating UI
 const features = featureFlags
-// const { showToast } = useToast()
+const { showToast } = useToast()
 
 // 피드 데이터 관리
 const { loading, sortedFeed, loadFeed } = useFeed()
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
+
+// 나랑도해 상태 관리
+const playWithMeRequests = ref(new Map()) // userId -> boolean (요청 상태)
+const showPlayerSelectModal = ref(false) // 플레이어 선택 모달 표시 상태
+
+// 현재 포스트의 나랑도해 요청 상태 (사용하지 않음 - 모달로 대체)
+const currentPlayWithMeStatus = computed(() => {
+  return false // 항상 false로 설정하여 기본 상태 유지
+})
 
 const fetchNotifications = async () => {
   const res = await api.get('/api/notifications')
@@ -1868,7 +1942,44 @@ function toggleLike(withBump = false) {
   }
 }
 function onDoWithMe() {
-  router.push('/create-game')
+  if (!post.value || !post.value.players || post.value.players.length === 0) {
+    showToast('플레이어 정보를 찾을 수 없습니다.', 'error')
+    return
+  }
+
+  // 플레이어 선택 모달 열기
+  showPlayerSelectModal.value = true
+}
+
+// 선택된 플레이어에게 나랑도해 요청 보내기
+async function sendPlayWithMeRequest(selectedPlayer) {
+  console.log('Selected player:', selectedPlayer)
+  console.log('Rule ID:', post.value?.rule?.id)
+
+  if (!post.value?.rule?.id) {
+    showToast('경기 정보를 찾을 수 없습니다.', 'error')
+    return
+  }
+
+  const targetUserId = selectedPlayer.id
+  const ruleId = post.value.rule.id
+
+  console.log('Sending request with targetUserId:', targetUserId, 'ruleId:', ruleId)
+
+  try {
+    await playWithMeTooAPI.sendRequest(targetUserId, ruleId)
+    playWithMeRequests.value.set(targetUserId, true)
+    showToast(`${selectedPlayer.name}님에게 나랑도해 요청을 보냈습니다.`, 'success')
+    showPlayerSelectModal.value = false
+  } catch (error) {
+    console.error('나랑도해 요청 처리 중 오류:', error)
+    showToast('요청 처리 중 오류가 발생했습니다.', 'error')
+  }
+}
+
+// 플레이어 선택 모달 닫기
+function closePlayerSelectModal() {
+  showPlayerSelectModal.value = false
 }
 
 function onComment() {

@@ -71,4 +71,56 @@ api.interceptors.response.use(
 )
 
 
+// 나랑도해 API
+export const playWithMeTooAPI = {
+  // 나랑도해 요청 보내기
+  async sendRequest(targetUserId, ruleId) {
+    const response = await api.post('/api/play-with-me-too/request', null, {
+      params: {
+        targetUserId,
+        ruleId
+      }
+    })
+    return response.data
+  },
+
+  // 나랑도해 요청 취소
+  async cancelRequest(targetUserId) {
+    const response = await api.delete('/api/play-with-me-too/request', {
+      params: { targetUserId }
+    })
+    return response.data
+  },
+
+  // 나랑도해 요청 수락
+  async acceptRequest(requesterId) {
+    const response = await api.post('/api/play-with-me-too/accept', null, {
+      params: {
+        requesterId
+      }
+    })
+    return response.data
+  },
+
+  // 나랑도해 요청 확인
+  async checkRequest(fromUserId) {
+    const response = await api.get('/api/play-with-me-too/check-request', {
+      params: { fromUserId }
+    })
+    return response.data
+  },
+
+  // 받은 요청들 조회
+  async getReceivedRequests() {
+    const response = await api.get('/api/play-with-me-too/received-requests')
+    return response.data
+  },
+
+  // 보낸 요청들 조회
+  async getSentRequests() {
+    const response = await api.get('/api/play-with-me-too/sent-requests')
+    return response.data
+  }
+}
+
 export default api

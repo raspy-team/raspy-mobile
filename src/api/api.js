@@ -102,6 +102,16 @@ export const playWithMeTooAPI = {
     return response.data
   },
 
+  // 나랑도해 요청 거절
+  async rejectRequest(requesterId) {
+    const response = await api.post('/api/play-with-me-too/reject', null, {
+      params: {
+        requesterId
+      }
+    })
+    return response.data
+  },
+
   // 나랑도해 요청 확인
   async checkRequest(fromUserId) {
     const response = await api.get('/api/play-with-me-too/check-request', {

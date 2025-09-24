@@ -173,8 +173,7 @@ const handleReject = async () => {
   if (!playWithMeRequest.value) return
 
   try {
-    // 거절 시에는 요청 취소 API 사용 (요청자가 취소하는 것과 동일)
-    await playWithMeTooAPI.cancelRequest(targetUserId)
+    await playWithMeTooAPI.rejectRequest(playWithMeRequest.value.fromUserId)
     console.log('나랑도해 요청 거절됨')
     playWithMeRequest.value = null
   } catch (error) {
@@ -407,6 +406,24 @@ const handleAddFriend = () => {
                 <p class="text-[10px] mt-1 text-right text-gray-400">
                   {{ formatTime(msg.timestamp) }}
                 </p>
+              </div>
+            </template>
+            <template v-else-if="msg.messageType === 'PLAY_WITH_ME_TOO'">
+              <div class="w-full max-w-sm mx-auto">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 shadow-md">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                      <i class="fas fa-gamepad text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="text-sm font-bold text-gray-900">나랑도 해 알림</h4>
+                      <p class="text-xs text-gray-600">{{ formatTime(msg.timestamp) }}</p>
+                    </div>
+                  </div>
+                  <div class="bg-white/70 rounded-lg p-3 border border-blue-100">
+                    <p class="text-sm text-gray-800 leading-relaxed text-center">{{ msg.content }}</p>
+                  </div>
+                </div>
               </div>
             </template>
             <template v-else>

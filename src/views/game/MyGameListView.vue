@@ -4,6 +4,7 @@
     <h1 class="text-xl font-black text-left mb-7 tracking-tight text-neutral-900">
       진행 예정된 게임
     </h1>
+
     <template v-if="!isLoading && games.length > 0">
       <div class="space-y-6 pb-[15dvh]">
         <div
@@ -67,6 +68,7 @@
               </div>
             </div>
           </div>
+
           <!-- VS AREA -->
           <div class="flex justify-between items-center px-7 pb-4">
             <div @click="router.push('/profile/0')" class="flex-1 flex flex-col items-center gap-1">
@@ -101,9 +103,11 @@
                 </div>
               </div>
             </div>
+
             <div class="vs-area flex flex-col items-center justify-center mx-3">
               <div class="text-lg font-black tracking-tight text-orange-500 mb-1">VS</div>
             </div>
+
             <div
               @click.stop="router.push('/profile/' + game.opponentId)"
               class="flex-1 flex flex-col flex-start items-center gap-2"
@@ -122,21 +126,21 @@
                 <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 tracking-wider">
                   <div>
                     <span class="block text-gray-400 font-medium">승</span>
-                    <span class="text-base text-orange-500">{{
-                      game.opponentStatistics?.wins ?? '-'
-                    }}</span>
+                    <span class="text-base text-orange-500">
+                      {{ game.opponentStatistics?.wins ?? '-' }}
+                    </span>
                   </div>
                   <div>
                     <span class="block text-gray-400 font-medium">무</span>
-                    <span class="text-base text-blue-400">{{
-                      game.opponentStatistics?.draws ?? '-'
-                    }}</span>
+                    <span class="text-base text-blue-400">
+                      {{ game.opponentStatistics?.draws ?? '-' }}
+                    </span>
                   </div>
                   <div>
                     <span class="block text-gray-400 font-medium">패</span>
-                    <span class="text-base text-red-400">{{
-                      game.opponentStatistics?.losses ?? '-'
-                    }}</span>
+                    <span class="text-base text-red-400">
+                      {{ game.opponentStatistics?.losses ?? '-' }}
+                    </span>
                   </div>
                 </div>
               </template>
@@ -176,6 +180,7 @@
                 <span>{{ formatDate(game.matchDate) }}</span>
               </div>
             </div>
+
             <button
               v-if="game.status === 'IN_PROGRESS'"
               class="w-full bg-orange-500 text-white font-bold rounded-xl py-3 shadow hover:bg-orange-400 transition active:scale-95"
@@ -183,6 +188,7 @@
             >
               <i class="fas fa-sign-in-alt mr-2"></i>경기 참여
             </button>
+
             <button
               v-else-if="game.isOwner && canStart(game)"
               class="w-full bg-[#56b97b] text-white font-bold rounded-xl py-3 shadow transition active:scale-95"
@@ -190,6 +196,7 @@
             >
               <i class="fas fa-play mr-2"></i>경기 시작
             </button>
+
             <button
               v-else-if="game.isOwner && !game.opponentNickname"
               class="w-full bg-orange-500 text-white font-bold rounded-xl py-3 shadow transition active:scale-95"
@@ -197,6 +204,7 @@
             >
               <i class="fas fa-share mr-2"></i>경기 공유하기
             </button>
+
             <div v-else class="text-center text-gray-400 text-sm py-3">경기 시작 대기 중</div>
           </div>
         </div>
@@ -255,14 +263,13 @@
       </div>
     </template>
 
-    <!-- RULE 상세 모달 (컴포넌트화, 반드시 따로 만들어서 import) -->
     <MatchRuleModal v-if="showRuleModal" :rule="selectedRule" @close="showRuleModal = false" />
   </div>
+
   <FooterNav tab="my-game" />
 
-  <!-- (아래: 장소/진행/공유/시작전확인/Toast 등 모달은 모두 기존과 동일) -->
+  <!-- 장소/진행/공유/시작전확인/Toast 등 모달은 모두 기존과 동일 -->
 
-  <!-- 장소/진행 모달 -->
   <div
     v-if="showAddressModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
@@ -292,6 +299,7 @@
           class="rounded-xl border p-3"
         >
           <input
+            id="place-detail"
             v-model="placeDetail"
             :disabled="!placeRoad"
             class="w-full text-sm text-gray-700 outline-none bg-transparent"
@@ -327,7 +335,6 @@
     </div>
   </div>
 
-  <!-- 시작 전 확인 모달 -->
   <div
     v-if="showCountdownModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
@@ -362,6 +369,7 @@
       </div>
     </div>
   </div>
+
   <CustomToast />
 </template>
 
@@ -372,13 +380,14 @@ import client from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import FooterNav from '../../components/FooterNav.vue'
 import ChampionBadge from '../../components/ChampionBadge.vue'
-import MatchRuleModal from '../../components/MatchModal.vue' // 반드시 이 컴포넌트 필요!
+import MatchRuleModal from '../../components/MatchModal.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 const { showToast } = useToast()
 
 const router = useRouter()
 const route = useRoute()
+
 const games = ref([])
 const elapsedTimes = ref({})
 const showAddressModal = ref(false)
@@ -395,6 +404,7 @@ const showEmpty = ref(false)
 // RULE 상세 모달 상태
 const showRuleModal = ref(false)
 const selectedRule = ref(null)
+
 function openRuleModal(rule) {
   selectedRule.value = rule
   showRuleModal.value = true
@@ -437,18 +447,79 @@ function scrollToParamId() {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     setTimeout(() => {
       el.classList.add('highlight-orange')
-    }, 100) // 1초 후 강조
+    }, 100)
   }
 }
 
+// 환경 변수로 dev / prod 제어
+const APP_ENV = (process.env.VUE_APP_ENV || 'prod').toString().toLowerCase()
+
+// 더미 데이터 (dev 모드용)
+const DUMMY_GAMES = [
+  {
+    id: 101,
+    myId: 1,
+    opponentId: 2,
+    championId: 2,
+    myProfileUrl: 'https://via.placeholder.com/80x80.png?text=ME',
+    opponentProfileUrl: 'https://via.placeholder.com/80x80.png?text=OP',
+    myNickname: '나야',
+    opponentNickname: '상대A',
+    myStatistics: { wins: 12, draws: 3, losses: 5 },
+    opponentStatistics: { wins: 8, draws: 2, losses: 6 },
+    status: 'SCHEDULED',
+    matchLocation: '서울시 중구',
+    matchDate: new Date().toISOString(),
+    rule: { ruleTitle: '빠른 매치', majorCategory: '스포츠', minorCategory: '농구', duration: 600 },
+    isOwner: true,
+    startedAt: null,
+  },
+  {
+    id: 102,
+    myId: 1,
+    opponentId: 3,
+    championId: 1,
+    myProfileUrl: 'https://via.placeholder.com/80x80.png?text=ME',
+    opponentProfileUrl: 'https://via.placeholder.com/80x80.png?text=OP2',
+    myNickname: '나야',
+    opponentNickname: '상대B',
+    myStatistics: { wins: 5, draws: 1, losses: 2 },
+    opponentStatistics: { wins: 6, draws: 0, losses: 3 },
+    status: 'IN_PROGRESS',
+    matchLocation: '미정',
+    matchDate: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+    rule: { ruleTitle: '토너먼트', majorCategory: '게임', minorCategory: '축구', duration: -1 },
+    isOwner: false,
+    startedAt: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 3분 전 시작
+  },
+]
+
+// onMounted: dev이면 더미로 동작
 onMounted(async () => {
   isLoading.value = true
   showEmpty.value = false
 
-  // 최소 1.5초 대기 Promise
   const minDelay = new Promise((resolve) => setTimeout(resolve, 1500))
 
-  // 데이터 불러오기
+  if (APP_ENV === 'dev') {
+    // dev: 더미 데이터 사용. 실제 API 호출 안 함.
+    games.value = DUMMY_GAMES
+    updateElapsed()
+    interval = setInterval(updateElapsed, 1000)
+    await minDelay
+    isLoading.value = false
+    // showEmpty handling
+    if (!games.value.length) {
+      const remain = 3000 - 2200
+      setTimeout(() => {
+        if (!games.value.length) showEmpty.value = true
+      }, remain)
+    }
+    nextTick(() => scrollToParamId())
+    return
+  }
+
+  // prod: 실제 API 호출
   let res
   try {
     res = await client.get('/api/games/my-games')
@@ -459,15 +530,11 @@ onMounted(async () => {
     games.value = []
   }
 
-  // 최소 1.5초 보장
   await minDelay
-
-  // 데이터 도착 후 isLoading 해제
   isLoading.value = false
 
-  // 최대 3초까지 Empty는 안 띄움
   if (!games.value.length) {
-    const remain = 3000 - 2200 // 남은 시간 계산
+    const remain = 3000 - 2200
     setTimeout(() => {
       if (!games.value.length) showEmpty.value = true
     }, remain)
@@ -506,7 +573,6 @@ const submitAndStartGame = async () => {
   })
 
   showAddressModal.value = false
-  // 시작 전 확인용 모달 열기
   const game = games.value.find((g) => g.id === currentGameId.value)
   const dur = game?.rule?.duration
 
@@ -543,7 +609,6 @@ async function shareGame(gameId) {
   const res = await client.post('/api/invite', null, { params: { gameId } })
   const url = res.data.url
 
-  // iOS WebView (WKWebView)
   if (
     window.webkit &&
     window.webkit.messageHandlers &&

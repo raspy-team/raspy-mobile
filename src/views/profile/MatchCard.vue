@@ -7,7 +7,6 @@
       isWin ? 'border-orange-400' : isDraw ? 'border-gray-400' : 'border-blue-400',
     ]"
   >
-    <!-- 우상단 승패 강조배지 -->
     <div class="absolute right-6 top-6 z-10">
       <span
         v-if="isWin"
@@ -28,7 +27,6 @@
         >패배</span
       >
     </div>
-    <!-- 상단: 룰정보/경기일시장소 -->
     <div class="min-w-0 flex items-center gap-2">
       <div>
         <div>
@@ -51,7 +49,6 @@
       </div>
     </div>
 
-    <!-- 총 점수 -->
     <div class="flex flex-col items-center mt-0">
       <div class="flex flex-col items-center w-full justify-center">
         <span
@@ -59,9 +56,7 @@
           :class="isWin ? 'text-orange-500' : isDraw ? 'text-gray-500' : 'text-blue-500'"
         >
           <div class="flex justify-between items-center">
-            <!-- 왼쪽 영역 (1) -->
             <div class="flex items-center gap-3 w-[42%]">
-              <!-- 유저 정보 및 점수 -->
               <div class="flex flex-col items-center pt-7 w-[80%]">
                 <router-link :to="'/profile/' + game.me.id" class="shrink-0">
                   <img
@@ -82,10 +77,8 @@
               </div>
             </div>
 
-            <!-- 가운데 콜론 (2) -->
             <div class="flex justify-center font-extrabold text-2xl w-[16%]">:</div>
 
-            <!-- 오른쪽 영역 (1) -->
             <div class="flex items-center gap-3 justify-end w-[42%]">
               <div class="font-extrabold w-[20%]">
                 {{ game.opponentScore }}
@@ -110,137 +103,138 @@
         </span>
       </div>
     </div>
-<!-- 세트 결과 아코디언 -->
-<div class="my-0">
-<button
-  type="button"
-  @click.stop="showSetResults = !showSetResults"
-  class="
-    w-full flex items-center justify-between
-    px-5 py-3 rounded-2xl
-    bg-white border border-gray-200
-    shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)]
-    font-semibold text-[1.05rem] text-gray-900
-    transition
-    active:bg-gray-100
-    hover:bg-orange-50
-    select-none cursor-pointer
-    outline-none focus:outline-none
-    "
-  style="outline: none;"
->
-  <span
-    :class="showSetResults ? 'text-orange-500' : 'text-gray-900'"
-    class="tracking-tight text-sm font-semibold"
-  >{{ showSetResults ? '세트 결과 접기' : '세트 결과 보기' }}</span>
-  <i
-    :class="[
-      'fas',
-      showSetResults ? 'fa-chevron-up' : 'fa-chevron-down',
-      showSetResults ? 'text-orange-400' : 'text-gray-400',
-      'text-[19px]',
-      'transition-transform'
-    ]"
-  ></i>
-</button>
-
-  <transition name="fade">
-    <div v-if="showSetResults">
-      <div
-        v-for="(set, i) in setResults"
-        :key="i"
-        class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-50 font-semibold shadow-sm mt-2"
-        :class="set.winnerIdx === 1
-            ? 'border-orange-200'
-            : set.winnerIdx === 2
-                ? 'border-blue-200'
-                : 'border-gray-200'"
+    <div class="my-0">
+      <button
+        type="button"
+        @click.stop="showSetResults = !showSetResults"
+        class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-white border border-gray-200 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-[1.05rem] text-gray-900 transition active:bg-gray-100 hover:bg-orange-50 select-none cursor-pointer outline-none focus:outline-none"
+        style="outline: none"
       >
-        <span class="text-xs font-bold text-gray-400 flex-1">{{ set.setIdx }}세트</span>
         <span
-          class="text-lg font-extrabold"
-          :class="set.winnerIdx === 1
-              ? 'text-orange-500'
-              : set.winnerIdx === 2
-                  ? 'text-blue-500'
-                  : 'text-gray-400'"
+          :class="showSetResults ? 'text-orange-500' : 'text-gray-900'"
+          class="tracking-tight text-sm font-semibold"
+          >{{ showSetResults ? '세트 결과 접기' : '세트 결과 보기' }}</span
         >
-          {{ set.user1Score }} : {{ set.user2SCore }}
-        </span>
-        <span class="flex items-center gap-1 font-semibold flex-1 justify-end">
-          <i
-            :class="set.winnerIdx === 1
-              ? 'fas fa-trophy text-orange-500'
-              : set.winnerIdx === 2
-                  ? 'fas fa-times text-blue-500'
-                  : 'fas fa-handshake text-gray-400'"
-          ></i>
-          <span
-            class="text-xs font-bold"
-            :class="set.winnerIdx === 1
-                ? 'text-orange-500'
-                : set.winnerIdx === 2
-                    ? 'text-blue-500'
-                    : 'text-gray-400'"
-          >
-            {{ set.winnerIdx === 1 ? '승리' : set.winnerIdx === 2 ? '패배' : '무승부' }}
-          </span>
-        </span>
-      </div>
-    </div>
-  </transition>
-</div>
+        <i
+          :class="[
+            'fas',
+            showSetResults ? 'fa-chevron-up' : 'fa-chevron-down',
+            showSetResults ? 'text-orange-400' : 'text-gray-400',
+            'text-[19px]',
+            'transition-transform',
+          ]"
+        ></i>
+      </button>
 
-<!-- 리뷰/매너/퍼포먼스 -->
-<div class="bg-gray-50 rounded-xl p-4 mt-2 flex flex-col gap-2 border border-gray-100">
-  <template v-if="game.review || game.mannerScore !== undefined || game.performanceScore !== undefined">
-    <div class="text-xs text-gray-500 font-bold mb-1">
-      {{ game.opponent?.nickname ?? '상대' }}님의 리뷰
+      <transition name="fade">
+        <div v-if="showSetResults">
+          <div
+            v-for="(set, i) in setResults"
+            :key="i"
+            class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-50 font-semibold shadow-sm mt-2"
+            :class="
+              set.winnerIdx === 1
+                ? 'border-orange-200'
+                : set.winnerIdx === 2
+                  ? 'border-blue-200'
+                  : 'border-gray-200'
+            "
+          >
+            <span class="text-xs font-bold text-gray-400 flex-1">{{ set.setIdx }}세트</span>
+            <span
+              class="text-lg font-extrabold"
+              :class="
+                set.winnerIdx === 1
+                  ? 'text-orange-500'
+                  : set.winnerIdx === 2
+                    ? 'text-blue-500'
+                    : 'text-gray-400'
+              "
+            >
+              {{ set.user1Score == null ? 0 : set.user1Score }} :
+              {{ set.user2SCore == null ? 0 : set.user2SCore }}
+            </span>
+            <span class="flex items-center gap-1 font-semibold flex-1 justify-end">
+              <i
+                :class="
+                  set.winnerIdx === 1
+                    ? 'fas fa-trophy text-orange-500'
+                    : set.winnerIdx === 2
+                      ? 'fas fa-times text-blue-500'
+                      : 'fas fa-handshake text-gray-400'
+                "
+              ></i>
+              <span
+                class="text-xs font-bold"
+                :class="
+                  set.winnerIdx === 1
+                    ? 'text-orange-500'
+                    : set.winnerIdx === 2
+                      ? 'text-blue-500'
+                      : 'text-gray-400'
+                "
+              >
+                {{ set.winnerIdx === 1 ? '승리' : set.winnerIdx === 2 ? '패배' : '무승부' }}
+              </span>
+            </span>
+          </div>
+        </div>
+      </transition>
     </div>
-    <div v-if="game.review" class="flex items-start gap-2 mb-2">
-      <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
-      <span class="text-sm text-gray-800 font-medium leading-snug">
-        "{{ game.review }}"
-      </span>
+
+    <div class="bg-gray-50 rounded-xl p-4 mt-2 flex flex-col gap-2 border border-gray-100">
+      <template
+        v-if="game.review || game.mannerScore !== undefined || game.performanceScore !== undefined"
+      >
+        <div class="text-xs text-gray-500 font-bold mb-1">
+          {{ game.opponent?.nickname ?? '상대' }}님의 리뷰
+        </div>
+        <div v-if="game.review" class="flex items-start gap-2 mb-2">
+          <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
+          <span class="text-sm text-gray-800 font-medium leading-snug"> "{{ game.review }}" </span>
+        </div>
+        <div v-else class="text-sm text-gray-400 italic mb-2">등록된 텍스트 리뷰가 없습니다.</div>
+        <div class="flex gap-3">
+          <div class="flex items-center gap-1">
+            <span class="text-xs text-gray-500">매너 :</span>
+            <span
+              class="font-bold text-base"
+              :class="[
+                game.mannerScore >= 4
+                  ? 'text-green-500'
+                  : game.mannerScore >= 2
+                    ? 'text-yellow-500'
+                    : game.mannerScore > 0
+                      ? 'text-red-500'
+                      : 'text-gray-400',
+              ]"
+            >
+              {{ game.mannerScore !== null ? game.mannerScore?.toFixed(1) : '-' }}
+            </span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-xs text-gray-500">퍼포먼스 :</span>
+            <span
+              class="font-bold text-base"
+              :class="[
+                game.performanceScore >= 4
+                  ? 'text-green-500'
+                  : game.performanceScore >= 2
+                    ? 'text-yellow-500'
+                    : game.performanceScore > 0
+                      ? 'text-red-500'
+                      : 'text-gray-400',
+              ]"
+            >
+              {{ game.performanceScore !== null ? game.performanceScore?.toFixed(1) : '-' }}
+            </span>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <div class="text-sm text-gray-400 italic">상대가 아직 리뷰와 점수를 등록하지 않았어요.</div>
+      </template>
     </div>
-    <div v-else class="text-sm text-gray-400 italic mb-2">등록된 텍스트 리뷰가 없습니다.</div>
-    <div class="flex gap-3">
-      <div class="flex items-center gap-1">
-        <span class="text-xs text-gray-500">매너 :</span>
-        <span class="font-bold text-base"
-          :class="[
-            game.mannerScore >= 4
-              ? 'text-green-500'
-              : game.mannerScore >= 2
-                ? 'text-yellow-500'
-                : game.mannerScore > 0
-                  ? 'text-red-500'
-                  : 'text-gray-400'
-          ]">
-          {{ game.mannerScore !== null ? game.mannerScore?.toFixed(1) : '-' }}
-        </span>
-      </div>
-      <div class="flex items-center gap-1">
-        <span class="text-xs text-gray-500">퍼포먼스 :</span>
-        <span class="font-bold text-base"
-          :class="[
-            game.performanceScore >= 4
-              ? 'text-green-500'
-              : game.performanceScore >= 2
-                ? 'text-yellow-500'
-                : game.performanceScore > 0
-                  ? 'text-red-500'
-                  : 'text-gray-400'
-          ]">
-          {{ game.performanceScore !== null ? game.performanceScore?.toFixed(1) : '-' }}
-        </span>
-      </div>
-    </div>
-  </template>
-  <template v-else>
-    <div class="text-sm text-gray-400 italic">상대가 아직 리뷰와 점수를 등록하지 않았어요.</div>
-  </template>
-</div>
 
     <div class="min-w-0 flex flex-col justify-center">
       <div class="flex flex-col gap-2 text-xs text-gray-500 mt-1 min-w-0">
@@ -255,17 +249,14 @@
       </div>
     </div>
 
-    <!-- 하단 액션 버튼 -->
     <div class="flex justify-between items-center pt-2 mt-2 border-t border-gray-100">
-      <!-- 좋아요 수 표시 (완료된 게임만) -->
-      <div v-if="game.likeCount > 0" class="flex items-center gap-1 text-sm text-gray-600">
+      <div v-if="likeCount > 0" class="flex items-center gap-2 text-sm text-gray-600">
         <i class="fas fa-heart text-red-500"></i>
-        <span>{{ game.likeCount }}명이 또 보고싶어해요</span>
+        <span class="font-gray-500 font-bold">{{ likeCount }}명이 또 보고싶어해요</span>
       </div>
       <div v-else></div>
 
       <div class="flex gap-3">
-        <!-- 코멘트 버튼(기존) -->
         <button
           @click.stop="toggleComment(game.id)"
           class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
@@ -273,7 +264,6 @@
           <i class="fas fa-comment"></i>
         </button>
 
-        <!-- 이미지 저장 버튼 (아이콘만 변경) -->
         <button
           @click.stop="openInstaModal"
           class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
@@ -282,12 +272,9 @@
           <i class="far fa-image"></i>
         </button>
       </div>
-
-
     </div>
   </div>
 
-  <!-- 인스타그램 공유 모달 -->
   <InstagramModal v-if="isOpenInsta" :game="game" :me="game.me" @close="isOpenInsta = false" />
 
   <transition name="fade">
@@ -308,6 +295,7 @@ import { defineProps, ref, onMounted } from 'vue'
 // import { useRouter } from 'vue-router'
 import InstagramModal from '../../components/InstagramShare.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
+import api from '../../api/api' // API 인스턴스 import
 
 import Default from '../../assets/default.png'
 
@@ -317,6 +305,7 @@ const toggleComment = (id) => {
   commentId.value = id
 }
 const setResults = ref([])
+const likeCount = ref(0) // 좋아요 수를 저장할 ref
 
 const showRuleDetail = ref(false)
 function openModal() {
@@ -353,8 +342,22 @@ function isWinner1More(results) {
 
 const showSetResults = ref(false)
 
+// 좋아요 수를 가져오는 함수
+const fetchLikeCount = async () => {
+  if (!props.game || !props.game.id) return
+  try {
+    const response = await api.get(`/api/games/${props.game.id}/like`)
+    likeCount.value = response.data.totalCount
+  } catch (error) {
+    console.error('좋아요 수를 가져오는데 실패했습니다:', error)
+    likeCount.value = 0 // 에러 발생 시 0으로 설정
+  }
+}
 
 onMounted(() => {
+  // 컴포넌트 마운트 시 좋아요 수 조회
+  fetchLikeCount()
+
   if (props.game.myScore >= props.game.opponentScore) {
     // 내 점수가 더 높음
     if (isWinner1More(props.game.setResults)) {
@@ -400,6 +403,4 @@ onMounted(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
-
 </style>

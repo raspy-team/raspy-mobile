@@ -648,8 +648,8 @@
                   :key="'set-' + idx"
                   class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
                 >
-                  <div class="font-semibold">{{ idx + 1 }}세트</div>
-                  <div class="font-bold">{{ sc.a }} : {{ sc.b }}</div>
+                  <div class="font-semibold">{{ sc.set + 1 }}세트</div>
+                  <div class="font-bold">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
                 </div>
               </div>
               <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">

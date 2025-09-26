@@ -1,7 +1,6 @@
 import { ref, computed } from 'vue'
 import api from '@/api/api.js'
 
-// 테스트/프로덕션 모드 설정 (코드로 수정 가능)
 const FEED_MODE =(process.env.VUE_APP_FEED_MODE || 'prod').toString().toLowerCase()
 
 
@@ -240,43 +239,134 @@ export function useFeed() {
     return result
   })
 
-  // 피드 로드
-  const loadFeed = async () => {
+  // 우선순위 게임 로드
+  const loadPriorityGame = async (gameId) => {
+    try {
+      console.log(`우선순위 게임 로딩: ${gameId}`)
+      const response = await api.get(`/api/feed/game/${gameId}`)
+      return response.data
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn('우선순위 게임을 찾을 수 없습니다.')
+        return null
+      }
+      console.error('우선순위 게임 로딩 실패:', error)
+      throw error
+    }
+  }
+
+  // 전체 피드 로드
+  const loadAllFeed = async () => {
+    console.log('전체 피드 API 호출')
+    const response = await api.get('/api/feed')
+    return (response.data.items || []).map(item => ({
+      ...item,
+      isLiked: item.isLiked || false,
+      likeCount: item.likeCount || 0
+    }))
+  }
+
+  // 더미 데이터 로드 (테스트 모드용)
+  const loadDummyData = async () => {
+    console.log('테스트 모드: 더미 데이터 사용')
+    await new Promise(resolve => setTimeout(resolve, 500)) // 로딩 시뮬레이션
+    return (DUMMY_FEED_DATA.items || []).map(item => ({
+      ...item,
+      isLiked: false,
+      likeCount: Math.floor(Math.random() * 50) + 5 // 5-54 사이 랜덤 좋아요 수
+    }))
+  }
+
+  // 피드 로드 (URL 파라미터 지원)
+  const loadFeed = async (route = null) => {
     console.log('loadFeed 시작, 현재 모드:', FEED_MODE)
     loading.value = true
-    console.log('loading 상태 설정:', loading.value)
 
     try {
+      // URL에서 우선순위 게임 ID 확인
+      const priorityGameId = route?.query?.id
+
       if (FEED_MODE === 'test') {
         // 테스트 모드: 더미 데이터 사용
-        console.log('테스트 모드: 더미 데이터 사용')
-        await new Promise(resolve => setTimeout(resolve, 500)) // 로딩 시뮬레이션
-        posts.value = DUMMY_FEED_DATA.items || []
-        console.log('더미 데이터 설정 완료:', posts.value.length, '개 포스트')
-        console.log('더미 데이터:', DUMMY_FEED_DATA.items)
+        posts.value = await loadDummyData()
       } else {
         // 프로덕션 모드: 실제 API 호출
-        console.log('프로덕션 모드: API 호출')
-        const response = await api.get('/api/feed')
-        posts.value = response.data.items || []
-        console.log('API 응답 데이터:', response.data.items)
+        let priorityItem = null
+        let feedItems = []
+
+        if (priorityGameId) {
+          // 우선순위 게임이 있는 경우
+          try {
+            // 1. 우선순위 게임과 전체 피드를 병렬로 로딩
+            const [priorityResult, feedResult] = await Promise.allSettled([
+              loadPriorityGame(priorityGameId),
+              loadAllFeed()
+            ])
+
+            if (priorityResult.status === 'fulfilled' && priorityResult.value) {
+              priorityItem = {
+                ...priorityResult.value,
+                isLiked: priorityResult.value.isLiked || false,
+                likeCount: priorityResult.value.likeCount || 0
+              }
+            }
+
+            if (feedResult.status === 'fulfilled') {
+              feedItems = feedResult.value
+            } else {
+              console.error('전체 피드 로딩 실패:', feedResult.reason)
+              feedItems = []
+            }
+
+            // 2. 우선순위 아이템이 전체 피드에 중복되지 않도록 필터링
+            const filteredFeedItems = feedItems.filter(item => item.id !== priorityGameId)
+
+            // 3. 우선순위 아이템을 맨 앞에 배치
+            if (priorityItem) {
+              posts.value = [priorityItem, ...filteredFeedItems]
+            } else {
+              posts.value = filteredFeedItems
+            }
+
+          } catch (error) {
+            console.error('우선순위 피드 로딩 실패:', error)
+            // 실패 시 일반 피드로 대체
+            posts.value = await loadAllFeed()
+          }
+        } else {
+          // 일반 피드 로딩
+          posts.value = await loadAllFeed()
+        }
       }
-      console.log('유효한 포스트:', posts.value.filter(isPostValid))
+
+      console.log('피드 로딩 완료:', posts.value.length, '개 포스트')
     } catch (error) {
       console.error('피드 로드 실패:', error)
       posts.value = []
     } finally {
-      console.log('loading 상태 해제 전:', loading.value)
       loading.value = false
-      console.log('loading 상태 해제 후:', loading.value)
-      console.log('최종 posts 개수:', posts.value.length)
     }
   }
 
   // 액션 핸들러들
   const handleLike = async (postId) => {
     console.log('좋아요:', postId)
-    // API 호출
+    try {
+      const response = await api.post(`/api/games/${postId}/like`)
+
+      // 해당 포스트의 좋아요 상태 업데이트
+      const postIndex = posts.value.findIndex(p => p.id === postId)
+      if (postIndex !== -1) {
+        const post = posts.value[postIndex]
+        post.isLiked = response.data.isLiked
+        post.likeCount = response.data.totalCount
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error)
+      throw error
+    }
   }
 
   const handleComment = async (postId) => {

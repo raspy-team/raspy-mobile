@@ -256,23 +256,32 @@
     </div>
 
     <!-- 하단 액션 버튼 -->
-    <div class="flex justify-end gap-3 pt-2 mt-2 border-t border-gray-100">
-<!-- 코멘트 버튼(기존) -->
-<button
-  @click.stop="toggleComment(game.id)"
-  class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
->
-  <i class="fas fa-comment"></i>
-</button>
+    <div class="flex justify-between items-center pt-2 mt-2 border-t border-gray-100">
+      <!-- 좋아요 수 표시 (완료된 게임만) -->
+      <div v-if="game.likeCount > 0" class="flex items-center gap-1 text-sm text-gray-600">
+        <i class="fas fa-heart text-red-500"></i>
+        <span>{{ game.likeCount }}명이 또 보고싶어해요</span>
+      </div>
+      <div v-else></div>
 
-<!-- 이미지 저장 버튼 (아이콘만 변경) -->
-<button
-  @click.stop="openInstaModal"
-  class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
-  title="이미지로 저장"
->
-  <i class="far fa-image"></i>
-</button>
+      <div class="flex gap-3">
+        <!-- 코멘트 버튼(기존) -->
+        <button
+          @click.stop="toggleComment(game.id)"
+          class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+        >
+          <i class="fas fa-comment"></i>
+        </button>
+
+        <!-- 이미지 저장 버튼 (아이콘만 변경) -->
+        <button
+          @click.stop="openInstaModal"
+          class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+          title="이미지로 저장"
+        >
+          <i class="far fa-image"></i>
+        </button>
+      </div>
 
 
     </div>

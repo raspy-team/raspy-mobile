@@ -133,4 +133,25 @@ export const playWithMeTooAPI = {
   }
 }
 
+// 또 보고싶어요 API
+export const likeAPI = {
+  // 또 보고싶어요 토글
+  async toggleLike(gameId) {
+    const response = await api.post(`/api/games/${gameId}/like`)
+    return response.data
+  },
+
+  // 좋아요 상태 조회
+  async getLikeStatus(gameId) {
+    const response = await api.get(`/api/games/${gameId}/like`)
+    return response.data
+  },
+
+  // 좋아요한 사용자 전체 목록
+  async getLikers(gameId) {
+    const response = await api.get(`/api/games/${gameId}/like/users`)
+    return response.data
+  }
+}
+
 export default api

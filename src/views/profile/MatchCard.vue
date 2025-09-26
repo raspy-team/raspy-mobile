@@ -152,7 +152,7 @@
               "
             >
               {{ set.user1Score == null ? 0 : set.user1Score }} :
-              {{ set.user2SCore == null ? 0 : set.user2SCore }}
+              {{ set.user2Score == null ? 0 : set.user2Score }}
             </span>
             <span class="flex items-center gap-1 font-semibold flex-1 justify-end">
               <i
@@ -368,8 +368,8 @@ onMounted(() => {
         // 내가 유저 2임 (재졍렬)
         setResults.value.push({
           setIdx: item.setIdx,
-          user1Score: item.user2SCore,
-          user2SCore: item.user1Score,
+          user1Score: item.user2Score,
+          user2Score: item.user1Score,
           winnerIdx: item.winnerIdx === 1 ? 2 : item.winnerIdx === 2 ? 1 : item.winnerIdx,
         })
       })
@@ -381,8 +381,8 @@ onMounted(() => {
       props.game.setResults.forEach((item) => {
         setResults.value.push({
           setIdx: item.setIdx,
-          user1Score: item.user2SCore,
-          user2SCore: item.user1Score,
+          user1Score: item.user2Score,
+          user2Score: item.user1Score,
           winnerIdx: item.winnerIdx === 1 ? 2 : item.winnerIdx === 2 ? 1 : item.winnerIdx,
         })
 

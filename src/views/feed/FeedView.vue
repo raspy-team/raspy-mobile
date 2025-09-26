@@ -876,19 +876,12 @@
         </div>
       </div>
 
-      <div class="absolute z-[100] left-4 top-[35px] raspy-top pointer-events-none">
-        <div
-          class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
+      <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
+        <button
+          v-if="post.type === 'game' && post.isCompleted"
+          @click="toggleLike"
+          class="flex flex-col items-center active:scale-95 transition"
         >
-          {{ currentSlide + 1 }} / {{ totalSlides }} · {{ currentSectionLabel }}
-        </div>
-      </div>
-
-      <div
-        v-if="post.type === 'game' && post.isCompleted"
-        class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4"
-      >
-        <button @click="toggleLike" class="flex flex-col items-center active:scale-95 transition">
           <span
             class="w-8 h-8"
             :class="[post?.isLiked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
@@ -897,6 +890,7 @@
           <span class="text-[10px] mt-1">{{ post?.likeCount ?? 0 }}</span>
         </button>
         <button
+          v-if="post.type === 'game' && post.isCompleted"
           @click="onDoWithMe"
           :class="[
             'flex flex-col items-center active:scale-95 transition',
@@ -1601,10 +1595,7 @@ function onFeedMouseUp(e) {
 const hasPhotos = computed(
   () => post.value && Array.isArray(post.value.photos) && post.value.photos.length > 0,
 )
-// const photoCount = computed(() => (post.photos ? post.photos.length : 0))
-// const sortedPhotos = computed(() =>
-//   (post.photos || []).slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt)),
-// )
+
 const headlinePhoto = computed(() => {
   // 새 API 구조: photos 배열의 첫 번째가 헤드라인 이미지
   if (!post.value) return null
@@ -1654,10 +1645,8 @@ const sections = computed(() => {
   return arr
 })
 const totalSlides = computed(() => sections.value.length)
-// function idx(label) {
-//   return sections.value.indexOf(label)
-// }
-const currentSectionLabel = computed(() => sections.value[currentSlide.value] || '')
+
+// const currentSectionLabel = computed(() => sections.value[currentSlide.value] || '')
 
 // Slides logic
 const currentSlide = ref(0)
@@ -1763,7 +1752,7 @@ function onTouchEnd(e) {
       target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
     )
     if (!onControl && !movedX && !movedY && tapGap < 260) {
-      const ty = e?.changedTouches?.[0]?.clientY ?? window.innerHeight * 0.45
+      //    const ty = e?.changedTouches?.[0]?.clientY ?? window.innerHeight * 0.45
       toggleLike()
       lastTapAt = 0
     } else if (!onControl && !movedX && !movedY) {
@@ -1887,17 +1876,6 @@ function commitSlide(dir) {
   })
 }
 
-// function nextSlide() {
-//   const before = currentSlide.value
-//   currentSlide.value = Math.min(currentSlide.value + 1, totalSlides.value - 1)
-//   if (currentSlide.value !== before) tryVibrate(10)
-// }
-// function prevSlide() {
-//   const before = currentSlide.value
-//   currentSlide.value = Math.max(currentSlide.value - 1, 0)
-//   if (currentSlide.value !== before) tryVibrate(10)
-// }
-
 // Actions
 const likeBump = ref(false)
 async function toggleLike() {
@@ -2006,24 +1984,7 @@ async function onShare() {
   }
 }
 
-// Quick navigation helpers
-// Rules modal state
 const showRuleModal = ref(false)
-// function goToReviews() {
-//   const i = idx('평점 & 리뷰')
-//   if (i >= 0) currentSlide.value = i
-//   tryVibrate(12)
-// }
-// function goToRanking() {
-//   const i = idx('친구 랭킹')
-//   if (i >= 0) currentSlide.value = i
-//   tryVibrate(12)
-// }
-// function goToGallery() {
-//   const i = idx('전체 사진')
-//   if (i >= 0) currentSlide.value = i
-//   tryVibrate(12)
-// }
 
 function goFriendProfile(f) {
   if (!f || !f.id) return
@@ -2073,13 +2034,6 @@ const icons = {
 }
 
 onBeforeUnmount(() => {})
-
-// Rules accordion state
-// const openRule = reactive({})
-// const allRulesOpen = computed(
-//   () => post.rule.items.length && post.rule.items.every((_, idx) => openRule[idx]),
-// )
-
 // Friends ranking (dummy 50 entries)
 const friendsRanking = ref(
   Array.from({ length: 50 }, (_, i) => ({

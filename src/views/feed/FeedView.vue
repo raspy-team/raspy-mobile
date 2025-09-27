@@ -447,12 +447,7 @@
                           : 'border-white/20'
                       "
                     />
-                    <div
-                      v-if="post.result.winner === post.players[0].name"
-                      class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
-                    >
-                      <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
-                    </div>
+                    
                     <div class="text-white font-semibold text-sm truncate">
                       {{ post.players[0].name }}
                     </div>
@@ -463,9 +458,6 @@
                     >
                       {{ post.result.scoreA }}<span class="text-white/50"> : </span
                       >{{ post.result.scoreB }}
-                    </div>
-                    <div class="mt-1 text-xs text-emerald-300 font-medium">
-                      Winner · {{ post.result.winner }}
                     </div>
                   </div>
                   <div class="text-center relative">
@@ -615,12 +607,7 @@
                 </div>
               </div>
 
-              <div
-                v-if="post.type === 'game' && post.isCompleted"
-                class="mt-2 text-center italic text-white/70 text-xs"
-              >
-                이 매치, 너라면 이길 수 있어?
-              </div>
+              
               <div
                 v-if="post.type === 'game' && post.isCompleted"
                 class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80"
@@ -644,17 +631,7 @@
                   <div class="font-bold">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
                 </div>
               </div>
-              <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">
-                <div class="flex items-center justify-between text-xs text-white/60 mb-2">
-                  <span>규칙 · {{ post.rule.title }}</span>
-                  <button
-                    class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
-                    @click="showRuleModal = true"
-                  >
-                    자세히 보기
-                  </button>
-                </div>
-              </div>
+              
               <div
                 v-if="post.type === 'game' && post.isCompleted"
                 class="mt-3 text-[11px] text-white/70 flex items-center justify-between"

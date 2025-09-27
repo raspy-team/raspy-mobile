@@ -2,11 +2,13 @@
   "name": "raspy-mobile",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
-  },
+"scripts": {
+  "serve": "cross-env VUE_APP_ENV=prod VUE_APP_FEED_MODE=prod vue-cli-service serve",
+  "serve:dev": "cross-env VUE_APP_ENV=dev VUE_APP_FEED_MODE=test vue-cli-service serve",
+  "serve:prod": "cross-env VUE_APP_ENV=prod VUE_APP_FEED_MODE=prod vue-cli-service serve",
+  "build": "cross-env VUE_APP_ENV=prod VUE_APP_FEED_MODE=prod vue-cli-service build",
+  "lint": "vue-cli-service lint"
+},
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",
     "axios": "^1.9.0",
@@ -23,6 +25,7 @@
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "autoprefixer": "^10.4.20",
+    "cross-env": "^10.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^8.7.1",

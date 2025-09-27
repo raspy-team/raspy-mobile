@@ -1,9 +1,6 @@
 <template>
   <HeaderComp />
   <div ref="container" class="h-full pt-24 pb-28 px-5 max-w-md mx-auto space-y-0">
-    <h1 class="text-xl font-black text-left mb-7 tracking-tight text-neutral-900">
-      진행 예정된 게임
-    </h1>
     <template v-if="!isLoading && games.length > 0">
       <div class="space-y-6 pb-[15dvh]">
         <div

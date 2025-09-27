@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import api from '@/api/api.js'
 
 // 테스트/프로덕션 모드 설정 (코드로 수정 가능)
-const FEED_MODE = 'prod' // 'test' 또는 'prod'
+const FEED_MODE = 'test' // 'test' 또는 'prod'
 
 // 테스트용 더미 데이터
 const DUMMY_FEED_DATA = {

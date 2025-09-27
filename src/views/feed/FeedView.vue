@@ -1,6 +1,8 @@
 <template>
   <header class="fixed top-0 left-0 w-full h-20 z-[30] raspy-top">
+    <!-- 우측: 알림 + DM -->
     <div class="flex items-center justify-end raspy-top mt-8 space-x-4 mr-3">
+      <!-- DM 버튼 -->
       <router-link
         to="/dm"
         class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full transition ml-1"
@@ -9,6 +11,7 @@
         <i class="fas fa-paper-plane text-orange-500 text-xl"></i>
       </router-link>
 
+      <!-- 알림 버튼  -->
       <button
         class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full transition"
         @click="toggleNotificationPanel"
@@ -21,6 +24,7 @@
       </button>
     </div>
 
+    <!-- 알림 패널 (오른쪽 슬라이드) -->
     <transition name="slide">
       <aside
         v-if="showNotificationPanel"
@@ -349,20 +353,21 @@
         @skip="handleSkipInvite"
         class="absolute inset-0 z-30"
       />
+      <!-- Slides progress (top) -->
       <div
         v-if="post.type !== 'friend-invite'"
-        class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top"
+        class="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-3 justify-center items-center"
       >
-        <div
-          v-for="(section, i) in sections"
-          :key="'prog-' + i"
-          class="h-1 flex-1 rounded-full bg-white/20 overflow-hidden"
-        >
-          <div
-            class="h-full bg-gradient-to-r from-amber-400 to-pink-500"
-            :style="{ width: i <= currentSlide ? '100%' : '0%' }"
-          ></div>
-        </div>
+        <span
+          v-for="(s, i) in sections"
+          :key="'prog-dot-' + i"
+          :class="[
+            'w-3 h-3 rounded-full transition-all duration-200',
+            i === currentSlide
+              ? 'bg-orange-400 shadow-[0_0_0_2px_rgba(251,140,0,0.25)]'
+              : 'bg-orange-400/30',
+          ]"
+        ></span>
       </div>
 
       <div
@@ -409,38 +414,25 @@
             </div>
           </section>
 
+          <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
           <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
-            <div
-              v-if="post.type === 'game' && post.isCompleted"
-              class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-cyan-600 to-blue-700"
-            />
-            <div
-              v-else-if="
-                post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
-              "
-              class="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-700"
-            />
+            <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
             <div class="ambient-overlay" />
 
             <div
               class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
-              <div
-                v-if="post.type === 'game' && post.isCompleted"
-                class="flex items-center justify-between mb-5"
-              >
-                <div class="text-xl font-extrabold">경기 결과</div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center justify-between text-xs text-white/60 mb-2">
+                  <span>규칙 · {{ post.rule?.title || '경기' }}</span>
+                  <button
+                    class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                    @click="showRuleModal = true"
+                  >
+                    자세히 보기
+                  </button>
+                </div>
                 <div class="text-xs text-white/60">{{ post.date }}</div>
-              </div>
-
-              <div
-                v-else-if="
-                  post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
-                "
-                class="flex items-center justify-between mb-5"
-              >
-                <div class="text-xl font-extrabold">예정된 경기</div>
-                <div class="text-xs text-blue-300">{{ post.date }}</div>
               </div>
 
               <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6">
@@ -876,6 +868,7 @@
         </div>
       </div>
 
+      <!-- Right action buttons column -->
       <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
         <button
           v-if="post.type === 'game' && post.isCompleted"
@@ -887,24 +880,15 @@
             :class="[post?.isLiked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
             v-html="post?.isLiked ? icons.heartFill : icons.heart"
           ></span>
-          <span class="text-[10px] mt-1">{{ post?.likeCount ?? 0 }}</span>
+          <span class="text-[10px] mt-1">또 보고싶어</span>
         </button>
         <button
           v-if="post.type === 'game' && post.isCompleted"
           @click="onDoWithMe"
-          :class="[
-            'flex flex-col items-center active:scale-95 transition',
-            currentPlayWithMeStatus ? 'text-orange-500' : '',
-          ]"
+          class="flex flex-col items-center active:scale-95 transition"
         >
-          <span
-            class="w-8 h-8"
-            :class="currentPlayWithMeStatus ? 'text-orange-500' : ''"
-            v-html="icons.handshake"
-          ></span>
-          <span class="text-[10px] mt-1">
-            {{ currentPlayWithMeStatus ? '요청됨' : '나랑도 해' }}
-          </span>
+          <span class="w-8 h-8" v-html="icons.handshake"></span>
+          <span class="text-[10px] mt-1">나랑도 해</span>
         </button>
         <button @click="onComment" class="flex flex-col items-center active:scale-95 transition">
           <span class="w-8 h-8" v-html="icons.comment"></span>
@@ -1183,11 +1167,6 @@ const unreadCount = ref(0)
 // 나랑도해 상태 관리
 const playWithMeRequests = ref(new Map()) // userId -> boolean (요청 상태)
 const showPlayerSelectModal = ref(false) // 플레이어 선택 모달 표시 상태
-
-// 현재 포스트의 나랑도해 요청 상태 (사용하지 않음 - 모달로 대체)
-const currentPlayWithMeStatus = computed(() => {
-  return false // 항상 false로 설정하여 기본 상태 유지
-})
 
 const fetchNotifications = async () => {
   const res = await api.get('/api/notifications')
@@ -2121,6 +2100,48 @@ function makeFriend(i) {
     transform: translate3d(0, -8px, 0) scale(1.02);
     opacity: 1;
   }
+}
+
+/* Winner label subtle glow */
+.winner-glow {
+  text-shadow:
+    0 0 6px rgba(251, 191, 36, 0.55),
+    0 0 12px rgba(251, 191, 36, 0.35);
+  filter: saturate(1.05);
+  animation: winner-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes winner-pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
+
+/* hide scrollbars for rule box */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* enable smooth touch scrolling inside nested scroll areas */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+
+.feed-viewport {
+  touch-action: none;
+  overscroll-behavior-y: contain;
 }
 
 /* Winner label subtle glow */

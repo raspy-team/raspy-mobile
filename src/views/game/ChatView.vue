@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '../../api/api'
+import api, { playWithMeTooAPI } from '../../api/api'
 import { socket } from '../../websocket'
 
 const route = useRoute()
@@ -13,27 +13,12 @@ const roomId = ref('')
 const messages = ref([])
 const headerTop = ref(0)
 
-// 더미 데이터 및 케이스 테스트용 변수들
-const testCase = ref('request_received') // 테스트 케이스 변경용
-// 가능한 케이스들: 'request_received', 'request_sent', 'challenge_received', 'game_scheduled', 'game_pre_match', 'no_relation'
-
-const targetUserNickname = ref('김민수')
+const targetUserNickname = ref('')
 const targetUserProfileUrl = ref('')
 const isFriend = ref(false)
 
-// 더미 게임 데이터
-const gameData = ref({
-  gameId: 123,
-  sport: '탁구',
-  location: '강남 탁구장',
-  dateTime: '2024-12-25 14:00',
-  status: 'scheduled', // 'pending', 'accepted', 'scheduled', 'completed'
-  rule: {
-    ruleTitle: '빠른 3세트 매치',
-    majorCategory: '라켓 스포츠',
-    minorCategory: '탁구',
-  },
-})
+// 나랑도해 요청 데이터
+const playWithMeRequest = ref(null) // 받은 나랑도해 요청 정보
 
 function updateHeaderPosition() {
   // visualViewport를 지원하는 경우만 적용 (for iOS)
@@ -84,6 +69,17 @@ onMounted(async () => {
 
     targetUserNickname.value = data.targetUserNickname
     targetUserProfileUrl.value = data.targetUserProfileUrl
+
+    // 나랑도해 요청 확인
+    try {
+      const playWithMeData = await playWithMeTooAPI.checkRequest(targetUserId)
+      if (playWithMeData) {
+        playWithMeRequest.value = playWithMeData
+      }
+    } catch (error) {
+      console.error('나랑도해 요청 확인 중 오류:', error)
+    }
+
     const res = await api.get(`/api/chat-room/${roomId.value}/chat-messages`)
     messages.value = res.data
     await nextTick()
@@ -141,70 +137,54 @@ const defaultProfileUrl = require('../../assets/default.png')
 
 // 헤더 표시 조건을 계산하는 computed
 const headerInfo = computed(() => {
-  switch (testCase.value) {
-    case 'request_received':
-      return {
-        show: true,
-        type: 'request_received',
-        title: '경기 요청을 받았습니다',
-        description: `${targetUserNickname.value}님이 ${gameData.value.rule.ruleTitle} 경기를 제안했습니다`,
-        showActions: true,
-        actionType: 'accept_reject',
-      }
-    case 'request_sent':
-      return {
-        show: true,
-        type: 'request_sent',
-        title: '경기 요청을 보냈습니다',
-        description: `${gameData.value.rule.ruleTitle} 경기 요청 대기 중`,
-        showActions: false,
-      }
-    case 'challenge_received':
-      return {
-        show: true,
-        type: 'challenge_received',
-        title: '"나랑도 해" 요청을 받았습니다',
-        description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
-        showActions: true,
-        actionType: 'accept_reject',
-      }
-    case 'game_scheduled':
-      return {
-        show: true,
-        type: 'game_scheduled',
-        title: '경기가 예정되어 있습니다',
-        description: `${gameData.value.rule.ruleTitle} • ${gameData.value.dateTime}`,
-        showActions: false,
-        isClickable: false,
-      }
-    case 'no_relation':
-    default:
-      return {
-        show: false,
-      }
+  if (playWithMeRequest.value) {
+    return {
+      show: true,
+      type: 'challenge_received',
+      title: '"나랑도 해" 요청을 받았습니다',
+      description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
+      showActions: true,
+      actionType: 'accept_reject',
+    }
+  }
+
+  return {
+    show: false,
   }
 })
 
 // 액션 핸들러들
-const handleAccept = () => {
-  console.log('수락됨')
-  // API 호출 로직
+const handleAccept = async () => {
+  if (!playWithMeRequest.value) return
+
+  try {
+    const gameId = await playWithMeTooAPI.acceptRequest(targetUserId)
+    console.log('나랑도해 요청 수락됨, 게임 ID:', gameId)
+    // 게임 생성 완료, 요청 상태 초기화
+    playWithMeRequest.value = null
+    // 게임 페이지로 이동하거나 성공 메시지 표시
+    router.push(`/games/${gameId}`)
+  } catch (error) {
+    console.error('나랑도해 요청 수락 중 오류:', error)
+  }
 }
 
-const handleReject = () => {
-  console.log('거절됨')
-  // API 호출 로직
-}
+const handleReject = async () => {
+  if (!playWithMeRequest.value) return
 
-const handleEditGame = () => {
-  console.log('경기 정보 수정')
-  // 경기 정보 수정 모달 또는 페이지로 이동
+  try {
+    await playWithMeTooAPI.rejectRequest(playWithMeRequest.value.fromUserId)
+    console.log('나랑도해 요청 거절됨')
+    playWithMeRequest.value = null
+  } catch (error) {
+    console.error('나랑도해 요청 거절 중 오류:', error)
+  }
 }
 
 const handleAddFriend = () => {
   console.log('친구 요청')
   isFriend.value = true
-  // API 호출 로직
+  // TODO: 친구 요청 API 호출
 }
 </script>
 
@@ -291,8 +271,8 @@ const handleAddFriend = () => {
                 <div class="relative">
                   <img
                     class="w-12 h-12 rounded-xl object-cover shadow-md"
-                    :src="`/category-picture/${gameData.rule.minorCategory || '미분류'}.png`"
-                    :alt="gameData.rule.minorCategory"
+                    :src="`/category-picture/${playWithMeRequest?.minorCategory || '미분류'}.png`"
+                    :alt="playWithMeRequest?.minorCategory"
                   />
                   <!-- 상태 배지 -->
                   <div
@@ -312,15 +292,15 @@ const handleAddFriend = () => {
                   <div class="flex-1 min-w-0">
                     <!-- 경기 제목 -->
                     <h3 class="text-base font-bold text-gray-900 truncate mb-1">
-                      {{ gameData.rule.ruleTitle }}
+                      {{ playWithMeRequest?.ruleTitle || '경기' }}
                     </h3>
 
                     <!-- 카테고리 -->
                     <div class="flex items-center gap-1 mb-2">
-                      <span class="text-xs text-gray-600 font-medium">{{ gameData.rule.majorCategory }}</span>
+                      <span class="text-xs text-gray-600 font-medium">{{ playWithMeRequest?.majorCategory || '스포츠' }}</span>
                       <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
                       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                        {{ gameData.rule.minorCategory }}
+                        {{ playWithMeRequest?.minorCategory || '경기' }}
                       </span>
                     </div>
 
@@ -384,7 +364,7 @@ const handleAddFriend = () => {
     </div>
     <div
       style="height: 100%"
-      class="fixed top-0 left-0 w-full pb-[170px] px-1 z-10"
+      class="fixed top-0 left-0 w-full pb-[81px] px-1 z-10"
       :style="{ paddingTop: `${headerTop + (headerInfo.show ? 190 : 70)}px` }"
     >
       <div ref="chatBox" class="h-full overflow-auto space-y-4 pb-2">
@@ -428,6 +408,24 @@ const handleAddFriend = () => {
                 </p>
               </div>
             </template>
+            <template v-else-if="msg.messageType === 'PLAY_WITH_ME_TOO'">
+              <div class="w-full max-w-sm mx-auto">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 shadow-md">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                      <i class="fas fa-gamepad text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="text-sm font-bold text-gray-900">나랑도 해 알림</h4>
+                      <p class="text-xs text-gray-600">{{ formatTime(msg.timestamp) }}</p>
+                    </div>
+                  </div>
+                  <div class="bg-white/70 rounded-lg p-3 border border-blue-100">
+                    <p class="text-sm text-gray-800 leading-relaxed text-center">{{ msg.content }}</p>
+                  </div>
+                </div>
+              </div>
+            </template>
             <template v-else>
               <div class="mx-auto bg-gray-100 px-3 py-1 rounded text-gray-600 text-xs shadow">
                 {{ msg.content }}
@@ -435,73 +433,6 @@ const handleAddFriend = () => {
             </template>
           </div>
         </template>
-      </div>
-    </div>
-    <!-- 테스트 케이스 변경 UI (개발용) -->
-    <div class="fixed bottom-[81px] left-0 w-full bg-gray-100 border-t p-2 z-30">
-      <div class="text-xs font-semibold text-gray-700 mb-2">테스트 케이스 (개발용):</div>
-      <div class="flex gap-1 overflow-x-auto pb-2">
-        <button
-          v-for="(case_name, case_key) in {
-            request_received: '요청받음',
-            request_sent: '요청보냄',
-            challenge_received: '나랑도해',
-            game_scheduled: '경기예정',
-            no_relation: '관계없음',
-          }"
-          :key="case_key"
-          @click="testCase = case_key"
-          :class="[
-            'px-2 py-1 text-xs rounded whitespace-nowrap',
-            testCase === case_key ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border',
-          ]"
-        >
-          {{ case_name }}
-        </button>
-        <button
-          @click="isFriend = !isFriend"
-          :class="[
-            'px-2 py-1 text-xs rounded whitespace-nowrap ml-2',
-            isFriend ? 'bg-green-500 text-white' : 'bg-white text-gray-600 border',
-          ]"
-        >
-          {{ isFriend ? '친구임' : '친구아님' }}
-        </button>
-      </div>
-
-      <!-- 스포츠 종목 변경 -->
-      <div class="text-xs font-semibold text-gray-700 mb-1">스포츠 종목:</div>
-      <div class="flex gap-1 overflow-x-auto">
-        <button
-          v-for="sport in [
-            { name: '탁구', major: '라켓 스포츠', minor: '탁구', title: '빠른 3세트 매치' },
-            {
-              name: '배드민턴',
-              major: '라켓 스포츠',
-              minor: '배드민턴',
-              title: '배드민턴 토너먼트',
-            },
-            { name: '테니스', major: '라켓 스포츠', minor: '테니스', title: '테니스 단식 경기' },
-            { name: '축구', major: '구기 스포츠', minor: '축구', title: '풋살 매치' },
-            { name: '농구', major: '구기 스포츠', minor: '농구', title: '3대3 농구' },
-          ]"
-          :key="sport.minor"
-          @click="
-            gameData.rule = {
-              ruleTitle: sport.title,
-              majorCategory: sport.major,
-              minorCategory: sport.minor,
-            }
-          "
-          :class="[
-            'px-2 py-1 text-xs rounded whitespace-nowrap',
-            gameData.rule.minorCategory === sport.minor
-              ? 'bg-blue-500 text-white'
-              : 'bg-white text-gray-600 border',
-          ]"
-        >
-          {{ sport.name }}
-        </button>
       </div>
     </div>
 

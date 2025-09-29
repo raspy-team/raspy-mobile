@@ -79,14 +79,12 @@
     </transition>
   </header>
 
-  <!-- 로딩 상태 -->
   <div
     v-if="loading"
     class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none"
   >
     <div class="flex items-center justify-center h-full">
       <div class="text-center">
-        <!-- 스켈레톤 UI -->
         <div class="space-y-4 max-w-sm mx-auto p-6">
           <div class="h-4 bg-white/10 rounded animate-pulse"></div>
           <div class="h-20 bg-white/10 rounded animate-pulse"></div>
@@ -98,7 +96,6 @@
     </div>
   </div>
 
-  <!-- 빈 상태 -->
   <div
     v-else-if="!loading && sortedFeed.length === 0"
     class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none"
@@ -121,7 +118,6 @@
     </div>
   </div>
 
-  <!-- 실제 피드 컨텐츠 -->
   <div
     v-else-if="!loading && sortedFeed.length > 0 && post"
     class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none feed-viewport"
@@ -133,23 +129,18 @@
     @mouseup="onFeedMouseUp"
     @mouseleave="onFeedMouseUp"
   >
-    <!-- Adjacent previews: show next/prev during vertical swipe -->
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-      <!-- Prev preview (appears when swiping down) -->
       <div v-if="prevPost" class="absolute inset-0" :style="prevPreviewStyle">
-        <!-- Preview for completed game -->
         <div
           v-if="prevPost.type === 'game' && prevPost.isCompleted"
           class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
         ></div>
-        <!-- Preview for scheduled game -->
         <div
           v-else-if="
             prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)
           "
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
         ></div>
-        <!-- Preview for invite -->
         <div
           v-else-if="prevPost.type === 'invite'"
           class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
@@ -157,7 +148,6 @@
 
         <div class="ambient-overlay"></div>
         <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
-          <!-- App invite preview -->
           <div v-if="prevPost.type === 'invite'" class="text-center text-white">
             <div
               class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
@@ -168,7 +158,6 @@
             <div class="text-sm text-white/70">더 많은 컨텐츠를 확인하세요</div>
           </div>
 
-          <!-- Completed game preview -->
           <div
             v-else-if="prevPost.type === 'game' && prevPost.isCompleted"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
@@ -210,7 +199,6 @@
             </div>
           </div>
 
-          <!-- Scheduled game preview -->
           <div
             v-else-if="
               prevPost.type === 'upcoming_game' ||
@@ -248,21 +236,17 @@
         </div>
       </div>
 
-      <!-- Next preview (appears when swiping up) -->
       <div v-if="nextPost" class="absolute inset-0" :style="nextPreviewStyle">
-        <!-- Preview for completed game -->
         <div
           v-if="nextPost.type === 'game' && nextPost.isCompleted"
           class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
         ></div>
-        <!-- Preview for scheduled game -->
         <div
           v-else-if="
             nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)
           "
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
         ></div>
-        <!-- Preview for invite -->
         <div
           v-else-if="nextPost.type === 'invite'"
           class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
@@ -270,7 +254,6 @@
 
         <div class="ambient-overlay"></div>
         <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
-          <!-- App invite preview -->
           <div v-if="nextPost.type === 'invite'" class="text-center text-white">
             <div
               class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
@@ -281,7 +264,6 @@
             <div class="text-sm text-white/70">더 많은 컨텐츠를 확인하세요</div>
           </div>
 
-          <!-- Completed game preview -->
           <div
             v-else-if="nextPost.type === 'game' && nextPost.isCompleted"
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
@@ -323,7 +305,6 @@
             </div>
           </div>
 
-          <!-- Scheduled game preview -->
           <div
             v-else-if="
               nextPost.type === 'upcoming_game' ||
@@ -361,35 +342,34 @@
         </div>
       </div>
     </div>
-    <!-- Original slides (all types) -->
     <div
       class="relative h-full w-full"
       :style="feedWrapperStyle"
       @transitionend="onFeedSnapTransitionEnd"
     >
-      <!-- App invite overlay (when current post is invite type) -->
       <AppInvitePost
-        v-if="post.type === 'invite'"
+        v-if="post.type === 'invite' || post.type === 'friend-invite'"
         @invite="handleInvite"
         @skip="handleSkipInvite"
         class="absolute inset-0 z-30"
       />
-      <div class="absolute top-0 left-0 right-0 z-20 flex gap-1 p-4 raspy-top">
-        <div
-          v-for="(section, i) in sections"
-          :key="'prog-' + i"
-          class="h-1 flex-1 rounded-full bg-white/20 overflow-hidden"
-        >
-          <div
-            class="h-full bg-gradient-to-r from-amber-400 to-pink-500"
-            :style="{ width: i <= currentSlide ? '100%' : '0%' }"
-          ></div>
-        </div>
+      <!-- Slides progress (top) -->
+      <div
+        v-if="post.type !== 'friend-invite'"
+        class="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-3 justify-center items-center"
+      >
+        <span
+          v-for="(s, i) in sections"
+          :key="'prog-dot-' + i"
+          :class="[
+            'w-3 h-3 rounded-full transition-all duration-200',
+            i === currentSlide
+              ? 'bg-orange-400 shadow-[0_0_0_2px_rgba(251,140,0,0.25)]'
+              : 'bg-orange-400/30',
+          ]"
+        ></span>
       </div>
 
-      <!-- Tap zones removed to allow inner scroll and gestures only -->
-
-      <!-- Slides Wrapper -->
       <div
         class="absolute inset-0 z-0"
         @touchstart.passive="onTouchStart"
@@ -401,7 +381,6 @@
         @mouseleave.passive="onMouseUp($event)"
       >
         <div class="h-full flex" :style="wrapperStyle">
-          <!-- 1. 헤드라인 사진 (완료된 경기만) -->
           <section
             v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
             class="w-screen shrink-0 h-full relative"
@@ -413,51 +392,50 @@
               draggable="false"
             />
             <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-            <div class="ambient-overlay" />            
+            <div class="ambient-overlay" />
+
+            <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
+              <div
+                class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
+              >
+                <div class="text-lg font-bold">{{ post.players[0]?.name }}의 경기 하이라이트</div>
+                <div class="mt-1 text-xs text-white/80">
+                  {{ post.meta.place }}
+                </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  <span
+                    v-for="t in post.tags"
+                    :key="t"
+                    class="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10"
+                    >#{{ t }}</span
+                  >
+                </div>
+              </div>
+            </div>
           </section>
 
-          <!-- 2. 경기 정보 (결과 or 예정 경기) -->
+          <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
           <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
-            <!-- Completed game background -->
-            <div
-              v-if="post.type === 'game' && post.isCompleted"
-              class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-cyan-600 to-blue-700"
-            />
-            <!-- Scheduled game background -->
-            <div
-              v-else-if="
-                post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
-              "
-              class="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-700"
-            />
+            <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
             <div class="ambient-overlay" />
 
             <div
               class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
-              <!-- Completed game header -->
-              <div
-                v-if="post.type === 'game' && post.isCompleted"
-                class="flex items-center justify-between mb-5"
-              >
-                <div class="text-xl font-extrabold">경기 결과</div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center justify-between text-xs text-white/60 mb-2">
+                  <span>규칙 · {{ post.rule?.title || '경기' }}</span>
+                  <button
+                    class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
+                    @click="showRuleModal = true"
+                  >
+                    자세히 보기
+                  </button>
+                </div>
                 <div class="text-xs text-white/60">{{ post.date }}</div>
               </div>
 
-              <!-- Scheduled game header -->
-              <div
-                v-else-if="
-                  post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
-                "
-                class="flex items-center justify-between mb-5"
-              >
-                <div class="text-xl font-extrabold">예정된 경기</div>
-                <div class="text-xs text-blue-300">{{ post.date }}</div>
-              </div>
-
-              <!-- Completed game content -->
               <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6">
-                <!-- 경기 결과 -->
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                   <div class="text-center relative">
                     <img
@@ -512,7 +490,6 @@
                   </div>
                 </div>
 
-                <!-- 경기 규칙 -->
                 <div
                   @click="showRuleModal = true"
                   class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200 group"
@@ -541,14 +518,12 @@
                 </div>
               </div>
 
-              <!-- Scheduled game content -->
               <div
                 v-else-if="
                   post.type === 'upcoming_game' || (post.type === 'game' && !post.isCompleted)
                 "
                 class="space-y-6"
               >
-                <!-- 스포츠 종목 -->
                 <div class="flex items-center gap-4">
                   <img
                     class="w-14 h-14 rounded-xl border border-white/30"
@@ -563,7 +538,6 @@
                   </div>
                 </div>
 
-                <!-- 경기 규칙 -->
                 <div
                   @click="showRuleModal = true"
                   class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200 group"
@@ -591,7 +565,6 @@
                   </div>
                 </div>
 
-                <!-- 대전 정보 -->
                 <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
                   <div class="text-center">
                     <img
@@ -617,7 +590,6 @@
                   </div>
                 </div>
 
-                <!-- 경기 상세 정보 -->
                 <div class="space-y-3">
                   <div class="flex items-center gap-3 text-white/90">
                     <i class="fas fa-calendar text-blue-400 w-4"></i>
@@ -633,7 +605,6 @@
                   </div>
                 </div>
 
-                <!-- 참가 버튼 -->
                 <div class="mt-6">
                   <button
                     @click="handleJoin(post.id)"
@@ -663,18 +634,16 @@
                   <span>총 시간 {{ post.result.duration }}</span>
                 </div>
               </div>
-              <!-- 세트 결과: 세로 전체폭 -->
               <div v-if="post.type === 'game' && post.isCompleted" class="mt-4 space-y-2">
                 <div
                   v-for="(sc, idx) in post.result.setScores"
                   :key="'set-' + idx"
                   class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
                 >
-                  <div class="font-semibold">{{ idx + 1 }}세트</div>
-                  <div class="font-bold">{{ sc.a }} : {{ sc.b }}</div>
+                  <div class="font-semibold">{{ sc.set + 1 }}세트</div>
+                  <div class="font-bold">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
                 </div>
               </div>
-              <!-- 규칙: 모달로 자세히 보기 -->
               <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">
                 <div class="flex items-center justify-between text-xs text-white/60 mb-2">
                   <span>규칙 · {{ post.rule.title }}</span>
@@ -696,7 +665,6 @@
             </div>
           </section>
 
-          <!-- 3. 평점 & 리뷰 (완료된 경기이고 리뷰가 있는 경우만) -->
           <section
             v-if="
               post?.type === 'game' &&
@@ -711,7 +679,6 @@
             <div
               class="relative z-10 h-full flex flex-col justify-center items-center gap-4 px-4 py-12"
             >
-              <!-- 섹션 타이틀 (박스 밖, 좌상단) -->
               <div class="max-w-xl mx-auto w-full">
                 <div class="flex items-center justify-between mb-1">
                   <div class="text-xl font-extrabold">평점 & 리뷰</div>
@@ -721,7 +688,6 @@
                 </div>
                 <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
               </div>
-              <!-- 리뷰가 있는 경우만 표시 -->
               <div
                 v-if="post.reviews?.length > 0 && post.reviews[0]?.author"
                 class="flex items-center justify-center"
@@ -742,11 +708,6 @@
                         <div class="font-semibold truncate">
                           {{ post.reviews[0]?.author?.name || '익명' }}
                         </div>
-                        <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
-                        <!-- <div class="text-[11px] text-white/80">
-                          <span class="mr-2">퍼포먼스 5.0/5</span>·
-                          <span class="ml-2">매너 5.0/5</span>
-                        </div> -->
                       </div>
                     </div>
                   </div>
@@ -772,7 +733,6 @@
                   </div>
                 </div>
               </div>
-              <!-- 두 번째 리뷰가 있는 경우만 표시 -->
               <div
                 v-if="post.reviews?.length > 1 && post.reviews[1]?.author"
                 class="flex items-center justify-center"
@@ -793,11 +753,6 @@
                         <div class="font-semibold truncate">
                           {{ post.reviews[1]?.author?.name || '익명' }}
                         </div>
-                        <!-- 퍼포먼스/매너 숨김 (API에 아직 추가 예정) -->
-                        <!-- <div class="text-[11px] text-white/80">
-                          <span class="mr-2">퍼포먼스 5.0/5</span>·
-                          <span class="ml-2">매너 5.0/5</span>
-                        </div> -->
                       </div>
                     </div>
                   </div>
@@ -824,7 +779,6 @@
                 </div>
               </div>
 
-              <!-- 리뷰가 없을 때 표시할 메시지 -->
               <div
                 v-if="!post.reviews || post.reviews.length === 0"
                 class="flex items-center justify-center"
@@ -841,7 +795,6 @@
               </div>
             </div>
           </section>
-          <!-- 4. 친구 랭킹 -->
           <section
             v-if="features.friendRanking"
             class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
@@ -895,7 +848,6 @@
             </div>
           </section>
 
-          <!-- 5. 전체 사진 (완료된 경기만, 헤드라인 제외, 각 1장씩 슬라이드) -->
           <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
             <section
               v-if="post.type === 'game' && post.isCompleted && features.gallery"
@@ -916,29 +868,25 @@
         </div>
       </div>
 
-      <!-- Global progress badge moved under top progress bar -->
-      <div class="absolute z-[100] left-4 top-[35px] raspy-top pointer-events-none">
-        <div
-          class="text-xs bg-white/10 border border-white/15 rounded-full px-2 py-1 backdrop-blur-md"
-        >
-          {{ currentSlide + 1 }} / {{ totalSlides }} · {{ currentSectionLabel }}
-        </div>
-      </div>
-
       <!-- Right action buttons column -->
       <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
         <button
-          @click="toggleLike(true)"
+          v-if="post.type === 'game' && post.isCompleted"
+          @click="toggleLike"
           class="flex flex-col items-center active:scale-95 transition"
         >
           <span
             class="w-8 h-8"
-            :class="[liked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
-            v-html="liked ? icons.heartFill : icons.heart"
+            :class="[post?.isLiked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
+            v-html="post?.isLiked ? icons.heartFill : icons.heart"
           ></span>
           <span class="text-[10px] mt-1">또 보고싶어</span>
         </button>
-        <button @click="onDoWithMe" class="flex flex-col items-center active:scale-95 transition">
+        <button
+          v-if="post.type === 'game' && post.isCompleted"
+          @click="onDoWithMe"
+          class="flex flex-col items-center active:scale-95 transition"
+        >
           <span class="w-8 h-8" v-html="icons.handshake"></span>
           <span class="text-[10px] mt-1">나랑도 해</span>
         </button>
@@ -952,9 +900,6 @@
         </button>
       </div>
 
-      <!-- Skip button removed per spec -->
-
-      <!-- Floating like hearts -->
       <div class="pointer-events-none absolute inset-0 z-30">
         <div
           v-for="h in hearts"
@@ -967,86 +912,178 @@
     </div>
   </div>
 
-  <!-- Rules modal -->
-  <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/80 flex flex-col">
-    <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-      <div class="text-lg font-bold">경기 규칙</div>
-      <button
-        class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 active:scale-95"
-        @click="showRuleModal = false"
-      >
-        닫기
-      </button>
-    </div>
-    <div
-      class="flex-1 overflow-auto p-4 space-y-4 touch-scroll"
-      @touchstart.stop
-      @touchmove.stop
-      @touchend.stop
-    >
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">경기 목표</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.ruleGoal || '목표 정보 없음' }}
-        </div>
-      </div>
-
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">점수 계산</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.ruleScoreDefinition || '점수 정보 없음' }}
-        </div>
-      </div>
-
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">경기 준비</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.rulePreparation || '준비 정보 없음' }}
-        </div>
-      </div>
-
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">경기 순서</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug whitespace-pre-line">
-          {{ post.value.rule?.ruleOrder || '순서 정보 없음' }}
-        </div>
-      </div>
-
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">판정 기준</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule?.ruleDecision || '판정 정보 없음' }}
-        </div>
-      </div>
-
-      <div class="bg-white/10 border border-white/10 rounded-xl">
-        <div class="px-4 py-3 font-semibold">반칙</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug whitespace-pre-line">
-          {{ post.value.rule?.ruleFoul || '반칙 정보 없음' }}
-        </div>
-      </div>
-
+  <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm">
+    <div class="h-full flex flex-col">
       <div
-        v-if="post.value.rule?.ruleExtraInfo"
-        class="bg-white/10 border border-white/10 rounded-xl"
+        class="flex-shrink-0 px-6 py-4 bg-gradient-to-r from-slate-900/95 to-gray-900/95 border-b border-white/10"
       >
-        <div class="px-4 py-3 font-semibold">추가 정보</div>
-        <div class="px-4 pb-4 text-sm text-white/80 leading-snug">
-          {{ post.value.rule.ruleExtraInfo }}
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <i class="fas fa-book text-blue-400 text-sm"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">경기 규칙</h2>
+              <p class="text-sm text-white/60">{{ post?.rule?.ruleTitle || '규칙 제목 없음' }}</p>
+            </div>
+          </div>
+          <button
+            class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white/80 flex items-center justify-center transition-all duration-200 active:scale-95"
+            @click="showRuleModal = false"
+          >
+            <i class="fas fa-times text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-hidden">
+        <div class="h-full overflow-y-auto scrollbar-hidden" style="scroll-behavior: smooth">
+          <div class="px-6 py-6 space-y-6">
+            <div
+              class="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-blue-500/10 border-b border-blue-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-target text-blue-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">경기 목표</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">
+                  {{ post?.rule?.ruleGoal || '목표 정보 없음' }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-emerald-500/10 border-b border-emerald-500/20">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-6 h-6 bg-emerald-500/20 rounded-lg flex items-center justify-center"
+                  >
+                    <i class="fas fa-calculator text-emerald-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">점수 계산</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">
+                  {{ post?.rule?.ruleScoreDefinition || '점수 정보 없음' }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-orange-500/10 border-b border-orange-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tools text-orange-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">경기 준비</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">
+                  {{ post?.rule?.rulePreparation || '준비 정보 없음' }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-purple-500/10 border-b border-purple-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-list-ol text-purple-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">경기 순서</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">
+                  {{ post?.rule?.ruleOrder || '순서 정보 없음' }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-indigo-500/10 border-b border-indigo-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-gavel text-indigo-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">판정 기준</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">
+                  {{ post?.rule?.ruleDecision || '판정 정보 없음' }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-red-500/10 border-b border-red-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-red-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">반칙</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">
+                  {{ post?.rule?.ruleFoul || '반칙 정보 없음' }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              v-if="post?.rule?.ruleExtraInfo"
+              class="bg-gradient-to-br from-gray-500/10 to-slate-500/10 border border-gray-500/20 rounded-2xl overflow-hidden"
+            >
+              <div class="px-5 py-4 bg-gray-500/10 border-b border-gray-500/20">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-gray-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-info-circle text-gray-400 text-xs"></i>
+                  </div>
+                  <h3 class="font-semibold text-white">추가 정보</h3>
+                </div>
+              </div>
+              <div class="px-5 py-4">
+                <p class="text-white/80 leading-relaxed whitespace-pre-line">
+                  {{ post?.rule?.ruleExtraInfo }}
+                </p>
+              </div>
+            </div>
+
+            <div class="h-4"></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 로딩 완료했지만 post가 없는 경우 -->
-  <div v-else-if="!loading && (!sortedFeed.length || !post)" class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none">
+  <div
+    v-else-if="!loading && (!sortedFeed.length || !post)"
+    class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none"
+  >
     <div class="flex items-center justify-center h-full">
       <div class="text-center max-w-sm mx-auto p-6">
         <i class="fas fa-trophy text-4xl text-white/30 mb-4"></i>
         <h3 class="text-lg font-semibold mb-2">아직 경기가 없어요</h3>
-        <p class="text-white/70 text-sm leading-relaxed">
-          첫 번째 경기를 만들어보세요!
-        </p>
+        <p class="text-white/70 text-sm leading-relaxed">첫 번째 경기를 만들어보세요!</p>
         <button
           class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition-colors"
           @click="$router.push('/games')"
@@ -1059,28 +1096,77 @@
 
   <Footer tab="feed" />
   <CustomToast />
+
+  <div
+    v-if="showPlayerSelectModal"
+    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    @click="closePlayerSelectModal"
+  >
+    <div class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto" @click.stop>
+      <div class="flex items-center justify-between p-6 border-b">
+        <h3 class="text-lg font-bold text-gray-900">플레이어 선택</h3>
+        <button
+          @click="closePlayerSelectModal"
+          class="text-gray-400 hover:text-gray-600 transition"
+        >
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <div class="p-6">
+        <p class="text-sm text-gray-600 mb-4">누구에게 나랑도해 요청을 보낼까요?</p>
+        <div class="space-y-3">
+          <button
+            v-for="player in post?.players || []"
+            :key="player.id"
+            @click="sendPlayWithMeRequest(player)"
+            class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 hover:border-orange-300 hover:bg-orange-50 transition group"
+          >
+            <img
+              :src="player.avatar || '/assets/default.png'"
+              :alt="player.name"
+              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 group-hover:border-orange-300 transition"
+            />
+            <div class="flex-1 text-left">
+              <div class="font-semibold text-gray-900 group-hover:text-orange-600 transition">
+                {{ player.name }}
+              </div>
+              <div class="text-sm text-gray-500">플레이어</div>
+            </div>
+            <i
+              class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500 transition"
+            ></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { computed, reactive, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
-import api from '../../api/api'
+import api, { playWithMeTooAPI } from '../../api/api'
 import featureFlags from '../../config/features'
-// import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composable/useToast'
 import CustomToast from '../../components/CustomToast.vue'
 import AppInvitePost from '../../components/feed/AppInvitePost.vue'
 import { useFeed } from '../../composables/useFeed.js'
 const router = useRouter()
 // Currently available info flags for gating UI
 const features = featureFlags
-// const { showToast } = useToast()
+const { showToast } = useToast()
 
 // 피드 데이터 관리
 const { loading, sortedFeed, loadFeed } = useFeed()
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
+
+// 나랑도해 상태 관리
+const playWithMeRequests = ref(new Map()) // userId -> boolean (요청 상태)
+const showPlayerSelectModal = ref(false) // 플레이어 선택 모달 표시 상태
 
 const fetchNotifications = async () => {
   const res = await api.get('/api/notifications')
@@ -1148,6 +1234,36 @@ const currentFeedIndex = ref(0)
 const post = computed(() => {
   return sortedFeed.value[currentFeedIndex.value] || null
 })
+
+watch(
+  post,
+  async (newPost) => {
+    if (newPost && newPost.type === 'game' && newPost.isCompleted) {
+      await fetchLikeStatus(newPost)
+    }
+  },
+  { immediate: true },
+)
+
+async function fetchLikeStatus(gamePost) {
+  try {
+    const response = await api.get(`/api/games/${gamePost.id}/like`)
+    const { isLiked, totalCount } = response.data
+
+    const postInFeed = sortedFeed.value.find((p) => p.id === gamePost.id)
+    if (postInFeed) {
+      postInFeed.isLiked = isLiked
+      postInFeed.likeCount = totalCount
+    }
+  } catch (error) {
+    console.error('좋아요 상태 조회 실패:', error)
+    const postInFeed = sortedFeed.value.find((p) => p.id === gamePost.id)
+    if (postInFeed) {
+      postInFeed.isLiked = false
+      postInFeed.likeCount = postInFeed.likeCount || 0
+    }
+  }
+}
 
 // ---------------------------
 // Vertical feed management
@@ -1455,11 +1571,10 @@ function onFeedMouseUp(e) {
 }
 
 // Photos computed
-const hasPhotos = computed(() => post.value && Array.isArray(post.value.photos) && post.value.photos.length > 0)
-// const photoCount = computed(() => (post.photos ? post.photos.length : 0))
-// const sortedPhotos = computed(() =>
-//   (post.photos || []).slice().sort((a, b) => new Date(a.takenAt) - new Date(b.takenAt)),
-// )
+const hasPhotos = computed(
+  () => post.value && Array.isArray(post.value.photos) && post.value.photos.length > 0,
+)
+
 const headlinePhoto = computed(() => {
   // 새 API 구조: photos 배열의 첫 번째가 헤드라인 이미지
   if (!post.value) return null
@@ -1509,10 +1624,8 @@ const sections = computed(() => {
   return arr
 })
 const totalSlides = computed(() => sections.value.length)
-// function idx(label) {
-//   return sections.value.indexOf(label)
-// }
-const currentSectionLabel = computed(() => sections.value[currentSlide.value] || '')
+
+// const currentSectionLabel = computed(() => sections.value[currentSlide.value] || '')
 
 // Slides logic
 const currentSlide = ref(0)
@@ -1618,9 +1731,8 @@ function onTouchEnd(e) {
       target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
     )
     if (!onControl && !movedX && !movedY && tapGap < 260) {
-      const ty = e?.changedTouches?.[0]?.clientY ?? window.innerHeight * 0.45
-      toggleLike(true)
-      spawnHeart(endX.value, ty)
+      //    const ty = e?.changedTouches?.[0]?.clientY ?? window.innerHeight * 0.45
+      toggleLike()
       lastTapAt = 0
     } else if (!onControl && !movedX && !movedY) {
       lastTapAt = now
@@ -1715,9 +1827,7 @@ function onMouseUp(e) {
       target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
     )
     if (!onControl && !movedX && !movedY && tapGap < 260) {
-      toggleLike(true)
-      const ty = e?.clientY ?? window.innerHeight * 0.45
-      spawnHeart(endX.value, ty)
+      toggleLike()
       lastTapAt = 0
     } else if (!onControl && !movedX && !movedY) {
       lastTapAt = now
@@ -1745,33 +1855,94 @@ function commitSlide(dir) {
   })
 }
 
-// function nextSlide() {
-//   const before = currentSlide.value
-//   currentSlide.value = Math.min(currentSlide.value + 1, totalSlides.value - 1)
-//   if (currentSlide.value !== before) tryVibrate(10)
-// }
-// function prevSlide() {
-//   const before = currentSlide.value
-//   currentSlide.value = Math.max(currentSlide.value - 1, 0)
-//   if (currentSlide.value !== before) tryVibrate(10)
-// }
-
 // Actions
-const liked = ref(false)
 const likeBump = ref(false)
-function toggleLike(withBump = false) {
-  liked.value = !liked.value
+async function toggleLike() {
+  if (!post.value || post.value.type !== 'game' || !post.value.isCompleted) {
+    return
+  }
+
+  const currentPost = post.value
+  const originalLikedState = currentPost.isLiked
+  const originalLikeCount = currentPost.likeCount || 0
+
+  // 1. Optimistic UI Update (UI 즉시 변경)
+  currentPost.isLiked = !originalLikedState
+  currentPost.likeCount = originalLikedState ? originalLikeCount - 1 : originalLikeCount + 1
+  if (currentPost.likeCount < 0) currentPost.likeCount = 0
+
+  // Animation & Haptic
+  likeBump.value = false
+  requestAnimationFrame(() => {
+    likeBump.value = true
+    setTimeout(() => (likeBump.value = false), 240)
+  })
   tryVibrate(15)
-  if (withBump) {
-    likeBump.value = false
-    requestAnimationFrame(() => {
-      likeBump.value = true
-      setTimeout(() => (likeBump.value = false), 240)
-    })
+
+  // Double tap heart spawn
+  if (!originalLikedState) {
+    const feedElement = document.querySelector('.feed-viewport')
+    if (feedElement) {
+      const rect = feedElement.getBoundingClientRect()
+      spawnHeart(rect.width / 2, rect.height / 2)
+    }
+  }
+
+  try {
+    // 2. API 호출
+    const response = await api.post(`/api/games/${currentPost.id}/like`)
+
+    // 3. 서버 응답으로 상태 동기화 (선택적이지만 권장)
+    currentPost.isLiked = response.data.isLiked
+    currentPost.likeCount = response.data.totalCount
+  } catch (error) {
+    console.error('좋아요 토글 실패:', error)
+    showToast('요청 처리 중 오류가 발생했습니다.', 'error')
+
+    // 4. 실패 시 UI 롤백
+    currentPost.isLiked = originalLikedState
+    currentPost.likeCount = originalLikeCount
   }
 }
 function onDoWithMe() {
-  router.push('/create-game')
+  if (!post.value || !post.value.players || post.value.players.length === 0) {
+    showToast('플레이어 정보를 찾을 수 없습니다.', 'error')
+    return
+  }
+
+  // 플레이어 선택 모달 열기
+  showPlayerSelectModal.value = true
+}
+
+// 선택된 플레이어에게 나랑도해 요청 보내기
+async function sendPlayWithMeRequest(selectedPlayer) {
+  console.log('Selected player:', selectedPlayer)
+  console.log('Rule ID:', post.value?.rule?.id)
+
+  if (!post.value?.rule?.id) {
+    showToast('경기 정보를 찾을 수 없습니다.', 'error')
+    return
+  }
+
+  const targetUserId = selectedPlayer.id
+  const ruleId = post.value.rule.id
+
+  console.log('Sending request with targetUserId:', targetUserId, 'ruleId:', ruleId)
+
+  try {
+    await playWithMeTooAPI.sendRequest(targetUserId, ruleId)
+    playWithMeRequests.value.set(targetUserId, true)
+    showToast(`${selectedPlayer.name}님에게 나랑도해 요청을 보냈습니다.`, 'success')
+    showPlayerSelectModal.value = false
+  } catch (error) {
+    console.error('나랑도해 요청 처리 중 오류:', error)
+    showToast('요청 처리 중 오류가 발생했습니다.', 'error')
+  }
+}
+
+// 플레이어 선택 모달 닫기
+function closePlayerSelectModal() {
+  showPlayerSelectModal.value = false
 }
 
 function onComment() {
@@ -1792,24 +1963,7 @@ async function onShare() {
   }
 }
 
-// Quick navigation helpers
-// Rules modal state
 const showRuleModal = ref(false)
-// function goToReviews() {
-//   const i = idx('평점 & 리뷰')
-//   if (i >= 0) currentSlide.value = i
-//   tryVibrate(12)
-// }
-// function goToRanking() {
-//   const i = idx('친구 랭킹')
-//   if (i >= 0) currentSlide.value = i
-//   tryVibrate(12)
-// }
-// function goToGallery() {
-//   const i = idx('전체 사진')
-//   if (i >= 0) currentSlide.value = i
-//   tryVibrate(12)
-// }
 
 function goFriendProfile(f) {
   if (!f || !f.id) return
@@ -1859,13 +2013,6 @@ const icons = {
 }
 
 onBeforeUnmount(() => {})
-
-// Rules accordion state
-// const openRule = reactive({})
-// const allRulesOpen = computed(
-//   () => post.rule.items.length && post.rule.items.every((_, idx) => openRule[idx]),
-// )
-
 // Friends ranking (dummy 50 entries)
 const friendsRanking = ref(
   Array.from({ length: 50 }, (_, i) => ({
@@ -1995,5 +2142,57 @@ function makeFriend(i) {
 .feed-viewport {
   touch-action: none;
   overscroll-behavior-y: contain;
+}
+
+/* Winner label subtle glow */
+.winner-glow {
+  text-shadow:
+    0 0 6px rgba(251, 191, 36, 0.55),
+    0 0 12px rgba(251, 191, 36, 0.35);
+  filter: saturate(1.05);
+  animation: winner-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes winner-pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
+
+/* hide scrollbars for rule box */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* enable smooth touch scrolling inside nested scroll areas */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+
+.feed-viewport {
+  touch-action: none;
+  overscroll-behavior-y: contain;
+}
+
+/* Hide scrollbar for better UX */
+.scrollbar-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 </style>

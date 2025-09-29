@@ -109,7 +109,6 @@
 
 <!-- 추천 경기 타이틀 행 -->
 <div class="flex items-center justify-between pt-0 pb-0 px-1">
-  <div class="font-extrabold text-xl text-gray-700">추천 경기</div>
   <button
     @click="fetchGames"
     aria-label="새로고침"

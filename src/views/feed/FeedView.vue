@@ -388,7 +388,7 @@
             <img
               :src="headlinePhoto.url"
               alt="headline"
-              class="absolute inset-0 w-full h-full object-cover"
+              class="max-w-[80vw] max-h-[70vh] rounded-2xl shadow-xl object-contain"
               draggable="false"
             />
             <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />

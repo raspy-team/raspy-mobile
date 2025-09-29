@@ -435,7 +435,7 @@
                 <div class="text-xs text-white/60">{{ post.date }}</div>
               </div>
 
-              <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6">
+              <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6 mb-4">
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                   <div class="text-center relative">
                     <img
@@ -489,33 +489,6 @@
                     </div>
                   </div>
                 </div>
-
-                <div
-                  @click="showRuleModal = true"
-                  class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200 group"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-10 h-10 bg-emerald-500/30 rounded-lg flex items-center justify-center"
-                      >
-                        <i class="fas fa-book text-emerald-400 text-lg"></i>
-                      </div>
-                      <div>
-                        <div class="text-white font-semibold text-sm">경기 규칙</div>
-                        <div class="text-white/70 text-xs">
-                          {{ post.rule?.ruleTitle || post.rule?.title }}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-white/50 group-hover:text-white/80 transition-colors">
-                      <i class="fas fa-chevron-right text-sm"></i>
-                    </div>
-                  </div>
-                  <div class="mt-3 text-white/60 text-xs">
-                    {{ post.rule?.majorCategory }} • {{ post.rule?.minorCategory }} • 자세히 보기
-                  </div>
-                </div>
               </div>
 
               <div
@@ -535,33 +508,6 @@
                     <div class="text-white/70 text-sm">
                       {{ post.rule?.majorCategory }} • {{ post.rule?.minorCategory }}
                     </div>
-                  </div>
-                </div>
-
-                <div
-                  @click="showRuleModal = true"
-                  class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200 group"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-10 h-10 bg-blue-500/30 rounded-lg flex items-center justify-center"
-                      >
-                        <i class="fas fa-book text-blue-400 text-lg"></i>
-                      </div>
-                      <div>
-                        <div class="text-white font-semibold text-sm">경기 규칙</div>
-                        <div class="text-white/70 text-xs">
-                          {{ post.rule?.ruleTitle || post.rule?.title }}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-white/50 group-hover:text-white/80 transition-colors">
-                      <i class="fas fa-chevron-right text-sm"></i>
-                    </div>
-                  </div>
-                  <div class="mt-3 text-white/60 text-xs">
-                    {{ post.rule?.majorCategory }} • {{ post.rule?.minorCategory }} • 자세히 보기
                   </div>
                 </div>
 

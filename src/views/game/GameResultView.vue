@@ -169,6 +169,10 @@
         <!-- 리뷰 등록 버튼 제거 -->
       </div>
 
+      <div class="flex justify-center gap-3 mt-4">
+        <button class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow">친구 추가</button>
+        <button class="px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold shadow">결과 공유</button>
+      </div>
       <CustomToast />
     </div>
   <!-- ...existing code... -->

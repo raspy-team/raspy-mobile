@@ -72,6 +72,15 @@
         </div>
       </div>
 
+      <div
+        v-if="(championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
+        class="relative max-w-md mx-auto my-8 px-6 py-8 rounded-2xl bg-gray-100 flex flex-col items-center border border-gray-200 shadow"
+      >
+        <i class="fas fa-frown text-2xl text-gray-400 mb-2"></i>
+        <span class="text-base font-bold text-gray-700 mb-1">챔피언 타이틀을 빼앗겼습니다</span>
+        <span class="text-xs text-gray-400">다음 기회를 노려보세요!</span>
+      </div>
+
       <!-- ...existing code... -->
 
   <div class="flex justify-around items-center py-4">

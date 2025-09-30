@@ -196,32 +196,17 @@
       </div>
     </div>
 
+
     <div
       v-if="isSetOver && !isGameOver"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
     >
-      <button
-        @click="socket_nextSet"
-        class="bg-orange-500 text-white w-[70dvw] py-4 rounded-full text-lg font-bold shadow animate-blink transition hover:scale-110"
-      >
-        다음 세트
-      </button>
-    </div>
-
-    <div
-      v-if="showFinishModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
       <div class="bg-white rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
-        <div class="text-lg font-bold mb-3">세트 종료</div>
-        <div class="text-orange-500 font-extrabold text-xl mb-4">
-          {{ winner != '-' ? winner + ' 승리' : '무승부' }}
-        </div>
         <button
-          @click="closeFinishModal"
-          class="bg-orange-500 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
+          @click="socket_nextSet"
+          class="bg-orange-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
         >
-          확인
+          {{ (currentSet + 1) + '세트 시작' }}
         </button>
       </div>
     </div>
@@ -408,7 +393,7 @@ function finishSet(who) {
   } else if (who === 2) {
     winner.value = user2.value.nickname
   }
-  showFinishModal.value = true
+  // showFinishModal.value = true // modal 제거
   const setsToWin = game.rule.setsToWin
   const requiredWins = Math.ceil(setsToWin / 2)
   if (user1SetsWon.value >= requiredWins || user2SetsWon.value >= requiredWins) {
@@ -416,13 +401,11 @@ function finishSet(who) {
     isSetOver.value = false
     socket_finishGame()
   } else {
-    currentSet.value++
+    // currentSet.value++ // 다음 세트는 버튼 클릭 시 증가
   }
 }
 
-function closeFinishModal() {
-  showFinishModal.value = false
-}
+// closeFinishModal 제거: 더 이상 사용하지 않음
 
 function startTimer() {
   if (isGameOver.value) return
@@ -611,12 +594,14 @@ const socket_sendScore = (userIndex, scoreDelta) => {
 }
 
 const socket_nextSet = () => {
+  currentSet.value++;
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SET',
     setIndex: currentSet.value,
     userId: 0,
     scoreDelta: 0,
   })
+  startSet();
 }
 
 const socket_finishGame = () => {

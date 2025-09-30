@@ -13,38 +13,38 @@
       <!-- 승패 결과 -->
       <div v-if="winnerIdx != 0" class="space-y-2">
         <div v-if="user1.id == currentUserId">
-          <i
-            :class="
-              winnerIdx == 1 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'
-            "
-            class="text-5xl mb-2"
-          ></i>
-          <h2
-            class="text-3xl font-extrabold"
-            :class="winnerIdx == 1 ? 'text-orange-500' : 'text-gray-500'"
-          >
-            {{ winnerIdx == 1 ? '승리!' : '패배' }}
-          </h2>
-          <p class="text-orange-600 mt-2" v-if="winnerIdx == 1">
-            축하합니다 {{ user1.nickname }}님!
-          </p>
+          <template v-if="!((championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect))">
+            <h2
+              v-if="winnerIdx == 1"
+              class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
+              style="animation: gradient-x 2.5s linear infinite;"
+            >
+              승리하셨습니다!
+            </h2>
+            <h2
+              v-else
+              class="text-3xl font-extrabold text-gray-500"
+            >
+              패배하셨습니다.
+            </h2>
+          </template>
         </div>
         <div v-else-if="user2.id == currentUserId">
-          <i
-            :class="
-              winnerIdx == 2 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'
-            "
-            class="text-5xl mb-2"
-          ></i>
-          <h2
-            class="text-3xl font-extrabold"
-            :class="winnerIdx == 2 ? 'text-orange-500' : 'text-gray-500'"
-          >
-            {{ winnerIdx == 2 ? '승리!' : '패배' }}
-          </h2>
-          <p class="text-orange-600 mt-2" v-if="winnerIdx == 2">
-            축하합니다 {{ user2.nickname }}님!
-          </p>
+          <template v-if="!((championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect))">
+            <h2
+              v-if="winnerIdx == 2"
+              class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
+              style="animation: gradient-x 2.5s linear infinite;"
+            >
+              승리하셨습니다!
+            </h2>
+            <h2
+              v-else
+              class="text-3xl font-extrabold text-gray-500"
+            >
+              패배하셨습니다.
+            </h2>
+          </template>
         </div>
       </div>
 
@@ -84,20 +84,7 @@
         <span class="text-xs text-gray-400">다음 기회를 노려보세요!</span>
       </div>
 
-      <!-- 게임 정보 카드 (아이콘 포함) -->
-      <div class="bg-white p-5 rounded-2xl shadow space-y-4 text-left border">
-        <div class="text-sm font-medium text-gray-700 flex justify-start items-center">
-          <span class="text-xs text-gray-500 flex flex-col gap-1">
-            <div>
-              <i class="fas fa-map-marker-alt"></i>
-              {{ game.matchLocation || '장소미정' }}
-            </div>
-            <div>
-              <i class="fas fa-calendar-alt"></i>
-              {{ formatDate(startDate) }}
-            </div>
-          </span>
-        </div>
+      <!-- ...existing code... -->
 
         <div class="flex justify-around items-center py-4">
           <div class="flex flex-col items-center">
@@ -123,62 +110,6 @@
         </div>
       </div>
 
-      <!-- 세트 결과 -->
-<div class="bg-gray-50 p-4 rounded-xl shadow space-y-3">
-  <div class="flex items-center justify-between">
-    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-      <i class="fas fa-list-ul"></i> 세트 결과
-    </h3>
-    <span
-      @click="showSetResults = !showSetResults"
-      class="flex items-center gap-1 select-none cursor-pointer text-orange-500 hover:text-orange-600 transition font-medium"
-      style="user-select: none;"
-    >
-      <span class="hidden sm:inline">{{ showSetResults ? '접기' : '펼치기' }}</span>
-      <i
-        :class="[
-          'fas transition-transform duration-200',
-          showSetResults ? 'fa-chevron-up' : 'fa-chevron-down'
-        ]"
-      ></i>
-    </span>
-  </div>
-  <transition name="fade">
-    <ul v-if="showSetResults" class="space-y-2">
-      <li
-        v-for="set in setResults"
-        :key="set.setIdx"
-        class="flex justify-between items-center bg-white p-3 rounded-lg shadow border text-sm"
-      >
-        <span>{{ set.setIdx }}세트</span>
-        <span v-if="idxCorrect">
-          {{ set.user1Score }} : {{ set.user2SCore }}
-          <i
-            :class="
-              set.winnerIdx == 1
-                ? 'fas fa-check-circle text-orange-500 ml-1'
-                : set.winnerIdx == 2
-                  ? 'fas fa-check-circle text-orange-500 ml-1'
-                  : 'fas fa-minus-circle text-gray-400 ml-1'
-            "
-          ></i>
-        </span>
-        <span v-else>
-          {{ set.user2SCore }} : {{ set.user1Score }}
-          <i
-            :class="
-              set.winnerIdx == 2
-                ? 'fas fa-check-circle text-orange-500 ml-1'
-                : set.winnerIdx == 1
-                  ? 'fas fa-check-circle text-orange-500 ml-1'
-                  : 'fas fa-minus-circle text-gray-400 ml-1'
-            "
-          ></i>
-        </span>
-      </li>
-    </ul>
-  </transition>
-</div>
 
 
       <!-- 리뷰 남기기 -->
@@ -239,7 +170,7 @@
 
       <CustomToast />
     </div>
-  </div>
+  <!-- ...existing code... -->
   
 
         <button
@@ -279,7 +210,7 @@ const winnerIdx = ref(0)
 const currentUserId = ref(0)
 const championIdx = ref(0)
 const idxCorrect = ref(true)
-const showSetResults = ref(false)
+// ...existing code...
 
 onMounted(async () => {
   try {
@@ -399,10 +330,7 @@ const submitReview = async () => {
 
 const goHome = () => router.push(`/profile/0?id=${gameId}`)
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr)
-  return d.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
-}
+// ...existing code...
 </script>
 
 <style scoped>
@@ -473,3 +401,18 @@ function formatDate(dateStr) {
 
 
 </style>
+
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.animate-gradient-x {
+  animation: gradient-x 2.5s linear infinite;
+}

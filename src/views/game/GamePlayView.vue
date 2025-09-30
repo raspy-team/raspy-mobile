@@ -591,6 +591,7 @@ const socket_finishGame = () => {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'FINISH',
   })
+  goToResult();
 }
 
 const socket_resetGame = () => {

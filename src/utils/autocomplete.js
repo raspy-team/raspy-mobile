@@ -1,44 +1,49 @@
-// kakaoAutocompleteDirective.js
 export default {
   mounted(el, binding) {
-    let timeout = null
+    if (!window.google?.maps?.places) {
+      console.error('Google Places API가 로드되지 않았습니다.')
+      return
+    }
 
-    el.addEventListener('input', (e) => {
-      const query = e.target.value
-      if (!query) return
-      if (timeout) clearTimeout(timeout)
+    const autocomplete = new window.google.maps.places.Autocomplete(el, {
+      componentRestrictions: { country: 'kr' },
+      fields: ['formatted_address', 'address_components', 'geometry', 'name'],
+      types: ['establishment', 'geocode']
+    })
 
-      timeout = setTimeout(async () => {
-        try {
-          const res = await fetch(
-            `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(query)}`,
-            {
-              headers: {
-                Authorization: `KakaoAK ${  process.env.VUE_APP_KAKAO_REST_API_KEY }`
-              }
-            }
-          )
-          const data = await res.json()
-          const first = data.documents?.[0]
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace()
 
-          if (first && binding.value && typeof binding.value === 'function') {
-            const regionParts = first.address_name.split(' ')
-            const region1 = regionParts[0] || ''
-            const region2 = regionParts[1] || ''
-            const full = `${region1} ${region2}`
+      if (!place.geometry) {
+        console.warn('선택된 장소의 정보가 불완전합니다.')
+        return
+      }
 
-            binding.value({
-              placeName: first.place_name,
-              address: first.road_address_name || first.address_name,
-              region: full,
-              lat: first.y,
-              lng: first.x
-            })
+      if (binding.value && typeof binding.value === 'function') {
+        // 주소 구성 요소에서 도/시 정보 추출
+        const addressComponents = place.address_components || []
+        let region1 = '' // 시/도
+        let region2 = '' // 시/군/구
+
+        for (const component of addressComponents) {
+          if (component.types.includes('administrative_area_level_1')) {
+            region1 = component.long_name
           }
-        } catch (err) {
-          console.error('카카오 API 오류:', err)
+          if (component.types.includes('locality') || component.types.includes('sublocality_level_1')) {
+            region2 = component.long_name
+          }
         }
-      }, 300)
+
+        const region = `${region1} ${region2}`.trim()
+
+        binding.value({
+          placeName: place.name || '',
+          address: place.formatted_address || '',
+          region: region,
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng()
+        })
+      }
     })
   }
 }

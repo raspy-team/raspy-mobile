@@ -7,11 +7,13 @@ export const setRouter = (router) => {
 }
 
 const getBaseURL = () => {
-
   if (process.env.VUE_APP_ENV === 'prod') {
     return 'https://raspy-be.shop'
+  } else if (process.env.VUE_APP_ENV === 'dev') {
+    return 'http://localhost:8080'
   }
-  return ''
+  // 기본값은 dev
+  return 'http://localhost:8080'
 }
 
 const api = axios.create({

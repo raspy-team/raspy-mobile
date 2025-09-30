@@ -35,59 +35,60 @@
   >
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
-      <div @click="openAddressSearch" class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">도로명 주소</label>
-        <div
-          class="flex items-center p-3 bg-white rounded-xl border border-gray-200 cursor-pointer"
-        >
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-search mr-1 text-orange-500"></i>
+          장소 검색
+        </label>
+        <div class="relative">
           <input
-            v-model="placeRoad"
-            readonly
-            class="text-sm flex-1 bg-white border-none outline-none cursor-not-allowed"
-            placeholder="도로명 주소 선택"
+            ref="addressInputWizard"
+            v-model="searchQuery"
+            class="w-full text-base px-4 py-3 bg-white rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+            placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
+            autocomplete="off"
           />
+          <i v-if="!searchQuery" class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
         </div>
-        <p class="text-xs text-gray-400 mt-1">도로명 주소를 입력하세요 (미입력 시 협의결정)</p>
+        <p class="text-xs text-gray-400 mt-2">
+          <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+          장소명이나 주소를 입력하면 자동으로 검색됩니다
+        </p>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">상세주소</label>
-        <div
-          :class="[
-            placeRoad ? 'bg-white border-gray-200' : 'bg-gray-100 text-gray-400 cursor-not-allowed',
-          ]"
-          class="rounded-xl border p-3"
-        >
-          <input
-            id="place-detail"
-            v-model="placeDetail"
-            :disabled="!placeRoad"
-            class="w-full text-sm text-gray-700 outline-none bg-transparent"
-            placeholder="상세주소 입력"
-          />
+
+      <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
+        <div class="flex items-start gap-3">
+          <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-800 mb-1">{{ selectedPlace.name }}</p>
+            <p class="text-sm text-gray-600">{{ selectedPlace.address }}</p>
+          </div>
+          <button
+            @click="clearSelection"
+            class="text-gray-400 hover:text-gray-600 transition"
+          >
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <p class="text-xs text-gray-500 mt-1">예: ○○빌딩 3층, ○○체육관</p>
       </div>
-      <div class="mt-4 text-xs text-gray-500">
-        <template v-if="!placeRoad || placeRoad.trim() === ''">
-          도로명 주소를 반드시 입력해야 게임을 시작할 수 있습니다.
-        </template>
-        <template v-else>
-          현재 장소: {{ placeRoad + ' ' + placeDetail }}<br />
-          이 장소가 맞는지 확인하거나, 수정해주세요.
-        </template>
+
+      <div v-if="!selectedPlace" class="mt-4 text-xs text-gray-500 flex items-center gap-2">
+        <i class="fas fa-info-circle text-blue-400"></i>
+        <span>장소를 선택해야 게임을 시작할 수 있습니다</span>
       </div>
       <div class="flex justify-end mt-6 space-x-2">
         <button
           @click="closeModal"
-          class="px-4 py-2 rounded-[5px] bg-gray-100 text-gray-700 text-sm"
+          class="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition"
         >
           취소
         </button>
         <button
-          :disabled="!placeRoad || placeRoad.trim() === ''"
-          class="px-5 py-2 rounded-[5px] bg-green-600 text-white text-sm disabled:opacity-50"
+          :disabled="!selectedPlace"
+          class="px-5 py-2 rounded-xl bg-orange-500 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition shadow-md"
           @click="submitAndStartGame"
         >
+          <i class="fas fa-play mr-1"></i>
           경기 진행
         </button>
       </div>
@@ -144,6 +145,7 @@ import PlaceSelectPage from '../../components/game-create/PlaceSelect.vue'
 import TimeSelectPage from '../../components/game-create/TimeSelect.vue'
 import GameFinalPage from '../../components/game-create/GameFinalPage.vue'
 import api from '../../api/api'
+import { parseRegion } from '../../utils/regionParser'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
@@ -176,8 +178,8 @@ const gameForm = reactive({
 
 // 장소/진행 모달 상태
 const showAddressModal = ref(false)
-const placeRoad = ref('')
-const placeDetail = ref('')
+const searchQuery = ref('')
+const selectedPlace = ref(null)
 
 // 시작 전 확인 모달 상태
 const showCountdownModal = ref(false)
@@ -251,9 +253,13 @@ async function friendSelect(friendId) {
   gameForm.time = new Date()
 
   // 장소 초기화 후 모달 오픈
-  placeRoad.value = ''
-  placeDetail.value = ''
+  searchQuery.value = ''
+  selectedPlace.value = null
   showAddressModal.value = true
+
+  nextTick(() => {
+    initGoogleAutocompleteWizard()
+  })
 }
 
 function onPlaceSelect(data) {
@@ -310,26 +316,67 @@ function formatDurationText(durationSec) {
   return (min ? `${min}분 ` : '') + (sec ? `${sec}초` : min ? '' : '0초')
 }
 
-function openAddressSearch() {
-  new window.daum.Postcode({
-    oncomplete(data) {
-      placeRoad.value = data.roadAddress || data.jibunAddress
-      nextTick(() => {
-        document.getElementById('place-detail')?.focus()
-      })
-    },
-  }).open()
+const addressInputWizard = ref(null)
+let autocompleteWizard = null
+
+function initGoogleAutocompleteWizard() {
+  if (window.google?.maps?.places && addressInputWizard.value) {
+    autocompleteWizard = new window.google.maps.places.Autocomplete(addressInputWizard.value, {
+      componentRestrictions: { country: 'kr' },
+      fields: ['formatted_address', 'address_components', 'geometry', 'name'],
+      types: ['establishment', 'geocode']
+    })
+
+    autocompleteWizard.addListener('place_changed', () => {
+      const place = autocompleteWizard.getPlace()
+      if (place.geometry && place.formatted_address) {
+        console.log('Original address:', place.formatted_address)
+
+        // 주소 파싱 및 검증
+        const parsed = parseRegion(place.formatted_address)
+
+        if (!parsed) {
+          alert('지원하지 않는 지역입니다.\n대한민국 내 유효한 주소를 입력해주세요.')
+          searchQuery.value = ''
+          selectedPlace.value = null
+          return
+        }
+
+        console.log('Parsed:', parsed)
+
+        selectedPlace.value = {
+          name: place.name || '',
+          address: parsed.fullAddress, // "경기 수원시 영통구 ..." 형태
+          region1: parsed.region1, // "경기" (변환됨)
+          region2: parsed.region2, // "수원시 영통구"
+          geometry: place.geometry
+        }
+
+        console.log('selectedPlace:', selectedPlace.value)
+      }
+    })
+  }
+}
+
+function clearSelection() {
+  selectedPlace.value = null
+  searchQuery.value = ''
 }
 
 async function submitAndStartGame() {
-  if (!placeRoad.value || !placeRoad.value.trim()) {
-    alert('도로명 주소를 반드시 입력해야 합니다.')
+  if (!selectedPlace.value) {
+    alert('장소를 선택해주세요.')
     return
   }
 
   // gameForm에 장소 반영
-  gameForm.placeRoad = placeRoad.value
-  gameForm.placeDetail = placeDetail.value
+  gameForm.placeRoad = selectedPlace.value.address
+  gameForm.placeDetail = selectedPlace.value.name
+
+  console.log('Submitting:', {
+    placeRoad: gameForm.placeRoad,
+    placeDetail: gameForm.placeDetail
+  })
 
   // 게임 생성
   const gameId = await createFriendGame()
@@ -364,8 +411,8 @@ async function confirmStartGame() {
 
 function closeModal() {
   showAddressModal.value = false
-  placeRoad.value = ''
-  placeDetail.value = ''
+  searchQuery.value = ''
+  selectedPlace.value = null
   currentGameId.value = null
 }
 </script>

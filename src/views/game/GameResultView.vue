@@ -10,9 +10,9 @@
     </div>
 
     <!-- 🎉 게임 결과 화면 -->
-    <div v-else class="max-w-xl pb-24 mx-auto px-4 py-6 space-y-8 text-center">
+  <div v-else class="max-w-xl pb-16 mx-auto px-2 py-2 space-y-2 text-center">
       <!-- 승패 결과 -->
-      <div v-if="winnerIdx != 0" class="space-y-2">
+  <div v-if="winnerIdx != 0" class="space-y-0.5">
         <div v-if="user1.id == currentUserId">
           <template v-if="!((championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect))">
             <h2
@@ -72,14 +72,6 @@
         </div>
       </div>
 
-      <div
-        v-if="(championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
-        class="relative max-w-md mx-auto my-8 px-6 py-8 rounded-2xl bg-gray-100 flex flex-col items-center border border-gray-200 shadow"
-      >
-        <i class="fas fa-frown text-2xl text-gray-400 mb-2"></i>
-        <span class="text-base font-bold text-gray-700 mb-1">챔피언 타이틀을 빼앗겼습니다</span>
-        <span class="text-xs text-gray-400">다음 기회를 노려보세요!</span>
-      </div>
 
       <!-- ...existing code... -->
 
@@ -111,7 +103,7 @@
 
       <!-- 리뷰 남기기 -->
       <div
-        class="p-5 space-y-4 text-left"
+        class="p-2 space-y-1 text-left"
       >
         <h3 class="text-lg font-bold text-gray-800">
           {{ (user1.id == currentUserId ? user2.nickname : user1.nickname) }} 님을 평가해주세요
@@ -166,7 +158,6 @@
             </div>
             <textarea
               v-model="review.text"
-              @input="autoSubmitReview"
               class="flex-1 w-full p-4 text-base focus:outline-none resize-none bg-transparent"
               placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요."
               style="min-height: 60vh;"
@@ -184,10 +175,10 @@
   
 
         <button
-        @click="goHome"
+        @click="submitReviewAndGoHome"
         class="w-full fixed bottom-0 left-0 text-gray-800  py-2 py-[16px] raspy-bot  bg-orange-500 text-white"
       >
-        나가기
+        제출하기
       </button>
 </template>
 
@@ -206,33 +197,35 @@ const showReviewModal = ref(false)
 // 자동 제출 함수들
 function setManner(n) {
   review.value.manner = n
-  autoSubmitReview()
 }
 function setPerformance(n) {
   review.value.performance = n
-  autoSubmitReview()
 }
-function autoSubmitReview() {
-  // 기존 submitReview 함수 내용 복사 (단, 중복 제출 방지)
+
+function submitReviewAndGoHome() {
+  // 리뷰 제출
   if (review.value.manner === 0 || review.value.performance === 0) {
-    // 평점이 모두 입력되어야 제출
-    return
+    showToast('매너와 퍼포먼스 평점을 모두 입력해주세요.');
+    return;
   }
-  // 비속어 검사
   const bannedWords = [
     'fuck','shit','asshole','bitch','bastard','dick','fucking','fucker','cunt','nigger','slut','whore','sex','sexy','nazi','motherfucker',
     '씨발','시발','씨바','ㅆㅂ','ㅅㅂ','ㅂㅅ','병신','새끼','좆','애미','개새끼','지랄','염병','꺼져','죽어','멍청','저능','존나','ㅄ','ㄱㅐ','ㅈㄴ','개같','더럽','섹스','자지','보지','딸딸이','빨아','꼬추','보빨','조까','좇','애비','년놈','암캐','걸레','쓰레기','창녀','미친놈','미친년',
-  ]
-  const lowerText = (review.value.text || '').toLowerCase()
-  const found = bannedWords.find((word) => lowerText.includes(word))
+  ];
+  const lowerText = (review.value.text || '').toLowerCase();
+  const found = bannedWords.find((word) => lowerText.includes(word));
   if (found) {
-  showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`)
-    return
+    showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`);
+    return;
   }
-  // 서버 제출
   api.post(`/api/games/${gameId}/review`, review.value)
-    .then(() => { showToast('리뷰가 제출되었습니다. 다시 입력하면 수정됩니다.'); })
-    .catch(() => { showToast('잘못된 접근입니다.'); })
+    .then(() => {
+      showToast('리뷰가 제출되었습니다.');
+      goHome();
+    })
+    .catch(() => {
+      showToast('잘못된 접근입니다.');
+    });
 }
 const route = useRoute()
 const router = useRouter()

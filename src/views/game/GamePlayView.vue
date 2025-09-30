@@ -24,10 +24,6 @@
       </button>
     </div>
 
-    <div class="text-xs text-gray-700 text-center mb-3">
-      경기 시작: {{ formatDate(game.totalGameStartedAt) }} | 현재 세트 시작:
-      {{ formatDate(game.setStartedAt) }}
-    </div>
 
 
 
@@ -48,76 +44,65 @@
 
 
     </div>
-    <div class="flex items-start justify-between mb-6 relative left-0">
-      <div class="flex flex-col items-center animate-fade-in">
-        <div class="flex justify-between items-start w-full">
-          <div class="flex flex-col items-center">
-            <img
-              :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
-              class="w-[17dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1"
-            />
-            <div class="font-bold text-sm">{{ user1.nickname }}</div>
-                  <div class="text-base font-bold text-orange-500 mt-0">세트: {{ user1SetsWon }}</div>
-                    <div class="flex space-x-2 mt-5 px-1">
-                      <button
-                        @click="socket_sendScore(1, 1)"
-                        :disabled="isSetOver || isGameOver"
-                        class="bg-orange-500 text-white w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
-                      >
-                        +
-                      </button>
-                      <button
-                        @click="socket_sendScore(1, -1)"
-                        :disabled="isSetOver || isGameOver || currentScore1 <= 0"
-                        class="bg-gray-200 text-gray-800 w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
-                      >
-                        -
-                      </button>
-                    </div>
-                  </div>
-          <div>
-            <div class="text-[10dvw] flex  font-extrabold text-orange-500 mt-0">{{ currentScore1 }}</div>
-          </div>
-        </div>
-
-      </div>
-      <div>
-        <div class="w-[5dvw] text-center text-[calc(10dvw-17px)] mt-4 font-[900] text-orange-500">
-          :
+  <div class="flex items-start justify-center mb-6 relative left-0">
+  <div class="flex flex-col items-center animate-fade-in">
+        <img
+          :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
+          class="w-[17dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-6"
+        />
+        <div class="font-bold text-sm">{{ user1.nickname }}</div>
+  <div class="flex flex-col space-y-2 mt-5 items-center">
+          <button
+            @click="socket_sendScore(1, 1)"
+            :disabled="isSetOver || isGameOver"
+            class="bg-orange-500 text-white w-[22dvw] py-0 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[1.6rem] font-bold"
+            style="border-top-left-radius:0.5rem;border-top-right-radius:0.5rem;border-bottom-left-radius:0;border-bottom-right-radius:0;"
+          >
+            +
+          </button>
+          <button
+            @click="socket_sendScore(1, -1)"
+            :disabled="isSetOver || isGameOver || currentScore1 <= 0"
+            class="bg-gray-200 text-gray-800 w-[22dvw] py-0 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[1.6rem] font-bold"
+            style="border-bottom-left-radius:0.5rem;border-bottom-right-radius:0.5rem;border-top-left-radius:0;border-top-right-radius:0;"
+          >
+            -
+          </button>
         </div>
       </div>
-   <div class="flex flex-col items-center animate-fade-in">
-        <div class="flex justify-between items-start w-full">
-                    <div>
-            <div class="text-[10dvw] flex  font-extrabold text-orange-500 mt-0">{{ currentScore2 }}</div>
-          </div>
-          <div class="flex flex-col items-center">
-            <img
-              :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
-              class="w-[17dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-1"
-            />
-            <div class="font-bold text-sm">{{ user2.nickname }}</div>
-                  <div class="text-base font-bold text-orange-500 mt-0">세트: {{ user2SetsWon }}</div>
-                    <div class="flex space-x-2 mt-5 px-1">
-                      <button
-                        @click="socket_sendScore(2, 1)"
-                        :disabled="isSetOver || isGameOver"
-                        class="bg-orange-500 text-white w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
-                      >
-                        +
-                      </button>
-                      <button
-                        @click="socket_sendScore(2, -1)"
-                        :disabled="isSetOver || isGameOver || currentScore2 <= 0"
-                        class="bg-gray-200 text-gray-800 w-[15dvw] py-0 rounded-full shadow hover:scale-110 transition text-[1.6rem] font-bold"
-                      >
-                        -
-                      </button>
-                    </div>
-                  </div>
-
+  <div class="flex flex-col items-center justify-center">
+        <div class="flex items-center justify-center mb-6">
+          <span class="text-[15dvw] font-extrabold text-orange-500">{{ currentScore1 }}</span>
+          <span class="ml-2 text-base font-bold text-orange-400" style="position:relative; top:0.9em;">{{ user1SetsWon }}</span>
+          <span class="mx-4 text-[8dvw] text-orange-400">:</span>
+          <span class="text-[15dvw] font-extrabold text-orange-500">{{ currentScore2 }}</span>
+          <span class="ml-2 text-base font-bold text-orange-400" style="position:relative; top:0.9em;">{{ user2SetsWon }}</span>
         </div>
-
+      </div>
+  <div class="flex flex-col items-center animate-fade-in">
+        <img
+          :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
+          class="w-[17dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-6"
+        />
+        <div class="font-bold text-sm">{{ user2.nickname }}</div>
+  <div class="flex flex-col space-y-2 mt-5 items-center">
+          <button
+            @click="socket_sendScore(2, 1)"
+            :disabled="isSetOver || isGameOver"
+            class="bg-orange-500 text-white w-[22dvw] py-0 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[1.6rem] font-bold"
+            style="border-top-left-radius:0.5rem;border-top-right-radius:0.5rem;border-bottom-left-radius:0;border-bottom-right-radius:0;"
+          >
+            +
+          </button>
+          <button
+            @click="socket_sendScore(2, -1)"
+            :disabled="isSetOver || isGameOver || currentScore2 <= 0"
+            class="bg-gray-200 text-gray-800 w-[22dvw] py-0 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[1.6rem] font-bold"
+            style="border-bottom-left-radius:0.5rem;border-bottom-right-radius:0.5rem;border-top-left-radius:0;border-top-right-radius:0;"
+          >
+            -
+          </button>
+        </div>
       </div>
     </div>
 
@@ -355,12 +340,6 @@ const openConfirm = (msg, cb) => {
 const closeConfirm = () => {
   showConfirm.value = false
   confirmCallback = null
-}
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 function startSet() {

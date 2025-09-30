@@ -211,25 +211,7 @@
       </div>
     </div>
 
-    <div
-      v-if="isGameOver"
-      class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-    >
-      <div
-        class="bg-orange-500 text-white rounded-xl p-8 text-center shadow-2xl animate-fade-in w-[90%] max-w-md"
-      >
-        <div class="text-xl font-bold mb-4">🎉 경기 종료 🎉</div>
-        <div class="text-2xl font-extrabold mb-5">
-          {{ gameWinner == '무승부' ? '무승부' : gameWinner + ' 최종 승리!' }}
-        </div>
-        <button
-          @click="goToResult"
-          class="bg-white text-orange-500 w-full py-2 rounded-full text-base font-bold shadow hover:scale-105 transition"
-        >
-          결과 보기
-        </button>
-      </div>
-    </div>
+
 
     <!-- MatchModal: 규칙 모달 -->
     <MatchModal v-if="game.showRuleDetail" :rule="game.rule" @close="game.showRuleDetail = false" />
@@ -400,6 +382,7 @@ function finishSet(who) {
     isGameOver.value = true
     isSetOver.value = false
     socket_finishGame()
+    goToResult()
   } else {
     // currentSet.value++ // 다음 세트는 버튼 클릭 시 증가
   }

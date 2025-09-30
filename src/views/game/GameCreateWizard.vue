@@ -462,3 +462,9 @@ function closeModal() {
   transition: width 0.25s cubic-bezier(0.6, 0, 0.3, 1);
 }
 </style>
+<style>
+/* Force Google Places Autocomplete dropdown to appear above modal overlay */
+.pac-container {
+  z-index: 400000 !important;
+}
+</style>

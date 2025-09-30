@@ -89,6 +89,29 @@
       </div>
     </div>
 
+    <!-- 주소 오류 모달 -->
+    <div
+      v-if="showAddressErrorModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    >
+      <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+        <div class="text-center mb-4">
+          <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">장소를 찾을 수 없습니다</h3>
+          <p class="text-sm text-gray-600">
+            더 구체적인 장소를 입력해주세요.<br />
+            <span class="text-xs text-gray-500 mt-2 block">예: 서초탁구장, 강남체육관</span>
+          </p>
+        </div>
+        <button
+          @click="showAddressErrorModal = false"
+          class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition shadow"
+        >
+          확인
+        </button>
+      </div>
+    </div>
+
     <div class="fixed bottom-0 left-0 w-full bg-white p-5 shadow-xl flex gap-2">
       <button
         @click="emitBack"
@@ -120,6 +143,7 @@ const recommendedPlaces = ref([
 
 const showConfirm = ref(false)
 const confirmItem = ref({ placeRoad: '', placeDetail: '' })
+const showAddressErrorModal = ref(false)
 
 let autocomplete = null
 
@@ -149,7 +173,7 @@ onMounted(() => {
         const parsed = parseRegion(place.formatted_address)
 
         if (!parsed) {
-          alert('지원하지 않는 지역입니다.\n대한민국 내 유효한 주소를 입력해주세요.')
+          showAddressErrorModal.value = true
           searchQuery.value = ''
           selectedPlace.value = null
           return

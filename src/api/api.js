@@ -6,10 +6,16 @@ export const setRouter = (router) => {
   routerInstance = router
 }
 
-const isVercel = window.location.hostname.endsWith('.vercel.app')
+const getBaseURL = () => {
+
+  if (process.env.VUE_APP_ENV === 'prod') {
+    return 'https://raspy-be.shop'
+  }
+  return ''
+}
 
 const api = axios.create({
-  baseURL: isVercel ? 'https://raspy-be.shop' : '',
+  baseURL: getBaseURL(),
   withCredentials: true
 })
 

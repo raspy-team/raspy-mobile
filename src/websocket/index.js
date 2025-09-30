@@ -1,10 +1,14 @@
 // websocket.js
 import { Client } from '@stomp/stompjs'
 
-const isLocalhostClient = window.location.hostname === 'localhost' && window.location.port === '8081'
-const WS_URL = isLocalhostClient
-  ? 'ws://localhost:8080/ws'
-  : 'wss://raspy-be.shop/ws'
+const getWebSocketURL = () => {
+  if (process.env.VUE_APP_ENV === 'prod') {
+    return 'wss://raspy-be.shop/ws'
+  }
+  return 'ws://localhost:8080/ws'
+}
+
+const WS_URL = getWebSocketURL()
 
 let stompClient = null
 let subscription = null

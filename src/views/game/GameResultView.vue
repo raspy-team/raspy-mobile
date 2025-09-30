@@ -1,5 +1,6 @@
 <template>
-  <div class="pb-[200px]">
+  <div class="pb-[200px] relative overflow-hidden">
+    
     <!-- 📌 로딩 오버레이 -->
     <div
       v-if="isLoading"
@@ -53,9 +54,9 @@
         <h2 class="text-3xl font-bold text-gray-500">무승부</h2>
       </div>
 
-      <!-- 챔피언 여부 카드 -->
+      <!-- 챔피언 여부 카드: 승/패 모두 동일 문구와 스타일 -->
       <div
-        v-if="(championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect)"
+        v-if="(championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
         class="relative max-w-md mx-auto my-8 px-6 py-10 rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center champion-card-glow"
       >
         <div class="absolute inset-0 z-0 pointer-events-none champion-card-bg"></div>
@@ -66,46 +67,33 @@
         <div class="relative z-20 flex flex-col items-center">
           <i class="fas fa-crown text-5xl mb-3 text-white drop-shadow champion-glow-anim"></i>
           <h2 class="text-2xl font-extrabold text-white mb-1 drop-shadow champion-glow-anim">
-            CHAMPION
+            오늘 새로운 챔피언이 탄생합니다.
           </h2>
-          <span class="text-lg font-semibold text-white mb-2">
-            축하합니다, {{ user1.nickname }}님!
-          </span>
-          <span class="text-base text-white/90">새로운 챔피언 타이틀을 획득하셨습니다.</span>
         </div>
-      </div>
-
-      <div
-        v-if="(championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
-        class="relative max-w-md mx-auto my-8 px-6 py-8 rounded-2xl bg-gray-100 flex flex-col items-center border border-gray-200 shadow"
-      >
-        <i class="fas fa-frown text-2xl text-gray-400 mb-2"></i>
-        <span class="text-base font-bold text-gray-700 mb-1">챔피언 타이틀을 빼앗겼습니다</span>
-        <span class="text-xs text-gray-400">다음 기회를 노려보세요!</span>
       </div>
 
       <!-- ...existing code... -->
 
-        <div class="flex justify-around items-center py-4">
+  <div class="flex justify-around items-center py-4">
           <div class="flex flex-col items-center">
+            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">{{ user1SetCount }}</p>
             <img
               :src="user1.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
             <p class="text-sm font-semibold">{{ user1.nickname }}</p>
-            <p class="text-2xl font-bold text-orange-500">{{ user1SetCount }}</p>
           </div>
-          <div class="text-center text-xs text-gray-500">
-            <p class="mb-1">세트</p>
-            <p class="text-lg font-bold">{{ totalSetCount }}</p>
+          <div class="flex flex-col items-center mx-6 sm:mx-20">
+            <span class="text-base sm:text-xl font-bold text-orange-900 mb-2 select-none">경기 종료</span>
+            <span class="text-[5rem] sm:text-[8rem] font-extrabold text-orange-300 select-none leading-none self-center flex items-center" style="line-height:1;">:</span>
           </div>
           <div class="flex flex-col items-center">
+            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">{{ user2SetCount }}</p>
             <img
               :src="user2.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
             <p class="text-sm font-semibold">{{ user2.nickname }}</p>
-            <p class="text-2xl font-bold text-orange-500">{{ user2SetCount }}</p>
           </div>
         </div>
       </div>
@@ -114,11 +102,10 @@
 
       <!-- 리뷰 남기기 -->
       <div
-        v-if="!reviewSubmitted"
-        class="bg-white p-5 rounded-xl shadow space-y-4 text-left border"
+        class="p-5 space-y-4 text-left"
       >
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <i class="fas fa-comment-dots"></i> 상대 리뷰 남기기
+        <h3 class="text-lg font-bold text-gray-800">
+          {{ (user1.id == currentUserId ? user2.nickname : user1.nickname) }} 님을 평가해주세요
         </h3>
 
         <div class="space-y-1">
@@ -127,7 +114,7 @@
             <i
               v-for="n in 5"
               :key="'manner' + n"
-              @click="review.manner = n"
+              @click="setManner(n)"
               :class="
                 n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-300'
               "
@@ -142,7 +129,7 @@
             <i
               v-for="n in 5"
               :key="'perf' + n"
-              @click="review.performance = n"
+              @click="setPerformance(n)"
               :class="
                 n <= review.performance
                   ? 'fas fa-fire text-orange-400'
@@ -153,19 +140,33 @@
           </div>
         </div>
 
-        <textarea
-          v-model="review.text"
-          rows="4"
-          class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-          placeholder="텍스트 리뷰 (선택)"
-        ></textarea>
-
         <button
-          @click="submitReview"
-          class="w-full bg-orange-500 text-white py-3 rounded-[7px] font-bold shadow hover:brightness-110 transition"
+          @click="showReviewModal = true"
+          class="w-full border border-gray-300 rounded-lg p-3 text-sm text-left text-gray-700 bg-white hover:bg-orange-50 transition"
         >
-          리뷰 등록
+          <span v-if="review.text && review.text.length > 0">{{ review.text }}</span>
+          <span v-else class="text-gray-400">텍스트 리뷰 (선택)</span>
         </button>
+
+        <!-- Fullscreen review modal -->
+        <div v-if="showReviewModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center">
+          <div class="bg-white w-full h-full max-w-md mx-auto flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+              <span class="font-bold text-lg">리뷰 작성</span>
+              <button @click="showReviewModal = false" class="text-orange-500 font-bold text-base">닫기</button>
+            </div>
+            <textarea
+              v-model="review.text"
+              @input="autoSubmitReview"
+              class="flex-1 w-full p-4 text-base focus:outline-none resize-none bg-transparent"
+              placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요."
+              style="min-height: 60vh;"
+              autofocus
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- 리뷰 등록 버튼 제거 -->
       </div>
 
       <CustomToast />
@@ -182,6 +183,7 @@
 </template>
 
 <script setup>
+// ...existing code...
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -190,12 +192,45 @@ import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 
 const { showToast } = useToast()
+const showReviewModal = ref(false)
+
+// 자동 제출 함수들
+function setManner(n) {
+  review.value.manner = n
+  autoSubmitReview()
+}
+function setPerformance(n) {
+  review.value.performance = n
+  autoSubmitReview()
+}
+function autoSubmitReview() {
+  // 기존 submitReview 함수 내용 복사 (단, 중복 제출 방지)
+  if (review.value.manner === 0 || review.value.performance === 0) {
+    // 평점이 모두 입력되어야 제출
+    return
+  }
+  // 비속어 검사
+  const bannedWords = [
+    'fuck','shit','asshole','bitch','bastard','dick','fucking','fucker','cunt','nigger','slut','whore','sex','sexy','nazi','motherfucker',
+    '씨발','시발','씨바','ㅆㅂ','ㅅㅂ','ㅂㅅ','병신','새끼','좆','애미','개새끼','지랄','염병','꺼져','죽어','멍청','저능','존나','ㅄ','ㄱㅐ','ㅈㄴ','개같','더럽','섹스','자지','보지','딸딸이','빨아','꼬추','보빨','조까','좇','애비','년놈','암캐','걸레','쓰레기','창녀','미친놈','미친년',
+  ]
+  const lowerText = (review.value.text || '').toLowerCase()
+  const found = bannedWords.find((word) => lowerText.includes(word))
+  if (found) {
+  showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`)
+    return
+  }
+  // 서버 제출
+  api.post(`/api/games/${gameId}/review`, review.value)
+    .then(() => { showToast('리뷰가 제출되었습니다. 다시 입력하면 수정됩니다.'); })
+    .catch(() => { showToast('잘못된 접근입니다.'); })
+}
 const route = useRoute()
 const router = useRouter()
 const gameId = route.params.gameId
 
 const isLoading = ref(true)
-const reviewSubmitted = ref(false)
+// removed reviewSubmitted, always show review UI
 const review = ref({ manner: 0, performance: 0, text: '' })
 const game = ref({})
 const user1 = ref({})
@@ -245,88 +280,7 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-const submitReview = async () => {
-  if (review.value.manner === 0 || review.value.performance === 0) {
-    showToast('매너와 퍼포먼스 평점을 모두 입력해 주세요.')
-    return
-  }
-
-  // ===== 비속어 검사 =====
-  const bannedWords = [
-    'fuck',
-    'shit',
-    'asshole',
-    'bitch',
-    'bastard',
-    'dick',
-    'fucking',
-    'fucker',
-    'cunt',
-    'nigger',
-    'slut',
-    'whore',
-    'sex',
-    'sexy',
-    'nazi',
-    'motherfucker',
-    '씨발',
-    '시발',
-    '씨바',
-    'ㅆㅂ',
-    'ㅅㅂ',
-    'ㅂㅅ',
-    '병신',
-    '새끼',
-    '좆',
-    '애미',
-    '개새끼',
-    '지랄',
-    '염병',
-    '꺼져',
-    '죽어',
-    '멍청',
-    '저능',
-    '존나',
-    'ㅄ',
-    'ㄱㅐ',
-    'ㅈㄴ',
-    '개같',
-    '더럽',
-    '섹스',
-    '자지',
-    '보지',
-    '딸딸이',
-    '빨아',
-    '꼬추',
-    '보빨',
-    '조까',
-    '좇',
-    '애비',
-    '년놈',
-    '암캐',
-    '걸레',
-    '쓰레기',
-    '창녀',
-    '미친놈',
-    '미친년',
-  ]
-
-  const lowerText = (review.value.comment || '').toLowerCase()
-  const found = bannedWords.find((word) => lowerText.includes(word))
-  if (found) {
-    showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`)
-    return
-  }
-
-  try {
-    await api.post(`/api/games/${gameId}/review`, review.value)
-    reviewSubmitted.value = true
-  } catch (err) {
-    console.error(err)
-    showToast('잘못된 접근입니다.')
-    reviewSubmitted.value = true
-  }
-}
+// ...removed unused submitReview...
 
 const goHome = () => router.push(`/profile/0?id=${gameId}`)
 

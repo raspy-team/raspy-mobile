@@ -131,6 +131,13 @@
   >
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
       <div v-if="prevPost" class="absolute inset-0" :style="prevPreviewStyle">
+        <!-- 배경 이미지 (완료된 경기이고 사진이 있을 때) -->
+        <img
+          v-if="prevPost.type === 'game' && prevPost.isCompleted && prevPost.photos?.length > 0"
+          :src="prevPost.photos[0]?.url || prevPost.photos[0]"
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+
         <div
           v-if="prevPost.type === 'game' && prevPost.isCompleted"
           class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
@@ -237,6 +244,13 @@
       </div>
 
       <div v-if="nextPost" class="absolute inset-0" :style="nextPreviewStyle">
+        <!-- 배경 이미지 (완료된 경기이고 사진이 있을 때) -->
+        <img
+          v-if="nextPost.type === 'game' && nextPost.isCompleted && nextPost.photos?.length > 0"
+          :src="nextPost.photos[0]?.url || nextPost.photos[0]"
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+
         <div
           v-if="nextPost.type === 'game' && nextPost.isCompleted"
           class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
@@ -381,34 +395,46 @@
         @mouseleave.passive="onMouseUp($event)"
       >
         <div class="h-full flex" :style="wrapperStyle">
+          <!-- 인증샷 전체 화면 (사진이 있을 때만) -->
           <section
             v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
             class="w-screen shrink-0 h-full relative"
           >
+            <!-- 전체 화면 배경 이미지 -->
             <img
               :src="headlinePhoto.url"
-              alt="headline"
-              class="max-w-[80vw] max-h-[70vh] rounded-2xl shadow-xl object-contain"
+              alt="인증샷"
+              class="w-full h-full object-cover"
               draggable="false"
             />
-            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-            <div class="ambient-overlay" />
+            <div class="absolute inset-0 bg-black/20" />
 
-            <div class="absolute bottom-[140px] left-0 right-0 px-4 z-10">
-              <div
-                class="max-w-xl bg-black/35 border border-white/10 rounded-2xl p-4 backdrop-blur-md"
-              >
-                <div class="text-lg font-bold">{{ post.players[0]?.name }}의 경기 하이라이트</div>
-                <div class="mt-1 text-xs text-white/80">
-                  {{ post.meta.place }}
+            <!-- 상단 헤더 -->
+            <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <img
+                    :src="post.players?.[0]?.avatar || post.author?.avatar"
+                    class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
+                  />
+                  <div>
+                    <div class="text-white font-semibold text-sm drop-shadow-lg">
+                      {{ post.players?.[0]?.name || post.author?.name }}
+                    </div>
+                    <div class="text-white/70 text-xs drop-shadow-lg">{{ post.date }}</div>
+                  </div>
                 </div>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  <span
-                    v-for="t in post.tags"
-                    :key="t"
-                    class="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10"
-                    >#{{ t }}</span
-                  >
+              </div>
+            </div>
+
+            <!-- 하단 정보 -->
+            <div class="absolute bottom-8 left-0 right-0 px-4 z-10">
+              <div class="max-w-xl mx-auto">
+                <div class="text-center mb-3">
+                  <div class="text-white/80 text-sm drop-shadow-lg">
+                    <i class="fas fa-map-marker-alt mr-1"></i>
+                    {{ post.meta?.place }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -447,7 +473,7 @@
                           : 'border-white/20'
                       "
                     />
-                    
+
                     <div class="text-white font-semibold text-sm truncate">
                       {{ post.players[0].name }}
                     </div>
@@ -553,7 +579,6 @@
                 </div>
               </div>
 
-              
               <div
                 v-if="post.type === 'game' && post.isCompleted"
                 class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80"
@@ -573,11 +598,11 @@
                   :key="'set-' + idx"
                   class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
                 >
-                  <div class="font-semibold">{{ sc.set + 1 }}세트</div>
+                  <div class="font-semibold">{{ sc.set }}세트</div>
                   <div class="font-bold">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
                 </div>
               </div>
-              
+
               <div
                 v-if="post.type === 'game' && post.isCompleted"
                 class="mt-3 text-[11px] text-white/70 flex items-center justify-between"
@@ -1504,8 +1529,8 @@ const headlinePhoto = computed(() => {
   const photos = post.value.photos || []
   if (photos.length === 0) return null
 
-  // 문자열 배열이므로 url 속성으로 감싸서 반환
-  return { url: photos[0] }
+  // photos[0]이 이미 { url: "..." } 객체 형태
+  return photos[0]?.url ? photos[0] : { url: photos[0] }
 })
 const galleryPhotos = computed(() => {
   // 새 API 구조: 첫 번째를 제외한 나머지가 갤러리 사진들
@@ -1513,8 +1538,8 @@ const galleryPhotos = computed(() => {
   const photos = post.value.photos || []
   if (photos.length <= 1) return []
 
-  // 나머지 사진들을 url 객체로 변환
-  return photos.slice(1).map((url) => ({ url }))
+  // 나머지 사진들 (이미 객체 형태거나 문자열일 수 있음)
+  return photos.slice(1).map((photo) => (photo?.url ? photo : { url: photo }))
 })
 
 // Sections order

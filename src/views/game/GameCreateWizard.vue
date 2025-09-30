@@ -98,7 +98,7 @@
   <!-- 시작 전 확인 모달 -->
   <div
     v-if="showCountdownModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[300050]"
   >
     <div class="bg-white p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
       <h2 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">경기 시작 전 확인</h2>
@@ -134,7 +134,7 @@
   <!-- 주소 오류 모달 -->
   <div
     v-if="showAddressErrorModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[300100]"
   >
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
@@ -153,6 +153,15 @@
       </button>
     </div>
   </div>
+
+  <!-- 카메라 캡처 모달 -->
+  <CameraCapture
+    :is-visible="showCameraModal"
+    title="경기 시작 인증샷"
+    subtitle="피드에 표시될 사진을 촬영해주세요"
+    @capture="onPhotoCapture"
+    @cancel="onCameraCancel"
+  />
 </template>
 
 <script setup>
@@ -170,6 +179,7 @@ import GameFinalPage from '../../components/game-create/GameFinalPage.vue'
 import api from '../../api/api'
 import { parseRegion } from '../../utils/regionParser'
 import { useRoute, useRouter } from 'vue-router'
+import CameraCapture from '../../components/CameraCapture.vue'
 const route = useRoute()
 const router = useRouter()
 
@@ -211,6 +221,10 @@ const showAddressErrorModal = ref(false)
 
 // 생성된 게임 ID
 const currentGameId = ref(null)
+
+// 카메라 모달 상태
+const showCameraModal = ref(false)
+const capturedPhotoFile = ref(null)
 
 const progressWidth = computed(() => Math.max(5, Math.round((step.value / totalSteps) * 100)))
 onMounted(() => {
@@ -407,7 +421,16 @@ async function submitAndStartGame() {
   if (!gameId) return
   currentGameId.value = gameId
 
-  // 규칙 duration 조회 (확인 모달 안내용)
+  // 장소 설정 후 카메라 모달 표시
+  showAddressModal.value = false
+  showCameraModal.value = true
+}
+
+const onPhotoCapture = async (photoFile) => {
+  capturedPhotoFile.value = photoFile
+  showCameraModal.value = false
+
+  // 사진 촬영 후 확인 모달 표시
   let duration = -1
   try {
     const { data: rule } = await api.get(`/api/rules/${gameForm.ruleId}`)
@@ -416,16 +439,32 @@ async function submitAndStartGame() {
     // ignore
   }
   countdownDurationText.value = formatDurationText(duration)
-
-  // 모달 전환
-  showAddressModal.value = false
   showCountdownModal.value = true
+}
+
+const onCameraCancel = () => {
+  showCameraModal.value = false
+  capturedPhotoFile.value = null
 }
 
 async function confirmStartGame() {
   if (!currentGameId.value) return
+  if (!capturedPhotoFile.value) {
+    alert('사진을 촬영해주세요.')
+    return
+  }
+
   try {
-    await api.post(`/api/games/${currentGameId.value}/start`)
+    // FormData로 사진과 함께 전송
+    const formData = new FormData()
+    formData.append('photo', capturedPhotoFile.value)
+
+    await api.post(`/api/games/${currentGameId.value}/start`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
     showCountdownModal.value = false
     router.push(`/games/${currentGameId.value}/play`)
   } catch (e) {
@@ -460,5 +499,12 @@ function closeModal() {
   background: linear-gradient(90deg, #ff8521 70%, #ff681c 100%);
   border-radius: 5px 0 0 5px;
   transition: width 0.25s cubic-bezier(0.6, 0, 0.3, 1);
+}
+</style>
+
+<style>
+/* Google Autocomplete 드롭다운 z-index 조정 */
+.pac-container {
+  z-index: 300010 !important;
 }
 </style>

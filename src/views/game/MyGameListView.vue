@@ -1,7 +1,6 @@
 <template>
   <HeaderComp />
   <div ref="container" class="h-full pt-24 pb-28 px-5 max-w-md mx-auto space-y-0">
-
     <template v-if="!isLoading && games.length > 0">
       <div class="space-y-6 pb-[15dvh]">
         <div
@@ -273,59 +272,60 @@
   >
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
-      <div @click="openAddressSearch" class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">도로명 주소</label>
-        <div
-          class="flex items-center p-3 bg-white rounded-xl border border-gray-200 cursor-pointer"
-        >
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-search mr-1 text-orange-500"></i>
+          장소 검색
+        </label>
+        <div class="relative">
           <input
-            v-model="placeRoad"
-            readonly
-            class="text-sm flex-1 bg-white border-none outline-none cursor-not-allowed"
-            placeholder="도로명 주소 선택"
+            ref="addressInputModal"
+            v-model="searchQuery"
+            class="w-full text-base px-4 py-3 bg-white rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+            placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
+            autocomplete="off"
           />
+          <i
+            v-if="!searchQuery"
+            class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"
+          ></i>
         </div>
-        <p class="text-xs text-gray-400 mt-1">도로명 주소를 입력하세요 (미입력 시 협의결정)</p>
+        <p class="text-xs text-gray-400 mt-2">
+          <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+          장소명이나 주소를 입력하면 자동으로 검색됩니다
+        </p>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">상세주소</label>
-        <div
-          :class="[
-            placeRoad ? 'bg-white border-gray-200' : 'bg-gray-100 text-gray-400 cursor-not-allowed',
-          ]"
-          class="rounded-xl border p-3"
-        >
-          <input
-            id="place-detail"
-            v-model="placeDetail"
-            :disabled="!placeRoad"
-            class="w-full text-sm text-gray-700 outline-none bg-transparent"
-            placeholder="상세주소 입력"
-          />
+
+      <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
+        <div class="flex items-start gap-3">
+          <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-800 mb-1">{{ selectedPlace.name }}</p>
+            <p class="text-sm text-gray-600">{{ selectedPlace.address }}</p>
+          </div>
+          <button @click="clearSelection" class="text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <p class="text-xs text-gray-500 mt-1">예: ○○빌딩 3층, ○○체육관</p>
       </div>
-      <div class="mt-4 text-xs text-gray-500">
-        <template v-if="!placeRoad || placeRoad.trim() === ''">
-          도로명 주소를 반드시 입력해야 게임을 시작할 수 있습니다.
-        </template>
-        <template v-else>
-          현재 장소: {{ placeRoad + ' ' + placeDetail }}<br />
-          이 장소가 맞는지 확인하거나, 수정해주세요.
-        </template>
+
+      <div v-if="!selectedPlace" class="mt-4 text-xs text-gray-500 flex items-center gap-2">
+        <i class="fas fa-info-circle text-blue-400"></i>
+        <span>장소를 선택해야 게임을 시작할 수 있습니다</span>
       </div>
       <div class="flex justify-end mt-6 space-x-2">
         <button
           @click="closeModal"
-          class="px-4 py-2 rounded-[5px] bg-gray-100 text-gray-700 text-sm"
+          class="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition"
         >
           취소
         </button>
         <button
-          :disabled="!placeRoad || placeRoad.trim() === ''"
-          class="px-5 py-2 rounded-[5px] bg-green-600 text-white text-sm disabled:opacity-50"
+          :disabled="!selectedPlace"
+          class="px-5 py-2 rounded-xl bg-orange-500 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition shadow-md"
           @click="submitAndStartGame"
         >
+          <i class="fas fa-play mr-1"></i>
           경기 진행
         </button>
       </div>
@@ -380,6 +380,7 @@ import ChampionBadge from '../../components/ChampionBadge.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
+import { parseRegion } from '../../utils/regionParser'
 const { showToast } = useToast()
 
 const router = useRouter()
@@ -388,8 +389,8 @@ const route = useRoute()
 const games = ref([])
 const elapsedTimes = ref({})
 const showAddressModal = ref(false)
-const placeRoad = ref('')
-const placeDetail = ref('')
+const searchQuery = ref('')
+const selectedPlace = ref(null)
 const currentGameId = ref(null)
 const showCountdownModal = ref(false)
 const countdownDurationText = ref('')
@@ -448,75 +449,14 @@ function scrollToParamId() {
   }
 }
 
-// 환경 변수로 dev / prod 제어
-const APP_ENV = (process.env.VUE_APP_ENV || 'prod').toString().toLowerCase()
-
-// 더미 데이터 (dev 모드용)
-const DUMMY_GAMES = [
-  {
-    id: 101,
-    myId: 1,
-    opponentId: 2,
-    championId: 2,
-    myProfileUrl: 'https://via.placeholder.com/80x80.png?text=ME',
-    opponentProfileUrl: 'https://via.placeholder.com/80x80.png?text=OP',
-    myNickname: '나야',
-    opponentNickname: '상대A',
-    myStatistics: { wins: 12, draws: 3, losses: 5 },
-    opponentStatistics: { wins: 8, draws: 2, losses: 6 },
-    status: 'SCHEDULED',
-    matchLocation: '서울시 중구',
-    matchDate: new Date().toISOString(),
-    rule: { ruleTitle: '빠른 매치', majorCategory: '스포츠', minorCategory: '농구', duration: 600 },
-    isOwner: true,
-    startedAt: null,
-  },
-  {
-    id: 102,
-    myId: 1,
-    opponentId: 3,
-    championId: 1,
-    myProfileUrl: 'https://via.placeholder.com/80x80.png?text=ME',
-    opponentProfileUrl: 'https://via.placeholder.com/80x80.png?text=OP2',
-    myNickname: '나야',
-    opponentNickname: '상대B',
-    myStatistics: { wins: 5, draws: 1, losses: 2 },
-    opponentStatistics: { wins: 6, draws: 0, losses: 3 },
-    status: 'IN_PROGRESS',
-    matchLocation: '미정',
-    matchDate: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    rule: { ruleTitle: '토너먼트', majorCategory: '게임', minorCategory: '축구', duration: -1 },
-    isOwner: false,
-    startedAt: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 3분 전 시작
-  },
-]
-
-// onMounted: dev이면 더미로 동작
+// onMounted: dev/prod 모두 실제 서버 연결
 onMounted(async () => {
   isLoading.value = true
   showEmpty.value = false
 
   const minDelay = new Promise((resolve) => setTimeout(resolve, 1500))
 
-  if (APP_ENV === 'dev') {
-    // dev: 더미 데이터 사용. 실제 API 호출 안 함.
-    games.value = DUMMY_GAMES
-    updateElapsed()
-    interval = setInterval(updateElapsed, 1000)
-    await minDelay
-    isLoading.value = false
-    // showEmpty handling
-    if (!games.value.length) {
-      const remain = 3000 - 2200
-      setTimeout(() => {
-        if (!games.value.length) showEmpty.value = true
-      }, remain)
-    }
-    nextTick(() => scrollToParamId())
-    return
-  }
-
-  // prod: 실제 API 호출
+  // 실제 API 호출
   let res
   try {
     res = await client.get('/api/games/my-games')
@@ -542,31 +482,63 @@ onMounted(async () => {
 
 onUnmounted(() => clearInterval(interval))
 
-// 주소 검색
-const openAddressSearch = () => {
-  new window.daum.Postcode({
-    oncomplete(data) {
-      placeRoad.value = data.roadAddress || data.jibunAddress
-      nextTick(() => {
-        const el = document.getElementById('place-detail')
-        if (el) el.focus()
-      })
-    },
-  }).open()
+const addressInputModal = ref(null)
+let autocompleteModal = null
+
+const initGoogleAutocomplete = () => {
+  if (window.google?.maps?.places && addressInputModal.value) {
+    autocompleteModal = new window.google.maps.places.Autocomplete(addressInputModal.value, {
+      componentRestrictions: { country: 'kr' },
+      fields: ['formatted_address', 'address_components', 'geometry', 'name'],
+      types: ['establishment', 'geocode'],
+    })
+
+    autocompleteModal.addListener('place_changed', () => {
+      const place = autocompleteModal.getPlace()
+      if (place.geometry && place.formatted_address) {
+        // 주소 파싱 및 검증
+        const parsed = parseRegion(place.formatted_address)
+
+        if (!parsed) {
+          alert('지원하지 않는 지역입니다.\n대한민국 내 유효한 주소를 입력해주세요.')
+          searchQuery.value = ''
+          selectedPlace.value = null
+          return
+        }
+
+        selectedPlace.value = {
+          name: place.name || '',
+          address: parsed.fullAddress, // "경기 수원시 영통구 ..." 형태
+          region1: parsed.region1, // "경기" (변환됨)
+          region2: parsed.region2, // "수원시 영통구"
+          geometry: place.geometry,
+        }
+      }
+    })
+  }
+}
+
+const clearSelection = () => {
+  selectedPlace.value = null
+  searchQuery.value = ''
 }
 
 const openStartModal = (game) => {
   showAddressModal.value = true
-  placeRoad.value = game.matchLocation || ''
-  placeDetail.value = ''
+  searchQuery.value = ''
+  selectedPlace.value = null
   currentGameId.value = game.id
+
+  nextTick(() => {
+    initGoogleAutocomplete()
+  })
 }
 
 const submitAndStartGame = async () => {
-  if (!placeRoad.value.trim()) return alert('도로명 주소를 반드시 입력해야 합니다.')
+  if (!selectedPlace.value) return alert('장소를 선택해주세요.')
   await client.post(`/api/games/${currentGameId.value}/set-region`, {
-    roadAddress: placeRoad.value,
-    detailAddress: placeDetail.value,
+    roadAddress: selectedPlace.value.address,
+    detailAddress: selectedPlace.value.name,
   })
 
   showAddressModal.value = false
@@ -592,8 +564,8 @@ const confirmStartGame = async () => {
 
 const closeModal = () => {
   showAddressModal.value = false
-  placeRoad.value = ''
-  placeDetail.value = ''
+  searchQuery.value = ''
+  selectedPlace.value = null
   currentGameId.value = null
 }
 

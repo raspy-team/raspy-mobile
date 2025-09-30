@@ -16,27 +16,41 @@
 
         <transition name="fade">
           <div v-if="placeRoad !== null">
-            <button
-              type="button"
-              @click="openAddressSearch"
-              class="flex items-center w-full border border-gray-200 rounded-xl p-3 text-left bg-gray-50 hover:bg-orange-50 transition mb-3"
-            >
-              <i class="far fa-building text-orange-400 mr-3"></i>
-              <div class="flex-1">
-                <div class="text-sm text-gray-700 mt-0.5">{{ placeRoad || '도로명 주소 입력' }}</div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-search mr-1 text-orange-500"></i>
+                장소 검색
+              </label>
+              <div class="relative">
+                <input
+                  ref="addressInput"
+                  v-model="searchQuery"
+                  placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
+                  class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-400 outline-none transition"
+                  autocomplete="off"
+                />
+                <i v-if="!searchQuery" class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
               </div>
-              <i class="fas fa-chevron-right text-gray-300"></i>
-            </button>
+              <p class="text-xs text-gray-400 mt-2">
+                <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                장소명이나 주소를 입력하면 자동으로 검색됩니다
+              </p>
+            </div>
 
-            <div class="mb-3">
-              <input
-                v-model="placeDetail"
-                id="place-detail"
-                placeholder="상세주소 입력"
-                class="w-full text-gray-700 text-base rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-orange-400 transition"
-                autocomplete="off"
-              />
-              <p class="text-xs text-gray-500 mt-1">예: ○○빌딩 3층, ○○체육관 등</p>
+            <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
+              <div class="flex items-start gap-3">
+                <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-gray-800 mb-1">{{ selectedPlace.name }}</p>
+                  <p class="text-sm text-gray-600">{{ selectedPlace.address }}</p>
+                </div>
+                <button
+                  @click="clearSelection"
+                  class="text-gray-400 hover:text-gray-600 transition"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
             </div>
 
             <!-- 추천 장소 리스트 -->
@@ -89,11 +103,14 @@
 </template>
 
 <script setup>
-import { ref, nextTick, defineEmits } from 'vue'
+import { ref, onMounted, defineEmits } from 'vue'
+import { parseRegion } from '../../utils/regionParser'
 const emit = defineEmits(['select', 'back'])
 
 const placeRoad = ref('')
-const placeDetail = ref('')
+const searchQuery = ref('')
+const selectedPlace = ref(null)
+const addressInput = ref(null)
 
 const recommendedPlaces = ref([
   { placeRoad: '서울 서초구 동광로 65', placeDetail: '서초탁구장' },
@@ -104,34 +121,67 @@ const recommendedPlaces = ref([
 const showConfirm = ref(false)
 const confirmItem = ref({ placeRoad: '', placeDetail: '' })
 
+let autocomplete = null
+
 function setUnset() {
   placeRoad.value = placeRoad.value === null ? '' : null
-  placeDetail.value = ''
+  searchQuery.value = ''
+  selectedPlace.value = null
 }
 
-function openAddressSearch() {
-  if (!window.daum?.Postcode) {
-    alert('주소 검색 서비스를 사용할 수 없습니다.')
-    return
-  }
-  new window.daum.Postcode({
-    oncomplete(data) {
-      placeRoad.value = data.roadAddress || data.jibunAddress
-      nextTick(() => {
-        const input = document.getElementById('place-detail')
-        if (input) input.focus()
-      })
-    },
-  }).open()
+function clearSelection() {
+  selectedPlace.value = null
+  searchQuery.value = ''
 }
+
+onMounted(() => {
+  if (window.google?.maps?.places && addressInput.value) {
+    autocomplete = new window.google.maps.places.Autocomplete(addressInput.value, {
+      componentRestrictions: { country: 'kr' },
+      fields: ['formatted_address', 'address_components', 'geometry', 'name'],
+      types: ['establishment', 'geocode']
+    })
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace()
+      if (place.geometry && place.formatted_address) {
+        // 주소 파싱 및 검증
+        const parsed = parseRegion(place.formatted_address)
+
+        if (!parsed) {
+          alert('지원하지 않는 지역입니다.\n대한민국 내 유효한 주소를 입력해주세요.')
+          searchQuery.value = ''
+          selectedPlace.value = null
+          return
+        }
+
+        selectedPlace.value = {
+          name: place.name || '',
+          address: parsed.fullAddress, // "경기 수원시 영통구 ..." 형태
+          region1: parsed.region1, // "경기" (변환됨)
+          region2: parsed.region2, // "수원시 영통구"
+          geometry: place.geometry
+        }
+      }
+    })
+  }
+})
 
 function submitPlace() {
-  emit('select', { placeRoad: placeRoad.value, placeDetail: placeDetail.value })
+  if (placeRoad.value === null) {
+    emit('select', { placeRoad: null, placeDetail: '' })
+  } else if (selectedPlace.value) {
+    emit('select', {
+      placeRoad: selectedPlace.value.address,
+      placeDetail: selectedPlace.value.name
+    })
+  }
 }
 
 function emitBack() {
   placeRoad.value = null
-  placeDetail.value = ''
+  searchQuery.value = ''
+  selectedPlace.value = null
   emit('back')
 }
 
@@ -145,8 +195,10 @@ function cancelConfirm() {
 }
 
 function acceptConfirm() {
-  placeRoad.value = confirmItem.value.placeRoad
-  placeDetail.value = confirmItem.value.placeDetail
+  selectedPlace.value = {
+    name: confirmItem.value.placeDetail,
+    address: confirmItem.value.placeRoad
+  }
   showConfirm.value = false
   submitPlace()
 }

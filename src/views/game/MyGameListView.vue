@@ -268,7 +268,7 @@
 
   <div
     v-if="showAddressModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
   >
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
@@ -334,7 +334,7 @@
 
   <div
     v-if="showCountdownModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100050]"
   >
     <div class="bg-white p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
       <h2 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">경기 시작 전 확인</h2>
@@ -372,7 +372,7 @@
   <!-- 주소 오류 모달 -->
   <div
     v-if="showAddressErrorModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100100]"
   >
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
@@ -391,6 +391,15 @@
       </button>
     </div>
   </div>
+
+  <!-- 카메라 캡처 모달 -->
+  <CameraCapture
+    :is-visible="showCameraModal"
+    title="경기 시작 인증샷"
+    subtitle="피드에 표시될 사진을 촬영해주세요"
+    @capture="onPhotoCapture"
+    @cancel="onCameraCancel"
+  />
 </template>
 
 <script setup>
@@ -404,6 +413,7 @@ import MatchRuleModal from '../../components/MatchModal.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 import { parseRegion } from '../../utils/regionParser'
+import CameraCapture from '../../components/CameraCapture.vue'
 const { showToast } = useToast()
 
 const router = useRouter()
@@ -422,6 +432,8 @@ let interval
 const isLoading = ref(true)
 const showEmpty = ref(false)
 const showAddressErrorModal = ref(false)
+const showCameraModal = ref(false)
+const capturedPhotoFile = ref(null)
 
 // RULE 상세 모달 상태
 const showRuleModal = ref(false)
@@ -566,6 +578,15 @@ const submitAndStartGame = async () => {
   })
 
   showAddressModal.value = false
+  // 장소 설정 후 카메라 모달 표시
+  showCameraModal.value = true
+}
+
+const onPhotoCapture = (photoFile) => {
+  capturedPhotoFile.value = photoFile
+  showCameraModal.value = false
+
+  // 사진 촬영 후 확인 모달 표시
   const game = games.value.find((g) => g.id === currentGameId.value)
   const dur = game?.rule?.duration
 
@@ -576,14 +597,36 @@ const submitAndStartGame = async () => {
     const sec = dur % 60
     countdownDurationText.value = (min ? `${min}분 ` : '') + (sec ? `${sec}초` : '')
   }
-  showAddressModal.value = false
   showCountdownModal.value = true
 }
 
+const onCameraCancel = () => {
+  showCameraModal.value = false
+  capturedPhotoFile.value = null
+}
+
 const confirmStartGame = async () => {
-  await client.post(`/api/games/${currentGameId.value}/start`)
-  router.push(`/games/${currentGameId.value}/play`)
-  showCountdownModal.value = false
+  if (!capturedPhotoFile.value) {
+    alert('사진을 촬영해주세요.')
+    return
+  }
+
+  try {
+    // FormData로 사진과 함께 전송
+    const formData = new FormData()
+    formData.append('photo', capturedPhotoFile.value)
+
+    await client.post(`/api/games/${currentGameId.value}/start`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    router.push(`/games/${currentGameId.value}/play`)
+    showCountdownModal.value = false
+  } catch (e) {
+    alert('게임 시작 실패: ' + (e.response?.data?.message ?? e.message))
+  }
 }
 
 const closeModal = () => {
@@ -820,5 +863,12 @@ function statusColor(s) {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+</style>
+
+<style>
+/* Google Autocomplete 드롭다운 z-index 조정 */
+.pac-container {
+  z-index: 100010 !important;
 }
 </style>

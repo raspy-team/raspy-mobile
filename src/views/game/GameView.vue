@@ -192,7 +192,7 @@
                 class="flex items-center justify-center gap-2 bg-green-500 text-sm text-white border-[1px] py-3 rounded-[8px]"
                 disabled
               >
-                <i class="fas fa-check"></i> 승인됨 - 게임 시작 대기중
+                <i class="fas fa-check"></i> 승인됨
               </button>
               <button
                 v-else-if="game.status === 'REJECTED'"
@@ -527,9 +527,9 @@ function formatDate(dateStr) {
 
 function getStatusClass(game) {
   if (game.type === 'sent') {
-    if (game.status === 'APPROVED') return 'bg-blue-100 text-blue-600'
+    if (game.status === 'APPROVED') return 'text-blue-600'
     if (game.status === 'REQUESTED') return 'text-gray-500'
-    if (game.status === 'REJECTED') return 'bg-red-100 text-red-500'
+    if (game.status === 'REJECTED') return 'text-red-500'
   } else if (game.type === 'my-game') {
     if (game.status === 'IN_PROGRESS') return 'text-green-500'
     if (game.status === 'SCHEDULED') return 'text-orange-500'
@@ -542,7 +542,7 @@ function getStatusClass(game) {
 
 function getStatusText(game) {
   if (game.type === 'sent') {
-    if (game.status === 'APPROVED') return '승인됨'
+    if (game.status === 'APPROVED') return '승인됨 - 시작 대기 중'
     if (game.status === 'REQUESTED') return '대기 중'
     if (game.status === 'REJECTED') return '거절됨'
   } else if (game.type === 'my-game') {

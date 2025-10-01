@@ -3,7 +3,7 @@
     @click="openModal"
     @click.stop
     :class="[
-      'relative rounded-2xl shadow-lg px-6 py-7 flex flex-col gap-3 bg-white border-l-4',
+  'relative rounded-2xl shadow-lg px-6 py-7 flex flex-col gap-3 bg-white dark:bg-surface-dark border-l-4',
       isWin ? 'border-orange-400' : isDraw ? 'border-gray-400' : 'border-blue-400',
     ]"
   >
@@ -16,7 +16,7 @@
       >
       <span
         v-else-if="isDraw"
-        class="bg-gray-300 text-gray-700 text-base px-4 py-1.5 rounded-full font-extrabold border shadow"
+  class="bg-gray-300 dark:bg-surface-dark text-gray-700 dark:text-white text-base px-4 py-1.5 rounded-full font-extrabold border shadow"
         style="letter-spacing: 0.05em"
         >무승부</span
       >
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div>
-        <span class="text-base font-extrabold text-gray-900 truncate block">
+  <span class="text-base font-extrabold text-gray-900 dark:text-white truncate block">
           {{ game.rule.ruleTitle }}
         </span>
         <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -66,7 +66,7 @@
                 </router-link>
                 <router-link :to="'/profile/' + game.me.id">
                   <div
-                    class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                    class="font-semibold text-gray-800 dark:text-white text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
                   >
                     {{ game.me.nickname }}
                   </div>
@@ -92,7 +92,7 @@
                 </router-link>
                 <router-link :to="'/profile/' + game.opponent.id">
                   <div
-                    class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                    class="font-semibold text-gray-800 dark:text-white text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
                   >
                     {{ game.opponent.nickname }}
                   </div>
@@ -107,11 +107,11 @@
       <button
         type="button"
         @click.stop="showSetResults = !showSetResults"
-        class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-white border border-gray-200 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-[1.05rem] text-gray-900 transition active:bg-gray-100 hover:bg-orange-50 select-none cursor-pointer outline-none focus:outline-none"
+  class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-white dark:bg-surface-dark border border-gray-200 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-[1.05rem] text-gray-900 dark:text-white transition active:bg-gray-100 hover:bg-orange-50 select-none cursor-pointer outline-none focus:outline-none"
         style="outline: none"
       >
         <span
-          :class="showSetResults ? 'text-orange-500' : 'text-gray-900'"
+          :class="showSetResults ? 'text-orange-500' : 'text-gray-900 dark:text-white'"
           class="tracking-tight text-sm font-semibold"
           >{{ showSetResults ? '세트 결과 접기' : '세트 결과 보기' }}</span
         >
@@ -119,7 +119,7 @@
           :class="[
             'fas',
             showSetResults ? 'fa-chevron-up' : 'fa-chevron-down',
-            showSetResults ? 'text-orange-400' : 'text-gray-400',
+            showSetResults ? 'text-orange-400' : 'text-gray-400 dark:text-white',
             'text-[19px]',
             'transition-transform',
           ]"
@@ -140,7 +140,7 @@
                   : 'border-gray-200'
             "
           >
-            <span class="text-xs font-bold text-gray-400 flex-1">{{ set.setIdx }}세트</span>
+            <span class="text-xs font-bold text-gray-400 dark:text-white flex-1">{{ set.setIdx }}세트</span>
             <span
               class="text-lg font-extrabold"
               :class="
@@ -148,7 +148,7 @@
                   ? 'text-orange-500'
                   : set.winnerIdx === 2
                     ? 'text-blue-500'
-                    : 'text-gray-400'
+                    : 'text-gray-400 dark:text-white'
               "
             >
               {{ set.user1Score == null ? 0 : set.user1Score }} :
@@ -161,7 +161,7 @@
                     ? 'fas fa-trophy text-orange-500'
                     : set.winnerIdx === 2
                       ? 'fas fa-times text-blue-500'
-                      : 'fas fa-handshake text-gray-400'
+                      : 'fas fa-handshake text-gray-400 dark:text-white'
                 "
               ></i>
               <span
@@ -171,7 +171,7 @@
                     ? 'text-orange-500'
                     : set.winnerIdx === 2
                       ? 'text-blue-500'
-                      : 'text-gray-400'
+                      : 'text-gray-400 dark:text-white'
                 "
               >
                 {{ set.winnerIdx === 1 ? '승리' : set.winnerIdx === 2 ? '패배' : '무승부' }}
@@ -186,17 +186,17 @@
       <template
         v-if="game.review || game.mannerScore !== undefined || game.performanceScore !== undefined"
       >
-        <div class="text-xs text-gray-500 font-bold mb-1">
+  <div class="text-xs text-gray-500 dark:text-white font-bold mb-1">
           {{ game.opponent?.nickname ?? '상대' }}님의 리뷰
         </div>
         <div v-if="game.review" class="flex items-start gap-2 mb-2">
           <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
-          <span class="text-sm text-gray-800 font-medium leading-snug"> "{{ game.review }}" </span>
+          <span class="text-sm text-gray-800 dark:text-white font-medium leading-snug"> "{{ game.review }}" </span>
         </div>
-        <div v-else class="text-sm text-gray-400 italic mb-2">등록된 텍스트 리뷰가 없습니다.</div>
+  <div v-else class="text-sm text-gray-400 dark:text-white italic mb-2">등록된 텍스트 리뷰가 없습니다.</div>
         <div class="flex gap-3">
           <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500">매너 :</span>
+            <span class="text-xs text-gray-500 dark:text-white">매너 :</span>
             <span
               class="font-bold text-base"
               :class="[
@@ -206,14 +206,14 @@
                     ? 'text-yellow-500'
                     : game.mannerScore > 0
                       ? 'text-red-500'
-                      : 'text-gray-400',
+                      : 'text-gray-400 dark:text-white',
               ]"
             >
               {{ game.mannerScore !== null ? game.mannerScore?.toFixed(1) : '-' }}
             </span>
           </div>
           <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500">퍼포먼스 :</span>
+            <span class="text-xs text-gray-500 dark:text-white">퍼포먼스 :</span>
             <span
               class="font-bold text-base"
               :class="[
@@ -223,7 +223,7 @@
                     ? 'text-yellow-500'
                     : game.performanceScore > 0
                       ? 'text-red-500'
-                      : 'text-gray-400',
+                      : 'text-gray-400 dark:text-white',
               ]"
             >
               {{ game.performanceScore !== null ? game.performanceScore?.toFixed(1) : '-' }}

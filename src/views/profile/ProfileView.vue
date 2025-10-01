@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-[#f8f9fa] min-h-full relative raspy-top">
+  <div class="bg-[#f8f9fa] dark:bg-base-dark min-h-full relative raspy-top">
     <!-- Fixed Top Bar -->
     <div
-      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white border-b raspy-top"
+  class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white dark:bg-surface-dark border-b raspy-top"
     >
       <div class="flex items-center h-14">
         <router-link to="/" class="font-bold text-[#f97316]">
@@ -30,7 +30,7 @@
     <!-- SKELETON: 유저정보/통계/그래프/탭 -->
     <template v-if="user == null">
       <section
-        class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-0 px-6 pt-7 pb-8 flex flex-col gap-5 relative animate-pulse"
+        class="max-w-lg mx-auto bg-white dark:bg-surface-dark rounded-2xl shadow-lg mt-10 mb-0 px-6 pt-7 pb-8 flex flex-col gap-5 relative animate-pulse"
       >
         <!-- 프로필 -->
         <div class="flex gap-5 items-start mb-2">

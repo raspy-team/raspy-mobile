@@ -15,10 +15,8 @@ function isActive(pathPrefix) {
       return props.tab == 'feed'
     case '/game-list':
       return props.tab == 'home'
-    case '/my-games':
-      return props.tab == 'my-game'
-    // case('/create-game') : return props.tab=='create-game'
-    // case('/inbox') : return props.tab=='inbox'
+    case '/game':
+      return props.tab == 'game'
     case '/profile':
       return props.tab == 'profile'
   }
@@ -59,105 +57,20 @@ function isActive(pathPrefix) {
         <span v-if="isActive('/')" class="indicator" />
       </router-link>
 
-      <!-- 홈 -->
+      <!-- 게임 -->
       <router-link
-        to="/game-list"
-        aria-label="홈"
+        to="/game"
+        aria-label="게임"
         class="nav-item flex flex-col gap-y-2 items-center px-3 py-1 rounded-xl transition-colors relative"
         :class="
-          isActive('/game-list') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'
+          isActive('/game') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'
         "
       >
-        <!-- 심플 리스트: 불릿 + 3줄 -->
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 14 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle
-            cx="2.8"
-            cy="4.8"
-            r="0.7"
-            :fill="isActive('/game-list') ? '#f97316' : '#9CA3AF'"
-          />
-          <path
-            d="M4.5 4.8H12"
-            :stroke="isActive('/game-list') ? '#f97316' : '#9CA3AF'"
-            stroke-width="1.6"
-            stroke-linecap="round"
-          />
-          <circle
-            cx="2.8"
-            cy="7.0"
-            r="0.7"
-            :fill="isActive('/game-list') ? '#f97316' : '#9CA3AF'"
-          />
-          <path
-            d="M4.5 7.0H12"
-            :stroke="isActive('/game-list') ? '#f97316' : '#9CA3AF'"
-            stroke-width="1.6"
-            stroke-linecap="round"
-          />
-          <circle
-            cx="2.8"
-            cy="9.2"
-            r="0.7"
-            :fill="isActive('/game-list') ? '#f97316' : '#9CA3AF'"
-          />
-          <path
-            d="M4.5 9.2H12"
-            :stroke="isActive('/game-list') ? '#f97316' : '#9CA3AF'"
-            stroke-width="1.6"
-            stroke-linecap="round"
-          />
-        </svg>
-        <span v-if="isActive('/game-list')" class="indicator" />
-      </router-link>
-
-      <!-- 내 경기 -->
-      <router-link
-        to="/my-games"
-        aria-label="내 경기"
-        class="nav-item flex flex-col gap-y-2 items-center px-3 py-1 rounded-xl transition-colors relative"
-        :class="
-          isActive('/my-games') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'
-        "
-      >
-        <!-- 내 경기: 캘린더 + 체크 배지 -->
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 14 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <!-- 심플 캘린더 + 체크 -->
-          <rect
-            x="1.2"
-            y="2.2"
-            width="11.6"
-            height="9.6"
-            rx="2"
-            :stroke="isActive('/my-games') ? '#f97316' : '#9CA3AF'"
-            stroke-width="1.6"
-          />
-          <path
-            d="M3.5 1.6V4.0M10.5 1.6V4.0"
-            :stroke="isActive('/my-games') ? '#f97316' : '#9CA3AF'"
-            stroke-width="1.6"
-            stroke-linecap="round"
-          />
-          <path
-            d="M5.0 8.4l1.2 1.2 2.2-2.2"
-            :stroke="isActive('/my-games') ? '#f97316' : '#9CA3AF'"
-            stroke-width="1.6"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span v-if="isActive('/my-games')" class="indicator" />
+        <i
+          class="fas fa-gamepad text-2xl"
+          :class="isActive('/game') ? 'text-orange-500' : 'text-gray-400'"
+        ></i>
+        <span v-if="isActive('/game')" class="indicator" />
       </router-link>
 
       <!-- 생성 -->

@@ -1,5 +1,5 @@
 <template>
-  <HeaderComp />
+  <HeaderComp :has-referer="true" title="경기 목록" />
   <div class="bg-white pb-16">
     <!-- Status Bar -->
     <div class="bg-white h-6 w-full"></div>
@@ -9,55 +9,7 @@
 
     <!-- Main Content -->
     <main class="pt-3 px-4 pb-4">
-      <!-- Menu Items -->
-      <div class="grid grid-cols-1 gap-3 mb-0">
-        <div class="flex flex-row gap-6 justify-between mb-2 px-8">
-          <div
-            v-for="(action, index) in menuItems"
-            :key="index"
-            @click="router.push(action.link)"
-            class="flex flex-col items-center justify-center gap-1 w-[64px] cursor-pointer group"
-          >
-            <div
-              class="w-14 mb-1 h-14 flex border border-gray-100 items-center justify-center rounded-xl bg-white shadow-sm transition-colors duration-200 group-hover:bg-orange-100"
-            >
-              <i :class="`${action.icon} text-orange-500 text-[1.6em]`"></i>
-            </div>
-            <span
-              class="text-[0.75rem] text-gray-600 font-medium text-center truncate max-w-[72px]"
-            >
-              {{ action.name }}
-            </span>
-
-            <div
-              v-if="requestCount > 0 && action.name === '경기 요청'"
-              class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white"
-            >
-              {{ requestCount }}
-            </div>
-          </div>
-
-          <div
-            v-if="false"
-            @click="showInviteModal = true"
-            class="flex flex-col items-center cursor-pointer relative group"
-            style="min-width: 64px"
-          >
-            <div
-              class="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all border border-gray-100 group-hover:bg-orange-50"
-            >
-              <i :class="`fas fa-user-plus  text-orange-500 text-2xl`"></i>
-            </div>
-            <span
-              class="mt-2 text-sm text-gray-700 font-[400] text-[0.8rem] whitespace-nowrap overflow-hidden text-overflow-ellipsis text-center max-w-[80px]"
-            >
-              초대 참여
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 게임리스트 (동일) -->
+      <!-- 게임리스트 -->
       <div class="space-y-4">
         <!-- 필터 버튼 -->
         <div class="relative flex justify-between itemw-full pt-3 border-none">
@@ -107,26 +59,18 @@
           </div>
         </div>
 
-<!-- 추천 경기 타이틀 행 -->
-<div class="flex items-center justify-between pt-0 pb-0 px-1">
-  <button
-    @click="fetchGames"
-    aria-label="새로고침"
-    class="ml-2 px-4 py-2  rounded-[10px] flex items-center justify-center border border-gray-200 shadow-sm bg-white"
-  >
-    <i
-      v-if="!loading"
-      class="fas fa-rotate-right text-orange-500 text-sm"
-    ></i>
-    <i
-      v-else
-      class="fas fa-spinner fa-spin text-orange-500 text-sm"
-    ></i>
-    <span class="ml-2 text-sm font-semibold text-orange-600">
-    새로고침
-    </span>
-  </button>
-</div>
+        <!-- 추천 경기 타이틀 행 -->
+        <div class="flex items-center justify-between pt-0 pb-0 px-1">
+          <button
+            @click="fetchGames"
+            aria-label="새로고침"
+            class="ml-2 px-4 py-2 rounded-[10px] flex items-center justify-center border border-gray-200 shadow-sm bg-white"
+          >
+            <i v-if="!loading" class="fas fa-rotate-right text-orange-500 text-sm"></i>
+            <i v-else class="fas fa-spinner fa-spin text-orange-500 text-sm"></i>
+            <span class="ml-2 text-sm font-semibold text-orange-600"> 새로고침 </span>
+          </button>
+        </div>
         <div v-if="games.length > 0">
           <div
             @click="openModal(game)"
@@ -682,14 +626,13 @@
         </div>
       </div>
     </div>
-    <FooterNav tab="home" />
     <CustomAlert
       v-if="alertMsg"
       :message="alertMsg"
       @confirm="applyConfirmed"
       @cancel="() => (alertMsg = '')"
     />
-    <CustomToast />
+    <CustomToast class="z-[200]" />
     <!-- Share Game Modal -->
     <div
       v-if="shareModal"
@@ -801,13 +744,21 @@
   </div>
 
   <Comment v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
+
+  <!-- 하단 중앙 고정 경기 생성 버튼 -->
+  <button
+    @click="router.push('/create-game')"
+    class="fixed bottom-10 z-0 left-1/2 -translate-x-1/2 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 active:scale-95 transition-all z-50 flex items-center gap-2 px-5 py-3.5"
+  >
+    <i class="fas fa-plus text-lg"></i>
+    <span class="font-semibold text-sm px-2">경기 만들기</span>
+  </button>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
-import FooterNav from '../../components/FooterNav.vue'
 import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import MatchModal from '../../components/MatchModal.vue'
@@ -979,12 +930,12 @@ const applyInviteGame = async (id) => {
 
 const requestCount = ref(0)
 
-const menuItems = [
-  { name: '규칙 탐색', icon: 'fas fa-book-open', link: '/rules' },
+// const menuItems = [
+//   { name: '규칙 탐색', icon: 'fas fa-book-open', link: '/rules' },
 
-  { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
-  { name: '경기 요청', icon: 'fas fa-envelope', link: '/inbox' },
-]
+//   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
+//   { name: '경기 요청', icon: 'fas fa-envelope', link: '/inbox' },
+// ]
 const showRegionModal = ref(false)
 const applyRegionFilter = () => {
   showRegionModal.value = false

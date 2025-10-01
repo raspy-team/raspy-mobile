@@ -238,7 +238,7 @@ async function approve(gameId, userId) {
     const user = group?.applicants?.find((a) => a.userId === userId)
     if (user) user.approved = true
     if (group) group.gameStatus = 'SCHEDULED'
-    showToast(`@${user.applicantNickname}님을 승인했습니다!`, `/my-games?id=${gameId}`)
+    showToast(`${user.applicantNickname}님을 승인했습니다!`, `/my-games?id=${gameId}`)
   } catch (err) {
     if (err.response?.data?.message?.includes('한 명만 승인 가능')) {
       alert('이미 다른 사용자가 승인되었습니다.')

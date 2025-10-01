@@ -24,6 +24,7 @@ import InviteView from "../views/InviteView.vue"
 import InviteDeep from "../views/InviteDeep.vue"
 
 import Feed from "../views/feed/FeedView.vue"
+import GameView from "../views/game/GameView.vue"
 
 const routes = [
   {
@@ -54,6 +55,10 @@ const routes = [
   {
     path: '/my-games',
     component: MyGameList
+  },
+  {
+    path: '/game',
+    component: GameView
   },
   {
     path: '/chat/:targetUserId',

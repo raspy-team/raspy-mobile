@@ -1,93 +1,92 @@
 <template>
-  <div v-if="isVisible" class="fixed inset-0 bg-black z-[99999] flex flex-col">
-    <!-- 헤더 -->
-    <div class="absolute top-0 left-0 right-0 z-10 pt-safe">
-      <div class="px-5 py-4 bg-gradient-to-b from-black/60 to-transparent">
-        <h2 class="text-white text-lg font-bold text-center">
+  <div
+    v-if="isVisible"
+    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center"
+  >
+    <div class="w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <!-- 헤더 -->
+      <div class="px-6 py-5 bg-gradient-to-r from-orange-500 to-orange-600">
+        <h2 class="text-white text-xl font-bold text-center">
           {{ title || '경기 시작 인증샷' }}
         </h2>
-        <p class="text-white/80 text-sm text-center mt-1">
-          {{ subtitle || '피드에 표시될 사진을 촬영해주세요' }}
+        <p class="text-white/90 text-sm text-center mt-2">
+          {{ subtitle || '피드에 표시될 사진을 선택해주세요' }}
         </p>
       </div>
-    </div>
 
-    <!-- 카메라 뷰 / 프리뷰 -->
-    <div class="flex-1 relative overflow-hidden">
-      <!-- 카메라 스트림 -->
-      <video
-        v-show="!capturedImage"
-        ref="videoElement"
-        autoplay
-        playsinline
-        class="w-full h-full object-cover"
-      ></video>
-
-      <!-- 촬영된 이미지 프리뷰 -->
-      <img
-        v-if="capturedImage"
-        :src="capturedImage"
-        class="w-full h-full object-cover"
-        alt="Captured"
-      />
-
-      <!-- 가이드 오버레이 -->
-      <div v-if="!capturedImage" class="absolute inset-0 pointer-events-none">
-        <div class="absolute inset-0 border-4 border-white/20 m-8 rounded-3xl"></div>
+      <!-- 이미지 프리뷰 -->
+      <div v-if="capturedImage" class="p-4">
+        <img
+          :src="capturedImage"
+          class="w-full aspect-square object-cover rounded-xl border-2 border-gray-200"
+          alt="Selected"
+        />
       </div>
-    </div>
 
-    <!-- 하단 컨트롤 -->
-    <div class="absolute bottom-0 left-0 right-0 pb-safe">
-      <div class="px-5 py-6 bg-gradient-to-t from-black/70 to-transparent">
-        <!-- 촬영 전 -->
-        <div v-if="!capturedImage" class="flex justify-center items-center gap-8">
-          <button
-            @click="$emit('cancel')"
-            class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <i class="fas fa-times text-white text-xl"></i>
-          </button>
-
-          <button
-            @click="capturePhoto"
-            class="w-20 h-20 rounded-full bg-white border-4 border-white/30 shadow-lg active:scale-95 transition-transform"
-          >
-            <div
-              class="w-full h-full rounded-full bg-gradient-to-br from-orange-400 to-orange-600"
-            ></div>
-          </button>
-
-          <button
-            @click="switchCamera"
-            class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <i class="fas fa-sync-alt text-white text-xl"></i>
-          </button>
+      <!-- 설명 -->
+      <div v-else class="p-8">
+        <div class="flex flex-col items-center justify-center gap-4 text-center">
+          <div class="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center">
+            <i class="fas fa-camera text-orange-500 text-4xl"></i>
+          </div>
+          <div class="space-y-2">
+            <p class="text-gray-700 font-semibold">사진을 촬영하세요</p>
+            <p class="text-gray-500 text-sm">
+              촬영한 사진은 피드의 첫 화면에 노출되며<br />실제로 경기를 진행했음을 증명해요
+            </p>
+          </div>
         </div>
+      </div>
 
-        <!-- 촬영 후 -->
-        <div v-else class="flex justify-center items-center gap-4">
+      <!-- 버튼 영역 -->
+      <div class="px-4 pb-4 space-y-3">
+        <button
+          v-if="!capturedImage"
+          @click="triggerCamera"
+          class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
+        >
+          <i class="fas fa-camera text-2xl"></i>
+          <span class="text-lg">사진 촬영하기</span>
+        </button>
+
+        <div v-else class="grid grid-cols-2 gap-3">
           <button
             @click="retake"
-            class="flex-1 py-3 px-6 rounded-xl bg-white/20 backdrop-blur-sm text-white font-semibold active:scale-95 transition-transform"
+            class="py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold active:scale-95 transition-all"
           >
-            <i class="fas fa-redo mr-2"></i>재촬영
+            <i class="fas fa-redo mr-2"></i>다시 촬영
           </button>
           <button
             @click="confirm"
-            class="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold shadow-lg active:scale-95 transition-transform"
+            class="py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all"
           >
             <i class="fas fa-check mr-2"></i>사용하기
           </button>
         </div>
+
+        <button
+          @click="$emit('cancel')"
+          class="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold active:scale-95 transition-all"
+        >
+          취소
+        </button>
       </div>
     </div>
+
+    <!-- 숨겨진 파일 입력 (카메라만) -->
+    <input
+      ref="cameraInputRef"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      @change="onImageChange"
+      class="hidden"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, defineProps, defineEmits } from 'vue'
+import { ref, watch, defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
   isVisible: {
@@ -106,106 +105,50 @@ const props = defineProps({
 
 const emit = defineEmits(['capture', 'cancel'])
 
-const videoElement = ref(null)
+const cameraInputRef = ref(null)
 const capturedImage = ref(null)
-const stream = ref(null)
-const currentFacingMode = ref('environment') // 'user' or 'environment'
+const selectedFile = ref(null)
 
-// 카메라 시작
-const startCamera = async () => {
-  try {
-    if (stream.value) {
-      stream.value.getTracks().forEach((track) => track.stop())
-    }
+// 카메라 트리거
+const triggerCamera = () => {
+  cameraInputRef.value?.click()
+}
 
-    const constraints = {
-      video: {
-        facingMode: currentFacingMode.value,
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-      },
-      audio: false,
-    }
-
-    stream.value = await navigator.mediaDevices.getUserMedia(constraints)
-    if (videoElement.value) {
-      videoElement.value.srcObject = stream.value
-    }
-  } catch (error) {
-    console.error('Camera access error:', error)
-    alert('카메라에 접근할 수 없습니다. 권한을 확인해주세요.')
-    emit('cancel')
+// 이미지 선택
+const onImageChange = (e) => {
+  const file = e.target.files?.[0]
+  if (file) {
+    selectedFile.value = file
+    capturedImage.value = URL.createObjectURL(file)
   }
-}
-
-// 카메라 전환
-const switchCamera = async () => {
-  currentFacingMode.value = currentFacingMode.value === 'user' ? 'environment' : 'user'
-  await startCamera()
-}
-
-// 사진 촬영
-const capturePhoto = () => {
-  if (!videoElement.value) return
-
-  const canvas = document.createElement('canvas')
-  canvas.width = videoElement.value.videoWidth
-  canvas.height = videoElement.value.videoHeight
-
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(videoElement.value, 0, 0, canvas.width, canvas.height)
-
-  capturedImage.value = canvas.toDataURL('image/jpeg', 0.9)
+  // input 초기화 (같은 파일 재선택 가능하도록)
+  e.target.value = ''
 }
 
 // 재촬영
 const retake = () => {
   capturedImage.value = null
+  selectedFile.value = null
 }
 
 // 확인
 const confirm = () => {
-  if (!capturedImage.value) return
-
-  // base64를 Blob으로 변환
-  fetch(capturedImage.value)
-    .then((res) => res.blob())
-    .then((blob) => {
-      const file = new File([blob], 'game-start-photo.jpg', { type: 'image/jpeg' })
-      emit('capture', file)
-    })
+  if (!selectedFile.value) return
+  emit('capture', selectedFile.value)
+  capturedImage.value = null
+  selectedFile.value = null
 }
 
-// 카메라 정리
-const stopCamera = () => {
-  if (stream.value) {
-    stream.value.getTracks().forEach((track) => track.stop())
-    stream.value = null
-  }
-}
-
-// isVisible 변경 감지
+// isVisible 변경 감지 - 닫힐 때 초기화
 watch(
   () => props.isVisible,
   (newVal) => {
-    if (newVal) {
+    if (!newVal) {
       capturedImage.value = null
-      startCamera()
-    } else {
-      stopCamera()
+      selectedFile.value = null
     }
   },
 )
-
-onMounted(() => {
-  if (props.isVisible) {
-    startCamera()
-  }
-})
-
-onUnmounted(() => {
-  stopCamera()
-})
 </script>
 
 <style scoped>

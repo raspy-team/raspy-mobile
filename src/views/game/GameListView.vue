@@ -1,11 +1,77 @@
 <template>
   <HeaderComp :has-referer="true" title="경기 목록" />
-  <div class="bg-white pb-16">
+  <div
+    class="bg-white pb-16"
+    ref="containerRef"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
+    @mousedown="handleMouseDown"
+    @mousemove="handleMouseMove"
+    @mouseup="handleMouseUp"
+    @mouseleave="handleMouseUp"
+  >
     <!-- Status Bar -->
     <div class="bg-white h-6 w-full"></div>
 
     <!-- Header with Logo and Actions -->
     <header class="px-4 py-3 mt-5"></header>
+
+    <!-- Pull to Refresh Indicator (새로고침 중) -->
+    <transition name="pull-fade">
+      <div
+        v-if="pullTriggered"
+        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
+      >
+        <div class="relative w-5 h-5">
+          <i class="fas fa-spinner fa-spin text-white text-lg"></i>
+        </div>
+        <span class="text-sm font-semibold text-white">새로고침 중...</span>
+      </div>
+    </transition>
+
+    <!-- Pull to Refresh Complete (완료) -->
+    <transition name="pull-fade">
+      <div
+        v-if="refreshComplete"
+        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
+      >
+        <div class="relative w-5 h-5 flex items-center justify-center">
+          <i class="fas fa-check text-white text-lg animate-bounce-in"></i>
+        </div>
+        <span class="text-sm font-semibold text-white">새로고침 완료!</span>
+      </div>
+    </transition>
+
+    <!-- Pull Indicator (당기는 중) -->
+    <transition name="pull-slide">
+      <div
+        v-if="isPulling && pullDistance > 20 && !pullTriggered"
+        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-white rounded-full shadow-2xl px-6 py-3 flex items-center gap-3 border-2"
+        :class="pullDistance > 80 ? 'border-orange-500' : 'border-gray-200'"
+        :style="{
+          opacity: Math.min(pullDistance / 80, 1),
+          transform: `translate(-50%, ${Math.min(pullDistance / 3, 30)}px)`
+        }"
+      >
+        <div class="relative w-5 h-5 flex items-center justify-center">
+          <i
+            class="fas text-lg transition-all duration-300"
+            :class="pullDistance > 80 ? 'fa-sync text-orange-500' : 'fa-arrow-down text-gray-400'"
+            :style="{
+              transform: pullDistance > 80 ? 'rotate(180deg)' : 'rotate(0deg)',
+              animation: pullDistance > 80 ? 'pulse 0.8s infinite' : 'none'
+            }"
+          ></i>
+        </div>
+        <span
+          class="text-sm font-semibold transition-colors"
+          :class="pullDistance > 80 ? 'text-orange-500' : 'text-gray-600'"
+        >
+          {{ pullDistance > 80 ? '놓아서 새로고침!' : '아래로 당기세요...' }}
+        </span>
+      </div>
+    </transition>
 
     <!-- Main Content -->
     <main class="pt-3 px-4 pb-4">
@@ -59,18 +125,6 @@
           </div>
         </div>
 
-        <!-- 추천 경기 타이틀 행 -->
-        <div class="flex items-center justify-between pt-0 pb-0 px-1">
-          <button
-            @click="fetchGames"
-            aria-label="새로고침"
-            class="ml-2 px-4 py-2 rounded-[10px] flex items-center justify-center border border-gray-200 shadow-sm bg-white"
-          >
-            <i v-if="!loading" class="fas fa-rotate-right text-orange-500 text-sm"></i>
-            <i v-else class="fas fa-spinner fa-spin text-orange-500 text-sm"></i>
-            <span class="ml-2 text-sm font-semibold text-orange-600"> 새로고침 </span>
-          </button>
-        </div>
         <div v-if="games.length > 0">
           <div
             @click="openModal(game)"
@@ -783,9 +837,134 @@ import Comment from '../GameCommentView.vue'
 
 const expanded = ref(false)
 const showScrollTop = ref(false)
-const handleScroll = () => {
-  showScrollTop.value = window.scrollY > 120 // 120px 넘게 스크롤 시 노출
+
+// Pull to Refresh 상태
+const pullTriggered = ref(false)
+const refreshComplete = ref(false)
+const startY = ref(0)
+const isPulling = ref(false)
+const pullDistance = ref(0)
+const containerRef = ref(null)
+const isMouseDown = ref(false)
+
+// 터치 이벤트
+const handleTouchStart = (e) => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+  if (scrollTop <= 0) {
+    startY.value = e.touches[0].clientY
+    isPulling.value = true
+    pullDistance.value = 0
+  }
 }
+
+const handleTouchMove = (e) => {
+  if (!startY.value) return
+
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+  if (scrollTop > 0) {
+    isPulling.value = false
+    pullDistance.value = 0
+    return
+  }
+
+  const currentY = e.touches[0].clientY
+  const diff = currentY - startY.value
+
+  if (diff > 5) {
+    isPulling.value = true
+    pullDistance.value = Math.min(diff, 150)
+    e.preventDefault()
+  } else {
+    pullDistance.value = 0
+  }
+}
+
+const handleTouchEnd = async () => {
+  if (isPulling.value && pullDistance.value > 80) {
+    pullTriggered.value = true
+    await fetchGames()
+    pullTriggered.value = false
+
+    // 완료 메시지 표시
+    refreshComplete.value = true
+    setTimeout(() => {
+      refreshComplete.value = false
+    }, 1500)
+  }
+
+  isPulling.value = false
+  pullDistance.value = 0
+  startY.value = 0
+}
+
+// 마우스 이벤트 (PC 테스트용)
+const handleMouseDown = (e) => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+  if (scrollTop <= 0) {
+    startY.value = e.clientY
+    isMouseDown.value = true
+    isPulling.value = true
+    pullDistance.value = 0
+  }
+}
+
+const handleMouseMove = (e) => {
+  if (!isMouseDown.value || !startY.value) return
+
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+  if (scrollTop > 0) {
+    isPulling.value = false
+    pullDistance.value = 0
+    return
+  }
+
+  const currentY = e.clientY
+  const diff = currentY - startY.value
+
+  if (diff > 5) {
+    isPulling.value = true
+    pullDistance.value = Math.min(diff, 150)
+    e.preventDefault()
+  } else {
+    pullDistance.value = 0
+  }
+}
+
+const handleMouseUp = async () => {
+  if (!isMouseDown.value) return
+
+  if (isPulling.value && pullDistance.value > 80) {
+    pullTriggered.value = true
+    await fetchGames()
+    pullTriggered.value = false
+
+    // 완료 메시지 표시
+    refreshComplete.value = true
+    setTimeout(() => {
+      refreshComplete.value = false
+    }, 1500)
+  }
+
+  isMouseDown.value = false
+  isPulling.value = false
+  pullDistance.value = 0
+  startY.value = 0
+}
+
+const handleScroll = () => {
+  showScrollTop.value = window.scrollY > 120
+
+  // 스크롤 중에는 pull 상태 초기화
+  if (window.scrollY > 0) {
+    isPulling.value = false
+    pullDistance.value = 0
+  }
+}
+
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -793,6 +972,7 @@ const scrollToTop = () => {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
 })
+
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
@@ -1083,5 +1263,57 @@ input[type='number']::-webkit-outer-spin-button {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+/* Pull to Refresh 애니메이션 */
+.pull-fade-enter-active,
+.pull-fade-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pull-fade-enter-from {
+  opacity: 0;
+  transform: translate(-50%, -20px) scale(0.9);
+}
+.pull-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -10px) scale(0.95);
+}
+
+.pull-slide-enter-active,
+.pull-slide-leave-active {
+  transition: all 0.2s ease-out;
+}
+.pull-slide-enter-from,
+.pull-slide-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -10px);
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
 }
 </style>

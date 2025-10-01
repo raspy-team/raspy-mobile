@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full">
+  <div class="h-full min-h-screen bg-white dark:bg-base-dark text-gray-900 dark:text-dark dark">
     <!-- Splash 화면 (anroid는 네이티브 위임, ios일때만 보임.) -->
     <transition name="fade">
       <div class="overflow-hidden">

@@ -1,19 +1,19 @@
 <template>
-  <header class="fixed top-0 left-0 w-full z-[30] border border-gray-100 bg-[#fff] raspy-top">
+  <header class="fixed top-0 left-0 w-full z-[30] border border-gray-100 bg-[#fff] dark:bg-surface-dark raspy-top">
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14">
         <router-link v-if="props.hasReferer != true" to="/" class="font-bold text-[#f97316]">
           <span class="RASPY mx-1">Match</span>
         </router-link>
-        <button v-else @click="goBack" class="text-black text-lg">
+  <button v-else @click="goBack" class="text-black dark:text-text-dark text-lg">
           <i class="fas fa-chevron-left"></i>
         </button>
       </div>
       <!-- 중앙: 타이틀 (hasReferer일 때만 표시) -->
       <div
         v-if="props.hasReferer == true"
-        class="absolute left-1/2 transform -translate-x-1/2 text-black text-sm py-[50px] font-light"
+        class="absolute left-1/2 transform -translate-x-1/2 text-black dark:text-text-dark text-sm py-[50px] font-light"
       >
         {{ props.title }}
       </div>
@@ -22,7 +22,7 @@
         <!-- DM 버튼 -->
         <router-link
           to="/dm"
-          class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full bg-white hover:bg-orange-50 transition ml-1"
+          class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full bg-white dark:bg-card-dark hover:bg-orange-50 dark:hover:bg-surface-dark transition ml-1"
           title="DM"
         >
           <i class="fas fa-paper-plane text-orange-500 text-xl"></i>
@@ -30,7 +30,7 @@
 
         <!-- 알림 버튼  -->
         <button
-          class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full bg-white hover:bg-orange-50 transition"
+          class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full bg-white dark:bg-card-dark hover:bg-orange-50 dark:hover:bg-surface-dark transition"
           @click="toggleNotificationPanel"
         >
           <i class="fas fa-bell text-orange-500 text-xl"></i>

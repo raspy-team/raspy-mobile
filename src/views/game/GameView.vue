@@ -303,7 +303,7 @@
                 @click.stop="goDM(game.ownerId)"
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-[8px]"
               >
-                <i class="fas fa-paper-plane"></i> 채팅
+                <i class="fas fa-paper-plane"></i> DM
               </button>
               <button
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"
@@ -342,7 +342,7 @@
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-[8px]"
                 @click.stop="goDM(game.opponentId || game.ownerId)"
               >
-                <i class="fas fa-paper-plane"></i> 채팅
+                <i class="fas fa-paper-plane"></i> DM
               </button>
               <button
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"

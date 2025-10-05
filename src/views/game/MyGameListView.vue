@@ -1,6 +1,6 @@
 <template>
   <HeaderComp />
-  <div ref="container" class="h-full pt-24 pb-28 px-5 max-w-md mx-auto space-y-0 bg-white dark:bg-base-dark">
+  <div ref="container" class="h-full pt-24 pb-28 px-5 max-w-md mx-auto space-y-0">
     <template v-if="!isLoading && games.length > 0">
       <div class="space-y-6 pb-[15dvh]">
         <div
@@ -9,7 +9,7 @@
           :ref="setGameRef"
           :id="`game-${game.id}`"
           @click="openRuleModal(game.rule)"
-          class="mb-8 w-full rounded-2xl border border-orange-100 shadow-xl bg-white/95 dark:bg-surface-dark hover:shadow-2xl transition-shadow"
+          class="mb-8 w-full rounded-2xl border border-orange-100 shadow-xl bg-white/95 hover:shadow-2xl transition-shadow"
         >
           <div class="flex justify-between items-center">
             <div class="flex-[2] p-5 pb-0 flex flex-col w-full justify-between">
@@ -25,7 +25,7 @@
                     </div>
                   </div>
                   <div>
-                    <span class="text-base font-extrabold text-gray-900 dark:text-white truncate block">
+                    <span class="text-base font-extrabold text-gray-900 truncate block">
                       {{ game.rule.ruleTitle }}
                     </span>
                     <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -74,27 +74,27 @@
               <div class="relative">
                 <img
                   :src="game.myProfileUrl"
-                  class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white dark:bg-card-dark"
+                  class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white"
                 />
                 <span
                   class="absolute bottom-0 right-0 bg-orange-400 text-xs text-white font-bold px-1.5 py-0.5 rounded-lg shadow"
                   >나</span
                 >
               </div>
-              <div class="text-gray-700 dark:text-white font-[600] text-sm">
+              <div class="text-gray-700 font-[600] text-sm">
                 {{ game.myNickname }}
               </div>
-              <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 dark:text-white tracking-wider">
+              <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 tracking-wider">
                 <div>
-                  <span class="block text-gray-400 dark:text-white font-medium">승</span>
+                  <span class="block text-gray-400 font-medium">승</span>
                   <span class="text-base text-orange-500">{{ game.myStatistics.wins }}</span>
                 </div>
                 <div>
-                  <span class="block text-gray-400 dark:text-white font-medium">무</span>
+                  <span class="block text-gray-400 font-medium">무</span>
                   <span class="text-base text-blue-400">{{ game.myStatistics.draws }}</span>
                 </div>
                 <div>
-                  <span class="block text-gray-400 dark:text-white font-medium">패</span>
+                  <span class="block text-gray-400 font-medium">패</span>
                   <span class="text-base text-red-400">{{ game.myStatistics.losses }}</span>
                 </div>
               </div>
@@ -114,26 +114,26 @@
                 </div>
                 <img
                   :src="game.opponentProfileUrl"
-                  class="w-14 h-14 rounded-full border-2 border-gray-200 shadow bg-gradient-to-tr from-gray-100 to-blue-100 dark:bg-card-dark"
+                  class="w-14 h-14 rounded-full border-2 border-gray-200 shadow bg-gradient-to-tr from-gray-100 to-blue-100"
                 />
-                <div class="text-gray-700 dark:text-white font-[600] text-sm">
+                <div class="text-gray-700 font-[600] text-sm">
                   {{ game.opponentNickname }}
                 </div>
-                <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 dark:text-white tracking-wider">
+                <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 tracking-wider">
                   <div>
-                    <span class="block text-gray-400 dark:text-white font-medium">승</span>
+                    <span class="block text-gray-400 font-medium">승</span>
                     <span class="text-base text-orange-500">
                       {{ game.opponentStatistics?.wins ?? '-' }}
                     </span>
                   </div>
                   <div>
-                    <span class="block text-gray-400 dark:text-white font-medium">무</span>
+                    <span class="block text-gray-400 font-medium">무</span>
                     <span class="text-base text-blue-400">
                       {{ game.opponentStatistics?.draws ?? '-' }}
                     </span>
                   </div>
                   <div>
-                    <span class="block text-gray-400 dark:text-white font-medium">패</span>
+                    <span class="block text-gray-400 font-medium">패</span>
                     <span class="text-base text-red-400">
                       {{ game.opponentStatistics?.losses ?? '-' }}
                     </span>
@@ -144,10 +144,10 @@
                 <div
                   class="w-14 h-14 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-full border border-gray-200 flex items-center justify-center"
                 >
-                  <i class="fas fa-user-clock text-2xl text-gray-400 dark:text-white"></i>
+                  <i class="fas fa-user-clock text-2xl text-gray-400"></i>
                 </div>
                 <div
-                  class="flex gap-1 mt-2 font-semibold text-xs text-gray-400 dark:text-white opacity-70 tracking-wide"
+                  class="flex gap-1 mt-2 font-semibold text-xs text-gray-400 opacity-70 tracking-wide"
                 >
                   <span>-</span><span>-</span><span>-</span>
                 </div>
@@ -159,7 +159,7 @@
           <div class="px-5 pb-5 space-y-2">
             <!-- 장소 & 날짜 -->
             <div
-              class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 dark:text-white gap-1 mb-2"
+              class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
             >
               <div class="flex items-center gap-2">
                 <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
@@ -201,7 +201,7 @@
               <i class="fas fa-share mr-2"></i>경기 공유하기
             </button>
 
-            <div v-else class="text-center text-gray-400 dark:text-white text-sm py-3">경기 시작 대기 중</div>
+            <div v-else class="text-center text-gray-400 text-sm py-3">경기 시작 대기 중</div>
           </div>
         </div>
       </div>
@@ -212,7 +212,7 @@
       <div
         v-for="n in 2"
         :key="n"
-  class="mb-8 rounded-2xl border border-orange-100 shadow-xl bg-white/90 dark:bg-surface-dark animate-pulse"
+        class="mb-8 rounded-2xl border border-orange-100 shadow-xl bg-white/90 animate-pulse"
       >
         <div class="flex justify-between items-center px-7 pt-1 pb-4">
           <div class="flex-1 flex flex-col items-center gap-1">
@@ -254,7 +254,7 @@
     </div>
 
     <template v-else>
-  <div class="text-center text-gray-400 dark:text-white py-10 font-light text-md">
+      <div class="text-center text-gray-400 py-10 font-light text-md">
         진행 예정인 게임이 없습니다.
       </div>
     </template>
@@ -273,7 +273,7 @@
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
       <div class="mb-4">
-  <label class="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
           <i class="fas fa-search mr-1 text-orange-500"></i>
           장소 검색
         </label>
@@ -287,10 +287,10 @@
           />
           <i
             v-if="!searchQuery"
-            class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-white"
+            class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"
           ></i>
         </div>
-  <p class="text-xs text-gray-400 dark:text-white mt-2">
+        <p class="text-xs text-gray-400 mt-2">
           <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
           장소명이나 주소를 입력하면 자동으로 검색됩니다
         </p>
@@ -300,8 +300,8 @@
         <div class="flex items-start gap-3">
           <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-800 dark:text-white mb-1">{{ selectedPlace.name }}</p>
-            <p class="text-sm text-gray-600 dark:text-white">{{ selectedPlace.address }}</p>
+            <p class="font-semibold text-gray-800 mb-1">{{ selectedPlace.name }}</p>
+            <p class="text-sm text-gray-600">{{ selectedPlace.address }}</p>
           </div>
           <button @click="clearSelection" class="text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-times"></i>

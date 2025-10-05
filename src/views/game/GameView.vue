@@ -5,28 +5,8 @@
     <!-- 상단 메뉴 버튼 -->
     <div class="flex gap-2 pt-3">
       <button
-        @click="router.push('/game-list')"
-        class="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-colors shadow-sm"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M2 4h12M2 8h12M2 12h12"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-        <span>경기 리스트</span>
-      </button>
-      <button
         @click="router.push('/rules')"
-        class="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-white text-gray-900 text-sm font-semibold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 flex items-center justify-center gap-2 py-4 px-4 bg-white text-gray-900 text-lg font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -48,7 +28,27 @@
             stroke-linecap="round"
           />
         </svg>
-        <span>규칙</span>
+  <span>규칙</span>
+      </button>
+      <button
+        @click="router.push('/game-list')"
+        class="flex-1 flex items-center justify-center gap-2 py-4 px-4 bg-white text-gray-900 text-lg font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M2 4h12M2 8h12M2 12h12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+  <span>경기</span>
       </button>
     </div>
 

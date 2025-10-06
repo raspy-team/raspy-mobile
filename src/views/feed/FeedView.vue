@@ -828,7 +828,9 @@
             :class="[post?.isLiked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
             v-html="post?.isLiked ? icons.heartFill : icons.heart"
           ></span>
-          <span class="text-[10px] mt-1">또 보고싶어</span>
+          <span class="text-[10px] mt-1">
+            {{ post.likeCount }}
+          </span>
         </button>
         <button
           v-if="post.type === 'game' && post.isCompleted"

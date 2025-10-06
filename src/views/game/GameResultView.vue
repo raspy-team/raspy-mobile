@@ -1,6 +1,5 @@
 <template>
-  <div class="pb-[200px] relative overflow-hidden">
-    
+  <div class="pb-[200px]">
     <!-- 📌 로딩 오버레이 -->
     <div
       v-if="isLoading"
@@ -10,42 +9,42 @@
     </div>
 
     <!-- 🎉 게임 결과 화면 -->
-  <div v-else class="max-w-xl pb-16 mx-auto px-2 py-2 space-y-2 text-center">
+    <div v-else class="max-w-xl pb-24 mx-auto px-4 py-6 space-y-8 text-center">
       <!-- 승패 결과 -->
-  <div v-if="winnerIdx != 0" class="space-y-0.5">
+      <div v-if="winnerIdx != 0" class="space-y-2">
         <div v-if="user1.id == currentUserId">
-          <template v-if="!((championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect))">
-            <h2
-              v-if="winnerIdx == 1"
-              class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
-              style="animation: gradient-x 2.5s linear infinite;"
-            >
-              승리하셨습니다!
-            </h2>
-            <h2
-              v-else
-              class="text-3xl font-extrabold text-gray-500"
-            >
-              패배하셨습니다.
-            </h2>
-          </template>
+          <i
+            :class="
+              winnerIdx == 1 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'
+            "
+            class="text-5xl mb-2"
+          ></i>
+          <h2
+            class="text-3xl font-extrabold"
+            :class="winnerIdx == 1 ? 'text-orange-500' : 'text-gray-500'"
+          >
+            {{ winnerIdx == 1 ? '승리!' : '패배' }}
+          </h2>
+          <p class="text-orange-600 mt-2" v-if="winnerIdx == 1">
+            축하합니다 {{ user1.nickname }}님!
+          </p>
         </div>
         <div v-else-if="user2.id == currentUserId">
-          <template v-if="!((championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect))">
-            <h2
-              v-if="winnerIdx == 2"
-              class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
-              style="animation: gradient-x 2.5s linear infinite;"
-            >
-              승리하셨습니다!
-            </h2>
-            <h2
-              v-else
-              class="text-3xl font-extrabold text-gray-500"
-            >
-              패배하셨습니다.
-            </h2>
-          </template>
+          <i
+            :class="
+              winnerIdx == 2 ? 'fas fa-trophy text-orange-500' : 'fas fa-times-circle text-gray-400'
+            "
+            class="text-5xl mb-2"
+          ></i>
+          <h2
+            class="text-3xl font-extrabold"
+            :class="winnerIdx == 2 ? 'text-orange-500' : 'text-gray-500'"
+          >
+            {{ winnerIdx == 2 ? '승리!' : '패배' }}
+          </h2>
+          <p class="text-orange-600 mt-2" v-if="winnerIdx == 2">
+            축하합니다 {{ user2.nickname }}님!
+          </p>
         </div>
       </div>
 
@@ -54,9 +53,9 @@
         <h2 class="text-3xl font-bold text-gray-500">무승부</h2>
       </div>
 
-      <!-- 챔피언 여부 카드: 승/패 모두 동일 문구와 스타일 -->
+      <!-- 챔피언 여부 카드 -->
       <div
-        v-if="(championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
+        v-if="(championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect)"
         class="relative max-w-md mx-auto my-8 px-6 py-10 rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center champion-card-glow"
       >
         <div class="absolute inset-0 z-0 pointer-events-none champion-card-bg"></div>
@@ -67,46 +66,128 @@
         <div class="relative z-20 flex flex-col items-center">
           <i class="fas fa-crown text-5xl mb-3 text-white drop-shadow champion-glow-anim"></i>
           <h2 class="text-2xl font-extrabold text-white mb-1 drop-shadow champion-glow-anim">
-            오늘 새로운 챔피언이 탄생합니다.
+            CHAMPION
           </h2>
+          <span class="text-lg font-semibold text-white mb-2">
+            축하합니다, {{ user1.nickname }}님!
+          </span>
+          <span class="text-base text-white/90">새로운 챔피언 타이틀을 획득하셨습니다.</span>
         </div>
       </div>
 
+      <div
+        v-if="(championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
+        class="relative max-w-md mx-auto my-8 px-6 py-8 rounded-2xl bg-gray-100 flex flex-col items-center border border-gray-200 shadow"
+      >
+        <i class="fas fa-frown text-2xl text-gray-400 mb-2"></i>
+        <span class="text-base font-bold text-gray-700 mb-1">챔피언 타이틀을 빼앗겼습니다</span>
+        <span class="text-xs text-gray-400">다음 기회를 노려보세요!</span>
+      </div>
 
-      <!-- ...existing code... -->
+      <!-- 게임 정보 카드 (아이콘 포함) -->
+      <div class="bg-white p-5 rounded-2xl shadow space-y-4 text-left border">
+        <div class="text-sm font-medium text-gray-700 flex justify-start items-center">
+          <span class="text-xs text-gray-500 flex flex-col gap-1">
+            <div>
+              <i class="fas fa-map-marker-alt"></i>
+              {{ game.matchLocation || '장소미정' }}
+            </div>
+            <div>
+              <i class="fas fa-calendar-alt"></i>
+              {{ formatDate(startDate) }}
+            </div>
+          </span>
+        </div>
 
-  <div class="flex justify-around items-center py-4">
+        <div class="flex justify-around items-center py-4">
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">{{ user1SetCount }}</p>
             <img
               :src="user1.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
             <p class="text-sm font-semibold">{{ user1.nickname }}</p>
+            <p class="text-2xl font-bold text-orange-500">{{ user1SetCount }}</p>
           </div>
-          <div class="flex flex-col items-center mx-6 sm:mx-20">
-            <span class="text-base sm:text-xl font-bold text-orange-900 mb-2 select-none">경기 종료</span>
-            <span class="text-[5rem] sm:text-[8rem] font-extrabold text-orange-300 select-none leading-none self-center flex items-center" style="line-height:1;">:</span>
+          <div class="text-center text-xs text-gray-500">
+            <p class="mb-1">세트</p>
+            <p class="text-lg font-bold">{{ totalSetCount }}</p>
           </div>
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">{{ user2SetCount }}</p>
             <img
               :src="user2.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
             <p class="text-sm font-semibold">{{ user2.nickname }}</p>
+            <p class="text-2xl font-bold text-orange-500">{{ user2SetCount }}</p>
           </div>
         </div>
       </div>
 
+      <!-- 세트 결과 -->
+<div class="bg-gray-50 p-4 rounded-xl shadow space-y-3">
+  <div class="flex items-center justify-between">
+    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+      <i class="fas fa-list-ul"></i> 세트 결과
+    </h3>
+    <span
+      @click="showSetResults = !showSetResults"
+      class="flex items-center gap-1 select-none cursor-pointer text-orange-500 hover:text-orange-600 transition font-medium"
+      style="user-select: none;"
+    >
+      <span class="hidden sm:inline">{{ showSetResults ? '접기' : '펼치기' }}</span>
+      <i
+        :class="[
+          'fas transition-transform duration-200',
+          showSetResults ? 'fa-chevron-up' : 'fa-chevron-down'
+        ]"
+      ></i>
+    </span>
+  </div>
+  <transition name="fade">
+    <ul v-if="showSetResults" class="space-y-2">
+      <li
+        v-for="set in setResults"
+        :key="set.setIdx"
+        class="flex justify-between items-center bg-white p-3 rounded-lg shadow border text-sm"
+      >
+        <span>{{ set.setIdx }}세트</span>
+        <span v-if="idxCorrect">
+          {{ set.user1Score }} : {{ set.user2SCore }}
+          <i
+            :class="
+              set.winnerIdx == 1
+                ? 'fas fa-check-circle text-orange-500 ml-1'
+                : set.winnerIdx == 2
+                  ? 'fas fa-check-circle text-orange-500 ml-1'
+                  : 'fas fa-minus-circle text-gray-400 ml-1'
+            "
+          ></i>
+        </span>
+        <span v-else>
+          {{ set.user2SCore }} : {{ set.user1Score }}
+          <i
+            :class="
+              set.winnerIdx == 2
+                ? 'fas fa-check-circle text-orange-500 ml-1'
+                : set.winnerIdx == 1
+                  ? 'fas fa-check-circle text-orange-500 ml-1'
+                  : 'fas fa-minus-circle text-gray-400 ml-1'
+            "
+          ></i>
+        </span>
+      </li>
+    </ul>
+  </transition>
+</div>
 
 
       <!-- 리뷰 남기기 -->
       <div
-        class="p-2 space-y-1 text-left"
+        v-if="!reviewSubmitted"
+        class="bg-white p-5 rounded-xl shadow space-y-4 text-left border"
       >
-        <h3 class="text-lg font-bold text-gray-800">
-          {{ (user1.id == currentUserId ? user2.nickname : user1.nickname) }} 님을 평가해주세요
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-comment-dots"></i> 상대 리뷰 남기기
         </h3>
 
         <div class="space-y-1">
@@ -115,7 +196,7 @@
             <i
               v-for="n in 5"
               :key="'manner' + n"
-              @click="setManner(n)"
+              @click="review.manner = n"
               :class="
                 n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-300'
               "
@@ -130,7 +211,7 @@
             <i
               v-for="n in 5"
               :key="'perf' + n"
-              @click="setPerformance(n)"
+              @click="review.performance = n"
               :class="
                 n <= review.performance
                   ? 'fas fa-fire text-orange-400'
@@ -141,53 +222,35 @@
           </div>
         </div>
 
+        <textarea
+          v-model="review.text"
+          rows="4"
+          class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          placeholder="텍스트 리뷰 (선택)"
+        ></textarea>
+
         <button
-          @click="showReviewModal = true"
-          class="w-full border border-gray-300 rounded-lg p-3 text-sm text-left text-gray-700 bg-white hover:bg-orange-50 transition"
+          @click="submitReview"
+          class="w-full bg-orange-500 text-white py-3 rounded-[7px] font-bold shadow hover:brightness-110 transition"
         >
-          <span v-if="review.text && review.text.length > 0">{{ review.text }}</span>
-          <span v-else class="text-gray-400">텍스트 리뷰 (선택)</span>
+          리뷰 등록
         </button>
-
-        <!-- Fullscreen review modal -->
-        <div v-if="showReviewModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center">
-          <div class="bg-white w-full h-full max-w-md mx-auto flex flex-col">
-            <div class="flex items-center justify-between p-4 border-b">
-              <span class="font-bold text-lg">리뷰 작성</span>
-              <button @click="showReviewModal = false" class="text-orange-500 font-bold text-base">닫기</button>
-            </div>
-            <textarea
-              v-model="review.text"
-              class="flex-1 w-full p-4 text-base focus:outline-none resize-none bg-transparent"
-              placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요."
-              style="min-height: 60vh;"
-              autofocus
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- 리뷰 등록 버튼 제거 -->
       </div>
 
-      <div class="flex justify-center gap-3 mt-4">
-        <button class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow">친구 추가</button>
-        <button class="px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold shadow">결과 공유</button>
-      </div>
       <CustomToast />
     </div>
-  <!-- ...existing code... -->
+  </div>
   
 
         <button
-        @click="submitReviewAndGoHome"
+        @click="goHome"
         class="w-full fixed bottom-0 left-0 text-gray-800  py-2 py-[16px] raspy-bot  bg-orange-500 text-white"
       >
-        제출하기
+        나가기
       </button>
 </template>
 
 <script setup>
-// ...existing code...
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -196,47 +259,12 @@ import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 
 const { showToast } = useToast()
-const showReviewModal = ref(false)
-
-// 자동 제출 함수들
-function setManner(n) {
-  review.value.manner = n
-}
-function setPerformance(n) {
-  review.value.performance = n
-}
-
-function submitReviewAndGoHome() {
-  // 리뷰 제출
-  if (review.value.manner === 0 || review.value.performance === 0) {
-    showToast('매너와 퍼포먼스 평점을 모두 입력해주세요.');
-    return;
-  }
-  const bannedWords = [
-    'fuck','shit','asshole','bitch','bastard','dick','fucking','fucker','cunt','nigger','slut','whore','sex','sexy','nazi','motherfucker',
-    '씨발','시발','씨바','ㅆㅂ','ㅅㅂ','ㅂㅅ','병신','새끼','좆','애미','개새끼','지랄','염병','꺼져','죽어','멍청','저능','존나','ㅄ','ㄱㅐ','ㅈㄴ','개같','더럽','섹스','자지','보지','딸딸이','빨아','꼬추','보빨','조까','좇','애비','년놈','암캐','걸레','쓰레기','창녀','미친놈','미친년',
-  ];
-  const lowerText = (review.value.text || '').toLowerCase();
-  const found = bannedWords.find((word) => lowerText.includes(word));
-  if (found) {
-    showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`);
-    return;
-  }
-  api.post(`/api/games/${gameId}/review`, review.value)
-    .then(() => {
-      showToast('리뷰가 제출되었습니다.');
-      goHome();
-    })
-    .catch(() => {
-      showToast('잘못된 접근입니다.');
-    });
-}
 const route = useRoute()
 const router = useRouter()
 const gameId = route.params.gameId
 
 const isLoading = ref(true)
-// removed reviewSubmitted, always show review UI
+const reviewSubmitted = ref(false)
 const review = ref({ manner: 0, performance: 0, text: '' })
 const game = ref({})
 const user1 = ref({})
@@ -251,7 +279,7 @@ const winnerIdx = ref(0)
 const currentUserId = ref(0)
 const championIdx = ref(0)
 const idxCorrect = ref(true)
-// ...existing code...
+const showSetResults = ref(false)
 
 onMounted(async () => {
   try {
@@ -286,11 +314,95 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-// ...removed unused submitReview...
+const submitReview = async () => {
+  if (review.value.manner === 0 || review.value.performance === 0) {
+    showToast('매너와 퍼포먼스 평점을 모두 입력해 주세요.')
+    return
+  }
+
+  // ===== 비속어 검사 =====
+  const bannedWords = [
+    'fuck',
+    'shit',
+    'asshole',
+    'bitch',
+    'bastard',
+    'dick',
+    'fucking',
+    'fucker',
+    'cunt',
+    'nigger',
+    'slut',
+    'whore',
+    'sex',
+    'sexy',
+    'nazi',
+    'motherfucker',
+    '씨발',
+    '시발',
+    '씨바',
+    'ㅆㅂ',
+    'ㅅㅂ',
+    'ㅂㅅ',
+    '병신',
+    '새끼',
+    '좆',
+    '애미',
+    '개새끼',
+    '지랄',
+    '염병',
+    '꺼져',
+    '죽어',
+    '멍청',
+    '저능',
+    '존나',
+    'ㅄ',
+    'ㄱㅐ',
+    'ㅈㄴ',
+    '개같',
+    '더럽',
+    '섹스',
+    '자지',
+    '보지',
+    '딸딸이',
+    '빨아',
+    '꼬추',
+    '보빨',
+    '조까',
+    '좇',
+    '애비',
+    '년놈',
+    '암캐',
+    '걸레',
+    '쓰레기',
+    '창녀',
+    '미친놈',
+    '미친년',
+  ]
+
+  const lowerText = (review.value.comment || '').toLowerCase()
+  const found = bannedWords.find((word) => lowerText.includes(word))
+  if (found) {
+    showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`)
+    return
+  }
+
+  try {
+    await api.post(`/api/games/${gameId}/review`, review.value)
+    reviewSubmitted.value = true
+  } catch (err) {
+    console.error(err)
+    showToast('잘못된 접근입니다.')
+    reviewSubmitted.value = true
+  }
+}
 
 const goHome = () => router.push(`/profile/0?id=${gameId}`)
 
-// ...existing code...
+function formatDate(dateStr) {
+  const d = new Date(dateStr)
+  return d.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
+}
 </script>
 
 <style scoped>
@@ -361,18 +473,3 @@ const goHome = () => router.push(`/profile/0?id=${gameId}`)
 
 
 </style>
-
-@keyframes gradient-x {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-.animate-gradient-x {
-  animation: gradient-x 2.5s linear infinite;
-}

@@ -5,28 +5,8 @@
     <!-- 상단 메뉴 버튼 -->
     <div class="flex gap-2 pt-3">
       <button
-        @click="router.push('/game-list')"
-        class="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-colors shadow-sm"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M2 4h12M2 8h12M2 12h12"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-        <span>경기 리스트</span>
-      </button>
-      <button
         @click="router.push('/rules')"
-        class="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-white text-gray-900 text-sm font-semibold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-lg font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -48,7 +28,27 @@
             stroke-linecap="round"
           />
         </svg>
-        <span>규칙</span>
+  <span>규칙</span>
+      </button>
+      <button
+        @click="router.push('/game-list')"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-lg font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M2 4h12M2 8h12M2 12h12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+  <span>경기</span>
       </button>
     </div>
 
@@ -80,6 +80,7 @@
     <!-- 게임 목록 -->
     <template v-else>
       <div v-if="allGames.length" class="space-y-4">
+
         <div
           v-for="game in allGames"
           :key="game.id"
@@ -90,19 +91,8 @@
             getCardClass(game),
           ]"
         >
-          <!-- 타입 표시 (왼쪽 상단 라벨) -->
-          <div class="flex items-center gap-2 mb-2">
-            <span :class="['text-xs font-semibold', getTypeTextClass(game)]">
-              {{ getTypeLabel(game) }}
-            </span>
-            <div class="h-3 w-px bg-gray-300"></div>
-            <span class="text-xs font-semibold" :class="getStatusClass(game)">
-              {{ getStatusText(game) }}
-            </span>
-          </div>
-
-          <!-- 헤더 -->
-          <div class="flex justify-between items-start">
+          <!-- 규칙(게임명, 카테고리) 정보 최상단 -->
+          <div class="flex justify-between items-start mb-2">
             <div class="min-w-0 flex items-center gap-2">
               <div>
                 <img
@@ -121,6 +111,114 @@
                   <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- 타입/상태 라벨 아래로 이동 -->
+          <div class="flex items-center gap-2 mb-2">
+            <span :class="['text-xs font-semibold', getTypeTextClass(game)]">
+              {{ getTypeLabel(game) }}
+            </span>
+            <div class="h-3 w-px bg-gray-300"></div>
+            <span class="text-xs font-semibold" :class="getStatusClass(game)">
+              {{ getStatusText(game) }}
+            </span>
+          </div>
+
+          <!-- 도전자 버튼 및 모달 -->
+          <div class="mb-2">
+            <!-- Owner vs Opponent Profile Row -->
+            <div class="flex justify-between items-end mt-3 mb-1">
+              <!-- Owner -->
+              <div class="flex flex-col items-center flex-1">
+                <img
+                  :src="game.ownerProfileUrl || '/default.png'"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
+                  alt="Owner Profile"
+                />
+                <span class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center">{{ game.ownerNickname }}</span>
+              </div>
+              <!-- VS -->
+              <div class="flex flex-col items-center flex-1">
+                <span class="text-lg font-bold text-gray-400 mb-2">VS</span>
+              </div>
+              <!-- Opponent -->
+              <div class="flex flex-col items-center flex-1">
+                <img
+                  v-if="game.opponentProfileUrl"
+                  :src="game.opponentProfileUrl"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
+                  alt="Opponent Profile"
+                />
+                <div v-else class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow">
+                  <i class="fas fa-user text-2xl text-gray-400"></i>
+                </div>
+                <span class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center">
+                  {{ game.opponentNickname || '미정' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 도전자(신청자) 목록 모달 -->
+          <div
+            v-if="showApplicantsModal && selectedApplicantsGame && selectedApplicantsGame.id === game.id"
+            class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
+          >
+            <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
+              <button @click.stop="closeApplicantsModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+              </button>
+              <h2 class="text-lg font-bold mb-4 text-gray-900">도전자 목록</h2>
+              <div v-if="selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0" class="space-y-3">
+                <div
+                  v-for="user in selectedApplicantsGame.applicants"
+                  :key="user.userId"
+                  class="p-3 bg-gray-50 rounded-xl flex items-center justify-between"
+                >
+                  <router-link :to="'/profile/' + user.userId">
+                    <div class="flex items-center gap-3">
+                      <img
+                        :src="user.applicantProfileUrl || '/default.png'"
+                        class="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div class="space-y-1">
+                        <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                          {{ user.applicantNickname }}
+                          <champion-badge v-if="selectedApplicantsGame.championId == user.userId"></champion-badge>
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          {{ user.applicantGameStatisticsDTO.wins }}승
+                          {{ user.applicantGameStatisticsDTO.draws }}무
+                          {{ user.applicantGameStatisticsDTO.losses }}패 · 승률
+                          {{ getWinRate(user.applicantGameStatisticsDTO) }}%
+                        </p>
+                      </div>
+                    </div>
+                  </router-link>
+                  <div class="flex flex-col gap-2">
+                    <template v-if="selectedApplicantsGame.type === 'my-game'">
+                      <button
+                        v-if="!user.approved"
+                        @click.stop="approve(selectedApplicantsGame.id, user.userId)"
+                        :disabled="approvedExists(selectedApplicantsGame.applicants)"
+                        class="px-4 py-2 text-xs rounded-lg text-white font-semibold"
+                        :class="approvedExists(selectedApplicantsGame.applicants) ? 'bg-gray-300' : 'bg-orange-500 hover:bg-orange-600'"
+                      >
+                        승인
+                      </button>
+                      <button
+                        v-else
+                        @click.stop="cancelApproval(selectedApplicantsGame.id, user.userId)"
+                        class="px-4 py-2 text-xs rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200"
+                      >
+                        취소
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-center text-gray-400 text-sm py-6">신청자가 없습니다.</div>
             </div>
           </div>
 
@@ -150,7 +248,7 @@
           />
 
           <!-- 신청한 게임: 소유자 정보 -->
-          <div v-if="game.type === 'sent'" class="border-t border-gray-300 pt-3">
+          <div v-if="game.type === 'sent'" class="pt-3">
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -179,122 +277,79 @@
                 <champion-badge v-if="game.championId == game.ownerId"></champion-badge>
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-3 pt-3">
+            <div class="flex gap-2 pt-3">
               <button
                 v-if="game.status === 'REQUESTED'"
                 @click.stop="cancelRequest(game.id)"
-                class="flex items-center justify-center gap-2 text-red-400 text-sm border-[1px] border-red-400 py-3 rounded-[8px]"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-red-400 text-sm border-[1px] border-red-400 py-3 px-0 rounded-[8px]"
               >
                 <i class="fas fa-xmark"></i> 신청 취소
               </button>
               <button
                 v-else-if="game.status === 'APPROVED'"
-                class="flex items-center justify-center gap-2 bg-green-500 text-sm text-white border-[1px] py-3 rounded-[8px]"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-green-500 text-sm text-white border-[1px] py-3 px-0 rounded-[8px] opacity-70 cursor-not-allowed"
                 disabled
               >
                 <i class="fas fa-check"></i> 승인됨
               </button>
               <button
                 v-else-if="game.status === 'REJECTED'"
-                class="flex items-center justify-center gap-2 bg-[#afafaf] text-sm text-white border-[1px] py-3 rounded-[8px]"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-[#afafaf] text-sm text-white border-[1px] py-3 px-0 rounded-[8px] opacity-70 cursor-not-allowed"
                 disabled
               >
                 승인 거부됨
               </button>
               <button
                 @click.stop="goDM(game.ownerId)"
-                class="flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 rounded-[8px]"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-[8px]"
               >
                 <i class="fas fa-paper-plane"></i> DM
+              </button>
+              <button
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"
+                @click.stop="openApplicantsModal(game)"
+              >
+                도전자
               </button>
             </div>
           </div>
 
-          <!-- 내 게임: 신청자 목록 + 게임 시작 버튼 -->
+          <!-- 내 게임: 게임 시작 버튼만 표시 -->
           <div v-else-if="game.type === 'my-game'" class="space-y-3">
-            <!-- 신청자 목록 (있을 경우만 표시) -->
-            <div
-              v-if="game.applicants && game.applicants.length > 0"
-              class="border-t border-gray-300 pt-4 space-y-3"
-            >
-              <h4 class="text-sm font-semibold text-gray-700">신청자 목록</h4>
-              <div
-                v-for="user in game.applicants"
-                :key="user.userId"
-                class="p-3 bg-gray-50 rounded-xl flex items-center justify-between"
-              >
-                <router-link :to="'/profile/' + user.userId">
-                  <div class="flex items-center gap-3">
-                    <img
-                      :src="user.applicantProfileUrl || '/default.png'"
-                      class="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div class="space-y-1">
-                      <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                        {{ user.applicantNickname }}
-                        <champion-badge v-if="game.championId == user.userId"></champion-badge>
-                      </p>
-                      <p class="text-xs text-gray-500">
-                        {{ user.applicantGameStatisticsDTO.wins }}승
-                        {{ user.applicantGameStatisticsDTO.draws }}무
-                        {{ user.applicantGameStatisticsDTO.losses }}패 · 승률
-                        {{ getWinRate(user.applicantGameStatisticsDTO) }}%
-                      </p>
-                    </div>
-                  </div>
-                </router-link>
-                <div class="flex flex-col gap-2">
-                  <button
-                    v-if="!user.approved"
-                    @click.stop="approve(game.id, user.userId)"
-                    :disabled="approvedExists(game.applicants)"
-                    class="px-4 py-2 text-xs rounded-lg text-white font-semibold"
-                    :class="
-                      approvedExists(game.applicants)
-                        ? 'bg-gray-300'
-                        : 'bg-orange-500 hover:bg-orange-600'
-                    "
-                  >
-                    승인
-                  </button>
-                  <button
-                    v-else
-                    @click.stop="cancelApproval(game.id, user.userId)"
-                    class="px-4 py-2 text-xs rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200"
-                  >
-                    취소
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- 게임 시작/참여 버튼 -->
-            <div class="border-t border-gray-300 pt-3">
+            <div class="pt-3 flex gap-2">
               <button
                 v-if="game.status === 'IN_PROGRESS'"
-                class="w-full bg-orange-500 text-white font-bold rounded-xl py-3 shadow hover:bg-orange-400 transition active:scale-95"
+                class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
                 @click.stop="joinGame(game.id)"
               >
                 <i class="fas fa-sign-in-alt mr-2"></i>경기 참여
               </button>
-
               <button
                 v-else-if="game.isOwner && canStart(game)"
-                class="w-full bg-[#56b97b] text-white font-bold rounded-xl py-3 shadow transition active:scale-95"
+                class="flex-1 min-w-0 bg-[#56b97b] text-white font-bold rounded-xl py-3 px-0 shadow transition active:scale-95"
                 @click.stop="openStartModal(game)"
               >
                 <i class="fas fa-play mr-2"></i>경기 시작
               </button>
-
               <button
                 v-else-if="game.isOwner && !game.opponentNickname"
-                class="w-full bg-orange-500 text-white font-bold rounded-xl py-3 shadow transition active:scale-95"
+                class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow transition active:scale-95"
                 @click.stop="shareGame(game.id)"
               >
-                <i class="fas fa-share mr-2"></i>경기 공유하기
+                <i class="fas fa-share mr-2"></i>공유
               </button>
-
-              <div v-else class="text-center text-gray-400 text-sm py-3">경기 시작 대기 중</div>
+              <button
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-[8px]"
+                @click.stop="goDM(game.opponentId || game.ownerId)"
+              >
+                <i class="fas fa-paper-plane"></i> DM
+              </button>
+              <button
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"
+                @click.stop="openApplicantsModal(game)"
+              >
+                도전자
+              </button>
             </div>
           </div>
         </div>
@@ -439,6 +494,19 @@
 </template>
 
 <script setup>
+// 도전자(신청자) 모달 상태
+const showApplicantsModal = ref(false)
+const selectedApplicantsGame = ref(null)
+
+function openApplicantsModal(game) {
+  selectedApplicantsGame.value = game
+  showApplicantsModal.value = true
+}
+
+function closeApplicantsModal() {
+  showApplicantsModal.value = false
+  selectedApplicantsGame.value = null
+}
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '../../api/api'

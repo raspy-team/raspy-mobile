@@ -744,7 +744,7 @@
             </div>
           </section>
           <section
-            v-if="post.type === 'game' && post.isCompleted && currentRanking.length > 0"
+            v-if="post.type === 'game' && post.isCompleted && currentRankingStatus"
             class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
           >
             <div
@@ -752,67 +752,99 @@
             />
             <div class="ambient-overlay" />
             <div class="relative z-10 max-w-xl w-full">
-              <div class="flex items-center justify-between mb-2">
-                <div class="text-xl font-extrabold">게임 랭킹</div>
-                <div class="text-xs text-white/70">총 {{ currentRanking.length }}명</div>
-              </div>
-              <div class="text-[11px] text-white/60 mb-2">이 게임으로 순위가 변동됐어요</div>
-              <div
-                class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
-                @touchstart.stop
-                @touchmove.stop
-                @touchend.stop
-              >
+              <!-- 랭킹 데이터가 있는 경우 -->
+              <template v-if="currentRankingStatus === 'available' && currentRanking.length > 0">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-xl font-extrabold">게임 랭킹</div>
+                  <div class="text-xs text-white/70">총 {{ currentRanking.length }}명</div>
+                </div>
+                <div class="text-[11px] text-white/60 mb-2">이 게임으로 순위가 변동됐어요</div>
                 <div
-                  v-for="r in currentRanking"
-                  :key="r.userId"
-                  class="flex items-center gap-3 px-4 py-3 border-b border-white/10 last:border-b-0"
-                  :class="r.isPlayer ? 'bg-blue-400/10' : ''"
+                  class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
+                  @touchstart.stop
+                  @touchmove.stop
+                  @touchend.stop
                 >
                   <div
-                    class="w-10 text-center font-bold flex-shrink-0"
-                    :class="r.rankAfter <= 3 ? 'text-amber-300' : 'text-white'"
+                    v-for="r in currentRanking"
+                    :key="r.userId"
+                    class="flex items-center gap-3 px-4 py-3 border-b border-white/10 last:border-b-0"
+                    :class="r.isPlayer ? 'bg-blue-400/10' : ''"
                   >
-                    {{ r.rankAfter }}
-                  </div>
-                  <img
-                    :src="r.profilePicture || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
-                    class="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                  />
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                      <div class="truncate font-semibold">{{ r.nickname }}</div>
-                      <div
-                        v-if="r.isPlayer"
-                        class="px-1.5 py-0.5 bg-blue-400/20 border border-blue-300/30 text-blue-200 text-[10px] rounded-full flex-shrink-0"
-                      >
-                        참여자
+                    <div
+                      class="w-10 text-center font-bold flex-shrink-0"
+                      :class="r.rankAfter <= 3 ? 'text-amber-300' : 'text-white'"
+                    >
+                      {{ r.rankAfter }}
+                    </div>
+                    <img
+                      :src="r.profilePicture || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
+                      class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <div class="truncate font-semibold">{{ r.nickname }}</div>
+                        <div
+                          v-if="r.isPlayer"
+                          class="px-1.5 py-0.5 bg-blue-400/20 border border-blue-300/30 text-blue-200 text-[10px] rounded-full flex-shrink-0"
+                        >
+                          참여자
+                        </div>
+                      </div>
+                      <div class="text-[10px] text-white/70 truncate mt-0.5">
+                        레이팅 {{ r.ratingAfter }}
+                        <span
+                          v-if="r.ratingChange !== 0"
+                          :class="r.ratingChange > 0 ? 'text-emerald-300' : 'text-red-300'"
+                        >
+                          ({{ r.ratingChange > 0 ? '+' : '' }}{{ r.ratingChange }})
+                        </span>
                       </div>
                     </div>
-                    <div class="text-[10px] text-white/70 truncate mt-0.5">
-                      레이팅 {{ r.ratingAfter }}
-                      <span
-                        v-if="r.ratingChange !== 0"
-                        :class="r.ratingChange > 0 ? 'text-emerald-300' : 'text-red-300'"
+                    <div v-if="r.rankChange !== null && r.rankChange !== 0" class="flex-shrink-0">
+                      <div
+                        class="text-xs font-medium flex items-center gap-0.5"
+                        :class="r.rankChange > 0 ? 'text-emerald-300' : 'text-red-300'"
                       >
-                        ({{ r.ratingChange > 0 ? '+' : '' }}{{ r.ratingChange }})
-                      </span>
-                    </div>
-                  </div>
-                  <div v-if="r.rankChange !== null && r.rankChange !== 0" class="flex-shrink-0">
-                    <div
-                      class="text-xs font-medium flex items-center gap-0.5"
-                      :class="r.rankChange > 0 ? 'text-emerald-300' : 'text-red-300'"
-                    >
-                      <i
-                        :class="r.rankChange > 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"
-                        class="text-[10px]"
-                      ></i>
-                      {{ Math.abs(r.rankChange) }}
+                        <i
+                          :class="r.rankChange > 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"
+                          class="text-[10px]"
+                        ></i>
+                        {{ Math.abs(r.rankChange) }}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </template>
+
+              <!-- 랭킹 시스템 도입 전 경기인 경우 -->
+              <template v-else-if="currentRankingStatus === 'unavailable'">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-xl font-extrabold">게임 랭킹</div>
+                </div>
+                <div
+                  class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md p-8 text-center"
+                >
+                  <div class="mb-4">
+                    <div
+                      class="w-16 h-16 mx-auto bg-white/10 rounded-2xl flex items-center justify-center"
+                    >
+                      <i class="fas fa-clock text-3xl text-white/60"></i>
+                    </div>
+                  </div>
+                  <h3 class="text-lg font-bold text-white mb-2">랭킹 정보 없음</h3>
+                  <p class="text-sm text-white/70 leading-relaxed">
+                    이 경기는 랭킹 시스템 도입 이전에<br />
+                    진행된 경기입니다.
+                  </p>
+                  <div class="mt-4 pt-4 border-t border-white/10">
+                    <p class="text-xs text-white/50">
+                      <i class="fas fa-info-circle mr-1"></i>
+                      2025.10.07 이후 경기부터 랭킹이 기록됩니다
+                    </p>
+                  </div>
+                </div>
+              </template>
             </div>
           </section>
 

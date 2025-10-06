@@ -284,7 +284,7 @@ export function useFeed() {
 
     try {
       // URL에서 우선순위 게임 ID 확인
-      const priorityGameId = route?.query?.id
+      const priorityGameId = route?.query?.gameId
 
       if (FEED_MODE === 'test') {
         // 테스트 모드: 더미 데이터 사용

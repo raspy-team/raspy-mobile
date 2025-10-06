@@ -744,7 +744,7 @@
             </div>
           </section>
           <section
-            v-if="features.friendRanking"
+            v-if="post.type === 'game' && post.isCompleted && currentRanking.length > 0"
             class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
           >
             <div
@@ -753,10 +753,10 @@
             <div class="ambient-overlay" />
             <div class="relative z-10 max-w-xl w-full">
               <div class="flex items-center justify-between mb-2">
-                <div class="text-xl font-extrabold">친구 랭킹</div>
-                <div class="text-xs text-white/70">총 {{ friendsRanking.length }}명</div>
+                <div class="text-xl font-extrabold">게임 랭킹</div>
+                <div class="text-xs text-white/70">총 {{ currentRanking.length }}명</div>
               </div>
-              <div class="text-[11px] text-white/60 mb-2">오늘은 누구를 제칠까?</div>
+              <div class="text-[11px] text-white/60 mb-2">이 게임으로 순위가 변동됐어요</div>
               <div
                 class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
                 @touchstart.stop
@@ -764,33 +764,53 @@
                 @touchend.stop
               >
                 <div
-                  v-for="(f, i) in friendsRanking"
-                  :key="f.id"
-                  class="flex items-center gap-3 px-4 py-2 border-b border-white/10 last:border-b-0 cursor-pointer active:scale-[0.98] transition"
-                  :class="i < 3 ? 'bg-amber-400/5' : ''"
-                  @click="goFriendProfile(f)"
+                  v-for="r in currentRanking"
+                  :key="r.userId"
+                  class="flex items-center gap-3 px-4 py-3 border-b border-white/10 last:border-b-0"
+                  :class="r.isPlayer ? 'bg-blue-400/10' : ''"
                 >
                   <div
-                    class="w-8 text-center font-bold"
-                    :class="i < 3 ? 'text-amber-300' : 'text-white'"
+                    class="w-10 text-center font-bold flex-shrink-0"
+                    :class="r.rankAfter <= 3 ? 'text-amber-300' : 'text-white'"
                   >
-                    {{ i + 1 }}
+                    {{ r.rankAfter }}
                   </div>
-                  <img :src="f.avatar" class="w-8 h-8 rounded-full object-cover" />
+                  <img
+                    :src="r.profilePicture || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
+                    class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                  />
                   <div class="flex-1 min-w-0">
-                    <div class="truncate">{{ f.name }}</div>
-                    <div class="text-[10px] text-white/70 truncate">
-                      최근 경기 {{ f.recentGames }} · 승률 {{ (f.winRate * 100).toFixed(0) }}%
+                    <div class="flex items-center gap-2">
+                      <div class="truncate font-semibold">{{ r.nickname }}</div>
+                      <div
+                        v-if="r.isPlayer"
+                        class="px-1.5 py-0.5 bg-blue-400/20 border border-blue-300/30 text-blue-200 text-[10px] rounded-full flex-shrink-0"
+                      >
+                        참여자
+                      </div>
+                    </div>
+                    <div class="text-[10px] text-white/70 truncate mt-0.5">
+                      레이팅 {{ r.ratingAfter }}
+                      <span
+                        v-if="r.ratingChange !== 0"
+                        :class="r.ratingChange > 0 ? 'text-emerald-300' : 'text-red-300'"
+                      >
+                        ({{ r.ratingChange > 0 ? '+' : '' }}{{ r.ratingChange }})
+                      </span>
                     </div>
                   </div>
-                  <div v-if="f.isFriend" class="text-xs text-white/80">팔로우 됨</div>
-                  <button
-                    v-else
-                    class="px-2 py-1 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-xs active:scale-95"
-                    @click.stop="makeFriend(i)"
-                  >
-                    팔로우
-                  </button>
+                  <div v-if="r.rankChange !== null && r.rankChange !== 0" class="flex-shrink-0">
+                    <div
+                      class="text-xs font-medium flex items-center gap-0.5"
+                      :class="r.rankChange > 0 ? 'text-emerald-300' : 'text-red-300'"
+                    >
+                      <i
+                        :class="r.rankChange > 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"
+                        class="text-[10px]"
+                      ></i>
+                      {{ Math.abs(r.rankChange) }}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1175,7 +1195,7 @@ onMounted(() => {
   console.log('FeedView onMounted 실행')
   fetchNotifications()
   console.log('loadFeed 호출 예정')
-  loadFeed()
+  loadFeed(router.currentRoute.value)
 })
 // 현재 표시 중인 피드 인덱스
 const currentFeedIndex = ref(0)
@@ -1190,6 +1210,7 @@ watch(
   async (newPost) => {
     if (newPost && newPost.type === 'game' && newPost.isCompleted) {
       await fetchLikeStatus(newPost)
+      await fetchRanking(newPost)
     }
   },
   { immediate: true },
@@ -1214,6 +1235,39 @@ async function fetchLikeStatus(gamePost) {
     }
   }
 }
+
+// 랭킹 데이터 저장
+const gameRankings = ref(new Map())
+const rankingStatus = ref(new Map()) // 'available', 'unavailable', 'error'
+
+async function fetchRanking(gamePost) {
+  try {
+    const response = await api.get(`/api/games/${gamePost.id}/ranking`)
+    gameRankings.value.set(gamePost.id, response.data.rankings || [])
+    rankingStatus.value.set(gamePost.id, 'available')
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.log('랭킹 시스템 도입 전 경기')
+      rankingStatus.value.set(gamePost.id, 'unavailable')
+    } else {
+      console.error('랭킹 조회 실패:', error)
+      rankingStatus.value.set(gamePost.id, 'error')
+    }
+    gameRankings.value.set(gamePost.id, [])
+  }
+}
+
+// 현재 포스트의 랭킹 데이터
+const currentRanking = computed(() => {
+  if (!post.value || !post.value.id) return []
+  return gameRankings.value.get(post.value.id) || []
+})
+
+// 현재 포스트의 랭킹 상태
+const currentRankingStatus = computed(() => {
+  if (!post.value || !post.value.id) return null
+  return rankingStatus.value.get(post.value.id) || null
+})
 
 // ---------------------------
 // Vertical feed management
@@ -1915,12 +1969,6 @@ async function onShare() {
 
 const showRuleModal = ref(false)
 
-function goFriendProfile(f) {
-  if (!f || !f.id) return
-  // router.push(`/profile/0`)
-  alert('친구 페이지로 이동함')
-}
-
 function tryVibrate(ms) {
   try {
     if (navigator.vibrate) navigator.vibrate(ms)
@@ -1963,25 +2011,6 @@ const icons = {
 }
 
 onBeforeUnmount(() => {})
-// Friends ranking (dummy 50 entries)
-const friendsRanking = ref(
-  Array.from({ length: 50 }, (_, i) => ({
-    id: 'f' + (i + 1),
-    name: '친구 ' + (i + 1),
-    avatar: `https://i.pravatar.cc/100?img=${(i % 70) + 1}`,
-    isFriend: i % 4 === 0,
-    recentGames: 8 + (i % 5),
-    winRate: 0.45 + ((50 - i) % 30) / 100,
-  })),
-)
-
-function makeFriend(i) {
-  const f = friendsRanking.value[i]
-  if (f && !f.isFriend) {
-    f.isFriend = true
-    tryVibrate(10)
-  }
-}
 </script>
 
 <style scoped>

@@ -7,6 +7,6 @@ export default {
   // not implemented yet
   headline: true, // 헤드라인 사진
   gallery: true, // 전체 사진/인증샷
-  friendRanking: false, // 친구 랭킹
+  friendRanking: true, // 친구 랭킹
 }
 

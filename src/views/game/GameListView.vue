@@ -83,42 +83,49 @@
           <div
             v-for="(game, index) in games"
             :key="index"
-            class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 cursor-pointer"
+            class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-0 cursor-pointer flex w-full aspect-[10/3]"
             @click="selectedGame = game"
             :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
           >
-            <!-- 타이틀과 생성자 정보(우측 상단) -->
-
-            <div class="flex justify-between items-start">
-              <div class="min-w-0 flex items-center gap-2">
-                <div
-                  :class="[
-                    'font-bold text-[0.79rem] mb-1 truncate cursor-pointer',
-                    game.championId ? 'text-yellow-500' : 'text-gray-900'
-                  ]"
-                  @click.stop="openModal(game)"
-                >
-                  {{ game.rule.ruleTitle }}
+            <!-- 카드 좌우 분할: 좌측 15%, 우측 85% -->
+            <div class="flex h-full w-full">
+              <!-- 좌측 영역: 30% width, 100% height -->
+              <div class="flex flex-col items-center justify-center w-[30%] h-full aspect-square gap-1">
+                <img
+                  :src="game.ownerProfileUrl || Default"
+                  class="w-14 h-14 rounded-full border border-orange-400 shadow bg-white mb-2"
+                />
+                <span class="text-gray-700 font-bold text-[0.95rem] mb-2">{{ game.ownerNickname }}</span>
+                <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.8rem] border border-gray-200">해당규칙전적</div>
+              </div>
+              <!-- 분할선: 좌우 경계 -->
+              <div class="h-full w-0.5 bg-gray-300"></div>
+              <!-- 우측 영역: 70% width, 100% height -->
+              <div class="flex flex-col justify-between w-[70%] h-full px-4 py-2">
+                <div class="flex justify-between items-start">
+                  <div
+                    :class="[
+                      'font-bold text-[0.95rem] mb-1 truncate cursor-pointer',
+                      game.championId ? 'text-yellow-500' : 'text-gray-900'
+                    ]"
+                    @click.stop="openModal(game)"
+                  >
+                    {{ game.rule.ruleTitle }}
+                  </div>
+                  <div class="text-right">
+                    <div class="text-gray-600 text-right text-[0.79rem] min-w-[60px]">
+                      {{ formatTimeAgo(game.createdAt) }}
+                    </div>
+                  </div>
                 </div>
-                <!-- 소유자 프로필 사진과 이름만 -->
-                <div @click="router.push('/profile/' + game.ownerId)" class="flex flex-row items-center gap-1 cursor-pointer ml-2">
-                  <img
-                    :src="game.ownerProfileUrl || Default"
-                    class="w-7 h-7 rounded-full border border-orange-400 shadow bg-white"
-                  />
-                  <span class="text-gray-700 font-bold text-[0.79rem]">{{ game.ownerNickname }}</span>
+                <div class="flex gap-1 mt-1">
+                  <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.8rem] border border-gray-200">도전자 수</div>
+                </div>
+                <div class="mt-2 flex items-center gap-4 text-sm text-gray-500">
+                  <span>{{ game.matchLocation == ' ' || game.matchLocation == '' ? '장소 미정' : game.matchLocation }}</span>
+                  <span>{{ !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate) }}</span>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-gray-600 text-right text-[0.79rem] min-w-[60px]">
-                  {{ formatTimeAgo(game.createdAt) }}
-                </div>
-              </div>
-            </div>
-            <!-- 껍데기 두개: 해당규칙전적, 도전자 수를 별도 div에 각각 표시 -->
-            <div class="flex gap-1 mt-1 ml-10">
-              <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.7rem] border border-gray-200">해당규칙전적</div>
-              <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.7rem] border border-gray-200">도전자 수</div>
             </div>
 
             <!-- 소유자 프로필만 남김 -->
@@ -127,12 +134,10 @@
             <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2 px-7">
               <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
-                  <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
-                  <span>{{ game.matchLocation == ' ' || game.matchLocation == '' ? '미정' : game.matchLocation }}</span>
+                  <span>{{ game.matchLocation == ' ' || game.matchLocation == '' ? '장소 미정' : game.matchLocation }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <i class="far w-3 fa-calendar text-orange-500"></i>
-                  <span>{{ formatDate(game.matchDate) }}</span>
+                  <span>{{ !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate) }}</span>
                 </div>
               </div>
             </div>

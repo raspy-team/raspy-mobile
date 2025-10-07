@@ -81,155 +81,106 @@
 
         <div v-if="games.length > 0">
           <div
-            @click="openModal(game)"
             v-for="(game, index) in games"
             :key="index"
-            class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-4"
+            class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 cursor-pointer"
+            @click="selectedGame = game"
+            :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
           >
             <!-- 타이틀과 생성자 정보(우측 상단) -->
 
             <div class="flex justify-between items-start">
-              <div class="min-w-0 flex items-center gap-1">
-                <div>
-                  <img
-                    class="w-10"
-                    :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
-                    alt="카테고리 이미지"
-                  />
+              <div class="min-w-0 flex items-center gap-2">
+                <div
+                  :class="[
+                    'font-bold text-[0.79rem] mb-1 truncate cursor-pointer',
+                    game.championId ? 'text-yellow-500' : 'text-gray-900'
+                  ]"
+                  @click.stop="openModal(game)"
+                >
+                  {{ game.rule.ruleTitle }}
                 </div>
-                <div>
-                  <div class="font-bold text-lg text-gray-900 mb-1 truncate">
-                    {{ game.rule.ruleTitle }}
-                  </div>
-                  <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
-                    {{ game.rule.majorCategory }}
-                    <span class="mx-1 text-orange-500">&gt;</span>
-                    {{ game.rule.minorCategory }}
-                  </div>
+                <!-- 소유자 프로필 사진과 이름만 -->
+                <div @click="router.push('/profile/' + game.ownerId)" class="flex flex-row items-center gap-1 cursor-pointer ml-2">
+                  <img
+                    :src="game.ownerProfileUrl || Default"
+                    class="w-7 h-7 rounded-full border border-orange-400 shadow bg-white"
+                  />
+                  <span class="text-gray-700 font-bold text-[0.79rem]">{{ game.ownerNickname }}</span>
                 </div>
               </div>
-
-              <div @click.stop="onClickReport(game.id)" class="text-right">
+              <div class="text-right">
                 <div class="text-gray-600 text-right text-[0.79rem] min-w-[60px]">
                   {{ formatTimeAgo(game.createdAt) }}
                 </div>
-                <div class="text-red-500 text-[0.7rem] py-2 pl-2">신고하기</div>
               </div>
+            </div>
+            <!-- 껍데기 두개: 해당규칙전적, 도전자 수를 별도 div에 각각 표시 -->
+            <div class="flex gap-1 mt-1 ml-10">
+              <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.7rem] border border-gray-200">해당규칙전적</div>
+              <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.7rem] border border-gray-200">도전자 수</div>
             </div>
 
-            <!-- VS AREA -->
-            <div class="flex justify-between items-center px-7 pt-1 pb-4">
-              <div
-                @click="router.push('/profile/' + game.ownerId)"
-                class="flex-1 flex flex-col items-center gap-1"
-              >
-                <div class="h-8 flex items-end">
-                  <champion-badge v-if="game.championId == game.ownerId" />
+            <!-- 소유자 프로필만 남김 -->
+            <!-- 소유자 프로필 영역 제거: 상단에 병합됨 -->
+            <!-- 경기 일시장소 표시 복원 -->
+            <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2 px-7">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                  <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
+                  <span>{{ game.matchLocation == ' ' || game.matchLocation == '' ? '미정' : game.matchLocation }}</span>
                 </div>
-                <div class="relative">
-                  <img
-                    :src="game.ownerProfileUrl || Default"
-                    class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white"
-                  />
-                </div>
-                <div class="text-gray-700 font-[600] text-sm">
-                  {{ game.ownerNickname }}
-                </div>
-                <div>
-                  <div
-                    class="text-xs font-semibold flex mr-2 items-center justify-end pr-2"
-                    :class="[
-                      game.mannerScore >= 4
-                        ? 'text-orange-500'
-                        : game.mannerScore >= 2
-                          ? 'text-orange-500'
-                          : game.mannerScore > 0
-                            ? 'text-red-500'
-                            : 'text-gray-400',
-                    ]"
-                  >
-                    <i
-                      :class="[
-                        game.mannerScore >= 4
-                          ? 'fas fa-face-smile'
-                          : game.mannerScore >= 2
-                            ? 'fas fa-face-meh'
-                            : game.mannerScore > 0
-                              ? 'fas fa-face-frown'
-                              : 'fas fa-user-slash',
-                      ]"
-                      class="mr-1"
-                    ></i>
-                    {{ game.mannerScore.toFixed(1) }}
-                  </div>
-                </div>
-              </div>
-              <div class="vs-area flex flex-col gap-1 items-center justify-center mx-3 mt-5">
-                <div class="text-lg font-black tracking-tight text-orange-500">VS</div>
-                <div class="text-sm font-semibold text-orange-400">경기 전</div>
-              </div>
-              <div class="flex-1 min-h-[60px] flex flex-col justify-center mt-6 items-center gap-2">
-                <div>
-                  <div
-                    class="w-14 h-14 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-full border border-gray-200 flex items-center justify-center"
-                  >
-                    <i class="fas fa-user-clock text-2xl text-gray-400"></i>
-                  </div>
-                  <div
-                    class="flex justify-center gap-1 mt-2 font-semibold text-xs text-gray-400 opacity-70 tracking-wide"
-                  >
-                    <span>-</span><span>-</span><span>-</span>
-                  </div>
+                <div class="flex items-center gap-2">
+                  <i class="far w-3 fa-calendar text-orange-500"></i>
+                  <span>{{ formatDate(game.matchDate) }}</span>
                 </div>
               </div>
             </div>
-            <MatchModal
-              v-if="game.showRuleDetail"
-              :rule="game.rule"
-              @close="game.showRuleDetail = false"
-            />
-            <!-- 장소 & 날짜 -->
-            <div
-              class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
+          </div>
+        </div>
+        <!-- 하단 고정 버튼 영역 -->
+        <div v-if="selectedGame" class="fixed bottom-0 left-0 w-full bg-white border-t z-50 flex justify-center gap-4 py-3 shadow-lg">
+          <button
+            :disabled="selectedGame.applied"
+            @click="!selectedGame.applied && confirmApply(selectedGame)"
+            :class="[
+              'w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white',
+              selectedGame.applied
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-orange-500 hover:bg-orange-600 cursor-pointer',
+            ]"
+          >
+            {{ selectedGame.applied ? '신청 완료' : '신청' }}
+          </button>
+          <button
+            @click="toggleComment(selectedGame.id)"
+            class="w-14 h-14 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+          >
+            <i class="fas fa-comment"></i>
+          </button>
+          <div class="relative">
+            <button
+              @click="selectedGame.showMoreMenu = !selectedGame.showMoreMenu"
+              class="w-14 h-14 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition"
+              aria-label="더보기"
             >
-              <div class="flex items-center gap-2">
-                <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
-                <span>{{
-                  game.matchLocation == undefined || game.matchLocation.trim() == ''
-                    ? '미정'
-                    : game.matchLocation
-                }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <i class="far w-3 fa-calendar text-orange-500"></i>
-                <span>{{ formatDate(game.matchDate) }}</span>
-              </div>
-            </div>
-            <!-- 참가 버튼들 -->
-            <div class="mt-4 flex items-center gap-2">
+              <span class="text-2xl">⋯</span>
+            </button>
+            <div
+              v-if="selectedGame.showMoreMenu"
+              class="absolute right-0 bottom-full mb-2 bg-white border rounded shadow-md z-30 w-32"
+            >
               <button
-                :disabled="game.applied"
-                @click.stop="() => !game.applied && confirmApply(game)"
-                :class="[
-                  'h-11 flex-grow font-semibold rounded-full transition text-white',
-                  game.applied
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-orange-500 hover:bg-orange-600 cursor-pointer',
-                ]"
+                @click="onClickReport(selectedGame.id); selectedGame.showMoreMenu = false"
+                class="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-50"
               >
-                {{ game.applied ? '신청 완료' : '참가하기' }}
+                신고하기
               </button>
               <button
-                @click.stop="toggleComment(game.id)"
-                class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+                @click="shareGame(selectedGame.id); selectedGame.showMoreMenu = false"
+                class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
               >
-                <i class="fas fa-comment"></i>
-              </button>
-              <button
-                @click.stop="shareGame(game.id)"
-                class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
-              >
-                <i class="fas fa-share"></i>
+                공유하기
               </button>
             </div>
           </div>
@@ -769,7 +720,7 @@ import api from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
-import MatchModal from '../../components/MatchModal.vue'
+// import MatchModal from '../../components/MatchModal.vue' (미사용)
 
 import { useToast } from '../../composable/useToast'
 import { useRouter } from 'vue-router'

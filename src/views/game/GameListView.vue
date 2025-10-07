@@ -77,53 +77,7 @@
     <main class="pt-3 px-4 pb-4">
       <!-- 게임리스트 -->
       <div class="space-y-4">
-        <!-- 필터 버튼 -->
-        <div class="relative flex justify-between itemw-full pt-3 border-none">
-          <div class="text-gray-700 font-[500] pl-1">
-            <button
-              @click="showRegionModal = true"
-              class="flex items-center border rounded px-4 py-2 text-sm hover:bg-gray-50 bg-white"
-            >
-              <i class="fas fa-map-marker-alt text-orange-500 mr-2"></i>
-              <span>{{ selectedSecondary || '지역 선택' }}</span>
-              <i class="fas fa-chevron-down ml-3 text-gray-500 text-xs"></i>
-            </button>
-          </div>
-          <div class="text-right">
-            <button
-              @click="showFilterMenu = !showFilterMenu"
-              class="flex items-center absolute right-0 justify-between w-[30%] bg-white px-4 py-2 border rounded text-sm bg-white hover:bg-gray-50"
-            >
-              <span>
-                {{
-                  sortOption === 'popular'
-                    ? '인기순'
-                    : sortOption === 'latest'
-                      ? '최신순'
-                      : '필터 선택'
-                }}
-              </span>
-              <i class="fas fa-chevron-down ml-2 text-gray-500"></i>
-            </button>
-            <div
-              v-if="showFilterMenu"
-              class="absolute right-0 mt-1 bg-white border rounded shadow-md z-20 text-left w-full"
-            >
-              <button
-                @click="setSort('popular')"
-                class="block px-4 py-2 hover:bg-gray-50 w-full text-left"
-              >
-                인기순
-              </button>
-              <button
-                @click="setSort('latest')"
-                class="block px-4 py-2 hover:bg-gray-50 w-full text-left"
-              >
-                최신순
-              </button>
-            </div>
-          </div>
-        </div>
+        <!-- 필터 버튼 제거됨: 모든 지역, 최신순 기본값으로 표시 -->
 
         <div v-if="games.length > 0">
           <div
@@ -1126,7 +1080,7 @@ const loading = ref(true)
 const alertMsg = ref('')
 const selectedGame = ref(null)
 const sortOption = ref('latest')
-const showFilterMenu = ref(false)
+// ...showFilterMenu 변수 제거됨
 const selectedPrimary = ref('전국')
 const selectedSecondary = ref('전국')
 const timerDone = ref(false)
@@ -1165,11 +1119,7 @@ function openModal(game) {
   game.showRuleDetail = true
 }
 
-const setSort = (option) => {
-  sortOption.value = option
-  showFilterMenu.value = false
-  fetchGames()
-}
+// ...setSort 함수 제거됨
 const formatDate = (dateStr) => {
   if (!dateStr) return '미정'
   const date = new Date(dateStr)
@@ -1251,6 +1201,7 @@ input[type='number']::-webkit-outer-spin-button {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

@@ -28,7 +28,7 @@
             stroke-linecap="round"
           />
         </svg>
-  <span>규칙</span>
+        <span>규칙</span>
       </button>
       <button
         @click="router.push('/game-list')"
@@ -48,7 +48,7 @@
             stroke-linecap="round"
           />
         </svg>
-  <span>경기</span>
+        <span>경기</span>
       </button>
     </div>
 
@@ -80,7 +80,6 @@
     <!-- 게임 목록 -->
     <template v-else>
       <div v-if="allGames.length" class="space-y-4">
-
         <div
           v-for="game in allGames"
           :key="game.id"
@@ -89,6 +88,7 @@
           :class="[
             'relative p-5 rounded-xl bg-white border space-y-4 transition-all',
             getCardClass(game),
+            { 'highlight-purple': highlightedGameId === game.id },
           ]"
         >
           <!-- 규칙(게임명, 카테고리) 정보 최상단 -->
@@ -112,37 +112,42 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- 타입/상태 라벨 아래로 이동 -->
-          <div class="flex items-center gap-2 mb-2">
-            <span :class="['text-xs font-semibold', getTypeTextClass(game)]">
-              {{ getTypeLabel(game) }}
-            </span>
-            <div class="h-3 w-px bg-gray-300"></div>
-            <span class="text-xs font-semibold" :class="getStatusClass(game)">
-              {{ getStatusText(game) }}
-            </span>
+            <!-- 공유 버튼 (우상단) -->
+            <button
+              @click.stop="shareGameWithNative(game)"
+              class="flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors flex-shrink-0"
+              title="공유하기"
+            >
+              <i class="fas fa-share-nodes text-sm"></i>
+            </button>
           </div>
 
           <!-- 도전자 버튼 및 모달 -->
           <div class="mb-2">
             <!-- Owner vs Opponent Profile Row -->
             <div class="flex justify-between items-end mt-3 mb-1">
-              <!-- Owner -->
+              <!-- Owner (좌측) -->
               <div class="flex flex-col items-center flex-1">
                 <img
-                  :src="game.ownerProfileUrl || '/default.png'"
+                  :src="
+                    game.type === 'my-game'
+                      ? game.myProfileUrl || '/default.png'
+                      : game.ownerProfileUrl || '/default.png'
+                  "
                   class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
                   alt="Owner Profile"
                 />
-                <span class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center">{{ game.ownerNickname }}</span>
+                <span
+                  class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center"
+                >
+                  {{ game.type === 'my-game' ? game.myNickname : game.ownerNickname }}
+                </span>
               </div>
               <!-- VS -->
               <div class="flex flex-col items-center flex-1">
                 <span class="text-lg font-bold text-gray-400 mb-2">VS</span>
               </div>
-              <!-- Opponent -->
+              <!-- Opponent (우측) -->
               <div class="flex flex-col items-center flex-1">
                 <img
                   v-if="game.opponentProfileUrl"
@@ -150,10 +155,15 @@
                   class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
                   alt="Opponent Profile"
                 />
-                <div v-else class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow">
+                <div
+                  v-else
+                  class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
+                >
                   <i class="fas fa-user text-2xl text-gray-400"></i>
                 </div>
-                <span class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center">
+                <span
+                  class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center"
+                >
                   {{ game.opponentNickname || '미정' }}
                 </span>
               </div>
@@ -162,15 +172,25 @@
 
           <!-- 도전자(신청자) 목록 모달 -->
           <div
-            v-if="showApplicantsModal && selectedApplicantsGame && selectedApplicantsGame.id === game.id"
+            v-if="
+              showApplicantsModal && selectedApplicantsGame && selectedApplicantsGame.id === game.id
+            "
             class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
           >
             <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
-              <button @click.stop="closeApplicantsModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+              <button
+                @click.stop="closeApplicantsModal"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              >
                 <i class="fas fa-times"></i>
               </button>
               <h2 class="text-lg font-bold mb-4 text-gray-900">도전자 목록</h2>
-              <div v-if="selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0" class="space-y-3">
+              <div
+                v-if="
+                  selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0
+                "
+                class="space-y-3"
+              >
                 <div
                   v-for="user in selectedApplicantsGame.applicants"
                   :key="user.userId"
@@ -185,7 +205,9 @@
                       <div class="space-y-1">
                         <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
                           {{ user.applicantNickname }}
-                          <champion-badge v-if="selectedApplicantsGame.championId == user.userId"></champion-badge>
+                          <champion-badge
+                            v-if="selectedApplicantsGame.championId == user.userId"
+                          ></champion-badge>
                         </p>
                         <p class="text-xs text-gray-500">
                           {{ user.applicantGameStatisticsDTO.wins }}승
@@ -203,7 +225,11 @@
                         @click.stop="approve(selectedApplicantsGame.id, user.userId)"
                         :disabled="approvedExists(selectedApplicantsGame.applicants)"
                         class="px-4 py-2 text-xs rounded-lg text-white font-semibold"
-                        :class="approvedExists(selectedApplicantsGame.applicants) ? 'bg-gray-300' : 'bg-orange-500 hover:bg-orange-600'"
+                        :class="
+                          approvedExists(selectedApplicantsGame.applicants)
+                            ? 'bg-gray-300'
+                            : 'bg-orange-500 hover:bg-orange-600'
+                        "
                       >
                         승인
                       </button>
@@ -279,18 +305,11 @@
             </div>
             <div class="flex gap-2 pt-3">
               <button
-                v-if="game.status === 'REQUESTED'"
-                @click.stop="cancelRequest(game.id)"
+                v-if="game.status === 'REQUESTED' || game.status === 'APPROVED'"
+                @click.stop="openCancelConfirmModal(game.id)"
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 text-red-400 text-sm border-[1px] border-red-400 py-3 px-0 rounded-[8px]"
               >
                 <i class="fas fa-xmark"></i> 신청 취소
-              </button>
-              <button
-                v-else-if="game.status === 'APPROVED'"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-green-500 text-sm text-white border-[1px] py-3 px-0 rounded-[8px] opacity-70 cursor-not-allowed"
-                disabled
-              >
-                <i class="fas fa-check"></i> 승인됨
               </button>
               <button
                 v-else-if="game.status === 'REJECTED'"
@@ -330,13 +349,6 @@
                 @click.stop="openStartModal(game)"
               >
                 <i class="fas fa-play mr-2"></i>경기 시작
-              </button>
-              <button
-                v-else-if="game.isOwner && !game.opponentNickname"
-                class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow transition active:scale-95"
-                @click.stop="shareGame(game.id)"
-              >
-                <i class="fas fa-share mr-2"></i>공유
               </button>
               <button
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-[8px]"
@@ -490,6 +502,31 @@
     @cancel="onCameraCancel"
   />
 
+  <!-- 신청 취소 확인 모달 -->
+  <div
+    v-if="showCancelConfirmModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
+  >
+    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-lg">
+      <h2 class="text-lg font-bold mb-3 text-gray-900">신청 취소</h2>
+      <p class="text-sm text-gray-600 mb-6">정말로 신청을 취소하시겠습니까?</p>
+      <div class="flex gap-2 justify-end">
+        <button
+          @click="showCancelConfirmModal = false"
+          class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition"
+        >
+          아니오
+        </button>
+        <button
+          @click="confirmCancelRequest"
+          class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition"
+        >
+          예, 취소합니다
+        </button>
+      </div>
+    </div>
+  </div>
+
   <CustomToast />
 </template>
 
@@ -497,6 +534,10 @@
 // 도전자(신청자) 모달 상태
 const showApplicantsModal = ref(false)
 const selectedApplicantsGame = ref(null)
+
+// 신청 취소 확인 모달 상태
+const showCancelConfirmModal = ref(false)
+const cancelTargetGameId = ref(null)
 
 function openApplicantsModal(game) {
   selectedApplicantsGame.value = game
@@ -508,7 +549,7 @@ function closeApplicantsModal() {
   selectedApplicantsGame.value = null
 }
 import { ref, onMounted, computed, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
 import FooterNav from '../../components/FooterNav.vue'
@@ -521,7 +562,7 @@ import { parseRegion } from '../../utils/regionParser'
 
 const { showToast } = useToast()
 const router = useRouter()
-// const route = useRoute()
+const route = useRoute()
 
 const sentGames = ref([]) // 신청한 게임
 const myGames = ref([]) // 내 게임
@@ -540,6 +581,9 @@ const showCameraModal = ref(false)
 const capturedPhotoFile = ref(null)
 const addressInputModal = ref(null)
 let autocompleteModal = null
+
+// 스크롤 하이라이트 관련
+const highlightedGameId = ref(null)
 
 // 모든 게임을 최신순으로 합쳐서 보여주기 (신청한 게임 + 내 게임)
 // 내 게임에는 신청자 목록도 함께 포함
@@ -584,8 +628,32 @@ onMounted(async () => {
     console.error('Failed to load games:', e)
   } finally {
     loading.value = false
+
+    // URL 쿼리에서 게임 ID 확인하고 스크롤
+    const gameId = route.query.id
+    if (gameId) {
+      await nextTick()
+      scrollToGame(gameId)
+    }
   }
 })
+
+// 게임으로 스크롤 이동 및 하이라이트
+function scrollToGame(gameId) {
+  const element = document.getElementById(`game-${gameId}`)
+  if (element) {
+    // 부드러운 스크롤
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+    // 하이라이트 효과
+    highlightedGameId.value = Number(gameId)
+
+    // 3초 후 하이라이트 제거
+    setTimeout(() => {
+      highlightedGameId.value = null
+    }, 3000)
+  }
+}
 
 function formatDate(dateStr) {
   if (!dateStr) return '미정'
@@ -593,35 +661,35 @@ function formatDate(dateStr) {
   return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }
 
-function getStatusClass(game) {
-  if (game.type === 'sent') {
-    if (game.status === 'APPROVED') return 'text-blue-600'
-    if (game.status === 'REQUESTED') return 'text-gray-500'
-    if (game.status === 'REJECTED') return 'text-red-500'
-  } else if (game.type === 'my-game') {
-    if (game.status === 'IN_PROGRESS') return 'text-green-500'
-    if (game.status === 'SCHEDULED') return 'text-orange-500'
-    if (game.status === 'MATCHING') return 'text-orange-400'
-    if (game.status === 'COMPLETED') return 'text-gray-400'
-    if (game.status === 'CANCELED') return 'text-red-400'
-  }
-  return 'text-gray-500'
-}
+// function getStatusClass(game) {
+//   if (game.type === 'sent') {
+//     if (game.status === 'APPROVED') return 'text-blue-600'
+//     if (game.status === 'REQUESTED') return 'text-gray-500'
+//     if (game.status === 'REJECTED') return 'text-red-500'
+//   } else if (game.type === 'my-game') {
+//     if (game.status === 'IN_PROGRESS') return 'text-green-500'
+//     if (game.status === 'SCHEDULED') return 'text-orange-500'
+//     if (game.status === 'MATCHING') return 'text-orange-400'
+//     if (game.status === 'COMPLETED') return 'text-gray-400'
+//     if (game.status === 'CANCELED') return 'text-red-400'
+//   }
+//   return 'text-gray-500'
+// }
 
-function getStatusText(game) {
-  if (game.type === 'sent') {
-    if (game.status === 'APPROVED') return '승인됨 - 시작 대기 중'
-    if (game.status === 'REQUESTED') return '대기 중'
-    if (game.status === 'REJECTED') return '거절됨'
-  } else if (game.type === 'my-game') {
-    if (game.status === 'MATCHING') return '매칭 중'
-    if (game.status === 'SCHEDULED') return '진행 예정'
-    if (game.status === 'IN_PROGRESS') return '진행 중'
-    if (game.status === 'COMPLETED') return '완료됨'
-    if (game.status === 'CANCELED') return '취소됨'
-  }
-  return '알 수 없음'
-}
+// function getStatusText(game) {
+//   if (game.type === 'sent') {
+//     if (game.status === 'APPROVED') return '승인됨 - 시작 대기 중'
+//     if (game.status === 'REQUESTED') return '대기 중'
+//     if (game.status === 'REJECTED') return '거절됨'
+//   } else if (game.type === 'my-game') {
+//     if (game.status === 'MATCHING') return '매칭 중'
+//     if (game.status === 'SCHEDULED') return '진행 예정'
+//     if (game.status === 'IN_PROGRESS') return '진행 중'
+//     if (game.status === 'COMPLETED') return '완료됨'
+//     if (game.status === 'CANCELED') return '취소됨'
+//   }
+//   return '알 수 없음'
+// }
 
 function getWinRate(stats) {
   const total = stats.wins + stats.draws + stats.losses
@@ -672,10 +740,23 @@ async function cancelApproval(gameId, userId) {
   showToast(`${user?.applicantNickname || '사용자'}님의 참여를 취소했습니다!`)
 }
 
-async function cancelRequest(gameId) {
-  await client.post('/api/games/cancel-request', { gameId })
-  sentGames.value = sentGames.value.filter((g) => g.id !== gameId)
-  showToast('신청을 취소했습니다.')
+function openCancelConfirmModal(gameId) {
+  cancelTargetGameId.value = gameId
+  showCancelConfirmModal.value = true
+}
+
+async function confirmCancelRequest() {
+  const gameId = cancelTargetGameId.value
+  if (!gameId) return
+
+  try {
+    await client.post('/api/games/cancel-request', { gameId })
+    sentGames.value = sentGames.value.filter((g) => g.id !== gameId)
+    showToast('신청을 취소했습니다.')
+  } finally {
+    showCancelConfirmModal.value = false
+    cancelTargetGameId.value = null
+  }
 }
 
 function goDM(userId) {
@@ -686,32 +767,93 @@ function goDM(userId) {
 const joinGame = (id) => router.push(`/games/${id}/play`)
 const canStart = (g) => g.status === 'SCHEDULED' && !!g.opponentNickname
 
-async function shareGame(gameId) {
-  showToast('공유 링크가 복사되었습니다!')
-  const res = await client.post('/api/invite', null, { params: { gameId } })
-  const url = res.data.url
+// 게임 상태별 공유 메시지 생성
+function getShareMessage(game) {
+  const ruleName = game.rule.ruleTitle
+  const location =
+    game.matchLocation && game.matchLocation.trim() !== '' ? game.matchLocation : '장소 미정'
+  const date = game.matchDate ? formatDate(game.matchDate) : '날짜 미정'
 
+  if (game.type === 'my-game') {
+    if (game.status === 'MATCHING') {
+      return `🎮 ${ruleName} 경기에 도전자를 찾고 있어요!\n📍 ${location}\n📅 ${date}\n\n지금 바로 도전해보세요!`
+    } else if (game.status === 'SCHEDULED') {
+      return `🎮 ${ruleName} 경기가 곧 시작됩니다!\n📍 ${location}\n📅 ${date}\n\n응원해주세요!`
+    } else if (game.status === 'IN_PROGRESS') {
+      return `🔥 ${ruleName} 경기가 진행 중입니다!\n📍 ${location}\n\n실시간으로 응원해주세요!`
+    } else if (game.status === 'COMPLETED') {
+      return `✅ ${ruleName} 경기가 종료되었습니다!\n📍 ${location}\n\n결과를 확인해보세요!`
+    }
+  } else if (game.type === 'sent') {
+    if (game.status === 'REQUESTED') {
+      return `🎮 ${ruleName} 경기에 신청했어요!\n📍 ${location}\n📅 ${date}\n\n승인을 기다리고 있습니다!`
+    } else if (game.status === 'APPROVED') {
+      return `✅ ${ruleName} 경기 신청이 승인되었어요!\n📍 ${location}\n📅 ${date}\n\n곧 경기가 시작됩니다!`
+    }
+  }
+
+  return `🎮 ${ruleName} 경기\n📍 ${location}\n📅 ${date}`
+}
+
+// Web Share API를 사용한 공유 함수
+async function shareGameWithNative(game) {
+  const message = getShareMessage(game)
+  const shareUrl = `https://raspy.app/game/${game.id}` // 임시 딥링크 URL
+
+  const shareData = {
+    title: `Match - ${game.rule.ruleTitle}`,
+    text: message,
+    url: shareUrl,
+  }
+
+  try {
+    // Web Share API 지원 확인
+    if (navigator.share) {
+      await navigator.share(shareData)
+      showToast('공유되었습니다!')
+    } else {
+      // Web Share API 미지원 시 URL 복사
+      await fallbackCopyToClipboard(shareUrl, message)
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      // 사용자가 취소한 경우가 아니면 fallback
+      await fallbackCopyToClipboard(shareUrl, message)
+    }
+  }
+}
+
+// URL 복사 fallback 함수
+async function fallbackCopyToClipboard(url, message) {
+  const fullText = `${message}\n\n${url}`
+
+  // iOS WebView 전용 복사
   if (
     window.webkit &&
     window.webkit.messageHandlers &&
     window.webkit.messageHandlers.clipboardCopy
   ) {
-    window.webkit.messageHandlers.clipboardCopy.postMessage(url)
+    window.webkit.messageHandlers.clipboardCopy.postMessage(fullText)
+    showToast('공유 링크가 복사되었습니다!')
     return
   }
 
+  // 일반 클립보드 복사
   try {
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(fullText)
+    showToast('공유 링크가 복사되었습니다!')
     return
   } catch (err) {
     try {
       const input = document.createElement('input')
-      input.value = url
+      input.value = fullText
       document.body.appendChild(input)
       input.select()
       const success = document.execCommand('copy')
       document.body.removeChild(input)
-      if (!success) {
+      if (success) {
+        showToast('공유 링크가 복사되었습니다!')
+      } else {
         showToast('복사에 실패했습니다!')
       }
     } catch (err2) {
@@ -845,20 +987,20 @@ function getCardClass(game) {
   return 'border-gray-200'
 }
 
-// 타입 텍스트 색상
-function getTypeTextClass(game) {
-  if (game.type === 'sent') {
-    return 'text-blue-600'
-  } else if (game.type === 'my-game') {
-    if (game.isOwner && canStart(game)) {
-      return 'text-green-600'
-    }
-    return 'text-orange-600'
-  }
-  return 'text-gray-600'
-}
+// // 타입 텍스트 색상
+// function getTypeTextClass(game) {
+//   if (game.type === 'sent') {
+//     return 'text-blue-600'
+//   } else if (game.type === 'my-game') {
+//     if (game.isOwner && canStart(game)) {
+//       return 'text-green-600'
+//     }
+//     return 'text-orange-600'
+//   }
+//   return 'text-gray-600'
+// }
 
-// 타입 라벨
+/**  타입 라벨
 function getTypeLabel(game) {
   if (game.type === 'sent') return '신청한 게임'
   if (game.type === 'my-game') {
@@ -867,6 +1009,7 @@ function getTypeLabel(game) {
   }
   return '게임'
 }
+*/
 </script>
 
 <style scoped>
@@ -887,6 +1030,25 @@ function getTypeLabel(game) {
   }
   100% {
     background: white;
+  }
+}
+
+.highlight-purple {
+  animation: highlight-purple-pulse 1.5s ease-out;
+}
+
+@keyframes highlight-purple-pulse {
+  0% {
+    background: #faf5ff;
+    border-color: #d8b4fe;
+  }
+  50% {
+    background: #f5f3ff;
+    border-color: #c4b5fd;
+  }
+  100% {
+    background: white;
+    border-color: inherit;
   }
 }
 </style>

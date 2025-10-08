@@ -21,7 +21,7 @@
       autocomplete="off"
       style="margin-right: 12px;"
     />
-    <div class="relative">
+    <div class="relative flex items-center gap-2">
       <button @click="toggleSort" class="filter-sort flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-orange-50 text-gray-700" :aria-expanded="showSortOptions">
         <i class="fas fa-sort text-orange-400 mr-1"></i>
         <span>{{ selectedSortLabel }}</span>
@@ -39,12 +39,7 @@
           {{ o.label }}
         </li>
       </ul>
-      <button
-        @click="onMyRulesClick"
-        class="ml-2 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
-      >
-        내 규칙
-      </button>
+      <button @click="onMyRulesClick" class="ml-2 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition">내 규칙</button>
     </div>
   </nav>
 

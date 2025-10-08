@@ -46,10 +46,9 @@
 
     <!-- CTA -->
     <div class="flex justify-center text-center mt-4">
-      <button class="game-cta w-full text-center" @click.stop="onGameCtaClick">
-        <div class="text-center flex justify-center w-full items-center font-semibold gap-2">
-          <i class="fas fa-play mr-1"></i>
-          {{ rule.ruleTitle }} 게임 생성하기
+      <button class="game-cta text-center px-6" @click.stop="onGameCtaClick">
+        <div class="text-center flex justify-center items-center font-semibold gap-2">
+          생성
         </div>
       </button>
     </div>

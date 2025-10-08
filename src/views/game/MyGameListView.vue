@@ -82,7 +82,9 @@
                 >
               </div>
               <div class="text-gray-700 font-[600] text-sm">
-                {{ game.myNickname }}
+                <span :class="game.myId == game.championId ? 'text-yellow-500 drop-shadow font-extrabold' : 'text-gray-700 font-[600]'">
+                  {{ game.myNickname }}
+                </span>
               </div>
               <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 tracking-wider">
                 <div>
@@ -117,7 +119,9 @@
                   class="w-14 h-14 rounded-full border-2 border-gray-200 shadow bg-gradient-to-tr from-gray-100 to-blue-100"
                 />
                 <div class="text-gray-700 font-[600] text-sm">
-                  {{ game.opponentNickname }}
+                  <span :class="game.opponentId == game.championId ? 'text-yellow-500 drop-shadow font-extrabold' : 'text-gray-700 font-[600]'">
+                    {{ game.opponentNickname }}
+                  </span>
                 </div>
                 <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 tracking-wider">
                   <div>

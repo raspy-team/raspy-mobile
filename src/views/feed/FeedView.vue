@@ -897,7 +897,7 @@
         </button>
         <button @click="onComment" class="flex flex-col items-center active:scale-95 transition">
           <span class="w-8 h-8" v-html="icons.comment"></span>
-          <span class="text-[10px] mt-1">댓글</span>
+          <span class="text-[10px] mt-1">{{ post.commentCount || 0 }}</span>
         </button>
         <button @click="onShare" class="flex flex-col items-center active:scale-95 transition">
           <span class="w-8 h-8" v-html="icons.share"></span>

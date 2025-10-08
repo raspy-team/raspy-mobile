@@ -98,8 +98,8 @@
       <!-- Step 2: 닉네임 (건너뛰기 없음) -->
       <div v-else-if="step === 2" class="screen-inner">
         <div class="question-box">
-          <h1 class="heading">닉네임 설정</h1>
-          <p class="subtext">최대 9자(한글 가능)</p>
+          <h1 class="heading">이름 입력</h1>
+          <p class="subtext">실명을 입력해주세요.</p>
         </div>
         <div class="content center">
           <input
@@ -108,7 +108,7 @@
             @input="onNicknameInput"
             class="input-box"
             maxlength="9"
-            placeholder="닉네임 입력"
+            placeholder="실명 입력"
           />
           <p class="error-text" v-if="nickError">{{ nickError }}</p>
         </div>
@@ -143,7 +143,6 @@
           <button class="btn btn-primary mb-3" @click="onProfileNext" :disabled="profileValidating">
             {{ profileValidating ? '처리 중...' : '다음' }}
           </button>
-          <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
       <!-- Step 4: 성별 -->
@@ -168,7 +167,6 @@
           <button class="btn btn-primary mb-3" @click="onProfileNext" :disabled="profileValidating">
             {{ profileValidating ? '처리 중...' : '다음' }}
           </button>
-          <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
       <!-- Step 5: 지역 -->
@@ -191,7 +189,6 @@
           <button class="btn btn-primary mb-3" @click="onProfileNext" :disabled="profileValidating">
             {{ profileValidating ? '처리 중...' : '다음' }}
           </button>
-          <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
       <!-- Step 6: 소개 -->
@@ -214,7 +211,6 @@
           <button class="btn btn-primary mb-3" @click="onProfileNext" :disabled="profileValidating">
             {{ profileValidating ? '처리 중...' : '다음' }}
           </button>
-          <button class="btn btn-outline" @click="onStepSkip">건너뛰기</button>
         </div>
       </div>
       <!-- Step 7: 사진 -->
@@ -235,10 +231,9 @@
           </div>
         </div>
         <div class="footer-col">
-          <button class="btn btn-primary mb-3" @click="onProfileNext" :disabled="profileValidating">
+          <button class="btn btn-primary mb-3" @click="onProfileNext" :disabled="profileValidating || !avatar">
             {{ profileValidating ? '처리 중...' : '다음' }}
           </button>
-          <button class="btn btn-outline" @click="onProfileNext">건너뛰기</button>
         </div>
       </div>
       <!-- Step 8: 완료 -->
@@ -515,21 +510,21 @@ function removeImage() {
   avatar.value = null
   preview.value = ''
 }
-// 각 프로필 단계 skip(값 초기화) - 3~7단계만 적용
-function onStepSkip() {
-  if (step.value === 3) age.value = 0
-  if (step.value === 4) gender.value = ''
-  if (step.value === 5) {
-    regionP.value = ''
-    regionS.value = ''
-  }
-  if (step.value === 6) bio.value = ''
-  if (step.value === 7) {
-    avatar.value = null
-    preview.value = ''
-  }
-  step.value++
-}
+// // 각 프로필 단계 skip(값 초기화) - 3~7단계만 적용
+// function onStepSkip() {
+//   if (step.value === 3) age.value = 0
+//   if (step.value === 4) gender.value = ''
+//   if (step.value === 5) {
+//     regionP.value = ''
+//     regionS.value = ''
+//   }
+//   if (step.value === 6) bio.value = ''
+//   if (step.value === 7) {
+//     avatar.value = null
+//     preview.value = ''
+//   }
+//   step.value++
+// }
 function validateProfileStep() {
   ageError.value =
     step.value === 3 && (!age.value || age.value < 0 || age.value > 150) ? '0~150 입력' : ''

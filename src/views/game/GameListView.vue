@@ -95,14 +95,6 @@
               />
               <div>
                 <div class="font-bold text-lg text-gray-900">{{ game.ownerNickname }}</div>
-                <div class="flex gap-2 mt-1">
-                  <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs border"
-                    >해당규칙전적</span
-                  >
-                  <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs border"
-                    >도전자 수</span
-                  >
-                </div>
               </div>
               <div class="flex-1"></div>
               <div class="text-gray-400 text-xs text-right min-w-[60px]">
@@ -131,6 +123,12 @@
               <span>{{
                 !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate)
               }}</span>
+            </div>
+            <!-- 전적 영역 -->
+            <div class="px-5 pb-3 flex gap-2">
+              <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs border font-semibold">상대 : 7승 3무 11패</span>
+              <span class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs border font-semibold">나 : 0승 0무 0패</span>
+              <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs border font-semibold">도전자 7명</span>
             </div>
           </div>
         </div>

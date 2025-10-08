@@ -44,8 +44,8 @@
       {{ rule.ruleGoal }}
     </div>
 
-    <!-- CTA & Info -->
-    <div class="flex justify-center items-center text-center mt-4 gap-4">
+    <!-- CTA -->
+    <div class="flex justify-center text-center mt-4">
       <button class="game-cta text-center px-6" @click.stop="onGameCtaClick">
         <div class="text-center flex justify-center items-center font-semibold gap-2">
           생성

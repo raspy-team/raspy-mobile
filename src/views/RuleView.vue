@@ -8,11 +8,9 @@
     <span>+</span>
   </button>
   <!-- 헤더 -->
-  <HeaderComp :has-referer="true" :title="headerTitle" class="z-[5000]" />
+  <HeaderComp  :has-referer="true" title="규칙 탐색" class="z-[5000]" />
   <!-- 항상 상단에 검색/필터 -->
-  <nav
-    class="bg-white border-b border-gray-100 px-4 pb-3 flex items-center mt-14 pt-5 gap-3 raspy-top sticky top-0 z-50"
-  >
+  <nav class="bg-white border-b border-gray-100 px-4 pb-3 flex items-center mt-14 pt-5 gap-3 raspy-top sticky top-0 z-50">
     <input
       v-model="search"
       type="search"
@@ -21,21 +19,14 @@
       aria-label="검색"
       @keyup.enter="onSubmitSearch"
       autocomplete="off"
-      style="margin-right: 12px"
+      style="margin-right: 12px;"
     />
-    <div class="relative flex items-center gap-2">
-      <button
-        @click="toggleSort"
-        class="filter-sort flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-orange-50 text-gray-700"
-        :aria-expanded="showSortOptions"
-      >
+    <div class="relative">
+      <button @click="toggleSort" class="filter-sort flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-orange-50 text-gray-700" :aria-expanded="showSortOptions">
         <i class="fas fa-sort text-orange-400 mr-1"></i>
         <span>{{ selectedSortLabel }}</span>
       </button>
-      <ul
-        v-if="showSortOptions"
-        class="sort-menu absolute left-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 px-1 min-w-[120px]"
-      >
+      <ul v-if="showSortOptions" class="sort-menu absolute left-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 px-1 min-w-[120px]">
         <li
           v-for="o in sortOptions"
           :key="o.value"
@@ -59,7 +50,7 @@
 
   <!-- Step 1: Major Category Fullscreen -->
   <div v-if="!major" class="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center">
-    <div class="text-lg font-bold mb-6">메인 카테고리를 선택하세요.</div>
+  <div class="text-lg font-bold mb-6">메인 카테고리를 선택하세요.</div>
     <div class="flex flex-col gap-4 w-full px-6">
       <div
         v-for="m in majors"
@@ -67,37 +58,39 @@
         @click="selectMajor(m)"
         class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-orange-50 rounded-xl transition justify-center"
         :class="major === m ? 'border-4 border-orange-400' : ''"
-        style="min-width: 90px"
+        style="min-width: 90px;"
       >
-        <img :src="`/category-picture/${m}.png`" alt="카테고리 아이콘" class="w-14 h-14 mr-4" />
+        <img
+          :src="`/category-picture/${m}.png`"
+          alt="카테고리 아이콘"
+          class="w-14 h-14 mr-4"
+        />
         <span class="text-base font-semibold text-gray-700">{{ m }}</span>
       </div>
     </div>
   </div>
 
   <!-- Step 2: Minor Category Fullscreen -->
-  <div
-    v-else-if="!minor"
-    class="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center"
-  >
-    <button
-      @click="major = ''"
-      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 hover:bg-orange-100 text-gray-700 border border-gray-200 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
-    >
+  <div v-else-if="!minor" class="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center">
+    <button @click="major = ''" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 hover:bg-orange-100 text-gray-700 border border-gray-200 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2">
       <i class="fas fa-arrow-left"></i>
       <span>뒤로</span>
     </button>
     <div class="text-lg font-bold mb-6">서브 카테고리를 선택하세요.</div>
-    <div class="flex flex-col gap-4 w-full px-6 overflow-y-auto" style="max-height: 60vh">
+    <div class="flex flex-col gap-4 w-full px-6 overflow-y-auto" style="max-height: 60vh;">
       <div
         v-for="n in minors"
         :key="n"
         @click="selectMinor(n)"
         class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-orange-50 rounded-xl transition justify-center"
         :class="minor === n ? 'border-4 border-orange-400' : ''"
-        style="min-width: 90px"
+        style="min-width: 90px;"
       >
-        <img :src="`/category-picture/${n}.png`" alt="서브카테고리 아이콘" class="w-14 h-14 mr-4" />
+        <img
+          :src="`/category-picture/${n}.png`"
+          alt="서브카테고리 아이콘"
+          class="w-14 h-14 mr-4"
+        />
         <span class="text-base font-semibold text-gray-700">{{ n }}</span>
       </div>
     </div>
@@ -105,10 +98,7 @@
 
   <!-- Step 3: Rule List (below search/filter bar) -->
   <div v-else class="max-w-2xl mx-auto px-5 pt-6 flex flex-col gap-0">
-    <button
-      @click="minor = ''"
-      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 hover:bg-orange-100 text-gray-700 border border-gray-200 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
-    >
+    <button @click="minor = ''" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 hover:bg-orange-100 text-gray-700 border border-gray-200 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2">
       <i class="fas fa-arrow-left"></i>
       <span>뒤로</span>
     </button>
@@ -158,18 +148,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import api from '../api/api'
 import HeaderComp from '../components/HeaderComp.vue'
 import RuleCard from '../components/RuleCard.vue'
-
-const router = useRouter()
-const route = useRoute()
-
-// 헤더 타이틀: fromGameCreate 파라미터가 있으면 "새로운 경기 생성"
-const headerTitle = computed(() => {
-  return route.query.fromGameCreate === 'true' ? '새로운 경기 생성' : '규칙 탐색'
-})
 
 // const showHeader = ref(true)
 const showScrollTop = ref(false)
@@ -275,9 +256,5 @@ const toggleExpand = (id) => {
   } else {
     expanded.value.push(id)
   }
-}
-
-const onPlusClick = () => {
-  router.push('/rules/create')
 }
 </script>

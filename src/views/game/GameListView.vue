@@ -83,56 +83,36 @@
           <div
             v-for="(game, index) in games"
             :key="index"
-            class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 cursor-pointer"
+            class="bg-white rounded-2xl shadow-lg border mb-4 p-0 overflow-hidden cursor-pointer"
             @click="selectedGame = game"
             :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
           >
-            <!-- 타이틀과 생성자 정보(우측 상단) -->
-
-            <div class="flex justify-between items-start">
-              <div class="min-w-0 flex items-center gap-2">
-                <div
-                  :class="[
-                    'font-bold text-[0.79rem] mb-1 truncate cursor-pointer',
-                    game.championId ? 'text-yellow-500' : 'text-gray-900'
-                  ]"
-                  @click.stop="openModal(game)"
-                >
-                  {{ game.rule.ruleTitle }}
-                </div>
-                <!-- 소유자 프로필 사진과 이름만 -->
-                <div @click="router.push('/profile/' + game.ownerId)" class="flex flex-row items-center gap-1 cursor-pointer ml-2">
-                  <img
-                    :src="game.ownerProfileUrl || Default"
-                    class="w-7 h-7 rounded-full border border-orange-400 shadow bg-white"
-                  />
-                  <span class="text-gray-700 font-bold text-[0.79rem]">{{ game.ownerNickname }}</span>
+            <!-- 생성자 영역 -->
+            <div class="flex items-center bg-orange-50 px-5 py-4 gap-4">
+              <img :src="game.ownerProfileUrl || Default" class="w-12 h-12 rounded-full border-2 border-orange-400 shadow" />
+              <div>
+                <div class="font-bold text-lg text-gray-900">{{ game.ownerNickname }}</div>
+                <div class="flex gap-2 mt-1">
+                  <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs border">해당규칙전적</span>
+                  <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs border">도전자 수</span>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-gray-600 text-right text-[0.79rem] min-w-[60px]">
-                  {{ formatTimeAgo(game.createdAt) }}
-                </div>
+              <div class="flex-1"></div>
+              <div class="text-gray-400 text-xs text-right min-w-[60px]">{{ formatTimeAgo(game.createdAt) }}</div>
+            </div>
+            <!-- 규칙 영역 -->
+            <div class="px-5 py-4 text-center border-b">
+              <div class="font-extrabold text-xl text-orange-500 cursor-pointer" @click.stop="openModal(game)">
+                {{ game.rule.ruleTitle }}
+              </div>
+              <div class="text-gray-500 text-sm mt-2 truncate">
+                {{ game.rule.ruleDescription }}
               </div>
             </div>
-            <!-- 껍데기 두개: 해당규칙전적, 도전자 수를 별도 div에 각각 표시 -->
-            <div class="flex gap-1 mt-1 ml-10">
-              <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.7rem] border border-gray-200">해당규칙전적</div>
-              <div class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[0.7rem] border border-gray-200">도전자 수</div>
-            </div>
-
-            <!-- 소유자 프로필만 남김 -->
-            <!-- 소유자 프로필 영역 제거: 상단에 병합됨 -->
-            <!-- 경기 일시장소 표시 복원 -->
-            <div class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2 px-7">
-              <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                  <span>{{ game.matchLocation == ' ' || game.matchLocation == '' ? '장소 미정' : game.matchLocation }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span>{{ !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate) }}</span>
-                </div>
-              </div>
+            <!-- 경기 조건 영역 -->
+            <div class="px-5 py-3 flex justify-between items-center text-sm text-gray-700">
+              <span>{{ game.matchLocation == ' ' || game.matchLocation == '' ? '장소 미정' : game.matchLocation }}</span>
+              <span>{{ !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate) }}</span>
             </div>
           </div>
         </div>

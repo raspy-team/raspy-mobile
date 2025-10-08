@@ -778,7 +778,10 @@
                       {{ r.rankAfter }}
                     </div>
                     <img
-                      :src="r.profilePicture || 'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'"
+                      :src="
+                        r.profilePicture ||
+                        'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'
+                      "
                       class="w-10 h-10 rounded-full object-cover flex-shrink-0"
                     />
                     <div class="flex-1 min-w-0">
@@ -1143,6 +1146,8 @@
       </div>
     </div>
   </div>
+
+  <Comment class="z-[100000]" v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
 </template>
 
 <script setup>
@@ -1155,6 +1160,7 @@ import { useToast } from '../../composable/useToast'
 import CustomToast from '../../components/CustomToast.vue'
 import AppInvitePost from '../../components/feed/AppInvitePost.vue'
 import { useFeed } from '../../composables/useFeed.js'
+import Comment from '../GameCommentView.vue'
 const router = useRouter()
 // Currently available info flags for gating UI
 const features = featureFlags
@@ -1982,7 +1988,10 @@ function closePlayerSelectModal() {
 }
 
 function onComment() {
-  router.push('/games/demo-game/comments')
+  const currentPost = post.value
+  if (currentPost?.id) {
+    commentId.value = currentPost.id
+  }
 }
 async function onShare() {
   const url = window.location.origin + '/'
@@ -2000,6 +2009,7 @@ async function onShare() {
 }
 
 const showRuleModal = ref(false)
+const commentId = ref(0)
 
 function tryVibrate(ms) {
   try {

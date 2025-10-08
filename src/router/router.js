@@ -15,6 +15,7 @@ import NotFoundView from "../views/NotFoundView.vue"
 import InstagramShare from "../components/InstagramShare.vue"
 import Setting from "../views/SettingView.vue"
 import Rule from "../views/RuleView.vue"
+import RuleCreate from "../views/rule/RuleCreateView.vue"
 import DmRoomList from '../views/DmRoomList.vue'
 import OauthCallback from '../views/OauthCallBack.vue'
 
@@ -103,6 +104,7 @@ const routes = [
 
   { path: '/settings', component:  Setting},
   { path: '/rules', component:  Rule},
+  { path: '/rules/create', component: RuleCreate},
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/group/login', component: GroupUserLogin},
   {path:'/invite-fall-back/:gameId', component : InviteDeep}, 

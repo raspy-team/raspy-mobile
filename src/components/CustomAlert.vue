@@ -6,11 +6,11 @@
         <button
           @click="$emit('confirm')"
           class="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-6 py-2 rounded-xl font-medium transition-all"
-        >신청</button>
+        >{{ confirmText }}</button>
         <button
           @click="$emit('cancel')"
           class="bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-800 px-6 py-2 rounded-xl font-medium border border-gray-200 transition-all"
-        >취소</button>
+        >{{ cancelText }}</button>
       </div>
     </div>
   </div>
@@ -18,7 +18,17 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-defineProps({ message: String })
+defineProps({
+  message: String,
+  confirmText: {
+    type: String,
+    default: '신청',
+  },
+  cancelText: {
+    type: String,
+    default: '취소',
+  },
+})
 defineEmits(['confirm', 'cancel'])
 </script>
 

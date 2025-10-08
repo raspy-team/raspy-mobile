@@ -6,26 +6,12 @@
     </div>
 
     <!-- 기존 콘텐츠 -->
-    <GameIntro v-if="step === 1" @next="step = 2" />
-    <RuleIntro v-if="step === 2" @select="onRuleIntroSelect" @back="step = 1" />
-    <RuleSelectPage v-if="step === 3" @select="onRuleSelected" @back="step = step - 1" />
-
-    <!-- 4~14: 나만의 규칙 생성 -->
-    <RuleCreateWizard
-      v-if="step >= 4 && step <= 14"
-      :step="step"
-      :form="ruleForm"
-      @next="onRuleFormNext"
-      @submit="submitRuleForm"
-      @back="onRuleFormBack"
-    />
-
-    <RuleAIGenerating v-if="step === 15" />
-    <RuleResultPage v-if="step === 16" :result="createdRule" @next="onFinishRule" />
-    <GameModeSelect v-if="step === 17" @mode="onModeSelect" />
-    <PlaceSelectPage v-if="step === 18" @select="onPlaceSelect" @back="step -= 1" />
-    <TimeSelectPage v-if="step === 19" @select="onTimeSelect" @back="step -= 1" />
-    <GameFinalPage v-if="step === 20" :game="gameForm" />
+    <GameIntro v-if="step === 1" @next="goToRuleView" />
+    <RuleSelectPage v-if="step === 2" @select="onRuleSelected" @back="goToRuleView" />
+    <GameModeSelect v-if="step === 3" @mode="onModeSelect" />
+    <PlaceSelectPage v-if="step === 4" @select="onPlaceSelect" @back="step -= 1" />
+    <TimeSelectPage v-if="step === 5" @select="onTimeSelect" @back="step -= 1" />
+    <GameFinalPage v-if="step === 6" :game="gameForm" />
   </div>
 
   <!-- 장소/진행 모달 -->
@@ -158,11 +144,7 @@
 <script setup>
 import { ref, computed, reactive, onMounted, nextTick } from 'vue'
 import GameIntro from '../../components/game-create/GameIntro.vue'
-import RuleIntro from '../../components/game-create/RuleIntro.vue'
 import RuleSelectPage from '../../components/game-create/RuleSelectPage.vue'
-import RuleCreateWizard from '../../components/game-create/RuleCreateWizard.vue'
-import RuleAIGenerating from '../../components/game-create/RuleAIGenerating.vue'
-import RuleResultPage from '../../components/game-create/RuleResultPage.vue'
 import GameModeSelect from '../../components/game-create/GameModeSelect.vue'
 import PlaceSelectPage from '../../components/game-create/PlaceSelect.vue'
 import TimeSelectPage from '../../components/game-create/TimeSelect.vue'
@@ -173,23 +155,9 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
-// 스텝 갯수 줄임 (14+6)
-const totalSteps = 20
+// 스텝 갯수: 6단계로 축소
+const totalSteps = 6
 const step = ref(1)
-const ruleForm = reactive({
-  ruleGoal: '',
-  ruleScoreDefinition: '',
-  rulePreparation: '',
-  ruleOrder: '',
-  ruleDecision: '',
-  ruleFoul: '',
-  ruleExtraInfo: '',
-  pointsToWin: -1,
-  duration: -1,
-  setsToWin: 1,
-  winBy: '',
-})
-const createdRule = ref(null)
 
 const gameForm = reactive({
   ruleId: null,
@@ -215,50 +183,23 @@ const currentGameId = ref(null)
 const progressWidth = computed(() => Math.max(5, Math.round((step.value / totalSteps) * 100)))
 onMounted(() => {
   // 최초 마운트 시 쿼리 파라미터 체크
-  handleQueryRuleId(route)
-})
-
-function handleQueryRuleId(route) {
   const ruleId = route.query.ruleId
   if (ruleId && !isNaN(Number(ruleId))) {
     gameForm.ruleId = Number(ruleId)
-    step.value = 17
+    step.value = 3 // GameModeSelect로 바로 이동
+  } else {
+    // ruleId가 없으면 바로 RuleView로 이동
+    router.push('/rules?fromGameCreate=true')
   }
+})
+
+function goToRuleView() {
+  router.push('/rules?fromGameCreate=true')
 }
 
-function onRuleIntroSelect(type) {
-  if (type === 'select') step.value = 3
-  else if (type === 'create') step.value = 4
-}
 function onRuleSelected(rule) {
   gameForm.ruleId = rule.id
-  step.value = 17
-}
-function onRuleFormNext(data) {
-  Object.assign(ruleForm, data)
-  if (step.value < 14) step.value += 1
-}
-function onRuleFormBack() {
-  if (step.value > 4) step.value -= 1
-  else step.value = 2
-}
-async function submitRuleForm(data) {
-  step.value = 15
-  try {
-    const payload = { ...data }
-    const { data: ruleData } = await api.post('/api/rules', payload)
-    setTimeout(() => {
-      createdRule.value = ruleData
-      gameForm.ruleId = ruleData.id
-      step.value = 16
-    }, 1800)
-  } catch (e) {
-    alert('규칙 생성 실패: ' + (e.response?.data?.message ?? e.message))
-    step.value = 14
-  }
-}
-function onFinishRule() {
-  step.value = 17
+  step.value = 3 // GameModeSelect로 이동
 }
 
 /**
@@ -268,7 +209,7 @@ function onFinishRule() {
 function onModeSelect(mode) {
   if (mode != 'random') {
     friendSelect(mode) // 이 경우 mode는 userId임
-  } else step.value = 18
+  } else step.value = 4 // PlaceSelectPage로 이동
 }
 
 async function friendSelect(friendId) {
@@ -289,12 +230,12 @@ async function friendSelect(friendId) {
 function onPlaceSelect(data) {
   gameForm.placeRoad = data.placeRoad
   gameForm.placeDetail = data.placeDetail
-  step.value = 19
+  step.value = 5 // TimeSelectPage로 이동
 }
 
 function onTimeSelect(time) {
   gameForm.time = time
-  step.value = 20
+  step.value = 6 // GameFinalPage로 이동
   createGame()
 }
 

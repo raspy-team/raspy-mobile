@@ -44,14 +44,17 @@
       {{ rule.ruleGoal }}
     </div>
 
-    <!-- CTA -->
-    <div class="flex justify-center text-center mt-4">
-      <button class="game-cta w-full text-center" @click.stop="onGameCtaClick">
-        <div class="text-center flex justify-center w-full items-center font-semibold gap-2">
-          <i class="fas fa-play mr-1"></i>
-          {{ rule.ruleTitle }} 게임 생성하기
+    <!-- CTA & Info -->
+    <div class="flex justify-center items-center text-center mt-4 gap-4">
+      <button class="game-cta text-center px-6" @click.stop="onGameCtaClick">
+        <div class="text-center flex justify-center items-center font-semibold gap-2">
+          생성
         </div>
       </button>
+      <div class="flex flex-col items-start text-xs text-gray-500 font-semibold gap-1">
+        <span>평점 : 4.7</span>
+        <span>플레이 수 : 17회</span>
+      </div>
     </div>
   </div>
 

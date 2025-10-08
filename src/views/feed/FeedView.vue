@@ -1974,11 +1974,11 @@ async function sendPlayWithMeRequest(selectedPlayer) {
   try {
     await playWithMeTooAPI.sendRequest(targetUserId, ruleId)
     playWithMeRequests.value.set(targetUserId, true)
-    showToast(`${selectedPlayer.name}님에게 나랑도해 요청을 보냈습니다.`, 'success')
+    showToast(`${selectedPlayer.name}님에게 나랑도해 요청을 보냈습니다.`, `/chat/${targetUserId}`)
     showPlayerSelectModal.value = false
   } catch (error) {
     console.error('나랑도해 요청 처리 중 오류:', error)
-    showToast('요청 처리 중 오류가 발생했습니다.', 'error')
+    showToast('이미 나랑도해 요청을 보낸 유저입니다.', 'error')
   }
 }
 

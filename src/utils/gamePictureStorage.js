@@ -29,6 +29,9 @@ export function getGamePictures(gameId) {
  */
 export function addGamePicture(gameId, dataUrl) {
   try {
+    // 현재 게임이 아닌 다른 게임의 사진들을 모두 삭제 TODO: 구현 필요
+    // clearOtherGamePictures(gameId)
+
     const pictures = getGamePictures(gameId)
     const newPicture = {
       id: `pic_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

@@ -42,6 +42,9 @@ export function addGamePicture(gameId, dataUrl) {
     return pictures
   } catch (error) {
     console.error('Failed to add game picture:', error)
+    if (error.name === 'QuotaExceededError') {
+      throw new Error('QUOTA_EXCEEDED')
+    }
     throw error
   }
 }
@@ -116,11 +119,11 @@ export function dataUrlToFile(dataUrl, filename = 'image.jpg') {
 /**
  * 이미지 압축 (크기 최적화)
  * @param {string} dataUrl
- * @param {number} maxWidth - 최대 너비 (기본 1920)
- * @param {number} quality - 품질 0~1 (기본 0.8)
+ * @param {number} maxWidth - 최대 너비 (기본 800)
+ * @param {number} quality - 품질 0~1 (기본 0.5)
  * @returns {Promise<string>} 압축된 base64 이미지
  */
-export function compressImage(dataUrl, maxWidth = 1920, quality = 0.8) {
+export function compressImage(dataUrl, maxWidth = 800, quality = 0.5) {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -128,9 +131,17 @@ export function compressImage(dataUrl, maxWidth = 1920, quality = 0.8) {
       let width = img.width
       let height = img.height
 
+      // 최대 너비 제한
       if (width > maxWidth) {
         height = (height * maxWidth) / width
         width = maxWidth
+      }
+
+      // 최대 높이도 제한 (긴 세로 이미지 대응)
+      const maxHeight = 800
+      if (height > maxHeight) {
+        width = (width * maxHeight) / height
+        height = maxHeight
       }
 
       canvas.width = width

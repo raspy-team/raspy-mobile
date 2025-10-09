@@ -51,7 +51,7 @@
         :class="pullDistance > 80 ? 'border-orange-500' : 'border-gray-200'"
         :style="{
           opacity: Math.min(pullDistance / 80, 1),
-          transform: `translate(-50%, ${Math.min(pullDistance / 3, 30)}px)`
+          transform: `translate(-50%, ${Math.min(pullDistance / 3, 30)}px)`,
         }"
       >
         <div class="relative w-5 h-5 flex items-center justify-center">
@@ -60,7 +60,7 @@
             :class="pullDistance > 80 ? 'fa-sync text-orange-500' : 'fa-arrow-down text-gray-400'"
             :style="{
               transform: pullDistance > 80 ? 'rotate(180deg)' : 'rotate(0deg)',
-              animation: pullDistance > 80 ? 'pulse 0.8s infinite' : 'none'
+              animation: pullDistance > 80 ? 'pulse 0.8s infinite' : 'none',
             }"
           ></i>
         </div>
@@ -89,16 +89,24 @@
           >
             <!-- 생성자 영역 -->
             <div class="flex items-center bg-orange-50 px-5 py-4 gap-4">
-              <img :src="game.ownerProfileUrl || Default" class="w-12 h-12 rounded-full border-2 border-orange-400 shadow" />
+              <img
+                :src="game.ownerProfileUrl || Default"
+                class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
+              />
               <div>
                 <div class="font-bold text-lg text-gray-900">{{ game.ownerNickname }}</div>
               </div>
               <div class="flex-1"></div>
-              <div class="text-gray-400 text-xs text-right min-w-[60px]">{{ formatTimeAgo(game.createdAt) }}</div>
+              <div class="text-gray-400 text-xs text-right min-w-[60px]">
+                {{ formatTimeAgo(game.createdAt) }}
+              </div>
             </div>
             <!-- 규칙 영역 -->
             <div class="px-5 py-4 text-center border-b">
-              <div class="font-extrabold text-xl text-orange-500 cursor-pointer" @click.stop="openModal(game)">
+              <div
+                class="font-extrabold text-xl text-orange-500 cursor-pointer"
+                @click.stop="openModal(game)"
+              >
                 {{ game.rule.ruleTitle }}
               </div>
               <div class="text-gray-500 text-sm mt-2 truncate">
@@ -107,19 +115,37 @@
             </div>
             <!-- 경기 조건 영역 -->
             <div class="px-5 py-3 flex justify-between items-center text-sm text-gray-700">
-              <span>{{ game.matchLocation == ' ' || game.matchLocation == '' ? '장소 미정' : game.matchLocation }}</span>
-              <span>{{ !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate) }}</span>
+              <span>{{
+                game.matchLocation == ' ' || game.matchLocation == ''
+                  ? '장소 미정'
+                  : game.matchLocation
+              }}</span>
+              <span>{{
+                !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate)
+              }}</span>
             </div>
             <!-- 전적 영역 -->
             <div class="px-5 pb-3 flex gap-2">
-              <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs border font-semibold">상대 : 7승 3무 11패</span>
-              <span class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs border font-semibold">나 : 0승 0무 0패</span>
-              <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs border font-semibold">도전자 7명</span>
+              <span
+                class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs border font-semibold"
+                >상대 : 7승 3무 11패</span
+              >
+              <span
+                class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs border font-semibold"
+                >나 : 0승 0무 0패</span
+              >
+              <span
+                class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs border font-semibold"
+                >도전자 7명</span
+              >
             </div>
           </div>
         </div>
         <!-- 하단 고정 버튼 영역 -->
-        <div v-if="selectedGame" class="fixed bottom-0 left-0 w-full bg-white border-t z-50 flex justify-center gap-4 py-3 shadow-lg">
+        <div
+          v-if="selectedGame"
+          class="fixed bottom-0 left-0 w-full bg-white border-t z-50 flex justify-center gap-4 py-3 shadow-lg"
+        >
           <button
             :disabled="selectedGame.applied"
             @click="!selectedGame.applied && confirmApply(selectedGame)"
@@ -151,13 +177,19 @@
               class="absolute right-0 bottom-full mb-2 bg-white border rounded shadow-md z-30 w-32"
             >
               <button
-                @click="onClickReport(selectedGame.id); selectedGame.showMoreMenu = false"
+                @click="
+                  onClickReport(selectedGame.id)
+                  selectedGame.showMoreMenu = false
+                "
                 class="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-50"
               >
                 신고하기
               </button>
               <button
-                @click="shareGame(selectedGame.id); selectedGame.showMoreMenu = false"
+                @click="
+                  shareGame(selectedGame.id)
+                  selectedGame.showMoreMenu = false
+                "
                 class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
               >
                 공유하기
@@ -987,7 +1019,7 @@ const submitInvite = async () => {
 const applyInviteGame = async (id) => {
   try {
     await api.post(`/api/games/${id}/apply`)
-    showToast('참가 신청이 완료되었습니다!', `/inbox?tab=sent&id=${id}`)
+    showToast('참가 신청이 완료되었습니다!', `/game&id=${id}`)
     closeInviteModal()
   } catch (e) {
     showToast(e.response?.data?.message || '신청에 실패했습니다.')

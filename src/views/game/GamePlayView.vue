@@ -2,28 +2,7 @@
   <div
     v-if="game && user1 && user2"
     class="w-dvw h-full flex flex-col px-4 py-3 relative text-black overflow-hidden"
-    :style="{
-      transform: `translateX(${swipeOffset}px)`,
-      transition: isSwipeComplete ? 'transform 0.3s ease-out' : 'none',
-    }"
-    @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove"
-    @touchend="handleTouchEnd"
-    @mousedown="handleMouseDown"
-    @mousemove="handleMouseMove"
-    @mouseup="handleMouseUp"
-    @mouseleave="handleMouseLeave"
   >
-    <!-- 스와이프 힌트 (카메라 아이콘) -->
-    <div
-      class="fixed left-0 top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-300"
-      :style="{ opacity: swipeHintOpacity }"
-    >
-      <div class="bg-orange-500 text-white p-4 rounded-r-2xl shadow-lg flex items-center gap-2">
-        <i class="fas fa-camera text-xl"></i>
-        <span class="text-sm font-semibold">촬영</span>
-      </div>
-    </div>
 
     <div class="flex items-center justify-between mb-4">
       <button @click="goBack" class="text-white text-lg">
@@ -164,7 +143,12 @@
                 >{{ user1SetsWon }}</span
               >
             </div>
-            <span class="mx-10 sm:mx-24 text-[16vw] sm:text-[24dvw] text-orange-400">:</span>
+                        <button
+              @click="openCamera"
+              class="mx-4 sm:mx-8 text-[12vw] sm:text-[16dvw] text-orange-300 hover:text-orange-400 active:text-orange-500 transition-colors duration-200 focus:outline-none rounded-full flex items-center justify-center w-[20vw] h-[20vw] sm:w-[24dvw] sm:h-[24dvw] active:scale-95"
+            >
+              <i class="fas fa-camera"></i>
+            </button>
             <div class="flex items-end">
               <span class="text-[28vw] sm:text-[38dvw] font-extrabold text-orange-500">{{
                 currentScore2
@@ -407,6 +391,8 @@
   </div>
 
   <CustomToast />
+
+
 </template>
 
 <script setup>
@@ -427,15 +413,6 @@ const gameId = route.params.gameId
 
 // 카메라 관련 상태
 const cameraInputRef = ref(null)
-
-// 스와이프 관련 상태
-const touchStartX = ref(0)
-const touchStartY = ref(0)
-const isSwiping = ref(false)
-const isMouseDown = ref(false)
-const swipeOffset = ref(0)
-const isSwipeComplete = ref(false)
-const swipeHintOpacity = ref(0)
 const game = reactive({})
 const chatRoomId = ref(null)
 const currentSet = ref(1)
@@ -599,7 +576,7 @@ function handleVisibilityChange() {
   }
 }
 
-const addLog = (log) => {
+function addLog(log) {
   const start = new Date(game.totalGameStartedAt)
   const current = new Date(log.time)
   const diffSec = Math.floor((current - start) / 1000)
@@ -727,7 +704,7 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
-const socket_sendScore = (userIndex, scoreDelta) => {
+function socket_sendScore(userIndex, scoreDelta) {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SCORE',
     userId: userIndex === 1 ? user1.value.id : user2.value.id,
@@ -736,7 +713,7 @@ const socket_sendScore = (userIndex, scoreDelta) => {
   })
 }
 
-const socket_nextSet = () => {
+function socket_nextSet() {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SET',
     setIndex: currentSet.value,
@@ -745,150 +722,25 @@ const socket_nextSet = () => {
   })
 }
 
-const socket_finishGame = () => {
+function socket_finishGame() {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'FINISH',
   })
 }
 
-const socket_resetGame = () => {
+function socket_resetGame() {
   socket.sendGameEvent(chatRoomId.value, {
     type: 'RESET',
   })
 }
 
-// 스와이프 핸들러 (터치)
-const handleTouchStart = (e) => {
-  touchStartX.value = e.touches[0].clientX
-  touchStartY.value = e.touches[0].clientY
-  isSwiping.value = false
-  isSwipeComplete.value = false
-  swipeOffset.value = 0
-  swipeHintOpacity.value = 0
-}
-
-const handleTouchMove = (e) => {
-  if (!touchStartX.value) return
-
-  const deltaX = e.touches[0].clientX - touchStartX.value
-  const deltaY = e.touches[0].clientY - touchStartY.value
-
-  // 수평 스와이프인지 확인 (좌→우)
-  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0) {
-    isSwiping.value = true
-
-    // 화면 따라 움직이기 (최대 200px까지만)
-    swipeOffset.value = Math.min(deltaX * 0.5, 200)
-
-    // 힌트 투명도 조절 (0 ~ 1)
-    swipeHintOpacity.value = Math.min(deltaX / 150, 1)
-  }
-}
-
-const handleTouchEnd = (e) => {
-  const deltaX = e.changedTouches[0].clientX - touchStartX.value
-  const deltaY = e.changedTouches[0].clientY - touchStartY.value
-
-  // 좌→우 스와이프 감지 (100px 이상 움직였을 때)
-  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 30) {
-    openCamera()
-  }
-
-  // 원래 위치로 복귀
-  isSwipeComplete.value = true
-  swipeOffset.value = 0
-  swipeHintOpacity.value = 0
-
-  touchStartX.value = 0
-  touchStartY.value = 0
-  isSwiping.value = false
-
-  setTimeout(() => {
-    isSwipeComplete.value = false
-  }, 300)
-}
-
-// 마우스 핸들러
-const handleMouseDown = (e) => {
-  isMouseDown.value = true
-  touchStartX.value = e.clientX
-  touchStartY.value = e.clientY
-  isSwiping.value = false
-  isSwipeComplete.value = false
-  swipeOffset.value = 0
-  swipeHintOpacity.value = 0
-}
-
-const handleMouseMove = (e) => {
-  if (!isMouseDown.value) return
-  if (!touchStartX.value) return
-
-  const deltaX = e.clientX - touchStartX.value
-  const deltaY = e.clientY - touchStartY.value
-
-  // 수평 스와이프인지 확인 (좌→우)
-  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0) {
-    isSwiping.value = true
-
-    // 화면 따라 움직이기 (최대 200px까지만)
-    swipeOffset.value = Math.min(deltaX * 0.5, 200)
-
-    // 힌트 투명도 조절 (0 ~ 1)
-    swipeHintOpacity.value = Math.min(deltaX / 150, 1)
-  }
-}
-
-const handleMouseUp = (e) => {
-  if (!isMouseDown.value) return
-
-  const deltaX = e.clientX - touchStartX.value
-  const deltaY = e.clientY - touchStartY.value
-
-  // 좌→우 스와이프 감지 (100px 이상 움직였을 때)
-  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 100) {
-    openCamera()
-  }
-
-  // 원래 위치로 복귀
-  isSwipeComplete.value = true
-  swipeOffset.value = 0
-  swipeHintOpacity.value = 0
-
-  isMouseDown.value = false
-  touchStartX.value = 0
-  touchStartY.value = 0
-  isSwiping.value = false
-
-  setTimeout(() => {
-    isSwipeComplete.value = false
-  }, 300)
-}
-
-const handleMouseLeave = () => {
-  if (isMouseDown.value) {
-    // 원래 위치로 복귀
-    isSwipeComplete.value = true
-    swipeOffset.value = 0
-    swipeHintOpacity.value = 0
-
-    isMouseDown.value = false
-    touchStartX.value = 0
-    touchStartY.value = 0
-    isSwiping.value = false
-
-    setTimeout(() => {
-      isSwipeComplete.value = false
-    }, 300)
-  }
-}
-
 // 카메라 열기 (바로 input 트리거)
-const openCamera = () => {
+function openCamera() {
   cameraInputRef.value?.click()
 }
 
 // 카메라 파일 선택 완료
-const onCameraChange = async (e) => {
+async function onCameraChange(e) {
   const file = e.target.files?.[0]
   if (!file) return
 

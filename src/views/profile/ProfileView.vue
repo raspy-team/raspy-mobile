@@ -1,8 +1,10 @@
 <template>
-  <div class="bg-[#f8f9fa] min-h-full relative raspy-top">
+  <div
+    class="bg-gradient-to-b from-orange-50/30 via-white to-gray-50 min-h-screen relative flex flex-col"
+  >
     <!-- Fixed Top Bar -->
     <div
-      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white border-b raspy-top"
+      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white/95 backdrop-blur-md border-b shadow-sm"
     >
       <div class="flex items-center h-14">
         <router-link to="/" class="font-bold text-[#f97316]">
@@ -133,345 +135,270 @@
 
     <!-- USER 정보: 로딩 후 노출 -->
     <template v-else>
-      <section
-        class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-8 px-6 pt-7 pb-5 flex flex-col gap-5 relative"
-      >
-        <div class="flex gap-5 items-start mb-0">
-          <div class="">
-            <img
-              :src="user.avatar ? user.avatar : Default"
-              alt="avatar"
-              class="w-20 h-20 rounded-full object-cover border-2 border-orange-400 shadow"
-            />
-          </div>
-          <div class="flex-1 flex flex-col">
-            <div class="flex flex-col items-start gap-2">
-              <h2 class="flex gap-2 items-center">
-                <span class="mb-[2.7px] text-gray-900 flex flex-col items-start gap-0">
-                  <div class="flex gap-3">
-                    <div class="text-xl font-bold">
-                      {{ user.nickname }}
-                    </div>
-                    <button
-                      v-if="!user.isMe"
-                      @click="blockUser"
-                      class="flex items-center gap-2 px-2 py-1 rounded-[5px] bg-red-500 text-white text-[0.7rem] hover:bg-red-600 active:bg-red-700"
-                    >
-                      <i class="fas fa-ban text-base"></i>
-                      <span>차단</span>
-                    </button>
-                  </div>
-                  <div class="text-[0.77rem] font-semibold text-gray-600">@{{ user.username }}</div>
+      <main class="flex-1 overflow-hidden flex flex-col pt-14">
+        <section
+          class="w-full mx-auto bg-gradient-to-br from-white via-orange-50/30 to-white rounded-3xl shadow-2xl mb-6 px-5 pt-8 pb-6 flex flex-col gap-4 relative overflow-hidden flex-shrink-0"
+        >
+          <!-- Decorative background -->
+          <div
+            class="absolute -top-20 -right-20 w-40 h-40 bg-orange-200/20 rounded-full blur-3xl"
+          ></div>
+          <div
+            class="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-300/15 rounded-full blur-3xl"
+          ></div>
+
+          <!-- Profile Section - Improved -->
+          <div class="flex flex-col items-center gap-5 relative z-10">
+            <!-- Avatar with glow effect -->
+            <div class="relative">
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full blur-xl opacity-30 animate-pulse"
+              ></div>
+              <div class="relative">
+                <img
+                  :src="user.avatar ? user.avatar : Default"
+                  alt="avatar"
+                  class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-2xl relative z-10 ring-4 ring-orange-100"
+                />
+                <!-- Status badge -->
+                <div
+                  class="absolute -bottom-1 -right-1 bg-green-500 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-lg z-20"
+                >
+                  <i class="fas fa-check text-white text-xs"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-2 w-full">
+              <div class="flex gap-2 items-center">
+                <h1
+                  class="text-4xl font-black bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 bg-clip-text text-transparent"
+                >
+                  {{ user.nickname }}
+                </h1>
+                <button
+                  v-if="!user.isMe"
+                  @click="blockUser"
+                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 active:bg-red-700 transition shadow-md"
+                >
+                  <i class="fas fa-ban text-xs"></i>
+                  <span>차단</span>
+                </button>
+              </div>
+              <div class="text-sm font-medium text-gray-400">@{{ user.username }}</div>
+
+              <!-- Info tags with icons -->
+              <div class="flex gap-2 flex-wrap justify-center mt-2">
+                <span
+                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-600 text-sm px-4 py-2 rounded-full font-bold border border-orange-200 shadow-sm"
+                >
+                  <i class="fas fa-birthday-cake text-xs"></i>
+                  {{ user.age ? user.age + '세' : '연령 -' }}
                 </span>
-              </h2>
-              <div class="flex gap-1">
                 <span
-                  class="inline-block bg-orange-100 text-orange-600 text-xs px-2.5 py-0.5 rounded font-bold"
-                  >{{ user.age ? user.age + '세' : '연령 -' }}</span
+                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-gray-50 to-gray-100 text-gray-600 text-sm px-4 py-2 rounded-full font-bold border border-gray-200 shadow-sm"
                 >
+                  <i class="fas fa-venus-mars text-xs"></i>
+                  {{ user.gender && user.gender != '비공개' ? user.gender : '성별 -' }}
+                </span>
                 <span
-                  class="inline-block bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded font-bold"
-                  >{{ user.gender && user.gender != '비공개' ? user.gender : '성별 -' }}</span
+                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 text-sm px-4 py-2 rounded-full font-bold border border-blue-200 shadow-sm"
                 >
-                <span
-                  class="inline-block bg-blue-100 text-blue-500 text-xs px-2 py-0.5 rounded font-bold"
-                  >{{
+                  <i class="fas fa-map-marker-alt text-xs"></i>
+                  {{
                     user.location != null && user.location.length > 2
                       ? user.location?.split(' ').slice(-1)[0] || ''
                       : '지역 -'
-                  }}</span
-                >
+                  }}
+                </span>
               </div>
-              <div class="text-xs text-gray-600">{{ user.intro }}</div>
-            </div>
-          </div>
-        </div>
 
-        <div
-          class="flex items-center justify-between bg-white/90 rounded-xl px-4 py-3 mt-2 mb-[-5px] cursor-pointer hover:bg-orange-50 border border-gray-100 shadow-sm transition"
-          @click="showRankingModal = true"
-        >
-          <div class="flex items-center gap-2">
-            <i
-              class="fas fa-trophy text-lg"
-              :style="`color: ${
-                ranking.totalRank == 1
-                  ? '#FFB300'
-                  : ranking.totalRank >= 2 && ranking.totalRank <= 10
-                    ? '#5DB0FF'
-                    : ranking.totalRank >= 11 && ranking.totalRank <= 100
-                      ? '#23C97A'
-                      : '#FF7043'
-              }`"
-            ></i>
-            <span class="font-bold text-gray-800 text-sm">
-              전체 랭킹
-              <span
-                class="font-black"
-                :style="`color: ${
-                  ranking.totalRank == 1
-                    ? '#FFB300'
-                    : ranking.totalRank >= 2 && ranking.totalRank <= 10
-                      ? '#5DB0FF'
-                      : ranking.totalRank >= 11 && ranking.totalRank <= 100
-                        ? '#23C97A'
-                        : '#FF7043'
-                }`"
+              <!-- Bio with better styling -->
+              <div
+                v-if="user.intro"
+                class="mt-3 px-6 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm max-w-sm"
               >
-                {{ ranking.totalRank == 0 ? '-' : ranking.totalRank }}위
-              </span>
-            </span>
-          </div>
-          <i class="fas fa-chevron-right text-gray-300 text-base"></i>
-        </div>
+                <p class="text-base text-gray-700 text-center leading-relaxed">{{ user.intro }}</p>
+              </div>
 
-        <div class="rounded-xl bg-white w-full max-w-xl mx-auto shadow flex flex-col">
-          <div class="grid grid-cols-4 border-b border-gray-200">
-            <!-- 승 -->
-            <div class="flex flex-col items-center justify-center p-4">
-              <span class="my-1">
-                <!-- 승 SVG -->
-                <svg width="24" height="24" viewBox="0 0 100 100">
-                  <path
-                    d="M39.7916 74.9999L16.0416 51.2499L21.9791 45.3124L39.7916 63.1249L78.0208 24.8958L83.9583 30.8333L39.7916 74.9999Z"
-                    fill="#4d4d4d"
-                  />
-                </svg>
-              </span>
-
-              <span class="text-[1.25rem] font-[800] text-[#4d4d4d]">{{ user.stats.wins }}</span>
-
-              <span class="text-xs text-gray-500 font-semibold mt-1">승</span>
-            </div>
-            <!-- 무 -->
-            <div class="flex flex-col items-center justify-center p-4">
-              <span class="my-1">
-                <svg width="24" height="24" viewBox="0 0 100 100">
-                  <path
-                    d="M8.33337 83.3334L50 16.6667L91.6667 83.3334H8.33337ZM23.3334 75.0001H76.6667L50 32.2917L23.3334 75.0001Z"
-                    fill="#4d4d4d"
-                  />
-                </svg>
-              </span>
-
-              <span class="text-[1.25rem] font-[800] text-[#4d4d4d]">{{ user.stats.draws }}</span>
-
-              <span class="text-xs text-gray-500 font-semibold mt-1">무</span>
-            </div>
-            <!-- 패 -->
-            <div class="flex flex-col items-center justify-center p-4">
-              <span class="my-1">
-                <svg width="24" height="24" viewBox="0 0 100 100">
-                  <path
-                    d="M26.6667 79.1666L20.8334 73.3333L44.1667 49.9999L20.8334 26.6666L26.6667 20.8333L50 44.1666L73.3334 20.8333L79.1667 26.6666L55.8334 49.9999L79.1667 73.3333L73.3334 79.1666L50 55.8333L26.6667 79.1666Z"
-                    fill="#4d4d4d"
-                  />
-                </svg>
-              </span>
-              <span class="text-[1.25rem] font-[800] text-[#4d4d4d]">{{ user.stats.losses }}</span>
-
-              <span class="text-xs text-gray-500 font-semibold mt-1">패</span>
-            </div>
-            <!-- 플레이 타임 -->
-            <div class="flex flex-col items-center justify-between p-4">
-              <span class="my-1">
-                <svg width="24" height="24" viewBox="0 0 100 100">
-                  <path
-                    d="M50 45.8333C54.5834 45.8333 58.507 44.2013 61.7709 40.9374C65.0347 37.6735 66.6667 33.7499 66.6667 29.1666V16.6666H33.3334V29.1666C33.3334 33.7499 34.9653 37.6735 38.2292 40.9374C41.4931 44.2013 45.4167 45.8333 50 45.8333ZM16.6667 91.6666V83.3333H25V70.8333C25 66.5971 25.9896 62.6214 27.9688 58.9062C29.9479 55.1909 32.7084 52.2221 36.25 49.9999C32.7084 47.7777 29.9479 44.8089 27.9688 41.0937C25.9896 37.3784 25 33.4027 25 29.1666V16.6666H16.6667V8.33325H83.3334V16.6666H75V29.1666C75 33.4027 74.0104 37.3784 72.0313 41.0937C70.0521 44.8089 67.2917 47.7777 63.75 49.9999C67.2917 52.2221 70.0521 55.1909 72.0313 58.9062C74.0104 62.6214 75 66.5971 75 70.8333V83.3333H83.3334V91.6666H16.6667Z"
-                    fill="#4d4d4d"
-                  />
-                </svg>
-              </span>
-              <span class="text-[1.25rem] font-[800] text-[#4d4d4d]">{{ formattedPlayTime }}</span>
-
-              <span class="text-[0.57rem] text-gray-500 font-semibold mt-1">플레이 시간</span>
-            </div>
-          </div>
-          <div class="grid grid-cols-4 flex items-end">
-            <!-- 퍼포먼스 -->
-            <div class="flex flex-col items-center justify-center p-4">
-              <span class="my-1">
-                <svg width="24" height="24" viewBox="0 0 100 100">
-                  <path
-                    d="M43.5417 64.5834C45.2084 66.2501 47.3612 67.0661 50 67.0313C52.6389 66.9966 54.5834 66.0417 55.8334 64.1667L79.1667 29.1667L44.1667 52.5001C42.2917 53.7501 41.3021 55.6598 41.198 58.2292C41.0938 60.7987 41.875 62.9167 43.5417 64.5834ZM50 16.6667C54.0973 16.6667 58.0382 17.2397 61.823 18.3855C65.6077 19.5313 69.1667 21.2501 72.5 23.5417L64.5834 28.5417C62.2917 27.3612 59.9132 26.4758 57.448 25.8855C54.9827 25.2952 52.5 25.0001 50 25.0001C40.7639 25.0001 32.8993 28.2466 26.4063 34.7397C19.9132 41.2327 16.6667 49.0973 16.6667 58.3334C16.6667 61.2501 17.066 64.132 17.8646 66.9792C18.6632 69.8265 19.7917 72.5001 21.25 75.0001H78.75C80.3473 72.3612 81.5105 69.6181 82.2396 66.7709C82.9688 63.9237 83.3334 60.9723 83.3334 57.9167C83.3334 55.4167 83.0382 52.9862 82.448 50.6251C81.8577 48.264 80.9723 45.9723 79.7917 43.7501L84.7917 35.8334C86.875 39.0973 88.5244 42.5695 89.7396 46.2501C90.9549 49.9306 91.5973 53.7501 91.6667 57.7084C91.7362 61.6667 91.2848 65.4515 90.3125 69.0626C89.3403 72.6737 87.9167 76.1112 86.0417 79.3751C85.2778 80.6251 84.2362 81.5973 82.9167 82.2917C81.5973 82.9862 80.2084 83.3334 78.75 83.3334H21.25C19.7917 83.3334 18.4028 82.9862 17.0834 82.2917C15.7639 81.5973 14.7223 80.6251 13.9584 79.3751C12.1528 76.2501 10.7639 72.9341 9.79171 69.4272C8.81949 65.9202 8.33337 62.2223 8.33337 58.3334C8.33337 52.5695 9.42712 47.1702 11.6146 42.1355C13.8021 37.1008 16.7882 32.6911 20.573 28.9063C24.3577 25.1216 28.7848 22.1355 33.8542 19.948C38.9237 17.7605 44.3056 16.6667 50 16.6667Z"
-                    fill="#4d4d4d"
-                  />
-                </svg>
-              </span>
-              <span class="text-[1.25rem] font-[800] text-[#4d4d4d]">{{
-                user.stats.performance == null ? 0.0 : user.stats.performance.toFixed(1)
-              }}</span>
-
-              <span class="text-xs text-gray-500 font-semibold mt-1">퍼포먼스</span>
-            </div>
-            <!-- 매너 -->
-            <div class="flex flex-col items-center justify-center p-4">
-              <span class="my-1">
-                <svg width="24" height="24" viewBox="0 0 100 100">
-                  <path
-                    d="M50 87.5001L43.9584 82.0834C36.9445 75.764 31.1459 70.3126 26.5625 65.7293C21.9792 61.1459 18.3334 57.0313 15.625 53.3855C12.9167 49.7397 11.0243 46.389 9.94796 43.3334C8.87157 40.2779 8.33337 37.1529 8.33337 33.9584C8.33337 27.4306 10.5209 21.9792 14.8959 17.6042C19.2709 13.2292 24.7223 11.0417 31.25 11.0417C34.8612 11.0417 38.2987 11.8056 41.5625 13.3334C44.8264 14.8612 47.6389 17.014 50 19.7917C52.3612 17.014 55.1737 14.8612 58.4375 13.3334C61.7014 11.8056 65.1389 11.0417 68.75 11.0417C75.2778 11.0417 80.7292 13.2292 85.1042 17.6042C89.4792 21.9792 91.6667 27.4306 91.6667 33.9584C91.6667 37.1529 91.1285 40.2779 90.0521 43.3334C88.9757 46.389 87.0834 49.7397 84.375 53.3855C81.6667 57.0313 78.0209 61.1459 73.4375 65.7293C68.8542 70.3126 63.0556 75.764 56.0417 82.0834L50 87.5001ZM50 76.2501C56.6667 70.2779 62.1528 65.1563 66.4584 60.8855C70.7639 56.6147 74.1667 52.8994 76.6667 49.7397C79.1667 46.5799 80.9028 43.7674 81.875 41.3022C82.8473 38.8369 83.3334 36.389 83.3334 33.9584C83.3334 29.7917 81.9445 26.3195 79.1667 23.5417C76.3889 20.764 72.9167 19.3751 68.75 19.3751C65.4862 19.3751 62.4653 20.2952 59.6875 22.1355C56.9098 23.9758 55 26.3195 53.9584 29.1667H46.0417C45 26.3195 43.0903 23.9758 40.3125 22.1355C37.5348 20.2952 34.5139 19.3751 31.25 19.3751C27.0834 19.3751 23.6112 20.764 20.8334 23.5417C18.0556 26.3195 16.6667 29.7917 16.6667 33.9584C16.6667 36.389 17.1528 38.8369 18.125 41.3022C19.0973 43.7674 20.8334 46.5799 23.3334 49.7397C25.8334 52.8994 29.2362 56.6147 33.5417 60.8855C37.8473 65.1563 43.3334 70.2779 50 76.2501Z"
-                    fill="#4d4d4d"
-                  />
-                </svg>
-              </span>
-              <span class="text-[1.25rem] font-[800] text-[#4d4d4d]">{{
-                user.mannerScore.toFixed(1)
-              }}</span>
-
-              <span class="text-xs text-gray-500 font-semibold mt-1">매너</span>
-            </div>
-            <!-- 친구 -->
-            <div @click="openFriendModal" class="flex flex-col items-center justify-center p-4">
-              <span class="my-1">
-                <svg width="24" height="24" viewBox="0 0 100 100">
-                  <path
-                    d="M4.16663 83.3334V71.6667C4.16663 69.3056 4.77426 67.1355 5.98954 65.1563C7.20482 63.1772 8.8194 61.6667 10.8333 60.6251C15.1388 58.4723 19.5138 56.8577 23.9583 55.7813C28.4027 54.7049 32.9166 54.1667 37.5 54.1667C42.0833 54.1667 46.5972 54.7049 51.0416 55.7813C55.4861 56.8577 59.8611 58.4723 64.1666 60.6251C66.1805 61.6667 67.7951 63.1772 69.0104 65.1563C70.2257 67.1355 70.8333 69.3056 70.8333 71.6667V83.3334H4.16663ZM79.1666 83.3334V70.8334C79.1666 67.7779 78.3159 64.8438 76.6145 62.0313C74.9132 59.2188 72.5 56.8056 69.375 54.7917C72.9166 55.2084 76.25 55.9202 79.375 56.9272C82.5 57.9341 85.4166 59.1667 88.125 60.6251C90.625 62.014 92.5347 63.5591 93.8541 65.2605C95.1736 66.9619 95.8333 68.8195 95.8333 70.8334V83.3334H79.1666ZM37.5 50.0001C32.9166 50.0001 28.993 48.3681 25.7291 45.1042C22.4652 41.8404 20.8333 37.9167 20.8333 33.3334C20.8333 28.7501 22.4652 24.8265 25.7291 21.5626C28.993 18.2987 32.9166 16.6667 37.5 16.6667C42.0833 16.6667 46.0069 18.2987 49.2708 21.5626C52.5347 24.8265 54.1666 28.7501 54.1666 33.3334C54.1666 37.9167 52.5347 41.8404 49.2708 45.1042C46.0069 48.3681 42.0833 50.0001 37.5 50.0001ZM79.1666 33.3334C79.1666 37.9167 77.5347 41.8404 74.2708 45.1042C71.0069 48.3681 67.0833 50.0001 62.5 50.0001C61.7361 50.0001 60.7638 49.9133 59.5833 49.7397C58.4027 49.5661 57.4305 49.3751 56.6666 49.1667C58.5416 46.9445 59.9826 44.4792 60.9895 41.7709C61.9965 39.0626 62.5 36.2501 62.5 33.3334C62.5 30.4167 61.9965 27.6042 60.9895 24.8959C59.9826 22.1876 58.5416 19.7223 56.6666 17.5001C57.6388 17.1529 58.6111 16.9272 59.5833 16.823C60.5555 16.7188 61.5277 16.6667 62.5 16.6667C67.0833 16.6667 71.0069 18.2987 74.2708 21.5626C77.5347 24.8265 79.1666 28.7501 79.1666 33.3334ZM12.5 75.0001H62.5V71.6667C62.5 70.9029 62.309 70.2084 61.927 69.5834C61.5451 68.9584 61.0416 68.4723 60.4166 68.1251C56.6666 66.2501 52.8819 64.8438 49.0625 63.9063C45.243 62.9688 41.3888 62.5001 37.5 62.5001C33.6111 62.5001 29.7569 62.9688 25.9375 63.9063C22.118 64.8438 18.3333 66.2501 14.5833 68.1251C13.9583 68.4723 13.4548 68.9584 13.0729 69.5834C12.6909 70.2084 12.5 70.9029 12.5 71.6667V75.0001ZM37.5 41.6667C39.7916 41.6667 41.7534 40.8508 43.3854 39.2188C45.0173 37.5869 45.8333 35.6251 45.8333 33.3334C45.8333 31.0417 45.0173 29.0799 43.3854 27.448C41.7534 25.8161 39.7916 25.0001 37.5 25.0001C35.2083 25.0001 33.2465 25.8161 31.6145 27.448C29.9826 29.0799 29.1666 31.0417 29.1666 33.3334C29.1666 35.6251 29.9826 37.5869 31.6145 39.2188C33.2465 40.8508 35.2083 41.6667 37.5 41.6667Z"
-                    fill="#4d4d4d"
-                  />
-                </svg>
-              </span>
-              <span class="text-[1.25rem] font-[800] text-[#4d4d4d]">
-                {{ user.stats.friends }}</span
+              <!-- Edit button for own profile -->
+              <button
+                v-if="user.isMe"
+                @click="router.push('/settings/profile')"
+                class="mt-4 px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
               >
-
-              <span class="text-xs text-gray-500 font-semibold mt-1">친구</span>
+                <i class="fas fa-edit mr-2"></i>
+                프로필 수정
+              </button>
             </div>
-            <!-- 챔피언 -->
+          </div>
+
+          <!-- Stats Card - Enhanced Design -->
+          <button
+            @click="showStatsModal = true"
+            class="group rounded-2xl bg-gradient-to-br from-white to-gray-50 w-full shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-200 relative z-10 p-5 overflow-hidden"
+          >
+            <!-- Animated background -->
             <div
-              class="flex flex-col items-center justify-center p-4 relative"
-              @click="toggleChampion"
-            >
-              <span class="text-[1.25rem] font-[800] text-gray-600 relative">
-                <svg class="" width="70" height="66" viewBox="0 0 150 135">
-                  <path
-                    d="M22.5 135V120H127.5V135H22.5ZM22.5 108.75L12.9375 48.5625C12.6875 48.5625 12.4062 48.5938 12.0938 48.6562C11.7812 48.7188 11.5 48.75 11.25 48.75C8.125 48.75 5.46875 47.6562 3.28125 45.4688C1.09375 43.2812 0 40.625 0 37.5C0 34.375 1.09375 31.7188 3.28125 29.5312C5.46875 27.3438 8.125 26.25 11.25 26.25C14.375 26.25 17.0312 27.3438 19.2188 29.5312C21.4062 31.7188 22.5 34.375 22.5 37.5C22.5 38.375 22.4062 39.1875 22.2188 39.9375C22.0312 40.6875 21.8125 41.375 21.5625 42L45 52.5L68.4375 20.4375C67.0625 19.4375 65.9375 18.125 65.0625 16.5C64.1875 14.875 63.75 13.125 63.75 11.25C63.75 8.125 64.8438 5.46875 67.0312 3.28125C69.2188 1.09375 71.875 0 75 0C78.125 0 80.7812 1.09375 82.9688 3.28125C85.1562 5.46875 86.25 8.125 86.25 11.25C86.25 13.125 85.8125 14.875 84.9375 16.5C84.0625 18.125 82.9375 19.4375 81.5625 20.4375L105 52.5L128.438 42C128.188 41.375 127.969 40.6875 127.781 39.9375C127.594 39.1875 127.5 38.375 127.5 37.5C127.5 34.375 128.594 31.7188 130.781 29.5312C132.969 27.3438 135.625 26.25 138.75 26.25C141.875 26.25 144.531 27.3438 146.719 29.5312C148.906 31.7188 150 34.375 150 37.5C150 40.625 148.906 43.2812 146.719 45.4688C144.531 47.6562 141.875 48.75 138.75 48.75C138.5 48.75 138.219 48.7188 137.906 48.6562C137.594 48.5938 137.312 48.5625 137.062 48.5625L127.5 108.75H22.5ZM35.25 93.75H114.75L119.625 62.4375L99.9375 71.0625L75 36.75L50.0625 71.0625L30.375 62.4375L35.25 93.75Z"
-                    :fill="user.myChampions.length > 0 ? '#F5C542' : '#5b5b5b'"
-                  />
-                </svg>
-                <span
-                  class="absolute left-1/2 top-[55%] transform -translate-x-1/2 -translate-y-1/2 text-[0.9rem] font-bold drop-shadow"
-                  :style="user.myChampions.length > 0 ? 'color : #F5C542' : '#color : 4d4d4d'"
-                  >{{ user.myChampions.length }}</span
-                >
-              </span>
-              <span class="text-xs text-gray-500 font-semibold mt-2">챔피언</span>
-            </div>
-          </div>
-        </div>
-        <transition name="champ-slide">
-          <div v-if="showChampions" class="champ-card-container w-full max-w-md mx-auto mt-0">
-            <div class="champ-card bg-white rounded-2xl shadow-xl px-6 py-6 border border-gray-100">
-              <div class="flex items-center mb-4">
-                <i class="fas fa-crown text-yellow-400 text-lg mr-2"></i>
-                <span class="font-bold text-gray-900 text-base">
-                  {{ user.nickname }}님이 획득한 챔피언
-                </span>
-              </div>
-              <div class="flex flex-col flex-wrap gap-2">
-                <span
-                  v-for="(champ, idx) in user.myChampions"
-                  :key="idx"
-                  class="p-5 relative flex items-center rounded-[25px] shadow-md px-6 py-3 space-x-1 overflow-hidden bg-gradient-animate animate-pulse-slow"
-                  title="챔피언"
-                >
-                  <i class="fas fa-crown text-white text-sm z-10"></i>
-                  <span class="text-md font-semibold text-white z-10 truncate">
-                    {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
-                  </span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </transition>
+              class="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
 
-        <div v-if="!user.isMe" class="flex gap-3 mt-1 pb-3">
-          <button
-            v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
-            class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 border-[0.1px] border-orange-500 text-white font-bold py-3 w-full rounded-xl shadow transition"
-            @click="sendFriendRequest"
-          >
-            <i class="fas fa-user-plus mr-2"></i> 친구추가
-          </button>
-          <button
-            v-else-if="friendStatus.sent && !friendStatus.isFriend"
-            class="flex justify-center items-center bg-white border-[0.1px] border-orange-400 text-orange-500 font-bold py-3 w-full rounded-xl shadow transition"
-            @click="sendFriendCancelRequest"
-          >
-            <i class="fas fa-hourglass-half mr-2"></i> 요청취소
-          </button>
-          <div
-            v-else-if="friendStatus.received && !friendStatus.isFriend"
-            class="flex flex-col gap-2 w-full"
-          >
-            <div class="flex gap-3 mb-2">
-              <button
-                class="flex-1 flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow transition"
-                @click="acceptFriendRequest"
-              >
-                <i class="fas fa-user-check mr-2"></i> 승인
-              </button>
-              <button
-                class="flex-1 flex justify-center items-center bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl shadow transition border border-gray-300"
-                @click="rejectFriendRequest"
-              >
-                <i class="fas fa-user-times mr-2"></i> 거부
-              </button>
+            <div class="relative flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-md"
+                >
+                  <i class="fas fa-chart-bar text-white text-xl"></i>
+                </div>
+                <div class="text-left">
+                  <span class="font-bold text-gray-800 text-lg block">내 통계 자세히 보기</span>
+                  <span class="text-xs text-gray-500">전적, 승률, 퍼포먼스 확인</span>
+                </div>
+              </div>
+              <i
+                class="fas fa-chevron-right text-gray-400 text-lg group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-200"
+              ></i>
             </div>
-            <div>
+          </button>
+
+          <!-- Top 3 Rules - Enhanced Section -->
+          <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-trophy text-yellow-500"></i>
+                가장 많이 플레이한 규칙
+              </h3>
+              <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full font-semibold">
+                TOP {{ user.top3Rules.length }}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 gap-3">
+              <TopRuleCard v-for="rule in user.top3Rules" :key="rule.ruleId" :rule="rule" />
+            </div>
+          </div>
+
+          <StatsModal
+            v-if="showStatsModal"
+            :stats="user.stats"
+            :nickname="user.nickname"
+            :playTime="user.playTime"
+            :myChampions="user.myChampions"
+            @close="showStatsModal = false"
+          />
+          <transition name="champ-slide">
+            <div v-if="showChampions" class="champ-card-container w-full max-w-md mx-auto mt-0">
+              <div
+                class="champ-card bg-white rounded-2xl shadow-xl px-6 py-6 border border-gray-100"
+              >
+                <div class="flex items-center mb-4">
+                  <i class="fas fa-crown text-yellow-400 text-lg mr-2"></i>
+                  <span class="font-bold text-gray-900 text-base">
+                    {{ user.nickname }}님이 획득한 챔피언
+                  </span>
+                </div>
+                <div class="flex flex-col flex-wrap gap-2">
+                  <span
+                    v-for="(champ, idx) in user.myChampions"
+                    :key="idx"
+                    class="p-5 relative flex items-center rounded-[25px] shadow-md px-6 py-3 space-x-1 overflow-hidden bg-gradient-animate animate-pulse-slow"
+                    title="챔피언"
+                  >
+                    <i class="fas fa-crown text-white text-sm z-10"></i>
+                    <span class="text-md font-semibold text-white z-10 truncate">
+                      {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </transition>
+
+          <div v-if="!user.isMe" class="flex gap-3 mt-4 pb-3">
+            <button
+              v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
+              class="flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              @click="sendFriendRequest"
+            >
+              <i class="fas fa-user-plus mr-2"></i> 친구추가
+            </button>
+            <button
+              v-else-if="friendStatus.sent && !friendStatus.isFriend"
+              class="flex justify-center items-center bg-white border-2 border-orange-400 text-orange-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-orange-50 transition-all"
+              @click="sendFriendCancelRequest"
+            >
+              <i class="fas fa-hourglass-half mr-2"></i> 요청취소
+            </button>
+            <div
+              v-else-if="friendStatus.received && !friendStatus.isFriend"
+              class="flex flex-col gap-3 w-full"
+            >
+              <div class="flex gap-3">
+                <button
+                  class="flex-1 flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
+                  @click="acceptFriendRequest"
+                >
+                  <i class="fas fa-user-check mr-2"></i> 승인
+                </button>
+                <button
+                  class="flex-1 flex justify-center items-center bg-white hover:bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl shadow-md transition-all border-2 border-gray-300"
+                  @click="rejectFriendRequest"
+                >
+                  <i class="fas fa-user-times mr-2"></i> 거부
+                </button>
+              </div>
               <button
                 @click="goChat"
-                class="flex w-[100%] justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition"
+                class="flex w-full justify-center items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
               >
                 <i class="fas fa-paper-plane mr-2"></i> DM
               </button>
             </div>
+            <button
+              v-else-if="friendStatus.isFriend"
+              class="flex justify-center items-center bg-white border-2 border-green-600 text-green-600 font-bold py-3.5 w-full rounded-xl shadow-md transition-all cursor-default"
+              disabled
+            >
+              <i class="fas fa-check mr-2"></i> 나의 친구
+            </button>
+            <button
+              v-if="!(friendStatus.received && !friendStatus.isFriend)"
+              @click="goChat"
+              class="flex justify-center items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl w-[50%] shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <i class="fas fa-paper-plane mr-2"></i> DM
+            </button>
           </div>
-          <button
-            v-else-if="friendStatus.isFriend"
-            class="flex justify-center items-center bg-white border-green-700 border-[0.1px] text-green-700 font-[500] py-3 w-full rounded-xl shadow transition cursor-default"
-            disabled
-          >
-            <i class="fas fa-check mr-2"></i> 나의 친구
-          </button>
-          <button
-            v-if="!(friendStatus.received && !friendStatus.isFriend)"
-            @click="goChat"
-            class="flex justify-center items-center bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-xl w-[50%] shadow transition"
-          >
-            <i class="fas fa-paper-plane mr-2"></i> DM
-          </button>
-        </div>
-      </section>
-      <section class="max-w-lg mx-auto px-4 bg-[#f8f9fa] pb-0">
-        <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
-        <div v-if="statMode === 'rule'" class="pb-4">
-          <button
-            @click="showRuleModal = true"
-            class="w-full py-3 rounded-xl bg-orange-100 text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2"
-          >
-            <i class="fas fa-list-alt"></i>
-            {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
-          </button>
-        </div>
-        <div v-if="statMode === 'category'" class="mb-4 flex gap-2">
-          <CustomSelect
-            :options="Object.keys(playedCategoryMap).map((cat) => ({ label: cat, value: cat }))"
-            v-model="selectedMainCategory"
-            placeholder="주 카테고리"
-          />
-          <CustomSelect
-            :options="subCategoryOptions"
-            v-model="selectedSubCategory"
-            :disabled="!selectedMainCategory"
-            placeholder="서브 카테고리"
-          />
-        </div>
-        <div class="mb-3 text-xs text-gray-500 px-2">
-          <template v-if="statMode === 'total' && false">
-            전체 기준 (플레이한 유저: <b>{{ user.totalPlayers }}</b
-            >명)
-          </template>
-          <!-- <template v-if="statMode === 'rule' && selectedRule">
+        </section>
+        <section class="w-full mx-auto px-4 bg-[#f8f9fa] pb-0">
+          <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
+          <div v-if="statMode === 'rule'" class="pb-4">
+            <button
+              @click="showRuleModal = true"
+              class="w-full py-3 rounded-xl bg-orange-100 text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2"
+            >
+              <i class="fas fa-list-alt"></i>
+              {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
+            </button>
+          </div>
+          <div v-if="statMode === 'category'" class="mb-4 flex gap-2">
+            <CustomSelect
+              :options="Object.keys(playedCategoryMap).map((cat) => ({ label: cat, value: cat }))"
+              v-model="selectedMainCategory"
+              placeholder="주 카테고리"
+            />
+            <CustomSelect
+              :options="subCategoryOptions"
+              v-model="selectedSubCategory"
+              :disabled="!selectedMainCategory"
+              placeholder="서브 카테고리"
+            />
+          </div>
+          <div class="mb-3 text-xs text-gray-500 px-2">
+            <template v-if="statMode === 'total' && false">
+              전체 기준 (플레이한 유저: <b>{{ user.totalPlayers }}</b
+              >명)
+            </template>
+            <!-- <template v-if="statMode === 'rule' && selectedRule">
             [{{ selectedRule.title }}] {{ selectedRule.description }}<br />
             카테고리: {{ selectedRule.majorCategory }} > {{ selectedRule.minorCategory }}
             <span class="block mt-1 text-gray-400"
@@ -479,13 +406,13 @@
               >명</span
             >
           </template> -->
-          <template v-if="statMode === 'category' && selectedMainCategory && selectedSubCategory">
-            [{{ selectedMainCategory }} > {{ selectedSubCategory }}] 기준<br />
-            플레이 유저: <b>{{ filteredCategoryPlayers }}</b
-            >명
-          </template>
-        </div>
-        <!-- <div class="rounded-2xl bg-white shadow p-5 mb-0">
+            <template v-if="statMode === 'category' && selectedMainCategory && selectedSubCategory">
+              [{{ selectedMainCategory }} > {{ selectedSubCategory }}] 기준<br />
+              플레이 유저: <b>{{ filteredCategoryPlayers }}</b
+              >명
+            </template>
+          </div>
+          <!-- <div class="rounded-2xl bg-white shadow p-5 mb-0">
           <div class="flex justify-between items-center mb-3">
             <span class="font-bold text-gray-900 text-base flex items-center gap-2">
               <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
@@ -519,50 +446,99 @@
             <div class="text-right text-orange-500 font-bold">{{ stat.winRate }}%</div>
           </div>
         </div> -->
-      </section>
-      <section class="w-full mx-auto px-4 pb-24 bg-[#f8f9fa]">
-        <div class="flex items-center gap-2 mb-4">
-          <h3 class="text-xl font-bold text-gray-900">플레이한 경기</h3>
-          <span
-            v-if="statMode === 'total'"
-            class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold"
-            >전체 경기</span
-          >
-          <span
-            v-if="statMode === 'rule' && selectedRule"
-            class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold"
-            >{{ selectedRule.ruleTitle }}</span
-          >
-          <span
-            v-if="statMode === 'category' && selectedMainCategory && selectedSubCategory"
-            class="text-sm text-orange-600 bg-orange-100 rounded px-2 py-1 font-bold"
-            >{{ selectedMainCategory }} > {{ selectedSubCategory }}</span
-          >
-        </div>
-        <div v-if="filteredGames.length" class="space-y-6">
-          <div
-            v-for="game in filteredGames"
-            :key="game.id"
-            :ref="(el) => setMatchRef(el, game.id)"
-            :id="'match-' + game.id"
-          >
-            <MatchCard
-              :game="game"
-              :isWin="game.result === 'win'"
-              :isDraw="game.result === 'draw'"
-            />
+        </section>
+        <!-- Most Recent Game - Enhanced Card -->
+        <section
+          v-if="user.recentGames && user.recentGames.length > 0"
+          class="w-full mx-auto px-4 pb-0 bg-[#f8f9fa]"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <i class="fas fa-history text-orange-500"></i>
+              최근 경기
+            </h3>
           </div>
-        </div>
-        <div v-else class="text-center text-gray-400 py-6 text-sm">표시할 경기가 없습니다.</div>
-      </section>
+          <div
+            class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-100 transition-all duration-300 cursor-pointer"
+          >
+            <!-- Result badge overlay -->
+            <div class="absolute top-3 right-3 z-10">
+              <span
+                :class="{
+                  'bg-gradient-to-r from-orange-500 to-orange-600 text-white':
+                    user.recentGames[0].result === 'win',
+                  'bg-gradient-to-r from-blue-500 to-blue-600 text-white':
+                    user.recentGames[0].result === 'loss',
+                  'bg-gradient-to-r from-gray-400 to-gray-500 text-white':
+                    user.recentGames[0].result === 'draw',
+                }"
+                class="px-3 py-1.5 rounded-full text-xs font-bold shadow-lg"
+              >
+                {{
+                  user.recentGames[0].result === 'win'
+                    ? '승리'
+                    : user.recentGames[0].result === 'loss'
+                      ? '패배'
+                      : '무승부'
+                }}
+              </span>
+            </div>
 
+            <div class="flex">
+              <div
+                class="relative flex-shrink-0 w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden"
+              >
+                <img
+                  :src="user.recentGames[0].startPhotoUrl"
+                  alt="경기 이미지"
+                  class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+              </div>
+
+              <div class="flex-1 p-5 flex flex-col justify-between">
+                <div>
+                  <span class="text-lg font-bold text-gray-900 truncate block mb-2">
+                    {{ user.recentGames[0].ruleTitle }}
+                  </span>
+                  <div class="flex items-center gap-3 text-base">
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="text-2xl font-black"
+                        :class="{
+                          'text-orange-500': user.recentGames[0].result === 'win',
+                          'text-blue-500': user.recentGames[0].result === 'loss',
+                          'text-gray-500': user.recentGames[0].result === 'draw',
+                        }"
+                      >
+                        {{ user.recentGames[0].myScore }}
+                      </span>
+                      <span class="text-gray-400 font-bold">:</span>
+                      <span class="text-2xl font-black text-gray-600">
+                        {{ user.recentGames[0].opponentScore }}
+                      </span>
+                    </div>
+                  </div>
+                  <span class="text-sm text-gray-500 mt-1 block">
+                    vs {{ user.recentGames[0].opponentNickname }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-400 mt-2">
+                  <i class="far fa-clock"></i>
+                  <span>{{ formatDate(user.recentGames[0].playedAt) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
       <!-- 모달/토스트/풋터 등 나머지 코드는 기존 그대로(생략) -->
       <transition name="fade">
         <div
           v-if="showRuleModal"
           class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-end z-50"
         >
-          <div class="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl p-6">
+          <div class="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl p-6 pb-">
             <div class="mb-2 flex justify-between items-center">
               <h3 class="text-lg font-bold text-gray-900">경기 규칙 선택</h3>
               <button
@@ -814,100 +790,7 @@
         </div>
       </div>
     </div>
-    <transition name="fade">
-      <div
-        v-if="showRankingModal"
-        class="fixed inset-0 bg-black/30 flex justify-center items-center z-50"
-        @click.self="showRankingModal = false"
-      >
-        <div
-          class="bg-white rounded-2xl p-7 shadow-2xl max-w-xs w-full relative overflow-visible animate-modalpop"
-        >
-          <!-- 닫기 -->
-          <button
-            @click="showRankingModal = false"
-            class="absolute right-6 top-6 text-gray-400 hover:text-orange-500 text-xl z-10"
-          >
-            <i class="fas fa-times"></i>
-          </button>
-          <!-- 타이틀 -->
-          <div class="flex flex-col gap-2 items-center mb-5 mt-1">
-            <div class="relative">
-              <i
-                class="fas fa-trophy text-3xl animate-shine"
-                :style="`color: ${
-                  rankingValue === 1
-                    ? '#FFB300'
-                    : rankingValue >= 2 && rankingValue <= 3
-                      ? '#5DB0FF'
-                      : rankingValue <= 10
-                        ? '#23C97A'
-                        : '#FF7043'
-                }`"
-              ></i>
-              <span v-if="rankingValue <= 3" class="shine"></span>
-            </div>
-            <span class="text-base font-bold text-gray-800 text-center"
-              >{{ user.nickname }}님의 랭킹</span
-            >
-            <div class="text-xs text-gray-500 -mt-1">카테고리별 랭킹을 확인해보세요</div>
-          </div>
-          <!-- 카테고리 Chips -->
-          <div class="flex flex-wrap gap-2 justify-center mb-3">
-            <button
-              v-for="cat in minorCategories"
-              :key="cat"
-              @click="selectMinorCategory(cat)"
-              :class="[
-                'px-3 py-1.5 rounded-full border font-bold text-xs transition shadow-sm active:scale-95 duration-100',
-                selectedMinorCategory === cat
-                  ? 'bg-orange-100 border-orange-400 text-orange-600 animate-bounce-fast'
-                  : 'bg-white border-gray-200 text-gray-700 hover:bg-orange-50',
-              ]"
-              style="transition: transform 0.15s cubic-bezier(0.42, 2, 0.58, 0.7)"
-            >
-              {{ cat }}
-            </button>
-          </div>
-          <!-- 랭킹 결과/애니메이션 -->
-          <div class="flex flex-col gap-2 items-center mt-2 min-h-[64px]">
-            <template v-if="ranking">
-              <span
-                class="text-3xl font-extrabold tracking-tight py-1"
-                :style="`color: ${
-                  rankingValue === 1
-                    ? '#FFB300'
-                    : rankingValue >= 2 && rankingValue <= 3
-                      ? '#5DB0FF'
-                      : rankingValue <= 10
-                        ? '#23C97A'
-                        : '#FF7043'
-                }`"
-              >
-                <CountUp
-                  :endVal="rankingValue"
-                  :duration="3"
-                  :options="{ separator: ',', decimal: '.', prefix: '', suffix: '위' }"
-                />
-              </span>
-              <span
-                class="px-3 py-1 rounded-full font-semibold text-xs mt-1 shadow-sm bg-gradient-to-r from-orange-200 to-yellow-100 text-orange-700 animate-pop"
-              >
-                상위 {{ rankingPercent == -98 ? '-' : rankingPercent }}%
-              </span>
-
-              <div class="font-light text-[0.7rem] text-gray-500 pt-1 text-center">
-                25.7.29 이후 종료된 경기 결과만 적용됩니다.
-              </div>
-            </template>
-            <div v-else class="text-center text-gray-400 py-4 text-sm">
-              랭킹 정보를 불러오는 중...
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
-
+    <div class="pb-[130px]"></div>
     <CustomToast />
   </div>
   <Footer tab="profile" />
@@ -919,13 +802,20 @@ import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
 import Footer from '../../components/FooterNav.vue'
 import CustomSelect from './CustomSelect.vue'
-import MatchCard from './MatchCard.vue'
 import Default from '../../assets/default.png'
 import api from '../../api/api'
 import CustomToast from '../../components/CustomToast.vue'
-import CountUp from './CountUp.vue'
+import StatsModal from '../../components/StatsModal.vue'
+// import CountUp from './CountUp.vue'
+import TopRuleCard from '../../components/TopRuleCard.vue'
 import { useToast } from '../../composable/useToast'
 const { showToast } = useToast()
+
+function formatDate(str) {
+  if (!str) return '미정'
+  const d = new Date(str)
+  return d.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
+}
 
 const showFriendModal = ref(false)
 const friendTab = ref('friends') // friends | sent | received
@@ -941,12 +831,12 @@ let userId = route.params.id
 
 const matchRefs = ref({})
 
-function setMatchRef(el, id) {
-  if (el) matchRefs.value[id] = el
-}
+// function setMatchRef(el, id) {
+//   if (el) matchRefs.value[id] = el
+// }
 
 const user = ref(null)
-const allGames = ref([])
+// const allGames = ref([])
 
 // [카테고리, [서브카테고리, ...]] 목록 (플레이한 것만)
 const playedCategoryMap = ref({}) // { "신체": ["축구", "농구"], "보드": ["체스"] }
@@ -971,10 +861,11 @@ const subCategoryOptions = computed(() =>
 )
 
 const showChampions = ref(false)
-function toggleChampion() {
-  if (user.value.myChampions.length == 0) return
-  showChampions.value = !showChampions.value
-}
+const showStatsModal = ref(false)
+// function toggleChampion() {
+//   if (user.value.myChampions.length == 0) return
+//   showChampions.value = !showChampions.value
+// }
 
 const selectedRule = computed(() => playedRules.value.find((r) => r.id === selectedRuleId.value))
 
@@ -1100,20 +991,20 @@ const filteredCategoryPlayers = computed(() => {
   return user.value?.totalPlayers ?? 0
 })
 
-const filteredGames = computed(() => {
-  if (statMode.value === 'total') return allGames.value
-  if (statMode.value === 'rule' && selectedRule.value) {
-    return allGames.value.filter((g) => g.ruleId === selectedRule.value.id)
-  }
-  if (statMode.value === 'category' && selectedMainCategory.value && selectedSubCategory.value) {
-    return allGames.value.filter(
-      (g) =>
-        g.mainCategory === selectedMainCategory.value &&
-        g.subCategory === selectedSubCategory.value,
-    )
-  }
-  return []
-})
+// const filteredGames = computed(() => {
+//   if (statMode.value === 'total') return allGames.value
+//   if (statMode.value === 'rule' && selectedRule.value) {
+//     return allGames.value.filter((g) => g.ruleId === selectedRule.value.id)
+//   }
+//   if (statMode.value === 'category' && selectedMainCategory.value && selectedSubCategory.value) {
+//     return allGames.value.filter(
+//       (g) =>
+//         g.mainCategory === selectedMainCategory.value &&
+//         g.subCategory === selectedSubCategory.value,
+//     )
+//   }
+//   return []
+// })
 async function loadFriends() {
   try {
     // 내 친구 목록
@@ -1130,14 +1021,14 @@ async function loadFriends() {
     showToast('친구 목록을 불러오지 못했습니다.')
   }
 }
-function openFriendModal() {
-  friendTab.value = 'friends'
-  showFriendModal.value = true
-  loadFriends()
-}
-function closeFriendModal() {
-  showFriendModal.value = false
-}
+// function openFriendModal() {
+//   friendTab.value = 'friends'
+//   showFriendModal.value = true
+//   loadFriends()
+// }
+// function closeFriendModal() {
+//   showFriendModal.value = false
+// }
 
 // function onTabChange(item) {
 //   statMode.value = item.id
@@ -1158,13 +1049,13 @@ const chartData = computed(() => {
   return []
 })
 
-const formattedPlayTime = computed(() => {
-  const min = user.value?.playTime ?? 0
-  const h = Math.floor(min / 60)
-  const m = min % 60
-  if (h === 0) return `${m}m`
-  return `${h}h`
-})
+// const formattedPlayTime = computed(() => {
+//   const min = user.value?.playTime ?? 0
+//   const h = Math.floor(min / 60)
+//   const m = min % 60
+//   if (h === 0) return `${m}m`
+//   return `${h}h`
+// })
 
 const filteredRules = computed(() =>
   playedRules.value.filter((r) => r.ruleTitle.includes(ruleSearch.value)),
@@ -1297,8 +1188,8 @@ onMounted(async () => {
     }
     if (playedRules.value.length) selectedRuleId.value = playedRules.value[0].id
 
-    const res2 = await api.get(`/api/user-profile/${userId}/games`)
-    allGames.value = res2.data
+    // allGames는 더 이상 사용되지 않으므로 제거하거나, 필요에 따라 user.recentGames를 할당할 수 있습니다.
+    // allGames.value = res2.data; // 이 줄은 제거됩니다.
 
     await nextTick()
 
@@ -1316,68 +1207,76 @@ onMounted(async () => {
 
     updateChart()
   } catch (e) {
-    showToast(e.response.data.message)
+    if (e.response && e.response.data && e.response.data.message) {
+      showToast(e.response.data.message)
+    } else {
+      showToast('프로필 정보를 불러오는데 실패했습니다.')
+    }
     console.log(e)
     router.back()
   }
 })
-const minorCategories = ref([])
-const selectedMinorCategory = ref('')
-const ranking = ref({})
-const loadingRanking = ref(false)
-const showRankingModal = ref(false)
-const rankingValue = ref(null)
-const rankingPercent = ref(null)
+// const minorCategories = ref([])
+// const selectedMinorCategory = ref('')
+// const ranking = ref({})
+// const loadingRanking = ref(false)
+// const showRankingModal = ref(false)
+// const rankingValue = ref(null)
+// const rankingPercent = ref(null)
 
-onMounted(async () => {
-  // 1. 마운트될 때 최다플레이 마이너카테고리 fetch
-  const res = await api.get(`/api/rules/top-played-categories/${userId}`)
-  minorCategories.value = res.data || []
-  minorCategories.value.unshift('전체')
+// onMounted(async () => {
+//   // 1. 마운트될 때 최다플레이 마이너카테고리 fetch
+//   const res = await api.get(`/api/rules/top-played-categories/${userId}`)
+//   minorCategories.value = res.data || []
+//   minorCategories.value.unshift('전체')
 
-  // 2. 첫 번째 카테고리로 자동 선택
-  selectedMinorCategory.value = minorCategories.value[0] || ''
-  // 3. 바로 해당 카테고리로 랭킹 조회
-  if (selectedMinorCategory.value) fetchRankingAll()
-})
+//   // 2. 첫 번째 카테고리로 자동 선택
+//   selectedMinorCategory.value = minorCategories.value[0] || ''
+//   // 3. 바로 해당 카테고리로 랭킹 조회
+//   if (selectedMinorCategory.value) fetchRankingAll()
+// })
 
-async function fetchRanking(minorCategory) {
-  loadingRanking.value = true
-  try {
-    const res = await api.get(`/api/rankings?userId=${userId}&minorCategory=${minorCategory}`)
-    console.log(minorCategory)
-    ranking.value = res.data
-  } finally {
-    loadingRanking.value = false
-    rankingValue.value = ranking.value.minorCategoryRank
-    rankingPercent.value = ranking.value.minorCategoryPercent
-  }
-}
+// async function fetchRanking(minorCategory) {
+//   loadingRanking.value = true
+//   try {
+//     const res = await api.get(`/api/rankings?userId=${userId}&minorCategory=${minorCategory}`)
+//     console.log(minorCategory)
+//     ranking.value = res.data
+//   } finally {
+//     loadingRanking.value = false
+//     rankingValue.value = ranking.value.minorCategoryRank
+//     rankingPercent.value = ranking.value.minorCategoryPercent
+//   }
+// }
 
-async function fetchRankingAll() {
-  loadingRanking.value = true
-  try {
-    const res = await api.get(`/api/rankings?userId=${userId}`)
-    ranking.value = res.data
-  } finally {
-    loadingRanking.value = false
-    rankingValue.value = ranking.value.totalRank
-    rankingPercent.value = ranking.value.totalPercent
-  }
-}
+// async function fetchRankingAll() {
+//   loadingRanking.value = true
+//   try {
+//     const res = await api.get(`/api/rankings?userId=${userId}`)
+//     ranking.value = res.data
+//   } finally {
+//     loadingRanking.value = false
+//     rankingValue.value = ranking.value.totalRank
+//     rankingPercent.value = ranking.value.totalPercent
+//   }
+// }
 
-async function selectMinorCategory(cat) {
-  selectedMinorCategory.value = cat
+// async function selectMinorCategory(cat) {
+//   selectedMinorCategory.value = cat
 
-  if (cat === '전체') {
-    await fetchRankingAll()
-  } else {
-    await fetchRanking(cat)
-  }
-}
+//   if (cat === '전체') {
+//     await fetchRankingAll()
+//   } else {
+//     await fetchRanking(cat)
+//   }
+// }
 
 watch([statMode, selectedRuleId, selectedMainCategory, selectedSubCategory], updateChart, {
   deep: true,
+})
+
+watch(showStatsModal, (newValue) => {
+  console.log('showStatsModal changed:', newValue)
 })
 </script>
 

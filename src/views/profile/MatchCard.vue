@@ -30,24 +30,23 @@
     <div class="min-w-0 flex items-center gap-2">
       <div>
         <div>
-          <img
-            class="w-10"
-            :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
-            alt="카테고리 이미지"
-          />
-        </div>
-      </div>
-      <div>
-        <span class="text-base font-extrabold text-gray-900 truncate block">
-          {{ game.rule.ruleTitle }}
-        </span>
-        <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
-          {{ game.rule.majorCategory }}
-          <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
-          <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
-        </div>
-      </div>
-    </div>
+                      <img
+                        class="w-10"
+                        :src="`/category-picture/${game.minorCategory || '미분류'}.png`"
+                        alt="카테고리 이미지"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <span class="text-base font-extrabold text-gray-900 truncate block">
+                      {{ game.ruleTitle }}
+                    </span>
+                    <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+                      {{ game.majorCategory }}
+                      <span v-if="game.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+                      <span v-if="game.minorCategory">{{ game.minorCategory }}</span>
+                    </div>
+                  </div>    </div>
 
     <div class="flex flex-col items-center mt-0">
       <div class="flex flex-col items-center w-full justify-center">
@@ -58,19 +57,15 @@
           <div class="flex justify-between items-center">
             <div class="flex items-center gap-3 w-[42%]">
               <div class="flex flex-col items-center pt-7 w-[80%]">
-                <router-link :to="'/profile/' + game.me.id" class="shrink-0">
-                  <img
-                    :src="game.me.avatar == null ? Default : game.me.avatar"
-                    class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
-                  />
-                </router-link>
-                <router-link :to="'/profile/' + game.me.id">
-                  <div
-                    class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
-                  >
-                    {{ game.me.nickname }}
-                  </div>
-                </router-link>
+                <img
+                  :src="myAvatar == null ? Default : myAvatar"
+                  class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
+                />
+                <div
+                  class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                >
+                  나
+                </div>
               </div>
               <div class="font-extrabold w-[20%]">
                 {{ game.myScore }}
@@ -84,19 +79,15 @@
                 {{ game.opponentScore }}
               </div>
               <div class="flex flex-col items-center pt-7 w-[80%]">
-                <router-link :to="'/profile/' + game.opponent.id" class="shrink-0">
-                  <img
-                    :src="game.opponent.avatar == null ? Default : game.opponent.avatar"
-                    class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
-                  />
-                </router-link>
-                <router-link :to="'/profile/' + game.opponent.id">
-                  <div
-                    class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
-                  >
-                    {{ game.opponent.nickname }}
-                  </div>
-                </router-link>
+                <img
+                  :src="Default"
+                  class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
+                />
+                <div
+                  class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                >
+                  {{ game.opponentNickname }}
+                </div>
               </div>
             </div>
           </div>
@@ -322,6 +313,7 @@ const props = defineProps({
   game: Object,
   isWin: Boolean,
   isDraw: Boolean,
+  myAvatar: String,
 })
 
 function formatDate(str) {

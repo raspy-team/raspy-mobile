@@ -790,7 +790,7 @@ const handleTouchEnd = (e) => {
   const deltaY = e.changedTouches[0].clientY - touchStartY.value
 
   // 좌→우 스와이프 감지 (100px 이상 움직였을 때)
-  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 100) {
+  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 30) {
     openCamera()
   }
 

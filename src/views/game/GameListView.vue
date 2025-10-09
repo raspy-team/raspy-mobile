@@ -177,19 +177,13 @@
               class="absolute right-0 bottom-full mb-2 bg-white border rounded shadow-md z-30 w-32"
             >
               <button
-                @click="
-                  onClickReport(selectedGame.id)
-                  selectedGame.showMoreMenu = false
-                "
+                @click="(onClickReport(selectedGame.id), (selectedGame.showMoreMenu = false))"
                 class="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-50"
               >
                 신고하기
               </button>
               <button
-                @click="
-                  shareGame(selectedGame.id)
-                  selectedGame.showMoreMenu = false
-                "
+                @click="(shareGame(selectedGame.id), (selectedGame.showMoreMenu = false))"
                 class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
               >
                 공유하기
@@ -1097,7 +1091,7 @@ const applyConfirmed = async () => {
   if (!selectedGame.value) return
   try {
     await api.post(`/api/games/${selectedGame.value.id}/apply`)
-    showToast('신청이 완료되었습니다!', `/inbox?tab=sent&id=${selectedGame.value.id}`)
+    showToast('신청이 완료되었습니다!', `/game&id=${selectedGame.value.id}`)
     requestCount.value += 1
   } catch (err) {
     showToast(err.response?.data?.message || '신청 실패. 다시 시도해주세요.')

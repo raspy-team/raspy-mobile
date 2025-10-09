@@ -147,8 +147,8 @@
               <!-- Opponent -->
               <div class="flex flex-col items-center flex-1">
                 <img
-                  v-if="game.opponentProfileUrl"
-                  :src="game.opponentProfileUrl"
+                  v-if="getOpponentProfileUrl(game)"
+                  :src="getOpponentProfileUrl(game)"
                   class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
                   alt="Opponent Profile"
                 />
@@ -161,7 +161,7 @@
                 <span
                   class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center"
                 >
-                  {{ game.opponentNickname || '미정' }}
+                  {{ getOpponentNickname(game) }}
                 </span>
               </div>
             </div>
@@ -304,7 +304,7 @@
             </div>
             <div class="flex gap-2 pt-3">
               <button
-                v-if="game.status === 'IN_PROGRESS'"
+                v-if="game.gameStatus === 'IN_PROGRESS'"
                 @click.stop="joinGame(game.id)"
                 class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
               >
@@ -644,6 +644,7 @@ function getStatusClass(game) {
 
 function getStatusText(game) {
   if (game.type === 'sent') {
+    if (game.gameStatus === 'IN_PROGRESS') return '경기 진행 중'
     if (game.status === 'APPROVED') return '승인됨 - 시작 대기 중'
     if (game.status === 'REQUESTED') return '대기 중'
     if (game.status === 'REJECTED') return '거절됨'
@@ -655,6 +656,40 @@ function getStatusText(game) {
     if (game.status === 'CANCELED') return '취소됨'
   }
   return '알 수 없음'
+}
+
+function getOpponentNickname(game) {
+  if (game.opponentNickname) {
+    return game.opponentNickname
+  }
+  if (
+    (game.status === 'APPROVED' || game.status === 'SCHEDULED') &&
+    game.applicants &&
+    game.applicants.length > 0
+  ) {
+    const approvedApplicant = game.applicants.find((a) => a.approved)
+    if (approvedApplicant) {
+      return approvedApplicant.applicantNickname
+    }
+  }
+  return '미정'
+}
+
+function getOpponentProfileUrl(game) {
+  if (game.opponentProfileUrl) {
+    return game.opponentProfileUrl
+  }
+  if (
+    (game.status === 'APPROVED' || game.status === 'SCHEDULED') &&
+    game.applicants &&
+    game.applicants.length > 0
+  ) {
+    const approvedApplicant = game.applicants.find((a) => a.approved)
+    if (approvedApplicant) {
+      return approvedApplicant.applicantProfileUrl
+    }
+  }
+  return null
 }
 
 function getWinRate(stats) {

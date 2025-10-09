@@ -2,8 +2,75 @@
   <div
     v-if="game && user1 && user2"
     class="w-dvw flex flex-col px-4 py-3 relative text-black overflow-hidden"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
+    @mousedown="handleMouseDown"
+    @mousemove="handleMouseMove"
+    @mouseup="handleMouseUp"
+    @mouseleave="handleMouseLeave"
   >
     <div class="absolute inset-0 bg-white -z-10"></div>
+
+    <!-- 카메라 오버레이 -->
+    <div
+      v-if="showCamera"
+      class="fixed inset-0 z-[100] bg-black flex flex-col"
+      :style="{ transform: `translateX(${cameraSlideOffset}px)` }"
+      style="transition: transform 0.3s ease-out"
+    >
+      <!-- 카메라 헤더 -->
+      <div class="flex justify-between items-center p-4 text-white">
+        <button @click="closeCamera" class="text-2xl">
+          <i class="fas fa-times"></i>
+        </button>
+        <span class="text-sm">경기 순간 촬영</span>
+        <div class="w-8"></div>
+      </div>
+
+      <!-- 비디오 프리뷰 -->
+      <div class="flex-1 relative flex items-center justify-center bg-black">
+        <video
+          ref="videoElement"
+          autoplay
+          playsinline
+          class="max-w-full max-h-full object-contain"
+        ></video>
+
+        <!-- 캡처된 이미지 프리뷰 -->
+        <div
+          v-if="capturedImage"
+          class="absolute inset-0 flex items-center justify-center bg-black"
+        >
+          <img :src="capturedImage" class="max-w-full max-h-full object-contain" />
+        </div>
+      </div>
+
+      <!-- 카메라 컨트롤 -->
+      <div class="p-6 flex justify-center items-center gap-4">
+        <button
+          v-if="!capturedImage"
+          @click="capturePhoto"
+          class="w-16 h-16 rounded-full border-4 border-white bg-white/20 hover:bg-white/30 transition"
+        >
+          <i class="fas fa-camera text-white text-xl"></i>
+        </button>
+        <template v-else>
+          <button
+            @click="retakePhoto"
+            class="px-6 py-3 rounded-full bg-gray-600 text-white font-semibold hover:bg-gray-500 transition"
+          >
+            다시 찍기
+          </button>
+          <button
+            @click="savePhoto"
+            class="px-6 py-3 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-400 transition"
+          >
+            저장
+          </button>
+        </template>
+      </div>
+    </div>
 
     <div class="flex items-center justify-between mb-4">
       <button @click="goBack" class="text-white text-lg">
@@ -310,10 +377,24 @@ import api from '../../api/api'
 import { socket } from '../../websocket'
 import DefaultImage from '../../assets/default.png'
 import MatchModal from '../../components/MatchModal.vue'
+import { addGamePicture, compressImage } from '../../utils/gamePictureStorage'
 
 const route = useRoute()
 const router = useRouter()
 const gameId = route.params.gameId
+
+// 카메라 관련 상태
+const showCamera = ref(false)
+const videoElement = ref(null)
+const capturedImage = ref(null)
+const cameraStream = ref(null)
+const cameraSlideOffset = ref(0)
+
+// 스와이프 관련 상태
+const touchStartX = ref(0)
+const touchStartY = ref(0)
+const isSwiping = ref(false)
+const isMouseDown = ref(false)
 const game = reactive({})
 const chatRoomId = ref(null)
 const currentSet = ref(1)
@@ -635,9 +716,195 @@ const socket_resetGame = () => {
   })
 }
 
+// 스와이프 핸들러 (터치)
+const handleTouchStart = (e) => {
+  if (showCamera.value) return
+  touchStartX.value = e.touches[0].clientX
+  touchStartY.value = e.touches[0].clientY
+  isSwiping.value = false
+}
+
+const handleTouchMove = (e) => {
+  if (showCamera.value) return
+  if (!touchStartX.value) return
+
+  const deltaX = e.touches[0].clientX - touchStartX.value
+  const deltaY = e.touches[0].clientY - touchStartY.value
+
+  // 수평 스와이프인지 확인 (좌→우)
+  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 50) {
+    isSwiping.value = true
+  }
+}
+
+const handleTouchEnd = (e) => {
+  if (showCamera.value) return
+
+  const deltaX = e.changedTouches[0].clientX - touchStartX.value
+  const deltaY = e.changedTouches[0].clientY - touchStartY.value
+
+  // 좌→우 스와이프 감지 (100px 이상 움직였을 때)
+  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 100) {
+    openCamera()
+  }
+
+  touchStartX.value = 0
+  touchStartY.value = 0
+  isSwiping.value = false
+}
+
+// 마우스 핸들러
+const handleMouseDown = (e) => {
+  if (showCamera.value) return
+  isMouseDown.value = true
+  touchStartX.value = e.clientX
+  touchStartY.value = e.clientY
+  isSwiping.value = false
+}
+
+const handleMouseMove = (e) => {
+  if (showCamera.value || !isMouseDown.value) return
+  if (!touchStartX.value) return
+
+  const deltaX = e.clientX - touchStartX.value
+  const deltaY = e.clientY - touchStartY.value
+
+  // 수평 스와이프인지 확인 (좌→우)
+  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 50) {
+    isSwiping.value = true
+  }
+}
+
+const handleMouseUp = (e) => {
+  if (showCamera.value || !isMouseDown.value) return
+
+  const deltaX = e.clientX - touchStartX.value
+  const deltaY = e.clientY - touchStartY.value
+
+  // 좌→우 스와이프 감지 (100px 이상 움직였을 때)
+  if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 100) {
+    openCamera()
+  }
+
+  isMouseDown.value = false
+  touchStartX.value = 0
+  touchStartY.value = 0
+  isSwiping.value = false
+}
+
+const handleMouseLeave = () => {
+  if (isMouseDown.value) {
+    isMouseDown.value = false
+    touchStartX.value = 0
+    touchStartY.value = 0
+    isSwiping.value = false
+  }
+}
+
+// 카메라 열기
+const openCamera = async () => {
+  showCamera.value = true
+  cameraSlideOffset.value = window.innerWidth
+
+  // 슬라이드 애니메이션
+  setTimeout(() => {
+    cameraSlideOffset.value = 0
+  }, 50)
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' },
+      audio: false
+    })
+    cameraStream.value = stream
+    if (videoElement.value) {
+      videoElement.value.srcObject = stream
+    }
+  } catch (error) {
+    console.error('카메라 접근 실패:', error)
+    alert('카메라에 접근할 수 없습니다.')
+    closeCamera()
+  }
+}
+
+// 카메라 닫기
+const closeCamera = () => {
+  if (cameraStream.value) {
+    cameraStream.value.getTracks().forEach(track => track.stop())
+    cameraStream.value = null
+  }
+  capturedImage.value = null
+  cameraSlideOffset.value = window.innerWidth
+  setTimeout(() => {
+    showCamera.value = false
+    cameraSlideOffset.value = 0
+  }, 300)
+}
+
+// 사진 촬영
+const capturePhoto = () => {
+  if (!videoElement.value) return
+
+  const canvas = document.createElement('canvas')
+  canvas.width = videoElement.value.videoWidth
+  canvas.height = videoElement.value.videoHeight
+
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(videoElement.value, 0, 0)
+
+  capturedImage.value = canvas.toDataURL('image/jpeg', 0.9)
+
+  // 비디오 스트림 일시 정지
+  if (cameraStream.value) {
+    cameraStream.value.getTracks().forEach(track => track.stop())
+  }
+}
+
+// 다시 찍기
+const retakePhoto = async () => {
+  capturedImage.value = null
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' },
+      audio: false
+    })
+    cameraStream.value = stream
+    if (videoElement.value) {
+      videoElement.value.srcObject = stream
+    }
+  } catch (error) {
+    console.error('카메라 재시작 실패:', error)
+  }
+}
+
+// 사진 저장
+const savePhoto = async () => {
+  if (!capturedImage.value) return
+
+  try {
+    // 이미지 압축
+    const compressed = await compressImage(capturedImage.value, 1920, 0.85)
+
+    // localStorage에 저장
+    addGamePicture(gameId, compressed)
+
+    alert('사진이 저장되었습니다!')
+    closeCamera()
+  } catch (error) {
+    console.error('사진 저장 실패:', error)
+    alert('사진 저장에 실패했습니다.')
+  }
+}
+
 onUnmounted(() => {
   clearInterval(timerRef.value)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+
+  // 카메라 스트림 정리
+  if (cameraStream.value) {
+    cameraStream.value.getTracks().forEach(track => track.stop())
+  }
 })
 </script>
 

@@ -124,62 +124,129 @@
       </div>
 
       <!-- 세트 결과 -->
-<div class="bg-gray-50 p-4 rounded-xl shadow space-y-3">
-  <div class="flex items-center justify-between">
-    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-      <i class="fas fa-list-ul"></i> 세트 결과
-    </h3>
-    <span
-      @click="showSetResults = !showSetResults"
-      class="flex items-center gap-1 select-none cursor-pointer text-orange-500 hover:text-orange-600 transition font-medium"
-      style="user-select: none;"
-    >
-      <span class="hidden sm:inline">{{ showSetResults ? '접기' : '펼치기' }}</span>
-      <i
-        :class="[
-          'fas transition-transform duration-200',
-          showSetResults ? 'fa-chevron-up' : 'fa-chevron-down'
-        ]"
-      ></i>
-    </span>
-  </div>
-  <transition name="fade">
-    <ul v-if="showSetResults" class="space-y-2">
-      <li
-        v-for="set in setResults"
-        :key="set.setIdx"
-        class="flex justify-between items-center bg-white p-3 rounded-lg shadow border text-sm"
-      >
-        <span>{{ set.setIdx }}세트</span>
-        <span v-if="idxCorrect">
-          {{ set.user1Score }} : {{ set.user2SCore }}
-          <i
-            :class="
-              set.winnerIdx == 1
-                ? 'fas fa-check-circle text-orange-500 ml-1'
-                : set.winnerIdx == 2
-                  ? 'fas fa-check-circle text-orange-500 ml-1'
-                  : 'fas fa-minus-circle text-gray-400 ml-1'
-            "
-          ></i>
-        </span>
-        <span v-else>
-          {{ set.user2SCore }} : {{ set.user1Score }}
-          <i
-            :class="
-              set.winnerIdx == 2
-                ? 'fas fa-check-circle text-orange-500 ml-1'
-                : set.winnerIdx == 1
-                  ? 'fas fa-check-circle text-orange-500 ml-1'
-                  : 'fas fa-minus-circle text-gray-400 ml-1'
-            "
-          ></i>
-        </span>
-      </li>
-    </ul>
-  </transition>
-</div>
+      <div class="bg-gray-50 p-4 rounded-xl shadow space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <i class="fas fa-list-ul"></i> 세트 결과
+          </h3>
+          <span
+            @click="showSetResults = !showSetResults"
+            class="flex items-center gap-1 select-none cursor-pointer text-orange-500 hover:text-orange-600 transition font-medium"
+            style="user-select: none"
+          >
+            <span class="hidden sm:inline">{{ showSetResults ? '접기' : '펼치기' }}</span>
+            <i
+              :class="[
+                'fas transition-transform duration-200',
+                showSetResults ? 'fa-chevron-up' : 'fa-chevron-down',
+              ]"
+            ></i>
+          </span>
+        </div>
+        <transition name="fade">
+          <ul v-if="showSetResults" class="space-y-2">
+            <li
+              v-for="set in setResults"
+              :key="set.setIdx"
+              class="flex justify-between items-center bg-white p-3 rounded-lg shadow border text-sm"
+            >
+              <span>{{ set.setIdx }}세트</span>
+              <span v-if="idxCorrect">
+                {{ set.user1Score }} : {{ set.user2SCore }}
+                <i
+                  :class="
+                    set.winnerIdx == 1
+                      ? 'fas fa-check-circle text-orange-500 ml-1'
+                      : set.winnerIdx == 2
+                        ? 'fas fa-check-circle text-orange-500 ml-1'
+                        : 'fas fa-minus-circle text-gray-400 ml-1'
+                  "
+                ></i>
+              </span>
+              <span v-else>
+                {{ set.user2SCore }} : {{ set.user1Score }}
+                <i
+                  :class="
+                    set.winnerIdx == 2
+                      ? 'fas fa-check-circle text-orange-500 ml-1'
+                      : set.winnerIdx == 1
+                        ? 'fas fa-check-circle text-orange-500 ml-1'
+                        : 'fas fa-minus-circle text-gray-400 ml-1'
+                  "
+                ></i>
+              </span>
+            </li>
+          </ul>
+        </transition>
+      </div>
 
+      <!-- 경기 사진 선택 -->
+      <div class="bg-white p-5 rounded-xl shadow space-y-4 text-left border">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-camera"></i> 경기 사진 선택 (최대 5장)
+        </h3>
+
+        <!-- 촬영된 사진이 없을 때 -->
+        <div v-if="allPictures.length === 0" class="text-center py-8 text-gray-400">
+          <i class="fas fa-images text-4xl mb-2"></i>
+          <p class="text-sm">경기 중 촬영한 사진이 없습니다</p>
+        </div>
+
+        <!-- 사진 목록 -->
+        <div v-else>
+          <!-- 선택된 사진 (드래그로 순서 변경 가능) -->
+          <div v-if="selectedPictures.length > 0" class="mb-4">
+            <p class="text-sm text-gray-600 mb-2">
+              선택된 사진 ({{ selectedPictures.length }}/5) - 드래그하여 순서 변경
+            </p>
+            <div class="grid grid-cols-3 gap-2">
+              <div
+                v-for="(pic, index) in selectedPictures"
+                :key="pic.id"
+                class="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-500 cursor-move"
+                draggable="true"
+                @dragstart="handleDragStart(index)"
+                @dragover.prevent
+                @drop="handleDrop(index)"
+              >
+                <img :src="pic.dataUrl" class="w-full h-full object-cover" />
+                <div
+                  class="absolute top-1 left-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                >
+                  {{ index + 1 }}
+                </div>
+                <button
+                  @click="deselectPicture(pic.id)"
+                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition"
+                >
+                  <i class="fas fa-times text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 선택 가능한 사진들 -->
+          <div v-if="unselectedPictures.length > 0">
+            <p class="text-sm text-gray-600 mb-2">사진 선택</p>
+            <div class="grid grid-cols-4 gap-2">
+              <div
+                v-for="pic in unselectedPictures"
+                :key="pic.id"
+                class="relative aspect-square rounded-lg overflow-hidden border border-gray-300 cursor-pointer hover:border-orange-400 transition"
+                @click="selectPicture(pic)"
+              >
+                <img :src="pic.dataUrl" class="w-full h-full object-cover" />
+                <button
+                  @click.stop="deletePicture(pic.id)"
+                  class="absolute top-1 right-1 bg-gray-800 bg-opacity-60 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition"
+                >
+                  <i class="fas fa-trash text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- 리뷰 남기기 -->
       <div
@@ -237,26 +304,50 @@
         </button>
       </div>
 
+      <!-- 사진 제출 버튼 (리뷰 제출 후에만 표시) -->
+      <div
+        v-if="reviewSubmitted && selectedPictures.length > 0 && !picturesSubmitted"
+        class="bg-white p-5 rounded-xl shadow space-y-4 text-left border"
+      >
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-upload"></i> 선택한 사진 제출
+        </h3>
+        <p class="text-sm text-gray-600">
+          {{ selectedPictures.length }}장의 사진이 선택되었습니다. 제출하시겠습니까?
+        </p>
+        <button
+          @click="submitPictures"
+          :disabled="isSubmittingPictures"
+          class="w-full bg-orange-500 text-white py-3 rounded-[7px] font-bold shadow hover:brightness-110 transition disabled:opacity-50"
+        >
+          {{ isSubmittingPictures ? '업로드 중...' : '사진 제출' }}
+        </button>
+      </div>
+
       <CustomToast />
     </div>
   </div>
-  
 
-        <button
-        @click="goHome"
-        class="w-full fixed bottom-0 left-0 text-gray-800  py-2 py-[16px] raspy-bot  bg-orange-500 text-white"
-      >
-        나가기
-      </button>
+  <button
+    @click="goHome"
+    class="w-full fixed bottom-0 left-0 text-gray-800 py-2 py-[16px] raspy-bot bg-orange-500 text-white"
+  >
+    나가기
+  </button>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import defaultImg from '../../assets/default.png'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
+import {
+  getGamePictures,
+  removeGamePicture,
+  // updateGamePicturesOrder
+} from '../../utils/gamePictureStorage'
 
 const { showToast } = useToast()
 const route = useRoute()
@@ -280,6 +371,19 @@ const currentUserId = ref(0)
 const championIdx = ref(0)
 const idxCorrect = ref(true)
 const showSetResults = ref(false)
+
+// 사진 관련 상태
+const allPictures = ref([])
+const selectedPictures = ref([])
+const draggedIndex = ref(null)
+const picturesSubmitted = ref(false)
+const isSubmittingPictures = ref(false)
+
+// 선택되지 않은 사진들
+const unselectedPictures = computed(() => {
+  const selectedIds = new Set(selectedPictures.value.map((p) => p.id))
+  return allPictures.value.filter((p) => !selectedIds.has(p.id))
+})
 
 onMounted(async () => {
   try {
@@ -308,12 +412,103 @@ onMounted(async () => {
       user2SetCount.value = res.data.user1SetCount
       winnerIdx.value = res.data.winnerIdx === 2 ? 1 : res.data.winnerIdx === 1 ? 2 : 0
     }
+
+    // 저장된 사진 불러오기
+    allPictures.value = getGamePictures(gameId)
   } catch (err) {
     console.error(err)
   } finally {
     isLoading.value = false
   }
 })
+
+// 사진 선택
+const selectPicture = (pic) => {
+  if (selectedPictures.value.length >= 5) {
+    showToast('최대 5장까지 선택할 수 있습니다.')
+    return
+  }
+  selectedPictures.value.push(pic)
+}
+
+// 사진 선택 해제
+const deselectPicture = (picId) => {
+  selectedPictures.value = selectedPictures.value.filter((p) => p.id !== picId)
+}
+
+// 사진 삭제 (영구 삭제)
+const deletePicture = (picId) => {
+  if (!confirm('이 사진을 삭제하시겠습니까?')) return
+
+  allPictures.value = removeGamePicture(gameId, picId)
+  selectedPictures.value = selectedPictures.value.filter((p) => p.id !== picId)
+}
+
+// 드래그 시작
+const handleDragStart = (index) => {
+  draggedIndex.value = index
+}
+
+// 드롭
+const handleDrop = (dropIndex) => {
+  if (draggedIndex.value === null) return
+
+  const draggedItem = selectedPictures.value[draggedIndex.value]
+  selectedPictures.value.splice(draggedIndex.value, 1)
+  selectedPictures.value.splice(dropIndex, 0, draggedItem)
+
+  draggedIndex.value = null
+}
+
+// 사진 제출
+const submitPictures = async () => {
+  if (selectedPictures.value.length === 0) {
+    showToast('선택된 사진이 없습니다.')
+    return
+  }
+
+  isSubmittingPictures.value = true
+
+  try {
+    // FormData 생성
+    const formData = new FormData()
+
+    // 선택된 사진들을 File 객체로 변환하여 추가
+    selectedPictures.value.forEach((pic, index) => {
+      const file = dataUrlToFile(pic.dataUrl, `game_${gameId}_${index}.jpg`)
+      formData.append('pictures', file)
+    })
+
+    // 백엔드 API 엔드포인트 (실제 API 경로에 맞게 수정 필요)
+    await api.post(`/api/games/${gameId}/pictures`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    picturesSubmitted.value = true
+    showToast('사진이 성공적으로 제출되었습니다!')
+  } catch (err) {
+    console.error('사진 제출 실패:', err)
+    showToast('사진 제출에 실패했습니다. 다시 시도해주세요.')
+  } finally {
+    isSubmittingPictures.value = false
+  }
+}
+
+// base64를 File 객체로 변환
+const dataUrlToFile = (dataUrl, filename) => {
+  const arr = dataUrl.split(',')
+  const mime = arr[0].match(/:(.*?);/)[1]
+  const bstr = atob(arr[1])
+  let n = bstr.length
+  const u8arr = new Uint8Array(n)
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n)
+  }
+  return new File([u8arr], filename, { type: mime })
+}
+
 const submitReview = async () => {
   if (review.value.manner === 0 || review.value.performance === 0) {
     showToast('매너와 퍼포먼스 평점을 모두 입력해 주세요.')
@@ -458,18 +653,21 @@ function formatDate(dateStr) {
   }
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: max-height 0.3s, opacity 0.2s;
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    max-height 0.3s,
+    opacity 0.2s;
   overflow: hidden;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   max-height: 0;
   opacity: 0;
 }
-.fade-enter-to, .fade-leave-from {
+.fade-enter-to,
+.fade-leave-from {
   max-height: 600px; /* 충분히 크게 */
   opacity: 1;
 }
-
-
 </style>

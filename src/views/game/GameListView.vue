@@ -1013,7 +1013,7 @@ const submitInvite = async () => {
 const applyInviteGame = async (id) => {
   try {
     await api.post(`/api/games/${id}/apply`)
-    showToast('참가 신청이 완료되었습니다!', `/game&id=${id}`)
+    showToast('참가 신청이 완료되었습니다!', `/game?id=${id}`)
     closeInviteModal()
   } catch (e) {
     showToast(e.response?.data?.message || '신청에 실패했습니다.')

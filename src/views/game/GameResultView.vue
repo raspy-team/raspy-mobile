@@ -180,11 +180,16 @@
         </transition>
       </div>
 
-      <!-- 경기 사진 선택 -->
-      <div class="bg-white p-5 rounded-xl shadow space-y-4 text-left border">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <i class="fas fa-camera"></i> 경기 사진 선택 (최대 5장)
-        </h3>
+      <!-- 경기 사진 선택 및 제출 -->
+      <div v-if="!picturesSubmitted" class="bg-white p-5 rounded-xl shadow space-y-4 text-left border">
+        <div>
+          <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <i class="fas fa-camera"></i> 경기 사진 선택 (최대 5장)
+          </h3>
+          <p class="text-sm text-gray-500 mt-2">
+            <i class="fas fa-info-circle text-orange-500"></i> 선택한 사진은 피드에 게시됩니다
+          </p>
+        </div>
 
         <!-- 촬영된 사진이 없을 때 -->
         <div v-if="allPictures.length === 0" class="text-center py-8 text-gray-400">
@@ -193,9 +198,9 @@
         </div>
 
         <!-- 사진 목록 -->
-        <div v-else>
+        <div v-else class="space-y-4">
           <!-- 선택된 사진 (드래그로 순서 변경 가능) -->
-          <div v-if="selectedPictures.length > 0" class="mb-4">
+          <div v-if="selectedPictures.length > 0">
             <p class="text-sm text-gray-600 mb-2">
               선택된 사진 ({{ selectedPictures.length }}/5) - 드래그하여 순서 변경
             </p>
@@ -203,21 +208,33 @@
               <div
                 v-for="(pic, index) in selectedPictures"
                 :key="pic.id"
-                class="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-500 cursor-move"
+                :data-index="index"
+                :class="[
+                  'relative aspect-square rounded-lg overflow-hidden border-2 cursor-move touch-none transition-all duration-150',
+                  isDragging && draggedIndex === index
+                    ? 'opacity-50 scale-95 border-orange-300'
+                    : touchCurrentIndex === index && isDragging
+                      ? 'border-blue-500 scale-105'
+                      : 'border-orange-500'
+                ]"
                 draggable="true"
                 @dragstart="handleDragStart(index)"
-                @dragover.prevent
+                @dragover.prevent="handleDragOver"
                 @drop="handleDrop(index)"
+                @dragend="handleDragEnd"
+                @touchstart="handleTouchStart(index)"
+                @touchmove.prevent="handleTouchMove($event)"
+                @touchend="handleTouchEnd(index)"
               >
-                <img :src="pic.dataUrl" class="w-full h-full object-cover" />
+                <img :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
                 <div
-                  class="absolute top-1 left-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                  class="absolute top-1 left-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold pointer-events-none"
                 >
                   {{ index + 1 }}
                 </div>
                 <button
-                  @click="deselectPicture(pic.id)"
-                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition"
+                  @click.stop="deselectPicture(pic.id)"
+                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition z-10"
                 >
                   <i class="fas fa-times text-xs"></i>
                 </button>
@@ -244,6 +261,27 @@
                 </button>
               </div>
             </div>
+          </div>
+
+          <!-- 사진 제출 버튼 -->
+          <button
+            v-if="selectedPictures.length > 0"
+            @click="submitPictures"
+            :disabled="isSubmittingPictures"
+            class="w-full bg-orange-500 text-white py-3 rounded-[7px] font-bold shadow hover:brightness-110 transition disabled:opacity-50"
+          >
+            {{ isSubmittingPictures ? '업로드 중...' : `선택한 사진 제출 (${selectedPictures.length}장)` }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 사진 제출 완료 표시 -->
+      <div v-else class="bg-green-50 p-5 rounded-xl shadow border border-green-200">
+        <div class="flex items-center gap-3 text-green-700">
+          <i class="fas fa-check-circle text-2xl"></i>
+          <div>
+            <h3 class="font-bold">사진 제출 완료</h3>
+            <p class="text-sm text-green-600">{{ selectedPictures.length }}장의 사진이 제출되었습니다.</p>
           </div>
         </div>
       </div>
@@ -304,26 +342,6 @@
         </button>
       </div>
 
-      <!-- 사진 제출 버튼 (리뷰 제출 후에만 표시) -->
-      <div
-        v-if="reviewSubmitted && selectedPictures.length > 0 && !picturesSubmitted"
-        class="bg-white p-5 rounded-xl shadow space-y-4 text-left border"
-      >
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <i class="fas fa-upload"></i> 선택한 사진 제출
-        </h3>
-        <p class="text-sm text-gray-600">
-          {{ selectedPictures.length }}장의 사진이 선택되었습니다. 제출하시겠습니까?
-        </p>
-        <button
-          @click="submitPictures"
-          :disabled="isSubmittingPictures"
-          class="w-full bg-orange-500 text-white py-3 rounded-[7px] font-bold shadow hover:brightness-110 transition disabled:opacity-50"
-        >
-          {{ isSubmittingPictures ? '업로드 중...' : '사진 제출' }}
-        </button>
-      </div>
-
       <CustomToast />
     </div>
   </div>
@@ -378,6 +396,9 @@ const selectedPictures = ref([])
 const draggedIndex = ref(null)
 const picturesSubmitted = ref(false)
 const isSubmittingPictures = ref(false)
+const touchStartIndex = ref(null)
+const touchCurrentIndex = ref(null)
+const isDragging = ref(false)
 
 // 선택되지 않은 사진들
 const unselectedPictures = computed(() => {
@@ -444,12 +465,24 @@ const deletePicture = (picId) => {
   selectedPictures.value = selectedPictures.value.filter((p) => p.id !== picId)
 }
 
-// 드래그 시작
+// 드래그 시작 (마우스)
 const handleDragStart = (index) => {
   draggedIndex.value = index
+  isDragging.value = true
 }
 
-// 드롭
+// 드래그 오버
+const handleDragOver = (e) => {
+  e.preventDefault()
+}
+
+// 드래그 종료
+const handleDragEnd = () => {
+  isDragging.value = false
+  draggedIndex.value = null
+}
+
+// 드롭 (마우스)
 const handleDrop = (dropIndex) => {
   if (draggedIndex.value === null) return
 
@@ -457,7 +490,49 @@ const handleDrop = (dropIndex) => {
   selectedPictures.value.splice(draggedIndex.value, 1)
   selectedPictures.value.splice(dropIndex, 0, draggedItem)
 
+  isDragging.value = false
   draggedIndex.value = null
+}
+
+// 터치 드래그 시작
+const handleTouchStart = (index) => {
+  touchStartIndex.value = index
+  isDragging.value = true
+}
+
+// 터치 드래그 중
+const handleTouchMove = (e) => {
+  if (touchStartIndex.value === null) return
+
+  // 터치 위치에서 가장 가까운 요소 찾기
+  const touch = e.touches[0]
+  const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY)
+
+  if (elementAtPoint) {
+    const closestItem = elementAtPoint.closest('[data-index]')
+    if (closestItem) {
+      const newIndex = parseInt(closestItem.getAttribute('data-index'))
+      touchCurrentIndex.value = newIndex
+    }
+  }
+}
+
+// 터치 드래그 종료
+const handleTouchEnd = (dropIndex) => {
+  if (touchStartIndex.value === null) return
+
+  // touchCurrentIndex가 있으면 그걸 사용, 없으면 dropIndex 사용
+  const targetIndex = touchCurrentIndex.value !== null ? touchCurrentIndex.value : dropIndex
+
+  if (touchStartIndex.value !== targetIndex) {
+    const draggedItem = selectedPictures.value[touchStartIndex.value]
+    selectedPictures.value.splice(touchStartIndex.value, 1)
+    selectedPictures.value.splice(targetIndex, 0, draggedItem)
+  }
+
+  isDragging.value = false
+  touchStartIndex.value = null
+  touchCurrentIndex.value = null
 }
 
 // 사진 제출

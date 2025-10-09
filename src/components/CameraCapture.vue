@@ -101,6 +101,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  autoOpen: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['capture', 'cancel'])
@@ -139,13 +143,18 @@ const confirm = () => {
   selectedFile.value = null
 }
 
-// isVisible 변경 감지 - 닫힐 때 초기화
+// isVisible 변경 감지 - 닫힐 때 초기화, 열릴 때 autoOpen이면 자동 실행
 watch(
   () => props.isVisible,
   (newVal) => {
     if (!newVal) {
       capturedImage.value = null
       selectedFile.value = null
+    } else if (newVal && props.autoOpen) {
+      // 모달이 열릴 때 autoOpen이 true면 자동으로 카메라 실행
+      setTimeout(() => {
+        triggerCamera()
+      }, 100)
     }
   },
 )

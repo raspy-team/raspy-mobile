@@ -163,7 +163,7 @@ const handleAccept = async () => {
     // 게임 생성 완료, 요청 상태 초기화
     playWithMeRequest.value = null
     // 게임 페이지로 이동하거나 성공 메시지 표시
-    router.push(`/games/${gameId}`)
+    router.push(`/game?id=${gameId}`)
   } catch (error) {
     console.error('나랑도해 요청 수락 중 오류:', error)
   }
@@ -252,9 +252,11 @@ const handleAddFriend = () => {
           <div
             class="h-1 w-full"
             :class="{
-              'bg-gradient-to-r from-green-400 to-emerald-500': headerInfo.type === 'game_scheduled',
-              'bg-gradient-to-r from-orange-400 to-red-500': headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
-              'bg-gradient-to-r from-gray-300 to-gray-400': headerInfo.type === 'request_sent'
+              'bg-gradient-to-r from-green-400 to-emerald-500':
+                headerInfo.type === 'game_scheduled',
+              'bg-gradient-to-r from-orange-400 to-red-500':
+                headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
+              'bg-gradient-to-r from-gray-300 to-gray-400': headerInfo.type === 'request_sent',
             }"
           ></div>
 
@@ -265,7 +267,7 @@ const handleAddFriend = () => {
               <div
                 class="flex-shrink-0 relative group"
                 :class="{
-                  'animate-pulse': headerInfo.type === 'request_received'
+                  'animate-pulse': headerInfo.type === 'request_received',
                 }"
               >
                 <div class="relative">
@@ -279,8 +281,10 @@ const handleAddFriend = () => {
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm"
                     :class="{
                       'bg-green-500': headerInfo.type === 'game_scheduled',
-                      'bg-orange-500': headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
-                      'bg-gray-400': headerInfo.type === 'request_sent'
+                      'bg-orange-500':
+                        headerInfo.type === 'request_received' ||
+                        headerInfo.type === 'challenge_received',
+                      'bg-gray-400': headerInfo.type === 'request_sent',
                     }"
                   ></div>
                 </div>
@@ -297,9 +301,13 @@ const handleAddFriend = () => {
 
                     <!-- 카테고리 -->
                     <div class="flex items-center gap-1 mb-2">
-                      <span class="text-xs text-gray-600 font-medium">{{ playWithMeRequest?.majorCategory || '스포츠' }}</span>
+                      <span class="text-xs text-gray-600 font-medium">{{
+                        playWithMeRequest?.majorCategory || '스포츠'
+                      }}</span>
                       <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                      >
                         {{ playWithMeRequest?.minorCategory || '경기' }}
                       </span>
                     </div>
@@ -311,17 +319,23 @@ const handleAddFriend = () => {
                           class="w-2 h-2 rounded-full animate-pulse"
                           :class="{
                             'bg-green-500': headerInfo.type === 'game_scheduled',
-                            'bg-orange-500': headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
-                            'bg-gray-400': headerInfo.type === 'request_sent'
+                            'bg-orange-500':
+                              headerInfo.type === 'request_received' ||
+                              headerInfo.type === 'challenge_received',
+                            'bg-gray-400': headerInfo.type === 'request_sent',
                           }"
                         ></div>
-                        <span class="text-sm font-semibold text-gray-900">{{ headerInfo.title }}</span>
+                        <span class="text-sm font-semibold text-gray-900">{{
+                          headerInfo.title
+                        }}</span>
                         <i
                           v-if="headerInfo.isClickable"
                           class="fas fa-external-link-alt text-gray-400 text-xs ml-auto"
                         ></i>
                       </div>
-                      <p class="text-xs text-gray-600 leading-relaxed pl-4">{{ headerInfo.description }}</p>
+                      <p class="text-xs text-gray-600 leading-relaxed pl-4">
+                        {{ headerInfo.description }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -410,9 +424,13 @@ const handleAddFriend = () => {
             </template>
             <template v-else-if="msg.messageType === 'PLAY_WITH_ME_TOO'">
               <div class="w-full max-w-sm mx-auto">
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 shadow-md">
+                <div
+                  class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 shadow-md"
+                >
                   <div class="flex items-center gap-3 mb-3">
-                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                    <div
+                      class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center"
+                    >
                       <i class="fas fa-gamepad text-white text-sm"></i>
                     </div>
                     <div class="flex-1">
@@ -421,7 +439,9 @@ const handleAddFriend = () => {
                     </div>
                   </div>
                   <div class="bg-white/70 rounded-lg p-3 border border-blue-100">
-                    <p class="text-sm text-gray-800 leading-relaxed text-center">{{ msg.content }}</p>
+                    <p class="text-sm text-gray-800 leading-relaxed text-center">
+                      {{ msg.content }}
+                    </p>
                   </div>
                 </div>
               </div>

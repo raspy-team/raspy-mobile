@@ -261,12 +261,16 @@
     const apiBase = isLocalhostClient ? 'http://localhost:8080' : 'https://raspy-be.shop'
 
     if (provider === 'kakao') {
-      // iOS 앱
+      // iOS 앱 (not support now)
       if (userAgent.includes('raspy-ios')) {
         window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'kakaoLogin' })
       }
-      // Android 앱 및 일반 웹 브라우저
-      // Android의 경우 shouldOverrideUrlLoading에서 자동으로 카카오톡 앱이 열림
+      
+      else if (window.AndroidApp && window.AndroidApp.loginWithKakao) {
+      // 네이티브 카카오 SDK 로그인 호출
+       window.AndroidApp.loginWithKakao();
+      }  
+
       else {
         window.location.href = `${apiBase}/oauth2/authorization/kakao`
       }

@@ -233,62 +233,65 @@
   </div>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router'
-const router = useRouter()
-import { ref } from 'vue'
-const isLoading = ref(false)
-const showTermsModal = ref(false)
-const showPrivacyModal = ref(false)
-const goHomeIfLoggedIn = () => {
-  if (localStorage.getItem('raspy_access_token2') != undefined) {
-    router.push('/')
-  }
-}
-goHomeIfLoggedIn()
-
-const pointColor = '#ff6f1f'
-document.documentElement.style.setProperty('--point-color', pointColor)
-
-// 플랫폼 감지 (iOS 웹뷰)
-const userAgent = navigator.userAgent.toLowerCase()
-const isIosApp = userAgent.includes('raspy-ios')
-
-const loginWith = (provider) => {
-  const isLocalhostClient =
-    window.location.hostname === 'localhost' && window.location.port === '8081'
-  isLoading.value = true
-  const apiBase = isLocalhostClient ? 'http://localhost:8080' : 'https://raspy-be.shop'
-
-  if (provider === 'kakao') {
-    if (userAgent.includes('raspy-ios')) {
-      window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'kakaoLogin' })
-    } else {
-      window.location.href = `${apiBase}/oauth2/authorization/kakao`
+  <script setup>
+  import { useRouter } from 'vue-router'
+  const router = useRouter()
+  import { ref } from 'vue'
+  const isLoading = ref(false)
+  const showTermsModal = ref(false)
+  const showPrivacyModal = ref(false)
+  const goHomeIfLoggedIn = () => {
+    if (localStorage.getItem('raspy_access_token2') != undefined) {
+      router.push('/')
     }
-  } else if (provider === 'apple') {
-    if (userAgent.includes('raspy-ios')) {
-      window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'appleLogin' })
-    } else {
-      alert('Apple 로그인은 iOS 앱에서만 가능합니다.')
-    }
-  } else {
-    window.location.href = `${apiBase}/oauth2/authorization/${provider}`
   }
-}
+  goHomeIfLoggedIn()
 
-const loginGroup = () => {
-  router.push('/group/login')
-}
+  const pointColor = '#ff6f1f'
+  document.documentElement.style.setProperty('--point-color', pointColor)
 
-window.onKakaoLoginSuccess = function ({ token }) {
-  // 토큰 저장
-  localStorage.setItem('raspy_access_token2', token)
+  // 플랫폼 감지 (iOS 웹뷰)
+  const userAgent = navigator.userAgent.toLowerCase()
+  const isIosApp = userAgent.includes('raspy-ios')
 
-  // 홈으로 이동
-  window.location.href = '/'
-}
-</script>
+  const loginWith = (provider) => {
+    const isLocalhostClient =
+      window.location.hostname === 'localhost' && window.location.port === '8081'
+    isLoading.value = true
+    const apiBase = isLocalhostClient ? 'http://localhost:8080' : 'https://raspy-be.shop'
+
+    if (provider === 'kakao') {
+      // iOS 앱
+      if (userAgent.includes('raspy-ios')) {
+        window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'kakaoLogin' })
+      }
+      // Android 앱 및 일반 웹 브라우저
+      // Android의 경우 shouldOverrideUrlLoading에서 자동으로 카카오톡 앱이 열림
+      else {
+        window.location.href = `${apiBase}/oauth2/authorization/kakao`
+      }
+    } else if (provider === 'apple') {
+      if (userAgent.includes('raspy-ios')) {
+        window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'appleLogin' })
+      } else {
+        alert('Apple 로그인은 iOS 앱에서만 가능합니다.')
+      }
+    } else {
+      window.location.href = `${apiBase}/oauth2/authorization/${provider}`
+    }
+  }
+
+  const loginGroup = () => {
+    router.push('/group/login')
+  }
+
+  // iOS 카카오 로그인 성공 콜백
+  window.onKakaoLoginSuccess = function ({ token }) {
+    localStorage.setItem('raspy_access_token2', token)
+    window.location.href = '/'
+  }
+  </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600&display=swap');

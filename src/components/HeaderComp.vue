@@ -44,8 +44,14 @@
     <!-- 알림 패널 (오른쪽 슬라이드) -->
     <transition name="slide">
       <aside
-        v-if="showNotificationPanel"
-        class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
+  v-if="showNotificationPanel"
+  class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
+  @touchstart="onPanelDragStart"
+  @touchmove="onPanelDragMove"
+  @touchend="onPanelDragEnd"
+  @mousedown="onPanelDragStart"
+  @mousemove="onPanelDragMove"
+  @mouseup="onPanelDragEnd"
       >
         <div class="flex items-center justify-between px-6 h-16 border-b">
           <span class="text-base font-bold text-gray-800">알림</span>
@@ -101,6 +107,10 @@
 import { ref, defineProps, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/api'
+
+// 드래그 관련 상태
+const dragStartX = ref(null)
+const dragging = ref(false)
 
 // 실제로는 pinia, useUser 등에서 user 정보 받아올 것.
 const router = useRouter()
@@ -184,6 +194,37 @@ const formatDate = (dt) => {
   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
   return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+}
+
+// 알림 패널 드래그 핸들러
+function onPanelDragStart(e) {
+  dragging.value = true
+  if (e.type === 'touchstart') {
+    dragStartX.value = e.touches[0].clientX
+  } else if (e.type === 'mousedown') {
+    dragStartX.value = e.clientX
+  }
+}
+
+function onPanelDragMove(e) {
+  if (!dragging.value || dragStartX.value === null) return
+  let currentX
+  if (e.type === 'touchmove') {
+    currentX = e.touches[0].clientX
+  } else if (e.type === 'mousemove') {
+    currentX = e.clientX
+  }
+  // 드래그 방향: 오른쪽으로 80px 이상 이동 시 닫기
+  if (currentX - dragStartX.value > 80) {
+    dragging.value = false
+    dragStartX.value = null
+    toggleNotificationPanel()
+  }
+}
+
+function onPanelDragEnd() {
+  dragging.value = false
+  dragStartX.value = null
 }
 
 onMounted(() => {

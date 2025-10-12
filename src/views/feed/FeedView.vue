@@ -410,7 +410,7 @@
             <img
               :src="headlinePhoto.url"
               alt="인증샷"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-contain"
               draggable="false"
             />
             <div class="absolute inset-0 bg-black/20" />

@@ -376,7 +376,7 @@
       <!-- Slides progress (top) -->
       <div
         v-if="post.type !== 'friend-invite'"
-        class="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-3 justify-center items-center"
+        class="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-3 justify-center items-center"
       >
         <span
           v-for="(s, i) in sections"
@@ -434,7 +434,7 @@
             </div>
 
             <!-- 하단 정보 -->
-            <div class="absolute bottom-[15%] left-0 right-0 px-4 z-10">
+            <div class="absolute bottom-[18%] left-0 right-0 px-4 z-10">
               <div class="max-w-xl mx-auto">
                 <div class="text-center mb-3">
                   <div class="text-white/80 text-sm drop-shadow-lg">

@@ -29,6 +29,12 @@
       <aside
         v-if="showNotificationPanel"
         class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
+        @touchstart="onPanelDragStart"
+        @touchmove="onPanelDragMove"
+        @touchend="onPanelDragEnd"
+        @mousedown="onPanelDragStart"
+        @mousemove="onPanelDragMove"
+        @mouseup="onPanelDragEnd"
       >
         <div class="flex items-center justify-between px-6 h-16 border-b">
           <span class="text-base font-bold text-gray-800">알림</span>
@@ -1307,6 +1313,16 @@ const currentRankingStatus = computed(() => {
   return rankingStatus.value.get(post.value.id) || null
 })
 
+const formatDate = (dt) => {
+  const d = new Date(dt)
+  const now = new Date()
+  const diff = (now - d) / 1000
+  if (diff < 60) return '방금 전'
+  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
+  return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+}
+
 // ---------------------------
 // Vertical feed management
 // ---------------------------
@@ -2053,6 +2069,42 @@ const icons = {
 }
 
 onBeforeUnmount(() => {})
+
+/**
+ * 알림창 관련
+ */
+
+const dragStartX = ref(null)
+const dragging = ref(false)
+
+// 알림 패널 드래그 핸들러
+function onPanelDragStart(e) {
+  dragging.value = true
+  if (e.type === 'touchstart') {
+    dragStartX.value = e.touches[0].clientX
+  } else if (e.type === 'mousedown') {
+    dragStartX.value = e.clientX
+  }
+}
+function onPanelDragMove(e) {
+  if (!dragging.value || dragStartX.value === null) return
+  let currentX
+  if (e.type === 'touchmove') {
+    currentX = e.touches[0].clientX
+  } else if (e.type === 'mousemove') {
+    currentX = e.clientX
+  }
+  // 드래그 방향: 오른쪽으로 80px 이상 이동 시 닫기
+  if (currentX - dragStartX.value > 80) {
+    dragging.value = false
+    dragStartX.value = null
+    toggleNotificationPanel()
+  }
+}
+function onPanelDragEnd() {
+  dragging.value = false
+  dragStartX.value = null
+}
 </script>
 
 <style scoped>
@@ -2215,5 +2267,18 @@ onBeforeUnmount(() => {})
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(100%);
+}
+.slide-enter-to,
+.slide-leave-from {
+  transform: translateX(0);
 }
 </style>

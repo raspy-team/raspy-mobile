@@ -141,15 +141,11 @@
         <img
           v-if="prevPost.type === 'game' && prevPost.isCompleted && prevPost.photos?.length > 0"
           :src="prevPost.photos[0]?.url || prevPost.photos[0]"
-          class="absolute inset-0 w-full h-full object-cover"
+          class="absolute inset-0 w-full h-full object-contain"
         />
 
         <div
-          v-if="prevPost.type === 'game' && prevPost.isCompleted"
-          class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
-        ></div>
-        <div
-          v-else-if="
+          v-if="
             prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)
           "
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
@@ -159,8 +155,8 @@
           class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
         ></div>
 
-        <div class="ambient-overlay"></div>
-        <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
+        <div v-if="prevPost.type !== 'game' || !prevPost.isCompleted" class="ambient-overlay"></div>
+        <div v-if="prevPost.type !== 'game' || !prevPost.isCompleted" class="relative z-10 w-full h-full flex items-center justify-center px-4">
           <div v-if="prevPost.type === 'invite'" class="text-center text-white">
             <div
               class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
@@ -169,47 +165,6 @@
             </div>
             <div class="text-lg font-bold">친구 초대</div>
             <div class="text-sm text-white/70">더 많은 컨텐츠를 확인하세요</div>
-          </div>
-
-          <div
-            v-else-if="prevPost.type === 'game' && prevPost.isCompleted"
-            class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
-          >
-            <div class="flex items-center justify-between mb-5">
-              <div class="text-xl font-extrabold">경기 결과</div>
-              <div class="text-xs text-white/70">{{ prevPost.date }}</div>
-            </div>
-            <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-              <div class="text-center">
-                <img
-                  :src="prevPost.players?.[0]?.avatar || prevPost.author?.avatar"
-                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
-                />
-                <div class="text-white font-semibold text-xs truncate">
-                  {{ prevPost.players?.[0]?.name || prevPost.author?.name }}
-                </div>
-              </div>
-              <div class="text-center">
-                <div
-                  class="font-extrabold text-white tracking-wide leading-none text-4xl sm:text-5xl"
-                >
-                  {{ prevPost.result?.scoreA || 0 }}<span class="text-white/50"> : </span
-                  >{{ prevPost.result?.scoreB || 0 }}
-                </div>
-                <div class="mt-1 text-xs text-emerald-300 font-medium">
-                  Winner · {{ prevPost.result?.winner || '?' }}
-                </div>
-              </div>
-              <div class="text-center">
-                <img
-                  :src="prevPost.players?.[1]?.avatar || prevPost.author?.avatar"
-                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
-                />
-                <div class="text-white font-semibold text-xs truncate">
-                  {{ prevPost.players?.[1]?.name || '상대' }}
-                </div>
-              </div>
-            </div>
           </div>
 
           <div
@@ -254,15 +209,11 @@
         <img
           v-if="nextPost.type === 'game' && nextPost.isCompleted && nextPost.photos?.length > 0"
           :src="nextPost.photos[0]?.url || nextPost.photos[0]"
-          class="absolute inset-0 w-full h-full object-cover"
+          class="absolute inset-0 w-full h-full object-contain"
         />
 
         <div
-          v-if="nextPost.type === 'game' && nextPost.isCompleted"
-          class="absolute inset-0 bg-gradient-to-br from-emerald-600/80 via-cyan-600/60 to-blue-700/40"
-        ></div>
-        <div
-          v-else-if="
+          v-if="
             nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)
           "
           class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
@@ -272,8 +223,8 @@
           class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
         ></div>
 
-        <div class="ambient-overlay"></div>
-        <div class="relative z-10 w-full h-full flex items-center justify-center px-4">
+        <div v-if="nextPost.type !== 'game' || !nextPost.isCompleted" class="ambient-overlay"></div>
+        <div v-if="nextPost.type !== 'game' || !nextPost.isCompleted" class="relative z-10 w-full h-full flex items-center justify-center px-4">
           <div v-if="nextPost.type === 'invite'" class="text-center text-white">
             <div
               class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
@@ -282,47 +233,6 @@
             </div>
             <div class="text-lg font-bold">친구 초대</div>
             <div class="text-sm text-white/70">더 많은 컨텐츠를 확인하세요</div>
-          </div>
-
-          <div
-            v-else-if="nextPost.type === 'game' && nextPost.isCompleted"
-            class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
-          >
-            <div class="flex items-center justify-between mb-5">
-              <div class="text-xl font-extrabold">경기 결과</div>
-              <div class="text-xs text-white/70">{{ nextPost.date }}</div>
-            </div>
-            <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-              <div class="text-center">
-                <img
-                  :src="nextPost.players?.[0]?.avatar || nextPost.author?.avatar"
-                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
-                />
-                <div class="text-white font-semibold text-xs truncate">
-                  {{ nextPost.players?.[0]?.name || nextPost.author?.name }}
-                </div>
-              </div>
-              <div class="text-center">
-                <div
-                  class="font-extrabold text-white tracking-wide leading-none text-4xl sm:text-5xl"
-                >
-                  {{ nextPost.result?.scoreA || 0 }}<span class="text-white/50"> : </span
-                  >{{ nextPost.result?.scoreB || 0 }}
-                </div>
-                <div class="mt-1 text-xs text-emerald-300 font-medium">
-                  Winner · {{ nextPost.result?.winner || '?' }}
-                </div>
-              </div>
-              <div class="text-center">
-                <img
-                  :src="nextPost.players?.[1]?.avatar || nextPost.author?.avatar"
-                  class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-white/20"
-                />
-                <div class="text-white font-semibold text-xs truncate">
-                  {{ nextPost.players?.[1]?.name || '상대' }}
-                </div>
-              </div>
-            </div>
           </div>
 
           <div
@@ -865,7 +775,7 @@
               <img
                 :src="p.url"
                 alt="photo"
-                class="absolute inset-0 w-full h-full object-cover"
+                class="absolute inset-0 w-full h-full object-contain"
                 draggable="false"
               />
               <div

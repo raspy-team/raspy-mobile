@@ -25,7 +25,7 @@ function isActive(pathPrefix) {
 
 <template>
   <nav
-    class="fixed bottom-0 px-6 py-2 raspy-bot left-0 w-full bg-black/80 backdrop-blur-md border-t border-white/10 z-10"
+    class="fixed bottom-0 px-6 py-2 left-0 w-full bg-black/80 backdrop-blur-md border-t border-white/10 z-10"
   >
     <div class="max-w-4xl mx-auto h-14 px-4 flex justify-between items-center text-[0.72rem]">
       <!-- 피드 (신규) -->
@@ -62,9 +62,7 @@ function isActive(pathPrefix) {
         to="/game"
         aria-label="게임"
         class="nav-item flex flex-col gap-y-2 items-center px-3 py-1 rounded-xl transition-colors relative"
-        :class="
-          isActive('/game') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'
-        "
+        :class="isActive('/game') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'"
       >
         <i
           class="fas fa-gamepad text-2xl"

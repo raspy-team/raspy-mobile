@@ -434,7 +434,7 @@
             </div>
 
             <!-- 하단 정보 -->
-            <div class="absolute bottom-8 left-0 right-0 px-4 z-10">
+            <div class="absolute bottom-[15%] left-0 right-0 px-4 z-10">
               <div class="max-w-xl mx-auto">
                 <div class="text-center mb-3">
                   <div class="text-white/80 text-sm drop-shadow-lg">

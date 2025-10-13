@@ -532,139 +532,65 @@
                 <span>{{ post.meta.place }}</span>
                 <span>{{ post.meta.time }}</span>
               </div>
-            </div>
-          </section>
-
-          <section
-            v-if="
-              post?.type === 'game' &&
-              post?.isCompleted &&
-              features.reviews &&
-              post?.reviews?.length > 0
-            "
-            class="w-screen shrink-0 h-full relative"
-          >
-            <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-black to-black" />
-            <div class="ambient-overlay" />
-            <div
-              class="relative z-10 h-full flex flex-col justify-center items-center gap-4 px-4 py-12"
-            >
-              <div class="max-w-xl mx-auto w-full">
-                <div class="flex items-center justify-between mb-1">
-                  <div class="text-xl font-extrabold">평점 & 리뷰</div>
-                  <div class="text-xs text-white/70" v-if="post.reviews && post.reviews.length > 0">
-                    총 {{ post.reviews.length }}개
-                  </div>
-                </div>
-                <div class="text-[11px] text-white/60 mb-2">너라면 더 잘할 수 있지?</div>
-              </div>
+              <!-- 평점 & 리뷰 (경기 정보 박스 아래에 간략하게 표시) -->
               <div
-                v-if="post.reviews?.length > 0 && post.reviews[0]?.author"
-                class="flex items-center justify-center"
+                v-if="
+                  post.type === 'game' &&
+                  post.isCompleted &&
+                  features.reviews &&
+                  post.reviews?.length > 0
+                "
+                class="mt-7 space-y-3"
               >
+                <div class="text-xs font-semibold text-white/90 mb-2">경기 리뷰</div>
+
+                <!-- 첫 번째 리뷰 -->
                 <div
-                  class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
+                  v-if="post.reviews[0]?.author"
+                  class="bg-black/30 border border-white/10 rounded-lg p-3 space-y-2"
                 >
-                  <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2">
                     <img
                       :src="
                         post.reviews[0]?.author?.avatar ||
                         'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'
                       "
-                      class="w-12 h-12 rounded-full object-cover"
+                      class="w-8 h-8 rounded-full object-cover"
                     />
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">
-                          {{ post.reviews[0]?.author?.name || '익명' }}
-                        </div>
-                      </div>
+                    <div class="text-xs font-semibold text-white/90">
+                      {{ post.reviews[0]?.author?.name || '익명' }}
                     </div>
                   </div>
-                  <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[0]">{{
-                      post.reviews[0]?.text ? truncatedText(post.reviews[0].text) : ''
-                    }}</span>
-                    <span v-else>{{ post.reviews[0]?.text || '' }}</span>
-                  </div>
-                  <div class="mt-2 flex items-center justify-between text-xs text-white/70">
-                    <button
-                      class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                      @click="toggleExpand(0)"
-                    >
-                      {{ expandedReviews[0] ? '접기' : '더보기' }}
-                    </button>
-                    <button
-                      class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                      @click="toggleHelpful(0)"
-                    >
-                      도움이 됐어요 · {{ helpfulCounts[0] || 0 }}
-                    </button>
+                  <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
+                    {{ post.reviews[0]?.text || '' }}
                   </div>
                 </div>
-              </div>
-              <div
-                v-if="post.reviews?.length > 1 && post.reviews[1]?.author"
-                class="flex items-center justify-center"
-              >
+
+                <!-- 두 번째 리뷰 (있는 경우) -->
                 <div
-                  class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-h-56 flex flex-col justify-between"
+                  v-if="post.reviews[1]?.author"
+                  class="bg-black/30 border border-white/10 rounded-lg p-3 space-y-2"
                 >
-                  <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2">
                     <img
                       :src="
                         post.reviews[1]?.author?.avatar ||
                         'https://d1iimlpplvq3em.cloudfront.net/service/default-profile.png'
                       "
-                      class="w-12 h-12 rounded-full object-cover"
+                      class="w-8 h-8 rounded-full object-cover"
                     />
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center justify-between">
-                        <div class="font-semibold truncate">
-                          {{ post.reviews[1]?.author?.name || '익명' }}
-                        </div>
-                      </div>
+                    <div class="text-xs font-semibold text-white/90">
+                      {{ post.reviews[1]?.author?.name || '익명' }}
                     </div>
                   </div>
-                  <div class="mt-3 text-white/80 text-sm leading-snug">
-                    <span v-if="!expandedReviews[1]">{{
-                      post.reviews[1]?.text ? truncatedText(post.reviews[1].text) : ''
-                    }}</span>
-                    <span v-else>{{ post.reviews[1]?.text || '' }}</span>
-                  </div>
-                  <div class="mt-2 flex items-center justify-between text-xs text-white/70">
-                    <button
-                      class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                      @click="toggleExpand(1)"
-                    >
-                      {{ expandedReviews[1] ? '접기' : '더보기' }}
-                    </button>
-                    <button
-                      class="px-2 py-1 bg-black/30 border border-white/10 rounded-full active:scale-95"
-                      @click="toggleHelpful(1)"
-                    >
-                      도움이 됐어요 · {{ helpfulCounts[1] || 0 }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                v-if="!post.reviews || post.reviews.length === 0"
-                class="flex items-center justify-center"
-              >
-                <div
-                  class="w-full max-w-xl bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-8 text-center"
-                >
-                  <div class="text-white/70 text-sm">
-                    <i class="fas fa-comment-dots text-2xl mb-3 block"></i>
-                    아직 리뷰가 없습니다.<br />
-                    첫 번째 리뷰를 남겨보세요!
+                  <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
+                    {{ post.reviews[1]?.text || '' }}
                   </div>
                 </div>
               </div>
             </div>
           </section>
+
           <section
             v-if="post.type === 'game' && post.isCompleted && currentRankingStatus"
             class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
@@ -1073,7 +999,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
 import api, { playWithMeTooAPI } from '../../api/api'
@@ -1294,10 +1220,6 @@ function setCurrentFeed(i) {
   // 포스트 단위 UX 상태 초기화
   currentSlide.value = 0
   hearts.value = []
-  expandedReviews[0] = false
-  expandedReviews[1] = false
-  helpfulCounts[0] = 0
-  helpfulCounts[1] = 0
   tryVibrate(10)
 }
 
@@ -1588,7 +1510,7 @@ const sections = computed(() => {
   if (post.value.type === 'game' && post.value.isCompleted) {
     if (features.headline && hasPhotos.value) arr.push('헤드라인 사진')
     if (features.gameInfo) arr.push('경기 정보')
-    if (features.reviews && post.value.reviews?.length > 0) arr.push('평점 & 리뷰')
+    // 평점 & 리뷰는 경기 정보 섹션 내에 표시되므로 별도 섹션 제거
     if (features.friendRanking) arr.push('친구 랭킹')
     if (features.gallery) {
       for (let i = 0; i < galleryPhotos.value.length; i++) arr.push('전체 사진')
@@ -1616,22 +1538,6 @@ let gestureStartAt = 0
 let activeScrollEl = null
 let lastTapAt = 0
 const hearts = ref([])
-
-// Reviews UX state
-const expandedReviews = reactive({ 0: false, 1: false })
-const helpfulCounts = reactive({ 0: 0, 1: 0 })
-
-function truncatedText(t) {
-  const max = 60
-  return t && t.length > max ? t.slice(0, max) + '…' : t
-}
-function toggleExpand(i) {
-  expandedReviews[i] = !expandedReviews[i]
-}
-function toggleHelpful(i) {
-  helpfulCounts[i] = (helpfulCounts[i] || 0) + 1
-  tryVibrate(10)
-}
 
 const wrapperStyle = computed(() => ({
   width: totalSlides.value * 100 + 'vw',

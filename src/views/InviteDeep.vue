@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col justify-center items-center bg-gradient-to-b from-orange-50 to-white px-5 py-8 relative">
+  <div
+    class="flex flex-col justify-center items-center bg-gradient-to-b from-orange-50 to-white px-5 py-8 relative"
+  >
     <!-- Raspy 브랜드 -->
     <div class="flex flex-col items-center mb-12">
       <span class="text-4xl font-extrabold tracking-tight text-orange-500 mb-2">Match</span>
@@ -9,16 +11,18 @@
     <!-- 일러스트 (SVG) -->
     <div class="mb-10 animate-fadeInUp">
       <svg width="110" height="110" fill="none" viewBox="0 0 110 110">
-        <circle cx="55" cy="55" r="50" fill="#FDBA74" opacity="0.18"/>
+        <circle cx="55" cy="55" r="50" fill="#FDBA74" opacity="0.18" />
         <circle cx="55" cy="55" r="38" fill="#FFEDD5" />
-        <path d="M35 63c6-8 34-8 40 0" stroke="#F97316" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="45" cy="48" r="5" fill="#F97316"/>
-        <circle cx="65" cy="48" r="5" fill="#F97316"/>
+        <path d="M35 63c6-8 34-8 40 0" stroke="#F97316" stroke-width="3" stroke-linecap="round" />
+        <circle cx="45" cy="48" r="5" fill="#F97316" />
+        <circle cx="65" cy="48" r="5" fill="#F97316" />
       </svg>
     </div>
 
     <!-- 안내 및 앱 이동 -->
-    <div class="w-full max-w-xs bg-white/90 rounded-2xl shadow-xl flex flex-col items-center py-8 px-6 mb-5 border border-orange-100">
+    <div
+      class="w-full max-w-xs bg-white/90 rounded-2xl shadow-xl flex flex-col items-center py-8 px-6 mb-5 border border-orange-100"
+    >
       <p class="text-lg font-bold mb-2 text-gray-900">Match 경기 정보를 확인하세요</p>
       <button
         @click="openApp"
@@ -33,7 +37,7 @@
         앱이 설치되지 않았나요?
       </button>
       <p v-if="showTip" class="mt-4 text-xs text-gray-400 text-center">
-        앱이 자동으로 열리지 않으면<br>
+        앱이 자동으로 열리지 않으면<br />
         위 버튼을 눌러주세요.
       </p>
     </div>
@@ -57,7 +61,9 @@ const showTip = ref(false)
 onMounted(() => {
   setTimeout(() => {
     openApp()
-    setTimeout(() => { showTip.value = true }, 900)
+    setTimeout(() => {
+      showTip.value = true
+    }, 900)
   }, 600)
 })
 
@@ -66,6 +72,7 @@ function openApp() {
   const isAndroid = /android/i.test(ua)
   const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream
 
+  alert()
   if (isAndroid) {
     // 안드로이드 intent 딥링크
     window.location.href = `intent://invite/${gameId}#Intent;scheme=raspy;package=com.xhadl.raspy_android;end`
@@ -91,8 +98,8 @@ function goToStore() {
   if (isAndroid) {
     window.location.href = 'https://play.google.com/store/apps/details?id=com.xhadl.raspy_android'
   } else if (isIOS) {
-    window.location.href = 'https://apps.apple.com/app/idYOUR_IOS_APP_ID'
-    // 위의 idYOUR_IOS_APP_ID 부분을 실제 App Store 앱 ID로 todo 
+    window.location.href = 'https://apps.apple.com/kr/app/match/id6748941318'
+    // 위의 idYOUR_IOS_APP_ID 부분을 실제 App Store 앱 ID로 todo
   } else {
     alert('앱 설치는 모바일에서 가능합니다.')
   }
@@ -101,10 +108,16 @@ function goToStore() {
 
 <style scoped>
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px);}
-  to { opacity: 1; transform: translateY(0);}
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .animate-fadeInUp {
-  animation: fadeInUp 0.7s cubic-bezier(.38,1.3,.44,.93);
+  animation: fadeInUp 0.7s cubic-bezier(0.38, 1.3, 0.44, 0.93);
 }
 </style>

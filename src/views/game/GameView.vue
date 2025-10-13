@@ -84,14 +84,13 @@
           v-for="game in allGames"
           :key="game.id"
           :id="'game-' + game.id"
-          @click="game.showRuleDetail = true"
           :class="[
             'relative p-5 rounded-xl bg-white border space-y-4 transition-all',
             getCardClass(game),
           ]"
         >
           <!-- 규칙(게임명, 카테고리) 정보 최상단 -->
-          <div class="flex justify-between items-start mb-2">
+          <div class="flex justify-between items-start mb-2" @click="game.showRuleDetail = true">
             <div class="min-w-0 flex items-center gap-2">
               <div>
                 <img
@@ -262,13 +261,6 @@
               <span>{{ formatDate(game.matchDate) }}</span>
             </div>
           </div>
-
-          <!-- 규칙 모달 -->
-          <MatchRuleModal
-            v-if="game.showRuleDetail"
-            :rule="game.rule"
-            @close="game.showRuleDetail = false"
-          />
 
           <!-- 신청한 게임: 소유자 정보 -->
           <div v-if="game.type === 'sent'" class="pt-3">
@@ -525,6 +517,13 @@
   />
 
   <CustomToast />
+
+  <!-- 규칙 모달 -->
+  <MatchRuleModal
+    v-if="game && game.showRuleDetail"
+    :rule="game.rule"
+    @close="game.showRuleDetail = false"
+  />
 </template>
 
 <script setup>

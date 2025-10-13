@@ -156,7 +156,10 @@
         ></div>
 
         <div v-if="prevPost.type !== 'game' || !prevPost.isCompleted" class="ambient-overlay"></div>
-        <div v-if="prevPost.type !== 'game' || !prevPost.isCompleted" class="relative z-10 w-full h-full flex items-center justify-center px-4">
+        <div
+          v-if="prevPost.type !== 'game' || !prevPost.isCompleted"
+          class="relative z-10 w-full h-full flex items-center justify-center px-4"
+        >
           <div v-if="prevPost.type === 'invite'" class="text-center text-white">
             <div
               class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
@@ -224,7 +227,10 @@
         ></div>
 
         <div v-if="nextPost.type !== 'game' || !nextPost.isCompleted" class="ambient-overlay"></div>
-        <div v-if="nextPost.type !== 'game' || !nextPost.isCompleted" class="relative z-10 w-full h-full flex items-center justify-center px-4">
+        <div
+          v-if="nextPost.type !== 'game' || !nextPost.isCompleted"
+          class="relative z-10 w-full h-full flex items-center justify-center px-4"
+        >
           <div v-if="nextPost.type === 'invite'" class="text-center text-white">
             <div
               class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center border border-white/30 mb-4"
@@ -1920,11 +1926,12 @@ function onComment() {
   }
 }
 async function onShare() {
-  const url = window.location.origin + '/'
-  const text = `${post.value.players[0]?.name}의 경기 하이라이트 – Raspy`
+  const res = await api.post('/api/invite', null, { params: { gameId: `${post.value.id}` } })
+  const url = res.data.url
+  const text = `${post.value.players[0]?.name}의 경기 피드 – Match`
   try {
     if (navigator.share) {
-      await navigator.share({ title: 'Raspy', text, url })
+      await navigator.share({ title: 'Match', text, url })
     } else {
       await navigator.clipboard.writeText(url)
       alert('링크를 복사했어요!')

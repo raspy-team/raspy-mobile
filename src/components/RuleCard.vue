@@ -47,13 +47,11 @@
     <!-- CTA & Info -->
     <div class="flex justify-center items-center text-center mt-4 gap-4">
       <button class="game-cta text-center px-6" @click.stop="onGameCtaClick">
-        <div class="text-center flex justify-center items-center font-semibold gap-2">
-          생성
-        </div>
+        <div class="text-center flex justify-center items-center font-semibold gap-2">생성</div>
       </button>
       <div class="flex flex-col items-start text-xs text-gray-500 font-semibold gap-1">
-        <span>평점 : 4.7</span>
-        <span>플레이 수 : 17회</span>
+        <span>평점 : -</span>
+        <span>플레이 수 : {{ rule.useCount }}회</span>
       </div>
     </div>
   </div>

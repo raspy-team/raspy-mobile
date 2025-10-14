@@ -395,7 +395,6 @@
                           : 'border-white/20'
                       "
                     />
-
                     <div class="text-white font-semibold text-sm truncate">
                       {{ post.players[0].name }}
                     </div>
@@ -404,8 +403,7 @@
                     <div
                       class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
                     >
-                      {{ post.result.scoreA }}<span class="text-white/50"> : </span
-                      >{{ post.result.scoreB }}
+                      {{ post.result.scoreA }}<span class="text-white/50"> : </span>{{ post.result.scoreB }}
                     </div>
                   </div>
                   <div class="text-center relative">
@@ -418,12 +416,6 @@
                           : 'border-white/20'
                       "
                     />
-                    <div
-                      v-if="post.result.winner === post.players[1].name"
-                      class="absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 text-xs flex items-center gap-1 winner-glow"
-                    >
-                      <span class="inline-block w-4 h-4" v-html="icons.trophy" /> WINNER
-                    </div>
                     <div class="text-white font-semibold text-sm truncate">
                       {{ post.players[1].name }}
                     </div>
@@ -501,28 +493,38 @@
                 </div>
               </div>
 
-              <div
-                v-if="post.type === 'game' && post.isCompleted"
-                class="mt-4 grid grid-cols-2 gap-2 text-xs text-white/80"
-              >
-                <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                  <span class="inline-block w-4 h-4" v-html="icons.trophy" />
-                  <span>세트수 {{ post.result.sets }}</span>
-                </div>
-                <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                  <span class="inline-block w-4 h-4" v-html="icons.clock" />
-                  <span>총 시간 {{ post.result.duration }}</span>
-                </div>
-              </div>
-              <div v-if="post.type === 'game' && post.isCompleted" class="mt-4 space-y-2">
-                <div
-                  v-for="(sc, idx) in post.result.setScores"
-                  :key="'set-' + idx"
-                  class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
+              <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">
+                <button
+                  class="w-full flex items-center justify-center gap-2 text-xs text-white/80 bg-black/30 rounded-lg px-3 py-2 mb-2 focus:outline-none"
+                  @click="showSetDetails = !showSetDetails"
                 >
-                  <div class="font-semibold">{{ sc.set }}세트</div>
-                  <div class="font-bold">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
-                </div>
+                  <span v-if="!showSetDetails"><i class="fas fa-chevron-down"></i></span>
+                  <span v-else><i class="fas fa-chevron-up"></i></span>
+                </button>
+                <transition name="set-details-transition">
+                  <div v-if="showSetDetails">
+                    <div class="grid grid-cols-2 gap-2 text-xs text-white/80 mb-2">
+                      <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                        <span class="inline-block w-4 h-4" v-html="icons.trophy" />
+                        <span>세트수 {{ post.result.sets }}</span>
+                      </div>
+                      <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                        <span class="inline-block w-4 h-4" v-html="icons.clock" />
+                        <span>총 시간 {{ post.result.duration }}</span>
+                      </div>
+                    </div>
+                    <div class="space-y-2">
+                      <div
+                        v-for="(sc, idx) in post.result.setScores"
+                        :key="'set-' + idx"
+                        class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
+                      >
+                        <div class="font-semibold">{{ sc.set }}세트</div>
+                        <div class="font-bold">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </transition>
               </div>
 
               <div
@@ -999,6 +1001,8 @@
 </template>
 
 <script setup>
+// 세트/시간 정보 아코디언 상태
+const showSetDetails = ref(false)
 import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
@@ -1931,6 +1935,21 @@ function onPanelDragEnd() {
 </script>
 
 <style scoped>
+.set-details-transition-enter-active,
+.set-details-transition-leave-active {
+  transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+  overflow: hidden;
+}
+.set-details-transition-enter-from,
+.set-details-transition-leave-to {
+  height: 0;
+  opacity: 0;
+}
+.set-details-transition-enter-to,
+.set-details-transition-leave-from {
+  height: auto;
+  opacity: 1;
+}
 .w-8 :deep(svg),
 .w-4 :deep(svg) {
   width: 100%;

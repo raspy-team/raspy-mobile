@@ -285,7 +285,6 @@
             class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
           >
             <div class="flex items-center gap-2">
-              <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
               <span>{{
                 !game.matchLocation || game.matchLocation.trim() === ''
                   ? '장소 미정'
@@ -293,7 +292,6 @@
               }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <i class="far w-3 fa-calendar text-orange-500"></i>
               <span>{{ formatDate(game.matchDate) }}</span>
             </div>
           </div>
@@ -626,7 +624,7 @@ onMounted(async () => {
 })
 
 function formatDate(dateStr) {
-  if (!dateStr) return '미정'
+  if (!dateStr) return '시간 미정'
   const date = new Date(dateStr)
   return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }

@@ -1,5 +1,16 @@
 <template>
   <header class="fixed top-0 left-0 w-full h-20 z-[30] raspy-top">
+    <!-- 좌측: 뒤로가기 버튼 (userId가 있을 때만) -->
+    <div v-if="isUserFeedMode" class="absolute left-3 top-8 flex items-center">
+      <button
+        @click="router.back()"
+        class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full transition"
+        title="뒤로가기"
+      >
+        <i class="fas fa-arrow-left text-orange-500 text-xl"></i>
+      </button>
+    </div>
+
     <!-- 우측: 알림 + DM -->
     <div class="flex items-center justify-end raspy-top mt-8 space-x-4 mr-3">
       <!-- DM 버튼 -->
@@ -403,7 +414,8 @@
                     <div
                       class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
                     >
-                      {{ post.result.scoreA }}<span class="text-white/50"> : </span>{{ post.result.scoreB }}
+                      {{ post.result.scoreA }}<span class="text-white/50"> : </span
+                      >{{ post.result.scoreB }}
                     </div>
                   </div>
                   <div class="text-center relative">
@@ -1017,6 +1029,11 @@ const router = useRouter()
 // Currently available info flags for gating UI
 const features = featureFlags
 const { showToast } = useToast()
+
+import { useRoute } from 'vue-router'
+const route = useRoute()
+// 특정 유저의 피드를 보고 있는지 확인
+const isUserFeedMode = computed(() => !!route.query.userId)
 
 // 피드 데이터 관리
 const { loading, sortedFeed, loadFeed } = useFeed()
@@ -1937,7 +1954,9 @@ function onPanelDragEnd() {
 <style scoped>
 .set-details-transition-enter-active,
 .set-details-transition-leave-active {
-  transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+  transition:
+    height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s;
   overflow: hidden;
 }
 .set-details-transition-enter-from,

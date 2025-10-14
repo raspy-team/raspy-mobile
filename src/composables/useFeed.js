@@ -167,6 +167,7 @@ export function useFeed() {
   const currentUser = ref(null)
   const loading = ref(false)
   const hasMore = ref(true)
+  const isUserFeedMode = ref(false) // 유저 피드 모드 여부
 
 
   // 시간 기반 필터링 - API에서 온 모든 데이터 표시
@@ -224,8 +225,8 @@ export function useFeed() {
     ]
 
     // 친구 포스트와 일반 포스트 사이에 친구 초대 포스트 삽입
-    // 친구 포스트가 있으면 친구 포스트 뒤에, 없으면 일반 포스트 앞에 삽입
-    if (allCompleted.length > 0 || allScheduled.length > 0) {
+    // 유저피드모드가 아닐 때만 friend-invite 포스트 추가
+    if (!isUserFeedMode.value && (allCompleted.length > 0 || allScheduled.length > 0)) {
       result.push({
         type: 'friend-invite',
         id: 'friend-invite-section',
@@ -266,6 +267,17 @@ export function useFeed() {
     }))
   }
 
+  // 특정 유저의 피드 로드
+  const loadUserFeed = async (userId) => {
+    console.log(`특정 유저(${userId}) 피드 API 호출`)
+    const response = await api.get(`/api/feed/user/${userId}/completed`)
+    return (response.data.items || []).map(item => ({
+      ...item,
+      isLiked: item.isLiked || false,
+      likeCount: item.likeCount || 0
+    }))
+  }
+
   // 더미 데이터 로드 (테스트 모드용)
   const loadDummyData = async () => {
     console.log('테스트 모드: 더미 데이터 사용')
@@ -283,8 +295,21 @@ export function useFeed() {
     loading.value = true
 
     try {
-      // URL에서 우선순위 게임 ID 확인
+      // URL에서 파라미터 확인
       const priorityGameId = route?.query?.gameId
+      const userId = route?.query?.userId
+
+      // 특정 유저의 피드를 조회하는 경우
+      if (userId) {
+        console.log(`특정 유저(${userId})의 피드 로딩`)
+        isUserFeedMode.value = true
+        posts.value = await loadUserFeed(userId)
+        console.log('유저 피드 로딩 완료:', posts.value.length, '개 포스트')
+        return
+      }
+
+      // 일반 피드 모드
+      isUserFeedMode.value = false
 
       if (FEED_MODE === 'test') {
         // 테스트 모드: 더미 데이터 사용
@@ -410,6 +435,7 @@ export function useFeed() {
     handleSkipInvite,
     // 모드 정보
     isTestMode: FEED_MODE === 'test',
-    currentMode: FEED_MODE
+    currentMode: FEED_MODE,
+    isUserFeedMode
   }
 }

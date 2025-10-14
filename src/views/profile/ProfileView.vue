@@ -261,6 +261,34 @@
             </div>
           </button>
 
+          <!-- Match History Card -->
+          <button
+            @click="goToUserFeed"
+            class="group rounded-2xl bg-gradient-to-br from-white to-gray-50 w-full shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-200 relative z-10 p-5 overflow-hidden mt-3"
+          >
+            <!-- Animated background -->
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
+
+            <div class="relative flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-md"
+                >
+                  <i class="fas fa-trophy text-white text-xl"></i>
+                </div>
+                <div class="text-left">
+                  <span class="font-bold text-gray-800 text-lg block">경기 전적 보기</span>
+                  <span class="text-xs text-gray-500">플레이한 모든 경기 확인</span>
+                </div>
+              </div>
+              <i
+                class="fas fa-chevron-right text-gray-400 text-lg group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200"
+              ></i>
+            </div>
+          </button>
+
           <!-- Top 3 Rules - Enhanced Section -->
           <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
             <div class="flex items-center justify-between mb-4">
@@ -1068,6 +1096,10 @@ function selectRule(id) {
 
 function goSettings() {
   router.push('/settings')
+}
+
+function goToUserFeed() {
+  router.push(`/feed?userId=${userId}`)
 }
 
 const updateChart = async () => {

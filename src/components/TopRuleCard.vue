@@ -1,5 +1,5 @@
 <template>
-  <div class="group relative flex items-center gap-4 p-4 bg-gradient-to-br from-white to-gray-50/50 rounded-2xl shadow-md hover:shadow-xl border border-gray-200 transition-all duration-300 overflow-hidden cursor-pointer">
+  <div @click="goToRanking" class="group relative flex items-center gap-4 p-4 bg-gradient-to-br from-white to-gray-50/50 rounded-2xl shadow-md hover:shadow-xl border border-gray-200 transition-all duration-300 overflow-hidden cursor-pointer">
     <!-- Hover effect background -->
     <div class="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -41,10 +41,17 @@
 
 <script setup>
 import { defineProps } from 'vue'
+import { useRouter } from 'vue-router'
 
-defineProps({
+const props = defineProps({
   rule: Object,
 })
+
+const router = useRouter()
+
+const goToRanking = () => {
+  router.push(`/rules/${props.rule.ruleId}/ranking`)
+}
 </script>
 
 <style scoped>

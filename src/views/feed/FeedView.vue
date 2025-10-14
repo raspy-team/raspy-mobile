@@ -16,21 +16,21 @@
       <!-- DM 버튼 -->
       <router-link
         to="/dm"
-        class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full transition ml-1"
+        class="w-9 h-9 flex items-center justify-center border-white rounded-full transition ml-1"
         title="DM"
       >
-        <i class="fas fa-paper-plane text-orange-500 text-xl"></i>
+        <i class="fas fa-paper-plane text-white text-xl"></i>
       </router-link>
 
       <!-- 알림 버튼  -->
       <button
-        class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full transition"
+        class="w-9 h-9 flex items-center justify-center relative border-white rounded-full transition"
         @click="toggleNotificationPanel"
       >
-        <i class="fas fa-bell text-orange-500 text-xl"></i>
+        <i class="fas fa-bell text-white text-xl"></i>
         <span
           v-if="unreadCount > 0"
-          class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"
+          class="absolute top-1 right-1 w-2 h-2 bg-white rounded-full"
         ></span>
       </button>
     </div>
@@ -379,7 +379,7 @@
             <div class="ambient-overlay" />
 
             <div
-              class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
+              class="relative z-10 w-[92%] max-w-xl rounded-2xl px-8 py-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
               <div class="mb-5 flex justify-center">
                 <span

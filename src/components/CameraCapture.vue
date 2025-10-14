@@ -87,6 +87,7 @@
 
 <script setup>
 import { ref, watch, defineProps, defineEmits } from 'vue'
+import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
 
 const props = defineProps({
   isVisible: {
@@ -119,11 +120,25 @@ const triggerCamera = () => {
 }
 
 // 이미지 선택
-const onImageChange = (e) => {
+const onImageChange = async (e) => {
   const file = e.target.files?.[0]
   if (file) {
-    selectedFile.value = file
-    capturedImage.value = URL.createObjectURL(file)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        // 이미지 압축 (화질 30%)
+        const compressedDataUrl = await compressImage(reader.result)
+        capturedImage.value = compressedDataUrl
+        // 압축된 이미지를 File 객체로 변환
+        selectedFile.value = dataUrlToFile(compressedDataUrl, file.name)
+      } catch (error) {
+        console.error('이미지 압축 실패:', error)
+        // 압축 실패 시 원본 사용
+        selectedFile.value = file
+        capturedImage.value = URL.createObjectURL(file)
+      }
+    }
+    reader.readAsDataURL(file)
   }
   // input 초기화 (같은 파일 재선택 가능하도록)
   e.target.value = ''

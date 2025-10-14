@@ -154,6 +154,7 @@ import {
 } from 'vue'
 import api from '../api/api'
 import CommentItem from '../components/CommentItem.vue'
+import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
 
 // Props/emit
 const props = defineProps({ id: { type: [String, Number], required: true } })
@@ -268,11 +269,25 @@ function findCommentById(list, id) {
   return null
 }
 const triggerImageInput = () => imageInputRef.value?.click()
-const onImageChange = (e) => {
+const onImageChange = async (e) => {
   const file = e.target.files[0]
   if (file) {
-    inputImage.value = file
-    inputImagePreview.value = URL.createObjectURL(file)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        // 이미지 압축 (화질 30%)
+        const compressedDataUrl = await compressImage(reader.result)
+        inputImagePreview.value = compressedDataUrl
+        // 압축된 이미지를 File 객체로 변환
+        inputImage.value = dataUrlToFile(compressedDataUrl, file.name)
+      } catch (error) {
+        console.error('이미지 압축 실패:', error)
+        // 압축 실패 시 원본 사용
+        inputImage.value = file
+        inputImagePreview.value = URL.createObjectURL(file)
+      }
+    }
+    reader.readAsDataURL(file)
   }
 }
 const removeInputImage = () => {

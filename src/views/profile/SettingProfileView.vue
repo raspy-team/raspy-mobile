@@ -286,6 +286,7 @@ import { useToast } from '../../composable/useToast'
 import CustomToast from '../../components/CustomToast.vue'
 import fullRegionMap from '../../assets/regionMap.json'
 import Header from '../../components/HeaderComp.vue'
+import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 
 const regionMap = {}
 Object.entries(fullRegionMap).forEach(([primary, subs]) => {
@@ -388,21 +389,35 @@ watch(
   markDirty,
 )
 
-const onImageChange = (e) => {
+const onImageChange = async (e) => {
   const file = e.target.files?.[0]
   if (!file) return
   if (file.size > 10 * 1024 * 1024) {
     showToast('파일은 10MB 이하여야 합니다.')
     return
   }
-  profilePicture.value = file
+
+  // 이미지를 base64로 읽기
   const reader = new FileReader()
-  reader.onload = () => (previewImage.value = reader.result)
+  reader.onload = async () => {
+    try {
+      // 이미지 압축 (화질 30%)
+      const compressedDataUrl = await compressImage(reader.result)
+      previewImage.value = compressedDataUrl
+
+      // 압축된 이미지를 File 객체로 변환
+      profilePicture.value = dataUrlToFile(compressedDataUrl, file.name)
+      imageState.value = 'updated'
+      dirty.value = true
+    } catch (error) {
+      console.error('이미지 압축 실패:', error)
+      showToast('이미지 처리 중 오류가 발생했습니다.')
+    }
+  }
   reader.readAsDataURL(file)
-  imageState.value = 'updated'
+
   // 같은 파일을 연속 선택해도 change 이벤트가 발생하도록 값 리셋
   if (fileInputRef.value) fileInputRef.value.value = ''
-  dirty.value = true
 }
 
 const validate = () => {

@@ -123,10 +123,10 @@ export function dataUrlToFile(dataUrl, filename = 'image.jpg') {
  * 이미지 압축 (크기 최적화)
  * @param {string} dataUrl
  * @param {number} maxWidth - 최대 너비 (기본 800)
- * @param {number} quality - 품질 0~1 (기본 0.5)
+ * @param {number} quality - 품질 0~1 (기본 0.3)
  * @returns {Promise<string>} 압축된 base64 이미지
  */
-export function compressImage(dataUrl, maxWidth = 800, quality = 0.5) {
+export function compressImage(dataUrl, maxWidth = 800, quality = 0.3) {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {

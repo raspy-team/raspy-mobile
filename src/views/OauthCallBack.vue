@@ -266,6 +266,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
 import regionData from '../assets/regionMap.json'
+import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
 
 const route = useRoute()
 const router = useRouter()
@@ -554,12 +555,22 @@ async function onProfileNext() {
     profileValidating.value = false
   }
 }
-function onImageChange(e) {
+async function onImageChange(e) {
   const file = e.target.files[0]
   if (file && file.size <= 1 * 1024 * 1024 * 10) {
-    avatar.value = file
     const reader = new FileReader()
-    reader.onload = () => (preview.value = reader.result)
+    reader.onload = async () => {
+      try {
+        // 이미지 압축 (화질 30%)
+        const compressedDataUrl = await compressImage(reader.result)
+        preview.value = compressedDataUrl
+        // 압축된 이미지를 File 객체로 변환
+        avatar.value = dataUrlToFile(compressedDataUrl, file.name)
+      } catch (error) {
+        console.error('이미지 압축 실패:', error)
+        alert('이미지 처리 중 오류가 발생했습니다.')
+      }
+    }
     reader.readAsDataURL(file)
   } else {
     alert('파일은 10MB 이하여야합니다')

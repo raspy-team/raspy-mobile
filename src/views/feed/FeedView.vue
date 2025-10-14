@@ -370,17 +370,15 @@
             <div
               class="relative z-10 w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
-              <div class="flex items-center justify-between mb-5">
-                <div class="flex items-center justify-between text-xs text-white/60 mb-2">
-                  <span>규칙 · {{ post.rule?.title || '경기' }}</span>
-                  <button
-                    class="px-3 py-1 rounded-full bg-black/30 border border-white/10 text-white/90 active:scale-95"
-                    @click="showRuleModal = true"
-                  >
-                    자세히 보기
-                  </button>
-                </div>
-                <div class="text-xs text-white/60">{{ post.date }}</div>
+              <div class="mb-5 flex justify-center">
+                <span
+                  class="cursor-pointer px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150 flex items-center gap-2"
+                  @click="showRuleModal = true"
+                  title="규칙 상세 보기"
+                >
+                  <i class="fas fa-book-open text-white/90"></i>
+                  <span class="drop-shadow">{{ post.rule?.title || '경기' }}</span>
+                </span>
               </div>
 
               <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6 mb-4">
@@ -532,7 +530,12 @@
                 class="mt-3 text-[11px] text-white/70 flex items-center justify-between"
               >
                 <span>{{ post.meta.place }}</span>
-                <span>{{ post.meta.time }}</span>
+                <span>
+                  {{ post.meta.time }}
+                  <template v-if="post.date">
+                    · {{ formatFeedDate(post.date) }}
+                  </template>
+                </span>
               </div>
               <!-- 평점 & 리뷰 (경기 정보 박스 아래에 간략하게 표시) -->
               <div
@@ -544,7 +547,6 @@
                 "
                 class="mt-7 space-y-3"
               >
-                <div class="text-xs font-semibold text-white/90 mb-2">경기 리뷰</div>
 
                 <!-- 첫 번째 리뷰 -->
                 <div
@@ -1001,6 +1003,19 @@
 </template>
 
 <script setup>
+// 피드 하단 날짜 포맷: 올해면 월/일만, 아니면 연도 포함
+function formatFeedDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const now = new Date()
+  if (d.getFullYear() === now.getFullYear()) {
+    // 월/일만
+    return `${d.getMonth() + 1}.${d.getDate()}`
+  } else {
+    // 연도 포함
+    return `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`
+  }
+}
 // 세트/시간 정보 아코디언 상태
 const showSetDetails = ref(false)
 import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'

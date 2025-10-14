@@ -48,7 +48,7 @@
         @mouseup="onPanelDragEnd"
       >
         <div class="flex items-center justify-between px-6 h-16 border-b">
-          <span class="text-base font-bold text-gray-800">알림</span>
+    <span class="text-lg font-bold text-gray-800">알림</span>
           <button
             @click="toggleNotificationPanel"
             class="text-gray-400 hover:text-gray-800 text-xl"
@@ -72,16 +72,16 @@
                 </div>
                 <div class="flex-1">
                   <div class="flex items-center gap-1">
-                    <span class="font-medium text-sm text-black">{{ n.title }}</span>
+                    <span class="font-bold text-base text-black">{{ n.title }}</span>
                     <span
                       v-if="!n.isRead"
                       class="inline-block ml-1 w-2 h-2 rounded-full bg-orange-500 align-middle"
                     ></span>
                   </div>
-                  <div class="text-xs text-gray-500 mt-1 truncate">
+                  <div class="text-sm text-gray-500 mt-1 truncate">
                     {{ n.message }}
                   </div>
-                  <div class="text-[10px] text-gray-400 mt-1">
+                  <div class="text-sm text-gray-400 mt-1">
                     {{ formatDate(n.createdAt) }}
                   </div>
                 </div>
@@ -89,7 +89,7 @@
             </ul>
           </template>
           <template v-else>
-            <div class="py-20 text-center text-gray-400 text-sm">알림이 없습니다.</div>
+            <div class="py-20 text-center text-gray-400 text-base">알림이 없습니다.</div>
           </template>
         </div>
       </aside>
@@ -108,7 +108,7 @@
           <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
           <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
         </div>
-        <p class="mt-6 text-white/70 text-sm">피드를 불러오는 중...</p>
+  <p class="mt-6 text-white/70 text-base">피드를 불러오는 중...</p>
       </div>
     </div>
   </div>
@@ -119,14 +119,14 @@
   >
     <div class="flex items-center justify-center h-full">
       <div class="text-center max-w-sm mx-auto p-6">
-        <i class="fas fa-trophy text-4xl text-white/30 mb-4"></i>
-        <h3 class="text-lg font-semibold mb-2">아직 경기가 없어요</h3>
-        <p class="text-white/70 text-sm leading-relaxed">
+  <i class="fas fa-trophy text-lg text-white/30 mb-4"></i>
+  <h3 class="text-lg font-bold mb-2">아직 경기가 없어요</h3>
+  <p class="text-white/70 text-base leading-relaxed">
           친구들과 첫 경기를 시작해보세요!<br />
           새로운 도전이 기다리고 있습니다.
         </p>
         <button
-          class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition-colors"
+          class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full transition-colors"
           @click="$router.push('/games')"
         >
           경기 만들기
@@ -189,7 +189,7 @@
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
-              <div class="text-xl font-extrabold">예정된 경기</div>
+              <div class="text-lg font-bold">예정된 경기</div>
               <div class="text-xs text-blue-300">{{ prevPost.date }}</div>
             </div>
             <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
@@ -198,11 +198,11 @@
                   :src="prevPost.author?.avatar"
                   class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
                 />
-                <div class="text-white font-semibold text-xs">{{ prevPost.author?.name }}</div>
+                <div class="text-base font-normal text-white">{{ prevPost.author?.name }}</div>
                 <div class="text-blue-300 text-xs">주최자</div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-black text-white/90">VS</div>
+                <div class="text-lg font-bold text-white/90">VS</div>
                 <div class="text-xs text-white/60 mt-1">예정</div>
               </div>
               <div class="text-center">
@@ -260,7 +260,7 @@
             class="w-[92%] max-w-xl rounded-2xl p-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl text-white/90"
           >
             <div class="flex items-center justify-between mb-5">
-              <div class="text-xl font-extrabold">예정된 경기</div>
+              <div class="text-lg font-bold">예정된 경기</div>
               <div class="text-xs text-blue-300">{{ nextPost.date }}</div>
             </div>
             <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
@@ -269,11 +269,11 @@
                   :src="nextPost.author?.avatar"
                   class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
                 />
-                <div class="text-white font-semibold text-xs">{{ nextPost.author?.name }}</div>
+                <div class="text-base font-normal text-white">{{ nextPost.author?.name }}</div>
                 <div class="text-blue-300 text-xs">주최자</div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-black text-white/90">VS</div>
+                <div class="text-lg font-bold text-white/90">VS</div>
                 <div class="text-xs text-white/60 mt-1">예정</div>
               </div>
               <div class="text-center">
@@ -351,10 +351,9 @@
                     class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
                   />
                   <div>
-                    <div class="text-white font-semibold text-sm drop-shadow-lg">
+                    <div class="text-base font-normal text-white drop-shadow-lg">
                       {{ post.players?.[0]?.name || post.author?.name }}
                     </div>
-                    <div class="text-white/70 text-xs drop-shadow-lg">{{ post.date }}</div>
                   </div>
                 </div>
               </div>
@@ -383,12 +382,11 @@
             >
               <div class="mb-5 flex justify-center">
                 <span
-                  class="cursor-pointer px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150 flex items-center gap-2"
+                  class="cursor-pointer px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
                   @click="showRuleModal = true"
                   title="규칙 상세 보기"
                 >
-                  <i class="fas fa-book-open text-white/90"></i>
-                  <span class="drop-shadow">{{ post.rule?.title || '경기' }}</span>
+                  {{ post.rule?.title || '경기' }}
                 </span>
               </div>
 
@@ -404,13 +402,13 @@
                           : 'border-white/20'
                       "
                     />
-                    <div class="text-white font-semibold text-sm truncate">
+                    <div class="text-base font-normal text-white truncate">
                       {{ post.players[0].name }}
                     </div>
                   </div>
                   <div class="text-center">
                     <div
-                      class="font-extrabold text-white tracking-wide leading-none text-[9.5vw] sm:text-6xl whitespace-nowrap"
+                      class="font-bold text-white tracking-wide leading-none text-lg whitespace-nowrap"
                     >
                       {{ post.result.scoreA }}<span class="text-white/50"> : </span
                       >{{ post.result.scoreB }}

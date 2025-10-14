@@ -25,10 +25,10 @@
                     </div>
                   </div>
                   <div>
-                    <span class="text-base font-extrabold text-gray-900 truncate block">
+                    <span class="text-lg font-bold text-gray-900 truncate block">
                       {{ game.rule.ruleTitle }}
                     </span>
-                    <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+                    <div class="flex gap-1 items-center mt-1 text-sm text-orange-500 font-normal">
                       {{ game.rule.majorCategory }}
                       <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
                       <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
@@ -57,7 +57,7 @@
 
                 <span
                   v-if="game.status === 'IN_PROGRESS' && game.startedAt"
-                  class="ml-3 text-orange-500 font-black animate-pulse text-sm"
+                  class="ml-3 text-orange-500 font-bold animate-pulse text-sm"
                 >
                   {{ elapsedTimes[game.id] }}
                 </span>
@@ -77,33 +77,31 @@
                   class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white"
                 />
                 <span
-                  class="absolute bottom-0 right-0 bg-orange-400 text-xs text-white font-bold px-1.5 py-0.5 rounded-lg shadow"
+                  class="absolute bottom-0 right-0 bg-orange-400 text-sm text-white font-bold px-1.5 py-0.5 rounded-lg shadow"
                   >나</span
                 >
               </div>
-              <div class="text-gray-700 font-[600] text-sm">
-                <span :class="game.myId == game.championId ? 'text-yellow-500 drop-shadow font-extrabold' : 'text-gray-700 font-[600]'">
-                  {{ game.myNickname }}
-                </span>
+              <div class="text-gray-700 font-normal text-base">
+                {{ game.myNickname }}
               </div>
-              <div class="flex gap-2 mt-2 font-bold text-xs text-neutral-700 tracking-wider">
+              <div class="flex gap-2 mt-2 font-bold text-sm text-neutral-700 tracking-wider">
                 <div>
-                  <span class="block text-gray-400 font-medium">승</span>
+                  <span class="block text-gray-400 font-normal">승</span>
                   <span class="text-base text-orange-500">{{ game.myStatistics.wins }}</span>
                 </div>
                 <div>
-                  <span class="block text-gray-400 font-medium">무</span>
+                  <span class="block text-gray-400 font-normal">무</span>
                   <span class="text-base text-blue-400">{{ game.myStatistics.draws }}</span>
                 </div>
                 <div>
-                  <span class="block text-gray-400 font-medium">패</span>
+                  <span class="block text-gray-400 font-normal">패</span>
                   <span class="text-base text-red-400">{{ game.myStatistics.losses }}</span>
                 </div>
               </div>
             </div>
 
             <div class="vs-area flex flex-col items-center justify-center mx-3">
-              <div class="text-lg font-black tracking-tight text-orange-500 mb-1">VS</div>
+              <div class="text-lg font-bold tracking-tight text-orange-500 mb-1">VS</div>
             </div>
 
             <div
@@ -118,26 +116,24 @@
                   :src="game.opponentProfileUrl"
                   class="w-14 h-14 rounded-full border-2 border-gray-200 shadow bg-gradient-to-tr from-gray-100 to-blue-100"
                 />
-                <div class="text-gray-700 font-[600] text-sm">
-                  <span :class="game.opponentId == game.championId ? 'text-yellow-500 drop-shadow font-extrabold' : 'text-gray-700 font-[600]'">
-                    {{ game.opponentNickname }}
-                  </span>
+                <div class="text-gray-700 font-normal text-base">
+                  {{ game.opponentNickname }}
                 </div>
-                <div class="flex gap-2 mt-0 font-bold text-xs text-neutral-700 tracking-wider">
+                <div class="flex gap-2 mt-0 font-bold text-sm text-neutral-700 tracking-wider">
                   <div>
-                    <span class="block text-gray-400 font-medium">승</span>
+                    <span class="block text-gray-400 font-normal">승</span>
                     <span class="text-base text-orange-500">
                       {{ game.opponentStatistics?.wins ?? '-' }}
                     </span>
                   </div>
                   <div>
-                    <span class="block text-gray-400 font-medium">무</span>
+                    <span class="block text-gray-400 font-normal">무</span>
                     <span class="text-base text-blue-400">
                       {{ game.opponentStatistics?.draws ?? '-' }}
                     </span>
                   </div>
                   <div>
-                    <span class="block text-gray-400 font-medium">패</span>
+                    <span class="block text-gray-400 font-normal">패</span>
                     <span class="text-base text-red-400">
                       {{ game.opponentStatistics?.losses ?? '-' }}
                     </span>
@@ -757,20 +753,6 @@ function statusColor(s) {
   box-shadow: 0 2px 6px 0 rgba(251, 146, 60, 0.018);
   padding: 17px 14px 13px 14px;
 }
-.stat-label {
-  color: #b3b3b3;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  margin-right: 0px;
-}
-.stat-num {
-  font-size: 1.17rem;
-  font-weight: 900;
-  margin: 0 6px 0 2px;
-  color: #222;
-  letter-spacing: -0.01em;
-}
 .vs-area {
   min-width: 66px;
   display: flex;
@@ -865,6 +847,7 @@ function statusColor(s) {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

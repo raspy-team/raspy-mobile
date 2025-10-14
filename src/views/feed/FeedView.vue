@@ -375,7 +375,7 @@
 
           <!-- 2. 경기 정보 (결과 + 규칙 접기/펼치기) -->
           <section class="w-screen shrink-0 h-full relative flex items-center justify-center">
-            <div class="absolute inset-0 bg-gradient-to-b from-indigo-900 via-black to-black" />
+            <div class="absolute inset-0 bg-black" />
             <div class="ambient-overlay" />
 
             <div
@@ -611,18 +611,15 @@
             v-if="post.type === 'game' && post.isCompleted && currentRankingStatus"
             class="w-screen shrink-0 h-full relative p-5 flex items-center justify-center"
           >
-            <div
-              class="absolute inset-0 bg-gradient-to-br from-pink-600 via-rose-600 to-orange-600"
-            />
+            <div class="absolute inset-0 bg-black" />
             <div class="ambient-overlay" />
             <div class="relative z-10 max-w-xl w-full">
               <!-- 랭킹 데이터가 있는 경우 -->
               <template v-if="currentRankingStatus === 'available' && currentRanking.length > 0">
                 <div class="flex items-center justify-between mb-2">
-                  <div class="text-xl font-extrabold">게임 랭킹</div>
+                  <div class="text-xl font-extrabold">규칙 랭킹</div>
                   <div class="text-xs text-white/70">총 {{ currentRanking.length }}명</div>
                 </div>
-                <div class="text-[11px] text-white/60 mb-2">이 게임으로 순위가 변동됐어요</div>
                 <div
                   class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md max-h-[70vh] overflow-auto no-scrollbar touch-scroll"
                   @touchstart.stop

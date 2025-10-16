@@ -10,7 +10,7 @@
     </button>
     <span class="ml-3 text-base font-bold text-gray-900">경기 목록</span>
     <button
-      @click="$router.push('/create-game')"
+      @click="$router.push('/gamecreatewizard')"
       class="ml-auto px-4 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
       aria-label="경기 생성"
     >

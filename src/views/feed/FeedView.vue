@@ -386,7 +386,8 @@
                   @click="showRuleModal = true"
                   title="규칙 상세 보기"
                 >
-                  {{ post.rule?.title || '경기' }}
+                  <i class="fas fa-book-open text-white/90"></i>
+                  <span class="drop-shadow">{{ post.rule?.ruleTitle || '-' }}</span>
                 </span>
               </div>
 
@@ -404,6 +405,14 @@
                     />
                     <div class="text-base font-normal text-white truncate">
                       {{ post.players[0].name }}
+                    </div>
+                    <div
+                      v-if="post.ruleStatisticsList && post.ruleStatisticsList[0]"
+                      class="text-xs text-white/60 mt-1"
+                    >
+                      {{ post.ruleStatisticsList[0].wins }}승
+                      {{ post.ruleStatisticsList[0].losses }}패
+                      {{ post.ruleStatisticsList[0].draws }}무
                     </div>
                   </div>
                   <div class="text-center">
@@ -426,6 +435,14 @@
                     />
                     <div class="text-white font-semibold text-sm truncate">
                       {{ post.players[1].name }}
+                    </div>
+                    <div
+                      v-if="post.ruleStatisticsList && post.ruleStatisticsList[1]"
+                      class="text-xs text-white/60 mt-1"
+                    >
+                      {{ post.ruleStatisticsList[1].wins }}승
+                      {{ post.ruleStatisticsList[1].losses }}패
+                      {{ post.ruleStatisticsList[1].draws }}무
                     </div>
                   </div>
                 </div>
@@ -542,9 +559,7 @@
                 <span>{{ post.meta.place }}</span>
                 <span>
                   {{ post.meta.time }}
-                  <template v-if="post.date">
-                    · {{ formatFeedDate(post.date) }}
-                  </template>
+                  <template v-if="post.date"> · {{ formatFeedDate(post.date) }} </template>
                 </span>
               </div>
               <!-- 평점 & 리뷰 (경기 정보 박스 아래에 간략하게 표시) -->
@@ -557,7 +572,6 @@
                 "
                 class="mt-7 space-y-3"
               >
-
                 <!-- 첫 번째 리뷰 -->
                 <div
                   v-if="post.reviews[0]?.author"
@@ -733,7 +747,7 @@
       <!-- Right action buttons column -->
       <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
         <button
-          v-if="post.type === 'game' && post.isCompleted"
+          v-if="post.type === 'game' && post.isCompleted && !post.isMyGame"
           @click="toggleLike"
           class="flex flex-col items-center active:scale-95 transition"
         >
@@ -747,7 +761,7 @@
           </span>
         </button>
         <button
-          v-if="post.type === 'game' && post.isCompleted"
+          v-if="post.type === 'game' && post.isCompleted && !post.isMyGame"
           @click="onDoWithMe"
           class="flex flex-col items-center active:scale-95 transition"
         >

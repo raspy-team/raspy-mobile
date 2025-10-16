@@ -241,8 +241,6 @@ async function submitReport() {
   margin-bottom: 0.15em;
   transition: background 0.16s;
 }
-.desc-block.expanded {
-}
 .desc-text {
   font-size: 15px;
   color: #363636;
@@ -282,6 +280,7 @@ async function submitReport() {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

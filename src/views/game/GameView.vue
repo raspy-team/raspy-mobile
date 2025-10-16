@@ -6,7 +6,7 @@
     <div class="flex gap-2 pt-3">
       <button
         @click="router.push('/rules')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-lg font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -28,11 +28,11 @@
             stroke-linecap="round"
           />
         </svg>
-        <span>규칙</span>
+        <span class="text-base font-bold">규칙</span>
       </button>
       <button
         @click="router.push('/game-list')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-lg font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -48,7 +48,7 @@
             stroke-linecap="round"
           />
         </svg>
-        <span>경기</span>
+        <span class="text-base font-bold">경기</span>
       </button>
     </div>
 
@@ -62,7 +62,7 @@
         <div class="flex justify-between items-start">
           <div class="space-y-2 w-full">
             <div class="mb-1 flex">
-              <span class="font-semibold text-gray-300 block w-32 h-5 bg-gray-200 rounded"></span>
+              <span class="font-bold text-gray-300 block w-32 h-5 bg-gray-200 rounded"></span>
               <span class="flex ml-3 w-6 h-6 bg-gray-200 rounded-full"></span>
             </div>
             <div class="text-xs flex gap-1 items-center">
@@ -71,7 +71,7 @@
               <span class="block w-12 h-3 bg-gray-200 rounded"></span>
             </div>
           </div>
-          <span class="text-xs font-semibold px-2 py-2 rounded-full w-[5rem] bg-gray-200"></span>
+          <span class="text-xs font-bold px-2 py-2 rounded-full w-[5rem] bg-gray-200"></span>
         </div>
         <div class="w-full h-10 bg-gray-200 rounded-[5px]"></div>
       </div>
@@ -89,7 +89,7 @@
             getCardClass(game),
           ]"
         >
-          <!-- 규칙(게임명, 카테고리) 정보 최상단 -->
+          <!-- 규칙(게임명, 카테고리) 정보 최상단 + 타입/상태 라벨 우측 배치 -->
           <div class="flex justify-between items-start mb-2" @click="game.showRuleDetail = true">
             <div class="min-w-0 flex items-center gap-2">
               <div>
@@ -100,71 +100,73 @@
                 />
               </div>
               <div>
-                <span class="text-base font-extrabold text-gray-900 truncate block">
+                <span class="text-base font-bold text-gray-900 truncate block">
                   {{ game.rule.ruleTitle }}
                 </span>
-                <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
+                <div class="flex gap-1 items-center mt-1 text-sm text-orange-500 font-normal">
                   {{ game.rule.majorCategory }}
                   <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
                   <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- 타입/상태 라벨 아래로 이동 -->
-          <div class="flex items-center gap-2 mb-2">
-            <span :class="['text-xs font-semibold', getTypeTextClass(game)]">
-              {{ getTypeLabel(game) }}
-            </span>
-            <div class="h-3 w-px bg-gray-300"></div>
-            <span class="text-xs font-semibold" :class="getStatusClass(game)">
-              {{ getStatusText(game) }}
-            </span>
-          </div>
-
-          <!-- 도전자 버튼 및 모달 -->
-          <div class="mb-2">
-            <!-- Owner vs Opponent Profile Row -->
-            <div class="flex justify-between items-end mt-3 mb-1">
-              <!-- Owner -->
-              <div class="flex flex-col items-center flex-1">
-                <img
-                  :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
-                  alt="Owner Profile"
-                />
-                <span
-                  class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center"
-                  >{{ game.ownerNickname || game.myNickname }}</span
-                >
-              </div>
-              <!-- VS -->
-              <div class="flex flex-col items-center flex-1">
-                <span class="text-lg font-bold text-gray-400 mb-2">VS</span>
-              </div>
-              <!-- Opponent -->
-              <div class="flex flex-col items-center flex-1">
-                <img
-                  v-if="getOpponentProfileUrl(game)"
-                  :src="getOpponentProfileUrl(game)"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
-                  alt="Opponent Profile"
-                />
-                <div
-                  v-else
-                  class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
-                >
-                  <i class="fas fa-user text-2xl text-gray-400"></i>
-                </div>
-                <span
-                  class="mt-1 text-xs font-semibold text-gray-700 truncate max-w-[4.5rem] text-center"
-                >
-                  {{ getOpponentNickname(game) }}
-                </span>
-              </div>
+            <!-- 타입/상태 라벨 우측 배치 -->
+            <div class="flex flex-col items-end gap-1 ml-2">
+              <span :class="['text-sm font-bold', getTypeTextClass(game)]">
+                {{ getTypeLabel(game) }}
+              </span>
+              <span class="text-sm font-bold" :class="getStatusClass(game)">
+                {{ getStatusText(game) }}
+              </span>
             </div>
           </div>
+
+ <div class="mb-2">
+  <!-- Owner vs Opponent Profile Row -->
+  <div class="flex justify-between items-center mt-3 mb-1">
+    <!-- Owner -->
+    <div class="flex flex-col items-center flex-1">
+      <img
+        :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
+        class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
+        alt="Owner Profile"
+      />
+      <span
+        class="mt-1 text-sm font-bold text-gray-700 truncate max-w-[4.5rem] text-center"
+      >
+        {{ game.ownerNickname || game.myNickname }}
+      </span>
+    </div>
+
+    <!-- VS -->
+    <div class="flex flex-col items-center flex-1 justify-center">
+      <span class="text-3xl font-extrabold text-gray-400 leading-none">
+        VS
+      </span>
+    </div>
+
+    <!-- Opponent -->
+    <div class="flex flex-col items-center flex-1">
+      <img
+        v-if="getOpponentProfileUrl(game)"
+        :src="getOpponentProfileUrl(game)"
+        class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
+        alt="Opponent Profile"
+      />
+      <div
+        v-else
+        class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
+      >
+        <i class="fas fa-user text-2xl text-gray-400"></i>
+      </div>
+      <span
+        class="mt-1 text-sm font-normal text-gray-700 truncate max-w-[4.5rem] text-center"
+      >
+        {{ getOpponentNickname(game) }}
+      </span>
+    </div>
+  </div>
+</div>
 
           <!-- 도전자(신청자) 목록 모달 -->
           <div
@@ -174,13 +176,51 @@
             class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
           >
             <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
+               <h2 class="text-lg font-bold mb-4 text-gray-900">생성자</h2>
+              <!-- 신청한 게임 소유자 정보 상단 렌더링 -->
+              <template v-if="selectedApplicantsGame.type === 'sent'">
+                <div class="p-3 bg-gray-50 rounded-xl flex items-center gap-3 mb-4">
+                  <img
+                    :src="selectedApplicantsGame.ownerProfileUrl || selectedApplicantsGame.myProfileUrl || '/default.png'"
+                    class="w-10 h-10 rounded-full object-cover"
+                    alt="Owner Profile"
+                  />
+                  <div class="space-y-1">
+                    <p class="text-sm font-bold flex items-center gap-2 mb-0"
+                      :class="selectedApplicantsGame.championId == (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId) ? 'text-yellow-500' : 'text-gray-800'"
+                    >
+                      {{ selectedApplicantsGame.ownerNickname || selectedApplicantsGame.myNickname }}
+                    </p>
+                    <p class="text-xs text-gray-500 mb-0">
+                      {{ selectedApplicantsGame.ownerStatistics?.wins }}승
+                      {{ selectedApplicantsGame.ownerStatistics?.draws }}무
+                      {{ selectedApplicantsGame.ownerStatistics?.losses }}패 · 승률
+                      {{ getWinRate(selectedApplicantsGame.ownerStatistics || { wins: 0, draws: 0, losses: 0 }) }}%
+                    </p>
+                    <p class="text-xs flex items-center gap-1 mb-0">
+                      <i
+                        :class="[
+                          (selectedApplicantsGame.ownerStatistics?.manner || 4.5) >= 4
+                            ? 'fas fa-face-smile text-green-500'
+                            : (selectedApplicantsGame.ownerStatistics?.manner || 4.5) >= 2
+                              ? 'fas fa-face-meh text-orange-500'
+                              : (selectedApplicantsGame.ownerStatistics?.manner || 4.5) > 0
+                                ? 'fas fa-face-frown text-red-500'
+                                : 'fas fa-user-slash text-gray-400',
+                        ]"
+                      ></i>
+                      {{ (selectedApplicantsGame.ownerStatistics?.manner || 4.5).toFixed(1) }}
+                    </p>
+                  </div>
+                </div>
+              </template>
               <button
                 @click.stop="closeApplicantsModal"
                 class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
               >
                 <i class="fas fa-times"></i>
               </button>
-              <h2 class="text-lg font-bold mb-4 text-gray-900">도전자 목록</h2>
+              <h2 class="text-lg font-bold mb-4 text-gray-900">도전자</h2>
               <div
                 v-if="
                   selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0
@@ -199,11 +239,11 @@
                         class="w-10 h-10 rounded-full object-cover"
                       />
                       <div class="space-y-1">
-                        <p class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                        <p
+                          class="text-sm font-bold flex items-center gap-2"
+                          :class="selectedApplicantsGame.championId == user.userId ? 'text-yellow-500' : 'text-gray-800'"
+                        >
                           {{ user.applicantNickname }}
-                          <champion-badge
-                            v-if="selectedApplicantsGame.championId == user.userId"
-                          ></champion-badge>
                         </p>
                         <p class="text-xs text-gray-500">
                           {{ user.applicantGameStatisticsDTO.wins }}승
@@ -249,7 +289,6 @@
             class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
           >
             <div class="flex items-center gap-2">
-              <i class="fas w-3 fa-map-marker-alt text-orange-500"></i>
               <span>{{
                 !game.matchLocation || game.matchLocation.trim() === ''
                   ? '장소 미정'
@@ -257,43 +296,12 @@
               }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <i class="far w-3 fa-calendar text-orange-500"></i>
               <span>{{ formatDate(game.matchDate) }}</span>
             </div>
           </div>
 
           <!-- 신청한 게임: 소유자 정보 -->
           <div v-if="game.type === 'sent'" class="pt-3">
-            <div class="flex justify-between items-center">
-              <div>
-                <p class="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                  {{ game.ownerNickname || game.myNickname }}
-                  <span class="text-xs flex items-center gap-1">
-                    <i
-                      :class="[
-                        (game.ownerStatistics.manner || 4.5) >= 4
-                          ? 'fas fa-face-smile text-green-500'
-                          : (game.ownerStatistics.manner || 4.5) >= 2
-                            ? 'fas fa-face-meh text-orange-500'
-                            : (game.ownerStatistics.manner || 4.5) > 0
-                              ? 'fas fa-face-frown text-red-500'
-                              : 'fas fa-user-slash text-gray-400',
-                      ]"
-                    ></i>
-                    {{ (game.ownerStatistics.manner || 4.5).toFixed(1) }}
-                  </span>
-                </p>
-                <p class="text-xs text-gray-500">
-                  {{ game.ownerStatistics.wins }}승 {{ game.ownerStatistics.draws }}무
-                  {{ game.ownerStatistics.losses }}패 · 승률 {{ getWinRate(game.ownerStatistics) }}%
-                </p>
-              </div>
-              <div>
-                <champion-badge
-                  v-if="game.championId == (game.ownerId || game.myId)"
-                ></champion-badge>
-              </div>
-            </div>
             <div class="flex gap-2 pt-3">
               <button
                 v-if="game.gameStatus === 'IN_PROGRESS'"
@@ -545,7 +553,6 @@ import { useRouter } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
 import FooterNav from '../../components/FooterNav.vue'
-import ChampionBadge from '../../components/ChampionBadge.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
@@ -621,7 +628,7 @@ onMounted(async () => {
 })
 
 function formatDate(dateStr) {
-  if (!dateStr) return '미정'
+  if (!dateStr) return '시간 미정'
   const date = new Date(dateStr)
   return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }

@@ -1,16 +1,30 @@
 <template>
-  <!-- Floating + button at bottom right -->
-  <button
-    class="fixed bottom-8 right-8 z-[99] bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-xl w-14 h-14 flex items-center justify-center text-3xl font-bold transition"
-    aria-label="추가"
-    @click="onPlusClick"
-  >
-    <span>+</span>
-  </button>
-  <!-- 헤더 -->
-  <HeaderComp :has-referer="true" title="규칙 탐색" class="z-[5000]" />
-  <!-- 항상 상단에 검색/필터 -->
+  <!-- 헤더: 뒤로가기, 내 규칙, 규칙 생성(+) 버튼 -->
+  <div class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4">
+    <button
+      @click="$router.push('/game')"
+      class="text-black text-lg px-2 py-1 rounded hover:bg-gray-100 transition"
+      aria-label="뒤로가기"
+    >
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button
+      @click="onMyRulesClick"
+      class="ml-auto px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
+    >
+      내 규칙
+    </button>
+    <button
+      @click="onPlusClick"
+      class="ml-2 px-4 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
+      aria-label="규칙 생성"
+    >
+      <span class="text-xl font-bold">+</span>
+    </button>
+  </div>
+  <!-- 규칙 리스트가 표시될 때만 검색/필터 -->
   <nav
+    v-if="major && minor"
     class="bg-white border-b border-gray-100 px-4 pb-3 flex items-center mt-14 pt-5 gap-3 raspy-top sticky top-0 z-50"
   >
     <input
@@ -23,6 +37,13 @@
       autocomplete="off"
       style="margin-right: 12px"
     />
+    <button
+      @click="onSubmitSearch"
+      class="ml-1 px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition flex items-center justify-center"
+      aria-label="검색"
+    >
+      <i class="fas fa-search"></i>
+    </button>
     <div class="relative flex items-center gap-2">
       <button
         @click="toggleSort"
@@ -48,12 +69,6 @@
           {{ o.label }}
         </li>
       </ul>
-      <button
-        @click="onMyRulesClick"
-        class="ml-2 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
-      >
-        내 규칙
-      </button>
     </div>
   </nav>
 
@@ -167,14 +182,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api from '../api/api'
-import HeaderComp from '../components/HeaderComp.vue'
 import RuleCard from '../components/RuleCard.vue'
 
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// const showHeader = ref(true)
 const showScrollTop = ref(false)
 const majors = ref([])
 const minors = ref([])

@@ -11,7 +11,7 @@
         @click.stop
       >
         <!-- 상단 헤더 + 만든이 심플표시 -->
-        <div class="px-4 pt-6 pb-3 border-b flex justify-between items-start">
+        <div class="px-4 pt-6 pb-3 border-b flex justify-between items-start bg-gray-50 rounded-t-xl">
           <div class="min-w-0 flex items-center justify-start gap-2">
             <div>
               <img
@@ -21,40 +21,49 @@
               />
             </div>
             <div>
-              <div class="font-bold text-lg text-gray-900 mb-1 truncate">
+              <div class="text-base font-extrabold text-gray-900 mb-1 truncate">
                 {{ rule.ruleTitle }}
               </div>
-              <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
+              <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
                 {{ rule.majorCategory }}
-                <span class="mx-1 text-orange-500">&gt;</span>
-                {{ rule.minorCategory }}
+                <span v-if="rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+                <span v-if="rule.minorCategory">{{ rule.minorCategory }}</span>
               </div>
             </div>
           </div>
-          <!-- 만든이: 심플 버전 -->
-          <div
-            v-if="rule.createdBy"
-            class="flex gap-1 flex-col items-start cursor-pointer mt-2 mr-4"
-            @click="goProfile(rule.createdBy.id)"
-            title="만든이 프로필로 이동"
-          >
-            <div class="flex items-center">
-              <img
-                :src="rule.createdBy.profile?.profilePicture || defaultProfile"
-                class="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 object-cover"
-                alt="프로필"
-                loading="lazy"
-              />
-              <span class="ml-1 text-xs flex flex-col max-w-[70px] truncate">
-                <span class="text-[9px] text-gray-400 font-semibold mr-1">규칙 만든이</span>
-                <span class="font-semibold text-gray-700"> {{ rule.createdBy.nickname }}</span>
-              </span>
+          <div class="flex items-center gap-2">
+            <!-- 만든이: 심플 버전 -->
+            <div
+              v-if="rule.createdBy"
+              class="flex gap-1 flex-col items-start cursor-pointer mt-2 mr-2"
+              @click="goProfile(rule.createdBy.id)"
+              title="만든이 프로필로 이동"
+            >
+              <div class="flex items-center">
+                <img
+                  :src="rule.createdBy.profile?.profilePicture || defaultProfile"
+                  class="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 object-cover"
+                  alt="프로필"
+                  loading="lazy"
+                />
+                <span class="ml-1 text-xs flex flex-col max-w-[70px] truncate">
+                  <span class="font-semibold text-gray-700"> {{ rule.createdBy.nickname }}</span>
+                </span>
+              </div>
             </div>
+            <!-- 닫기 버튼 -->
+            <button
+              @click="close"
+              class="text-gray-500 hover:text-gray-700 z-10 ml-2 mt-2 text-2xl w-10 h-10 flex items-center justify-center"
+              aria-label="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
 
         <!-- 내용 (스크롤) -->
-        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+  <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5 bg-gray-50">
           <ModalSection label="1. 경기 목표" :value="rule.ruleGoal" />
           <ModalSection label="2. 점수 정의" :value="rule.ruleScoreDefinition" />
           <ModalSection label="3. 경기 준비물" :value="rule.rulePreparation" />
@@ -83,14 +92,6 @@
           </div>
         </div>
 
-        <!-- 닫기 버튼 -->
-        <button
-          @click="close"
-          class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
-          aria-label="Close"
-        >
-          ✕
-        </button>
       </div>
     </div>
   </transition>
@@ -123,12 +124,12 @@ const ModalSection = defineComponent({
     return () =>
       props.value && props.value.trim() !== ''
         ? h('div', [
-            h('div', { class: 'font-bold text-sm text-gray-800 mb-1' }, props.label),
+            h('div', { class: 'text-xs text-orange-500 font-medium mb-1' }, props.label),
             h(
               'pre',
               {
                 class:
-                  'whitespace-pre-line text-[15px] text-gray-700 leading-snug bg-orange-50/60 rounded-lg p-3 border border-orange-50 mb-1 overflow-x-auto',
+                  'whitespace-pre-line text-sm text-gray-600 leading-relaxed bg-white rounded-xl p-3 border border-gray-100 mb-1 overflow-x-auto',
                 style: 'max-height:180px',
               },
               props.value,

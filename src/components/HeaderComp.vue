@@ -3,10 +3,7 @@
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14">
-        <router-link v-if="props.hasReferer != true" to="/" class="font-bold text-[#f97316]">
-          <span class="RASPY mx-1">Match</span>
-        </router-link>
-        <button v-else @click="goBack" class="text-black text-lg">
+        <button v-if="props.hasReferer" @click="goBack" class="text-black text-lg">
           <i class="fas fa-chevron-left"></i>
         </button>
       </div>

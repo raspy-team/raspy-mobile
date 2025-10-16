@@ -121,52 +121,50 @@
             </div>
           </div>
 
- <div class="mb-2">
-  <!-- Owner vs Opponent Profile Row -->
-  <div class="flex justify-between items-center mt-3 mb-1">
-    <!-- Owner -->
-    <div class="flex flex-col items-center flex-1">
-      <img
-        :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
-        class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
-        alt="Owner Profile"
-      />
-      <span
-        class="mt-1 text-sm font-bold text-gray-700 truncate max-w-[4.5rem] text-center"
-      >
-        {{ game.ownerNickname || game.myNickname }}
-      </span>
-    </div>
+          <div class="mb-2">
+            <!-- Owner vs Opponent Profile Row -->
+            <div class="flex justify-between items-center mt-3 mb-1">
+              <!-- Owner -->
+              <div class="flex flex-col items-center flex-1">
+                <img
+                  :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
+                  alt="Owner Profile"
+                />
+                <span
+                  class="mt-1 text-sm font-bold text-gray-700 truncate max-w-[4.5rem] text-center"
+                >
+                  {{ game.ownerNickname || game.myNickname }}
+                </span>
+              </div>
 
-    <!-- VS -->
-    <div class="flex flex-col items-center flex-1 justify-center">
-      <span class="text-3xl font-extrabold text-gray-400 leading-none">
-        VS
-      </span>
-    </div>
+              <!-- VS -->
+              <div class="flex flex-col items-center flex-1 justify-center">
+                <span class="text-3xl font-extrabold text-gray-400 leading-none"> VS </span>
+              </div>
 
-    <!-- Opponent -->
-    <div class="flex flex-col items-center flex-1">
-      <img
-        v-if="getOpponentProfileUrl(game)"
-        :src="getOpponentProfileUrl(game)"
-        class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
-        alt="Opponent Profile"
-      />
-      <div
-        v-else
-        class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
-      >
-        <i class="fas fa-user text-2xl text-gray-400"></i>
-      </div>
-      <span
-        class="mt-1 text-sm font-normal text-gray-700 truncate max-w-[4.5rem] text-center"
-      >
-        {{ getOpponentNickname(game) }}
-      </span>
-    </div>
-  </div>
-</div>
+              <!-- Opponent -->
+              <div class="flex flex-col items-center flex-1">
+                <img
+                  v-if="getOpponentProfileUrl(game)"
+                  :src="getOpponentProfileUrl(game)"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
+                  alt="Opponent Profile"
+                />
+                <div
+                  v-else
+                  class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
+                >
+                  <i class="fas fa-user text-2xl text-gray-400"></i>
+                </div>
+                <span
+                  class="mt-1 text-sm font-normal text-gray-700 truncate max-w-[4.5rem] text-center"
+                >
+                  {{ getOpponentNickname(game) }}
+                </span>
+              </div>
+            </div>
+          </div>
 
           <!-- 도전자(신청자) 목록 모달 -->
           <div
@@ -176,26 +174,46 @@
             class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
           >
             <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
-               <h2 class="text-lg font-bold mb-4 text-gray-900">생성자</h2>
+              <h2 class="text-lg font-bold mb-4 text-gray-900">생성자</h2>
               <!-- 신청한 게임 소유자 정보 상단 렌더링 -->
               <template v-if="selectedApplicantsGame.type === 'sent'">
                 <div class="p-3 bg-gray-50 rounded-xl flex items-center gap-3 mb-4">
                   <img
-                    :src="selectedApplicantsGame.ownerProfileUrl || selectedApplicantsGame.myProfileUrl || '/default.png'"
+                    :src="
+                      selectedApplicantsGame.ownerProfileUrl ||
+                      selectedApplicantsGame.myProfileUrl ||
+                      '/default.png'
+                    "
                     class="w-10 h-10 rounded-full object-cover"
                     alt="Owner Profile"
                   />
                   <div class="space-y-1">
-                    <p class="text-sm font-bold flex items-center gap-2 mb-0"
-                      :class="selectedApplicantsGame.championId == (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId) ? 'text-yellow-500' : 'text-gray-800'"
+                    <p
+                      class="text-sm font-bold flex items-center gap-2 mb-0"
+                      :class="
+                        selectedApplicantsGame.championId ==
+                        (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId)
+                          ? 'text-yellow-500'
+                          : 'text-gray-800'
+                      "
                     >
-                      {{ selectedApplicantsGame.ownerNickname || selectedApplicantsGame.myNickname }}
+                      {{
+                        selectedApplicantsGame.ownerNickname || selectedApplicantsGame.myNickname
+                      }}
                     </p>
                     <p class="text-xs text-gray-500 mb-0">
                       {{ selectedApplicantsGame.ownerStatistics?.wins }}승
                       {{ selectedApplicantsGame.ownerStatistics?.draws }}무
                       {{ selectedApplicantsGame.ownerStatistics?.losses }}패 · 승률
-                      {{ getWinRate(selectedApplicantsGame.ownerStatistics || { wins: 0, draws: 0, losses: 0 }) }}%
+                      {{
+                        getWinRate(
+                          selectedApplicantsGame.ownerStatistics || {
+                            wins: 0,
+                            draws: 0,
+                            losses: 0,
+                          },
+                        )
+                      }}%
                     </p>
                     <p class="text-xs flex items-center gap-1 mb-0">
                       <i
@@ -241,7 +259,11 @@
                       <div class="space-y-1">
                         <p
                           class="text-sm font-bold flex items-center gap-2"
-                          :class="selectedApplicantsGame.championId == user.userId ? 'text-yellow-500' : 'text-gray-800'"
+                          :class="
+                            selectedApplicantsGame.championId == user.userId
+                              ? 'text-yellow-500'
+                              : 'text-gray-800'
+                          "
                         >
                           {{ user.applicantNickname }}
                         </p>
@@ -343,7 +365,7 @@
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"
                 @click.stop="openApplicantsModal(game)"
               >
-                도전자
+                도전자 {{ game.applicants.length }}명
               </button>
             </div>
           </div>
@@ -382,7 +404,7 @@
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"
                 @click.stop="openApplicantsModal(game)"
               >
-                도전자
+                도전자 {{ game.applicants.length }}명
               </button>
             </div>
           </div>

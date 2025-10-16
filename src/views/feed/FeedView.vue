@@ -751,8 +751,8 @@
           @click="onDoWithMe"
           class="flex flex-col items-center active:scale-95 transition"
         >
-          <span class="w-8 h-8" v-html="icons.handshake"></span>
-          <span class="text-[10px] mt-1">나랑도 해</span>
+          <span class="w-8 h-8" v-html="icons.trophy"></span>
+          <span class="text-[10px] mt-1">도전</span>
         </button>
         <button @click="onComment" class="flex flex-col items-center active:scale-95 transition">
           <span class="w-8 h-8" v-html="icons.comment"></span>

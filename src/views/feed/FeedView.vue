@@ -966,41 +966,42 @@
     class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
     @click="closePlayerSelectModal"
   >
-    <div class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto" @click.stop>
-      <div class="flex items-center justify-between p-6 border-b">
-        <h3 class="text-lg font-bold text-gray-900">플레이어 선택</h3>
-        <button
-          @click="closePlayerSelectModal"
-          class="text-gray-400 hover:text-gray-600 transition"
-        >
-          <i class="fas fa-times text-xl"></i>
-        </button>
-      </div>
-
-      <div class="p-6">
-        <p class="text-sm text-gray-600 mb-4">누구에게 나랑도해 요청을 보낼까요?</p>
+    <div class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto relative" @click.stop>
+      <button
+        @click="closePlayerSelectModal"
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2 "
+        style="z-index:10;"
+        aria-label="닫기"
+      >
+        <i class="fas fa-times text-xl"></i>
+      </button>
+      <div class="p-6 pt-8">
+        <p class="text-sm text-gray-600 mb-4">내가 도전할 상대는?</p>
         <div class="space-y-3">
-          <button
+          <div
             v-for="player in post?.players || []"
             :key="player.id"
-            @click="sendPlayWithMeRequest(player)"
-            class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 hover:border-orange-300 hover:bg-orange-50 transition group"
+            class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 transition group select-none"
           >
             <img
               :src="player.avatar || '/assets/default.png'"
               :alt="player.name"
-              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 group-hover:border-orange-300 transition"
+              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 transition"
             />
             <div class="flex-1 text-left">
-              <div class="font-semibold text-gray-900 group-hover:text-orange-600 transition">
+              <div class="font-semibold text-gray-900 transition">
                 {{ player.name }}
               </div>
               <div class="text-sm text-gray-500">플레이어</div>
             </div>
-            <i
-              class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500 transition"
-            ></i>
-          </button>
+            <button
+              @click="sendPlayWithMeRequest(player)"
+              class="ml-2 text-gray-400 hover:text-orange-500 transition p-2 rounded-full hover:bg-orange-100"
+              aria-label="요청 보내기"
+            >
+              <i class="fas fa-chevron-right text-lg"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>

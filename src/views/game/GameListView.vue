@@ -1,5 +1,22 @@
 <template>
-  <HeaderComp :has-referer="true" title="경기 목록" />
+  <!-- 상단 헤더: 뒤로가기 버튼 -->
+  <div class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4">
+    <button
+      @click="$router.push('/game')"
+      class="text-black text-lg px-2 py-1 rounded hover:bg-gray-100 transition"
+      aria-label="뒤로가기"
+    >
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <span class="ml-3 text-base font-bold text-gray-900">경기 목록</span>
+    <button
+      @click="$router.push('/create-game')"
+      class="ml-auto px-4 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
+      aria-label="경기 생성"
+    >
+      <span class="text-xl font-bold">+</span>
+    </button>
+  </div>
   <div
     class="bg-white pb-16"
     ref="containerRef"
@@ -14,8 +31,6 @@
     <!-- Status Bar -->
     <div class="bg-white h-6 w-full"></div>
 
-    <!-- Header with Logo and Actions -->
-    <header class="px-4 py-3 mt-5"></header>
 
     <!-- Pull to Refresh Indicator (새로고침 중) -->
     <transition name="pull-fade">
@@ -710,21 +725,11 @@
 
   <Comment v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
 
-  <!-- 하단 우측 고정 경기 생성 버튼 -->
-  <button
-    @click="router.push('/create-game')"
-    class="fixed bottom-20 right-8 z-50 bg-orange-500 text-white rounded-full shadow-xl hover:bg-orange-600 active:scale-95 transition-all w-14 h-14 flex items-center justify-center text-3xl font-bold"
-    style="box-shadow: 0 6px 18px 0 rgba(255, 115, 0, 0.12)"
-    aria-label="경기 만들기"
-  >
-    +
-  </button>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../../api/api'
-import HeaderComp from '../../components/HeaderComp.vue'
 import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
 // import MatchModal from '../../components/MatchModal.vue' (미사용)

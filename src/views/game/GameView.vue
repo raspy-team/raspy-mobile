@@ -121,48 +121,52 @@
             </div>
           </div>
 
-          <!-- 도전자 버튼 및 모달 -->
-          <div class="mb-2">
-            <!-- Owner vs Opponent Profile Row -->
-            <div class="flex justify-between items-end mt-3 mb-1">
-              <!-- Owner -->
-              <div class="flex flex-col items-center flex-1">
-                <img
-                  :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
-                  alt="Owner Profile"
-                />
-                <span
-                  class="mt-1 text-sm font-bold text-gray-700 truncate max-w-[4.5rem] text-center"
-                  >{{ game.ownerNickname || game.myNickname }}</span
-                >
-              </div>
-              <!-- VS -->
-              <div class="flex flex-col items-center flex-1">
-                <span class="text-lg font-bold text-gray-400 mb-2">VS</span>
-              </div>
-              <!-- Opponent -->
-              <div class="flex flex-col items-center flex-1">
-                <img
-                  v-if="getOpponentProfileUrl(game)"
-                  :src="getOpponentProfileUrl(game)"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
-                  alt="Opponent Profile"
-                />
-                <div
-                  v-else
-                  class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
-                >
-                  <i class="fas fa-user text-2xl text-gray-400"></i>
-                </div>
-                <span
-                  class="mt-1 text-sm font-normal text-gray-700 truncate max-w-[4.5rem] text-center"
-                >
-                  {{ getOpponentNickname(game) }}
-                </span>
-              </div>
-            </div>
-          </div>
+ <div class="mb-2">
+  <!-- Owner vs Opponent Profile Row -->
+  <div class="flex justify-between items-center mt-3 mb-1">
+    <!-- Owner -->
+    <div class="flex flex-col items-center flex-1">
+      <img
+        :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
+        class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
+        alt="Owner Profile"
+      />
+      <span
+        class="mt-1 text-sm font-bold text-gray-700 truncate max-w-[4.5rem] text-center"
+      >
+        {{ game.ownerNickname || game.myNickname }}
+      </span>
+    </div>
+
+    <!-- VS -->
+    <div class="flex flex-col items-center flex-1 justify-center">
+      <span class="text-3xl font-extrabold text-gray-400 leading-none">
+        VS
+      </span>
+    </div>
+
+    <!-- Opponent -->
+    <div class="flex flex-col items-center flex-1">
+      <img
+        v-if="getOpponentProfileUrl(game)"
+        :src="getOpponentProfileUrl(game)"
+        class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
+        alt="Opponent Profile"
+      />
+      <div
+        v-else
+        class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
+      >
+        <i class="fas fa-user text-2xl text-gray-400"></i>
+      </div>
+      <span
+        class="mt-1 text-sm font-normal text-gray-700 truncate max-w-[4.5rem] text-center"
+      >
+        {{ getOpponentNickname(game) }}
+      </span>
+    </div>
+  </div>
+</div>
 
           <!-- 도전자(신청자) 목록 모달 -->
           <div

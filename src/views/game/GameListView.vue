@@ -1091,7 +1091,7 @@ const applyConfirmed = async () => {
   if (!selectedGame.value) return
   try {
     await api.post(`/api/games/${selectedGame.value.id}/apply`)
-    showToast('신청이 완료되었습니다!', `/game&id=${selectedGame.value.id}`)
+    showToast('신청이 완료되었습니다!')
     requestCount.value += 1
   } catch (err) {
     showToast(err.response?.data?.message || '신청 실패. 다시 시도해주세요.')

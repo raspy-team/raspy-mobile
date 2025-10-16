@@ -1,6 +1,8 @@
 <template>
   <!-- 상단 헤더: 뒤로가기 버튼 -->
-  <div class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4">
+  <div
+    class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4"
+  >
     <button
       @click="$router.push('/game')"
       class="text-black text-lg px-2 py-1 rounded hover:bg-gray-100 transition"
@@ -9,7 +11,7 @@
       <i class="fas fa-chevron-left"></i>
     </button>
     <button
-      @click="$router.push('/gamecreatewizard')"
+      @click="$router.push('/create-game')"
       class="ml-auto px-4 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
       aria-label="경기 생성"
     >
@@ -29,7 +31,6 @@
   >
     <!-- Status Bar -->
     <div class="bg-white h-6 w-full"></div>
-
 
     <!-- Pull to Refresh Indicator (새로고침 중) -->
     <transition name="pull-fade">
@@ -722,7 +723,6 @@
   </div>
 
   <Comment v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
-
 </template>
 
 <script setup>

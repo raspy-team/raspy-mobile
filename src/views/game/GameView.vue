@@ -570,7 +570,7 @@ function closeApplicantsModal() {
   showApplicantsModal.value = false
   selectedApplicantsGame.value = null
 }
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
@@ -589,6 +589,7 @@ const sentGames = ref([]) // 신청한 게임
 const myGames = ref([]) // 내 게임
 const applicantsMap = ref({}) // 각 게임의 신청자 목록 (gameId -> applicants)
 const loading = ref(true)
+let pollingInterval = null // 폴링 인터벌 ID
 
 // 게임 시작 관련
 const showAddressModal = ref(false)
@@ -624,9 +625,8 @@ const allGames = computed(() => {
   return all
 })
 
-onMounted(async () => {
-  loading.value = true
-
+// 게임 데이터를 가져오는 함수
+const fetchGames = async () => {
   try {
     const [applicantsRes, sentRes, myGamesRes] = await Promise.all([
       client.get('/api/games/my-games/applicants'), // 내 게임의 신청자 목록
@@ -636,16 +636,37 @@ onMounted(async () => {
 
     // 신청자 목록을 gameId로 매핑
     const applicantsData = applicantsRes.data
+    const newApplicantsMap = {}
     applicantsData.forEach((game) => {
-      applicantsMap.value[game.gameId] = game.applicants || []
+      newApplicantsMap[game.gameId] = game.applicants || []
     })
+    applicantsMap.value = newApplicantsMap
 
     sentGames.value = sentRes.data.map((g) => ({ ...g, showRuleDetail: false }))
     myGames.value = myGamesRes.data.map((g) => ({ ...g, showRuleDetail: false }))
   } catch (e) {
     console.error('Failed to load games:', e)
-  } finally {
-    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  loading.value = true
+
+  // 첫 데이터 로드
+  await fetchGames()
+  loading.value = false
+
+  // 3초마다 자동 갱신 시작
+  pollingInterval = setInterval(async () => {
+    await fetchGames()
+  }, 3000)
+})
+
+// 컴포넌트가 언마운트될 때 인터벌 정리
+onUnmounted(() => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
   }
 })
 

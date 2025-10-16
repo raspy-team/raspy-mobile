@@ -768,11 +768,19 @@
           <span class="w-8 h-8" v-html="icons.trophy"></span>
           <span class="text-[10px] mt-1">도전</span>
         </button>
-        <button @click="onComment" class="flex flex-col items-center active:scale-95 transition">
+        <button
+          v-if="post.type !== 'invite' && post.type !== 'friend-invite'"
+          @click="onComment"
+          class="flex flex-col items-center active:scale-95 transition"
+        >
           <span class="w-8 h-8" v-html="icons.comment"></span>
           <span class="text-[10px] mt-1">{{ post.commentCount || 0 }}</span>
         </button>
-        <button @click="onShare" class="flex flex-col items-center active:scale-95 transition">
+        <button
+          v-if="post.type !== 'invite' && post.type !== 'friend-invite'"
+          @click="onShare"
+          class="flex flex-col items-center active:scale-95 transition"
+        >
           <span class="w-8 h-8" v-html="icons.share"></span>
           <span class="text-[10px] mt-1">공유</span>
         </button>

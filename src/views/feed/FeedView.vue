@@ -383,12 +383,12 @@
             >
               <div class="mb-5 flex justify-center">
                 <span
-                  class="cursor-pointer px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150 flex items-center gap-2"
+                  class="cursor-pointer px-4 py-2 rounded-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white font-semibold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150 flex items-center gap-3"
                   @click="showRuleModal = true"
                   title="규칙 상세 보기"
                 >
                   <i class="fas fa-book-open text-white/90"></i>
-                  <span class="drop-shadow">{{ post.rule?.title || '경기' }}</span>
+                  <span class="drop-shadow">{{ post.rule?.ruleTitle || '-' }}</span>
                 </span>
               </div>
 
@@ -544,9 +544,7 @@
                 <span>{{ post.meta.place }}</span>
                 <span>
                   {{ post.meta.time }}
-                  <template v-if="post.date">
-                    · {{ formatFeedDate(post.date) }}
-                  </template>
+                  <template v-if="post.date"> · {{ formatFeedDate(post.date) }} </template>
                 </span>
               </div>
               <!-- 평점 & 리뷰 (경기 정보 박스 아래에 간략하게 표시) -->
@@ -559,7 +557,6 @@
                 "
                 class="mt-7 space-y-3"
               >
-
                 <!-- 첫 번째 리뷰 -->
                 <div
                   v-if="post.reviews[0]?.author"

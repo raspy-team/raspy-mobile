@@ -7,9 +7,7 @@
       class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white/95 backdrop-blur-md border-b shadow-sm"
     >
       <div class="flex items-center h-14">
-        <router-link to="/" class="font-bold text-[#f97316]">
-          <span class="RASPY mx-1">Match</span>
-        </router-link>
+        <!-- 로고 제거됨 -->
       </div>
       <div class="flex items-enter gap-3 mr-4">
         <button
@@ -1321,6 +1319,7 @@ body {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
 }
 .fade-enter-active,

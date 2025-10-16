@@ -1,5 +1,5 @@
 <template>
-  <!-- 상단 헤더: 뒤로가기 버튼 -->
+  <!-- 헤더: 뒤로가기, 내 규칙, 규칙 생성(+) 버튼 -->
   <div class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4">
     <button
       @click="$router.push('/game')"
@@ -8,24 +8,6 @@
     >
       <i class="fas fa-chevron-left"></i>
     </button>
-    <span class="ml-3 text-base font-bold text-gray-900">규칙 탐색</span>
-    <button
-      @click="onMyRulesClick"
-      class="ml-auto px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
-    >
-      내 규칙
-    </button>
-  </div>
-  <!-- 헤더에 규칙 생성(+) 버튼 추가 -->
-  <div class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4">
-    <button
-      @click="$router.push('/game')"
-      class="text-black text-lg px-2 py-1 rounded hover:bg-gray-100 transition"
-      aria-label="뒤로가기"
-    >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <span class="ml-3 text-base font-bold text-gray-900">규칙 탐색</span>
     <button
       @click="onMyRulesClick"
       class="ml-auto px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
@@ -40,8 +22,9 @@
       <span class="text-xl font-bold">+</span>
     </button>
   </div>
-  <!-- 항상 상단에 검색/필터 -->
+  <!-- 규칙 리스트가 표시될 때만 검색/필터 -->
   <nav
+    v-if="major && minor"
     class="bg-white border-b border-gray-100 px-4 pb-3 flex items-center mt-14 pt-5 gap-3 raspy-top sticky top-0 z-50"
   >
     <input
@@ -54,6 +37,13 @@
       autocomplete="off"
       style="margin-right: 12px"
     />
+    <button
+      @click="onSubmitSearch"
+      class="ml-1 px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition flex items-center justify-center"
+      aria-label="검색"
+    >
+      <i class="fas fa-search"></i>
+    </button>
     <div class="relative flex items-center gap-2">
       <button
         @click="toggleSort"

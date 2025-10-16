@@ -8,7 +8,6 @@
     >
       <i class="fas fa-chevron-left"></i>
     </button>
-    <span class="ml-3 text-base font-bold text-gray-900">경기 목록</span>
     <button
       @click="$router.push('/gamecreatewizard')"
       class="ml-auto px-4 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
@@ -18,7 +17,7 @@
     </button>
   </div>
   <div
-    class="bg-white pb-16"
+    class="bg-white pb-16 pt-14"
     ref="containerRef"
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
@@ -269,7 +268,6 @@
               </div>
             </div>
           </template>
-          <div v-else class="text-center mt-10 text-gray-600 text-sm">표시할 게임이 없습니다</div>
         </div>
       </div>
     </main>

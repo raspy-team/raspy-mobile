@@ -140,19 +140,34 @@
               }}</span>
             </div>
             <!-- 전적 영역 -->
-            <div class="px-5 pb-3 flex gap-2">
-              <span
-                class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs border font-semibold"
-                >상대 : 7승 3무 11패</span
+            <div class="px-5 pb-3 flex gap-2 flex-wrap items-center">
+              <div
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200"
               >
-              <span
-                class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs border font-semibold"
-                >나 : 0승 0무 0패</span
+                <span class="text-xs font-semibold text-green-600"
+                  >{{ game.ruleStatisticsOfOwner?.wins || 0 }}승</span
+                >
+                <span class="text-xs font-semibold text-gray-500"
+                  >{{ game.ruleStatisticsOfOwner?.draws || 0 }}무</span
+                >
+                <span class="text-xs font-semibold text-red-500"
+                  >{{ game.ruleStatisticsOfOwner?.losses || 0 }}패</span
+                >
+                <span class="text-xs text-gray-400">|</span>
+                <div class="flex items-center gap-1">
+                  <i class="fas fa-trophy text-yellow-500 text-[10px]"></i>
+                  <span class="text-xs font-bold text-orange-600">{{
+                    game.ruleStatisticsOfOwner?.ruleRating || 0
+                  }}</span>
+                </div>
+              </div>
+              <button
+                @click.stop="openChallengersModal(game)"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-95"
               >
-              <span
-                class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs border font-semibold"
-                >도전자 7명</span
-              >
+                <i class="fas fa-users text-[10px]"></i>
+                <span>도전자 {{ game.challengers?.length || 0 }}명</span>
+              </button>
             </div>
           </div>
         </div>
@@ -162,16 +177,18 @@
           class="fixed bottom-0 left-0 w-full bg-white border-t z-50 flex justify-center gap-4 py-3 shadow-lg"
         >
           <button
-            :disabled="selectedGame.applied"
-            @click="!selectedGame.applied && confirmApply(selectedGame)"
-            :class="[
-              'w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white',
-              selectedGame.applied
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-orange-500 hover:bg-orange-600 cursor-pointer',
-            ]"
+            v-if="!selectedGame.isAppliedByMe"
+            @click="confirmApply(selectedGame)"
+            class="w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white bg-orange-500 hover:bg-orange-600 cursor-pointer"
           >
-            {{ selectedGame.applied ? '신청 완료' : '신청' }}
+            신청
+          </button>
+          <button
+            v-else
+            @click="cancelApply(selectedGame)"
+            class="w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white bg-red-500 hover:bg-red-600 cursor-pointer"
+          >
+            취소
           </button>
           <button
             @click="toggleComment(selectedGame.id)"
@@ -723,6 +740,51 @@
   </div>
 
   <Comment v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
+
+  <!-- 도전자 목록 모달 -->
+  <div
+    v-if="showChallengersModal"
+    class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    @click.self="closeChallengersModal"
+  >
+    <div
+      class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto"
+    >
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-800">도전자 목록</h3>
+        <button
+          @click="closeChallengersModal"
+          class="text-gray-400 hover:text-gray-600 transition"
+          aria-label="닫기"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div v-if="selectedChallengers && selectedChallengers.length > 0" class="space-y-3">
+        <div
+          v-for="challenger in selectedChallengers"
+          :key="challenger.userId"
+          class="p-3 bg-gray-50 rounded-xl flex items-center gap-3"
+        >
+          <img
+            :src="challenger.applicantProfileUrl || Default"
+            class="w-12 h-12 rounded-full object-cover border-2 border-blue-400"
+            alt="Challenger Profile"
+          />
+          <div class="flex-1">
+            <p class="text-sm font-bold text-gray-800">{{ challenger.applicantNickname }}</p>
+            <p class="text-xs text-gray-500">
+              {{ challenger.applicantGameStatisticsDTO?.wins || 0 }}승
+              {{ challenger.applicantGameStatisticsDTO?.draws || 0 }}무
+              {{ challenger.applicantGameStatisticsDTO?.losses || 0 }}패 · 레이팅
+              {{ challenger.applicantGameStatisticsDTO?.ruleRating || 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div v-else class="text-center text-gray-400 text-sm py-6">도전자가 없습니다.</div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -1063,7 +1125,6 @@ const fetchGames = async () => {
     games.value = res.data.map((game) => ({
       ...game,
       showRuleDetail: false,
-      applied: false,
     }))
 
     setTimeout(() => (timerDone.value = true), 1200)
@@ -1094,6 +1155,7 @@ const applyConfirmed = async () => {
   if (!selectedGame.value) return
   try {
     await api.post(`/api/games/${selectedGame.value.id}/apply`)
+    selectedGame.value.isAppliedByMe = true
     showToast('신청이 완료되었습니다!')
     requestCount.value += 1
   } catch (err) {
@@ -1133,6 +1195,31 @@ async function confirmReport() {
     console.error('신고 실패', err)
     showToast('신고 접수가 완료된 경기입니다.')
     showReportModal.value = false
+  }
+}
+
+// 도전자 모달 관련
+const showChallengersModal = ref(false)
+const selectedChallengers = ref([])
+
+const openChallengersModal = (game) => {
+  selectedChallengers.value = game.challengers || []
+  showChallengersModal.value = true
+}
+
+const closeChallengersModal = () => {
+  showChallengersModal.value = false
+  selectedChallengers.value = []
+}
+
+// 신청 취소 함수
+const cancelApply = async (game) => {
+  try {
+    await api.post('/api/games/cancel-request', { gameId: game.id })
+    game.isAppliedByMe = false
+    showToast('신청이 취소되었습니다!')
+  } catch (err) {
+    showToast(err.response?.data?.message || '취소에 실패했습니다.')
   }
 }
 

@@ -179,7 +179,6 @@
                   class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 active:bg-red-700 transition shadow-md"
                 >
                   <i class="fas fa-ban text-xs"></i>
-                  <span>차단</span>
                 </button>
               </div>
               <div class="text-sm font-medium text-gray-400">@{{ user.username }}</div>
@@ -288,29 +287,18 @@
             </div>
           </div>
 
-          <!-- Stats Card - Enhanced Design -->
-          <button
-            @click="showStatsModal = true"
-            class="rounded-xl bg-white border border-gray-200 w-full py-3 font-bold text-gray-800 text-lg shadow hover:bg-orange-50 transition-all"
-          >
-            통계 더보기
-          </button>
-
-          <!-- Match History Button -->
-          <button
-            @click="goToUserFeed"
-            class="rounded-xl bg-white border border-gray-200 w-full py-3 font-bold text-gray-800 text-lg shadow hover:bg-orange-50 transition-all"
-          >
-            경기 전적 보기
-          </button>
-
           <!-- Top 3 Rules - Enhanced Section -->
           <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <i class="fas fa-trophy text-yellow-500"></i>
-                {{ user.nickname }}님의 인기 규칙
+                인기 규칙
               </h3>
+              <button
+                @click="showStatsModal = true"
+                class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"
+              >
+                통계 더보기
+              </button>
             </div>
             <div class="grid grid-cols-1 gap-3">
               <TopRuleCard v-for="rule in user.top3Rules" :key="rule.ruleId" :rule="rule" />
@@ -358,18 +346,11 @@
         <section class="w-full mx-auto px-4 bg-[#f8f9fa] pb-0">
           <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
           <div v-if="statMode === 'rule'" class="pb-4">
-            <button
               @click="showRuleModal = true"
               class="w-full py-3 rounded-xl bg-orange-100 text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2"
             >
               <i class="fas fa-list-alt"></i>
               {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
-            </button>
-          </div>
-          <div v-if="statMode === 'category'" class="mb-4 flex gap-2">
-            <CustomSelect
-              :options="Object.keys(playedCategoryMap).map((cat) => ({ label: cat, value: cat }))"
-              v-model="selectedMainCategory"
               placeholder="주 카테고리"
             />
             <CustomSelect
@@ -439,10 +420,15 @@
           class="w-full mx-auto px-4 pb-0 bg-[#f8f9fa]"
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <i class="fas fa-history text-orange-500"></i>
+            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
               최근 경기
             </h3>
+            <button
+              @click="goToUserFeed"
+              class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"
+            >
+              더보기
+            </button>
           </div>
           <div
             class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-100 transition-all duration-300 cursor-pointer"

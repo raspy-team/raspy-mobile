@@ -27,17 +27,17 @@
     <div class="flex-shrink-0">
       <div class="flex items-center w-full gap-2">
         <!-- Info Cards: 세트 승점, 세트 수, 세트 시간 -->
-        <div class="flex w-full gap-2 sm:gap-2 gap-1">
+        <div class="flex w-full gap-1 sm:gap-1">
           <div
-            class="h-[22vw] sm:h-[16vw] flex-1 max-h-[90px] sm:max-h-[130px] flex flex-col justify-between bg-white text-orange-500 px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-white text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div
-                class="flex items-center justify-center text-[1.1rem] sm:text-[1.25rem] font-semibold mb-1 sm:mb-2"
+                class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1"
               >
                 <svg
-                  width="26"
-                  height="26"
+                  width="16"
+                  height="16"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -47,23 +47,23 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-sm sm:text-base font-semibold">세트 승점</span>
+                <span class="ml-1 text-gray-800 text-xs sm:text-sm font-semibold">세트 승점</span>
               </div>
               <div
-                class="flex items-center justify-center text-orange-500 font-extrabold text-lg sm:text-xl mt-1 sm:mt-2"
+                class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1"
               >
                 {{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[22vw] sm:h-[16vw] flex-1 max-h-[90px] sm:max-h-[130px] flex flex-col justify-between bg-white text-orange-500 px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-white text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center text-[1.25rem] font-semibold mb-2">
+              <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
                 <svg
-                  width="26"
-                  height="26"
+                  width="16"
+                  height="16"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -73,23 +73,21 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-sm sm:text-base font-semibold">세트 수</span>
+                <span class="ml-1 text-gray-800 text-xs sm:text-sm font-semibold">세트 수</span>
               </div>
-              <div
-                class="flex items-center justify-center text-orange-500 font-extrabold text-lg sm:text-xl mt-1 sm:mt-2"
-              >
+              <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ game.rule.setsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[22vw] sm:h-[16vw] flex-1 max-h-[90px] sm:max-h-[130px] flex flex-col justify-between bg-white text-orange-500 px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-white text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center text-[1.25rem] font-semibold mb-2">
+              <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
                 <svg
-                  width="26"
-                  height="26"
+                  width="16"
+                  height="16"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -99,11 +97,9 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-sm sm:text-base font-semibold">세트 시간</span>
+                <span class="ml-1 text-gray-800 text-xs sm:text-sm font-semibold">세트 시간</span>
               </div>
-              <div
-                class="flex items-center justify-center text-orange-500 font-extrabold text-lg sm:text-xl mt-1 sm:mt-2"
-              >
+              <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ limitTimeStr }}
               </div>
             </div>
@@ -164,14 +160,14 @@
             <div class="flex flex-col items-center flex-1">
               <img
                 :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
-                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-2 sm:mb-3"
+                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg mb-2 sm:mb-3"
               />
               <div class="font-bold text-base sm:text-xl mb-1 sm:mb-2">{{ user1.nickname }}</div>
               <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
                 <button
                   @click="socket_sendScore(1, 1)"
                   :disabled="isSetOver || isGameOver"
-                  class="bg-orange-500 text-white w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -199,14 +195,14 @@
             <div class="flex flex-col items-center flex-1">
               <img
                 :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
-                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-2 sm:mb-3"
+                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg mb-2 sm:mb-3"
               />
               <div class="font-bold text-base sm:text-xl mb-1 sm:mb-2">{{ user2.nickname }}</div>
               <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
                 <button
                   @click="socket_sendScore(2, 1)"
                   :disabled="isSetOver || isGameOver"
-                  class="bg-orange-500 text-white w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -270,7 +266,7 @@
           "
         >
           <span style="font-size: 1em"
-            >슈퍼덩크 <span style="color: #ff5722">덩크 콘테스트</span> 모집중!!</span
+            >클래시오브클랜 <span style="color: #ff5722">회원</span> 모집중!!</span
           >
         </div>
       </div>
@@ -303,30 +299,12 @@
           @click="closeFinishModal"
           class="bg-orange-500 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
         >
-          확인
+          다음 세트로
         </button>
       </div>
     </div>
 
-    <div
-      v-if="isGameOver"
-      class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-    >
-      <div
-        class="bg-orange-500 text-white rounded-xl p-8 text-center shadow-2xl animate-fade-in w-[90%] max-w-md"
-      >
-        <div class="text-xl font-bold mb-4">🎉 경기 종료 🎉</div>
-        <div class="text-2xl font-extrabold mb-5">
-          {{ gameWinner == '무승부' ? '무승부' : gameWinner + ' 최종 승리!' }}
-        </div>
-        <button
-          @click="goToResult"
-          class="bg-white text-orange-500 w-full py-2 rounded-full text-base font-bold shadow hover:scale-105 transition"
-        >
-          결과 보기
-        </button>
-      </div>
-    </div>
+    <!-- 경기 종료시 모달 제거 -->
 
     <!-- MatchModal: 규칙 모달 -->
     <MatchModal v-if="game.showRuleDetail" :rule="game.rule" @close="game.showRuleDetail = false" />
@@ -518,6 +496,7 @@ function finishSet(who) {
     isGameOver.value = true
     isSetOver.value = false
     socket_finishGame()
+    goToResult()
   } else {
     currentSet.value++
   }

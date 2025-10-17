@@ -7,7 +7,6 @@
       class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white/95 backdrop-blur-md border-b shadow-sm"
     >
       <div class="flex items-center h-14">
-        <!-- 로고 제거됨 -->
       </div>
       <div class="flex items-enter gap-3 mr-4">
         <button
@@ -218,16 +217,74 @@
               >
                 <p class="text-base text-gray-700 text-center leading-relaxed">{{ user.intro }}</p>
               </div>
+              <!-- 친구추가/나의 친구 버튼: 바이오 바로 아래 -->
+              <div v-if="!user.isMe" class="flex gap-3 mt-4 pb-3 w-full justify-center">
+                <template v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received">
+                  <button
+                    class="flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                    @click="sendFriendRequest"
+                  >
+                    <i class="fas fa-user-plus mr-2"></i> 친구추가
+                  </button>
+                  <button
+                    class="flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                    @click="goChat"
+                  >
+                    <i class="fas fa-comment-dots mr-2"></i> DM
+                  </button>
+                </template>
+                <template v-else-if="friendStatus.sent && !friendStatus.isFriend">
+                  <button
+                    class="flex justify-center items-center bg-white border-2 border-orange-400 text-orange-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-orange-50 transition-all"
+                    @click="sendFriendCancelRequest"
+                  >
+                    <i class="fas fa-hourglass-half mr-2"></i> 요청취소
+                  </button>
+                  <button
+                    class="flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                    @click="goChat"
+                  >
+                    <i class="fas fa-comment-dots mr-2"></i> DM
+                  </button>
+                </template>
+                <template v-else-if="friendStatus.received && !friendStatus.isFriend">
+                  <div class="flex gap-3">
+                    <button
+                      class="flex-1 flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
+                      @click="acceptFriendRequest"
+                    >
+                      <i class="fas fa-user-check mr-2"></i> 승인
+                    </button>
+                    <button
+                      class="flex-1 flex justify-center items-center bg-white hover:bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl shadow-md transition-all border-2 border-gray-300"
+                      @click="rejectFriendRequest"
+                    >
+                      <i class="fas fa-user-times mr-2"></i> 거부
+                    </button>
+                    <button
+                      class="flex-1 flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                      @click="goChat"
+                    >
+                      <i class="fas fa-comment-dots mr-2"></i> DM
+                    </button>
+                  </div>
+                </template>
+                <template v-else-if="friendStatus.isFriend">
+                  <button
+                    class="flex justify-center items-center bg-white border-2 border-green-600 text-green-600 font-bold py-3.5 w-full rounded-xl shadow-md transition-all cursor-default"
+                    disabled
+                  >
+                    <i class="fas fa-check mr-2"></i> 나의 친구
+                  </button>
+                  <button
+                    class="flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                    @click="goChat"
+                  >
+                    <i class="fas fa-comment-dots mr-2"></i> DM
+                  </button>
+                </template>
+              </div>
 
-              <!-- Edit button for own profile -->
-              <button
-                v-if="user.isMe"
-                @click="router.push('/settings/profile')"
-                class="mt-4 px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-              >
-                <i class="fas fa-edit mr-2"></i>
-                프로필 수정
-              </button>
             </div>
           </div>
 
@@ -339,61 +396,7 @@
             </div>
           </transition>
 
-          <div v-if="!user.isMe" class="flex gap-3 mt-4 pb-3">
-            <button
-              v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
-              class="flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-              @click="sendFriendRequest"
-            >
-              <i class="fas fa-user-plus mr-2"></i> 친구추가
-            </button>
-            <button
-              v-else-if="friendStatus.sent && !friendStatus.isFriend"
-              class="flex justify-center items-center bg-white border-2 border-orange-400 text-orange-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-orange-50 transition-all"
-              @click="sendFriendCancelRequest"
-            >
-              <i class="fas fa-hourglass-half mr-2"></i> 요청취소
-            </button>
-            <div
-              v-else-if="friendStatus.received && !friendStatus.isFriend"
-              class="flex flex-col gap-3 w-full"
-            >
-              <div class="flex gap-3">
-                <button
-                  class="flex-1 flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
-                  @click="acceptFriendRequest"
-                >
-                  <i class="fas fa-user-check mr-2"></i> 승인
-                </button>
-                <button
-                  class="flex-1 flex justify-center items-center bg-white hover:bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl shadow-md transition-all border-2 border-gray-300"
-                  @click="rejectFriendRequest"
-                >
-                  <i class="fas fa-user-times mr-2"></i> 거부
-                </button>
-              </div>
-              <button
-                @click="goChat"
-                class="flex w-full justify-center items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
-              >
-                <i class="fas fa-paper-plane mr-2"></i> DM
-              </button>
-            </div>
-            <button
-              v-else-if="friendStatus.isFriend"
-              class="flex justify-center items-center bg-white border-2 border-green-600 text-green-600 font-bold py-3.5 w-full rounded-xl shadow-md transition-all cursor-default"
-              disabled
-            >
-              <i class="fas fa-check mr-2"></i> 나의 친구
-            </button>
-            <button
-              v-if="!(friendStatus.received && !friendStatus.isFriend)"
-              @click="goChat"
-              class="flex justify-center items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl w-[50%] shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <i class="fas fa-paper-plane mr-2"></i> DM
-            </button>
-          </div>
+          <!-- 기존 친구추가/DM 버튼 영역 제거 -->
         </section>
         <section class="w-full mx-auto px-4 bg-[#f8f9fa] pb-0">
           <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>

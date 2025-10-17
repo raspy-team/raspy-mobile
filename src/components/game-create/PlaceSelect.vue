@@ -53,22 +53,6 @@
               </div>
             </div>
 
-            <!-- 추천 장소 리스트 -->
-            <div class="mt-6">
-              <p class="text-sm font-medium text-gray-700 mb-2">추천 장소</p>
-              <div class="flex flex-col gap-2">
-                <button
-                  v-for="(item, idx) in recommendedPlaces"
-                  :key="idx"
-                  type="button"
-                  @click="onRecommendClick(item)"
-                  class="flex flex-col text-left p-3 rounded-xl  bg-blue-50 hover:bg-orange-100 transition"
-                >
-                  <div class="text-base font-semibold text-blue-600">{{ item.placeDetail }}</div>
-                  <div class="text-[0.7rem] text-gray-600 mt-0.5">{{ item.placeRoad }}</div>
-                </button>
-              </div>
-            </div>
           </div>
           <div v-else class="text-gray-400 text-sm mt-4">미정으로 설정됨</div>
         </transition>
@@ -135,11 +119,6 @@ const searchQuery = ref('')
 const selectedPlace = ref(null)
 const addressInput = ref(null)
 
-const recommendedPlaces = ref([
-  { placeRoad: '서울 서초구 동광로 65', placeDetail: '서초탁구장' },
-  { placeRoad: '서울 동대문구 경희대로 26', placeDetail: '경희대 대운동장' },
-  { placeRoad: '서울 송파구 잠실동 1-1', placeDetail: '잠실한강공원' },
-])
 
 const showConfirm = ref(false)
 const confirmItem = ref({ placeRoad: '', placeDetail: '' })
@@ -209,10 +188,6 @@ function emitBack() {
   emit('back')
 }
 
-function onRecommendClick(item) {
-  confirmItem.value = item
-  showConfirm.value = true
-}
 
 function cancelConfirm() {
   showConfirm.value = false

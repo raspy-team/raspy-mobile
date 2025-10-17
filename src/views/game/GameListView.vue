@@ -184,7 +184,7 @@
         >
           <button
             v-if="!selectedGame.isAppliedByMe"
-            @click="confirmApply(selectedGame)"
+            @click="applyDirect(selectedGame)"
             class="w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white bg-orange-500 hover:bg-orange-600 cursor-pointer"
           >
             신청
@@ -628,12 +628,7 @@
         </div>
       </div>
     </div>
-    <CustomAlert
-      v-if="alertMsg"
-      :message="alertMsg"
-      @confirm="applyConfirmed"
-      @cancel="() => (alertMsg = '')"
-    />
+    <!-- CustomAlert 확정 모달 제거 -->
     <CustomToast class="z-[200]" />
     <!-- Share Game Modal -->
     <div
@@ -796,7 +791,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../../api/api'
-import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
 // import MatchModal from '../../components/MatchModal.vue' (미사용)
 
@@ -1106,7 +1100,7 @@ const applyRegionFilter = () => {
 }
 const games = ref([])
 const loading = ref(true)
-const alertMsg = ref('')
+// const alertMsg = ref('')
 const selectedGame = ref(null)
 const sortOption = ref('latest')
 // ...showFilterMenu 변수 제거됨
@@ -1153,22 +1147,15 @@ const formatDate = (dateStr) => {
   const date = new Date(dateStr)
   return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }
-const confirmApply = (game) => {
-  selectedGame.value = game
-  alertMsg.value = `신청하시겠습니까?`
-}
-const applyConfirmed = async () => {
-  if (!selectedGame.value) return
+const applyDirect = async (game) => {
+  if (!game) return
   try {
-    await api.post(`/api/games/${selectedGame.value.id}/apply`)
-    selectedGame.value.isAppliedByMe = true
+    await api.post(`/api/games/${game.id}/apply`)
+    game.isAppliedByMe = true
     showToast('신청이 완료되었습니다!')
     requestCount.value += 1
   } catch (err) {
     showToast(err.response?.data?.message || '신청 실패. 다시 시도해주세요.')
-  } finally {
-    alertMsg.value = ''
-    selectedGame.value = null
   }
 }
 

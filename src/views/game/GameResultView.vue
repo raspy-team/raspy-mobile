@@ -272,42 +272,7 @@
       제출하기
     </button>
 
-    <!-- 제출 확인 모달 -->
-    <div
-      v-if="showConfirmModal"
-      class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4"
-    >
-      <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl p-6 text-center">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">경기 결과 제출</h3>
-        <div class="text-left text-sm text-gray-700 space-y-2 mb-6">
-          <p v-if="selectedPictures.length > 0">
-            <i class="fas fa-check-circle text-green-500"></i>
-            선택하신 사진 <span class="font-bold text-orange-500">{{ selectedPictures.length }}장</span>이 업로드됩니다.
-          </p>
-          <p v-else>
-            <i class="fas fa-info-circle text-gray-400"></i>
-            선택한 사진이 없습니다.
-          </p>
-          <p class="text-xs text-gray-500 mt-2">
-            * 제출 후에는 수정할 수 없습니다.
-          </p>
-        </div>
-        <div class="flex gap-3">
-          <button
-            @click="cancelSubmit"
-            class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition"
-          >
-            취소
-          </button>
-          <button
-            @click="confirmSubmit"
-            class="flex-1 px-4 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:brightness-110 transition shadow"
-          >
-            확인
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- 제출 확인 모달 제거 -->
 
     <!-- 제출 중 로딩 오버레이 -->
     <div
@@ -344,7 +309,6 @@ import { getGamePictures, removeGamePicture, addGamePicture, compressImage } fro
 
 const { showToast } = useToast()
 const showReviewModal = ref(false)
-const showConfirmModal = ref(false)
 const isSubmitting = ref(false)
 const cameraInputRef = ref(null)
 
@@ -373,23 +337,14 @@ function submitReviewAndGoHome() {
     return
   }
 
-  // 확인 모달 표시
-  showConfirmModal.value = true
-}
-
-function confirmSubmit() {
-  showConfirmModal.value = false
+  // 바로 제출
   isSubmitting.value = true
-
-  // 사진 제출 후 리뷰 제출
   submitPictures()
     .then(() => {
-      // 리뷰 제출
       return api.post(`/api/games/${gameId}/review`, review.value)
     })
     .then(() => {
       showToast('리뷰가 제출되었습니다.')
-      // 약간의 딜레이 후 이동 (토스트 메시지 보이도록)
       setTimeout(() => {
         goHome()
       }, 500)
@@ -400,9 +355,7 @@ function confirmSubmit() {
     })
 }
 
-function cancelSubmit() {
-  showConfirmModal.value = false
-}
+
 
 const route = useRoute()
 const router = useRouter()

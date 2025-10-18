@@ -15,8 +15,6 @@ const headerTop = ref(0)
 
 const targetUserNickname = ref('')
 const targetUserProfileUrl = ref('')
-const isFriend = ref(false)
-
 // 나랑도해 요청 데이터
 const playWithMeRequest = ref(null) // 받은 나랑도해 요청 정보
 
@@ -181,11 +179,6 @@ const handleReject = async () => {
   }
 }
 
-const handleAddFriend = () => {
-  console.log('친구 요청')
-  isFriend.value = true
-  // TODO: 친구 요청 API 호출
-}
 </script>
 
 <template>
@@ -223,19 +216,8 @@ const handleAddFriend = () => {
             </div>
           </div>
         </div>
-
-        <!-- 친구 요청 버튼 -->
-        <div v-if="!isFriend" class="flex items-center">
-          <button
-            @click="handleAddFriend"
-            class="px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-full hover:bg-orange-600 transition-colors"
-          >
-            친구 요청
-          </button>
-        </div>
       </div>
     </div>
-
     <!-- 진보된 스타일 상태 헤더 -->
     <div
       v-if="headerInfo.show"
@@ -420,30 +402,6 @@ const handleAddFriend = () => {
                 <p class="text-[10px] mt-1 text-right text-gray-400">
                   {{ formatTime(msg.timestamp) }}
                 </p>
-              </div>
-            </template>
-            <template v-else-if="msg.messageType === 'PLAY_WITH_ME_TOO'">
-              <div class="w-full max-w-sm mx-auto">
-                <div
-                  class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 shadow-md"
-                >
-                  <div class="flex items-center gap-3 mb-3">
-                    <div
-                      class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center"
-                    >
-                      <i class="fas fa-gamepad text-white text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="text-sm font-bold text-gray-900">나랑도 해 알림</h4>
-                      <p class="text-xs text-gray-600">{{ formatTime(msg.timestamp) }}</p>
-                    </div>
-                  </div>
-                  <div class="bg-white/70 rounded-lg p-3 border border-blue-100">
-                    <p class="text-sm text-gray-800 leading-relaxed text-center">
-                      {{ msg.content }}
-                    </p>
-                  </div>
-                </div>
               </div>
             </template>
             <template v-else>

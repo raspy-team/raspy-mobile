@@ -2,8 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Init from "../views/InitView.vue"
 import GameList from "../views/game/GameListView.vue"
-import Inbox from "../views/InboxView.vue"
-import MyGameList from "../views/game/MyGameListView.vue"
 import GameChatView from "../views/game/ChatView.vue"
 import CreateGame from "../views/game/GameCreateWizard.vue"
 import SettingProfile from "../views/profile/SettingProfileView.vue"
@@ -49,14 +47,6 @@ const routes = [
   {
     path: '/set-profile',
     component: SettingProfile
-  },
-  {
-    path: '/inbox',
-    component: Inbox
-  },
-  {
-    path: '/my-games',
-    component: MyGameList
   },
   {
     path: '/game',

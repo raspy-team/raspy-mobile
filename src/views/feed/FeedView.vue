@@ -590,7 +590,7 @@
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[0]?.text || '' }}
+                    {{ post.reviews[1]?.text || '' }}
                   </div>
                 </div>
 
@@ -612,7 +612,7 @@
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[1]?.text || '' }}
+                    {{ post.reviews[0]?.text || '' }}
                   </div>
                 </div>
               </div>

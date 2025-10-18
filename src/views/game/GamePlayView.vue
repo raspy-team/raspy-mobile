@@ -272,6 +272,19 @@
       </div>
     </div>
 
+    <div
+      v-if="isSetOver && !isGameOver"
+      class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+    >
+      <div class="bg-white rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
+        <button
+          @click="socket_nextSet"
+          class="bg-orange-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
+        >
+          {{ currentSet + '세트 시작' }}
+        </button>
+      </div>
+    </div>
 
     <div
       v-if="showFinishModal"
@@ -676,6 +689,15 @@ function socket_sendScore(userIndex, scoreDelta) {
     userId: userIndex === 1 ? user1.value.id : user2.value.id,
     setIndex: currentSet.value,
     scoreDelta: scoreDelta,
+  })
+}
+
+function socket_nextSet() {
+  socket.sendGameEvent(chatRoomId.value, {
+    type: 'SET',
+    setIndex: currentSet.value,
+    userId: 0,
+    scoreDelta: 0,
   })
 }
 

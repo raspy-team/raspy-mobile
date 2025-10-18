@@ -15,10 +15,9 @@ const headerTop = ref(0)
 
 const targetUserNickname = ref('')
 const targetUserProfileUrl = ref('')
-const isFriend = ref(false)
-
 // 나랑도해 요청 데이터
 const playWithMeRequest = ref(null) // 받은 나랑도해 요청 정보
+const lastPlayWithMeRequest = ref(null) // 요청 처리 후에도 헤더 표시용
 
 function updateHeaderPosition() {
   // visualViewport를 지원하는 경우만 적용 (for iOS)
@@ -137,6 +136,7 @@ const defaultProfileUrl = require('../../assets/default.png')
 
 // 헤더 표시 조건을 계산하는 computed
 const headerInfo = computed(() => {
+  // 요청이 처리되지 않은 경우
   if (playWithMeRequest.value) {
     return {
       show: true,
@@ -145,9 +145,24 @@ const headerInfo = computed(() => {
       description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
       showActions: true,
       actionType: 'accept_reject',
+      majorCategory: playWithMeRequest.value.majorCategory,
+      minorCategory: playWithMeRequest.value.minorCategory,
+      ruleTitle: playWithMeRequest.value.ruleTitle,
     }
   }
-
+  // 요청이 처리된 후에도 헤더 표시
+  if (lastPlayWithMeRequest.value) {
+    return {
+      show: true,
+      type: 'challenge_handled',
+      title: '"나랑도 해" 요청이 처리되었습니다',
+      description: `${targetUserNickname.value}님과의 경기 요청이 완료되었습니다`,
+      showActions: false,
+      majorCategory: lastPlayWithMeRequest.value.majorCategory,
+      minorCategory: lastPlayWithMeRequest.value.minorCategory,
+      ruleTitle: lastPlayWithMeRequest.value.ruleTitle,
+    }
+  }
   return {
     show: false,
   }
@@ -160,7 +175,8 @@ const handleAccept = async () => {
   try {
     const gameId = await playWithMeTooAPI.acceptRequest(targetUserId)
     console.log('나랑도해 요청 수락됨, 게임 ID:', gameId)
-    // 게임 생성 완료, 요청 상태 초기화
+    // 요청 정보 저장 후 상태 초기화
+    lastPlayWithMeRequest.value = playWithMeRequest.value
     playWithMeRequest.value = null
     // 게임 페이지로 이동하거나 성공 메시지 표시
     router.push(`/game?id=${gameId}`)
@@ -175,17 +191,13 @@ const handleReject = async () => {
   try {
     await playWithMeTooAPI.rejectRequest(playWithMeRequest.value.fromUserId)
     console.log('나랑도해 요청 거절됨')
+    lastPlayWithMeRequest.value = playWithMeRequest.value
     playWithMeRequest.value = null
   } catch (error) {
     console.error('나랑도해 요청 거절 중 오류:', error)
   }
 }
 
-const handleAddFriend = () => {
-  console.log('친구 요청')
-  isFriend.value = true
-  // TODO: 친구 요청 API 호출
-}
 </script>
 
 <template>
@@ -223,19 +235,8 @@ const handleAddFriend = () => {
             </div>
           </div>
         </div>
-
-        <!-- 친구 요청 버튼 -->
-        <div v-if="!isFriend" class="flex items-center">
-          <button
-            @click="handleAddFriend"
-            class="px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-full hover:bg-orange-600 transition-colors"
-          >
-            친구 요청
-          </button>
-        </div>
       </div>
     </div>
-
     <!-- 진보된 스타일 상태 헤더 -->
     <div
       v-if="headerInfo.show"
@@ -273,8 +274,8 @@ const handleAddFriend = () => {
                 <div class="relative">
                   <img
                     class="w-12 h-12 rounded-xl object-cover shadow-md"
-                    :src="`/category-picture/${playWithMeRequest?.minorCategory || '미분류'}.png`"
-                    :alt="playWithMeRequest?.minorCategory"
+                    :src="`/category-picture/${headerInfo.minorCategory || '미분류'}.png`"
+                    :alt="headerInfo.minorCategory"
                   />
                   <!-- 상태 배지 -->
                   <div
@@ -284,7 +285,7 @@ const handleAddFriend = () => {
                       'bg-orange-500':
                         headerInfo.type === 'request_received' ||
                         headerInfo.type === 'challenge_received',
-                      'bg-gray-400': headerInfo.type === 'request_sent',
+                      'bg-gray-400': headerInfo.type === 'request_sent' || headerInfo.type === 'challenge_handled',
                     }"
                   ></div>
                 </div>
@@ -296,19 +297,19 @@ const handleAddFriend = () => {
                   <div class="flex-1 min-w-0">
                     <!-- 경기 제목 -->
                     <h3 class="text-base font-bold text-gray-900 truncate mb-1">
-                      {{ playWithMeRequest?.ruleTitle || '경기' }}
+                      {{ headerInfo.ruleTitle || '경기' }}
                     </h3>
 
                     <!-- 카테고리 -->
                     <div class="flex items-center gap-1 mb-2">
                       <span class="text-xs text-gray-600 font-medium">{{
-                        playWithMeRequest?.majorCategory || '스포츠'
+                        headerInfo.majorCategory || '스포츠'
                       }}</span>
                       <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
                       <span
                         class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
                       >
-                        {{ playWithMeRequest?.minorCategory || '경기' }}
+                        {{ headerInfo.minorCategory || '경기' }}
                       </span>
                     </div>
 
@@ -420,30 +421,6 @@ const handleAddFriend = () => {
                 <p class="text-[10px] mt-1 text-right text-gray-400">
                   {{ formatTime(msg.timestamp) }}
                 </p>
-              </div>
-            </template>
-            <template v-else-if="msg.messageType === 'PLAY_WITH_ME_TOO'">
-              <div class="w-full max-w-sm mx-auto">
-                <div
-                  class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 shadow-md"
-                >
-                  <div class="flex items-center gap-3 mb-3">
-                    <div
-                      class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center"
-                    >
-                      <i class="fas fa-gamepad text-white text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="text-sm font-bold text-gray-900">나랑도 해 알림</h4>
-                      <p class="text-xs text-gray-600">{{ formatTime(msg.timestamp) }}</p>
-                    </div>
-                  </div>
-                  <div class="bg-white/70 rounded-lg p-3 border border-blue-100">
-                    <p class="text-sm text-gray-800 leading-relaxed text-center">
-                      {{ msg.content }}
-                    </p>
-                  </div>
-                </div>
               </div>
             </template>
             <template v-else>

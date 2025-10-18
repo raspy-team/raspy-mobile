@@ -17,7 +17,6 @@ const targetUserNickname = ref('')
 const targetUserProfileUrl = ref('')
 // 나랑도해 요청 데이터
 const playWithMeRequest = ref(null) // 받은 나랑도해 요청 정보
-const lastPlayWithMeRequest = ref(null) // 요청 처리 후에도 헤더 표시용
 
 function updateHeaderPosition() {
   // visualViewport를 지원하는 경우만 적용 (for iOS)
@@ -136,7 +135,6 @@ const defaultProfileUrl = require('../../assets/default.png')
 
 // 헤더 표시 조건을 계산하는 computed
 const headerInfo = computed(() => {
-  // 요청이 처리되지 않은 경우
   if (playWithMeRequest.value) {
     return {
       show: true,
@@ -145,24 +143,9 @@ const headerInfo = computed(() => {
       description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
       showActions: true,
       actionType: 'accept_reject',
-      majorCategory: playWithMeRequest.value.majorCategory,
-      minorCategory: playWithMeRequest.value.minorCategory,
-      ruleTitle: playWithMeRequest.value.ruleTitle,
     }
   }
-  // 요청이 처리된 후에도 헤더 표시
-  if (lastPlayWithMeRequest.value) {
-    return {
-      show: true,
-      type: 'challenge_handled',
-      title: '"나랑도 해" 요청이 처리되었습니다',
-      description: `${targetUserNickname.value}님과의 경기 요청이 완료되었습니다`,
-      showActions: false,
-      majorCategory: lastPlayWithMeRequest.value.majorCategory,
-      minorCategory: lastPlayWithMeRequest.value.minorCategory,
-      ruleTitle: lastPlayWithMeRequest.value.ruleTitle,
-    }
-  }
+
   return {
     show: false,
   }
@@ -175,8 +158,7 @@ const handleAccept = async () => {
   try {
     const gameId = await playWithMeTooAPI.acceptRequest(targetUserId)
     console.log('나랑도해 요청 수락됨, 게임 ID:', gameId)
-    // 요청 정보 저장 후 상태 초기화
-    lastPlayWithMeRequest.value = playWithMeRequest.value
+    // 게임 생성 완료, 요청 상태 초기화
     playWithMeRequest.value = null
     // 게임 페이지로 이동하거나 성공 메시지 표시
     router.push(`/game?id=${gameId}`)
@@ -191,7 +173,6 @@ const handleReject = async () => {
   try {
     await playWithMeTooAPI.rejectRequest(playWithMeRequest.value.fromUserId)
     console.log('나랑도해 요청 거절됨')
-    lastPlayWithMeRequest.value = playWithMeRequest.value
     playWithMeRequest.value = null
   } catch (error) {
     console.error('나랑도해 요청 거절 중 오류:', error)
@@ -274,8 +255,8 @@ const handleReject = async () => {
                 <div class="relative">
                   <img
                     class="w-12 h-12 rounded-xl object-cover shadow-md"
-                    :src="`/category-picture/${headerInfo.minorCategory || '미분류'}.png`"
-                    :alt="headerInfo.minorCategory"
+                    :src="`/category-picture/${playWithMeRequest?.minorCategory || '미분류'}.png`"
+                    :alt="playWithMeRequest?.minorCategory"
                   />
                   <!-- 상태 배지 -->
                   <div
@@ -285,7 +266,7 @@ const handleReject = async () => {
                       'bg-orange-500':
                         headerInfo.type === 'request_received' ||
                         headerInfo.type === 'challenge_received',
-                      'bg-gray-400': headerInfo.type === 'request_sent' || headerInfo.type === 'challenge_handled',
+                      'bg-gray-400': headerInfo.type === 'request_sent',
                     }"
                   ></div>
                 </div>
@@ -297,19 +278,19 @@ const handleReject = async () => {
                   <div class="flex-1 min-w-0">
                     <!-- 경기 제목 -->
                     <h3 class="text-base font-bold text-gray-900 truncate mb-1">
-                      {{ headerInfo.ruleTitle || '경기' }}
+                      {{ playWithMeRequest?.ruleTitle || '경기' }}
                     </h3>
 
                     <!-- 카테고리 -->
                     <div class="flex items-center gap-1 mb-2">
                       <span class="text-xs text-gray-600 font-medium">{{
-                        headerInfo.majorCategory || '스포츠'
+                        playWithMeRequest?.majorCategory || '스포츠'
                       }}</span>
                       <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
                       <span
                         class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
                       >
-                        {{ headerInfo.minorCategory || '경기' }}
+                        {{ playWithMeRequest?.minorCategory || '경기' }}
                       </span>
                     </div>
 

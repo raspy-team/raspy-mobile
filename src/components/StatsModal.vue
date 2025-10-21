@@ -121,7 +121,7 @@
               </svg>
             </span>
             <span class="text-lg font-extrabold text-[#4d4d4d]">{{
-              stats.mannerScore == null ? '-' : stats.mannerScore.toFixed(1)
+              manner == null ? '-' : manner.toFixed(1)
             }}</span>
             <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">매너</span>
           </div>
@@ -152,9 +152,11 @@
                 />
               </svg>
             </span>
-              <span class="block text-[1.1rem] font-extrabold drop-shadow mt-1"
-                :style="championCount > 0 ? 'color : #F5C542' : 'color : #4d4d4d'"
-                >{{ championCount }}</span>
+            <span
+              class="block text-[1.1rem] font-extrabold drop-shadow mt-1"
+              :style="championCount > 0 ? 'color : #F5C542' : 'color : #4d4d4d'"
+              >{{ championCount }}</span
+            >
             <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">챔피언</span>
           </div>
         </div>
@@ -172,6 +174,7 @@ const props = defineProps({
   nickname: String,
   playTime: Number,
   myChampions: Array,
+  manner: String,
 })
 
 defineEmits(['close'])

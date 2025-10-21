@@ -6,8 +6,7 @@
     <div
       class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white/95 backdrop-blur-md border-b shadow-sm"
     >
-      <div class="flex items-center h-14">
-      </div>
+      <div class="flex items-center h-14"></div>
       <div class="flex items-enter gap-3 mr-4">
         <button
           @click="searchUsers"
@@ -218,7 +217,9 @@
               </div>
               <!-- 친구추가/나의 친구 버튼: 바이오 바로 아래 -->
               <div v-if="!user.isMe" class="flex gap-3 mt-4 pb-3 w-full justify-center">
-                <template v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received">
+                <template
+                  v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
+                >
                   <button
                     class="flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                     @click="sendFriendRequest"
@@ -283,16 +284,13 @@
                   </button>
                 </template>
               </div>
-
             </div>
           </div>
 
           <!-- Top 3 Rules - Enhanced Section -->
           <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                인기 규칙
-              </h3>
+              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">인기 규칙</h3>
               <button
                 @click="showStatsModal = true"
                 class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"
@@ -311,6 +309,7 @@
             :nickname="user.nickname"
             :playTime="user.playTime"
             :myChampions="user.myChampions"
+            :manner="user.mannerScore"
             @close="showStatsModal = false"
           />
           <transition name="champ-slide">
@@ -346,13 +345,11 @@
         <section class="w-full mx-auto px-4 bg-[#f8f9fa] pb-0">
           <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
           <div v-if="statMode === 'rule'" class="pb-4">
-              @click="showRuleModal = true"
-              class="w-full py-3 rounded-xl bg-orange-100 text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2"
-            >
-              <i class="fas fa-list-alt"></i>
-              {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
-              placeholder="주 카테고리"
-            />
+            @click="showRuleModal = true" class="w-full py-3 rounded-xl bg-orange-100
+            text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2" >
+            <i class="fas fa-list-alt"></i>
+            {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
+            placeholder="주 카테고리" />
             <CustomSelect
               :options="subCategoryOptions"
               v-model="selectedSubCategory"
@@ -420,9 +417,7 @@
           class="w-full mx-auto px-4 pb-0 bg-[#f8f9fa]"
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-              최근 경기
-            </h3>
+            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">최근 경기</h3>
             <button
               @click="goToUserFeed"
               class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"

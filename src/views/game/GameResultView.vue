@@ -257,8 +257,8 @@
         </div>
 
         <div class="flex justify-center gap-3 mt-4">
-          <button class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow">친구 추가</button>
-          <button class="px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold shadow">결과 공유</button>
+          <button @click="sendFriendRequest" class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow">친구 추가</button>
+          <button @click="onShare" class="px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold shadow">결과 공유</button>
         </div>
       </div>
     </div>
@@ -616,6 +616,40 @@ const dataUrlToFile = (dataUrl, filename) => {
 }
 
 const goHome = () => router.push(`/profile/0?id=${gameId}`)
+
+// 친구 요청
+async function sendFriendRequest() {
+  try {
+    const opponentId = user1.value.id === currentUserId.value ? user2.value.id : user1.value.id
+    await api.post(`/api/friends/request/${opponentId}`)
+    showToast('친구 요청을 보냈습니다!')
+  } catch (e) {
+    if (e?.response?.data?.message) showToast(e.response.data.message)
+    else showToast('이미 요청했거나 친구 상태입니다.')
+  }
+}
+
+// 경기 공유
+async function onShare() {
+  try {
+    const res = await api.post('/api/invite', null, { params: { gameId: `${gameId}` } })
+    const url = res.data.url
+    const opponentName = user1.value.id === currentUserId.value ? user2.value.nickname : user1.value.nickname
+    const text = `${opponentName}님과의 경기 결과 – Match`
+
+    if (navigator.share) {
+      await navigator.share({ title: 'Match', text, url })
+    } else {
+      await navigator.clipboard.writeText(url)
+      showToast('링크를 복사했어요!')
+    }
+  } catch (e) {
+    console.log(e)
+    if (e?.message !== 'Share canceled') {
+      showToast('공유에 실패했습니다.')
+    }
+  }
+}
 </script>
 
 <style scoped>

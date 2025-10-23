@@ -244,10 +244,11 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import api from '../../api/api'
 import RuleComparisonModal from '../../components/admin/RuleComparisonModal.vue'
 
+const router = useRouter()
 const route = useRoute()
 
 const loading = ref(true)
@@ -291,6 +292,9 @@ async function loadRequests() {
     requests.value = allRequests.slice(startIdx, endIdx)
   } catch (e) {
     console.error('Failed to load requests:', e)
+    // 관리자 권한이 없거나 에러 발생 시 메인으로 이동
+    alert('관리자 권한이 필요합니다.')
+    router.push('/admin')
   } finally {
     loading.value = false
   }

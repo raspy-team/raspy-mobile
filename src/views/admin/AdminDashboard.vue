@@ -175,6 +175,9 @@ async function fetchStats() {
     recentRequests.value = pendingData.slice(0, 5)
   } catch (e) {
     console.error('Failed to fetch stats:', e)
+    // 관리자 권한이 없거나 에러 발생 시 메인으로 이동
+    alert('관리자 권한이 필요합니다.')
+    router.push('/game')
   } finally {
     loading.value = false
   }

@@ -406,6 +406,14 @@
               >
                 도전자 {{ game.applicants.length }}명
               </button>
+              <button
+                v-if="game.isOwner && game.status !== 'IN_PROGRESS' && game.status !== 'COMPLETED'"
+                @click.stop="openDeleteModal(game)"
+                class="flex items-center justify-center w-12 py-3 px-0 bg-red-100 text-red-600 rounded-[8px] hover:bg-red-200 transition"
+                title="경기 삭제"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -546,6 +554,37 @@
     @cancel="onCameraCancel"
   />
 
+  <!-- 경기 삭제 확인 모달 -->
+  <div
+    v-if="showDeleteModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100200]"
+  >
+    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+      <div class="text-center mb-4">
+        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">경기 삭제</h3>
+        <p class="text-sm text-gray-600">
+          정말로 이 경기를 삭제하시겠습니까?<br />
+          <span class="text-xs text-red-500 mt-2 block">이 작업은 되돌릴 수 없습니다.</span>
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button
+          @click="showDeleteModal = false"
+          class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition"
+        >
+          취소
+        </button>
+        <button
+          @click="confirmDeleteGame"
+          class="flex-1 bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition shadow"
+        >
+          삭제
+        </button>
+      </div>
+    </div>
+  </div>
+
   <CustomToast />
 
   <!-- 규칙 모달 -->
@@ -603,6 +642,10 @@ const showCameraModal = ref(false)
 const capturedPhotoFile = ref(null)
 const addressInputModal = ref(null)
 let autocompleteModal = null
+
+// 경기 삭제 관련
+const showDeleteModal = ref(false)
+const gameToDelete = ref(null)
 
 // 모든 게임을 최신순으로 합쳐서 보여주기 (신청한 게임 + 내 게임)
 // 내 게임에는 신청자 목록도 함께 포함
@@ -984,6 +1027,36 @@ function getTypeLabel(game) {
     return '내 게임'
   }
   return '게임'
+}
+
+// 경기 삭제 관련
+function openDeleteModal(game) {
+  gameToDelete.value = game
+  showDeleteModal.value = true
+}
+
+async function confirmDeleteGame() {
+  if (!gameToDelete.value) return
+
+  try {
+    await client.delete(`/api/games/${gameToDelete.value.id}/delete`)
+
+    // 목록에서 제거
+    myGames.value = myGames.value.filter((g) => g.id !== gameToDelete.value.id)
+
+    showToast('경기가 삭제되었습니다.')
+    showDeleteModal.value = false
+    gameToDelete.value = null
+  } catch (e) {
+    if (e.response?.status === 403) {
+      showToast('본인이 생성한 경기만 삭제할 수 있습니다.')
+    } else if (e.response?.status === 404) {
+      showToast('존재하지 않는 경기입니다.')
+    } else {
+      showToast('경기 삭제에 실패했습니다.')
+    }
+    console.error('Failed to delete game:', e)
+  }
 }
 </script>
 

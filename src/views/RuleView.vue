@@ -280,6 +280,9 @@ const toggleSort = () => {
 const onPlusClick = () => {
   router.push('/rules/create')
 }
+const onMyRulesClick = () => {
+  router.push('/rules/my-rules')
+}
 const selectSort = (v) => {
   sort.value = v
   showSortOptions.value = false

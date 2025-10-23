@@ -15,6 +15,8 @@ import Setting from "../views/SettingView.vue"
 import Rule from "../views/RuleView.vue"
 import RuleCreate from "../views/rule/RuleCreateView.vue"
 import RuleRanking from "../views/rule/RuleRankingView.vue"
+import MyRules from "../views/rule/MyRulesView.vue"
+import RuleEdit from "../views/rule/RuleEditView.vue"
 import DmRoomList from '../views/DmRoomList.vue'
 import OauthCallback from '../views/OauthCallBack.vue'
 
@@ -25,6 +27,9 @@ import InviteDeep from "../views/InviteDeep.vue"
 
 import Feed from "../views/feed/FeedView.vue"
 import GameView from "../views/game/GameView.vue"
+
+import AdminDashboard from "../views/admin/AdminDashboard.vue"
+import AdminRuleEditRequests from "../views/admin/AdminRuleEditRequestsView.vue"
 
 const routes = [
   {
@@ -96,14 +101,19 @@ const routes = [
   { path: '/settings', component:  Setting},
   { path: '/rules', component:  Rule},
   { path: '/rules/create', component: RuleCreate},
+  { path: '/rules/my-rules', component: MyRules},
+  { path: '/rules/edit/:id', component: RuleEdit, props: true},
   { path: '/rules/:ruleId/ranking', component: RuleRanking, props: true},
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/group/login', component: GroupUserLogin},
-  {path:'/invite-fall-back/:gameId', component : InviteDeep}, 
+  {path:'/invite-fall-back/:gameId', component : InviteDeep},
   { path: '/feed', component: Feed},
 
+  // Admin routes
+  { path: '/admin', component: AdminDashboard},
+  { path: '/admin/rule-edit-requests', component: AdminRuleEditRequests},
 
-  
+
   /**
    * not found view
    */

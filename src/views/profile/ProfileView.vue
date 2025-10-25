@@ -290,7 +290,7 @@
           <!-- Top 3 Rules - Enhanced Section -->
           <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">인기 규칙</h3>
+              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">가장 많이 플레이한 규칙</h3>
               <button
                 @click="showStatsModal = true"
                 class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"

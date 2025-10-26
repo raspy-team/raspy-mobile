@@ -271,10 +271,10 @@
                 </template>
                 <template v-else-if="friendStatus.isFriend">
                   <button
-                    class="flex justify-center items-center bg-white border-2 border-green-600 text-green-600 font-bold py-3.5 w-full rounded-xl shadow-md transition-all cursor-default"
-                    disabled
+                    class="flex justify-center items-center bg-white border-2 border-red-400 text-red-600 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-red-50 transition-all"
+                    @click="showUnfriendConfirm = true"
                   >
-                    <i class="fas fa-check mr-2"></i> 나의 친구
+                    <i class="fas fa-user-minus mr-2"></i> 친구 끊기
                   </button>
                   <button
                     class="flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
@@ -766,6 +766,46 @@
     <CustomToast />
   </div>
   <Footer tab="profile" />
+
+  <!-- 친구 끊기 확인 모달 -->
+  <transition name="fade">
+    <div
+      v-if="showUnfriendConfirm"
+      class="fixed inset-0 bg-black/50 flex justify-center items-center z-[60]"
+      @click.self="showUnfriendConfirm = false"
+    >
+      <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-modalpop">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-user-minus text-red-600 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">
+            친구를 끊으시겠습니까?
+          </h3>
+          <p class="text-sm text-gray-600 mb-1">
+            {{ user?.nickname }}님과의 친구 관계가 삭제됩니다.
+          </p>
+          <p class="text-xs text-gray-500">
+            상대는 내가 친구를 끊은 것을 알 수 없습니다.
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <button
+            @click="showUnfriendConfirm = false"
+            class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+          >
+            취소
+          </button>
+          <button
+            @click="confirmUnfriend"
+            class="flex-1 py-3 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all"
+          >
+            끊기
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -882,6 +922,8 @@ async function sendFriendRequest() {
 }
 
 const showConfirm = ref(false)
+const showUnfriendConfirm = ref(false)
+
 function blockUser() {
   showConfirm.value = true
 }
@@ -901,6 +943,19 @@ async function confirmBlock() {
     console.error('차단 실패', error)
   } finally {
     showConfirm.value = false
+  }
+}
+
+async function confirmUnfriend() {
+  try {
+    await api.delete(`/api/friends/${userId}`)
+    showToast('친구를 끊었습니다.')
+    showUnfriendConfirm.value = false
+    // 친구 상태 다시 가져오기
+    await fetchFriendStatus()
+  } catch (error) {
+    console.error('친구 끊기 실패:', error)
+    showToast('친구 끊기에 실패했습니다.')
   }
 }
 async function sendFriendCancelRequest() {

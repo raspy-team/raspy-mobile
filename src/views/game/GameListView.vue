@@ -197,6 +197,12 @@
             취소
           </button>
           <button
+            @click="goToDM(selectedGame.ownerId)"
+            class="w-14 h-14 flex items-center justify-center bg-blue-400 text-white rounded-full hover:bg-blue-500 transition"
+          >
+            <i class="fas fa-paper-plane"></i>
+          </button>
+          <button
             @click="toggleComment(selectedGame.id)"
             class="w-14 h-14 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
           >
@@ -1214,6 +1220,11 @@ const cancelApply = async (game) => {
   } catch (err) {
     showToast(err.response?.data?.message || '취소에 실패했습니다.')
   }
+}
+
+// DM으로 이동
+const goToDM = (ownerId) => {
+  router.push(`/chat/${ownerId}`)
 }
 
 onMounted(() => {

@@ -48,7 +48,7 @@
         @mouseup="onPanelDragEnd"
       >
         <div class="flex items-center justify-between px-6 h-16 border-b">
-    <span class="text-lg font-bold text-gray-800">알림</span>
+          <span class="text-lg font-bold text-gray-800">알림</span>
           <button
             @click="toggleNotificationPanel"
             class="text-gray-400 hover:text-gray-800 text-xl"
@@ -108,7 +108,7 @@
           <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
           <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
         </div>
-  <p class="mt-6 text-white/70 text-base">피드를 불러오는 중...</p>
+        <p class="mt-6 text-white/70 text-base">피드를 불러오는 중...</p>
       </div>
     </div>
   </div>
@@ -119,9 +119,9 @@
   >
     <div class="flex items-center justify-center h-full">
       <div class="text-center max-w-sm mx-auto p-6">
-  <i class="fas fa-trophy text-lg text-white/30 mb-4"></i>
-  <h3 class="text-lg font-bold mb-2">아직 경기가 없어요</h3>
-  <p class="text-white/70 text-base leading-relaxed">
+        <i class="fas fa-trophy text-lg text-white/30 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">아직 경기가 없어요</h3>
+        <p class="text-white/70 text-base leading-relaxed">
           친구들과 첫 경기를 시작해보세요!<br />
           새로운 도전이 기다리고 있습니다.
         </p>
@@ -988,11 +988,14 @@
     class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
     @click="closePlayerSelectModal"
   >
-    <div class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto relative" @click.stop>
+    <div
+      class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto relative"
+      @click.stop
+    >
       <button
         @click="closePlayerSelectModal"
-        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2 "
-        style="z-index:10;"
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2"
+        style="z-index: 10"
         aria-label="닫기"
       >
         <i class="fas fa-times text-xl"></i>
@@ -1029,7 +1032,7 @@
     </div>
   </div>
 
-  <Comment class="z-[100000]" v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
+  <Comment class="z-[100000]" v-if="commentId == 1" :id="post.id" @close="commentId = 0" />
 </template>
 
 <script setup>
@@ -1882,7 +1885,7 @@ function closePlayerSelectModal() {
 function onComment() {
   const currentPost = post.value
   if (currentPost?.id) {
-    commentId.value = currentPost.id
+    commentId.value = 1
   }
 }
 async function onShare() {

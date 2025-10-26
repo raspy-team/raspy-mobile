@@ -18,6 +18,10 @@ const targetUserProfileUrl = ref('')
 // 나랑도해 요청 데이터
 const playWithMeRequest = ref(null) // 받은 나랑도해 요청 정보
 
+// 에러 모달 관련
+const showErrorModal = ref(false)
+const errorMessage = ref('')
+
 function updateHeaderPosition() {
   // visualViewport를 지원하는 경우만 적용 (for iOS)
   if (window.visualViewport) {
@@ -84,6 +88,11 @@ onMounted(async () => {
     scrollToBottom()
   } catch (e) {
     console.error(e)
+    // 자기 자신과의 DM 에러 처리
+    if (e.response?.data?.message?.includes('자기 자신과의 DM')) {
+      errorMessage.value = '자기 자신과의 DM은 생성할 수 없습니다.'
+      showErrorModal.value = true
+    }
   }
 })
 
@@ -177,6 +186,12 @@ const handleReject = async () => {
   } catch (error) {
     console.error('나랑도해 요청 거절 중 오류:', error)
   }
+}
+
+// 에러 모달 확인 버튼 클릭 시
+const closeErrorModal = () => {
+  showErrorModal.value = false
+  router.go(-1)
 }
 
 </script>
@@ -447,6 +462,26 @@ const handleReject = async () => {
             </svg>
           </button>
         </form>
+      </div>
+    </div>
+
+    <!-- 에러 모달 -->
+    <div
+      v-if="showErrorModal"
+      class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full">
+        <div class="text-center mb-4">
+          <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">알림</h3>
+          <p class="text-sm text-gray-600">{{ errorMessage }}</p>
+        </div>
+        <button
+          @click="closeErrorModal"
+          class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition shadow"
+        >
+          확인
+        </button>
       </div>
     </div>
   </div>

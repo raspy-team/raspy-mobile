@@ -7,8 +7,9 @@
       <div
         class="bg-white rounded-2xl p-7 shadow-2xl max-w-xs w-full relative overflow-visible animate-modalpop"
       >
-        <!-- Close Button -->
+        <!-- Close Button (메인 뷰일 때만) -->
         <button
+          v-if="currentView === 'main'"
           @click="$emit('close')"
           class="absolute right-6 top-6 text-gray-400 hover:text-red-400 text-2xl z-10 transition-colors duration-150 bg-white rounded-full shadow-md p-1"
           aria-label="닫기"
@@ -22,15 +23,27 @@
           </svg>
         </button>
 
+        <!-- Back Button (서브 뷰일 때만) -->
+        <button
+          v-if="currentView !== 'main'"
+          @click="goBackToMain"
+          class="absolute left-6 top-6 text-gray-600 hover:text-gray-800 text-xl z-10 transition-colors duration-150"
+          aria-label="뒤로가기"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
         <!-- Title -->
         <div class="flex flex-col gap-2 items-center mb-5 mt-1">
           <span class="text-base font-bold text-gray-800 text-center">
-            {{ nickname }}님의 통계
+            <template v-if="currentView === 'main'">{{ nickname }}님의 통계</template>
+            <template v-else-if="currentView === 'champions'">챔피언 목록</template>
+            <template v-else-if="currentView === 'friends'">친구 목록</template>
           </span>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-2 gap-4 text-center">
+        <!-- Main Stats Grid -->
+        <div v-if="currentView === 'main'" class="grid grid-cols-2 gap-4 text-center">
           <!-- 승 -->
           <div
             class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
@@ -127,8 +140,13 @@
           </div>
           <!-- 친구 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            @click="showFriends"
+            class="relative flex flex-col items-center justify-center p-3 rounded-lg shadow-sm transition-all bg-blue-50 border-blue-300 border-2 border-transparent cursor-pointer group"
           >
+            <!-- 클릭 가능 표시 -->
+            <div class="absolute top-2 right-2 opacity-100 transition-opacity">
+              <i class="fas fa-chevron-right text-blue-500 text-xs"></i>
+            </div>
             <span class="my-1">
               <svg width="60" height="56" viewBox="0 0 100 100">
                 <path
@@ -142,8 +160,13 @@
           </div>
           <!-- 챔피언 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            @click="showChampions"
+            class="relative flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm transition-all bg-yellow-50 border-yellow-300 border-2 border-transparent cursor-pointer group"
           >
+            <!-- 클릭 가능 표시 -->
+            <div class="absolute top-2 right-2 opacity-100 transition-opacity">
+              <i class="fas fa-chevron-right text-yellow-600 text-xs"></i>
+            </div>
             <span class="text-lg font-extrabold text-gray-600 relative">
               <svg class="" width="60" height="56" viewBox="0 0 150 135">
                 <path
@@ -160,13 +183,184 @@
             <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">챔피언</span>
           </div>
         </div>
+
+        <!-- Champions List View -->
+        <div v-else-if="currentView === 'champions'" class="max-h-96 overflow-y-auto">
+          <div v-if="myChampions && myChampions.length > 0" class="space-y-3">
+            <div
+              v-for="(champion, index) in myChampions"
+              :key="index"
+              class="relative p-4 rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all group"
+            >
+              <div class="flex items-center gap-3">
+                <!-- 순위 뱃지 -->
+                <div class="flex-shrink-0">
+                  <div class="relative w-14 h-14 flex items-center justify-center">
+                    <!-- 금메달 -->
+                    <div
+                      v-if="index === 0"
+                      class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full"
+                    ></div>
+                    <!-- 은메달 -->
+                    <div
+                      v-else-if="index === 1"
+                      class="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full"
+                    ></div>
+                    <!-- 동메달 -->
+                    <div
+                      v-else-if="index === 2"
+                      class="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full"
+                    ></div>
+                    <!-- 그 외 -->
+                    <div
+                      v-else
+                      class="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full"
+                    ></div>
+
+                    <i class="fas fa-trophy text-white text-2xl relative z-10 drop-shadow-md"></i>
+                    <div
+                      class="absolute -bottom-1 -right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md border-2"
+                      :class="{
+                        'border-yellow-500': index === 0,
+                        'border-gray-400': index === 1,
+                        'border-orange-500': index === 2,
+                        'border-blue-500': index > 2,
+                      }"
+                    >
+                      <span
+                        class="text-xs font-black"
+                        :class="{
+                          'text-yellow-600': index === 0,
+                          'text-gray-600': index === 1,
+                          'text-orange-600': index === 2,
+                          'text-blue-600': index > 2,
+                        }"
+                      >
+                        {{ index + 1 }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-bold text-gray-900 truncate mb-1">
+                    {{ champion.ruleTitle }}
+                  </h3>
+                  <p class="text-xs text-gray-600 flex items-center gap-1">
+                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                    {{ champion.region }}
+                  </p>
+                </div>
+
+                <!-- 우승 아이콘 -->
+                <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i class="fas fa-crown text-yellow-500 text-xl"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center text-gray-400 py-10">
+            <div class="relative inline-block">
+              <div
+                class="absolute inset-0 bg-gray-200 rounded-full blur-2xl opacity-30 animate-pulse"
+              ></div>
+              <i class="fas fa-trophy text-6xl mb-3 opacity-20 relative"></i>
+            </div>
+            <p class="text-sm font-semibold">아직 획득한 챔피언이 없습니다</p>
+            <p class="text-xs text-gray-400 mt-2">경기에서 우승하여 챔피언 타이틀을 획득하세요!</p>
+          </div>
+        </div>
+
+        <!-- Friends List View -->
+        <div v-else-if="currentView === 'friends'" class="max-h-96 overflow-y-auto">
+          <div v-if="loadingFriends" class="text-center py-10">
+            <i class="fas fa-spinner fa-spin text-orange-500 text-3xl"></i>
+            <p class="text-sm text-gray-500 mt-3">친구 목록을 불러오는 중...</p>
+          </div>
+          <div v-else-if="friendsList && friendsList.length > 0" class="space-y-3">
+            <div
+              v-for="friend in friendsList"
+              :key="friend.id"
+              class="p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all"
+            >
+              <div class="flex items-center gap-3">
+                <img
+                  @click="goToFriendProfile(friend.id)"
+                  :src="friend.avatar || '/default.png'"
+                  class="w-12 h-12 rounded-full object-cover border-2 border-blue-400 cursor-pointer hover:border-blue-500 transition-all"
+                  alt="Friend Profile"
+                />
+                <div class="flex-1 min-w-0 cursor-pointer" @click="goToFriendProfile(friend.id)">
+                  <h3 class="text-sm font-bold text-gray-900 truncate">
+                    {{ friend.nickname }}
+                  </h3>
+                  <p v-if="friend.intro" class="text-xs text-gray-600 mt-0.5 truncate">
+                    {{ friend.intro }}
+                  </p>
+                </div>
+                <!-- 내 프로필일 때만 친구 끊기 버튼 표시 -->
+                <button
+                  v-if="isMyProfile"
+                  @click.stop="openUnfriendModal(friend)"
+                  class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all"
+                >
+                  <i class="fas fa-user-minus mr-1"></i>
+                  끊기
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center text-gray-400 py-10">
+            <i class="fas fa-user-friends text-4xl mb-3 opacity-30"></i>
+            <p class="text-sm">친구가 없습니다</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- 친구 끊기 확인 모달 -->
+  <transition name="fade">
+    <div
+      v-if="showUnfriendModal"
+      class="fixed inset-0 bg-black/50 flex justify-center items-center z-[60]"
+      @click.self="cancelUnfriend"
+    >
+      <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-modalpop">
+        <div class="text-center mb-6">
+          <div
+            class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <i class="fas fa-user-minus text-red-600 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">친구를 끊으시겠습니까?</h3>
+          <p class="text-sm text-gray-600 mb-1">
+            {{ friendToUnfriend?.nickname }}님과의 친구 관계가 삭제됩니다.
+          </p>
+          <p class="text-xs text-gray-500">상대는 내가 친구를 끊은 것을 알 수 없습니다.</p>
+        </div>
+        <div class="flex gap-3">
+          <button
+            @click="cancelUnfriend"
+            class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+          >
+            취소
+          </button>
+          <button
+            @click="confirmUnfriend"
+            class="flex-1 py-3 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all"
+          >
+            끊기
+          </button>
+        </div>
       </div>
     </div>
   </transition>
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits, onMounted, watch } from 'vue'
+import { computed, defineProps, defineEmits, onMounted, watch, ref } from 'vue'
+import api from '../api/api'
 
 const props = defineProps({
   show: Boolean,
@@ -175,9 +369,19 @@ const props = defineProps({
   playTime: Number,
   myChampions: Array,
   manner: String,
+  userId: Number,
 })
 
-defineEmits(['close'])
+const emit = defineEmits(['close', 'navigateToProfile', 'friendRemoved'])
+
+// 뷰 상태 관리
+const currentView = ref('main') // 'main', 'champions', 'friends'
+const friendsList = ref([])
+const loadingFriends = ref(false)
+
+// 친구 끊기 확인 모달
+const showUnfriendModal = ref(false)
+const friendToUnfriend = ref(null)
 
 onMounted(() => {
   console.log('StatsModal mounted. Show prop:', props.show)
@@ -187,6 +391,10 @@ watch(
   () => props.show,
   (newValue) => {
     console.log('StatsModal show prop changed:', newValue)
+    // 모달이 닫힐 때 메인 뷰로 리셋
+    if (!newValue) {
+      currentView.value = 'main'
+    }
   },
 )
 
@@ -199,6 +407,72 @@ const formattedPlayTime = computed(() => {
 })
 
 const championCount = computed(() => props.myChampions?.length ?? 0)
+
+// 챔피언 목록 보기
+const showChampions = () => {
+  currentView.value = 'champions'
+}
+
+// 친구 목록 보기
+const showFriends = async () => {
+  currentView.value = 'friends'
+  loadingFriends.value = true
+  try {
+    const response = await api.get('/api/friends/my', {
+      params: { userId: props.userId || 0 },
+    })
+    friendsList.value = response.data
+  } catch (error) {
+    console.error('친구 목록 불러오기 실패:', error)
+  } finally {
+    loadingFriends.value = false
+  }
+}
+
+// 메인 뷰로 돌아가기
+const goBackToMain = () => {
+  currentView.value = 'main'
+}
+
+// 친구 프로필로 이동
+const goToFriendProfile = (friendId) => {
+  // emit으로 부모 컴포넌트에 알려서 모달을 닫고 라우팅
+  emit('navigateToProfile', friendId)
+}
+
+// 친구 끊기 확인 모달 열기
+const openUnfriendModal = (friend) => {
+  friendToUnfriend.value = friend
+  showUnfriendModal.value = true
+}
+
+// 친구 끊기 확인
+const confirmUnfriend = async () => {
+  if (!friendToUnfriend.value) return
+
+  try {
+    await api.delete(`/api/friends/${friendToUnfriend.value.id}`)
+    // 목록에서 제거
+    friendsList.value = friendsList.value.filter((f) => f.id !== friendToUnfriend.value.id)
+    // 부모 컴포넌트에 친구가 제거되었음을 알림
+    emit('friendRemoved')
+    // 모달 닫기
+    showUnfriendModal.value = false
+    friendToUnfriend.value = null
+  } catch (error) {
+    console.error('친구 끊기 실패:', error)
+    alert('친구 끊기에 실패했습니다.')
+  }
+}
+
+// 친구 끊기 취소
+const cancelUnfriend = () => {
+  showUnfriendModal.value = false
+  friendToUnfriend.value = null
+}
+
+// 내 프로필인지 확인
+const isMyProfile = computed(() => props.userId == 0)
 </script>
 
 <style scoped>

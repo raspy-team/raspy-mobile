@@ -290,7 +290,9 @@
           <!-- Top 3 Rules - Enhanced Section -->
           <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">가장 많이 플레이한 규칙</h3>
+              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                가장 많이 플레이한 규칙
+              </h3>
               <button
                 @click="showStatsModal = true"
                 class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"
@@ -310,7 +312,10 @@
             :playTime="user.playTime"
             :myChampions="user.myChampions"
             :manner="user.mannerScore"
+            :userId="userId"
             @close="showStatsModal = false"
+            @navigateToProfile="navigateToFriendProfile"
+            @friendRemoved="onFriendRemoved"
           />
           <transition name="champ-slide">
             <div v-if="showChampions" class="champ-card-container w-full max-w-md mx-auto mt-0">
@@ -923,6 +928,21 @@ async function fetchFriendStatus() {
   friendStatus.value = res.data
   sent.value = friendStatus.value.sent
 }
+
+// 친구 프로필로 이동
+function navigateToFriendProfile(friendId) {
+  showStatsModal.value = false
+  router.push(`/profile/${friendId}`)
+}
+
+// 친구 제거 후 처리
+function onFriendRemoved() {
+  // 친구 수 감소
+  if (user.value && user.value.stats && user.value.stats.friends > 0) {
+    user.value.stats.friends -= 1
+  }
+}
+
 onMounted(() => {
   fetchFriendStatus()
 })

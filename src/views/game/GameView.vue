@@ -457,6 +457,23 @@
         </p>
       </div>
 
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-map-pin mr-1 text-orange-500"></i>
+          상세 장소 (선택)
+        </label>
+        <input
+          v-model="detailedPlace"
+          class="w-full text-base px-4 py-3 bg-white rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+          placeholder="상세 장소를 입력하세요 (예: 3층, A코트)"
+          autocomplete="off"
+        />
+        <p class="text-xs text-gray-400 mt-2">
+          <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+          추가 정보를 입력하면 장소에 함께 표시됩니다
+        </p>
+      </div>
+
       <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
         <div class="flex items-start gap-3">
           <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
@@ -634,6 +651,7 @@ let pollingInterval = null // 폴링 인터벌 ID
 const showAddressModal = ref(false)
 const searchQuery = ref('')
 const selectedPlace = ref(null)
+const detailedPlace = ref('')
 const currentGameId = ref(null)
 const showCountdownModal = ref(false)
 const countdownDurationText = ref('')
@@ -916,12 +934,14 @@ const initGoogleAutocomplete = () => {
 const clearSelection = () => {
   selectedPlace.value = null
   searchQuery.value = ''
+  detailedPlace.value = ''
 }
 
 const openStartModal = (game) => {
   showAddressModal.value = true
   searchQuery.value = ''
   selectedPlace.value = null
+  detailedPlace.value = ''
   currentGameId.value = game.id
 
   nextTick(() => {
@@ -931,9 +951,15 @@ const openStartModal = (game) => {
 
 const submitAndStartGame = async () => {
   if (!selectedPlace.value) return alert('장소를 선택해주세요.')
+
+  // Google API 장소 이름과 상세 장소를 공백으로 합침
+  const combinedDetailAddress = detailedPlace.value
+    ? `${selectedPlace.value.name} ${detailedPlace.value}`
+    : selectedPlace.value.name
+
   await client.post(`/api/games/${currentGameId.value}/set-region`, {
     roadAddress: selectedPlace.value.address,
-    detailAddress: selectedPlace.value.name,
+    detailAddress: combinedDetailAddress,
   })
 
   showAddressModal.value = false
@@ -989,6 +1015,7 @@ const closeModal = () => {
   showAddressModal.value = false
   searchQuery.value = ''
   selectedPlace.value = null
+  detailedPlace.value = ''
   currentGameId.value = null
 }
 

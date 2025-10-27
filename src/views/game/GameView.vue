@@ -426,7 +426,65 @@
 
   <FooterNav tab="game" />
 
-  <!-- 게임 시작 모달들 (MyGameListView에서 가져온 것) -->
+  <!-- 게임 시작 모달들 -->
+
+  <!-- 기존 장소 확인 모달 (최강의 UX!) -->
+  <div
+    v-if="showLocationConfirmModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
+  >
+    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-2xl">
+      <!-- 헤더 -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-4">
+          <i class="fas fa-map-marker-alt text-orange-500 text-3xl"></i>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900 mb-2">경기 장소 확인</h2>
+        <p class="text-sm text-gray-500">선택하신 장소에서 경기를 진행합니다</p>
+      </div>
+
+      <!-- 장소 정보 카드 -->
+      <div class="mb-6 p-5 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200">
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 mt-1">
+            <i class="fas fa-location-dot text-orange-600 text-xl"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-bold text-gray-900 mb-1 break-words">
+              {{ currentGameLocation }}
+            </p>
+            <p class="text-xs text-orange-600 font-medium">
+              <i class="fas fa-info-circle mr-1"></i>이 장소로 경기를 시작합니다
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 버튼 영역 -->
+      <div class="space-y-3">
+        <button
+          @click="continueWithExistingLocation"
+          class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg active:scale-95 transition-all"
+        >
+          <i class="fas fa-check-circle mr-2"></i>이 장소로 계속하기
+        </button>
+        <button
+          @click="changeLocation"
+          class="w-full py-3 px-6 rounded-xl bg-white border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-gray-700 font-semibold active:scale-95 transition-all"
+        >
+          <i class="fas fa-edit mr-2"></i>다른 장소로 변경
+        </button>
+        <button
+          @click="showLocationConfirmModal = false"
+          class="w-full py-2 text-gray-500 hover:text-gray-700 font-medium transition"
+        >
+          취소
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 장소 설정 모달 -->
   <div
     v-if="showAddressModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
@@ -648,11 +706,13 @@ const loading = ref(true)
 let pollingInterval = null // 폴링 인터벌 ID
 
 // 게임 시작 관련
+const showLocationConfirmModal = ref(false) // 기존 장소 확인 모달
 const showAddressModal = ref(false)
 const searchQuery = ref('')
 const selectedPlace = ref(null)
 const detailedPlace = ref('')
 const currentGameId = ref(null)
+const currentGameLocation = ref('') // 기존 장소 저장
 const showCountdownModal = ref(false)
 const countdownDurationText = ref('')
 const showAddressErrorModal = ref(false)
@@ -938,15 +998,42 @@ const clearSelection = () => {
 }
 
 const openStartModal = (game) => {
+  currentGameId.value = game.id
+
+  // 기존 장소가 있는지 확인
+  if (game.matchLocation && game.matchLocation.trim() !== '') {
+    // 기존 장소가 있으면 확인 모달 표시
+    currentGameLocation.value = game.matchLocation
+    showLocationConfirmModal.value = true
+  } else {
+    // 기존 장소가 없으면 바로 장소 설정 모달 표시
+    openAddressModal()
+  }
+}
+
+// 장소 설정 모달 열기
+const openAddressModal = () => {
   showAddressModal.value = true
   searchQuery.value = ''
   selectedPlace.value = null
   detailedPlace.value = ''
-  currentGameId.value = game.id
 
   nextTick(() => {
     initGoogleAutocomplete()
   })
+}
+
+// 기존 장소로 계속하기
+const continueWithExistingLocation = () => {
+  showLocationConfirmModal.value = false
+  // set-region API 호출 없이 바로 사진 촬영으로 이동
+  showCameraModal.value = true
+}
+
+// 장소 변경하기
+const changeLocation = () => {
+  showLocationConfirmModal.value = false
+  openAddressModal()
 }
 
 const submitAndStartGame = async () => {

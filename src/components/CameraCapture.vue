@@ -1,4 +1,5 @@
 <template>
+  <!-- 모달 UI -->
   <div
     v-if="isVisible"
     class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center"
@@ -42,7 +43,7 @@
       <div class="px-4 pb-4 space-y-3">
         <button
           v-if="!capturedImage"
-          @click="triggerCamera"
+          @click.stop="triggerCamera"
           class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
         >
           <i class="fas fa-camera text-2xl"></i>
@@ -72,17 +73,17 @@
         </button>
       </div>
     </div>
-
-    <!-- 숨겨진 파일 입력 (카메라만) -->
-    <input
-      ref="cameraInputRef"
-      type="file"
-      accept="image/*"
-      capture="environment"
-      @change="onImageChange"
-      class="hidden"
-    />
   </div>
+
+  <!-- 숨겨진 파일 입력 (모달 외부에 배치 - 안드로이드 웹뷰 호환성) -->
+  <input
+    ref="cameraInputRef"
+    type="file"
+    accept="image/*"
+    capture="environment"
+    @change="onImageChange"
+    class="hidden"
+  />
 </template>
 
 <script setup>
@@ -116,7 +117,18 @@ const selectedFile = ref(null)
 
 // 카메라 트리거
 const triggerCamera = () => {
-  cameraInputRef.value?.click()
+  // 안드로이드 웹뷰 호환성을 위해 명시적으로 처리
+  if (cameraInputRef.value) {
+    try {
+      // input 엘리먼트가 DOM에 존재하는지 확인
+      console.log('Triggering camera input...')
+      cameraInputRef.value.click()
+    } catch (error) {
+      console.error('Failed to trigger camera:', error)
+    }
+  } else {
+    console.warn('Camera input ref is not available')
+  }
 }
 
 // 이미지 선택
@@ -167,9 +179,10 @@ watch(
       selectedFile.value = null
     } else if (newVal && props.autoOpen) {
       // 모달이 열릴 때 autoOpen이 true면 자동으로 카메라 실행
+      // 약간의 지연을 주어 DOM이 완전히 렌더링된 후 실행
       setTimeout(() => {
         triggerCamera()
-      }, 100)
+      }, 150)
     }
   },
 )

@@ -730,7 +730,7 @@ async function onCameraChange(e) {
     try {
       const dataUrl = event.target.result
 
-      // 이미지 압축 (기본값 사용: 1200px, quality 0.6)
+      // 이미지 압축 (기본값 사용: 800px, quality 0.3)
       const compressed = await compressImage(dataUrl)
 
       // localStorage에 저장

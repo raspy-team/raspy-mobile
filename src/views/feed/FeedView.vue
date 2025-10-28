@@ -416,16 +416,20 @@
                 muted
                 playsinline
                 webkit-playsinline
+                x-webkit-airplay="deny"
+                disablePictureInPicture
                 preload="auto"
                 @loadedmetadata="onVideoLoaded($event, 'headline')"
                 @canplay="onVideoCanPlay($event, 'headline')"
                 @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
                 @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
+                @webkitbeginfullscreen.prevent="console.log('[FeedView] 전체화면 방지')"
+                @webkitendfullscreen.prevent="console.log('[FeedView] 전체화면 종료 방지')"
               />
               <!-- Canvas로 동영상 표시 -->
               <canvas
                 :ref="(el) => videoCanvasRefs.headline = el"
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                 @click="toggleVideoPlay('headline')"
               />
             </div>
@@ -843,12 +847,16 @@
                   muted
                   playsinline
                   webkit-playsinline
+                  x-webkit-airplay="deny"
+                  disablePictureInPicture
                   preload="metadata"
+                  @webkitbeginfullscreen.prevent
+                  @webkitendfullscreen.prevent
                 />
                 <!-- Canvas로 동영상 표시 -->
                 <canvas
                   :ref="(el) => videoCanvasRefs['gallery_' + idx] = el"
-                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full"
+                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                   @click="toggleVideoPlay('gallery_' + idx)"
                 />
               </div>
@@ -1831,22 +1839,22 @@ function setupVideoCanvas(videoEl, id) {
     const canvas = videoCanvasRefs[id]
     if (!canvas) return
 
-    // Canvas 크기를 화면에 맞게 설정 (가로 꽉 차게)
+    // Canvas 크기를 화면에 맞게 설정 (object-fit: contain - 전체 보이기)
     const containerWidth = window.innerWidth
     const containerHeight = window.innerHeight
 
     const videoAspectRatio = videoEl.videoWidth / videoEl.videoHeight
     const containerAspectRatio = containerWidth / containerHeight
 
-    // object-fit: cover 효과를 위해 Canvas 크기 조정
+    // object-fit: contain 효과 - 동영상 전체가 보이도록
     if (videoAspectRatio > containerAspectRatio) {
-      // 동영상이 더 넓음 - 높이를 기준으로 맞춤
-      canvas.width = containerHeight * videoAspectRatio
-      canvas.height = containerHeight
-    } else {
-      // 동영상이 더 좁음 - 너비를 기준으로 맞춤
+      // 동영상이 더 넓음 (가로가 김) - 너비를 기준으로 맞춤
       canvas.width = containerWidth
       canvas.height = containerWidth / videoAspectRatio
+    } else {
+      // 동영상이 더 좁음 (세로가 김) - 높이를 기준으로 맞춤
+      canvas.width = containerHeight * videoAspectRatio
+      canvas.height = containerHeight
     }
 
     // 비디오 재생 시작 (autoplay)

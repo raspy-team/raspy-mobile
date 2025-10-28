@@ -1233,59 +1233,26 @@ const showOnboarding = ref(false)
 // 온보딩 완료 처리
 function completeOnboarding() {
   showOnboarding.value = false
-  console.log('[FeedView] 온보딩 완료, 동영상 재생 시도')
+  console.log('[FeedView] 온보딩 완료, 실시간 렌더링 재생 시작')
 
-  // 온보딩 완료 후 동영상 재생 시도 (여러 방법으로)
+  // 온보딩 완료 후 실시간 렌더링 재생 시작
   const tryPlayVideo = () => {
-    console.log('[FeedView] videoElements:', videoElements)
-    const headlineVideo = videoElements['headline']
-
-    if (!headlineVideo) {
-      console.warn('[FeedView] headline 비디오 요소를 찾을 수 없음')
-
-      // DOM에서 직접 찾기 시도
-      const videoEl = document.querySelector('video[src]')
-      if (videoEl) {
-        console.log('[FeedView] DOM에서 비디오 요소 발견, 재생 시도')
-        videoEl.muted = true
-        videoEl.volume = 0
-        videoEl.play().then(() => {
-          console.log('[FeedView] DOM 비디오 재생 성공!')
-        }).catch((err) => {
-          console.warn('[FeedView] DOM 비디오 재생 실패:', err.message)
-        })
-      } else {
-        console.warn('[FeedView] DOM에서도 비디오 요소를 찾을 수 없음')
+    // headline 비디오가 준비되었는지 확인
+    if (videoElements['headline']) {
+      console.log('[FeedView] headline 비디오 준비 완료, 재생 시작')
+      if (!videoPlaying['headline']) {
+        startRealTimeRendering('headline')
       }
-      return
+    } else {
+      console.log('[FeedView] headline 비디오 아직 준비 중...')
     }
-
-    console.log('[FeedView] headline 비디오 발견, 상태:', {
-      paused: headlineVideo.paused,
-      readyState: headlineVideo.readyState,
-      src: headlineVideo.src
-    })
-
-    headlineVideo.muted = true
-    headlineVideo.volume = 0
-    headlineVideo.play().then(() => {
-      console.log('[FeedView] 온보딩 후 동영상 재생 성공!')
-    }).catch((err) => {
-      console.warn('[FeedView] 온보딩 후 동영상 재생 실패:', err.message)
-    })
   }
 
-  // 즉시 시도
-  tryPlayVideo()
-
-  // 100ms 후 재시도
+  // 여러 시점에 재생 시도
   setTimeout(tryPlayVideo, 100)
-
-  // 300ms 후 재시도
-  setTimeout(tryPlayVideo, 300)
-
-  // 500ms 후 재시도
   setTimeout(tryPlayVideo, 500)
+  setTimeout(tryPlayVideo, 1000)
+  setTimeout(tryPlayVideo, 2000)
 }
 
 // 나랑도해 상태 관리
@@ -1810,10 +1777,12 @@ const galleryPhotos = computed(() => {
   return sorted.slice(1)
 })
 
-// 동영상 Canvas 렌더링 (iOS 전체화면 방지)
+// 동영상 Canvas 렌더링 (실시간 렌더링 방식 - iOS 전체화면 완전 방지)
 const videoCanvasRefs = reactive({})
 const videoElements = reactive({})
 const videoAnimationFrames = reactive({})
+const videoPlaying = reactive({}) // 재생 상태
+const videoCurrentTime = reactive({}) // 현재 재생 시간
 
 // 동영상 로드 이벤트 핸들러
 function onVideoLoaded(event, id) {
@@ -1850,10 +1819,14 @@ function setupVideoCanvas(videoEl, id) {
   if (!videoEl) return
 
   videoElements[id] = videoEl
+  videoPlaying[id] = false
+  videoCurrentTime[id] = 0
 
   videoEl.addEventListener('loadedmetadata', () => {
     const canvas = videoCanvasRefs[id]
     if (!canvas) return
+
+    console.log(`[FeedView] ${id} 비디오 메타데이터 로드 완료, 실시간 렌더링 준비`)
 
     // Canvas 크기를 화면에 맞게 설정 (object-fit: contain - 전체 보이기)
     const containerWidth = window.innerWidth
@@ -1873,87 +1846,74 @@ function setupVideoCanvas(videoEl, id) {
       canvas.height = containerHeight
     }
 
-    // 비디오 재생 시작 (autoplay)
-    // 브라우저 autoplay 정책 우회를 위해 명시적으로 muted 설정
+    // 비디오 설정
     videoEl.muted = true
     videoEl.volume = 0
+    videoEl.currentTime = 0
 
-    // Intersection Observer로 화면에 보일 때 재생 (threshold를 0.1로 낮춤)
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && videoEl.paused) {
-          console.log('[FeedView] IntersectionObserver: 동영상이 화면에 보임, 재생 시도')
-          videoEl.muted = true
-          videoEl.volume = 0
-          videoEl.play().then(() => {
-            console.log('[FeedView] IntersectionObserver: 재생 성공')
-            renderVideoToCanvas(id)
-          }).catch(err => {
-            console.warn('[FeedView] IntersectionObserver: 재생 실패', err)
-          })
-        }
-      })
-    }, { threshold: 0.1 })
-
-    observer.observe(canvas)
-
-    // 즉시 재생 시도 (웹뷰 등에서는 성공할 수 있음)
-    videoEl.play().then(() => {
-      console.log('[FeedView] setupVideoCanvas: 즉시 재생 성공')
-    }).catch(() => {
-      console.log('[FeedView] setupVideoCanvas: 즉시 재생 실패, IntersectionObserver 또는 사용자 인터랙션 대기')
-    })
-
-    // 렌더링 시작
-    renderVideoToCanvas(id)
-
-    // 추가 시도: 100ms, 500ms, 1000ms 후에도 재생 시도
-    const retryDelays = [100, 500, 1000]
-    retryDelays.forEach(delay => {
-      setTimeout(() => {
-        if (videoEl.paused) {
-          videoEl.muted = true
-          videoEl.volume = 0
-          videoEl.play().catch(() => {})
-        }
-      }, delay)
-    })
+    // 자동 재생 시작
+    console.log(`[FeedView] ${id} 실시간 렌더링 시작`)
+    startRealTimeRendering(id)
   })
 }
 
-function renderVideoToCanvas(id) {
-  const video = videoElements[id]
+// 실시간 렌더링 (Video를 Canvas에 계속 그리기)
+function startRealTimeRendering(id) {
   const canvas = videoCanvasRefs[id]
+  const videoEl = videoElements[id]
 
-  if (!video || !canvas) return
+  if (!canvas || !videoEl) return
 
+  videoPlaying[id] = true
   const ctx = canvas.getContext('2d')
+  const fps = 30
+  const frameDuration = 1000 / fps
 
-  function draw() {
-    if (video.paused || video.ended) {
-      videoAnimationFrames[id] = null
-      return
+  let lastFrameTime = Date.now()
+  const duration = videoEl.duration
+
+  function renderFrame() {
+    if (!videoPlaying[id]) return
+
+    const now = Date.now()
+    const elapsed = now - lastFrameTime
+
+    if (elapsed >= frameDuration) {
+      // Canvas에 현재 비디오 프레임 그리기
+      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height)
+
+      // 비디오 시간 업데이트
+      videoCurrentTime[id] += elapsed / 1000
+
+      // 루프 처리
+      if (videoCurrentTime[id] >= duration) {
+        videoCurrentTime[id] = 0
+      }
+
+      videoEl.currentTime = videoCurrentTime[id]
+      lastFrameTime = now
     }
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    videoAnimationFrames[id] = requestAnimationFrame(draw)
+    videoAnimationFrames[id] = requestAnimationFrame(renderFrame)
   }
 
-  draw()
+  renderFrame()
 }
 
-function toggleVideoPlay(id) {
-  const video = videoElements[id]
-  if (!video) return
 
-  if (video.paused) {
-    video.play()
-    renderVideoToCanvas(id)
-  } else {
-    video.pause()
+function toggleVideoPlay(id) {
+  console.log(`[FeedView] ${id} 재생 토글, 현재 상태: ${videoPlaying[id] ? '재생중' : '일시정지'}`)
+
+  if (videoPlaying[id]) {
+    // 일시정지
+    videoPlaying[id] = false
     if (videoAnimationFrames[id]) {
       cancelAnimationFrame(videoAnimationFrames[id])
+      videoAnimationFrames[id] = null
     }
+  } else {
+    // 재생
+    startRealTimeRendering(id)
   }
 }
 

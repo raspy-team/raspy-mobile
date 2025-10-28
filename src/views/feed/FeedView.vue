@@ -381,8 +381,7 @@
               <!-- Canvas로 동영상 표시 -->
               <canvas
                 :ref="(el) => videoCanvasRefs.headline = el"
-                class="absolute top-0 left-0 w-screen h-auto min-h-full"
-                style="object-fit: cover;"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full"
                 @click="toggleVideoPlay('headline')"
               />
             </div>
@@ -784,25 +783,30 @@
               v-if="post.type === 'game' && post.isCompleted && features.gallery"
               class="w-screen shrink-0 h-full relative"
             >
-              <!-- 동영상 -->
-              <video
+              <!-- 동영상 (Canvas로 렌더링하여 iOS 전체화면 방지) -->
+              <div
                 v-if="p && p.mediaType === 'VIDEO'"
-                :src="p.url"
-                class="absolute top-0 left-0 w-screen h-auto min-h-full bg-black"
-                style="object-fit: cover; object-position: center;"
-                autoplay
-                loop
-                muted
-                playsinline
-                webkit-playsinline
-                x-webkit-airplay="deny"
-                preload="auto"
-                disablePictureInPicture
-                controlsList="nodownload nofullscreen noremoteplayback"
-                @click.stop="$event.target.paused ? $event.target.play() : $event.target.pause()"
-                @webkitbeginfullscreen.prevent
-                @webkitendfullscreen.prevent
-              />
+                class="absolute top-0 left-0 w-screen h-full bg-black"
+              >
+                <!-- 실제 video 태그 (화면에 안 보임) -->
+                <video
+                  :ref="(el) => setupVideoCanvas(el, 'gallery_' + idx)"
+                  :src="p.url"
+                  class="hidden"
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  webkit-playsinline
+                  preload="auto"
+                />
+                <!-- Canvas로 동영상 표시 -->
+                <canvas
+                  :ref="(el) => videoCanvasRefs['gallery_' + idx] = el"
+                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full"
+                  @click="toggleVideoPlay('gallery_' + idx)"
+                />
+              </div>
 
               <!-- 이미지 -->
               <img
@@ -1231,6 +1235,16 @@ watch(
     if (newPost && newPost.type === 'game' && newPost.isCompleted) {
       await fetchLikeStatus(newPost)
       await fetchRanking(newPost)
+
+      // 동영상 자동재생 트리거 (페이지 로드 시)
+      setTimeout(() => {
+        const headlineVideo = videoElements['headline']
+        if (headlineVideo && headlineVideo.paused) {
+          headlineVideo.play().catch(err => {
+            console.warn('[FeedView] watch: 동영상 자동재생 실패:', err)
+          })
+        }
+      }, 100)
     }
   },
   { immediate: true },
@@ -1674,9 +1688,28 @@ function setupVideoCanvas(videoEl, id) {
     const canvas = videoCanvasRefs[id]
     if (!canvas) return
 
-    // Canvas 크기 설정
-    canvas.width = videoEl.videoWidth
-    canvas.height = videoEl.videoHeight
+    // Canvas 크기를 화면에 맞게 설정 (가로 꽉 차게)
+    const containerWidth = window.innerWidth
+    const containerHeight = window.innerHeight
+
+    const videoAspectRatio = videoEl.videoWidth / videoEl.videoHeight
+    const containerAspectRatio = containerWidth / containerHeight
+
+    // object-fit: cover 효과를 위해 Canvas 크기 조정
+    if (videoAspectRatio > containerAspectRatio) {
+      // 동영상이 더 넓음 - 높이를 기준으로 맞춤
+      canvas.width = containerHeight * videoAspectRatio
+      canvas.height = containerHeight
+    } else {
+      // 동영상이 더 좁음 - 너비를 기준으로 맞춤
+      canvas.width = containerWidth
+      canvas.height = containerWidth / videoAspectRatio
+    }
+
+    // 비디오 재생 시작 (autoplay)
+    videoEl.play().catch(err => {
+      console.warn('[FeedView] 동영상 자동재생 실패:', err)
+    })
 
     // 렌더링 시작
     renderVideoToCanvas(id)

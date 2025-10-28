@@ -400,41 +400,18 @@
             v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
             class="w-screen shrink-0 h-full relative"
           >
-            <!-- 동영상 (Canvas로 렌더링하여 iOS 전체화면 방지) -->
-            <div
+            <!-- 동영상 -->
+            <video
               v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
-              class="absolute top-0 left-0 w-screen min-h-full bg-black"
-              style="overflow: hidden;"
-            >
-              <!-- Canvas로 동영상 표시 -->
-              <canvas
-                :ref="(el) => videoCanvasRefs.headline = el"
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                style="z-index: 10;"
-                @click.stop.prevent="toggleVideoPlay('headline')"
-                @touchstart.stop.prevent
-                @touchend.stop.prevent="toggleVideoPlay('headline')"
-              />
-            </div>
-
-            <!-- Video 태그를 완전히 분리된 숨겨진 컨테이너에 배치 -->
-            <div
-              v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
-              class="fixed"
-              style="top: -10000px; left: -10000px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none;"
-            >
-              <video
-                :ref="(el) => setupVideoCanvas(el, 'headline')"
-                :src="headlinePhoto.url"
-                style="width: 100%; height: 100%;"
-                muted
-                playsinline
-                webkit-playsinline
-                x-webkit-airplay="deny"
-                disablePictureInPicture
-                preload="auto"
-              />
-            </div>
+              :src="headlinePhoto.url"
+              class="w-full h-full object-contain bg-black"
+              autoplay
+              loop
+              muted
+              playsinline
+              webkit-playsinline
+              preload="auto"
+            />
 
             <!-- 이미지 -->
             <img
@@ -833,41 +810,18 @@
               v-if="post.type === 'game' && post.isCompleted && features.gallery"
               class="w-screen shrink-0 h-full relative"
             >
-              <!-- 동영상 (Canvas로 렌더링하여 iOS 전체화면 방지) -->
-              <div
+              <!-- 동영상 -->
+              <video
                 v-if="p && p.mediaType === 'VIDEO'"
-                class="absolute top-0 left-0 w-screen h-full bg-black"
-                style="overflow: hidden;"
-              >
-                <!-- Canvas로 동영상 표시 -->
-                <canvas
-                  :ref="(el) => videoCanvasRefs['gallery_' + idx] = el"
-                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style="z-index: 10;"
-                  @click.stop.prevent="toggleVideoPlay('gallery_' + idx)"
-                  @touchstart.stop.prevent
-                  @touchend.stop.prevent="toggleVideoPlay('gallery_' + idx)"
-                />
-              </div>
-
-              <!-- Video 태그를 완전히 분리된 숨겨진 컨테이너에 배치 -->
-              <div
-                v-if="p && p.mediaType === 'VIDEO'"
-                class="fixed"
-                style="top: -10000px; left: -10000px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none;"
-              >
-                <video
-                  :ref="(el) => setupVideoCanvas(el, 'gallery_' + idx)"
-                  :src="p.url"
-                  style="width: 100%; height: 100%;"
-                  muted
-                  playsinline
-                  webkit-playsinline
-                  x-webkit-airplay="deny"
-                  disablePictureInPicture
-                  preload="metadata"
-                />
-              </div>
+                :src="p.url"
+                class="absolute inset-0 w-full h-full object-contain bg-black"
+                autoplay
+                loop
+                muted
+                playsinline
+                webkit-playsinline
+                preload="auto"
+              />
 
               <!-- 이미지 -->
               <img
@@ -1193,7 +1147,7 @@ function formatFeedDate(dateStr) {
 }
 // 세트/시간 정보 아코디언 상태
 const showSetDetails = ref(false)
-import { computed, ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
 import api, { playWithMeTooAPI } from '../../api/api'
@@ -1226,7 +1180,7 @@ const showOnboarding = ref(false)
 function completeOnboarding() {
   showOnboarding.value = false
   localStorage.setItem('feedOnboardingCompleted', 'true')
-  console.log('[FeedView] 온보딩 완료, localStorage에 저장')
+  console.log('[FeedView] 온보딩 완료 - GIF는 자동으로 재생됨')
 }
 
 // 나랑도해 상태 관리
@@ -1314,17 +1268,6 @@ watch(
     if (newPost && newPost.type === 'game' && newPost.isCompleted) {
       await fetchLikeStatus(newPost)
       await fetchRanking(newPost)
-
-      // 동영상 자동재생 트리거 (페이지 로드 시)
-      setTimeout(() => {
-        const headlineVideo = videoElements['headline']
-        if (headlineVideo && headlineVideo.paused) {
-          // 브라우저 autoplay 정책 우회를 위해 명시적으로 muted 설정
-          headlineVideo.muted = true
-          // 웹뷰에서는 성공, 브라우저에서는 실패하지만 에러 무시
-          headlineVideo.play().catch(() => {})
-        }
-      }, 300)
     }
   },
   { immediate: true },
@@ -1754,115 +1697,10 @@ const galleryPhotos = computed(() => {
   return sorted.slice(1)
 })
 
-// 동영상 Canvas 렌더링 (실시간 렌더링 방식 - iOS 전체화면 완전 방지)
-const videoCanvasRefs = reactive({})
-const videoElements = reactive({})
-const videoAnimationFrames = reactive({})
-const videoPlaying = reactive({}) // 재생 상태
-const videoCurrentTime = reactive({}) // 현재 재생 시간
+// 동영상은 이제 서버에서 GIF로 변환되어 제공됨
+// Video 관련 코드 제거됨
 
 
-function setupVideoCanvas(videoEl, id) {
-  if (!videoEl) return
-
-  videoElements[id] = videoEl
-  videoPlaying[id] = false
-  videoCurrentTime[id] = 0
-
-  videoEl.addEventListener('loadedmetadata', () => {
-    const canvas = videoCanvasRefs[id]
-    if (!canvas) return
-
-    console.log(`[FeedView] ${id} 비디오 메타데이터 로드 완료, 실시간 렌더링 준비`)
-
-    // Canvas 크기를 화면에 맞게 설정 (object-fit: contain - 전체 보이기)
-    const containerWidth = window.innerWidth
-    const containerHeight = window.innerHeight
-
-    const videoAspectRatio = videoEl.videoWidth / videoEl.videoHeight
-    const containerAspectRatio = containerWidth / containerHeight
-
-    // object-fit: contain 효과 - 동영상 전체가 보이도록
-    if (videoAspectRatio > containerAspectRatio) {
-      // 동영상이 더 넓음 (가로가 김) - 너비를 기준으로 맞춤
-      canvas.width = containerWidth
-      canvas.height = containerWidth / videoAspectRatio
-    } else {
-      // 동영상이 더 좁음 (세로가 김) - 높이를 기준으로 맞춤
-      canvas.width = containerHeight * videoAspectRatio
-      canvas.height = containerHeight
-    }
-
-    // 비디오 설정
-    videoEl.muted = true
-    videoEl.volume = 0
-    videoEl.currentTime = 0
-
-    // 자동 재생 시작
-    console.log(`[FeedView] ${id} 실시간 렌더링 시작`)
-    startRealTimeRendering(id)
-  })
-}
-
-// 실시간 렌더링 (Video를 Canvas에 계속 그리기)
-function startRealTimeRendering(id) {
-  const canvas = videoCanvasRefs[id]
-  const videoEl = videoElements[id]
-
-  if (!canvas || !videoEl) return
-
-  videoPlaying[id] = true
-  const ctx = canvas.getContext('2d')
-  const fps = 30
-  const frameDuration = 1000 / fps
-
-  let lastFrameTime = Date.now()
-  const duration = videoEl.duration
-
-  function renderFrame() {
-    if (!videoPlaying[id]) return
-
-    const now = Date.now()
-    const elapsed = now - lastFrameTime
-
-    if (elapsed >= frameDuration) {
-      // Canvas에 현재 비디오 프레임 그리기
-      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height)
-
-      // 비디오 시간 업데이트
-      videoCurrentTime[id] += elapsed / 1000
-
-      // 루프 처리
-      if (videoCurrentTime[id] >= duration) {
-        videoCurrentTime[id] = 0
-      }
-
-      videoEl.currentTime = videoCurrentTime[id]
-      lastFrameTime = now
-    }
-
-    videoAnimationFrames[id] = requestAnimationFrame(renderFrame)
-  }
-
-  renderFrame()
-}
-
-
-function toggleVideoPlay(id) {
-  console.log(`[FeedView] ${id} 재생 토글, 현재 상태: ${videoPlaying[id] ? '재생중' : '일시정지'}`)
-
-  if (videoPlaying[id]) {
-    // 일시정지
-    videoPlaying[id] = false
-    if (videoAnimationFrames[id]) {
-      cancelAnimationFrame(videoAnimationFrames[id])
-      videoAnimationFrames[id] = null
-    }
-  } else {
-    // 재생
-    startRealTimeRendering(id)
-  }
-}
 
 // Sections order
 const sections = computed(() => {

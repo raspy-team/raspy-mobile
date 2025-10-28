@@ -405,12 +405,12 @@
               v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
               class="absolute top-0 left-0 w-screen min-h-full bg-black"
             >
-              <!-- 실제 video 태그 (화면에 안 보이지만 autoplay를 위해 작게 표시) -->
+              <!-- 실제 video 태그 (Canvas 뒤에 숨김, autoplay를 위해 화면에 존재) -->
               <video
                 :ref="(el) => setupVideoCanvas(el, 'headline')"
                 :src="headlinePhoto.url"
-                class="absolute opacity-0 pointer-events-none"
-                style="width: 1px; height: 1px;"
+                class="absolute top-0 left-0 w-full h-full"
+                style="opacity: 0; z-index: -1; pointer-events: none; object-fit: contain;"
                 autoplay
                 loop
                 muted
@@ -423,13 +423,12 @@
                 @canplay="onVideoCanPlay($event, 'headline')"
                 @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
                 @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
-                @webkitbeginfullscreen.prevent="console.log('[FeedView] 전체화면 방지')"
-                @webkitendfullscreen.prevent="console.log('[FeedView] 전체화면 종료 방지')"
               />
               <!-- Canvas로 동영상 표시 -->
               <canvas
                 :ref="(el) => videoCanvasRefs.headline = el"
                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                style="z-index: 1;"
                 @click="toggleVideoPlay('headline')"
               />
             </div>
@@ -836,12 +835,12 @@
                 v-if="p && p.mediaType === 'VIDEO'"
                 class="absolute top-0 left-0 w-screen h-full bg-black"
               >
-                <!-- 실제 video 태그 (화면에 안 보이지만 autoplay를 위해 작게 표시) -->
+                <!-- 실제 video 태그 (Canvas 뒤에 숨김, autoplay를 위해 화면에 존재) -->
                 <video
                   :ref="(el) => setupVideoCanvas(el, 'gallery_' + idx)"
                   :src="p.url"
-                  class="absolute opacity-0 pointer-events-none"
-                  style="width: 1px; height: 1px;"
+                  class="absolute top-0 left-0 w-full h-full"
+                  style="opacity: 0; z-index: -1; pointer-events: none; object-fit: contain;"
                   autoplay
                   loop
                   muted
@@ -850,13 +849,12 @@
                   x-webkit-airplay="deny"
                   disablePictureInPicture
                   preload="metadata"
-                  @webkitbeginfullscreen.prevent
-                  @webkitendfullscreen.prevent
                 />
                 <!-- Canvas로 동영상 표시 -->
                 <canvas
                   :ref="(el) => videoCanvasRefs['gallery_' + idx] = el"
                   class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style="z-index: 1;"
                   @click="toggleVideoPlay('gallery_' + idx)"
                 />
               </div>

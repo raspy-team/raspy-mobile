@@ -8,7 +8,7 @@
     <!-- 로딩 상태 -->
     <div v-if="loading" class="flex flex-col items-center justify-center h-screen">
       <i class="fas fa-spinner fa-spin text-4xl text-orange-500 mb-4"></i>
-      <p class="text-gray-600">규칙 정보를 불러오는 중...</p>
+      <p class="text-gray-300">규칙 정보를 불러오는 중...</p>
     </div>
 
     <!-- 규칙 수정 위자드 -->
@@ -16,13 +16,13 @@
       <!-- 안내 메시지 -->
       <div
         v-if="step == 4"
-        class="bg-blue-50 border-l-4 border-blue-500 p-4 mx-5 fixed top-[16dvh] rounded-r-lg"
+        class="bg-blue-900/20 border-l-4 border-blue-400 p-4 mx-5 fixed top-[16dvh] rounded-r-lg"
       >
         <div class="flex items-start">
-          <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
+          <i class="fas fa-info-circle text-blue-400 mt-0.5 mr-3"></i>
           <div class="flex-1">
-            <p class="text-sm font-semibold text-blue-700 mb-1">규칙 수정 요청</p>
-            <p class="text-xs text-blue-600">
+            <p class="text-sm font-semibold text-blue-300 mb-1">규칙 수정 요청</p>
+            <p class="text-xs text-blue-400">
               수정 내용은 관리자 승인 후 반영됩니다. 기존 값이 미리 채워져 있으니 수정할 부분만
               변경해주세요.
             </p>
@@ -43,22 +43,22 @@
     <!-- AI 처리 중 -->
     <div v-if="step === 15" class="flex flex-col items-center justify-center h-screen">
       <i class="fas fa-spinner fa-spin text-4xl text-orange-500 mb-4"></i>
-      <p class="text-gray-600 text-lg font-semibold">수정 요청 제출 중...</p>
+      <p class="text-gray-300 text-lg font-semibold">수정 요청 제출 중...</p>
     </div>
 
     <!-- 수정 요청 완료 -->
     <div v-if="step === 16" class="flex flex-col items-center justify-center h-screen px-6">
       <div
-        class="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center border-2 border-orange-200"
+        class="bg-gray-800 rounded-2xl shadow-lg p-8 max-w-md w-full text-center border-2 border-orange-600"
       >
         <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
-        <h2 class="text-2xl font-bold text-gray-900 mb-3">수정 요청 완료!</h2>
-        <p class="text-gray-600 mb-6 leading-relaxed">
+        <h2 class="text-2xl font-bold text-white mb-3">수정 요청 완료!</h2>
+        <p class="text-gray-300 mb-6 leading-relaxed">
           규칙 수정 요청이 성공적으로 제출되었습니다.<br />
           관리자 검토 후 승인되면 변경사항이 반영됩니다.
         </p>
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <p class="text-sm text-blue-700">
+        <div class="bg-blue-900/20 border border-blue-600 rounded-lg p-4 mb-6">
+          <p class="text-sm text-blue-300">
             <i class="fas fa-info-circle mr-1"></i>
             승인/거절 상태는 '내 규칙' 페이지에서 확인할 수 있습니다.
           </p>
@@ -190,10 +190,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.raspy-top {
+  background: #1f2937;
+}
+
 .progress-bar-outer {
   width: 92dvw;
   height: 7px;
-  background: #f2f4f8;
+  background: #6b7280;
   border-radius: 5px;
   overflow: hidden;
   position: fixed;

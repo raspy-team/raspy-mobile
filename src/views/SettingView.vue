@@ -2,13 +2,13 @@
   <Header :title="'설정'" :has-referer="true" />
 
   <!-- Page container -->
-  <div class="bg-white min-h-dvh">
+  <div class="bg-black min-h-dvh">
     <div class="mx-auto max-w-md px-4 pt-24 pb-12">
       <!-- Profile capsule (optional future area) -->
       <section class="mb-6">
-        <div class="flex items-center gap-3 rounded-2xl border p-3 shadow-sm">
+        <div class="flex items-center gap-3 rounded-2xl border border-gray-600 p-3 shadow-sm bg-gray-800">
           <div
-            class="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center"
+            class="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-700 flex items-center justify-center"
           >
             <img
               v-if="myProfileImage"
@@ -19,13 +19,13 @@
             <i v-else class="fas fa-user text-xl text-gray-400" aria-hidden="true"></i>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm text-gray-600">로그인된 계정</p>
-            <p class="truncate font-semibold">{{ myNickname || (currentUserLabel ? '@' + currentUserLabel : '') }}</p>
+            <p class="truncate text-sm text-gray-400">로그인된 계정</p>
+            <p class="truncate font-semibold text-gray-200">{{ myNickname || (currentUserLabel ? '@' + currentUserLabel : '') }}</p>
             <p v-if="myIntro" class="truncate text-xs text-gray-500">{{ myIntro }}</p>
           </div>
           <button
             @click="goToSetProfile"
-            class="shrink-0 rounded-full border px-3 py-1 text-sm hover:bg-gray-50"
+            class="shrink-0 rounded-full border border-gray-600 px-3 py-1 text-sm text-gray-300 hover:bg-gray-700"
           >
             프로필 설정
           </button>
@@ -38,45 +38,45 @@
         <div>
           <h2
             id="account-section"
-            class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500"
+            class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400"
           >
             계정
           </h2>
-          <ul class="divide-y rounded-2xl border">
+          <ul class="divide-y divide-gray-600 rounded-2xl border border-gray-600">
             <!-- 알림 설정 -->
             <li>
               <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 @click="goNotifications"
                 aria-label="알림 설정"
               >
-                <i class="fas fa-bell text-base text-gray-500" aria-hidden="true"></i>
+                <i class="fas fa-bell text-base text-gray-400" aria-hidden="true"></i>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-gray-900">알림 설정</p>
+                  <p class="truncate font-medium text-gray-200">알림 설정</p>
                   <p class="truncate text-xs text-gray-500">푸시 알림 수신 관리</p>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-400" aria-hidden="true"></i>
+                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
               </button>
             </li>
             <!-- 차단한 유저 보기 -->
             <li>
               <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 @click="openBlockList"
                 aria-label="차단한 유저 보기"
               >
-                <i class="fas fa-shield-alt text-base text-gray-500" aria-hidden="true"></i>
+                <i class="fas fa-shield-alt text-base text-gray-400" aria-hidden="true"></i>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-gray-900">차단한 유저 보기</p>
+                  <p class="truncate font-medium text-gray-200">차단한 유저 보기</p>
                   <p class="truncate text-xs text-gray-500">관리 및 해제</p>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-400" aria-hidden="true"></i>
+                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
               </button>
             </li>
             <!-- 로그아웃 -->
             <li>
               <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 @click="logout"
                 aria-label="로그아웃"
               >
@@ -85,13 +85,13 @@
                   <p class="truncate font-medium text-red-600">로그아웃</p>
                   <p class="truncate text-xs text-gray-500">로그인 화면으로 이동</p>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-400" aria-hidden="true"></i>
+                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
               </button>
             </li>
             <!-- 계정 삭제하기 -->
             <li>
               <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 @click="() => (showDeleteModal = true)"
                 aria-label="계정 삭제하기"
               >
@@ -100,7 +100,7 @@
                   <p class="truncate font-medium text-red-600">계정 삭제하기</p>
                   <p class="truncate text-xs text-gray-500">영구 삭제</p>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-400" aria-hidden="true"></i>
+                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
               </button>
             </li>
           </ul>
@@ -108,36 +108,36 @@
 
         <!-- 정보 -->
         <div>
-          <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">정보</h2>
-          <ul class="divide-y rounded-2xl border">
+          <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">정보</h2>
+          <ul class="divide-y divide-gray-600 rounded-2xl border border-gray-600">
             <!-- 법적 고지사항 -->
             <li>
               <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 @click="() => (showLegalModal = true)"
                 aria-label="법적 고지사항"
               >
-                <i class="fas fa-balance-scale text-base text-gray-500" aria-hidden="true"></i>
+                <i class="fas fa-balance-scale text-base text-gray-400" aria-hidden="true"></i>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-gray-900">법적 고지사항</p>
+                  <p class="truncate font-medium text-gray-200">법적 고지사항</p>
                   <p class="truncate text-xs text-gray-500">개인정보, 커뮤니티, 저작권</p>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-400" aria-hidden="true"></i>
+                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
               </button>
             </li>
             <!-- 앱 정보 -->
             <li>
               <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 @click="openAbout"
                 aria-label="앱 정보"
               >
-                <i class="fas fa-info-circle text-base text-gray-500" aria-hidden="true"></i>
+                <i class="fas fa-info-circle text-base text-gray-400" aria-hidden="true"></i>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-gray-900">앱 정보</p>
+                  <p class="truncate font-medium text-gray-200">앱 정보</p>
                   <p class="truncate text-xs text-gray-500">버전, 빌드, 오픈소스 라이선스</p>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-400" aria-hidden="true"></i>
+                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
               </button>
             </li>
           </ul>
@@ -162,17 +162,17 @@
       @click="showLegalModal = false"
       aria-hidden="true"
     ></div>
-    <div class="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-white p-5 shadow-lg">
+    <div class="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-gray-800 p-5 shadow-lg">
       <div class="absolute right-3 top-3">
         <button
-          class="rounded p-2 text-gray-400 hover:bg-gray-100"
+          class="rounded p-2 text-gray-400 hover:bg-gray-700"
           @click="showLegalModal = false"
           aria-label="닫기"
         >
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <h3 class="mb-3 text-lg font-bold text-gray-900">법적 고지사항</h3>
+      <h3 class="mb-3 text-lg font-bold text-gray-200">법적 고지사항</h3>
       <div class="prose prose-sm max-w-none max-h-[70dvh] overflow-auto">
         <section>
           <h3>1. 개인정보 수집 및 이용</h3>
@@ -265,10 +265,10 @@
       @click="showDeleteModal = false"
       aria-hidden="true"
     ></div>
-    <div class="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-white p-5 shadow-lg">
+    <div class="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-gray-800 p-5 shadow-lg">
       <div class="absolute right-3 top-3">
         <button
-          class="rounded p-2 text-gray-400 hover:bg-gray-100"
+          class="rounded p-2 text-gray-400 hover:bg-gray-700"
           @click="showDeleteModal = false"
           aria-label="닫기"
         >
@@ -276,16 +276,16 @@
         </button>
       </div>
       <h3 class="mb-3 text-lg font-bold text-red-600">계정 삭제 안내</h3>
-      <p class="text-sm text-gray-700">
+      <p class="text-sm text-gray-300">
         정말로 계정을 <span class="font-semibold text-red-600">삭제</span>하시겠습니까? 이 작업은
         되돌릴 수 없습니다.<br /><br />
         단, 언제든지 재가입 할 수 있습니다.
       </p>
       <div class="mt-4 flex gap-2">
-        <button class="flex-1 rounded-lg bg-gray-100 px-4 py-2" @click="showDeleteModal = false">
+        <button class="flex-1 rounded-lg bg-gray-700 px-4 py-2 text-gray-300 hover:bg-gray-600" @click="showDeleteModal = false">
           취소
         </button>
-        <button class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white" @click="deleteAccount">
+        <button class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700" @click="deleteAccount">
           영구 삭제
         </button>
       </div>
@@ -297,27 +297,27 @@
     v-if="showBlockListModal"
     class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
   >
-    <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
+    <div class="relative w-full max-w-md rounded-2xl bg-gray-800 p-6 shadow-lg">
       <button
-        class="absolute top-3 right-3 text-gray-400"
+        class="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
         @click="showBlockListModal = false"
         aria-label="닫기"
       >
         <i class="fas fa-times"></i>
       </button>
-      <h2 class="text-xl font-bold mb-4">내가 차단한 사용자</h2>
-      <div v-if="isLoadingBlocked" class="py-4 text-center text-sm text-gray-500">
+      <h2 class="text-xl font-bold mb-4 text-gray-200">내가 차단한 사용자</h2>
+      <div v-if="isLoadingBlocked" class="py-4 text-center text-sm text-gray-400">
         불러오는 중...
       </div>
       <ul v-else class="space-y-2 max-h-80 overflow-auto">
         <li
           v-for="user in blockedUsers"
           :key="user.id"
-          class="flex items-center justify-between rounded-lg border p-2 hover:bg-gray-50"
+          class="flex items-center justify-between rounded-lg border border-gray-600 p-2 hover:bg-gray-700 bg-gray-800"
         >
           <div class="min-w-0">
-            <p class="truncate font-medium text-gray-800">{{ user.nickname }}</p>
-            <p class="truncate text-xs text-gray-500">@{{ user.email }}</p>
+            <p class="truncate font-medium text-gray-200">{{ user.nickname }}</p>
+            <p class="truncate text-xs text-gray-400">@{{ user.email }}</p>
           </div>
           <button
             @click="unblock(user.id)"
@@ -326,12 +326,12 @@
             해제
           </button>
         </li>
-        <li v-if="!blockedUsers.length" class="py-6 text-center text-gray-500">
+        <li v-if="!blockedUsers.length" class="py-6 text-center text-gray-400">
           차단된 사용자가 없습니다.
         </li>
       </ul>
       <div class="mt-4 text-right">
-        <button class="rounded-lg bg-gray-100 px-4 py-2" @click="showBlockListModal = false">
+        <button class="rounded-lg bg-gray-700 px-4 py-2 text-gray-300 hover:bg-gray-600" @click="showBlockListModal = false">
           닫기
         </button>
       </div>

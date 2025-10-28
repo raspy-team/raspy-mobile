@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="game && user1 && user2"
-    class="w-dvw h-full flex flex-col px-4 py-3 relative text-black overflow-hidden"
+    class="w-dvw h-full flex flex-col px-4 py-3 relative bg-gray-900 text-gray-100 overflow-hidden"
   >
 
     <div class="flex items-center justify-between mb-4">
@@ -10,7 +10,7 @@
           width="8"
           height="12"
           viewBox="0 0 8 12"
-          fill="black"
+          fill="white"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -29,7 +29,7 @@
         <!-- Info Cards: 세트 승점, 세트 수, 세트 시간 -->
         <div class="flex w-full gap-1 sm:gap-1">
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-white text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div
@@ -47,7 +47,7 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-xs sm:text-sm font-semibold">세트 승점</span>
+                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 승점</span>
               </div>
               <div
                 class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1"
@@ -57,7 +57,7 @@
             </div>
           </div>
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-white text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
@@ -73,7 +73,7 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-xs sm:text-sm font-semibold">세트 수</span>
+                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 수</span>
               </div>
               <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ game.rule.setsToWin }}
@@ -81,7 +81,7 @@
             </div>
           </div>
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-white text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
@@ -97,7 +97,7 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-xs sm:text-sm font-semibold">세트 시간</span>
+                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 시간</span>
               </div>
               <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ limitTimeStr }}
@@ -109,12 +109,12 @@
       <div class="w-full flex justify-end mt-2 gap-2">
         <button
           @click="showLogModal = true"
-          class="text-xs text-orange-500 border border-orange-200 rounded-full px-4 py-1 shadow-sm hover:bg-orange-50 transition font-semibold"
+          class="text-xs text-orange-400 border border-orange-600 rounded-full px-4 py-1 shadow-sm hover:bg-gray-700 transition font-semibold"
         >
           로그 보기
         </button>
         <button
-          class="text-xs text-orange-500 border border-orange-200 rounded-full px-4 py-1 shadow-sm hover:bg-orange-50 transition font-semibold"
+          class="text-xs text-orange-400 border border-orange-600 rounded-full px-4 py-1 shadow-sm hover:bg-gray-700 transition font-semibold"
           @click="game.showRuleDetail = true"
         >
           규칙 보기
@@ -123,7 +123,7 @@
     </div>
     <!-- 점수판 섹션 (중앙 영역 - flex-1로 남은 공간 차지) -->
     <div class="flex-1 flex flex-col items-center justify-center relative min-h-0 py-0">
-      <div class="text-orange-600 text-2xl font-bold mb-1 sm:mb-2">
+      <div class="text-orange-400 text-2xl font-bold mb-1 sm:mb-2">
         {{ elapsedTimeStr }}, 세트 {{ currentSet }}
       </div>
       <div class="flex w-full items-start justify-center">
@@ -186,7 +186,7 @@
                 <button
                   @click="socket_sendScore(1, 1)"
                   :disabled="isSetOver || isGameOver"
-                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -199,7 +199,7 @@
                 <button
                   @click="socket_sendScore(1, -1)"
                   :disabled="isSetOver || isGameOver || currentScore1 <= 0"
-                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
                   style="
                     border-bottom-left-radius: 0.5rem;
                     border-bottom-right-radius: 0.5rem;
@@ -221,7 +221,7 @@
                 <button
                   @click="socket_sendScore(2, 1)"
                   :disabled="isSetOver || isGameOver"
-                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -234,7 +234,7 @@
                 <button
                   @click="socket_sendScore(2, -1)"
                   :disabled="isSetOver || isGameOver || currentScore2 <= 0"
-                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
                   style="
                     border-bottom-left-radius: 0.5rem;
                     border-bottom-right-radius: 0.5rem;
@@ -256,13 +256,13 @@
       <div class="w-full grid grid-cols-2 gap-2 sm:gap-4 mb-10">
         <button
           @click="openConfirm('정말로 게임을 재시작 하겠습니까?', socket_resetGame)"
-          class="border text-orange-500 px-3 py-3 rounded-[8.2px] text-xs sm:text-base hover:bg-orange-50 transition"
+          class="border text-orange-400 px-3 py-3 rounded-[8.2px] text-xs sm:text-base hover:bg-gray-700 transition"
         >
           처음부터
         </button>
         <button
           @click="openConfirm('정말로 게임을 즉시 종료합니까?', socket_finishGame)"
-          class="bg-orange-500 text-white px-3 py-3 rounded-[8.2px] text-xs sm:text-base shadow hover:brightness-110 transition"
+          class="bg-orange-600 text-white px-3 py-3 rounded-[8.2px] text-xs sm:text-base shadow hover:brightness-110 transition"
         >
           경기 끝내기
         </button>
@@ -295,10 +295,10 @@
       v-if="isSetOver && !isGameOver"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
     >
-      <div class="bg-white rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
+      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
         <button
           @click="socket_nextSet"
-          class="bg-orange-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
+          class="bg-orange-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
         >
           {{ currentSet + '세트 시작' }}
         </button>
@@ -309,14 +309,14 @@
       v-if="showFinishModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
+      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
         <div class="text-lg font-bold mb-3">세트 종료</div>
         <div class="text-orange-500 font-extrabold text-xl mb-4">
           {{ winner != '-' ? winner + ' 승리' : '무승부' }}
         </div>
         <button
           @click="closeFinishModal"
-          class="bg-orange-500 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
+          class="bg-orange-600 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
         >
           다음 세트로
         </button>
@@ -333,18 +333,18 @@
       v-if="showConfirm"
       class="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center"
     >
-      <div class="bg-white w-full max-w-xs rounded-xl shadow-lg p-7 text-center">
-        <div class="mb-5 text-lg font-bold text-gray-800">{{ confirmMessage }}</div>
+      <div class="bg-gray-800 w-full max-w-xs rounded-xl shadow-lg p-7 text-center">
+        <div class="mb-5 text-lg font-bold text-gray-100">{{ confirmMessage }}</div>
         <div class="flex justify-center gap-3 mt-4">
           <button
             @click="closeConfirm"
-            class="px-5 py-2 bg-gray-100 text-gray-600 rounded-full font-semibold text-sm"
+            class="px-5 py-2 bg-gray-700 text-gray-100 rounded-full font-semibold text-sm"
           >
             취소
           </button>
           <button
             @click="confirmCallbackWrapper"
-            class="px-6 py-2 bg-orange-500 text-white rounded-full font-semibold text-sm shadow hover:bg-orange-400"
+            class="px-6 py-2 bg-orange-600 text-white rounded-full font-semibold text-sm shadow hover:bg-orange-400"
           >
             확인
           </button>
@@ -377,19 +377,19 @@
     v-if="showLogModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
   >
-    <div class="bg-white rounded-xl p-4 shadow-lg w-[90%] max-w-md max-h-[70vh] overflow-y-auto">
+    <div class="bg-gray-800 rounded-xl p-4 shadow-lg w-[90%] max-w-md max-h-[70vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-3">
-        <div class="text-lg font-bold">전체 로그</div>
-        <button @click="showLogModal = false" class="text-orange-500 text-sm">닫기</button>
+        <div class="text-lg font-bold text-gray-100">전체 로그</div>
+        <button @click="showLogModal = false" class="text-orange-400 text-sm">닫기</button>
       </div>
       <div class="flex flex-col space-y-1">
         <div
           v-for="(log, index) in logs"
           :key="index"
-          class="text-xs bg-orange-50 border border-orange-200 rounded-md px-2 py-1 shadow-sm flex items-center justify-between text-gray-700"
+          class="text-xs bg-gray-700 border border-gray-600 rounded-md px-2 py-1 shadow-sm flex items-center justify-between text-gray-100"
         >
           <div class="flex-1 truncate">
-            <span class="text-[11px] text-gray-500 mr-1">[{{ log.elapsed }}]</span>
+            <span class="text-[11px] text-gray-400 mr-1">[{{ log.elapsed }}]</span>
             {{ log.message }}
           </div>
         </div>

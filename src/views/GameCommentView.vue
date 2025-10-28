@@ -8,7 +8,7 @@
       <div
         v-show="showModal"
         ref="sheet"
-        class="w-full raspy-bot max-w-md flex flex-col rounded-t-2xl bg-white shadow-xl"
+        class="w-full raspy-bot max-w-md flex flex-col rounded-t-2xl bg-gray-800 shadow-xl"
         :style="{
           height: `${sheetHeight}px`,
           display: 'flex',
@@ -20,7 +20,7 @@
         @mousedown="onMouseDown"
       >
         <!-- 드래그바 -->
-        <div class="mx-auto mt-2 mb-2 w-10 h-1.5 rounded bg-gray-300" />
+        <div class="mx-auto mt-2 mb-2 w-10 h-1.5 rounded bg-gray-600" />
 
         <!-- 댓글 리스트 영역 -->
         <div
@@ -37,10 +37,10 @@
           <!-- 댓글 내용 -->
           <template v-if="isLoading">
             <div v-for="i in 5" :key="i" class="flex gap-3 py-2 animate-pulse">
-              <div class="w-9 h-9 rounded-full bg-gray-200"></div>
+              <div class="w-9 h-9 rounded-full bg-gray-700"></div>
               <div class="flex-1 space-y-2">
-                <div class="h-3 w-1/4 bg-gray-200 rounded"></div>
-                <div class="h-3 w-full bg-gray-200 rounded"></div>
+                <div class="h-3 w-1/4 bg-gray-700 rounded"></div>
+                <div class="h-3 w-full bg-gray-700 rounded"></div>
               </div>
             </div>
           </template>
@@ -57,13 +57,13 @@
               @img-click="onImagePreview"
             />
           </template>
-          <p v-else class="text-gray-400 text-center text-[15px] mt-16">아직 댓글이 없습니다.</p>
+          <p v-else class="text-gray-300 text-center text-[15px] mt-16">아직 댓글이 없습니다.</p>
         </div>
 
         <!-- 입력창 (항상 바텀) -->
         <form
           @submit.prevent="submitInput"
-          class="flex gap-2 items-center border-t pt-2 pb-2 px-3 bg-white"
+          class="flex gap-2 items-center border-t border-gray-600 pt-2 pb-2 px-3 bg-gray-800"
           ref="inputForm"
           :style="{
             minHeight: `${inputAreaHeight}px`,
@@ -71,7 +71,7 @@
           }"
         >
           <div
-            class="flex items-center flex-1 min-w-0 bg-gray-100 rounded-full px-3 py-2 focus-within:bg-white focus-within:border-gray-300 transition border"
+            class="flex items-center flex-1 min-w-0 bg-gray-700 rounded-full px-3 py-2 focus-within:bg-gray-800 focus-within:border-gray-600 transition border"
           >
             <span
               v-if="replyingToId"
@@ -95,7 +95,7 @@
           <button
             type="button"
             @click="triggerImageInput"
-            class="text-gray-500 px-2 flex items-center justify-center"
+            class="text-gray-400 px-2 flex items-center justify-center"
             style="height: 38px; width: 38px"
             title="사진첨부"
           >
@@ -104,7 +104,7 @@
           <button
             type="submit"
             :disabled="!canSubmit || isLoading"
-            class="px-4 py-2 rounded-full text-white bg-orange-500 disabled:bg-gray-300 font-semibold text-base transition flex items-center justify-center"
+            class="px-4 py-2 rounded-full text-white bg-orange-500 disabled:bg-gray-600 font-semibold text-base transition flex items-center justify-center"
             style="height: 38px"
           >
             게시
@@ -121,10 +121,10 @@
         <!-- 입력 이미지 프리뷰 (있을 때만) -->
         <div
           v-if="inputImagePreview"
-          class="flex items-center gap-2 px-4 pt-1 pb-2 bg-white border-t"
+          class="flex items-center gap-2 px-4 pt-1 pb-2 bg-gray-800 border-t border-gray-600"
         >
           <img :src="inputImagePreview" class="w-14 h-14 rounded-lg object-cover border" />
-          <button @click="removeInputImage" type="button" class="text-gray-500 hover:text-red-400">
+          <button @click="removeInputImage" type="button" class="text-gray-400 hover:text-red-400">
             <i class="fas fa-times text-lg"></i>
           </button>
         </div>

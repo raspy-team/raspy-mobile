@@ -404,13 +404,29 @@
             <div
               v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
               class="absolute top-0 left-0 w-screen min-h-full bg-black"
+              style="overflow: hidden;"
             >
-              <!-- 실제 video 태그 (Canvas 뒤에 숨김, autoplay를 위해 화면에 존재) -->
+              <!-- Canvas로 동영상 표시 -->
+              <canvas
+                :ref="(el) => videoCanvasRefs.headline = el"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                style="z-index: 10;"
+                @click.stop.prevent="toggleVideoPlay('headline')"
+                @touchstart.stop.prevent
+                @touchend.stop.prevent="toggleVideoPlay('headline')"
+              />
+            </div>
+
+            <!-- Video 태그를 완전히 분리된 숨겨진 컨테이너에 배치 -->
+            <div
+              v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
+              class="fixed"
+              style="top: -10000px; left: -10000px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none;"
+            >
               <video
                 :ref="(el) => setupVideoCanvas(el, 'headline')"
                 :src="headlinePhoto.url"
-                class="absolute top-0 left-0 w-full h-full"
-                style="opacity: 0; z-index: -1; pointer-events: none; object-fit: contain;"
+                style="width: 100%; height: 100%;"
                 autoplay
                 loop
                 muted
@@ -423,13 +439,6 @@
                 @canplay="onVideoCanPlay($event, 'headline')"
                 @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
                 @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
-              />
-              <!-- Canvas로 동영상 표시 -->
-              <canvas
-                :ref="(el) => videoCanvasRefs.headline = el"
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                style="z-index: 1;"
-                @click="toggleVideoPlay('headline')"
               />
             </div>
 
@@ -834,13 +843,29 @@
               <div
                 v-if="p && p.mediaType === 'VIDEO'"
                 class="absolute top-0 left-0 w-screen h-full bg-black"
+                style="overflow: hidden;"
               >
-                <!-- 실제 video 태그 (Canvas 뒤에 숨김, autoplay를 위해 화면에 존재) -->
+                <!-- Canvas로 동영상 표시 -->
+                <canvas
+                  :ref="(el) => videoCanvasRefs['gallery_' + idx] = el"
+                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style="z-index: 10;"
+                  @click.stop.prevent="toggleVideoPlay('gallery_' + idx)"
+                  @touchstart.stop.prevent
+                  @touchend.stop.prevent="toggleVideoPlay('gallery_' + idx)"
+                />
+              </div>
+
+              <!-- Video 태그를 완전히 분리된 숨겨진 컨테이너에 배치 -->
+              <div
+                v-if="p && p.mediaType === 'VIDEO'"
+                class="fixed"
+                style="top: -10000px; left: -10000px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none;"
+              >
                 <video
                   :ref="(el) => setupVideoCanvas(el, 'gallery_' + idx)"
                   :src="p.url"
-                  class="absolute top-0 left-0 w-full h-full"
-                  style="opacity: 0; z-index: -1; pointer-events: none; object-fit: contain;"
+                  style="width: 100%; height: 100%;"
                   autoplay
                   loop
                   muted
@@ -849,13 +874,6 @@
                   x-webkit-airplay="deny"
                   disablePictureInPicture
                   preload="metadata"
-                />
-                <!-- Canvas로 동영상 표시 -->
-                <canvas
-                  :ref="(el) => videoCanvasRefs['gallery_' + idx] = el"
-                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style="z-index: 1;"
-                  @click="toggleVideoPlay('gallery_' + idx)"
                 />
               </div>
 

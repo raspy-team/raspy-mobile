@@ -139,12 +139,31 @@
                 >{{ user1SetsWon }}</span
               >
             </div>
-                        <button
-              @click="openCamera"
-              class="mx-4 sm:mx-8 text-[12vw] sm:text-[16dvw] text-orange-300 hover:text-orange-400 active:text-orange-500 transition-colors duration-200 focus:outline-none rounded-full flex items-center justify-center w-[20vw] h-[20vw] sm:w-[24dvw] sm:h-[24dvw] active:scale-95"
-            >
-              <i class="fas fa-camera"></i>
-            </button>
+                        <div class="mx-4 sm:mx-8 flex flex-col items-center relative">
+              <button
+                @touchstart="onCaptureButtonDown"
+                @touchend="onCaptureButtonUp"
+                @mousedown="onCaptureButtonDown"
+                @mouseup="onCaptureButtonUp"
+                @mouseleave="onCaptureButtonCancel"
+                :class="[
+                  'relative text-[12vw] sm:text-[16dvw] transition-all duration-200 focus:outline-none rounded-full flex items-center justify-center w-[20vw] h-[20vw] sm:w-[24dvw] sm:h-[24dvw]',
+                  isLongPressing ? 'text-red-400 scale-105' : 'text-orange-300 hover:text-orange-400 active:text-orange-500 active:scale-95'
+                ]"
+              >
+                <i :class="isLongPressing ? 'fas fa-video animate-pulse' : 'fas fa-camera'"></i>
+              </button>
+
+              <!-- 안내 텍스트 -->
+              <div class="mt-2 text-center">
+                <p v-if="!isLongPressing" class="text-[2.5vw] sm:text-[3vw] text-orange-400 font-semibold drop-shadow">
+                  탭: 사진 | 길게: 동영상
+                </p>
+                <p v-else class="text-[2.5vw] sm:text-[3vw] text-red-400 font-bold drop-shadow animate-pulse">
+                  동영상 촬영 시작...
+                </p>
+              </div>
+            </div>
             <div class="flex items-end">
               <span class="text-[28vw] sm:text-[38dvw] font-extrabold text-orange-500">{{
                 currentScore2
@@ -344,6 +363,16 @@
     class="hidden"
   />
 
+  <!-- 숨겨진 동영상 input -->
+  <input
+    ref="videoInputRef"
+    type="file"
+    accept="video/*"
+    capture="environment"
+    @change="onVideoChange"
+    class="hidden"
+  />
+
   <div
     v-if="showLogModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -382,7 +411,7 @@ import DefaultImage from '../../assets/default.png'
 import MatchModal from '../../components/MatchModal.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
-import { addGamePicture, compressImage } from '../../utils/gamePictureStorage'
+import { addGamePicture, addGameVideo, compressImage, compressVideo } from '../../utils/gamePictureStorage'
 
 const route = useRoute()
 const router = useRouter()
@@ -391,6 +420,9 @@ const gameId = route.params.gameId
 
 // 카메라 관련 상태
 const cameraInputRef = ref(null)
+const videoInputRef = ref(null)
+const isLongPressing = ref(false)
+let longPressTimer = null
 const game = reactive({})
 const chatRoomId = ref(null)
 const currentSet = ref(1)
@@ -713,9 +745,42 @@ function socket_resetGame() {
   })
 }
 
-// 카메라 열기 (바로 input 트리거)
-function openCamera() {
-  cameraInputRef.value?.click()
+// 통합 촬영 버튼 이벤트 핸들러
+function onCaptureButtonDown(e) {
+  e.preventDefault()
+  isLongPressing.value = true
+
+  // 0.5초 길게 누르면 동영상 촬영
+  longPressTimer = setTimeout(() => {
+    if (isLongPressing.value) {
+      isLongPressing.value = false
+      // 동영상 input 트리거
+      videoInputRef.value?.click()
+    }
+  }, 500)
+}
+
+function onCaptureButtonUp(e) {
+  e.preventDefault()
+
+  // 짧게 눌렀으면 사진 촬영
+  if (isLongPressing.value && longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+    isLongPressing.value = false
+
+    // 사진 촬영
+    cameraInputRef.value?.click()
+  }
+}
+
+function onCaptureButtonCancel() {
+  // 마우스가 버튼을 벗어나면 취소
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+  isLongPressing.value = false
 }
 
 // 카메라 파일 선택 완료
@@ -758,9 +823,42 @@ async function onCameraChange(e) {
   e.target.value = ''
 }
 
+// 동영상 파일 선택 완료
+async function onVideoChange(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  showToast('동영상 처리 중...')
+
+  try {
+    // 동영상 압축 (최대 2분)
+    const { dataUrl, duration } = await compressVideo(file, 120)
+
+    // localStorage에 저장
+    addGameVideo(gameId, dataUrl, duration)
+
+    showToast(`동영상이 저장되었습니다! (${Math.floor(duration)}초)`)
+  } catch (error) {
+    console.error('동영상 저장 실패:', error)
+    if (error.message === 'QUOTA_EXCEEDED') {
+      showToast('저장 공간이 부족합니다. 일부 미디어를 삭제한 후 다시 시도해주세요.')
+    } else {
+      showToast('동영상 저장에 실패했습니다.')
+    }
+  }
+
+  // input 초기화
+  e.target.value = ''
+}
+
 onUnmounted(() => {
   clearInterval(timerRef.value)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+
+  // 타이머 정리
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+  }
 })
 </script>
 

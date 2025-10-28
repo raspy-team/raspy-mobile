@@ -148,12 +148,25 @@
   >
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
       <div v-if="prevPost" class="absolute inset-0" :style="prevPreviewStyle">
-        <!-- 배경 이미지 (완료된 경기이고 사진이 있을 때) -->
-        <img
+        <!-- 배경 미디어 (완료된 경기이고 미디어가 있을 때) -->
+        <template
           v-if="prevPost.type === 'game' && prevPost.isCompleted && prevPost.photos?.length > 0"
-          :src="prevPost.photos[0]?.url || prevPost.photos[0]"
-          class="absolute inset-0 w-full h-full object-contain"
-        />
+        >
+          <!-- 동영상 -->
+          <video
+            v-if="(prevPost.photos[0]?.mediaType || 'IMAGE') === 'VIDEO'"
+            :src="prevPost.photos[0]?.url || prevPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+            muted
+            playsinline
+          />
+          <!-- 이미지 -->
+          <img
+            v-else
+            :src="prevPost.photos[0]?.url || prevPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+          />
+        </template>
 
         <div
           v-if="
@@ -219,12 +232,25 @@
       </div>
 
       <div v-if="nextPost" class="absolute inset-0" :style="nextPreviewStyle">
-        <!-- 배경 이미지 (완료된 경기이고 사진이 있을 때) -->
-        <img
+        <!-- 배경 미디어 (완료된 경기이고 미디어가 있을 때) -->
+        <template
           v-if="nextPost.type === 'game' && nextPost.isCompleted && nextPost.photos?.length > 0"
-          :src="nextPost.photos[0]?.url || nextPost.photos[0]"
-          class="absolute inset-0 w-full h-full object-contain"
-        />
+        >
+          <!-- 동영상 -->
+          <video
+            v-if="(nextPost.photos[0]?.mediaType || 'IMAGE') === 'VIDEO'"
+            :src="nextPost.photos[0]?.url || nextPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+            muted
+            playsinline
+          />
+          <!-- 이미지 -->
+          <img
+            v-else
+            :src="nextPost.photos[0]?.url || nextPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+          />
+        </template>
 
         <div
           v-if="
@@ -328,19 +354,39 @@
         @mouseleave.passive="onMouseUp($event)"
       >
         <div class="h-full flex" :style="wrapperStyle">
-          <!-- 인증샷 전체 화면 (사진이 있을 때만) -->
+          <!-- 인증샷 전체 화면 (미디어가 있을 때만) -->
           <section
             v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
             class="w-screen shrink-0 h-full relative"
           >
-            <!-- 전체 화면 배경 이미지 -->
+            <!-- 동영상 -->
+            <video
+              v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
+              :src="headlinePhoto.url"
+              class="absolute top-0 left-0 w-screen h-auto min-h-full bg-black"
+              style="object-fit: cover; object-position: center;"
+              autoplay
+              loop
+              muted
+              playsinline
+              preload="auto"
+              disablePictureInPicture
+              controlsList="nodownload nofullscreen noremoteplayback"
+              @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
+              @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
+              @canplay="console.log('[FeedView] 동영상 재생 가능:', headlinePhoto.url)"
+              @click="$event.target.paused ? $event.target.play() : $event.target.pause()"
+            />
+
+            <!-- 이미지 -->
             <img
+              v-else-if="headlinePhoto"
               :src="headlinePhoto.url"
               alt="인증샷"
               class="w-full h-full object-contain"
               draggable="false"
             />
-            <div class="absolute inset-0 bg-black/20" />
+            <div class="absolute inset-0 bg-black/20 pointer-events-none" />
 
             <!-- 상단 헤더 -->
             <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
@@ -724,19 +770,37 @@
             </div>
           </section>
 
-          <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
+          <template v-for="(p, idx) in galleryPhotos" :key="'gal-' + (p.url || idx)">
             <section
               v-if="post.type === 'game' && post.isCompleted && features.gallery"
               class="w-screen shrink-0 h-full relative"
             >
+              <!-- 동영상 -->
+              <video
+                v-if="p && p.mediaType === 'VIDEO'"
+                :src="p.url"
+                class="absolute top-0 left-0 w-screen h-auto min-h-full bg-black"
+                style="object-fit: cover; object-position: center;"
+                autoplay
+                loop
+                muted
+                playsinline
+                preload="auto"
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
+                @click="$event.target.paused ? $event.target.play() : $event.target.pause()"
+              />
+
+              <!-- 이미지 -->
               <img
+                v-else-if="p && p.url"
                 :src="p.url"
                 alt="photo"
                 class="absolute inset-0 w-full h-full object-contain"
                 draggable="false"
               />
               <div
-                class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
+                class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none"
               ></div>
               <div class="ambient-overlay"></div>
             </section>
@@ -1528,23 +1592,59 @@ const hasPhotos = computed(
   () => post.value && Array.isArray(post.value.photos) && post.value.photos.length > 0,
 )
 
-const headlinePhoto = computed(() => {
-  // 새 API 구조: photos 배열의 첫 번째가 헤드라인 이미지
-  if (!post.value) return null
-  const photos = post.value.photos || []
-  if (photos.length === 0) return null
-
-  // photos[0]이 이미 { url: "..." } 객체 형태
-  return photos[0]?.url ? photos[0] : { url: photos[0] }
-})
-const galleryPhotos = computed(() => {
-  // 새 API 구조: 첫 번째를 제외한 나머지가 갤러리 사진들
+// 미디어 정렬: 동영상을 첫 번째로
+const sortedPhotos = computed(() => {
   if (!post.value) return []
   const photos = post.value.photos || []
-  if (photos.length <= 1) return []
+  if (photos.length === 0) return []
 
-  // 나머지 사진들 (이미 객체 형태거나 문자열일 수 있음)
-  return photos.slice(1).map((photo) => (photo?.url ? photo : { url: photo }))
+  // photos를 객체 형태로 정규화
+  const normalized = photos
+    .map((photo) => {
+      if (photo?.url) {
+        return {
+          url: photo.url,
+          mediaType: photo.mediaType || 'IMAGE', // mediaType이 없으면 IMAGE로 간주
+        }
+      } else if (typeof photo === 'string') {
+        return { url: photo, mediaType: 'IMAGE' }
+      }
+      // 잘못된 형식이면 기본값 반환
+      return { url: '', mediaType: 'IMAGE' }
+    })
+    .filter((p) => p.url) // url이 있는 것만 필터링
+
+  // 동영상을 앞으로, 나머지는 뒤로
+  const videos = normalized.filter((p) => p.mediaType === 'VIDEO')
+  const images = normalized.filter((p) => p.mediaType !== 'VIDEO')
+
+  // 디버깅: 동영상이 있으면 로그 출력
+  if (videos.length > 0) {
+    console.log('[FeedView] 동영상 발견:', videos)
+  }
+
+  return [...videos, ...images]
+})
+
+const headlinePhoto = computed(() => {
+  // 정렬된 미디어 배열의 첫 번째가 헤드라인 (동영상 우선)
+  const sorted = sortedPhotos.value
+  if (sorted.length === 0) return null
+  const headline = sorted[0]
+
+  // 디버깅
+  if (headline && headline.mediaType === 'VIDEO') {
+    console.log('[FeedView] headlinePhoto는 동영상입니다:', headline)
+  }
+
+  return headline
+})
+
+const galleryPhotos = computed(() => {
+  // 정렬된 미디어 배열의 나머지가 갤러리
+  const sorted = sortedPhotos.value
+  if (sorted.length <= 1) return []
+  return sorted.slice(1)
 })
 
 // Sections order

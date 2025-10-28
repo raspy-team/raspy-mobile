@@ -97,30 +97,38 @@
           </div>
         </div>
 
-        <!-- 경기 사진 섹션 -->
+        <!-- 경기 사진/동영상 섹션 -->
         <div class="p-2 space-y-2 text-left">
           <h3 class="text-lg font-bold text-gray-800">
-            경기 사진 (최대 5장)
+            경기 사진/동영상 (최대 5개)
           </h3>
 
-          <!-- 촬영/선택된 사진이 없을 때 -->
+          <!-- 촬영/선택된 미디어가 없을 때 -->
           <div v-if="allPictures.length === 0" class="text-center py-6 text-gray-400 bg-gray-50 rounded-lg">
             <i class="fas fa-images text-4xl mb-2"></i>
-            <p class="text-sm mb-3">촬영된 사진이 없습니다</p>
-            <button
-              @click="openCamera"
-              class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:brightness-110 transition"
-            >
-              <i class="fas fa-camera mr-1"></i> 사진 촬영하기
-            </button>
+            <p class="text-sm mb-3">촬영된 미디어가 없습니다</p>
+            <div class="flex gap-2 justify-center">
+              <button
+                @click="openCamera"
+                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:brightness-110 transition"
+              >
+                <i class="fas fa-camera mr-1"></i> 사진 촬영
+              </button>
+              <button
+                @click="openVideoRecorder"
+                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:brightness-110 transition"
+              >
+                <i class="fas fa-video mr-1"></i> 동영상 촬영
+              </button>
+            </div>
           </div>
 
           <!-- 사진 목록 -->
           <div v-else class="space-y-3">
-            <!-- 선택된 사진 (드래그로 순서 변경 가능) -->
+            <!-- 선택된 미디어 (드래그로 순서 변경 가능) -->
             <div v-if="selectedPictures.length > 0">
               <p class="text-sm text-gray-600 mb-2">
-                선택된 사진 ({{ selectedPictures.length }}/5) - 드래그하여 순서 변경
+                선택된 미디어 ({{ selectedPictures.length }}/5) - 드래그하여 순서 변경
               </p>
               <div class="grid grid-cols-3 gap-2">
                 <div
@@ -144,7 +152,20 @@
                   @touchmove.prevent="handleTouchMove($event)"
                   @touchend="handleTouchEnd(index)"
                 >
-                  <img :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
+                  <!-- 이미지 -->
+                  <img v-if="pic.type === 'image'" :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
+
+                  <!-- 동영상 -->
+                  <div v-else-if="pic.type === 'video'" class="relative w-full h-full">
+                    <video :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 pointer-events-none">
+                      <i class="fas fa-play-circle text-white text-3xl"></i>
+                    </div>
+                    <div class="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded pointer-events-none">
+                      {{ formatDuration(pic.duration) }}
+                    </div>
+                  </div>
+
                   <div
                     class="absolute top-1 left-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold pointer-events-none"
                   >
@@ -160,9 +181,9 @@
               </div>
             </div>
 
-            <!-- 선택 가능한 사진들 -->
+            <!-- 선택 가능한 미디어들 -->
             <div v-if="unselectedPictures.length > 0">
-              <p class="text-sm text-gray-600 mb-2">사진 선택</p>
+              <p class="text-sm text-gray-600 mb-2">미디어 선택</p>
               <div class="grid grid-cols-4 gap-2">
                 <div
                   v-for="pic in unselectedPictures"
@@ -170,7 +191,20 @@
                   class="relative aspect-square rounded-lg overflow-hidden border border-gray-300 cursor-pointer hover:border-orange-400 transition"
                   @click="selectPicture(pic)"
                 >
-                  <img :src="pic.dataUrl" class="w-full h-full object-cover" />
+                  <!-- 이미지 -->
+                  <img v-if="pic.type === 'image'" :src="pic.dataUrl" class="w-full h-full object-cover" />
+
+                  <!-- 동영상 -->
+                  <div v-else-if="pic.type === 'video'" class="relative w-full h-full">
+                    <video :src="pic.dataUrl" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                      <i class="fas fa-play-circle text-white text-2xl"></i>
+                    </div>
+                    <div class="absolute bottom-0.5 left-0.5 bg-black bg-opacity-70 text-white text-[10px] px-1 py-0.5 rounded">
+                      {{ formatDuration(pic.duration) }}
+                    </div>
+                  </div>
+
                   <button
                     @click.stop="deletePicture(pic.id)"
                     class="absolute top-1 right-1 bg-gray-800 bg-opacity-60 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition"
@@ -181,14 +215,21 @@
               </div>
             </div>
 
-            <!-- 추가 촬영 버튼 (5장 미만일 때만 표시) -->
-            <button
-              v-if="allPictures.length < 5"
-              @click="openCamera"
-              class="w-full border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
-            >
-              <i class="fas fa-camera mr-1"></i> 사진 추가 촬영 ({{ allPictures.length }}/5)
-            </button>
+            <!-- 추가 촬영 버튼 (5개 미만일 때만 표시) -->
+            <div v-if="allPictures.length < 5" class="flex gap-2">
+              <button
+                @click="openCamera"
+                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
+              >
+                <i class="fas fa-camera mr-1"></i> 사진 추가 ({{ allPictures.length }}/5)
+              </button>
+              <button
+                @click="openVideoRecorder"
+                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
+              >
+                <i class="fas fa-video mr-1"></i> 동영상 추가 ({{ allPictures.length }}/5)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -294,6 +335,44 @@
       class="hidden"
     />
 
+    <!-- 숨겨진 동영상 input -->
+    <input
+      ref="videoInputRef"
+      type="file"
+      accept="video/*"
+      capture="environment"
+      @change="onVideoChange"
+      class="hidden"
+    />
+
+    <!-- 사진 삭제 확인 모달 -->
+    <div
+      v-if="showDeleteConfirm"
+      class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+      <div class="bg-white w-full max-w-xs rounded-xl shadow-lg p-6 text-center mx-4">
+        <div class="mb-5">
+          <i class="fas fa-trash-alt text-4xl text-red-500 mb-3"></i>
+          <div class="text-lg font-bold text-gray-800 mb-2">사진을 삭제하시겠습니까?</div>
+          <p class="text-sm text-gray-500">삭제된 사진은 복구할 수 없습니다.</p>
+        </div>
+        <div class="flex justify-center gap-3">
+          <button
+            @click="cancelDeletePicture"
+            class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-200 transition"
+          >
+            취소
+          </button>
+          <button
+            @click="confirmDeletePicture"
+            class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-semibold text-sm shadow hover:bg-red-600 transition"
+          >
+            삭제
+          </button>
+        </div>
+      </div>
+    </div>
+
     <CustomToast />
   </div>
 </template>
@@ -305,12 +384,15 @@ import api from '../../api/api'
 import defaultImg from '../../assets/default.png'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
-import { getGamePictures, removeGamePicture, addGamePicture, compressImage } from '../../utils/gamePictureStorage'
+import { getGamePictures, removeGamePicture, addGamePicture, addGameVideo, compressImage, compressVideo } from '../../utils/gamePictureStorage'
 
 const { showToast } = useToast()
 const showReviewModal = ref(false)
 const isSubmitting = ref(false)
 const cameraInputRef = ref(null)
+const videoInputRef = ref(null)
+const showDeleteConfirm = ref(false)
+const pictureToDelete = ref(null)
 
 // 자동 제출 함수들
 function setManner(n) {
@@ -431,10 +513,19 @@ onMounted(async () => {
 // 카메라 열기
 const openCamera = () => {
   if (allPictures.value.length >= 5) {
-    showToast('최대 5장까지 촬영할 수 있습니다.')
+    showToast('최대 5개까지 촬영할 수 있습니다.')
     return
   }
   cameraInputRef.value?.click()
+}
+
+// 동영상 촬영기 열기
+const openVideoRecorder = () => {
+  if (allPictures.value.length >= 5) {
+    showToast('최대 5개까지 촬영할 수 있습니다.')
+    return
+  }
+  videoInputRef.value?.click()
 }
 
 // 카메라 파일 선택 완료
@@ -443,7 +534,7 @@ const onCameraChange = async (e) => {
   if (!file) return
 
   if (allPictures.value.length >= 5) {
-    showToast('최대 5장까지 촬영할 수 있습니다.')
+    showToast('최대 5개까지 촬영할 수 있습니다.')
     e.target.value = ''
     return
   }
@@ -485,6 +576,61 @@ const onCameraChange = async (e) => {
   e.target.value = ''
 }
 
+// 동영상 파일 선택 완료
+const onVideoChange = async (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  if (allPictures.value.length >= 5) {
+    showToast('최대 5개까지 촬영할 수 있습니다.')
+    e.target.value = ''
+    return
+  }
+
+  // 파일 형식 체크
+  const fileType = file.type.toLowerCase()
+  console.log('[GameResultView] 동영상 파일 형식:', fileType, file.name)
+
+  // WebM이 아닌 경우 경고
+  if (!fileType.includes('webm')) {
+    showToast(`⚠️ 주의: ${fileType || '알 수 없는 형식'} 파일입니다. 서버 업로드 시 WebM으로 변환이 필요할 수 있습니다.`)
+    console.warn('[GameResultView] Non-WebM video detected:', file.type)
+  }
+
+  showToast('동영상 처리 중...')
+
+  try {
+    // 동영상 압축 (최대 2분)
+    const { dataUrl, duration } = await compressVideo(file, 120)
+
+    // localStorage에 저장
+    addGameVideo(gameId, dataUrl, duration)
+
+    // 목록 갱신
+    allPictures.value = getGamePictures(gameId)
+
+    showToast(`동영상이 저장되었습니다! (${Math.floor(duration)}초)`)
+  } catch (error) {
+    console.error('동영상 저장 실패:', error)
+    if (error.message === 'QUOTA_EXCEEDED') {
+      showToast('저장 공간이 부족합니다. 일부 미디어를 삭제한 후 다시 시도해주세요.')
+    } else {
+      showToast('동영상 저장에 실패했습니다.')
+    }
+  }
+
+  // input 초기화
+  e.target.value = ''
+}
+
+// 동영상 길이 포맷팅 (초 -> mm:ss)
+const formatDuration = (seconds) => {
+  if (!seconds) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
 // 사진 선택
 const selectPicture = (pic) => {
   if (selectedPictures.value.length >= 5) {
@@ -499,12 +645,27 @@ const deselectPicture = (picId) => {
   selectedPictures.value = selectedPictures.value.filter((p) => p.id !== picId)
 }
 
-// 사진 삭제 (영구 삭제)
+// 사진 삭제 확인 모달 열기
 const deletePicture = (picId) => {
-  if (!confirm('이 사진을 삭제하시겠습니까?')) return
+  pictureToDelete.value = picId
+  showDeleteConfirm.value = true
+}
 
-  allPictures.value = removeGamePicture(gameId, picId)
-  selectedPictures.value = selectedPictures.value.filter((p) => p.id !== picId)
+// 사진 삭제 확정
+const confirmDeletePicture = () => {
+  if (pictureToDelete.value) {
+    allPictures.value = removeGamePicture(gameId, pictureToDelete.value)
+    selectedPictures.value = selectedPictures.value.filter((p) => p.id !== pictureToDelete.value)
+    showToast('사진이 삭제되었습니다.')
+  }
+  showDeleteConfirm.value = false
+  pictureToDelete.value = null
+}
+
+// 사진 삭제 취소
+const cancelDeletePicture = () => {
+  showDeleteConfirm.value = false
+  pictureToDelete.value = null
 }
 
 // 드래그 시작 (마우스)
@@ -575,7 +736,7 @@ const handleTouchEnd = (dropIndex) => {
   touchCurrentIndex.value = null
 }
 
-// 사진 제출
+// 사진/동영상 제출
 const submitPictures = async () => {
   if (selectedPictures.value.length === 0) {
     return Promise.resolve()
@@ -585,8 +746,13 @@ const submitPictures = async () => {
     const formData = new FormData()
 
     selectedPictures.value.forEach((pic, index) => {
-      const file = dataUrlToFile(pic.dataUrl, `game_${gameId}_${index}.jpg`)
-      formData.append('pictures', file)
+      if (pic.type === 'image') {
+        const file = dataUrlToFile(pic.dataUrl, `game_${gameId}_${index}.jpg`)
+        formData.append('pictures', file)
+      } else if (pic.type === 'video') {
+        const file = dataUrlToFile(pic.dataUrl, `game_${gameId}_${index}.webm`)
+        formData.append('videos', file)
+      }
     })
 
     await api.post(`/api/games/${gameId}/pictures`, formData, {
@@ -597,7 +763,7 @@ const submitPictures = async () => {
 
     return Promise.resolve()
   } catch (err) {
-    console.error('사진 제출 실패:', err)
+    console.error('미디어 제출 실패:', err)
     return Promise.reject(err)
   }
 }

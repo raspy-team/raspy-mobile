@@ -10,9 +10,7 @@
       <div class="flex flex-col items-center justify-center space-y-8 px-8">
         <!-- 메인 텍스트 -->
         <div class="text-center space-y-4">
-          <h2 class="text-3xl font-bold text-white animate-fade-in-up">
-            피드를 탐색해보세요
-          </h2>
+          <h2 class="text-3xl font-bold text-white animate-fade-in-up">피드를 탐색해보세요</h2>
           <p class="text-lg text-white/80 animate-fade-in-up animation-delay-200">
             상하좌우로 넘겨보세요
           </p>
@@ -32,9 +30,7 @@
 
         <!-- 탭하여 시작 -->
         <div class="text-center animate-fade-in-up animation-delay-600">
-          <p class="text-sm text-white/60 animate-pulse">
-            화면을 탭하여 시작
-          </p>
+          <p class="text-sm text-white/60 animate-pulse">화면을 탭하여 시작</p>
         </div>
       </div>
     </div>
@@ -467,8 +463,8 @@
                   @click="showRuleModal = true"
                   title="규칙 상세 보기"
                 >
-                  <i class="fas fa-book-open text-white/90"></i>
-                  <span class="drop-shadow">{{ post.rule?.ruleTitle || '-' }}</span>
+                  <i class="fas fa-book-open text-white/90 mr-2"></i>
+                  <span class="drop-shadow"> {{ post.rule?.ruleTitle || '-' }}</span>
                 </span>
               </div>
 
@@ -591,10 +587,18 @@
 
                 <div class="mt-6">
                   <button
+                    v-if="!post.isAppliedByMe"
                     @click="handleJoin(post.id)"
                     class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
                     경기 참가하기
+                  </button>
+                  <button
+                    v-else
+                    disabled
+                    class="w-full py-3 bg-gray-500 text-white font-semibold rounded-xl cursor-not-allowed opacity-60"
+                  >
+                    <i class="fas fa-check mr-2"></i>신청 완료
                   </button>
                 </div>
               </div>
@@ -1255,22 +1259,7 @@ onMounted(() => {
   }
 })
 
-// gameId 파라미터가 있을 때 해당 피드로 이동
-watch([loading, sortedFeed], ([isLoading, feed]) => {
-  // 로딩이 완료되고, 피드가 있고, gameId 파라미터가 있을 때
-  if (!isLoading && feed.length > 0 && route.query.gameId) {
-    const gameId = route.query.gameId
-    const targetIndex = feed.findIndex(item => item.id === gameId)
-
-    if (targetIndex !== -1) {
-      console.log(`[FeedView] gameId ${gameId} 발견 - 인덱스 ${targetIndex}로 이동`)
-      currentFeedIndex.value = targetIndex
-    } else {
-      console.warn(`[FeedView] gameId ${gameId}를 피드에서 찾을 수 없음`)
-    }
-  }
-}, { immediate: true })
-// 현재 표시 중인 피드 인덱스
+// 현재 표시 중인 피드 인덱스 (gameId가 있으면 sortedFeed computed에서 자동으로 맨 위로 정렬됨)
 const currentFeedIndex = ref(0)
 
 // 현재 표시 중인 포스트
@@ -1391,9 +1380,21 @@ const handleSkipInvite = () => {
 }
 
 // Event handler for scheduled game join
-const handleJoin = (postId) => {
+const handleJoin = async (postId) => {
   console.log('Join clicked:', postId)
-  // Add join functionality
+  try {
+    await api.post(`/api/games/${postId}/apply`)
+
+    // 현재 포스트의 신청 상태 업데이트
+    const currentPost = post.value
+    if (currentPost && currentPost.id === postId) {
+      currentPost.isAppliedByMe = true
+    }
+
+    showToast('참가 신청이 완료되었습니다!')
+  } catch (err) {
+    showToast(err.response?.data?.message || '신청에 실패했습니다.')
+  }
 }
 
 // fetchInitialFeed는 더 이상 필요없음 - useFeed의 loadFeed 사용
@@ -1715,8 +1716,6 @@ const galleryPhotos = computed(() => {
 
 // 동영상은 이제 서버에서 GIF로 변환되어 제공됨
 // Video 관련 코드 제거됨
-
-
 
 // Sections order
 const sections = computed(() => {
@@ -2397,7 +2396,8 @@ function onPanelDragEnd() {
 
 /* 스와이프 애니메이션 - 상하 */
 @keyframes swipe-vertical {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     opacity: 1;
   }
@@ -2413,7 +2413,8 @@ function onPanelDragEnd() {
 
 /* 스와이프 애니메이션 - 좌우 */
 @keyframes swipe-horizontal {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
     opacity: 0.6;
   }

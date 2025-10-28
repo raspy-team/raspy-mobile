@@ -146,6 +146,12 @@ import { useActiveGamePolling } from './composable/useActiveGamePolling'
 
 const showSplash = ref(true)
 const route = useRoute()
+// 진행 중인 게임 폴링 (명시적으로 초기화)
+const activeGamePolling = useActiveGamePolling()
+const activeGame = activeGamePolling.activeGame || ref(null)
+const startPolling = activeGamePolling.startPolling
+const stopPolling = activeGamePolling.stopPolling
+const dismissActiveGame = activeGamePolling.dismissActiveGame
 
 const isIos = ref(false)
 const ua = navigator.userAgent.toLowerCase()
@@ -257,6 +263,8 @@ const stopGameCountdown = () => {
 }
 
 // router 필요
+const router = useRouter()
+
 function getChatUrlFromPath(path) {
   // /chat/xxx 또는 /games/xxx/play 등 다양한 방 라우트 패턴 지원
   const chatMatch = path.match(/^\/chat\/([^/]+)/)

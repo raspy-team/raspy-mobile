@@ -359,28 +359,33 @@
             v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
             class="w-screen shrink-0 h-full relative"
           >
-            <!-- 동영상 -->
-            <video
+            <!-- 동영상 (Canvas로 렌더링하여 iOS 전체화면 방지) -->
+            <div
               v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
-              :src="headlinePhoto.url"
-              class="absolute top-0 left-0 w-screen h-auto min-h-full bg-black"
-              style="object-fit: cover; object-position: center;"
-              autoplay
-              loop
-              muted
-              playsinline
-              webkit-playsinline
-              x-webkit-airplay="deny"
-              preload="auto"
-              disablePictureInPicture
-              controlsList="nodownload nofullscreen noremoteplayback"
-              @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
-              @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
-              @canplay="console.log('[FeedView] 동영상 재생 가능:', headlinePhoto.url)"
-              @click.stop="$event.target.paused ? $event.target.play() : $event.target.pause()"
-              @webkitbeginfullscreen.prevent
-              @webkitendfullscreen.prevent
-            />
+              class="absolute top-0 left-0 w-screen min-h-full bg-black"
+            >
+              <!-- 실제 video 태그 (화면에 안 보임) -->
+              <video
+                :ref="(el) => setupVideoCanvas(el, 'headline')"
+                :src="headlinePhoto.url"
+                class="hidden"
+                autoplay
+                loop
+                muted
+                playsinline
+                webkit-playsinline
+                preload="auto"
+                @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
+                @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
+              />
+              <!-- Canvas로 동영상 표시 -->
+              <canvas
+                :ref="(el) => videoCanvasRefs.headline = el"
+                class="absolute top-0 left-0 w-screen h-auto min-h-full"
+                style="object-fit: cover;"
+                @click="toggleVideoPlay('headline')"
+              />
+            </div>
 
             <!-- 이미지 -->
             <img
@@ -1123,7 +1128,7 @@ function formatFeedDate(dateStr) {
 }
 // 세트/시간 정보 아코디언 상태
 const showSetDetails = ref(false)
-import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { computed, ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
 import api, { playWithMeTooAPI } from '../../api/api'
@@ -1654,6 +1659,65 @@ const galleryPhotos = computed(() => {
   if (sorted.length <= 1) return []
   return sorted.slice(1)
 })
+
+// 동영상 Canvas 렌더링 (iOS 전체화면 방지)
+const videoCanvasRefs = reactive({})
+const videoElements = reactive({})
+const videoAnimationFrames = reactive({})
+
+function setupVideoCanvas(videoEl, id) {
+  if (!videoEl) return
+
+  videoElements[id] = videoEl
+
+  videoEl.addEventListener('loadedmetadata', () => {
+    const canvas = videoCanvasRefs[id]
+    if (!canvas) return
+
+    // Canvas 크기 설정
+    canvas.width = videoEl.videoWidth
+    canvas.height = videoEl.videoHeight
+
+    // 렌더링 시작
+    renderVideoToCanvas(id)
+  })
+}
+
+function renderVideoToCanvas(id) {
+  const video = videoElements[id]
+  const canvas = videoCanvasRefs[id]
+
+  if (!video || !canvas) return
+
+  const ctx = canvas.getContext('2d')
+
+  function draw() {
+    if (video.paused || video.ended) {
+      videoAnimationFrames[id] = null
+      return
+    }
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    videoAnimationFrames[id] = requestAnimationFrame(draw)
+  }
+
+  draw()
+}
+
+function toggleVideoPlay(id) {
+  const video = videoElements[id]
+  if (!video) return
+
+  if (video.paused) {
+    video.play()
+    renderVideoToCanvas(id)
+  } else {
+    video.pause()
+    if (videoAnimationFrames[id]) {
+      cancelAnimationFrame(videoAnimationFrames[id])
+    }
+  }
+}
 
 // Sections order
 const sections = computed(() => {

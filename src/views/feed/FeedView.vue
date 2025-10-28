@@ -427,18 +427,12 @@
                 :ref="(el) => setupVideoCanvas(el, 'headline')"
                 :src="headlinePhoto.url"
                 style="width: 100%; height: 100%;"
-                autoplay
-                loop
                 muted
                 playsinline
                 webkit-playsinline
                 x-webkit-airplay="deny"
                 disablePictureInPicture
                 preload="auto"
-                @loadedmetadata="onVideoLoaded($event, 'headline')"
-                @canplay="onVideoCanPlay($event, 'headline')"
-                @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
-                @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
               />
             </div>
 
@@ -866,8 +860,6 @@
                   :ref="(el) => setupVideoCanvas(el, 'gallery_' + idx)"
                   :src="p.url"
                   style="width: 100%; height: 100%;"
-                  autoplay
-                  loop
                   muted
                   playsinline
                   webkit-playsinline
@@ -1233,26 +1225,8 @@ const showOnboarding = ref(false)
 // 온보딩 완료 처리
 function completeOnboarding() {
   showOnboarding.value = false
-  console.log('[FeedView] 온보딩 완료, 실시간 렌더링 재생 시작')
-
-  // 온보딩 완료 후 실시간 렌더링 재생 시작
-  const tryPlayVideo = () => {
-    // headline 비디오가 준비되었는지 확인
-    if (videoElements['headline']) {
-      console.log('[FeedView] headline 비디오 준비 완료, 재생 시작')
-      if (!videoPlaying['headline']) {
-        startRealTimeRendering('headline')
-      }
-    } else {
-      console.log('[FeedView] headline 비디오 아직 준비 중...')
-    }
-  }
-
-  // 여러 시점에 재생 시도
-  setTimeout(tryPlayVideo, 100)
-  setTimeout(tryPlayVideo, 500)
-  setTimeout(tryPlayVideo, 1000)
-  setTimeout(tryPlayVideo, 2000)
+  localStorage.setItem('feedOnboardingCompleted', 'true')
+  console.log('[FeedView] 온보딩 완료, localStorage에 저장')
 }
 
 // 나랑도해 상태 관리
@@ -1318,10 +1292,13 @@ onMounted(() => {
   console.log('loadFeed 호출 예정')
   loadFeed(router.currentRoute.value)
 
-  // 매번 온보딩 표시 (페이지 로드 후 0.5초 뒤)
-  setTimeout(() => {
-    showOnboarding.value = true
-  }, 500)
+  // 최초 접속 시에만 온보딩 표시
+  const hasCompletedOnboarding = localStorage.getItem('feedOnboardingCompleted') === 'true'
+  if (!hasCompletedOnboarding) {
+    setTimeout(() => {
+      showOnboarding.value = true
+    }, 500)
+  }
 })
 // 현재 표시 중인 피드 인덱스
 const currentFeedIndex = ref(0)
@@ -1784,36 +1761,6 @@ const videoAnimationFrames = reactive({})
 const videoPlaying = reactive({}) // 재생 상태
 const videoCurrentTime = reactive({}) // 현재 재생 시간
 
-// 동영상 로드 이벤트 핸들러
-function onVideoLoaded(event, id) {
-  const video = event.target
-  console.log(`[FeedView] ${id} 동영상 메타데이터 로드 완료`)
-
-  // 로드되자마자 재생 시도
-  video.muted = true
-  video.volume = 0
-  video.play().then(() => {
-    console.log(`[FeedView] ${id} 로드 직후 재생 성공!`)
-  }).catch((err) => {
-    console.log(`[FeedView] ${id} 로드 직후 재생 실패:`, err.message)
-  })
-}
-
-// 동영상 재생 가능 이벤트 핸들러
-function onVideoCanPlay(event, id) {
-  const video = event.target
-  console.log(`[FeedView] ${id} 동영상 재생 가능 상태`)
-
-  if (video.paused) {
-    video.muted = true
-    video.volume = 0
-    video.play().then(() => {
-      console.log(`[FeedView] ${id} canplay에서 재생 성공!`)
-    }).catch((err) => {
-      console.log(`[FeedView] ${id} canplay에서 재생 실패:`, err.message)
-    })
-  }
-}
 
 function setupVideoCanvas(videoEl, id) {
   if (!videoEl) return

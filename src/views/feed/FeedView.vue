@@ -369,13 +369,17 @@
               loop
               muted
               playsinline
+              webkit-playsinline
+              x-webkit-airplay="deny"
               preload="auto"
               disablePictureInPicture
               controlsList="nodownload nofullscreen noremoteplayback"
               @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
               @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
               @canplay="console.log('[FeedView] 동영상 재생 가능:', headlinePhoto.url)"
-              @click="$event.target.paused ? $event.target.play() : $event.target.pause()"
+              @click.stop="$event.target.paused ? $event.target.play() : $event.target.pause()"
+              @webkitbeginfullscreen.prevent
+              @webkitendfullscreen.prevent
             />
 
             <!-- 이미지 -->
@@ -785,10 +789,14 @@
                 loop
                 muted
                 playsinline
+                webkit-playsinline
+                x-webkit-airplay="deny"
                 preload="auto"
                 disablePictureInPicture
                 controlsList="nodownload nofullscreen noremoteplayback"
-                @click="$event.target.paused ? $event.target.play() : $event.target.pause()"
+                @click.stop="$event.target.paused ? $event.target.play() : $event.target.pause()"
+                @webkitbeginfullscreen.prevent
+                @webkitendfullscreen.prevent
               />
 
               <!-- 이미지 -->

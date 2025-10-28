@@ -1254,6 +1254,22 @@ onMounted(() => {
     }, 500)
   }
 })
+
+// gameId 파라미터가 있을 때 해당 피드로 이동
+watch([loading, sortedFeed], ([isLoading, feed]) => {
+  // 로딩이 완료되고, 피드가 있고, gameId 파라미터가 있을 때
+  if (!isLoading && feed.length > 0 && route.query.gameId) {
+    const gameId = route.query.gameId
+    const targetIndex = feed.findIndex(item => item.id === gameId)
+
+    if (targetIndex !== -1) {
+      console.log(`[FeedView] gameId ${gameId} 발견 - 인덱스 ${targetIndex}로 이동`)
+      currentFeedIndex.value = targetIndex
+    } else {
+      console.warn(`[FeedView] gameId ${gameId}를 피드에서 찾을 수 없음`)
+    }
+  }
+}, { immediate: true })
 // 현재 표시 중인 피드 인덱스
 const currentFeedIndex = ref(0)
 

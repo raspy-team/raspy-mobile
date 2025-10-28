@@ -1,12 +1,12 @@
 <template>
-  <Header :has-referer="false" title="게임" class="z-50" />
+  <Header :has-referer="false" title="게임" class="z-50 bg-black" />
 
-  <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4 bg-white text-black">
+  <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4 bg-black text-white">
     <!-- 상단 메뉴 버튼 -->
     <div class="flex gap-2 pt-3">
       <button
         @click="router.push('/rules')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-black text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-gray-800 text-gray-100 text-base font-bold rounded-lg border border-gray-600 hover:bg-gray-700 active:bg-gray-900 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -32,7 +32,7 @@
       </button>
       <button
         @click="router.push('/game-list')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-black text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-gray-800 text-gray-100 text-base font-bold rounded-lg border border-gray-600 hover:bg-gray-700 active:bg-gray-900 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -57,23 +57,23 @@
       <div
         v-for="i in 3"
         :key="i"
-        class="p-5 border bg-black rounded-2xl shadow space-y-5 animate-pulse"
+        class="p-5 border bg-gray-900 rounded-2xl shadow space-y-5 animate-pulse"
       >
         <div class="flex justify-between items-start">
           <div class="space-y-2 w-full">
             <div class="mb-1 flex">
-              <span class="font-bold text-gray-300 block w-32 h-5 bg-gray-200 rounded"></span>
-              <span class="flex ml-3 w-6 h-6 bg-gray-200 rounded-full"></span>
+              <span class="font-bold text-gray-500 block w-32 h-5 bg-gray-700 rounded"></span>
+              <span class="flex ml-3 w-6 h-6 bg-gray-700 rounded-full"></span>
             </div>
             <div class="text-xs flex gap-1 items-center">
-              <span class="block w-16 h-3 bg-gray-200 rounded"></span>
-              <span class="mx-1 text-gray-200">&gt;</span>
-              <span class="block w-12 h-3 bg-gray-200 rounded"></span>
+              <span class="block w-16 h-3 bg-gray-700 rounded"></span>
+              <span class="mx-1 text-gray-500">&gt;</span>
+              <span class="block w-12 h-3 bg-gray-700 rounded"></span>
             </div>
           </div>
-          <span class="text-xs font-bold px-2 py-2 rounded-full w-[5rem] bg-gray-200"></span>
+          <span class="text-xs font-bold px-2 py-2 rounded-full w-[5rem] bg-gray-700"></span>
         </div>
-        <div class="w-full h-10 bg-gray-200 rounded-[5px]"></div>
+        <div class="w-full h-10 bg-gray-700 rounded-[5px]"></div>
       </div>
     </div>
 
@@ -85,7 +85,7 @@
           :key="game.id"
           :id="'game-' + game.id"
           :class="[
-            'relative p-5 rounded-xl bg-black border space-y-4 transition-all',
+            'relative p-5 rounded-xl bg-gray-900 border border-gray-700 space-y-4 transition-all',
             getCardClass(game),
           ]"
         >
@@ -100,22 +100,22 @@
                 />
               </div>
               <div>
-                <span class="text-base font-bold text-gray-900 truncate block">
+                <span class="text-base font-bold text-gray-100 truncate block">
                   {{ game.rule.ruleTitle }}
                 </span>
-                <div class="flex gap-1 items-center mt-1 text-sm text-orange-500 font-normal">
+                <div class="flex gap-1 items-center mt-1 text-sm text-orange-400 font-normal">
                   {{ game.rule.majorCategory }}
-                  <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+                  <span v-if="game.rule.minorCategory" class="mx-1 text-orange-400">&gt;</span>
                   <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
                 </div>
               </div>
             </div>
             <!-- 타입/상태 라벨 우측 배치 -->
             <div class="flex flex-col items-end gap-1 ml-2">
-              <span :class="['text-sm font-bold', getTypeTextClass(game)]">
+              <span :class="['text-sm font-bold text-gray-100', getTypeTextClass(game)]">
                 {{ getTypeLabel(game) }}
               </span>
-              <span class="text-sm font-bold" :class="getStatusClass(game)">
+              <span class="text-sm font-bold text-gray-400" :class="getStatusClass(game)">
                 {{ getStatusText(game) }}
               </span>
             </div>
@@ -128,11 +128,11 @@
               <div class="flex flex-col items-center flex-1">
                 <img
                   :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-500 shadow"
                   alt="Owner Profile"
                 />
                 <span
-                  class="mt-1 text-sm font-bold text-gray-700 truncate max-w-[4.5rem] text-center"
+                  class="mt-1 text-sm font-bold text-gray-100 truncate max-w-[4.5rem] text-center"
                 >
                   {{ game.ownerNickname || game.myNickname }}
                 </span>
@@ -140,7 +140,7 @@
 
               <!-- VS -->
               <div class="flex flex-col items-center flex-1 justify-center">
-                <span class="text-3xl font-extrabold text-gray-400 leading-none"> VS </span>
+                <span class="text-3xl font-extrabold text-gray-500 leading-none"> VS </span>
               </div>
 
               <!-- Opponent -->
@@ -148,17 +148,17 @@
                 <img
                   v-if="getOpponentProfileUrl(game)"
                   :src="getOpponentProfileUrl(game)"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow"
                   alt="Opponent Profile"
                 />
                 <div
                   v-else
-                  class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
+                  class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600 shadow"
                 >
-                  <i class="fas fa-user text-2xl text-gray-400"></i>
+                  <i class="fas fa-user text-2xl text-gray-500"></i>
                 </div>
                 <span
-                  class="mt-1 text-sm font-normal text-gray-700 truncate max-w-[4.5rem] text-center"
+                  class="mt-1 text-sm font-normal text-gray-100 truncate max-w-[4.5rem] text-center"
                 >
                   {{ getOpponentNickname(game) }}
                 </span>

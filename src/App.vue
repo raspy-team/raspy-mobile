@@ -146,14 +146,6 @@ import { useActiveGamePolling } from './composable/useActiveGamePolling'
 
 const showSplash = ref(true)
 const route = useRoute()
-const router = useRouter()
-
-// 진행 중인 게임 폴링 (명시적으로 초기화)
-const activeGamePolling = useActiveGamePolling()
-const activeGame = activeGamePolling.activeGame || ref(null)
-const startPolling = activeGamePolling.startPolling
-const stopPolling = activeGamePolling.stopPolling
-const dismissActiveGame = activeGamePolling.dismissActiveGame
 
 const isIos = ref(false)
 const ua = navigator.userAgent.toLowerCase()

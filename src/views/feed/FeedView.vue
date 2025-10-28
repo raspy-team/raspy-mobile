@@ -1,4 +1,45 @@
 <template>
+  <!-- 온보딩 오버레이 -->
+  <transition name="fade-overlay">
+    <div
+      v-if="showOnboarding"
+      class="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center"
+      @click="completeOnboarding"
+      @touchstart="completeOnboarding"
+    >
+      <div class="flex flex-col items-center justify-center space-y-8 px-8">
+        <!-- 메인 텍스트 -->
+        <div class="text-center space-y-4">
+          <h2 class="text-3xl font-bold text-white animate-fade-in-up">
+            피드를 탐색해보세요
+          </h2>
+          <p class="text-lg text-white/80 animate-fade-in-up animation-delay-200">
+            상하좌우로 넘겨보세요
+          </p>
+        </div>
+
+        <!-- 스와이프 애니메이션 아이콘 -->
+        <div class="relative w-32 h-32 animate-fade-in-up animation-delay-400">
+          <!-- 상하 스와이프 -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-hand-pointer text-white text-5xl animate-swipe-vertical"></i>
+          </div>
+          <!-- 좌우 스와이프 -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-hand-pointer text-white/60 text-5xl animate-swipe-horizontal"></i>
+          </div>
+        </div>
+
+        <!-- 탭하여 시작 -->
+        <div class="text-center animate-fade-in-up animation-delay-600">
+          <p class="text-sm text-white/60 animate-pulse">
+            화면을 탭하여 시작
+          </p>
+        </div>
+      </div>
+    </div>
+  </transition>
+
   <header class="fixed top-0 left-0 w-full h-20 z-[30] raspy-top">
     <!-- 좌측: 뒤로가기 버튼 (userId가 있을 때만) -->
     <div v-if="isUserFeedMode" class="absolute left-3 top-8 flex items-center">
@@ -364,17 +405,20 @@
               v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
               class="absolute top-0 left-0 w-screen min-h-full bg-black"
             >
-              <!-- 실제 video 태그 (화면에 안 보임) -->
+              <!-- 실제 video 태그 (화면에 안 보이지만 autoplay를 위해 작게 표시) -->
               <video
                 :ref="(el) => setupVideoCanvas(el, 'headline')"
                 :src="headlinePhoto.url"
-                class="hidden"
+                class="absolute opacity-0 pointer-events-none"
+                style="width: 1px; height: 1px;"
                 autoplay
                 loop
                 muted
                 playsinline
                 webkit-playsinline
                 preload="auto"
+                @loadedmetadata="onVideoLoaded($event, 'headline')"
+                @canplay="onVideoCanPlay($event, 'headline')"
                 @loadeddata="console.log('[FeedView] 동영상 로드 완료:', headlinePhoto.url)"
                 @error="console.error('[FeedView] 동영상 로드 실패:', $event)"
               />
@@ -788,17 +832,18 @@
                 v-if="p && p.mediaType === 'VIDEO'"
                 class="absolute top-0 left-0 w-screen h-full bg-black"
               >
-                <!-- 실제 video 태그 (화면에 안 보임) -->
+                <!-- 실제 video 태그 (화면에 안 보이지만 autoplay를 위해 작게 표시) -->
                 <video
                   :ref="(el) => setupVideoCanvas(el, 'gallery_' + idx)"
                   :src="p.url"
-                  class="hidden"
+                  class="absolute opacity-0 pointer-events-none"
+                  style="width: 1px; height: 1px;"
                   autoplay
                   loop
                   muted
                   playsinline
                   webkit-playsinline
-                  preload="auto"
+                  preload="metadata"
                 />
                 <!-- Canvas로 동영상 표시 -->
                 <canvas
@@ -1158,6 +1203,67 @@ const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
 
+// 온보딩 상태 관리
+const showOnboarding = ref(false)
+
+// 온보딩 완료 처리
+function completeOnboarding() {
+  showOnboarding.value = false
+  console.log('[FeedView] 온보딩 완료, 동영상 재생 시도')
+
+  // 온보딩 완료 후 동영상 재생 시도 (여러 방법으로)
+  const tryPlayVideo = () => {
+    console.log('[FeedView] videoElements:', videoElements)
+    const headlineVideo = videoElements['headline']
+
+    if (!headlineVideo) {
+      console.warn('[FeedView] headline 비디오 요소를 찾을 수 없음')
+
+      // DOM에서 직접 찾기 시도
+      const videoEl = document.querySelector('video[src]')
+      if (videoEl) {
+        console.log('[FeedView] DOM에서 비디오 요소 발견, 재생 시도')
+        videoEl.muted = true
+        videoEl.volume = 0
+        videoEl.play().then(() => {
+          console.log('[FeedView] DOM 비디오 재생 성공!')
+        }).catch((err) => {
+          console.warn('[FeedView] DOM 비디오 재생 실패:', err.message)
+        })
+      } else {
+        console.warn('[FeedView] DOM에서도 비디오 요소를 찾을 수 없음')
+      }
+      return
+    }
+
+    console.log('[FeedView] headline 비디오 발견, 상태:', {
+      paused: headlineVideo.paused,
+      readyState: headlineVideo.readyState,
+      src: headlineVideo.src
+    })
+
+    headlineVideo.muted = true
+    headlineVideo.volume = 0
+    headlineVideo.play().then(() => {
+      console.log('[FeedView] 온보딩 후 동영상 재생 성공!')
+    }).catch((err) => {
+      console.warn('[FeedView] 온보딩 후 동영상 재생 실패:', err.message)
+    })
+  }
+
+  // 즉시 시도
+  tryPlayVideo()
+
+  // 100ms 후 재시도
+  setTimeout(tryPlayVideo, 100)
+
+  // 300ms 후 재시도
+  setTimeout(tryPlayVideo, 300)
+
+  // 500ms 후 재시도
+  setTimeout(tryPlayVideo, 500)
+}
+
 // 나랑도해 상태 관리
 const playWithMeRequests = ref(new Map()) // userId -> boolean (요청 상태)
 const showPlayerSelectModal = ref(false) // 플레이어 선택 모달 표시 상태
@@ -1220,6 +1326,11 @@ onMounted(() => {
   fetchNotifications()
   console.log('loadFeed 호출 예정')
   loadFeed(router.currentRoute.value)
+
+  // 매번 온보딩 표시 (페이지 로드 후 0.5초 뒤)
+  setTimeout(() => {
+    showOnboarding.value = true
+  }, 500)
 })
 // 현재 표시 중인 피드 인덱스
 const currentFeedIndex = ref(0)
@@ -1240,11 +1351,12 @@ watch(
       setTimeout(() => {
         const headlineVideo = videoElements['headline']
         if (headlineVideo && headlineVideo.paused) {
-          headlineVideo.play().catch(err => {
-            console.warn('[FeedView] watch: 동영상 자동재생 실패:', err)
-          })
+          // 브라우저 autoplay 정책 우회를 위해 명시적으로 muted 설정
+          headlineVideo.muted = true
+          // 웹뷰에서는 성공, 브라우저에서는 실패하지만 에러 무시
+          headlineVideo.play().catch(() => {})
         }
-      }, 100)
+      }, 300)
     }
   },
   { immediate: true },
@@ -1679,6 +1791,37 @@ const videoCanvasRefs = reactive({})
 const videoElements = reactive({})
 const videoAnimationFrames = reactive({})
 
+// 동영상 로드 이벤트 핸들러
+function onVideoLoaded(event, id) {
+  const video = event.target
+  console.log(`[FeedView] ${id} 동영상 메타데이터 로드 완료`)
+
+  // 로드되자마자 재생 시도
+  video.muted = true
+  video.volume = 0
+  video.play().then(() => {
+    console.log(`[FeedView] ${id} 로드 직후 재생 성공!`)
+  }).catch((err) => {
+    console.log(`[FeedView] ${id} 로드 직후 재생 실패:`, err.message)
+  })
+}
+
+// 동영상 재생 가능 이벤트 핸들러
+function onVideoCanPlay(event, id) {
+  const video = event.target
+  console.log(`[FeedView] ${id} 동영상 재생 가능 상태`)
+
+  if (video.paused) {
+    video.muted = true
+    video.volume = 0
+    video.play().then(() => {
+      console.log(`[FeedView] ${id} canplay에서 재생 성공!`)
+    }).catch((err) => {
+      console.log(`[FeedView] ${id} canplay에서 재생 실패:`, err.message)
+    })
+  }
+}
+
 function setupVideoCanvas(videoEl, id) {
   if (!videoEl) return
 
@@ -1707,12 +1850,50 @@ function setupVideoCanvas(videoEl, id) {
     }
 
     // 비디오 재생 시작 (autoplay)
-    videoEl.play().catch(err => {
-      console.warn('[FeedView] 동영상 자동재생 실패:', err)
+    // 브라우저 autoplay 정책 우회를 위해 명시적으로 muted 설정
+    videoEl.muted = true
+    videoEl.volume = 0
+
+    // Intersection Observer로 화면에 보일 때 재생 (threshold를 0.1로 낮춤)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && videoEl.paused) {
+          console.log('[FeedView] IntersectionObserver: 동영상이 화면에 보임, 재생 시도')
+          videoEl.muted = true
+          videoEl.volume = 0
+          videoEl.play().then(() => {
+            console.log('[FeedView] IntersectionObserver: 재생 성공')
+            renderVideoToCanvas(id)
+          }).catch(err => {
+            console.warn('[FeedView] IntersectionObserver: 재생 실패', err)
+          })
+        }
+      })
+    }, { threshold: 0.1 })
+
+    observer.observe(canvas)
+
+    // 즉시 재생 시도 (웹뷰 등에서는 성공할 수 있음)
+    videoEl.play().then(() => {
+      console.log('[FeedView] setupVideoCanvas: 즉시 재생 성공')
+    }).catch(() => {
+      console.log('[FeedView] setupVideoCanvas: 즉시 재생 실패, IntersectionObserver 또는 사용자 인터랙션 대기')
     })
 
     // 렌더링 시작
     renderVideoToCanvas(id)
+
+    // 추가 시도: 100ms, 500ms, 1000ms 후에도 재생 시도
+    const retryDelays = [100, 500, 1000]
+    retryDelays.forEach(delay => {
+      setTimeout(() => {
+        if (videoEl.paused) {
+          videoEl.muted = true
+          videoEl.volume = 0
+          videoEl.play().catch(() => {})
+        }
+      }, delay)
+    })
   })
 }
 
@@ -2382,5 +2563,83 @@ function onPanelDragEnd() {
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0);
+}
+
+/* 온보딩 애니메이션 */
+.fade-overlay-enter-active,
+.fade-overlay-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-overlay-enter-from,
+.fade-overlay-leave-to {
+  opacity: 0;
+}
+.fade-overlay-enter-to,
+.fade-overlay-leave-from {
+  opacity: 1;
+}
+
+/* Fade in up 애니메이션 */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+  opacity: 0;
+}
+
+/* 스와이프 애니메이션 - 상하 */
+@keyframes swipe-vertical {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.6;
+  }
+}
+
+.animate-swipe-vertical {
+  animation: swipe-vertical 2s ease-in-out infinite;
+}
+
+/* 스와이프 애니메이션 - 좌우 */
+@keyframes swipe-horizontal {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(20px);
+    opacity: 0.3;
+  }
+}
+
+.animate-swipe-horizontal {
+  animation: swipe-horizontal 2s ease-in-out infinite;
+  animation-delay: 1s;
 }
 </style>

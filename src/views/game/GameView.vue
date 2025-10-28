@@ -1,12 +1,12 @@
 <template>
-  <Header :has-referer="false" title="게임" class="z-10" />
+  <Header :has-referer="false" title="게임" class="z-50" />
 
-  <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4">
+  <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4 bg-white text-black">
     <!-- 상단 메뉴 버튼 -->
     <div class="flex gap-2 pt-3">
       <button
         @click="router.push('/rules')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-black text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -32,7 +32,7 @@
       </button>
       <button
         @click="router.push('/game-list')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-black text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -57,7 +57,7 @@
       <div
         v-for="i in 3"
         :key="i"
-        class="p-5 border bg-white rounded-2xl shadow space-y-5 animate-pulse"
+        class="p-5 border bg-black rounded-2xl shadow space-y-5 animate-pulse"
       >
         <div class="flex justify-between items-start">
           <div class="space-y-2 w-full">
@@ -85,7 +85,7 @@
           :key="game.id"
           :id="'game-' + game.id"
           :class="[
-            'relative p-5 rounded-xl bg-white border space-y-4 transition-all',
+            'relative p-5 rounded-xl bg-black border space-y-4 transition-all',
             getCardClass(game),
           ]"
         >
@@ -173,7 +173,7 @@
             "
             class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
           >
-            <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
+            <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
               <h2 class="text-lg font-bold mb-4 text-gray-900">생성자</h2>
               <!-- 신청한 게임 소유자 정보 상단 렌더링 -->
               <template v-if="selectedApplicantsGame.type === 'sent'">
@@ -489,7 +489,7 @@
     v-if="showAddressModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
   >
-    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
+    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
       <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -500,7 +500,7 @@
           <input
             ref="addressInputModal"
             v-model="searchQuery"
-            class="w-full text-base px-4 py-3 bg-white rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+            class="w-full text-base px-4 py-3 bg-black rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
             placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
             autocomplete="off"
           />
@@ -572,7 +572,7 @@
     v-if="showCountdownModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100050]"
   >
-    <div class="bg-white p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
+    <div class="bg-black p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
       <h2 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">경기 시작 전 확인</h2>
       <p class="text-sm text-gray-500 mb-1">이 경기는 다음 시간 동안 진행됩니다:</p>
       <div class="text-4xl font-black text-orange-500 py-4 mb-4 mt-3">
@@ -603,7 +603,7 @@
     v-if="showAddressErrorModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100100]"
   >
-    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
         <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
         <h3 class="text-lg font-bold text-gray-900 mb-2">장소를 찾을 수 없습니다</h3>
@@ -634,7 +634,7 @@
     v-if="showDeleteModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100200]"
   >
-    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
         <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
         <h3 class="text-lg font-bold text-gray-900 mb-2">경기 삭제</h3>

@@ -3,6 +3,17 @@
     v-if="game && user1 && user2"
     class="w-dvw h-full flex flex-col px-4 py-3 relative bg-gray-900 text-gray-100 overflow-hidden"
   >
+    <!-- Reconnecting Overlay -->
+    <div
+      v-if="socketStatus === 'connecting'"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-[100]"
+    >
+      <div class="text-white text-2xl font-bold animate-pulse">
+        <i class="fas fa-sync-alt fa-spin mr-3"></i>
+        재연결 중...
+      </div>
+      <div class="text-gray-400 mt-2">네트워크 연결을 확인해주세요.</div>
+    </div>
 
     <div class="flex items-center justify-between mb-4">
       <button @click="goBack" class="text-white text-lg">
@@ -457,6 +468,9 @@ const router = useRouter()
 const { showToast } = useToast()
 const gameId = route.params.gameId
 
+// 소켓 연결 상태
+const socketStatus = ref('connected') // 'connected', 'connecting', 'disconnected'
+
 // 카메라 관련 상태
 const cameraInputRef = ref(null)
 const videoInputRef = ref(null)
@@ -657,6 +671,10 @@ function goBack() {
 
 function handleVisibilityChange() {
   if (document.visibilityState === 'visible') {
+    // 페이지가 다시 활성화될 때 소켓 연결을 시도합니다.
+    // socket.connect 내부 로직에 의해 이미 연결된 상태라면 아무 작업도 수행하지 않습니다.
+    socket.connect(chatRoomId.value)
+
     updateElapsed()
     if (!isSetOver.value && !isGameOver.value) {
       startTimer()
@@ -752,6 +770,17 @@ onMounted(async () => {
   const logResponse = await api.get(`/api/games/${gameId}/game-logs`)
   const rawLogs = logResponse.data
   rawLogs.forEach((log) => addLog(log))
+
+  // 소켓 핸들러 등록
+  socket.onConnecting(() => {
+    socketStatus.value = 'connecting'
+  })
+  socket.onConnected(() => {
+    socketStatus.value = 'connected'
+  })
+  socket.onDisconnected(() => {
+    socketStatus.value = 'disconnected'
+  })
 
   socket.onMessage((payload) => {
     if (payload.type === 'SCORE') {
@@ -933,6 +962,11 @@ async function onVideoChange(e) {
 onUnmounted(() => {
   clearInterval(timerRef.value)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+
+  // 소켓 핸들러 정리
+  socket.onConnecting(null)
+  socket.onConnected(null)
+  socket.onDisconnected(null)
 
   // 타이머 정리
   if (longPressTimer) {

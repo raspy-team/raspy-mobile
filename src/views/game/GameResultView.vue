@@ -15,37 +15,45 @@
         <!-- 승패 결과 -->
         <div v-if="winnerIdx != 0" class="space-y-0.5">
           <div v-if="user1.id == currentUserId">
-            <template v-if="!((championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect))">
+            <template
+              v-if="
+                !(
+                  (championIdx == 1 && idxCorrect) ||
+                  (championIdx == 2 && !idxCorrect) ||
+                  (championIdx == 2 && idxCorrect) ||
+                  (championIdx == 1 && !idxCorrect)
+                )
+              "
+            >
               <h2
                 v-if="winnerIdx == 1"
                 class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
-                style="animation: gradient-x 2.5s linear infinite;"
+                style="animation: gradient-x 2.5s linear infinite"
               >
                 승리하셨습니다!
               </h2>
-              <h2
-                v-else
-                class="text-3xl font-extrabold text-gray-500"
-              >
-                패배하셨습니다.
-              </h2>
+              <h2 v-else class="text-3xl font-extrabold text-gray-500">패배하셨습니다.</h2>
             </template>
           </div>
           <div v-else-if="user2.id == currentUserId">
-            <template v-if="!((championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect))">
+            <template
+              v-if="
+                !(
+                  (championIdx == 1 && idxCorrect) ||
+                  (championIdx == 2 && !idxCorrect) ||
+                  (championIdx == 2 && idxCorrect) ||
+                  (championIdx == 1 && !idxCorrect)
+                )
+              "
+            >
               <h2
                 v-if="winnerIdx == 2"
                 class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
-                style="animation: gradient-x 2.5s linear infinite;"
+                style="animation: gradient-x 2.5s linear infinite"
               >
                 승리하셨습니다!
               </h2>
-              <h2
-                v-else
-                class="text-3xl font-extrabold text-gray-500"
-              >
-                패배하셨습니다.
-              </h2>
+              <h2 v-else class="text-3xl font-extrabold text-gray-500">패배하셨습니다.</h2>
             </template>
           </div>
         </div>
@@ -57,7 +65,12 @@
 
         <!-- 챔피언 여부 카드: 승/패 모두 동일 문구와 스타일 -->
         <div
-          v-if="(championIdx == 1 && idxCorrect) || (championIdx == 2 && !idxCorrect) || (championIdx == 2 && idxCorrect) || (championIdx == 1 && !idxCorrect)"
+          v-if="
+            (championIdx == 1 && idxCorrect) ||
+            (championIdx == 2 && !idxCorrect) ||
+            (championIdx == 2 && idxCorrect) ||
+            (championIdx == 1 && !idxCorrect)
+          "
           class="relative max-w-md mx-auto my-6 px-6 py-8 rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center champion-card-glow"
         >
           <div class="absolute inset-0 z-0 pointer-events-none champion-card-bg"></div>
@@ -76,7 +89,9 @@
         <!-- 점수판 -->
         <div class="flex justify-around items-center py-4">
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">{{ user1SetCount }}</p>
+            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">
+              {{ user1SetCount }}
+            </p>
             <img
               :src="user1.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
@@ -84,11 +99,19 @@
             <p class="text-sm font-semibold text-white">{{ user1.nickname }}</p>
           </div>
           <div class="flex flex-col items-center mx-6 sm:mx-20">
-            <span class="text-base sm:text-xl font-bold text-orange-900 mb-2 select-none">경기 종료</span>
-            <span class="text-[5rem] sm:text-[8rem] font-extrabold text-orange-300 select-none leading-none self-center flex items-center" style="line-height:1;">:</span>
+            <span class="text-base sm:text-xl font-bold text-orange-900 mb-2 select-none"
+              >경기 종료</span
+            >
+            <span
+              class="text-[5rem] sm:text-[8rem] font-extrabold text-orange-300 select-none leading-none self-center flex items-center"
+              style="line-height: 1"
+              >:</span
+            >
           </div>
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">{{ user2SetCount }}</p>
+            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">
+              {{ user2SetCount }}
+            </p>
             <img
               :src="user2.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
@@ -105,6 +128,7 @@
 
           <!-- 촬영/선택된 미디어가 없을 때 -->
           <div v-if="allPictures.length === 0" class="text-center py-6 text-gray-400 bg-gray-700 rounded-lg">
+
             <i class="fas fa-images text-4xl mb-2"></i>
             <p class="text-sm mb-3">촬영된 미디어가 없습니다</p>
             <div class="flex gap-2 justify-center">
@@ -141,7 +165,7 @@
                       ? 'opacity-50 scale-95 border-orange-300'
                       : touchCurrentIndex === index && isDragging
                         ? 'border-blue-500 scale-105'
-                        : 'border-orange-500'
+                        : 'border-orange-500',
                   ]"
                   draggable="true"
                   @dragstart="handleDragStart(index)"
@@ -153,15 +177,26 @@
                   @touchend="handleTouchEnd(index)"
                 >
                   <!-- 이미지 -->
-                  <img v-if="pic.type === 'image'" :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
+                  <img
+                    v-if="pic.type === 'image'"
+                    :src="pic.dataUrl"
+                    class="w-full h-full object-cover pointer-events-none"
+                  />
 
                   <!-- 동영상 -->
                   <div v-else-if="pic.type === 'video'" class="relative w-full h-full">
-                    <video :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
-                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 pointer-events-none">
+                    <video
+                      :src="pic.dataUrl"
+                      class="w-full h-full object-cover pointer-events-none"
+                    />
+                    <div
+                      class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 pointer-events-none"
+                    >
                       <i class="fas fa-play-circle text-white text-3xl"></i>
                     </div>
-                    <div class="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded pointer-events-none">
+                    <div
+                      class="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded pointer-events-none"
+                    >
                       {{ formatDuration(pic.duration) }}
                     </div>
                   </div>
@@ -192,15 +227,23 @@
                   @click="selectPicture(pic)"
                 >
                   <!-- 이미지 -->
-                  <img v-if="pic.type === 'image'" :src="pic.dataUrl" class="w-full h-full object-cover" />
+                  <img
+                    v-if="pic.type === 'image'"
+                    :src="pic.dataUrl"
+                    class="w-full h-full object-cover"
+                  />
 
                   <!-- 동영상 -->
                   <div v-else-if="pic.type === 'video'" class="relative w-full h-full">
                     <video :src="pic.dataUrl" class="w-full h-full object-cover" />
-                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                    <div
+                      class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30"
+                    >
                       <i class="fas fa-play-circle text-white text-2xl"></i>
                     </div>
-                    <div class="absolute bottom-0.5 left-0.5 bg-black bg-opacity-70 text-white text-[10px] px-1 py-0.5 rounded">
+                    <div
+                      class="absolute bottom-0.5 left-0.5 bg-black bg-opacity-70 text-white text-[10px] px-1 py-0.5 rounded"
+                    >
                       {{ formatDuration(pic.duration) }}
                     </div>
                   </div>
@@ -233,64 +276,180 @@
           </div>
         </div>
 
-        <!-- 리뷰 남기기 -->
-        <div class="p-2 space-y-1 text-left">
-          <h3 class="text-lg font-bold text-gray-100">
-            {{ (user1.id == currentUserId ? user2.nickname : user1.nickname) }} 님을 평가해주세요
-          </h3>
+        <!-- 상대방 평가 섹션 -->
+        <div
+          class="p-4 space-y-4 text-left bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200 shadow-sm"
+        >
+          <div class="flex items-center gap-2">
+            <i class="fas fa-user-friends text-orange-600 text-lg"></i>
+            <h3 class="text-lg font-bold text-gray-800">
+              {{ user1.id == currentUserId ? user2.nickname : user1.nickname }} 님을 평가해주세요
+            </h3>
+          </div>
 
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-gray-300">매너</label>
-            <div class="flex gap-1">
-              <i
-                v-for="n in 5"
-                :key="'manner' + n"
-                @click="setManner(n)"
-                :class="
-                  n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-300'
-                "
-                class="text-xl cursor-pointer w-6"
-              ></i>
+          <div class="space-y-3">
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                <i class="fas fa-heart text-orange-500 text-xs"></i>
+                매너
+              </label>
+              <div class="flex gap-1.5 items-center">
+                <i
+                  v-for="n in 5"
+                  :key="'manner' + n"
+                  @click="setManner(n)"
+                  :class="
+                    n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-300'
+                  "
+                  class="text-2xl cursor-pointer hover:scale-110 transition-transform"
+                ></i>
+                <span v-if="review.manner > 0" class="text-base font-bold text-orange-600 ml-2"
+                  >{{ review.manner }}/5</span
+                >
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                <i class="fas fa-fire text-orange-500 text-xs"></i>
+                퍼포먼스
+              </label>
+              <div class="flex gap-1.5 items-center">
+                <i
+                  v-for="n in 5"
+                  :key="'perf' + n"
+                  @click="setPerformance(n)"
+                  :class="
+                    n <= review.performance
+                      ? 'fas fa-star text-orange-400'
+                      : 'far fa-star text-gray-300'
+                  "
+                  class="text-2xl cursor-pointer hover:scale-110 transition-transform"
+                ></i>
+                <span v-if="review.performance > 0" class="text-base font-bold text-orange-600 ml-2"
+                  >{{ review.performance }}/5</span
+                >
+              </div>
             </div>
           </div>
 
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-gray-300">퍼포먼스</label>
-            <div class="flex gap-1">
+          <button
+            @click="showReviewModal = true"
+            class="w-full border border-orange-300 rounded-xl p-3.5 text-sm text-left text-gray-700 bg-white hover:bg-orange-50 transition shadow-sm"
+          >
+            <div class="flex items-center gap-2">
+              <i class="fas fa-comment-dots text-orange-400"></i>
+              <span v-if="review.text && review.text.length > 0" class="flex-1">{{
+                review.text
+              }}</span>
+              <span v-else class="text-gray-400 flex-1">텍스트 리뷰 (선택)</span>
+            </div>
+          </button>
+
+          <!-- Fullscreen review modal -->
+          <div
+            v-if="showReviewModal"
+            class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
+          >
+            <div class="bg-white w-full h-full max-w-md mx-auto flex flex-col">
+              <div
+                class="flex items-center justify-between p-4 border-b border-orange-200 bg-orange-50"
+              >
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-comment-dots text-orange-500"></i>
+                  <span class="font-bold text-lg text-gray-800">상대방 리뷰</span>
+                </div>
+                <button
+                  @click="showReviewModal = false"
+                  class="text-orange-500 font-bold text-base hover:text-orange-600"
+                >
+                  닫기
+                </button>
+              </div>
+              <textarea
+                v-model="review.text"
+                class="flex-1 w-full p-4 text-base focus:outline-none resize-none bg-transparent"
+                placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요."
+                style="min-height: 60vh"
+                autofocus
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 규칙 평가 섹션 -->
+        <div
+          class="p-4 space-y-4 text-left bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 shadow-sm"
+        >
+          <div class="flex items-center gap-2">
+            <i class="fas fa-book text-purple-600 text-lg"></i>
+            <h3 class="text-lg font-bold text-gray-800">이 규칙은 어떠셨나요?</h3>
+          </div>
+          <p class="text-xs text-gray-600">
+            규칙의 재미, 명확성, 밸런스를 평가해주세요. 여러분의 평가는 다른 사용자들에게 도움이
+            됩니다.
+          </p>
+
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+              <i class="fas fa-star text-purple-500 text-xs"></i>
+              규칙 평가
+            </label>
+            <div class="flex gap-1.5 items-center">
               <i
                 v-for="n in 5"
-                :key="'perf' + n"
-                @click="setPerformance(n)"
+                :key="'rule' + n"
+                @click="setRuleRating(n)"
                 :class="
-                  n <= review.performance
-                    ? 'fas fa-fire text-orange-400'
-                    : 'fas fa-fire text-gray-300'
+                  n <= ruleRating ? 'fas fa-star text-purple-500' : 'far fa-star text-gray-300'
                 "
-                class="text-xl cursor-pointer w-6"
+                class="text-2xl cursor-pointer hover:scale-110 transition-transform"
               ></i>
+              <span v-if="ruleRating > 0" class="text-base font-bold text-purple-600 ml-2"
+                >{{ ruleRating }}/5</span
+              >
             </div>
           </div>
 
           <button
             @click="showReviewModal = true"
             class="w-full border border-gray-600 rounded-lg p-3 text-sm text-left text-gray-300 bg-gray-800 hover:bg-gray-700 transition"
+
           >
-            <span v-if="review.text && review.text.length > 0">{{ review.text }}</span>
-            <span v-else class="text-gray-400">텍스트 리뷰 (선택)</span>
+            <div class="flex items-center gap-2">
+              <i class="fas fa-comment-dots text-purple-400"></i>
+              <span v-if="ruleReview && ruleReview.length > 0" class="flex-1">{{
+                ruleReview
+              }}</span>
+              <span v-else class="text-gray-400 flex-1">규칙에 대한 의견 (선택)</span>
+            </div>
           </button>
 
-          <!-- Fullscreen review modal -->
-          <div v-if="showReviewModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center">
-            <div class="bg-gray-800 w-full h-full max-w-md mx-auto flex flex-col">
-              <div class="flex items-center justify-between p-4 border-b">
-                <span class="font-bold text-lg text-gray-100">리뷰 작성</span>
-                <button @click="showReviewModal = false" class="text-orange-500 font-bold text-base">닫기</button>
+          <!-- Fullscreen rule review modal -->
+          <div
+            v-if="showRuleReviewModal"
+            class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
+          >
+            <div class="bg-white w-full h-full max-w-md mx-auto flex flex-col">
+              <div
+                class="flex items-center justify-between p-4 border-b border-purple-200 bg-purple-50"
+              >
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-comment-dots text-purple-500"></i>
+                  <span class="font-bold text-lg text-gray-800">규칙 평가 의견</span>
+                </div>
+                <button
+                  @click="showRuleReviewModal = false"
+                  class="text-purple-500 font-bold text-base hover:text-purple-600"
+                >
+                  닫기
+                </button>
               </div>
               <textarea
-                v-model="review.text"
+                v-model="ruleReview"
                 class="flex-1 w-full p-4 text-base focus:outline-none resize-none bg-transparent"
-                placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요."
-                style="min-height: 60vh;"
+                placeholder="규칙의 장단점, 개선할 점 등을 자유롭게 작성해주세요."
+                style="min-height: 60vh"
                 autofocus
               ></textarea>
             </div>
@@ -300,6 +459,7 @@
         <div class="flex justify-center gap-3 mt-4">
           <button @click="sendFriendRequest" class="px-4 py-2 rounded-lg bg-blue-800 text-blue-300 font-semibold shadow">친구 추가</button>
           <button @click="onShare" class="px-4 py-2 rounded-lg bg-green-800 text-green-300 font-semibold shadow">결과 공유</button>
+
         </div>
       </div>
     </div>
@@ -320,7 +480,9 @@
       v-if="isSubmitting"
       class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-900 bg-opacity-95"
     >
-      <div class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500 border-orange-200 mb-4"></div>
+      <div
+        class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500 border-orange-200 mb-4"
+      ></div>
       <p class="text-lg font-semibold text-gray-700">제출 중...</p>
       <p class="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
     </div>
@@ -384,10 +546,18 @@ import api from '../../api/api'
 import defaultImg from '../../assets/default.png'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
-import { getGamePictures, removeGamePicture, addGamePicture, addGameVideo, compressImage, compressVideo } from '../../utils/gamePictureStorage'
+import {
+  getGamePictures,
+  removeGamePicture,
+  addGamePicture,
+  addGameVideo,
+  compressImage,
+  compressVideo,
+} from '../../utils/gamePictureStorage'
 
 const { showToast } = useToast()
 const showReviewModal = ref(false)
+const showRuleReviewModal = ref(false) // 규칙 평가 모달
 const isSubmitting = ref(false)
 const cameraInputRef = ref(null)
 const videoInputRef = ref(null)
@@ -401,6 +571,9 @@ function setManner(n) {
 function setPerformance(n) {
   review.value.performance = n
 }
+function setRuleRating(n) {
+  ruleRating.value = n
+}
 
 function submitReviewAndGoHome() {
   // 리뷰 제출 전 유효성 검사
@@ -409,8 +582,62 @@ function submitReviewAndGoHome() {
     return
   }
   const bannedWords = [
-    'fuck','shit','asshole','bitch','bastard','dick','fucking','fucker','cunt','nigger','slut','whore','sex','sexy','nazi','motherfucker',
-    '씨발','시발','씨바','ㅆㅂ','ㅅㅂ','ㅂㅅ','병신','새끼','좆','애미','개새끼','지랄','염병','꺼져','죽어','멍청','저능','존나','ㅄ','ㄱㅐ','ㅈㄴ','개같','더럽','섹스','자지','보지','딸딸이','빨아','꼬추','보빨','조까','좇','애비','년놈','암캐','걸레','쓰레기','창녀','미친놈','미친년',
+    'fuck',
+    'shit',
+    'asshole',
+    'bitch',
+    'bastard',
+    'dick',
+    'fucking',
+    'fucker',
+    'cunt',
+    'nigger',
+    'slut',
+    'whore',
+    'sex',
+    'sexy',
+    'nazi',
+    'motherfucker',
+    '씨발',
+    '시발',
+    '씨바',
+    'ㅆㅂ',
+    'ㅅㅂ',
+    'ㅂㅅ',
+    '병신',
+    '새끼',
+    '좆',
+    '애미',
+    '개새끼',
+    '지랄',
+    '염병',
+    '꺼져',
+    '죽어',
+    '멍청',
+    '저능',
+    '존나',
+    'ㅄ',
+    'ㄱㅐ',
+    'ㅈㄴ',
+    '개같',
+    '더럽',
+    '섹스',
+    '자지',
+    '보지',
+    '딸딸이',
+    '빨아',
+    '꼬추',
+    '보빨',
+    '조까',
+    '좇',
+    '애비',
+    '년놈',
+    '암캐',
+    '걸레',
+    '쓰레기',
+    '창녀',
+    '미친놈',
+    '미친년',
   ]
   const lowerText = (review.value.text || '').toLowerCase()
   const found = bannedWords.find((word) => lowerText.includes(word))
@@ -423,7 +650,19 @@ function submitReviewAndGoHome() {
   isSubmitting.value = true
   submitPictures()
     .then(() => {
+      // 상대방 리뷰 제출
       return api.post(`/api/games/${gameId}/review`, review.value)
+    })
+    .then(() => {
+      // 규칙 평가 제출 (점수가 있을 때만)
+      if (ruleRating.value > 0) {
+        return api.post(`/api/rules/${game.value.rule.id}/rating`, {
+          gameId: game.value.id,
+          rating: ruleRating.value,
+          comment: ruleReview.value || null,
+        })
+      }
+      return Promise.resolve()
     })
     .then(() => {
       showToast('리뷰가 제출되었습니다.')
@@ -431,13 +670,12 @@ function submitReviewAndGoHome() {
         goHome()
       }, 500)
     })
-    .catch(() => {
+    .catch((error) => {
       isSubmitting.value = false
+      console.error('제출 실패:', error)
       showToast('잘못된 접근입니다.')
     })
 }
-
-
 
 const route = useRoute()
 const router = useRouter()
@@ -445,6 +683,8 @@ const gameId = route.params.gameId
 
 const isLoading = ref(true)
 const review = ref({ manner: 0, performance: 0, text: '' })
+const ruleRating = ref(0) // 규칙 평가 점수 (0~5)
+const ruleReview = ref('') // 규칙 평가 의견
 const game = ref({})
 const user1 = ref({})
 const user2 = ref({})
@@ -593,7 +833,9 @@ const onVideoChange = async (e) => {
 
   // WebM이 아닌 경우 경고
   if (!fileType.includes('webm')) {
-    showToast(`⚠️ 주의: ${fileType || '알 수 없는 형식'} 파일입니다. 서버 업로드 시 WebM으로 변환이 필요할 수 있습니다.`)
+    showToast(
+      `⚠️ 주의: ${fileType || '알 수 없는 형식'} 파일입니다. 서버 업로드 시 WebM으로 변환이 필요할 수 있습니다.`,
+    )
     console.warn('[GameResultView] Non-WebM video detected:', file.type)
   }
 
@@ -800,7 +1042,8 @@ async function onShare() {
   try {
     const res = await api.post('/api/invite', null, { params: { gameId: `${gameId}` } })
     const url = res.data.url
-    const opponentName = user1.value.id === currentUserId.value ? user2.value.nickname : user1.value.nickname
+    const opponentName =
+      user1.value.id === currentUserId.value ? user2.value.nickname : user1.value.nickname
     const text = `${opponentName}님과의 경기 결과 – Match`
 
     if (navigator.share) {

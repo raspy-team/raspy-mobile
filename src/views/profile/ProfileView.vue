@@ -1,23 +1,23 @@
 <template>
   <div
-    class="bg-gradient-to-b from-orange-50/30 via-white to-gray-50 min-h-screen relative flex flex-col"
+    class="bg-black min-h-screen relative flex flex-col"
   >
     <!-- Fixed Top Bar -->
     <div
-      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-100 bg-white/95 backdrop-blur-md border-b shadow-sm"
+      class="fixed z-30 left-0 right-0 top-0 flex justify-between items-center px-4 border-b border-gray-600 bg-black/95 backdrop-blur-md border-b shadow-sm"
     >
       <div class="flex items-center h-14"></div>
       <div class="flex items-enter gap-3 mr-4">
         <button
           @click="searchUsers"
-          class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
+          class="flex items-center gap-2 px-2 py-1 text-gray-300 hover:text-orange-500 pt-3"
         >
           <i @click="searchUsers" class="fas fa-search text-xl text-orange-500"></i>
         </button>
 
         <button
           @click="goSettings"
-          class="flex items-center gap-2 px-2 py-1 text-gray-700 hover:text-orange-500 pt-3"
+          class="flex items-center gap-2 px-2 py-1 text-gray-300 hover:text-orange-500 pt-3"
         >
           <i class="fas fa-cog text-xl text-orange-500"></i>
           <span class="font-semibold text-sm hidden sm:inline">설정</span>
@@ -28,18 +28,18 @@
     <!-- SKELETON: 유저정보/통계/그래프/탭 -->
     <template v-if="user == null">
       <section
-        class="max-w-lg mx-auto bg-white rounded-2xl shadow-lg mt-10 mb-0 px-6 pt-7 pb-8 flex flex-col gap-5 relative animate-pulse"
+        class="max-w-lg mx-auto bg-gray-800 rounded-2xl shadow-lg mt-10 mb-0 px-6 pt-7 pb-8 flex flex-col gap-5 relative animate-pulse"
       >
         <!-- 프로필 -->
         <div class="flex gap-5 items-start mb-2">
-          <div class="w-20 h-20 rounded-full bg-gray-200"></div>
+          <div class="w-20 h-20 rounded-full bg-gray-700"></div>
           <div class="flex-1 flex flex-col gap-2">
-            <div class="w-28 h-6 bg-gray-200 rounded"></div>
+            <div class="w-28 h-6 bg-gray-700 rounded"></div>
             <div class="flex gap-2">
-              <div class="w-16 h-5 bg-orange-100 rounded"></div>
-              <div class="w-16 h-5 bg-gray-100 rounded"></div>
+              <div class="w-16 h-5 bg-orange-800 rounded"></div>
+              <div class="w-16 h-5 bg-gray-700 rounded"></div>
             </div>
-            <div class="w-40 h-4 bg-gray-100 rounded"></div>
+            <div class="w-40 h-4 bg-gray-700 rounded"></div>
             <div class="flex gap-2 mt-3 mb-2">
               <div class="w-20 h-7 rounded-full bg-gradient-animate opacity-60"></div>
               <div class="w-20 h-7 rounded-full bg-gradient-animate opacity-60"></div>
@@ -47,84 +47,84 @@
           </div>
         </div>
         <div
-          class="rounded-xl bg-gray-50 p-0.5 w-full flex flex-col sm:flex-row gap-0 sm:gap-4 items-stretch shadow-sm"
+          class="rounded-xl bg-gray-700 p-0.5 w-full flex flex-col sm:flex-row gap-0 sm:gap-4 items-stretch shadow-sm"
         >
           <div
-            class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0 border-b sm:border-b-0 sm:border-r border-gray-200"
+            class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0 border-b sm:border-b-0 sm:border-r border-gray-600"
           >
             <div class="flex flex-col items-center gap-0.5">
-              <div class="w-8 h-5 bg-gray-200 rounded"></div>
-              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+              <div class="w-8 h-5 bg-gray-700 rounded"></div>
+              <div class="w-6 h-3 bg-gray-600 rounded mt-1"></div>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-              <div class="w-8 h-5 bg-gray-200 rounded"></div>
-              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+              <div class="w-8 h-5 bg-gray-700 rounded"></div>
+              <div class="w-6 h-3 bg-gray-600 rounded mt-1"></div>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-              <div class="w-8 h-5 bg-gray-200 rounded"></div>
-              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+              <div class="w-8 h-5 bg-gray-700 rounded"></div>
+              <div class="w-6 h-3 bg-gray-600 rounded mt-1"></div>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-              <div class="w-10 h-5 bg-orange-100 rounded"></div>
-              <div class="w-8 h-3 bg-orange-100 rounded mt-1"></div>
+              <div class="w-10 h-5 bg-orange-800 rounded"></div>
+              <div class="w-8 h-3 bg-orange-800 rounded mt-1"></div>
             </div>
           </div>
           <div class="flex flex-row flex-1 items-center justify-around px-4 py-3 gap-0">
             <div class="flex flex-col items-center gap-0.5">
-              <div class="w-8 h-5 bg-gray-200 rounded"></div>
-              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+              <div class="w-8 h-5 bg-gray-700 rounded"></div>
+              <div class="w-6 h-3 bg-gray-600 rounded mt-1"></div>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-              <div class="w-8 h-5 bg-gray-200 rounded"></div>
-              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+              <div class="w-8 h-5 bg-gray-700 rounded"></div>
+              <div class="w-6 h-3 bg-gray-600 rounded mt-1"></div>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-              <div class="w-8 h-5 bg-gray-200 rounded"></div>
-              <div class="w-6 h-3 bg-gray-100 rounded mt-1"></div>
+              <div class="w-8 h-5 bg-gray-700 rounded"></div>
+              <div class="w-6 h-3 bg-gray-600 rounded mt-1"></div>
             </div>
           </div>
         </div>
         <div class="flex gap-3 mt-1">
-          <div class="flex-1 h-12 bg-gray-100 rounded-xl"></div>
-          <div class="flex-1 h-12 bg-gray-100 rounded-xl"></div>
+          <div class="flex-1 h-12 bg-gray-700 rounded-xl"></div>
+          <div class="flex-1 h-12 bg-gray-700 rounded-xl"></div>
         </div>
       </section>
       <section class="max-w-lg mx-auto px-4">
         <div class="mb-4 flex gap-2">
-          <div class="w-24 h-8 bg-gray-200 rounded"></div>
-          <div class="w-20 h-8 bg-orange-100 rounded"></div>
-          <div class="w-24 h-8 bg-gray-100 rounded"></div>
+          <div class="w-24 h-8 bg-gray-700 rounded"></div>
+          <div class="w-20 h-8 bg-orange-800 rounded"></div>
+          <div class="w-24 h-8 bg-gray-700 rounded"></div>
         </div>
-        <div class="rounded-2xl bg-white shadow p-5 mb-8">
+        <div class="rounded-2xl bg-gray-800 shadow p-5 mb-8">
           <div class="flex justify-between items-center mb-3">
-            <div class="w-32 h-6 bg-gray-100 rounded"></div>
+            <div class="w-32 h-6 bg-gray-700 rounded"></div>
             <div class="flex items-center gap-2">
-              <div class="w-14 h-6 bg-orange-100 rounded"></div>
-              <div class="w-14 h-6 bg-gray-100 rounded"></div>
+              <div class="w-14 h-6 bg-orange-800 rounded"></div>
+              <div class="w-14 h-6 bg-gray-700 rounded"></div>
             </div>
           </div>
           <div class="w-full flex items-center justify-center my-5 -ml-2">
-            <div class="w-full h-36 bg-gray-100 rounded-xl"></div>
+            <div class="w-full h-36 bg-gray-700 rounded-xl"></div>
           </div>
           <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-[0.97rem]">
-            <div class="w-24 h-5 bg-gray-100 rounded"></div>
-            <div class="w-12 h-5 bg-gray-100 rounded justify-self-end"></div>
-            <div class="w-24 h-5 bg-gray-100 rounded"></div>
-            <div class="w-20 h-5 bg-gray-100 rounded justify-self-end"></div>
-            <div class="w-24 h-5 bg-gray-100 rounded"></div>
-            <div class="w-16 h-5 bg-orange-100 rounded justify-self-end"></div>
+            <div class="w-24 h-5 bg-gray-700 rounded"></div>
+            <div class="w-12 h-5 bg-gray-700 rounded justify-self-end"></div>
+            <div class="w-24 h-5 bg-gray-700 rounded"></div>
+            <div class="w-20 h-5 bg-gray-700 rounded justify-self-end"></div>
+            <div class="w-24 h-5 bg-gray-700 rounded"></div>
+            <div class="w-16 h-5 bg-orange-800 rounded justify-self-end"></div>
           </div>
         </div>
       </section>
       <section class="max-w-lg mx-auto px-4">
         <div class="flex items-center gap-2 mb-4">
-          <div class="w-24 h-8 bg-gray-200 rounded"></div>
-          <div class="w-16 h-8 bg-orange-100 rounded"></div>
+          <div class="w-24 h-8 bg-gray-700 rounded"></div>
+          <div class="w-16 h-8 bg-orange-800 rounded"></div>
         </div>
         <div class="space-y-6">
-          <div class="h-20 bg-gray-100 rounded-xl"></div>
-          <div class="h-20 bg-gray-100 rounded-xl"></div>
-          <div class="h-20 bg-gray-100 rounded-xl"></div>
+          <div class="h-20 bg-gray-700 rounded-xl"></div>
+          <div class="h-20 bg-gray-700 rounded-xl"></div>
+          <div class="h-20 bg-gray-700 rounded-xl"></div>
         </div>
       </section>
     </template>
@@ -133,14 +133,14 @@
     <template v-else>
       <main class="flex-1 overflow-hidden flex flex-col pt-14">
         <section
-          class="w-full mx-auto bg-gradient-to-br from-white via-orange-50/30 to-white rounded-3xl shadow-2xl mb-6 px-5 pt-8 pb-6 flex flex-col gap-4 relative overflow-hidden flex-shrink-0"
+          class="w-full mx-auto bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-3xl shadow-2xl mb-6 px-5 pt-8 pb-6 flex flex-col gap-4 relative overflow-hidden flex-shrink-0"
         >
           <!-- Decorative background -->
           <div
-            class="absolute -top-20 -right-20 w-40 h-40 bg-orange-200/20 rounded-full blur-3xl"
+            class="absolute -top-20 -right-20 w-40 h-40 bg-orange-900/20 rounded-full blur-3xl"
           ></div>
           <div
-            class="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-300/15 rounded-full blur-3xl"
+            class="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-900/15 rounded-full blur-3xl"
           ></div>
 
           <!-- Profile Section - Improved -->
@@ -154,11 +154,11 @@
                 <img
                   :src="user.avatar ? user.avatar : Default"
                   alt="avatar"
-                  class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-2xl relative z-10 ring-4 ring-orange-100"
+                  class="w-32 h-32 rounded-full object-cover border-4 border-gray-700 shadow-2xl relative z-10 ring-4 ring-orange-900"
                 />
                 <!-- Status badge -->
                 <div
-                  class="absolute -bottom-1 -right-1 bg-green-500 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-lg z-20"
+                  class="absolute -bottom-1 -right-1 bg-green-500 w-8 h-8 rounded-full border-4 border-gray-700 flex items-center justify-center shadow-lg z-20"
                 >
                   <i class="fas fa-check text-white text-xs"></i>
                 </div>
@@ -191,13 +191,13 @@
                   {{ user.age ? user.age + '세' : '연령 -' }}
                 </span>
                 <span
-                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-gray-50 to-gray-100 text-gray-600 text-sm px-4 py-2 rounded-full font-bold border border-gray-200 shadow-sm"
+                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-gray-700 to-gray-800 text-gray-300 text-sm px-4 py-2 rounded-full font-bold border border-gray-600 shadow-sm"
                 >
                   <i class="fas fa-venus-mars text-xs"></i>
                   {{ user.gender && user.gender != '비공개' ? user.gender : '성별 -' }}
                 </span>
                 <span
-                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 text-sm px-4 py-2 rounded-full font-bold border border-blue-200 shadow-sm"
+                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-blue-900 to-blue-800 text-blue-300 text-sm px-4 py-2 rounded-full font-bold border border-blue-700 shadow-sm"
                 >
                   <i class="fas fa-map-marker-alt text-xs"></i>
                   {{
@@ -211,9 +211,9 @@
               <!-- Bio with better styling -->
               <div
                 v-if="user.intro"
-                class="mt-3 px-6 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm max-w-sm"
+                class="mt-3 px-6 py-4 bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-gray-600 shadow-sm max-w-sm"
               >
-                <p class="text-base text-gray-700 text-center leading-relaxed">{{ user.intro }}</p>
+                <p class="text-base text-gray-300 text-center leading-relaxed">{{ user.intro }}</p>
               </div>
               <!-- 친구추가/나의 친구 버튼: 바이오 바로 아래 -->
               <div v-if="!user.isMe" class="flex gap-3 mt-4 pb-3 w-full justify-center">
@@ -235,13 +235,13 @@
                 </template>
                 <template v-else-if="friendStatus.sent && !friendStatus.isFriend">
                   <button
-                    class="flex justify-center items-center bg-white border-2 border-orange-400 text-orange-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-orange-50 transition-all"
+                    class="flex justify-center items-center bg-gray-700 border-2 border-orange-400 text-orange-300 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all"
                     @click="sendFriendCancelRequest"
                   >
                     <i class="fas fa-hourglass-half mr-2"></i> 요청취소
                   </button>
                   <button
-                    class="flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                    class="flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
                     @click="goChat"
                   >
                     <i class="fas fa-comment-dots mr-2"></i> DM
@@ -256,13 +256,13 @@
                       <i class="fas fa-user-check mr-2"></i> 승인
                     </button>
                     <button
-                      class="flex-1 flex justify-center items-center bg-white hover:bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl shadow-md transition-all border-2 border-gray-300"
+                      class="flex-1 flex justify-center items-center bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-3.5 rounded-xl shadow-md transition-all border-2 border-gray-600"
                       @click="rejectFriendRequest"
                     >
                       <i class="fas fa-user-times mr-2"></i> 거부
                     </button>
                     <button
-                      class="flex-1 flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                      class="flex-1 flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-bold py-3.5 rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
                       @click="goChat"
                     >
                       <i class="fas fa-comment-dots mr-2"></i> DM
@@ -271,13 +271,13 @@
                 </template>
                 <template v-else-if="friendStatus.isFriend">
                   <button
-                    class="flex justify-center items-center bg-white border-2 border-red-400 text-red-600 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-red-50 transition-all"
+                    class="flex justify-center items-center bg-gray-700 border-2 border-red-400 text-red-400 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all"
                     @click="showUnfriendConfirm = true"
                   >
                     <i class="fas fa-user-minus mr-2"></i> 친구 끊기
                   </button>
                   <button
-                    class="flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                    class="flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
                     @click="goChat"
                   >
                     <i class="fas fa-comment-dots mr-2"></i> DM
@@ -290,12 +290,12 @@
           <!-- Top 3 Rules - Enhanced Section -->
           <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2">
                 가장 많이 플레이한 규칙
               </h3>
               <button
                 @click="showStatsModal = true"
-                class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"
+                class="rounded-xl bg-gray-700 border border-gray-600 py-2 px-4 font-bold text-gray-300 text-base shadow hover:bg-gray-600 transition-all ml-2"
               >
                 통계 더보기
               </button>
@@ -320,11 +320,11 @@
           <transition name="champ-slide">
             <div v-if="showChampions" class="champ-card-container w-full max-w-md mx-auto mt-0">
               <div
-                class="champ-card bg-white rounded-2xl shadow-xl px-6 py-6 border border-gray-100"
+                class="champ-card bg-gray-800 rounded-2xl shadow-xl px-6 py-6 border border-gray-600"
               >
                 <div class="flex items-center mb-4">
                   <i class="fas fa-crown text-yellow-400 text-lg mr-2"></i>
-                  <span class="font-bold text-gray-900 text-base">
+                  <span class="font-bold text-gray-200 text-base">
                     {{ user.nickname }}님이 획득한 챔피언
                   </span>
                 </div>
@@ -347,7 +347,7 @@
 
           <!-- 기존 친구추가/DM 버튼 영역 제거 -->
         </section>
-        <section class="w-full mx-auto px-4 bg-[#f8f9fa] pb-0">
+        <section class="w-full mx-auto px-4 bg-gradient-to-b from-gray-800 to-gray-900 pb-0">
           <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
           <div v-if="statMode === 'rule'" class="pb-4">
             @click="showRuleModal = true" class="w-full py-3 rounded-xl bg-orange-100
@@ -362,7 +362,7 @@
               placeholder="서브 카테고리"
             />
           </div>
-          <div class="mb-3 text-xs text-gray-500 px-2">
+          <div class="mb-3 text-xs text-gray-400 px-2">
             <template v-if="statMode === 'total' && false">
               전체 기준 (플레이한 유저: <b>{{ user.totalPlayers }}</b
               >명)
@@ -419,19 +419,19 @@
         <!-- Most Recent Game - Enhanced Card -->
         <section
           v-if="user.recentGames && user.recentGames.length > 0"
-          class="w-full mx-auto px-4 pb-0 bg-[#f8f9fa]"
+          class="w-full mx-auto px-4 pb-0 bg-gray-900"
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">최근 경기</h3>
+            <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2">최근 경기</h3>
             <button
               @click="goToUserFeed"
-              class="rounded-xl bg-white border border-gray-200 py-2 px-4 font-bold text-gray-800 text-base shadow hover:bg-orange-50 transition-all ml-2"
+              class="rounded-xl bg-gray-700 border border-gray-600 py-2 px-4 font-bold text-gray-300 text-base shadow hover:bg-gray-600 transition-all ml-2"
             >
               더보기
             </button>
           </div>
           <div
-            class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-100 transition-all duration-300 cursor-pointer"
+            class="group relative bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-600 transition-all duration-300 cursor-pointer"
           >
             <!-- Result badge overlay -->
             <div class="absolute top-3 right-3 z-10">
@@ -444,7 +444,7 @@
                   'bg-gradient-to-r from-gray-400 to-gray-500 text-white':
                     user.recentGames[0].result === 'draw',
                 }"
-                class="px-3 py-1.5 rounded-full text-xs font-bold shadow-lg"
+                class="px-3 py-1.5 rounded-full text-xs text-white font-bold shadow-lg"
               >
                 {{
                   user.recentGames[0].result === 'win'
@@ -458,7 +458,7 @@
 
             <div class="flex">
               <div
-                class="relative flex-shrink-0 w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden"
+                class="relative flex-shrink-0 w-32 h-32 bg-gradient-to-br from-gray-700 to-gray-800 overflow-hidden"
               >
                 <img
                   :src="user.recentGames[0].startPhotoUrl"
@@ -470,13 +470,13 @@
 
               <div class="flex-1 p-5 flex flex-col justify-between">
                 <div>
-                  <span class="text-lg font-bold text-gray-900 truncate block mb-2">
+                  <span class="text-lg font-bold text-gray-200 truncate block mb-2">
                     {{ user.recentGames[0].ruleTitle }}
                   </span>
                   <div class="flex items-center gap-3 text-base">
                     <div class="flex items-center gap-2">
                       <span
-                        class="text-2xl font-black"
+                        class="text-2xl font-black text-white"
                         :class="{
                           'text-orange-500': user.recentGames[0].result === 'win',
                           'text-blue-500': user.recentGames[0].result === 'loss',
@@ -486,12 +486,12 @@
                         {{ user.recentGames[0].myScore }}
                       </span>
                       <span class="text-gray-400 font-bold">:</span>
-                      <span class="text-2xl font-black text-gray-600">
+                      <span class="text-2xl font-black text-white">
                         {{ user.recentGames[0].opponentScore }}
                       </span>
                     </div>
                   </div>
-                  <span class="text-sm text-gray-500 mt-1 block">
+                  <span class="text-sm text-gray-400 mt-1 block">
                     vs {{ user.recentGames[0].opponentNickname }}
                   </span>
                 </div>
@@ -510,12 +510,12 @@
           v-if="showRuleModal"
           class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-end z-50"
         >
-          <div class="w-full max-w-lg bg-white rounded-t-3xl shadow-2xl p-6 pb-">
+          <div class="w-full max-w-lg bg-gray-800 rounded-t-3xl shadow-2xl p-6 pb-">
             <div class="mb-2 flex justify-between items-center">
-              <h3 class="text-lg font-bold text-gray-900">경기 규칙 선택</h3>
+              <h3 class="text-lg font-bold text-gray-200">경기 규칙 선택</h3>
               <button
                 @click="showRuleModal = false"
-                class="text-gray-400 hover:text-orange-500 text-xl"
+                class="text-gray-500 hover:text-orange-500 text-xl"
               >
                 <i class="fas fa-times"></i>
               </button>
@@ -532,17 +532,17 @@
               <button
                 v-for="rule in filteredRules"
                 :key="rule.id"
-                class="flex flex-col items-start gap-1 p-3 bg-gray-100 hover:bg-orange-50 rounded-xl text-sm font-bold text-gray-800 transition"
-                :class="{ 'bg-orange-200 text-orange-700': selectedRuleId === rule.id }"
+                class="flex flex-col items-start gap-1 p-3 bg-gray-700 hover:bg-orange-900 rounded-xl text-sm font-bold text-gray-300 transition"
+                :class="{ 'bg-orange-800 text-orange-300': selectedRuleId === rule.id }"
                 @click="selectRule(rule.id)"
               >
                 <div class="flex items-center gap-2">
                   <span class="font-bold text-base">{{ rule.ruleTitle }}</span>
-                  <span class="text-xs px-2 py-0.5 bg-gray-200 rounded"
+                  <span class="text-xs px-2 py-0.5 bg-gray-600 rounded"
                     >{{ rule.majorCategory }} > {{ rule.minorCategory }}</span
                   >
                 </div>
-                <div class="text-xs text-gray-600 whitespace-pre-line leading-relaxed">
+                <div class="text-xs text-gray-400 whitespace-pre-line leading-relaxed">
                   {{ rule.ruleDescription }}
                 </div>
               </button>
@@ -557,16 +557,16 @@
           class="fixed inset-0 top-0 h-full bg-black bg-opacity-30 z-50 flex justify-center items-center"
         >
           <div
-            class="bg-white w-dvw w-full h-full p-6 pt-10 relative"
+            class="bg-gray-800 w-dvw w-full h-full p-6 pt-10 relative"
             style="min-height: calc(var(--real-vh, 1vh) * 100)"
           >
             <button
-              class="absolute top-10 right-7 text-gray-400 hover:text-orange-500 text-xl"
+              class="absolute top-10 right-7 text-gray-500 hover:text-orange-500 text-xl"
               @click="closeUserModal"
             >
               <i class="fas fa-times"></i>
             </button>
-            <h3 class="font-bold text-lg mb-4 text-gray-800">유저 찾기</h3>
+            <h3 class="font-bold text-lg mb-4 text-gray-200">유저 찾기</h3>
             <input
               v-model="userSearch"
               @input="onUserSearch"
@@ -575,12 +575,12 @@
               class="w-full border rounded-[10px] px-4 py-3 mb-4 text-sm focus:ring-2 focus:ring-orange-200 outline-none"
               placeholder="유저의 이름을 입력하세요"
             />
-            <div v-if="userSearching" class="text-center text-gray-400 py-4 text-sm">
+            <div v-if="userSearching" class="text-center text-gray-500 py-4 text-sm">
               검색 중...
             </div>
             <div
               v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''"
-              class="text-center text-gray-400 py-10 text-base"
+              class="text-center text-gray-500 py-10 text-base"
             >
               검색 결과가 없습니다.
             </div>
@@ -589,7 +589,7 @@
                 v-for="user in userSearchResult"
                 :key="user.id"
                 @click="gotoUser(user.id)"
-                class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl transition border border-transparent hover:border-orange-200"
+                class="flex items-center gap-3 p-2 hover:bg-orange-900 rounded-xl transition border border-transparent hover:border-orange-700"
               >
                 <img
                   :src="user.avatar ? user.avatar : Default"
@@ -597,12 +597,12 @@
                 />
                 <div class="flex-1 text-left">
                   <div class="flex flex-col gap-0">
-                    <div class="font-bold text-gray-800 text-sm">
+                    <div class="font-bold text-gray-200 text-sm">
                       {{ user.nickname }}
                     </div>
                     <div class="text-[0.8rem]">@{{ user.username }}</div>
                   </div>
-                  <div class="text-xs text-gray-500">{{ user.intro }}</div>
+                  <div class="text-xs text-gray-400">{{ user.intro }}</div>
                 </div>
               </button>
             </div>
@@ -615,11 +615,11 @@
           class="h-full fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center"
         >
           <div
-            class="bg-white h-[60%] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
+            class="bg-gray-800 h-[60%] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
             style="padding: 2rem 1.2rem 2.2rem 1.2rem; overflow-y: auto"
           >
             <button
-              class="absolute right-5 top-4 text-xl text-gray-400 hover:text-orange-500"
+              class="absolute right-5 top-4 text-xl text-gray-500 hover:text-orange-500"
               @click="closeFriendModal"
             >
               <i class="fas fa-times"></i>
@@ -628,8 +628,8 @@
               <button
                 :class="
                   friendTab === 'friends'
-                    ? 'font-bold border-b-2 border-orange-500 text-orange-600'
-                    : 'text-gray-500'
+                    ? 'font-bold border-b-2 border-orange-500 text-orange-400'
+                    : 'text-gray-400'
                 "
                 class="flex-1 py-2 text-base transition"
                 @click="friendTab = 'friends'"
@@ -640,8 +640,8 @@
                 v-if="user?.isMe"
                 :class="
                   friendTab === 'sent'
-                    ? 'font-bold border-b-2 border-orange-500 text-orange-600'
-                    : 'text-gray-500'
+                    ? 'font-bold border-b-2 border-orange-500 text-orange-400'
+                    : 'text-gray-400'
                 "
                 class="flex-1 py-2 text-base transition"
                 @click="friendTab = 'sent'"
@@ -652,8 +652,8 @@
                 v-if="user?.isMe"
                 :class="
                   friendTab === 'received'
-                    ? 'font-bold border-b-2 border-orange-500 text-orange-600'
-                    : 'text-gray-500'
+                    ? 'font-bold border-b-2 border-orange-500 text-orange-400'
+                    : 'text-gray-400'
                 "
                 class="flex-1 py-2 text-base transition"
                 @click="friendTab = 'received'"
@@ -666,7 +666,7 @@
                 <button
                   v-for="f in friends"
                   :key="f.id"
-                  class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
+                  class="flex items-center gap-3 p-3 hover:bg-orange-900 rounded-xl border border-transparent hover:border-orange-700 transition"
                   @click="gotoUser(f.id)"
                 >
                   <img
@@ -674,20 +674,20 @@
                     class="w-10 h-10 rounded-full object-cover border"
                   />
                   <div class="flex-1 text-left min-w-0">
-                    <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+                    <div class="font-bold text-gray-200 text-sm truncate">{{ f.nickname }}</div>
                     <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
-                    <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+                    <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
                   </div>
                 </button>
               </div>
-              <div v-else class="text-gray-400 text-center py-8">친구가 없습니다.</div>
+              <div v-else class="text-gray-500 text-center py-8">친구가 없습니다.</div>
             </div>
             <div v-if="friendTab === 'sent' && user?.isMe">
               <div v-if="friendRequestsSent.length" class="flex flex-col gap-3 overflow-y-auto">
                 <button
                   v-for="f in friendRequestsSent"
                   :key="f.id"
-                  class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
+                  class="flex items-center gap-3 p-3 hover:bg-orange-900 rounded-xl border border-transparent hover:border-orange-700 transition"
                   @click="gotoUser(f.id)"
                 >
                   <img
@@ -695,29 +695,29 @@
                     class="w-10 h-10 rounded-full object-cover border"
                   />
                   <div class="flex-1 text-left min-w-0">
-                    <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+                    <div class="font-bold text-gray-200 text-sm truncate">{{ f.nickname }}</div>
                     <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
-                    <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+                    <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
                   </div>
                 </button>
               </div>
-              <div v-else class="text-gray-400 text-center py-8">요청한 친구가 없습니다.</div>
+              <div v-else class="text-gray-500 text-center py-8">요청한 친구가 없습니다.</div>
             </div>
             <div v-if="friendTab === 'received' && user?.isMe">
               <div v-if="friendRequestsReceived.length" class="flex flex-col gap-3 overflow-y-auto">
                 <div
                   v-for="f in friendRequestsReceived"
                   :key="f.id"
-                  class="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl border border-transparent hover:border-orange-200 transition"
+                  class="flex items-center gap-3 p-3 hover:bg-orange-900 rounded-xl border border-transparent hover:border-orange-700 transition"
                 >
                   <img
                     :src="f.avatar || Default"
                     class="w-10 h-10 rounded-full object-cover border"
                   />
                   <div @click="gotoUser(f.id)" class="flex-1 text-left min-w-0">
-                    <div class="font-bold text-gray-800 text-sm truncate">{{ f.nickname }}</div>
+                    <div class="font-bold text-gray-200 text-sm truncate">{{ f.nickname }}</div>
                     <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
-                    <div class="text-xs text-gray-500 truncate">{{ f.intro }}</div>
+                    <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
                   </div>
                   <div class="flex gap-1 ml-2">
                     <button
@@ -727,7 +727,7 @@
                       승인
                     </button>
                     <button
-                      class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-bold shadow border border-gray-300"
+                      class="px-5 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-xs font-bold shadow border border-gray-600"
                       @click="onRejectRequest(f.id)"
                     >
                       거부
@@ -735,22 +735,21 @@
                   </div>
                 </div>
               </div>
-              <div v-else class="text-gray-400 text-center py-8">받은 친구 요청이 없습니다.</div>
+              <div v-else class="text-gray-500 text-center py-8">받은 친구 요청이 없습니다.</div>
             </div>
           </div>
         </div>
       </transition>
     </template>
-    <!-- 커스텀 confirm 모달 -->
     <div
       v-if="showConfirm"
       class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
     >
-      <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-        <h2 class="text-lg font-semibold mb-4">유저 차단</h2>
-        <p class="mb-6">정말로 이 사용자를 차단하시겠어요?</p>
+      <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
+        <h2 class="text-lg font-semibold mb-4 text-gray-200">유저 차단</h2>
+        <p class="mb-6 text-gray-300">정말로 이 사용자를 차단하시겠어요?</p>
         <div class="flex justify-end gap-3">
-          <button @click="cancel" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">
+          <button @click="cancel" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-300">
             취소
           </button>
           <button
@@ -774,15 +773,15 @@
       class="fixed inset-0 bg-black/50 flex justify-center items-center z-[60]"
       @click.self="showUnfriendConfirm = false"
     >
-      <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-modalpop">
+      <div class="bg-gray-800 rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-modalpop">
         <div class="text-center mb-6">
-          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-user-minus text-red-600 text-2xl"></i>
+          <div class="w-16 h-16 bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-user-minus text-red-400 text-2xl"></i>
           </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">
+          <h3 class="text-lg font-bold text-gray-200 mb-2">
             친구를 끊으시겠습니까?
           </h3>
-          <p class="text-sm text-gray-600 mb-1">
+          <p class="text-sm text-gray-400 mb-1">
             {{ user?.nickname }}님과의 친구 관계가 삭제됩니다.
           </p>
           <p class="text-xs text-gray-500">
@@ -792,7 +791,7 @@
         <div class="flex gap-3">
           <button
             @click="showUnfriendConfirm = false"
-            class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+            class="flex-1 py-3 px-4 bg-gray-700 text-gray-300 font-semibold rounded-xl hover:bg-gray-600 transition-all"
           >
             취소
           </button>

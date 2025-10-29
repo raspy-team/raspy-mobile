@@ -1,9 +1,10 @@
 <template>
-  <div class="h-dvh w-dvw flex flex-col relative overflow-hidden bg-white">
+  <div class="h-dvh w-dvw flex flex-col relative overflow-hidden bg-gray-900">
+
     <!-- 📌 로딩 오버레이 -->
     <div
       v-if="isLoading"
-      class="fixed inset-0 z-50 flex justify-center items-center bg-white bg-opacity-70"
+      class="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-70"
     >
       <div class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500"></div>
     </div>
@@ -59,7 +60,7 @@
 
         <div v-else>
           <i class="fas fa-handshake text-5xl text-gray-400 mb-2"></i>
-          <h2 class="text-3xl font-bold text-gray-500">무승부</h2>
+          <h2 class="text-3xl font-bold text-gray-400">무승부</h2>
         </div>
 
         <!-- 챔피언 여부 카드: 승/패 모두 동일 문구와 스타일 -->
@@ -95,7 +96,7 @@
               :src="user1.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
-            <p class="text-sm font-semibold">{{ user1.nickname }}</p>
+            <p class="text-sm font-semibold text-white">{{ user1.nickname }}</p>
           </div>
           <div class="flex flex-col items-center mx-6 sm:mx-20">
             <span class="text-base sm:text-xl font-bold text-orange-900 mb-2 select-none"
@@ -115,19 +116,19 @@
               :src="user2.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
-            <p class="text-sm font-semibold">{{ user2.nickname }}</p>
+            <p class="text-sm font-semibold text-white">{{ user2.nickname }}</p>
           </div>
         </div>
 
         <!-- 경기 사진/동영상 섹션 -->
         <div class="p-2 space-y-2 text-left">
-          <h3 class="text-lg font-bold text-gray-800">경기 사진/동영상 (최대 5개)</h3>
+          <h3 class="text-lg font-bold text-gray-100">
+            경기 사진/동영상 (최대 5개)
+          </h3>
 
           <!-- 촬영/선택된 미디어가 없을 때 -->
-          <div
-            v-if="allPictures.length === 0"
-            class="text-center py-6 text-gray-400 bg-gray-50 rounded-lg"
-          >
+          <div v-if="allPictures.length === 0" class="text-center py-6 text-gray-400 bg-gray-700 rounded-lg">
+
             <i class="fas fa-images text-4xl mb-2"></i>
             <p class="text-sm mb-3">촬영된 미디어가 없습니다</p>
             <div class="flex gap-2 justify-center">
@@ -150,7 +151,7 @@
           <div v-else class="space-y-3">
             <!-- 선택된 미디어 (드래그로 순서 변경 가능) -->
             <div v-if="selectedPictures.length > 0">
-              <p class="text-sm text-gray-600 mb-2">
+              <p class="text-sm text-gray-400 mb-2">
                 선택된 미디어 ({{ selectedPictures.length }}/5) - 드래그하여 순서 변경
               </p>
               <div class="grid grid-cols-3 gap-2">
@@ -217,7 +218,7 @@
 
             <!-- 선택 가능한 미디어들 -->
             <div v-if="unselectedPictures.length > 0">
-              <p class="text-sm text-gray-600 mb-2">미디어 선택</p>
+              <p class="text-sm text-gray-400 mb-2">미디어 선택</p>
               <div class="grid grid-cols-4 gap-2">
                 <div
                   v-for="pic in unselectedPictures"
@@ -261,13 +262,13 @@
             <div v-if="allPictures.length < 5" class="flex gap-2">
               <button
                 @click="openCamera"
-                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
+                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-gray-700 transition"
               >
                 <i class="fas fa-camera mr-1"></i> 사진 추가 ({{ allPictures.length }}/5)
               </button>
               <button
                 @click="openVideoRecorder"
-                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
+                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-gray-700 transition"
               >
                 <i class="fas fa-video mr-1"></i> 동영상 추가 ({{ allPictures.length }}/5)
               </button>
@@ -411,8 +412,9 @@
           </div>
 
           <button
-            @click="showRuleReviewModal = true"
-            class="w-full border border-purple-300 rounded-xl p-3.5 text-sm text-left text-gray-700 bg-white hover:bg-purple-50 transition shadow-sm"
+            @click="showReviewModal = true"
+            class="w-full border border-gray-600 rounded-lg p-3 text-sm text-left text-gray-300 bg-gray-800 hover:bg-gray-700 transition"
+
           >
             <div class="flex items-center gap-2">
               <i class="fas fa-comment-dots text-purple-400"></i>
@@ -455,18 +457,9 @@
         </div>
 
         <div class="flex justify-center gap-3 mt-4">
-          <button
-            @click="sendFriendRequest"
-            class="px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow"
-          >
-            친구 추가
-          </button>
-          <button
-            @click="onShare"
-            class="px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold shadow"
-          >
-            결과 공유
-          </button>
+          <button @click="sendFriendRequest" class="px-4 py-2 rounded-lg bg-blue-800 text-blue-300 font-semibold shadow">친구 추가</button>
+          <button @click="onShare" class="px-4 py-2 rounded-lg bg-green-800 text-green-300 font-semibold shadow">결과 공유</button>
+
         </div>
       </div>
     </div>
@@ -485,7 +478,7 @@
     <!-- 제출 중 로딩 오버레이 -->
     <div
       v-if="isSubmitting"
-      class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-white bg-opacity-95"
+      class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-900 bg-opacity-95"
     >
       <div
         class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500 border-orange-200 mb-4"
@@ -519,16 +512,16 @@
       v-if="showDeleteConfirm"
       class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
     >
-      <div class="bg-white w-full max-w-xs rounded-xl shadow-lg p-6 text-center mx-4">
+      <div class="bg-gray-800 w-full max-w-xs rounded-xl shadow-lg p-6 text-center mx-4">
         <div class="mb-5">
           <i class="fas fa-trash-alt text-4xl text-red-500 mb-3"></i>
-          <div class="text-lg font-bold text-gray-800 mb-2">사진을 삭제하시겠습니까?</div>
-          <p class="text-sm text-gray-500">삭제된 사진은 복구할 수 없습니다.</p>
+          <div class="text-lg font-bold text-gray-100 mb-2">사진을 삭제하시겠습니까?</div>
+          <p class="text-sm text-gray-400">삭제된 사진은 복구할 수 없습니다.</p>
         </div>
         <div class="flex justify-center gap-3">
           <button
             @click="cancelDeletePicture"
-            class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-200 transition"
+            class="flex-1 px-4 py-2.5 bg-gray-700 text-gray-300 rounded-lg font-semibold text-sm hover:bg-gray-600 transition"
           >
             취소
           </button>

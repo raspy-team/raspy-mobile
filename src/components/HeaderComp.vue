@@ -1,16 +1,16 @@
 <template>
-  <header class="fixed top-0 left-0 w-full z-[30] border border-gray-100 bg-[#fff] raspy-top">
+  <header class="fixed top-0 left-0 w-full z-[30] border border-gray-600 bg-black raspy-top">
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14">
-        <button v-if="props.hasReferer" @click="goBack" class="text-black text-lg">
+        <button v-if="props.hasReferer" @click="goBack" class="text-gray-200 text-lg">
           <i class="fas fa-chevron-left"></i>
         </button>
       </div>
       <!-- 중앙: 타이틀 (hasReferer일 때만 표시) -->
       <div
         v-if="props.hasReferer == true"
-        class="absolute left-1/2 transform -translate-x-1/2 text-black text-sm py-[50px] font-light"
+        class="absolute left-1/2 transform -translate-x-1/2 text-gray-200 text-sm py-[50px] font-light"
       >
         {{ props.title }}
       </div>
@@ -19,7 +19,7 @@
         <!-- DM 버튼 -->
         <router-link
           to="/dm"
-          class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full bg-white hover:bg-orange-50 transition ml-1"
+          class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full bg-gray-800 hover:bg-gray-700 transition ml-1"
           title="DM"
         >
           <i class="fas fa-paper-plane text-orange-500 text-xl"></i>
@@ -27,7 +27,7 @@
 
         <!-- 알림 버튼  -->
         <button
-          class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full bg-white hover:bg-orange-50 transition"
+          class="w-9 h-9 flex items-center justify-center relative border-orange-500 rounded-full bg-gray-800 hover:bg-gray-700 transition"
           @click="toggleNotificationPanel"
         >
           <i class="fas fa-bell text-orange-500 text-xl"></i>
@@ -42,7 +42,7 @@
     <transition name="slide">
       <aside
   v-if="showNotificationPanel"
-  class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
+  class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-gray-800 raspy-top border-l border-gray-600 z-[100] shadow-lg flex flex-col"
   @touchstart="onPanelDragStart"
   @touchmove="onPanelDragMove"
   @touchend="onPanelDragEnd"
@@ -50,11 +50,11 @@
   @mousemove="onPanelDragMove"
   @mouseup="onPanelDragEnd"
       >
-        <div class="flex items-center justify-between px-6 h-16 border-b">
-          <span class="text-base font-bold text-gray-800">알림</span>
+        <div class="flex items-center justify-between px-6 h-16 border-b border-gray-600">
+          <span class="text-base font-bold text-gray-200">알림</span>
           <button
             @click="toggleNotificationPanel"
-            class="text-gray-400 hover:text-gray-800 text-xl"
+            class="text-gray-400 hover:text-gray-200 text-xl"
           >
             <i class="fas fa-times"></i>
           </button>
@@ -65,26 +65,26 @@
               <li
                 v-for="n in notifications"
                 :key="n.id"
-                class="flex px-5 py-4 border-b group cursor-pointer hover:bg-orange-50/70 transition relative"
+                class="flex px-5 py-4 border-b border-gray-600 group cursor-pointer hover:bg-gray-700 transition relative"
                 @click="openNotification(n)"
               >
                 <div
-                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-orange-50 mr-4"
+                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-700 mr-4"
                 >
-                  <i :class="notificationIcon(n.type)" class="text-xl" />
+                  <i :class="notificationIcon(n.type)" class="text-xl text-orange-500" />
                 </div>
                 <div class="flex-1">
                   <div class="flex items-center gap-1">
-                    <span class="font-medium text-sm text-black">{{ n.title }}</span>
+                    <span class="font-medium text-sm text-gray-200">{{ n.title }}</span>
                     <span
                       v-if="!n.isRead"
                       class="inline-block ml-1 w-2 h-2 rounded-full bg-orange-500 align-middle"
                     ></span>
                   </div>
-                  <div class="text-xs text-gray-500 mt-1 truncate">
+                  <div class="text-xs text-gray-400 mt-1 truncate">
                     {{ n.message }}
                   </div>
-                  <div class="text-[10px] text-gray-400 mt-1">
+                  <div class="text-[10px] text-gray-500 mt-1">
                     {{ formatDate(n.createdAt) }}
                   </div>
                 </div>

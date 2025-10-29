@@ -146,7 +146,6 @@ import { useActiveGamePolling } from './composable/useActiveGamePolling'
 
 const showSplash = ref(true)
 const route = useRoute()
-
 // 진행 중인 게임 폴링 (명시적으로 초기화)
 const activeGamePolling = useActiveGamePolling()
 const activeGame = activeGamePolling.activeGame || ref(null)
@@ -167,6 +166,7 @@ onMounted(() => {
   if (localStorage.getItem('250725update') != 1) {
     localStorage.removeItem('raspy_access_token2')
     localStorage.setItem('250725update', 1)
+    router.push('/')
   }
 
   try {

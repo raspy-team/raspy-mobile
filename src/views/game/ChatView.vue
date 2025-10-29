@@ -201,10 +201,10 @@ const closeErrorModal = () => {
     <!-- 기본 네비게이션 헤더 -->
     <div class="fixed left-0 w-full h-[70px] z-30" :style="{ top: `${headerTop}px` }">
       <div
-        class="h-full flex items-center justify-between p-4 bg-white shadow-sm border-b border-gray-100"
+        class="h-full flex items-center justify-between p-4 bg-gray-900 shadow-sm border-b border-gray-700"
       >
         <div class="flex items-center gap-3">
-          <button @click="goBack()" class="text-gray-600 hover:text-gray-800 p-1">
+          <button @click="goBack()" class="text-gray-300 hover:text-gray-100 p-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-6 w-6"
@@ -224,10 +224,10 @@ const closeErrorModal = () => {
             <img
               :src="targetUserProfileUrl || defaultProfileUrl"
               alt="상대방 프로필"
-              class="w-10 h-10 rounded-full border-2 border-gray-200 object-cover"
+              class="w-10 h-10 rounded-full border-2 border-gray-600 object-cover"
             />
             <div class="flex flex-col">
-              <span class="font-semibold text-lg text-gray-900">{{ targetUserNickname }}</span>
+              <span class="font-semibold text-lg text-gray-100">{{ targetUserNickname }}</span>
             </div>
           </div>
         </div>
@@ -241,7 +241,7 @@ const closeErrorModal = () => {
     >
       <div class="mx-3 my-2">
         <div
-          class="bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 overflow-hidden"
+          class="bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-600 overflow-hidden"
           :class="{ 'cursor-pointer': headerInfo.isClickable }"
           @click="headerInfo.isClickable && handleEditGame()"
         >
@@ -253,7 +253,7 @@ const closeErrorModal = () => {
                 headerInfo.type === 'game_scheduled',
               'bg-gradient-to-r from-orange-400 to-red-500':
                 headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
-              'bg-gradient-to-r from-gray-300 to-gray-400': headerInfo.type === 'request_sent',
+              'bg-gradient-to-r from-gray-500 to-gray-600': headerInfo.type === 'request_sent',
             }"
           ></div>
 
@@ -275,13 +275,13 @@ const closeErrorModal = () => {
                   />
                   <!-- 상태 배지 -->
                   <div
-                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-800 shadow-sm"
                     :class="{
                       'bg-green-500': headerInfo.type === 'game_scheduled',
                       'bg-orange-500':
                         headerInfo.type === 'request_received' ||
                         headerInfo.type === 'challenge_received',
-                      'bg-gray-400': headerInfo.type === 'request_sent',
+                      'bg-gray-500': headerInfo.type === 'request_sent',
                     }"
                   ></div>
                 </div>
@@ -292,18 +292,18 @@ const closeErrorModal = () => {
                 <div class="flex items-start justify-between">
                   <div class="flex-1 min-w-0">
                     <!-- 경기 제목 -->
-                    <h3 class="text-base font-bold text-gray-900 truncate mb-1">
+                    <h3 class="text-base font-bold text-gray-100 truncate mb-1">
                       {{ playWithMeRequest?.ruleTitle || '경기' }}
                     </h3>
 
                     <!-- 카테고리 -->
                     <div class="flex items-center gap-1 mb-2">
-                      <span class="text-xs text-gray-600 font-medium">{{
+                      <span class="text-xs text-gray-400 font-medium">{{
                         playWithMeRequest?.majorCategory || '스포츠'
                       }}</span>
-                      <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                      <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
                       <span
-                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500 text-gray-100"
                       >
                         {{ playWithMeRequest?.minorCategory || '경기' }}
                       </span>
@@ -319,18 +319,18 @@ const closeErrorModal = () => {
                             'bg-orange-500':
                               headerInfo.type === 'request_received' ||
                               headerInfo.type === 'challenge_received',
-                            'bg-gray-400': headerInfo.type === 'request_sent',
+                            'bg-gray-500': headerInfo.type === 'request_sent',
                           }"
                         ></div>
-                        <span class="text-sm font-semibold text-gray-900">{{
+                        <span class="text-sm font-semibold text-gray-100">{{
                           headerInfo.title
                         }}</span>
                         <i
                           v-if="headerInfo.isClickable"
-                          class="fas fa-external-link-alt text-gray-400 text-xs ml-auto"
+                          class="fas fa-external-link-alt text-gray-500 text-xs ml-auto"
                         ></i>
                       </div>
-                      <p class="text-xs text-gray-600 leading-relaxed pl-4">
+                      <p class="text-xs text-gray-400 leading-relaxed pl-4">
                         {{ headerInfo.description }}
                       </p>
                     </div>
@@ -340,12 +340,12 @@ const closeErrorModal = () => {
             </div>
 
             <!-- 액션 버튼들 -->
-            <div v-if="headerInfo.showActions" class="mt-4 pt-3 border-t border-gray-100">
+            <div v-if="headerInfo.showActions" class="mt-4 pt-3 border-t border-gray-600">
               <template v-if="headerInfo.actionType === 'accept_reject'">
                 <div class="flex gap-3">
                   <button
                     @click.stop="handleReject"
-                    class="flex-1 py-2.5 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl transition-all duration-200 border border-gray-200"
+                    class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-gray-100 text-sm font-semibold rounded-xl transition-all duration-200 border border-gray-500"
                   >
                     <i class="fas fa-times mr-2 text-xs"></i>
                     거절

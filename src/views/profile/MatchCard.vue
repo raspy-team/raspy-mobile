@@ -3,7 +3,7 @@
     @click="openModal"
     @click.stop
     :class="[
-      'relative rounded-2xl shadow-lg px-6 py-7 flex flex-col gap-3 bg-white border-l-4',
+      'relative rounded-2xl shadow-lg px-6 py-7 flex flex-col gap-3 bg-gray-800 border-l-4',
       isWin ? 'border-orange-400' : isDraw ? 'border-gray-400' : 'border-blue-400',
     ]"
   >
@@ -38,7 +38,7 @@
                     </div>
                   </div>
                   <div>
-                    <span class="text-base font-extrabold text-gray-900 truncate block">
+                    <span class="text-base font-extrabold text-white truncate block">
                       {{ game.ruleTitle }}
                     </span>
                     <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -62,7 +62,7 @@
                   class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
                 />
                 <div
-                  class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                  class="font-semibold text-gray-300 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
                 >
                   나
                 </div>
@@ -84,7 +84,7 @@
                   class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
                 />
                 <div
-                  class="font-semibold text-gray-800 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                  class="font-semibold text-gray-300 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
                 >
                   {{ game.opponentNickname }}
                 </div>
@@ -98,7 +98,7 @@
       <button
         type="button"
         @click.stop="showSetResults = !showSetResults"
-        class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-white border border-gray-200 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-[1.05rem] text-gray-900 transition active:bg-gray-100 hover:bg-orange-50 select-none cursor-pointer outline-none focus:outline-none"
+        class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-gray-700 border border-gray-600 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-[1.05rem] text-white transition active:bg-gray-600 hover:bg-gray-600 select-none cursor-pointer outline-none focus:outline-none"
         style="outline: none"
       >
         <span
@@ -110,7 +110,7 @@
           :class="[
             'fas',
             showSetResults ? 'fa-chevron-up' : 'fa-chevron-down',
-            showSetResults ? 'text-orange-400' : 'text-gray-400',
+            showSetResults ? 'text-orange-400' : 'text-gray-500',
             'text-[19px]',
             'transition-transform',
           ]"
@@ -122,7 +122,7 @@
           <div
             v-for="(set, i) in setResults"
             :key="i"
-            class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-50 font-semibold shadow-sm mt-2"
+            class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-700 font-semibold shadow-sm mt-2"
             :class="
               set.winnerIdx === 1
                 ? 'border-orange-200'
@@ -131,7 +131,7 @@
                   : 'border-gray-200'
             "
           >
-            <span class="text-xs font-bold text-gray-400 flex-1">{{ set.setIdx }}세트</span>
+            <span class="text-xs font-bold text-gray-500 flex-1">{{ set.setIdx }}세트</span>
             <span
               class="text-lg font-extrabold"
               :class="
@@ -173,21 +173,21 @@
       </transition>
     </div>
 
-    <div class="bg-gray-50 rounded-xl p-4 mt-2 flex flex-col gap-2 border border-gray-100">
+    <div class="bg-gray-700 rounded-xl p-4 mt-2 flex flex-col gap-2 border border-gray-600">
       <template
         v-if="game.review || game.mannerScore !== undefined || game.performanceScore !== undefined"
       >
-        <div class="text-xs text-gray-500 font-bold mb-1">
+        <div class="text-xs text-gray-400 font-bold mb-1">
           {{ game.opponent?.nickname ?? '상대' }}님의 리뷰
         </div>
         <div v-if="game.review" class="flex items-start gap-2 mb-2">
           <i class="fas fa-quote-left text-orange-400 mt-0.5"></i>
-          <span class="text-sm text-gray-800 font-medium leading-snug"> "{{ game.review }}" </span>
+          <span class="text-sm text-gray-300 font-medium leading-snug"> "{{ game.review }}" </span>
         </div>
-        <div v-else class="text-sm text-gray-400 italic mb-2">등록된 텍스트 리뷰가 없습니다.</div>
+        <div v-else class="text-sm text-gray-500 italic mb-2">등록된 텍스트 리뷰가 없습니다.</div>
         <div class="flex gap-3">
           <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500">매너 :</span>
+            <span class="text-xs text-gray-400">매너 :</span>
             <span
               class="font-bold text-base"
               :class="[
@@ -204,7 +204,7 @@
             </span>
           </div>
           <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500">퍼포먼스 :</span>
+            <span class="text-xs text-gray-400">퍼포먼스 :</span>
             <span
               class="font-bold text-base"
               :class="[
@@ -223,12 +223,12 @@
         </div>
       </template>
       <template v-else>
-        <div class="text-sm text-gray-400 italic">상대가 아직 리뷰와 점수를 등록하지 않았어요.</div>
+        <div class="text-sm text-gray-500 italic">상대가 아직 리뷰와 점수를 등록하지 않았어요.</div>
       </template>
     </div>
 
     <div class="min-w-0 flex flex-col justify-center">
-      <div class="flex flex-col gap-2 text-xs text-gray-500 mt-1 min-w-0">
+      <div class="flex flex-col gap-2 text-xs text-gray-400 mt-1 min-w-0">
         <span class="flex items-center gap-1 min-w-0">
           <i class="far fa-calendar"></i>
           <span class="truncate">{{ formatDate(game.date) }}</span>
@@ -240,24 +240,24 @@
       </div>
     </div>
 
-    <div class="flex justify-between items-center pt-2 mt-2 border-t border-gray-100">
-      <div v-if="likeCount > 0" class="flex items-center gap-2 text-sm text-gray-600">
+    <div class="flex justify-between items-center pt-2 mt-2 border-t border-gray-600">
+      <div v-if="likeCount > 0" class="flex items-center gap-2 text-sm text-gray-500">
         <i class="fas fa-heart text-red-500"></i>
-        <span class="font-gray-500 font-bold">{{ likeCount }}명이 또 보고싶어해요</span>
+        <span class="text-gray-400 font-bold">{{ likeCount }}명이 또 보고싶어해요</span>
       </div>
       <div v-else></div>
 
       <div class="flex gap-3">
         <button
           @click.stop="toggleComment(game.id)"
-          class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+          class="w-11 h-11 flex items-center justify-center bg-gray-700 text-white rounded-full hover:bg-gray-600 transition"
         >
           <i class="fas fa-comment"></i>
         </button>
 
         <button
           @click.stop="openInstaModal"
-          class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+          class="w-11 h-11 flex items-center justify-center bg-gray-700 text-white rounded-full hover:bg-gray-600 transition"
           title="이미지로 저장"
         >
           <i class="far fa-image"></i>

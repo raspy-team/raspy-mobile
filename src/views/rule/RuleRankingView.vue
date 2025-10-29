@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-orange-50 via-white to-gray-50">
+  <div class="min-h-screen bg-gray-900">
     <!-- Fixed Header -->
-    <header class="fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <header class="fixed top-0 left-0 right-0 z-30 bg-gray-900/95 backdrop-blur-md border-b border-gray-700 shadow-sm">
       <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
         <button
           @click="router.back()"
-          class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+          class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-700 transition"
         >
-          <i class="fas fa-arrow-left text-gray-700 text-lg"></i>
+          <i class="fas fa-arrow-left text-gray-300 text-lg"></i>
         </button>
-        <h1 class="text-lg font-bold text-gray-900 truncate flex-1 text-center px-4">
+        <h1 class="text-lg font-bold text-white truncate flex-1 text-center px-4">
           {{ ruleName || '규칙 랭킹' }}
         </h1>
         <div class="w-9"></div> <!-- Spacer for centering -->
@@ -19,22 +19,22 @@
     <!-- Loading State -->
     <div v-if="loading" class="pt-20 px-4 max-w-lg mx-auto">
       <div class="animate-pulse space-y-4">
-        <div class="h-32 bg-gray-200 rounded-2xl"></div>
+        <div class="h-32 bg-gray-700 rounded-2xl"></div>
         <div class="space-y-3">
-          <div v-for="i in 5" :key="i" class="h-20 bg-gray-200 rounded-xl"></div>
+          <div v-for="i in 5" :key="i" class="h-20 bg-gray-700 rounded-xl"></div>
         </div>
       </div>
     </div>
 
     <!-- Error State -->
     <div v-else-if="error" class="pt-20 px-4 max-w-lg mx-auto">
-      <div class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+      <div class="bg-red-900/20 border border-red-600 rounded-2xl p-6 text-center">
         <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-3"></i>
-        <p class="text-red-800 font-semibold mb-2">데이터를 불러올 수 없습니다</p>
-        <p class="text-red-600 text-sm">{{ error }}</p>
+        <p class="text-red-300 font-semibold mb-2">데이터를 불러올 수 없습니다</p>
+        <p class="text-red-400 text-sm">{{ error }}</p>
         <button
           @click="fetchRankings"
-          class="mt-4 px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+          class="mt-4 px-6 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition"
         >
           다시 시도
         </button>
@@ -81,16 +81,16 @@
       <!-- No Ranking for Current User -->
       <div
         v-else
-        class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-6 text-center"
+        class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-6 text-center"
       >
         <i class="fas fa-trophy text-gray-400 text-3xl mb-2"></i>
-        <p class="text-gray-600 font-semibold mb-1">아직 이 규칙으로 플레이한 기록이 없어요</p>
-        <p class="text-gray-500 text-sm">첫 경기를 시작해보세요!</p>
+        <p class="text-gray-300 font-semibold mb-1">아직 이 규칙으로 플레이한 기록이 없어요</p>
+        <p class="text-gray-400 text-sm">첫 경기를 시작해보세요!</p>
       </div>
 
       <!-- Top 3 Podium -->
-      <div v-if="rankings.length > 0" class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+      <div v-if="rankings.length > 0" class="bg-gray-800 rounded-2xl shadow-lg p-6">
+        <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
           <i class="fas fa-crown text-yellow-500"></i>
           상위 랭커
         </h2>
@@ -119,7 +119,7 @@
               </div>
             </div>
             <div
-              class="w-full mt-3 bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-xl text-center py-3 h-20 flex flex-col justify-center cursor-pointer group-hover:from-gray-400 group-hover:to-gray-500 transition"
+              class="w-full mt-3 bg-gradient-to-b from-gray-600 to-gray-700 rounded-t-xl text-center py-3 h-20 flex flex-col justify-center cursor-pointer group-hover:from-gray-700 group-hover:to-gray-800 transition"
             >
               <p class="text-xs font-semibold text-white truncate px-2">
                 {{ rankings[1].userName }}
@@ -181,7 +181,7 @@
               </div>
             </div>
             <div
-              class="w-full mt-3 bg-gradient-to-b from-orange-600 to-orange-700 rounded-t-xl text-center py-3 h-16 flex flex-col justify-center cursor-pointer group-hover:from-orange-700 group-hover:to-orange-800 transition"
+              class="w-full mt-3 bg-gradient-to-b from-orange-700 to-orange-800 rounded-t-xl text-center py-3 h-16 flex flex-col justify-center cursor-pointer group-hover:from-orange-800 group-hover:to-orange-900 transition"
             >
               <p class="text-xs font-semibold text-white truncate px-2">
                 {{ rankings[2].userName }}
@@ -197,7 +197,7 @@
             v-for="ranking in rankings"
             :key="ranking.userId"
             @click="goToProfile(ranking.userId)"
-            class="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-white rounded-xl border border-orange-200 hover:shadow-md transition cursor-pointer"
+            class="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-900/20 to-gray-800 rounded-xl border border-orange-600 hover:shadow-md transition cursor-pointer"
           >
             <div class="relative">
               <img
@@ -219,20 +219,20 @@
               </div>
             </div>
             <div class="flex-1">
-              <p class="font-semibold text-gray-900">{{ ranking.userName }}</p>
-              <p class="text-sm text-gray-600">{{ ranking.playCount }}회 플레이</p>
+              <p class="font-semibold text-white">{{ ranking.userName }}</p>
+              <p class="text-sm text-gray-300">{{ ranking.playCount }}회 플레이</p>
             </div>
             <div class="text-right">
               <p class="text-lg font-bold text-orange-600">{{ ranking.rating }}</p>
-              <p class="text-xs text-gray-500">레이팅</p>
+              <p class="text-xs text-gray-400">레이팅</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Full Rankings List (4th and below) -->
-      <div v-if="rankings.length > 3" class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <div v-if="rankings.length > 3" class="bg-gray-800 rounded-2xl shadow-lg p-6">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
           <i class="fas fa-list-ol text-orange-500"></i>
           전체 랭킹
         </h2>
@@ -244,15 +244,15 @@
             :class="[
               'flex items-center gap-4 p-4 rounded-xl border transition cursor-pointer',
               ranking.isCurrentUser
-                ? 'bg-orange-50 border-orange-300 hover:bg-orange-100'
-                : 'bg-gray-50 border-gray-200 hover:bg-gray-100',
+                ? 'bg-orange-900/20 border-orange-600 hover:bg-orange-800/30'
+                : 'bg-gray-700 border-gray-600 hover:bg-gray-600',
             ]"
           >
             <div class="w-8 text-center">
               <span
                 :class="[
                   'font-bold',
-                  ranking.isCurrentUser ? 'text-orange-600' : 'text-gray-500',
+                  ranking.isCurrentUser ? 'text-orange-400' : 'text-gray-400',
                 ]"
               >
                 {{ ranking.rank }}
@@ -262,31 +262,31 @@
               v-if="ranking.userAvatar"
               :src="ranking.userAvatar"
               :alt="ranking.userName"
-              class="w-12 h-12 rounded-full border-2 border-gray-300 shadow object-cover"
+              class="w-12 h-12 rounded-full border-2 border-gray-600 shadow object-cover"
             />
             <div
               v-else
-              class="w-12 h-12 rounded-full border-2 border-gray-300 bg-gray-200 flex items-center justify-center shadow"
+              class="w-12 h-12 rounded-full border-2 border-gray-600 bg-gray-700 flex items-center justify-center shadow"
             >
-              <i class="fas fa-user text-gray-500"></i>
+              <i class="fas fa-user text-gray-400"></i>
             </div>
             <div class="flex-1">
               <p
                 :class="[
                   'font-semibold',
-                  ranking.isCurrentUser ? 'text-orange-600' : 'text-gray-900',
+                  ranking.isCurrentUser ? 'text-orange-400' : 'text-white',
                 ]"
               >
                 {{ ranking.userName }}
                 <span v-if="ranking.isCurrentUser" class="text-xs ml-1">(나)</span>
               </p>
-              <p class="text-sm text-gray-600">{{ ranking.playCount }}회</p>
+              <p class="text-sm text-gray-300">{{ ranking.playCount }}회</p>
             </div>
             <div class="text-right">
               <p
                 :class="[
                   'text-lg font-bold',
-                  ranking.isCurrentUser ? 'text-orange-600' : 'text-gray-700',
+                  ranking.isCurrentUser ? 'text-orange-400' : 'text-gray-300',
                 ]"
               >
                 {{ ranking.rating }}
@@ -297,10 +297,10 @@
       </div>
 
       <!-- Empty State -->
-      <div v-if="rankings.length === 0" class="bg-white rounded-2xl shadow-lg p-12 text-center">
-        <i class="fas fa-users-slash text-gray-300 text-5xl mb-4"></i>
-        <p class="text-gray-600 font-semibold mb-2">아직 랭킹 정보가 없습니다</p>
-        <p class="text-gray-500 text-sm">이 규칙으로 첫 경기를 시작해보세요!</p>
+      <div v-if="rankings.length === 0" class="bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+        <i class="fas fa-users-slash text-gray-400 text-5xl mb-4"></i>
+        <p class="text-gray-300 font-semibold mb-2">아직 랭킹 정보가 없습니다</p>
+        <p class="text-gray-400 text-sm">이 규칙으로 첫 경기를 시작해보세요!</p>
       </div>
     </div>
   </div>

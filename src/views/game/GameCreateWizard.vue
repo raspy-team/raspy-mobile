@@ -1,8 +1,8 @@
 <template>
   <div class="pt-7 raspy-top h-full">
     <!-- Progress Bar -->
-    <div class="progress-bar-outer">
-      <div class="progress-bar-inner" :style="{ width: progressWidth + '%' }"></div>
+    <div class="progress-bar-outer bg-gray-700">
+      <div class="progress-bar-inner bg-orange-500" :style="{ width: progressWidth + '%' }"></div>
     </div>
 
     <!-- 기존 콘텐츠 -->
@@ -19,11 +19,11 @@
     v-if="showAddressErrorModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
   >
-    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+    <div class="bg-gray-800 p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
         <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">장소를 찾을 수 없습니다</h3>
-        <p class="text-sm text-gray-600">
+        <h3 class="text-lg font-bold text-gray-100 mb-2">장소를 찾을 수 없습니다</h3>
+        <p class="text-sm text-gray-400">
           더 구체적인 장소를 입력해주세요.<br />
           <span class="text-xs text-gray-500 mt-2 block">예: 서초탁구장, 강남체육관</span>
         </p>
@@ -139,10 +139,14 @@ async function createGame() {
 </script>
 
 <style scoped>
+.raspy-top {
+  background: #1f2937;
+}
+
 .progress-bar-outer {
   width: 92dvw;
   height: 7px;
-  background: #f2f4f8;
+  background: #6b7280;
   border-radius: 5px;
   overflow: hidden;
   position: fixed;

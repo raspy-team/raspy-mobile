@@ -1,15 +1,15 @@
 <template>
-  <header class="fixed top-0 left-0 w-full z-[30] border border-gray-100 bg-[#fff] raspy-top">
+  <header class="fixed top-0 left-0 w-full z-[30] border-b border-gray-700 bg-gray-800">
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14">
-        <button @click="goBack" class="text-black text-lg">
+        <button @click="goBack" class="text-gray-100 text-lg">
           <i class="fas fa-chevron-left"></i>
         </button>
       </div>
       <!-- 중앙: 타이틀 (hasReferer일 때만 표시) -->
       <div
-        class="absolute left-1/2 transform -translate-x-1/2 text-black text-sm py-[50px] font-light"
+        class="absolute left-1/2 transform -translate-x-1/2 text-gray-100 text-sm py-[50px] font-light"
       >
         DM
       </div>
@@ -18,7 +18,7 @@
     </div>
     <!-- 알림 패널 (오른쪽 슬라이드) -->
   </header>
-  <div class="bg-[#121212] pb-24 min-h-screen">
+  <div class="bg-gray-900 pb-24 min-h-screen">
     <div class="max-w-lg mx-auto pt-20 px-3">
       <!-- 로딩 상태 -->
       <div v-if="loading" class="flex justify-center items-center py-40">
@@ -42,7 +42,7 @@
         >
           <img
             :src="dm.targetUserProfileUrl || defaultProfileUrl"
-            class="w-12 h-12 rounded-full object-cover border border-orange-100"
+            class="w-12 h-12 rounded-full object-cover border-2 border-gray-600"
             :alt="dm.targetUserNickname"
           />
           <div class="flex-1 min-w-0 ml-4 flex flex-col">

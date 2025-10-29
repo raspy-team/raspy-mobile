@@ -123,8 +123,19 @@
     </div>
     <!-- 점수판 섹션 (중앙 영역 - flex-1로 남은 공간 차지) -->
     <div class="flex-1 flex flex-col items-center justify-center relative min-h-0 py-0">
-      <div class="text-orange-400 text-2xl font-bold mb-1 sm:mb-2">
-        {{ elapsedTimeStr }}, 세트 {{ currentSet }}
+      <div class="flex flex-col items-center gap-1">
+        <div
+          class="text-2xl font-bold"
+          :class="game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds ? 'text-red-500 animate-pulse' : 'text-orange-400'"
+        >
+          {{ elapsedTimeStr }}, 세트 {{ currentSet }}
+        </div>
+        <div
+          v-if="game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds"
+          class="text-xs text-red-400 font-semibold"
+        >
+          추가시간
+        </div>
       </div>
       <div class="flex w-full items-start justify-center">
         <div class="flex flex-col items-center justify-center w-full">
@@ -146,9 +157,10 @@
                 @mousedown="onCaptureButtonDown"
                 @mouseup="onCaptureButtonUp"
                 @mouseleave="onCaptureButtonCancel"
+                :disabled="isCountingDown"
                 :class="[
                   'relative text-[12vw] sm:text-[16dvw] transition-all duration-200 focus:outline-none rounded-full flex items-center justify-center w-[20vw] h-[20vw] sm:w-[24dvw] sm:h-[24dvw]',
-                  isLongPressing ? 'text-red-400 scale-105' : 'text-orange-300 hover:text-orange-400 active:text-orange-500 active:scale-95'
+                  isCountingDown ? 'text-gray-600 cursor-not-allowed' : isLongPressing ? 'text-red-400 scale-105' : 'text-orange-300 hover:text-orange-400 active:text-orange-500 active:scale-95'
                 ]"
               >
                 <i :class="isLongPressing ? 'fas fa-video animate-pulse' : 'fas fa-camera'"></i>
@@ -185,8 +197,8 @@
               <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
                 <button
                   @click="socket_sendScore(1, 1)"
-                  :disabled="isSetOver || isGameOver"
-                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -198,8 +210,8 @@
                 </button>
                 <button
                   @click="socket_sendScore(1, -1)"
-                  :disabled="isSetOver || isGameOver || currentScore1 <= 0"
-                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown || currentScore1 <= 0"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-bottom-left-radius: 0.5rem;
                     border-bottom-right-radius: 0.5rem;
@@ -220,8 +232,8 @@
               <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
                 <button
                   @click="socket_sendScore(2, 1)"
-                  :disabled="isSetOver || isGameOver"
-                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -233,8 +245,8 @@
                 </button>
                 <button
                   @click="socket_sendScore(2, -1)"
-                  :disabled="isSetOver || isGameOver || currentScore2 <= 0"
-                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown || currentScore2 <= 0"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-bottom-left-radius: 0.5rem;
                     border-bottom-right-radius: 0.5rem;
@@ -253,6 +265,15 @@
 
     <!-- 하단 버튼 섹션 -->
     <div class="flex-shrink-0 w-full flex flex-col gap-3 sm:gap-4 items-stretch">
+      <!-- 세트 종료 버튼 (시간 초과 또는 수동 종료 필요 시) -->
+      <button
+        v-if="!isSetOver && !isGameOver && !isCountingDown && game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds"
+        @click="manualFinishSet"
+        class="w-full bg-gradient-to-r from-purple-600 to-orange-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:brightness-110 transition animate-pulse"
+      >
+        <i class="fas fa-flag-checkered mr-2"></i>세트 종료
+      </button>
+
       <div class="w-full grid grid-cols-2 gap-2 sm:gap-4 mb-10">
         <button
           @click="openConfirm('정말로 게임을 재시작 하겠습니까?', socket_resetGame)"
@@ -287,6 +308,24 @@
           <span style="font-size: 1em"
             >클래시오브클랜 <span style="color: #ff5722">회원</span> 모집중!!</span
           >
+        </div>
+      </div>
+    </div>
+
+    <!-- 5초 카운트다운 오버레이 -->
+    <div
+      v-if="isCountingDown"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60]"
+    >
+      <div class="text-center">
+        <div class="text-orange-400 text-xl sm:text-2xl font-semibold mb-4">
+          세트 {{ currentSet }} 시작까지
+        </div>
+        <div class="text-orange-500 text-[25vw] sm:text-[30vw] font-extrabold animate-countdown">
+          {{ countdown }}
+        </div>
+        <div class="text-gray-400 text-base sm:text-lg mt-4">
+          준비하세요!
         </div>
       </div>
     </div>
@@ -443,6 +482,8 @@ const user1 = ref(null)
 const user2 = ref(null)
 const gameWinner = ref('')
 const showLogModal = ref(false)
+const countdown = ref(0)
+const isCountingDown = ref(false)
 
 // confirm 관련 상태
 const showConfirm = ref(false)
@@ -468,16 +509,39 @@ function startSet() {
   isSetOver.value = false
   showFinishModal.value = false
   winner.value = '-'
-  updateElapsed()
-  startTimer()
+
+  // 5초 카운트다운 시작
+  isCountingDown.value = true
+  countdown.value = 5
+
+  const countdownInterval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(countdownInterval)
+      isCountingDown.value = false
+      // 카운트다운 종료 후 세트 시작
+      game.setStartedAt = new Date()
+      elapsedSeconds.value = 0
+      updateElapsed()
+      startTimer()
+    }
+  }, 1000)
 }
 
 function addScore(userIdx, delta) {
-  if (isSetOver.value || isGameOver.value) return
+  if (isSetOver.value || isGameOver.value || isCountingDown.value) return
 
   if (userIdx == user1.value.id) {
+    // pointsToWin이 설정되어 있으면 그 이상으로 증가 불가
+    if (game.rule.pointsToWin !== -1 && delta > 0 && currentScore1.value >= game.rule.pointsToWin) {
+      return
+    }
     currentScore1.value = Math.max(0, currentScore1.value + delta)
   } else {
+    // pointsToWin이 설정되어 있으면 그 이상으로 증가 불가
+    if (game.rule.pointsToWin !== -1 && delta > 0 && currentScore2.value >= game.rule.pointsToWin) {
+      return
+    }
     currentScore2.value = Math.max(0, currentScore2.value + delta)
   }
 
@@ -485,6 +549,7 @@ function addScore(userIdx, delta) {
 }
 
 function checkSetOver() {
+  // pointsToWin 도달 시에만 자동으로 세트 종료
   if (game.rule.pointsToWin != -1 && currentScore1.value >= game.rule.pointsToWin) {
     user1SetsWon.value++
     finishSet(1)
@@ -495,22 +560,26 @@ function checkSetOver() {
     finishSet(2)
     return
   }
-  if (game.limitSeconds !== -1 && elapsedSeconds.value >= game.limitSeconds) {
-    if (game.rule.winBy == 'MOST_SETS_AND_POINTS' && currentScore1.value > currentScore2.value) {
+
+  // 제한시간이 지나도 세트를 자동 종료하지 않음 (UI만 빨간색으로 표시)
+  // 수동으로 '세트종료' 버튼을 눌러야 다음 세트로 진행
+}
+
+function manualFinishSet() {
+  // 수동으로 세트 종료 (시간 초과 시)
+  if (game.rule.winBy == 'MOST_SETS_AND_POINTS') {
+    if (currentScore1.value > currentScore2.value) {
       user1SetsWon.value++
       finishSet(1)
-    } else if (
-      game.rule.winBy == 'MOST_SETS_AND_POINTS' &&
-      currentScore2.value > currentScore1.value
-    ) {
+    } else if (currentScore2.value > currentScore1.value) {
       user2SetsWon.value++
       finishSet(2)
     } else {
       finishSet(0) // 무승부
     }
-    return
+  } else {
+    finishSet(0) // 무승부
   }
-  elapsedSeconds.value = 0
 }
 
 function finishSet(who) {
@@ -546,17 +615,25 @@ function startTimer() {
 }
 
 function updateElapsed() {
-  if (!game.setStartedAt || isSetOver.value) return
+  if (!game.setStartedAt || isSetOver.value || isCountingDown.value) return
   const startedAt = new Date(game.setStartedAt)
   const now = new Date()
   const elapsed = Math.floor((now - startedAt) / 1000)
-  elapsedSeconds.value = game.limitSeconds === -1 ? elapsed : Math.min(elapsed, game.limitSeconds)
-  elapsedTimeStr.value = getTimeStr(elapsedSeconds.value)
+
+  // 제한시간이 있는 경우 시간 계산
   if (game.limitSeconds !== -1) {
+    elapsedSeconds.value = elapsed
+    // 남은 시간 계산 (0 미만 가능 - 오버타임)
+    const remainingSeconds = game.limitSeconds - elapsed
+    elapsedTimeStr.value = getTimeStr(Math.abs(remainingSeconds))
     limitTimeStr.value = getTimeStr(game.limitSeconds)
   } else {
+    // 제한 없음
+    elapsedSeconds.value = elapsed
+    elapsedTimeStr.value = getTimeStr(elapsedSeconds.value)
     limitTimeStr.value = '제한 없음'
   }
+
   if (!isSetOver.value && !isGameOver.value) {
     checkSetOver()
   }
@@ -681,7 +758,7 @@ onMounted(async () => {
       addScore(payload.targetId, payload.delta)
       addLog(payload)
     } else if (payload.type === 'SET') {
-      game.setStartedAt = new Date()
+      // setStartedAt는 startSet() 내부의 카운트다운이 끝난 후 설정됨
       startSet()
       addLog(payload)
     } else if (payload.type === 'FINISH') {
@@ -747,6 +824,7 @@ function socket_resetGame() {
 
 // 통합 촬영 버튼 이벤트 핸들러
 function onCaptureButtonDown(e) {
+  if (isCountingDown.value) return
   e.preventDefault()
   isLongPressing.value = true
 
@@ -761,6 +839,7 @@ function onCaptureButtonDown(e) {
 }
 
 function onCaptureButtonUp(e) {
+  if (isCountingDown.value) return
   e.preventDefault()
 
   // 짧게 눌렀으면 사진 촬영
@@ -906,6 +985,20 @@ onUnmounted(() => {
     opacity: 1;
   }
 }
+@keyframes countdown {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
 .vs-jump-blink {
   animation: vs-jump-blink 1.5s ease-in-out infinite;
 }
@@ -914,5 +1007,8 @@ onUnmounted(() => {
 }
 .animate-blink {
   animation: blink 2.5s infinite;
+}
+.animate-countdown {
+  animation: countdown 1s ease-in-out;
 }
 </style>

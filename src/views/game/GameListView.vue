@@ -108,10 +108,10 @@
                 :src="game.ownerProfileUrl || Default"
                 class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
               />
-              <div class="flex items-center gap-3">
-                <div class="font-bold text-lg text-gray-100">{{ game.ownerNickname }}</div>
+              <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
+                <div class="font-bold text-lg text-gray-100 truncate">{{ game.ownerNickname }}</div>
                 <div
-                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-600 to-gray-500 border border-gray-500"
+                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-600 to-gray-500 border border-gray-500 flex-shrink-0"
                 >
                   <span class="text-xs font-semibold text-green-400"
                     >{{ game.ruleStatisticsOfOwner?.wins || 0 }}</span
@@ -131,8 +131,7 @@
                   </div>
                 </div>
               </div>
-              <div class="flex-1"></div>
-              <div class="text-gray-400 text-xs text-right min-w-[60px]">
+              <div class="text-gray-400 text-xs text-right flex-shrink-0 min-w-[60px]">
                 {{ formatTimeAgo(game.createdAt) }}
               </div>
             </div>

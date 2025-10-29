@@ -278,43 +278,45 @@
 
         <!-- 상대방 평가 섹션 -->
         <div
-          class="p-4 space-y-4 text-left bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200 shadow-sm"
+          class="p-5 space-y-5 text-left bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50"
         >
-          <div class="flex items-center gap-2">
-            <i class="fas fa-user-friends text-orange-600 text-lg"></i>
-            <h3 class="text-lg font-bold text-gray-800">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <i class="fas fa-user-friends text-orange-400 text-sm"></i>
+            </div>
+            <h3 class="text-base font-semibold text-white">
               {{ user1.id == currentUserId ? user2.nickname : user1.nickname }} 님을 평가해주세요
             </h3>
           </div>
 
-          <div class="space-y-3">
-            <div class="space-y-2">
-              <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
-                <i class="fas fa-heart text-orange-500 text-xs"></i>
+          <div class="space-y-4">
+            <div class="space-y-2.5">
+              <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
+                <i class="fas fa-heart text-orange-400 text-xs"></i>
                 매너
               </label>
-              <div class="flex gap-1.5 items-center">
+              <div class="flex gap-2 items-center">
                 <i
                   v-for="n in 5"
                   :key="'manner' + n"
                   @click="setManner(n)"
                   :class="
-                    n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-300'
+                    n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-600'
                   "
-                  class="text-2xl cursor-pointer hover:scale-110 transition-transform"
+                  class="text-2xl cursor-pointer hover:scale-110 hover:text-orange-300 transition-all"
                 ></i>
-                <span v-if="review.manner > 0" class="text-base font-bold text-orange-600 ml-2"
+                <span v-if="review.manner > 0" class="text-sm font-semibold text-orange-400 ml-1"
                   >{{ review.manner }}/5</span
                 >
               </div>
             </div>
 
-            <div class="space-y-2">
-              <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
-                <i class="fas fa-fire text-orange-500 text-xs"></i>
+            <div class="space-y-2.5">
+              <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
+                <i class="fas fa-fire text-orange-400 text-xs"></i>
                 퍼포먼스
               </label>
-              <div class="flex gap-1.5 items-center">
+              <div class="flex gap-2 items-center">
                 <i
                   v-for="n in 5"
                   :key="'perf' + n"
@@ -322,11 +324,11 @@
                   :class="
                     n <= review.performance
                       ? 'fas fa-star text-orange-400'
-                      : 'far fa-star text-gray-300'
+                      : 'far fa-star text-gray-600'
                   "
-                  class="text-2xl cursor-pointer hover:scale-110 transition-transform"
+                  class="text-2xl cursor-pointer hover:scale-110 hover:text-orange-300 transition-all"
                 ></i>
-                <span v-if="review.performance > 0" class="text-base font-bold text-orange-600 ml-2"
+                <span v-if="review.performance > 0" class="text-sm font-semibold text-orange-400 ml-1"
                   >{{ review.performance }}/5</span
                 >
               </div>
@@ -335,130 +337,181 @@
 
           <button
             @click="showReviewModal = true"
-            class="w-full border border-orange-300 rounded-xl p-3.5 text-sm text-left text-gray-700 bg-white hover:bg-orange-50 transition shadow-sm"
+            class="w-full border border-gray-700 rounded-xl p-3.5 text-sm text-left bg-gray-800/50 hover:bg-gray-700/50 transition-all"
           >
-            <div class="flex items-center gap-2">
-              <i class="fas fa-comment-dots text-orange-400"></i>
-              <span v-if="review.text && review.text.length > 0" class="flex-1">{{
+            <div class="flex items-center gap-2.5">
+              <i class="fas fa-comment-dots text-gray-400"></i>
+              <span v-if="review.text && review.text.length > 0" class="flex-1 text-gray-200">{{
                 review.text
               }}</span>
-              <span v-else class="text-gray-400 flex-1">텍스트 리뷰 (선택)</span>
+              <span v-else class="text-gray-500 flex-1">텍스트 리뷰 (선택)</span>
             </div>
           </button>
 
           <!-- Fullscreen review modal -->
-          <div
-            v-if="showReviewModal"
-            class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
-          >
-            <div class="bg-white w-full h-full max-w-md mx-auto flex flex-col">
-              <div
-                class="flex items-center justify-between p-4 border-b border-orange-200 bg-orange-50"
-              >
-                <div class="flex items-center gap-2">
-                  <i class="fas fa-comment-dots text-orange-500"></i>
-                  <span class="font-bold text-lg text-gray-800">상대방 리뷰</span>
+          <transition name="modal-fade">
+            <div
+              v-if="showReviewModal"
+              class="fixed inset-0 z-[60]"
+            >
+              <!-- 블러 배경 -->
+              <div class="absolute inset-0 bg-black/90 backdrop-blur-md" @click="showReviewModal = false"></div>
+
+              <!-- 모달 컨텐츠 -->
+              <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden flex flex-col max-h-[85vh]">
+                <!-- 헤더 -->
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gradient-to-r from-gray-800/80 to-gray-900/80">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-orange-500/15 flex items-center justify-center">
+                      <i class="fas fa-comment-dots text-orange-400"></i>
+                    </div>
+                    <span class="font-semibold text-lg text-white">상대방 리뷰</span>
+                  </div>
+                  <button
+                    @click="showReviewModal = false"
+                    class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all flex items-center justify-center"
+                  >
+                    <i class="fas fa-times text-sm"></i>
+                  </button>
                 </div>
-                <button
-                  @click="showReviewModal = false"
-                  class="text-orange-500 font-bold text-base hover:text-orange-600"
-                >
-                  닫기
-                </button>
+
+                <!-- 텍스트 영역 -->
+                <div class="flex-1 p-5 overflow-y-auto">
+                  <textarea
+                    v-model="review.text"
+                    class="w-full h-full min-h-[300px] text-base text-white focus:outline-none resize-none bg-transparent placeholder-gray-500"
+                    placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요..."
+                    autofocus
+                  ></textarea>
+                </div>
+
+                <!-- 푸터 -->
+                <div class="px-5 py-4 border-t border-gray-800 bg-gray-900/50">
+                  <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span>{{ review.text?.length || 0 }}자</span>
+                    <button
+                      @click="showReviewModal = false"
+                      class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-medium transition-all"
+                    >
+                      완료
+                    </button>
+                  </div>
+                </div>
               </div>
-              <textarea
-                v-model="review.text"
-                class="flex-1 w-full p-4 text-base focus:outline-none resize-none bg-transparent"
-                placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요."
-                style="min-height: 60vh"
-                autofocus
-              ></textarea>
             </div>
-          </div>
+          </transition>
         </div>
 
         <!-- 규칙 평가 섹션 -->
         <div
-          class="p-4 space-y-4 text-left bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 shadow-sm"
+          class="p-5 space-y-5 text-left bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50"
         >
-          <div class="flex items-center gap-2">
-            <i class="fas fa-book text-purple-600 text-lg"></i>
-            <h3 class="text-lg font-bold text-gray-800">이 규칙은 어떠셨나요?</h3>
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <i class="fas fa-book text-purple-400 text-sm"></i>
+            </div>
+            <h3 class="text-base font-semibold text-white">이 규칙은 어떠셨나요?</h3>
           </div>
-          <p class="text-xs text-gray-600">
+          <p class="text-xs text-gray-400 -mt-2">
             규칙의 재미, 명확성, 밸런스를 평가해주세요. 여러분의 평가는 다른 사용자들에게 도움이
             됩니다.
           </p>
 
-          <div class="space-y-2">
-            <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
-              <i class="fas fa-star text-purple-500 text-xs"></i>
+          <div class="space-y-2.5">
+            <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
+              <i class="fas fa-star text-purple-400 text-xs"></i>
               규칙 평가
             </label>
-            <div class="flex gap-1.5 items-center">
+            <div class="flex gap-2 items-center">
               <i
                 v-for="n in 5"
                 :key="'rule' + n"
                 @click="setRuleRating(n)"
                 :class="
-                  n <= ruleRating ? 'fas fa-star text-purple-500' : 'far fa-star text-gray-300'
+                  n <= ruleRating ? 'fas fa-star text-purple-400' : 'far fa-star text-gray-600'
                 "
-                class="text-2xl cursor-pointer hover:scale-110 transition-transform"
+                class="text-2xl cursor-pointer hover:scale-110 hover:text-purple-300 transition-all"
               ></i>
-              <span v-if="ruleRating > 0" class="text-base font-bold text-purple-600 ml-2"
+              <span v-if="ruleRating > 0" class="text-sm font-semibold text-purple-400 ml-1"
                 >{{ ruleRating }}/5</span
               >
             </div>
           </div>
 
           <button
-            @click="showReviewModal = true"
-            class="w-full border border-gray-600 rounded-lg p-3 text-sm text-left text-gray-300 bg-gray-800 hover:bg-gray-700 transition"
-
+            @click="showRuleReviewModal = true"
+            class="w-full border border-gray-700 rounded-xl p-3.5 text-sm text-left bg-gray-800/50 hover:bg-gray-700/50 transition-all"
           >
-            <div class="flex items-center gap-2">
-              <i class="fas fa-comment-dots text-purple-400"></i>
-              <span v-if="ruleReview && ruleReview.length > 0" class="flex-1">{{
+            <div class="flex items-center gap-2.5">
+              <i class="fas fa-comment-dots text-gray-400"></i>
+              <span v-if="ruleReview && ruleReview.length > 0" class="flex-1 text-gray-200">{{
                 ruleReview
               }}</span>
-              <span v-else class="text-gray-400 flex-1">규칙에 대한 의견 (선택)</span>
+              <span v-else class="text-gray-500 flex-1">규칙에 대한 의견 (선택)</span>
             </div>
           </button>
 
           <!-- Fullscreen rule review modal -->
-          <div
-            v-if="showRuleReviewModal"
-            class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
-          >
-            <div class="bg-white w-full h-full max-w-md mx-auto flex flex-col">
-              <div
-                class="flex items-center justify-between p-4 border-b border-purple-200 bg-purple-50"
-              >
-                <div class="flex items-center gap-2">
-                  <i class="fas fa-comment-dots text-purple-500"></i>
-                  <span class="font-bold text-lg text-gray-800">규칙 평가 의견</span>
+          <transition name="modal-fade">
+            <div
+              v-if="showRuleReviewModal"
+              class="fixed inset-0 z-[60]"
+            >
+              <!-- 블러 배경 -->
+              <div class="absolute inset-0 bg-black/90 backdrop-blur-md" @click="showRuleReviewModal = false"></div>
+
+              <!-- 모달 컨텐츠 -->
+              <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden flex flex-col max-h-[85vh]">
+                <!-- 헤더 -->
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gradient-to-r from-gray-800/80 to-gray-900/80">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center">
+                      <i class="fas fa-comment-dots text-purple-400"></i>
+                    </div>
+                    <span class="font-semibold text-lg text-white">규칙 평가 의견</span>
+                  </div>
+                  <button
+                    @click="showRuleReviewModal = false"
+                    class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all flex items-center justify-center"
+                  >
+                    <i class="fas fa-times text-sm"></i>
+                  </button>
                 </div>
-                <button
-                  @click="showRuleReviewModal = false"
-                  class="text-purple-500 font-bold text-base hover:text-purple-600"
-                >
-                  닫기
-                </button>
+
+                <!-- 텍스트 영역 -->
+                <div class="flex-1 p-5 overflow-y-auto">
+                  <textarea
+                    v-model="ruleReview"
+                    class="w-full h-full min-h-[300px] text-base text-white focus:outline-none resize-none bg-transparent placeholder-gray-500"
+                    placeholder="규칙의 장단점, 개선할 점 등을 자유롭게 작성해주세요..."
+                    autofocus
+                  ></textarea>
+                </div>
+
+                <!-- 푸터 -->
+                <div class="px-5 py-4 border-t border-gray-800 bg-gray-900/50">
+                  <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span>{{ ruleReview?.length || 0 }}자</span>
+                    <button
+                      @click="showRuleReviewModal = false"
+                      class="px-4 py-2 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-medium transition-all"
+                    >
+                      완료
+                    </button>
+                  </div>
+                </div>
               </div>
-              <textarea
-                v-model="ruleReview"
-                class="flex-1 w-full p-4 text-base focus:outline-none resize-none bg-transparent"
-                placeholder="규칙의 장단점, 개선할 점 등을 자유롭게 작성해주세요."
-                style="min-height: 60vh"
-                autofocus
-              ></textarea>
             </div>
-          </div>
+          </transition>
         </div>
 
-        <div class="flex justify-center gap-3 mt-4">
-          <button @click="sendFriendRequest" class="px-4 py-2 rounded-lg bg-blue-800 text-blue-300 font-semibold shadow">친구 추가</button>
-          <button @click="onShare" class="px-4 py-2 rounded-lg bg-green-800 text-green-300 font-semibold shadow">결과 공유</button>
+        <div class="flex justify-center gap-3 mt-6">
+          <button @click="sendFriendRequest" class="px-5 py-2.5 rounded-xl bg-blue-500/20 text-blue-400 font-semibold border border-blue-500/30 hover:bg-blue-500/30 transition-all">
+            <i class="fas fa-user-plus mr-1.5 text-sm"></i>친구 추가
+          </button>
+          <button @click="onShare" class="px-5 py-2.5 rounded-xl bg-green-500/20 text-green-400 font-semibold border border-green-500/30 hover:bg-green-500/30 transition-all">
+            <i class="fas fa-share-alt mr-1.5 text-sm"></i>결과 공유
+          </button>
 
         </div>
       </div>
@@ -1127,5 +1180,26 @@ async function onShare() {
 }
 .animate-gradient-x {
   animation: gradient-x 2.5s linear infinite;
+}
+
+/* 모달 트랜지션 */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-from .fixed,
+.modal-fade-leave-to .fixed {
+  transform: translate(-50%, -50%) scale(0.9) !important;
+}
+
+.modal-fade-enter-active .fixed,
+.modal-fade-leave-active .fixed {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 </style>

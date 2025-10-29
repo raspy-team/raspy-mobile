@@ -50,7 +50,13 @@
         <div class="text-center flex justify-center items-center font-semibold gap-2">생성</div>
       </button>
       <div class="flex flex-col items-start text-xs text-gray-500 font-semibold gap-1">
-        <span>평점 : -</span>
+        <span class="flex items-center gap-1">
+          <i class="fas fa-star text-purple-500 text-xs"></i>
+          <span v-if="rule.averageRating && rule.averageRating > 0">
+            평점 : {{ rule.averageRating.toFixed(1) }}/5 ({{ rule.ratingCount || 0 }})
+          </span>
+          <span v-else>평점 : 아직 없음</span>
+        </span>
         <span>플레이 수 : {{ rule.useCount }}회</span>
       </div>
     </div>

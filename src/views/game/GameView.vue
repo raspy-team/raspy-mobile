@@ -684,7 +684,7 @@ function closeApplicantsModal() {
   showApplicantsModal.value = false
   selectedApplicantsGame.value = null
 }
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
@@ -703,7 +703,7 @@ const sentGames = ref([]) // 신청한 게임
 const myGames = ref([]) // 내 게임
 const applicantsMap = ref({}) // 각 게임의 신청자 목록 (gameId -> applicants)
 const loading = ref(true)
-let pollingInterval = null // 폴링 인터벌 ID
+const pollingInterval = ref(null) // 폴링 인터벌 ID (ref로 관리)
 
 // 게임 시작 관련
 const showLocationConfirmModal = ref(false) // 기존 장소 확인 모달
@@ -770,7 +770,20 @@ const fetchGames = async () => {
   }
 }
 
+// 폴링 정리 함수
+const stopPolling = () => {
+  if (pollingInterval.value) {
+    console.log('[GameView] 폴링 중지, interval ID:', pollingInterval.value)
+    clearInterval(pollingInterval.value)
+    pollingInterval.value = null
+  } else {
+    console.log('[GameView] 폴링 중지 시도했으나 이미 null')
+  }
+}
+
+// 컴포넌트 마운트 시: 데이터 로드 및 폴링 시작
 onMounted(async () => {
+  console.log('[GameView] 마운트: 데이터 로드 및 폴링 시작')
   loading.value = true
 
   // 첫 데이터 로드
@@ -778,17 +791,23 @@ onMounted(async () => {
   loading.value = false
 
   // 3초마다 자동 갱신 시작
-  pollingInterval = setInterval(async () => {
+  pollingInterval.value = setInterval(async () => {
+    console.log('[GameView] 폴링 실행 중...')
     await fetchGames()
   }, 3000)
+  console.log('[GameView] 폴링 시작됨, interval ID:', pollingInterval.value)
 })
 
-// 컴포넌트가 언마운트될 때 인터벌 정리
+// 컴포넌트가 언마운트되기 직전: 폴링 중지
+onBeforeUnmount(() => {
+  console.log('[GameView] 언마운트 직전: 폴링 중지')
+  stopPolling()
+})
+
+// 컴포넌트 언마운트 후: 최종 정리 (안전장치)
 onUnmounted(() => {
-  if (pollingInterval) {
-    clearInterval(pollingInterval)
-    pollingInterval = null
-  }
+  console.log('[GameView] 언마운트 완료: 최종 정리')
+  stopPolling()
 })
 
 function formatDate(dateStr) {

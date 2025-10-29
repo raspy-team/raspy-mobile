@@ -911,6 +911,12 @@
             <div>
               <h2 class="text-xl font-bold text-white">경기 규칙</h2>
               <p class="text-sm text-white/60">{{ post?.rule?.ruleTitle || '규칙 제목 없음' }}</p>
+              <div v-if="post?.rule?.averageRating && post.rule.averageRating > 0" class="flex items-center gap-1 mt-1">
+                <i class="fas fa-star text-purple-400 text-xs"></i>
+                <span class="text-xs text-white/70">
+                  {{ post.rule.averageRating.toFixed(1) }}/5 ({{ post.rule.ratingCount || 0 }}명)
+                </span>
+              </div>
             </div>
           </div>
           <button

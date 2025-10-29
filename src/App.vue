@@ -17,10 +17,67 @@
     <!-- 실제 라우터 뷰 -->
     <RouterView class="h-full" :key="route.fullPath" />
 
+    <!-- 펜딩 리뷰 알림 (전역) - 우선순위가 더 높음 -->
+    <Transition name="fade">
+      <div
+        v-if="showPendingReviewModal && pendingReviewGameId"
+        class="fixed inset-0 bg-black/70 backdrop-blur-md z-[9999999] flex items-center justify-center p-4"
+        @click.self="() => {}"
+      >
+        <Transition name="slide-up">
+          <div
+            v-if="showPendingReviewModal && pendingReviewGameId"
+            class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+          >
+            <!-- 헤더 -->
+            <div class="relative px-6 py-8 bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 text-white">
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center mb-4">
+                  <div class="relative">
+                    <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
+                    <div class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30">
+                      <i class="fas fa-star text-4xl"></i>
+                    </div>
+                  </div>
+                </div>
+                <h2 class="text-2xl font-black mb-2 tracking-tight">경기 평가가 필요해요!</h2>
+                <p class="text-white/90 text-sm font-medium">종료된 경기에 대한 리뷰를 작성해주세요</p>
+              </div>
+            </div>
+
+            <!-- 내용 -->
+            <div class="px-6 py-6 space-y-4">
+              <div class="text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full border border-purple-200">
+                  <i class="fas fa-clipboard-check text-purple-500"></i>
+                  <span class="text-sm font-bold text-purple-700">상대방 평가 및 규칙 평가</span>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed">
+                <p class="mb-2"><i class="fas fa-info-circle text-purple-500 mr-2"></i>경기가 종료되었습니다.</p>
+                <p>상대방과 규칙에 대한 평가를 남겨주세요.</p>
+              </div>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="px-6 pb-6 space-y-3">
+              <button
+                @click="goToPendingReview"
+                class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold active:scale-95 transition-all shadow-lg"
+              >
+                <i class="fas fa-arrow-right mr-2"></i>평가하러 가기
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
     <!-- 게임 시작 알림 (전역) -->
     <Transition name="fade">
       <div
-        v-if="activeGame && activeGame.gameId"
+        v-if="!showPendingReviewModal && activeGame && activeGame.gameId"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4"
         @click.self="dismissActiveGame"
       >
@@ -149,15 +206,42 @@ const route = useRoute()
 // 진행 중인 게임 폴링 (명시적으로 초기화)
 const activeGamePolling = useActiveGamePolling()
 const activeGame = activeGamePolling.activeGame || ref(null)
+const pendingReviewGameIds = activeGamePolling.pendingReviewGameIds || ref([])
 const startPolling = activeGamePolling.startPolling
 const stopPolling = activeGamePolling.stopPolling
 const dismissActiveGame = activeGamePolling.dismissActiveGame
+
+// 펜딩 리뷰 모달 상태
+const showPendingReviewModal = ref(false)
+const pendingReviewGameId = ref(null)
 
 const isIos = ref(false)
 const ua = navigator.userAgent.toLowerCase()
 if (ua.includes('raspy-ios')) {
   isIos.value = true
 }
+// 하루에 한 번만 daily-first API 호출
+const checkAndSendDailyFirst = async () => {
+  try {
+    const token = localStorage.getItem('raspy_access_token2')
+    if (!token) return
+
+    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD 형식
+    const lastCallDate = localStorage.getItem('daily_first_last_call')
+
+    if (lastCallDate !== today) {
+      // 오늘 아직 호출하지 않았으면 호출
+      await api.post('/api/access/daily-first')
+      localStorage.setItem('daily_first_last_call', today)
+      console.log('Daily first access recorded:', today)
+    } else {
+      console.log('Daily first access already recorded today:', today)
+    }
+  } catch (error) {
+    console.error('Failed to send daily-first:', error)
+  }
+}
+
 onMounted(() => {
   setTimeout(() => {
     showSplash.value = false
@@ -178,6 +262,8 @@ onMounted(() => {
     // 로그인된 사용자면 게임 폴링 시작
     if (token) {
       startPolling(() => route.fullPath)
+      // 하루 최초 접속 API 호출
+      checkAndSendDailyFirst()
     }
 
     setTimeout(() => {
@@ -225,12 +311,41 @@ const formatStartTime = (startedAt) => {
   })
 }
 
+// pendingReviewGameIds 변경 감지
+watch(
+  pendingReviewGameIds,
+  (newIds) => {
+    if (newIds && newIds.length > 0) {
+      // 결과 페이지에 있지 않을 때만 모달 표시
+      if (!route.fullPath.includes('/result')) {
+        pendingReviewGameId.value = newIds[0]
+        showPendingReviewModal.value = true
+      }
+    } else {
+      showPendingReviewModal.value = false
+      pendingReviewGameId.value = null
+    }
+  },
+  { immediate: true }
+)
+
+// 펜딩 리뷰 페이지로 이동
+const goToPendingReview = () => {
+  if (pendingReviewGameId.value) {
+    showPendingReviewModal.value = false
+    router.push(`/games/${pendingReviewGameId.value}/result`)
+  }
+}
+
 // activeGame 변경 감지하여 카운트다운 시작
 watch(
   activeGame,
   (newGame) => {
     if (newGame && newGame.gameId) {
-      startGameCountdown()
+      // 펜딩 리뷰가 없을 때만 게임 시작 알림 표시
+      if (!showPendingReviewModal.value) {
+        startGameCountdown()
+      }
     } else {
       stopGameCountdown()
     }

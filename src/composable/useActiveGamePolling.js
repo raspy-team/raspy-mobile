@@ -11,6 +11,7 @@ const POLLING_INTERVAL = 5000 // 5초
 
 // 전역 상태 (모든 컴포넌트가 공유)
 const activeGame = ref(null)
+const pendingReviewGameIds = ref([])
 const isPolling = ref(false)
 const dismissedGameIds = ref(new Set()) // 사용자가 거부한 게임 ID들
 let pollingTimer = null
@@ -20,8 +21,17 @@ export function useActiveGamePolling() {
   const checkActiveGame = async (currentPath) => {
     try {
       const response = await api.get('/api/games/active/my')
-      const game = response.data
-      console.log(game)
+      const data = response.data
+      console.log('🎮 Active game data:', data)
+
+      // pendingReviewGameIds 업데이트
+      if (data.pendingReviewGameIds && Array.isArray(data.pendingReviewGameIds)) {
+        pendingReviewGameIds.value = data.pendingReviewGameIds
+      } else {
+        pendingReviewGameIds.value = []
+      }
+
+      const game = data.activeGame
 
       // 새로운 게임이 감지되었는지 확인
       if (game && game.gameId) {
@@ -95,6 +105,7 @@ export function useActiveGamePolling() {
 
   return {
     activeGame,
+    pendingReviewGameIds,
     isPolling,
     startPolling,
     stopPolling,

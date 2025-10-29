@@ -148,12 +148,25 @@
           </div>
 
           <!-- 사진 목록 -->
-          <div v-else class="space-y-3">
+          <div v-else class="space-y-4">
+            <!-- 안내 메시지 -->
+            <div v-if="selectedPictures.length === 0 && allPictures.length > 0" class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 flex items-start gap-3">
+              <i class="fas fa-info-circle text-blue-400 text-lg mt-0.5"></i>
+              <div class="flex-1">
+                <p class="text-sm text-blue-300 font-medium mb-1">사진을 클릭하여 선택해주세요</p>
+                <p class="text-xs text-blue-400/70">아래 사진을 탭하면 제출할 미디어로 선택됩니다 (최대 5개)</p>
+              </div>
+            </div>
+
             <!-- 선택된 미디어 (드래그로 순서 변경 가능) -->
             <div v-if="selectedPictures.length > 0">
-              <p class="text-sm text-gray-400 mb-2">
-                선택된 미디어 ({{ selectedPictures.length }}/5) - 드래그하여 순서 변경
-              </p>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-sm font-semibold text-green-400">
+                  <i class="fas fa-check-circle mr-1"></i>
+                  선택됨 ({{ selectedPictures.length }}/5)
+                </p>
+                <p class="text-xs text-gray-500">드래그로 순서 변경</p>
+              </div>
               <div class="grid grid-cols-3 gap-2">
                 <div
                   v-for="(pic, index) in selectedPictures"
@@ -218,12 +231,18 @@
 
             <!-- 선택 가능한 미디어들 -->
             <div v-if="unselectedPictures.length > 0">
-              <p class="text-sm text-gray-400 mb-2">미디어 선택</p>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+                  <i class="fas fa-hand-pointer text-orange-400 text-xs"></i>
+                  탭하여 선택
+                </p>
+                <p class="text-xs text-gray-500">최대 5개</p>
+              </div>
               <div class="grid grid-cols-4 gap-2">
                 <div
                   v-for="pic in unselectedPictures"
                   :key="pic.id"
-                  class="relative aspect-square rounded-lg overflow-hidden border border-gray-300 cursor-pointer hover:border-orange-400 transition"
+                  class="relative aspect-square rounded-lg overflow-hidden border-2 border-dashed border-gray-600 cursor-pointer hover:border-orange-400 hover:scale-105 transition-all duration-200 group"
                   @click="selectPicture(pic)"
                 >
                   <!-- 이미지 -->
@@ -248,9 +267,17 @@
                     </div>
                   </div>
 
+                  <!-- 선택하기 오버레이 (hover 시) -->
+                  <div class="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/80 transition-all duration-200 flex items-center justify-center">
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-1">
+                      <i class="fas fa-plus-circle text-white text-2xl"></i>
+                      <span class="text-white text-[10px] font-semibold">선택</span>
+                    </div>
+                  </div>
+
                   <button
                     @click.stop="deletePicture(pic.id)"
-                    class="absolute top-1 right-1 bg-gray-800 bg-opacity-60 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition"
+                    class="absolute top-1 right-1 bg-gray-800 bg-opacity-70 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition z-10"
                   >
                     <i class="fas fa-trash text-xs"></i>
                   </button>

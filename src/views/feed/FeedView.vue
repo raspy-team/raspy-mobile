@@ -1455,6 +1455,9 @@ const prevPreviewStyle = computed(() => ({
 function onFeedTouchStart(e) {
   const t = e.touches?.[0]
   if (!t) return
+  // 애니메이션이 진행 중이면 새로운 터치를 무시
+  if (feedAnimating.value) return
+
   feedStartX.value = t.clientX
   feedStartY.value = t.clientY
   feedDeltaX.value = 0
@@ -1464,7 +1467,6 @@ function onFeedTouchStart(e) {
   feedIsPointerDown.value = true
   feedGestureStartAt = Date.now()
   feedActiveScrollEl = findScrollable(e.target)
-  feedAnimating.value = false
   feedSwipeDirection = 0
   feedTranslateY.value = 0
 }
@@ -1506,7 +1508,8 @@ function onFeedTouchEnd(e) {
   if (!feedIsPointerDown.value) return
   const thresholdPx = Math.floor(window.innerHeight * 0.08) // 조금 더 관대하게
   const duration = Math.max(1, Date.now() - feedGestureStartAt)
-  const velocityY = feedDeltaY.value / duration
+  // 속도를 픽셀/초 단위로 계산 (밀리초를 초로 변환)
+  const velocityY = (feedDeltaY.value / duration) * 1000
 
   const target = e?.target
   const onControl = !!(
@@ -1515,7 +1518,8 @@ function onFeedTouchEnd(e) {
     target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
   )
   const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
-  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
+  // 빠른 스와이프 감지 향상: 속도가 300px/s 이상이거나 거리가 임계값 이상
+  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 300
 
   if (verticalMove && !onControl && movedY) {
     if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
@@ -1576,6 +1580,9 @@ function onFeedMouseDown(e) {
     e.target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
   )
     return
+  // 애니메이션이 진행 중이면 새로운 드래그를 무시
+  if (feedAnimating.value) return
+
   feedStartX.value = e.clientX
   feedStartY.value = e.clientY
   feedDeltaX.value = 0
@@ -1585,7 +1592,6 @@ function onFeedMouseDown(e) {
   feedIsPointerDown.value = true
   feedGestureStartAt = Date.now()
   feedActiveScrollEl = findScrollable(e.target)
-  feedAnimating.value = false
   feedSwipeDirection = 0
   feedTranslateY.value = 0
 }
@@ -1619,7 +1625,8 @@ function onFeedMouseUp(e) {
   if (!feedIsPointerDown.value) return
   const thresholdPx = Math.floor(window.innerHeight * 0.08)
   const duration = Math.max(1, Date.now() - feedGestureStartAt)
-  const velocityY = feedDeltaY.value / duration
+  // 속도를 픽셀/초 단위로 계산 (밀리초를 초로 변환)
+  const velocityY = (feedDeltaY.value / duration) * 1000
   const target = e?.target
   const onControl = !!(
     target &&
@@ -1627,7 +1634,8 @@ function onFeedMouseUp(e) {
     target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
   )
   const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
-  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
+  // 빠른 스와이프 감지 향상: 속도가 300px/s 이상이거나 거리가 임계값 이상
+  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 300
   if (verticalMove && !onControl && movedY) {
     if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
       feedAnimating.value = true

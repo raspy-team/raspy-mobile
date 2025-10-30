@@ -115,12 +115,28 @@ const cameraInputRef = ref(null)
 const capturedImage = ref(null)
 const selectedFile = ref(null)
 
+// 안드로이드 웹뷰 감지
+const isAndroidWebView = () => {
+  return window.AndroidApp !== undefined
+}
+
 // 카메라 트리거
 const triggerCamera = () => {
-  // 안드로이드 웹뷰 호환성을 위해 명시적으로 처리
-  if (cameraInputRef.value) {
+  // 안드로이드 웹뷰에서는 네이티브 카메라 사용
+  if (isAndroidWebView()) {
     try {
-      // input 엘리먼트가 DOM에 존재하는지 확인
+      console.log('Calling Android native camera...')
+      // AndroidApp.openCamera() 호출 시 콜백으로 이미지 받음
+      window.AndroidApp.openCamera()
+      // 콜백은 window.onCameraResult로 받음 (아래 정의)
+    } catch (error) {
+      console.error('Failed to call Android camera:', error)
+      // 실패 시 fallback to web input
+      cameraInputRef.value?.click()
+    }
+  } else if (cameraInputRef.value) {
+    // iOS 또는 일반 웹에서는 기존 방식 사용
+    try {
       console.log('Triggering camera input...')
       cameraInputRef.value.click()
     } catch (error) {
@@ -128,6 +144,21 @@ const triggerCamera = () => {
     }
   } else {
     console.warn('Camera input ref is not available')
+  }
+}
+
+// 안드로이드 네이티브 카메라 콜백 (전역 함수로 등록)
+if (typeof window !== 'undefined') {
+  window.onCameraResult = async (base64Image) => {
+    try {
+      console.log('Received image from Android camera')
+      // base64 이미지를 받아서 처리
+      const compressedDataUrl = await compressImage(base64Image)
+      capturedImage.value = compressedDataUrl
+      selectedFile.value = dataUrlToFile(compressedDataUrl, 'camera_image.jpg')
+    } catch (error) {
+      console.error('Failed to process camera image:', error)
+    }
   }
 }
 

@@ -712,6 +712,35 @@ function addLog(log) {
 }
 
 onMounted(async () => {
+  // 안드로이드 네이티브 카메라 콜백 등록
+  if (typeof window !== 'undefined') {
+    // 사진 촬영 콜백
+    window.onGameCameraResult = async (base64Image) => {
+      try {
+        console.log('Received photo from Android camera')
+        const compressed = await compressImage(base64Image)
+        addGamePicture(gameId, compressed)
+        showToast('사진이 저장되었습니다!')
+      } catch (error) {
+        console.error('Failed to process camera image:', error)
+        showToast('사진 저장에 실패했습니다.')
+      }
+    }
+
+    // 동영상 촬영 콜백
+    window.onGameVideoCameraResult = async (base64Video, duration) => {
+      try {
+        console.log('Received video from Android camera')
+        // duration은 밀리초 단위로 전달된다고 가정
+        addGameVideo(gameId, base64Video, duration || 0)
+        showToast('동영상이 저장되었습니다!')
+      } catch (error) {
+        console.error('Failed to process video:', error)
+        showToast('동영상 저장에 실패했습니다.')
+      }
+    }
+  }
+
   const userRes = await api.get('/api/auth/current-user-id')
   const currentUserId = userRes.data
 
@@ -892,19 +921,55 @@ function onCaptureButtonUp(e) {
   // 롱프레스 여부 판단
   if (pressDuration >= LONG_PRESS_DURATION) {
     // 롱프레스: 동영상 촬영
-    // 사용자 제스처 컨텍스트 내에서 즉시 실행
-    if (videoInputRef.value) {
-      videoInputRef.value.click()
-    }
+    triggerVideoCapture()
   } else if (isLongPressing.value) {
     // 짧은 프레스: 사진 촬영
-    if (cameraInputRef.value) {
-      cameraInputRef.value.click()
-    }
+    triggerPhotoCapture()
   }
 
   isLongPressing.value = false
   pressStartTime = 0
+}
+
+// 안드로이드 웹뷰 감지
+function isAndroidWebView() {
+  return window.AndroidApp !== undefined
+}
+
+// 사진 촬영 트리거
+function triggerPhotoCapture() {
+  if (isAndroidWebView()) {
+    try {
+      console.log('Calling Android native camera for photo...')
+      window.AndroidApp.openCamera()
+      // 콜백은 window.onGameCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call Android camera:', error)
+      // 실패 시 fallback
+      cameraInputRef.value?.click()
+    }
+  } else {
+    // iOS 또는 일반 웹
+    cameraInputRef.value?.click()
+  }
+}
+
+// 동영상 촬영 트리거
+function triggerVideoCapture() {
+  if (isAndroidWebView()) {
+    try {
+      console.log('Calling Android native camera for video...')
+      window.AndroidApp.openVideoCamera()
+      // 콜백은 window.onGameVideoCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call Android video camera:', error)
+      // 실패 시 fallback
+      videoInputRef.value?.click()
+    }
+  } else {
+    // iOS 또는 일반 웹
+    videoInputRef.value?.click()
+  }
 }
 
 function onCaptureButtonCancel() {
@@ -988,6 +1053,12 @@ async function onVideoChange(e) {
 onUnmounted(() => {
   clearInterval(timerRef.value)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+
+  // 안드로이드 네이티브 카메라 콜백 정리
+  if (typeof window !== 'undefined') {
+    window.onGameCameraResult = null
+    window.onGameVideoCameraResult = null
+  }
 
   // 소켓 핸들러 정리
   socket.onConnecting(null)

@@ -215,6 +215,17 @@
               >
                 <p class="text-base text-gray-300 text-center leading-relaxed">{{ user.intro }}</p>
               </div>
+
+              <!-- Affiliation with better styling -->
+              <div
+                v-if="user.affiliation"
+                class="mt-3 px-6 py-3 bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-gray-600 shadow-sm max-w-sm"
+              >
+                <div class="flex items-center justify-center gap-2">
+                  <i class="fas fa-building text-orange-500 text-sm"></i>
+                  <p class="text-sm text-gray-300 leading-relaxed">{{ user.affiliation }}</p>
+                </div>
+              </div>
               <!-- 친구추가/나의 친구 버튼: 바이오 바로 아래 -->
               <div v-if="!user.isMe" class="flex gap-3 mt-4 pb-3 w-full justify-center">
                 <template

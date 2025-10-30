@@ -232,6 +232,22 @@
             <p class="text-xs" :class="bioCountColor">{{ form.bio.length }} / 100자</p>
           </fieldset>
 
+          <!-- 소속 -->
+          <fieldset class="space-y-2">
+            <legend class="block text-sm font-semibold text-gray-200 mb-1">
+              소속 <span class="text-gray-400 text-xs">(선택)</span>
+            </legend>
+            <input
+              v-model="form.affiliation"
+              type="text"
+              maxlength="100"
+              class="w-full px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-base bg-gray-800 text-gray-200 placeholder-gray-500"
+              placeholder="예: 서울대학교, ABC회사, 런닝크루 등"
+              @input="markDirty"
+            />
+            <p class="text-xs text-gray-400">{{ form.affiliation.length }} / 100자</p>
+          </fieldset>
+
           <!-- 저장 -->
           <div class="pt-2">
             <button
@@ -304,6 +320,7 @@ const form = ref({
   gender: '',
   region: '',
   bio: '',
+  affiliation: '',
   profilePictureUrl: '',
 })
 const serverSnapshot = ref(null)
@@ -343,6 +360,7 @@ onMounted(async () => {
       form.value.age = data.age || ''
       form.value.gender = data.gender || ''
       form.value.bio = data.bio || ''
+      form.value.affiliation = data.affiliation || ''
       if (data.region) {
         const [primary = '', secondary = ''] = String(data.region).split(' ')
         selectedPrimary.value = primary
@@ -368,6 +386,7 @@ const snapshot = () => ({
   age: form.value.age,
   gender: form.value.gender,
   bio: form.value.bio,
+  affiliation: form.value.affiliation,
   primary: selectedPrimary.value,
   secondary: selectedSecondary.value,
   profilePictureUrl: form.value.profilePictureUrl,
@@ -383,6 +402,7 @@ watch(
     () => form.value.age,
     () => form.value.gender,
     () => form.value.bio,
+    () => form.value.affiliation,
     selectedPrimary,
     selectedSecondary,
   ],
@@ -470,6 +490,7 @@ const submitProfile = async () => {
         : ''
     formData.append('region', region)
     formData.append('bio', form.value.bio || '')
+    formData.append('affiliation', form.value.affiliation || '')
     // 이미지 파라미터 rule
     // - updated: 새 파일 업로드
     // - deleted: null 전달

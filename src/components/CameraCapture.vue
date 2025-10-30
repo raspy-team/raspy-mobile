@@ -120,22 +120,41 @@ const isAndroidWebView = () => {
   return window.AndroidApp !== undefined
 }
 
+// iOS 웹뷰 감지
+const isIOSWebView = () => {
+  const userAgent = navigator.userAgent.toLowerCase()
+  return userAgent.includes('raspy-ios') ||
+         (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge)
+}
+
 // 카메라 트리거
 const triggerCamera = () => {
   // 안드로이드 웹뷰에서는 네이티브 카메라 사용
   if (isAndroidWebView()) {
     try {
       console.log('Calling Android native camera...')
-      // AndroidApp.openCamera() 호출 시 콜백으로 이미지 받음
       window.AndroidApp.openCamera()
-      // 콜백은 window.onCameraResult로 받음 (아래 정의)
+      // 콜백은 window.onCameraResult로 받음
     } catch (error) {
       console.error('Failed to call Android camera:', error)
       // 실패 시 fallback to web input
       cameraInputRef.value?.click()
     }
+  } else if (isIOSWebView()) {
+    try {
+      console.log('Calling iOS native camera...')
+      window.webkit.messageHandlers.iosBridge.postMessage({
+        action: 'openCamera',
+        type: 'photo'
+      })
+      // 콜백은 window.onCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call iOS camera:', error)
+      // 실패 시 fallback to web input
+      cameraInputRef.value?.click()
+    }
   } else if (cameraInputRef.value) {
-    // iOS 또는 일반 웹에서는 기존 방식 사용
+    // 일반 웹에서는 기존 방식 사용
     try {
       console.log('Triggering camera input...')
       cameraInputRef.value.click()

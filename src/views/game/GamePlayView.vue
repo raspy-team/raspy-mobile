@@ -427,8 +427,7 @@
   <input
     ref="videoInputRef"
     type="file"
-    accept="video/*"
-    capture="environment"
+    accept="video/mp4,video/quicktime,video/*"
     @change="onVideoChange"
     class="hidden"
   />
@@ -894,6 +893,12 @@ function isAndroidWebView() {
   return window.AndroidApp !== undefined
 }
 
+function isIOSWebView() {
+  const userAgent = navigator.userAgent.toLowerCase()
+  return userAgent.includes('raspy-ios') ||
+         (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge)
+}
+
 // 사진 촬영 트리거
 function triggerPhotoCapture() {
   if (isAndroidWebView()) {
@@ -906,8 +911,21 @@ function triggerPhotoCapture() {
       // 실패 시 fallback
       cameraInputRef.value?.click()
     }
+  } else if (isIOSWebView()) {
+    try {
+      console.log('Calling iOS native camera for photo...')
+      window.webkit.messageHandlers.iosBridge.postMessage({
+        action: 'openCamera',
+        type: 'photo'
+      })
+      // 콜백은 window.onGameCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call iOS camera:', error)
+      // 실패 시 fallback
+      cameraInputRef.value?.click()
+    }
   } else {
-    // iOS 또는 일반 웹
+    // 일반 웹
     cameraInputRef.value?.click()
   }
 }
@@ -924,8 +942,21 @@ function triggerVideoCapture() {
       // 실패 시 fallback
       videoInputRef.value?.click()
     }
+  } else if (isIOSWebView()) {
+    try {
+      console.log('Calling iOS native camera for video...')
+      window.webkit.messageHandlers.iosBridge.postMessage({
+        action: 'openCamera',
+        type: 'video'
+      })
+      // 콜백은 window.onGameVideoCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call iOS video camera:', error)
+      // 실패 시 fallback
+      videoInputRef.value?.click()
+    }
   } else {
-    // iOS 또는 일반 웹
+    // 일반 웹
     videoInputRef.value?.click()
   }
 }

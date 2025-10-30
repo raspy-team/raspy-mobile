@@ -851,35 +851,60 @@ function socket_resetGame() {
   })
 }
 
+// 웹뷰 환경 감지
+function isWebView() {
+  const userAgent = navigator.userAgent.toLowerCase()
+  return userAgent.includes('raspy-ios') || window.AndroidApp !== undefined
+}
+
+let pressStartTime = 0
+const LONG_PRESS_DURATION = 500 // 0.5초
+
 // 통합 촬영 버튼 이벤트 핸들러
 function onCaptureButtonDown(e) {
   if (isCountingDown.value) return
   e.preventDefault()
+
+  pressStartTime = Date.now()
   isLongPressing.value = true
 
-  // 0.5초 길게 누르면 동영상 촬영
+  // 롱프레스 타이머 - 시각적 피드백용
   longPressTimer = setTimeout(() => {
+    // 시각적으로만 표시 (실제 촬영은 touchend에서)
     if (isLongPressing.value) {
       isLongPressing.value = false
-      // 동영상 input 트리거
-      videoInputRef.value?.click()
     }
-  }, 500)
+  }, LONG_PRESS_DURATION)
 }
 
 function onCaptureButtonUp(e) {
   if (isCountingDown.value) return
   e.preventDefault()
 
-  // 짧게 눌렀으면 사진 촬영
-  if (isLongPressing.value && longPressTimer) {
+  const pressDuration = Date.now() - pressStartTime
+
+  // 타이머 정리
+  if (longPressTimer) {
     clearTimeout(longPressTimer)
     longPressTimer = null
-    isLongPressing.value = false
-
-    // 사진 촬영
-    cameraInputRef.value?.click()
   }
+
+  // 롱프레스 여부 판단
+  if (pressDuration >= LONG_PRESS_DURATION) {
+    // 롱프레스: 동영상 촬영
+    // 사용자 제스처 컨텍스트 내에서 즉시 실행
+    if (videoInputRef.value) {
+      videoInputRef.value.click()
+    }
+  } else if (isLongPressing.value) {
+    // 짧은 프레스: 사진 촬영
+    if (cameraInputRef.value) {
+      cameraInputRef.value.click()
+    }
+  }
+
+  isLongPressing.value = false
+  pressStartTime = 0
 }
 
 function onCaptureButtonCancel() {
@@ -889,6 +914,7 @@ function onCaptureButtonCancel() {
     longPressTimer = null
   }
   isLongPressing.value = false
+  pressStartTime = 0
 }
 
 // 카메라 파일 선택 완료

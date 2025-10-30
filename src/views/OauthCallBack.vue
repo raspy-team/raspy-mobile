@@ -208,13 +208,35 @@
           <p class="subtext">{{ bio.length }}/100</p>
         </div>
         <div class="footer-col">
-          <button class="btn btn-primary mb-3" @click="onProfileNext" :disabled="profileValidating">
-            {{ profileValidating ? '처리 중...' : '다음' }}
+          <button class="btn btn-primary mb-3" @click="next">
+            다음
           </button>
         </div>
       </div>
-      <!-- Step 7: 사진 -->
+      <!-- Step 7: 소속 -->
       <div v-else-if="step === 7" class="screen-inner">
+        <div class="question-box">
+          <h1 class="heading">소속</h1>
+          <p class="subtext">선택사항 / 최대 100자</p>
+        </div>
+        <div class="content center">
+          <input
+            type="text"
+            v-model="affiliation"
+            class="input-box"
+            maxlength="100"
+            placeholder="예: 서울대학교, ABC회사, 런닝크루 등"
+          />
+          <p class="subtext">{{ affiliation.length }}/100</p>
+        </div>
+        <div class="footer-col">
+          <button class="btn btn-primary mb-3" @click="next">
+            다음
+          </button>
+        </div>
+      </div>
+      <!-- Step 8: 사진 -->
+      <div v-else-if="step === 8" class="screen-inner">
         <div class="question-box">
           <h1 class="heading">프로필 사진</h1>
         </div>
@@ -236,8 +258,8 @@
           </button>
         </div>
       </div>
-      <!-- Step 8: 완료 -->
-      <div v-else-if="step === 8" class="screen-inner">
+      <!-- Step 9: 완료 -->
+      <div v-else-if="step === 9" class="screen-inner">
         <div class="content center">
           <i class="fas fa-circle-check icon-large"></i>
           <h1 class="text-center font-extrabold text-orange-500 mt-2 text-2xl">설정 완료!</h1>
@@ -441,14 +463,15 @@ const gender = ref(''),
 const regionP = ref(''),
   regionS = ref(''),
   regionError = ref('')
-const bio = ref(''),
-  avatar = ref(null),
+const bio = ref('')
+const affiliation = ref('')
+const avatar = ref(null),
   preview = ref('')
 const profileValidating = ref(false)
 const genders = ['남성', '여성', '기타']
 const regionMap = regionData
 const regionList = computed(() => Object.keys(regionMap).filter((k) => k !== '전국'))
-const totalSteps = 8
+const totalSteps = 9
 
 const progressWidth = computed(() => (step.value / totalSteps) * 100)
 const next = () => {
@@ -537,12 +560,13 @@ async function onProfileNext() {
   if (!validateProfileStep()) return
   profileValidating.value = true
   try {
-    if (step.value === 7) {
+    if (step.value === 8) {
       const fd = new FormData()
       fd.append('age', age.value)
       fd.append('gender', gender.value == '남성' ? 'M' : gender.value == '여성' ? 'F' : 'O')
       fd.append('region', `${regionP.value} ${regionS.value}`)
       fd.append('bio', bio.value)
+      fd.append('affiliation', affiliation.value)
       if (avatar.value) fd.append('profile_picture', avatar.value)
       await api.patch('/api/user-profile/save', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },

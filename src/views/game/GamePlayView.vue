@@ -161,31 +161,8 @@
                 >{{ user1SetsWon }}</span
               >
             </div>
-                        <div class="mx-4 sm:mx-8 flex flex-col items-center relative">
-              <button
-                @touchstart="onCaptureButtonDown"
-                @touchend="onCaptureButtonUp"
-                @mousedown="onCaptureButtonDown"
-                @mouseup="onCaptureButtonUp"
-                @mouseleave="onCaptureButtonCancel"
-                :disabled="isCountingDown"
-                :class="[
-                  'relative text-[12vw] sm:text-[16dvw] transition-all duration-200 focus:outline-none rounded-full flex items-center justify-center w-[20vw] h-[20vw] sm:w-[24dvw] sm:h-[24dvw]',
-                  isCountingDown ? 'text-gray-600 cursor-not-allowed' : isLongPressing ? 'text-red-400 scale-105' : 'text-orange-300 hover:text-orange-400 active:text-orange-500 active:scale-95'
-                ]"
-              >
-                <i :class="isLongPressing ? 'fas fa-video animate-pulse' : 'fas fa-camera'"></i>
-              </button>
-
-              <!-- 안내 텍스트 -->
-              <div class="mt-2 text-center">
-                <p v-if="!isLongPressing" class="text-[2.5vw] sm:text-[3vw] text-orange-400 font-semibold drop-shadow">
-                  탭: 사진 | 길게: 동영상
-                </p>
-                <p v-else class="text-[2.5vw] sm:text-[3vw] text-red-400 font-bold drop-shadow animate-pulse">
-                  동영상 촬영 시작...
-                </p>
-              </div>
+            <div class="mx-4 sm:mx-8 flex items-center">
+              <span class="text-6xl font-bold text-orange-500">:</span>
             </div>
             <div class="flex items-end">
               <span class="text-[28vw] sm:text-[38dvw] font-extrabold text-orange-500">{{
@@ -401,6 +378,39 @@
         </div>
       </div>
     </div>
+
+    <!-- 플로팅 카메라 버튼 (우측 하단) -->
+    <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
+      <!-- 사진 촬영 버튼 -->
+      <button
+        @click="triggerPhotoCapture"
+        :disabled="isCountingDown"
+        :class="[
+          'relative transition-all duration-300 focus:outline-none rounded-full flex items-center justify-center w-[61.6px] h-[61.6px] shadow-2xl',
+          isCountingDown
+            ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+            : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:scale-110 hover:shadow-orange-500/50 active:scale-95'
+        ]"
+        title="사진 촬영"
+      >
+        <i class="fas fa-camera text-xl"></i>
+      </button>
+
+      <!-- 동영상 촬영 버튼 -->
+      <button
+        @click="triggerVideoCapture"
+        :disabled="isCountingDown"
+        :class="[
+          'relative transition-all duration-300 focus:outline-none rounded-full flex items-center justify-center w-[61.6px] h-[61.6px] shadow-2xl',
+          isCountingDown
+            ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+            : 'bg-gradient-to-br from-red-500 to-red-600 text-white hover:scale-110 hover:shadow-red-500/50 active:scale-95'
+        ]"
+        title="동영상 촬영"
+      >
+        <i class="fas fa-video text-xl"></i>
+      </button>
+    </div>
   </div>
 
   <!-- 숨겨진 카메라 input -->
@@ -474,8 +484,6 @@ const socketStatus = ref('connected') // 'connected', 'connecting', 'disconnecte
 // 카메라 관련 상태
 const cameraInputRef = ref(null)
 const videoInputRef = ref(null)
-const isLongPressing = ref(false)
-let longPressTimer = null
 const game = reactive({})
 const chatRoomId = ref(null)
 const currentSet = ref(1)
@@ -880,56 +888,6 @@ function socket_resetGame() {
   })
 }
 
-// 웹뷰 환경 감지
-function isWebView() {
-  const userAgent = navigator.userAgent.toLowerCase()
-  return userAgent.includes('raspy-ios') || window.AndroidApp !== undefined
-}
-
-let pressStartTime = 0
-const LONG_PRESS_DURATION = 500 // 0.5초
-
-// 통합 촬영 버튼 이벤트 핸들러
-function onCaptureButtonDown(e) {
-  if (isCountingDown.value) return
-  e.preventDefault()
-
-  pressStartTime = Date.now()
-  isLongPressing.value = true
-
-  // 롱프레스 타이머 - 시각적 피드백용
-  longPressTimer = setTimeout(() => {
-    // 시각적으로만 표시 (실제 촬영은 touchend에서)
-    if (isLongPressing.value) {
-      isLongPressing.value = false
-    }
-  }, LONG_PRESS_DURATION)
-}
-
-function onCaptureButtonUp(e) {
-  if (isCountingDown.value) return
-  e.preventDefault()
-
-  const pressDuration = Date.now() - pressStartTime
-
-  // 타이머 정리
-  if (longPressTimer) {
-    clearTimeout(longPressTimer)
-    longPressTimer = null
-  }
-
-  // 롱프레스 여부 판단
-  if (pressDuration >= LONG_PRESS_DURATION) {
-    // 롱프레스: 동영상 촬영
-    triggerVideoCapture()
-  } else if (isLongPressing.value) {
-    // 짧은 프레스: 사진 촬영
-    triggerPhotoCapture()
-  }
-
-  isLongPressing.value = false
-  pressStartTime = 0
-}
 
 // 안드로이드 웹뷰 감지
 function isAndroidWebView() {
@@ -972,15 +930,6 @@ function triggerVideoCapture() {
   }
 }
 
-function onCaptureButtonCancel() {
-  // 마우스가 버튼을 벗어나면 취소
-  if (longPressTimer) {
-    clearTimeout(longPressTimer)
-    longPressTimer = null
-  }
-  isLongPressing.value = false
-  pressStartTime = 0
-}
 
 // 카메라 파일 선택 완료
 async function onCameraChange(e) {
@@ -1064,11 +1013,6 @@ onUnmounted(() => {
   socket.onConnecting(null)
   socket.onConnected(null)
   socket.onDisconnected(null)
-
-  // 타이머 정리
-  if (longPressTimer) {
-    clearTimeout(longPressTimer)
-  }
 })
 </script>
 

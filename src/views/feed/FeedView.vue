@@ -422,7 +422,10 @@
             <!-- 상단 헤더 -->
             <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
+                  @click="goToProfile(post.players?.[0]?.id || post.author?.id)"
+                >
                   <img
                     :src="post.players?.[0]?.avatar || post.author?.avatar"
                     class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
@@ -470,7 +473,10 @@
 
               <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6 mb-4">
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-                  <div class="text-center relative">
+                  <div
+                    class="text-center relative cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.players[0].id)"
+                  >
                     <img
                       :src="post.players[0].avatar"
                       class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
@@ -500,7 +506,10 @@
                       >{{ post.result.scoreB }}
                     </div>
                   </div>
-                  <div class="text-center relative">
+                  <div
+                    class="text-center relative cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.players[1].id)"
+                  >
                     <img
                       :src="post.players[1].avatar"
                       class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2"
@@ -546,7 +555,10 @@
                 </div>
 
                 <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-                  <div class="text-center">
+                  <div
+                    class="text-center cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.players[0]?.id)"
+                  >
                     <img
                       :src="post.players[0]?.avatar"
                       class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
@@ -662,7 +674,10 @@
                   v-if="post.reviews[0]?.author"
                   class="bg-black/30 border border-white/10 rounded-lg p-3 space-y-2"
                 >
-                  <div class="flex items-center gap-2">
+                  <div
+                    class="flex items-center gap-2 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.reviews[0]?.author?.id)"
+                  >
                     <img
                       :src="
                         post.reviews[0]?.author?.avatar ||
@@ -684,7 +699,10 @@
                   v-if="post.reviews[1]?.author"
                   class="bg-black/30 border border-white/10 rounded-lg p-3 space-y-2"
                 >
-                  <div class="flex items-center gap-2">
+                  <div
+                    class="flex items-center gap-2 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.reviews[1]?.author?.id)"
+                  >
                     <img
                       :src="
                         post.reviews[1]?.author?.avatar ||
@@ -726,8 +744,9 @@
                   <div
                     v-for="r in currentRanking"
                     :key="r.userId"
-                    class="flex items-center gap-3 px-4 py-3 border-b border-white/10 last:border-b-0"
+                    class="flex items-center gap-3 px-4 py-3 border-b border-white/10 last:border-b-0 cursor-pointer active:scale-[0.98] transition"
                     :class="r.isPlayer ? 'bg-blue-400/10' : ''"
+                    @click="goToProfile(r.userId)"
                   >
                     <div
                       class="w-10 text-center font-bold flex-shrink-0"
@@ -1237,6 +1256,15 @@ function onReport() {
 
   // TODO: 나중에 API 연결
   // await api.post(`/api/posts/${postId}/report`)
+}
+
+// 프로필 클릭 핸들러
+function goToProfile(userId) {
+  if (!userId) return
+  // 피드 터치 상태 리셋
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+  router.push(`/profile/${userId}`)
 }
 
 const fetchNotifications = async () => {

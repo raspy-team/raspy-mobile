@@ -28,8 +28,8 @@
       </button> -->
 
       <div class="fixed w-[90%] bottom-10 left-[5%]">
-        <!-- Kakao Login -->
-        <button v-if="!isIosApp" class="oauth-btn kakao" @click="loginWith('kakao')">
+        <!-- Kakao Login - Hidden -->
+        <!-- <button v-if="!isIosApp" class="oauth-btn kakao" @click="loginWith('kakao')">
           <div class="icon-text">
             <img
               src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png"
@@ -38,6 +38,19 @@
               alt="Kakao"
             />
             <span>Kakao로 시작하기</span>
+          </div>
+        </button> -->
+
+        <!-- Google Login (only Android app) -->
+        <button v-if="isAndroidApp" class="oauth-btn google" @click="loginWith('google')">
+          <div class="icon-text">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M12 11.99v2.98h4.21c-.18 1.12-.83 2.07-1.78 2.71v2.26h2.88c1.69-1.56 2.67-3.86 2.67-6.61 0-.55-.05-1.09-.14-1.61H12z"/>
+              <path fill="#34A853" d="M12 21c2.43 0 4.47-.8 5.96-2.15l-2.88-2.26c-.8.54-1.81.86-3.08.86-2.37 0-4.38-1.6-5.1-3.76H3.9v2.36C5.39 18.97 8.45 21 12 21z"/>
+              <path fill="#FBBC05" d="M6.9 13.69a5.997 5.997 0 0 1 0-3.38V7.95H3.9a9.003 9.003 0 0 0 0 8.1l3-2.36z"/>
+              <path fill="#EA4335" d="M12 6.58c1.32 0 2.5.45 3.43 1.33l2.57-2.57C16.46 3.83 14.42 3 12 3 8.45 3 5.39 5.03 3.9 7.95l3 2.36C7.62 8.18 9.63 6.58 12 6.58z"/>
+            </svg>
+            <span>Google로 시작하기</span>
           </div>
         </button>
 
@@ -250,9 +263,10 @@
   const pointColor = '#ff6f1f'
   document.documentElement.style.setProperty('--point-color', pointColor)
 
-  // 플랫폼 감지 (iOS 웹뷰)
+  // 플랫폼 감지 (iOS/Android 웹뷰)
   const userAgent = navigator.userAgent.toLowerCase()
   const isIosApp = userAgent.includes('raspy-ios')
+  const isAndroidApp = userAgent.includes('raspy-android')
 
   const loginWith = (provider) => {
     const isLocalhostClient =
@@ -280,6 +294,14 @@
       } else {
         alert('Apple 로그인은 iOS 앱에서만 가능합니다.')
       }
+    } else if (provider === 'google') {
+      // Android 앱에서 Google 로그인
+      if (window.AndroidApp && window.AndroidApp.loginWithGoogle) {
+        window.AndroidApp.loginWithGoogle()
+      } else {
+        // 웹 브라우저에서는 OAuth2 플로우 사용
+        window.location.href = `${apiBase}/oauth2/authorization/google`
+      }
     } else {
       window.location.href = `${apiBase}/oauth2/authorization/${provider}`
     }
@@ -291,6 +313,12 @@
 
   // iOS 카카오 로그인 성공 콜백
   window.onKakaoLoginSuccess = function ({ token }) {
+    localStorage.setItem('raspy_access_token2', token)
+    window.location.href = '/'
+  }
+
+  // Android Google 로그인 성공 콜백
+  window.onGoogleLoginSuccess = function ({ token }) {
     localStorage.setItem('raspy_access_token2', token)
     window.location.href = '/'
   }

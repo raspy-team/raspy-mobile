@@ -1,9 +1,9 @@
 <template>
   <!-- 헤더: 뒤로가기, 내 규칙, 규칙 생성(+) 버튼 -->
-  <div class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4">
+  <div class="fixed top-0 left-0 w-full z-[5000] bg-gray-900 border-b border-gray-700 h-14 flex items-center px-4">
     <button
       @click="$router.push('/game')"
-      class="text-black text-lg px-2 py-1 rounded hover:bg-gray-100 transition"
+      class="text-white text-lg px-2 py-1 rounded hover:bg-gray-700 transition"
       aria-label="뒤로가기"
     >
       <i class="fas fa-chevron-left"></i>
@@ -16,7 +16,7 @@
     </button>
     <button
       @click="onPlusClick"
-      class="ml-2 px-4 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
+      class="ml-2 w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
       aria-label="규칙 생성"
     >
       <span class="text-xl font-bold">+</span>
@@ -25,13 +25,13 @@
   <!-- 규칙 리스트가 표시될 때만 검색/필터 -->
   <nav
     v-if="major && minor"
-    class="bg-white border-b border-gray-100 px-4 pb-3 flex items-center mt-14 pt-5 gap-3 raspy-top sticky top-0 z-50"
+    class="bg-gray-900 border-b border-gray-700 px-4 pb-3 flex items-center mt-14 pt-5 gap-3 raspy-top sticky top-0 z-50"
   >
     <input
       v-model="search"
       type="search"
       placeholder="검색어"
-      class="filter-input border border-gray-300 rounded-lg px-4 py-2 w-40 focus:border-orange-400 transition"
+      class="filter-input border border-gray-600 rounded-lg px-4 py-2 w-40 focus:border-orange-400 transition"
       aria-label="검색"
       @keyup.enter="onSubmitSearch"
       autocomplete="off"
@@ -47,7 +47,7 @@
     <div class="relative flex items-center gap-2">
       <button
         @click="toggleSort"
-        class="filter-sort flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-orange-50 text-gray-700"
+        class="filter-sort flex items-center px-3 py-2 border border-gray-600 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300"
         :aria-expanded="showSortOptions"
       >
         <i class="fas fa-sort text-orange-400 mr-1"></i>
@@ -55,13 +55,13 @@
       </button>
       <ul
         v-if="showSortOptions"
-        class="sort-menu absolute left-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 px-1 min-w-[120px]"
+        class="sort-menu absolute left-0 mt-2 bg-gray-800 rounded-xl shadow-lg border border-gray-600 py-2 px-1 min-w-[120px]"
       >
         <li
           v-for="o in sortOptions"
           :key="o.value"
           @click="selectSort(o.value)"
-          class="sort-option px-4 py-2 cursor-pointer rounded-lg font-semibold text-gray-700 hover:bg-orange-100 transition"
+          class="sort-option px-4 py-2 cursor-pointer rounded-lg font-semibold text-gray-300 hover:bg-gray-700 transition"
           :aria-selected="sort === o.value"
           :style="sort === o.value ? 'color:#fb923c;background:#fff7ed;' : ''"
         >
@@ -73,8 +73,8 @@
   </nav>
 
   <!-- Step 1: Major Category Fullscreen -->
-  <div v-if="!major" class="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center">
-    <div class="text-lg font-bold mb-6">메인 카테고리를 선택하세요.</div>
+  <div v-if="!major" class="fixed inset-0 bg-gray-900 z-40 flex flex-col items-center justify-center">
+    <div class="text-lg text-white font-bold mb-6">메인 카테고리를 선택하세요.</div>
     <div v-if="loadingMajors" class="py-32 text-center text-orange-500">
       <i class="fas fa-spinner fa-spin text-3xl"></i>
       <div class="mt-4 text-base">로딩 중입니다…</div>
@@ -84,12 +84,12 @@
         v-for="m in majors"
         :key="m"
         @click="selectMajor(m)"
-        class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-orange-50 rounded-xl transition justify-center"
+        class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-gray-700 rounded-xl transition justify-center"
         :class="major === m ? 'border-4 border-orange-400' : ''"
         style="min-width: 90px"
       >
         <img :src="`/category-picture/${m}.png`" alt="카테고리 아이콘" class="w-14 h-14 mr-4" />
-        <span class="text-base font-semibold text-gray-700">{{ m }}</span>
+        <span class="text-base font-semibold text-gray-300">{{ m }}</span>
       </div>
     </div>
   </div>
@@ -97,16 +97,16 @@
   <!-- Step 2: Minor Category Fullscreen -->
   <div
     v-else-if="!minor"
-    class="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center"
+    class="fixed inset-0 bg-gray-900 z-40 flex flex-col items-center justify-center"
   >
     <button
       @click="major = ''"
-      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 hover:bg-orange-100 text-gray-700 border border-gray-200 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
+      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
     >
       <i class="fas fa-arrow-left"></i>
       <span>뒤로</span>
     </button>
-    <div class="text-lg font-bold mb-6">서브 카테고리를 선택하세요.</div>
+    <div class="text-lg text-white font-bold mb-6">서브 카테고리를 선택하세요.</div>
     <div v-if="loadingMinors" class="py-32 text-center text-orange-500">
       <i class="fas fa-spinner fa-spin text-3xl"></i>
       <div class="mt-4 text-base">로딩 중입니다…</div>
@@ -116,21 +116,21 @@
         v-for="n in minors"
         :key="n"
         @click="selectMinor(n)"
-        class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-orange-50 rounded-xl transition justify-center"
+        class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-gray-700 rounded-xl transition justify-center"
         :class="minor === n ? 'border-4 border-orange-400' : ''"
         style="min-width: 90px"
       >
         <img :src="`/category-picture/${n}.png`" alt="서브카테고리 아이콘" class="w-14 h-14 mr-4" />
-        <span class="text-base font-semibold text-gray-700">{{ n }}</span>
+        <span class="text-base font-semibold text-gray-300">{{ n }}</span>
       </div>
     </div>
   </div>
 
   <!-- Step 3: Rule List (below search/filter bar) -->
-  <div v-else class="max-w-2xl mx-auto px-5 pt-6 flex flex-col gap-0">
+  <div v-else class="max-w-2xl mx-auto bg-gray-900 px-5 pt-6 flex flex-col gap-0 min-h-screen">
     <button
       @click="minor = ''"
-      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 hover:bg-orange-100 text-gray-700 border border-gray-200 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
+      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
     >
       <i class="fas fa-arrow-left"></i>
       <span>뒤로</span>
@@ -153,7 +153,7 @@
         @openMenu="openMenu"
       />
     </template>
-    <div v-else class="py-32 text-center text-gray-400">조건에 맞는 규칙이 없습니다 😥</div>
+    <div v-else class="py-32 text-center text-gray-500">조건에 맞는 규칙이 없습니다 😥</div>
     <div class="h-10"><br /></div>
     <!-- Toaster -->
     <transition name="fade">
@@ -279,6 +279,9 @@ const toggleSort = () => {
 }
 const onPlusClick = () => {
   router.push('/rules/create')
+}
+const onMyRulesClick = () => {
+  router.push('/rules/my-rules')
 }
 const selectSort = (v) => {
   sort.value = v

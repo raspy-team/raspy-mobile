@@ -6,9 +6,9 @@
 const STORAGE_KEY_PREFIX = 'game_pictures_'
 
 /**
- * 특정 게임의 사진 목록 조회
+ * 특정 게임의 사진/동영상 목록 조회
  * @param {string|number} gameId
- * @returns {Array<{id: string, dataUrl: string, timestamp: number}>}
+ * @returns {Array<{id: string, dataUrl: string, timestamp: number, type: 'image'|'video', duration?: number}>}
  */
 export function getGamePictures(gameId) {
   try {
@@ -25,7 +25,7 @@ export function getGamePictures(gameId) {
  * 특정 게임에 사진 추가
  * @param {string|number} gameId
  * @param {string} dataUrl - base64 이미지 데이터
- * @returns {Array<{id: string, dataUrl: string, timestamp: number}>} 업데이트된 사진 목록
+ * @returns {Array<{id: string, dataUrl: string, timestamp: number, type: 'image'}>} 업데이트된 사진 목록
  */
 export function addGamePicture(gameId, dataUrl) {
   try {
@@ -34,9 +34,10 @@ export function addGamePicture(gameId, dataUrl) {
 
     const pictures = getGamePictures(gameId)
     const newPicture = {
-      id: `pic_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `pic_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       dataUrl,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      type: 'image'
     }
     pictures.push(newPicture)
 
@@ -45,6 +46,37 @@ export function addGamePicture(gameId, dataUrl) {
     return pictures
   } catch (error) {
     console.error('Failed to add game picture:', error)
+    if (error.name === 'QuotaExceededError') {
+      throw new Error('QUOTA_EXCEEDED')
+    }
+    throw error
+  }
+}
+
+/**
+ * 특정 게임에 동영상 추가
+ * @param {string|number} gameId
+ * @param {string} dataUrl - base64 동영상 데이터
+ * @param {number} duration - 동영상 길이 (초)
+ * @returns {Array<{id: string, dataUrl: string, timestamp: number, type: 'video', duration: number}>} 업데이트된 목록
+ */
+export function addGameVideo(gameId, dataUrl, duration) {
+  try {
+    const pictures = getGamePictures(gameId)
+    const newVideo = {
+      id: `vid_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      dataUrl,
+      timestamp: Date.now(),
+      type: 'video',
+      duration
+    }
+    pictures.push(newVideo)
+
+    const key = STORAGE_KEY_PREFIX + gameId
+    localStorage.setItem(key, JSON.stringify(pictures))
+    return pictures
+  } catch (error) {
+    console.error('Failed to add game video:', error)
     if (error.name === 'QuotaExceededError') {
       throw new Error('QUOTA_EXCEEDED')
     }
@@ -156,5 +188,95 @@ export function compressImage(dataUrl, maxWidth = 800, quality = 0.3) {
     }
     img.onerror = reject
     img.src = dataUrl
+  })
+}
+
+/**
+ * 동영상 압축 및 길이 제한 (최대 2분)
+ * WebView 호환을 위해 단순하게 파일을 base64로 변환
+ * @param {File} videoFile - 동영상 파일
+ * @param {number} maxDuration - 최대 길이 (초, 기본 120)
+ * @returns {Promise<{dataUrl: string, duration: number}>} base64 동영상과 길이
+ */
+export function compressVideo(videoFile, maxDuration = 120) {
+  return new Promise((resolve, reject) => {
+    // 파일 크기 체크 (50MB 제한)
+    if (videoFile.size > 50 * 1024 * 1024) {
+      reject(new Error('Video file too large (max 50MB)'))
+      return
+    }
+
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+
+    video.onloadedmetadata = () => {
+      const duration = video.duration
+      URL.revokeObjectURL(video.src)
+
+      // 2분 초과 경고 (하지만 그대로 저장)
+      if (duration > maxDuration) {
+        console.warn(`Video duration (${duration}s) exceeds max duration (${maxDuration}s)`)
+      }
+
+      // 파일을 base64로 변환
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        resolve({
+          dataUrl: reader.result,
+          duration: Math.min(duration, maxDuration)
+        })
+      }
+      reader.onerror = () => {
+        reject(new Error('Failed to read video file'))
+      }
+      reader.readAsDataURL(videoFile)
+    }
+
+    video.onerror = () => {
+      reject(new Error('Failed to load video metadata'))
+    }
+
+    video.src = URL.createObjectURL(videoFile)
+  })
+}
+
+/**
+ * 동영상을 Blob으로 변환 (간단한 방식 - 실제로는 그냥 File을 base64로 변환)
+ * @param {File} videoFile
+ * @param {number} maxDuration - 최대 길이 (초)
+ * @returns {Promise<{dataUrl: string, duration: number}>}
+ */
+export function convertVideoToBase64(videoFile, maxDuration = 120) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+
+    video.onloadedmetadata = () => {
+      window.URL.revokeObjectURL(video.src)
+
+      const actualDuration = Math.min(video.duration, maxDuration)
+
+      // 동영상이 2분 이하면 그냥 변환
+      if (video.duration <= maxDuration) {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          resolve({
+            dataUrl: reader.result,
+            duration: actualDuration
+          })
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(videoFile)
+      } else {
+        // 2분을 초과하면 압축 필요
+        reject(new Error('Video exceeds maximum duration'))
+      }
+    }
+
+    video.onerror = () => {
+      reject(new Error('Failed to load video metadata'))
+    }
+
+    video.src = URL.createObjectURL(videoFile)
   })
 }

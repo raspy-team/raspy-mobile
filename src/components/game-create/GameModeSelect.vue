@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col min-h-full px-5 pt-10">
     <div class="text-center mb-7 pt-[10%]">
-      <div class="text-lg font-bold text-gray-900 mb-2 mt-7">누구와 플레이할까요?</div>
+      <div class="text-lg font-bold text-gray-900 mb-2 mt-7">친구를 상대로 지정하시겠어요?</div>
       <div class="text-gray-500 text-base mb-7">
-        친구와 플레이하기는 친구를 지정하여 바로 게임을 시작할 수 있습니다.
+        친구를 지정하면 해당 친구와 경기를 생성할 수 있습니다.
       </div>
     </div>
     <div class="flex flex-col gap-2 mb-5">
@@ -11,7 +11,7 @@
         @click="$emit('mode', 'random')"
         class="w-full py-4 bg-white text-orange-500 text-lg font-bold rounded-xl border border-orange-300"
       >
-        다른 유저들과 경기하기
+        건너뛰기
       </button>
     </div>
     <div class="w-full">
@@ -19,7 +19,7 @@
         @click="showModal = true"
         class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl shadow"
       >
-        친구와 바로 시작하기
+        친구 선택하기
       </button>
     </div>
   </div>

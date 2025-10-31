@@ -168,6 +168,7 @@ export function useFeed() {
   const loading = ref(false)
   const hasMore = ref(true)
   const isUserFeedMode = ref(false) // 유저 피드 모드 여부
+  const priorityGameId = ref(null) // 우선순위 게임 ID
 
 
   // 시간 기반 필터링 - API에서 온 모든 데이터 표시
@@ -196,33 +197,53 @@ export function useFeed() {
     const validPosts = posts.value.filter(isPostValid)
     console.log('유효한 포스트 개수:', validPosts.length)
 
+    // 우선순위 게임이 있는지 확인
+    let priorityPost = null
+    let remainingPosts = validPosts
+
+    if (priorityGameId.value) {
+      priorityPost = validPosts.find(p => p.id === priorityGameId.value)
+      if (priorityPost) {
+        console.log(`우선순위 게임 발견: ${priorityGameId.value}, 맨 위로 이동`)
+        // 우선순위 게임을 제외한 나머지 포스트들
+        remainingPosts = validPosts.filter(p => p.id !== priorityGameId.value)
+      }
+    }
+
     // 1. 친구 완료 경기 (최근 끝난 순)
-    const friendsCompleted = validPosts
+    const friendsCompleted = remainingPosts
       .filter(p => p.type === 'game' && p.isCompleted && p.isFriend)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
 
     // 2. 친구 예정 경기 (최근 날짜 순)
-    const friendsScheduled = validPosts
+    const friendsScheduled = remainingPosts
       .filter(p => (p.type === 'upcoming_game' || (p.type === 'game' && !p.isCompleted)) && p.isFriend)
       .sort((a, b) => new Date(a.date) - new Date(b.date))
 
     // 3. 앱 초대 링크
-    const invitePost = validPosts.filter(p => p.type === 'invite')
+    const invitePost = remainingPosts.filter(p => p.type === 'invite')
 
     // 4. 모든 완료 경기 (최근 끝난 순)
-    const allCompleted = validPosts
+    const allCompleted = remainingPosts
       .filter(p => p.type === 'game' && p.isCompleted && !p.isFriend)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
 
     // 5. 모든 예정 경기 (가까운 날짜 순)
-    const allScheduled = validPosts
+    const allScheduled = remainingPosts
       .filter(p => (p.type === 'upcoming_game' || (p.type === 'game' && !p.isCompleted)) && !p.isFriend)
       .sort((a, b) => new Date(a.date) - new Date(b.date))
 
-    const result = [
+    const result = []
+
+    // 우선순위 게임이 있으면 맨 앞에 추가
+    if (priorityPost) {
+      result.push(priorityPost)
+    }
+
+    result.push(
       ...friendsCompleted,
       ...friendsScheduled,
-    ]
+    )
 
     // 친구 포스트와 일반 포스트 사이에 친구 초대 포스트 삽입
     // 유저피드모드가 아닐 때만 friend-invite 포스트 추가
@@ -296,8 +317,11 @@ export function useFeed() {
 
     try {
       // URL에서 파라미터 확인
-      const priorityGameId = route?.query?.gameId
+      const gameIdParam = route?.query?.gameId
       const userId = route?.query?.userId
+
+      // 우선순위 게임 ID 설정
+      priorityGameId.value = gameIdParam || null
 
       // 특정 유저의 피드를 조회하는 경우
       if (userId) {
@@ -319,12 +343,12 @@ export function useFeed() {
         let priorityItem = null
         let feedItems = []
 
-        if (priorityGameId) {
+        if (gameIdParam) {
           // 우선순위 게임이 있는 경우
           try {
             // 1. 우선순위 게임과 전체 피드를 병렬로 로딩
             const [priorityResult, feedResult] = await Promise.allSettled([
-              loadPriorityGame(priorityGameId),
+              loadPriorityGame(gameIdParam),
               loadAllFeed()
             ])
 
@@ -344,9 +368,9 @@ export function useFeed() {
             }
 
             // 2. 우선순위 아이템이 전체 피드에 중복되지 않도록 필터링
-            const filteredFeedItems = feedItems.filter(item => item.id !== priorityGameId)
+            const filteredFeedItems = feedItems.filter(item => item.id !== gameIdParam)
 
-            // 3. 우선순위 아이템을 맨 앞에 배치
+            // 3. posts에 모든 아이템 저장 (sortedFeed computed에서 우선순위 게임을 맨 위로 정렬)
             if (priorityItem) {
               posts.value = [priorityItem, ...filteredFeedItems]
             } else {
@@ -357,10 +381,12 @@ export function useFeed() {
             console.error('우선순위 피드 로딩 실패:', error)
             // 실패 시 일반 피드로 대체
             posts.value = await loadAllFeed()
+            priorityGameId.value = null
           }
         } else {
-          // 일반 피드 로딩
+          // 일반 피드 로딩 (우선순위 게임 없음)
           posts.value = await loadAllFeed()
+          priorityGameId.value = null
         }
       }
 
@@ -368,6 +394,7 @@ export function useFeed() {
     } catch (error) {
       console.error('피드 로드 실패:', error)
       posts.value = []
+      priorityGameId.value = null
     } finally {
       loading.value = false
     }

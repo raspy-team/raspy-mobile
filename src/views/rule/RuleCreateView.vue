@@ -108,7 +108,7 @@ function handleBrowseRules() {
 .raspy-top {
   display: flex;
   flex-direction: column;
-  background: white;
+  background: #1f2937;
 }
 
 .progress-bar-outer {
@@ -117,7 +117,7 @@ function handleBrowseRules() {
   left: 0;
   right: 0;
   height: 4px;
-  background: #e5e7eb;
+  background: #6b7280;
   z-index: 1000;
 }
 

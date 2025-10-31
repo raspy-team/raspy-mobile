@@ -1,12 +1,12 @@
 <template>
-  <Header :has-referer="false" title="게임" class="z-10" />
+  <Header :has-referer="false" title="게임" class="z-50 bg-black" />
 
-  <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4">
+  <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4 bg-black text-white">
     <!-- 상단 메뉴 버튼 -->
     <div class="flex gap-2 pt-3">
       <button
         @click="router.push('/rules')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-gray-800 text-gray-100 text-base font-bold rounded-lg border border-gray-600 hover:bg-gray-700 active:bg-gray-900 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -32,7 +32,7 @@
       </button>
       <button
         @click="router.push('/game-list')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-white text-gray-900 text-base font-bold rounded-lg border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-gray-800 text-gray-100 text-base font-bold rounded-lg border border-gray-600 hover:bg-gray-700 active:bg-gray-900 transition-colors shadow-sm"
       >
         <svg
           width="16"
@@ -57,23 +57,23 @@
       <div
         v-for="i in 3"
         :key="i"
-        class="p-5 border bg-white rounded-2xl shadow space-y-5 animate-pulse"
+        class="p-5 border bg-gray-900 rounded-2xl shadow space-y-5 animate-pulse"
       >
         <div class="flex justify-between items-start">
           <div class="space-y-2 w-full">
             <div class="mb-1 flex">
-              <span class="font-bold text-gray-300 block w-32 h-5 bg-gray-200 rounded"></span>
-              <span class="flex ml-3 w-6 h-6 bg-gray-200 rounded-full"></span>
+              <span class="font-bold text-gray-500 block w-32 h-5 bg-gray-700 rounded"></span>
+              <span class="flex ml-3 w-6 h-6 bg-gray-700 rounded-full"></span>
             </div>
             <div class="text-xs flex gap-1 items-center">
-              <span class="block w-16 h-3 bg-gray-200 rounded"></span>
-              <span class="mx-1 text-gray-200">&gt;</span>
-              <span class="block w-12 h-3 bg-gray-200 rounded"></span>
+              <span class="block w-16 h-3 bg-gray-700 rounded"></span>
+              <span class="mx-1 text-gray-500">&gt;</span>
+              <span class="block w-12 h-3 bg-gray-700 rounded"></span>
             </div>
           </div>
-          <span class="text-xs font-bold px-2 py-2 rounded-full w-[5rem] bg-gray-200"></span>
+          <span class="text-xs font-bold px-2 py-2 rounded-full w-[5rem] bg-gray-700"></span>
         </div>
-        <div class="w-full h-10 bg-gray-200 rounded-[5px]"></div>
+        <div class="w-full h-10 bg-gray-700 rounded-[5px]"></div>
       </div>
     </div>
 
@@ -85,7 +85,7 @@
           :key="game.id"
           :id="'game-' + game.id"
           :class="[
-            'relative p-5 rounded-xl bg-white border space-y-4 transition-all',
+            'relative p-5 rounded-xl bg-gray-900 border border-gray-700 space-y-4 transition-all',
             getCardClass(game),
           ]"
         >
@@ -100,22 +100,22 @@
                 />
               </div>
               <div>
-                <span class="text-base font-bold text-gray-900 truncate block">
+                <span class="text-base font-bold text-gray-100 truncate block">
                   {{ game.rule.ruleTitle }}
                 </span>
-                <div class="flex gap-1 items-center mt-1 text-sm text-orange-500 font-normal">
+                <div class="flex gap-1 items-center mt-1 text-sm text-orange-400 font-normal">
                   {{ game.rule.majorCategory }}
-                  <span v-if="game.rule.minorCategory" class="mx-1 text-orange-500">&gt;</span>
+                  <span v-if="game.rule.minorCategory" class="mx-1 text-orange-400">&gt;</span>
                   <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
                 </div>
               </div>
             </div>
             <!-- 타입/상태 라벨 우측 배치 -->
             <div class="flex flex-col items-end gap-1 ml-2">
-              <span :class="['text-sm font-bold', getTypeTextClass(game)]">
+              <span :class="['text-sm font-bold text-gray-100', getTypeTextClass(game)]">
                 {{ getTypeLabel(game) }}
               </span>
-              <span class="text-sm font-bold" :class="getStatusClass(game)">
+              <span class="text-sm font-bold text-gray-400" :class="getStatusClass(game)">
                 {{ getStatusText(game) }}
               </span>
             </div>
@@ -128,11 +128,11 @@
               <div class="flex flex-col items-center flex-1">
                 <img
                   :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-400 shadow"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-500 shadow"
                   alt="Owner Profile"
                 />
                 <span
-                  class="mt-1 text-sm font-bold text-gray-700 truncate max-w-[4.5rem] text-center"
+                  class="mt-1 text-sm font-bold text-gray-100 truncate max-w-[4.5rem] text-center"
                 >
                   {{ game.ownerNickname || game.myNickname }}
                 </span>
@@ -140,7 +140,7 @@
 
               <!-- VS -->
               <div class="flex flex-col items-center flex-1 justify-center">
-                <span class="text-3xl font-extrabold text-gray-400 leading-none"> VS </span>
+                <span class="text-3xl font-extrabold text-gray-500 leading-none"> VS </span>
               </div>
 
               <!-- Opponent -->
@@ -148,17 +148,17 @@
                 <img
                   v-if="getOpponentProfileUrl(game)"
                   :src="getOpponentProfileUrl(game)"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-400 shadow"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow"
                   alt="Opponent Profile"
                 />
                 <div
                   v-else
-                  class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shadow"
+                  class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600 shadow"
                 >
-                  <i class="fas fa-user text-2xl text-gray-400"></i>
+                  <i class="fas fa-user text-2xl text-gray-500"></i>
                 </div>
                 <span
-                  class="mt-1 text-sm font-normal text-gray-700 truncate max-w-[4.5rem] text-center"
+                  class="mt-1 text-sm font-normal text-gray-100 truncate max-w-[4.5rem] text-center"
                 >
                   {{ getOpponentNickname(game) }}
                 </span>
@@ -173,7 +173,7 @@
             "
             class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
           >
-            <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
+            <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
               <h2 class="text-lg font-bold mb-4 text-gray-900">생성자</h2>
               <!-- 신청한 게임 소유자 정보 상단 렌더링 -->
               <template v-if="selectedApplicantsGame.type === 'sent'">
@@ -406,6 +406,14 @@
               >
                 도전자 {{ game.applicants.length }}명
               </button>
+              <button
+                v-if="game.isOwner && game.status !== 'IN_PROGRESS' && game.status !== 'COMPLETED'"
+                @click.stop="openDeleteModal(game)"
+                class="flex items-center justify-center w-12 py-3 px-0 bg-red-100 text-red-600 rounded-[8px] hover:bg-red-200 transition"
+                title="경기 삭제"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -418,12 +426,70 @@
 
   <FooterNav tab="game" />
 
-  <!-- 게임 시작 모달들 (MyGameListView에서 가져온 것) -->
+  <!-- 게임 시작 모달들 -->
+
+  <!-- 기존 장소 확인 모달 (최강의 UX!) -->
+  <div
+    v-if="showLocationConfirmModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
+  >
+    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-2xl">
+      <!-- 헤더 -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-4">
+          <i class="fas fa-map-marker-alt text-orange-500 text-3xl"></i>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900 mb-2">경기 장소 확인</h2>
+        <p class="text-sm text-gray-500">선택하신 장소에서 경기를 진행합니다</p>
+      </div>
+
+      <!-- 장소 정보 카드 -->
+      <div class="mb-6 p-5 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200">
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 mt-1">
+            <i class="fas fa-location-dot text-orange-600 text-xl"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-bold text-gray-900 mb-1 break-words">
+              {{ currentGameLocation }}
+            </p>
+            <p class="text-xs text-orange-600 font-medium">
+              <i class="fas fa-info-circle mr-1"></i>이 장소로 경기를 시작합니다
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 버튼 영역 -->
+      <div class="space-y-3">
+        <button
+          @click="continueWithExistingLocation"
+          class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg active:scale-95 transition-all"
+        >
+          <i class="fas fa-check-circle mr-2"></i>이 장소로 계속하기
+        </button>
+        <button
+          @click="changeLocation"
+          class="w-full py-3 px-6 rounded-xl bg-white border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-gray-700 font-semibold active:scale-95 transition-all"
+        >
+          <i class="fas fa-edit mr-2"></i>다른 장소로 변경
+        </button>
+        <button
+          @click="showLocationConfirmModal = false"
+          class="w-full py-2 text-gray-500 hover:text-gray-700 font-medium transition"
+        >
+          취소
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 장소 설정 모달 -->
   <div
     v-if="showAddressModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
   >
-    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
+    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
       <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -434,7 +500,7 @@
           <input
             ref="addressInputModal"
             v-model="searchQuery"
-            class="w-full text-base px-4 py-3 bg-white rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+            class="w-full text-base px-4 py-3 bg-black rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
             placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
             autocomplete="off"
           />
@@ -446,6 +512,23 @@
         <p class="text-xs text-gray-400 mt-2">
           <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
           장소명이나 주소를 입력하면 자동으로 검색됩니다
+        </p>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-map-pin mr-1 text-orange-500"></i>
+          상세 장소 (선택)
+        </label>
+        <input
+          v-model="detailedPlace"
+          class="w-full text-base px-4 py-3 bg-white rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+          placeholder="상세 장소를 입력하세요 (예: 3층, A코트)"
+          autocomplete="off"
+        />
+        <p class="text-xs text-gray-400 mt-2">
+          <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+          추가 정보를 입력하면 장소에 함께 표시됩니다
         </p>
       </div>
 
@@ -489,7 +572,7 @@
     v-if="showCountdownModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100050]"
   >
-    <div class="bg-white p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
+    <div class="bg-black p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
       <h2 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">경기 시작 전 확인</h2>
       <p class="text-sm text-gray-500 mb-1">이 경기는 다음 시간 동안 진행됩니다:</p>
       <div class="text-4xl font-black text-orange-500 py-4 mb-4 mt-3">
@@ -520,7 +603,7 @@
     v-if="showAddressErrorModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100100]"
   >
-    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
         <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
         <h3 class="text-lg font-bold text-gray-900 mb-2">장소를 찾을 수 없습니다</h3>
@@ -546,6 +629,37 @@
     @cancel="onCameraCancel"
   />
 
+  <!-- 경기 삭제 확인 모달 -->
+  <div
+    v-if="showDeleteModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100200]"
+  >
+    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+      <div class="text-center mb-4">
+        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">경기 삭제</h3>
+        <p class="text-sm text-gray-600">
+          정말로 이 경기를 삭제하시겠습니까?<br />
+          <span class="text-xs text-red-500 mt-2 block">이 작업은 되돌릴 수 없습니다.</span>
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button
+          @click="showDeleteModal = false"
+          class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition"
+        >
+          취소
+        </button>
+        <button
+          @click="confirmDeleteGame"
+          class="flex-1 bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition shadow"
+        >
+          삭제
+        </button>
+      </div>
+    </div>
+  </div>
+
   <CustomToast />
 
   <!-- 규칙 모달 -->
@@ -570,7 +684,7 @@ function closeApplicantsModal() {
   showApplicantsModal.value = false
   selectedApplicantsGame.value = null
 }
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
@@ -589,13 +703,16 @@ const sentGames = ref([]) // 신청한 게임
 const myGames = ref([]) // 내 게임
 const applicantsMap = ref({}) // 각 게임의 신청자 목록 (gameId -> applicants)
 const loading = ref(true)
-let pollingInterval = null // 폴링 인터벌 ID
+const pollingInterval = ref(null) // 폴링 인터벌 ID (ref로 관리)
 
 // 게임 시작 관련
+const showLocationConfirmModal = ref(false) // 기존 장소 확인 모달
 const showAddressModal = ref(false)
 const searchQuery = ref('')
 const selectedPlace = ref(null)
+const detailedPlace = ref('')
 const currentGameId = ref(null)
+const currentGameLocation = ref('') // 기존 장소 저장
 const showCountdownModal = ref(false)
 const countdownDurationText = ref('')
 const showAddressErrorModal = ref(false)
@@ -603,6 +720,10 @@ const showCameraModal = ref(false)
 const capturedPhotoFile = ref(null)
 const addressInputModal = ref(null)
 let autocompleteModal = null
+
+// 경기 삭제 관련
+const showDeleteModal = ref(false)
+const gameToDelete = ref(null)
 
 // 모든 게임을 최신순으로 합쳐서 보여주기 (신청한 게임 + 내 게임)
 // 내 게임에는 신청자 목록도 함께 포함
@@ -649,7 +770,20 @@ const fetchGames = async () => {
   }
 }
 
+// 폴링 정리 함수
+const stopPolling = () => {
+  if (pollingInterval.value) {
+    console.log('[GameView] 폴링 중지, interval ID:', pollingInterval.value)
+    clearInterval(pollingInterval.value)
+    pollingInterval.value = null
+  } else {
+    console.log('[GameView] 폴링 중지 시도했으나 이미 null')
+  }
+}
+
+// 컴포넌트 마운트 시: 데이터 로드 및 폴링 시작
 onMounted(async () => {
+  console.log('[GameView] 마운트: 데이터 로드 및 폴링 시작')
   loading.value = true
 
   // 첫 데이터 로드
@@ -657,17 +791,23 @@ onMounted(async () => {
   loading.value = false
 
   // 3초마다 자동 갱신 시작
-  pollingInterval = setInterval(async () => {
+  pollingInterval.value = setInterval(async () => {
+    console.log('[GameView] 폴링 실행 중...')
     await fetchGames()
   }, 3000)
+  console.log('[GameView] 폴링 시작됨, interval ID:', pollingInterval.value)
 })
 
-// 컴포넌트가 언마운트될 때 인터벌 정리
+// 컴포넌트가 언마운트되기 직전: 폴링 중지
+onBeforeUnmount(() => {
+  console.log('[GameView] 언마운트 직전: 폴링 중지')
+  stopPolling()
+})
+
+// 컴포넌트 언마운트 후: 최종 정리 (안전장치)
 onUnmounted(() => {
-  if (pollingInterval) {
-    clearInterval(pollingInterval)
-    pollingInterval = null
-  }
+  console.log('[GameView] 언마운트 완료: 최종 정리')
+  stopPolling()
 })
 
 function formatDate(dateStr) {
@@ -873,24 +1013,59 @@ const initGoogleAutocomplete = () => {
 const clearSelection = () => {
   selectedPlace.value = null
   searchQuery.value = ''
+  detailedPlace.value = ''
 }
 
 const openStartModal = (game) => {
+  currentGameId.value = game.id
+
+  // 기존 장소가 있는지 확인
+  if (game.matchLocation && game.matchLocation.trim() !== '') {
+    // 기존 장소가 있으면 확인 모달 표시
+    currentGameLocation.value = game.matchLocation
+    showLocationConfirmModal.value = true
+  } else {
+    // 기존 장소가 없으면 바로 장소 설정 모달 표시
+    openAddressModal()
+  }
+}
+
+// 장소 설정 모달 열기
+const openAddressModal = () => {
   showAddressModal.value = true
   searchQuery.value = ''
   selectedPlace.value = null
-  currentGameId.value = game.id
+  detailedPlace.value = ''
 
   nextTick(() => {
     initGoogleAutocomplete()
   })
 }
 
+// 기존 장소로 계속하기
+const continueWithExistingLocation = () => {
+  showLocationConfirmModal.value = false
+  // set-region API 호출 없이 바로 사진 촬영으로 이동
+  showCameraModal.value = true
+}
+
+// 장소 변경하기
+const changeLocation = () => {
+  showLocationConfirmModal.value = false
+  openAddressModal()
+}
+
 const submitAndStartGame = async () => {
   if (!selectedPlace.value) return alert('장소를 선택해주세요.')
+
+  // Google API 장소 이름과 상세 장소를 공백으로 합침
+  const combinedDetailAddress = detailedPlace.value
+    ? `${selectedPlace.value.name} ${detailedPlace.value}`
+    : selectedPlace.value.name
+
   await client.post(`/api/games/${currentGameId.value}/set-region`, {
     roadAddress: selectedPlace.value.address,
-    detailAddress: selectedPlace.value.name,
+    detailAddress: combinedDetailAddress,
   })
 
   showAddressModal.value = false
@@ -946,6 +1121,7 @@ const closeModal = () => {
   showAddressModal.value = false
   searchQuery.value = ''
   selectedPlace.value = null
+  detailedPlace.value = ''
   currentGameId.value = null
 }
 
@@ -984,6 +1160,36 @@ function getTypeLabel(game) {
     return '내 게임'
   }
   return '게임'
+}
+
+// 경기 삭제 관련
+function openDeleteModal(game) {
+  gameToDelete.value = game
+  showDeleteModal.value = true
+}
+
+async function confirmDeleteGame() {
+  if (!gameToDelete.value) return
+
+  try {
+    await client.delete(`/api/games/${gameToDelete.value.id}/delete`)
+
+    // 목록에서 제거
+    myGames.value = myGames.value.filter((g) => g.id !== gameToDelete.value.id)
+
+    showToast('경기가 삭제되었습니다.')
+    showDeleteModal.value = false
+    gameToDelete.value = null
+  } catch (e) {
+    if (e.response?.status === 403) {
+      showToast('본인이 생성한 경기만 삭제할 수 있습니다.')
+    } else if (e.response?.status === 404) {
+      showToast('존재하지 않는 경기입니다.')
+    } else {
+      showToast('경기 삭제에 실패했습니다.')
+    }
+    console.error('Failed to delete game:', e)
+  }
 }
 </script>
 

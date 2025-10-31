@@ -1,25 +1,25 @@
 <template>
   <!-- 상단 헤더: 뒤로가기 버튼 -->
   <div
-    class="fixed top-0 left-0 w-full z-[5000] bg-white border-b border-gray-100 h-14 flex items-center px-4"
+    class="fixed top-0 left-0 w-full z-[5000] bg-gray-900 border-b border-gray-700 h-14 flex items-center px-4"
   >
     <button
       @click="$router.push('/game')"
-      class="text-black text-lg px-2 py-1 rounded hover:bg-gray-100 transition"
+      class="text-gray-100 text-lg px-2 py-1 rounded hover:bg-gray-700 transition"
       aria-label="뒤로가기"
     >
       <i class="fas fa-chevron-left"></i>
     </button>
     <button
       @click="$router.push('/create-game')"
-      class="ml-auto px-4 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
+      class="ml-auto w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
       aria-label="경기 생성"
     >
       <span class="text-xl font-bold">+</span>
     </button>
   </div>
   <div
-    class="bg-white pb-16 pt-14"
+    class="bg-gray-900 pb-16 pt-14"
     ref="containerRef"
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
@@ -30,7 +30,7 @@
     @mouseleave="handleMouseUp"
   >
     <!-- Status Bar -->
-    <div class="bg-white h-6 w-full"></div>
+    <div class="bg-gray-900 h-6 w-full"></div>
 
     <!-- Pull to Refresh Indicator (새로고침 중) -->
     <transition name="pull-fade">
@@ -62,8 +62,8 @@
     <transition name="pull-slide">
       <div
         v-if="isPulling && pullDistance > 20 && !pullTriggered"
-        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-white rounded-full shadow-2xl px-6 py-3 flex items-center gap-3 border-2"
-        :class="pullDistance > 80 ? 'border-orange-500' : 'border-gray-200'"
+        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-800 rounded-full shadow-2xl px-6 py-3 flex items-center gap-3 border-2 border-gray-600"
+        :class="pullDistance > 80 ? 'border-orange-500' : 'border-gray-600'"
         :style="{
           opacity: Math.min(pullDistance / 80, 1),
           transform: `translate(-50%, ${Math.min(pullDistance / 3, 30)}px)`,
@@ -81,7 +81,7 @@
         </div>
         <span
           class="text-sm font-semibold transition-colors"
-          :class="pullDistance > 80 ? 'text-orange-500' : 'text-gray-600'"
+          :class="pullDistance > 80 ? 'text-orange-500' : 'text-gray-400'"
         >
           {{ pullDistance > 80 ? '놓아서 새로고침!' : '아래로 당기세요...' }}
         </span>
@@ -98,67 +98,53 @@
           <div
             v-for="(game, index) in games"
             :key="index"
-            class="bg-white rounded-2xl shadow-lg border mb-4 p-0 overflow-hidden cursor-pointer"
+            class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 mb-4 p-0 overflow-hidden cursor-pointer"
             @click="selectedGame = game"
             :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
           >
-            <!-- 생성자 영역 -->
-            <div class="flex items-center bg-orange-50 px-5 py-4 gap-4">
+            <!-- 생성자 영역: 유저네임과 같은 줄에 전적/점수 -->
+            <div class="flex items-center bg-gray-700 px-5 py-4 gap-4">
               <img
                 :src="game.ownerProfileUrl || Default"
                 class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
               />
-              <div>
-                <div class="font-bold text-lg text-gray-900">{{ game.ownerNickname }}</div>
+              <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
+                <div class="font-bold text-lg text-gray-100 truncate">{{ game.ownerNickname }}</div>
+                <div
+                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-600 to-gray-500 border border-gray-500 flex-shrink-0"
+                >
+                  <span class="text-xs font-semibold text-green-400"
+                    >{{ game.ruleStatisticsOfOwner?.wins || 0 }}</span
+                  >
+                  <span class="text-xs font-semibold text-gray-300"
+                    >{{ game.ruleStatisticsOfOwner?.draws || 0 }}</span
+                  >
+                  <span class="text-xs font-semibold text-red-400"
+                    >{{ game.ruleStatisticsOfOwner?.losses || 0 }}</span
+                  >
+                  <span class="text-xs text-gray-400">|</span>
+                  <div class="flex items-center gap-1">
+                    <i class="fas fa-trophy text-yellow-500 text-[10px]"></i>
+                    <span class="text-xs font-bold text-orange-400">{{
+                      game.ruleStatisticsOfOwner?.ruleRating || 0
+                    }}</span>
+                  </div>
+                </div>
               </div>
-              <div class="flex-1"></div>
-              <div class="text-gray-400 text-xs text-right min-w-[60px]">
+              <div class="text-gray-400 text-xs text-right flex-shrink-0 min-w-[60px]">
                 {{ formatTimeAgo(game.createdAt) }}
               </div>
             </div>
-            <!-- 규칙 영역 -->
-            <div class="px-5 py-4 text-center border-b">
-              <div
-                class="font-extrabold text-xl text-orange-500 cursor-pointer"
-                @click.stop="openModal(game)"
-              >
-                {{ game.rule.ruleTitle }}
-              </div>
-              <div class="text-gray-500 text-sm mt-2 truncate">
-                {{ game.rule.ruleDescription }}
-              </div>
-            </div>
-            <!-- 경기 조건 영역 -->
-            <div class="px-5 py-3 flex justify-between items-center text-sm text-gray-700">
-              <span>{{
-                game.matchLocation == ' ' || game.matchLocation == ''
-                  ? '장소 미정'
-                  : game.matchLocation
-              }}</span>
-              <span>{{
-                !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate)
-              }}</span>
-            </div>
-            <!-- 전적 영역 -->
-            <div class="px-5 pb-3 flex gap-2 flex-wrap items-center">
-              <div
-                class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200"
-              >
-                <span class="text-xs font-semibold text-green-600"
-                  >{{ game.ruleStatisticsOfOwner?.wins || 0 }}승</span
-                >
-                <span class="text-xs font-semibold text-gray-500"
-                  >{{ game.ruleStatisticsOfOwner?.draws || 0 }}무</span
-                >
-                <span class="text-xs font-semibold text-red-500"
-                  >{{ game.ruleStatisticsOfOwner?.losses || 0 }}패</span
-                >
-                <span class="text-xs text-gray-400">|</span>
-                <div class="flex items-center gap-1">
-                  <i class="fas fa-trophy text-yellow-500 text-[10px]"></i>
-                  <span class="text-xs font-bold text-orange-600">{{
-                    game.ruleStatisticsOfOwner?.ruleRating || 0
-                  }}</span>
+            <!-- 규칙 영역: 규칙명 왼쪽에 카테고리 아이콘 표시 -->
+            <div class="px-5 py-4 border-b border-gray-600 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <img
+                  class="w-8 h-8"
+                  :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
+                  :alt="game.rule.minorCategory || '카테고리'"
+                />
+                <div class="font-extrabold text-xl text-orange-400 cursor-pointer" @click.stop="openModal(game)">
+                  {{ game.rule.ruleTitle }}
                 </div>
               </div>
               <button
@@ -169,16 +155,35 @@
                 <span>도전자 {{ game.challengers?.length || 0 }}명</span>
               </button>
             </div>
+            <div class="px-5 text-gray-400 text-sm mt-2 truncate">
+              {{ game.rule.ruleDescription }}
+            </div>
+            <!-- 경기 조건 영역: 장소와 시간을 각각 한 줄씩 -->
+            <div class="px-5 py-3 text-sm text-gray-300 flex flex-col gap-1 items-start">
+              <span>
+                {{
+                  game.matchLocation == ' ' || game.matchLocation == ''
+                    ? '장소 미정'
+                    : game.matchLocation
+                }}
+              </span>
+              <span>
+                {{
+                  !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate)
+                }}
+              </span>
+            </div>
+            <!-- 전적 영역: 생성자 줄로 이동했으므로 제거 -->
           </div>
         </div>
         <!-- 하단 고정 버튼 영역 -->
         <div
           v-if="selectedGame"
-          class="fixed bottom-0 left-0 w-full bg-white border-t z-50 flex justify-center gap-4 py-3 shadow-lg"
+          class="fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-700 z-50 flex justify-center gap-4 py-3 shadow-lg"
         >
           <button
             v-if="!selectedGame.isAppliedByMe"
-            @click="confirmApply(selectedGame)"
+            @click="applyDirect(selectedGame)"
             class="w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white bg-orange-500 hover:bg-orange-600 cursor-pointer"
           >
             신청
@@ -189,6 +194,12 @@
             class="w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white bg-red-500 hover:bg-red-600 cursor-pointer"
           >
             취소
+          </button>
+          <button
+            @click="goToDM(selectedGame.ownerId)"
+            class="w-14 h-14 flex items-center justify-center bg-blue-400 text-white rounded-full hover:bg-blue-500 transition"
+          >
+            <i class="fas fa-paper-plane"></i>
           </button>
           <button
             @click="toggleComment(selectedGame.id)"
@@ -622,12 +633,7 @@
         </div>
       </div>
     </div>
-    <CustomAlert
-      v-if="alertMsg"
-      :message="alertMsg"
-      @confirm="applyConfirmed"
-      @cancel="() => (alertMsg = '')"
-    />
+    <!-- CustomAlert 확정 모달 제거 -->
     <CustomToast class="z-[200]" />
     <!-- Share Game Modal -->
     <div
@@ -748,13 +754,13 @@
     @click.self="closeChallengersModal"
   >
     <div
-      class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto"
+      class="bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto"
     >
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">도전자 목록</h3>
+        <h3 class="text-lg font-semibold text-gray-100">도전자 목록</h3>
         <button
           @click="closeChallengersModal"
-          class="text-gray-400 hover:text-gray-600 transition"
+          class="text-gray-500 hover:text-gray-300 transition"
           aria-label="닫기"
         >
           <i class="fas fa-times"></i>
@@ -764,16 +770,16 @@
         <div
           v-for="challenger in selectedChallengers"
           :key="challenger.userId"
-          class="p-3 bg-gray-50 rounded-xl flex items-center gap-3"
+          class="p-3 bg-gray-700 rounded-xl flex items-center gap-3"
         >
           <img
             :src="challenger.applicantProfileUrl || Default"
-            class="w-12 h-12 rounded-full object-cover border-2 border-blue-400"
+            class="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
             alt="Challenger Profile"
           />
           <div class="flex-1">
-            <p class="text-sm font-bold text-gray-800">{{ challenger.applicantNickname }}</p>
-            <p class="text-xs text-gray-500">
+            <p class="text-sm font-bold text-gray-100">{{ challenger.applicantNickname }}</p>
+            <p class="text-xs text-gray-400">
               {{ challenger.applicantGameStatisticsDTO?.wins || 0 }}승
               {{ challenger.applicantGameStatisticsDTO?.draws || 0 }}무
               {{ challenger.applicantGameStatisticsDTO?.losses || 0 }}패 · 레이팅
@@ -782,7 +788,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="text-center text-gray-400 text-sm py-6">도전자가 없습니다.</div>
+      <div v-else class="text-center text-gray-500 text-sm py-6">도전자가 없습니다.</div>
     </div>
   </div>
 </template>
@@ -790,7 +796,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../../api/api'
-import CustomAlert from '../../components/CustomAlert.vue'
 import CustomToast from '../../components/CustomToast.vue'
 // import MatchModal from '../../components/MatchModal.vue' (미사용)
 
@@ -1100,7 +1105,7 @@ const applyRegionFilter = () => {
 }
 const games = ref([])
 const loading = ref(true)
-const alertMsg = ref('')
+// const alertMsg = ref('')
 const selectedGame = ref(null)
 const sortOption = ref('latest')
 // ...showFilterMenu 변수 제거됨
@@ -1147,22 +1152,15 @@ const formatDate = (dateStr) => {
   const date = new Date(dateStr)
   return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }
-const confirmApply = (game) => {
-  selectedGame.value = game
-  alertMsg.value = `@${game.ownerNickname}님의 경기에 신청하시겠습니까?`
-}
-const applyConfirmed = async () => {
-  if (!selectedGame.value) return
+const applyDirect = async (game) => {
+  if (!game) return
   try {
-    await api.post(`/api/games/${selectedGame.value.id}/apply`)
-    selectedGame.value.isAppliedByMe = true
+    await api.post(`/api/games/${game.id}/apply`)
+    game.isAppliedByMe = true
     showToast('신청이 완료되었습니다!')
     requestCount.value += 1
   } catch (err) {
     showToast(err.response?.data?.message || '신청 실패. 다시 시도해주세요.')
-  } finally {
-    alertMsg.value = ''
-    selectedGame.value = null
   }
 }
 
@@ -1221,6 +1219,11 @@ const cancelApply = async (game) => {
   } catch (err) {
     showToast(err.response?.data?.message || '취소에 실패했습니다.')
   }
+}
+
+// DM으로 이동
+const goToDM = (ownerId) => {
+  router.push(`/chat/${ownerId}`)
 }
 
 onMounted(() => {

@@ -37,6 +37,23 @@
               </p>
             </div>
 
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-map-pin mr-1 text-orange-500"></i>
+                상세 장소 (선택)
+              </label>
+              <input
+                v-model="detailedPlace"
+                placeholder="상세 장소를 입력하세요 (예: 3층, A코트)"
+                class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-400 outline-none transition"
+                autocomplete="off"
+              />
+              <p class="text-xs text-gray-400 mt-2">
+                <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+                추가 정보를 입력하면 장소에 함께 표시됩니다
+              </p>
+            </div>
+
             <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
               <div class="flex items-start gap-3">
                 <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
@@ -53,22 +70,6 @@
               </div>
             </div>
 
-            <!-- 추천 장소 리스트 -->
-            <div class="mt-6">
-              <p class="text-sm font-medium text-gray-700 mb-2">추천 장소</p>
-              <div class="flex flex-col gap-2">
-                <button
-                  v-for="(item, idx) in recommendedPlaces"
-                  :key="idx"
-                  type="button"
-                  @click="onRecommendClick(item)"
-                  class="flex flex-col text-left p-3 rounded-xl  bg-blue-50 hover:bg-orange-100 transition"
-                >
-                  <div class="text-base font-semibold text-blue-600">{{ item.placeDetail }}</div>
-                  <div class="text-[0.7rem] text-gray-600 mt-0.5">{{ item.placeRoad }}</div>
-                </button>
-              </div>
-            </div>
           </div>
           <div v-else class="text-gray-400 text-sm mt-4">미정으로 설정됨</div>
         </transition>
@@ -133,13 +134,9 @@ const emit = defineEmits(['select', 'back'])
 const placeRoad = ref('')
 const searchQuery = ref('')
 const selectedPlace = ref(null)
+const detailedPlace = ref('')
 const addressInput = ref(null)
 
-const recommendedPlaces = ref([
-  { placeRoad: '서울 서초구 동광로 65', placeDetail: '서초탁구장' },
-  { placeRoad: '서울 동대문구 경희대로 26', placeDetail: '경희대 대운동장' },
-  { placeRoad: '서울 송파구 잠실동 1-1', placeDetail: '잠실한강공원' },
-])
 
 const showConfirm = ref(false)
 const confirmItem = ref({ placeRoad: '', placeDetail: '' })
@@ -151,11 +148,13 @@ function setUnset() {
   placeRoad.value = placeRoad.value === null ? '' : null
   searchQuery.value = ''
   selectedPlace.value = null
+  detailedPlace.value = ''
 }
 
 function clearSelection() {
   selectedPlace.value = null
   searchQuery.value = ''
+  detailedPlace.value = ''
 }
 
 onMounted(() => {
@@ -195,9 +194,14 @@ function submitPlace() {
   if (placeRoad.value === null) {
     emit('select', { placeRoad: null, placeDetail: '' })
   } else if (selectedPlace.value) {
+    // Google API 장소 이름과 상세 장소를 공백으로 합침
+    const combinedPlaceDetail = detailedPlace.value
+      ? `${selectedPlace.value.name} ${detailedPlace.value}`
+      : selectedPlace.value.name
+
     emit('select', {
       placeRoad: selectedPlace.value.address,
-      placeDetail: selectedPlace.value.name
+      placeDetail: combinedPlaceDetail
     })
   }
 }
@@ -206,13 +210,10 @@ function emitBack() {
   placeRoad.value = null
   searchQuery.value = ''
   selectedPlace.value = null
+  detailedPlace.value = ''
   emit('back')
 }
 
-function onRecommendClick(item) {
-  confirmItem.value = item
-  showConfirm.value = true
-}
 
 function cancelConfirm() {
   showConfirm.value = false

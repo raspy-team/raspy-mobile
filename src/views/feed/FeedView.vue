@@ -1,4 +1,41 @@
 <template>
+  <!-- 온보딩 오버레이 -->
+  <transition name="fade-overlay">
+    <div
+      v-if="showOnboarding"
+      class="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center"
+      @click="completeOnboarding"
+      @touchstart="completeOnboarding"
+    >
+      <div class="flex flex-col items-center justify-center space-y-8 px-8">
+        <!-- 메인 텍스트 -->
+        <div class="text-center space-y-4">
+          <h2 class="text-3xl font-bold text-white animate-fade-in-up">피드를 탐색해보세요</h2>
+          <p class="text-lg text-white/80 animate-fade-in-up animation-delay-200">
+            상하좌우로 넘겨보세요
+          </p>
+        </div>
+
+        <!-- 스와이프 애니메이션 아이콘 -->
+        <div class="relative w-32 h-32 animate-fade-in-up animation-delay-400">
+          <!-- 상하 스와이프 -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-hand-pointer text-white text-5xl animate-swipe-vertical"></i>
+          </div>
+          <!-- 좌우 스와이프 -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-hand-pointer text-white/60 text-5xl animate-swipe-horizontal"></i>
+          </div>
+        </div>
+
+        <!-- 탭하여 시작 -->
+        <div class="text-center animate-fade-in-up animation-delay-600">
+          <p class="text-sm text-white/60 animate-pulse">화면을 탭하여 시작</p>
+        </div>
+      </div>
+    </div>
+  </transition>
+
   <header class="fixed top-0 left-0 w-full h-20 z-[30] raspy-top">
     <!-- 좌측: 뒤로가기 버튼 (userId가 있을 때만) -->
     <div v-if="isUserFeedMode" class="absolute left-3 top-8 flex items-center">
@@ -48,7 +85,7 @@
         @mouseup="onPanelDragEnd"
       >
         <div class="flex items-center justify-between px-6 h-16 border-b">
-    <span class="text-lg font-bold text-gray-800">알림</span>
+          <span class="text-lg font-bold text-gray-800">알림</span>
           <button
             @click="toggleNotificationPanel"
             class="text-gray-400 hover:text-gray-800 text-xl"
@@ -108,7 +145,7 @@
           <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
           <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
         </div>
-  <p class="mt-6 text-white/70 text-base">피드를 불러오는 중...</p>
+        <p class="mt-6 text-white/70 text-base">피드를 불러오는 중...</p>
       </div>
     </div>
   </div>
@@ -119,9 +156,9 @@
   >
     <div class="flex items-center justify-center h-full">
       <div class="text-center max-w-sm mx-auto p-6">
-  <i class="fas fa-trophy text-lg text-white/30 mb-4"></i>
-  <h3 class="text-lg font-bold mb-2">아직 경기가 없어요</h3>
-  <p class="text-white/70 text-base leading-relaxed">
+        <i class="fas fa-trophy text-lg text-white/30 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">아직 경기가 없어요</h3>
+        <p class="text-white/70 text-base leading-relaxed">
           친구들과 첫 경기를 시작해보세요!<br />
           새로운 도전이 기다리고 있습니다.
         </p>
@@ -148,12 +185,25 @@
   >
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
       <div v-if="prevPost" class="absolute inset-0" :style="prevPreviewStyle">
-        <!-- 배경 이미지 (완료된 경기이고 사진이 있을 때) -->
-        <img
+        <!-- 배경 미디어 (완료된 경기이고 미디어가 있을 때) -->
+        <template
           v-if="prevPost.type === 'game' && prevPost.isCompleted && prevPost.photos?.length > 0"
-          :src="prevPost.photos[0]?.url || prevPost.photos[0]"
-          class="absolute inset-0 w-full h-full object-contain"
-        />
+        >
+          <!-- 동영상 -->
+          <video
+            v-if="(prevPost.photos[0]?.mediaType || 'IMAGE') === 'VIDEO'"
+            :src="prevPost.photos[0]?.url || prevPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+            muted
+            playsinline
+          />
+          <!-- 이미지 -->
+          <img
+            v-else
+            :src="prevPost.photos[0]?.url || prevPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+          />
+        </template>
 
         <div
           v-if="
@@ -219,12 +269,25 @@
       </div>
 
       <div v-if="nextPost" class="absolute inset-0" :style="nextPreviewStyle">
-        <!-- 배경 이미지 (완료된 경기이고 사진이 있을 때) -->
-        <img
+        <!-- 배경 미디어 (완료된 경기이고 미디어가 있을 때) -->
+        <template
           v-if="nextPost.type === 'game' && nextPost.isCompleted && nextPost.photos?.length > 0"
-          :src="nextPost.photos[0]?.url || nextPost.photos[0]"
-          class="absolute inset-0 w-full h-full object-contain"
-        />
+        >
+          <!-- 동영상 -->
+          <video
+            v-if="(nextPost.photos[0]?.mediaType || 'IMAGE') === 'VIDEO'"
+            :src="nextPost.photos[0]?.url || nextPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+            muted
+            playsinline
+          />
+          <!-- 이미지 -->
+          <img
+            v-else
+            :src="nextPost.photos[0]?.url || nextPost.photos[0]"
+            class="absolute inset-0 w-full h-full object-contain"
+          />
+        </template>
 
         <div
           v-if="
@@ -328,19 +391,33 @@
         @mouseleave.passive="onMouseUp($event)"
       >
         <div class="h-full flex" :style="wrapperStyle">
-          <!-- 인증샷 전체 화면 (사진이 있을 때만) -->
+          <!-- 인증샷 전체 화면 (미디어가 있을 때만) -->
           <section
             v-if="post.type === 'game' && post.isCompleted && features.headline && hasPhotos"
             class="w-screen shrink-0 h-full relative"
           >
-            <!-- 전체 화면 배경 이미지 -->
+            <!-- 동영상 -->
+            <video
+              v-if="headlinePhoto && headlinePhoto.mediaType === 'VIDEO'"
+              :src="headlinePhoto.url"
+              class="w-full h-full object-contain bg-black"
+              autoplay
+              loop
+              muted
+              playsinline
+              webkit-playsinline
+              preload="auto"
+            />
+
+            <!-- 이미지 -->
             <img
+              v-else-if="headlinePhoto"
               :src="headlinePhoto.url"
               alt="인증샷"
               class="w-full h-full object-contain"
               draggable="false"
             />
-            <div class="absolute inset-0 bg-black/20" />
+            <div class="absolute inset-0 bg-black/20 pointer-events-none" />
 
             <!-- 상단 헤더 -->
             <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
@@ -386,8 +463,8 @@
                   @click="showRuleModal = true"
                   title="규칙 상세 보기"
                 >
-                  <i class="fas fa-book-open text-white/90"></i>
-                  <span class="drop-shadow">{{ post.rule?.ruleTitle || '-' }}</span>
+                  <i class="fas fa-book-open text-white/90 mr-2"></i>
+                  <span class="drop-shadow"> {{ post.rule?.ruleTitle || '-' }}</span>
                 </span>
               </div>
 
@@ -510,10 +587,18 @@
 
                 <div class="mt-6">
                   <button
+                    v-if="!post.isAppliedByMe"
                     @click="handleJoin(post.id)"
                     class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
                     경기 참가하기
+                  </button>
+                  <button
+                    v-else
+                    disabled
+                    class="w-full py-3 bg-gray-500 text-white font-semibold rounded-xl cursor-not-allowed opacity-60"
+                  >
+                    <i class="fas fa-check mr-2"></i>신청 완료
                   </button>
                 </div>
               </div>
@@ -590,7 +675,7 @@
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[0]?.text || '' }}
+                    {{ post.reviews[1]?.text || '' }}
                   </div>
                 </div>
 
@@ -612,7 +697,7 @@
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[1]?.text || '' }}
+                    {{ post.reviews[0]?.text || '' }}
                   </div>
                 </div>
               </div>
@@ -724,19 +809,34 @@
             </div>
           </section>
 
-          <template v-for="p in galleryPhotos" :key="'gal-' + p.id">
+          <template v-for="(p, idx) in galleryPhotos" :key="'gal-' + (p.url || idx)">
             <section
               v-if="post.type === 'game' && post.isCompleted && features.gallery"
               class="w-screen shrink-0 h-full relative"
             >
+              <!-- 동영상 -->
+              <video
+                v-if="p && p.mediaType === 'VIDEO'"
+                :src="p.url"
+                class="absolute inset-0 w-full h-full object-contain bg-black"
+                autoplay
+                loop
+                muted
+                playsinline
+                webkit-playsinline
+                preload="auto"
+              />
+
+              <!-- 이미지 -->
               <img
+                v-else-if="p && p.url"
                 :src="p.url"
                 alt="photo"
                 class="absolute inset-0 w-full h-full object-contain"
                 draggable="false"
               />
               <div
-                class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"
+                class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none"
               ></div>
               <div class="ambient-overlay"></div>
             </section>
@@ -811,6 +911,12 @@
             <div>
               <h2 class="text-xl font-bold text-white">경기 규칙</h2>
               <p class="text-sm text-white/60">{{ post?.rule?.ruleTitle || '규칙 제목 없음' }}</p>
+              <div v-if="post?.rule?.averageRating && post.rule.averageRating > 0" class="flex items-center gap-1 mt-1">
+                <i class="fas fa-star text-purple-400 text-xs"></i>
+                <span class="text-xs text-white/70">
+                  {{ post.rule.averageRating.toFixed(1) }}/5 ({{ post.rule.ratingCount || 0 }}명)
+                </span>
+              </div>
             </div>
           </div>
           <button
@@ -988,11 +1094,14 @@
     class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
     @click="closePlayerSelectModal"
   >
-    <div class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto relative" @click.stop>
+    <div
+      class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto relative"
+      @click.stop
+    >
       <button
         @click="closePlayerSelectModal"
-        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2 "
-        style="z-index:10;"
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2"
+        style="z-index: 10"
         aria-label="닫기"
       >
         <i class="fas fa-times text-xl"></i>
@@ -1029,7 +1138,7 @@
     </div>
   </div>
 
-  <Comment class="z-[100000]" v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
+  <Comment class="z-[100000]" v-if="commentId == 1" :id="post.id" @close="commentId = 0" />
 </template>
 
 <script setup>
@@ -1073,6 +1182,16 @@ const { loading, sortedFeed, loadFeed } = useFeed()
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
+
+// 온보딩 상태 관리
+const showOnboarding = ref(false)
+
+// 온보딩 완료 처리
+function completeOnboarding() {
+  showOnboarding.value = false
+  localStorage.setItem('feedOnboardingCompleted', 'true')
+  console.log('[FeedView] 온보딩 완료 - GIF는 자동으로 재생됨')
+}
 
 // 나랑도해 상태 관리
 const playWithMeRequests = ref(new Map()) // userId -> boolean (요청 상태)
@@ -1136,8 +1255,17 @@ onMounted(() => {
   fetchNotifications()
   console.log('loadFeed 호출 예정')
   loadFeed(router.currentRoute.value)
+
+  // 최초 접속 시에만 온보딩 표시
+  const hasCompletedOnboarding = localStorage.getItem('feedOnboardingCompleted') === 'true'
+  if (!hasCompletedOnboarding) {
+    setTimeout(() => {
+      showOnboarding.value = true
+    }, 500)
+  }
 })
-// 현재 표시 중인 피드 인덱스
+
+// 현재 표시 중인 피드 인덱스 (gameId가 있으면 sortedFeed computed에서 자동으로 맨 위로 정렬됨)
 const currentFeedIndex = ref(0)
 
 // 현재 표시 중인 포스트
@@ -1258,9 +1386,21 @@ const handleSkipInvite = () => {
 }
 
 // Event handler for scheduled game join
-const handleJoin = (postId) => {
+const handleJoin = async (postId) => {
   console.log('Join clicked:', postId)
-  // Add join functionality
+  try {
+    await api.post(`/api/games/${postId}/apply`)
+
+    // 현재 포스트의 신청 상태 업데이트
+    const currentPost = post.value
+    if (currentPost && currentPost.id === postId) {
+      currentPost.isAppliedByMe = true
+    }
+
+    showToast('참가 신청이 완료되었습니다!')
+  } catch (err) {
+    showToast(err.response?.data?.message || '신청에 실패했습니다.')
+  }
 }
 
 // fetchInitialFeed는 더 이상 필요없음 - useFeed의 loadFeed 사용
@@ -1315,6 +1455,9 @@ const prevPreviewStyle = computed(() => ({
 function onFeedTouchStart(e) {
   const t = e.touches?.[0]
   if (!t) return
+  // 애니메이션이 진행 중이면 새로운 터치를 무시
+  if (feedAnimating.value) return
+
   feedStartX.value = t.clientX
   feedStartY.value = t.clientY
   feedDeltaX.value = 0
@@ -1324,7 +1467,6 @@ function onFeedTouchStart(e) {
   feedIsPointerDown.value = true
   feedGestureStartAt = Date.now()
   feedActiveScrollEl = findScrollable(e.target)
-  feedAnimating.value = false
   feedSwipeDirection = 0
   feedTranslateY.value = 0
 }
@@ -1366,7 +1508,8 @@ function onFeedTouchEnd(e) {
   if (!feedIsPointerDown.value) return
   const thresholdPx = Math.floor(window.innerHeight * 0.08) // 조금 더 관대하게
   const duration = Math.max(1, Date.now() - feedGestureStartAt)
-  const velocityY = feedDeltaY.value / duration
+  // 속도를 픽셀/초 단위로 계산 (밀리초를 초로 변환)
+  const velocityY = (feedDeltaY.value / duration) * 1000
 
   const target = e?.target
   const onControl = !!(
@@ -1375,7 +1518,8 @@ function onFeedTouchEnd(e) {
     target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
   )
   const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
-  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
+  // 빠른 스와이프 감지 향상: 속도가 300px/s 이상이거나 거리가 임계값 이상
+  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 300
 
   if (verticalMove && !onControl && movedY) {
     if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
@@ -1436,6 +1580,9 @@ function onFeedMouseDown(e) {
     e.target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
   )
     return
+  // 애니메이션이 진행 중이면 새로운 드래그를 무시
+  if (feedAnimating.value) return
+
   feedStartX.value = e.clientX
   feedStartY.value = e.clientY
   feedDeltaX.value = 0
@@ -1445,7 +1592,6 @@ function onFeedMouseDown(e) {
   feedIsPointerDown.value = true
   feedGestureStartAt = Date.now()
   feedActiveScrollEl = findScrollable(e.target)
-  feedAnimating.value = false
   feedSwipeDirection = 0
   feedTranslateY.value = 0
 }
@@ -1479,7 +1625,8 @@ function onFeedMouseUp(e) {
   if (!feedIsPointerDown.value) return
   const thresholdPx = Math.floor(window.innerHeight * 0.08)
   const duration = Math.max(1, Date.now() - feedGestureStartAt)
-  const velocityY = feedDeltaY.value / duration
+  // 속도를 픽셀/초 단위로 계산 (밀리초를 초로 변환)
+  const velocityY = (feedDeltaY.value / duration) * 1000
   const target = e?.target
   const onControl = !!(
     target &&
@@ -1487,7 +1634,8 @@ function onFeedMouseUp(e) {
     target.closest('button, a, input, textarea, select, label, [data-stop-slide]')
   )
   const verticalMove = Math.abs(feedDeltaY.value) > Math.abs(feedDeltaX.value)
-  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 0.25
+  // 빠른 스와이프 감지 향상: 속도가 300px/s 이상이거나 거리가 임계값 이상
+  const movedY = Math.abs(feedDeltaY.value) > thresholdPx || Math.abs(velocityY) > 300
   if (verticalMove && !onControl && movedY) {
     if (feedDeltaY.value < 0 && currentFeedIndex.value < sortedFeed.value.length - 1) {
       feedAnimating.value = true
@@ -1525,24 +1673,63 @@ const hasPhotos = computed(
   () => post.value && Array.isArray(post.value.photos) && post.value.photos.length > 0,
 )
 
-const headlinePhoto = computed(() => {
-  // 새 API 구조: photos 배열의 첫 번째가 헤드라인 이미지
-  if (!post.value) return null
-  const photos = post.value.photos || []
-  if (photos.length === 0) return null
-
-  // photos[0]이 이미 { url: "..." } 객체 형태
-  return photos[0]?.url ? photos[0] : { url: photos[0] }
-})
-const galleryPhotos = computed(() => {
-  // 새 API 구조: 첫 번째를 제외한 나머지가 갤러리 사진들
+// 미디어 정렬: 동영상을 첫 번째로
+const sortedPhotos = computed(() => {
   if (!post.value) return []
   const photos = post.value.photos || []
-  if (photos.length <= 1) return []
+  if (photos.length === 0) return []
 
-  // 나머지 사진들 (이미 객체 형태거나 문자열일 수 있음)
-  return photos.slice(1).map((photo) => (photo?.url ? photo : { url: photo }))
+  // photos를 객체 형태로 정규화
+  const normalized = photos
+    .map((photo) => {
+      if (photo?.url) {
+        return {
+          url: photo.url,
+          mediaType: photo.mediaType || 'IMAGE', // mediaType이 없으면 IMAGE로 간주
+        }
+      } else if (typeof photo === 'string') {
+        return { url: photo, mediaType: 'IMAGE' }
+      }
+      // 잘못된 형식이면 기본값 반환
+      return { url: '', mediaType: 'IMAGE' }
+    })
+    .filter((p) => p.url) // url이 있는 것만 필터링
+
+  // 동영상을 앞으로, 나머지는 뒤로
+  const videos = normalized.filter((p) => p.mediaType === 'VIDEO')
+  const images = normalized.filter((p) => p.mediaType !== 'VIDEO')
+
+  // 디버깅: 동영상이 있으면 로그 출력
+  if (videos.length > 0) {
+    console.log('[FeedView] 동영상 발견:', videos)
+  }
+
+  return [...videos, ...images]
 })
+
+const headlinePhoto = computed(() => {
+  // 정렬된 미디어 배열의 첫 번째가 헤드라인 (동영상 우선)
+  const sorted = sortedPhotos.value
+  if (sorted.length === 0) return null
+  const headline = sorted[0]
+
+  // 디버깅
+  if (headline && headline.mediaType === 'VIDEO') {
+    console.log('[FeedView] headlinePhoto는 동영상입니다:', headline)
+  }
+
+  return headline
+})
+
+const galleryPhotos = computed(() => {
+  // 정렬된 미디어 배열의 나머지가 갤러리
+  const sorted = sortedPhotos.value
+  if (sorted.length <= 1) return []
+  return sorted.slice(1)
+})
+
+// 동영상은 이제 서버에서 GIF로 변환되어 제공됨
+// Video 관련 코드 제거됨
 
 // Sections order
 const sections = computed(() => {
@@ -1882,7 +2069,7 @@ function closePlayerSelectModal() {
 function onComment() {
   const currentPost = post.value
   if (currentPost?.id) {
-    commentId.value = currentPost.id
+    commentId.value = 1
   }
 }
 async function onShare() {
@@ -2174,5 +2361,85 @@ function onPanelDragEnd() {
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0);
+}
+
+/* 온보딩 애니메이션 */
+.fade-overlay-enter-active,
+.fade-overlay-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-overlay-enter-from,
+.fade-overlay-leave-to {
+  opacity: 0;
+}
+.fade-overlay-enter-to,
+.fade-overlay-leave-from {
+  opacity: 1;
+}
+
+/* Fade in up 애니메이션 */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+  opacity: 0;
+}
+
+/* 스와이프 애니메이션 - 상하 */
+@keyframes swipe-vertical {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.6;
+  }
+}
+
+.animate-swipe-vertical {
+  animation: swipe-vertical 2s ease-in-out infinite;
+}
+
+/* 스와이프 애니메이션 - 좌우 */
+@keyframes swipe-horizontal {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(20px);
+    opacity: 0.3;
+  }
+}
+
+.animate-swipe-horizontal {
+  animation: swipe-horizontal 2s ease-in-out infinite;
+  animation-delay: 1s;
 }
 </style>

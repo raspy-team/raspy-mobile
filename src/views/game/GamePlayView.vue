@@ -1,8 +1,19 @@
 <template>
   <div
     v-if="game && user1 && user2"
-    class="w-dvw h-full flex flex-col px-4 py-3 relative text-black overflow-hidden"
+    class="w-dvw h-full flex flex-col px-4 py-3 relative bg-gray-900 text-gray-100 overflow-hidden"
   >
+    <!-- Reconnecting Overlay -->
+    <div
+      v-if="socketStatus === 'connecting'"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-[100]"
+    >
+      <div class="text-white text-2xl font-bold animate-pulse">
+        <i class="fas fa-sync-alt fa-spin mr-3"></i>
+        재연결 중...
+      </div>
+      <div class="text-gray-400 mt-2">네트워크 연결을 확인해주세요.</div>
+    </div>
 
     <div class="flex items-center justify-between mb-4">
       <button @click="goBack" class="text-white text-lg">
@@ -10,7 +21,7 @@
           width="8"
           height="12"
           viewBox="0 0 8 12"
-          fill="black"
+          fill="white"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -27,17 +38,17 @@
     <div class="flex-shrink-0">
       <div class="flex items-center w-full gap-2">
         <!-- Info Cards: 세트 승점, 세트 수, 세트 시간 -->
-        <div class="flex w-full gap-2 sm:gap-2 gap-1">
+        <div class="flex w-full gap-1 sm:gap-1">
           <div
-            class="h-[22vw] sm:h-[16vw] flex-1 max-h-[90px] sm:max-h-[130px] flex flex-col justify-between bg-white text-orange-500 px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div
-                class="flex items-center justify-center text-[1.1rem] sm:text-[1.25rem] font-semibold mb-1 sm:mb-2"
+                class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1"
               >
                 <svg
-                  width="26"
-                  height="26"
+                  width="16"
+                  height="16"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -47,23 +58,23 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-sm sm:text-base font-semibold">세트 승점</span>
+                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 승점</span>
               </div>
               <div
-                class="flex items-center justify-center text-orange-500 font-extrabold text-lg sm:text-xl mt-1 sm:mt-2"
+                class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1"
               >
                 {{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[22vw] sm:h-[16vw] flex-1 max-h-[90px] sm:max-h-[130px] flex flex-col justify-between bg-white text-orange-500 px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center text-[1.25rem] font-semibold mb-2">
+              <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
                 <svg
-                  width="26"
-                  height="26"
+                  width="16"
+                  height="16"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -73,23 +84,21 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-sm sm:text-base font-semibold">세트 수</span>
+                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 수</span>
               </div>
-              <div
-                class="flex items-center justify-center text-orange-500 font-extrabold text-lg sm:text-xl mt-1 sm:mt-2"
-              >
+              <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ game.rule.setsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[22vw] sm:h-[16vw] flex-1 max-h-[90px] sm:max-h-[130px] flex flex-col justify-between bg-white text-orange-500 px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center text-[1.25rem] font-semibold mb-2">
+              <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
                 <svg
-                  width="26"
-                  height="26"
+                  width="16"
+                  height="16"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -99,11 +108,9 @@
                     fill="#808080"
                   />
                 </svg>
-                <span class="ml-1 text-gray-800 text-sm sm:text-base font-semibold">세트 시간</span>
+                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 시간</span>
               </div>
-              <div
-                class="flex items-center justify-center text-orange-500 font-extrabold text-lg sm:text-xl mt-1 sm:mt-2"
-              >
+              <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ limitTimeStr }}
               </div>
             </div>
@@ -113,12 +120,12 @@
       <div class="w-full flex justify-end mt-2 gap-2">
         <button
           @click="showLogModal = true"
-          class="text-xs text-orange-500 border border-orange-200 rounded-full px-4 py-1 shadow-sm hover:bg-orange-50 transition font-semibold"
+          class="text-xs text-orange-400 border border-orange-600 rounded-full px-4 py-1 shadow-sm hover:bg-gray-700 transition font-semibold"
         >
           로그 보기
         </button>
         <button
-          class="text-xs text-orange-500 border border-orange-200 rounded-full px-4 py-1 shadow-sm hover:bg-orange-50 transition font-semibold"
+          class="text-xs text-orange-400 border border-orange-600 rounded-full px-4 py-1 shadow-sm hover:bg-gray-700 transition font-semibold"
           @click="game.showRuleDetail = true"
         >
           규칙 보기
@@ -127,8 +134,19 @@
     </div>
     <!-- 점수판 섹션 (중앙 영역 - flex-1로 남은 공간 차지) -->
     <div class="flex-1 flex flex-col items-center justify-center relative min-h-0 py-0">
-      <div class="text-orange-600 text-2xl font-bold mb-1 sm:mb-2">
-        {{ elapsedTimeStr }}, 세트 {{ currentSet }}
+      <div class="flex flex-col items-center gap-1">
+        <div
+          class="text-2xl font-bold"
+          :class="game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds ? 'text-red-500 animate-pulse' : 'text-orange-400'"
+        >
+          {{ elapsedTimeStr }}, 세트 {{ currentSet }}
+        </div>
+        <div
+          v-if="game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds"
+          class="text-xs text-red-400 font-semibold"
+        >
+          추가시간
+        </div>
       </div>
       <div class="flex w-full items-start justify-center">
         <div class="flex flex-col items-center justify-center w-full">
@@ -143,12 +161,9 @@
                 >{{ user1SetsWon }}</span
               >
             </div>
-                        <button
-              @click="openCamera"
-              class="mx-4 sm:mx-8 text-[12vw] sm:text-[16dvw] text-orange-300 hover:text-orange-400 active:text-orange-500 transition-colors duration-200 focus:outline-none rounded-full flex items-center justify-center w-[20vw] h-[20vw] sm:w-[24dvw] sm:h-[24dvw] active:scale-95"
-            >
-              <i class="fas fa-camera"></i>
-            </button>
+            <div class="mx-4 sm:mx-8 flex items-center">
+              <span class="text-6xl font-bold text-orange-500">:</span>
+            </div>
             <div class="flex items-end">
               <span class="text-[28vw] sm:text-[38dvw] font-extrabold text-orange-500">{{
                 currentScore2
@@ -164,14 +179,14 @@
             <div class="flex flex-col items-center flex-1">
               <img
                 :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
-                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-2 sm:mb-3"
+                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg mb-2 sm:mb-3"
               />
               <div class="font-bold text-base sm:text-xl mb-1 sm:mb-2">{{ user1.nickname }}</div>
               <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
                 <button
                   @click="socket_sendScore(1, 1)"
-                  :disabled="isSetOver || isGameOver"
-                  class="bg-orange-500 text-white w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -183,8 +198,8 @@
                 </button>
                 <button
                   @click="socket_sendScore(1, -1)"
-                  :disabled="isSetOver || isGameOver || currentScore1 <= 0"
-                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown || currentScore1 <= 0"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-bottom-left-radius: 0.5rem;
                     border-bottom-right-radius: 0.5rem;
@@ -199,14 +214,14 @@
             <div class="flex flex-col items-center flex-1">
               <img
                 :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
-                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-4 border-orange-500 shadow-lg mb-2 sm:mb-3"
+                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg mb-2 sm:mb-3"
               />
               <div class="font-bold text-base sm:text-xl mb-1 sm:mb-2">{{ user2.nickname }}</div>
               <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
                 <button
                   @click="socket_sendScore(2, 1)"
-                  :disabled="isSetOver || isGameOver"
-                  class="bg-orange-500 text-white w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -218,8 +233,8 @@
                 </button>
                 <button
                   @click="socket_sendScore(2, -1)"
-                  :disabled="isSetOver || isGameOver || currentScore2 <= 0"
-                  class="bg-gray-200 text-gray-800 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px]"
+                  :disabled="isSetOver || isGameOver || isCountingDown || currentScore2 <= 0"
+                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-b-xl rounded-t-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-bottom-left-radius: 0.5rem;
                     border-bottom-right-radius: 0.5rem;
@@ -238,16 +253,25 @@
 
     <!-- 하단 버튼 섹션 -->
     <div class="flex-shrink-0 w-full flex flex-col gap-3 sm:gap-4 items-stretch">
+      <!-- 세트 종료 버튼 (시간 초과 또는 수동 종료 필요 시) -->
+      <button
+        v-if="!isSetOver && !isGameOver && !isCountingDown && game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds"
+        @click="manualFinishSet"
+        class="w-full bg-gradient-to-r from-purple-600 to-orange-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:brightness-110 transition animate-pulse"
+      >
+        <i class="fas fa-flag-checkered mr-2"></i>세트 종료
+      </button>
+
       <div class="w-full grid grid-cols-2 gap-2 sm:gap-4 mb-10">
         <button
           @click="openConfirm('정말로 게임을 재시작 하겠습니까?', socket_resetGame)"
-          class="border text-orange-500 px-3 py-3 rounded-[8.2px] text-xs sm:text-base hover:bg-orange-50 transition"
+          class="border text-orange-400 px-3 py-3 rounded-[8.2px] text-xs sm:text-base hover:bg-gray-700 transition"
         >
           처음부터
         </button>
         <button
           @click="openConfirm('정말로 게임을 즉시 종료합니까?', socket_finishGame)"
-          class="bg-orange-500 text-white px-3 py-3 rounded-[8.2px] text-xs sm:text-base shadow hover:brightness-110 transition"
+          class="bg-orange-600 text-white px-3 py-3 rounded-[8.2px] text-xs sm:text-base shadow hover:brightness-110 transition"
         >
           경기 끝내기
         </button>
@@ -270,8 +294,26 @@
           "
         >
           <span style="font-size: 1em"
-            >슈퍼덩크 <span style="color: #ff5722">덩크 콘테스트</span> 모집중!!</span
+            >클래시오브클랜 <span style="color: #ff5722">회원</span> 모집중!!</span
           >
+        </div>
+      </div>
+    </div>
+
+    <!-- 5초 카운트다운 오버레이 -->
+    <div
+      v-if="isCountingDown"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60]"
+    >
+      <div class="text-center">
+        <div class="text-orange-400 text-xl sm:text-2xl font-semibold mb-4">
+          세트 {{ currentSet }} 시작까지
+        </div>
+        <div class="text-orange-500 text-[25vw] sm:text-[30vw] font-extrabold animate-countdown">
+          {{ countdown }}
+        </div>
+        <div class="text-gray-400 text-base sm:text-lg mt-4">
+          준비하세요!
         </div>
       </div>
     </div>
@@ -280,10 +322,10 @@
       v-if="isSetOver && !isGameOver"
       class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
     >
-      <div class="bg-white rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
+      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
         <button
           @click="socket_nextSet"
-          class="bg-orange-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
+          class="bg-orange-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
         >
           {{ currentSet + '세트 시작' }}
         </button>
@@ -294,39 +336,21 @@
       v-if="showFinishModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
+      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
         <div class="text-lg font-bold mb-3">세트 종료</div>
         <div class="text-orange-500 font-extrabold text-xl mb-4">
           {{ winner != '-' ? winner + ' 승리' : '무승부' }}
         </div>
         <button
           @click="closeFinishModal"
-          class="bg-orange-500 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
+          class="bg-orange-600 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
         >
-          확인
+          다음 세트로
         </button>
       </div>
     </div>
 
-    <div
-      v-if="isGameOver"
-      class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-    >
-      <div
-        class="bg-orange-500 text-white rounded-xl p-8 text-center shadow-2xl animate-fade-in w-[90%] max-w-md"
-      >
-        <div class="text-xl font-bold mb-4">🎉 경기 종료 🎉</div>
-        <div class="text-2xl font-extrabold mb-5">
-          {{ gameWinner == '무승부' ? '무승부' : gameWinner + ' 최종 승리!' }}
-        </div>
-        <button
-          @click="goToResult"
-          class="bg-white text-orange-500 w-full py-2 rounded-full text-base font-bold shadow hover:scale-105 transition"
-        >
-          결과 보기
-        </button>
-      </div>
-    </div>
+    <!-- 경기 종료시 모달 제거 -->
 
     <!-- MatchModal: 규칙 모달 -->
     <MatchModal v-if="game.showRuleDetail" :rule="game.rule" @close="game.showRuleDetail = false" />
@@ -336,23 +360,56 @@
       v-if="showConfirm"
       class="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center"
     >
-      <div class="bg-white w-full max-w-xs rounded-xl shadow-lg p-7 text-center">
-        <div class="mb-5 text-lg font-bold text-gray-800">{{ confirmMessage }}</div>
+      <div class="bg-gray-800 w-full max-w-xs rounded-xl shadow-lg p-7 text-center">
+        <div class="mb-5 text-lg font-bold text-gray-100">{{ confirmMessage }}</div>
         <div class="flex justify-center gap-3 mt-4">
           <button
             @click="closeConfirm"
-            class="px-5 py-2 bg-gray-100 text-gray-600 rounded-full font-semibold text-sm"
+            class="px-5 py-2 bg-gray-700 text-gray-100 rounded-full font-semibold text-sm"
           >
             취소
           </button>
           <button
             @click="confirmCallbackWrapper"
-            class="px-6 py-2 bg-orange-500 text-white rounded-full font-semibold text-sm shadow hover:bg-orange-400"
+            class="px-6 py-2 bg-orange-600 text-white rounded-full font-semibold text-sm shadow hover:bg-orange-400"
           >
             확인
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- 플로팅 카메라 버튼 (우측 하단) -->
+    <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
+      <!-- 사진 촬영 버튼 -->
+      <button
+        @click="triggerPhotoCapture"
+        :disabled="isCountingDown"
+        :class="[
+          'relative transition-all duration-300 focus:outline-none rounded-full flex items-center justify-center w-[61.6px] h-[61.6px] shadow-2xl',
+          isCountingDown
+            ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+            : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:scale-110 hover:shadow-orange-500/50 active:scale-95'
+        ]"
+        title="사진 촬영"
+      >
+        <i class="fas fa-camera text-xl"></i>
+      </button>
+
+      <!-- 동영상 촬영 버튼 -->
+      <button
+        @click="triggerVideoCapture"
+        :disabled="isCountingDown"
+        :class="[
+          'relative transition-all duration-300 focus:outline-none rounded-full flex items-center justify-center w-[61.6px] h-[61.6px] shadow-2xl',
+          isCountingDown
+            ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+            : 'bg-gradient-to-br from-red-500 to-red-600 text-white hover:scale-110 hover:shadow-red-500/50 active:scale-95'
+        ]"
+        title="동영상 촬영"
+      >
+        <i class="fas fa-video text-xl"></i>
+      </button>
     </div>
   </div>
 
@@ -366,23 +423,32 @@
     class="hidden"
   />
 
+  <!-- 숨겨진 동영상 input -->
+  <input
+    ref="videoInputRef"
+    type="file"
+    accept="video/mp4,video/quicktime,video/*"
+    @change="onVideoChange"
+    class="hidden"
+  />
+
   <div
     v-if="showLogModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
   >
-    <div class="bg-white rounded-xl p-4 shadow-lg w-[90%] max-w-md max-h-[70vh] overflow-y-auto">
+    <div class="bg-gray-800 rounded-xl p-4 shadow-lg w-[90%] max-w-md max-h-[70vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-3">
-        <div class="text-lg font-bold">전체 로그</div>
-        <button @click="showLogModal = false" class="text-orange-500 text-sm">닫기</button>
+        <div class="text-lg font-bold text-gray-100">전체 로그</div>
+        <button @click="showLogModal = false" class="text-orange-400 text-sm">닫기</button>
       </div>
       <div class="flex flex-col space-y-1">
         <div
           v-for="(log, index) in logs"
           :key="index"
-          class="text-xs bg-orange-50 border border-orange-200 rounded-md px-2 py-1 shadow-sm flex items-center justify-between text-gray-700"
+          class="text-xs bg-gray-700 border border-gray-600 rounded-md px-2 py-1 shadow-sm flex items-center justify-between text-gray-100"
         >
           <div class="flex-1 truncate">
-            <span class="text-[11px] text-gray-500 mr-1">[{{ log.elapsed }}]</span>
+            <span class="text-[11px] text-gray-400 mr-1">[{{ log.elapsed }}]</span>
             {{ log.message }}
           </div>
         </div>
@@ -404,15 +470,19 @@ import DefaultImage from '../../assets/default.png'
 import MatchModal from '../../components/MatchModal.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
-import { addGamePicture, compressImage } from '../../utils/gamePictureStorage'
+import { addGamePicture, addGameVideo, compressImage, compressVideo } from '../../utils/gamePictureStorage'
 
 const route = useRoute()
 const router = useRouter()
 const { showToast } = useToast()
 const gameId = route.params.gameId
 
+// 소켓 연결 상태
+const socketStatus = ref('connected') // 'connected', 'connecting', 'disconnected'
+
 // 카메라 관련 상태
 const cameraInputRef = ref(null)
+const videoInputRef = ref(null)
 const game = reactive({})
 const chatRoomId = ref(null)
 const currentSet = ref(1)
@@ -433,6 +503,8 @@ const user1 = ref(null)
 const user2 = ref(null)
 const gameWinner = ref('')
 const showLogModal = ref(false)
+const countdown = ref(0)
+const isCountingDown = ref(false)
 
 // confirm 관련 상태
 const showConfirm = ref(false)
@@ -458,16 +530,39 @@ function startSet() {
   isSetOver.value = false
   showFinishModal.value = false
   winner.value = '-'
-  updateElapsed()
-  startTimer()
+
+  // 5초 카운트다운 시작
+  isCountingDown.value = true
+  countdown.value = 5
+
+  const countdownInterval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(countdownInterval)
+      isCountingDown.value = false
+      // 카운트다운 종료 후 세트 시작
+      game.setStartedAt = new Date()
+      elapsedSeconds.value = 0
+      updateElapsed()
+      startTimer()
+    }
+  }, 1000)
 }
 
 function addScore(userIdx, delta) {
-  if (isSetOver.value || isGameOver.value) return
+  if (isSetOver.value || isGameOver.value || isCountingDown.value) return
 
   if (userIdx == user1.value.id) {
+    // pointsToWin이 설정되어 있으면 그 이상으로 증가 불가
+    if (game.rule.pointsToWin !== -1 && delta > 0 && currentScore1.value >= game.rule.pointsToWin) {
+      return
+    }
     currentScore1.value = Math.max(0, currentScore1.value + delta)
   } else {
+    // pointsToWin이 설정되어 있으면 그 이상으로 증가 불가
+    if (game.rule.pointsToWin !== -1 && delta > 0 && currentScore2.value >= game.rule.pointsToWin) {
+      return
+    }
     currentScore2.value = Math.max(0, currentScore2.value + delta)
   }
 
@@ -475,6 +570,7 @@ function addScore(userIdx, delta) {
 }
 
 function checkSetOver() {
+  // pointsToWin 도달 시에만 자동으로 세트 종료
   if (game.rule.pointsToWin != -1 && currentScore1.value >= game.rule.pointsToWin) {
     user1SetsWon.value++
     finishSet(1)
@@ -485,22 +581,26 @@ function checkSetOver() {
     finishSet(2)
     return
   }
-  if (game.limitSeconds !== -1 && elapsedSeconds.value >= game.limitSeconds) {
-    if (game.rule.winBy == 'MOST_SETS_AND_POINTS' && currentScore1.value > currentScore2.value) {
+
+  // 제한시간이 지나도 세트를 자동 종료하지 않음 (UI만 빨간색으로 표시)
+  // 수동으로 '세트종료' 버튼을 눌러야 다음 세트로 진행
+}
+
+function manualFinishSet() {
+  // 수동으로 세트 종료 (시간 초과 시)
+  if (game.rule.winBy == 'MOST_SETS_AND_POINTS') {
+    if (currentScore1.value > currentScore2.value) {
       user1SetsWon.value++
       finishSet(1)
-    } else if (
-      game.rule.winBy == 'MOST_SETS_AND_POINTS' &&
-      currentScore2.value > currentScore1.value
-    ) {
+    } else if (currentScore2.value > currentScore1.value) {
       user2SetsWon.value++
       finishSet(2)
     } else {
       finishSet(0) // 무승부
     }
-    return
+  } else {
+    finishSet(0) // 무승부
   }
-  elapsedSeconds.value = 0
 }
 
 function finishSet(who) {
@@ -518,6 +618,7 @@ function finishSet(who) {
     isGameOver.value = true
     isSetOver.value = false
     socket_finishGame()
+    goToResult()
   } else {
     currentSet.value++
   }
@@ -535,17 +636,25 @@ function startTimer() {
 }
 
 function updateElapsed() {
-  if (!game.setStartedAt || isSetOver.value) return
+  if (!game.setStartedAt || isSetOver.value || isCountingDown.value) return
   const startedAt = new Date(game.setStartedAt)
   const now = new Date()
   const elapsed = Math.floor((now - startedAt) / 1000)
-  elapsedSeconds.value = game.limitSeconds === -1 ? elapsed : Math.min(elapsed, game.limitSeconds)
-  elapsedTimeStr.value = getTimeStr(elapsedSeconds.value)
+
+  // 제한시간이 있는 경우 시간 계산
   if (game.limitSeconds !== -1) {
+    elapsedSeconds.value = elapsed
+    // 남은 시간 계산 (0 미만 가능 - 오버타임)
+    const remainingSeconds = game.limitSeconds - elapsed
+    elapsedTimeStr.value = getTimeStr(Math.abs(remainingSeconds))
     limitTimeStr.value = getTimeStr(game.limitSeconds)
   } else {
+    // 제한 없음
+    elapsedSeconds.value = elapsed
+    elapsedTimeStr.value = getTimeStr(elapsedSeconds.value)
     limitTimeStr.value = '제한 없음'
   }
+
   if (!isSetOver.value && !isGameOver.value) {
     checkSetOver()
   }
@@ -569,6 +678,10 @@ function goBack() {
 
 function handleVisibilityChange() {
   if (document.visibilityState === 'visible') {
+    // 페이지가 다시 활성화될 때 소켓 연결을 시도합니다.
+    // socket.connect 내부 로직에 의해 이미 연결된 상태라면 아무 작업도 수행하지 않습니다.
+    socket.connect(chatRoomId.value)
+
     updateElapsed()
     if (!isSetOver.value && !isGameOver.value) {
       startTimer()
@@ -606,6 +719,35 @@ function addLog(log) {
 }
 
 onMounted(async () => {
+  // 안드로이드 네이티브 카메라 콜백 등록
+  if (typeof window !== 'undefined') {
+    // 사진 촬영 콜백
+    window.onGameCameraResult = async (base64Image) => {
+      try {
+        console.log('Received photo from Android camera')
+        const compressed = await compressImage(base64Image)
+        addGamePicture(gameId, compressed)
+        showToast('사진이 저장되었습니다!')
+      } catch (error) {
+        console.error('Failed to process camera image:', error)
+        showToast('사진 저장에 실패했습니다.')
+      }
+    }
+
+    // 동영상 촬영 콜백
+    window.onGameVideoCameraResult = async (base64Video, duration) => {
+      try {
+        console.log('Received video from Android camera')
+        // duration은 밀리초 단위로 전달된다고 가정
+        addGameVideo(gameId, base64Video, duration || 0)
+        showToast('동영상이 저장되었습니다!')
+      } catch (error) {
+        console.error('Failed to process video:', error)
+        showToast('동영상 저장에 실패했습니다.')
+      }
+    }
+  }
+
   const userRes = await api.get('/api/auth/current-user-id')
   const currentUserId = userRes.data
 
@@ -665,12 +807,23 @@ onMounted(async () => {
   const rawLogs = logResponse.data
   rawLogs.forEach((log) => addLog(log))
 
+  // 소켓 핸들러 등록
+  socket.onConnecting(() => {
+    socketStatus.value = 'connecting'
+  })
+  socket.onConnected(() => {
+    socketStatus.value = 'connected'
+  })
+  socket.onDisconnected(() => {
+    socketStatus.value = 'disconnected'
+  })
+
   socket.onMessage((payload) => {
     if (payload.type === 'SCORE') {
       addScore(payload.targetId, payload.delta)
       addLog(payload)
     } else if (payload.type === 'SET') {
-      game.setStartedAt = new Date()
+      // setStartedAt는 startSet() 내부의 카운트다운이 끝난 후 설정됨
       startSet()
       addLog(payload)
     } else if (payload.type === 'FINISH') {
@@ -734,10 +887,80 @@ function socket_resetGame() {
   })
 }
 
-// 카메라 열기 (바로 input 트리거)
-function openCamera() {
-  cameraInputRef.value?.click()
+
+// 안드로이드 웹뷰 감지
+function isAndroidWebView() {
+  return window.AndroidApp !== undefined
 }
+
+function isIOSWebView() {
+  const userAgent = navigator.userAgent.toLowerCase()
+  return userAgent.includes('raspy-ios') ||
+         (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge)
+}
+
+// 사진 촬영 트리거
+function triggerPhotoCapture() {
+  if (isAndroidWebView()) {
+    try {
+      console.log('Calling Android native camera for photo...')
+      window.AndroidApp.openCamera()
+      // 콜백은 window.onGameCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call Android camera:', error)
+      // 실패 시 fallback
+      cameraInputRef.value?.click()
+    }
+  } else if (isIOSWebView()) {
+    try {
+      console.log('Calling iOS native camera for photo...')
+      window.webkit.messageHandlers.iosBridge.postMessage({
+        action: 'openCamera',
+        type: 'photo'
+      })
+      // 콜백은 window.onGameCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call iOS camera:', error)
+      // 실패 시 fallback
+      cameraInputRef.value?.click()
+    }
+  } else {
+    // 일반 웹
+    cameraInputRef.value?.click()
+  }
+}
+
+// 동영상 촬영 트리거
+function triggerVideoCapture() {
+  if (isAndroidWebView()) {
+    try {
+      console.log('Calling Android native camera for video...')
+      window.AndroidApp.openVideoCamera()
+      // 콜백은 window.onGameVideoCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call Android video camera:', error)
+      // 실패 시 fallback
+      videoInputRef.value?.click()
+    }
+  } else if (isIOSWebView()) {
+    try {
+      console.log('Calling iOS native camera for video...')
+      window.webkit.messageHandlers.iosBridge.postMessage({
+        action: 'openCamera',
+        type: 'video'
+      })
+      // 콜백은 window.onGameVideoCameraResult로 받음
+    } catch (error) {
+      console.error('Failed to call iOS video camera:', error)
+      // 실패 시 fallback
+      videoInputRef.value?.click()
+    }
+  } else {
+    // 일반 웹
+    videoInputRef.value?.click()
+  }
+}
+
 
 // 카메라 파일 선택 완료
 async function onCameraChange(e) {
@@ -751,7 +974,7 @@ async function onCameraChange(e) {
     try {
       const dataUrl = event.target.result
 
-      // 이미지 압축 (기본값 사용: 1200px, quality 0.6)
+      // 이미지 압축 (기본값 사용: 800px, quality 0.3)
       const compressed = await compressImage(dataUrl)
 
       // localStorage에 저장
@@ -779,9 +1002,48 @@ async function onCameraChange(e) {
   e.target.value = ''
 }
 
+// 동영상 파일 선택 완료
+async function onVideoChange(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  showToast('동영상 처리 중...')
+
+  try {
+    // 동영상 압축 (최대 2분)
+    const { dataUrl, duration } = await compressVideo(file, 120)
+
+    // localStorage에 저장
+    addGameVideo(gameId, dataUrl, duration)
+
+    showToast(`동영상이 저장되었습니다! (${Math.floor(duration)}초)`)
+  } catch (error) {
+    console.error('동영상 저장 실패:', error)
+    if (error.message === 'QUOTA_EXCEEDED') {
+      showToast('저장 공간이 부족합니다. 일부 미디어를 삭제한 후 다시 시도해주세요.')
+    } else {
+      showToast('동영상 저장에 실패했습니다.')
+    }
+  }
+
+  // input 초기화
+  e.target.value = ''
+}
+
 onUnmounted(() => {
   clearInterval(timerRef.value)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+
+  // 안드로이드 네이티브 카메라 콜백 정리
+  if (typeof window !== 'undefined') {
+    window.onGameCameraResult = null
+    window.onGameVideoCameraResult = null
+  }
+
+  // 소켓 핸들러 정리
+  socket.onConnecting(null)
+  socket.onConnected(null)
+  socket.onDisconnected(null)
 })
 </script>
 
@@ -829,6 +1091,20 @@ onUnmounted(() => {
     opacity: 1;
   }
 }
+@keyframes countdown {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
 .vs-jump-blink {
   animation: vs-jump-blink 1.5s ease-in-out infinite;
 }
@@ -837,5 +1113,8 @@ onUnmounted(() => {
 }
 .animate-blink {
   animation: blink 2.5s infinite;
+}
+.animate-countdown {
+  animation: countdown 1s ease-in-out;
 }
 </style>

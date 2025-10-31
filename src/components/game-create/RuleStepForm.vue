@@ -336,35 +336,35 @@ import { ref, defineProps, defineEmits, onMounted, watch, nextTick } from 'vue'
 import api from '../../api/api'
 import CustomInputNumber from './CustomInputNumber.vue'
 
-const props = defineProps(['step', 'form'])
+const props = defineProps(['step', 'form', 'isEditMode'])
 const emit = defineEmits(['input', 'validation'])
 
 const minors = ref([])
 const showDropdown = ref(false)
 const selectedMinorLabel = ref('')
-const localInput = ref('')
+const localInput = ref(props.form.ruleGoal || '')
 const inputError = ref('')
 
-const localScoreInput = ref('')
+const localScoreInput = ref(props.form.ruleScoreDefinition || '')
 const checkedScorePreset = ref(false)
 const scoreInputError = ref('')
 
-const localReadyInput = ref('')
+const localReadyInput = ref(props.form.rulePreparation || '')
 const readyInputError = ref('')
 
-const localOrderInput = ref('')
+const localOrderInput = ref(props.form.ruleOrder || '')
 const checkedOrderPreset = ref(false)
 const orderInputError = ref('')
 
 const checkedJudge1 = ref(false)
-const localJudgeInput = ref('')
+const localJudgeInput = ref(props.form.ruleDecision || '')
 const judgeInputError = ref('')
 
 const checkedFoulPreset = ref(false)
-const localFoulInput = ref('')
+const localFoulInput = ref(props.form.ruleFoul || '')
 const foulInputError = ref('')
 
-const localExtraInput = ref('')
+const localExtraInput = ref(props.form.ruleExtraInfo || '')
 
 // 12단계
 const localPointsToWin = ref(props.form.pointsToWin ?? -1)
@@ -693,6 +693,10 @@ watch(
     if (validators[newVal]) {
       await nextTick()
       validators[newVal]()
+    }
+    // 수정 모드일 때는 항상 검증 통과
+    if (props.isEditMode) {
+      emit('validation', true)
     }
   },
 )

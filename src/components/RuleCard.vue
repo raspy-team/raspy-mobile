@@ -13,7 +13,7 @@
           </div>
         </div>
         <div>
-          <span class="text-base font-extrabold text-gray-900 truncate block">
+          <span class="text-base font-extrabold text-gray-200 truncate block">
             {{ rule.ruleTitle }}
           </span>
           <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -27,10 +27,10 @@
         <div class="flex items-center gap-2 justify-end">
           <img
             :src="rule.createdBy.profile?.profilePicture"
-            class="w-7 h-7 rounded-full border border-orange-100 object-cover"
+            class="w-7 h-7 rounded-full border border-gray-600 object-cover"
             :alt="rule.createdBy.nickname"
           />
-          <span class="text-xs text-gray-500 font-medium max-w-[60px] truncate">
+          <span class="text-xs text-gray-400 font-medium max-w-[60px] truncate">
             {{ rule.createdBy.nickname }}
           </span>
         </div>
@@ -40,7 +40,7 @@
       </div>
     </div>
 
-    <div class="mb-4 text-gray-600 text-sm">
+    <div class="mb-4 text-gray-400 text-sm">
       {{ rule.ruleGoal }}
     </div>
 
@@ -49,8 +49,15 @@
       <button class="game-cta text-center px-6" @click.stop="onGameCtaClick">
         <div class="text-center flex justify-center items-center font-semibold gap-2">생성</div>
       </button>
-      <div class="flex flex-col items-start text-xs text-gray-500 font-semibold gap-1">
-        <span>평점 : -</span>
+
+      <div class="flex flex-col items-start text-xs text-gray-400 font-semibold gap-1">
+        <span class="flex items-center gap-1">
+          <i class="fas fa-star text-purple-500 text-xs"></i>
+          <span v-if="rule.averageRating && rule.averageRating > 0">
+            평점 : {{ rule.averageRating.toFixed(1) }}/5 ({{ rule.ratingCount || 0 }})
+          </span>
+          <span v-else>평점 : 아직 없음</span>
+        </span>
         <span>플레이 수 : {{ rule.useCount }}회</span>
       </div>
     </div>
@@ -76,11 +83,11 @@
       @click.stop
     >
       <div
-        class="bg-white rounded-2xl shadow-lg px-6 py-8 w-full max-w-xs flex flex-col items-center"
+        class="bg-gray-800 rounded-2xl shadow-lg px-6 py-8 w-full max-w-xs flex flex-col items-center"
         @click.stop
       >
-        <div class="font-bold text-lg text-gray-900 mb-3">정말로 생성할까요?</div>
-        <div class="text-sm text-gray-600 mb-6 text-center">
+        <div class="font-bold text-lg text-gray-200 mb-3">정말로 생성할까요?</div>
+        <div class="text-sm text-gray-400 mb-6 text-center">
           아래 규칙으로<br />
           <b class="text-orange-500 text-base">{{ rule.ruleTitle }}</b
           ><br />
@@ -89,13 +96,13 @@
         <div class="flex gap-3 w-full">
           <button
             @click="confirmVisible = false"
-            class="flex-1 py-2 bg-gray-200 text-gray-500 rounded-xl font-bold text-base"
+            class="flex-1 py-2 bg-gray-700 text-gray-300 rounded-xl font-bold text-base hover:bg-gray-600"
           >
             취소
           </button>
           <button
             @click="onGameCreateConfirm"
-            class="flex-1 py-2 bg-orange-500 text-white rounded-xl font-bold text-base"
+            class="flex-1 py-2 bg-orange-500 text-white rounded-xl font-bold text-base hover:bg-orange-600"
           >
             생성
           </button>
@@ -213,14 +220,14 @@ async function submitReport() {
 
 <style scoped>
 .card-style {
-  background: #fafafb;
+  background: #374151;
   border-radius: 1.3rem;
   box-shadow:
     0 2px 14px 0 rgba(31, 41, 55, 0.04),
     0 2px 8px 0 rgba(251, 146, 60, 0.06);
   padding: 1.45rem 1.15rem 1.4rem 1.15rem;
   margin-bottom: 1.05rem;
-  border: 1.2px solid #f6f6f6;
+  border: 1.2px solid #4b5563;
   transition:
     box-shadow 0.2s,
     border 0.15s;

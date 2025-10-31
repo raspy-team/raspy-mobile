@@ -72,13 +72,12 @@ function openApp() {
   const isAndroid = /android/i.test(ua)
   const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream
 
-  alert()
   if (isAndroid) {
     // 안드로이드 intent 딥링크
     window.location.href = `intent://invite/${gameId}#Intent;scheme=raspy;package=com.xhadl.raspy_android;end`
   } else if (isIOS) {
     // iOS: 우선 커스텀스킴(앱에 raspy:// 세팅되어 있어야 동작)
-    window.location.href = `raspy://invite/${gameId}`
+    window.location.href = `raspy://invite/${gameId}` // it does not means real game ID !!!!!!!!
 
     // 유니버설 링크도 세팅했다면, 아래 코드로 더 확실한 fallback 가능:
     // window.location.href = `https://raspy-mobile-fork.vercel.app/invite/${gameId}`

@@ -149,10 +149,20 @@
         <button @click="openHelp" class="text-sm underline">도움말</button>
         <button @click="openContact" class="text-sm underline">문의하기</button>
       </div>
+
+      <!-- Instagram Link -->
+      <div class="mt-6 flex justify-center">
+        <button
+          @click="openInstagram"
+          class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 rounded-full text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+          aria-label="인스타그램 방문"
+        >
+          <i class="fab fa-instagram text-xl"></i>
+          <span>인스타그램</span>
+        </button>
+      </div>
     </div>
   </div>
-
-  <!-- 법적 고지 모달 -->
   <div
     v-if="showLegalModal"
     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5"
@@ -381,6 +391,7 @@ const goNotifications = () => router.push('/settings/notifications')
 const openAbout = () => router.push('/settings/about')
 const openHelp = () => router.push('/help')
 const openContact = () => router.push('/contact')
+const openInstagram = () => window.open('https://www.instagram.com/matchmobileapp/', '_blank')
 
 const openBlockList = () => {
   showBlockListModal.value = true

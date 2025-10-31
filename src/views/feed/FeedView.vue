@@ -76,7 +76,7 @@
     <transition name="slide">
       <aside
         v-if="showNotificationPanel"
-        class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
+        class="fixed top-0 right-0 h-full w-full max-w-[350px] sm:max-w-[400px] bg-gray-900/95 raspy-top border-l border-gray-700 z-[100] shadow-2xl shadow-black/60 flex flex-col overflow-hidden"
         @touchstart="onPanelDragStart"
         @touchmove="onPanelDragMove"
         @touchend="onPanelDragEnd"
@@ -84,41 +84,41 @@
         @mousemove="onPanelDragMove"
         @mouseup="onPanelDragEnd"
       >
-        <div class="flex items-center justify-between px-6 h-16 border-b">
-          <span class="text-lg font-bold text-gray-800">알림</span>
+        <div class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80">
+          <span class="text-base font-semibold text-gray-100 tracking-tight">알림</span>
           <button
             @click="toggleNotificationPanel"
-            class="text-gray-400 hover:text-gray-800 text-xl"
+            class="text-gray-400 hover:text-gray-100 text-xl transition-colors"
           >
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <template v-if="notifications.length > 0">
             <ul>
               <li
                 v-for="n in notifications"
                 :key="n.id"
-                class="flex px-5 py-4 border-b group cursor-pointer hover:bg-orange-50/70 transition relative"
+                class="flex px-5 py-4 border-b border-gray-700 group cursor-pointer hover:bg-gray-800/80 transition-colors duration-150 relative overflow-hidden"
                 @click="openNotification(n)"
               >
                 <div
-                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-orange-50 mr-4"
+                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 border border-gray-700 mr-4 shadow-inner shadow-black/40"
                 >
-                  <i :class="notificationIcon(n.type)" class="text-xl" />
+                  <i :class="notificationIcon(n.type)" class="text-xl text-orange-500" />
                 </div>
-                <div class="flex-1">
+                <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-1">
-                    <span class="font-bold text-base text-black">{{ n.title }}</span>
+                    <span class="font-medium text-sm text-gray-100 truncate">{{ n.title }}</span>
                     <span
                       v-if="!n.isRead"
                       class="inline-block ml-1 w-2 h-2 rounded-full bg-orange-500 align-middle"
                     ></span>
                   </div>
-                  <div class="text-sm text-gray-500 mt-1 truncate">
+                  <div class="text-xs text-gray-400 mt-1 truncate">
                     {{ n.message }}
                   </div>
-                  <div class="text-sm text-gray-400 mt-1">
+                  <div class="text-[10px] text-gray-500 mt-1">
                     {{ formatDate(n.createdAt) }}
                   </div>
                 </div>
@@ -126,7 +126,7 @@
             </ul>
           </template>
           <template v-else>
-            <div class="py-20 text-center text-gray-400 text-base">알림이 없습니다.</div>
+            <div class="py-20 text-center text-gray-500 text-sm">알림이 없습니다.</div>
           </template>
         </div>
       </aside>

@@ -211,7 +211,7 @@ const skip = () => {
 }
 
 const complete = () => {
-  // localStorage.setItem('feedOnboardingCompleted', 'true')
+  // localStorage.setItem('feedOnboardingCompleted', 'true') // TODO: 고병연 구현 완료 시 해제필요
   currentPage.value = 0 // 다음 번을 위해 페이지 리셋
   emit('complete')
 }

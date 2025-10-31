@@ -884,6 +884,15 @@
           <span class="w-8 h-8" v-html="icons.share"></span>
           <span class="text-[10px] mt-1">공유</span>
         </button>
+        <button
+          v-if="post.type !== 'invite' && post.type !== 'friend-invite'"
+          @click="onReport"
+          class="flex flex-col items-center active:scale-95 transition"
+          :class="{ 'opacity-50': isReported(post.id) }"
+        >
+          <span class="w-8 h-8" v-html="icons.flag"></span>
+          <span class="text-[10px] mt-1">신고</span>
+        </button>
       </div>
 
       <div class="pointer-events-none absolute inset-0 z-30">
@@ -911,7 +920,10 @@
             <div>
               <h2 class="text-xl font-bold text-white">경기 규칙</h2>
               <p class="text-sm text-white/60">{{ post?.rule?.ruleTitle || '규칙 제목 없음' }}</p>
-              <div v-if="post?.rule?.averageRating && post.rule.averageRating > 0" class="flex items-center gap-1 mt-1">
+              <div
+                v-if="post?.rule?.averageRating && post.rule.averageRating > 0"
+                class="flex items-center gap-1 mt-1"
+              >
                 <i class="fas fa-star text-purple-400 text-xs"></i>
                 <span class="text-xs text-white/70">
                   {{ post.rule.averageRating.toFixed(1) }}/5 ({{ post.rule.ratingCount || 0 }}명)
@@ -1139,6 +1151,7 @@
   </div>
 
   <Comment class="z-[100000]" v-if="commentId == 1" :id="post.id" @close="commentId = 0" />
+  <custom-toast />
 </template>
 
 <script setup>
@@ -1189,13 +1202,38 @@ const showOnboarding = ref(false)
 // 온보딩 완료 처리
 function completeOnboarding() {
   showOnboarding.value = false
-  localStorage.setItem('feedOnboardingCompleted', 'true')
+  // localStorage.setItem('feedOnboardingCompleted2', 'true')
   console.log('[FeedView] 온보딩 완료 - GIF는 자동으로 재생됨')
 }
 
 // 나랑도해 상태 관리
 const playWithMeRequests = ref(new Map()) // userId -> boolean (요청 상태)
 const showPlayerSelectModal = ref(false) // 플레이어 선택 모달 표시 상태
+
+// 신고 상태 관리 (localStorage에 저장하여 중복 신고 방지)
+const reportedPosts = ref(new Set(JSON.parse(localStorage.getItem('reportedPosts') || '[]')))
+
+function isReported(postId) {
+  return reportedPosts.value.has(postId)
+}
+
+function onReport() {
+  const postId = post.value?.id
+  if (!postId) return
+
+  if (isReported(postId)) {
+    showToast('이미 신고한 게시물입니다')
+    return
+  }
+
+  // 신고 완료 처리
+  reportedPosts.value.add(postId)
+  localStorage.setItem('reportedPosts', JSON.stringify([...reportedPosts.value]))
+  showToast('신고가 완료되었습니다')
+
+  // TODO: 나중에 API 연결
+  // await api.post(`/api/posts/${postId}/report`)
+}
 
 const fetchNotifications = async () => {
   const res = await api.get('/api/notifications')
@@ -1257,7 +1295,7 @@ onMounted(() => {
   loadFeed(router.currentRoute.value)
 
   // 최초 접속 시에만 온보딩 표시
-  const hasCompletedOnboarding = localStorage.getItem('feedOnboardingCompleted') === 'true'
+  const hasCompletedOnboarding = localStorage.getItem('feedOnboardingCompleted2') === 'true'
   if (!hasCompletedOnboarding) {
     setTimeout(() => {
       showOnboarding.value = true
@@ -2119,6 +2157,7 @@ const icons = {
     '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0Z"/></svg>',
   share:
     '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6 12 2 8 6"/><path d="M12 2v14"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M4 21V4"/><path d="M4 6h10l4 4-4 4H4"/></svg>',
   camera:
     '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="M3 7h3l2-3h8l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="4"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="m12 3 2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9L12 3Z"/></svg>',

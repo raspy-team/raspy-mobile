@@ -33,32 +33,42 @@
             class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
           >
             <!-- 헤더 -->
-            <div class="relative px-6 py-8 bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 text-white">
+            <div
+              class="relative px-6 py-8 bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 text-white"
+            >
               <div class="text-center">
                 <div class="inline-flex items-center justify-center mb-4">
                   <div class="relative">
                     <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
-                    <div class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30">
+                    <div
+                      class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30"
+                    >
                       <i class="fas fa-star text-4xl"></i>
                     </div>
                   </div>
                 </div>
                 <h2 class="text-2xl font-black mb-2 tracking-tight">경기 평가가 필요해요!</h2>
-                <p class="text-white/90 text-sm font-medium">종료된 경기에 대한 리뷰를 작성해주세요</p>
+                <p class="text-white/90 text-sm font-medium">
+                  종료된 경기에 대한 리뷰를 작성해주세요
+                </p>
               </div>
             </div>
 
             <!-- 내용 -->
             <div class="px-6 py-6 space-y-4">
               <div class="text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full border border-purple-200">
+                <div
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full border border-purple-200"
+                >
                   <i class="fas fa-clipboard-check text-purple-500"></i>
                   <span class="text-sm font-bold text-purple-700">상대방 평가 및 규칙 평가</span>
                 </div>
               </div>
 
               <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed">
-                <p class="mb-2"><i class="fas fa-info-circle text-purple-500 mr-2"></i>경기가 종료되었습니다.</p>
+                <p class="mb-2">
+                  <i class="fas fa-info-circle text-purple-500 mr-2"></i>경기가 종료되었습니다.
+                </p>
                 <p>상대방과 규칙에 대한 평가를 남겨주세요.</p>
               </div>
             </div>
@@ -90,12 +100,16 @@
             class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
           >
             <!-- 헤더 -->
-            <div class="relative px-6 py-8 bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 text-white">
+            <div
+              class="relative px-6 py-8 bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 text-white"
+            >
               <div class="text-center">
                 <div class="inline-flex items-center justify-center mb-4">
                   <div class="relative">
                     <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
-                    <div class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30">
+                    <div
+                      class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30"
+                    >
                       <i class="fas fa-trophy text-4xl"></i>
                     </div>
                   </div>
@@ -109,16 +123,22 @@
             <div class="px-6 py-6 space-y-4">
               <!-- 규칙 제목 -->
               <div class="text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full border border-orange-200">
+                <div
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full border border-orange-200"
+                >
                   <i class="fas fa-gamepad text-orange-500"></i>
-                  <span class="text-sm font-bold text-orange-700">{{ activeGame.ruleTitle || '경기' }}</span>
+                  <span class="text-sm font-bold text-orange-700">{{
+                    activeGame.ruleTitle || '경기'
+                  }}</span>
                 </div>
               </div>
 
               <!-- 플레이어 VS -->
               <div class="flex items-center justify-center gap-3 py-4">
                 <div class="flex flex-col items-center flex-1">
-                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg">
+                  <div
+                    class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
+                  >
                     {{ getInitial(activeGame.player1?.nickname) }}
                   </div>
                   <p class="text-sm font-bold text-gray-800 truncate max-w-[80px]">
@@ -131,7 +151,9 @@
                 </div>
 
                 <div class="flex flex-col items-center flex-1">
-                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg">
+                  <div
+                    class="w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
+                  >
                     {{ getInitial(activeGame.player2?.nickname) }}
                   </div>
                   <p class="text-sm font-bold text-gray-800 truncate max-w-[80px]">
@@ -152,12 +174,25 @@
                   <p class="text-xs text-gray-500 font-medium">자동 참여까지</p>
                   <div class="relative">
                     <svg class="transform -rotate-90" width="80" height="80">
-                      <circle cx="40" cy="40" r="36" stroke="#fee2e2" stroke-width="6" fill="none" />
                       <circle
                         cx="40"
                         cy="40"
                         r="36"
-                        :stroke="gameCountdown <= 2 ? '#ef4444' : gameCountdown <= 3 ? '#f97316' : '#22c55e'"
+                        stroke="#fee2e2"
+                        stroke-width="6"
+                        fill="none"
+                      />
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="36"
+                        :stroke="
+                          gameCountdown <= 2
+                            ? '#ef4444'
+                            : gameCountdown <= 3
+                              ? '#f97316'
+                              : '#22c55e'
+                        "
                         stroke-width="6"
                         fill="none"
                         stroke-linecap="round"
@@ -169,7 +204,13 @@
                     <div class="absolute inset-0 flex items-center justify-center">
                       <span
                         class="text-3xl font-black"
-                        :class="gameCountdown <= 2 ? 'text-red-500' : gameCountdown <= 3 ? 'text-orange-500' : 'text-green-500'"
+                        :class="
+                          gameCountdown <= 2
+                            ? 'text-red-500'
+                            : gameCountdown <= 3
+                              ? 'text-orange-500'
+                              : 'text-green-500'
+                        "
                       >
                         {{ gameCountdown }}
                       </span>
@@ -331,7 +372,7 @@ watch(
       pendingReviewGameId.value = null
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 펜딩 리뷰 페이지로 이동
@@ -343,19 +384,16 @@ const goToPendingReview = () => {
 }
 
 // activeGame 변경 감지하여 카운트다운 시작
-watch(
-  activeGame,
-  (newGame) => {
-    if (newGame && newGame.gameId) {
-      // 펜딩 리뷰가 없을 때만 게임 시작 알림 표시
-      if (!showPendingReviewModal.value) {
-        startGameCountdown()
-      }
-    } else {
-      stopGameCountdown()
+watch(activeGame, (newGame) => {
+  if (newGame && newGame.gameId) {
+    // 펜딩 리뷰가 없을 때만 게임 시작 알림 표시
+    if (!showPendingReviewModal.value) {
+      startGameCountdown()
     }
+  } else {
+    stopGameCountdown()
   }
-)
+})
 
 const startGameCountdown = () => {
   stopGameCountdown()
@@ -396,7 +434,7 @@ watch(
   () => route.path,
   (path) => {
     if (path === '/') {
-      const completed = localStorage.getItem('feedOnboardingCompleted')
+      const completed = localStorage.getItem('feedOnboardingCompleted2')
       if (completed !== 'true') {
         // 온보딩을 즉시 표시 (FeedView의 초기 애니메이션보다 먼저)
         showFeedOnboarding.value = true
@@ -405,7 +443,7 @@ watch(
       showFeedOnboarding.value = false
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 function getChatUrlFromPath(path) {
@@ -510,7 +548,8 @@ onBeforeUnmount(() => {
 
 /* ping animation */
 @keyframes ping {
-  75%, 100% {
+  75%,
+  100% {
     transform: scale(1.5);
     opacity: 0;
   }

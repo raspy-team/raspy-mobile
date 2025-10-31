@@ -420,7 +420,7 @@
             <div class="absolute inset-0 bg-black/20 pointer-events-none" />
 
             <!-- 상단 헤더 -->
-            <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
+            <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12 sm:pt-16 md:pt-20 lg:pt-24">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <!-- 첫 번째 플레이어 -->
@@ -480,7 +480,7 @@
             </div>
 
             <!-- 하단 정보 -->
-            <div class="absolute bottom-[18%] left-0 right-0 px-4 z-10">
+            <div class="absolute bottom-32 sm:bottom-36 md:bottom-40 lg:bottom-44 left-0 right-0 px-4 z-10">
               <div class="max-w-xl mx-auto">
                 <div class="text-center mb-3">
                   <div class="text-white/80 text-sm drop-shadow-lg">
@@ -1148,7 +1148,7 @@
     </div>
   </div>
 
-  <Footer tab="feed" />
+  <Footer v-if="!isUserFeedMode" tab="feed" />
   <CustomToast />
 
   <div

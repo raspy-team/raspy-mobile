@@ -914,15 +914,6 @@
         </button>
       </div>
 
-      <div class="pointer-events-none absolute inset-0 z-30">
-        <div
-          v-for="h in hearts"
-          :key="h.id"
-          class="absolute text-red-500 animate-heart-pop"
-          :style="{ left: h.x + 'px', top: h.y + 'px' }"
-          v-html="icons.heartFill"
-        ></div>
-      </div>
     </div>
   </div>
 
@@ -1483,7 +1474,6 @@ function setCurrentFeed(i) {
   // post는 computed이므로 자동으로 업데이트됨
   // 포스트 단위 UX 상태 초기화
   currentSlide.value = 0
-  hearts.value = []
   tryVibrate(10)
 }
 
@@ -1848,7 +1838,6 @@ const isPointerDown = ref(false)
 let gestureStartAt = 0
 let activeScrollEl = null
 let lastTapAt = 0
-const hearts = ref([])
 
 const wrapperStyle = computed(() => ({
   width: totalSlides.value * 100 + 'vw',
@@ -2074,15 +2063,6 @@ async function toggleLike() {
   })
   tryVibrate(15)
 
-  // Double tap heart spawn
-  if (!originalLikedState) {
-    const feedElement = document.querySelector('.feed-viewport')
-    if (feedElement) {
-      const rect = feedElement.getBoundingClientRect()
-      spawnHeart(rect.width / 2, rect.height / 2)
-    }
-  }
-
   try {
     // 2. API 호출
     const response = await api.post(`/api/games/${currentPost.id}/like`)
@@ -2198,14 +2178,6 @@ function tryVibrate(ms) {
   }
 }
 
-function spawnHeart(x, y) {
-  const id = Math.random().toString(36).slice(2)
-  hearts.value.push({ id, x: x - 16, y: y - 16 })
-  setTimeout(() => {
-    hearts.value = hearts.value.filter((h) => h.id !== id)
-  }, 700)
-}
-
 // Icons (inline SVG)
 const icons = {
   heart:
@@ -2297,26 +2269,6 @@ function onPanelDragEnd() {
 .w-8 :deep(svg),
 .w-4 :deep(svg) {
   display: block;
-}
-
-@keyframes heart-pop {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  10% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.6) translateY(-20px);
-    opacity: 0;
-  }
-}
-.animate-heart-pop :deep(svg) {
-  width: 32px;
-  height: 32px;
-  animation: heart-pop 650ms ease forwards;
 }
 
 @keyframes like-bump-kf {

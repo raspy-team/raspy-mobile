@@ -1150,7 +1150,7 @@
     </div>
   </div>
 
-  <Comment class="z-[100000]" v-if="commentId == 1" :id="post.id" @close="commentId = 0" />
+  <Comment class="z-[100000]" v-if="commentId == 1" :id="post.id" @close="onCloseComment" />
   <custom-toast />
 </template>
 
@@ -1218,6 +1218,10 @@ function isReported(postId) {
 }
 
 function onReport() {
+  // 피드 터치 상태 리셋
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+
   const postId = post.value?.id
   if (!postId) return
 
@@ -2021,6 +2025,10 @@ async function toggleLike() {
     return
   }
 
+  // 피드 터치 상태 리셋
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+
   const currentPost = post.value
   const originalLikedState = currentPost.isLiked
   const originalLikeCount = currentPost.likeCount || 0
@@ -2069,6 +2077,10 @@ function onDoWithMe() {
     return
   }
 
+  // 피드 터치 상태 리셋 (모달 열 때)
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+
   // 플레이어 선택 모달 열기
   showPlayerSelectModal.value = true
 }
@@ -2102,15 +2114,32 @@ async function sendPlayWithMeRequest(selectedPlayer) {
 // 플레이어 선택 모달 닫기
 function closePlayerSelectModal() {
   showPlayerSelectModal.value = false
+  // 피드 터치 상태 리셋 (모달 닫을 때)
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
 }
 
 function onComment() {
   const currentPost = post.value
   if (currentPost?.id) {
+    // 피드 터치 상태 리셋 (모달 열 때)
+    feedIsPointerDown.value = false
+    feedAnimating.value = false
     commentId.value = 1
   }
 }
+
+function onCloseComment() {
+  commentId.value = 0
+  // 피드 터치 상태 리셋 (모달 닫을 때)
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+}
 async function onShare() {
+  // 피드 터치 상태 리셋
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+
   const res = await api.post('/api/invite', null, { params: { gameId: `${post.value.id}` } })
   const url = res.data.url
   const text = `${post.value.players[0]?.name}의 경기 피드 – Match`
@@ -2124,6 +2153,10 @@ async function onShare() {
   } catch (e) {
     console.log(e)
   }
+
+  // 공유 완료 후에도 터치 상태 리셋
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
 }
 
 const showRuleModal = ref(false)

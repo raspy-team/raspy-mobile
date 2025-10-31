@@ -90,7 +90,7 @@
           ]"
         >
           <!-- 규칙(게임명, 카테고리) 정보 최상단 + 타입/상태 라벨 우측 배치 -->
-          <div class="flex justify-between items-start mb-2" @click="game.showRuleDetail = true">
+          <div class="flex justify-between items-start mb-2 cursor-pointer hover:bg-gray-800 rounded-lg p-2 transition-colors" @click="openRuleDetail(game)">
             <div class="min-w-0 flex items-center gap-2">
               <div>
                 <img
@@ -99,10 +99,13 @@
                   alt="카테고리 이미지"
                 />
               </div>
-              <div>
-                <span class="text-base font-bold text-gray-100 truncate block">
-                  {{ game.rule.ruleTitle }}
-                </span>
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-base font-bold text-gray-100 truncate block">
+                    {{ game.rule.ruleTitle }}
+                  </span>
+                  <i class="fas fa-info-circle text-orange-400 text-sm"></i>
+                </div>
                 <div class="flex gap-1 items-center mt-1 text-sm text-orange-400 font-normal">
                   {{ game.rule.majorCategory }}
                   <span v-if="game.rule.minorCategory" class="mx-1 text-orange-400">&gt;</span>
@@ -128,8 +131,9 @@
               <div class="flex flex-col items-center flex-1">
                 <img
                   :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-500 shadow"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-500 shadow cursor-pointer hover:opacity-80 transition-opacity"
                   alt="Owner Profile"
+                  @click="router.push('/profile/' + (game.ownerId || game.myId))"
                 />
                 <span
                   class="mt-1 text-sm font-bold text-gray-100 truncate max-w-[4.5rem] text-center"
@@ -148,8 +152,9 @@
                 <img
                   v-if="getOpponentProfileUrl(game)"
                   :src="getOpponentProfileUrl(game)"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow"
+                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow cursor-pointer hover:opacity-80 transition-opacity"
                   alt="Opponent Profile"
+                  @click="router.push('/profile/' + getOpponentUserId(game))"
                 />
                 <div
                   v-else
@@ -664,9 +669,9 @@
 
   <!-- 규칙 모달 -->
   <MatchRuleModal
-    v-if="game && game.showRuleDetail"
-    :rule="game.rule"
-    @close="game.showRuleDetail = false"
+    v-if="selectedGame"
+    :rule="selectedGame.rule"
+    @close="closeRuleDetail"
   />
 </template>
 
@@ -725,6 +730,9 @@ let autocompleteModal = null
 const showDeleteModal = ref(false)
 const gameToDelete = ref(null)
 
+// 규칙 모달 관련
+const selectedGame = ref(null)
+
 // 모든 게임을 최신순으로 합쳐서 보여주기 (신청한 게임 + 내 게임)
 // 내 게임에는 신청자 목록도 함께 포함
 const allGames = computed(() => {
@@ -763,8 +771,8 @@ const fetchGames = async () => {
     })
     applicantsMap.value = newApplicantsMap
 
-    sentGames.value = sentRes.data.map((g) => ({ ...g, showRuleDetail: false }))
-    myGames.value = myGamesRes.data.map((g) => ({ ...g, showRuleDetail: false }))
+    sentGames.value = sentRes.data.map((g) => ({ ...g }))
+    myGames.value = myGamesRes.data.map((g) => ({ ...g }))
   } catch (e) {
     console.error('Failed to load games:', e)
   }
@@ -876,6 +884,23 @@ function getOpponentProfileUrl(game) {
     const approvedApplicant = game.applicants.find((a) => a.approved)
     if (approvedApplicant) {
       return approvedApplicant.applicantProfileUrl
+    }
+  }
+  return null
+}
+
+function getOpponentUserId(game) {
+  if (game.opponentId) {
+    return game.opponentId
+  }
+  if (
+    (game.status === 'APPROVED' || game.status === 'SCHEDULED') &&
+    game.applicants &&
+    game.applicants.length > 0
+  ) {
+    const approvedApplicant = game.applicants.find((a) => a.approved)
+    if (approvedApplicant) {
+      return approvedApplicant.userId
     }
   }
   return null
@@ -1190,6 +1215,15 @@ async function confirmDeleteGame() {
     }
     console.error('Failed to delete game:', e)
   }
+}
+
+// 규칙 모달 관련
+function openRuleDetail(game) {
+  selectedGame.value = game
+}
+
+function closeRuleDetail() {
+  selectedGame.value = null
 }
 </script>
 

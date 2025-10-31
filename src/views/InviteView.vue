@@ -15,9 +15,9 @@ const route = useRoute()
 const router = useRouter()
 
 onMounted(() => {
-  // route.params.gameId는 실제로는 인코딩된 딥링크 URL
+  // route.params.encodedUrl는 인코딩된 딥링크 URL
   // 예: "https://raspy-mobile-fork.vercel.app/feed?gameId=123"가 인코딩된 형태
-  const encodedDeeplink = route.params.gameId
+  const encodedDeeplink = route.params.encodedUrl
 
   try {
     // URL 디코딩

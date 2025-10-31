@@ -93,7 +93,7 @@ const routes = [
     props: true
   },
   {
-    path: '/invite/:gameId',
+    path: '/invite/:encodedUrl',
     component: InviteView,
   },
   { path: '/profile/:id', component: Profile },
@@ -106,7 +106,7 @@ const routes = [
   { path: '/rules/:ruleId/ranking', component: RuleRanking, props: true},
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/group/login', component: GroupUserLogin},
-  {path:'/invite-fall-back/:gameId', component : InviteDeep},
+  {path:'/invite-fall-back/:encodedUrl', component : InviteDeep},
   { path: '/feed', component: Feed},
 
   // Admin routes

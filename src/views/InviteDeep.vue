@@ -54,7 +54,11 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const gameId = route.params.gameId || ''
+// route.params.encodedUrl는 인코딩된 전체 URL
+// 예: "https%3A%2F%2Fraspy-mobile-fork.vercel.app%2Ffeed%3FgameId%3D102"
+// /invite-fall-back/ 뒤에 오는 URL을 통째로 가져옴
+const encodedDeeplink = route.params.encodedUrl || ''
+
 const showTip = ref(false)
 
 // 자동 앱 열기 (0.6초 뒤 시도, 0.9초 뒤 안내)
@@ -73,11 +77,11 @@ function openApp() {
   const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream
 
   if (isAndroid) {
-    // 안드로이드 intent 딥링크
-    window.location.href = `intent://invite/${gameId}#Intent;scheme=raspy;package=com.xhadl.raspy_android;end`
+    // 안드로이드 intent 딥링크 (encodedDeeplink는 인코딩된 전체 URL)
+    window.location.href = `intent://invite/${encodedDeeplink}#Intent;scheme=raspy;package=com.xhadl.raspy_android;end`
   } else if (isIOS) {
-    // iOS: 우선 커스텀스킴(앱에 raspy:// 세팅되어 있어야 동작)
-    window.location.href = `raspy://invite/${gameId}` // it does not means real game ID !!!!!!!!
+    // iOS: 커스텀 스킴 (encodedDeeplink는 인코딩된 전체 URL)
+    window.location.href = `raspy://invite/${encodedDeeplink}`
 
     // 유니버설 링크도 세팅했다면, 아래 코드로 더 확실한 fallback 가능:
     // window.location.href = `https://raspy-mobile-fork.vercel.app/invite/${gameId}`

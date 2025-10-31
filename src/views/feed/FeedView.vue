@@ -686,11 +686,11 @@
                       class="w-8 h-8 rounded-full object-cover"
                     />
                     <div class="text-xs font-semibold text-white/90">
-                      {{ post.reviews[0]?.author?.name || '익명' }}
+                      {{ post.reviews[0]?.author?.name || '익명' }}님의 한마디
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[1]?.text || '' }}
+                    {{ post.reviews[0]?.text || '' }}
                   </div>
                 </div>
 
@@ -711,11 +711,11 @@
                       class="w-8 h-8 rounded-full object-cover"
                     />
                     <div class="text-xs font-semibold text-white/90">
-                      {{ post.reviews[1]?.author?.name || '익명' }}
+                      {{ post.reviews[1]?.author?.name || '익명' }}님의 한마디
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[0]?.text || '' }}
+                    {{ post.reviews[1]?.text || '' }}
                   </div>
                 </div>
               </div>

@@ -33,7 +33,7 @@
               </div>
               <p class="text-xs text-gray-400 mt-2">
                 <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
-                장소명이나 주소를 입력하면 자동으로 검색됩니다
+                장소명이나 주소를 입력하면 자동으로 검색됩니다.
               </p>
             </div>
 
@@ -98,9 +98,9 @@
       <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
         <div class="text-center mb-4">
           <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">장소를 찾을 수 없습니다</h3>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">선택하신 곳의 주소가 정확하지 않습니다.</h3>
           <p class="text-sm text-gray-600">
-            더 구체적인 장소를 입력해주세요.<br />
+            다른 장소를 선택하신 후 추가 정보를 입력해주세요.<br />
             <span class="text-xs text-gray-500 mt-2 block">예: 서초탁구장, 강남체육관</span>
           </p>
         </div>

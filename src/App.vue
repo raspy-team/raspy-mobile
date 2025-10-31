@@ -1,5 +1,8 @@
 <template>
   <div class="h-full">
+    <!-- 피드 온보딩 (/ 경로 최초 접속 시) -->
+    <FeedOnboarding :show="showFeedOnboarding" @complete="onOnboardingComplete" />
+
     <!-- Splash 화면 (anroid는 네이티브 위임, ios일때만 보임.) -->
     <transition name="fade">
       <div class="overflow-hidden">
@@ -198,10 +201,12 @@ import { useRoute, useRouter } from 'vue-router'
 import MatchLogo from './assets/Match.png'
 import { socket } from './websocket'
 import api from './api/api'
+import FeedOnboarding from './components/FeedOnboarding.vue'
 // import GameStartNotification from './components/GameStartNotificationSimple.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 
 const showSplash = ref(true)
+const showFeedOnboarding = ref(false)
 const route = useRoute()
 // 진행 중인 게임 폴링 (명시적으로 초기화)
 const activeGamePolling = useActiveGamePolling()
@@ -379,6 +384,29 @@ const stopGameCountdown = () => {
 
 // router 필요
 const router = useRouter()
+
+// 온보딩 완료 핸들러
+const onOnboardingComplete = () => {
+  console.log('Feed onboarding completed')
+  showFeedOnboarding.value = false
+}
+
+// 라우트 변경 감지하여 / 경로일 때 온보딩 체크
+watch(
+  () => route.path,
+  (path) => {
+    if (path === '/') {
+      const completed = localStorage.getItem('feedOnboardingCompleted')
+      if (completed !== 'true') {
+        // 온보딩을 즉시 표시 (FeedView의 초기 애니메이션보다 먼저)
+        showFeedOnboarding.value = true
+      }
+    } else {
+      showFeedOnboarding.value = false
+    }
+  },
+  { immediate: true }
+)
 
 function getChatUrlFromPath(path) {
   // /chat/xxx 또는 /games/xxx/play 등 다양한 방 라우트 패턴 지원

@@ -422,17 +422,57 @@
             <!-- 상단 헤더 -->
             <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
               <div class="flex items-center justify-between">
-                <div
-                  class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
-                  @click="goToProfile(post.players?.[0]?.id || post.author?.id)"
-                >
-                  <img
-                    :src="post.players?.[0]?.avatar || post.author?.avatar"
-                    class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
-                  />
-                  <div>
-                    <div class="text-base font-normal text-white drop-shadow-lg">
-                      {{ post.players?.[0]?.name || post.author?.name }}
+                <div class="flex items-center gap-3">
+                  <!-- 첫 번째 플레이어 -->
+                  <div
+                    v-if="post.players?.[0]"
+                    class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.players[0].id)"
+                  >
+                    <img
+                      :src="post.players[0].avatar"
+                      class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-normal text-white drop-shadow-lg">
+                        {{ post.players[0].name }}
+                      </div>
+                    </div>
+                  </div>
+                  <!-- VS 표시 (두 플레이어가 있을 때) -->
+                  <div v-if="post.players?.[0] && post.players?.[1]" class="text-white/80 text-sm drop-shadow-lg mx-2">
+                    VS
+                  </div>
+                  <!-- 두 번째 플레이어 -->
+                  <div
+                    v-if="post.players?.[1]"
+                    class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.players[1].id)"
+                  >
+                    <img
+                      :src="post.players[1].avatar"
+                      class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-normal text-white drop-shadow-lg">
+                        {{ post.players[1].name }}
+                      </div>
+                    </div>
+                  </div>
+                  <!-- author 표시 (플레이어가 없을 때) -->
+                  <div
+                    v-if="!post.players?.[0] && post.author"
+                    class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.author.id)"
+                  >
+                    <img
+                      :src="post.author.avatar"
+                      class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-normal text-white drop-shadow-lg">
+                        {{ post.author.name }}
+                      </div>
                     </div>
                   </div>
                 </div>

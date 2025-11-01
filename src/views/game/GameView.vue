@@ -179,10 +179,10 @@
             class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
           >
             <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
-              <h2 class="text-lg font-bold mb-4 text-gray-900">생성자</h2>
+              <h2 class="text-lg font-bold mb-4 text-white">생성자</h2>
               <!-- 신청한 게임 소유자 정보 상단 렌더링 -->
               <template v-if="selectedApplicantsGame.type === 'sent'">
-                <div class="p-3 bg-gray-50 rounded-xl flex items-center gap-3 mb-4">
+                <div class="p-3 bg-gray-800 rounded-xl flex items-center gap-3 mb-4">
                   <img
                     :src="
                       selectedApplicantsGame.ownerProfileUrl ||
@@ -199,14 +199,14 @@
                         selectedApplicantsGame.championId ==
                         (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId)
                           ? 'text-yellow-500'
-                          : 'text-gray-800'
+                          : 'text-gray-200'
                       "
                     >
                       {{
                         selectedApplicantsGame.ownerNickname || selectedApplicantsGame.myNickname
                       }}
                     </p>
-                    <p class="text-xs text-gray-500 mb-0">
+                    <p class="text-xs text-gray-400 mb-0">
                       {{ selectedApplicantsGame.ownerStatistics?.wins }}승
                       {{ selectedApplicantsGame.ownerStatistics?.draws }}무
                       {{ selectedApplicantsGame.ownerStatistics?.losses }}패 · 승률
@@ -243,7 +243,7 @@
               >
                 <i class="fas fa-times"></i>
               </button>
-              <h2 class="text-lg font-bold mb-4 text-gray-900">도전자</h2>
+              <h2 class="text-lg font-bold mb-4 text-white">도전자</h2>
               <div
                 v-if="
                   selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0
@@ -253,7 +253,7 @@
                 <div
                   v-for="user in selectedApplicantsGame.applicants"
                   :key="user.userId"
-                  class="p-3 bg-gray-50 rounded-xl flex items-center justify-between"
+                  class="p-3 bg-gray-800 rounded-xl flex items-center justify-between"
                 >
                   <router-link :to="'/profile/' + user.userId">
                     <div class="flex items-center gap-3">
@@ -267,12 +267,12 @@
                           :class="
                             selectedApplicantsGame.championId == user.userId
                               ? 'text-yellow-500'
-                              : 'text-gray-800'
+                              : 'text-gray-200'
                           "
                         >
                           {{ user.applicantNickname }}
                         </p>
-                        <p class="text-xs text-gray-500">
+                        <p class="text-xs text-gray-400">
                           {{ user.applicantGameStatisticsDTO.wins }}승
                           {{ user.applicantGameStatisticsDTO.draws }}무
                           {{ user.applicantGameStatisticsDTO.losses }}패 · 승률
@@ -290,7 +290,7 @@
                         class="px-4 py-2 text-xs rounded-lg text-white font-semibold"
                         :class="
                           approvedExists(selectedApplicantsGame.applicants)
-                            ? 'bg-gray-300'
+                            ? 'bg-gray-600'
                             : 'bg-orange-500 hover:bg-orange-600'
                         "
                       >
@@ -299,7 +299,7 @@
                       <button
                         v-else
                         @click.stop="cancelApproval(selectedApplicantsGame.id, user.userId)"
-                        class="px-4 py-2 text-xs rounded-lg bg-red-100 text-red-600 font-semibold hover:bg-red-200"
+                        class="px-4 py-2 text-xs rounded-lg bg-red-800 text-red-400 font-semibold hover:bg-red-700"
                       >
                         취소
                       </button>

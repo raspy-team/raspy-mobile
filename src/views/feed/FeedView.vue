@@ -76,7 +76,7 @@
     <transition name="slide">
       <aside
         v-if="showNotificationPanel"
-        class="fixed top-0 right-0 h-full w-[350px] max-w-[96vw] bg-white raspy-top border-l z-[100] shadow-lg flex flex-col"
+        class="fixed top-0 right-0 h-full w-full max-w-[350px] sm:max-w-[400px] bg-gray-900/95 raspy-top border-l border-gray-700 z-[100] shadow-2xl shadow-black/60 flex flex-col overflow-hidden"
         @touchstart="onPanelDragStart"
         @touchmove="onPanelDragMove"
         @touchend="onPanelDragEnd"
@@ -84,41 +84,41 @@
         @mousemove="onPanelDragMove"
         @mouseup="onPanelDragEnd"
       >
-        <div class="flex items-center justify-between px-6 h-16 border-b">
-          <span class="text-lg font-bold text-gray-800">알림</span>
+        <div class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80">
+          <span class="text-base font-semibold text-gray-100 tracking-tight">알림</span>
           <button
             @click="toggleNotificationPanel"
-            class="text-gray-400 hover:text-gray-800 text-xl"
+            class="text-gray-400 hover:text-gray-100 text-xl transition-colors"
           >
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <template v-if="notifications.length > 0">
             <ul>
               <li
                 v-for="n in notifications"
                 :key="n.id"
-                class="flex px-5 py-4 border-b group cursor-pointer hover:bg-orange-50/70 transition relative"
+                class="flex px-5 py-4 border-b border-gray-700 group cursor-pointer hover:bg-gray-800/80 transition-colors duration-150 relative overflow-hidden"
                 @click="openNotification(n)"
               >
                 <div
-                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-orange-50 mr-4"
+                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 border border-gray-700 mr-4 shadow-inner shadow-black/40"
                 >
-                  <i :class="notificationIcon(n.type)" class="text-xl" />
+                  <i :class="notificationIcon(n.type)" class="text-xl text-orange-500" />
                 </div>
-                <div class="flex-1">
+                <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-1">
-                    <span class="font-bold text-base text-black">{{ n.title }}</span>
+                    <span class="font-medium text-sm text-gray-100 truncate">{{ n.title }}</span>
                     <span
                       v-if="!n.isRead"
                       class="inline-block ml-1 w-2 h-2 rounded-full bg-orange-500 align-middle"
                     ></span>
                   </div>
-                  <div class="text-sm text-gray-500 mt-1 truncate">
+                  <div class="text-xs text-gray-400 mt-1 truncate">
                     {{ n.message }}
                   </div>
-                  <div class="text-sm text-gray-400 mt-1">
+                  <div class="text-[10px] text-gray-500 mt-1">
                     {{ formatDate(n.createdAt) }}
                   </div>
                 </div>
@@ -126,7 +126,7 @@
             </ul>
           </template>
           <template v-else>
-            <div class="py-20 text-center text-gray-400 text-base">알림이 없습니다.</div>
+            <div class="py-20 text-center text-gray-500 text-sm">알림이 없습니다.</div>
           </template>
         </div>
       </aside>
@@ -420,19 +420,59 @@
             <div class="absolute inset-0 bg-black/20 pointer-events-none" />
 
             <!-- 상단 헤더 -->
-            <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
+            <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-12 sm:pt-16 md:pt-20 lg:pt-24">
               <div class="flex items-center justify-between">
-                <div
-                  class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
-                  @click="goToProfile(post.players?.[0]?.id || post.author?.id)"
-                >
-                  <img
-                    :src="post.players?.[0]?.avatar || post.author?.avatar"
-                    class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
-                  />
-                  <div>
-                    <div class="text-base font-normal text-white drop-shadow-lg">
-                      {{ post.players?.[0]?.name || post.author?.name }}
+                <div class="flex items-center gap-3">
+                  <!-- 첫 번째 플레이어 -->
+                  <div
+                    v-if="post.players?.[0]"
+                    class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.players[0].id)"
+                  >
+                    <img
+                      :src="post.players[0].avatar"
+                      class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-normal text-white drop-shadow-lg">
+                        {{ post.players[0].name }}
+                      </div>
+                    </div>
+                  </div>
+                  <!-- VS 표시 (두 플레이어가 있을 때) -->
+                  <div v-if="post.players?.[0] && post.players?.[1]" class="text-white/80 text-sm drop-shadow-lg mx-2">
+                    VS
+                  </div>
+                  <!-- 두 번째 플레이어 -->
+                  <div
+                    v-if="post.players?.[1]"
+                    class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.players[1].id)"
+                  >
+                    <img
+                      :src="post.players[1].avatar"
+                      class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-normal text-white drop-shadow-lg">
+                        {{ post.players[1].name }}
+                      </div>
+                    </div>
+                  </div>
+                  <!-- author 표시 (플레이어가 없을 때) -->
+                  <div
+                    v-if="!post.players?.[0] && post.author"
+                    class="flex items-center gap-3 cursor-pointer active:scale-95 transition"
+                    @click="goToProfile(post.author.id)"
+                  >
+                    <img
+                      :src="post.author.avatar"
+                      class="w-10 h-10 rounded-full border-2 border-white/30 object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-normal text-white drop-shadow-lg">
+                        {{ post.author.name }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -440,7 +480,7 @@
             </div>
 
             <!-- 하단 정보 -->
-            <div class="absolute bottom-[18%] left-0 right-0 px-4 z-10">
+            <div class="absolute bottom-32 sm:bottom-36 md:bottom-40 lg:bottom-44 left-0 right-0 px-4 z-10">
               <div class="max-w-xl mx-auto">
                 <div class="text-center mb-3">
                   <div class="text-white/80 text-sm drop-shadow-lg">
@@ -686,11 +726,11 @@
                       class="w-8 h-8 rounded-full object-cover"
                     />
                     <div class="text-xs font-semibold text-white/90">
-                      {{ post.reviews[0]?.author?.name || '익명' }}
+                      {{ post.reviews[0]?.author?.name || '익명' }}님의 한마디
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[1]?.text || '' }}
+                    {{ post.reviews[0]?.text || '' }}
                   </div>
                 </div>
 
@@ -711,11 +751,11 @@
                       class="w-8 h-8 rounded-full object-cover"
                     />
                     <div class="text-xs font-semibold text-white/90">
-                      {{ post.reviews[1]?.author?.name || '익명' }}
+                      {{ post.reviews[1]?.author?.name || '익명' }}님의 한마디
                     </div>
                   </div>
                   <div class="text-xs text-white/80 leading-relaxed line-clamp-2">
-                    {{ post.reviews[0]?.text || '' }}
+                    {{ post.reviews[1]?.text || '' }}
                   </div>
                 </div>
               </div>
@@ -914,15 +954,6 @@
         </button>
       </div>
 
-      <div class="pointer-events-none absolute inset-0 z-30">
-        <div
-          v-for="h in hearts"
-          :key="h.id"
-          class="absolute text-red-500 animate-heart-pop"
-          :style="{ left: h.x + 'px', top: h.y + 'px' }"
-          v-html="icons.heartFill"
-        ></div>
-      </div>
     </div>
   </div>
 
@@ -1117,7 +1148,7 @@
     </div>
   </div>
 
-  <Footer tab="feed" />
+  <Footer v-if="!isUserFeedMode" tab="feed" />
   <CustomToast />
 
   <div
@@ -1483,7 +1514,6 @@ function setCurrentFeed(i) {
   // post는 computed이므로 자동으로 업데이트됨
   // 포스트 단위 UX 상태 초기화
   currentSlide.value = 0
-  hearts.value = []
   tryVibrate(10)
 }
 
@@ -1848,7 +1878,6 @@ const isPointerDown = ref(false)
 let gestureStartAt = 0
 let activeScrollEl = null
 let lastTapAt = 0
-const hearts = ref([])
 
 const wrapperStyle = computed(() => ({
   width: totalSlides.value * 100 + 'vw',
@@ -2074,15 +2103,6 @@ async function toggleLike() {
   })
   tryVibrate(15)
 
-  // Double tap heart spawn
-  if (!originalLikedState) {
-    const feedElement = document.querySelector('.feed-viewport')
-    if (feedElement) {
-      const rect = feedElement.getBoundingClientRect()
-      spawnHeart(rect.width / 2, rect.height / 2)
-    }
-  }
-
   try {
     // 2. API 호출
     const response = await api.post(`/api/games/${currentPost.id}/like`)
@@ -2198,14 +2218,6 @@ function tryVibrate(ms) {
   }
 }
 
-function spawnHeart(x, y) {
-  const id = Math.random().toString(36).slice(2)
-  hearts.value.push({ id, x: x - 16, y: y - 16 })
-  setTimeout(() => {
-    hearts.value = hearts.value.filter((h) => h.id !== id)
-  }, 700)
-}
-
 // Icons (inline SVG)
 const icons = {
   heart:
@@ -2297,26 +2309,6 @@ function onPanelDragEnd() {
 .w-8 :deep(svg),
 .w-4 :deep(svg) {
   display: block;
-}
-
-@keyframes heart-pop {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  10% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.6) translateY(-20px);
-    opacity: 0;
-  }
-}
-.animate-heart-pop :deep(svg) {
-  width: 32px;
-  height: 32px;
-  animation: heart-pop 650ms ease forwards;
 }
 
 @keyframes like-bump-kf {

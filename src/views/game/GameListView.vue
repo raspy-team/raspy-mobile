@@ -98,36 +98,41 @@
           <div
             v-for="(game, index) in games"
             :key="index"
-            class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 mb-4 p-0 overflow-hidden cursor-pointer"
+            class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 mb-3 p-0 overflow-hidden cursor-pointer"
             @click="selectedGame = game"
             :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
           >
             <!-- 생성자 영역: 유저네임과 같은 줄에 전적/점수 -->
-            <div class="flex items-center bg-gray-700 px-5 py-4 gap-4">
-              <img
-                :src="game.ownerProfileUrl || Default"
-                class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
-              />
-              <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
-                <div class="font-bold text-lg text-gray-100 truncate">{{ game.ownerNickname }}</div>
-                <div
-                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-600 to-gray-500 border border-gray-500 flex-shrink-0"
-                >
-                  <span class="text-xs font-semibold text-green-400"
-                    >{{ game.ruleStatisticsOfOwner?.wins || 0 }}</span
+            <div class="flex items-center bg-gray-700 px-4 py-3 gap-4">
+              <div
+                class="flex items-center gap-4 cursor-pointer hover:bg-gray-600 rounded-lg p-2 transition-colors"
+                @click.stop="selectedGame && selectedGame.id === game.id && $router.push('/profile/' + game.ownerId)"
+              >
+                <img
+                  :src="game.ownerProfileUrl || Default"
+                  class="w-10 h-10 rounded-full border-2 border-orange-400 shadow"
+                />
+                <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
+                  <div class="font-bold text-sm text-gray-100 truncate">{{ game.ownerNickname }}</div>
+                  <div
+                    class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gradient-to-r from-gray-600 to-gray-500 border border-gray-500 flex-shrink-0"
                   >
-                  <span class="text-xs font-semibold text-gray-300"
-                    >{{ game.ruleStatisticsOfOwner?.draws || 0 }}</span
-                  >
-                  <span class="text-xs font-semibold text-red-400"
-                    >{{ game.ruleStatisticsOfOwner?.losses || 0 }}</span
-                  >
-                  <span class="text-xs text-gray-400">|</span>
-                  <div class="flex items-center gap-1">
-                    <i class="fas fa-trophy text-yellow-500 text-[10px]"></i>
-                    <span class="text-xs font-bold text-orange-400">{{
-                      game.ruleStatisticsOfOwner?.ruleRating || 0
-                    }}</span>
+                    <span class="text-xs font-semibold text-green-400"
+                      >{{ game.ruleStatisticsOfOwner?.wins || 0 }}</span
+                    >
+                    <span class="text-xs font-semibold text-gray-300"
+                      >{{ game.ruleStatisticsOfOwner?.draws || 0 }}</span
+                    >
+                    <span class="text-xs font-semibold text-red-400"
+                      >{{ game.ruleStatisticsOfOwner?.losses || 0 }}</span
+                    >
+                    <span class="text-xs text-gray-400">|</span>
+                    <div class="flex items-center gap-1">
+                      <i class="fas fa-trophy text-yellow-500 text-[10px]"></i>
+                      <span class="text-xs font-bold text-orange-400">{{
+                        game.ruleStatisticsOfOwner?.ruleRating || 0
+                      }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -136,15 +141,16 @@
               </div>
             </div>
             <!-- 규칙 영역: 규칙명 왼쪽에 카테고리 아이콘 표시 -->
-            <div class="px-5 py-4 border-b border-gray-600 flex items-center justify-between">
+            <div class="px-4 py-3 border-b border-gray-600 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <img
                   class="w-8 h-8"
                   :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
                   :alt="game.rule.minorCategory || '카테고리'"
                 />
-                <div class="font-extrabold text-xl text-orange-400 cursor-pointer" @click.stop="openModal(game)">
+                <div class="font-extrabold text-lg text-orange-400 cursor-pointer" @click.stop="selectedGame && selectedGame.id === game.id && openModal(game)">
                   {{ game.rule.ruleTitle }}
+                  <i class="fas fa-info-circle text-orange-400 text-sm ml-2"></i>
                 </div>
               </div>
               <button
@@ -155,11 +161,11 @@
                 <span>도전자 {{ game.challengers?.length || 0 }}명</span>
               </button>
             </div>
-            <div class="px-5 text-gray-400 text-sm mt-2 truncate">
+            <div class="px-4 text-gray-400 text-sm mt-2 truncate">
               {{ game.rule.ruleDescription }}
             </div>
             <!-- 경기 조건 영역: 장소와 시간을 각각 한 줄씩 -->
-            <div class="px-5 py-3 text-sm text-gray-300 flex flex-col gap-1 items-start">
+            <div class="px-4 py-2 text-sm text-gray-300 flex flex-col gap-1 items-start">
               <span>
                 {{
                   game.matchLocation == ' ' || game.matchLocation == ''
@@ -791,13 +797,19 @@
       <div v-else class="text-center text-gray-500 text-sm py-6">도전자가 없습니다.</div>
     </div>
   </div>
+
+  <MatchRuleModal
+    v-if="selectedGame && selectedGame.showRuleDetail"
+    :rule="selectedGame.rule"
+    @close="selectedGame.showRuleDetail = false"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../../api/api'
 import CustomToast from '../../components/CustomToast.vue'
-// import MatchModal from '../../components/MatchModal.vue' (미사용)
+import MatchRuleModal from '../../components/MatchModal.vue'
 
 import { useToast } from '../../composable/useToast'
 import { useRouter } from 'vue-router'
@@ -1143,6 +1155,7 @@ const fetchGames = async () => {
 
 function openModal(game) {
   if (game.showRuleDetail == true) return
+  selectedGame.value = game
   game.showRuleDetail = true
 }
 

@@ -40,7 +40,7 @@
         <!-- Info Cards: 세트 승점, 세트 수, 세트 시간 -->
         <div class="flex w-full gap-1 sm:gap-1">
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gradient-to-br from-gray-700 to-gray-800 text-white px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow-lg border border-gray-600"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div
@@ -55,20 +55,20 @@
                 >
                   <path
                     d="M64.5834 62.5002C63.4028 62.5002 62.4132 62.1009 61.6146 61.3022C60.816 60.5036 60.4167 59.514 60.4167 58.3335V41.6668C60.4167 40.4863 60.816 39.4967 61.6146 38.6981C62.4132 37.8995 63.4028 37.5002 64.5834 37.5002H75C76.1806 37.5002 77.1702 37.8995 77.9688 38.6981C78.7674 39.4967 79.1667 40.4863 79.1667 41.6668V58.3335C79.1667 59.514 78.7674 60.5036 77.9688 61.3022C77.1702 62.1009 76.1806 62.5002 75 62.5002H64.5834ZM66.6667 56.2502H72.9167V43.7502H66.6667V56.2502ZM20.8334 62.5002V52.0835C20.8334 50.9029 21.2327 49.9134 22.0313 49.1147C22.8299 48.3161 23.8195 47.9168 25 47.9168H33.3334V43.7502H20.8334V37.5002H35.4167C36.5973 37.5002 37.5868 37.8995 38.3855 38.6981C39.1841 39.4967 39.5834 40.4863 39.5834 41.6668V47.9168C39.5834 49.0974 39.1841 50.087 38.3855 50.8856C37.5868 51.6842 36.5973 52.0835 35.4167 52.0835H27.0834V56.2502H39.5834V62.5002H20.8334ZM46.875 45.8335V39.5835H53.125V45.8335H46.875ZM46.875 60.4168V54.1668H53.125V60.4168H46.875ZM16.6667 83.3335C14.375 83.3335 12.4132 82.5175 10.7813 80.8856C9.14935 79.2536 8.33337 77.2918 8.33337 75.0002V25.0002C8.33337 22.7085 9.14935 20.7467 10.7813 19.1147C12.4132 17.4828 14.375 16.6668 16.6667 16.6668H29.1667V8.3335H37.5V16.6668H62.5V8.3335H70.8334V16.6668H83.3334C85.625 16.6668 87.5869 17.4828 89.2188 19.1147C90.8507 20.7467 91.6667 22.7085 91.6667 25.0002V75.0002C91.6667 77.2918 90.8507 79.2536 89.2188 80.8856C87.5869 82.5175 85.625 83.3335 83.3334 83.3335H16.6667ZM16.6667 75.0002H46.875V68.7502H53.125V75.0002H83.3334V25.0002H53.125V31.2502H46.875V25.0002H16.6667V75.0002Z"
-                    fill="#808080"
+                    fill="white"
                   />
                 </svg>
                 <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 승점</span>
               </div>
               <div
-                class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1"
+                class="flex items-center justify-center text-orange-400 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1"
               >
                 {{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gradient-to-br from-gray-700 to-gray-800 text-white px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow-lg border border-gray-600"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
@@ -81,18 +81,18 @@
                 >
                   <path
                     d="M29.1667 87.5V79.1667H45.8333V66.25C42.4306 65.4861 39.3924 64.0451 36.7188 61.9271C34.0451 59.809 32.0833 57.1528 30.8333 53.9583C25.625 53.3333 21.2674 51.059 17.7604 47.1354C14.2535 43.2118 12.5 38.6111 12.5 33.3333V29.1667C12.5 26.875 13.316 24.9132 14.9479 23.2812C16.5799 21.6493 18.5417 20.8333 20.8333 20.8333H29.1667V12.5H70.8333V20.8333H79.1667C81.4583 20.8333 83.4201 21.6493 85.0521 23.2812C86.684 24.9132 87.5 26.875 87.5 29.1667V33.3333C87.5 38.6111 85.7465 43.2118 82.2396 47.1354C78.7326 51.059 74.375 53.3333 69.1667 53.9583C67.9167 57.1528 65.9549 59.809 63.2812 61.9271C60.6076 64.0451 57.5694 65.4861 54.1667 66.25V79.1667H70.8333V87.5H29.1667ZM29.1667 45V29.1667H20.8333V33.3333C20.8333 35.9722 21.5972 38.3507 23.125 40.4688C24.6528 42.5868 26.6667 44.0972 29.1667 45ZM50 58.3333C53.4722 58.3333 56.4236 57.1181 58.8542 54.6875C61.2847 52.2569 62.5 49.3056 62.5 45.8333V20.8333H37.5V45.8333C37.5 49.3056 38.7153 52.2569 41.1458 54.6875C43.5764 57.1181 46.5278 58.3333 50 58.3333ZM70.8333 45C73.3333 44.0972 75.3472 42.5868 76.875 40.4688C78.4028 38.3507 79.1667 35.9722 79.1667 33.3333V29.1667H70.8333V45Z"
-                    fill="#808080"
+                    fill="white"
                   />
                 </svg>
                 <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 수</span>
               </div>
-              <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
+              <div class="flex items-center justify-center text-orange-400 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ game.rule.setsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gray-800 text-orange-500 px-1 sm:px-2 py-1 sm:py-2 rounded-xl text-center shadow"
+            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gradient-to-br from-gray-700 to-gray-800 text-white px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow-lg border border-gray-600"
           >
             <div class="flex-1 flex flex-col items-center justify-center">
               <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
@@ -105,12 +105,12 @@
                 >
                   <path
                     d="M50 45.8335C54.5834 45.8335 58.507 44.2016 61.7709 40.9377C65.0347 37.6738 66.6667 33.7502 66.6667 29.1668V16.6668H33.3334V29.1668C33.3334 33.7502 34.9653 37.6738 38.2292 40.9377C41.4931 44.2016 45.4167 45.8335 50 45.8335ZM16.6667 91.6668V83.3335H25V70.8335C25 66.5974 25.9896 62.6217 27.9688 58.9064C29.9479 55.1911 32.7084 52.2224 36.25 50.0002C32.7084 47.7779 29.9479 44.8092 27.9688 41.0939C25.9896 37.3786 25 33.4029 25 29.1668V16.6668H16.6667V8.3335H83.3334V16.6668H75V29.1668C75 33.4029 74.0104 37.3786 72.0313 41.0939C70.0521 44.8092 67.2917 47.7779 63.75 50.0002C67.2917 52.2224 70.0521 55.1911 72.0313 58.9064C74.0104 62.6217 75 66.5974 75 70.8335V83.3335H83.3334V91.6668H16.6667Z"
-                    fill="#808080"
+                    fill="white"
                   />
                 </svg>
                 <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 시간</span>
               </div>
-              <div class="flex items-center justify-center text-orange-500 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
+              <div class="flex items-center justify-center text-orange-400 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
                 {{ limitTimeStr }}
               </div>
             </div>
@@ -120,15 +120,15 @@
       <div class="w-full flex justify-end mt-2 gap-2">
         <button
           @click="showLogModal = true"
-          class="text-xs text-orange-400 border border-orange-600 rounded-full px-4 py-1 shadow-sm hover:bg-gray-700 transition font-semibold"
+          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
         >
-          로그 보기
+          <i class="fas fa-list mr-1"></i>로그 보기
         </button>
         <button
-          class="text-xs text-orange-400 border border-orange-600 rounded-full px-4 py-1 shadow-sm hover:bg-gray-700 transition font-semibold"
+          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
           @click="game.showRuleDetail = true"
         >
-          규칙 보기
+          <i class="fas fa-book mr-1"></i>규칙 보기
         </button>
       </div>
     </div>
@@ -253,49 +253,73 @@
 
     <!-- 하단 버튼 섹션 -->
     <div class="flex-shrink-0 w-full flex flex-col gap-3 sm:gap-4 items-stretch">
-      <!-- 세트 종료 버튼 (시간 초과 또는 수동 종료 필요 시) -->
-      <button
-        v-if="!isSetOver && !isGameOver && !isCountingDown && game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds"
-        @click="manualFinishSet"
-        class="w-full bg-gradient-to-r from-purple-600 to-orange-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:brightness-110 transition animate-pulse"
-      >
-        <i class="fas fa-flag-checkered mr-2"></i>세트 종료
-      </button>
+      <!-- 세트 종료 버튼과 카메라 버튼들 -->
+      <div class="flex items-center justify-between gap-4">
+        <button
+          v-if="!isSetOver && !isGameOver && !isCountingDown"
+          @click="manualFinishSet"
+          class="flex-1 bg-orange-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:brightness-110 transition"
+        >
+          <i class="fas fa-flag-checkered mr-2"></i>세트 종료
+        </button>
+        <div class="flex gap-2">
+          <button
+            @click="triggerPhotoCapture"
+            :disabled="isCountingDown"
+            :class="[
+              'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition',
+              isCountingDown
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+                : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:scale-110'
+            ]"
+            title="사진 촬영"
+          >
+            <i class="fas fa-camera text-xl"></i>
+          </button>
+          <button
+            @click="triggerVideoCapture"
+            :disabled="isCountingDown"
+            :class="[
+              'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition',
+              isCountingDown
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+                : 'bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:scale-110'
+            ]"
+            title="동영상 촬영"
+          >
+            <i class="fas fa-video text-xl"></i>
+          </button>
+        </div>
+      </div>
 
       <div class="w-full grid grid-cols-2 gap-2 sm:gap-4 mb-10">
         <button
           @click="openConfirm('정말로 게임을 재시작 하겠습니까?', socket_resetGame)"
-          class="border text-orange-400 px-3 py-3 rounded-[8.2px] text-xs sm:text-base hover:bg-gray-700 transition"
+          class="bg-gradient-to-br from-blue-500 to-blue-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 transition-all duration-200"
         >
-          처음부터
+          <i class="fas fa-redo mr-2"></i>처음부터
         </button>
         <button
           @click="openConfirm('정말로 게임을 즉시 종료합니까?', socket_finishGame)"
-          class="bg-orange-600 text-white px-3 py-3 rounded-[8.2px] text-xs sm:text-base shadow hover:brightness-110 transition"
+          class="bg-gradient-to-br from-red-500 to-red-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 transition-all duration-200"
         >
-          경기 끝내기
+          <i class="fas fa-stop-circle mr-2"></i>경기 끝내기
         </button>
       </div>
-      <!-- Dummy Ad Banner below the buttons, responsive spacing -->
+      <!-- Google AdMob Style Banner -->
       <div class="w-full flex justify-center mt-2 sm:mt-4 fixed bottom-0">
         <div
-          class="w-full max-w-xs sm:max-w-md h-10 sm:h-12 rounded-t-xl flex items-center justify-center shadow-lg font-extrabold text-xs sm:text-sm animate-fade-in pointer-events-auto mx-1 sm:mx-2"
-          style="
-            background: linear-gradient(90deg, #ff9800 0%, #ffeb3b 50%, #00bcd4 100%);
-            color: #222;
-            border-top: 3px solid #ff5722;
-            border-left: 3px solid #ff5722;
-            border-right: 3px solid #ff5722;
-            letter-spacing: 1px;
-            text-shadow:
-              1px 1px 0 #fff,
-              0 2px 8px #ff9800;
-            box-sizing: border-box;
-          "
+          class="w-full max-w-xs sm:max-w-md h-8 bg-white border border-gray-300 rounded-lg flex items-center shadow-sm mx-1 sm:mx-2 relative"
+          style="box-sizing: border-box;"
         >
-          <span style="font-size: 1em"
-            >클래시오브클랜 <span style="color: #ff5722">회원</span> 모집중!!</span
-          >
+          <!-- 광고 표시 -->
+          <div class="absolute top-0 left-0 bg-gray-100 text-gray-500 text-[10px] px-1 py-0.5 rounded-tl-lg rounded-br-sm font-medium">
+            광고
+          </div>
+          <!-- 광고 내용 -->
+          <div class="flex-1 flex items-center justify-center text-gray-700 text-xs font-medium">
+            클래시오브클랜 <span class="text-orange-500 font-semibold">회원</span> 모집중!
+          </div>
         </div>
       </div>
     </div>
@@ -319,33 +343,29 @@
     </div>
 
     <div
-      v-if="isSetOver && !isGameOver"
-      class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+      v-if="showStartButton"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
+      <div class="bg-gradient-to-b from-gray-700 to-gray-900 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600">
         <button
-          @click="socket_nextSet"
-          class="bg-orange-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
+          @click="startSet(); showStartButton = false"
+          class="bg-gradient-to-r from-blue-500 to-blue-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
-          {{ currentSet + '세트 시작' }}
+          1세트 시작
         </button>
       </div>
     </div>
 
     <div
-      v-if="showFinishModal"
+      v-if="isSetOver && !isGameOver"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
-        <div class="text-lg font-bold mb-3">세트 종료</div>
-        <div class="text-orange-500 font-extrabold text-xl mb-4">
-          {{ winner != '-' ? winner + ' 승리' : '무승부' }}
-        </div>
+      <div class="bg-gradient-to-b from-gray-700 to-gray-900 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600">
         <button
-          @click="closeFinishModal"
-          class="bg-orange-600 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
+          @click="socket_nextSet"
+          class="bg-gradient-to-r from-orange-500 to-orange-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
-          다음 세트로
+          {{ currentSet }}세트 시작
         </button>
       </div>
     </div>
@@ -379,38 +399,7 @@
       </div>
     </div>
 
-    <!-- 플로팅 카메라 버튼 (우측 하단) -->
-    <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
-      <!-- 사진 촬영 버튼 -->
-      <button
-        @click="triggerPhotoCapture"
-        :disabled="isCountingDown"
-        :class="[
-          'relative transition-all duration-300 focus:outline-none rounded-full flex items-center justify-center w-[61.6px] h-[61.6px] shadow-2xl',
-          isCountingDown
-            ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
-            : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:scale-110 hover:shadow-orange-500/50 active:scale-95'
-        ]"
-        title="사진 촬영"
-      >
-        <i class="fas fa-camera text-xl"></i>
-      </button>
 
-      <!-- 동영상 촬영 버튼 -->
-      <button
-        @click="triggerVideoCapture"
-        :disabled="isCountingDown"
-        :class="[
-          'relative transition-all duration-300 focus:outline-none rounded-full flex items-center justify-center w-[61.6px] h-[61.6px] shadow-2xl',
-          isCountingDown
-            ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
-            : 'bg-gradient-to-br from-red-500 to-red-600 text-white hover:scale-110 hover:shadow-red-500/50 active:scale-95'
-        ]"
-        title="동영상 촬영"
-      >
-        <i class="fas fa-video text-xl"></i>
-      </button>
-    </div>
   </div>
 
   <!-- 숨겨진 카메라 input -->
@@ -503,8 +492,10 @@ const user1 = ref(null)
 const user2 = ref(null)
 const gameWinner = ref('')
 const showLogModal = ref(false)
+const showStartButton = ref(false)
 const countdown = ref(0)
 const isCountingDown = ref(false)
+const timeOverNotified = ref(false)
 
 // confirm 관련 상태
 const showConfirm = ref(false)
@@ -624,10 +615,6 @@ function finishSet(who) {
   }
 }
 
-function closeFinishModal() {
-  showFinishModal.value = false
-}
-
 function startTimer() {
   if (isGameOver.value) return
   clearInterval(timerRef.value)
@@ -657,6 +644,22 @@ function updateElapsed() {
 
   if (!isSetOver.value && !isGameOver.value) {
     checkSetOver()
+  }
+
+  // 시간 초과 알림
+  if (game.limitSeconds !== -1 && elapsedSeconds.value >= game.limitSeconds && !timeOverNotified.value) {
+    timeOverNotified.value = true
+    // 진동
+    if (navigator.vibrate) {
+      navigator.vibrate(500)
+    }
+    // 소리 (브라우저 기본 알림음 사용, 파일이 없으면 무시)
+    try {
+      const audio = new Audio('/notification.mp3')
+      audio.play()
+    } catch (e) {
+      // 무시
+    }
   }
 }
 
@@ -800,7 +803,15 @@ onMounted(async () => {
     isSetOver.value = false
     isGameOver.value = false
     updateElapsed()
-    startTimer()
+    // 시간 제한 없는 경우에만 자동 시작
+    if (game.limitSeconds === -1) {
+      startTimer()
+    }
+  }
+
+  // 시간 제한 있는 경우 세트 시작 버튼 표시
+  if (game.limitSeconds !== -1 && !isSetOver.value) {
+    showStartButton.value = true
   }
 
   const logResponse = await api.get(`/api/games/${gameId}/game-logs`)

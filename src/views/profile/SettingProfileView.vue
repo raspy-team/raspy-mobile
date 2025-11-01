@@ -262,7 +262,18 @@
         </form>
       </div>
 
-      <div v-if="afterLogin" class="text-center mt-6">
+      <div v-if="afterLogin" class="mt-6 flex flex-col items-center gap-4">
+        <label
+          class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border border-gray-600 bg-gray-800/80 shadow-sm"
+        >
+          <input
+            type="checkbox"
+            class="w-5 h-5 rounded border-gray-500 bg-gray-900 text-orange-500 focus:ring-orange-400"
+          />
+          <span class="text-sm text-gray-200 font-medium">
+            주변 유저들과 경기하고 소식을 공유하시겠습니까?
+          </span>
+        </label>
         <button @click="router.push('/game-list')" class="text-sm text-gray-400 hover:underline">
           건너뛰기
         </button>
@@ -536,6 +547,7 @@ const clearProfilePicture = () => {
 input,
 select,
 textarea {
-  @apply font-sans;
+  font-family: 'Noto Sans KR', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
 }
 </style>

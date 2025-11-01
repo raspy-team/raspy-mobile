@@ -299,7 +299,7 @@
           </div>
 
           <!-- Top 3 Rules - Enhanced Section -->
-          <div v-if="user.top3Rules && user.top3Rules.length > 0" class="mt-6 w-full">
+          <div v-if="user.top3Rules && user.top3Rules.length > 0" class="w-full">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2">
                 가장 많이 플레이한 규칙
@@ -430,19 +430,14 @@
         <!-- Most Recent Game - Enhanced Card -->
         <section
           v-if="user.recentGames && user.recentGames.length > 0"
-          class="w-full mx-auto px-4 pb-0 bg-gray-900"
+          class="w-full mx-auto px-4 pb-6 bg-gray-900"
         >
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2">최근 경기</h3>
-            <button
-              @click="goToUserFeed"
-              class="rounded-xl bg-gray-700 border border-gray-600 py-2 px-4 font-bold text-gray-300 text-base shadow hover:bg-gray-600 transition-all ml-2"
-            >
-              더보기
-            </button>
           </div>
           <div
-            class="group relative bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-600 transition-all duration-300 cursor-pointer"
+            class="group relative bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-600 transition-all duration-300 cursor-pointer h-32"
+            @click="goToUserFeed"
           >
             <!-- Result badge overlay -->
             <div class="absolute top-3 right-3 z-10">
@@ -469,7 +464,7 @@
 
             <div class="flex">
               <div
-                class="relative flex-shrink-0 w-32 h-32 bg-gradient-to-br from-gray-700 to-gray-800 overflow-hidden"
+                class="relative flex-shrink-0 w-32 h-full bg-gradient-to-br from-gray-700 to-gray-800 overflow-hidden"
               >
                 <img
                   :src="user.recentGames[0].startPhotoUrl"

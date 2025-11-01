@@ -1260,7 +1260,7 @@
             </div>
 
             <div v-else class="py-4 text-center">
-              <p class="text-xs text-gray-400">아직 좋아요가 없습니다</p>
+              <p class="text-xs text-gray-400">아직 또 보고싶어요가 없습니다</p>
             </div>
           </div>
         </div>

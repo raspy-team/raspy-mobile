@@ -724,10 +724,10 @@ function addLog(log) {
 onMounted(async () => {
   // 안드로이드 네이티브 카메라 콜백 등록
   if (typeof window !== 'undefined') {
-    // 사진 촬영 콜백
-    window.onGameCameraResult = async (base64Image) => {
+    // 사진 촬영 콜백 핸들러
+    const handleCameraResult = async (base64Image) => {
       try {
-        console.log('Received photo from Android camera')
+        console.log('Received photo from native camera')
         const compressed = await compressImage(base64Image)
         addGamePicture(gameId, compressed)
         showToast('사진이 저장되었습니다!')
@@ -737,10 +737,10 @@ onMounted(async () => {
       }
     }
 
-    // 동영상 촬영 콜백
-    window.onGameVideoCameraResult = async (base64Video, duration) => {
+    // 동영상 촬영 콜백 핸들러
+    const handleVideoCameraResult = async (base64Video, duration) => {
       try {
-        console.log('Received video from Android camera')
+        console.log('Received video from native camera')
         // duration은 밀리초 단위로 전달된다고 가정
         addGameVideo(gameId, base64Video, duration || 0)
         showToast('동영상이 저장되었습니다!')
@@ -749,6 +749,12 @@ onMounted(async () => {
         showToast('동영상 저장에 실패했습니다.')
       }
     }
+
+    // 여러 콜백 이름을 모두 등록 (안드로이드/iOS 호환성)
+    window.onCameraResult = handleCameraResult
+    window.onGameCameraResult = handleCameraResult
+    window.onVideoCameraResult = handleVideoCameraResult
+    window.onGameVideoCameraResult = handleVideoCameraResult
   }
 
   const userRes = await api.get('/api/auth/current-user-id')
@@ -1047,7 +1053,9 @@ onUnmounted(() => {
 
   // 안드로이드 네이티브 카메라 콜백 정리
   if (typeof window !== 'undefined') {
+    window.onCameraResult = null
     window.onGameCameraResult = null
+    window.onVideoCameraResult = null
     window.onGameVideoCameraResult = null
   }
 

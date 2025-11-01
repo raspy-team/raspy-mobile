@@ -57,14 +57,21 @@ api.interceptors.response.use(
     // 요청 URL 추출
     const requestUrl = error.config && error.config.url
 
-    // /api/auth/login 이면 라우터 변경하지 않음
+    // 현재 페이지 경로 확인
+    const currentPath = window.location.pathname
+
+    // /api/auth/login 또는 /invite-fall-back/ 페이지면 라우터 변경하지 않음
     if (requestUrl && requestUrl.includes('/api/auth/login')) {
         // 로그인 API에서 401은 라우터 변경하지 않음
-        // 필요하다면 추가 처리만 여기에
-        localStorage.removeItem('raspy_access_token2') // 이건 해도 되고
+        localStorage.removeItem('raspy_access_token2')
         return Promise.reject(error)
     }
-    
+
+    // /invite-fall-back/ 페이지에서의 모든 401은 무시
+    if (currentPath && currentPath.startsWith('/invite-fall-back/')) {
+        return Promise.reject(error)
+    }
+
     // 그 외 401은 기존대로 처리
     localStorage.removeItem('raspy_access_token2')
     if (routerInstance) {

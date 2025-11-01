@@ -84,7 +84,9 @@
         @mousemove="onPanelDragMove"
         @mouseup="onPanelDragEnd"
       >
-        <div class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80">
+        <div
+          class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80"
+        >
           <span class="text-base font-semibold text-gray-100 tracking-tight">알림</span>
           <button
             @click="toggleNotificationPanel"
@@ -440,7 +442,10 @@
                     </div>
                   </div>
                   <!-- VS 표시 (두 플레이어가 있을 때) -->
-                  <div v-if="post.players?.[0] && post.players?.[1]" class="text-white/80 text-sm drop-shadow-lg mx-2">
+                  <div
+                    v-if="post.players?.[0] && post.players?.[1]"
+                    class="text-white/80 text-sm drop-shadow-lg mx-2"
+                  >
                     VS
                   </div>
                   <!-- 두 번째 플레이어 -->
@@ -480,7 +485,9 @@
             </div>
 
             <!-- 하단 정보 -->
-            <div class="absolute bottom-32 sm:bottom-36 md:bottom-40 lg:bottom-44 left-0 right-0 px-4 z-10">
+            <div
+              class="absolute bottom-32 sm:bottom-36 md:bottom-40 lg:bottom-44 left-0 right-0 px-4 z-10"
+            >
               <div class="max-w-xl mx-auto">
                 <div class="text-center mb-3">
                   <div class="text-white/80 text-sm drop-shadow-lg">
@@ -908,6 +915,11 @@
         <button
           v-if="post.type === 'game' && post.isCompleted && !post.isMyGame"
           @click="toggleLike"
+          @touchstart="onLikeLongPressStart"
+          @touchend="onLikeLongPressEnd"
+          @mousedown="onLikeLongPressStart"
+          @mouseup="onLikeLongPressEnd"
+          @mouseleave="onLikeLongPressEnd"
           class="flex flex-col items-center active:scale-95 transition"
         >
           <span
@@ -953,7 +965,6 @@
           <span class="text-[10px] mt-1">신고</span>
         </button>
       </div>
-
     </div>
   </div>
 
@@ -1200,6 +1211,63 @@
     </div>
   </div>
 
+  <!-- 좋아요한 사람 툴팁 (말풍선) - 좋아요 버튼 근처에 위치 -->
+  <transition name="fade-scale">
+    <div v-if="showLikersModal">
+      <!-- 전체 화면 투명 오버레이 (클릭 시 모달 닫기) -->
+      <div class="fixed inset-0 z-[50]" @click="closeLikersModal"></div>
+
+      <!-- 말풍선 모달 - 좋아요 버튼(맨 위) 바로 왼쪽에 위치 -->
+      <div class="fixed right-[72px] bottom-[calc(25%+192px)] z-[51]" @click.stop>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-[280px]">
+          <!-- 말풍선 꼬리 (오른쪽 중앙, 좋아요 버튼을 가리킴) -->
+          <div
+            class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rotate-45 shadow-md"
+          ></div>
+
+          <div class="p-4 space-y-3">
+            <div class="text-center">
+              <div class="text-sm font-bold text-gray-900 mb-2">
+                {{ likersData.totalCount || 0 }}명이 또 보고싶어합니다
+              </div>
+            </div>
+
+            <div
+              v-if="likersData.recentLikers && likersData.recentLikers.length > 0"
+              class="space-y-2 max-h-[300px] overflow-y-auto"
+            >
+              <div
+                v-for="liker in likersData.recentLikers"
+                :key="liker.userId"
+                @click="(goToProfile(liker.userId), closeLikersModal())"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer"
+              >
+                <img
+                  v-if="liker.profileImageUrl"
+                  :src="liker.profileImageUrl"
+                  class="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
+                <div
+                  v-else
+                  class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                >
+                  {{ liker.nickname.charAt(0) }}
+                </div>
+                <div class="flex-1 text-sm font-medium text-gray-900 truncate">
+                  {{ liker.nickname }}
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="py-4 text-center">
+              <p class="text-xs text-gray-400">아직 좋아요가 없습니다</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+
   <Comment class="z-[100000]" v-if="commentId == 1" :id="post.id" @close="onCloseComment" />
   <custom-toast />
 </template>
@@ -1265,6 +1333,63 @@ const reportedPosts = ref(new Set(JSON.parse(localStorage.getItem('reportedPosts
 
 function isReported(postId) {
   return reportedPosts.value.has(postId)
+}
+
+// 좋아요한 사람 목록 모달
+const showLikersModal = ref(false)
+const likersData = ref({ totalCount: 0, recentLikers: [] })
+let likeLongPressTimer = null
+
+function onLikeLongPressStart(e) {
+  // 롱프레스 타이머 시작 (500ms)
+  likeLongPressTimer = setTimeout(async () => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // 피드 터치 상태 리셋
+    feedIsPointerDown.value = false
+    feedAnimating.value = false
+
+    // 좋아요 정보 가져오기
+    await fetchLikersData()
+  }, 500)
+}
+
+function onLikeLongPressEnd() {
+  // 타이머 취소
+  if (likeLongPressTimer) {
+    clearTimeout(likeLongPressTimer)
+    likeLongPressTimer = null
+  }
+}
+
+async function fetchLikersData() {
+  if (!post.value?.id) return
+
+  try {
+    // GET API로 좋아요 정보만 조회 (토글하지 않음)
+    const response = await api.get(`/api/games/${post.value.id}/like`)
+    likersData.value = {
+      totalCount: response.data.totalCount || 0,
+      recentLikers: response.data.recentLikers || [],
+    }
+    showLikersModal.value = true
+  } catch (error) {
+    console.error('좋아요한 사람 목록 조회 실패:', error)
+    // GET이 안되면 현재 post 데이터 사용
+    likersData.value = {
+      totalCount: post.value.likeCount || 0,
+      recentLikers: [],
+    }
+    showLikersModal.value = true
+  }
+}
+
+function closeLikersModal() {
+  showLikersModal.value = false
+  // 피드 터치 상태 리셋
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
 }
 
 function onReport() {
@@ -2533,5 +2658,23 @@ function onPanelDragEnd() {
 .animate-swipe-horizontal {
   animation: swipe-horizontal 2s ease-in-out infinite;
   animation-delay: 1s;
+}
+
+/* 좋아요 툴팁 fade-scale transition */
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: all 0.2s ease;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.fade-scale-enter-to,
+.fade-scale-leave-from {
+  opacity: 1;
+  transform: scale(1);
 }
 </style>

@@ -253,11 +253,11 @@
 
     <!-- 하단 버튼 섹션 -->
     <div class="flex-shrink-0 w-full flex flex-col gap-3 sm:gap-4 items-stretch">
-      <!-- 세트 종료 버튼 (시간 초과 또는 수동 종료 필요 시) -->
+      <!-- 세트 종료 버튼 (항상 표시) -->
       <button
-        v-if="!isSetOver && !isGameOver && !isCountingDown && game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds"
+        v-if="!isSetOver && !isGameOver && !isCountingDown"
         @click="manualFinishSet"
-        class="w-full bg-gradient-to-r from-purple-600 to-orange-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:brightness-110 transition animate-pulse"
+        class="w-full bg-orange-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:brightness-110 transition"
       >
         <i class="fas fa-flag-checkered mr-2"></i>세트 종료
       </button>
@@ -319,33 +319,29 @@
     </div>
 
     <div
-      v-if="isSetOver && !isGameOver"
-      class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+      v-if="showStartButton"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
+      <div class="bg-gradient-to-b from-gray-700 to-gray-900 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600">
         <button
-          @click="socket_nextSet"
-          class="bg-orange-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-3 rounded-full text-xl font-bold shadow animate-blink transition hover:scale-110 whitespace-nowrap"
+          @click="startSet(); showStartButton = false"
+          class="bg-gradient-to-r from-blue-500 to-blue-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
-          {{ currentSet + '세트 시작' }}
+          1세트 시작
         </button>
       </div>
     </div>
 
     <div
-      v-if="showFinishModal"
+      v-if="isSetOver && !isGameOver"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-gray-800 rounded-xl p-6 text-center shadow-lg w-[90%] max-w-md">
-        <div class="text-lg font-bold mb-3">세트 종료</div>
-        <div class="text-orange-500 font-extrabold text-xl mb-4">
-          {{ winner != '-' ? winner + ' 승리' : '무승부' }}
-        </div>
+      <div class="bg-gradient-to-b from-gray-700 to-gray-900 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600">
         <button
-          @click="closeFinishModal"
-          class="bg-orange-600 w-full text-white px-4 py-2 rounded-full text-sm shadow hover:brightness-110 transition"
+          @click="socket_nextSet"
+          class="bg-gradient-to-r from-orange-500 to-orange-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
-          다음 세트로
+          {{ currentSet }}세트 시작
         </button>
       </div>
     </div>
@@ -503,8 +499,10 @@ const user1 = ref(null)
 const user2 = ref(null)
 const gameWinner = ref('')
 const showLogModal = ref(false)
+const showStartButton = ref(false)
 const countdown = ref(0)
 const isCountingDown = ref(false)
+const timeOverNotified = ref(false)
 
 // confirm 관련 상태
 const showConfirm = ref(false)
@@ -624,10 +622,6 @@ function finishSet(who) {
   }
 }
 
-function closeFinishModal() {
-  showFinishModal.value = false
-}
-
 function startTimer() {
   if (isGameOver.value) return
   clearInterval(timerRef.value)
@@ -657,6 +651,22 @@ function updateElapsed() {
 
   if (!isSetOver.value && !isGameOver.value) {
     checkSetOver()
+  }
+
+  // 시간 초과 알림
+  if (game.limitSeconds !== -1 && elapsedSeconds.value >= game.limitSeconds && !timeOverNotified.value) {
+    timeOverNotified.value = true
+    // 진동
+    if (navigator.vibrate) {
+      navigator.vibrate(500)
+    }
+    // 소리 (브라우저 기본 알림음 사용, 파일이 없으면 무시)
+    try {
+      const audio = new Audio('/notification.mp3')
+      audio.play()
+    } catch (e) {
+      // 무시
+    }
   }
 }
 
@@ -800,7 +810,15 @@ onMounted(async () => {
     isSetOver.value = false
     isGameOver.value = false
     updateElapsed()
-    startTimer()
+    // 시간 제한 없는 경우에만 자동 시작
+    if (game.limitSeconds === -1) {
+      startTimer()
+    }
+  }
+
+  // 시간 제한 있는 경우 세트 시작 버튼 표시
+  if (game.limitSeconds !== -1 && !isSetOver.value) {
+    showStartButton.value = true
   }
 
   const logResponse = await api.get(`/api/games/${gameId}/game-logs`)

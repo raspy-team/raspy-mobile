@@ -67,24 +67,24 @@
         @mouseup="onPanelDragEnd"
       >
         <div
-          class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80"
+          class="notification-header flex items-center justify-between px-4 h-14 border-b border-gray-700 bg-gray-900/80"
         >
-          <span class="text-base font-semibold text-gray-100 tracking-tight">알림</span>
-          <div class="flex items-center gap-3">
+          <span class="notification-title text-sm font-semibold text-gray-100 tracking-tight">알림</span>
+          <div class="flex items-center gap-2">
             <button
               v-if="notifications.length > 0"
               @click="clearAllNotifications"
               :disabled="clearingNotifications"
-              class="text-xs font-semibold text-gray-400 hover:text-orange-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="clear-all-btn text-[11px] font-semibold text-gray-400 hover:text-orange-400 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               title="알림 모두 지우기"
             >
-              <i v-if="clearingNotifications" class="fas fa-spinner fa-spin mr-1"></i>
-              <i v-else class="fas fa-trash-alt mr-1"></i>
+              <i v-if="clearingNotifications" class="fas fa-spinner fa-spin mr-1 text-[10px]"></i>
+              <i v-else class="fas fa-trash-alt mr-1 text-[10px]"></i>
               모두 지우기
             </button>
             <button
               @click="toggleNotificationPanel"
-              class="text-gray-400 hover:text-gray-100 text-xl transition-colors"
+              class="close-btn text-gray-400 hover:text-gray-100 text-lg transition-colors"
             >
               <i class="fas fa-times"></i>
             </button>
@@ -93,9 +93,9 @@
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <!-- 친구 요청 섹션 -->
           <div v-if="friendRequests.length > 0" class="border-b-2 border-orange-500/30 bg-gray-800/50">
-            <div class="px-5 py-3 border-b border-gray-700">
-              <h3 class="text-sm font-bold text-orange-400 flex items-center gap-2">
-                <i class="fas fa-user-plus"></i>
+            <div class="px-4 py-2.5 border-b border-gray-700">
+              <h3 class="text-xs font-bold text-orange-400 flex items-center gap-1.5">
+                <i class="fas fa-user-plus text-[10px]"></i>
                 친구 요청 ({{ friendRequests.length }})
               </h3>
             </div>
@@ -103,25 +103,25 @@
               <li
                 v-for="request in friendRequests"
                 :key="request.id"
-                class="px-5 py-4 border-b border-gray-700/50 hover:bg-gray-800/80 transition-colors"
+                class="px-4 py-3 border-b border-gray-700/50 hover:bg-gray-800/80 transition-colors"
               >
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2.5">
                   <!-- 프로필 이미지 -->
                   <img
                     :src="request.avatar || '/default-avatar.png'"
                     :alt="request.nickname"
-                    class="w-12 h-12 rounded-full border-2 border-orange-400 object-cover flex-shrink-0"
+                    class="w-10 h-10 rounded-full border-2 border-orange-400 object-cover flex-shrink-0"
                   />
 
                   <!-- 사용자 정보 -->
                   <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-sm text-gray-100 truncate">
+                    <div class="font-semibold text-xs text-gray-100 truncate">
                       {{ request.nickname }}
                     </div>
-                    <div class="text-xs text-gray-400 truncate">
+                    <div class="text-[10px] text-gray-400 truncate">
                       @{{ request.username }}
                     </div>
-                    <div v-if="request.intro" class="text-xs text-gray-500 mt-1 truncate">
+                    <div v-if="request.intro" class="text-[10px] text-gray-500 mt-0.5 truncate">
                       {{ request.intro }}
                     </div>
                   </div>
@@ -129,34 +129,34 @@
                   <!-- 액션 버튼 또는 상태 -->
                   <div class="flex-shrink-0">
                     <!-- 처리 전 버튼 -->
-                    <div v-if="!request.status" class="flex gap-2">
+                    <div v-if="!request.status" class="flex gap-1.5">
                       <button
                         @click.stop="acceptFriendRequest(request.id)"
                         :disabled="request.processing"
-                        class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <i v-if="request.processing" class="fas fa-spinner fa-spin mr-1"></i>
+                        <i v-if="request.processing" class="fas fa-spinner fa-spin mr-0.5 text-[9px]"></i>
                         수락
                       </button>
                       <button
                         @click.stop="rejectFriendRequest(request.id)"
                         :disabled="request.processing"
-                        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-[11px] font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         거절
                       </button>
                     </div>
 
                     <!-- 수락됨 상태 -->
-                    <div v-else-if="request.status === 'accepted'" class="flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/50 rounded-lg">
-                      <i class="fas fa-check-circle text-green-400 text-sm"></i>
-                      <span class="text-xs font-semibold text-green-300">친구가 되었습니다</span>
+                    <div v-else-if="request.status === 'accepted'" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-500/20 border border-green-500/50 rounded-lg">
+                      <i class="fas fa-check-circle text-green-400 text-[10px]"></i>
+                      <span class="text-[10px] font-semibold text-green-300">친구가 되었습니다</span>
                     </div>
 
                     <!-- 거절됨 상태 -->
-                    <div v-else-if="request.status === 'rejected'" class="flex items-center gap-2 px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg">
-                      <i class="fas fa-times-circle text-gray-400 text-sm"></i>
-                      <span class="text-xs font-semibold text-gray-400">거절됨</span>
+                    <div v-else-if="request.status === 'rejected'" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-700/50 border border-gray-600 rounded-lg">
+                      <i class="fas fa-times-circle text-gray-400 text-[10px]"></i>
+                      <span class="text-[10px] font-semibold text-gray-400">거절됨</span>
                     </div>
                   </div>
                 </div>
@@ -170,26 +170,26 @@
               <li
                 v-for="n in notifications"
                 :key="n.id"
-                class="flex px-5 py-4 border-b border-gray-700 group cursor-pointer hover:bg-gray-800/80 transition-colors duration-150 relative overflow-hidden"
+                class="flex px-4 py-3 border-b border-gray-700 group cursor-pointer hover:bg-gray-800/80 transition-colors duration-150 relative overflow-hidden"
                 @click="openNotification(n)"
               >
                 <div
-                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 border border-gray-700 mr-4 shadow-inner shadow-black/40"
+                  class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 border border-gray-700 mr-3 shadow-inner shadow-black/40"
                 >
-                  <i :class="notificationIcon(n.type)" class="text-xl text-orange-500" />
+                  <i :class="notificationIcon(n.type)" class="text-base text-orange-500" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-1">
-                    <span class="font-medium text-sm text-gray-100 truncate">{{ n.title }}</span>
+                    <span class="font-medium text-xs text-gray-100 truncate">{{ n.title }}</span>
                     <span
                       v-if="!n.isRead"
-                      class="inline-block ml-1 w-2 h-2 rounded-full bg-orange-500 align-middle"
+                      class="inline-block ml-1 w-1.5 h-1.5 rounded-full bg-orange-500 align-middle"
                     ></span>
                   </div>
-                  <div class="text-xs text-gray-400 mt-1 truncate">
+                  <div class="text-[10px] text-gray-400 mt-0.5 truncate">
                     {{ n.message }}
                   </div>
-                  <div class="text-[10px] text-gray-500 mt-1">
+                  <div class="text-[9px] text-gray-500 mt-0.5">
                     {{ formatDate(n.createdAt) }}
                   </div>
                 </div>

@@ -932,7 +932,7 @@
           </span>
         </button>
         <button
-          v-if="post.type === 'game' && post.isCompleted && !post.isMyGame"
+          v-if="post.type === 'game' && post.isCompleted"
           @click="onDoWithMe"
           class="flex flex-col items-center active:scale-95 transition"
         >

@@ -1370,9 +1370,13 @@ async function fetchLikersData() {
   try {
     // GET API로 좋아요 정보만 조회 (토글하지 않음)
     const response = await api.get(`/api/games/${post.value.id}/like`)
+    // null 또는 userId가 없는 데이터 필터링
+    const validLikers = (response.data.recentLikers || []).filter(
+      liker => liker && liker.userId
+    )
     likersData.value = {
       totalCount: response.data.totalCount || 0,
-      recentLikers: response.data.recentLikers || [],
+      recentLikers: validLikers,
     }
     showLikersModal.value = true
   } catch (error) {

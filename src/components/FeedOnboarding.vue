@@ -1,13 +1,16 @@
 <template>
   <div
     v-if="isVisible"
-    class="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black z-[99999] flex flex-col"
+    class="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black z-[99999] flex flex-col pt-safe"
   >
     <!-- 슬라이드 컨테이너 -->
     <div class="flex-1 relative overflow-hidden">
       <div
         class="absolute inset-0 flex transition-transform duration-500 ease-out"
         :style="{ transform: `translateX(-${currentPage * 100}%)` }"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
       >
         <!-- Page 1: 주변에서 펼쳐지는 경기에 도전하세요 -->
         <div class="w-full flex-shrink-0 flex flex-col items-center justify-center px-8">
@@ -202,14 +205,7 @@
     <!-- 버튼 영역 -->
     <div class="px-8 pb-8 space-y-3">
       <button
-        v-if="currentPage < 3"
-        @click="nextPage"
-        class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg shadow-2xl active:scale-95 transition-all"
-      >
-        다음
-      </button>
-      <button
-        v-else
+        v-if="currentPage === 3"
         @click="complete"
         class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg shadow-2xl active:scale-95 transition-all"
       >
@@ -239,6 +235,11 @@ const props = defineProps({
 const route = useRoute()
 const currentPage = ref(0)
 
+// 터치 슬라이드 관련 상태
+const touchStartX = ref(0)
+const touchEndX = ref(0)
+const isDragging = ref(false)
+
 const emit = defineEmits(['complete'])
 
 const isVisible = computed(() => {
@@ -246,10 +247,31 @@ const isVisible = computed(() => {
   return route.path === '/' && props.show
 })
 
-const nextPage = () => {
-  if (currentPage.value < 3) {
+// 터치 슬라이드 핸들러
+const handleTouchStart = (e) => {
+  touchStartX.value = e.touches[0].clientX
+  isDragging.value = true
+}
+
+const handleTouchMove = (e) => {
+  if (!isDragging.value) return
+  touchEndX.value = e.touches[0].clientX
+}
+
+const handleTouchEnd = () => {
+  if (!isDragging.value) return
+
+  const distance = touchStartX.value - touchEndX.value
+  const isLeftSwipe = distance > 50  // 왼쪽으로 스와이프 (다음 페이지)
+  const isRightSwipe = distance < -50 // 오른쪽으로 스와이프 (이전 페이지)
+
+  if (isLeftSwipe && currentPage.value < 3) {
     currentPage.value++
+  } else if (isRightSwipe && currentPage.value > 0) {
+    currentPage.value--
   }
+
+  isDragging.value = false
 }
 
 const skip = () => {
@@ -264,6 +286,10 @@ const complete = () => {
 </script>
 
 <style scoped>
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
 @keyframes bounce {
   0%,
   100% {

@@ -560,57 +560,92 @@
       <transition name="fade">
         <div
           v-if="showUserModal"
-          class="fixed inset-0 top-0 h-full bg-black bg-opacity-30 z-50 flex justify-center items-center"
+          class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex justify-center items-center p-4"
+          @click="closeUserModal"
         >
           <div
-            class="bg-gray-800 w-dvw w-full h-full p-6 pt-10 relative"
-            style="min-height: calc(var(--real-vh, 1vh) * 100)"
+            class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl shadow-2xl max-w-md w-full mx-auto overflow-hidden border border-gray-700"
+            @click.stop
           >
-            <button
-              class="absolute top-10 right-7 text-gray-500 hover:text-orange-500 text-xl"
-              @click="closeUserModal"
-            >
-              <i class="fas fa-times"></i>
-            </button>
-            <h3 class="font-bold text-lg mb-4 text-gray-200">유저 찾기</h3>
-            <input
-              v-model="userSearch"
-              @input="onUserSearch"
-              ref="userinput"
-              type="text"
-              class="w-full border rounded-[10px] px-4 py-3 mb-4 text-sm focus:ring-2 focus:ring-orange-200 outline-none"
-              placeholder="유저의 이름을 입력하세요"
-            />
-            <div v-if="userSearching" class="text-center text-gray-500 py-4 text-sm">
-              검색 중...
+            <!-- 헤더 -->
+            <div class="px-6 py-5 border-b border-gray-700/50 bg-gradient-to-r from-orange-500/10 to-transparent">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-xl text-white flex items-center gap-2">
+                  <i class="fas fa-search text-orange-500"></i>
+                  유저 찾기
+                </h3>
+                <button
+                  class="w-9 h-9 rounded-full bg-gray-700/50 hover:bg-gray-700 text-gray-400 hover:text-white transition-all flex items-center justify-center"
+                  @click="closeUserModal"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
             </div>
-            <div
-              v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''"
-              class="text-center text-gray-500 py-10 text-base"
-            >
-              검색 결과가 없습니다.
-            </div>
-            <div v-else class="flex flex-col gap-2 overflow-y-auto">
-              <button
-                v-for="user in userSearchResult"
-                :key="user.id"
-                @click="gotoUser(user.id)"
-                class="flex items-center gap-3 p-2 hover:bg-orange-900 rounded-xl transition border border-transparent hover:border-orange-700"
-              >
-                <img
-                  :src="user.avatar ? user.avatar : Default"
-                  class="w-10 h-10 rounded-full border object-cover"
+
+            <!-- 검색 입력 -->
+            <div class="px-6 py-4">
+              <div class="relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                <input
+                  v-model="userSearch"
+                  @input="onUserSearch"
+                  ref="userinput"
+                  type="text"
+                  class="w-full bg-gray-900/50 border border-gray-700 rounded-2xl pl-11 pr-4 py-3.5 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
+                  placeholder="이름 또는 유저네임 검색..."
                 />
-                <div class="flex-1 text-left">
-                  <div class="flex flex-col gap-0">
-                    <div class="font-bold text-gray-200 text-sm">
+              </div>
+            </div>
+
+            <!-- 검색 결과 -->
+            <div class="px-6 pb-6 max-h-[60vh] overflow-y-auto">
+              <!-- 로딩 상태 -->
+              <div v-if="userSearching" class="text-center py-12">
+                <i class="fas fa-spinner fa-spin text-3xl text-orange-500 mb-3"></i>
+                <p class="text-gray-400 text-sm">검색 중...</p>
+              </div>
+
+              <!-- 검색 결과 없음 -->
+              <div
+                v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''"
+                class="text-center py-12"
+              >
+                <i class="fas fa-user-slash text-4xl text-gray-600 mb-3"></i>
+                <p class="text-gray-400 text-base">검색 결과가 없습니다</p>
+                <p class="text-gray-600 text-sm mt-1">다른 키워드로 시도해보세요</p>
+              </div>
+
+              <!-- 검색 결과 리스트 -->
+              <div v-else-if="userSearchResult.length > 0" class="space-y-2">
+                <button
+                  v-for="user in userSearchResult"
+                  :key="user.id"
+                  @click="gotoUser(user.id)"
+                  class="w-full flex items-center gap-3 p-3 rounded-2xl bg-gray-900/30 hover:bg-gradient-to-r hover:from-orange-500/20 hover:to-transparent border border-transparent hover:border-orange-500/30 transition-all group"
+                >
+                  <img
+                    :src="user.avatar ? user.avatar : Default"
+                    class="w-12 h-12 rounded-full border-2 border-gray-700 group-hover:border-orange-500 object-cover transition-all"
+                  />
+                  <div class="flex-1 text-left min-w-0">
+                    <div class="font-semibold text-white text-sm truncate group-hover:text-orange-400 transition-colors">
                       {{ user.nickname }}
                     </div>
-                    <div class="text-[0.8rem]">@{{ user.username }}</div>
+                    <div class="text-xs text-gray-400 truncate">@{{ user.username }}</div>
+                    <div v-if="user.intro" class="text-xs text-gray-500 mt-0.5 truncate">
+                      {{ user.intro }}
+                    </div>
                   </div>
-                  <div class="text-xs text-gray-400">{{ user.intro }}</div>
-                </div>
-              </button>
+                  <i class="fas fa-chevron-right text-gray-600 group-hover:text-orange-500 transition-colors"></i>
+                </button>
+              </div>
+
+              <!-- 초기 상태 (검색 전) -->
+              <div v-else class="text-center py-12">
+                <i class="fas fa-search text-4xl text-gray-700 mb-3"></i>
+                <p class="text-gray-500 text-sm">검색어를 입력하세요</p>
+              </div>
             </div>
           </div>
         </div>

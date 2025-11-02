@@ -1,17 +1,11 @@
 <template>
-  <!-- 헤더 -->
-  <div
-    class="fixed top-0 left-0 w-full z-[5000] bg-gray-900 border-b border-gray-700 h-14 flex items-center px-4"
-  >
-    <button
-      @click="$router.push('/rules')"
-      class="text-white text-lg px-2 py-1 rounded hover:bg-gray-700 transition"
-      aria-label="뒤로가기"
-    >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <h1 class="ml-3 text-lg font-bold text-white">내 규칙</h1>
-  </div>
+  <HeaderComp
+    :has-referer="true"
+    title="내 규칙"
+    :show-bell="false"
+    :show-dm="false"
+    custom-class="bg-gray-900"
+  />
 
   <!-- 필터 탭 -->
   <div class="mt-14 pt-4 px-4 bg-gray-900 sticky top-14 z-40 border-b border-gray-700">
@@ -28,9 +22,7 @@
         ]"
       >
         {{ tab.label }}
-        <span v-if="getCo(tab.value) > 0" class="ml-1 text-xs">
-          ({{ getCount(tab.value) }})
-        </span>
+        <span v-if="getCo(tab.value) > 0" class="ml-1 text-xs"> ({{ getCount(tab.value) }}) </span>
       </button>
     </div>
   </div>
@@ -94,6 +86,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
+import HeaderComp from '../../components/HeaderComp.vue'
 import MyRuleCard from '../../components/MyRuleCard.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'

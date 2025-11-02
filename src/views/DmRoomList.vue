@@ -1,23 +1,11 @@
 <template>
-  <header class="fixed top-0 left-0 w-full z-[30] border-b border-gray-700 bg-gray-800">
-    <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between">
-      <!-- 좌측: 로고 또는 뒤로가기 -->
-      <div class="flex items-center h-14">
-        <button @click="goBack" class="text-gray-100 text-lg">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-      </div>
-      <!-- 중앙: 타이틀 (hasReferer일 때만 표시) -->
-      <div
-        class="absolute left-1/2 transform -translate-x-1/2 text-gray-100 text-sm py-[50px] font-light"
-      >
-        DM
-      </div>
-      <!-- 우측: 알림 + DM -->
-      <div class="flex items-center space-x-4 mr-3"></div>
-    </div>
-    <!-- 알림 패널 (오른쪽 슬라이드) -->
-  </header>
+  <HeaderComp
+    :has-referer="true"
+    title="DM"
+    :show-bell="false"
+    :show-dm="false"
+    custom-class="bg-gray-800"
+  />
   <div class="bg-gray-900 pb-24 min-h-screen">
     <div class="max-w-lg mx-auto pt-20 px-3">
       <!-- 로딩 상태 -->
@@ -72,6 +60,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/api'
+import HeaderComp from '@/components/HeaderComp.vue'
 import DefaultProfile from '@/assets/default.png'
 
 const router = useRouter()
@@ -93,9 +82,6 @@ async function fetchDmList() {
 
 function goToChat(userId) {
   router.push(`/chat/${userId}`)
-}
-function goBack() {
-  router.go(-1)
 }
 
 function relativeTime(date) {

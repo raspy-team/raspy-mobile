@@ -1,23 +1,21 @@
 <template>
-  <!-- 상단 헤더: 뒤로가기 버튼 -->
-  <div
-    class="fixed top-0 left-0 w-full z-[5000] bg-gray-900 border-b border-gray-700 h-14 flex items-center px-4"
+  <HeaderComp
+    :has-referer="true"
+    :show-bell="false"
+    :show-dm="false"
+    custom-class="bg-gray-900"
   >
-    <button
-      @click="$router.push('/game')"
-      class="text-gray-100 text-lg px-2 py-1 rounded hover:bg-gray-700 transition"
-      aria-label="뒤로가기"
-    >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <button
-      @click="$router.push('/create-game')"
-      class="ml-auto w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
-      aria-label="경기 생성"
-    >
-      <span class="text-xl font-bold">+</span>
-    </button>
-  </div>
+    <template #right-after>
+      <button
+        @click="$router.push('/create-game')"
+        class="w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
+        aria-label="경기 생성"
+      >
+        <span class="text-xl font-bold">+</span>
+      </button>
+    </template>
+  </HeaderComp>
+
   <div
     class="bg-gray-900 pb-16 pt-14"
     ref="containerRef"
@@ -808,6 +806,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../../api/api'
+import HeaderComp from '../../components/HeaderComp.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 

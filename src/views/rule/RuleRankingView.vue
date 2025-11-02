@@ -1,20 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-900">
-    <!-- Fixed Header -->
-    <header class="fixed top-0 left-0 right-0 z-30 bg-gray-900/95 backdrop-blur-md border-b border-gray-700 shadow-sm">
-      <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-        <button
-          @click="router.back()"
-          class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-700 transition"
-        >
-          <i class="fas fa-arrow-left text-gray-300 text-lg"></i>
-        </button>
-        <h1 class="text-lg font-bold text-white truncate flex-1 text-center px-4">
-          {{ ruleName || '규칙 랭킹' }}
-        </h1>
-        <div class="w-9"></div> <!-- Spacer for centering -->
-      </div>
-    </header>
+    <HeaderComp
+      :has-referer="true"
+      :title="ruleName || '규칙 랭킹'"
+      :show-bell="false"
+      :show-dm="false"
+      custom-class="bg-gray-900/95 backdrop-blur-md"
+      back-icon-class="fas fa-arrow-left"
+    />
 
     <!-- Loading State -->
     <div v-if="loading" class="pt-20 px-4 max-w-lg mx-auto">
@@ -310,6 +303,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '@/api/api.js'
+import HeaderComp from '@/components/HeaderComp.vue'
 
 const router = useRouter()
 const route = useRoute()

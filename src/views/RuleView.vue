@@ -1,27 +1,27 @@
 <template>
-  <!-- 헤더: 뒤로가기, 내 규칙, 규칙 생성(+) 버튼 -->
-  <div class="fixed top-0 left-0 w-full z-[5000] bg-gray-900 border-b border-gray-700 h-14 flex items-center px-4">
-    <button
-      @click="$router.push('/game')"
-      class="text-white text-lg px-2 py-1 rounded hover:bg-gray-700 transition"
-      aria-label="뒤로가기"
-    >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <button
-      @click="onMyRulesClick"
-      class="ml-auto px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
-    >
-      내 규칙
-    </button>
-    <button
-      @click="onPlusClick"
-      class="ml-2 w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
-      aria-label="규칙 생성"
-    >
-      <span class="text-xl font-bold">+</span>
-    </button>
-  </div>
+  <HeaderComp
+    :has-referer="true"
+    :show-bell="false"
+    :show-dm="false"
+    custom-class="bg-gray-900 z-[444444]"
+  >
+    <template #right-after>
+      <button
+        @click="onMyRulesClick"
+        class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
+      >
+        내 규칙
+      </button>
+      <button
+        @click="onPlusClick"
+        class="ml-2 w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
+        aria-label="규칙 생성"
+      >
+        <span class="text-xl font-bold">+</span>
+      </button>
+    </template>
+  </HeaderComp>
+
   <!-- 규칙 리스트가 표시될 때만 검색/필터 -->
   <nav
     v-if="major && minor"
@@ -73,7 +73,10 @@
   </nav>
 
   <!-- Step 1: Major Category Fullscreen -->
-  <div v-if="!major" class="fixed inset-0 bg-gray-900 z-40 flex flex-col items-center justify-center">
+  <div
+    v-if="!major"
+    class="fixed inset-0 bg-gray-900 z-40 flex flex-col items-center justify-center"
+  >
     <div class="text-lg text-white font-bold mb-6">메인 카테고리를 선택하세요.</div>
     <div v-if="loadingMajors" class="py-32 text-center text-orange-500">
       <i class="fas fa-spinner fa-spin text-3xl"></i>
@@ -182,6 +185,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api from '../api/api'
+import HeaderComp from '../components/HeaderComp.vue'
 import RuleCard from '../components/RuleCard.vue'
 
 import { useRouter } from 'vue-router'

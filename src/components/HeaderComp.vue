@@ -1,23 +1,29 @@
 <template>
-  <header class="fixed top-0 left-0 w-full z-[30] border-b border-gray-700 bg-black/90 backdrop-blur-md raspy-top shadow-lg shadow-black/50">
+  <header :class="['fixed top-0 left-0 w-full z-[30] border-b border-gray-700 bg-black/90 backdrop-blur-md raspy-top shadow-lg shadow-black/50', props.customClass]">
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between text-gray-200">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14 text-gray-300">
         <button v-if="props.hasReferer" @click="goBack" class="text-gray-200 text-lg">
-          <i class="fas fa-chevron-left"></i>
+          <i :class="props.backIconClass"></i>
         </button>
+        <slot name="left"></slot>
       </div>
       <!-- 중앙: 타이틀 (hasReferer일 때만 표시) -->
       <div
-        v-if="props.hasReferer == true"
+        v-if="props.hasReferer == true && props.title"
         class="absolute left-1/2 transform -translate-x-1/2 text-gray-100 text-sm py-[50px] font-light"
       >
         {{ props.title }}
       </div>
+      <slot name="center"></slot>
+
       <!-- 우측: 알림 + DM -->
       <div class="flex items-center space-x-4 mr-3">
+        <slot name="right-before"></slot>
+
         <!-- DM 버튼 -->
         <router-link
+          v-if="props.showDm"
           to="/dm"
           class="w-10 h-10 flex items-center justify-center rounded-full ml-1 focus:outline-none"
           title="DM"
@@ -27,6 +33,7 @@
 
         <!-- 알림 버튼  -->
         <button
+          v-if="props.showBell"
           class="w-10 h-10 flex items-center justify-center relative rounded-full focus:outline-none"
           @click="toggleNotificationPanel"
         >
@@ -36,6 +43,8 @@
             class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"
           ></span>
         </button>
+
+        <slot name="right-after"></slot>
       </div>
     </div>
     <!-- 알림 패널 (오른쪽 슬라이드) -->
@@ -114,6 +123,10 @@ const router = useRouter()
 const props = defineProps({
   hasReferer: { type: Boolean, default: false },
   title: { type: String, default: '' },
+  showBell: { type: Boolean, default: true },
+  showDm: { type: Boolean, default: true },
+  customClass: { type: String, default: '' },
+  backIconClass: { type: String, default: 'fas fa-chevron-left' },
 })
 
 const showNotificationPanel = ref(false)

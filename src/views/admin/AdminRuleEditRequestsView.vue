@@ -1,19 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 헤더 -->
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <button
-            @click="$router.push('/admin')"
-            class="text-gray-600 hover:text-orange-500 transition"
-          >
-            <i class="fas fa-arrow-left text-xl"></i>
-          </button>
-          <h1 class="text-xl font-bold text-gray-900">규칙 수정 요청 관리</h1>
-        </div>
-      </div>
-    </div>
+    <HeaderComp
+      :has-referer="true"
+      title="규칙 수정 요청 관리"
+      :show-bell="false"
+      :show-dm="false"
+      custom-class="bg-white border-gray-200 shadow-sm"
+      back-icon-class="fas fa-arrow-left"
+    />
 
     <!-- 탭 필터 -->
     <div class="max-w-7xl mx-auto px-4 py-4">
@@ -246,6 +240,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../../api/api'
+import HeaderComp from '../../components/HeaderComp.vue'
 import RuleComparisonModal from '../../components/admin/RuleComparisonModal.vue'
 
 const router = useRouter()

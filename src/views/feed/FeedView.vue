@@ -36,104 +36,13 @@
     </div>
   </transition>
 
-  <header class="fixed top-0 left-0 w-full h-20 z-[30] raspy-top">
-    <!-- 좌측: 뒤로가기 버튼 (userId가 있을 때만) -->
-    <div v-if="isUserFeedMode" class="absolute left-3 top-8 flex items-center">
-      <button
-        @click="router.back()"
-        class="w-9 h-9 flex items-center justify-center border-orange-500 rounded-full transition"
-        title="뒤로가기"
-      >
-        <i class="fas fa-arrow-left text-orange-500 text-xl"></i>
-      </button>
-    </div>
-
-    <!-- 우측: 알림 + DM -->
-    <div class="flex items-center justify-end raspy-top mt-8 space-x-4 mr-3">
-      <!-- DM 버튼 -->
-      <router-link
-        to="/dm"
-        class="w-9 h-9 flex items-center justify-center border-white rounded-full transition ml-1"
-        title="DM"
-      >
-        <i class="fas fa-paper-plane text-white text-xl"></i>
-      </router-link>
-
-      <!-- 알림 버튼  -->
-      <button
-        class="w-9 h-9 flex items-center justify-center relative border-white rounded-full transition"
-        @click="toggleNotificationPanel"
-      >
-        <i class="fas fa-bell text-white text-xl"></i>
-        <span
-          v-if="unreadCount > 0"
-          class="absolute top-1 right-1 w-2 h-2 bg-white rounded-full"
-        ></span>
-      </button>
-    </div>
-
-    <!-- 알림 패널 (오른쪽 슬라이드) -->
-    <transition name="slide">
-      <aside
-        v-if="showNotificationPanel"
-        class="fixed top-0 right-0 h-full w-full max-w-[350px] sm:max-w-[400px] bg-gray-900/95 raspy-top border-l border-gray-700 z-[100] shadow-2xl shadow-black/60 flex flex-col overflow-hidden"
-        @touchstart="onPanelDragStart"
-        @touchmove="onPanelDragMove"
-        @touchend="onPanelDragEnd"
-        @mousedown="onPanelDragStart"
-        @mousemove="onPanelDragMove"
-        @mouseup="onPanelDragEnd"
-      >
-        <div
-          class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80"
-        >
-          <span class="text-base font-semibold text-gray-100 tracking-tight">알림</span>
-          <button
-            @click="toggleNotificationPanel"
-            class="text-gray-400 hover:text-gray-100 text-xl transition-colors"
-          >
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="flex-1 overflow-y-auto overflow-x-hidden">
-          <template v-if="notifications.length > 0">
-            <ul>
-              <li
-                v-for="n in notifications"
-                :key="n.id"
-                class="flex px-5 py-4 border-b border-gray-700 group cursor-pointer hover:bg-gray-800/80 transition-colors duration-150 relative overflow-hidden"
-                @click="openNotification(n)"
-              >
-                <div
-                  class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 border border-gray-700 mr-4 shadow-inner shadow-black/40"
-                >
-                  <i :class="notificationIcon(n.type)" class="text-xl text-orange-500" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-1">
-                    <span class="font-medium text-sm text-gray-100 truncate">{{ n.title }}</span>
-                    <span
-                      v-if="!n.isRead"
-                      class="inline-block ml-1 w-2 h-2 rounded-full bg-orange-500 align-middle"
-                    ></span>
-                  </div>
-                  <div class="text-xs text-gray-400 mt-1 truncate">
-                    {{ n.message }}
-                  </div>
-                  <div class="text-[10px] text-gray-500 mt-1">
-                    {{ formatDate(n.createdAt) }}
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </template>
-          <template v-else>
-            <div class="py-20 text-center text-gray-500 text-sm">알림이 없습니다.</div>
-          </template>
-        </div>
-      </aside>
-    </transition>
-  </header>
+  <HeaderComp
+    :has-referer="isUserFeedMode"
+    :show-bell="true"
+    :show-dm="true"
+    custom-class="bg-transparent border-none backdrop-blur-none"
+    back-icon-class="fas fa-arrow-left text-orange-500 text-xl"
+  />
 
   <div
     v-if="loading"
@@ -1292,6 +1201,7 @@ const showSetDetails = ref(false)
 import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Footer from '../../components/FooterNav.vue'
+import HeaderComp from '../../components/HeaderComp.vue'
 import api, { playWithMeTooAPI } from '../../api/api'
 import featureFlags from '../../config/features'
 import { useToast } from '../../composable/useToast'
@@ -1311,9 +1221,6 @@ const isUserFeedMode = computed(() => !!route.query.userId)
 
 // 피드 데이터 관리
 const { loading, sortedFeed, loadFeed } = useFeed()
-const showNotificationPanel = ref(false)
-const notifications = ref([])
-const unreadCount = ref(0)
 
 // 온보딩 상태 관리
 const showOnboarding = ref(false)
@@ -1428,62 +1335,8 @@ function goToProfile(userId) {
   router.push(`/profile/${userId}`)
 }
 
-const fetchNotifications = async () => {
-  const res = await api.get('/api/notifications')
-  notifications.value = res.data
-  console.log(res.data)
-  unreadCount.value = notifications.value.filter((n) => !n.isRead).length
-}
-
-const toggleNotificationPanel = async () => {
-  showNotificationPanel.value = !showNotificationPanel.value
-  if (showNotificationPanel.value && notifications.value.length === 0) {
-    await fetchNotifications()
-  }
-}
-
-const openNotification = async (n) => {
-  if (!n.isRead) {
-    await api.post(`/api/notifications/${n.id}/read`)
-    n.isRead = true
-    unreadCount.value = notifications.value.filter((x) => !x.isRead).length
-  }
-  // url 존재 시 해당 링크로 이동
-  if (n.url) {
-    try {
-      // 1. 완전한 URL이면, pathname + search + hash 만 추출
-      const parsed = new URL(n.url, window.location.origin)
-      const internalPath = parsed.pathname + parsed.search + parsed.hash
-      router.push(internalPath)
-    } catch (e) {
-      // 2. 이미 상대경로면 그대로 push
-      router.push(n.url)
-    }
-  }
-}
-
-const notificationIcon = (type) => {
-  switch (type) {
-    case 'GAME_START':
-      return 'fas fa-play-circle text-orange-400'
-    case 'GAME_END':
-      return 'fas fa-flag-checkered text-gray-500'
-    case 'GAME_COMMENT':
-      return 'fas fa-comment-dots text-blue-400'
-    case 'COMMENT_REPLY':
-      return 'fas fa-comment-dots text-blue-400'
-    case 'INBOX':
-      return 'fas fa-inbox text-pink-400'
-    case 'MY_GAME':
-      return 'fas fa-calendar-alt text-green-500'
-    default:
-      return 'fas fa-bell text-orange-400'
-  }
-}
-
 onMounted(() => {
   console.log('FeedView onMounted 실행')
-  fetchNotifications()
   console.log('loadFeed 호출 예정')
   loadFeed(router.currentRoute.value)
 
@@ -1567,16 +1420,6 @@ const currentRankingStatus = computed(() => {
   if (!post.value || !post.value.id) return null
   return rankingStatus.value.get(post.value.id) || null
 })
-
-const formatDate = (dt) => {
-  const d = new Date(dt)
-  const now = new Date()
-  const diff = (now - d) / 1000
-  if (diff < 60) return '방금 전'
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
-  return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
-}
 
 // ---------------------------
 // Vertical feed management
@@ -2406,42 +2249,6 @@ const icons = {
 }
 
 onBeforeUnmount(() => {})
-
-/**
- * 알림창 관련
- */
-
-const dragStartX = ref(null)
-const dragging = ref(false)
-
-// 알림 패널 드래그 핸들러
-function onPanelDragStart(e) {
-  dragging.value = true
-  if (e.type === 'touchstart') {
-    dragStartX.value = e.touches[0].clientX
-  } else if (e.type === 'mousedown') {
-    dragStartX.value = e.clientX
-  }
-}
-function onPanelDragMove(e) {
-  if (!dragging.value || dragStartX.value === null) return
-  let currentX
-  if (e.type === 'touchmove') {
-    currentX = e.touches[0].clientX
-  } else if (e.type === 'mousemove') {
-    currentX = e.clientX
-  }
-  // 드래그 방향: 오른쪽으로 80px 이상 이동 시 닫기
-  if (currentX - dragStartX.value > 80) {
-    dragging.value = false
-    dragStartX.value = null
-    toggleNotificationPanel()
-  }
-}
-function onPanelDragEnd() {
-  dragging.value = false
-  dragStartX.value = null
-}
 </script>
 
 <style scoped>
@@ -2603,17 +2410,10 @@ function onPanelDragEnd() {
   display: none; /* Chrome, Safari, Opera */
 }
 
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.slide-enter-from,
-.slide-leave-to {
-  transform: translateX(100%);
-}
-.slide-enter-to,
-.slide-leave-from {
-  transform: translateX(0);
+/* FeedView 헤더 스타일 오버라이드 - 아이콘을 흰색으로 */
+:deep(.fa-bell),
+:deep(.fa-paper-plane) {
+  color: white !important;
 }
 
 /* 온보딩 애니메이션 */

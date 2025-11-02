@@ -70,12 +70,25 @@
           class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80"
         >
           <span class="text-base font-semibold text-gray-100 tracking-tight">알림</span>
-          <button
-            @click="toggleNotificationPanel"
-            class="text-gray-400 hover:text-gray-100 text-xl transition-colors"
-          >
-            <i class="fas fa-times"></i>
-          </button>
+          <div class="flex items-center gap-3">
+            <button
+              v-if="notifications.length > 0"
+              @click="clearAllNotifications"
+              :disabled="clearingNotifications"
+              class="text-xs font-semibold text-gray-400 hover:text-orange-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="알림 모두 지우기"
+            >
+              <i v-if="clearingNotifications" class="fas fa-spinner fa-spin mr-1"></i>
+              <i v-else class="fas fa-trash-alt mr-1"></i>
+              모두 지우기
+            </button>
+            <button
+              @click="toggleNotificationPanel"
+              class="text-gray-400 hover:text-gray-100 text-xl transition-colors"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <!-- 친구 요청 섹션 -->
@@ -216,6 +229,7 @@ const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
 const friendRequests = ref([])
+const clearingNotifications = ref(false)
 
 // 총 미읽음 카운트 (일반 알림 + 친구 요청)
 const totalUnreadCount = computed(() => {
@@ -300,6 +314,25 @@ const rejectFriendRequest = async (requesterId) => {
     alert('친구 요청 거절에 실패했습니다.')
   } finally {
     request.processing = false
+  }
+}
+
+const clearAllNotifications = async () => {
+  if (clearingNotifications.value) return
+
+  clearingNotifications.value = true
+  try {
+    // 서버에 삭제 요청
+    await api.post('/api/notifications/clear')
+
+    // 즉시 프론트에서 알림 목록 비우기
+    notifications.value = []
+    unreadCount.value = 0
+  } catch (error) {
+    console.error('Failed to clear notifications:', error)
+    alert('알림 삭제에 실패했습니다.')
+  } finally {
+    clearingNotifications.value = false
   }
 }
 

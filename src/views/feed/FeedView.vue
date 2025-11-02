@@ -913,7 +913,7 @@
       <!-- Right action buttons column -->
       <div class="absolute z-40 right-4 bottom-[22%] flex flex-col items-center gap-4">
         <button
-          v-if="post.type === 'game' && post.isCompleted && !post.isMyGame"
+          v-if="post.type === 'game' && post.isCompleted"
           @click="toggleLike"
           @touchstart="onLikeLongPressStart"
           @touchend="onLikeLongPressEnd"

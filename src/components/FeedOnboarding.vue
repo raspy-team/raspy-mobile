@@ -9,7 +9,7 @@
         class="absolute inset-0 flex transition-transform duration-500 ease-out"
         :style="{ transform: `translateX(-${currentPage * 100}%)` }"
       >
-        <!-- Page 1: 피드 탐색 -->
+        <!-- Page 1: 주변에서 펼쳐지는 경기에 도전하세요 -->
         <div class="w-full flex-shrink-0 flex flex-col items-center justify-center px-8">
           <div class="text-center space-y-8">
             <!-- 아이콘 -->
@@ -18,35 +18,35 @@
               <div
                 class="relative bg-gradient-to-br from-orange-400 to-orange-600 rounded-full p-8 shadow-2xl"
               >
-                <i class="fas fa-newspaper text-6xl text-white"></i>
+                <i class="fas fa-map-marker-alt text-6xl text-white"></i>
               </div>
             </div>
 
             <!-- 제목 -->
             <div class="space-y-4">
-              <h1 class="text-4xl font-black text-white">피드 탐색하기</h1>
+              <h1 class="text-4xl font-black text-white">주변에서 펼쳐지는<br />경기에 도전하세요</h1>
               <p class="text-lg text-gray-300 leading-relaxed">
-                상하로 스와이프하여<br />
-                다양한 경기와 초대를 확인하세요
+                위치 기반으로 주변의<br />
+                다양한 경기를 찾아보세요
               </p>
             </div>
 
             <!-- 애니메이션 데모 -->
             <div class="flex flex-col items-center gap-4 py-8">
               <div class="flex items-center gap-3">
-                <i class="fas fa-arrow-up text-orange-400 text-3xl animate-bounce"></i>
-                <span class="text-gray-400">위로 스와이프</span>
+                <i class="fas fa-search text-orange-400 text-3xl animate-pulse"></i>
+                <span class="text-gray-400">주변 경기 탐색</span>
               </div>
               <div class="w-16 h-1 bg-gray-700 rounded-full"></div>
               <div class="flex items-center gap-3">
-                <i class="fas fa-arrow-down text-orange-400 text-3xl animate-bounce"></i>
-                <span class="text-gray-400">아래로 스와이프</span>
+                <i class="fas fa-bolt text-orange-400 text-3xl animate-pulse"></i>
+                <span class="text-gray-400">즉시 참여</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Page 2: 친구 추가 -->
+        <!-- Page 2: 인증샷, 경기 중 촬영, 점수 기록 -->
         <div class="w-full flex-shrink-0 flex flex-col items-center justify-center px-8">
           <div class="text-center space-y-8">
             <!-- 아이콘 -->
@@ -55,39 +55,48 @@
               <div
                 class="relative bg-gradient-to-br from-blue-400 to-blue-600 rounded-full p-8 shadow-2xl"
               >
-                <i class="fas fa-user-plus text-6xl text-white"></i>
+                <i class="fas fa-camera text-6xl text-white"></i>
               </div>
             </div>
 
             <!-- 제목 -->
             <div class="space-y-4">
-              <h1 class="text-4xl font-black text-white">친구 추가하기</h1>
+              <h1 class="text-4xl font-black text-white">실시간 경기 경험</h1>
               <p class="text-lg text-gray-300 leading-relaxed">
-                프로필을 좌우로 스와이프하여<br />
-                친구를 추가하거나 건너뛸 수 있어요
+                경기를 더욱 생생하게<br />
+                기록하고 공유하세요
               </p>
             </div>
 
-            <!-- 애니메이션 데모 -->
-            <div class="flex items-center justify-center gap-8 py-8">
-              <div class="flex flex-col items-center gap-3">
-                <i class="fas fa-arrow-left text-red-400 text-3xl animate-pulse"></i>
-                <span class="text-gray-400 text-sm">건너뛰기</span>
+            <!-- 기능 리스트 -->
+            <div class="space-y-4 py-8">
+              <div class="flex items-center gap-4 bg-white/5 rounded-xl p-4 backdrop-blur-sm">
+                <div
+                  class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center"
+                >
+                  <i class="fas fa-camera-retro text-orange-400"></i>
+                </div>
+                <span class="text-gray-300 text-left flex-1">인증샷 촬영</span>
               </div>
-              <div
-                class="w-20 h-20 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-xl"
-              >
-                <i class="fas fa-user text-3xl text-gray-400"></i>
+              <div class="flex items-center gap-4 bg-white/5 rounded-xl p-4 backdrop-blur-sm">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <i class="fas fa-video text-blue-400"></i>
+                </div>
+                <span class="text-gray-300 text-left flex-1">경기 중 촬영</span>
               </div>
-              <div class="flex flex-col items-center gap-3">
-                <i class="fas fa-arrow-right text-green-400 text-3xl animate-pulse"></i>
-                <span class="text-gray-400 text-sm">친구 추가</span>
+              <div class="flex items-center gap-4 bg-white/5 rounded-xl p-4 backdrop-blur-sm">
+                <div
+                  class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"
+                >
+                  <i class="fas fa-chart-line text-purple-400"></i>
+                </div>
+                <span class="text-gray-300 text-left flex-1">점수 기록</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Page 3: 경기 참여 -->
+        <!-- Page 3: 피드 및 랭킹 확인 -->
         <div class="w-full flex-shrink-0 flex flex-col items-center justify-center px-8">
           <div class="text-center space-y-8">
             <!-- 아이콘 -->
@@ -102,10 +111,10 @@
 
             <!-- 제목 -->
             <div class="space-y-4">
-              <h1 class="text-4xl font-black text-white">경기 참여하기</h1>
+              <h1 class="text-4xl font-black text-white">피드 및 랭킹 확인</h1>
               <p class="text-lg text-gray-300 leading-relaxed">
-                초대를 수락하고<br />
-                실시간으로 점수를 기록하세요
+                다른 사람들의 경기 결과를<br />
+                확인하고 순위를 경쟁하세요
               </p>
             </div>
 
@@ -115,23 +124,60 @@
                 <div
                   class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center"
                 >
-                  <i class="fas fa-camera text-orange-400"></i>
+                  <i class="fas fa-newspaper text-orange-400"></i>
                 </div>
-                <span class="text-gray-300 text-left flex-1">사진/동영상 촬영</span>
+                <span class="text-gray-300 text-left flex-1">실시간 피드</span>
               </div>
               <div class="flex items-center gap-4 bg-white/5 rounded-xl p-4 backdrop-blur-sm">
                 <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <i class="fas fa-chart-line text-blue-400"></i>
+                  <i class="fas fa-medal text-blue-400"></i>
                 </div>
-                <span class="text-gray-300 text-left flex-1">실시간 점수 기록</span>
+                <span class="text-gray-300 text-left flex-1">랭킹 시스템</span>
               </div>
               <div class="flex items-center gap-4 bg-white/5 rounded-xl p-4 backdrop-blur-sm">
                 <div
                   class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"
                 >
-                  <i class="fas fa-star text-purple-400"></i>
+                  <i class="fas fa-users text-purple-400"></i>
                 </div>
-                <span class="text-gray-300 text-left flex-1">경기 후 평가</span>
+                <span class="text-gray-300 text-left flex-1">커뮤니티</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page 4: 이제 주변인들과의 경기가 시작됩니다 -->
+        <div class="w-full flex-shrink-0 flex flex-col items-center justify-center px-8">
+          <div class="text-center space-y-8">
+            <!-- 아이콘 -->
+            <div class="relative inline-block">
+              <div class="absolute inset-0 bg-green-500/30 blur-3xl animate-pulse"></div>
+              <div
+                class="relative bg-gradient-to-br from-green-400 to-green-600 rounded-full p-8 shadow-2xl"
+              >
+                <i class="fas fa-play text-6xl text-white"></i>
+              </div>
+            </div>
+
+            <!-- 제목 -->
+            <div class="space-y-4">
+              <h1 class="text-4xl font-black text-white">이제 주변인들과의<br />경기가 시작됩니다</h1>
+              <p class="text-lg text-gray-300 leading-relaxed">
+                즐겁고 공정한 경기를 통해<br />
+                새로운 친구들을 만나보세요
+              </p>
+            </div>
+
+            <!-- 시작 메시지 -->
+            <div class="flex flex-col items-center gap-4 py-8">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-map-marker-alt text-green-400 text-3xl animate-pulse"></i>
+                <span class="text-gray-400">주변 사람들과 연결</span>
+              </div>
+              <div class="w-16 h-1 bg-gray-700 rounded-full"></div>
+              <div class="flex items-center gap-3">
+                <i class="fas fa-rocket text-green-400 text-3xl animate-pulse"></i>
+                <span class="text-gray-400">즐거운 경기 시작</span>
               </div>
             </div>
           </div>
@@ -142,7 +188,7 @@
     <!-- 페이지 인디케이터 -->
     <div class="flex justify-center gap-2 py-6">
       <div
-        v-for="page in 3"
+        v-for="page in 4"
         :key="page"
         class="transition-all duration-300"
         :class="
@@ -156,7 +202,7 @@
     <!-- 버튼 영역 -->
     <div class="px-8 pb-8 space-y-3">
       <button
-        v-if="currentPage < 2"
+        v-if="currentPage < 3"
         @click="nextPage"
         class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg shadow-2xl active:scale-95 transition-all"
       >
@@ -201,7 +247,7 @@ const isVisible = computed(() => {
 })
 
 const nextPage = () => {
-  if (currentPage.value < 2) {
+  if (currentPage.value < 3) {
     currentPage.value++
   }
 }

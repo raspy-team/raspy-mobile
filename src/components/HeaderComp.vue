@@ -1,5 +1,10 @@
 <template>
-  <header :class="['fixed top-0 left-0 w-full z-[30] border-b border-gray-700 bg-black/90 backdrop-blur-md raspy-top shadow-lg shadow-black/50', props.customClass]">
+  <header
+    :class="[
+      'fixed top-0 left-0 w-full z-[30] border-b border-gray-200 bg-black/90 backdrop-blur-md raspy-top ',
+      props.customClass,
+    ]"
+  >
     <div class="max-w-4xl mx-auto px-4 md:px-8 flex items-center justify-between text-gray-200">
       <!-- 좌측: 로고 또는 뒤로가기 -->
       <div class="flex items-center h-14 text-gray-300">
@@ -59,7 +64,9 @@
         @mousemove="onPanelDragMove"
         @mouseup="onPanelDragEnd"
       >
-        <div class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80">
+        <div
+          class="flex items-center justify-between px-6 h-16 border-b border-gray-700 bg-gray-900/80"
+        >
           <span class="text-base font-semibold text-gray-100 tracking-tight">알림</span>
           <button
             @click="toggleNotificationPanel"

@@ -68,7 +68,9 @@ api.interceptors.response.use(
     }
 
     // /invite-fall-back/ 페이지에서의 모든 401은 무시
-    if (currentPath && currentPath.startsWith('/invite-fall-back/')) {
+    if (currentPath && 
+      currentPath.startsWith('/invite-fall-back/') || 
+    currentPath.startsWith('/group/login'))  {
         return Promise.reject(error)
     }
 

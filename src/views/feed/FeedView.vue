@@ -2316,7 +2316,24 @@ async function onShare() {
 
   const res = await api.post('/api/invite', null, { params: { gameId: `${post.value.id}` } })
   const url = res.data.url
-  const text = `${post.value.players[0]?.name}의 경기 피드 – Match`
+
+  // 경기 상태에 따라 공유 텍스트 변경
+  const ruleName = post.value.rule?.name || '경기'
+  let text = ''
+
+  if (post.value.isCompleted) {
+    // 종료된 경기: 경기 결과 + 규칙명 표시
+    const result = post.value.result || {}
+    const winnerName = result.winnerName || '승자'
+    const loserName = result.loserName || '패자'
+    const winnerScore = result.winnerScore || 0
+    const loserScore = result.loserScore || 0
+    text = `[${ruleName}] ${winnerName} ${winnerScore} vs ${loserScore} ${loserName} – Match`
+  } else {
+    // 진행중/예정 경기: 규칙명 + 플레이어
+    text = `[${ruleName}] ${post.value.players[0]?.name}의 경기 – Match`
+  }
+
   try {
     if (navigator.share) {
       await navigator.share({ title: 'Match', text, url })

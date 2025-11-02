@@ -163,8 +163,8 @@
             <div class="space-y-4">
               <h1 class="text-4xl font-black text-white">이제 주변인들과의<br />경기가 시작됩니다</h1>
               <p class="text-lg text-gray-300 leading-relaxed">
-                즐겁고 공정한 경기를 통해<br />
-                새로운 친구들을 만나보세요
+                당신의 즐거운 경기 경험으로<br />
+                우리는 새롭게 이어집니다
               </p>
             </div>
 

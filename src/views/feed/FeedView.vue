@@ -2324,10 +2324,24 @@ async function onShare() {
   if (post.value.isCompleted) {
     // 종료된 경기: 경기 결과 + 규칙명 표시
     const result = post.value.result || {}
-    const winnerName = result.winnerName || '승자'
-    const loserName = result.loserName || '패자'
-    const winnerScore = result.winnerScore || 0
-    const loserScore = result.loserScore || 0
+    const players = post.value.players || []
+
+    // winner 이름과 매칭되는 플레이어 찾기
+    const winnerName = result.winner || players[0]?.name || '승자'
+    const player1Name = players[0]?.name || ''
+    const player2Name = players[1]?.name || ''
+
+    // 승자가 아닌 플레이어 찾기
+    const loserName = winnerName === player1Name ? player2Name :
+                      winnerName === player2Name ? player1Name : '패자'
+
+    const scoreA = result.scoreA || 0
+    const scoreB = result.scoreB || 0
+
+    // 승자가 player1이면 scoreA가 승자 점수, 아니면 scoreB가 승자 점수
+    const winnerScore = winnerName === player1Name ? scoreA : scoreB
+    const loserScore = winnerName === player1Name ? scoreB : scoreA
+
     text = `[${ruleName}] ${winnerName} ${winnerScore} vs ${loserScore} ${loserName} – Match`
   } else {
     // 진행중/예정 경기: 규칙명 + 플레이어

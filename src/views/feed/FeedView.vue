@@ -1321,7 +1321,7 @@ const showOnboarding = ref(false)
 // 온보딩 완료 처리
 function completeOnboarding() {
   showOnboarding.value = false
-  // localStorage.setItem('feedOnboardingCompleted2', 'true')
+  localStorage.setItem('feedOnboardingCompleted2', 'true')
   console.log('[FeedView] 온보딩 완료 - GIF는 자동으로 재생됨')
 }
 

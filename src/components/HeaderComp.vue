@@ -44,9 +44,11 @@
         >
           <i class="fas fa-bell text-orange-400 text-xl"></i>
           <span
-            v-if="unreadCount > 0"
-            class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"
-          ></span>
+            v-if="totalUnreadCount > 0"
+            class="absolute top-0 right-0 min-w-[18px] h-[18px] bg-orange-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-gray-900"
+          >
+            {{ totalUnreadCount > 9 ? '9+' : totalUnreadCount }}
+          </span>
         </button>
 
         <slot name="right-after"></slot>
@@ -76,6 +78,80 @@
           </button>
         </div>
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <!-- 친구 요청 섹션 -->
+          <div v-if="friendRequests.length > 0" class="border-b-2 border-orange-500/30 bg-gray-800/50">
+            <div class="px-5 py-3 border-b border-gray-700">
+              <h3 class="text-sm font-bold text-orange-400 flex items-center gap-2">
+                <i class="fas fa-user-plus"></i>
+                친구 요청 ({{ friendRequests.length }})
+              </h3>
+            </div>
+            <ul>
+              <li
+                v-for="request in friendRequests"
+                :key="request.id"
+                class="px-5 py-4 border-b border-gray-700/50 hover:bg-gray-800/80 transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <!-- 프로필 이미지 -->
+                  <img
+                    :src="request.avatar || '/default-avatar.png'"
+                    :alt="request.nickname"
+                    class="w-12 h-12 rounded-full border-2 border-orange-400 object-cover flex-shrink-0"
+                  />
+
+                  <!-- 사용자 정보 -->
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm text-gray-100 truncate">
+                      {{ request.nickname }}
+                    </div>
+                    <div class="text-xs text-gray-400 truncate">
+                      @{{ request.username }}
+                    </div>
+                    <div v-if="request.intro" class="text-xs text-gray-500 mt-1 truncate">
+                      {{ request.intro }}
+                    </div>
+                  </div>
+
+                  <!-- 액션 버튼 또는 상태 -->
+                  <div class="flex-shrink-0">
+                    <!-- 처리 전 버튼 -->
+                    <div v-if="!request.status" class="flex gap-2">
+                      <button
+                        @click.stop="acceptFriendRequest(request.id)"
+                        :disabled="request.processing"
+                        class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <i v-if="request.processing" class="fas fa-spinner fa-spin mr-1"></i>
+                        수락
+                      </button>
+                      <button
+                        @click.stop="rejectFriendRequest(request.id)"
+                        :disabled="request.processing"
+                        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        거절
+                      </button>
+                    </div>
+
+                    <!-- 수락됨 상태 -->
+                    <div v-else-if="request.status === 'accepted'" class="flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500/50 rounded-lg">
+                      <i class="fas fa-check-circle text-green-400 text-sm"></i>
+                      <span class="text-xs font-semibold text-green-300">친구가 되었습니다</span>
+                    </div>
+
+                    <!-- 거절됨 상태 -->
+                    <div v-else-if="request.status === 'rejected'" class="flex items-center gap-2 px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg">
+                      <i class="fas fa-times-circle text-gray-400 text-sm"></i>
+                      <span class="text-xs font-semibold text-gray-400">거절됨</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 일반 알림 섹션 -->
           <template v-if="notifications.length > 0">
             <ul>
               <li
@@ -107,7 +183,7 @@
               </li>
             </ul>
           </template>
-          <template v-else>
+          <template v-else-if="friendRequests.length === 0">
             <div class="py-20 text-center text-gray-500 text-sm">알림이 없습니다.</div>
           </template>
         </div>
@@ -117,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, onMounted } from 'vue'
+import { ref, defineProps, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/api'
 
@@ -139,6 +215,12 @@ const props = defineProps({
 const showNotificationPanel = ref(false)
 const notifications = ref([])
 const unreadCount = ref(0)
+const friendRequests = ref([])
+
+// 총 미읽음 카운트 (일반 알림 + 친구 요청)
+const totalUnreadCount = computed(() => {
+  return unreadCount.value + friendRequests.value.filter(r => !r.status).length
+})
 
 const goBack = () => {
   const { origin } = window.location
@@ -157,10 +239,67 @@ const fetchNotifications = async () => {
   unreadCount.value = notifications.value.filter((n) => !n.isRead).length
 }
 
+const fetchFriendRequests = async () => {
+  try {
+    const res = await api.get('/api/friends/my/received')
+    friendRequests.value = res.data.map(request => ({
+      ...request,
+      processing: false,
+      status: null // null, 'accepted', 'rejected'
+    }))
+  } catch (error) {
+    console.error('Failed to fetch friend requests:', error)
+    friendRequests.value = []
+  }
+}
+
 const toggleNotificationPanel = async () => {
   showNotificationPanel.value = !showNotificationPanel.value
   if (showNotificationPanel.value && notifications.value.length === 0) {
     await fetchNotifications()
+    await fetchFriendRequests()
+  }
+}
+
+const acceptFriendRequest = async (requesterId) => {
+  const request = friendRequests.value.find(r => r.id === requesterId)
+  if (!request) return
+
+  request.processing = true
+  try {
+    await api.post(`/api/friends/accept/${requesterId}`)
+    request.status = 'accepted'
+
+    // 2초 후 리스트에서 제거 (애니메이션 효과를 위해)
+    setTimeout(() => {
+      friendRequests.value = friendRequests.value.filter(r => r.id !== requesterId)
+    }, 2000)
+  } catch (error) {
+    console.error('Failed to accept friend request:', error)
+    alert('친구 요청 수락에 실패했습니다.')
+  } finally {
+    request.processing = false
+  }
+}
+
+const rejectFriendRequest = async (requesterId) => {
+  const request = friendRequests.value.find(r => r.id === requesterId)
+  if (!request) return
+
+  request.processing = true
+  try {
+    await api.post(`/api/friends/reject/${requesterId}`)
+    request.status = 'rejected'
+
+    // 1.5초 후 리스트에서 제거
+    setTimeout(() => {
+      friendRequests.value = friendRequests.value.filter(r => r.id !== requesterId)
+    }, 1500)
+  } catch (error) {
+    console.error('Failed to reject friend request:', error)
+    alert('친구 요청 거절에 실패했습니다.')
+  } finally {
+    request.processing = false
   }
 }
 
@@ -246,6 +385,7 @@ function onPanelDragEnd() {
 
 onMounted(() => {
   fetchNotifications()
+  fetchFriendRequests()
 })
 </script>
 

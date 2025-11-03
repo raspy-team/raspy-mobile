@@ -144,11 +144,13 @@ const triggerCamera = () => {
     }
   } else if (isIOSWebView()) {
     try {
-      console.log('Calling iOS native camera...')
-      window.webkit.messageHandlers.iosBridge.postMessage({
-        action: 'openCamera',
-        type: 'photo',
-      })
+      cameraInputRef.value.click()
+
+      // console.log('Calling iOS native camera...')
+      // window.webkit.messageHandlers.iosBridge.postMessage({
+      //   action: 'openCamera',
+      //   type: 'photo',
+      // })
       // 콜백은 window.onCameraResult로 받음
     } catch (error) {
       console.error('Failed to call iOS camera:', error)
@@ -159,7 +161,6 @@ const triggerCamera = () => {
     // 일반 웹에서는 기존 방식 사용
     try {
       console.log('Triggering camera input...')
-      cameraInputRef.value.click()
     } catch (error) {
       console.error('Failed to trigger camera:', error)
     }

@@ -7,16 +7,16 @@
   >
     <Transition name="fade-scale">
       <div
-        class="bg-white min-h-[70%] w-full max-w-md rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden"
+        class="bg-gray-800 min-h-[70%] w-full max-w-md rounded-2xl shadow-2xl ring-1 ring-gray-700 overflow-hidden"
         @click.stop
       >
         <!-- Header -->
-        <div class="px-6 pt-5 pb-4 border-b bg-gradient-to-b from-white to-gray-50">
+        <div class="px-6 pt-5 pb-4 border-b bg-gradient-to-b from-gray-800 to-gray-700 border-gray-700">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900">내 친구 선택</h2>
+            <h2 class="text-lg font-bold text-white">내 친구 선택</h2>
             <button
               @click="emit('close')"
-              class="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
+              class="p-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-700 transition"
               aria-label="닫기"
             >
               ×
@@ -28,7 +28,7 @@
               v-model="q"
               type="text"
               placeholder="닉네임/소개/아이디 검색"
-              class="w-full rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 px-4 py-2.5 text-sm outline-none transition"
+              class="w-full rounded-xl border border-gray-600 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/20 px-4 py-2.5 text-sm outline-none transition text-white placeholder-gray-400 bg-gray-700"
             />
             <div v-if="filteredFriends.length" class="sr-only">{{ filteredFriends.length }}명</div>
           </div>
@@ -37,23 +37,23 @@
         <!-- Content -->
         <div class="max-h-[65svh] overflow-y-auto">
           <!-- Loading skeleton -->
-          <ul v-if="loading" class="divide-y">
+          <ul v-if="loading" class="divide-y divide-gray-700">
             <li v-for="i in 6" :key="i" class="flex items-center gap-3 py-4 px-6 animate-pulse">
-              <div class="w-10 h-10 rounded-full bg-gray-200"></div>
+              <div class="w-10 h-10 rounded-full bg-gray-700"></div>
               <div class="flex-1">
-                <div class="h-3 w-32 bg-gray-200 rounded mb-2"></div>
-                <div class="h-3 w-48 bg-gray-100 rounded"></div>
+                <div class="h-3 w-32 bg-gray-700 rounded mb-2"></div>
+                <div class="h-3 w-48 bg-gray-600 rounded"></div>
               </div>
-              <div class="h-9 w-20 rounded-lg bg-gray-200"></div>
+              <div class="h-9 w-20 rounded-lg bg-gray-700"></div>
             </li>
           </ul>
 
           <!-- Error state -->
           <div v-else-if="error" class="px-6 py-12 text-center">
-            <div class="text-gray-500 text-sm">친구 목록을 불러오지 못했어요.</div>
+            <div class="text-gray-400 text-sm">친구 목록을 불러오지 못했어요.</div>
             <button
               @click="fetchFriends"
-              class="mt-4 px-4 py-2 rounded-lg border text-sm hover:bg-gray-50"
+              class="mt-4 px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition"
             >
               다시 시도
             </button>
@@ -61,19 +61,19 @@
 
           <!-- Empty state -->
           <div v-else-if="!filteredFriends.length" class="px-6 py-14 text-center">
-            <div class="mx-auto mb-4 grid place-items-center w-16 h-16 rounded-2xl bg-orange-50">
+            <div class="mx-auto mb-4 grid place-items-center w-16 h-16 rounded-2xl bg-gray-700">
               🧑‍🤝‍🧑
             </div>
-            <p class="text-gray-900 font-semibold mb-1">친구가 없습니다</p>
-            <p class="text-gray-500 text-sm">상단 검색을 확인하거나, 친구를 먼저 추가해보세요.</p>
+            <p class="text-white font-semibold mb-1">친구가 없습니다</p>
+            <p class="text-gray-400 text-sm">상단 검색을 확인하거나, 친구를 먼저 추가해보세요.</p>
           </div>
 
           <!-- List -->
-          <ul v-else class="divide-y">
+          <ul v-else class="divide-y divide-gray-700">
             <li
               v-for="f in filteredFriends"
               :key="f.id"
-              class="group flex items-center gap-3 py-3 px-6 hover:bg-orange-50/60 transition cursor-pointer"
+              class="group flex items-center gap-3 py-3 px-6 hover:bg-gray-700 transition cursor-pointer"
               @click="openConfirm(f)"
             >
               <div class="relative">
@@ -81,25 +81,25 @@
                   v-if="f.avatar"
                   :src="f.avatar"
                   alt=""
-                  class="w-10 h-10 rounded-full bg-gray-100 object-cover"
+                  class="w-10 h-10 rounded-full bg-gray-600 object-cover"
                 />
                 <img
                   v-else
                   :src="Default"
                   alt=""
-                  class="w-10 h-10 border rounded-full bg-gray-100 object-cover"
+                  class="w-10 h-10 border border-gray-600 rounded-full bg-gray-600 object-cover"
                 />
               </div>
               <div class="flex-1 min-w-0">
-                <div class="text-sm font-semibold text-gray-900 truncate">
+                <div class="text-sm font-semibold text-white truncate">
                   {{ f.nickname || f.username }}
                 </div>
-                <div class="text-xs text-gray-500 truncate">
+                <div class="text-xs text-gray-400 truncate">
                   {{ f.intro || '@' + f.username }}
                 </div>
               </div>
               <button
-                class="px-3.5 py-2 rounded-lg border border-orange-300 text-orange-600 bg-white text-sm font-medium group-hover:bg-orange-100/60 group-active:scale-[.98] transition"
+                class="px-3.5 py-2 rounded-lg border border-orange-400 text-orange-400 bg-gray-800 text-sm font-medium group-hover:bg-gray-700 group-active:scale-[.98] transition"
               >
                 선택
               </button>
@@ -114,46 +114,46 @@
       <div v-if="showConfirm" class="fixed inset-0 z-[31000]" @click.self="closeConfirm">
         <div class="absolute inset-0 bg-black/40"></div>
         <div
-          class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl ring-1 ring-black/5 p-5 pb-6"
+          class="absolute bottom-0 left-0 right-0 bg-gray-800 rounded-t-2xl shadow-2xl ring-1 ring-gray-700 p-5 pb-6"
         >
           <div class="flex items-center gap-3 mb-3">
             <img
               v-if="selectedFriend?.avatar"
               :src="selectedFriend.avatar"
               alt=""
-              class="w-12 h-12 rounded-full object-cover bg-gray-100"
+              class="w-12 h-12 rounded-full object-cover bg-gray-600"
             />
             <img
               v-else
               :src="Default"
               alt=""
-              class="w-12 h-12 rounded-full object-cover border bg-gray-50"
+              class="w-12 h-12 rounded-full object-cover border border-gray-600 bg-gray-600"
             />
             <div class="min-w-0">
-              <p class="text-base font-bold text-gray-900 truncate">
+              <p class="text-base font-bold text-white truncate">
                 {{ selectedFriend?.nickname || selectedFriend?.username }}
               </p>
-              <p class="text-xs text-gray-500 truncate">
+              <p class="text-xs text-gray-400 truncate">
                 {{ selectedFriend?.intro || '@' + (selectedFriend?.username || '') }}
               </p>
             </div>
           </div>
-          <p class="text-sm text-gray-700 leading-relaxed mb-4 py-2">
+          <p class="text-sm text-gray-300 leading-relaxed mb-4 py-2">
             <strong>{{ selectedFriend?.nickname || selectedFriend?.username }}</strong> 님과 게임을
             시작하시겠습니까?<br />
-            확인을 누르면 <span class="font-semibold">게임 진행 화면</span>으로 이동하며, 바로
-            <span class="font-semibold">“게임 시작”</span>을 누를 수 있어요.
+            확인을 누르면 <span class="font-semibold text-orange-400">게임 진행 화면</span>으로 이동하며, 바로
+            <span class="font-semibold text-orange-400">"게임 시작"</span>을 누를 수 있어요.
           </p>
           <div class="grid grid-cols-2 gap-3">
             <button
               @click="closeConfirm"
-              class="h-12 rounded-xl border text-gray-700 active:scale-95 transition"
+              class="h-12 rounded-xl border border-gray-600 text-gray-300 hover:bg-gray-700 active:scale-95 transition"
             >
               아니요
             </button>
             <button
               @click="confirmProceed"
-              class="h-12 rounded-xl bg-orange-500 text-white font-semibold active:scale-95 transition shadow"
+              class="h-12 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 active:scale-95 transition shadow"
             >
               확인
             </button>

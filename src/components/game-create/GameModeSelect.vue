@@ -1,23 +1,23 @@
 <template>
-  <div class="flex flex-col min-h-full px-5 pt-10">
+  <div class="flex flex-col min-h-full px-5 pt-10 bg-gray-900">
     <div class="text-center mb-7 pt-[10%]">
-      <div class="text-lg font-bold text-gray-900 mb-2 mt-7">친구를 상대로 지정하시겠어요?</div>
-      <div class="text-gray-500 text-base mb-7">
+      <div class="text-xl font-bold text-white mb-3 mt-7">친구를 상대로 지정하시겠어요?</div>
+      <div class="text-gray-300 text-base mb-8 leading-relaxed">
         친구를 지정하면 해당 친구와 경기를 생성할 수 있습니다.
       </div>
     </div>
-    <div class="flex flex-col gap-2 mb-5">
+    <div class="flex flex-col gap-3 mb-6">
       <button
         @click="$emit('mode', 'random')"
-        class="w-full py-4 bg-white text-orange-500 text-lg font-bold rounded-xl border border-orange-300"
+        class="w-full py-4 bg-gray-800 text-orange-400 text-lg font-semibold rounded-xl border border-gray-600 hover:bg-gray-700 active:scale-98 transition-all duration-200"
       >
         건너뛰기
       </button>
     </div>
-    <div class="w-full">
+    <div class="w-full mb-8">
       <button
         @click="showModal = true"
-        class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl shadow"
+        class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl shadow-lg hover:bg-orange-600 active:scale-98 transition-all duration-200"
       >
         친구 선택하기
       </button>
@@ -27,7 +27,7 @@
   <div class="fixed bottom-10 w-full p-5">
     <button
       @click="router.push('/rules')"
-      class="w-full py-4 bg-white text-gray-500 text-lg font-lg rounded-xl border shadow active:scale-98 transition"
+      class="w-full py-4 bg-gray-800 text-gray-300 text-lg font-medium rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700 active:scale-98 transition-all duration-200"
     >
       규칙 다시 선택하기
     </button>

@@ -1,24 +1,27 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gradient-to-b from-white to-gray-50 px-5 pt-10">
+  <div class="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 px-5 pt-10">
     <div class="max-w-lg mx-auto w-full">
-      <section class="rounded-2xl shadow-lg bg-white p-6 mt-16 mb-4">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-lg font-bold text-gray-900">경기 장소</span>
+      <section class="rounded-2xl shadow-2xl bg-gray-800 p-6 mt-16 mb-4 border border-gray-700">
+        <div class="mb-4">
+          <span class="text-xl font-bold text-white block mb-3">경기 장소</span>
           <button
             type="button"
             @click="setUnset"
             :class="placeRoad === null
-              ? 'bg-orange-100 text-orange-500 border border-orange-300'
-              : 'bg-gray-100 text-gray-400 border border-gray-200'"
-            class="rounded-full px-4 py-1 text-xs font-semibold shadow-sm transition hover:scale-105"
-          >미정</button>
+              ? 'bg-orange-500 text-white border-orange-400 shadow-lg'
+              : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'"
+            class="w-full py-3 text-sm font-semibold rounded-xl border transition-all duration-200 active:scale-98"
+          >
+            <i class="fas fa-question-circle mr-2"></i>
+            {{ placeRoad === null ? '장소 미정으로 설정됨' : '장소 미정으로 변경' }}
+          </button>
         </div>
 
         <transition name="fade">
           <div v-if="placeRoad !== null">
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-search mr-1 text-orange-500"></i>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                <i class="fas fa-search mr-1 text-orange-400"></i>
                 장소 검색
               </label>
               <div class="relative">
@@ -26,44 +29,44 @@
                   ref="addressInput"
                   v-model="searchQuery"
                   placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
-                  class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-400 outline-none transition"
+                  class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
                   autocomplete="off"
                 />
-                <i v-if="!searchQuery" class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                <i v-if="!searchQuery" class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
               </div>
-              <p class="text-xs text-gray-400 mt-2">
-                <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+              <p class="text-xs text-gray-500 mt-2">
+                <i class="fas fa-lightbulb text-yellow-400 mr-1"></i>
                 장소명이나 주소를 입력하면 자동으로 검색됩니다.
               </p>
             </div>
 
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <i class="fas fa-map-pin mr-1 text-orange-500"></i>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                <i class="fas fa-map-pin mr-1 text-orange-400"></i>
                 상세 장소 (선택)
               </label>
               <input
                 v-model="detailedPlace"
                 placeholder="상세 장소를 입력하세요 (예: 3층, A코트)"
-                class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-400 outline-none transition"
+                class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
                 autocomplete="off"
               />
-              <p class="text-xs text-gray-400 mt-2">
+              <p class="text-xs text-gray-500 mt-2">
                 <i class="fas fa-info-circle text-blue-400 mr-1"></i>
                 추가 정보를 입력하면 장소에 함께 표시됩니다
               </p>
             </div>
 
-            <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
+            <div v-if="selectedPlace" class="mb-4 p-4 bg-gray-700 rounded-xl border border-gray-600">
               <div class="flex items-start gap-3">
-                <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
+                <i class="fas fa-map-marker-alt text-orange-400 mt-1"></i>
                 <div class="flex-1 min-w-0">
-                  <p class="font-semibold text-gray-800 mb-1">{{ selectedPlace.name }}</p>
-                  <p class="text-sm text-gray-600">{{ selectedPlace.address }}</p>
+                  <p class="font-semibold text-white mb-1">{{ selectedPlace.name }}</p>
+                  <p class="text-sm text-gray-300">{{ selectedPlace.address }}</p>
                 </div>
                 <button
                   @click="clearSelection"
-                  class="text-gray-400 hover:text-gray-600 transition"
+                  class="text-gray-400 hover:text-gray-200 transition"
                 >
                   <i class="fas fa-times"></i>
                 </button>
@@ -71,21 +74,36 @@
             </div>
 
           </div>
-          <div v-else class="text-gray-400 text-sm mt-4">미정으로 설정됨</div>
+          <div v-else class="mb-4">
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              <i class="fas fa-heart mr-1 text-orange-400"></i>
+              선호 장소 (선택)
+            </label>
+            <input
+              v-model="preferredPlace"
+              placeholder="선호하는 경기 장소를 입력해요."
+              class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
+              autocomplete="off"
+            />
+            <p class="text-xs text-gray-500 mt-2">
+              <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+              입력하신 선호 장소는 경기 생성 시 "A 장소 선호, 협의 가능" 형태로 표시됩니다
+            </p>
+          </div>
         </transition>
       </section>
     </div>
 
     <!-- 커스텀 confirm 모달 -->
-    <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center bg-black p-5 bg-opacity-30 z-50">
-      <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-lg">
-        <p class="text-gray-800 text-lg mb-4">
-          <strong class="text-orange-600">{{ confirmItem.placeDetail }}</strong><br>
+    <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center bg-black p-5 bg-opacity-60 z-50">
+      <div class="bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl border border-gray-700">
+        <p class="text-gray-200 text-lg mb-4">
+          <strong class="text-orange-400">{{ confirmItem.placeDetail }}</strong><br>
           으로 하시겠습니까?
         </p>
         <div class="flex justify-end gap-3">
-          <button @click="cancelConfirm" class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600">취소</button>
-          <button @click="acceptConfirm" class="px-4 py-2 rounded-xl bg-orange-500 text-white">확인</button>
+          <button @click="cancelConfirm" class="px-4 py-2 rounded-xl bg-gray-700 text-gray-300 hover:bg-gray-600 transition">취소</button>
+          <button @click="acceptConfirm" class="px-4 py-2 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition">확인</button>
         </div>
       </div>
     </div>
@@ -93,34 +111,34 @@
     <!-- 주소 오류 모달 -->
     <div
       v-if="showAddressErrorModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
     >
-      <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
+      <div class="bg-gray-800 p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl border border-gray-700">
         <div class="text-center mb-4">
-          <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">선택하신 곳의 주소가 정확하지 않습니다.</h3>
-          <p class="text-sm text-gray-600">
+          <i class="fas fa-exclamation-triangle text-orange-400 text-4xl mb-3"></i>
+          <h3 class="text-lg font-bold text-white mb-2">선택하신 곳의 주소가 정확하지 않습니다.</h3>
+          <p class="text-sm text-gray-300">
             다른 장소를 선택하신 후 추가 정보를 입력해주세요.<br />
-            <span class="text-xs text-gray-500 mt-2 block">예: 서초탁구장, 강남체육관</span>
+            <span class="text-xs text-gray-400 mt-2 block">예: 서초탁구장, 강남체육관</span>
           </p>
         </div>
         <button
           @click="showAddressErrorModal = false"
-          class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition shadow"
+          class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition shadow-lg"
         >
           확인
         </button>
       </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 w-full bg-white p-5 shadow-xl flex gap-2">
+    <div class="fixed bottom-0 left-0 w-full bg-gray-800 p-5 shadow-2xl flex gap-3 border-t border-gray-700">
       <button
         @click="emitBack"
-        class="flex-1 py-4 text-lg font-bold rounded-xl border border-gray-200 bg-gray-100 text-gray-400"
+        class="flex-1 py-4 text-lg font-bold rounded-xl border border-gray-600 bg-gray-700 text-gray-300 hover:bg-gray-600 active:scale-98 transition-all duration-200"
       >이전</button>
       <button
         @click="submitPlace"
-        class="flex-1 py-4 text-lg font-bold rounded-xl bg-orange-500 text-white transition disabled:opacity-60"
+        class="flex-1 py-4 text-lg font-bold rounded-xl bg-orange-500 text-white hover:bg-orange-600 active:scale-98 transition-all duration-200 disabled:opacity-60 shadow-lg"
       >다음</button>
     </div>
   </div>
@@ -135,6 +153,7 @@ const placeRoad = ref('')
 const searchQuery = ref('')
 const selectedPlace = ref(null)
 const detailedPlace = ref('')
+const preferredPlace = ref('')
 const addressInput = ref(null)
 
 
@@ -149,6 +168,7 @@ function setUnset() {
   searchQuery.value = ''
   selectedPlace.value = null
   detailedPlace.value = ''
+  preferredPlace.value = ''
 }
 
 function clearSelection() {
@@ -192,7 +212,10 @@ onMounted(() => {
 
 function submitPlace() {
   if (placeRoad.value === null) {
-    emit('select', { placeRoad: null, placeDetail: '' })
+    const placeDetail = preferredPlace.value
+      ? `${preferredPlace.value} 선호, 협의 가능`
+      : '협의 가능'
+    emit('select', { placeRoad: null, placeDetail })
   } else if (selectedPlace.value) {
     // Google API 장소 이름과 상세 장소를 공백으로 합침
     const combinedPlaceDetail = detailedPlace.value
@@ -211,6 +234,7 @@ function emitBack() {
   searchQuery.value = ''
   selectedPlace.value = null
   detailedPlace.value = ''
+  preferredPlace.value = ''
   emit('back')
 }
 

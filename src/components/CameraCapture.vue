@@ -87,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, watch, defineProps, defineEmits } from 'vue'
+import { ref, watch, defineProps, defineEmits, onMounted, onUnmounted } from 'vue'
 import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
 
 const props = defineProps({
@@ -168,20 +168,29 @@ const triggerCamera = () => {
   }
 }
 
-// 안드로이드 네이티브 카메라 콜백 (전역 함수로 등록)
-if (typeof window !== 'undefined') {
-  window.onCameraResult = async (base64Image) => {
-    try {
-      console.log('Received image from Android camera')
-      // base64 이미지를 받아서 처리
-      const compressedDataUrl = await compressImage(base64Image)
-      capturedImage.value = compressedDataUrl
-      selectedFile.value = dataUrlToFile(compressedDataUrl, 'camera_image.jpg')
-    } catch (error) {
-      console.error('Failed to process camera image:', error)
+// 네이티브 카메라 콜백 등록 (onMounted에서 처리)
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.onCameraResult = async (base64Image) => {
+      try {
+        console.log('Received image from native camera (CameraCapture)')
+        // base64 이미지를 받아서 처리
+        const compressedDataUrl = await compressImage(base64Image)
+        capturedImage.value = compressedDataUrl
+        selectedFile.value = dataUrlToFile(compressedDataUrl, 'camera_image.jpg')
+      } catch (error) {
+        console.error('Failed to process camera image:', error)
+      }
     }
   }
-}
+})
+
+// 네이티브 카메라 콜백 정리
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.onCameraResult = null
+  }
+})
 
 // 이미지 선택
 const onImageChange = async (e) => {

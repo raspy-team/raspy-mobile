@@ -637,6 +637,7 @@
     :is-visible="showCameraModal"
     title="경기 시작 인증샷"
     subtitle="피드에 표시될 사진을 촬영해주세요"
+    :auto-open="true"
     @capture="onPhotoCapture"
     @cancel="onCameraCancel"
   />

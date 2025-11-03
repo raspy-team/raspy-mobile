@@ -2,8 +2,8 @@
   <div class="py-6 px-5">
     <!-- 1. 어떤 경기인가요? -->
     <div v-if="step === 5">
-      <div class="mb-2 text-base font-bold">1. 어떤 경기인가요?</div>
-      <div class="mb-2 text-sm text-gray-500">
+      <div class="mb-2 text-base font-bold text-white">1. 어떤 경기인가요?</div>
+      <div class="mb-2 text-sm text-gray-300">
         참고할 만한 기존 스포츠가 있다면 아래에서 선택해주세요.<br />
         (없다면 아래 입력란에 직접 작성해 주세요.)
       </div>
@@ -11,7 +11,7 @@
         <button
           type="button"
           @click="toggleDropdown"
-          class="w-full flex justify-between items-center px-3 py-2 border rounded-lg bg-white shadow-sm text-gray-700 focus:ring-2 focus:ring-orange-400"
+          class="w-full flex justify-between items-center px-3 py-2 border rounded-lg bg-gray-800 border-gray-600 shadow-sm text-gray-200 focus:ring-2 focus:ring-orange-400 hover:bg-gray-700 transition"
         >
           <span class="truncate">{{ selectedMinorLabel || '참고할 스포츠 선택' }}</span>
           <svg
@@ -26,13 +26,13 @@
         </button>
         <div
           v-show="showDropdown"
-          class="absolute z-10 bg-white border shadow-lg rounded-xl mt-1 w-full max-h-48 overflow-auto"
+          class="absolute z-10 bg-gray-800 border border-gray-600 shadow-lg rounded-xl mt-1 w-full max-h-48 overflow-auto"
         >
           <div
             v-for="minor in minors"
             :key="minor"
             @click="selectMinor(minor)"
-            class="cursor-pointer px-4 py-2 hover:bg-orange-100"
+            class="cursor-pointer px-4 py-2 hover:bg-gray-700 text-gray-200"
           >
             {{ minor }}
           </div>
@@ -40,145 +40,146 @@
       </div>
       <textarea
         :placeholder="'경기에 대해 자유롭게 설명해주세요.\n(예: 상대와 누가 더 높이 뛸 수 있는지 겨루는 경기입니다.)'"
-        class="w-full border border-gray-200 rounded-xl p-3 mb-1 text-gray-700 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-400"
+        class="w-full border border-gray-600 rounded-xl p-3 mb-1 text-gray-200 bg-gray-800 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-500"
         v-model="localInput"
         :maxlength="150"
         :rows="3"
         @input="validateStep5"
       />
       <div class="flex justify-end text-xs text-gray-400">{{ localInput.length }}/150</div>
-      <div v-if="inputError" class="text-sm text-red-500 mt-1">{{ inputError }}</div>
+      <div v-if="inputError" class="text-sm text-red-400 mt-1">{{ inputError }}</div>
     </div>
 
     <!-- 2. 점수 정의 -->
     <div v-else-if="step === 6">
-      <div class="mb-3 text-base font-bold">2. 어떻게 점수를 획득하나요?</div>
+      <div class="mb-3 text-base font-bold text-white">2. 어떻게 점수를 획득하나요?</div>
       <template v-if="selectedMinorLabel">
-        <label class="flex items-center gap-3 mb-3 bg-gray-100 p-3 rounded-lg shadow-sm">
+        <label class="flex items-center gap-3 mb-3 bg-gray-800 p-3 rounded-lg border border-gray-600">
           <input
             type="checkbox"
             v-model="checkedScorePreset"
             class="accent-orange-500 w-5 h-5"
             @change="validateStep6"
           />
-          <span class="text-base font-semibold text-gray-700"
+          <span class="text-base font-semibold text-gray-200"
             >{{ selectedMinorLabel }} 경기 규칙을 따릅니다.</span
           >
         </label>
       </template>
       <textarea
         :placeholder="'예시: 더 높이 뛴 사람이 점수를 가져갑니다.'"
-        class="w-full border border-gray-200 rounded-xl p-3 mb-1 text-gray-700 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
+        class="w-full border border-gray-600 rounded-xl p-3 mb-1 text-gray-200 bg-gray-800 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-500"
         v-model="localScoreInput"
         :maxlength="120"
         :rows="3"
         @input="validateStep6"
       />
       <div class="flex justify-end text-xs text-gray-400">{{ localScoreInput.length }}/120</div>
-      <div v-if="scoreInputError" class="text-sm text-red-500 mt-1">{{ scoreInputError }}</div>
+      <div v-if="scoreInputError" class="text-sm text-red-400 mt-1">{{ scoreInputError }}</div>
     </div>
 
     <!-- 3. 경기 준비 -->
     <div v-else-if="step === 7">
-      <div class="mb-3 text-base font-bold">3. 경기 전 준비할 것이 있나요?</div>
+      <div class="mb-3 text-base font-bold text-white">3. 경기 전 준비할 것이 있나요?</div>
       <textarea
         :placeholder="'예시: 조끼와 축구화, 축구공이 필요합니다.'"
-        class="w-full border border-gray-200 rounded-xl p-3 mb-1 text-gray-700 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
+        class="w-full border border-gray-600 rounded-xl p-3 mb-1 text-gray-200 bg-gray-800 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-500"
         v-model="localReadyInput"
         :maxlength="100"
         :rows="2"
         @input="validateStep7"
       />
       <div class="flex justify-end text-xs text-gray-400">{{ localReadyInput.length }}/100</div>
-      <div v-if="readyInputError" class="text-sm text-red-500 mt-1">{{ readyInputError }}</div>
+      <div v-if="readyInputError" class="text-sm text-red-400 mt-1">{{ readyInputError }}</div>
     </div>
 
     <!-- 4. 경기 순서 -->
     <div v-else-if="step === 8">
-      <div class="mb-3 text-base font-bold">4. 경기는 어떤 순서로 진행되나요?</div>
+      <div class="mb-3 text-base font-bold text-white">4. 경기는 어떤 순서로 진행되나요?</div>
       <template v-if="selectedMinorLabel">
-        <label class="flex items-center gap-3 mb-3 bg-gray-100 p-3 rounded-lg shadow-sm">
+        <label class="flex items-center gap-3 mb-3 bg-gray-800 p-3 rounded-lg border border-gray-600">
           <input
             @change="validateStep8"
             type="checkbox"
             v-model="checkedOrderPreset"
             class="accent-orange-500 w-5 h-5"
           />
-          <span class="text-base font-semibold text-gray-700"
+          <span class="text-base font-semibold text-gray-200"
             >{{ selectedMinorLabel }} 경기 규칙을 따릅니다.</span
           >
         </label>
       </template>
       <textarea
         :placeholder="'예시: 1. 가위바위보로 순서를 정한다. 2. ...'"
-        class="w-full border border-gray-200 rounded-xl p-3 mb-1 text-gray-700 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
+        class="w-full border border-gray-600 rounded-xl p-3 mb-1 text-gray-200 bg-gray-800 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-500"
         v-model="localOrderInput"
         :maxlength="300"
         :rows="5"
         @input="validateStep8"
       />
       <div class="flex justify-end text-xs text-gray-400">{{ localOrderInput.length }}/300</div>
-      <div v-if="orderInputError" class="text-sm text-red-500 mt-1">{{ orderInputError }}</div>
+      <div v-if="orderInputError" class="text-sm text-red-400 mt-1">{{ orderInputError }}</div>
     </div>
 
     <!-- 5. 판정 방식 -->
     <div v-else-if="step === 9">
-      <div class="mb-3 text-base font-bold">5. 판정 방식</div>
-      <label class="flex items-center gap-3 mb-3 bg-gray-100 p-3 rounded-lg shadow-sm">
+      <div class="mb-3 text-base font-bold text-white">5. 판정 방식</div>
+      <label class="flex items-center gap-3 mb-3 bg-gray-800 p-3 rounded-lg border border-gray-600">
         <input
           @change="validateStep9"
           type="checkbox"
           v-model="checkedJudge1"
           class="accent-orange-500 w-5 h-5"
         />
-        <span class="text-base font-semibold text-gray-700">상호 합의</span>
+        <span class="text-base font-semibold text-gray-200">상호 합의</span>
       </label>
       <textarea
         :placeholder="'예시: 제3자의 판정이 필요하나, 서로가 기록해주면서 진행도 가능합니다.'"
-        class="w-full border border-gray-200 rounded-xl p-3 mb-1 text-gray-700 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
+        class="w-full border border-gray-600 rounded-xl p-3 mb-1 text-gray-200 bg-gray-800 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-500"
         v-model="localJudgeInput"
         :maxlength="100"
         :rows="2"
         @input="validateStep9"
       />
       <div class="flex justify-end text-xs text-gray-400">{{ localJudgeInput.length }}/100</div>
-      <div v-if="judgeInputError" class="text-sm text-red-500 mt-1">{{ judgeInputError }}</div>
+      <div v-if="judgeInputError" class="text-sm text-red-400 mt-1">{{ judgeInputError }}</div>
     </div>
 
     <!-- 6. 반칙 -->
     <div v-else-if="step === 10">
-      <div class="mb-3 text-base font-bold">6. 반칙</div>
+      <div class="mb-3 text-base font-bold text-white">6. 반칙</div>
       <template v-if="selectedMinorLabel">
-        <label class="flex items-center gap-3 mb-3 bg-gray-100 p-3 rounded-lg shadow-sm">
+        <label class="flex items-center gap-3 mb-3 bg-gray-800 p-3 rounded-lg border border-gray-600">
           <input
             @change="validateStep10"
             type="checkbox"
             v-model="checkedFoulPreset"
             class="accent-orange-500 w-5 h-5"
           />
-          <span class="text-base font-semibold text-gray-700"
+          <span class="text-base font-semibold text-gray-200"
             >{{ selectedMinorLabel }} 경기 규칙을 따릅니다.</span
           >
         </label>
       </template>
       <textarea
         :placeholder="'예시: 도움닫기 금지, 신발 벗고 진행이 원칙입니다.'"
-        class="w-full border border-gray-200 rounded-xl p-3 mb-1 text-gray-700 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
+        class="w-full border border-gray-600 rounded-xl p-3 mb-1 text-gray-200 bg-gray-800 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-500"
         v-model="localFoulInput"
         :maxlength="100"
         :rows="2"
         @input="validateStep10"
       />
       <div class="flex justify-end text-xs text-gray-400">{{ localFoulInput.length }}/100</div>
-      <div v-if="foulInputError" class="text-sm text-red-500 mt-1">{{ foulInputError }}</div>
+      <div v-if="foulInputError" class="text-sm text-red-400 mt-1">{{ foulInputError }}</div>
     </div>
 
     <!-- 7. 기타 정보 -->
+        <!-- 7. 기타 정보 -->
     <div v-else-if="step === 11">
-      <div class="mb-3 text-base font-bold">7. 기타 정보</div>
+      <div class="mb-3 text-base font-bold text-white">7. 기타 정보</div>
       <textarea
         :placeholder="'(선택)'"
-        class="w-full border border-gray-200 rounded-xl p-3 mb-1 text-gray-700 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
+        class="w-full border border-gray-600 rounded-xl p-3 mb-1 text-gray-200 bg-gray-800 resize-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition placeholder:text-gray-500"
         v-model="localExtraInput"
         :maxlength="60"
         :rows="2"
@@ -187,18 +188,18 @@
       <div class="flex justify-end text-xs text-gray-400">{{ localExtraInput.length }}/60</div>
     </div>
 
-    <!-- 8, 한 세트 승리 점수 / 제한시간 (설명 텍스트 추가된 버전) -->
-    <div v-else-if="step === 12" class="bg-white rounded-2xl w-full max-w-2xl mx-auto">
-      <div class="mb-3 text-base font-bold tracking-tight text-gray-900">
+        <!-- 8, 한 세트 승리 점수 / 제한시간 (설명 텍스트 추가된 버전) -->
+    <div v-else-if="step === 12" class="bg-gray-800 rounded-2xl w-full max-w-2xl mx-auto border border-gray-600">
+      <div class="mb-3 text-base font-bold tracking-tight text-white">
         8. 한 세트 승리 점수 / 제한 시간
       </div>
-      <div class="mb-4 text-xs font-medium text-orange-500">
-        둘 다 ‘제한 없음’으로 설정할 수 없습니다.
+      <div class="mb-4 text-xs font-medium text-orange-400">
+        둘 다 '제한 없음'으로 설정할 수 없습니다.
       </div>
       <div class="flex flex-col gap-8 md:flex-row md:gap-12 mt-6">
         <!-- 점수 -->
         <div class="flex-1">
-          <div class="text-sm font-semibold mb-2 text-gray-800">점수</div>
+          <div class="text-sm font-semibold mb-2 text-gray-200">점수</div>
           <div class="flex gap-3">
             <button
               type="button"
@@ -206,7 +207,7 @@
               :class="[
                 pointsUnlimited
                   ? 'bg-orange-500 text-white font-bold'
-                  : 'bg-orange-50 text-orange-500 border border-orange-200 hover:bg-orange-100 font-semibold',
+                  : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 font-semibold',
                 'rounded-full px-6 py-2 text-sm transition-all focus:outline-none',
               ]"
             >
@@ -218,7 +219,7 @@
               :class="[
                 !pointsUnlimited
                   ? 'bg-orange-500 text-white font-bold'
-                  : 'bg-orange-50 text-orange-500 border border-orange-200 hover:bg-orange-100 font-semibold',
+                  : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 font-semibold',
                 'rounded-full px-6 py-2 text-sm transition-all focus:outline-none',
               ]"
             >
@@ -240,7 +241,7 @@
         </div>
         <!-- 제한시간 -->
         <div class="flex-1">
-          <div class="text-sm font-semibold mb-2 text-gray-800">제한 시간</div>
+          <div class="text-sm font-semibold mb-2 text-gray-200">제한 시간</div>
           <div class="flex gap-3">
             <button
               type="button"
@@ -301,7 +302,7 @@
 
     <!-- 9. 총 세트 수 -->
     <div v-else-if="step === 13">
-      <div class="mb-3 text-base font-bold">9. 총 세트 수</div>
+      <div class="mb-3 text-base font-bold text-white">9. 총 세트 수</div>
       <CustomInputNumber
         v-model="localSetsToWin"
         :min="1"
@@ -310,23 +311,39 @@
         @change="validateStep13"
       />
       <div class="text-gray-400 text-xs mt-2">과반 세트를 먼저 이기면 자동 승리 처리됩니다.</div>
-      <div v-if="setsError" class="text-sm text-red-500 mt-1">{{ setsError }}</div>
+      <div v-if="setsError" class="text-sm text-red-400 mt-1">{{ setsError }}</div>
     </div>
 
     <!-- 10. 세트 승리 기준 -->
     <div v-else-if="step === 14">
-      <div class="mb-3 text-base font-bold">10. 세트 승리 기준</div>
-      <select v-model="localWinBy" class="modern-input text-xs w-full" @change="validateStep14">
-        <option disabled value="">기준 선택</option>
-        <option value="SETS_HALF_WIN" :disabled="pointsUnlimited">
-          점수 달성(미달성 시 무승부)
-        </option>
-        <option value="MOST_SETS_AND_POINTS" :disabled="timeUnlimited">
-          제한시간 도달(동점 시 무승부)
-        </option>
-      </select>
-      <div class="text-gray-400 text-xs mt-2">점수/시간 조합에 따라 선택 불가 옵션이 있습니다.</div>
-      <div v-if="winByError" class="text-sm text-red-500 mt-1">{{ winByError }}</div>
+      <div class="mb-4 text-lg font-bold text-white">10. 세트 승리 기준</div>
+      <div class="mb-4 p-4 bg-gray-800 border border-gray-600 rounded-xl">
+        <select
+          v-model="localWinBy"
+          class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all appearance-none"
+          @change="validateStep14"
+        >
+          <option disabled value="" class="bg-gray-700 text-gray-300">기준 선택</option>
+          <option value="SETS_HALF_WIN" :disabled="pointsUnlimited" class="bg-gray-700 text-gray-200">
+            점수 달성(미달성 시 무승부)
+          </option>
+          <option value="MOST_SETS_AND_POINTS" :disabled="timeUnlimited" class="bg-gray-700 text-gray-200">
+            제한시간 도달(동점 시 무승부)
+          </option>
+        </select>
+        <div class="flex items-center justify-between mt-3">
+          <div class="text-sm text-gray-400">점수/시간 조합에 따라 선택 불가 옵션이 있습니다.</div>
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+      <div v-if="winByError" class="text-sm text-red-400 mt-2 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+        {{ winByError }}
+      </div>
     </div>
   </div>
 </template>

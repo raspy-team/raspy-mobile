@@ -574,7 +574,10 @@
               <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">
                 <button
                   class="w-full flex items-center justify-center gap-2 text-xs text-white/80 bg-black/30 rounded-lg px-3 py-2 mb-2 focus:outline-none"
-                  @click="showSetDetails = !showSetDetails"
+                  @click="
+                    ;((showSetDetails = !showSetDetails), (feedIsPointerDown.value = false))
+                    feedAnimating.value = false
+                  "
                 >
                   <span v-if="!showSetDetails"><i class="fas fa-chevron-down"></i></span>
                   <span v-else><i class="fas fa-chevron-up"></i></span>
@@ -1278,9 +1281,7 @@ async function fetchLikersData() {
     // GET API로 좋아요 정보만 조회 (토글하지 않음)
     const response = await api.get(`/api/games/${post.value.id}/like`)
     // null 또는 userId가 없는 데이터 필터링
-    const validLikers = (response.data.recentLikers || []).filter(
-      liker => liker && liker.userId
-    )
+    const validLikers = (response.data.recentLikers || []).filter((liker) => liker && liker.userId)
     likersData.value = {
       totalCount: response.data.totalCount || 0,
       recentLikers: validLikers,
@@ -2179,8 +2180,8 @@ async function onShare() {
     const player2Name = players[1]?.name || ''
 
     // 승자가 아닌 플레이어 찾기
-    const loserName = winnerName === player1Name ? player2Name :
-                      winnerName === player2Name ? player1Name : '패자'
+    const loserName =
+      winnerName === player1Name ? player2Name : winnerName === player2Name ? player1Name : '패자'
 
     const scoreA = result.scoreA || 0
     const scoreB = result.scoreB || 0

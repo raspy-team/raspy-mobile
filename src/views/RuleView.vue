@@ -223,9 +223,18 @@ const handleGoBack = () => {
   // fromGameCreate 쿼리 파라미터가 있으면 GameListView로 이동
   if (route.query.fromGameCreate === 'true') {
     router.push('/game-list')
-  } else {
-    // 일반적인 경우 뒤로가기
-    router.back()
+  }
+  // 규칙 생성에서 돌아온 경우 피드로 이동
+  else if (route.query.fromRuleCreate === 'true') {
+    router.push('/')
+  }
+  else {
+    // 히스토리 길이가 1 이하면 (첫 페이지) 피드로 이동
+    if (window.history.length <= 1) {
+      router.push('/');
+    } else {
+      router.back();
+    }
   }
 }
 

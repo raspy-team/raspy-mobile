@@ -13,18 +13,8 @@
     >
       게임 생성 시작
     </button>
-
-    <button
-      @click="router.go(-1)"
-      class="w-full py-4 bg-white text-gray-500 text-lg font-lg rounded-xl border shadow active:scale-98 transition"
-    >
-      뒤로 가기
-    </button>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
 </script>

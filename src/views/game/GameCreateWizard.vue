@@ -1,4 +1,11 @@
 <template>
+  <HeaderComp
+    :has-referer="true"
+    :show-bell="false"
+    :show-dm="false"
+    custom-class="bg-gray-900"
+  />
+
   <div class="pt-7 raspy-top h-full">
     <!-- Progress Bar -->
     <div class="progress-bar-outer bg-gray-700">

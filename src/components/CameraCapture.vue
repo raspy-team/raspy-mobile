@@ -123,8 +123,10 @@ const isAndroidWebView = () => {
 // iOS 웹뷰 감지
 const isIOSWebView = () => {
   const userAgent = navigator.userAgent.toLowerCase()
-  return userAgent.includes('raspy-ios') ||
-         (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge)
+  return (
+    userAgent.includes('raspy-ios') ||
+    (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge)
+  )
 }
 
 // 카메라 트리거
@@ -145,7 +147,7 @@ const triggerCamera = () => {
       console.log('Calling iOS native camera...')
       window.webkit.messageHandlers.iosBridge.postMessage({
         action: 'openCamera',
-        type: 'photo'
+        type: 'photo',
       })
       // 콜백은 window.onCameraResult로 받음
     } catch (error) {

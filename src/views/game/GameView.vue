@@ -90,7 +90,10 @@
           ]"
         >
           <!-- 규칙(게임명, 카테고리) 정보 최상단 + 타입/상태 라벨 우측 배치 -->
-          <div class="flex justify-between items-start mb-2 cursor-pointer hover:bg-gray-800 rounded-lg p-2 transition-colors" @click="openRuleDetail(game)">
+          <div
+            class="flex justify-between items-start mb-2 cursor-pointer hover:bg-gray-800 rounded-lg p-2 transition-colors"
+            @click="openRuleDetail(game)"
+          >
             <div class="min-w-0 flex items-center gap-2">
               <div>
                 <img
@@ -433,7 +436,7 @@
 
   <!-- 게임 시작 모달들 -->
 
-  <!-- 기존 장소 확인 모달 (최강의 UX!) -->
+  <!-- 기존 장소 확인 모달 -->
   <div
     v-if="showLocationConfirmModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
@@ -441,7 +444,9 @@
     <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-2xl">
       <!-- 헤더 -->
       <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-4">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-4"
+        >
           <i class="fas fa-map-marker-alt text-orange-500 text-3xl"></i>
         </div>
         <h2 class="text-xl font-bold text-gray-900 mb-2">경기 장소 확인</h2>
@@ -449,7 +454,9 @@
       </div>
 
       <!-- 장소 정보 카드 -->
-      <div class="mb-6 p-5 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200">
+      <div
+        class="mb-6 p-5 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200"
+      >
         <div class="flex items-start gap-3">
           <div class="flex-shrink-0 mt-1">
             <i class="fas fa-location-dot text-orange-600 text-xl"></i>
@@ -668,11 +675,7 @@
   <CustomToast />
 
   <!-- 규칙 모달 -->
-  <MatchRuleModal
-    v-if="selectedGame"
-    :rule="selectedGame.rule"
-    @close="closeRuleDetail"
-  />
+  <MatchRuleModal v-if="selectedGame" :rule="selectedGame.rule" @close="closeRuleDetail" />
 </template>
 
 <script setup>
@@ -699,6 +702,7 @@ import CustomToast from '../../components/CustomToast.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
 import { useToast } from '../../composable/useToast'
 import { parseRegion } from '../../utils/regionParser'
+import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 
 const { showToast } = useToast()
 const router = useRouter()
@@ -794,6 +798,39 @@ onMounted(async () => {
   console.log('[GameView] 마운트: 데이터 로드 및 폴링 시작')
   loading.value = true
 
+  // iOS 네이티브 카메라 콜백 등록
+  if (typeof window !== 'undefined') {
+    const handleCameraResult = async (base64Image) => {
+      try {
+        console.log('Received photo from native camera')
+        const compressedDataUrl = await compressImage(base64Image)
+        const file = dataUrlToFile(compressedDataUrl, 'camera-photo.jpg')
+        capturedPhotoFile.value = file
+        showCameraModal.value = false
+
+        // 카운트다운 모달 표시
+        const game = myGames.value.find((g) => g.id === currentGameId.value)
+        const dur = game?.rule?.duration
+
+        if (dur === -1) {
+          countdownDurationText.value = '제한 없음'
+        } else {
+          const min = Math.floor(dur / 60)
+          const sec = dur % 60
+          countdownDurationText.value = (min ? `${min}분 ` : '') + (sec ? `${sec}초` : '')
+        }
+        showCountdownModal.value = true
+      } catch (error) {
+        console.error('Failed to process camera image:', error)
+        showToast('사진 저장에 실패했습니다.')
+      }
+    }
+
+    // 여러 콜백 이름을 모두 등록 (iOS 호환성)
+    window.onCameraResult = handleCameraResult
+    window.onGameViewCameraResult = handleCameraResult
+  }
+
   // 첫 데이터 로드
   await fetchGames()
   loading.value = false
@@ -816,6 +853,12 @@ onBeforeUnmount(() => {
 onUnmounted(() => {
   console.log('[GameView] 언마운트 완료: 최종 정리')
   stopPolling()
+
+  // iOS 네이티브 카메라 콜백 정리
+  if (typeof window !== 'undefined') {
+    window.onCameraResult = null
+    window.onGameViewCameraResult = null
+  }
 })
 
 function formatDate(dateStr) {

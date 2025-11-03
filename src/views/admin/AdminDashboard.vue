@@ -94,6 +94,28 @@
               <p class="text-xs text-gray-500">모든 규칙 목록 확인</p>
             </div>
           </button>
+
+          <button
+            @click="$router.push('/group/register')"
+            class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-300 transition"
+          >
+            <i class="fas fa-user-plus text-purple-500 text-xl"></i>
+            <div class="text-left">
+              <p class="font-semibold text-gray-900">그룹 계정 생성</p>
+              <p class="text-xs text-gray-500">관리자 권한으로 그룹 계정 생성</p>
+            </div>
+          </button>
+
+          <button
+            @click="openUserListModal"
+            class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition"
+          >
+            <i class="fas fa-users text-green-500 text-xl"></i>
+            <div class="text-left">
+              <p class="font-semibold text-gray-900">전체 유저 조회</p>
+              <p class="text-xs text-gray-500">모든 유저 목록 확인 및 프로필 이동</p>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -137,11 +159,95 @@
         </div>
       </div>
     </div>
+
+    <!-- 전체 유저 조회 모달 -->
+    <transition name="fade">
+      <div
+        v-if="showUserListModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+        @click="showUserListModal = false"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+          @click.stop
+        >
+          <!-- 모달 헤더 -->
+          <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-500/10 to-transparent">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-users text-green-500"></i>
+                전체 유저 조회
+              </h3>
+              <button
+                @click="showUserListModal = false"
+                class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition flex items-center justify-center"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 검색 -->
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="relative">
+              <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              <input
+                v-model="userSearch"
+                @input="searchUsers"
+                type="text"
+                placeholder="닉네임 또는 유저네임으로 검색..."
+                class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+              />
+            </div>
+          </div>
+
+          <!-- 유저 목록 -->
+          <div class="overflow-y-auto max-h-[50vh]">
+            <div v-if="loadingUsers" class="text-center py-12 text-gray-400">
+              <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+              <p>유저 목록을 불러오는 중...</p>
+            </div>
+            <div v-else-if="filteredUsers.length === 0" class="text-center py-12 text-gray-400">
+              <i class="fas fa-user-slash text-4xl mb-3"></i>
+              <p>{{ userSearch ? '검색 결과가 없습니다' : '유저가 없습니다' }}</p>
+            </div>
+            <div v-else class="divide-y divide-gray-200">
+              <div
+                v-for="user in filteredUsers"
+                :key="user.id"
+                @click="goToUserProfile(user.id)"
+                class="px-6 py-4 hover:bg-gray-50 cursor-pointer transition"
+              >
+                <div class="flex items-center gap-4">
+                  <img
+                    :src="user.avatar || '/default-avatar.png'"
+                    :alt="user.nickname"
+                    class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-gray-900 truncate">
+                      {{ user.nickname }}
+                    </div>
+                    <div class="text-sm text-gray-500 truncate">
+                      @{{ user.username }}
+                    </div>
+                    <div v-if="user.intro" class="text-xs text-gray-400 truncate mt-0.5">
+                      {{ user.intro }}
+                    </div>
+                  </div>
+                  <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
 
@@ -153,6 +259,22 @@ const stats = ref({
   rejected: 0,
 })
 const recentRequests = ref([])
+
+// 유저 목록 관련
+const showUserListModal = ref(false)
+const loadingUsers = ref(false)
+const allUsers = ref([])
+const userSearch = ref('')
+
+const filteredUsers = computed(() => {
+  if (!userSearch.value.trim()) return allUsers.value
+  const search = userSearch.value.toLowerCase()
+  return allUsers.value.filter(
+    (user) =>
+      user.nickname?.toLowerCase().includes(search) ||
+      user.username?.toLowerCase().includes(search)
+  )
+})
 
 async function fetchStats() {
   try {
@@ -228,6 +350,43 @@ function viewRequest(request) {
   router.push(`/admin/rule-edit-requests?highlight=${request.id}`)
 }
 
+// 유저 목록 조회
+async function fetchAllUsers() {
+  loadingUsers.value = true
+  try {
+    const res = await api.get('/api/admin/users')
+    allUsers.value = res.data
+  } catch (e) {
+    console.error('Failed to fetch users:', e)
+    alert('유저 목록을 불러오는데 실패했습니다.')
+  } finally {
+    loadingUsers.value = false
+  }
+}
+
+// 유저 검색 (디바운싱)
+let searchTimeout = null
+function searchUsers() {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    // filteredUsers computed가 자동으로 처리
+  }, 300)
+}
+
+// 유저 프로필로 이동
+function goToUserProfile(userId) {
+  showUserListModal.value = false
+  router.push(`/profile/${userId}`)
+}
+
+// 모달 열릴 때 유저 목록 로드
+function openUserListModal() {
+  showUserListModal.value = true
+  if (allUsers.value.length === 0) {
+    fetchAllUsers()
+  }
+}
+
 onMounted(() => {
   fetchStats()
 })
@@ -235,4 +394,13 @@ onMounted(() => {
 
 <style scoped>
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

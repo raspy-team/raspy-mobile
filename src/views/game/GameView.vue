@@ -176,138 +176,154 @@
             v-if="
               showApplicantsModal && selectedApplicantsGame && selectedApplicantsGame.id === game.id
             "
-            class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
+            class="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100000] p-4"
           >
-            <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg relative">
-              <h2 class="text-lg font-bold mb-4 text-white">생성자</h2>
-              <!-- 신청한 게임 소유자 정보 상단 렌더링 -->
+            <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl border border-gray-700 relative max-h-[80vh] overflow-y-auto">
+              <button
+                @click.stop="closeApplicantsModal"
+                class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-1"
+              >
+                <i class="fas fa-times text-xl"></i>
+              </button>
+
+              <h2 class="text-xl font-bold mb-6 text-white pr-8">도전자 목록</h2>
+
+              <!-- 생성자 정보 (신청한 게임의 경우) -->
               <template v-if="selectedApplicantsGame.type === 'sent'">
-                <div class="p-3 bg-gray-800 rounded-xl flex items-center gap-3 mb-4">
-                  <img
-                    :src="
-                      selectedApplicantsGame.ownerProfileUrl ||
-                      selectedApplicantsGame.myProfileUrl ||
-                      '/default.png'
-                    "
-                    class="w-10 h-10 rounded-full object-cover"
-                    alt="Owner Profile"
-                  />
-                  <div class="space-y-1">
-                    <p
-                      class="text-sm font-bold flex items-center gap-2 mb-0"
-                      :class="
-                        selectedApplicantsGame.championId ==
-                        (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId)
-                          ? 'text-yellow-500'
-                          : 'text-gray-200'
+                <div class="p-4 bg-gray-700/50 rounded-xl border border-gray-600 mb-6">
+                  <h3 class="text-sm font-semibold text-gray-300 mb-3 flex items-center">
+                    <i class="fas fa-crown text-yellow-400 mr-2"></i>
+                    생성자
+                  </h3>
+                  <div class="flex items-center gap-3">
+                    <img
+                      :src="
+                        selectedApplicantsGame.ownerProfileUrl ||
+                        selectedApplicantsGame.myProfileUrl ||
+                        '/default.png'
                       "
-                    >
-                      {{
-                        selectedApplicantsGame.ownerNickname || selectedApplicantsGame.myNickname
-                      }}
-                    </p>
-                    <p class="text-xs text-gray-400 mb-0">
-                      {{ selectedApplicantsGame.ownerStatistics?.wins }}승
-                      {{ selectedApplicantsGame.ownerStatistics?.draws }}무
-                      {{ selectedApplicantsGame.ownerStatistics?.losses }}패 · 승률
-                      {{
-                        getWinRate(
-                          selectedApplicantsGame.ownerStatistics || {
-                            wins: 0,
-                            draws: 0,
-                            losses: 0,
-                          },
-                        )
-                      }}%
-                    </p>
-                    <p class="text-xs flex items-center gap-1 mb-0">
-                      <i
-                        :class="[
-                          (selectedApplicantsGame.ownerStatistics?.manner || 4.5) >= 4
-                            ? 'fas fa-face-smile text-green-500'
-                            : (selectedApplicantsGame.ownerStatistics?.manner || 4.5) >= 2
-                              ? 'fas fa-face-meh text-orange-500'
-                              : (selectedApplicantsGame.ownerStatistics?.manner || 4.5) > 0
-                                ? 'fas fa-face-frown text-red-500'
-                                : 'fas fa-user-slash text-gray-400',
-                        ]"
-                      ></i>
-                      {{ (selectedApplicantsGame.ownerStatistics?.manner || 4.5).toFixed(1) }}
-                    </p>
+                      class="w-12 h-12 rounded-full object-cover border-2 border-orange-400"
+                      alt="Owner Profile"
+                    />
+                    <div class="flex-1">
+                      <p
+                        class="text-base font-bold flex items-center gap-2 text-white"
+                        :class="
+                          selectedApplicantsGame.championId ==
+                          (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId)
+                            ? 'text-yellow-400'
+                            : 'text-white'
+                        "
+                      >
+                        {{
+                          selectedApplicantsGame.ownerNickname || selectedApplicantsGame.myNickname
+                        }}
+                        <i v-if="selectedApplicantsGame.championId == (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId)" class="fas fa-crown text-yellow-400 text-sm"></i>
+                      </p>
+                      <p class="text-sm text-gray-400">
+                        {{ selectedApplicantsGame.ownerStatistics?.wins }}승
+                        {{ selectedApplicantsGame.ownerStatistics?.draws }}무
+                        {{ selectedApplicantsGame.ownerStatistics?.losses }}패 · 승률
+                        {{
+                          getWinRate(
+                            selectedApplicantsGame.ownerStatistics || {
+                              wins: 0,
+                              draws: 0,
+                              losses: 0,
+                            },
+                          )
+                        }}%
+                      </p>
+                      <p class="text-sm flex items-center gap-1 text-gray-400">
+                        <i
+                          :class="[
+                            (selectedApplicantsGame.ownerStatistics?.manner || 4.5) >= 4
+                              ? 'fas fa-face-smile text-green-400'
+                              : (selectedApplicantsGame.ownerStatistics?.manner || 4.5) >= 2
+                                ? 'fas fa-face-meh text-orange-400'
+                                : (selectedApplicantsGame.ownerStatistics?.manner || 4.5) > 0
+                                  ? 'fas fa-face-frown text-red-400'
+                                  : 'fas fa-user-slash text-gray-500',
+                          ]"
+                        ></i>
+                        {{ (selectedApplicantsGame.ownerStatistics?.manner || 4.5).toFixed(1) }}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </template>
-              <button
-                @click.stop="closeApplicantsModal"
-                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-              <h2 class="text-lg font-bold mb-4 text-white">도전자</h2>
-              <div
-                v-if="
-                  selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0
-                "
-                class="space-y-3"
-              >
-                <div
-                  v-for="user in selectedApplicantsGame.applicants"
-                  :key="user.userId"
-                  class="p-3 bg-gray-800 rounded-xl flex items-center justify-between"
-                >
-                  <router-link :to="'/profile/' + user.userId">
-                    <div class="flex items-center gap-3">
-                      <img
-                        :src="user.applicantProfileUrl || '/default.png'"
-                        class="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div class="space-y-1">
-                        <p
-                          class="text-sm font-bold flex items-center gap-2"
-                          :class="
-                            selectedApplicantsGame.championId == user.userId
-                              ? 'text-yellow-500'
-                              : 'text-gray-200'
-                          "
-                        >
-                          {{ user.applicantNickname }}
-                        </p>
-                        <p class="text-xs text-gray-400">
-                          {{ user.applicantGameStatisticsDTO.wins }}승
-                          {{ user.applicantGameStatisticsDTO.draws }}무
-                          {{ user.applicantGameStatisticsDTO.losses }}패 · 승률
-                          {{ getWinRate(user.applicantGameStatisticsDTO) }}%
-                        </p>
+
+              <!-- 도전자 목록 -->
+              <div v-if="selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0">
+                <h3 class="text-sm font-semibold text-gray-300 mb-3 flex items-center">
+                  <i class="fas fa-users text-orange-400 mr-2"></i>
+                  도전자 ({{ selectedApplicantsGame.applicants.length }}명)
+                </h3>
+                <div class="space-y-3">
+                  <div
+                    v-for="user in selectedApplicantsGame.applicants"
+                    :key="user.userId"
+                    class="p-4 bg-gray-700/50 rounded-xl border border-gray-600 hover:bg-gray-700/70 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <router-link :to="'/profile/' + user.userId" class="flex items-center gap-3 flex-1">
+                        <img
+                          :src="user.applicantProfileUrl || '/default.png'"
+                          class="w-12 h-12 rounded-full object-cover border-2 border-blue-400"
+                        />
+                        <div class="flex-1">
+                          <p
+                            class="text-base font-bold flex items-center gap-2 text-white"
+                            :class="
+                              selectedApplicantsGame.championId == user.userId
+                                ? 'text-yellow-400'
+                                : 'text-white'
+                            "
+                          >
+                            {{ user.applicantNickname }}
+                            <i v-if="selectedApplicantsGame.championId == user.userId" class="fas fa-crown text-yellow-400 text-sm"></i>
+                          </p>
+                          <p class="text-sm text-gray-400">
+                            {{ user.applicantGameStatisticsDTO.wins }}승
+                            {{ user.applicantGameStatisticsDTO.draws }}무
+                            {{ user.applicantGameStatisticsDTO.losses }}패 · 승률
+                            {{ getWinRate(user.applicantGameStatisticsDTO) }}%
+                          </p>
+                        </div>
+                      </router-link>
+
+                      <div class="flex flex-col gap-2 ml-3">
+                        <template v-if="selectedApplicantsGame.type === 'my-game'">
+                          <button
+                            v-if="!user.approved"
+                            @click.stop="approve(selectedApplicantsGame.id, user.userId)"
+                            :disabled="approvedExists(selectedApplicantsGame.applicants)"
+                            class="px-4 py-2 text-xs rounded-lg text-white font-semibold transition-all duration-200"
+                            :class="
+                              approvedExists(selectedApplicantsGame.applicants)
+                                ? 'bg-gray-600 cursor-not-allowed'
+                                : 'bg-orange-500 hover:bg-orange-600 active:scale-95'
+                            "
+                          >
+                            승인
+                          </button>
+                          <button
+                            v-else
+                            @click.stop="cancelApproval(selectedApplicantsGame.id, user.userId)"
+                            class="px-4 py-2 text-xs rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 active:scale-95 transition-all duration-200"
+                          >
+                            취소
+                          </button>
+                        </template>
                       </div>
                     </div>
-                  </router-link>
-                  <div class="flex flex-col gap-2">
-                    <template v-if="selectedApplicantsGame.type === 'my-game'">
-                      <button
-                        v-if="!user.approved"
-                        @click.stop="approve(selectedApplicantsGame.id, user.userId)"
-                        :disabled="approvedExists(selectedApplicantsGame.applicants)"
-                        class="px-4 py-2 text-xs rounded-lg text-white font-semibold"
-                        :class="
-                          approvedExists(selectedApplicantsGame.applicants)
-                            ? 'bg-gray-600'
-                            : 'bg-orange-500 hover:bg-orange-600'
-                        "
-                      >
-                        승인
-                      </button>
-                      <button
-                        v-else
-                        @click.stop="cancelApproval(selectedApplicantsGame.id, user.userId)"
-                        class="px-4 py-2 text-xs rounded-lg bg-red-800 text-red-400 font-semibold hover:bg-red-700"
-                      >
-                        취소
-                      </button>
-                    </template>
                   </div>
                 </div>
               </div>
-              <div v-else class="text-center text-gray-400 text-sm py-6">신청자가 없습니다.</div>
+              <div v-else class="text-center text-gray-400 text-sm py-8">
+                <i class="fas fa-users text-3xl text-gray-600 mb-3"></i>
+                <p>아직 도전자가 없습니다.</p>
+              </div>
             </div>
           </div>
 

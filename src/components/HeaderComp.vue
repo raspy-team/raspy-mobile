@@ -1,7 +1,7 @@
 <template>
   <header
     :class="[
-      'fixed top-0 left-0 w-full z-[30] border-b border-gray-200 bg-black/90 backdrop-blur-md raspy-top ',
+      'fixed top-0 left-0 w-full z-[30] border-b border-gray-600 bg-black/90 backdrop-blur-md raspy-top ',
       props.customClass,
     ]"
   >

@@ -2411,9 +2411,16 @@ onBeforeUnmount(() => {})
 }
 
 /* FeedView 헤더 스타일 오버라이드 - 아이콘을 흰색으로 */
-:deep(.fa-bell),
-:deep(.fa-paper-plane) {
+:deep(header .fa-bell),
+:deep(header .fa-paper-plane) {
   color: white !important;
+}
+
+/* 알림 배지 배경색도 흰색으로 변경 */
+:deep(header .fa-bell + span) {
+  background-color: white !important;
+  border-color: transparent !important;
+  color: #1f2937 !important;
 }
 
 /* 온보딩 애니메이션 */

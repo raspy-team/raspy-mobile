@@ -316,6 +316,21 @@
             </div>
           </div>
 
+          <!-- Empty State: No Top 3 Rules -->
+          <div v-else class="w-full">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2">
+                가장 많이 플레이한 규칙
+              </h3>
+            </div>
+            <div class="bg-gray-800 rounded-2xl border border-gray-600 p-6">
+              <div class="text-center text-gray-500">
+                <i class="fas fa-gamepad text-4xl mb-3"></i>
+                <p class="text-sm">아직 플레이한 규칙이 없습니다</p>
+              </div>
+            </div>
+          </div>
+
           <StatsModal
             v-if="showStatsModal"
             :stats="user.stats"
@@ -339,7 +354,7 @@
                     {{ user.nickname }}님이 획득한 챔피언
                   </span>
                 </div>
-                <div class="flex flex-col flex-wrap gap-2">
+                <div v-if="user.myChampions && user.myChampions.length > 0" class="flex flex-col flex-wrap gap-2">
                   <span
                     v-for="(champ, idx) in user.myChampions"
                     :key="idx"
@@ -351,6 +366,10 @@
                       {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
                     </span>
                   </span>
+                </div>
+                <div v-else class="text-center text-gray-500 py-4">
+                  <i class="fas fa-trophy text-4xl mb-3"></i>
+                  <p class="text-sm">아직 획득한 챔피언이 없습니다</p>
                 </div>
               </div>
             </div>
@@ -506,6 +525,32 @@
                   <span>{{ formatDate(user.recentGames[0].playedAt) }}</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Empty State: No Recent Games -->
+        <section
+          v-else
+          class="w-full mx-auto px-4 pb-6 bg-gray-900"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2">최근 경기</h3>
+          </div>
+          <div class="bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-600 p-8">
+            <div class="text-center">
+              <div class="mb-4">
+                <i class="fas fa-trophy text-gray-600 text-5xl"></i>
+              </div>
+              <h4 class="text-lg font-bold text-gray-300 mb-2">아직 경기 기록이 없어요</h4>
+              <p class="text-sm text-gray-500 mb-6">첫 경기를 시작해보세요!</p>
+              <button
+                @click="$router.push('/game-list')"
+                class="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+              >
+                <i class="fas fa-plus mr-2"></i>
+                경기 참여하기
+              </button>
             </div>
           </div>
         </section>

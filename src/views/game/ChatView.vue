@@ -15,15 +15,14 @@ const headerTop = ref(0)
 
 const targetUserNickname = ref('')
 const targetUserProfileUrl = ref('')
-// 나랑도해 요청 데이터
-const playWithMeRequest = ref(null) // 받은 나랑도해 요청 정보
+// 도전 요청 데이터 (모든 상태 포함)
+const challengeStatus = ref(null)
 
 // 에러 모달 관련
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 
 function updateHeaderPosition() {
-  // visualViewport를 지원하는 경우만 적용 (for iOS)
   if (window.visualViewport) {
     headerTop.value = window.visualViewport.offsetTop
     scrollToBottom()
@@ -31,11 +30,10 @@ function updateHeaderPosition() {
     headerTop.value = 0
   }
 }
-// 헤더 위치 실시간 업데이트
+
 updateHeaderPosition()
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', updateHeaderPosition)
-
   window.visualViewport.addEventListener('scroll', updateHeaderPosition)
 }
 
@@ -72,14 +70,14 @@ onMounted(async () => {
     targetUserNickname.value = data.targetUserNickname
     targetUserProfileUrl.value = data.targetUserProfileUrl
 
-    // 나랑도해 요청 확인
+    // 도전 상태 확인 (모든 상태 포함)
     try {
-      const playWithMeData = await playWithMeTooAPI.checkRequest(targetUserId)
-      if (playWithMeData) {
-        playWithMeRequest.value = playWithMeData
+      const statusData = await playWithMeTooAPI.getStatusWithUser(targetUserId)
+      if (statusData) {
+        challengeStatus.value = statusData
       }
     } catch (error) {
-      console.error('나랑도해 요청 확인 중 오류:', error)
+      console.error('도전 상태 확인 중 오류:', error)
     }
 
     const res = await api.get(`/api/chat-room/${roomId.value}/chat-messages`)
@@ -88,7 +86,6 @@ onMounted(async () => {
     scrollToBottom()
   } catch (e) {
     console.error(e)
-    // 자기 자신과의 DM 에러 처리
     if (e.response?.data?.message?.includes('자기 자신과의 DM')) {
       errorMessage.value = '자기 자신과의 DM은 생성할 수 없습니다.'
       showErrorModal.value = true
@@ -105,7 +102,6 @@ onBeforeUnmount(() => {
 
 const messageInput = ref(null)
 function keepFocus() {
-  // 마우스를 누르는 순간 바로 포커스 주기
   if (messageInput.value == null) return
   messageInput.value.focus()
 }
@@ -144,47 +140,145 @@ const defaultProfileUrl = require('../../assets/default.png')
 
 // 헤더 표시 조건을 계산하는 computed
 const headerInfo = computed(() => {
-  if (playWithMeRequest.value) {
-    return {
-      show: true,
-      type: 'challenge_received',
-      title: '"나랑도 해" 요청을 받았습니다',
-      description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
-      showActions: true,
-      actionType: 'accept_reject',
+  if (!challengeStatus.value) {
+    return { show: false }
+  }
+
+  const status = challengeStatus.value.status
+  const isRequester = challengeStatus.value.fromUserId === currentUserId.value
+  const gameStatus = challengeStatus.value.gameStatus
+
+  // CANCELLED는 표시하지 않음
+  if (status === 'CANCELLED') {
+    return { show: false }
+  }
+
+  // PENDING 상태
+  if (status === 'PENDING') {
+    if (isRequester) {
+      // 내가 도전한 경우
+      return {
+        show: true,
+        type: 'challenge_sent',
+        title: '도전 대기 중',
+        description: `${targetUserNickname.value}님의 응답을 기다리고 있습니다`,
+        showActions: false,
+        statusColor: 'gray',
+      }
+    } else {
+      // 상대방이 나에게 도전한 경우
+      return {
+        show: true,
+        type: 'challenge_received',
+        title: '도전 요청을 받았습니다',
+        description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
+        showActions: true,
+        actionType: 'accept_reject',
+        statusColor: 'orange',
+      }
     }
   }
 
-  return {
-    show: false,
+  // ACCEPTED 상태
+  if (status === 'ACCEPTED') {
+    const gameId = challengeStatus.value.gameId
+    if (!gameId) {
+      return { show: false }
+    }
+
+    // 게임이 완료된 경우
+    if (gameStatus === 'COMPLETED') {
+      const challengerNickname = isRequester ? '내가' : targetUserNickname.value + '님이'
+      return {
+        show: true,
+        type: 'game_completed',
+        title: `${challengerNickname} 도전한 경기가 종료되었습니다`,
+        description: '경기 결과를 확인하세요',
+        showActions: true,
+        actionType: 'view_result',
+        gameId,
+        statusColor: 'blue',
+      }
+    }
+
+    // 게임이 진행 중인 경우
+    return {
+      show: true,
+      type: 'game_in_progress',
+      title: '경기 진행 중',
+      description: '경기 페이지로 이동하여 경기를 진행하세요',
+      showActions: true,
+      actionType: 'go_to_game',
+      gameId,
+      statusColor: 'green',
+    }
   }
+
+  // REJECTED 상태
+  if (status === 'REJECTED') {
+    if (isRequester) {
+      return {
+        show: true,
+        type: 'challenge_rejected',
+        title: '도전이 거절되었습니다',
+        description: `${targetUserNickname.value}님이 도전을 거절했습니다`,
+        showActions: false,
+        statusColor: 'red',
+      }
+    } else {
+      return {
+        show: true,
+        type: 'challenge_rejected',
+        title: '도전을 거절했습니다',
+        description: `${targetUserNickname.value}님의 도전 요청을 거절했습니다`,
+        showActions: false,
+        statusColor: 'red',
+      }
+    }
+  }
+
+  return { show: false }
 })
 
 // 액션 핸들러들
 const handleAccept = async () => {
-  if (!playWithMeRequest.value) return
+  if (!challengeStatus.value) return
 
   try {
-    const gameId = await playWithMeTooAPI.acceptRequest(targetUserId)
-    console.log('나랑도해 요청 수락됨, 게임 ID:', gameId)
-    // 게임 생성 완료, 요청 상태 초기화
-    playWithMeRequest.value = null
-    // 게임 페이지로 이동하거나 성공 메시지 표시
+    const gameId = await playWithMeTooAPI.acceptRequest(challengeStatus.value.fromUserId)
+    console.log('도전 요청 수락됨, 게임 ID:', gameId)
+    // 상태 업데이트
+    challengeStatus.value.status = 'ACCEPTED'
+    challengeStatus.value.gameId = gameId
+    challengeStatus.value.gameStatus = 'SCHEDULED'
+    // 게임 페이지로 이동
     router.push(`/game?id=${gameId}`)
   } catch (error) {
-    console.error('나랑도해 요청 수락 중 오류:', error)
+    console.error('도전 요청 수락 중 오류:', error)
   }
 }
 
 const handleReject = async () => {
-  if (!playWithMeRequest.value) return
+  if (!challengeStatus.value) return
 
   try {
-    await playWithMeTooAPI.rejectRequest(playWithMeRequest.value.fromUserId)
-    console.log('나랑도해 요청 거절됨')
-    playWithMeRequest.value = null
+    await playWithMeTooAPI.rejectRequest(challengeStatus.value.fromUserId)
+    console.log('도전 요청 거절됨')
+    challengeStatus.value.status = 'REJECTED'
   } catch (error) {
-    console.error('나랑도해 요청 거절 중 오류:', error)
+    console.error('도전 요청 거절 중 오류:', error)
+  }
+}
+
+const handleGoToGame = () => {
+  if (headerInfo.value.gameId) {
+    router.push(`/game?id=${headerInfo.value.gameId}`)
+  }
+}
+
+const handleViewResult = () => {
+  if (headerInfo.value.gameId) {
+    router.push(`/game?id=${headerInfo.value.gameId}`)
   }
 }
 
@@ -233,7 +327,8 @@ const closeErrorModal = () => {
         </div>
       </div>
     </div>
-    <!-- 진보된 스타일 상태 헤더 -->
+
+    <!-- 도전 상태 헤더 -->
     <div
       v-if="headerInfo.show"
       class="fixed left-0 w-full z-20"
@@ -242,18 +337,16 @@ const closeErrorModal = () => {
       <div class="mx-3 my-2">
         <div
           class="bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-600 overflow-hidden"
-          :class="{ 'cursor-pointer': headerInfo.isClickable }"
-          @click="headerInfo.isClickable && handleEditGame()"
         >
           <!-- 상태 표시 헤더 바 -->
           <div
             class="h-1 w-full"
             :class="{
-              'bg-gradient-to-r from-green-400 to-emerald-500':
-                headerInfo.type === 'game_scheduled',
-              'bg-gradient-to-r from-orange-400 to-red-500':
-                headerInfo.type === 'request_received' || headerInfo.type === 'challenge_received',
-              'bg-gradient-to-r from-gray-500 to-gray-600': headerInfo.type === 'request_sent',
+              'bg-gradient-to-r from-green-400 to-emerald-500': headerInfo.statusColor === 'green',
+              'bg-gradient-to-r from-orange-400 to-red-500': headerInfo.statusColor === 'orange',
+              'bg-gradient-to-r from-gray-500 to-gray-600': headerInfo.statusColor === 'gray',
+              'bg-gradient-to-r from-blue-400 to-blue-600': headerInfo.statusColor === 'blue',
+              'bg-gradient-to-r from-red-400 to-red-600': headerInfo.statusColor === 'red',
             }"
           ></div>
 
@@ -264,24 +357,24 @@ const closeErrorModal = () => {
               <div
                 class="flex-shrink-0 relative group"
                 :class="{
-                  'animate-pulse': headerInfo.type === 'request_received',
+                  'animate-pulse': headerInfo.type === 'challenge_received',
                 }"
               >
                 <div class="relative">
                   <img
                     class="w-12 h-12 rounded-xl object-cover shadow-md"
-                    :src="`/category-picture/${playWithMeRequest?.minorCategory || '미분류'}.png`"
-                    :alt="playWithMeRequest?.minorCategory"
+                    :src="`/category-picture/${challengeStatus?.minorCategory || '미분류'}.png`"
+                    :alt="challengeStatus?.minorCategory"
                   />
                   <!-- 상태 배지 -->
                   <div
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-800 shadow-sm"
                     :class="{
-                      'bg-green-500': headerInfo.type === 'game_scheduled',
-                      'bg-orange-500':
-                        headerInfo.type === 'request_received' ||
-                        headerInfo.type === 'challenge_received',
-                      'bg-gray-500': headerInfo.type === 'request_sent',
+                      'bg-green-500': headerInfo.statusColor === 'green',
+                      'bg-orange-500': headerInfo.statusColor === 'orange',
+                      'bg-gray-500': headerInfo.statusColor === 'gray',
+                      'bg-blue-500': headerInfo.statusColor === 'blue',
+                      'bg-red-500': headerInfo.statusColor === 'red',
                     }"
                   ></div>
                 </div>
@@ -293,19 +386,19 @@ const closeErrorModal = () => {
                   <div class="flex-1 min-w-0">
                     <!-- 경기 제목 -->
                     <h3 class="text-base font-bold text-gray-100 truncate mb-1">
-                      {{ playWithMeRequest?.ruleTitle || '경기' }}
+                      {{ challengeStatus?.ruleTitle || '경기' }}
                     </h3>
 
                     <!-- 카테고리 -->
                     <div class="flex items-center gap-1 mb-2">
                       <span class="text-xs text-gray-400 font-medium">{{
-                        playWithMeRequest?.majorCategory || '스포츠'
+                        challengeStatus?.majorCategory || '스포츠'
                       }}</span>
                       <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
                       <span
                         class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500 text-gray-100"
                       >
-                        {{ playWithMeRequest?.minorCategory || '경기' }}
+                        {{ challengeStatus?.minorCategory || '경기' }}
                       </span>
                     </div>
 
@@ -315,20 +408,16 @@ const closeErrorModal = () => {
                         <div
                           class="w-2 h-2 rounded-full animate-pulse"
                           :class="{
-                            'bg-green-500': headerInfo.type === 'game_scheduled',
-                            'bg-orange-500':
-                              headerInfo.type === 'request_received' ||
-                              headerInfo.type === 'challenge_received',
-                            'bg-gray-500': headerInfo.type === 'request_sent',
+                            'bg-green-500': headerInfo.statusColor === 'green',
+                            'bg-orange-500': headerInfo.statusColor === 'orange',
+                            'bg-gray-500': headerInfo.statusColor === 'gray',
+                            'bg-blue-500': headerInfo.statusColor === 'blue',
+                            'bg-red-500': headerInfo.statusColor === 'red',
                           }"
                         ></div>
                         <span class="text-sm font-semibold text-gray-100">{{
                           headerInfo.title
                         }}</span>
-                        <i
-                          v-if="headerInfo.isClickable"
-                          class="fas fa-external-link-alt text-gray-500 text-xs ml-auto"
-                        ></i>
                       </div>
                       <p class="text-xs text-gray-400 leading-relaxed pl-4">
                         {{ headerInfo.description }}
@@ -341,6 +430,7 @@ const closeErrorModal = () => {
 
             <!-- 액션 버튼들 -->
             <div v-if="headerInfo.showActions" class="mt-4 pt-3 border-t border-gray-600">
+              <!-- 수락/거절 버튼 (PENDING, 수신자) -->
               <template v-if="headerInfo.actionType === 'accept_reject'">
                 <div class="flex gap-3">
                   <button
@@ -359,13 +449,26 @@ const closeErrorModal = () => {
                   </button>
                 </div>
               </template>
-              <template v-else-if="headerInfo.actionType === 'edit_game'">
+
+              <!-- 경기 바로가기 버튼 (ACCEPTED, 진행 중) -->
+              <template v-else-if="headerInfo.actionType === 'go_to_game'">
                 <button
-                  @click.stop="handleEditGame"
+                  @click.stop="handleGoToGame"
+                  class="w-full py-2.5 px-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.01] flex items-center justify-center gap-2"
+                >
+                  <i class="fas fa-gamepad text-sm"></i>
+                  경기 바로가기
+                </button>
+              </template>
+
+              <!-- 결과 보기 버튼 (ACCEPTED, COMPLETED) -->
+              <template v-else-if="headerInfo.actionType === 'view_result'">
+                <button
+                  @click.stop="handleViewResult"
                   class="w-full py-2.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.01] flex items-center justify-center gap-2"
                 >
-                  <i class="fas fa-edit text-sm"></i>
-                  경기 정보 수정
+                  <i class="fas fa-trophy text-sm"></i>
+                  경기 결과 보기
                 </button>
               </template>
             </div>
@@ -373,6 +476,8 @@ const closeErrorModal = () => {
         </div>
       </div>
     </div>
+
+    <!-- 채팅 영역 -->
     <div
       style="height: 100%"
       class="fixed top-0 left-0 w-full pb-[81px] px-1 z-10"
@@ -429,6 +534,7 @@ const closeErrorModal = () => {
       </div>
     </div>
 
+    <!-- 메시지 입력 영역 -->
     <div class="fixed bottom-0 w-full h-[81px] bg-white z-20">
       <div class="p-[5px] bg-white flex items-center">
         <form @submit.prevent="sendMsg" class="flex items-center w-full">

@@ -147,6 +147,14 @@ export const playWithMeTooAPI = {
   async getSentRequests() {
     const response = await api.get('/api/play-with-me-too/sent-requests')
     return response.data
+  },
+
+  // 특정 유저와의 도전 상태 확인 (모든 상태 포함, 게임 정보 포함)
+  async getStatusWithUser(otherUserId) {
+    const response = await api.get('/api/play-with-me-too/status-with-user', {
+      params: { otherUserId }
+    })
+    return response.data
   }
 }
 

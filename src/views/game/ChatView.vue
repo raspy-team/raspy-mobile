@@ -22,6 +22,9 @@ const challengeStatus = ref(null)
 const showErrorModal = ref(false)
 const errorMessage = ref('')
 
+// 폴링 인터벌
+let statusPollingInterval = null
+
 function updateHeaderPosition() {
   if (window.visualViewport) {
     headerTop.value = window.visualViewport.offsetTop
@@ -70,15 +73,23 @@ onMounted(async () => {
     targetUserNickname.value = data.targetUserNickname
     targetUserProfileUrl.value = data.targetUserProfileUrl
 
-    // 도전 상태 확인 (모든 상태 포함)
-    try {
-      const statusData = await playWithMeTooAPI.getStatusWithUser(targetUserId)
-      if (statusData) {
-        challengeStatus.value = statusData
+    // 도전 상태 확인 함수
+    const fetchChallengeStatus = async () => {
+      try {
+        const statusData = await playWithMeTooAPI.getStatusWithUser(targetUserId)
+        if (statusData) {
+          challengeStatus.value = statusData
+        }
+      } catch (error) {
+        console.error('도전 상태 확인 중 오류:', error)
       }
-    } catch (error) {
-      console.error('도전 상태 확인 중 오류:', error)
     }
+
+    // 첫 도전 상태 확인
+    await fetchChallengeStatus()
+
+    // 5초마다 도전 상태 폴링 시작
+    statusPollingInterval = setInterval(fetchChallengeStatus, 5000)
 
     const res = await api.get(`/api/chat-room/${roomId.value}/chat-messages`)
     messages.value = res.data
@@ -94,6 +105,14 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  // 폴링 중지
+  if (statusPollingInterval) {
+    clearInterval(statusPollingInterval)
+    statusPollingInterval = null
+    console.log('[ChatView] 도전 상태 폴링 중지')
+  }
+
+  // visualViewport 이벤트 리스너 제거
   if (window.visualViewport) {
     window.visualViewport.removeEventListener('resize', updateHeaderPosition)
     window.visualViewport.removeEventListener('scroll', updateHeaderPosition)

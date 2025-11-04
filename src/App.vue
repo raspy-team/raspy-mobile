@@ -293,9 +293,9 @@ onMounted(() => {
     showSplash.value = false
   }, 2000) //
 
-  if (localStorage.getItem('250725update') != 1) {
+  if (localStorage.getItem('251105match') != 1) {
     localStorage.removeItem('raspy_access_token2')
-    localStorage.setItem('250725update', 1)
+    localStorage.setItem('251105match', 1)
     router.push('/')
   }
 

@@ -1811,13 +1811,12 @@ const sections = computed(() => {
 
   if (!post.value) return arr
 
-  // 예정된 경기는 경기 정보와 친구 랭킹 표시
+  // 예정된 경기는 단일 섹션 (슬라이드 없음)
   if (
     post.value.type === 'upcoming_game' ||
     (post.value.type === 'game' && !post.value.isCompleted)
   ) {
-    if (features.gameInfo) arr.push('경기 정보')
-    if (features.friendRanking) arr.push('친구 랭킹')
+    arr.push('예정된 경기')
     return arr
   }
 

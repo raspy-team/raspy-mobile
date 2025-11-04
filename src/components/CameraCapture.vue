@@ -157,15 +157,18 @@ const triggerCamera = () => {
       // 실패 시 fallback to web input
       cameraInputRef.value?.click()
     }
-  } else if (cameraInputRef.value) {
-    // 일반 웹에서는 기존 방식 사용
-    try {
-      console.log('Triggering camera input...')
-    } catch (error) {
-      console.error('Failed to trigger camera:', error)
-    }
   } else {
-    console.warn('Camera input ref is not available')
+    // PC 또는 일반 웹에서는 파일 입력 사용
+    if (cameraInputRef.value) {
+      try {
+        console.log('Triggering camera input on PC/Web...')
+        cameraInputRef.value.click()
+      } catch (error) {
+        console.error('Failed to trigger camera:', error)
+      }
+    } else {
+      console.warn('Camera input ref is not available')
+    }
   }
 }
 

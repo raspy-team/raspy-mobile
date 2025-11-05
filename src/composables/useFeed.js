@@ -212,7 +212,7 @@ export function useFeed() {
 
     // 1. 친구 완료 경기 (최근 끝난 순)
     const friendsCompleted = remainingPosts
-      .filter(p => p.type === 'game' && p.isCompleted && p.isFriend)
+      .filter(p => p.type === 'game' && p.isCompleted && (p.isFriend || p.isMyGame))
       .sort((a, b) => new Date(b.date) - new Date(a.date))
 
     // 2. 친구 예정 경기 (최근 날짜 순)
@@ -225,12 +225,12 @@ export function useFeed() {
 
     // 4. 모든 완료 경기 (최근 끝난 순)
     const allCompleted = remainingPosts
-      .filter(p => p.type === 'game' && p.isCompleted && !p.isFriend)
+      .filter(p => p.type === 'game' && p.isCompleted &&  !(p.isFriend || p.isMyGame))
       .sort((a, b) => new Date(b.date) - new Date(a.date))
 
     // 5. 모든 예정 경기 (가까운 날짜 순)
     const allScheduled = remainingPosts
-      .filter(p => (p.type === 'upcoming_game' || (p.type === 'game' && !p.isCompleted)) && !p.isFriend)
+      .filter(p => (p.type === 'upcoming_game' || (p.type === 'game' && !p.isCompleted)) && !(p.isFriend || p.isMyGame))
       .sort((a, b) => new Date(a.date) - new Date(b.date))
 
     const result = []

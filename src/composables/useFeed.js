@@ -217,7 +217,7 @@ export function useFeed() {
 
     // 2. 친구 예정 경기 (최근 날짜 순)
     const friendsScheduled = remainingPosts
-      .filter(p => (p.type === 'upcoming_game' || (p.type === 'game' && !p.isCompleted)) && p.isFriend)
+      .filter(p => (p.type === 'upcoming_game' || (p.type === 'game' && !p.isCompleted)) && (p.isFriend || p.isMyGame))
       .sort((a, b) => new Date(a.date) - new Date(b.date))
 
     // 3. 앱 초대 링크
@@ -247,7 +247,7 @@ export function useFeed() {
 
     // 친구 포스트와 일반 포스트 사이에 친구 초대 포스트 삽입
     // 유저피드모드가 아닐 때만 friend-invite 포스트 추가
-    if (!isUserFeedMode.value && (allCompleted.length > 0 || allScheduled.length > 0)) {
+    if (!isUserFeedMode.value) {
       result.push({
         type: 'friend-invite',
         id: 'friend-invite-section',

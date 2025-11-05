@@ -264,15 +264,7 @@ const handleAccept = async () => {
   if (!challengeStatus.value) return
 
   try {
-    const gameId = await playWithMeTooAPI.acceptRequest(challengeStatus.value.fromUserId)
-    console.log('도전 요청 수락됨, 게임 ID:', gameId)
-
-    // 서버에서 최신 상태 가져오기
-    const statusData = await playWithMeTooAPI.getStatusWithUser(targetUserId)
-    if (statusData) {
-      challengeStatus.value = statusData
-      console.log('도전 상태 업데이트됨:', statusData)
-    }
+    await playWithMeTooAPI.acceptRequest(challengeStatus.value.fromUserId)
   } catch (error) {
     console.error('도전 요청 수락 중 오류:', error)
   }
@@ -284,13 +276,7 @@ const handleReject = async () => {
   try {
     await playWithMeTooAPI.rejectRequest(challengeStatus.value.fromUserId)
     console.log('도전 요청 거절됨')
-
-    // 서버에서 최신 상태 가져오기
-    const statusData = await playWithMeTooAPI.getStatusWithUser(targetUserId)
-    if (statusData) {
-      challengeStatus.value = statusData
-      console.log('도전 상태 업데이트됨:', statusData)
-    }
+    challengeStatus.value.status = 'REJECTED'
   } catch (error) {
     console.error('도전 요청 거절 중 오류:', error)
   }

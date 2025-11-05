@@ -574,10 +574,7 @@
               <div v-if="post.type === 'game' && post.isCompleted" class="mt-4">
                 <button
                   class="w-full flex items-center justify-center gap-2 text-xs text-white/80 bg-black/30 rounded-lg px-3 py-2 mb-2 focus:outline-none"
-                  @click="
-                    ;((showSetDetails = !showSetDetails), (feedIsPointerDown.value = false))
-                    feedAnimating.value = false
-                  "
+                  @click.stop="showSetDetails = !showSetDetails"
                 >
                   <span v-if="!showSetDetails"><i class="fas fa-chevron-down"></i></span>
                   <span v-else><i class="fas fa-chevron-up"></i></span>

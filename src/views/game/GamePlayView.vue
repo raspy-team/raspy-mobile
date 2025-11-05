@@ -729,11 +729,15 @@ onMounted(async () => {
       try {
         console.log('Received photo from native camera')
         const compressed = await compressImage(base64Image)
-        addGamePicture(gameId, compressed)
+        await addGamePicture(gameId, compressed)
         showToast('사진이 저장되었습니다!')
       } catch (error) {
         console.error('Failed to process camera image:', error)
-        showToast('사진 저장에 실패했습니다.')
+        if (error.message === 'QUOTA_EXCEEDED') {
+          showToast('저장 공간이 부족합니다.')
+        } else {
+          showToast('사진 저장에 실패했습니다.')
+        }
       }
     }
 
@@ -742,11 +746,15 @@ onMounted(async () => {
       try {
         console.log('Received video from native camera')
         // duration은 밀리초 단위로 전달된다고 가정
-        addGameVideo(gameId, base64Video, duration || 0)
+        await addGameVideo(gameId, base64Video, duration || 0)
         showToast('동영상이 저장되었습니다!')
       } catch (error) {
         console.error('Failed to process video:', error)
-        showToast('동영상 저장에 실패했습니다.')
+        if (error.message === 'QUOTA_EXCEEDED') {
+          showToast('저장 공간이 부족합니다.')
+        } else {
+          showToast('동영상 저장에 실패했습니다.')
+        }
       }
     }
 
@@ -994,8 +1002,8 @@ async function onCameraChange(e) {
       // 이미지 압축 (기본값 사용: 800px, quality 0.3)
       const compressed = await compressImage(dataUrl)
 
-      // localStorage에 저장
-      addGamePicture(gameId, compressed)
+      // IndexedDB에 저장
+      await addGamePicture(gameId, compressed)
 
       showToast('사진이 저장되었습니다!')
     } catch (error) {
@@ -1030,8 +1038,8 @@ async function onVideoChange(e) {
     // 동영상 압축 (최대 2분)
     const { dataUrl, duration } = await compressVideo(file, 120)
 
-    // localStorage에 저장
-    addGameVideo(gameId, dataUrl, duration)
+    // IndexedDB에 저장
+    await addGameVideo(gameId, dataUrl, duration)
 
     showToast(`동영상이 저장되었습니다! (${Math.floor(duration)}초)`)
   } catch (error) {

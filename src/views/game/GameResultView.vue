@@ -822,7 +822,7 @@ onMounted(async () => {
     }
 
     // 저장된 사진 불러오기
-    allPictures.value = getGamePictures(gameId)
+    allPictures.value = await getGamePictures(gameId)
   } catch (err) {
     console.error(err)
   } finally {
@@ -868,11 +868,11 @@ const onCameraChange = async (e) => {
       // 이미지 압축 (기본값 사용: 1200px, quality 0.6)
       const compressed = await compressImage(dataUrl)
 
-      // localStorage에 저장
-      addGamePicture(gameId, compressed)
+      // IndexedDB에 저장
+      await addGamePicture(gameId, compressed)
 
       // 목록 갱신
-      allPictures.value = getGamePictures(gameId)
+      allPictures.value = await getGamePictures(gameId)
 
       showToast('사진이 저장되었습니다!')
     } catch (error) {
@@ -925,11 +925,11 @@ const onVideoChange = async (e) => {
     // 동영상 압축 (최대 2분)
     const { dataUrl, duration } = await compressVideo(file, 120)
 
-    // localStorage에 저장
-    addGameVideo(gameId, dataUrl, duration)
+    // IndexedDB에 저장
+    await addGameVideo(gameId, dataUrl, duration)
 
     // 목록 갱신
-    allPictures.value = getGamePictures(gameId)
+    allPictures.value = await getGamePictures(gameId)
 
     showToast(`동영상이 저장되었습니다! (${Math.floor(duration)}초)`)
   } catch (error) {
@@ -974,9 +974,9 @@ const deletePicture = (picId) => {
 }
 
 // 사진 삭제 확정
-const confirmDeletePicture = () => {
+const confirmDeletePicture = async () => {
   if (pictureToDelete.value) {
-    allPictures.value = removeGamePicture(gameId, pictureToDelete.value)
+    allPictures.value = await removeGamePicture(gameId, pictureToDelete.value)
     selectedPictures.value = selectedPictures.value.filter((p) => p.id !== pictureToDelete.value)
     showToast('사진이 삭제되었습니다.')
   }

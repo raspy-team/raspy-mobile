@@ -1,20 +1,68 @@
 /**
  * 게임 사진 저장/조회를 위한 유틸리티
- * gameId별로 촬영한 사진들을 localStorage에 저장/관리
+ * gameId별로 촬영한 사진들을 IndexedDB에 저장/관리 (대용량 동영상 지원)
  */
 
-const STORAGE_KEY_PREFIX = 'game_pictures_'
+const DB_NAME = 'GameMediaDB'
+const DB_VERSION = 1
+const STORE_NAME = 'gameMedia'
+
+// IndexedDB 초기화
+let dbInstance = null
+
+async function getDB() {
+  if (dbInstance) return dbInstance
+
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+    request.onerror = () => {
+      console.error('IndexedDB open error:', request.error)
+      reject(request.error)
+    }
+
+    request.onsuccess = () => {
+      dbInstance = request.result
+      resolve(dbInstance)
+    }
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+        objectStore.createIndex('gameId', 'gameId', { unique: false })
+        objectStore.createIndex('timestamp', 'timestamp', { unique: false })
+      }
+    }
+  })
+}
 
 /**
  * 특정 게임의 사진/동영상 목록 조회
  * @param {string|number} gameId
- * @returns {Array<{id: string, dataUrl: string, timestamp: number, type: 'image'|'video', duration?: number}>}
+ * @returns {Promise<Array<{id: string, dataUrl: string, timestamp: number, type: 'image'|'video', duration?: number}>>}
  */
-export function getGamePictures(gameId) {
+export async function getGamePictures(gameId) {
   try {
-    const key = STORAGE_KEY_PREFIX + gameId
-    const data = localStorage.getItem(key)
-    return data ? JSON.parse(data) : []
+    const db = await getDB()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readonly')
+      const objectStore = transaction.objectStore(STORE_NAME)
+      const index = objectStore.index('gameId')
+      const request = index.getAll(String(gameId))
+
+      request.onsuccess = () => {
+        const results = request.result || []
+        // timestamp 순으로 정렬
+        results.sort((a, b) => a.timestamp - b.timestamp)
+        resolve(results)
+      }
+
+      request.onerror = () => {
+        console.error('Failed to get game pictures:', request.error)
+        reject(request.error)
+      }
+    })
   } catch (error) {
     console.error('Failed to get game pictures:', error)
     return []
@@ -25,25 +73,29 @@ export function getGamePictures(gameId) {
  * 특정 게임에 사진 추가
  * @param {string|number} gameId
  * @param {string} dataUrl - base64 이미지 데이터
- * @returns {Array<{id: string, dataUrl: string, timestamp: number, type: 'image'}>} 업데이트된 사진 목록
+ * @returns {Promise<Array<{id: string, dataUrl: string, timestamp: number, type: 'image'}>>} 업데이트된 사진 목록
  */
-export function addGamePicture(gameId, dataUrl) {
+export async function addGamePicture(gameId, dataUrl) {
   try {
-    // 현재 게임이 아닌 다른 게임의 사진들을 모두 삭제 TODO: 구현 필요
-    // clearOtherGamePictures(gameId)
-
-    const pictures = getGamePictures(gameId)
+    const db = await getDB()
     const newPicture = {
       id: `pic_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      gameId: String(gameId),
       dataUrl,
       timestamp: Date.now(),
       type: 'image'
     }
-    pictures.push(newPicture)
 
-    const key = STORAGE_KEY_PREFIX + gameId
-    localStorage.setItem(key, JSON.stringify(pictures))
-    return pictures
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite')
+      const objectStore = transaction.objectStore(STORE_NAME)
+      const request = objectStore.add(newPicture)
+
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+
+    return await getGamePictures(gameId)
   } catch (error) {
     console.error('Failed to add game picture:', error)
     if (error.name === 'QuotaExceededError') {
@@ -58,23 +110,30 @@ export function addGamePicture(gameId, dataUrl) {
  * @param {string|number} gameId
  * @param {string} dataUrl - base64 동영상 데이터
  * @param {number} duration - 동영상 길이 (초)
- * @returns {Array<{id: string, dataUrl: string, timestamp: number, type: 'video', duration: number}>} 업데이트된 목록
+ * @returns {Promise<Array<{id: string, dataUrl: string, timestamp: number, type: 'video', duration: number}>>} 업데이트된 목록
  */
-export function addGameVideo(gameId, dataUrl, duration) {
+export async function addGameVideo(gameId, dataUrl, duration) {
   try {
-    const pictures = getGamePictures(gameId)
+    const db = await getDB()
     const newVideo = {
       id: `vid_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      gameId: String(gameId),
       dataUrl,
       timestamp: Date.now(),
       type: 'video',
       duration
     }
-    pictures.push(newVideo)
 
-    const key = STORAGE_KEY_PREFIX + gameId
-    localStorage.setItem(key, JSON.stringify(pictures))
-    return pictures
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite')
+      const objectStore = transaction.objectStore(STORE_NAME)
+      const request = objectStore.add(newVideo)
+
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+
+    return await getGamePictures(gameId)
   } catch (error) {
     console.error('Failed to add game video:', error)
     if (error.name === 'QuotaExceededError') {
@@ -88,16 +147,21 @@ export function addGameVideo(gameId, dataUrl, duration) {
  * 특정 게임의 사진 삭제
  * @param {string|number} gameId
  * @param {string} pictureId
- * @returns {Array<{id: string, dataUrl: string, timestamp: number}>} 업데이트된 사진 목록
+ * @returns {Promise<Array<{id: string, dataUrl: string, timestamp: number}>>} 업데이트된 사진 목록
  */
-export function removeGamePicture(gameId, pictureId) {
+export async function removeGamePicture(gameId, pictureId) {
   try {
-    const pictures = getGamePictures(gameId)
-    const filtered = pictures.filter(p => p.id !== pictureId)
+    const db = await getDB()
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite')
+      const objectStore = transaction.objectStore(STORE_NAME)
+      const request = objectStore.delete(pictureId)
 
-    const key = STORAGE_KEY_PREFIX + gameId
-    localStorage.setItem(key, JSON.stringify(filtered))
-    return filtered
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+
+    return await getGamePictures(gameId)
   } catch (error) {
     console.error('Failed to remove game picture:', error)
     throw error
@@ -109,10 +173,27 @@ export function removeGamePicture(gameId, pictureId) {
  * @param {string|number} gameId
  * @param {Array<{id: string, dataUrl: string, timestamp: number}>} orderedPictures
  */
-export function updateGamePicturesOrder(gameId, orderedPictures) {
+export async function updateGamePicturesOrder(gameId, orderedPictures) {
   try {
-    const key = STORAGE_KEY_PREFIX + gameId
-    localStorage.setItem(key, JSON.stringify(orderedPictures))
+    const db = await getDB()
+    const transaction = db.transaction([STORE_NAME], 'readwrite')
+    const objectStore = transaction.objectStore(STORE_NAME)
+
+    // timestamp를 새로운 순서에 맞게 업데이트
+    const promises = orderedPictures.map((picture, index) => {
+      return new Promise((resolve, reject) => {
+        const updatedPicture = {
+          ...picture,
+          gameId: String(gameId),
+          timestamp: Date.now() + index // 순서대로 timestamp 부여
+        }
+        const request = objectStore.put(updatedPicture)
+        request.onsuccess = () => resolve()
+        request.onerror = () => reject(request.error)
+      })
+    })
+
+    await Promise.all(promises)
   } catch (error) {
     console.error('Failed to update pictures order:', error)
     throw error
@@ -123,10 +204,23 @@ export function updateGamePicturesOrder(gameId, orderedPictures) {
  * 특정 게임의 모든 사진 삭제
  * @param {string|number} gameId
  */
-export function clearGamePictures(gameId) {
+export async function clearGamePictures(gameId) {
   try {
-    const key = STORAGE_KEY_PREFIX + gameId
-    localStorage.removeItem(key)
+    const db = await getDB()
+    const pictures = await getGamePictures(gameId)
+
+    const transaction = db.transaction([STORE_NAME], 'readwrite')
+    const objectStore = transaction.objectStore(STORE_NAME)
+
+    const promises = pictures.map((picture) => {
+      return new Promise((resolve, reject) => {
+        const request = objectStore.delete(picture.id)
+        request.onsuccess = () => resolve()
+        request.onerror = () => reject(request.error)
+      })
+    })
+
+    await Promise.all(promises)
   } catch (error) {
     console.error('Failed to clear game pictures:', error)
     throw error

@@ -224,8 +224,8 @@ const headerInfo = computed(() => {
     return {
       show: true,
       type: 'game_in_progress',
-      title: '경기 진행 중',
-      description: '경기 페이지로 이동하여 경기를 진행하세요',
+      title: '경기 진행 예정',
+      description: '도전자가 바로 경기를 시작할 수 있어요',
       showActions: true,
       actionType: 'go_to_game',
       gameId,

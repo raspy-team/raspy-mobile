@@ -6,7 +6,9 @@
     <div class="mx-auto max-w-md px-4 pt-24 pb-12">
       <!-- Profile capsule (optional future area) -->
       <section class="mb-6">
-        <div class="flex items-center gap-3 rounded-2xl border border-gray-600 p-3 shadow-sm bg-gray-800">
+        <div
+          class="flex items-center gap-3 rounded-2xl border border-gray-600 p-3 shadow-sm bg-gray-800"
+        >
           <div
             class="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-700 flex items-center justify-center"
           >
@@ -20,7 +22,9 @@
           </div>
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm text-gray-400">로그인된 계정</p>
-            <p class="truncate font-semibold text-gray-200">{{ myNickname || (currentUserLabel ? '@' + currentUserLabel : '') }}</p>
+            <p class="truncate font-semibold text-gray-200">
+              {{ myNickname || (currentUserLabel ? '@' + currentUserLabel : '') }}
+            </p>
             <p v-if="myIntro" class="truncate text-xs text-gray-500">{{ myIntro }}</p>
           </div>
           <button
@@ -183,7 +187,7 @@
         </button>
       </div>
       <h3 class="mb-3 text-lg font-bold text-gray-200">법적 고지사항</h3>
-      <div class="prose prose-sm max-w-none max-h-[70dvh] overflow-auto">
+      <div class="prose prose-sm max-w-none max-h-[70dvh] overflow-auto text-gray-100">
         <section>
           <h3>1. 개인정보 수집 및 이용</h3>
           <ul>
@@ -292,10 +296,16 @@
         단, 언제든지 재가입 할 수 있습니다.
       </p>
       <div class="mt-4 flex gap-2">
-        <button class="flex-1 rounded-lg bg-gray-700 px-4 py-2 text-gray-300 hover:bg-gray-600" @click="showDeleteModal = false">
+        <button
+          class="flex-1 rounded-lg bg-gray-700 px-4 py-2 text-gray-300 hover:bg-gray-600"
+          @click="showDeleteModal = false"
+        >
           취소
         </button>
-        <button class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700" @click="deleteAccount">
+        <button
+          class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+          @click="deleteAccount"
+        >
           영구 삭제
         </button>
       </div>
@@ -341,7 +351,10 @@
         </li>
       </ul>
       <div class="mt-4 text-right">
-        <button class="rounded-lg bg-gray-700 px-4 py-2 text-gray-300 hover:bg-gray-600" @click="showBlockListModal = false">
+        <button
+          class="rounded-lg bg-gray-700 px-4 py-2 text-gray-300 hover:bg-gray-600"
+          @click="showBlockListModal = false"
+        >
           닫기
         </button>
       </div>

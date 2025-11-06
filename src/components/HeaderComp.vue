@@ -1,7 +1,7 @@
 <template>
   <header
     :class="[
-      'fixed top-0 left-0 w-full z-[30] border-b border-gray-200 bg-black/90 backdrop-blur-md raspy-top ',
+      'fixed top-0 left-0 w-full z-[30] border-b border-gray-600 bg-black/90 backdrop-blur-md raspy-top ',
       props.customClass,
     ]"
   >
@@ -223,6 +223,7 @@ const props = defineProps({
   showDm: { type: Boolean, default: true },
   customClass: { type: String, default: '' },
   backIconClass: { type: String, default: 'fas fa-chevron-left' },
+  customGoBack: { type: Function, default: null },
 })
 
 const showNotificationPanel = ref(false)
@@ -237,12 +238,18 @@ const totalUnreadCount = computed(() => {
 })
 
 const goBack = () => {
-  const { origin } = window.location
-  // referrer가 없거나, 우리 서비스가 아니면 메인으로
-  if (!document.referrer || !document.referrer.startsWith(origin)) {
-    router.replace('/') // replace로 기록 남기지 않음 (권장)
-  } else {
+  // 커스텀 goBack 핸들러가 있으면 사용
+  if (props.customGoBack) {
+    props.customGoBack()
+    return
+  }
+  
+  // Vue Router의 히스토리가 있는 경우 뒤로가기
+  if (window.history.length > 1) {
     router.back()
+  } else {
+    // 히스토리가 없는 경우 홈으로 이동
+    router.replace('/')
   }
 }
 

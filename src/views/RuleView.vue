@@ -4,6 +4,7 @@
     :show-bell="false"
     :show-dm="false"
     custom-class="bg-gray-900 z-[444444]"
+    :customGoBack="handleGoBack"
   >
     <template #right-after>
       <button
@@ -189,8 +190,10 @@ import HeaderComp from '../components/HeaderComp.vue'
 import RuleCard from '../components/RuleCard.vue'
 
 import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 
 const showScrollTop = ref(false)
 const majors = ref([])
@@ -215,6 +218,25 @@ const toastMsg = ref('')
 const selectedSortLabel = computed(
   () => sortOptions.find((o) => o.value === sort.value)?.label || '정렬',
 )
+
+const handleGoBack = () => {
+  // fromGameCreate 쿼리 파라미터가 있으면 GameListView로 이동
+  if (route.query.fromGameCreate === 'true') {
+    router.push('/game-list')
+  }
+  // 규칙 생성에서 돌아온 경우 피드로 이동
+  else if (route.query.fromRuleCreate === 'true') {
+    router.push('/')
+  }
+  else {
+    // 히스토리 길이가 1 이하면 (첫 페이지) 피드로 이동
+    if (window.history.length <= 1) {
+      router.push('/');
+    } else {
+      router.back();
+    }
+  }
+}
 
 const handleScroll = () => {
   showScrollTop.value = window.scrollY > 120

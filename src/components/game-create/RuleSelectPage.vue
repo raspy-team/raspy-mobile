@@ -1,12 +1,6 @@
 <template>
   <div class="flex flex-col min-h-full px-5 pt-[20%]">
-    <div class="flex items-center mb-4">
-      <button
-        @click="$emit('back')"
-        class="fixed w-full bottom-0 left-0 p-5 text-white bg-gray-400 text-xl mr-2 text-gray-400"
-      >
-        이전으로
-      </button>
+    <div class="mb-4">
       <span class="text-xl font-bold text-gray-900">기존 규칙 선택</span>
     </div>
     <input

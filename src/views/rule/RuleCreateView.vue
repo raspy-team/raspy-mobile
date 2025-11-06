@@ -73,7 +73,7 @@ function onRuleFormNext(data) {
 
 function onRuleFormBack() {
   if (step.value > 4) step.value -= 1
-  else router.push('/rules') // 규칙 목록으로 돌아가기
+  else router.push('/rules?fromRuleCreate=true') // 규칙 목록으로 돌아가기
 }
 
 async function submitRuleForm(data) {

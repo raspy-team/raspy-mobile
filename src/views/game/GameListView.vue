@@ -4,6 +4,7 @@
     :show-bell="false"
     :show-dm="false"
     custom-class="bg-gray-900"
+    :customGoBack="handleGoBack"
   >
     <template #right-after>
       <button
@@ -983,10 +984,11 @@ function formatTimeAgo(dateString) {
 }
 const router = useRouter()
 
-const commentId = ref(0)
-const toggleComment = (id) => {
-  commentId.value = id
+const handleGoBack = () => {
+  router.push('/game')
 }
+
+const commentId = ref(0)
 const shareModal = ref(false)
 const inviteCode = ref('')
 const copied = ref(false)

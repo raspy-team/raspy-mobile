@@ -27,15 +27,15 @@
         <div class="flex items-center gap-2 justify-end">
           <img
             :src="rule.createdBy.profile?.profilePicture"
-            class="w-7 h-7 rounded-full border border-gray-600 object-cover"
+            class="w-7 h-7 rounded-full border-2 border-gray-500 object-cover"
             :alt="rule.createdBy.nickname"
           />
-          <span class="text-xs text-gray-400 font-medium max-w-[60px] truncate">
+          <span class="text-xs text-gray-300 font-medium max-w-[60px] truncate">
             {{ rule.createdBy.nickname }}
           </span>
         </div>
         <div class="text-[0.7rem] flex justify-end py-2 pl-2">
-          <button @click.stop="onReportClick" class="text-red-500">신고하기</button>
+          <button @click.stop="onReportClick" class="text-red-400 hover:text-red-300 transition-colors">신고하기</button>
         </div>
       </div>
     </div>
@@ -78,31 +78,31 @@
   <transition name="fade">
     <div
       v-if="confirmVisible"
-      class="fixed inset-0 z-[999999] bg-black/40 flex items-center justify-center"
+      class="fixed inset-0 z-[999999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
       @click.self="confirmVisible = false"
       @click.stop
     >
       <div
-        class="bg-gray-800 rounded-2xl shadow-lg px-6 py-8 w-full max-w-xs flex flex-col items-center"
+        class="bg-gray-800 rounded-2xl shadow-2xl px-6 py-8 w-full max-w-xs flex flex-col items-center border border-gray-700"
         @click.stop
       >
-        <div class="font-bold text-lg text-gray-200 mb-3">정말로 생성할까요?</div>
-        <div class="text-sm text-gray-400 mb-6 text-center">
+        <div class="font-bold text-lg text-white mb-3">정말로 생성할까요?</div>
+        <div class="text-sm text-gray-300 mb-6 text-center">
           아래 규칙으로<br />
-          <b class="text-orange-500 text-base">{{ rule.ruleTitle }}</b
+          <b class="text-orange-400 text-base">{{ rule.ruleTitle }}</b
           ><br />
           게임을 생성하시겠습니까?
         </div>
         <div class="flex gap-3 w-full">
           <button
             @click="confirmVisible = false"
-            class="flex-1 py-2 bg-gray-700 text-gray-300 rounded-xl font-bold text-base hover:bg-gray-600"
+            class="flex-1 py-3 bg-gray-700 text-gray-300 rounded-xl font-bold text-base hover:bg-gray-600 active:scale-98 transition-all duration-200"
           >
             취소
           </button>
           <button
             @click="onGameCreateConfirm"
-            class="flex-1 py-2 bg-orange-500 text-white rounded-xl font-bold text-base hover:bg-orange-600"
+            class="flex-1 py-3 bg-orange-500 text-white rounded-xl font-bold text-base hover:bg-orange-600 active:scale-98 transition-all duration-200"
           >
             생성
           </button>
@@ -115,22 +115,22 @@
   <transition name="fade">
     <div
       v-if="reportVisible"
-      class="fixed inset-0 z-[9999999] bg-black/30 flex items-center justify-center"
+      class="fixed inset-0 z-[9999999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
       @click.self="closeReport"
       @click.stop
     >
       <div
-        class="bg-white rounded-2xl shadow-lg px-6 py-7 w-full max-w-xs flex flex-col items-stretch"
+        class="bg-gray-800 rounded-2xl shadow-2xl px-6 py-7 w-full max-w-xs flex flex-col items-stretch border border-gray-700"
         @click.stop
       >
-        <div class="font-bold text-lg mb-2 text-gray-900">규칙 신고하기</div>
-        <div class="text-gray-500 text-sm mb-3 leading-snug">
-          신고는 <b>24시간 내에 처리</b>되며,<br />
+        <div class="font-bold text-lg mb-2 text-white">규칙 신고하기</div>
+        <div class="text-gray-300 text-sm mb-3 leading-snug">
+          신고는 <b class="text-orange-400">24시간 내에 처리</b>되며,<br />
           신고해주셔서 감사합니다.
         </div>
         <textarea
           v-model="reportReason"
-          class="border rounded p-2 w-full mb-3 text-[15px]"
+          class="border-2 border-gray-600 rounded-xl p-3 w-full mb-3 text-[15px] bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
           rows="3"
           maxlength="100"
           placeholder="신고 사유를 입력해주세요"
@@ -141,13 +141,13 @@
         <button
           @click.stop="submitReport"
           :disabled="!reportReason.trim() || reportLoading"
-          class="w-full bg-red-500 text-white py-2 rounded-xl font-bold mt-1 disabled:bg-gray-300"
+          class="w-full bg-red-500 text-white py-3 rounded-xl font-bold mt-1 disabled:bg-gray-600 hover:bg-red-600 active:scale-98 transition-all duration-200"
         >
           {{ reportLoading ? '신고 중...' : '신고하기' }}
         </button>
-        <button @click.stop="closeReport" class="w-full mt-2 text-gray-400 text-sm">취소</button>
-        <p v-if="reportError" class="text-red-500 mt-2 text-sm text-center">{{ reportError }}</p>
-        <p v-if="reportSuccess" class="text-green-600 mt-2 text-sm text-center">
+        <button @click.stop="closeReport" class="w-full mt-2 text-gray-400 text-sm hover:text-gray-200 transition">취소</button>
+        <p v-if="reportError" class="text-red-400 mt-2 text-sm text-center">{{ reportError }}</p>
+        <p v-if="reportSuccess" class="text-green-500 mt-2 text-sm text-center">
           {{ reportSuccess }}
         </p>
       </div>
@@ -220,24 +220,26 @@ async function submitReport() {
 
 <style scoped>
 .card-style {
-  background: #374151;
+  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
   border-radius: 1.3rem;
   box-shadow:
-    0 2px 14px 0 rgba(31, 41, 55, 0.04),
-    0 2px 8px 0 rgba(251, 146, 60, 0.06);
+    0 4px 20px 0 rgba(31, 41, 55, 0.08),
+    0 2px 8px 0 rgba(251, 146, 60, 0.04);
   padding: 1.45rem 1.15rem 1.4rem 1.15rem;
   margin-bottom: 1.05rem;
   border: 1.2px solid #4b5563;
   transition:
-    box-shadow 0.2s,
-    border 0.15s;
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
   position: relative;
 }
 .card-style:hover {
   box-shadow:
-    0 8px 36px 0 rgba(251, 146, 60, 0.1),
-    0 2px 8px 0 rgba(0, 0, 0, 0.05);
+    0 12px 40px 0 rgba(251, 146, 60, 0.15),
+    0 4px 16px 0 rgba(0, 0, 0, 0.1);
   border-color: #fed7aa;
+  transform: translateY(-2px);
 }
 .desc-block {
   background: #f8fafc;
@@ -292,7 +294,7 @@ async function submitReport() {
   overflow: hidden;
 }
 .game-cta {
-  background: linear-gradient(to right, #fb923c, #f59e42 85%);
+  background: linear-gradient(135deg, #fb923c 0%, #f59e42 50%, #fb923c 100%);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
@@ -300,17 +302,19 @@ async function submitReport() {
   text-align: center;
   border-radius: 15px;
   border: none;
-  box-shadow: 0 2px 8px 0 rgba(251, 146, 60, 0.08);
+  box-shadow: 0 4px 12px 0 rgba(251, 146, 60, 0.2);
   transition:
-    background 0.16s,
-    transform 0.13s;
+    background 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.22rem;
 }
 .game-cta:hover {
-  background: linear-gradient(to right, #f59e42 80%, #fb923c 120%);
-  transform: translateY(-1.5px) scale(1.025);
+  background: linear-gradient(135deg, #f59e42 0%, #fb923c 50%, #f59e42 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px 0 rgba(251, 146, 60, 0.3);
 }
 .fade-enter-active,
 .fade-leave-active {

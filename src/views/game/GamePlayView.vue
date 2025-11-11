@@ -1,7 +1,8 @@
 <template>
   <div
     v-if="game && user1 && user2"
-    class="w-dvw h-full flex flex-col px-4 py-3 relative bg-gray-900 text-gray-100 overflow-hidden"
+    class="w-dvw h-dvh flex flex-col px-4 relative bg-gray-900 text-gray-100 overflow-hidden"
+    style="padding-top: clamp(0.5rem, 1.5vh, 0.75rem); padding-bottom: clamp(0.5rem, 1.5vh, 0.75rem)"
   >
     <!-- Reconnecting Overlay -->
     <div
@@ -15,7 +16,7 @@
       <div class="text-gray-400 mt-2">네트워크 연결을 확인해주세요.</div>
     </div>
 
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-2">
       <button @click="goBack" class="text-white text-lg">
         <svg
           width="8"
@@ -36,19 +37,20 @@
 
     <!-- 경기 정보 섹션 -->
     <div class="flex-shrink-0">
-      <div class="flex items-center w-full gap-2">
+      <div class="flex items-center w-full" style="gap: clamp(0.25rem, 1vw, 0.5rem)">
         <!-- Info Cards: 세트 승점, 세트 수, 세트 시간 -->
-        <div class="flex w-full gap-1 sm:gap-1">
+        <div class="flex w-full" style="gap: clamp(0.25rem, 0.5vw, 0.5rem)">
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gradient-to-br from-gray-700 to-gray-800 text-white px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow-lg border border-gray-600"
+            class="flex-1 flex flex-col justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-xl text-center shadow-lg border border-gray-600"
+            style="min-height: 60px; padding: clamp(0.5rem, 1.5vh, 0.625rem) clamp(0.375rem, 1.5vw, 0.5rem)"
           >
-            <div class="flex-1 flex flex-col items-center justify-center">
+            <div class="flex flex-col items-center justify-center gap-1">
               <div
-                class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1"
+                class="flex items-center justify-center font-semibold"
+                style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)"
               >
                 <svg
-                  width="16"
-                  height="16"
+                  style="width: clamp(13px, 3.5vw, 15px); height: clamp(13px, 3.5vw, 15px)"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -58,23 +60,24 @@
                     fill="white"
                   />
                 </svg>
-                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 승점</span>
+                <span class="ml-1 text-gray-100 font-semibold">세트 승점</span>
               </div>
               <div
-                class="flex items-center justify-center text-orange-400 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1"
+                class="flex items-center justify-center text-orange-400 font-extrabold"
+                style="font-size: clamp(0.75rem, 1.6vh, 0.9rem)"
               >
                 {{ game.rule.pointsToWin == -1 ? '제한 없음' : game.rule.pointsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gradient-to-br from-gray-700 to-gray-800 text-white px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow-lg border border-gray-600"
+            class="flex-1 flex flex-col justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-xl text-center shadow-lg border border-gray-600"
+            style="min-height: 60px; padding: clamp(0.5rem, 1.5vh, 0.625rem) clamp(0.375rem, 1.5vw, 0.5rem)"
           >
-            <div class="flex-1 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
+            <div class="flex flex-col items-center justify-center gap-1">
+              <div class="flex items-center justify-center font-semibold" style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)">
                 <svg
-                  width="16"
-                  height="16"
+                  style="width: clamp(13px, 3.5vw, 15px); height: clamp(13px, 3.5vw, 15px)"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -84,21 +87,21 @@
                     fill="white"
                   />
                 </svg>
-                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 수</span>
+                <span class="ml-1 text-gray-100 font-semibold">세트 수</span>
               </div>
-              <div class="flex items-center justify-center text-orange-400 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
+              <div class="flex items-center justify-center text-orange-400 font-extrabold" style="font-size: clamp(0.75rem, 1.6vh, 0.9rem)">
                 {{ game.rule.setsToWin }}
               </div>
             </div>
           </div>
           <div
-            class="h-[14vw] sm:h-[10vw] flex-1 max-h-[54px] sm:max-h-[70px] flex flex-col justify-between bg-gradient-to-br from-gray-700 to-gray-800 text-white px-2 sm:px-3 py-2 sm:py-3 rounded-xl text-center shadow-lg border border-gray-600"
+            class="flex-1 flex flex-col justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-xl text-center shadow-lg border border-gray-600"
+            style="min-height: 60px; padding: clamp(0.5rem, 1.5vh, 0.625rem) clamp(0.375rem, 1.5vw, 0.5rem)"
           >
-            <div class="flex-1 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center text-[0.85rem] sm:text-[1rem] font-semibold mb-0.5 sm:mb-1">
+            <div class="flex flex-col items-center justify-center gap-1">
+              <div class="flex items-center justify-center font-semibold" style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)">
                 <svg
-                  width="16"
-                  height="16"
+                  style="width: clamp(13px, 3.5vw, 15px); height: clamp(13px, 3.5vw, 15px)"
                   viewBox="0 0 100 100"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -108,24 +111,26 @@
                     fill="white"
                   />
                 </svg>
-                <span class="ml-1 text-gray-100 text-xs sm:text-sm font-semibold">세트 시간</span>
+                <span class="ml-1 text-gray-100 font-semibold">세트 시간</span>
               </div>
-              <div class="flex items-center justify-center text-orange-400 font-extrabold text-base sm:text-lg mt-0.5 sm:mt-1">
+              <div class="flex items-center justify-center text-orange-400 font-extrabold" style="font-size: clamp(0.75rem, 1.6vh, 0.9rem)">
                 {{ limitTimeStr }}
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="w-full flex justify-end mt-2 gap-2">
+      <div class="w-full flex justify-end" style="margin-top: clamp(0.375rem, 1vh, 0.5rem); gap: clamp(0.375rem, 1vw, 0.5rem)">
         <button
           @click="showLogModal = true"
-          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
+          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-lg font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
+          style="padding: clamp(0.375rem, 1.2vh, 0.5rem) clamp(0.625rem, 2.5vw, 0.875rem); font-size: clamp(0.7rem, 2vw, 0.8rem)"
         >
           <i class="fas fa-list mr-1"></i>로그 보기
         </button>
         <button
-          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
+          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-lg font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
+          style="padding: clamp(0.375rem, 1.2vh, 0.5rem) clamp(0.625rem, 2.5vw, 0.875rem); font-size: clamp(0.7rem, 2vw, 0.8rem)"
           @click="game.showRuleDetail = true"
         >
           <i class="fas fa-book mr-1"></i>규칙 보기
@@ -134,9 +139,10 @@
     </div>
     <!-- 점수판 섹션 (중앙 영역 - flex-1로 남은 공간 차지) -->
     <div class="flex-1 flex flex-col items-center justify-center relative min-h-0 py-0">
-      <div class="flex flex-col items-center gap-1">
+      <div class="flex flex-col items-center" style="gap: clamp(0.125rem, 0.5vh, 0.25rem)">
         <div
-          class="text-2xl font-bold"
+          class="font-bold"
+          style="font-size: clamp(1.125rem, 3vh, 1.5rem)"
           :class="game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds ? 'text-red-500 animate-pulse' : 'text-orange-400'"
         >
           {{ elapsedTimeStr }}, 세트 {{ currentSet }}
@@ -150,39 +156,48 @@
       </div>
       <div class="flex w-full items-start justify-center">
         <div class="flex flex-col items-center justify-center w-full">
-          <div class="flex items-center justify-center mb-2 sm:mb-4 w-full">
+          <div class="flex items-center justify-center w-full" style="margin-bottom: clamp(0.25rem, 1vh, 0.5rem)">
             <div class="flex items-end">
-              <span class="text-[28vw] sm:text-[38dvw] font-extrabold text-orange-500">{{
-                currentScore1
-              }}</span>
               <span
-                class="ml-2 sm:ml-4 text-[2.8rem] sm:text-[4.5rem] font-bold text-orange-400"
-                style="position: relative; top: 0.1em"
+                class="font-extrabold text-orange-500"
+                style="font-size: clamp(4rem, 15vh, 10rem); line-height: 1"
+                >{{ currentScore1 }}</span
+              >
+              <span
+                class="font-bold text-orange-400"
+                style="position: relative; top: 0.1em; font-size: clamp(1.5rem, 4vh, 3rem); margin-left: clamp(0.25rem, 1vw, 0.5rem)"
                 >{{ user1SetsWon }}</span
               >
             </div>
-            <div class="mx-4 sm:mx-8 flex items-center">
-              <span class="text-6xl font-bold text-orange-500">:</span>
+            <div class="flex items-center" style="margin-left: clamp(0.5rem, 2vw, 1rem); margin-right: clamp(0.5rem, 2vw, 1rem)">
+              <span
+                class="font-bold text-orange-500"
+                style="font-size: clamp(2.5rem, 7vh, 5rem)"
+                >:</span
+              >
             </div>
             <div class="flex items-end">
-              <span class="text-[28vw] sm:text-[38dvw] font-extrabold text-orange-500">{{
-                currentScore2
-              }}</span>
               <span
-                class="ml-2 sm:ml-4 text-[2.8rem] sm:text-[4.5rem] font-bold text-orange-400"
-                style="position: relative; top: 0.1em"
+                class="font-extrabold text-orange-500"
+                style="font-size: clamp(4rem, 15vh, 10rem); line-height: 1"
+                >{{ currentScore2 }}</span
+              >
+              <span
+                class="font-bold text-orange-400"
+                style="position: relative; top: 0.1em; font-size: clamp(1.5rem, 4vh, 3rem); margin-left: clamp(0.25rem, 1vw, 0.5rem)"
                 >{{ user2SetsWon }}</span
               >
             </div>
           </div>
-          <div class="flex flex-row w-full justify-between mt-2 sm:mt-4">
+          <div class="flex flex-row w-full justify-between" style="margin-top: clamp(0.25rem, 1vh, 0.5rem)">
             <div class="flex flex-col items-center flex-1">
               <img
                 :src="user1.profileUrl ? user1.profileUrl : DefaultImage"
-                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg mb-2 sm:mb-3"
+                class="aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg"
+                style="width: clamp(44px, 12vh, 100px); height: clamp(44px, 12vh, 100px); margin-bottom: clamp(0.25rem, 1vh, 0.5rem)"
               />
-              <div class="font-bold text-base sm:text-xl mb-1 sm:mb-2">{{ user1.nickname }}</div>
-              <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
+              <div class="font-bold mb-1" style="font-size: clamp(0.875rem, 2.5vh, 1.125rem)">{{ user1.nickname }}</div>
+              <div class="flex flex-col items-center w-full" style="gap: clamp(0.375rem, 1.5vh, 0.5rem); margin-top: clamp(0.25rem, 1vh, 0.5rem)">
                 <button
                   @click="socket_sendScore(1, 1)"
                   :disabled="isSetOver || isGameOver || isCountingDown"
@@ -214,10 +229,11 @@
             <div class="flex flex-col items-center flex-1">
               <img
                 :src="user2.profileUrl ? user2.profileUrl : DefaultImage"
-                class="w-[18vw] sm:w-[24dvw] aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg mb-2 sm:mb-3"
+                class="aspect-square object-cover rounded-full border-2 border-orange-500 shadow-lg"
+                style="width: clamp(44px, 12vh, 100px); height: clamp(44px, 12vh, 100px); margin-bottom: clamp(0.25rem, 1vh, 0.5rem)"
               />
-              <div class="font-bold text-base sm:text-xl mb-1 sm:mb-2">{{ user2.nickname }}</div>
-              <div class="flex flex-col space-y-2 sm:space-y-3 mt-6 items-center w-full">
+              <div class="font-bold mb-1" style="font-size: clamp(0.875rem, 2.5vh, 1.125rem)">{{ user2.nickname }}</div>
+              <div class="flex flex-col items-center w-full" style="gap: clamp(0.375rem, 1.5vh, 0.5rem); margin-top: clamp(0.25rem, 1vh, 0.5rem)">
                 <button
                   @click="socket_sendScore(2, 1)"
                   :disabled="isSetOver || isGameOver || isCountingDown"
@@ -252,17 +268,18 @@
     </div>
 
     <!-- 하단 버튼 섹션 -->
-    <div class="flex-shrink-0 w-full flex flex-col gap-3 sm:gap-4 items-stretch">
+    <div class="flex-shrink-0 w-full flex flex-col items-stretch" style="gap: clamp(0.5rem, 1.5vh, 0.75rem)">
       <!-- 세트 종료 버튼과 카메라 버튼들 -->
-      <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center justify-between" style="gap: clamp(0.5rem, 1.5vw, 0.75rem)">
         <button
           v-if="!isSetOver && !isGameOver && !isCountingDown"
           @click="manualFinishSet"
-          class="flex-1 bg-orange-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:brightness-110 transition"
+          class="flex-1 bg-orange-600 text-white rounded-xl font-bold shadow-lg hover:brightness-110 transition"
+          style="padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem); font-size: clamp(0.875rem, 2.5vh, 1.125rem)"
         >
           <i class="fas fa-flag-checkered mr-2"></i>세트 종료
         </button>
-        <div class="flex gap-2">
+        <div class="flex" style="gap: clamp(0.375rem, 1vw, 0.5rem)">
           <button
             @click="triggerPhotoCapture"
             :disabled="isCountingDown"
@@ -292,16 +309,18 @@
         </div>
       </div>
 
-      <div class="w-full grid grid-cols-2 gap-2 sm:gap-4 mb-10">
+      <div class="w-full grid grid-cols-2 mb-10" style="gap: clamp(0.375rem, 1vw, 0.5rem)">
         <button
           @click="openConfirm('정말로 게임을 재시작 하겠습니까?', socket_resetGame)"
-          class="bg-gradient-to-br from-blue-500 to-blue-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 transition-all duration-200"
+          class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 transition-all duration-200"
+          style="padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem); font-size: clamp(0.875rem, 2.5vh, 1.125rem)"
         >
           <i class="fas fa-redo mr-2"></i>처음부터
         </button>
         <button
           @click="openConfirm('정말로 게임을 즉시 종료합니까?', socket_finishGame)"
-          class="bg-gradient-to-br from-red-500 to-red-600 text-white px-4 py-4 rounded-xl text-base sm:text-lg font-bold shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 transition-all duration-200"
+          class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl font-bold shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 transition-all duration-200"
+          style="padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem); font-size: clamp(0.875rem, 2.5vh, 1.125rem)"
         >
           <i class="fas fa-stop-circle mr-2"></i>경기 끝내기
         </button>

@@ -416,7 +416,7 @@
             <div
               class="relative z-10 w-[92%] max-w-xl rounded-2xl px-8 py-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
-              <div class="mb-5 flex justify-center">
+              <div class="mb-5 flex justify-center gap-2">
                 <span
                   class="cursor-pointer px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
                   @click="showRuleModal = true"
@@ -425,6 +425,13 @@
                   <i class="fas fa-book-open text-white/90 mr-2"></i>
                   <span class="drop-shadow"> {{ post.rule?.ruleTitle || '-' }}</span>
                 </span>
+                <button
+                  class="px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
+                  @click="openRankingModal"
+                  title="랭킹 보기"
+                >
+                  <i class="fas fa-trophy text-white/90"></i>
+                </button>
               </div>
 
               <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6 mb-4">
@@ -1180,6 +1187,19 @@
   </transition>
 
   <Comment class="z-[100000]" v-if="commentId == 1" :id="post.id" @close="onCloseComment" />
+
+  <!-- 랭킹 모달 -->
+  <RankingModal v-model="showRankingModal" :title="rankingRuleName">
+    <RankingList
+      :loading="rankingLoading"
+      :error="rankingError"
+      :current-user-ranking="rankingCurrentUser"
+      :rankings="rankingData"
+      @retry="fetchRankingData"
+      @profile-click="handleRankingProfileClick"
+    />
+  </RankingModal>
+
   <custom-toast />
 </template>
 
@@ -1210,6 +1230,8 @@ import CustomToast from '../../components/CustomToast.vue'
 import AppInvitePost from '../../components/feed/AppInvitePost.vue'
 import { useFeed } from '../../composables/useFeed.js'
 import Comment from '../GameCommentView.vue'
+import RankingModal from '../../components/modals/RankingModal.vue'
+import RankingList from '../../components/ranking/RankingList.vue'
 const router = useRouter()
 // Currently available info flags for gating UI
 const features = featureFlags
@@ -2215,6 +2237,54 @@ async function onShare() {
 
 const showRuleModal = ref(false)
 const commentId = ref(0)
+
+// 랭킹 모달 관련 상태
+const showRankingModal = ref(false)
+const rankingRuleId = ref(null)
+const rankingRuleName = ref('')
+const rankingData = ref([])
+const rankingCurrentUser = ref(null)
+const rankingLoading = ref(false)
+const rankingError = ref(null)
+
+const openRankingModal = async () => {
+  if (!post.value?.rule?.id) return
+
+  showRankingModal.value = true
+  rankingRuleId.value = post.value.rule.id
+  rankingRuleName.value = post.value.rule.ruleTitle || '규칙 랭킹'
+
+  await fetchRankingData()
+}
+
+const fetchRankingData = async () => {
+  rankingLoading.value = true
+  rankingError.value = null
+
+  try {
+    const response = await api.get(`/api/rules/${rankingRuleId.value}/rankings`)
+    const data = response.data
+
+    rankingData.value = data.rankings || []
+    rankingCurrentUser.value = data.currentUserRanking || null
+  } catch (err) {
+    console.error('랭킹 조회 실패:', err)
+    if (err.response && err.response.data && err.response.data.message) {
+      rankingError.value = err.response.data.message
+    } else {
+      rankingError.value = '랭킹 정보를 불러오는 데 실패했습니다.'
+    }
+  } finally {
+    rankingLoading.value = false
+  }
+}
+
+const handleRankingProfileClick = (userId) => {
+  showRankingModal.value = false
+  setTimeout(() => {
+    router.push(`/profile/${userId}`)
+  }, 300)
+}
 
 function tryVibrate(ms) {
   try {

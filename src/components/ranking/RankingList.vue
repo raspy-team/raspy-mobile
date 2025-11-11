@@ -75,7 +75,10 @@
         <!-- Podium Display for Top 3 -->
         <div v-if="rankings.length >= 3" class="flex items-end justify-center gap-2 mb-8">
           <!-- 2nd Place -->
-          <div class="flex-1 flex flex-col items-center" @click="handleProfileClick(rankings[1].userId)">
+          <div
+            class="flex-1 flex flex-col items-center"
+            @click="handleProfileClick(rankings[1].userId)"
+          >
             <div class="relative cursor-pointer group">
               <img
                 v-if="rankings[1].userAvatar"
@@ -106,7 +109,10 @@
           </div>
 
           <!-- 1st Place -->
-          <div class="flex-1 flex flex-col items-center" @click="handleProfileClick(rankings[0].userId)">
+          <div
+            class="flex-1 flex flex-col items-center"
+            @click="handleProfileClick(rankings[0].userId)"
+          >
             <div class="relative cursor-pointer group">
               <img
                 v-if="rankings[0].userAvatar"
@@ -137,7 +143,10 @@
           </div>
 
           <!-- 3rd Place -->
-          <div class="flex-1 flex flex-col items-center" @click="handleProfileClick(rankings[2].userId)">
+          <div
+            class="flex-1 flex flex-col items-center"
+            @click="handleProfileClick(rankings[2].userId)"
+          >
             <div class="relative cursor-pointer group">
               <img
                 v-if="rankings[2].userAvatar"
@@ -245,7 +254,9 @@
               <i class="fas fa-user text-gray-400"></i>
             </div>
             <div class="flex-1">
-              <p :class="['font-semibold', ranking.isCurrentUser ? 'text-orange-400' : 'text-white']">
+              <p
+                :class="['font-semibold', ranking.isCurrentUser ? 'text-orange-400' : 'text-white']"
+              >
                 {{ ranking.userName }}
                 <span v-if="ranking.isCurrentUser" class="text-xs ml-1">(나)</span>
               </p>
@@ -276,6 +287,8 @@
 </template>
 
 <script setup>
+import { defineEmits, defineProps } from 'vue'
+
 defineProps({
   loading: {
     type: Boolean,

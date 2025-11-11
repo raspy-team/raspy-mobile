@@ -9,7 +9,10 @@
     >
       <!-- Backdrop -->
       <transition name="fade">
-        <div v-if="showContent" class="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none"></div>
+        <div
+          v-if="showContent"
+          class="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none"
+        ></div>
       </transition>
 
       <!-- Modal Content -->
@@ -57,6 +60,7 @@
 
 <script setup>
 import { ref, watch, nextTick, computed } from 'vue'
+import { defineEmits, defineProps } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -109,7 +113,7 @@ watch(
       showContent.value = false
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const onScroll = (e) => {
@@ -269,11 +273,7 @@ const onBackdropTouchStart = (e) => {
 
 const onBackdropTouchEnd = (e) => {
   // 터치 시작과 끝이 같은 위치이고, 백드롭인 경우에만 닫기
-  if (
-    backdropTouchStartTarget === e.target &&
-    e.target === e.currentTarget &&
-    !isDragging.value
-  ) {
+  if (backdropTouchStartTarget === e.target && e.target === e.currentTarget && !isDragging.value) {
     close()
   }
   backdropTouchStartTarget = null

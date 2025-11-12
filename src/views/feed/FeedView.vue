@@ -416,7 +416,7 @@
             <div
               class="relative z-10 w-[92%] max-w-xl rounded-2xl px-8 py-5 bg-white/10 backdrop-blur-md border border-white/15 shadow-2xl"
             >
-              <div class="mb-5 flex justify-center gap-2">
+              <div class="mb-5 flex justify-center">
                 <span
                   class="cursor-pointer px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
                   @click="showRuleModal = true"
@@ -425,13 +425,6 @@
                   <i class="fas fa-book-open text-white/90 mr-2"></i>
                   <span class="drop-shadow"> {{ post.rule?.ruleTitle || '-' }}</span>
                 </span>
-                <button
-                  class="px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
-                  @click="openRankingModal"
-                  title="랭킹 보기"
-                >
-                  <i class="fas fa-trophy text-white/90"></i>
-                </button>
               </div>
 
               <div v-if="post.type === 'game' && post.isCompleted" class="space-y-6 mb-4">
@@ -582,7 +575,7 @@
                 <button
                   class="w-full flex items-center justify-center gap-2 text-xs text-white/80 bg-black/30 rounded-lg px-3 py-2 mb-2 focus:outline-none"
                   data-allow-swipe
-                  @click.stop="showSetDetails = !showSetDetails"
+                  @click.stop="toggleSetDetails"
                 >
                   <span v-if="!showSetDetails"><i class="fas fa-chevron-down"></i></span>
                   <span v-else><i class="fas fa-chevron-up"></i></span>
@@ -759,6 +752,16 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- 전체 랭킹 보기 버튼 -->
+                <button
+                  @click="openRankingModal"
+                  class="w-full mt-4 px-6 py-3 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
+                >
+                  <i class="fas fa-trophy text-white/90"></i>
+                  <span>전체 랭킹 보기</span>
+                  <i class="fas fa-chevron-right text-sm text-white/70"></i>
+                </button>
               </template>
 
               <!-- 랭킹 시스템 도입 전 경기인 경우 -->
@@ -2250,6 +2253,10 @@ const rankingError = ref(null)
 const openRankingModal = async () => {
   if (!post.value?.rule?.id) return
 
+  // 피드 터치 상태 리셋 (모달 열 때)
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+
   showRankingModal.value = true
   rankingRuleId.value = post.value.rule.id
   rankingRuleName.value = post.value.rule.ruleTitle || '규칙 랭킹'
@@ -2284,6 +2291,15 @@ const handleRankingProfileClick = (userId) => {
   setTimeout(() => {
     router.push(`/profile/${userId}`)
   }, 300)
+}
+
+// 세트 상세 정보 토글
+const toggleSetDetails = () => {
+  // 피드 터치 상태 리셋
+  feedIsPointerDown.value = false
+  feedAnimating.value = false
+
+  showSetDetails.value = !showSetDetails.value
 }
 
 function tryVibrate(ms) {

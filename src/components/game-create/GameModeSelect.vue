@@ -48,12 +48,11 @@
 import { ref, defineEmits, defineProps } from 'vue'
 import FriendModal from './FriendModal.vue'
 import { useRouter } from 'vue-router'
-
-const props = defineProps({
+defineProps({
   isContest: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const showModal = ref(false)

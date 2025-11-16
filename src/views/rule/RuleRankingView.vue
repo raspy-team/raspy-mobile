@@ -72,12 +72,9 @@
       </div>
 
       <!-- No Ranking for Current User -->
-      <div
-        v-else
-        class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-6 text-center"
-      >
+      <div v-else class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-6 text-center">
         <i class="fas fa-trophy text-gray-400 text-3xl mb-2"></i>
-        <p class="text-gray-300 font-semibold mb-1">아직 이 규칙으로 플레이한 기록이 없어요</p>
+        <p class="text-gray-300 font-semibold mb-1">나는 아직 이 규칙으로 플레이한 기록이 없어요</p>
         <p class="text-gray-400 text-sm">첫 경기를 시작해보세요!</p>
       </div>
 
@@ -243,10 +240,7 @@
           >
             <div class="w-8 text-center">
               <span
-                :class="[
-                  'font-bold',
-                  ranking.isCurrentUser ? 'text-orange-400' : 'text-gray-400',
-                ]"
+                :class="['font-bold', ranking.isCurrentUser ? 'text-orange-400' : 'text-gray-400']"
               >
                 {{ ranking.rank }}
               </span>
@@ -265,10 +259,7 @@
             </div>
             <div class="flex-1">
               <p
-                :class="[
-                  'font-semibold',
-                  ranking.isCurrentUser ? 'text-orange-400' : 'text-white',
-                ]"
+                :class="['font-semibold', ranking.isCurrentUser ? 'text-orange-400' : 'text-white']"
               >
                 {{ ranking.userName }}
                 <span v-if="ranking.isCurrentUser" class="text-xs ml-1">(나)</span>

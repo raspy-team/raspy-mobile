@@ -107,10 +107,10 @@
           >
             <span class="text-xs font-bold text-white/95">경희대·외대 서울캠퍼스 대회</span>
           </div>
-          <h3 class="text-[2.6rem] py-3 font-black text-white leading-[1.5] tracking-tight">
+          <h3 class="text-[1.8rem] py-3 font-black text-white leading-[1.5] tracking-tight">
             손뼉밀치기 챌린지
           </h3>
-          <p class="text-[1.2rem] text-white/90 font-medium mt-2 leading-relaxed">
+          <p class="text-[0.8rem] text-white/90 font-medium mt-2 leading-relaxed">
             학우들과 손뼉밀치기 대결을 펼쳐보세요.<br />
             지금 경기를 생성하고 최강자를 가려보세요!
           </p>
@@ -132,7 +132,7 @@
               <i class="fas fa-plus text-white text-sm"></i>
             </div>
             <span
-              class="text-lg font-black bg-gradient-to-r from-orange-600 via-rose-600 to-fuchsia-600 bg-clip-text text-transparent"
+              class="text-md font-black bg-gradient-to-r from-orange-600 via-rose-600 to-fuchsia-600 bg-clip-text text-transparent"
             >
               경기 생성하기
             </span>

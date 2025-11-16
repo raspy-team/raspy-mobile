@@ -15,7 +15,7 @@
     <!-- 기존 콘텐츠 -->
     <GameIntro v-if="step === 1" @next="goToRuleView" />
     <RuleSelectPage v-if="step === 2" @select="onRuleSelected" @back="goToRuleView" />
-    <GameModeSelect v-if="step === 3" @mode="onModeSelect" />
+    <GameModeSelect v-if="step === 3" @mode="onModeSelect" :is-contest="isContest" />
     <PlaceSelectPage v-if="step === 4" @select="onPlaceSelect" @back="step -= 1" />
     <TimeSelectPage v-if="step === 5" @select="onTimeSelect" @back="step -= 1" />
     <GameFinalPage v-if="step === 6" :game="gameForm" />
@@ -71,11 +71,18 @@ const gameForm = reactive({
 })
 
 const showAddressErrorModal = ref(false)
+const isContest = ref(false)
 
 const progressWidth = computed(() => Math.max(5, Math.round((step.value / totalSteps) * 100)))
 onMounted(() => {
   // 최초 마운트 시 쿼리 파라미터 체크
   const ruleId = route.query.ruleId
+  const contest = route.query.contest
+
+  if (contest === 'true') {
+    isContest.value = true
+  }
+
   if (ruleId && !isNaN(Number(ruleId))) {
     gameForm.ruleId = Number(ruleId)
     step.value = 3 // GameModeSelect로 바로 이동

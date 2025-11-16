@@ -26,10 +26,18 @@
 
   <div class="fixed bottom-10 w-full p-5">
     <button
+      v-if="!isContest"
       @click="router.push('/rules')"
       class="w-full py-4 bg-gray-800 text-gray-300 text-lg font-medium rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700 active:scale-98 transition-all duration-200"
     >
       규칙 다시 선택하기
+    </button>
+    <button
+      v-else
+      @click="router.back()"
+      class="w-full py-4 bg-gray-800 text-gray-300 text-lg font-medium rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700 active:scale-98 transition-all duration-200"
+    >
+      <i class="fas fa-arrow-left mr-2"></i>뒤로 가기
     </button>
   </div>
 
@@ -37,9 +45,16 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits, defineProps } from 'vue'
 import FriendModal from './FriendModal.vue'
 import { useRouter } from 'vue-router'
+
+const props = defineProps({
+  isContest: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const showModal = ref(false)
 const router = useRouter()

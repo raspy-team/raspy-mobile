@@ -79,16 +79,36 @@
               <i class="fas fa-heart mr-1 text-orange-400"></i>
               선호 장소 (선택)
             </label>
-            <input
-              v-model="preferredPlace"
-              placeholder="선호하는 경기 장소를 입력해요."
-              class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
-              autocomplete="off"
-            />
+            <div class="relative">
+              <input
+                ref="preferredPlaceInput"
+                v-model="preferredSearchQuery"
+                placeholder="선호하는 경기 장소를 검색하세요 (예: 서초탁구장)"
+                class="w-full text-base px-4 py-3 rounded-xl border-2 border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
+                autocomplete="off"
+              />
+              <i v-if="!preferredSearchQuery" class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+            </div>
             <p class="text-xs text-gray-500 mt-2">
               <i class="fas fa-info-circle text-blue-400 mr-1"></i>
               입력하신 선호 장소는 경기 생성 시 "A 장소 선호, 협의 가능" 형태로 표시됩니다
             </p>
+
+            <div v-if="selectedPreferredPlace" class="mt-3 p-4 bg-gray-700 rounded-xl border border-gray-600">
+              <div class="flex items-start gap-3">
+                <i class="fas fa-map-marker-alt text-orange-400 mt-1"></i>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-white mb-1">{{ selectedPreferredPlace.name }}</p>
+                  <p class="text-sm text-gray-300">{{ selectedPreferredPlace.address }}</p>
+                </div>
+                <button
+                  @click="clearPreferredSelection"
+                  class="text-gray-400 hover:text-gray-200 transition"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </transition>
       </section>
@@ -145,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits } from 'vue'
+import { ref, onMounted, defineEmits, watch } from 'vue'
 import { parseRegion } from '../../utils/regionParser'
 const emit = defineEmits(['select', 'back'])
 
@@ -153,8 +173,10 @@ const placeRoad = ref('')
 const searchQuery = ref('')
 const selectedPlace = ref(null)
 const detailedPlace = ref('')
-const preferredPlace = ref('')
+const preferredSearchQuery = ref('')
+const selectedPreferredPlace = ref(null)
 const addressInput = ref(null)
+const preferredPlaceInput = ref(null)
 
 
 const showConfirm = ref(false)
@@ -162,13 +184,15 @@ const confirmItem = ref({ placeRoad: '', placeDetail: '' })
 const showAddressErrorModal = ref(false)
 
 let autocomplete = null
+let preferredAutocomplete = null
 
 function setUnset() {
   placeRoad.value = placeRoad.value === null ? '' : null
   searchQuery.value = ''
   selectedPlace.value = null
   detailedPlace.value = ''
-  preferredPlace.value = ''
+  preferredSearchQuery.value = ''
+  selectedPreferredPlace.value = null
 }
 
 function clearSelection() {
@@ -177,47 +201,111 @@ function clearSelection() {
   detailedPlace.value = ''
 }
 
-onMounted(() => {
-  if (window.google?.maps?.places && addressInput.value) {
-    autocomplete = new window.google.maps.places.Autocomplete(addressInput.value, {
+function clearPreferredSelection() {
+  selectedPreferredPlace.value = null
+  preferredSearchQuery.value = ''
+}
+
+function initializePreferredAutocomplete() {
+  if (window.google?.maps?.places && preferredPlaceInput.value && !preferredAutocomplete) {
+    preferredAutocomplete = new window.google.maps.places.Autocomplete(preferredPlaceInput.value, {
       componentRestrictions: { country: 'kr' },
       fields: ['formatted_address', 'address_components', 'geometry', 'name'],
       types: ['establishment', 'geocode']
     })
 
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace()
+    preferredAutocomplete.addListener('place_changed', () => {
+      const place = preferredAutocomplete.getPlace()
       if (place.geometry && place.formatted_address) {
         // 주소 파싱 및 검증
         const parsed = parseRegion(place.formatted_address)
 
         if (!parsed) {
           showAddressErrorModal.value = true
-          searchQuery.value = ''
-          selectedPlace.value = null
+          preferredSearchQuery.value = ''
+          selectedPreferredPlace.value = null
           return
         }
 
-        selectedPlace.value = {
+        selectedPreferredPlace.value = {
           name: place.name || '',
-          address: parsed.fullAddress, // "경기 수원시 영통구 ..." 형태
-          region1: parsed.region1, // "경기" (변환됨)
-          region2: parsed.region2, // "수원시 영통구"
+          address: parsed.fullAddress,
+          region1: parsed.region1,
+          region2: parsed.region2,
           geometry: place.geometry
         }
       }
     })
   }
+}
+
+onMounted(() => {
+  if (window.google?.maps?.places) {
+    // 일반 장소 검색 (장소 미정이 아닐 때)
+    if (addressInput.value) {
+      autocomplete = new window.google.maps.places.Autocomplete(addressInput.value, {
+        componentRestrictions: { country: 'kr' },
+        fields: ['formatted_address', 'address_components', 'geometry', 'name'],
+        types: ['establishment', 'geocode']
+      })
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace()
+        if (place.geometry && place.formatted_address) {
+          // 주소 파싱 및 검증
+          const parsed = parseRegion(place.formatted_address)
+
+          if (!parsed) {
+            showAddressErrorModal.value = true
+            searchQuery.value = ''
+            selectedPlace.value = null
+            return
+          }
+
+          selectedPlace.value = {
+            name: place.name || '',
+            address: parsed.fullAddress, // "경기 수원시 영통구 ..." 형태
+            region1: parsed.region1, // "경기" (변환됨)
+            region2: parsed.region2, // "수원시 영통구"
+            geometry: place.geometry
+          }
+        }
+      })
+    }
+  }
+})
+
+// 선호 장소 입력에 대한 Google API autocomplete 설정
+watch(() => placeRoad.value, (newValue) => {
+  if (newValue === null) {
+    // 장소 미정일 때 선호 장소 입력 필드에 autocomplete 설정
+    setTimeout(() => {
+      initializePreferredAutocomplete()
+    }, 100)
+  } else {
+    // 일반 장소 선택으로 돌아갈 때 선호 장소 autocomplete 정리
+    if (preferredAutocomplete) {
+      window.google?.maps?.event?.clearInstanceListeners(preferredPlaceInput.value)
+      preferredAutocomplete = null
+    }
+  }
 })
 
 function submitPlace() {
   if (placeRoad.value === null) {
-    const placeDetail = preferredPlace.value
-      ? `${preferredPlace.value} 선호, 협의 가능`
-      : '협의 가능'
-    emit('select', { placeRoad: null, placeDetail })
+    // 장소 미정인 경우: 선호 장소가 있으면 끝에 " 선호, 협의 가능" 추가
+    if (selectedPreferredPlace.value) {
+      // 선호 장소가 선택된 경우: placeRoad와 placeDetail 모두 전송
+      emit('select', {
+        placeRoad: selectedPreferredPlace.value.address,
+        placeDetail: `${selectedPreferredPlace.value.name} 선호, 협의 가능`
+      })
+    } else {
+      // 선호 장소가 없는 경우: placeRoad는 null, placeDetail만 전송
+      emit('select', { placeRoad: null, placeDetail: '협의 가능' })
+    }
   } else if (selectedPlace.value) {
-    // Google API 장소 이름과 상세 장소를 공백으로 합침
+    // 일반 장소 선택인 경우: Google API 장소 이름과 상세 장소를 공백으로 합침
     const combinedPlaceDetail = detailedPlace.value
       ? `${selectedPlace.value.name} ${detailedPlace.value}`
       : selectedPlace.value.name
@@ -234,7 +322,8 @@ function emitBack() {
   searchQuery.value = ''
   selectedPlace.value = null
   detailedPlace.value = ''
-  preferredPlace.value = ''
+  preferredSearchQuery.value = ''
+  selectedPreferredPlace.value = null
   emit('back')
 }
 

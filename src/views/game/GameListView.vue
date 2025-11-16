@@ -18,7 +18,7 @@
   </HeaderComp>
 
   <div
-    class="bg-gray-900 pb-16 pt-14"
+    class="bg-gray-900 h-full pb-16 pt-14"
     ref="containerRef"
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
@@ -105,26 +105,32 @@
             <div class="flex items-center bg-gray-700 px-4 py-3 gap-4">
               <div
                 class="flex items-center gap-4 cursor-pointer hover:bg-gray-600 rounded-lg p-2 transition-colors"
-                @click.stop="selectedGame && selectedGame.id === game.id && $router.push('/profile/' + game.ownerId)"
+                @click.stop="
+                  selectedGame &&
+                  selectedGame.id === game.id &&
+                  $router.push('/profile/' + game.ownerId)
+                "
               >
                 <img
                   :src="game.ownerProfileUrl || Default"
                   class="w-10 h-10 rounded-full border-2 border-orange-400 shadow"
                 />
                 <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
-                  <div class="font-bold text-sm text-gray-100 truncate">{{ game.ownerNickname }}</div>
+                  <div class="font-bold text-sm text-gray-100 truncate">
+                    {{ game.ownerNickname }}
+                  </div>
                   <div
                     class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gradient-to-r from-gray-600 to-gray-500 border border-gray-500 flex-shrink-0"
                   >
-                    <span class="text-xs font-semibold text-green-400"
-                      >{{ game.ruleStatisticsOfOwner?.wins || 0 }}</span
-                    >
-                    <span class="text-xs font-semibold text-gray-300"
-                      >{{ game.ruleStatisticsOfOwner?.draws || 0 }}</span
-                    >
-                    <span class="text-xs font-semibold text-red-400"
-                      >{{ game.ruleStatisticsOfOwner?.losses || 0 }}</span
-                    >
+                    <span class="text-xs font-semibold text-green-400">{{
+                      game.ruleStatisticsOfOwner?.wins || 0
+                    }}</span>
+                    <span class="text-xs font-semibold text-gray-300">{{
+                      game.ruleStatisticsOfOwner?.draws || 0
+                    }}</span>
+                    <span class="text-xs font-semibold text-red-400">{{
+                      game.ruleStatisticsOfOwner?.losses || 0
+                    }}</span>
                     <span class="text-xs text-gray-400">|</span>
                     <div class="flex items-center gap-1">
                       <i class="fas fa-trophy text-yellow-500 text-[10px]"></i>
@@ -147,7 +153,10 @@
                   :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
                   :alt="game.rule.minorCategory || '카테고리'"
                 />
-                <div class="font-extrabold text-lg text-orange-400 cursor-pointer" @click.stop="selectedGame && selectedGame.id === game.id && openModal(game)">
+                <div
+                  class="font-extrabold text-lg text-orange-400 cursor-pointer"
+                  @click.stop="selectedGame && selectedGame.id === game.id && openModal(game)"
+                >
                   {{ game.rule.ruleTitle }}
                   <i class="fas fa-info-circle text-orange-400 text-sm ml-2"></i>
                 </div>
@@ -174,7 +183,9 @@
               </span>
               <span>
                 {{
-                  !game.matchDate || game.matchDate == ' ' ? '시간 미정' : formatDate(game.matchDate)
+                  !game.matchDate || game.matchDate == ' '
+                    ? '시간 미정'
+                    : formatDate(game.matchDate)
                 }}
               </span>
             </div>

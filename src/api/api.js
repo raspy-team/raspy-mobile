@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { API_BASE_URL } from '@/config/server'
 
 let routerInstance = null
 
@@ -6,18 +7,8 @@ export const setRouter = (router) => {
   routerInstance = router
 }
 
-const getBaseURL = () => {
-  if (process.env.VUE_APP_ENV === 'prod') {
-    return 'https://raspy-be.shop'
-  } else if (process.env.VUE_APP_ENV === 'dev') {
-    return 'http://localhost:8080'
-  }
-  // 기본값은 dev
-  return 'http://localhost:8080'
-}
-
 const api = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: API_BASE_URL,
   withCredentials: true
 })
 

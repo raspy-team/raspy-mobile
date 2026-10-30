@@ -250,6 +250,7 @@
   import { useRouter } from 'vue-router'
   const router = useRouter()
   import { ref } from 'vue'
+  import { API_BASE_URL } from '@/config/server'
   const isLoading = ref(false)
   const showTermsModal = ref(false)
   const showPrivacyModal = ref(false)
@@ -269,10 +270,8 @@
   const isAndroidApp = userAgent.includes('raspy-android')
 
   const loginWith = (provider) => {
-    const isLocalhostClient =
-      window.location.hostname === 'localhost' && window.location.port === '8081'
     isLoading.value = true
-    const apiBase = isLocalhostClient ? 'http://localhost:8080' : 'https://raspy-be.shop'
+    const apiBase = API_BASE_URL
 
     if (provider === 'kakao') {
       // iOS 앱 (not support now)

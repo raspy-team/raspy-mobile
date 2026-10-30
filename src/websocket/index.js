@@ -1,14 +1,6 @@
 // websocket.js
 import { Client } from '@stomp/stompjs'
-
-const getWebSocketURL = () => {
-  if (process.env.VUE_APP_ENV === 'prod') {
-    return 'wss://raspy-be.shop/ws'
-  }
-  return 'ws://localhost:8080/ws'
-}
-
-const WS_URL = getWebSocketURL()
+import { WS_URL } from '@/config/server'
 
 let stompClient = null
 let subscription = null

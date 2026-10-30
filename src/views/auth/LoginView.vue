@@ -19,8 +19,8 @@
       <!-- Right: Login -->
       <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-white px-6 lg:px-24">
         <div class="w-full max-w-md space-y-8">
-          <h2 class="text-2xl font-bold text-gray-900 text-left">그룹 계정 로그인</h2>
-          <form @submit.prevent="handleLogin" class="space-y-4">
+          <h2 class="text-2xl font-bold text-gray-900 text-left">{{ isSignup ? '가입하기' : '로그인' }}</h2>
+          <form @submit.prevent="isSignup ? handleSignup() : handleLogin()" class="space-y-4">
             <!-- Email -->
             <div class="relative">
               <i
@@ -43,7 +43,7 @@
               <input
                 :type="showPassword ? 'text' : 'password'"
                 v-model="password"
-                placeholder="비밀번호 (8자 이상)"
+                placeholder="비밀번호 (8~20자)"
                 class="w-full pl-11 pr-12 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-50"
                 :class="{ 'border-red-500': passwordError }"
               />
@@ -63,20 +63,19 @@
               type="submit"
               class="w-full py-3 bg-[var(--point-color)] text-white rounded-lg font-semibold hover:bg-opacity-90 transition text-base mt-2"
             >
-              로그인
+              {{ isSignup ? '가입하고 시작하기' : '로그인' }}
             </button>
             <p v-if="submitError" class="text-red-500 text-center text-xs mt-2">
               {{ submitError }}
             </p>
           </form>
-          <!-- 안내/신청 방법 -->
-          <div
-            class="rounded-lg bg-gray-50 border border-gray-100 p-4 text-gray-600 text-sm text-left leading-relaxed mt-4"
-          >
-            운영진에게 부여받은 계정만 로그인할 수 있습니다.<br />
-            계정이 필요하신 경우 <b class="text-gray-900">xhae000@gmail.com</b> 으로 단체의 대표자
-            <b>주민등록증</b> 및 단체를 인증할 수 있는 자료(종류 무관)를 첨부하여 신청해주세요.
-          </div>
+          <!-- 가입/로그인 전환 -->
+          <p class="text-center text-sm text-gray-500">
+            {{ isSignup ? '이미 계정이 있나요?' : '처음이세요?' }}
+            <button type="button" class="font-semibold text-[var(--point-color)] ml-1" @click="toggleMode">
+              {{ isSignup ? '로그인' : '가입하기' }}
+            </button>
+          </p>
         </div>
       </div>
     </div>
@@ -85,7 +84,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 
@@ -99,16 +98,46 @@ const emailError = ref('')
 const passwordError = ref('')
 const submitError = ref('')
 const router = useRouter()
+const route = useRoute()
+const isSignup = ref(route.query.mode === 'signup')
+
+const toggleMode = () => {
+  isSignup.value = !isSignup.value
+  emailError.value = ''
+  passwordError.value = ''
+  submitError.value = ''
+}
 
 const validate = () => {
   emailError.value = ''
   passwordError.value = ''
   let ok = true
-  if (password.value.length < 8) {
-    passwordError.value = '비밀번호를 8자 이상 입력하세요'
+  if (!email.value.trim()) {
+    emailError.value = '아이디를 입력하세요'
+    ok = false
+  } else if (email.value.length > 50) {
+    emailError.value = '아이디는 50자 이하로 입력하세요'
+    ok = false
+  }
+  if (password.value.length < 8 || password.value.length > 20) {
+    passwordError.value = '비밀번호는 8~20자로 입력하세요'
     ok = false
   }
   return ok
+}
+
+// 가입 후 바로 로그인한다. 첫 로그인이라 프로필 설정 화면으로 이어진다
+const handleSignup = async () => {
+  if (!validate()) return
+  try {
+    await api.post('/api/auth/register', { email: email.value.trim(), password: password.value })
+  } catch (err) {
+    submitError.value =
+      err.response?.status === 409 ? '이미 사용 중인 아이디예요' : '가입에 실패했어요. 잠시 후 다시 시도해주세요'
+    return
+  }
+  email.value = email.value.trim()
+  await handleLogin()
 }
 
 const handleLogin = async () => {

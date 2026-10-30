@@ -102,9 +102,9 @@
             :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
           >
             <!-- 생성자 영역: 유저네임과 같은 줄에 전적/점수 -->
-            <div class="flex items-center bg-gray-700 px-4 py-3 gap-4">
+            <div class="flex items-center bg-gray-700 px-3 py-3 gap-2">
               <div
-                class="flex items-center gap-4 cursor-pointer hover:bg-gray-600 rounded-lg p-2 transition-colors"
+                class="flex flex-1 min-w-0 items-center gap-3 cursor-pointer hover:bg-gray-600 rounded-lg p-2 transition-colors"
                 @click.stop="
                   selectedGame &&
                   selectedGame.id === game.id &&
@@ -113,7 +113,7 @@
               >
                 <img
                   :src="game.ownerProfileUrl || Default"
-                  class="w-10 h-10 rounded-full border-2 border-orange-400 shadow"
+                  class="w-10 h-10 rounded-full border-2 border-orange-400 shadow flex-shrink-0 object-cover"
                 />
                 <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
                   <div class="font-bold text-sm text-gray-100 truncate">
@@ -141,7 +141,7 @@
                   </div>
                 </div>
               </div>
-              <div class="text-gray-400 text-xs text-right flex-shrink-0 min-w-[60px]">
+              <div class="text-gray-400 text-xs text-right flex-shrink-0 whitespace-nowrap">
                 {{ formatTimeAgo(game.createdAt) }}
               </div>
             </div>

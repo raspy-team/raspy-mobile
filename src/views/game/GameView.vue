@@ -52,112 +52,17 @@
       </button>
     </div>
 
-    <!-- 이벤트 배너: 손뼉밀치기 대회 -->
-    <div
-      @click="router.push('/create-game?ruleId=87&contest=true')"
-      class="relative mt-3 rounded-3xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+    <!-- 경기 만들기: 이 탭의 주 행동 -->
+    <button
+      @click="router.push('/create-game')"
+      class="w-full flex items-center justify-between gap-3 p-5 rounded-xl bg-orange-500 text-white text-left active:scale-[0.98] transition-transform"
     >
-      <!-- 배경 그라디언트 -->
-      <div
-        class="absolute inset-0 bg-gradient-to-br from-orange-400 via-rose-500 to-fuchsia-600"
-      ></div>
-
-      <!-- 움직이는 그리드 패턴 -->
-      <div
-        class="absolute inset-0 opacity-[0.15]"
-        style="
-          background-image: repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 10px,
-            rgba(255, 255, 255, 0.05) 10px,
-            rgba(255, 255, 255, 0.05) 20px
-          );
-        "
-      ></div>
-
-      <!-- 메인 컨텐츠 -->
-      <div class="relative z-10 p-6 pb-7">
-        <!-- 상단 영역 -->
-        <div class="flex items-start justify-between mb-5">
-          <div class="flex items-center gap-2">
-            <div
-              class="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/15 backdrop-blur-xl rounded-full border border-white/25 shadow-lg"
-            >
-              <div
-                class="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"
-              ></div>
-              <span class="text-[10px] font-extrabold text-white uppercase tracking-wider"
-                >Live</span
-              >
-            </div>
-          </div>
-          <div
-            class="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-lg"
-          >
-            <i class="fas fa-trophy text-white text-xs drop-shadow"></i>
-            <span class="text-[10px] font-black text-white uppercase tracking-wide">Special</span>
-          </div>
-        </div>
-
-        <!-- 제목 영역 -->
-        <div class="mb-6">
-          <div
-            class="inline-block px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-3"
-          >
-            <span class="text-xs font-bold text-white/95">경희대·외대 서울캠퍼스 대회</span>
-          </div>
-          <h3 class="text-[1.8rem] py-3 font-black text-white leading-[1.5] tracking-tight">
-            손뼉밀치기 챌린지
-          </h3>
-          <p class="text-[0.8rem] text-white/90 font-medium mt-2 leading-relaxed">
-            학우들과 손뼉밀치기 대결을 펼쳐보세요.<br />
-            지금 경기를 생성하고 최강자를 가려보세요!
-          </p>
-        </div>
-
-        <!-- CTA 버튼 -->
-        <button
-          class="w-full group/btn relative overflow-hidden bg-white rounded-2xl p-4 shadow-2xl hover:shadow-[0_20px_50px_rgba(255,255,255,0.3)] transition-all active:scale-[0.98]"
-        >
-          <!-- 버튼 글로우 효과 -->
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-orange-100 via-white to-pink-100 opacity-0 group-hover/btn:opacity-100 transition-opacity"
-          ></div>
-
-          <div class="relative flex items-center justify-center gap-3">
-            <div
-              class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center shadow-lg"
-            >
-              <i class="fas fa-plus text-white text-sm"></i>
-            </div>
-            <span
-              class="text-md font-black bg-gradient-to-r from-orange-600 via-rose-600 to-fuchsia-600 bg-clip-text text-transparent"
-            >
-              경기 생성하기
-            </span>
-            <i
-              class="fas fa-arrow-right text-orange-600 text-base group-hover/btn:translate-x-1 transition-transform"
-            ></i>
-          </div>
-        </button>
+      <div>
+        <div class="text-lg font-bold">경기 만들기</div>
+        <div class="text-sm text-white/80 mt-1">규칙을 고르고 상대를 기다리세요</div>
       </div>
-
-      <!-- 장식 요소들 -->
-      <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-300/20 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 left-0 w-24 h-24 bg-fuchsia-400/20 rounded-full blur-2xl"></div>
-
-      <!-- 반짝이는 파티클 -->
-      <div class="absolute top-8 right-12">
-        <div class="w-1 h-1 bg-white rounded-full animate-ping"></div>
-      </div>
-      <div class="absolute top-14 right-20">
-        <div class="w-1.5 h-1.5 bg-yellow-200 rounded-full animate-pulse"></div>
-      </div>
-      <div class="absolute bottom-12 left-8">
-        <div class="w-1 h-1 bg-white rounded-full animate-ping" style="animation-delay: 0.5s"></div>
-      </div>
-    </div>
+      <i class="fas fa-plus text-xl"></i>
+    </button>
 
     <!-- 로딩 상태 -->
     <div v-if="loading" class="space-y-5">
@@ -569,7 +474,7 @@
       </div>
 
       <!-- 빈 상태 -->
-      <div v-else class="text-center text-gray-400 text-sm py-10">게임이 없습니다.</div>
+      <div v-else class="text-center text-gray-400 text-sm py-10">아직 참여한 경기가 없어요.<br />경기를 만들거나 경기 목록에서 도전해보세요.</div>
     </template>
   </div>
 

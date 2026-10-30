@@ -62,12 +62,10 @@
           </div>
         </button>
         <!-- Group Login -->
-        <button class="oauth-btn bg-orange-500 text-white" @click="loginGroup">
-          <div class="icon-text">
-            <i class="fas fa-building w-6"></i>
-            <span>그룹 계정으로 시작하기</span>
-          </div>
+        <button class="oauth-btn bg-orange-500 text-white justify-center" @click="signup">
+          <span class="w-full text-center font-semibold">시작하기</span>
         </button>
+        <button class="w-full text-center text-sm text-gray-500 py-2" @click="loginGroup">이미 계정이 있어요</button>
 
         <div class="mt-5 text-xs text-gray-600 text-left">
           본 서비스 이용 시
@@ -306,6 +304,9 @@
     }
   }
 
+  const signup = () => {
+    router.push('/group/login?mode=signup')
+  }
   const loginGroup = () => {
     router.push('/group/login')
   }

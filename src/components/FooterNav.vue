@@ -24,25 +24,27 @@ function isActive(pathPrefix) {
       <router-link
         to="/"
         aria-label="피드"
-        class="nav-item flex flex-col gap-y-2 items-center px-3 py-1 rounded-xl transition-colors relative"
+        class="nav-item flex flex-col gap-y-1 items-center px-3 py-1 rounded-xl transition-colors relative"
         :class="isActive('/') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'"
       >
         <i
           class="fas fa-newspaper text-2xl"
           :class="isActive('/') ? 'text-orange-500' : 'text-gray-400'"
         ></i>
+        <span>피드</span>
       </router-link>
 
       <router-link
         to="/game"
-        aria-label="진행"
-        class="nav-item flex flex-col gap-y-2 items-center px-3 py-1 rounded-xl transition-colors relative"
+        aria-label="경기"
+        class="nav-item flex flex-col gap-y-1 items-center px-3 py-1 rounded-xl transition-colors relative"
         :class="isActive('/game') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'"
       >
         <i
           class="fas fa-gamepad text-2xl"
           :class="isActive('/game') ? 'text-orange-500' : 'text-gray-400'"
         ></i>
+        <span>경기</span>
       </router-link>
 
 
@@ -50,7 +52,7 @@ function isActive(pathPrefix) {
       <router-link
         to="/profile/0"
         aria-label="프로필"
-        class="nav-item flex flex-col gap-y-2 items-center px-3 py-1 rounded-xl transition-colors relative"
+        class="nav-item flex flex-col gap-y-1 items-center px-3 py-1 rounded-xl transition-colors relative"
         :class="
           isActive('/profile') ? 'nav-item-active text-white' : 'text-white/70 hover:text-white'
         "
@@ -77,6 +79,7 @@ function isActive(pathPrefix) {
             stroke-linecap="round"
           />
         </svg>
+        <span>내 정보</span>
       </router-link>
     </div>
   </nav>

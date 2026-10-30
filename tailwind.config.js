@@ -1,11 +1,31 @@
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors')
+
+// 브랜드 색은 주황 하나. 화면마다 섞여 있던 보라·분홍·파랑 계열을 주황으로 모은다.
+// 빨강(패배·삭제), 초록(승리·완료), 노랑(금메달)은 의미가 있는 색이라 그대로 둔다.
+const brand = colors.orange
+
 module.exports = {
   content: [
     "./public/index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        gray: colors.neutral,
+        slate: colors.neutral,
+        amber: brand,
+        pink: brand,
+        rose: brand,
+        fuchsia: brand,
+        purple: brand,
+        violet: brand,
+        indigo: brand,
+        blue: brand,
+        sky: brand,
+      },
+    },
   },
   plugins: [
     function({ addBase }) {

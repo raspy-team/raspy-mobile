@@ -245,17 +245,19 @@ export function useFeed() {
       ...friendsScheduled,
     )
 
-    // 친구 포스트와 일반 포스트 사이에 친구 초대 포스트 삽입
-    // 유저피드모드가 아닐 때만 friend-invite 포스트 추가
-    if (!isUserFeedMode.value) {
-      result.push({
-        type: 'friend-invite',
-        id: 'friend-invite-section',
-        caption: '친구를 초대해보세요!'
-      })
-    }
+    const rest = [...invitePost, ...allCompleted, ...allScheduled]
+    const invite = { type: 'friend-invite', id: 'friend-invite-section', caption: '친구를 초대해보세요!' }
 
-    result.push(...invitePost, ...allCompleted, ...allScheduled)
+    // 친구 초대 포스트는 유저피드모드가 아닐 때만. 친구 포스트 뒤에 넣되,
+    // 친구가 없으면(신규 유저) 첫 화면이 초대 요청이 되지 않도록 일반 포스트 몇 개 뒤에 넣는다
+    if (!isUserFeedMode.value && friendsCompleted.length + friendsScheduled.length > 0) {
+      result.push(invite, ...rest)
+    } else if (!isUserFeedMode.value) {
+      const at = Math.min(3, rest.length)
+      result.push(...rest.slice(0, at), invite, ...rest.slice(at))
+    } else {
+      result.push(...rest)
+    }
 
     console.log('최종 sortedFeed 결과:', result.length, '개 포스트')
     return result

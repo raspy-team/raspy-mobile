@@ -303,7 +303,7 @@ export interface paths {
         put?: never;
         /**
          * Start Game
-         * @description 경기 주최자가 해당 게임을 시작 상태로 변경합니다. 게임 시작 사진이 필수입니다.
+         * @description 경기 주최자가 해당 게임을 시작 상태로 변경합니다. 시작 사진(인증샷)은 있으면 올린다.
          */
         post: operations["startGame"];
         delete?: never;
@@ -1244,6 +1244,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/media/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/invite/{gameId}": {
         parameters: {
             query?: never;
@@ -1928,6 +1944,9 @@ export interface components {
             /** Format: int32 */
             duration: number;
             winBy: string;
+            ruleTitle?: string;
+            majorCategory?: string;
+            minorCategory?: string;
         };
         FullRuleResponse: {
             /** Format: int64 */
@@ -3439,7 +3458,7 @@ export interface operations {
             content: {
                 "multipart/form-data": {
                     /** Format: binary */
-                    photo: string;
+                    photo?: string;
                 };
             };
         };
@@ -4726,6 +4745,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["NotificationResponse"][];
+                };
+            };
+        };
+    };
+    get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
                 };
             };
         };

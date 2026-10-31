@@ -277,12 +277,20 @@
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
   >
     <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
-      <h2 class="text-lg font-bold mb-4">경기 장소 설정</h2>
+      <h2 class="text-lg font-bold mb-4">어디서 하나요?</h2>
+      <!-- 지역: 챔피언이 지역 단위라 꼭 필요하다. 장소 검색으로 고르면 자동으로 채워진다 -->
+      <div v-if="!selectedPlace" class="grid grid-cols-2 gap-2 mb-4">
+        <select v-model="manualRegion1" class="px-3 py-3 bg-gray-900 rounded-xl border border-gray-800 text-base">
+          <option value="" disabled>시·도</option>
+          <option v-for="r in region1Options" :key="r" :value="r">{{ r }}</option>
+        </select>
+        <select v-model="manualRegion2" :disabled="!manualRegion1" class="px-3 py-3 bg-gray-900 rounded-xl border border-gray-800 text-base disabled:opacity-50">
+          <option value="" disabled>구·시·군</option>
+          <option v-for="r in region2Options" :key="r" :value="r">{{ r }}</option>
+        </select>
+      </div>
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-200 mb-2">
-          <i class="fas fa-search mr-1 text-orange-500"></i>
-          장소 검색
-        </label>
+        <label class="block text-sm font-medium text-gray-200 mb-2">장소 이름</label>
         <div class="relative">
           <input
             ref="addressInputModal"
@@ -296,10 +304,7 @@
             class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"
           ></i>
         </div>
-        <p class="text-xs text-gray-400 mt-2">
-          <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
-          장소명이나 주소를 입력하면 자동으로 검색됩니다
-        </p>
+
       </div>
 
       <div class="mb-4">
@@ -332,10 +337,7 @@
         </div>
       </div>
 
-      <div v-if="!selectedPlace" class="mt-4 text-xs text-gray-500 flex items-center gap-2">
-        <i class="fas fa-info-circle text-blue-400"></i>
-        <span>장소를 선택해야 경기를 시작할 수 있습니다</span>
-      </div>
+
       <div class="flex justify-end mt-6 space-x-2">
         <button
           @click="closeModal"
@@ -344,7 +346,7 @@
           취소
         </button>
         <button
-          :disabled="!selectedPlace"
+          :disabled="!canSubmitPlace"
           class="px-5 py-2 rounded-xl bg-orange-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition shadow-md"
           @click="submitAndStartGame"
         >
@@ -412,7 +414,9 @@
     :is-visible="showCameraModal"
     title="경기 시작 인증샷"
     subtitle="피드에 표시될 사진을 촬영해주세요"
+    allow-skip
     @capture="onPhotoCapture"
+    @skip="onPhotoCapture(null)"
     @cancel="onCameraCancel"
   />
 
@@ -453,6 +457,7 @@
 </template>
 
 <script setup>
+import regionMap from '../../assets/regionMap.json'
 import ApplicantsModal from '../../components/game/ApplicantsModal.vue'
 import LocationConfirmModal from '../../components/game/LocationConfirmModal.vue'
 import { refreshOnChange } from '../../websocket/userChannel'
@@ -471,7 +476,7 @@ function closeApplicantsModal() {
   showApplicantsModal.value = false
   selectedApplicantsGame.value = null
 }
-import { ref, onMounted, onBeforeUnmount, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, onUnmounted, computed, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
@@ -881,8 +886,24 @@ const changeLocation = () => {
   openAddressModal()
 }
 
+// 장소 직접 입력: 지역(시·도, 구) + 장소 이름. Google 키가 없어도 경기를 시작할 수 있어야 한다
+const manualRegion1 = ref('')
+const manualRegion2 = ref('')
+const region1Options = Object.keys(regionMap).filter((r) => r !== '전국')
+const region2Options = computed(() => (regionMap[manualRegion1.value] || []).filter((r) => r !== '전체'))
+watch(manualRegion1, () => (manualRegion2.value = ''))
+const canSubmitPlace = computed(
+  () => !!selectedPlace.value || !!(manualRegion1.value && manualRegion2.value && searchQuery.value.trim()),
+)
+
 const submitAndStartGame = async () => {
-  if (!selectedPlace.value) return alert('장소를 선택해주세요.')
+  if (!selectedPlace.value) {
+    if (!canSubmitPlace.value) return alert('지역과 장소 이름을 입력해주세요.')
+    selectedPlace.value = {
+      name: searchQuery.value.trim(),
+      address: `${manualRegion1.value} ${manualRegion2.value}`,
+    }
+  }
 
   // Google API 장소 이름과 상세 장소를 공백으로 합침
   const combinedDetailAddress = detailedPlace.value
@@ -921,14 +942,10 @@ const onCameraCancel = () => {
 }
 
 const confirmStartGame = async () => {
-  if (!capturedPhotoFile.value) {
-    alert('사진을 촬영해주세요.')
-    return
-  }
-
   try {
+    // 인증샷은 선택. 찍었으면 함께 보낸다
     const formData = new FormData()
-    formData.append('photo', capturedPhotoFile.value)
+    if (capturedPhotoFile.value) formData.append('photo', capturedPhotoFile.value)
 
     await client.post(`/api/games/${currentGameId.value}/start`, formData, {
       headers: {

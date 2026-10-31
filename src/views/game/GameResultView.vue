@@ -9,6 +9,17 @@
       <div class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500"></div>
     </div>
 
+    <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
+    <div
+      v-if="!isLoading && resultError"
+      class="fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-gray-900 px-6 text-center"
+    >
+      <p class="text-lg font-bold text-white">{{ resultError }}</p>
+      <button @click="$router.push('/game')" class="px-6 py-3 rounded-xl bg-orange-500 text-white font-bold">
+        내 경기로
+      </button>
+    </div>
+
     <!-- 🎉 게임 결과 화면 -->
     <div v-else class="flex-1 overflow-y-auto px-4 py-4">
       <div class="max-w-xl mx-auto space-y-4 text-center pb-20">
@@ -710,6 +721,8 @@ const unselectedPictures = computed(() => {
   return allPictures.value.filter((p) => !selectedIds.has(p.id))
 })
 
+const resultError = ref('')
+
 onMounted(async () => {
   try {
     const myIdRes = await api.get('/api/auth/current-user-id')
@@ -742,6 +755,7 @@ onMounted(async () => {
     allPictures.value = await getGamePictures(gameId)
   } catch (err) {
     console.error(err)
+    resultError.value = err.response?.data?.message || '결과를 불러오지 못했어요'
   } finally {
     isLoading.value = false
   }

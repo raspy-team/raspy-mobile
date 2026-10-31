@@ -28,20 +28,19 @@
               @click="emit('profile', liker.userId)"
               class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 active:bg-gray-800 transition cursor-pointer"
             >
-              <!--이거 내가 서버에서 Nickname, profileImageUrl 반대로 값 넣어줘서 이렇게해야함.-->
               <img
-                v-if="liker.nickname"
-                :src="liker.nickname"
+                v-if="liker.profileImageUrl"
+                :src="liker.profileImageUrl"
                 class="w-8 h-8 rounded-full object-cover flex-shrink-0"
               />
               <div
                 v-else
                 class="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-medium flex-shrink-0"
               >
-                {{ liker.profileImageUrl.charAt(0) }}
+                {{ liker.nickname?.charAt(0) }}
               </div>
               <div class="flex-1 text-sm font-medium text-white truncate">
-                {{ liker.profileImageUrl }}
+                {{ liker.nickname }}
               </div>
             </div>
           </div>

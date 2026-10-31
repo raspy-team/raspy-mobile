@@ -65,6 +65,9 @@
           </button>
         </div>
 
+        <button v-if="allowSkip && !capturedImage" @click="$emit('skip')" class="w-full py-3 text-sm text-gray-300">
+          사진 없이 시작
+        </button>
         <button
           @click="$emit('cancel')"
          class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-medium active:scale-95 transition-all"
@@ -91,6 +94,8 @@ import { ref, watch, defineProps, defineEmits, onMounted, onUnmounted } from 'vu
 import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
 
 const props = defineProps({
+  // 인증샷 없이도 진행할 수 있으면 '사진 없이 시작'을 보여준다
+  allowSkip: { type: Boolean, default: false },
   isVisible: {
     type: Boolean,
     default: false,
@@ -109,7 +114,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['capture', 'cancel'])
+const emit = defineEmits(['capture', 'cancel', 'skip'])
 
 const cameraInputRef = ref(null)
 const capturedImage = ref(null)

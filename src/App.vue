@@ -29,7 +29,7 @@
       <div
         v-if="showPendingReviewModal && pendingReviewGameId"
         class="fixed inset-0 bg-black/70 backdrop-blur-md z-[9999999] flex items-center justify-center p-4"
-        @click.self="() => {}"
+        @click.self="dismissPendingReview"
       >
         <Transition name="slide-up">
           <div
@@ -83,6 +83,9 @@
                class="w-full py-3 px-6 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-medium active:scale-95 transition-all shadow-lg"
               >
                 <i class="fas fa-arrow-right mr-2"></i>평가하러 가기
+              </button>
+              <button @click="dismissPendingReview" class="w-full py-3 text-sm text-gray-400">
+                나중에 할게요
               </button>
             </div>
           </div>
@@ -373,14 +376,36 @@ const formatStartTime = (startedAt) => {
   })
 }
 
+// '나중에 할게요': 이 경기는 다시 묻지 않는다 (평가는 결과 화면에서 언제든 할 수 있다)
+const dismissedReviewIds = (() => {
+  try {
+    return JSON.parse(localStorage.getItem('dismissedReviewIds') || '[]')
+  } catch {
+    return []
+  }
+})()
+const dismissPendingReview = () => {
+  if (pendingReviewGameId.value) {
+    dismissedReviewIds.push(pendingReviewGameId.value)
+    try {
+      localStorage.setItem('dismissedReviewIds', JSON.stringify(dismissedReviewIds.slice(-50)))
+    } catch {
+      // 저장 못 해도 이번에는 닫힌다
+    }
+  }
+  showPendingReviewModal.value = false
+}
+
 // pendingReviewGameIds 변경 감지
 watch(
   pendingReviewGameIds,
   (newIds) => {
     if (newIds && newIds.length > 0) {
       // 결과 페이지에 있지 않을 때만 모달 표시
-      if (!route.fullPath.includes('/result')) {
-        pendingReviewGameId.value = newIds[0]
+      // 결과 화면에 있거나 '나중에'를 누른 경기는 다시 띄우지 않는다
+      const next = newIds.find((id) => !dismissedReviewIds.includes(id))
+      if (next && !route.fullPath.includes('/result')) {
+        pendingReviewGameId.value = next
         showPendingReviewModal.value = true
       }
     } else {

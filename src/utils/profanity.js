@@ -1,0 +1,68 @@
+// 규칙 글에 쓰면 안 되는 말. 들어 있으면 그 단어를, 없으면 null
+export function containsProfanity(text) {
+  const bannedWords = [
+    // 영어 비속어
+    'fuck',
+    'shit',
+    'asshole',
+    'bitch',
+    'bastard',
+    'dick',
+    'fucking',
+    'fucker',
+    'cunt',
+    'nigger',
+    'slut',
+    'whore',
+    'sex',
+    'sexy',
+    'nazi',
+    'motherfucker',
+
+    // 한글 비속어 (변형 포함)
+    '씨발',
+    '시발',
+    '씨바',
+    'ㅆㅂ',
+    'ㅅㅂ',
+    'ㅂㅅ',
+    '병신',
+    '새끼',
+    '좆',
+    '애미',
+    '개새끼',
+    '지랄',
+    '염병',
+    '꺼져',
+    '죽어',
+    '멍청',
+    '저능',
+    '존나',
+    'ㅄ',
+    'ㄱㅐ',
+    'ㅈㄴ',
+    '개같',
+    '더럽',
+    '섹스',
+    '자지',
+    '보지',
+    '딸딸이',
+    '빨아',
+    '꼬추',
+    '보빨',
+    '조까',
+    '좇',
+    '애비',
+    '년놈',
+    '암캐',
+    '걸레',
+    '쓰레기',
+    '창녀',
+    '미친놈',
+    '미친년',
+  ]
+
+  const lower = text.toLowerCase()
+  const found = bannedWords.find((word) => lower.includes(word))
+  return found || null
+}

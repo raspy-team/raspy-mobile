@@ -340,6 +340,7 @@
 import { ref, defineProps, defineEmits, onMounted, watch, nextTick } from 'vue'
 import api from '../../api/api'
 import CustomInputNumber from './CustomInputNumber.vue'
+import { containsProfanity } from '../../utils/profanity'
 
 const props = defineProps(['step', 'form', 'isEditMode'])
 const emit = defineEmits(['input', 'validation'])
@@ -386,75 +387,6 @@ const localSetsToWin = ref(props.form.setsToWin ?? 1)
 const setsError = ref('')
 const localWinBy = ref(props.form.winBy ?? '')
 const winByError = ref('')
-
-// ====== 욕설 검사 함수 ======
-function containsProfanity(text) {
-  const bannedWords = [
-    // 영어 비속어
-    'fuck',
-    'shit',
-    'asshole',
-    'bitch',
-    'bastard',
-    'dick',
-    'fucking',
-    'fucker',
-    'cunt',
-    'nigger',
-    'slut',
-    'whore',
-    'sex',
-    'sexy',
-    'nazi',
-    'motherfucker',
-
-    // 한글 비속어 (변형 포함)
-    '씨발',
-    '시발',
-    '씨바',
-    'ㅆㅂ',
-    'ㅅㅂ',
-    'ㅂㅅ',
-    '병신',
-    '새끼',
-    '좆',
-    '애미',
-    '개새끼',
-    '지랄',
-    '염병',
-    '꺼져',
-    '죽어',
-    '멍청',
-    '저능',
-    '존나',
-    'ㅄ',
-    'ㄱㅐ',
-    'ㅈㄴ',
-    '개같',
-    '더럽',
-    '섹스',
-    '자지',
-    '보지',
-    '딸딸이',
-    '빨아',
-    '꼬추',
-    '보빨',
-    '조까',
-    '좇',
-    '애비',
-    '년놈',
-    '암캐',
-    '걸레',
-    '쓰레기',
-    '창녀',
-    '미친놈',
-    '미친년',
-  ]
-
-  const lower = text.toLowerCase()
-  const found = bannedWords.find((word) => lower.includes(word))
-  return found || null
-}
 
 // 커스텀 드롭다운
 onMounted(async () => {

@@ -95,6 +95,7 @@
 // - 친구 / 전체. 서버가 친구 경기를 앞에 주므로 '친구'는 받은 것에서 고른다
 // - ?gameId= 링크·알림으로 온 경기는 맨 위에 강조, ?userId= 는 그 사람의 경기만
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { haptic } from '../../utils/haptics'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import FeedCard from '../../components/feed/FeedCard.vue'
@@ -200,7 +201,7 @@ async function toggleLike(p) {
   const was = p.isLiked
   p.isLiked = !was
   p.likeCount = (p.likeCount || 0) + (was ? -1 : 1)
-  if (!was && navigator.vibrate) navigator.vibrate(10)
+  if (!was) haptic('tap')
   try {
     const { data } = await api.post(`/api/games/${p.id}/like`)
     p.isLiked = data.isLiked

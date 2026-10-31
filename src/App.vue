@@ -2,7 +2,12 @@
   <div class="h-full">
 
     <!-- 실제 라우터 뷰 -->
-    <RouterView class="h-full" :key="route.fullPath" />
+    <!-- 들어가면 오른쪽에서, 뒤로 가면 왼쪽에서 살짝. 하단 탭끼리는 움직이지 않는다 -->
+    <RouterView v-slot="{ Component }">
+      <Transition :name="pageTransition" mode="out-in">
+        <div :key="route.fullPath" class="h-full"><component :is="Component" class="h-full" /></div>
+      </Transition>
+    </RouterView>
 
     <!-- 하단 탭: 어느 화면에서든 큰 갈래로 돌아갈 수 있게 앱 전체에서 한 번만 그린다 -->
     <FooterNav v-if="footerTab !== null" :tab="footerTab" />
@@ -48,6 +53,7 @@ import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 
 const route = useRoute()
+const router = useRouter()
 
 // 하단 탭을 보여줄 화면과 그때 켜질 탭. null이면 탭을 숨긴다 (가입·경기 진행·채팅처럼 한 가지에 집중하는 화면)
 const footerTab = computed(() => {
@@ -62,6 +68,18 @@ const footerTab = computed(() => {
   if (p === '/dm') return ''
   return null
 })
+// 화면 전환 방향. 브라우저 기록의 위치(position)로 앞으로·뒤로를 가린다
+const TAB_ROOTS = ['/', '/feed', '/game', '/profile/0']
+const pageTransition = ref('page-none')
+let lastPosition = window.history.state?.position ?? 0
+router.afterEach((to, from) => {
+  const position = window.history.state?.position ?? lastPosition
+  const betweenTabs = TAB_ROOTS.includes(to.path) && TAB_ROOTS.includes(from.path)
+  if (!from.matched.length || betweenTabs || to.path === from.path) pageTransition.value = 'page-none'
+  else pageTransition.value = position < lastPosition ? 'page-back' : 'page-forward'
+  lastPosition = position
+})
+
 // 진행 중인 게임 폴링 (명시적으로 초기화)
 const activeGamePolling = useActiveGamePolling()
 const activeGame = activeGamePolling.activeGame || ref(null)
@@ -186,9 +204,6 @@ const showActiveBanner = computed(
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)
 }
-
-// router 필요
-const router = useRouter()
 
 function getChatUrlFromPath(path) {
   // /chat/xxx 또는 /games/xxx/play 등 다양한 방 라우트 패턴 지원

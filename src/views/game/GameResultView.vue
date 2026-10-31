@@ -251,6 +251,7 @@
 // 경기 결과: 누가 이겼나 → 사진 고르기 → 상대·규칙 평가 → 보내기. 평가는 경기에 뛴 사람에게만 보인다
 
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { haptic } from '../../utils/haptics'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { POST } from '../../api/client'
@@ -410,6 +411,7 @@ async function confirmResult() {
   isAnswering.value = 'confirm'
   try {
     await POST('/api/games/{id}/result/confirm', { path: { id: Number(gameId) } })
+    haptic('success')
     await load()
   } catch (e) {
     showToast(e.response?.data?.message || '확인하지 못했어요. 다시 시도해 주세요')

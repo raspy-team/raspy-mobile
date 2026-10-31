@@ -139,6 +139,7 @@ import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { record } from '../../utils/format'
 import { copyText } from '../../utils/clipboard'
+import { haptic } from '../../utils/haptics'
 
 const REPORT_REASONS = ['욕설·비방', '거짓 경기', '광고·스팸', '기타']
 
@@ -175,6 +176,7 @@ async function apply(game) {
   try {
     await api.post(`/api/games/${game.id}/apply`)
     game.isAppliedByMe = true
+    haptic('success')
     showToast('신청했어요. 주최자가 승인하면 알려드려요')
   } catch (e) {
     showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 시도해주세요')

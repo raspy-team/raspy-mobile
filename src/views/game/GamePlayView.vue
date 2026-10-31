@@ -135,6 +135,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
+import { haptic } from '../../utils/haptics'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { socket } from '../../websocket'
@@ -282,6 +283,7 @@ function manualFinishSet() {
 }
 
 function finishSet(who) {
+  haptic('success')
   isSetOver.value = true
   clearInterval(timerRef.value)
   if (who === 1) {
@@ -341,9 +343,7 @@ function updateElapsed() {
   ) {
     timeOverNotified.value = true
     // 진동
-    if (navigator.vibrate) {
-      navigator.vibrate(500)
-    }
+    haptic('alert')
     // 소리 (브라우저 기본 알림음 사용, 파일이 없으면 무시)
     try {
       const audio = new Audio('/notification.mp3')
@@ -572,6 +572,7 @@ onMounted(async () => {
 })
 
 function socket_sendScore(userIndex, scoreDelta) {
+  haptic('tap')
   socket.sendGameEvent(chatRoomId.value, {
     type: 'SCORE',
     userId: userIndex === 1 ? user1.value.id : user2.value.id,

@@ -1,95 +1,62 @@
 <template>
-  <div class="raspy-top">
-    <HeaderComp
-      :has-referer="true"
-      :show-bell="false"
-      :show-dm="false"
-      custom-class="bg-gray-900 border-0"
-    />
-    <div class="flex pt-20">
-      <!-- Left: Brand -->
-      <div class="hidden lg:flex w-1/2 bg-[#191919] items-center justify-center">
-        <div class="text-center space-y-8 px-8">
-          <span class="raspy">Match</span>
-          <p class="brand-desc">
-            즐기고, 경쟁하는 <span class="text-[var(--point-color)] font-medium">스포츠 플랫폼</span>
-          </p>
+  <div class="min-h-dvh bg-canvas">
+    <UiTopBar back="/init" />
+
+    <main class="max-w-md mx-auto px-4 pt-[72px] pb-12">
+      <h1 class="t-title mt-4">{{ isSignup ? '가입하기' : '로그인' }}</h1>
+      <p class="t-body text-fg-muted mt-2">
+        {{ isSignup ? '아이디와 비밀번호만 있으면 돼요.' : '다시 만나서 반가워요.' }}
+      </p>
+
+      <form class="mt-8 space-y-5" novalidate @submit.prevent="submit">
+        <UiInput
+          v-model="email"
+          label="아이디"
+          :maxlength="50"
+          :hint="isSignup ? '로그인할 때 써요' : ''"
+          :error="emailError"
+          autocomplete="username"
+        />
+        <div>
+          <UiInput
+            v-model="password"
+            label="비밀번호"
+            :type="showPassword ? 'text' : 'password'"
+            :maxlength="20"
+            :hint="isSignup ? '8~20자' : ''"
+            :error="passwordError"
+            :autocomplete="isSignup ? 'new-password' : 'current-password'"
+          />
+          <UiButton variant="ghost" size="sm" class="-ml-2 mt-1" @click="showPassword = !showPassword">
+            <i :class="showPassword ? 'far fa-eye-slash' : 'far fa-eye'" aria-hidden="true"></i>
+            {{ showPassword ? '비밀번호 숨기기' : '비밀번호 보기' }}
+          </UiButton>
         </div>
-      </div>
-      <!-- Right: Login -->
-      <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-gray-900 px-6 lg:px-24">
-        <div class="w-full max-w-md space-y-8">
-          <h2 class="text-2xl font-bold text-white text-left">{{ isSignup ? '가입하기' : '로그인' }}</h2>
-          <form @submit.prevent="isSignup ? handleSignup() : handleLogin()" class="space-y-4">
-            <!-- Email -->
-            <div class="relative">
-              <i
-                class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-lg"
-              ></i>
-              <input
-                v-model="email"
-                type="text"
-                placeholder="아이디"
-                class="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-800 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-800"
-                :class="{ 'border-red-500': emailError }"
-              />
-            </div>
-            <p v-if="emailError" class="text-red-500 text-xs ml-1">{{ emailError }}</p>
-            <!-- Password -->
-            <div class="relative">
-              <i
-                class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-lg"
-              ></i>
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                v-model="password"
-                placeholder="비밀번호 (8~20자)"
-                class="w-full pl-11 pr-12 py-3 rounded-lg border border-gray-800 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-800"
-                :class="{ 'border-red-500': passwordError }"
-              />
-              <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[var(--point-color)]"
-                tabindex="-1"
-                aria-label="비밀번호 보기"
-              >
-                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-              </button>
-            </div>
-            <p v-if="passwordError" class="text-red-500 text-xs ml-1">{{ passwordError }}</p>
-            <!-- Button -->
-            <button
-              type="submit"
-             class="w-full py-3 bg-[var(--point-color)] text-white rounded-lg font-medium hover:bg-opacity-90 transition text-base mt-2"
-            >
-              {{ isSignup ? '가입하고 시작하기' : '로그인' }}
-            </button>
-            <p v-if="submitError" class="text-red-500 text-center text-xs mt-2">
-              {{ submitError }}
-            </p>
-          </form>
-          <!-- 가입/로그인 전환 -->
-          <p class="text-center text-sm text-gray-500">
-            {{ isSignup ? '이미 계정이 있나요?' : '처음이세요?' }}
-            <button type="button" class="font-medium text-[var(--point-color)] ml-1" @click="toggleMode">
-              {{ isSignup ? '로그인' : '가입하기' }}
-            </button>
-          </p>
-        </div>
-      </div>
-    </div>
+
+        <p v-if="submitError" class="text-sm text-danger" role="alert">{{ submitError }}</p>
+
+        <UiButton type="submit" block size="lg" :loading="busy">{{ isSignup ? '가입하기' : '로그인' }}</UiButton>
+      </form>
+
+      <p class="mt-6 text-center t-caption">
+        {{ isSignup ? '이미 계정이 있나요?' : '처음이신가요?' }}
+        <UiButton variant="ghost" size="sm" @click="toggleMode">{{ isSignup ? '로그인' : '가입하기' }}</UiButton>
+      </p>
+    </main>
   </div>
 </template>
 
 <script setup>
+// 아이디·비밀번호 가입/로그인. 약관·닉네임은 다음 화면(/welcome)에서 받는다
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import HeaderComp from '../../components/HeaderComp.vue'
+import { UiButton, UiInput, UiTopBar } from '../../components/ui'
+import { takeReturnTo } from '../../utils/authRedirect'
+import { registerFcmToken } from '../../utils/nativeBridge'
 
-const pointColor = '#ff6f1f'
-document.documentElement.style.setProperty('--point-color', pointColor)
+const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
@@ -97,100 +64,54 @@ const showPassword = ref(false)
 const emailError = ref('')
 const passwordError = ref('')
 const submitError = ref('')
-const router = useRouter()
-const route = useRoute()
+const busy = ref(false)
 const isSignup = ref(route.query.mode === 'signup')
 
-const toggleMode = () => {
+function toggleMode() {
   isSignup.value = !isSignup.value
   emailError.value = ''
   passwordError.value = ''
   submitError.value = ''
+  router.replace({ query: isSignup.value ? { mode: 'signup' } : {} })
 }
 
-const validate = () => {
-  emailError.value = ''
-  passwordError.value = ''
-  let ok = true
-  if (!email.value.trim()) {
-    emailError.value = '아이디를 입력하세요'
-    ok = false
-  } else if (email.value.length > 50) {
-    emailError.value = '아이디는 50자 이하로 입력하세요'
-    ok = false
-  }
-  if (password.value.length < 8 || password.value.length > 20) {
-    passwordError.value = '비밀번호는 8~20자로 입력하세요'
-    ok = false
-  }
-  return ok
+function validate() {
+  emailError.value = email.value.trim() ? '' : '아이디를 적어주세요'
+  passwordError.value = password.value.length >= 8 && password.value.length <= 20 ? '' : '비밀번호는 8~20자로 적어주세요'
+  submitError.value = ''
+  return !emailError.value && !passwordError.value
 }
 
-// 가입 후 바로 로그인한다. 첫 로그인이라 프로필 설정 화면으로 이어진다
-const handleSignup = async () => {
+async function submit() {
   if (!validate()) return
+  busy.value = true
+  const id = email.value.trim()
   try {
-    await api.post('/api/auth/register', { email: email.value.trim(), password: password.value })
-  } catch (err) {
-    submitError.value =
-      err.response?.status === 409 ? '이미 사용 중인 아이디예요' : '가입에 실패했어요. 잠시 후 다시 시도해주세요'
-    return
-  }
-  email.value = email.value.trim()
-  await handleLogin()
-}
-
-const handleLogin = async () => {
-  if (!validate()) return
-  try {
-    const res = await api.post('/api/auth/login', { email: email.value, password: password.value })
-    localStorage.setItem('raspy_access_token2', res.data.token)
-    if (res.data.token == null || res.data.token == undefined) {
-      submitError.value = '로그인 실패: 아이디 또는 비밀번호를 확인하세요'
-    } else {
-      if (res.data.isInitialGroup) {
-        router.push('/oauth/callback?isNewUser=true')
-      } else {
-        router.push('/')
+    if (isSignup.value) {
+      try {
+        await api.post('/api/auth/register', { email: id, password: password.value })
+      } catch (err) {
+        if (err.response?.status === 409) emailError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어주세요'
+        else submitError.value = '가입하지 못했어요. 잠시 뒤 다시 시도해주세요'
+        return
       }
     }
-    const token = localStorage.getItem('raspy_access_token2')
-    if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
-      window.AndroidApp.registerFcmToken(token)
-    } else if (
-      window.webkit &&
-      window.webkit.messageHandlers &&
-      window.webkit.messageHandlers.iosBridge
-    ) {
-      window.webkit.messageHandlers.iosBridge.postMessage({
-        action: 'registerFcmToken',
-        jwt: token,
-      })
+    let token
+    try {
+      token = (await api.post('/api/auth/login', { email: id, password: password.value })).data?.token
+    } catch {
+      token = null
     }
-  } catch {
-    submitError.value = '로그인 실패: 아이디 또는 비밀번호를 확인하세요'
+    if (!token) {
+      submitError.value = '아이디나 비밀번호가 맞지 않아요'
+      return
+    }
+    localStorage.setItem('raspy_access_token2', token)
+    registerFcmToken(token)
+    // 약관·첫 설정이 남았으면 라우터 가드가 /welcome으로 보낸다
+    router.replace(takeReturnTo() || '/')
+  } finally {
+    busy.value = false
   }
 }
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600&display=swap');
-
-.raspy {
-  font-family: 'Kanit', sans-serif;
-  font-weight: 700;
-  font-size: 4rem;
-  letter-spacing: 0.05em;
-  color: var(--point-color);
-  display: block;
-}
-.brand-desc {
-  color: #fff;
-  font-family: 'Kanit', sans-serif;
-  font-size: 1.18rem;
-  letter-spacing: 0.01em;
-}
-.brand-desc .font-bold {
-  font-weight: 700;
-}
-</style>

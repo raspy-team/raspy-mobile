@@ -1,3 +1,4 @@
+import { rememberReturnTo } from '../utils/authRedirect'
 import axios from 'axios'
 import { API_BASE_URL } from '@/config/server'
 
@@ -65,8 +66,9 @@ api.interceptors.response.use(
         return Promise.reject(error)
     }
 
-    // 그 외 401은 기존대로 처리
+    // 그 외 401은 시작 화면으로. 보던 주소는 기억해 두고 로그인 뒤 돌려보낸다
     localStorage.removeItem('raspy_access_token2')
+    rememberReturnTo(routerInstance?.currentRoute.value.fullPath || window.location.pathname + window.location.search)
     if (routerInstance) {
       routerInstance.push('/init')
     } else {

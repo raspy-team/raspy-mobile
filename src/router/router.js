@@ -21,6 +21,8 @@ const MyRules = () => import('../views/rule/MyRulesView.vue')
 const RuleEdit = () => import('../views/rule/RuleEditView.vue')
 const DmRoomList = () => import('../views/DmRoomList.vue')
 const OauthCallback = () => import('../views/OauthCallBack.vue')
+const Onboarding = () => import('../views/auth/OnboardingView.vue')
+import { installOnboardingGuard } from './onboardingGuard'
 
 const GroupUserLogin = () => import('../views/auth/LoginView.vue')
 const GroupUserRegister = () => import('../views/admin/GroupUserRegister.vue')
@@ -51,6 +53,8 @@ const routes = [
     path: '/oauth/callback',
     component: OauthCallback
   },
+  // 약관 동의 + 닉네임·지역 (가입 직후, 또는 설정을 끝내지 않고 들어온 사람)
+  { path: '/welcome', component: Onboarding },
   {
     path: '/set-profile',
     component: SettingProfile
@@ -128,5 +132,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+installOnboardingGuard(router)
 
 export default router

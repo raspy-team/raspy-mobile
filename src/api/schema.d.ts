@@ -680,6 +680,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/terms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 약관 동의 기록
+         * @description 이용약관·개인정보처리방침 동의 시각을 남긴다. 이미 동의했으면 그대로 둔다
+         */
+        post: operations["agreeToTerms"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/register": {
         parameters: {
             query?: never;
@@ -729,6 +749,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * 첫 설정 완료
+         * @description 아이디·닉네임을 정하고 설정을 마친 것으로 기록한다. 아이디가 겹치면 409
+         */
         post: operations["completeOauth"];
         delete?: never;
         options?: never;
@@ -1792,6 +1816,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 첫 설정 상태
+         * @description 약관 동의와 첫 설정(닉네임·아이디)을 마쳤는지. 앱은 둘 다 끝나야 홈으로 보낸다
+         */
+        get: operations["onboarding"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/current-user-id": {
         parameters: {
             query?: never;
@@ -2614,6 +2658,10 @@ export interface components {
             /** Format: date-time */
             registeredAt: string;
             isBot: boolean;
+            /** Format: date-time */
+            termsAgreedAt?: string;
+            /** Format: date-time */
+            onboardedAt?: string;
             bot?: boolean;
         };
         UserProfileEntity: {
@@ -3035,6 +3083,12 @@ export interface components {
             lastMessageTimestamp?: string;
         };
         BodyBuilder: Record<string, never>;
+        OnboardingStatus: {
+            termsAgreed: boolean;
+            onboarded: boolean;
+            username: string;
+            nickname: string;
+        };
         AdminUserResponse: {
             /** Format: int64 */
             id: number;
@@ -3967,6 +4021,24 @@ export interface operations {
             path: {
                 targetId: number;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    agreeToTerms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -5387,6 +5459,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BodyBuilder"];
+                };
+            };
+        };
+    };
+    onboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OnboardingStatus"];
                 };
             };
         };

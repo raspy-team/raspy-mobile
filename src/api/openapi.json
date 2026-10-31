@@ -1260,6 +1260,21 @@
         }
       }
     },
+    "/api/auth/terms": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "summary": "약관 동의 기록",
+        "description": "이용약관·개인정보처리방침 동의 시각을 남긴다. 이미 동의했으면 그대로 둔다",
+        "operationId": "agreeToTerms",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/auth/register": {
       "post": {
         "tags": [
@@ -1378,6 +1393,8 @@
         "tags": [
           "auth-controller"
         ],
+        "summary": "첫 설정 완료",
+        "description": "아이디·닉네임을 정하고 설정을 마친 것으로 기록한다. 아이디가 겹치면 409",
         "operationId": "completeOauth",
         "requestBody": {
           "content": {
@@ -3240,6 +3257,28 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/BodyBuilder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/onboarding": {
+      "get": {
+        "tags": [
+          "auth-controller"
+        ],
+        "summary": "첫 설정 상태",
+        "description": "약관 동의와 첫 설정(닉네임·아이디)을 마쳤는지. 앱은 둘 다 끝나야 홈으로 보낸다",
+        "operationId": "onboarding",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingStatus"
                 }
               }
             }
@@ -5694,6 +5733,14 @@
           "isBot": {
             "type": "boolean"
           },
+          "termsAgreedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "onboardedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "bot": {
             "type": "boolean",
             "writeOnly": true
@@ -7069,6 +7116,29 @@
       },
       "BodyBuilder": {
         "type": "object"
+      },
+      "OnboardingStatus": {
+        "required": [
+          "nickname",
+          "onboarded",
+          "termsAgreed",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "termsAgreed": {
+            "type": "boolean"
+          },
+          "onboarded": {
+            "type": "boolean"
+          },
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          }
+        }
       },
       "AdminUserResponse": {
         "required": [

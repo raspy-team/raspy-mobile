@@ -95,10 +95,10 @@ const checkAndSendDailyFirst = async () => {
 
 onMounted(() => {
 
+  // 2025-11-05 이전 토큰을 한 번 지운다. 화면은 옮기지 않는다 (처음 온 사람이 연 링크를 지키려고)
   if (localStorage.getItem('251105match') != 1) {
     localStorage.removeItem('raspy_access_token2')
     localStorage.setItem('251105match', 1)
-    router.push('/')
   }
 
   try {

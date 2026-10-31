@@ -4,6 +4,18 @@
   <main class="px-4 pt-[72px] pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
+    <!-- 첫 설정을 막 마친 사람에게 한 번 -->
+    <UiCard v-if="route.query.welcome" class="mb-4 flex items-start gap-3">
+      <span class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <i class="fas fa-hand"></i>
+      </span>
+      <div class="flex-1 min-w-0">
+        <p class="t-heading">준비됐어요!</p>
+        <p class="t-caption mt-0.5">아래 열린 경기에 신청하거나, 원하는 규칙으로 직접 경기를 열어보세요.</p>
+      </div>
+      <UiIconButton icon="fas fa-xmark" label="닫기" class="-mt-2 -mr-2" @click="router.replace({ query: {} })" />
+    </UiCard>
+
     <!-- 이 화면의 주 행동은 하나: 경기 만들기 -->
     <UiButton block size="lg" icon="fas fa-plus" to="/create-game">경기 만들기</UiButton>
     <UiButton variant="ghost" size="sm" to="/rules" class="mt-2 -ml-2">
@@ -117,7 +129,7 @@ import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import Comment from '../GameCommentView.vue'
 import {
-  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem,
+  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
   UiPullIndicator, UiSection, UiSheet, UiSkeleton,
 } from '../../components/ui'
 import { useToast } from '../../composable/useToast'

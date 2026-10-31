@@ -1,14 +1,14 @@
 <template>
   <div class="relative w-full">
-    <button class="w-full bg-white border px-4 py-2 rounded-full text-left flex items-center justify-between"
+    <button class="w-full bg-gray-900 border px-4 py-2 rounded-full text-left flex items-center justify-between"
       @click="open = !open" :disabled="disabled">
       <span>{{ selectedLabel || placeholder }}</span>
       <i class="fas fa-chevron-down text-xs ml-2"></i>
     </button>
-    <ul v-if="open" class="absolute z-10 w-full bg-white border mt-1 rounded shadow">
+    <ul v-if="open" class="absolute z-10 w-full bg-gray-900 border mt-1 rounded shadow">
       <li v-for="opt in options" :key="opt.value"
           @click="select(opt.value)"
-          class="px-4 py-2 hover:bg-orange-50 cursor-pointer">
+          class="px-4 py-2 hover:bg-orange-500/10 cursor-pointer">
         {{ opt.label }}
       </li>
     </ul>

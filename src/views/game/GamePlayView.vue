@@ -12,7 +12,7 @@
       v-if="socketStatus === 'connecting'"
       class="fixed inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-[100]"
     >
-      <div class="text-white text-2xl font-bold animate-pulse">
+      <div class="text-white text-2xl font-bold">
         <i class="fas fa-sync-alt fa-spin mr-3"></i>
         재연결 중...
       </div>
@@ -21,20 +21,7 @@
 
     <div class="flex items-center justify-between mb-2">
       <button @click="goBack" class="text-white text-lg">
-        <svg
-          width="8"
-          height="12"
-          viewBox="0 0 8 12"
-          fill="white"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M7.08934 0.410704C7.41477 0.736141 7.41477 1.26378 7.08934 1.58922L2.67859 5.99996L7.08934 10.4107C7.41477 10.7361 7.41477 11.2638 7.08934 11.5892C6.7639 11.9147 6.23626 11.9147 5.91083 11.5892L0.910826 6.58922C0.585389 6.26378 0.585389 5.73614 0.910826 5.4107L5.91083 0.410704C6.23626 0.0852667 6.7639 0.0852667 7.08934 0.410704Z"
-            fill="black"
-          />
-        </svg>
+        <i class="fas fa-chevron-left text-xl"></i>
       </button>
     </div>
 
@@ -44,7 +31,7 @@
         <!-- Info Cards: 세트 승점, 세트 수, 세트 시간 -->
         <div class="flex w-full" style="gap: clamp(0.25rem, 0.5vw, 0.5rem)">
           <div
-            class="flex-1 flex flex-col justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-xl text-center shadow-lg border border-gray-600"
+            class="flex-1 flex flex-col justify-center bg-gray-700 text-white rounded-xl text-center shadow-lg border border-gray-600"
             style="
               min-height: 60px;
               padding: clamp(0.5rem, 1.5vh, 0.625rem) clamp(0.375rem, 1.5vw, 0.5rem);
@@ -55,17 +42,7 @@
                 class="flex items-center justify-center font-semibold"
                 style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)"
               >
-                <svg
-                  style="width: clamp(13px, 3.5vw, 15px); height: clamp(13px, 3.5vw, 15px)"
-                  viewBox="0 0 100 100"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M64.5834 62.5002C63.4028 62.5002 62.4132 62.1009 61.6146 61.3022C60.816 60.5036 60.4167 59.514 60.4167 58.3335V41.6668C60.4167 40.4863 60.816 39.4967 61.6146 38.6981C62.4132 37.8995 63.4028 37.5002 64.5834 37.5002H75C76.1806 37.5002 77.1702 37.8995 77.9688 38.6981C78.7674 39.4967 79.1667 40.4863 79.1667 41.6668V58.3335C79.1667 59.514 78.7674 60.5036 77.9688 61.3022C77.1702 62.1009 76.1806 62.5002 75 62.5002H64.5834ZM66.6667 56.2502H72.9167V43.7502H66.6667V56.2502ZM20.8334 62.5002V52.0835C20.8334 50.9029 21.2327 49.9134 22.0313 49.1147C22.8299 48.3161 23.8195 47.9168 25 47.9168H33.3334V43.7502H20.8334V37.5002H35.4167C36.5973 37.5002 37.5868 37.8995 38.3855 38.6981C39.1841 39.4967 39.5834 40.4863 39.5834 41.6668V47.9168C39.5834 49.0974 39.1841 50.087 38.3855 50.8856C37.5868 51.6842 36.5973 52.0835 35.4167 52.0835H27.0834V56.2502H39.5834V62.5002H20.8334ZM46.875 45.8335V39.5835H53.125V45.8335H46.875ZM46.875 60.4168V54.1668H53.125V60.4168H46.875ZM16.6667 83.3335C14.375 83.3335 12.4132 82.5175 10.7813 80.8856C9.14935 79.2536 8.33337 77.2918 8.33337 75.0002V25.0002C8.33337 22.7085 9.14935 20.7467 10.7813 19.1147C12.4132 17.4828 14.375 16.6668 16.6667 16.6668H29.1667V8.3335H37.5V16.6668H62.5V8.3335H70.8334V16.6668H83.3334C85.625 16.6668 87.5869 17.4828 89.2188 19.1147C90.8507 20.7467 91.6667 22.7085 91.6667 25.0002V75.0002C91.6667 77.2918 90.8507 79.2536 89.2188 80.8856C87.5869 82.5175 85.625 83.3335 83.3334 83.3335H16.6667ZM16.6667 75.0002H46.875V68.7502H53.125V75.0002H83.3334V25.0002H53.125V31.2502H46.875V25.0002H16.6667V75.0002Z"
-                    fill="white"
-                  />
-                </svg>
+                <i class="fas fa-bullseye"></i>
                 <span class="ml-1 text-gray-100 font-semibold">세트 승점</span>
               </div>
               <div
@@ -88,17 +65,7 @@
                 class="flex items-center justify-center font-semibold"
                 style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)"
               >
-                <svg
-                  style="width: clamp(13px, 3.5vw, 15px); height: clamp(13px, 3.5vw, 15px)"
-                  viewBox="0 0 100 100"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M29.1667 87.5V79.1667H45.8333V66.25C42.4306 65.4861 39.3924 64.0451 36.7188 61.9271C34.0451 59.809 32.0833 57.1528 30.8333 53.9583C25.625 53.3333 21.2674 51.059 17.7604 47.1354C14.2535 43.2118 12.5 38.6111 12.5 33.3333V29.1667C12.5 26.875 13.316 24.9132 14.9479 23.2812C16.5799 21.6493 18.5417 20.8333 20.8333 20.8333H29.1667V12.5H70.8333V20.8333H79.1667C81.4583 20.8333 83.4201 21.6493 85.0521 23.2812C86.684 24.9132 87.5 26.875 87.5 29.1667V33.3333C87.5 38.6111 85.7465 43.2118 82.2396 47.1354C78.7326 51.059 74.375 53.3333 69.1667 53.9583C67.9167 57.1528 65.9549 59.809 63.2812 61.9271C60.6076 64.0451 57.5694 65.4861 54.1667 66.25V79.1667H70.8333V87.5H29.1667ZM29.1667 45V29.1667H20.8333V33.3333C20.8333 35.9722 21.5972 38.3507 23.125 40.4688C24.6528 42.5868 26.6667 44.0972 29.1667 45ZM50 58.3333C53.4722 58.3333 56.4236 57.1181 58.8542 54.6875C61.2847 52.2569 62.5 49.3056 62.5 45.8333V20.8333H37.5V45.8333C37.5 49.3056 38.7153 52.2569 41.1458 54.6875C43.5764 57.1181 46.5278 58.3333 50 58.3333ZM70.8333 45C73.3333 44.0972 75.3472 42.5868 76.875 40.4688C78.4028 38.3507 79.1667 35.9722 79.1667 33.3333V29.1667H70.8333V45Z"
-                    fill="white"
-                  />
-                </svg>
+                <i class="fas fa-layer-group"></i>
                 <span class="ml-1 text-gray-100 font-semibold">세트 수</span>
               </div>
               <div
@@ -121,17 +88,7 @@
                 class="flex items-center justify-center font-semibold"
                 style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)"
               >
-                <svg
-                  style="width: clamp(13px, 3.5vw, 15px); height: clamp(13px, 3.5vw, 15px)"
-                  viewBox="0 0 100 100"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M50 45.8335C54.5834 45.8335 58.507 44.2016 61.7709 40.9377C65.0347 37.6738 66.6667 33.7502 66.6667 29.1668V16.6668H33.3334V29.1668C33.3334 33.7502 34.9653 37.6738 38.2292 40.9377C41.4931 44.2016 45.4167 45.8335 50 45.8335ZM16.6667 91.6668V83.3335H25V70.8335C25 66.5974 25.9896 62.6217 27.9688 58.9064C29.9479 55.1911 32.7084 52.2224 36.25 50.0002C32.7084 47.7779 29.9479 44.8092 27.9688 41.0939C25.9896 37.3786 25 33.4029 25 29.1668V16.6668H16.6667V8.3335H83.3334V16.6668H75V29.1668C75 33.4029 74.0104 37.3786 72.0313 41.0939C70.0521 44.8092 67.2917 47.7779 63.75 50.0002C67.2917 52.2224 70.0521 55.1911 72.0313 58.9064C74.0104 62.6217 75 66.5974 75 70.8335V83.3335H83.3334V91.6668H16.6667Z"
-                    fill="white"
-                  />
-                </svg>
+                <i class="far fa-clock"></i>
                 <span class="ml-1 text-gray-100 font-semibold">세트 시간</span>
               </div>
               <div
@@ -362,11 +319,11 @@
             @click="triggerPhotoCapture"
             :disabled="isCountingDown"
             :class="[
-              'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition',
-              isCountingDown
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
-                : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:scale-110',
-            ]"
+'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition',
+ isCountingDown
+ ?'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+ :' bg-orange-500 text-white hover:scale-110',
+ ]"
             title="사진 촬영"
           >
             <i class="fas fa-camera text-xl"></i>
@@ -375,11 +332,11 @@
             @click="triggerVideoCapture"
             :disabled="isCountingDown"
             :class="[
-              'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition',
-              isCountingDown
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
-                : 'bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:scale-110',
-            ]"
+'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition',
+ isCountingDown
+ ?'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
+ :' bg-blue-500 text-white hover:scale-110',
+ ]"
             title="동영상 촬영"
           >
             <i class="fas fa-video text-xl"></i>
@@ -389,8 +346,8 @@
 
       <div class="w-full grid grid-cols-2 mb-10" style="gap: clamp(0.375rem, 1vw, 0.5rem)">
         <button
-          @click="openConfirm('정말로 게임을 재시작 하겠습니까?', socket_resetGame)"
-          class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 transition-all duration-200"
+          @click="openConfirm('정말로 경기를 재시작 하겠습니까?', socket_resetGame)"
+          class=" bg-blue-500 text-white rounded-xl font-bold shadow-lg hover:bg-blue-600 hover:scale-105 transition-all duration-200"
           style="
             padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem);
             font-size: clamp(0.875rem, 2.5vh, 1.125rem);
@@ -399,8 +356,8 @@
           <i class="fas fa-redo mr-2"></i>처음부터
         </button>
         <button
-          @click="openConfirm('정말로 게임을 즉시 종료합니까?', socket_finishGame)"
-          class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl font-bold shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 transition-all duration-200"
+          @click="openConfirm('정말로 경기를 즉시 종료합니까?', socket_finishGame)"
+          class=" bg-red-500 text-white rounded-xl font-bold shadow-lg hover:bg-red-600 hover:scale-105 transition-all duration-200"
           style="
             padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem);
             font-size: clamp(0.875rem, 2.5vh, 1.125rem);
@@ -412,13 +369,13 @@
       <!-- Google AdMob Style Banner -->
       <!-- <div class="w-full flex justify-center mt-2 sm:mt-4 fixed bottom-0">
         <div
-          class="w-full max-w-xs sm:max-w-md h-8 bg-white border border-gray-300 rounded-lg flex items-center shadow-sm mx-1 sm:mx-2 relative"
+          class="w-full max-w-xs sm:max-w-md h-8 bg-gray-900 border border-gray-700 rounded-lg flex items-center shadow-sm mx-1 sm:mx-2 relative"
           style="box-sizing: border-box;"
         >
-          <div class="absolute top-0 left-0 bg-gray-100 text-gray-500 text-[10px] px-1 py-0.5 rounded-tl-lg rounded-br-sm font-medium">
+          <div class="absolute top-0 left-0 bg-gray-800 text-gray-500 text-xs px-1 py-0.5 rounded-tl-lg rounded-br-sm font-medium">
             광고
           </div>
-          <div class="flex-1 flex items-center justify-center text-gray-700 text-xs font-medium">
+          <div class="flex-1 flex items-center justify-center text-gray-200 text-xs font-medium">
             클래시오브클랜 <span class="text-orange-500 font-semibold">회원</span> 모집중!
           </div>
         </div>
@@ -434,7 +391,7 @@
         <div class="text-orange-400 text-xl sm:text-2xl font-semibold mb-4">
           세트 {{ currentSet }} 시작까지
         </div>
-        <div class="text-orange-500 text-[25vw] sm:text-[30vw] font-extrabold animate-countdown">
+        <div class="text-orange-500 text-[25vw] sm:text-[30vw] font-bold animate-countdown">
           {{ countdown }}
         </div>
         <div class="text-gray-400 text-base sm:text-lg mt-4">준비하세요!</div>
@@ -446,11 +403,11 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
       <div
-        class="bg-gradient-to-b from-gray-700 to-gray-900 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600"
+        class=" bg-gray-700 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600"
       >
         <button
           @click="(startSet(), (showStartButton = false))"
-          class="bg-gradient-to-r from-blue-500 to-blue-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+          class=" bg-blue-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-blue-600 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
           1세트 시작
         </button>
@@ -462,11 +419,11 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
       <div
-        class="bg-gradient-to-b from-gray-700 to-gray-900 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600"
+        class=" bg-gray-700 rounded-2xl p-8 flex justify-center items-center shadow-2xl w-[90%] max-w-md border border-gray-600"
       >
         <button
           @click="socket_nextSet"
-          class="bg-gradient-to-r from-orange-500 to-orange-600 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+          class=" bg-orange-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-orange-600 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
           {{ currentSet }}세트 시작
         </button>
@@ -488,13 +445,13 @@
         <div class="flex justify-center gap-3 mt-4">
           <button
             @click="closeConfirm"
-            class="px-5 py-2 bg-gray-700 text-gray-100 rounded-full font-semibold text-sm"
+            class="px-5 py-2 bg-gray-700 text-gray-100 rounded-full font-medium text-sm"
           >
             취소
           </button>
           <button
             @click="confirmCallbackWrapper"
-            class="px-6 py-2 bg-orange-600 text-white rounded-full font-semibold text-sm shadow hover:bg-orange-400"
+            class="px-6 py-2 bg-orange-600 text-white rounded-full font-medium text-sm shadow hover:bg-orange-400"
           >
             확인
           </button>
@@ -538,7 +495,7 @@
           class="text-xs bg-gray-700 border border-gray-600 rounded-md px-2 py-1 shadow-sm flex items-center justify-between text-gray-100"
         >
           <div class="flex-1 truncate">
-            <span class="text-[11px] text-gray-400 mr-1">[{{ log.elapsed }}]</span>
+            <span class="text-xs text-gray-400 mr-1">[{{ log.elapsed }}]</span>
             {{ log.message }}
           </div>
         </div>
@@ -814,9 +771,9 @@ function addLog(log) {
   } else if (log.type === 'SET') {
     message = `${log.userSummary.nickname} 세트를 증가시킴`
   } else if (log.type === 'RESET') {
-    message = `${log.userSummary.nickname} 게임을 리셋함`
+    message = `${log.userSummary.nickname} 경기를 리셋함`
   } else if (log.type === 'FINISH') {
-    message = `게임이 종료되었습니다!`
+    message = `경기가 종료되었습니다!`
   } else {
     message = '알 수 없는 이벤트'
   }

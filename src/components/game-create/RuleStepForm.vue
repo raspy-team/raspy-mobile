@@ -14,15 +14,7 @@
           class="w-full flex justify-between items-center px-3 py-2 border rounded-lg bg-gray-800 border-gray-600 shadow-sm text-gray-200 focus:ring-2 focus:ring-orange-400 hover:bg-gray-700 transition"
         >
           <span class="truncate">{{ selectedMinorLabel || '참고할 스포츠 선택' }}</span>
-          <svg
-            class="w-4 h-4 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
+          <i class="fas fa-chevron-down text-sm text-gray-400"></i>
         </button>
         <div
           v-show="showDropdown"
@@ -199,15 +191,15 @@
       <div class="flex flex-col gap-8 md:flex-row md:gap-12 mt-6">
         <!-- 점수 -->
         <div class="flex-1">
-          <div class="text-sm font-semibold mb-2 text-gray-200">점수</div>
+          <div class="text-sm font-medium mb-2 text-gray-200">점수</div>
           <div class="flex gap-3">
             <button
               type="button"
               @click="setPointsUnlimited"
               :class="[
                 pointsUnlimited
-                  ? 'bg-orange-500 text-white font-bold'
-                  : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 font-semibold',
+                  ? 'bg-orange-500 text-white font-medium'
+                  : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 font-medium',
                 'rounded-full px-6 py-2 text-sm transition-all focus:outline-none',
               ]"
             >
@@ -218,8 +210,8 @@
               @click="setPointsCustom"
               :class="[
                 !pointsUnlimited
-                  ? 'bg-orange-500 text-white font-bold'
-                  : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 font-semibold',
+                  ? 'bg-orange-500 text-white font-medium'
+                  : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 font-medium',
                 'rounded-full px-6 py-2 text-sm transition-all focus:outline-none',
               ]"
             >
@@ -231,7 +223,7 @@
               v-model="localPointsToWin"
               :min="1"
               placeholder="점수 입력"
-              class="w-32 border-orange-200 rounded-xl focus:border-orange-500 focus:ring-orange-500"
+              class="w-32 border-orange-500/30 rounded-xl focus:border-orange-500 focus:ring-orange-500"
               @change="validateStep12"
             />
             <div class="text-gray-400 text-xs mt-4 ml-1">
@@ -241,15 +233,15 @@
         </div>
         <!-- 제한시간 -->
         <div class="flex-1">
-          <div class="text-sm font-semibold mb-2 text-gray-200">제한 시간</div>
+          <div class="text-sm font-medium mb-2 text-gray-200">제한 시간</div>
           <div class="flex gap-3">
             <button
               type="button"
               @click="setTimeUnlimited"
               :class="[
                 timeUnlimited
-                  ? 'bg-orange-500 text-white font-bold'
-                  : 'bg-orange-50 text-orange-500 border border-orange-200 hover:bg-orange-100 font-semibold',
+                  ? 'bg-orange-500 text-white font-medium'
+                  : 'bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-500/15 font-medium',
                 'rounded-full px-6 py-2 text-sm transition-all focus:outline-none',
               ]"
             >
@@ -260,8 +252,8 @@
               @click="setTimeCustom"
               :class="[
                 !timeUnlimited
-                  ? 'bg-orange-500 text-white font-bold'
-                  : 'bg-orange-50 text-orange-500 border border-orange-200 hover:bg-orange-100 font-semibold',
+                  ? 'bg-orange-500 text-white font-medium'
+                  : 'bg-orange-500/10 text-orange-500 border border-orange-500/30 hover:bg-orange-500/15 font-medium',
                 'rounded-full px-6 py-2 text-sm transition-all focus:outline-none',
               ]"
             >
@@ -275,10 +267,10 @@
                 :min="0"
                 :max="999"
                 placeholder="분"
-                class="w-full border-orange-200 rounded-xl focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
+                class="w-full border-orange-500/30 rounded-xl focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
                 @change="validateStep12"
               />
-              <span class="text-xs font-semibold text-gray-500">분</span>
+              <span class="text-xs font-medium text-gray-500">분</span>
             </div>
             <div class="flex items-center space-x-1">
               <CustomInputNumber
@@ -286,10 +278,10 @@
                 :min="0"
                 :max="59"
                 placeholder="초"
-                class="w-full border-orange-200 rounded-xl focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
+                class="w-full border-orange-500/30 rounded-xl focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
                 @change="validateStep12"
               />
-              <span class="text-xs font-semibold text-gray-500">초</span>
+              <span class="text-xs font-medium text-gray-500">초</span>
             </div>
           </div>
         </div>
@@ -333,15 +325,11 @@
         </select>
         <div class="flex items-center justify-between mt-3">
           <div class="text-sm text-gray-400">점수/시간 조합에 따라 선택 불가 옵션이 있습니다.</div>
-          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
+          <i class="fas fa-chevron-down text-gray-400"></i>
         </div>
       </div>
       <div v-if="winByError" class="text-sm text-red-400 mt-2 flex items-center gap-2">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-        </svg>
+        <i class="fas fa-circle-exclamation"></i>
         {{ winByError }}
       </div>
     </div>

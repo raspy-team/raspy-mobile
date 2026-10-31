@@ -1,10 +1,10 @@
 <template>
-  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="flex flex-col items-center justify-between  bg-gray-50 p-6 text-center">
-    <i class="fas fa-arrow-left self-start text-xl text-gray-600 mb-4" @click="goBack"></i>
+  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="flex flex-col items-center justify-between  bg-gray-800 p-6 text-center">
+    <i class="fas fa-arrow-left self-start text-xl text-gray-400 mb-4" @click="goBack"></i>
 
 
     <div>
-    <h1 class=" text-4xl font-extrabold text-gray-800 mb-2">Oops!<br> <span class="text-2xl font-extrabold">페이지를 찾을 수 없어요</span></h1>
+    <h1 class=" text-4xl font-bold text-gray-100 mb-2">Oops!<br> <span class="text-2xl font-bold">페이지를 찾을 수 없어요</span></h1>
     <p class="mt-12 text-gray-500 mb-6 px-4">
       죄송해요, 요청하신 페이지가 없거나 이동되었어요.
       홈으로 다시 가볼까요?

@@ -5,7 +5,7 @@
     </div>
   </div>
 
-  <div class="flex flex-col justify-between items-center bg-white px-6">
+  <div class="flex flex-col justify-between items-center bg-gray-900 px-6">
     <div></div>
     <div class="text-center flex-2 mt-20 fixed left-0 w-full text-center top-[30dvh]">
       <span class="raspy mb-4">Match</span>
@@ -67,7 +67,7 @@
         </button>
         <button class="w-full text-center text-sm text-gray-500 py-2" @click="loginGroup">이미 계정이 있어요</button>
 
-        <div class="mt-5 text-xs text-gray-600 text-left">
+        <div class="mt-5 text-xs text-gray-400 text-left">
           본 서비스 이용 시
           <span class="text-blue-600 underline cursor-pointer" @click="showTermsModal = true">
             개인정보 이용약관
@@ -84,7 +84,7 @@
             class="fixed text-left inset-0 bg-black/30 flex items-center justify-center z-50"
             @click.self="showTermsModal = false"
           >
-            <div class="bg-white rounded-2xl shadow-2xl w-[90vw] max-w-md p-6">
+            <div class="bg-gray-900 rounded-2xl shadow-2xl w-[90vw] max-w-md p-6">
               <div class="font-bold mb-2">이용약관</div>
               <div class="max-h-64 overflow-auto text-sm space-y-2">
                 <b>Match 서비스 이용약관</b>
@@ -181,7 +181,7 @@
             class="fixed text-left inset-0 bg-black/30 flex items-center justify-center z-50"
             @click.self="showPrivacyModal = false"
           >
-            <div class="bg-white rounded-2xl shadow-2xl w-[90vw] max-w-md p-6">
+            <div class="bg-gray-900 rounded-2xl shadow-2xl w-[90vw] max-w-md p-6">
               <div class="font-bold mb-2">개인정보처리방침</div>
               <div class="max-h-64 overflow-auto text-sm space-y-2">
                 <b>Match 개인정보처리방침</b>
@@ -339,7 +339,7 @@
 .tagline {
   font-family: 'Kanit', sans-serif;
   font-size: 1.15rem;
-  color: #333;
+  color: #f5f5f5;
   text-align: center;
 }
 
@@ -377,13 +377,13 @@
 }
 
 .google {
-  background: #fff;
-  border: 1px solid #dfdfdf;
-  color: #444;
+  background: #171717;
+  border: 1px solid #262626;
+  color: #e5e5e5;
 }
 
 .google:hover {
-  background: #f7f7f7;
+  background: #262626;
 }
 
 .kakao {
@@ -419,7 +419,7 @@
   background: rgba(255, 255, 255, 0.7);
   padding: 24px 36px;
   border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;

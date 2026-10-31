@@ -311,27 +311,14 @@ const closeErrorModal = () => {
     <!-- 기본 네비게이션 헤더 -->
     <div class="fixed left-0 w-full h-[83px] z-30" :style="{ top: `${headerTop}px` }">
       <div
-        class="h-full flex items-center justify-between px-4 bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 backdrop-blur-xl shadow-lg border-b border-white/10"
+        class="h-full flex items-center justify-between px-4 bg-gray-900 backdrop-blur-xl shadow-lg border-b border-white/10"
       >
         <div class="flex items-center gap-3">
           <button
             @click="goBack()"
             class="text-gray-400 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-all duration-200 active:scale-95"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2.5"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <i class="fas fa-chevron-left text-xl w-6 h-6 flex items-center justify-center"></i>
           </button>
           <div class="flex items-center gap-3 cursor-pointer" @click="goToProfile">
             <div class="relative">
@@ -360,23 +347,23 @@ const closeErrorModal = () => {
     >
       <div class="mx-3 my-2">
         <div
-          class="bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
+          class=" bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
         >
           <!-- 상태 표시 헤더 바 -->
           <div
             class="h-1.5 w-full"
             :class="{
-              'bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500':
-                headerInfo.statusColor === 'green',
-              'bg-gradient-to-r from-orange-400 via-orange-500 to-red-500':
-                headerInfo.statusColor === 'orange',
-              'bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700':
-                headerInfo.statusColor === 'gray',
-              'bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-600':
-                headerInfo.statusColor === 'blue',
-              'bg-gradient-to-r from-red-400 via-red-500 to-rose-600':
-                headerInfo.statusColor === 'red',
-            }"
+' bg-green-400':
+ headerInfo.statusColor ==='green',
+' bg-orange-400':
+ headerInfo.statusColor ==='orange',
+' bg-gray-500':
+ headerInfo.statusColor ==='gray',
+' bg-blue-400':
+ headerInfo.statusColor ==='blue',
+' bg-red-400':
+ headerInfo.statusColor ==='red',
+ }"
           ></div>
 
           <div class="p-4">
@@ -391,7 +378,7 @@ const closeErrorModal = () => {
               >
                 <div class="relative">
                   <div
-                    class="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl blur-md"
+                    class="absolute inset-0 bg-orange-500/20 rounded-xl blur-md"
                   ></div>
                   <img
                     class="relative w-14 h-14 rounded-xl object-cover shadow-xl border-2 border-white/10"
@@ -402,17 +389,17 @@ const closeErrorModal = () => {
                   <div
                     class="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-gray-900 shadow-lg animate-pulse"
                     :class="{
-                      'bg-gradient-to-br from-green-400 to-emerald-500':
-                        headerInfo.statusColor === 'green',
-                      'bg-gradient-to-br from-orange-400 to-red-500':
-                        headerInfo.statusColor === 'orange',
-                      'bg-gradient-to-br from-gray-400 to-gray-500':
-                        headerInfo.statusColor === 'gray',
-                      'bg-gradient-to-br from-blue-400 to-indigo-500':
-                        headerInfo.statusColor === 'blue',
-                      'bg-gradient-to-br from-red-400 to-rose-500':
-                        headerInfo.statusColor === 'red',
-                    }"
+' bg-green-400':
+ headerInfo.statusColor ==='green',
+' bg-orange-400':
+ headerInfo.statusColor ==='orange',
+' bg-gray-400':
+ headerInfo.statusColor ==='gray',
+' bg-blue-400':
+ headerInfo.statusColor ==='blue',
+' bg-red-400':
+ headerInfo.statusColor ==='red',
+ }"
                   ></div>
                 </div>
               </div>
@@ -431,9 +418,9 @@ const closeErrorModal = () => {
                       <span class="text-xs text-gray-400 font-medium">{{
                         challengeStatus?.majorCategory || '스포츠'
                       }}</span>
-                      <i class="fas fa-chevron-right text-gray-600 text-[10px]"></i>
+                      <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
                       <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md"
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-500 text-white shadow-md"
                       >
                         {{ challengeStatus?.minorCategory || '경기' }}
                       </span>
@@ -457,7 +444,7 @@ const closeErrorModal = () => {
                               headerInfo.statusColor === 'red',
                           }"
                         ></div>
-                        <span class="text-sm font-bold text-white">{{ headerInfo.title }}</span>
+                        <span class="text-sm font-medium text-white">{{ headerInfo.title }}</span>
                       </div>
                       <p class="text-xs text-gray-400 leading-relaxed pl-4">
                         {{ headerInfo.description }}
@@ -475,14 +462,14 @@ const closeErrorModal = () => {
                 <div class="flex gap-3">
                   <button
                     @click.stop="handleReject"
-                    class="flex-1 py-3 px-4 bg-gradient-to-br from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 text-white text-sm font-bold rounded-xl transition-all duration-200 border border-white/10 shadow-lg hover:shadow-xl active:scale-95"
+                    class="flex-1 py-3 px-4 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/10 shadow-lg hover:shadow-xl active:scale-95"
                   >
                     <i class="fas fa-times mr-2"></i>
                     거절
                   </button>
                   <button
                     @click.stop="handleAccept"
-                    class="flex-1 py-3 px-4 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 hover:from-orange-600 hover:via-orange-700 hover:to-red-700 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
+                    class="flex-1 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
                   >
                     <i class="fas fa-check mr-2"></i>
                     수락
@@ -494,7 +481,7 @@ const closeErrorModal = () => {
               <template v-else-if="headerInfo.actionType === 'go_to_game'">
                 <button
                   @click.stop="handleGoToGame"
-                  class="w-full py-3 px-4 bg-gradient-to-br from-green-500 via-emerald-600 to-teal-600 hover:from-green-600 hover:via-emerald-700 hover:to-teal-700 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-green-500/50 active:scale-95 flex items-center justify-center gap-2"
+                  class="w-full py-3 px-4 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-green-500/50 active:scale-95 flex items-center justify-center gap-2"
                 >
                   <i class="fas fa-gamepad"></i>
                   경기 바로가기
@@ -505,7 +492,7 @@ const closeErrorModal = () => {
               <template v-else-if="headerInfo.actionType === 'view_result'">
                 <button
                   @click.stop="handleViewResult"
-                  class="w-full py-3 px-4 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 hover:from-blue-600 hover:via-indigo-700 hover:to-purple-700 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 active:scale-95 flex items-center justify-center gap-2"
+                  class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 active:scale-95 flex items-center justify-center gap-2"
                 >
                   <i class="fas fa-trophy"></i>
                   경기 결과 보기
@@ -526,7 +513,6 @@ const closeErrorModal = () => {
       <!-- 로딩 상태 -->
       <div v-if="isLoadingMessages" class="h-full flex items-center justify-center">
         <div class="relative">
-          <div class="absolute inset-0 bg-orange-500/20 rounded-full blur-xl animate-pulse"></div>
           <div class="relative flex flex-col items-center gap-3">
             <i class="fas fa-spinner fa-spin text-4xl text-orange-500"></i>
             <p class="text-sm text-gray-400 font-medium">메시지를 불러오는 중...</p>
@@ -537,7 +523,7 @@ const closeErrorModal = () => {
       <div v-else ref="chatBox" class="h-full overflow-auto space-y-3 pb-2">
         <div v-if="visibleMessages.length > 0" class="flex justify-center py-4">
           <div
-            class="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm text-orange-400 rounded-full px-5 py-2 text-xs font-bold shadow-lg border border-orange-500/30"
+            class=" bg-orange-500/20 backdrop-blur-sm text-orange-400 rounded-full px-5 py-2 text-xs font-medium shadow-lg border border-orange-500/30"
           >
             대화의 첫 부분입니다
           </div>
@@ -545,7 +531,7 @@ const closeErrorModal = () => {
         <template v-for="(msg, idx) in visibleMessages" :key="msg._key">
           <div v-if="shouldShowDate(idx, visibleMessages)" class="flex justify-center my-3">
             <div
-              class="bg-gray-800/60 backdrop-blur-sm border border-white/10 px-4 py-1.5 rounded-full text-xs text-gray-300 shadow-lg font-semibold"
+              class="bg-gray-800/60 backdrop-blur-sm border border-white/10 px-4 py-1.5 rounded-full text-xs text-gray-300 shadow-lg font-medium"
             >
               {{ formatDateOnly(msg.timestamp) }}
             </div>
@@ -556,19 +542,19 @@ const closeErrorModal = () => {
           >
             <template v-if="msg.messageType === 'TALK'">
               <div v-if="msg.senderId === currentUserId" class="flex items-end gap-2 max-w-[75%]">
-                <span class="text-[10px] text-gray-500 mb-1">{{ formatTime(msg.timestamp) }}</span>
+                <span class="text-xs text-gray-500 mb-1">{{ formatTime(msg.timestamp) }}</span>
                 <div
-                  class="p-3.5 rounded-2xl break-words bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 text-white rounded-br-md shadow-lg"
+                  class="p-3.5 rounded-2xl break-words bg-orange-500 text-white rounded-br-md shadow-lg"
                 >
                   <p class="whitespace-pre-line leading-relaxed text-sm">{{ msg.content }}</p>
                 </div>
               </div>
               <div
                 v-else
-                class="max-w-[75%] p-3.5 rounded-2xl break-words bg-gradient-to-br from-gray-800 to-gray-700 text-gray-100 rounded-bl-md shadow-lg border border-white/10"
+                class="max-w-[75%] p-3.5 rounded-2xl break-words bg-gray-800 text-gray-100 rounded-bl-md shadow-lg border border-white/10"
               >
                 <p class="whitespace-pre-line leading-relaxed text-sm">{{ msg.content }}</p>
-                <p class="text-[10px] mt-1.5 text-gray-400">
+                <p class="text-xs mt-1.5 text-gray-400">
                   {{ formatTime(msg.timestamp) }}
                 </p>
               </div>
@@ -587,7 +573,7 @@ const closeErrorModal = () => {
 
     <!-- 메시지 입력 영역 -->
     <div
-      class="fixed bottom-0 w-full z-20 bg-gradient-to-t from-gray-900 via-gray-900 to-gray-900/95 backdrop-blur-xl border-t border-white/10 shadow-2xl"
+      class="fixed bottom-0 w-full z-20 bg-gray-900 backdrop-blur-xl border-t border-white/10 shadow-2xl"
     >
       <div class="p-3 flex items-center gap-2">
         <form @submit.prevent="sendMsg" class="flex items-center w-full gap-2">
@@ -605,22 +591,9 @@ const closeErrorModal = () => {
             @click="sendMsg"
             @mousedown.prevent="keepFocus"
             :disabled="!newMsg.trim()"
-            class="p-3 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 text-white rounded-full shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none"
+            class="p-3 bg-orange-500 text-white rounded-full shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 transform rotate-45"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2.5"
-                d="M5 12h14M12 5l7 7-7 7"
-              />
-            </svg>
+            <i class="fas fa-paper-plane text-lg w-6 h-6 flex items-center justify-center"></i>
           </button>
         </form>
       </div>
@@ -632,11 +605,10 @@ const closeErrorModal = () => {
       class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
-        class="bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 rounded-2xl shadow-2xl p-6 max-w-sm w-full"
+        class=" bg-gray-900 border border-white/10 rounded-2xl shadow-2xl p-6 max-w-sm w-full"
       >
         <div class="text-center mb-5">
           <div class="mb-4 relative inline-block">
-            <div class="absolute inset-0 bg-orange-500/20 rounded-full blur-xl"></div>
             <i class="fas fa-exclamation-triangle text-orange-500 text-5xl mb-3 relative"></i>
           </div>
           <h3 class="text-xl font-bold text-white mb-3">알림</h3>
@@ -644,7 +616,7 @@ const closeErrorModal = () => {
         </div>
         <button
           @click="closeErrorModal"
-          class="w-full bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 hover:from-orange-600 hover:via-orange-700 hover:to-red-700 text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
+          class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
         >
           확인
         </button>

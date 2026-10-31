@@ -3,22 +3,23 @@
     :has-referer="true"
     :show-bell="false"
     :show-dm="false"
+    title="규칙"
     custom-class="bg-gray-900 z-[444444]"
     :customGoBack="handleGoBack"
   >
     <template #right-after>
       <button
         @click="onMyRulesClick"
-        class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition"
+        class="px-3 py-2 text-sm text-gray-200"
       >
         내 규칙
       </button>
       <button
         @click="onPlusClick"
-        class="ml-2 w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
-        aria-label="규칙 생성"
+        class="ml-1 px-3 py-2 text-sm text-gray-200"
+        aria-label="규칙 만들기"
       >
-        <span class="text-xl font-bold">+</span>
+        만들기
       </button>
     </template>
   </HeaderComp>
@@ -64,7 +65,7 @@
           @click="selectSort(o.value)"
           class="sort-option px-4 py-2 cursor-pointer rounded-lg font-semibold text-gray-300 hover:bg-gray-700 transition"
           :aria-selected="sort === o.value"
-          :style="sort === o.value ? 'color:#fb923c;background:#fff7ed;' : ''"
+          :style="sort === o.value ? 'color:#fb923c;background:rgba(249,115,22,.15);' : ''"
         >
           <i class="fas fa-check mr-2" v-if="sort === o.value"></i>
           {{ o.label }}
@@ -78,7 +79,7 @@
     v-if="!major"
     class="fixed inset-0 bg-gray-900 z-40 flex flex-col items-center justify-center"
   >
-    <div class="text-lg text-white font-bold mb-6">메인 카테고리를 선택하세요.</div>
+    <div class="text-xl text-white font-bold mb-6">어떤 종류로 겨룰까요?</div>
     <div v-if="loadingMajors" class="py-32 text-center text-orange-500">
       <i class="fas fa-spinner fa-spin text-3xl"></i>
       <div class="mt-4 text-base">로딩 중입니다…</div>
@@ -222,7 +223,7 @@ const selectedSortLabel = computed(
 const handleGoBack = () => {
   // fromGameCreate 쿼리 파라미터가 있으면 GameListView로 이동
   if (route.query.fromGameCreate === 'true') {
-    router.push('/game-list')
+    router.push('/')
   }
   // 규칙 생성에서 돌아온 경우 피드로 이동
   else if (route.query.fromRuleCreate === 'true') {

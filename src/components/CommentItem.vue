@@ -8,7 +8,7 @@
   >
     <!-- 신고 버튼 (우측 상단) -->
     <button
-      class="absolute text-red-500 text-[0.7rem] right-0 top-2 z-10 text-gray-300 hover:text-orange-500 p-1"
+      class="absolute text-red-500 text-xs right-0 top-2 z-10 text-gray-300 hover:text-orange-500 p-1"
       @click.stop="openReportModal"
       title="댓글 신고"
     >
@@ -19,7 +19,7 @@
     <router-link :to="`/profile/${comment.author.id}`" class="w-9 h-9 flex-shrink-0" tabindex="-1">
       <img
         :src="comment.author.profileImageUrl || defaultProfile"
-        class="w-9 h-9 rounded-full object-cover bg-gray-200 border"
+        class="w-9 h-9 rounded-full object-cover bg-gray-700 border"
         alt="profile"
       />
     </router-link>
@@ -28,7 +28,7 @@
       <div class="flex items-center gap-2">
         <router-link
           :to="`/profile/${comment.author.id}`"
-          class="font-semibold text-[15px] hover:underline focus:underline focus:outline-none"
+          class="font-semibold text-base hover:underline focus:underline focus:outline-none"
         >
           {{ comment.author.nickname }}
         </router-link>
@@ -38,10 +38,10 @@
         <span v-if="comment.editedAt" class="text-xs text-gray-400 ml-1">(수정됨)</span>
         <span v-if="comment.deleted" class="text-xs text-red-400 ml-1">[삭제됨]</span>
       </div>
-      <div class="whitespace-pre-wrap break-all text-[15px] mt-1 leading-snug">
+      <div class="whitespace-pre-wrap break-all text-base mt-1 leading-snug">
         <span
           v-if="comment.mentionUserNickname"
-          class="inline-block px-2 py-0.5 bg-blue-100 text-blue-600 font-semibold rounded-full mr-1 text-[14px] align-middle"
+          class="inline-block px-2 py-0.5 bg-blue-100 text-blue-600 font-medium rounded-full mr-1 text-sm align-middle"
         >
           {{ comment.mentionUserNickname }}
         </span>
@@ -54,7 +54,7 @@
           @click="emitImgClick(comment.imageUrl)"
         />
       </div>
-      <div class="flex items-center gap-2 mt-2 text-gray-500 text-[14px]">
+      <div class="flex items-center gap-2 mt-2 text-gray-500 text-sm">
         <button
           class="focus:outline-none transition flex items-center justify-center"
           style="height: 26px; width: 26px"
@@ -67,12 +67,12 @@
             ]"
           ></i>
         </button>
-        <span v-if="comment.likeCount > 0" class="min-w-[16px] text-[14px] select-none">{{
+        <span v-if="comment.likeCount > 0" class="min-w-[16px] text-sm select-none">{{
           comment.likeCount
         }}</span>
         <button
           v-if="!isReply"
-          class="text-[13px] hover:underline focus:underline ml-1 px-1"
+          class="text-sm hover:underline focus:underline ml-1 px-1"
           @click="emitReply(comment.id, comment.author.nickname)"
         >
           답글
@@ -102,16 +102,16 @@
         @click.stop
       >
         <div
-          class="bg-white rounded-2xl shadow-lg px-6 py-6 w-full max-w-xs flex flex-col items-stretch"
+          class="bg-gray-900 rounded-2xl shadow-lg px-6 py-6 w-full max-w-xs flex flex-col items-stretch"
           @click.stop
         >
-          <div class="font-bold text-lg mb-2 text-gray-900">댓글 신고하기</div>
+          <div class="font-bold text-lg mb-2 text-white">댓글 신고하기</div>
           <div class="text-gray-500 text-sm mb-3 leading-snug">
             신고는 <b>24시간 내에 처리</b>되며, 신고해주셔서 감사합니다.
           </div>
           <textarea
             v-model="reportReason"
-            class="border rounded p-2 w-full mb-3 text-[15px]"
+            class="border rounded p-2 w-full mb-3 text-base"
             rows="3"
             maxlength="100"
             placeholder="신고 사유를 입력해주세요"

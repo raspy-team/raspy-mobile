@@ -1,24 +1,8 @@
 <template>
-  <HeaderComp
-    :has-referer="true"
-    :show-bell="false"
-    :show-dm="false"
-    custom-class="bg-gray-900"
-    :customGoBack="handleGoBack"
-  >
-    <template #right-after>
-      <button
-        @click="$router.push('/create-game')"
-        class="w-10 h-10 px-2 py-2 rounded-lg bg-orange-400 hover:bg-orange-500 text-white font-bold shadow transition flex items-center justify-center"
-        aria-label="경기 생성"
-      >
-        <span class="text-xl font-bold">+</span>
-      </button>
-    </template>
-  </HeaderComp>
+  <HeaderComp title="경기" custom-class="bg-gray-900" />
 
   <div
-    class="bg-gray-900 h-full pb-16 pt-14"
+    class="bg-gray-900 h-full pb-24 pt-14"
     ref="containerRef"
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
@@ -35,12 +19,12 @@
     <transition name="pull-fade">
       <div
         v-if="pullTriggered"
-        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
+        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-orange-500 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
       >
         <div class="relative w-5 h-5">
           <i class="fas fa-spinner fa-spin text-white text-lg"></i>
         </div>
-        <span class="text-sm font-semibold text-white">새로고침 중...</span>
+        <span class="text-sm font-medium text-white">새로고침 중...</span>
       </div>
     </transition>
 
@@ -48,12 +32,12 @@
     <transition name="pull-fade">
       <div
         v-if="refreshComplete"
-        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
+        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
       >
         <div class="relative w-5 h-5 flex items-center justify-center">
           <i class="fas fa-check text-white text-lg animate-bounce-in"></i>
         </div>
-        <span class="text-sm font-semibold text-white">새로고침 완료!</span>
+        <span class="text-sm font-medium text-white">새로고침 완료!</span>
       </div>
     </transition>
 
@@ -79,7 +63,7 @@
           ></i>
         </div>
         <span
-          class="text-sm font-semibold transition-colors"
+          class="text-sm font-medium transition-colors"
           :class="pullDistance > 80 ? 'text-orange-500' : 'text-gray-400'"
         >
           {{ pullDistance > 80 ? '놓아서 새로고침!' : '아래로 당기세요...' }}
@@ -91,7 +75,18 @@
     <main class="pt-3 px-4 pb-4">
       <!-- 게임리스트 -->
       <div class="space-y-4">
-        <!-- 필터 버튼 제거됨: 모든 지역, 최신순 기본값으로 표시 -->
+        <!-- 이 화면의 주 행동은 하나: 경기 만들기. 규칙은 그 아래 보조 링크 -->
+        <div class="flex flex-col gap-3 mb-4">
+          <button
+            @click="$router.push('/create-game')"
+            class="w-full py-4 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
+          >
+            경기 만들기
+          </button>
+          <button @click="$router.push('/rules')" class="self-start text-sm text-gray-400">
+            어떤 규칙이 있는지 보기 <i class="fas fa-chevron-right text-xs ml-1"></i>
+          </button>
+        </div>
 
         <div v-if="games.length > 0">
           <div
@@ -102,7 +97,7 @@
             :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
           >
             <!-- 생성자 영역: 유저네임과 같은 줄에 전적/점수 -->
-            <div class="flex items-center bg-gray-700 px-3 py-3 gap-2">
+            <div class="flex items-center px-3 py-3 gap-2">
               <div
                 class="flex flex-1 min-w-0 items-center gap-3 cursor-pointer hover:bg-gray-600 rounded-lg p-2 transition-colors"
                 @click.stop="
@@ -113,28 +108,28 @@
               >
                 <img
                   :src="game.ownerProfileUrl || Default"
-                  class="w-10 h-10 rounded-full border-2 border-orange-400 shadow flex-shrink-0 object-cover"
+                  class="w-10 h-10 rounded-full flex-shrink-0 object-cover"
                 />
                 <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
-                  <div class="font-bold text-sm text-gray-100 truncate">
+                  <div class="font-medium text-sm text-gray-100 truncate">
                     {{ game.ownerNickname }}
                   </div>
                   <div
-                    class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gradient-to-r from-gray-600 to-gray-500 border border-gray-500 flex-shrink-0"
+                    class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gray-600 border border-gray-500 flex-shrink-0"
                   >
-                    <span class="text-xs font-semibold text-green-400">{{
+                    <span class="text-xs font-medium text-green-400">{{
                       game.ruleStatisticsOfOwner?.wins || 0
                     }}</span>
-                    <span class="text-xs font-semibold text-gray-300">{{
+                    <span class="text-xs font-medium text-gray-300">{{
                       game.ruleStatisticsOfOwner?.draws || 0
                     }}</span>
-                    <span class="text-xs font-semibold text-red-400">{{
+                    <span class="text-xs font-medium text-red-400">{{
                       game.ruleStatisticsOfOwner?.losses || 0
                     }}</span>
                     <span class="text-xs text-gray-400">|</span>
                     <div class="flex items-center gap-1">
-                      <i class="fas fa-trophy text-yellow-500 text-[10px]"></i>
-                      <span class="text-xs font-bold text-orange-400">{{
+                      <i class="fas fa-trophy text-yellow-500 text-xs"></i>
+                      <span class="text-xs font-medium text-orange-400">{{
                         game.ruleStatisticsOfOwner?.ruleRating || 0
                       }}</span>
                     </div>
@@ -154,18 +149,18 @@
                   :alt="game.rule.minorCategory || '카테고리'"
                 />
                 <div
-                  class="font-extrabold text-lg text-orange-400 cursor-pointer"
+                  class="font-bold text-lg text-white cursor-pointer"
                   @click.stop="selectedGame && selectedGame.id === game.id && openModal(game)"
                 >
                   {{ game.rule.ruleTitle }}
-                  <i class="fas fa-info-circle text-orange-400 text-sm ml-2"></i>
+                  <i class="fas fa-info-circle text-gray-500 text-sm ml-2"></i>
                 </div>
               </div>
               <button
                 @click.stop="openChallengersModal(game)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-95"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-700 text-gray-200 text-xs font-medium active:scale-95"
               >
-                <i class="fas fa-users text-[10px]"></i>
+                <i class="fas fa-users text-xs"></i>
                 <span>도전자 {{ game.challengers?.length || 0 }}명</span>
               </button>
             </div>
@@ -219,31 +214,31 @@
           </button>
           <button
             @click="toggleComment(selectedGame.id)"
-            class="w-14 h-14 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+            class="w-14 h-14 flex items-center justify-center bg-gray-700 text-gray-400 rounded-full hover:bg-gray-300 transition"
           >
             <i class="fas fa-comment"></i>
           </button>
           <div class="relative">
             <button
               @click="selectedGame.showMoreMenu = !selectedGame.showMoreMenu"
-              class="w-14 h-14 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition"
+              class="w-14 h-14 flex items-center justify-center rounded-full bg-gray-700 text-gray-400 hover:bg-gray-300 transition"
               aria-label="더보기"
             >
               <span class="text-2xl">⋯</span>
             </button>
             <div
               v-if="selectedGame.showMoreMenu"
-              class="absolute right-0 bottom-full mb-2 bg-white border rounded shadow-md z-30 w-32"
+              class="absolute right-0 bottom-full mb-2 bg-gray-900 border rounded shadow-md z-30 w-32"
             >
               <button
                 @click="(onClickReport(selectedGame.id), (selectedGame.showMoreMenu = false))"
-                class="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-50"
+                class="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-800"
               >
                 신고하기
               </button>
               <button
                 @click="(shareGame(selectedGame.id), (selectedGame.showMoreMenu = false))"
-                class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
+                class="block w-full text-left px-4 py-2 text-gray-200 hover:bg-gray-800"
               >
                 공유하기
               </button>
@@ -257,39 +252,39 @@
             <div
               v-for="n in 3"
               :key="n"
-              class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 animate-pulse"
+              class="bg-gray-900 rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 animate-pulse"
             >
               <div class="flex justify-between items-start">
                 <div class="flex flex-col w-full justify-between">
-                  <div class="h-5 bg-gray-200 rounded w-2/3 mb-2"></div>
-                  <div class="h-3 bg-gray-100 rounded w-1/3"></div>
+                  <div class="h-5 bg-gray-700 rounded w-2/3 mb-2"></div>
+                  <div class="h-3 bg-gray-800 rounded w-1/3"></div>
                 </div>
-                <div class="h-4 bg-gray-100 rounded w-12"></div>
+                <div class="h-4 bg-gray-800 rounded w-12"></div>
               </div>
               <div class="flex justify-between items-center px-7 pt-1 pb-4">
                 <div class="flex-1 flex flex-col items-center gap-1">
                   <div class="h-8"></div>
                   <div class="relative">
-                    <div class="w-14 h-14 rounded-full bg-gray-100 border-2 border-gray-200"></div>
+                    <div class="w-14 h-14 rounded-full bg-gray-800 border-2 border-gray-800"></div>
                   </div>
-                  <div class="h-4 w-16 bg-gray-100 rounded mt-2"></div>
-                  <div class="h-3 w-10 bg-gray-100 rounded"></div>
+                  <div class="h-4 w-16 bg-gray-800 rounded mt-2"></div>
+                  <div class="h-3 w-10 bg-gray-800 rounded"></div>
                 </div>
                 <div class="vs-area flex flex-col gap-1 items-center justify-center mx-3 mt-5">
-                  <div class="h-6 w-8 bg-gray-200 rounded"></div>
-                  <div class="h-4 w-10 bg-gray-100 rounded"></div>
+                  <div class="h-6 w-8 bg-gray-700 rounded"></div>
+                  <div class="h-4 w-10 bg-gray-800 rounded"></div>
                 </div>
                 <div
                   class="flex-1 min-h-[60px] flex flex-col justify-center mt-6 items-center gap-2"
                 >
                   <div>
                     <div
-                      class="w-14 h-14 bg-gray-100 rounded-full border border-gray-200 flex items-center justify-center"
+                      class="w-14 h-14 bg-gray-800 rounded-full border border-gray-800 flex items-center justify-center"
                     ></div>
                     <div class="flex justify-center gap-1 mt-2">
-                      <div class="w-3 h-3 bg-gray-100 rounded"></div>
-                      <div class="w-3 h-3 bg-gray-100 rounded"></div>
-                      <div class="w-3 h-3 bg-gray-100 rounded"></div>
+                      <div class="w-3 h-3 bg-gray-800 rounded"></div>
+                      <div class="w-3 h-3 bg-gray-800 rounded"></div>
+                      <div class="w-3 h-3 bg-gray-800 rounded"></div>
                     </div>
                   </div>
                 </div>
@@ -298,21 +293,25 @@
                 class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
               >
                 <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 bg-gray-100 rounded"></div>
-                  <div class="h-3 w-16 bg-gray-100 rounded"></div>
+                  <div class="w-4 h-4 bg-gray-800 rounded"></div>
+                  <div class="h-3 w-16 bg-gray-800 rounded"></div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 bg-gray-100 rounded"></div>
-                  <div class="h-3 w-12 bg-gray-100 rounded"></div>
+                  <div class="w-4 h-4 bg-gray-800 rounded"></div>
+                  <div class="h-3 w-12 bg-gray-800 rounded"></div>
                 </div>
               </div>
               <div class="mt-4 flex items-center gap-2">
-                <div class="h-11 flex-grow rounded-full bg-gray-200"></div>
-                <div class="w-11 h-11 bg-gray-200 rounded-full"></div>
-                <div class="w-11 h-11 bg-gray-200 rounded-full"></div>
+                <div class="h-11 flex-grow rounded-full bg-gray-700"></div>
+                <div class="w-11 h-11 bg-gray-700 rounded-full"></div>
+                <div class="w-11 h-11 bg-gray-700 rounded-full"></div>
               </div>
             </div>
           </template>
+          <div v-else class="py-16 text-center">
+            <p class="text-base text-white">아직 열린 경기가 없어요</p>
+            <p class="text-sm text-gray-400 mt-2">첫 경기를 만들면 여기에 올라가요</p>
+          </div>
         </div>
       </div>
     </main>
@@ -325,14 +324,14 @@
       @click.self="closeInviteModal"
     >
       <div
-        class="relative bg-white rounded-3xl shadow-2xl w-[95%] pt-8 pb-2 flex flex-col items-center gap-2"
+        class="relative bg-gray-900 rounded-3xl shadow-2xl w-[95%] pt-8 pb-2 flex flex-col items-center gap-2"
         style="box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15)"
       >
         <!-- X Close Button -->
         <button
           @click="closeInviteModal"
           aria-label="닫기"
-          class="absolute right-4 top-4 w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition text-gray-500 hover:text-gray-900 z-10"
+          class="absolute right-4 top-4 w-9 h-9 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-full transition text-gray-500 hover:text-white z-10"
           style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04)"
         >
           <i class="fas fa-times text-xl"></i>
@@ -340,10 +339,10 @@
 
         <!-- Icon and Title -->
         <div class="mb-1 flex flex-col items-center w-full px-7">
-          <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+          <div class="w-12 h-12 rounded-full bg-orange-500/15 flex items-center justify-center mb-2">
             <i class="fas fa-key text-orange-500 text-2xl"></i>
           </div>
-          <div class="text-xl font-bold text-gray-900 tracking-tight text-center">
+          <div class="text-xl font-bold text-white tracking-tight text-center">
             초대 코드로 빠른 참가
           </div>
           <div class="text-gray-500 text-xs mt-1 text-center">
@@ -359,7 +358,7 @@
             maxlength="4"
             inputmode="numeric"
             placeholder="0000"
-            class="w-full text-center text-2xl font-extrabold border-0 border-b-2 border-gray-200 focus:border-orange-500 focus:ring-0 transition placeholder-gray-300 tracking-widest bg-transparent py-2 mb-2"
+            class="w-full text-center text-2xl font-bold border-0 border-b-2 border-gray-800 focus:border-orange-500 focus:ring-0 transition placeholder-gray-300 tracking-widest bg-transparent py-2 mb-2"
             @keyup.enter="submitInvite"
             autocomplete="one-time-code"
           />
@@ -374,7 +373,7 @@
         <div v-if="!inviteGame" class="flex w-full mt-5 gap-2 px-7">
           <button
             @click="closeInviteModal"
-            class="flex-1 py-2.5 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 text-gray-500 font-semibold transition"
+            class="flex-1 py-2.5 rounded-xl border border-gray-800 bg-gray-800 hover:bg-gray-800 text-gray-500 font-semibold transition"
           >
             취소
           </button>
@@ -393,12 +392,12 @@
         <!-- 게임 정보 카드 -->
         <transition name="fade">
           <div v-if="inviteGame">
-            <div class="bg-white overflow-auto mb-4 w-[86dvw] max-h-[68%] p-4">
+            <div class="bg-gray-900 overflow-auto mb-4 w-[86dvw] max-h-[68%] p-4">
               <!-- 타이틀과 생성자 정보(우측 상단) -->
 
               <div class="flex justify-between items-start">
                 <div class="flex flex-col w-full justify-between">
-                  <h4 class="text-lg font-extrabold text-gray-800 mb-1">
+                  <h4 class="text-lg font-bold text-gray-100 mb-1">
                     {{ inviteGame.ruleTitle }}
                   </h4>
                   <div class="text-xs text-orange-500 font-medium mb-2 flex gap-1 items-center">
@@ -407,7 +406,7 @@
                   </div>
                 </div>
 
-                <div class="text-gray-600 text-right text-[0.79rem] min-w-[60px]">
+                <div class="text-gray-400 text-right text-xs min-w-[60px]">
                   {{ formatTimeAgo(inviteGame.createdAt) }}
                 </div>
               </div>
@@ -424,15 +423,15 @@
                   <div class="relative">
                     <img
                       :src="inviteGame.ownerProfileUrl || Default"
-                      class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-white"
+                      class="w-14 h-14 rounded-full border-2 border-orange-400 shadow-lg bg-gray-900"
                     />
                   </div>
-                  <div class="text-gray-700 font-[600] text-sm">
+                  <div class="text-gray-200 font-[600] text-sm">
                     {{ inviteGame.ownerNickname }}
                   </div>
                   <div>
                     <div
-                      class="text-xs font-semibold flex mr-2 items-center justify-end pr-2"
+                      class="text-xs font-medium flex mr-2 items-center justify-end pr-2"
                       :class="[
                         inviteGame.mannerScore >= 4
                           ? 'text-orange-500'
@@ -460,20 +459,20 @@
                   </div>
                 </div>
                 <div class="vs-area flex flex-col gap-1 items-center justify-center mx-3 mt-5">
-                  <div class="text-lg font-black tracking-tight text-orange-500">VS</div>
-                  <div class="text-sm font-semibold text-orange-400">경기 전</div>
+                  <div class="text-lg font-bold tracking-tight text-orange-500">VS</div>
+                  <div class="text-sm font-medium text-orange-400">경기 전</div>
                 </div>
                 <div
                   class="flex-1 min-h-[60px] flex flex-col justify-center mt-6 items-center gap-2"
                 >
                   <div>
                     <div
-                      class="w-14 h-14 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-full border border-gray-200 flex items-center justify-center"
+                      class="w-14 h-14 bg-gray-800 rounded-full border border-gray-800 flex items-center justify-center"
                     >
                       <i class="fas fa-user-clock text-2xl text-gray-400"></i>
                     </div>
                     <div
-                      class="flex justify-center gap-1 mt-2 font-semibold text-xs text-gray-400 opacity-70 tracking-wide"
+                      class="flex justify-center gap-1 mt-2 font-medium text-xs text-gray-400 opacity-70 tracking-wide"
                     >
                       <span>-</span><span>-</span><span>-</span>
                     </div>
@@ -482,9 +481,9 @@
               </div>
 
               <!-- 모달 Content -->
-              <div class="bg-white rounded-xl py-6 max-w-lg w-full relative z-[1000000000]">
+              <div class="bg-gray-900 rounded-xl py-6 max-w-lg w-full relative z-[1000000000]">
                 <div class="flex gap-3 mb-3 items-center">
-                  <div class="font-semibold text-gray-700">
+                  <div class="font-semibold text-gray-200">
                     {{ inviteGame.ruleTitle }}
                   </div>
                   <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
@@ -492,7 +491,7 @@
                     {{ inviteGame.minorCategory }}
                   </div>
                 </div>
-                <div class="text-sm text-gray-700 space-y-4">
+                <div class="text-sm text-gray-200 space-y-4">
                   <div>
                     <!-- 접힘 상태 -->
                     <div v-if="!expanded" class="relative text-right">
@@ -588,13 +587,13 @@
                 </button>
                 <button
                   @click.stop="toggleComment(inviteGame.id)"
-                  class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+                  class="w-11 h-11 flex items-center justify-center bg-gray-700 text-gray-400 rounded-full hover:bg-gray-300 transition"
                 >
                   <i class="fas fa-comment"></i>
                 </button>
                 <button
                   @click.stop="shareGame(inviteGame)"
-                  class="w-11 h-11 flex items-center justify-center bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition"
+                  class="w-11 h-11 flex items-center justify-center bg-gray-700 text-gray-400 rounded-full hover:bg-gray-300 transition"
                 >
                   <i class="fas fa-share"></i>
                 </button>
@@ -610,8 +609,8 @@
       v-if="showRegionModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30"
     >
-      <div class="bg-white rounded-xl w-11/12 max-w-md p-5 space-y-4">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">지역 선택</h3>
+      <div class="bg-gray-900 rounded-xl w-11/12 max-w-md p-5 space-y-4">
+        <h3 class="text-lg font-bold text-gray-100 mb-4">지역 선택</h3>
         <select
           v-model="selectedPrimary"
           @change="selectedSecondary = selectedPrimary === '전국' ? '전국' : ''"
@@ -635,7 +634,7 @@
         <div class="flex justify-end space-x-2 pt-3">
           <button
             @click="showRegionModal = false"
-            class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 text-sm"
+            class="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 text-sm"
           >
             취소
           </button>
@@ -650,15 +649,14 @@
       </div>
     </div>
     <!-- CustomAlert 확정 모달 제거 -->
-    <CustomToast class="z-[200]" />
     <!-- Share Game Modal -->
     <div
       v-if="shareModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[30000]"
       @click.self="shareModal = false"
     >
-      <div class="bg-white rounded-xl shadow-lg p-6 w-80 mx-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">초대 코드</h3>
+      <div class="bg-gray-900 rounded-xl shadow-lg p-6 w-80 mx-4">
+        <h3 class="text-lg font-semibold text-gray-100 mb-4 text-center">초대 코드</h3>
         <div class="text-3xl font-bold text-orange-600 mb-2 tracking-widest text-center">
           {{ inviteCode }}
         </div>
@@ -674,7 +672,7 @@
         <div v-if="copied" class="text-orange-500 text-xs text-center mb-2">복사 완료!</div>
         <button
           @click="shareModal = false"
-          class="w-full py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+          class="w-full py-2 bg-gray-700 hover:bg-gray-300 text-gray-200 rounded-lg transition"
         >
           닫기
         </button>
@@ -698,7 +696,7 @@
     v-if="showReportModal"
     class="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center p-4"
   >
-    <div class="bg-white rounded-lg max-w-sm w-full p-6 shadow-lg relative">
+    <div class="bg-gray-900 rounded-lg max-w-sm w-full p-6 shadow-lg relative">
       <button
         class="absolute top-3 right-3 text-gray-400"
         @click="showReportModal = false"
@@ -707,7 +705,7 @@
         <i class="fas fa-times"></i>
       </button>
       <h2 class="text-xl font-bold mb-3">신고하기</h2>
-      <p class="text-gray-700 mb-4">신고 사유를 입력해주세요:</p>
+      <p class="text-gray-200 mb-4">신고 사유를 입력해주세요:</p>
       <textarea
         v-model="reportReason"
         class="w-full border rounded p-2 text-sm mb-4"
@@ -717,7 +715,7 @@
       <div class="flex justify-end gap-2">
         <button
           @click="cancelReport"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+          class="px-4 py-2 bg-gray-700 text-gray-100 rounded hover:bg-gray-300"
         >
           취소
         </button>
@@ -737,7 +735,7 @@
     v-if="showThankModal"
     class="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center p-4"
   >
-    <div class="bg-white rounded-lg max-w-sm w-full p-6 shadow-lg relative">
+    <div class="bg-gray-900 rounded-lg max-w-sm w-full p-6 shadow-lg relative">
       <button
         class="absolute top-3 right-3 text-gray-400"
         @click="showThankModal = false"
@@ -746,7 +744,7 @@
         <i class="fas fa-times"></i>
       </button>
       <h2 class="text-xl font-bold text-green-600 mb-3">신고 접수 완료</h2>
-      <p class="text-gray-700 mb-4">
+      <p class="text-gray-200 mb-4">
         신고해 주셔서 감사합니다.<br />
         제출하신 내용은 24시간 이내에 처리됩니다.
       </p>
@@ -794,7 +792,7 @@
             alt="Challenger Profile"
           />
           <div class="flex-1">
-            <p class="text-sm font-bold text-gray-100">{{ challenger.applicantNickname }}</p>
+            <p class="text-sm font-medium text-gray-100">{{ challenger.applicantNickname }}</p>
             <p class="text-xs text-gray-400">
               {{ challenger.applicantGameStatisticsDTO?.wins || 0 }}승
               {{ challenger.applicantGameStatisticsDTO?.draws || 0 }}무
@@ -816,10 +814,11 @@
 </template>
 
 <script setup>
+import { useBackClose } from '../../composable/useBackClose'
+
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
-import CustomToast from '../../components/CustomToast.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 
 import { useToast } from '../../composable/useToast'
@@ -994,10 +993,6 @@ function formatTimeAgo(dateString) {
   return `${Math.floor(diff / 31104000)}년 전`
 }
 const router = useRouter()
-
-const handleGoBack = () => {
-  router.push('/game')
-}
 
 const commentId = ref(0)
 const shareModal = ref(false)
@@ -1258,6 +1253,9 @@ onMounted(() => {
     commentId.value = Number(commentQueryId)
   }
 })
+
+// 뒤로가기는 열린 모달부터 닫는다
+useBackClose(shareModal, showInviteModal, showRegionModal, showReportModal, showThankModal, showChallengersModal)
 </script>
 <style scoped>
 input:focus {

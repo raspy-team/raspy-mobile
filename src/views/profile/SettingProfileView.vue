@@ -41,7 +41,7 @@
                   capture="environment"
                   @change="onImageChange"
                 />
-                <span class="text-[10px] text-gray-300">편집</span>
+                <span class="text-xs text-gray-300">편집</span>
               </label>
             </div>
             <div class="min-w-0">
@@ -75,7 +75,7 @@
         <form v-else @submit.prevent="submitProfile" class="p-6 space-y-7" @input="markDirty">
           <!-- 기본 정보 -->
           <fieldset class="space-y-4">
-            <legend class="block text-sm font-semibold text-gray-200 mb-1">기본 정보</legend>
+            <legend class="block text-sm font-medium text-gray-200 mb-1">기본 정보</legend>
 
             <!-- 닉네임 -->
             <div>
@@ -179,7 +179,7 @@
 
           <!-- 지역 -->
           <fieldset class="space-y-3">
-            <legend class="block text-sm font-semibold text-gray-200 mb-1">
+            <legend class="block text-sm font-medium text-gray-200 mb-1">
               지역 <span class="text-gray-400 text-xs">(선택)</span>
             </legend>
             <div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
@@ -218,7 +218,7 @@
 
           <!-- 자기소개 -->
           <fieldset class="space-y-2">
-            <legend class="block text-sm font-semibold text-gray-200 mb-1">
+            <legend class="block text-sm font-medium text-gray-200 mb-1">
               자기소개 <span class="text-gray-400 text-xs">(선택)</span>
             </legend>
             <textarea
@@ -234,7 +234,7 @@
 
           <!-- 소속 -->
           <fieldset class="space-y-2">
-            <legend class="block text-sm font-semibold text-gray-200 mb-1">
+            <legend class="block text-sm font-medium text-gray-200 mb-1">
               소속 <span class="text-gray-400 text-xs">(선택)</span>
             </legend>
             <input
@@ -274,7 +274,7 @@
             주변 유저들과 경기하고 소식을 공유하시겠습니까?
           </span>
         </label>
-        <button @click="router.push('/game-list')" class="text-sm text-gray-400 hover:underline">
+        <button @click="router.push('/')" class="text-sm text-gray-400 hover:underline">
           건너뛰기
         </button>
       </div>

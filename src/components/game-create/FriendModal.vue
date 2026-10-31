@@ -11,7 +11,7 @@
         @click.stop
       >
         <!-- Header -->
-        <div class="px-6 pt-5 pb-4 border-b bg-gradient-to-b from-gray-800 to-gray-700 border-gray-700">
+        <div class="px-6 pt-5 pb-4 border-b bg-gray-800 border-gray-700">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold text-white">내 친구 선택</h2>
             <button
@@ -91,7 +91,7 @@
                 />
               </div>
               <div class="flex-1 min-w-0">
-                <div class="text-sm font-semibold text-white truncate">
+                <div class="text-sm font-medium text-white truncate">
                   {{ f.nickname || f.username }}
                 </div>
                 <div class="text-xs text-gray-400 truncate">
@@ -139,10 +139,10 @@
             </div>
           </div>
           <p class="text-sm text-gray-300 leading-relaxed mb-4 py-2">
-            <strong>{{ selectedFriend?.nickname || selectedFriend?.username }}</strong> 님과 게임을
+            <strong>{{ selectedFriend?.nickname || selectedFriend?.username }}</strong> 님과 경기를
             시작하시겠습니까?<br />
-            확인을 누르면 <span class="font-semibold text-orange-400">게임 진행 화면</span>으로 이동하며, 바로
-            <span class="font-semibold text-orange-400">"게임 시작"</span>을 누를 수 있어요.
+            확인을 누르면 <span class="font-semibold text-orange-400">경기 진행 화면</span>으로 이동하며, 바로
+            <span class="font-semibold text-orange-400">"경기 시작"</span>을 누를 수 있어요.
           </p>
           <div class="grid grid-cols-2 gap-3">
             <button

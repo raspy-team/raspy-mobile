@@ -1,7 +1,7 @@
 <template>
   <header
     :class="[
-      'fixed top-0 left-0 w-full z-[30] border-b border-gray-600 bg-black/90 backdrop-blur-md raspy-top ',
+      'fixed top-0 left-0 w-full z-[30] border-b border-gray-800 bg-black raspy-top ',
       props.customClass,
     ]"
   >
@@ -11,12 +11,16 @@
         <button v-if="props.hasReferer" @click="goBack" class="text-gray-200 text-lg">
           <i :class="props.backIconClass"></i>
         </button>
+        <!-- 탭 화면: 제목을 왼쪽에 크게 -->
+        <h1 v-if="!props.hasReferer && props.title" class="text-xl font-bold text-white">
+          {{ props.title }}
+        </h1>
         <slot name="left"></slot>
       </div>
-      <!-- 중앙: 타이틀 (hasReferer일 때만 표시) -->
+      <!-- 하위 화면: 뒤로가기 옆 가운데 제목 -->
       <div
         v-if="props.hasReferer == true && props.title"
-        class="absolute left-1/2 transform -translate-x-1/2 text-gray-100 text-sm py-[50px] font-light"
+        class="absolute left-1/2 transform -translate-x-1/2 text-white text-base font-semibold"
       >
         {{ props.title }}
       </div>
@@ -33,7 +37,7 @@
           class="w-10 h-10 flex items-center justify-center rounded-full ml-1 focus:outline-none"
           title="DM"
         >
-          <i class="fas fa-paper-plane text-orange-400 text-xl"></i>
+          <i class="fas fa-paper-plane text-gray-200 text-xl"></i>
         </router-link>
 
         <!-- 알림 버튼  -->
@@ -42,10 +46,10 @@
           class="w-10 h-10 flex items-center justify-center relative rounded-full focus:outline-none"
           @click="toggleNotificationPanel"
         >
-          <i class="fas fa-bell text-orange-400 text-xl"></i>
+          <i class="fas fa-bell text-gray-200 text-xl"></i>
           <span
             v-if="totalUnreadCount > 0"
-            class="absolute top-0 right-0 min-w-[18px] h-[18px] bg-orange-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-gray-900"
+            class="absolute top-0 right-0 min-w-[18px] h-[18px] bg-orange-500 rounded-full flex items-center justify-center text-xs font-medium text-white border-2 border-gray-900"
           >
             {{ totalUnreadCount > 9 ? '9+' : totalUnreadCount }}
           </span>
@@ -69,17 +73,17 @@
         <div
           class="notification-header flex items-center justify-between px-4 h-14 border-b border-gray-700 bg-gray-900/80"
         >
-          <span class="notification-title text-sm font-semibold text-gray-100 tracking-tight">알림</span>
+          <span class="notification-title text-sm font-medium text-gray-100 tracking-tight">알림</span>
           <div class="flex items-center gap-2">
             <button
               v-if="notifications.length > 0"
               @click="clearAllNotifications"
               :disabled="clearingNotifications"
-              class="clear-all-btn text-[11px] font-semibold text-gray-400 hover:text-orange-400 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="clear-all-btn text-xs font-medium text-gray-400 hover:text-orange-400 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               title="알림 모두 지우기"
             >
-              <i v-if="clearingNotifications" class="fas fa-spinner fa-spin mr-1 text-[10px]"></i>
-              <i v-else class="fas fa-trash-alt mr-1 text-[10px]"></i>
+              <i v-if="clearingNotifications" class="fas fa-spinner fa-spin mr-1 text-xs"></i>
+              <i v-else class="fas fa-trash-alt mr-1 text-xs"></i>
               모두 지우기
             </button>
             <button
@@ -94,8 +98,8 @@
           <!-- 친구 요청 섹션 -->
           <div v-if="friendRequests.length > 0" class="border-b-2 border-orange-500/30 bg-gray-800/50">
             <div class="px-4 py-2.5 border-b border-gray-700">
-              <h3 class="text-xs font-bold text-orange-400 flex items-center gap-1.5">
-                <i class="fas fa-user-plus text-[10px]"></i>
+              <h3 class="text-xs font-medium text-orange-400 flex items-center gap-1.5">
+                <i class="fas fa-user-plus text-xs"></i>
                 친구 요청 ({{ friendRequests.length }})
               </h3>
             </div>
@@ -115,13 +119,13 @@
 
                   <!-- 사용자 정보 -->
                   <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-xs text-gray-100 truncate">
+                    <div class="font-medium text-xs text-gray-100 truncate">
                       {{ request.nickname }}
                     </div>
-                    <div class="text-[10px] text-gray-400 truncate">
+                    <div class="text-xs text-gray-400 truncate">
                       @{{ request.username }}
                     </div>
-                    <div v-if="request.intro" class="text-[10px] text-gray-500 mt-0.5 truncate">
+                    <div v-if="request.intro" class="text-xs text-gray-500 mt-0.5 truncate">
                       {{ request.intro }}
                     </div>
                   </div>
@@ -133,15 +137,15 @@
                       <button
                         @click.stop="acceptFriendRequest(request.id)"
                         :disabled="request.processing"
-                        class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <i v-if="request.processing" class="fas fa-spinner fa-spin mr-0.5 text-[9px]"></i>
+                        <i v-if="request.processing" class="fas fa-spinner fa-spin mr-0.5 text-xs"></i>
                         수락
                       </button>
                       <button
                         @click.stop="rejectFriendRequest(request.id)"
                         :disabled="request.processing"
-                        class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-[11px] font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-medium rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         거절
                       </button>
@@ -149,14 +153,14 @@
 
                     <!-- 수락됨 상태 -->
                     <div v-else-if="request.status === 'accepted'" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-500/20 border border-green-500/50 rounded-lg">
-                      <i class="fas fa-check-circle text-green-400 text-[10px]"></i>
-                      <span class="text-[10px] font-semibold text-green-300">친구가 되었습니다</span>
+                      <i class="fas fa-check-circle text-green-400 text-xs"></i>
+                      <span class="text-xs font-medium text-green-300">친구가 되었습니다</span>
                     </div>
 
                     <!-- 거절됨 상태 -->
                     <div v-else-if="request.status === 'rejected'" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-700/50 border border-gray-600 rounded-lg">
-                      <i class="fas fa-times-circle text-gray-400 text-[10px]"></i>
-                      <span class="text-[10px] font-semibold text-gray-400">거절됨</span>
+                      <i class="fas fa-times-circle text-gray-400 text-xs"></i>
+                      <span class="text-xs font-medium text-gray-400">거절됨</span>
                     </div>
                   </div>
                 </div>
@@ -186,10 +190,10 @@
                       class="inline-block ml-1 w-1.5 h-1.5 rounded-full bg-orange-500 align-middle"
                     ></span>
                   </div>
-                  <div class="text-[10px] text-gray-400 mt-0.5 truncate">
+                  <div class="text-xs text-gray-400 mt-0.5 truncate">
                     {{ n.message }}
                   </div>
-                  <div class="text-[9px] text-gray-500 mt-0.5">
+                  <div class="text-xs text-gray-500 mt-0.5">
                     {{ formatDate(n.createdAt) }}
                   </div>
                 </div>

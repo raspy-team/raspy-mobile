@@ -1,11 +1,11 @@
 <template>
-  <div @click="goToRanking" class="group relative flex items-center gap-4 p-4 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-md hover:shadow-xl border border-gray-600 transition-all duration-300 overflow-hidden cursor-pointer">
+  <div @click="goToRanking" class="group relative flex items-center gap-4 p-4 bg-gray-800 rounded-2xl shadow-md hover:shadow-xl border border-gray-600 transition-all duration-300 overflow-hidden cursor-pointer">
     <!-- Hover effect background -->
     <div class="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/10 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
     <!-- Icon/Image Section -->
     <div class="relative flex-shrink-0">
-      <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+      <div class="w-16 h-16 rounded-xl bg-orange-500/15 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
         <img
           :src="`/category-picture/${rule.minorCategory || '미분류'}.png`"
           alt="rule category"
@@ -22,7 +22,7 @@
       <div class="flex items-center gap-3 flex-wrap">
         <div class="flex items-center gap-1">
           <i class="fas fa-star text-yellow-500 text-xs"></i>
-          <span class="text-sm font-semibold text-gray-300">{{ rule.rating }}</span>
+          <span class="text-sm font-medium text-gray-300">{{ rule.rating }}</span>
         </div>
         <div class="w-1 h-1 rounded-full bg-gray-500"></div>
         <div class="flex items-center gap-1">
@@ -34,10 +34,10 @@
              :class="rankBadgeStyle"
              class="flex items-center gap-1.5 px-2.5 py-1 rounded-full shadow-lg ring-2 ring-white/20">
           <i :class="`fas ${rankIcon} text-white text-xs`"></i>
-          <span class="text-xs font-bold text-white">
+          <span class="text-xs font-medium text-white">
             {{ rule.myRank }}위
           </span>
-          <span class="text-[10px] text-white/80">
+          <span class="text-xs text-white/80">
             (상위 {{ rankPercentile }}%)
           </span>
         </div>
@@ -86,15 +86,15 @@ const rankTier = computed(() => {
 const rankBadgeStyle = computed(() => {
   switch (rankTier.value) {
     case 'legendary':
-      return 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 animate-pulse-slow'
+      return ' bg-purple-600 '
     case 'master':
-      return 'bg-gradient-to-r from-orange-500 to-red-500'
+      return ' bg-orange-500 '
     case 'diamond':
-      return 'bg-gradient-to-r from-cyan-500 to-blue-500'
+      return ' bg-cyan-500 '
     case 'gold':
-      return 'bg-gradient-to-r from-yellow-500 to-orange-500'
+      return ' bg-yellow-500 '
     default:
-      return 'bg-gradient-to-r from-gray-600 to-gray-700'
+      return ' bg-gray-600 '
   }
 })
 

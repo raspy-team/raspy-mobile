@@ -7,7 +7,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- 원본 -->
       <div>
-        <p class="text-xs font-semibold text-gray-500 mb-2">원본</p>
+        <p class="text-xs font-medium text-gray-500 mb-2">원본</p>
         <div
           :class="[
             'bg-white border-2 rounded-lg p-3',
@@ -28,7 +28,7 @@
 
       <!-- 수정본 -->
       <div>
-        <p class="text-xs font-semibold text-gray-500 mb-2">수정본</p>
+        <p class="text-xs font-medium text-gray-500 mb-2">수정본</p>
         <div
           :class="[
             'bg-white border-2 rounded-lg p-3',
@@ -37,7 +37,7 @@
         >
           <p
             :class="[
-              'text-sm font-semibold',
+              'text-sm font-medium',
               multiline ? 'whitespace-pre-wrap' : 'truncate',
               hasChanged ? 'text-green-700' : 'text-gray-700',
             ]"

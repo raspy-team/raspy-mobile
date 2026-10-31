@@ -7,17 +7,10 @@
   />
 
   <div class="pt-7 raspy-top h-full">
-    <!-- Progress Bar -->
-    <div class="progress-bar-outer bg-gray-700">
-      <div class="progress-bar-inner bg-orange-500" :style="{ width: progressWidth + '%' }"></div>
-    </div>
-
-    <!-- 기존 콘텐츠 -->
-    <GameIntro v-if="step === 1" @next="goToRuleView" />
+    <!-- 규칙은 /rules에서 고르고 돌아온다. 여기서는 상대만 정하면 경기가 열린다.
+         장소·시간은 상대가 정해진 뒤 함께 정한다 (장소는 경기 시작 때 다시 고른다) -->
     <RuleSelectPage v-if="step === 2" @select="onRuleSelected" @back="goToRuleView" />
     <GameModeSelect v-if="step === 3" @mode="onModeSelect" :is-contest="isContest" />
-    <PlaceSelectPage v-if="step === 4" @select="onPlaceSelect" @back="step -= 1" />
-    <TimeSelectPage v-if="step === 5" @select="onTimeSelect" @back="step -= 1" />
     <GameFinalPage v-if="step === 6" :game="gameForm" />
   </div>
 
@@ -46,20 +39,15 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
-import GameIntro from '../../components/game-create/GameIntro.vue'
+import { ref, reactive, onMounted } from 'vue'
 import RuleSelectPage from '../../components/game-create/RuleSelectPage.vue'
 import GameModeSelect from '../../components/game-create/GameModeSelect.vue'
-import PlaceSelectPage from '../../components/game-create/PlaceSelect.vue'
-import TimeSelectPage from '../../components/game-create/TimeSelect.vue'
 import GameFinalPage from '../../components/game-create/GameFinalPage.vue'
 import api from '../../api/api'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
-// 스텝 갯수: 6단계로 축소
-const totalSteps = 6
 const step = ref(1)
 
 const gameForm = reactive({
@@ -73,7 +61,6 @@ const gameForm = reactive({
 const showAddressErrorModal = ref(false)
 const isContest = ref(false)
 
-const progressWidth = computed(() => Math.max(5, Math.round((step.value / totalSteps) * 100)))
 onMounted(() => {
   // 최초 마운트 시 쿼리 파라미터 체크
   const ruleId = route.query.ruleId
@@ -113,17 +100,10 @@ function onModeSelect(mode) {
     // 건너뛰기를 선택한 경우: friendId는 null로 유지
     gameForm.friendId = null
   }
-  step.value = 4 // PlaceSelectPage로 이동
-}
-
-function onPlaceSelect(data) {
-  gameForm.placeRoad = data.placeRoad
-  gameForm.placeDetail = data.placeDetail
-  step.value = 5 // TimeSelectPage로 이동
-}
-
-function onTimeSelect(time) {
-  gameForm.time = time
+  // 장소·시간은 비워서 연다: 장소는 프로필 지역으로 표시되고, 시간은 '시간 미정'
+  gameForm.placeRoad = null
+  gameForm.placeDetail = null
+  gameForm.time = null
   step.value = 6 // GameFinalPage로 이동
   createGame()
 }
@@ -146,7 +126,7 @@ async function createGame() {
     const gameIdRes = await api.post(endpoint, payload)
     return gameIdRes.data
   } catch (e) {
-    alert('게임 생성 실패: ' + (e.response?.data?.message ?? e.message))
+    alert('경기 생성 실패: ' + (e.response?.data?.message ?? e.message))
   }
 }
 
@@ -154,13 +134,13 @@ async function createGame() {
 
 <style scoped>
 .raspy-top {
-  background: #1f2937;
+  background: #262626;
 }
 
 .progress-bar-outer {
   width: 92dvw;
   height: 7px;
-  background: #6b7280;
+  background: #737373;
   border-radius: 5px;
   overflow: hidden;
   position: fixed;

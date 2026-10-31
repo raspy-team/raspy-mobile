@@ -57,7 +57,7 @@
               @img-click="onImagePreview"
             />
           </template>
-          <p v-else class="text-gray-300 text-center text-[15px] mt-16">아직 댓글이 없습니다.</p>
+          <p v-else class="text-gray-300 text-center text-base mt-16">아직 댓글이 없습니다.</p>
         </div>
 
         <!-- 입력창 (항상 바텀) -->
@@ -75,7 +75,7 @@
           >
             <span
               v-if="replyingToId"
-              class="inline-block px-2 py-0.5 mr-2 bg-blue-100 text-blue-600 font-semibold rounded-full text-[14px] whitespace-nowrap cursor-pointer select-none"
+              class="inline-block px-2 py-0.5 mr-2 bg-blue-100 text-blue-600 font-medium rounded-full text-sm whitespace-nowrap cursor-pointer select-none"
               @click="resetInput"
             >
               {{ replyNickname }}
@@ -86,7 +86,7 @@
               ref="commentInputRef"
               type="text"
               placeholder="댓글 달기..."
-              class="flex-1 text-[16px] bg-transparent border-0 focus:ring-0 p-0 m-0 outline-none"
+              class="flex-1 text-base bg-transparent border-0 focus:ring-0 p-0 m-0 outline-none"
               :disabled="isLoading"
               maxlength="1000"
               autocomplete="off"
@@ -396,7 +396,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition:

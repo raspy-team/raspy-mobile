@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col items-center justify-center pt-7 min-h-full px-3 bg-neutral-50">
     <div
-      class="w-full max-w-md bg-white rounded-2xl border border-orange-200 px-6 py-8"
+      class="w-full max-w-md bg-gray-900 rounded-2xl border border-orange-500/30 px-6 py-8"
       style="max-height: 75%"
     >
-      <div class="mb-5 text-orange-600 text-[17px] font-semibold tracking-tight">
+      <div class="mb-5 text-orange-600 text-lg font-semibold tracking-tight">
         ✓ 규칙 생성 완료
       </div>
       <div class="min-w-0 flex items-center gap-2 mb-5">
@@ -18,7 +18,7 @@
           </div>
         </div>
         <div>
-          <span class="text-base font-extrabold text-gray-900 truncate block">
+          <span class="text-base font-bold text-white truncate block">
             {{ result.ruleTitle }}
           </span>
           <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -30,8 +30,8 @@
       </div>
       <div class="flex flex-col gap-2 overflow-auto" style="max-height: 56dvh">
         <div v-for="item in ruleList" :key="item.label" class="py-1 px-2">
-          <div class="text-[13px] text-gray-400 font-medium mb-0.5">{{ item.label }}</div>
-          <div class="text-[15px] text-gray-900 leading-snug font-normal whitespace-pre-line">
+          <div class="text-sm text-gray-400 font-medium mb-0.5">{{ item.label }}</div>
+          <div class="text-base text-white leading-snug font-normal whitespace-pre-line">
             {{ item.value }}
           </div>
         </div>

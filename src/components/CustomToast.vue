@@ -1,13 +1,14 @@
 <template>
   <div
     v-if="toastMsg"
-    class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-5 py-3 rounded-xl shadow-md z-50 animate-toast-in w-[92vw] max-w-sm text-base font-semibold text-center"
+    class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 border border-gray-700 text-white px-5 py-3 rounded-xl z-[10000000] animate-toast-in w-[92vw] max-w-sm text-sm text-center"
+    role="status"
   >
     <div>{{ toastMsg }}</div>
     <button
       v-if="toastGoTo"
       @click="navigate"
-      class="mt-3 bg-white text-orange-600 font-bold py-2 px-4 rounded-lg shadow hover:bg-orange-50 transition"
+      class="mt-2 text-orange-400 font-medium"
     >
       바로가기
     </button>

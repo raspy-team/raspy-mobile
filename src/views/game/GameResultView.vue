@@ -27,12 +27,12 @@
             >
               <h2
                 v-if="winnerIdx == 1"
-                class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
+                class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
                 style="animation: gradient-x 2.5s linear infinite"
               >
                 승리하셨습니다!
               </h2>
-              <h2 v-else class="text-3xl font-extrabold text-gray-500">패배하셨습니다.</h2>
+              <h2 v-else class="text-3xl font-bold text-gray-500">패배하셨습니다.</h2>
             </template>
           </div>
           <div v-else-if="user2.id == currentUserId">
@@ -48,12 +48,12 @@
             >
               <h2
                 v-if="winnerIdx == 2"
-                class="text-3xl font-extrabold bg-gradient-to-r from-blue-400 via-green-400 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
+                class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
                 style="animation: gradient-x 2.5s linear infinite"
               >
                 승리하셨습니다!
               </h2>
-              <h2 v-else class="text-3xl font-extrabold text-gray-500">패배하셨습니다.</h2>
+              <h2 v-else class="text-3xl font-bold text-gray-500">패배하셨습니다.</h2>
             </template>
           </div>
         </div>
@@ -80,7 +80,7 @@
           ></div>
           <div class="relative z-20 flex flex-col items-center">
             <i class="fas fa-crown text-5xl mb-3 text-white drop-shadow champion-glow-anim"></i>
-            <h2 class="text-2xl font-extrabold text-white mb-1 drop-shadow champion-glow-anim">
+            <h2 class="text-2xl font-bold text-white mb-1 drop-shadow champion-glow-anim">
               오늘 새로운 챔피언이 탄생합니다.
             </h2>
           </div>
@@ -89,34 +89,34 @@
         <!-- 점수판 -->
         <div class="flex justify-around items-center py-4">
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">
+            <p class="text-[7rem] sm:text-[10rem] font-bold text-orange-500 mb-3 leading-none">
               {{ user1SetCount }}
             </p>
             <img
               :src="user1.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
-            <p class="text-sm font-semibold text-white">{{ user1.nickname }}</p>
+            <p class="text-sm font-medium text-white">{{ user1.nickname }}</p>
           </div>
           <div class="flex flex-col items-center mx-6 sm:mx-20">
             <span class="text-base sm:text-xl font-bold text-orange-900 mb-2 select-none"
               >경기 종료</span
             >
             <span
-              class="text-[5rem] sm:text-[8rem] font-extrabold text-orange-300 select-none leading-none self-center flex items-center"
+              class="text-[5rem] sm:text-[8rem] font-bold text-orange-300 select-none leading-none self-center flex items-center"
               style="line-height: 1"
               >:</span
             >
           </div>
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-extrabold text-orange-500 mb-3 leading-none">
+            <p class="text-[7rem] sm:text-[10rem] font-bold text-orange-500 mb-3 leading-none">
               {{ user2SetCount }}
             </p>
             <img
               :src="user2.profileUrl || defaultImg"
               class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
             />
-            <p class="text-sm font-semibold text-white">{{ user2.nickname }}</p>
+            <p class="text-sm font-medium text-white">{{ user2.nickname }}</p>
           </div>
         </div>
 
@@ -134,13 +134,13 @@
             <div class="flex gap-2 justify-center">
               <button
                 @click="openCamera"
-                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:brightness-110 transition"
+                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:brightness-110 transition"
               >
                 <i class="fas fa-camera mr-1"></i> 사진 촬영
               </button>
               <button
                 @click="openVideoRecorder"
-                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:brightness-110 transition"
+                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:brightness-110 transition"
               >
                 <i class="fas fa-video mr-1"></i> 동영상 촬영
               </button>
@@ -161,7 +161,7 @@
             <!-- 선택된 미디어 (드래그로 순서 변경 가능) -->
             <div v-if="selectedPictures.length > 0">
               <div class="flex items-center justify-between mb-2">
-                <p class="text-sm font-semibold text-green-400">
+                <p class="text-sm font-medium text-green-400">
                   <i class="fas fa-check-circle mr-1"></i>
                   선택됨 ({{ selectedPictures.length }}/5)
                 </p>
@@ -215,7 +215,7 @@
                   </div>
 
                   <div
-                    class="absolute top-1 left-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold pointer-events-none"
+                    class="absolute top-1 left-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium pointer-events-none"
                   >
                     {{ index + 1 }}
                   </div>
@@ -232,7 +232,7 @@
             <!-- 선택 가능한 미디어들 -->
             <div v-if="unselectedPictures.length > 0">
               <div class="flex items-center justify-between mb-2">
-                <p class="text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+                <p class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
                   <i class="fas fa-hand-pointer text-orange-400 text-xs"></i>
                   탭하여 선택
                 </p>
@@ -261,7 +261,7 @@
                       <i class="fas fa-play-circle text-white text-2xl"></i>
                     </div>
                     <div
-                      class="absolute bottom-0.5 left-0.5 bg-black bg-opacity-70 text-white text-[10px] px-1 py-0.5 rounded"
+                      class="absolute bottom-0.5 left-0.5 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded"
                     >
                       {{ formatDuration(pic.duration) }}
                     </div>
@@ -271,7 +271,7 @@
                   <div class="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/80 transition-all duration-200 flex items-center justify-center">
                     <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-1">
                       <i class="fas fa-plus-circle text-white text-2xl"></i>
-                      <span class="text-white text-[10px] font-semibold">선택</span>
+                      <span class="text-white text-xs font-medium">선택</span>
                     </div>
                   </div>
 
@@ -289,13 +289,13 @@
             <div v-if="allPictures.length < 5" class="flex gap-2">
               <button
                 @click="openCamera"
-                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-gray-700 transition"
+                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
               >
                 <i class="fas fa-camera mr-1"></i> 사진 추가 ({{ allPictures.length }}/5)
               </button>
               <button
                 @click="openVideoRecorder"
-                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-semibold hover:bg-gray-700 transition"
+                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
               >
                 <i class="fas fa-video mr-1"></i> 동영상 추가 ({{ allPictures.length }}/5)
               </button>
@@ -328,11 +328,11 @@
                   :key="'manner' + n"
                   @click="setManner(n)"
                   :class="
-                    n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-600'
+                    n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-400'
                   "
                   class="text-2xl cursor-pointer hover:scale-110 hover:text-orange-300 transition-all"
                 ></i>
-                <span v-if="review.manner > 0" class="text-sm font-semibold text-orange-400 ml-1"
+                <span v-if="review.manner > 0" class="text-sm font-medium text-orange-400 ml-1"
                   >{{ review.manner }}/5</span
                 >
               </div>
@@ -351,11 +351,11 @@
                   :class="
                     n <= review.performance
                       ? 'fas fa-star text-orange-400'
-                      : 'far fa-star text-gray-600'
+                      : 'far fa-star text-gray-400'
                   "
                   class="text-2xl cursor-pointer hover:scale-110 hover:text-orange-300 transition-all"
                 ></i>
-                <span v-if="review.performance > 0" class="text-sm font-semibold text-orange-400 ml-1"
+                <span v-if="review.performance > 0" class="text-sm font-medium text-orange-400 ml-1"
                   >{{ review.performance }}/5</span
                 >
               </div>
@@ -387,7 +387,7 @@
               <!-- 모달 컨텐츠 -->
               <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden flex flex-col max-h-[85vh]">
                 <!-- 헤더 -->
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gradient-to-r from-gray-800/80 to-gray-900/80">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gray-800/80 ">
                   <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-orange-500/15 flex items-center justify-center">
                       <i class="fas fa-comment-dots text-orange-400"></i>
@@ -455,11 +455,11 @@
                 :key="'rule' + n"
                 @click="setRuleRating(n)"
                 :class="
-                  n <= ruleRating ? 'fas fa-star text-purple-400' : 'far fa-star text-gray-600'
+                  n <= ruleRating ? 'fas fa-star text-purple-400' : 'far fa-star text-gray-400'
                 "
                 class="text-2xl cursor-pointer hover:scale-110 hover:text-purple-300 transition-all"
               ></i>
-              <span v-if="ruleRating > 0" class="text-sm font-semibold text-purple-400 ml-1"
+              <span v-if="ruleRating > 0" class="text-sm font-medium text-purple-400 ml-1"
                 >{{ ruleRating }}/5</span
               >
             </div>
@@ -490,7 +490,7 @@
               <!-- 모달 컨텐츠 -->
               <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden flex flex-col max-h-[85vh]">
                 <!-- 헤더 -->
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gradient-to-r from-gray-800/80 to-gray-900/80">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gray-800/80 ">
                   <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center">
                       <i class="fas fa-comment-dots text-purple-400"></i>
@@ -548,7 +548,7 @@
     <button
       @click="submitReviewAndGoHome"
       :disabled="isSubmitting"
-      class="flex-shrink-0 w-full text-gray-800 py-4 bg-orange-500 text-white font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+      class="flex-shrink-0 w-full text-gray-100 py-4 bg-orange-500 text-white font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
     >
       제출하기
     </button>
@@ -561,9 +561,9 @@
       class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-900 bg-opacity-95"
     >
       <div
-        class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500 border-orange-200 mb-4"
+        class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500 border-orange-500/30 mb-4"
       ></div>
-      <p class="text-lg font-semibold text-gray-700">제출 중...</p>
+      <p class="text-lg font-semibold text-gray-200">제출 중...</p>
       <p class="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
     </div>
 
@@ -601,13 +601,13 @@
         <div class="flex justify-center gap-3">
           <button
             @click="cancelDeletePicture"
-            class="flex-1 px-4 py-2.5 bg-gray-700 text-gray-300 rounded-lg font-semibold text-sm hover:bg-gray-600 transition"
+            class="flex-1 px-4 py-2.5 bg-gray-700 text-gray-300 rounded-lg font-medium text-sm hover:bg-gray-600 transition"
           >
             취소
           </button>
           <button
             @click="confirmDeletePicture"
-            class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-semibold text-sm shadow hover:bg-red-600 transition"
+            class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-medium text-sm shadow hover:bg-red-600 transition"
           >
             삭제
           </button>
@@ -620,6 +620,8 @@
 </template>
 
 <script setup>
+import { useBackClose } from '../../composable/useBackClose'
+
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -1139,6 +1141,9 @@ async function onShare() {
     }
   }
 }
+
+// 뒤로가기는 열린 모달부터 닫는다
+useBackClose(showReviewModal, showRuleReviewModal, showDeleteConfirm)
 </script>
 
 <style scoped>

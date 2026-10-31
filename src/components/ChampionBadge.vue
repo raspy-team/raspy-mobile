@@ -8,7 +8,7 @@
 
     <!-- 아이콘 + 텍스트 -->
     <i class="fas fa-crown text-white text-sm z-10"></i>
-    <span class="text-xs font-semibold text-white z-10 animate-pulse-slow">
+    <span class="text-xs font-medium text-white z-10">
       챔피언
     </span>
   </span>

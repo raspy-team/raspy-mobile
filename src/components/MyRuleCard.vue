@@ -11,7 +11,7 @@
           />
         </div>
         <div>
-          <span class="text-base font-extrabold text-gray-900 truncate block">
+          <span class="text-base font-bold text-white truncate block">
             {{ rule.ruleTitle }}
           </span>
           <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -26,7 +26,7 @@
       <div v-if="rule.editRequestStatus" class="flex flex-col items-end gap-1">
         <span
           :class="[
-            'text-xs font-bold px-2 py-1 rounded-full',
+            'text-xs font-medium px-2 py-1 rounded-full',
             getStatusBadgeClass(rule.editRequestStatus),
           ]"
         >
@@ -42,19 +42,19 @@
       </div>
     </div>
 
-    <div class="mb-4 text-gray-600 text-sm">
+    <div class="mb-4 text-gray-400 text-sm">
       {{ rule.ruleGoal }}
     </div>
 
     <!-- 거절 사유 표시 -->
     <div
       v-if="rule.editRequestStatus === 'REJECTED' && rule.rejectionReason"
-      class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg"
+      class="mb-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg"
     >
       <div class="flex items-start gap-2">
         <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
         <div class="flex-1">
-          <p class="text-xs font-bold text-red-700 mb-1">거절 사유</p>
+          <p class="text-xs font-medium text-red-400 mb-1">거절 사유</p>
           <p class="text-xs text-red-600">{{ rule.rejectionReason }}</p>
         </div>
       </div>
@@ -62,7 +62,7 @@
 
     <!-- 통계 & 액션 -->
     <div class="flex justify-between items-center mt-4 gap-4">
-      <div class="flex flex-col text-xs text-gray-600 gap-1.5">
+      <div class="flex flex-col text-xs text-gray-400 gap-1.5">
         <div class="flex items-center gap-1.5">
           <i class="fas fa-star text-yellow-500"></i>
           <span class="font-semibold">평점: {{ rule.rating ? rule.rating.toFixed(1) : '-' }}</span>
@@ -123,13 +123,13 @@ const showRuleDetail = ref(false)
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'PENDING':
-      return 'bg-yellow-100 text-yellow-700'
+      return 'bg-yellow-500/15 text-yellow-400'
     case 'APPROVED':
-      return 'bg-green-100 text-green-700'
+      return 'bg-green-500/15 text-green-400'
     case 'REJECTED':
-      return 'bg-red-100 text-red-700'
+      return 'bg-red-500/15 text-red-400'
     default:
-      return 'bg-gray-100 text-gray-700'
+      return 'bg-gray-800 text-gray-200'
   }
 }
 
@@ -164,14 +164,12 @@ function formatDate(dateStr) {
 
 <style scoped>
 .card-style {
-  background: #fafafb;
+  background: #262626;
   border-radius: 1.3rem;
-  box-shadow:
-    0 2px 14px 0 rgba(31, 41, 55, 0.04),
-    0 2px 8px 0 rgba(251, 146, 60, 0.06);
+  box-shadow: none;
   padding: 1.45rem 1.15rem 1.4rem 1.15rem;
   margin-bottom: 1.05rem;
-  border: 1.2px solid #f6f6f6;
+  border: 1.2px solid #262626;
   transition:
     box-shadow 0.2s,
     border 0.15s;
@@ -179,10 +177,8 @@ function formatDate(dateStr) {
 }
 
 .card-style:hover {
-  box-shadow:
-    0 8px 36px 0 rgba(251, 146, 60, 0.1),
-    0 2px 8px 0 rgba(0, 0, 0, 0.05);
-  border-color: #fed7aa;
+  box-shadow: none;
+  border-color: #9a3412;
 }
 
 .fade-enter-active,

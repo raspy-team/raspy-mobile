@@ -21,7 +21,7 @@
               />
             </div>
             <div>
-              <div class="text-base font-extrabold text-white mb-1 truncate">
+              <div class="text-base font-bold text-white mb-1 truncate">
                 {{ rule.ruleTitle }}
               </div>
               <div class="flex gap-1 items-center mt-1 text-xs text-orange-400 font-medium">
@@ -70,7 +70,7 @@
           <ModalSection label="6. 반칙" :value="rule.ruleFoul" />
           <ModalSection label="7. 기타" :value="rule.ruleExtraInfo" />
 
-          <div class="pt-2 space-y-3 text-[15px] text-gray-300 border-t border-gray-600">
+          <div class="pt-2 space-y-3 text-base text-gray-300 border-t border-gray-600">
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-400 font-medium">세트 승리 기준</span>
               <span class="text-white font-semibold">{{ rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달' }}</span>
@@ -150,10 +150,10 @@ function goProfile(userId) {
   width: 7px;
 }
 .flex-1::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: #525252;
   border-radius: 6px;
 }
 .flex-1::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: #737373;
 }
 </style>

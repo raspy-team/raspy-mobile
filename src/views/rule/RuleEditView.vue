@@ -21,7 +21,7 @@
         <div class="flex items-start">
           <i class="fas fa-info-circle text-blue-400 mt-0.5 mr-3"></i>
           <div class="flex-1">
-            <p class="text-sm font-semibold text-blue-300 mb-1">규칙 수정 요청</p>
+            <p class="text-sm font-medium text-blue-300 mb-1">규칙 수정 요청</p>
             <p class="text-xs text-blue-400">
               수정 내용은 관리자 승인 후 반영됩니다. 기존 값이 미리 채워져 있으니 수정할 부분만
               변경해주세요.
@@ -191,13 +191,13 @@ onMounted(() => {
 
 <style scoped>
 .raspy-top {
-  background: #1f2937;
+  background: #262626;
 }
 
 .progress-bar-outer {
   width: 92dvw;
   height: 7px;
-  background: #6b7280;
+  background: #737373;
   border-radius: 5px;
   overflow: hidden;
   position: fixed;

@@ -5,29 +5,23 @@
       @click.self="$emit('close')"
     >
       <div
-        class="bg-white rounded-2xl p-7 shadow-2xl max-w-xs w-full relative overflow-visible animate-modalpop"
+        class="bg-gray-900 rounded-2xl p-7 shadow-2xl max-w-xs w-full relative overflow-visible animate-modalpop"
       >
         <!-- Close Button (메인 뷰일 때만) -->
         <button
           v-if="currentView === 'main'"
           @click="$emit('close')"
-          class="absolute right-6 top-6 text-gray-400 hover:text-red-400 text-2xl z-10 transition-colors duration-150 bg-white rounded-full shadow-md p-1"
+          class="absolute right-6 top-6 text-gray-400 hover:text-red-400 text-2xl z-10 transition-colors duration-150 bg-gray-900 rounded-full shadow-md p-1"
           aria-label="닫기"
         >
-          <svg width="32" height="32" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="48" fill="#f3f4f6" />
-            <path
-              d="M26.6667 79.1666L20.8334 73.3333L44.1667 49.9999L20.8334 26.6666L26.6667 20.8333L50 44.1666L73.3334 20.8333L79.1667 26.6666L55.8334 49.9999L79.1667 73.3333L73.3334 79.1666L50 55.8333L26.6667 79.1666Z"
-              fill="#e11d48"
-            />
-          </svg>
+          <i class="fas fa-xmark text-xl w-8 h-8 flex items-center justify-center"></i>
         </button>
 
         <!-- Back Button (서브 뷰일 때만) -->
         <button
           v-if="currentView !== 'main'"
           @click="goBackToMain"
-          class="absolute left-6 top-6 text-gray-600 hover:text-gray-800 text-xl z-10 transition-colors duration-150"
+          class="absolute left-6 top-6 text-gray-400 hover:text-gray-100 text-xl z-10 transition-colors duration-150"
           aria-label="뒤로가기"
         >
           <i class="fas fa-chevron-left"></i>
@@ -35,7 +29,7 @@
 
         <!-- Title -->
         <div class="flex flex-col gap-2 items-center mb-5 mt-1">
-          <span class="text-base font-bold text-gray-800 text-center">
+          <span class="text-base font-bold text-gray-100 text-center">
             <template v-if="currentView === 'main'">{{ nickname }}님의 통계</template>
             <template v-else-if="currentView === 'champions'">챔피언 목록</template>
             <template v-else-if="currentView === 'friends'">친구 목록</template>
@@ -46,7 +40,7 @@
         <div v-if="currentView === 'main'" class="grid grid-cols-2 gap-4 text-center">
           <!-- 승 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            class="flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg shadow-sm"
           >
             <span class="my-1">
               <svg width="60" height="56" viewBox="0 0 100 100">
@@ -56,12 +50,12 @@
                 />
               </svg>
             </span>
-            <span class="text-lg font-extrabold text-[#4d4d4d]">{{ stats.wins }}</span>
-            <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">승</span>
+            <span class="text-lg font-bold text-[#4d4d4d]">{{ stats.wins }}</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">승</span>
           </div>
           <!-- 무 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            class="flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg shadow-sm"
           >
             <span class="my-1">
               <svg width="60" height="56" viewBox="0 0 100 100">
@@ -71,12 +65,12 @@
                 />
               </svg>
             </span>
-            <span class="text-lg font-extrabold text-[#4d4d4d]">{{ stats.draws }}</span>
-            <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">무</span>
+            <span class="text-lg font-bold text-[#4d4d4d]">{{ stats.draws }}</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">무</span>
           </div>
           <!-- 패 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            class="flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg shadow-sm"
           >
             <span class="my-1">
               <svg width="60" height="56" viewBox="0 0 100 100">
@@ -86,12 +80,12 @@
                 />
               </svg>
             </span>
-            <span class="text-lg font-extrabold text-[#4d4d4d]">{{ stats.losses }}</span>
-            <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">패</span>
+            <span class="text-lg font-bold text-[#4d4d4d]">{{ stats.losses }}</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">패</span>
           </div>
           <!-- 플레이 타임 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            class="flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg shadow-sm"
           >
             <span class="my-1">
               <svg width="60" height="56" viewBox="0 0 100 100">
@@ -101,12 +95,12 @@
                 />
               </svg>
             </span>
-            <span class="text-lg font-extrabold text-[#4d4d4d]">{{ formattedPlayTime }}</span>
-            <span class="text-[0.55rem] text-gray-500 font-semibold mt-0.5">플레이 시간</span>
+            <span class="text-lg font-bold text-[#4d4d4d]">{{ formattedPlayTime }}</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">플레이 시간</span>
           </div>
           <!-- 퍼포먼스 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            class="flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg shadow-sm"
           >
             <span class="my-1">
               <svg width="60" height="56" viewBox="0 0 100 100">
@@ -119,11 +113,11 @@
             <span class="text-lg font-extrabold text-[#4d4d4d]">{{
               stats.performance == null ? '-' : stats.performance.toFixed(1)
             }}</span>
-            <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">퍼포먼스</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">퍼포먼스</span>
           </div>
           <!-- 매너 -->
           <div
-            class="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm"
+            class="flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg shadow-sm"
           >
             <span class="my-1">
               <svg width="60" height="56" viewBox="0 0 100 100">
@@ -136,7 +130,7 @@
             <span class="text-lg font-extrabold text-[#4d4d4d]">{{
               manner == null ? '-' : manner.toFixed(1)
             }}</span>
-            <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">매너</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">매너</span>
           </div>
           <!-- 친구 -->
           <div
@@ -156,18 +150,18 @@
               </svg>
             </span>
             <span class="text-lg font-extrabold text-[#4d4d4d]"> {{ stats.friends }}</span>
-            <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">친구</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">친구</span>
           </div>
           <!-- 챔피언 -->
           <div
             @click="showChampions"
-            class="relative flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg shadow-sm transition-all bg-yellow-50 border-yellow-300 border-2 border-transparent cursor-pointer group"
+            class="relative flex flex-col items-center justify-center p-3 bg-gray-800 rounded-lg shadow-sm transition-all bg-yellow-500/10 border-yellow-300 border-2 border-transparent cursor-pointer group"
           >
             <!-- 클릭 가능 표시 -->
             <div class="absolute top-2 right-2 opacity-100 transition-opacity">
               <i class="fas fa-chevron-right text-yellow-600 text-xs"></i>
             </div>
-            <span class="text-lg font-extrabold text-gray-600 relative">
+            <span class="text-lg font-extrabold text-gray-400 relative">
               <svg class="" width="60" height="56" viewBox="0 0 150 135">
                 <path
                   d="M22.5 135V120H127.5V135H22.5ZM22.5 108.75L12.9375 48.5625C12.6875 48.5625 12.4062 48.5938 12.0938 48.6562C11.7812 48.7188 11.5 48.75 11.25 48.75C8.125 48.75 5.46875 47.6562 3.28125 45.4688C1.09375 43.2812 0 40.625 0 37.5C0 34.375 1.09375 31.7188 3.28125 29.5312C5.46875 27.3438 8.125 26.25 11.25 26.25C14.375 26.25 17.0312 27.3438 19.2188 29.5312C21.4062 31.7188 22.5 34.375 22.5 37.5C22.5 38.375 22.4062 39.1875 22.2188 39.9375C22.0312 40.6875 21.8125 41.375 21.5625 42L45 52.5L68.4375 20.4375C67.0625 19.4375 65.9375 18.125 65.0625 16.5C64.1875 14.875 63.75 13.125 63.75 11.25C63.75 8.125 64.8438 5.46875 67.0312 3.28125C69.2188 1.09375 71.875 0 75 0C78.125 0 80.7812 1.09375 82.9688 3.28125C85.1562 5.46875 86.25 8.125 86.25 11.25C86.25 13.125 85.8125 14.875 84.9375 16.5C84.0625 18.125 82.9375 19.4375 81.5625 20.4375L105 52.5L128.438 42C128.188 41.375 127.969 40.6875 127.781 39.9375C127.594 39.1875 127.5 38.375 127.5 37.5C127.5 34.375 128.594 31.7188 130.781 29.5312C132.969 27.3438 135.625 26.25 138.75 26.25C141.875 26.25 144.531 27.3438 146.719 29.5312C148.906 31.7188 150 34.375 150 37.5C150 40.625 148.906 43.2812 146.719 45.4688C144.531 47.6562 141.875 48.75 138.75 48.75C138.5 48.75 138.219 48.7188 137.906 48.6562C137.594 48.5938 137.312 48.5625 137.062 48.5625L127.5 108.75H22.5ZM35.25 93.75H114.75L119.625 62.4375L99.9375 71.0625L75 36.75L50.0625 71.0625L30.375 62.4375L35.25 93.75Z"
@@ -176,11 +170,11 @@
               </svg>
             </span>
             <span
-              class="block text-[1.1rem] font-extrabold drop-shadow mt-1"
+              class="block text-lg font-bold drop-shadow mt-1"
               :style="championCount > 0 ? 'color : #F5C542' : 'color : #4d4d4d'"
               >{{ championCount }}</span
             >
-            <span class="text-[0.65rem] text-gray-500 font-semibold mt-0.5">챔피언</span>
+            <span class="text-xs text-gray-500 font-medium mt-0.5">챔피언</span>
           </div>
         </div>
 
@@ -190,7 +184,7 @@
             <div
               v-for="(champion, index) in myChampions"
               :key="index"
-              class="relative p-4 rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all group"
+              class="relative p-4 rounded-xl bg-gray-900 border border-gray-800 shadow-md hover:shadow-lg transition-all group"
             >
               <div class="flex items-center gap-3">
                 <!-- 순위 뱃지 -->
@@ -199,22 +193,22 @@
                     <!-- 금메달 -->
                     <div
                       v-if="index === 0"
-                      class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full"
+                      class="absolute inset-0 bg-yellow-400 rounded-full"
                     ></div>
                     <!-- 은메달 -->
                     <div
                       v-else-if="index === 1"
-                      class="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full"
+                      class="absolute inset-0 bg-gray-300 rounded-full"
                     ></div>
                     <!-- 동메달 -->
                     <div
                       v-else-if="index === 2"
-                      class="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full"
+                      class="absolute inset-0 bg-orange-400 rounded-full"
                     ></div>
                     <!-- 그 외 -->
                     <div
                       v-else
-                      class="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full"
+                      class="absolute inset-0 bg-blue-400 rounded-full"
                     ></div>
 
                     <i class="fas fa-trophy text-white text-2xl relative z-10 drop-shadow-md"></i>
@@ -228,10 +222,10 @@
                       }"
                     >
                       <span
-                        class="text-xs font-black"
+                        class="text-xs font-medium"
                         :class="{
                           'text-yellow-600': index === 0,
-                          'text-gray-600': index === 1,
+                          'text-gray-400': index === 1,
                           'text-orange-600': index === 2,
                           'text-blue-600': index > 2,
                         }"
@@ -243,10 +237,10 @@
                 </div>
 
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-sm font-bold text-gray-900 truncate mb-1">
+                  <h3 class="text-sm font-medium text-white truncate mb-1">
                     {{ champion.ruleTitle }}
                   </h3>
-                  <p class="text-xs text-gray-600 flex items-center gap-1">
+                  <p class="text-xs text-gray-400 flex items-center gap-1">
                     <i class="fas fa-map-marker-alt text-gray-400"></i>
                     {{ champion.region }}
                   </p>
@@ -261,12 +255,9 @@
           </div>
           <div v-else class="text-center text-gray-400 py-10">
             <div class="relative inline-block">
-              <div
-                class="absolute inset-0 bg-gray-200 rounded-full blur-2xl opacity-30 animate-pulse"
-              ></div>
               <i class="fas fa-trophy text-6xl mb-3 opacity-20 relative"></i>
             </div>
-            <p class="text-sm font-semibold">아직 획득한 챔피언이 없습니다</p>
+            <p class="text-sm font-medium">아직 획득한 챔피언이 없습니다</p>
             <p class="text-xs text-gray-400 mt-2">경기에서 우승하여 챔피언 타이틀을 획득하세요!</p>
           </div>
         </div>
@@ -281,7 +272,7 @@
             <div
               v-for="friend in friendsList"
               :key="friend.id"
-              class="p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all"
+              class="p-3 bg-gray-800 rounded-xl border border-gray-800 hover:bg-gray-800 transition-all"
             >
               <div class="flex items-center gap-3">
                 <img
@@ -291,10 +282,10 @@
                   alt="Friend Profile"
                 />
                 <div class="flex-1 min-w-0 cursor-pointer" @click="goToFriendProfile(friend.id)">
-                  <h3 class="text-sm font-bold text-gray-900 truncate">
+                  <h3 class="text-sm font-medium text-white truncate">
                     {{ friend.nickname }}
                   </h3>
-                  <p v-if="friend.intro" class="text-xs text-gray-600 mt-0.5 truncate">
+                  <p v-if="friend.intro" class="text-xs text-gray-400 mt-0.5 truncate">
                     {{ friend.intro }}
                   </p>
                 </div>
@@ -302,7 +293,7 @@
                 <button
                   v-if="isMyProfile"
                   @click.stop="openUnfriendModal(friend)"
-                  class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all"
+                  class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-500/10 hover:bg-red-500/15 rounded-lg border border-red-500/30 transition-all"
                 >
                   <i class="fas fa-user-minus mr-1"></i>
                   끊기
@@ -326,15 +317,15 @@
       class="fixed inset-0 bg-black/50 flex justify-center items-center z-[60]"
       @click.self="cancelUnfriend"
     >
-      <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-modalpop">
+      <div class="bg-gray-900 rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-modalpop">
         <div class="text-center mb-6">
           <div
-            class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-16 h-16 bg-red-500/15 rounded-full flex items-center justify-center mx-auto mb-4"
           >
             <i class="fas fa-user-minus text-red-600 text-2xl"></i>
           </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">친구를 끊으시겠습니까?</h3>
-          <p class="text-sm text-gray-600 mb-1">
+          <h3 class="text-lg font-bold text-white mb-2">친구를 끊으시겠습니까?</h3>
+          <p class="text-sm text-gray-400 mb-1">
             {{ friendToUnfriend?.nickname }}님과의 친구 관계가 삭제됩니다.
           </p>
           <p class="text-xs text-gray-500">상대는 내가 친구를 끊은 것을 알 수 없습니다.</p>
@@ -342,7 +333,7 @@
         <div class="flex gap-3">
           <button
             @click="cancelUnfriend"
-            class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+            class="flex-1 py-3 px-4 bg-gray-800 text-gray-200 font-semibold rounded-xl hover:bg-gray-700 transition-all"
           >
             취소
           </button>

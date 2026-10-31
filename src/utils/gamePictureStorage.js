@@ -1,5 +1,5 @@
 /**
- * 게임 사진 저장/조회를 위한 유틸리티
+ * 경기 사진 저장/조회를 위한 유틸리티
  * gameId별로 촬영한 사진들을 IndexedDB에 저장/관리 (대용량 동영상 지원)
  */
 
@@ -38,7 +38,7 @@ async function getDB() {
 }
 
 /**
- * 특정 게임의 사진/동영상 목록 조회
+ * 특정 경기의 사진/동영상 목록 조회
  * @param {string|number} gameId
  * @returns {Promise<Array<{id: string, dataUrl: string, timestamp: number, type: 'image'|'video', duration?: number}>>}
  */
@@ -70,7 +70,7 @@ export async function getGamePictures(gameId) {
 }
 
 /**
- * 특정 게임에 사진 추가
+ * 특정 경기에 사진 추가
  * @param {string|number} gameId
  * @param {string} dataUrl - base64 이미지 데이터
  * @returns {Promise<Array<{id: string, dataUrl: string, timestamp: number, type: 'image'}>>} 업데이트된 사진 목록
@@ -106,7 +106,7 @@ export async function addGamePicture(gameId, dataUrl) {
 }
 
 /**
- * 특정 게임에 동영상 추가
+ * 특정 경기에 동영상 추가
  * @param {string|number} gameId
  * @param {string} dataUrl - base64 동영상 데이터
  * @param {number} duration - 동영상 길이 (초)
@@ -144,7 +144,7 @@ export async function addGameVideo(gameId, dataUrl, duration) {
 }
 
 /**
- * 특정 게임의 사진 삭제
+ * 특정 경기의 사진 삭제
  * @param {string|number} gameId
  * @param {string} pictureId
  * @returns {Promise<Array<{id: string, dataUrl: string, timestamp: number}>>} 업데이트된 사진 목록
@@ -169,7 +169,7 @@ export async function removeGamePicture(gameId, pictureId) {
 }
 
 /**
- * 특정 게임의 사진 순서 업데이트
+ * 특정 경기의 사진 순서 업데이트
  * @param {string|number} gameId
  * @param {Array<{id: string, dataUrl: string, timestamp: number}>} orderedPictures
  */
@@ -201,7 +201,7 @@ export async function updateGamePicturesOrder(gameId, orderedPictures) {
 }
 
 /**
- * 특정 게임의 모든 사진 삭제
+ * 특정 경기의 모든 사진 삭제
  * @param {string|number} gameId
  */
 export async function clearGamePictures(gameId) {

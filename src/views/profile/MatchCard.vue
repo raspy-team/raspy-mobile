@@ -10,19 +10,19 @@
     <div class="absolute right-6 top-6 z-10">
       <span
         v-if="isWin"
-        class="bg-orange-500 text-white text-base px-4 py-1.5 rounded-full font-extrabold shadow-lg border-2 border-orange-500 drop-shadow"
+        class="bg-orange-500 text-white text-base px-4 py-1.5 rounded-full font-bold shadow-lg border-2 border-orange-500 drop-shadow"
         style="letter-spacing: 0.06em"
         >승리</span
       >
       <span
         v-else-if="isDraw"
-        class="bg-gray-300 text-gray-700 text-base px-4 py-1.5 rounded-full font-extrabold border shadow"
+        class="bg-gray-300 text-gray-200 text-base px-4 py-1.5 rounded-full font-bold border shadow"
         style="letter-spacing: 0.05em"
         >무승부</span
       >
       <span
         v-else
-        class="bg-blue-400 text-white text-base px-4 py-1.5 rounded-full font-extrabold border shadow"
+        class="bg-blue-400 text-white text-base px-4 py-1.5 rounded-full font-bold border shadow"
         style="letter-spacing: 0.05em"
         >패배</span
       >
@@ -38,7 +38,7 @@
                     </div>
                   </div>
                   <div>
-                    <span class="text-base font-extrabold text-white truncate block">
+                    <span class="text-base font-bold text-white truncate block">
                       {{ game.ruleTitle }}
                     </span>
                     <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -51,7 +51,7 @@
     <div class="flex flex-col items-center mt-0">
       <div class="flex flex-col items-center w-full justify-center">
         <span
-          class="text-4xl font-black w-full"
+          class="text-4xl font-bold w-full"
           :class="isWin ? 'text-orange-500' : isDraw ? 'text-gray-500' : 'text-blue-500'"
         >
           <div class="flex justify-between items-center">
@@ -62,20 +62,20 @@
                   class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
                 />
                 <div
-                  class="font-semibold text-gray-300 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                  class="font-medium text-gray-300 text-sm mt-[-5px] truncate max-w-[160px]"
                 >
                   나
                 </div>
               </div>
-              <div class="font-extrabold w-[20%]">
+              <div class="font-bold w-[20%]">
                 {{ game.myScore }}
               </div>
             </div>
 
-            <div class="flex justify-center font-extrabold text-2xl w-[16%]">:</div>
+            <div class="flex justify-center font-bold text-2xl w-[16%]">:</div>
 
             <div class="flex items-center gap-3 justify-end w-[42%]">
-              <div class="font-extrabold w-[20%]">
+              <div class="font-bold w-[20%]">
                 {{ game.opponentScore }}
               </div>
               <div class="flex flex-col items-center pt-7 w-[80%]">
@@ -84,7 +84,7 @@
                   class="w-12 h-12 rounded-full border-2 border-orange-400 shadow"
                 />
                 <div
-                  class="font-semibold text-gray-300 text-[0.88rem] mt-[-5px] truncate max-w-[160px]"
+                  class="font-medium text-gray-300 text-sm mt-[-5px] truncate max-w-[160px]"
                 >
                   {{ game.opponentNickname }}
                 </div>
@@ -98,12 +98,12 @@
       <button
         type="button"
         @click.stop="showSetResults = !showSetResults"
-        class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-gray-700 border border-gray-600 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-[1.05rem] text-white transition active:bg-gray-600 hover:bg-gray-600 select-none cursor-pointer outline-none focus:outline-none"
+        class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-gray-700 border border-gray-600 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-base text-white transition active:bg-gray-600 hover:bg-gray-600 select-none cursor-pointer outline-none focus:outline-none"
         style="outline: none"
       >
         <span
-          :class="showSetResults ? 'text-orange-500' : 'text-gray-900'"
-          class="tracking-tight text-sm font-semibold"
+          :class="showSetResults ? 'text-orange-500' : 'text-white'"
+          class="tracking-tight text-sm font-medium"
           >{{ showSetResults ? '세트 결과 접기' : '세트 결과 보기' }}</span
         >
         <i
@@ -111,7 +111,7 @@
             'fas',
             showSetResults ? 'fa-chevron-up' : 'fa-chevron-down',
             showSetResults ? 'text-orange-400' : 'text-gray-500',
-            'text-[19px]',
+            'text-lg',
             'transition-transform',
           ]"
         ></i>
@@ -125,15 +125,15 @@
             class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-700 font-semibold shadow-sm mt-2"
             :class="
               set.winnerIdx === 1
-                ? 'border-orange-200'
+                ? 'border-orange-500/30'
                 : set.winnerIdx === 2
                   ? 'border-blue-200'
-                  : 'border-gray-200'
+                  : 'border-gray-800'
             "
           >
-            <span class="text-xs font-bold text-gray-500 flex-1">{{ set.setIdx }}세트</span>
+            <span class="text-xs font-medium text-gray-500 flex-1">{{ set.setIdx }}세트</span>
             <span
-              class="text-lg font-extrabold"
+              class="text-lg font-bold"
               :class="
                 set.winnerIdx === 1
                   ? 'text-orange-500'
@@ -156,7 +156,7 @@
                 "
               ></i>
               <span
-                class="text-xs font-bold"
+                class="text-xs font-medium"
                 :class="
                   set.winnerIdx === 1
                     ? 'text-orange-500'
@@ -177,7 +177,7 @@
       <template
         v-if="game.review || game.mannerScore !== undefined || game.performanceScore !== undefined"
       >
-        <div class="text-xs text-gray-400 font-bold mb-1">
+        <div class="text-xs text-gray-400 font-medium mb-1">
           {{ game.opponent?.nickname ?? '상대' }}님의 리뷰
         </div>
         <div v-if="game.review" class="flex items-start gap-2 mb-2">

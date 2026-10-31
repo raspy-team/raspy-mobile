@@ -148,7 +148,7 @@
             <div>
               <span
                 :class="[
-                  'px-3 py-1 rounded-full text-xs font-semibold',
+                  'px-3 py-1 rounded-full text-xs font-medium',
                   getStatusClass(request.status),
                 ]"
               >
@@ -393,7 +393,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 
 .fade-enter-active,
 .fade-leave-active {

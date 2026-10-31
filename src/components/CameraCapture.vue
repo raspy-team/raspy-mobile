@@ -4,9 +4,9 @@
     v-if="isVisible"
     class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center"
   >
-    <div class="w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div class="w-full max-w-md mx-4 bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
       <!-- 헤더 -->
-      <div class="px-6 py-5 bg-gradient-to-r from-orange-500 to-orange-600">
+      <div class="px-6 py-5 bg-orange-500 ">
         <h2 class="text-white text-xl font-bold text-center">
           {{ title || '경기 시작 인증샷' }}
         </h2>
@@ -19,7 +19,7 @@
       <div v-if="capturedImage" class="p-4">
         <img
           :src="capturedImage"
-          class="w-full aspect-square object-cover rounded-xl border-2 border-gray-200"
+          class="w-full aspect-square object-cover rounded-xl border-2 border-gray-800"
           alt="Selected"
         />
       </div>
@@ -27,11 +27,11 @@
       <!-- 설명 -->
       <div v-else class="p-8">
         <div class="flex flex-col items-center justify-center gap-4 text-center">
-          <div class="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center">
+          <div class="w-24 h-24 rounded-full bg-orange-500/15 flex items-center justify-center">
             <i class="fas fa-camera text-orange-500 text-4xl"></i>
           </div>
           <div class="space-y-2">
-            <p class="text-gray-700 font-semibold">사진을 촬영하세요</p>
+            <p class="text-gray-200 font-semibold">사진을 촬영하세요</p>
             <p class="text-gray-500 text-sm">
               촬영한 사진은 피드의 첫 화면에 노출되며<br />실제로 경기를 진행했음을 증명해요
             </p>
@@ -44,7 +44,7 @@
         <button
           v-if="!capturedImage"
           @click.stop="triggerCamera"
-          class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
+          class="w-full py-4 px-6 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
         >
           <i class="fas fa-camera text-2xl"></i>
           <span class="text-lg">사진 촬영하기</span>
@@ -53,13 +53,13 @@
         <div v-else class="grid grid-cols-2 gap-3">
           <button
             @click="retake"
-            class="py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold active:scale-95 transition-all"
+            class="py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold active:scale-95 transition-all"
           >
             <i class="fas fa-redo mr-2"></i>다시 촬영
           </button>
           <button
             @click="confirm"
-            class="py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all"
+            class="py-3 px-4 rounded-xl bg-orange-500 text-white font-bold shadow-lg active:scale-95 transition-all"
           >
             <i class="fas fa-check mr-2"></i>사용하기
           </button>
@@ -67,7 +67,7 @@
 
         <button
           @click="$emit('cancel')"
-          class="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold active:scale-95 transition-all"
+          class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-semibold active:scale-95 transition-all"
         >
           취소
         </button>

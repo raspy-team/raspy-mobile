@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000]" style="min-height: calc(var(--real-vh, 1vh) * 100)">
-    <div class="bg-white w-[90dvw] max-w-[400px] rounded-2xl shadow-lg flex flex-col items-center p-4">
+    <div class="bg-gray-900 w-[90dvw] max-w-[400px] rounded-2xl shadow-lg flex flex-col items-center p-4">
       <!-- 헤더 -->
       <div class="flex items-center justify-between w-full mb-3">
         <span class="text-base font-semibold">경기 결과 저장</span>
@@ -21,7 +21,7 @@
       @click="selectPalette(item.image)"
       :class="[
         'w-12 h-12 rounded-xl cursor-pointer border-2 overflow-hidden flex items-center justify-center',
-        selectedImage === item.image ? 'border-orange-500' : 'border-gray-200'
+        selectedImage === item.image ? 'border-orange-500' : 'border-gray-800'
       ]"
     >
       <img :src="item.image" class="object-cover w-full h-full" />
@@ -45,8 +45,8 @@
           <span class="font-bold">저장</span>
         </button>
         <button v-else disabled class="ml-3 flex items-center gap-1 text-sm text-green-500">
-          <i class="fas fa-check font-extrabold"></i>
-          <span class="font-extrabold">저장됨</span>
+          <i class="fas fa-check font-bold"></i>
+          <span class="font-bold">저장됨</span>
         </button>
       </div>
     </div>

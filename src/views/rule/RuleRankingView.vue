@@ -39,7 +39,7 @@
       <!-- Current User Highlight Card -->
       <div
         v-if="currentUserRanking"
-        class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg p-6 text-white"
+        class=" bg-orange-500 rounded-2xl shadow-lg p-6 text-white"
       >
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
@@ -72,7 +72,7 @@
       </div>
 
       <!-- No Ranking for Current User -->
-      <div v-else class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-6 text-center">
+      <div v-else class=" bg-gray-700 rounded-2xl p-6 text-center">
         <i class="fas fa-trophy text-gray-400 text-3xl mb-2"></i>
         <p class="text-gray-300 font-semibold mb-1">나는 아직 이 규칙으로 플레이한 기록이 없어요</p>
         <p class="text-gray-400 text-sm">첫 경기를 시작해보세요!</p>
@@ -98,23 +98,23 @@
               />
               <div
                 v-else
-                class="w-16 h-16 rounded-full border-4 border-gray-400 bg-gray-200 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
+                class="w-16 h-16 rounded-full border-4 border-gray-400 bg-gray-700 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
               >
                 <i class="fas fa-user text-gray-500"></i>
               </div>
               <div
-                class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gray-400 text-white flex items-center justify-center font-bold text-sm shadow-md"
+                class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gray-400 text-white flex items-center justify-center font-medium text-sm shadow-md"
               >
                 2
               </div>
             </div>
             <div
-              class="w-full mt-3 bg-gradient-to-b from-gray-600 to-gray-700 rounded-t-xl text-center py-3 h-20 flex flex-col justify-center cursor-pointer group-hover:from-gray-700 group-hover:to-gray-800 transition"
+              class="w-full mt-3 bg-gray-600 rounded-t-xl text-center py-3 h-20 flex flex-col justify-center cursor-pointer group-hover:bg-gray-700 transition"
             >
-              <p class="text-xs font-semibold text-white truncate px-2">
+              <p class="text-xs font-medium text-white truncate px-2">
                 {{ rankings[1].userName }}
               </p>
-              <p class="text-sm font-bold text-white mt-1">{{ rankings[1].rating }}</p>
+              <p class="text-sm font-medium text-white mt-1">{{ rankings[1].rating }}</p>
             </div>
           </div>
 
@@ -129,20 +129,20 @@
               />
               <div
                 v-else
-                class="w-20 h-20 rounded-full border-4 border-yellow-500 bg-yellow-100 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform"
+                class="w-20 h-20 rounded-full border-4 border-yellow-500 bg-yellow-500/15 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform"
               >
                 <i class="fas fa-user text-yellow-600 text-xl"></i>
               </div>
               <div
-                class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 text-white flex items-center justify-center font-bold shadow-lg"
+                class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold shadow-lg"
               >
                 <i class="fas fa-crown text-sm"></i>
               </div>
             </div>
             <div
-              class="w-full mt-3 bg-gradient-to-b from-yellow-400 to-yellow-500 rounded-t-xl text-center py-4 h-28 flex flex-col justify-center cursor-pointer group-hover:from-yellow-500 group-hover:to-yellow-600 transition"
+              class="w-full mt-3 bg-yellow-400 rounded-t-xl text-center py-4 h-28 flex flex-col justify-center cursor-pointer group-hover:bg-yellow-500 transition"
             >
-              <p class="text-xs font-semibold text-white truncate px-2">
+              <p class="text-xs font-medium text-white truncate px-2">
                 {{ rankings[0].userName }}
               </p>
               <p class="text-lg font-bold text-white mt-1">{{ rankings[0].rating }}</p>
@@ -160,23 +160,23 @@
               />
               <div
                 v-else
-                class="w-16 h-16 rounded-full border-4 border-orange-700 bg-orange-100 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
+                class="w-16 h-16 rounded-full border-4 border-orange-700 bg-orange-500/15 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
               >
-                <i class="fas fa-user text-orange-700"></i>
+                <i class="fas fa-user text-orange-400"></i>
               </div>
               <div
-                class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-orange-700 text-white flex items-center justify-center font-bold text-sm shadow-md"
+                class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-orange-700 text-white flex items-center justify-center font-medium text-sm shadow-md"
               >
                 3
               </div>
             </div>
             <div
-              class="w-full mt-3 bg-gradient-to-b from-orange-700 to-orange-800 rounded-t-xl text-center py-3 h-16 flex flex-col justify-center cursor-pointer group-hover:from-orange-800 group-hover:to-orange-900 transition"
+              class="w-full mt-3 bg-orange-700 rounded-t-xl text-center py-3 h-16 flex flex-col justify-center cursor-pointer group-hover:bg-orange-800 transition"
             >
-              <p class="text-xs font-semibold text-white truncate px-2">
+              <p class="text-xs font-medium text-white truncate px-2">
                 {{ rankings[2].userName }}
               </p>
-              <p class="text-sm font-bold text-white mt-1">{{ rankings[2].rating }}</p>
+              <p class="text-sm font-medium text-white mt-1">{{ rankings[2].rating }}</p>
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@
             v-for="ranking in rankings"
             :key="ranking.userId"
             @click="goToProfile(ranking.userId)"
-            class="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-900/20 to-gray-800 rounded-xl border border-orange-600 hover:shadow-md transition cursor-pointer"
+            class="flex items-center gap-4 p-4 bg-orange-900/20 rounded-xl border border-orange-600 hover:shadow-md transition cursor-pointer"
           >
             <div class="relative">
               <img
@@ -198,12 +198,12 @@
               />
               <div
                 v-else
-                class="w-14 h-14 rounded-full border-3 border-orange-400 bg-orange-100 flex items-center justify-center shadow-md"
+                class="w-14 h-14 rounded-full border-3 border-orange-400 bg-orange-500/15 flex items-center justify-center shadow-md"
               >
                 <i class="fas fa-user text-orange-600"></i>
               </div>
               <div
-                class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-xs"
+                class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center font-medium text-xs"
               >
                 {{ ranking.rank }}
               </div>

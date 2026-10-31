@@ -1,69 +1,7 @@
 <template>
-  <Header :has-referer="false" title="게임" class="z-50 bg-black" />
+  <Header :has-referer="false" title="내 경기" class="z-50 bg-black" />
 
   <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4 bg-black text-white">
-    <!-- 상단 메뉴 버튼 -->
-    <div class="flex gap-2 pt-3">
-      <button
-        @click="router.push('/rules')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-gray-800 text-gray-100 text-base font-bold rounded-lg border border-gray-600 hover:bg-gray-700 active:bg-gray-900 transition-colors shadow-sm"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M4 2h8c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2z"
-            stroke="currentColor"
-            stroke-width="1.5"
-            fill="none"
-          />
-          <path
-            d="M5 6h6M5 9h6M5 12h4"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-        <span class="text-base font-bold">규칙</span>
-      </button>
-      <button
-        @click="router.push('/game-list')"
-        class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 px-0 bg-gray-800 text-gray-100 text-base font-bold rounded-lg border border-gray-600 hover:bg-gray-700 active:bg-gray-900 transition-colors shadow-sm"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M2 4h12M2 8h12M2 12h12"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-        <span class="text-base font-bold">경기</span>
-      </button>
-    </div>
-
-    <!-- 경기 만들기: 이 탭의 주 행동 -->
-    <button
-      @click="router.push('/create-game')"
-      class="w-full flex items-center justify-between gap-3 p-5 rounded-xl bg-orange-500 text-white text-left active:scale-[0.98] transition-transform"
-    >
-      <div>
-        <div class="text-lg font-bold">경기 만들기</div>
-        <div class="text-sm text-white/80 mt-1">규칙을 고르고 상대를 기다리세요</div>
-      </div>
-      <i class="fas fa-plus text-xl"></i>
-    </button>
-
     <!-- 로딩 상태 -->
     <div v-if="loading" class="space-y-5">
       <div
@@ -83,9 +21,9 @@
               <span class="block w-12 h-3 bg-gray-700 rounded"></span>
             </div>
           </div>
-          <span class="text-xs font-bold px-2 py-2 rounded-full w-[5rem] bg-gray-700"></span>
+          <span class="text-xs font-medium px-2 py-2 rounded-full w-[5rem] bg-gray-700"></span>
         </div>
-        <div class="w-full h-10 bg-gray-700 rounded-[5px]"></div>
+        <div class="w-full h-10 bg-gray-700 rounded-md"></div>
       </div>
     </div>
 
@@ -130,10 +68,10 @@
             </div>
             <!-- 타입/상태 라벨 우측 배치 -->
             <div class="flex flex-col items-end gap-1 ml-2">
-              <span :class="['text-sm font-bold text-gray-100', getTypeTextClass(game)]">
+              <span :class="['text-sm font-medium text-gray-100', getTypeTextClass(game)]">
                 {{ getTypeLabel(game) }}
               </span>
-              <span class="text-sm font-bold text-gray-400" :class="getStatusClass(game)">
+              <span class="text-sm font-medium text-gray-400" :class="getStatusClass(game)">
                 {{ getStatusText(game) }}
               </span>
             </div>
@@ -151,7 +89,7 @@
                   @click="router.push('/profile/' + (game.ownerId || game.myId))"
                 />
                 <span
-                  class="mt-1 text-sm font-bold text-gray-100 truncate max-w-[4.5rem] text-center"
+                  class="mt-1 text-sm font-medium text-gray-100 truncate max-w-[4.5rem] text-center"
                 >
                   {{ game.ownerNickname || game.myNickname }}
                 </span>
@@ -159,7 +97,7 @@
 
               <!-- VS -->
               <div class="flex flex-col items-center flex-1 justify-center">
-                <span class="text-3xl font-extrabold text-gray-500 leading-none"> VS </span>
+                <span class="text-3xl font-bold text-gray-500 leading-none"> VS </span>
               </div>
 
               <!-- Opponent -->
@@ -208,7 +146,7 @@
               <!-- 생성자 정보 (신청한 게임의 경우) -->
               <template v-if="selectedApplicantsGame.type === 'sent'">
                 <div class="p-4 bg-gray-700/50 rounded-xl border border-gray-600 mb-6">
-                  <h3 class="text-sm font-semibold text-gray-300 mb-3 flex items-center">
+                  <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
                     <i class="fas fa-crown text-yellow-400 mr-2"></i>
                     생성자
                   </h3>
@@ -282,7 +220,7 @@
                   selectedApplicantsGame.applicants && selectedApplicantsGame.applicants.length > 0
                 "
               >
-                <h3 class="text-sm font-semibold text-gray-300 mb-3 flex items-center">
+                <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
                   <i class="fas fa-users text-orange-400 mr-2"></i>
                   도전자 ({{ selectedApplicantsGame.applicants.length }}명)
                 </h3>
@@ -331,7 +269,7 @@
                             v-if="!user.approved"
                             @click.stop="approve(selectedApplicantsGame.id, user.userId)"
                             :disabled="approvedExists(selectedApplicantsGame.applicants)"
-                            class="px-4 py-2 text-xs rounded-lg text-white font-semibold transition-all duration-200"
+                            class="px-4 py-2 text-xs rounded-lg text-white font-medium transition-all duration-200"
                             :class="
                               approvedExists(selectedApplicantsGame.applicants)
                                 ? 'bg-gray-600 cursor-not-allowed'
@@ -343,7 +281,7 @@
                           <button
                             v-else
                             @click.stop="cancelApproval(selectedApplicantsGame.id, user.userId)"
-                            class="px-4 py-2 text-xs rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 active:scale-95 transition-all duration-200"
+                            class="px-4 py-2 text-xs rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 active:scale-95 transition-all duration-200"
                           >
                             취소
                           </button>
@@ -354,7 +292,7 @@
                 </div>
               </div>
               <div v-else class="text-center text-gray-400 text-sm py-8">
-                <i class="fas fa-users text-3xl text-gray-600 mb-3"></i>
+                <i class="fas fa-users text-3xl text-gray-400 mb-3"></i>
                 <p>아직 도전자가 없습니다.</p>
               </div>
             </div>
@@ -389,20 +327,20 @@
               <button
                 v-else-if="game.status === 'REQUESTED'"
                 @click.stop="cancelRequest(game.id)"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-red-400 text-sm border-[1px] border-red-400 py-3 px-0 rounded-[8px]"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-red-400 text-sm border-[1px] border-red-400 py-3 px-0 rounded-xl"
               >
                 <i class="fas fa-xmark"></i> 신청 취소
               </button>
               <button
                 v-else-if="game.status === 'APPROVED'"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-green-500 text-sm text-white border-[1px] py-3 px-0 rounded-[8px] opacity-70 cursor-not-allowed"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-green-500 text-sm text-white border-[1px] py-3 px-0 rounded-xl opacity-70 cursor-not-allowed"
                 disabled
               >
                 <i class="fas fa-check"></i> 승인됨
               </button>
               <button
                 v-else-if="game.status === 'REJECTED'"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-[#afafaf] text-sm text-white border-[1px] py-3 px-0 rounded-[8px] opacity-70 cursor-not-allowed"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-[#afafaf] text-sm text-white border-[1px] py-3 px-0 rounded-xl opacity-70 cursor-not-allowed"
                 disabled
               >
                 승인 거부됨
@@ -410,13 +348,13 @@
               <button
                 v-if="game.status !== 'IN_PROGRESS'"
                 @click.stop="goDM(game.ownerId || game.myId)"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-[8px]"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-xl"
               >
                 <i class="fas fa-paper-plane"></i> DM
               </button>
               <button
                 v-if="game.status !== 'IN_PROGRESS'"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-xl font-medium text-sm hover:bg-blue-200 transition"
                 @click.stop="openApplicantsModal(game)"
               >
                 도전자 {{ game.applicants.length }}명
@@ -449,13 +387,13 @@
                 <i class="fas fa-share mr-2"></i>공유
               </button>
               <button
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-[8px]"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-xl"
                 @click.stop="goDM(game.opponentId || game.ownerId || game.myId)"
               >
                 <i class="fas fa-paper-plane"></i> DM
               </button>
               <button
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-[8px] font-semibold text-sm hover:bg-blue-200 transition"
+                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-xl font-medium text-sm hover:bg-blue-200 transition"
                 @click.stop="openApplicantsModal(game)"
               >
                 도전자 {{ game.applicants.length }}명
@@ -463,7 +401,7 @@
               <button
                 v-if="game.isOwner && game.status !== 'IN_PROGRESS' && game.status !== 'COMPLETED'"
                 @click.stop="openDeleteModal(game)"
-                class="flex items-center justify-center w-12 py-3 px-0 bg-red-100 text-red-600 rounded-[8px] hover:bg-red-200 transition"
+                class="flex items-center justify-center w-12 py-3 px-0 bg-red-500/15 text-red-600 rounded-xl hover:bg-red-200 transition"
                 title="경기 삭제"
               >
                 <i class="fas fa-trash"></i>
@@ -474,11 +412,19 @@
       </div>
 
       <!-- 빈 상태 -->
-      <div v-else class="text-center text-gray-400 text-sm py-10">아직 참여한 경기가 없어요.<br />경기를 만들거나 경기 목록에서 도전해보세요.</div>
+      <div v-else class="py-16 text-center">
+        <p class="text-base text-white">아직 잡힌 경기가 없어요</p>
+        <p class="text-sm text-gray-400 mt-2">열린 경기에 신청하거나 직접 만들어보세요</p>
+        <button
+          @click="router.push('/')"
+          class="mt-6 px-6 py-3 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
+        >
+          경기 찾기
+        </button>
+      </div>
     </template>
   </div>
 
-  <FooterNav tab="game" />
 
   <!-- 게임 시작 모달들 -->
 
@@ -487,28 +433,28 @@
     v-if="showLocationConfirmModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
   >
-    <div class="bg-white p-6 m-5 rounded-2xl w-full max-w-md shadow-2xl">
+    <div class="bg-gray-900 p-6 m-5 rounded-2xl w-full max-w-md shadow-2xl">
       <!-- 헤더 -->
       <div class="text-center mb-6">
         <div
-          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-4"
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-500/15 mb-4"
         >
           <i class="fas fa-map-marker-alt text-orange-500 text-3xl"></i>
         </div>
-        <h2 class="text-xl font-bold text-gray-900 mb-2">경기 장소 확인</h2>
+        <h2 class="text-xl font-bold text-white mb-2">경기 장소 확인</h2>
         <p class="text-sm text-gray-500">선택하신 장소에서 경기를 진행합니다</p>
       </div>
 
       <!-- 장소 정보 카드 -->
       <div
-        class="mb-6 p-5 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200"
+        class="mb-6 p-5 bg-orange-500/10 rounded-xl border-2 border-orange-500/30"
       >
         <div class="flex items-start gap-3">
           <div class="flex-shrink-0 mt-1">
             <i class="fas fa-location-dot text-orange-600 text-xl"></i>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-base font-bold text-gray-900 mb-1 break-words">
+            <p class="text-base font-bold text-white mb-1 break-words">
               {{ currentGameLocation }}
             </p>
             <p class="text-xs text-orange-600 font-medium">
@@ -522,19 +468,19 @@
       <div class="space-y-3">
         <button
           @click="continueWithExistingLocation"
-          class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg active:scale-95 transition-all"
+          class="w-full py-4 px-6 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all"
         >
           <i class="fas fa-check-circle mr-2"></i>이 장소로 계속하기
         </button>
         <button
           @click="changeLocation"
-          class="w-full py-3 px-6 rounded-xl bg-white border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-gray-700 font-semibold active:scale-95 transition-all"
+          class="w-full py-3 px-6 rounded-xl bg-gray-900 border-2 border-gray-800 hover:border-orange-300 hover:bg-orange-500/10 text-gray-200 font-semibold active:scale-95 transition-all"
         >
           <i class="fas fa-edit mr-2"></i>다른 장소로 변경
         </button>
         <button
           @click="showLocationConfirmModal = false"
-          class="w-full py-2 text-gray-500 hover:text-gray-700 font-medium transition"
+          class="w-full py-2 text-gray-500 hover:text-gray-200 font-medium transition"
         >
           취소
         </button>
@@ -550,7 +496,7 @@
     <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
       <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
+        <label class="block text-sm font-medium text-gray-200 mb-2">
           <i class="fas fa-search mr-1 text-orange-500"></i>
           장소 검색
         </label>
@@ -558,7 +504,7 @@
           <input
             ref="addressInputModal"
             v-model="searchQuery"
-            class="w-full text-base px-4 py-3 bg-black rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+            class="w-full text-base px-4 py-3 bg-black rounded-xl border-2 border-gray-800 outline-none focus:border-orange-400 transition"
             placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
             autocomplete="off"
           />
@@ -574,13 +520,13 @@
       </div>
 
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
+        <label class="block text-sm font-medium text-gray-200 mb-2">
           <i class="fas fa-map-pin mr-1 text-orange-500"></i>
           상세 장소 (선택)
         </label>
         <input
           v-model="detailedPlace"
-          class="w-full text-base px-4 py-3 bg-white rounded-xl border-2 border-gray-200 outline-none focus:border-orange-400 transition"
+          class="w-full text-base px-4 py-3 bg-gray-900 rounded-xl border-2 border-gray-800 outline-none focus:border-orange-400 transition"
           placeholder="상세 장소를 입력하세요 (예: 3층, A코트)"
           autocomplete="off"
         />
@@ -590,14 +536,14 @@
         </p>
       </div>
 
-      <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
+      <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-500/10 rounded-xl border border-orange-500/30">
         <div class="flex items-start gap-3">
           <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-800 mb-1">{{ selectedPlace.name }}</p>
-            <p class="text-sm text-gray-600">{{ selectedPlace.address }}</p>
+            <p class="font-semibold text-gray-100 mb-1">{{ selectedPlace.name }}</p>
+            <p class="text-sm text-gray-400">{{ selectedPlace.address }}</p>
           </div>
-          <button @click="clearSelection" class="text-gray-400 hover:text-gray-600 transition">
+          <button @click="clearSelection" class="text-gray-400 hover:text-gray-400 transition">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -605,18 +551,18 @@
 
       <div v-if="!selectedPlace" class="mt-4 text-xs text-gray-500 flex items-center gap-2">
         <i class="fas fa-info-circle text-blue-400"></i>
-        <span>장소를 선택해야 게임을 시작할 수 있습니다</span>
+        <span>장소를 선택해야 경기를 시작할 수 있습니다</span>
       </div>
       <div class="flex justify-end mt-6 space-x-2">
         <button
           @click="closeModal"
-          class="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition"
+          class="px-4 py-2 rounded-xl bg-gray-800 text-gray-200 text-sm hover:bg-gray-700 transition"
         >
           취소
         </button>
         <button
           :disabled="!selectedPlace"
-          class="px-5 py-2 rounded-xl bg-orange-500 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition shadow-md"
+          class="px-5 py-2 rounded-xl bg-orange-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition shadow-md"
           @click="submitAndStartGame"
         >
           <i class="fas fa-play mr-1"></i>
@@ -631,9 +577,9 @@
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100050]"
   >
     <div class="bg-black p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
-      <h2 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">경기 시작 전 확인</h2>
+      <h2 class="text-xl font-bold text-white mb-3 tracking-tight">경기 시작 전 확인</h2>
       <p class="text-sm text-gray-500 mb-1">이 경기는 다음 시간 동안 진행됩니다:</p>
-      <div class="text-4xl font-black text-orange-500 py-4 mb-4 mt-3">
+      <div class="text-4xl font-bold text-orange-500 py-4 mb-4 mt-3">
         {{ countdownDurationText }}
       </div>
       <p class="text-xs text-gray-400 mb-5">
@@ -643,13 +589,13 @@
       <div class="flex justify-end gap-2">
         <button
           @click="showCountdownModal = false"
-          class="px-4 py-2 rounded bg-gray-100 text-gray-600 text-sm"
+          class="px-4 py-2 rounded bg-gray-800 text-gray-400 text-sm"
         >
           취소
         </button>
         <button
           @click="confirmStartGame"
-          class="px-5 py-2 rounded bg-orange-500 text-white text-sm font-semibold shadow hover:bg-orange-400 transition active:scale-95"
+          class="px-5 py-2 rounded bg-orange-500 text-white text-sm font-medium shadow hover:bg-orange-400 transition active:scale-95"
         >
           바로 시작하기
         </button>
@@ -664,8 +610,8 @@
     <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
         <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">장소를 찾을 수 없습니다</h3>
-        <p class="text-sm text-gray-600">
+        <h3 class="text-lg font-bold text-white mb-2">장소를 찾을 수 없습니다</h3>
+        <p class="text-sm text-gray-400">
           더 구체적인 장소를 입력해주세요.<br />
           <span class="text-xs text-gray-500 mt-2 block">예: 서초탁구장, 강남체육관</span>
         </p>
@@ -695,8 +641,8 @@
     <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
       <div class="text-center mb-4">
         <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">경기 삭제</h3>
-        <p class="text-sm text-gray-600">
+        <h3 class="text-lg font-bold text-white mb-2">경기 삭제</h3>
+        <p class="text-sm text-gray-400">
           정말로 이 경기를 삭제하시겠습니까?<br />
           <span class="text-xs text-red-500 mt-2 block">이 작업은 되돌릴 수 없습니다.</span>
         </p>
@@ -704,7 +650,7 @@
       <div class="flex gap-2">
         <button
           @click="showDeleteModal = false"
-          class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition"
+          class="flex-1 bg-gray-800 text-gray-200 font-semibold py-3 rounded-xl hover:bg-gray-700 transition"
         >
           취소
         </button>
@@ -725,6 +671,8 @@
 </template>
 
 <script setup>
+import { useBackClose } from '../../composable/useBackClose'
+
 // 도전자(신청자) 모달 상태
 const showApplicantsModal = ref(false)
 const selectedApplicantsGame = ref(null)
@@ -742,7 +690,6 @@ import { ref, onMounted, onBeforeUnmount, onUnmounted, computed, nextTick } from
 import { useRouter } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
-import FooterNav from '../../components/FooterNav.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import CustomToast from '../../components/CustomToast.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
@@ -1227,7 +1174,7 @@ const confirmStartGame = async () => {
     router.push(`/games/${currentGameId.value}/play`)
     showCountdownModal.value = false
   } catch (e) {
-    alert('게임 시작 실패: ' + (e.response?.data?.message ?? e.message))
+    alert('경기 시작 실패: ' + (e.response?.data?.message ?? e.message))
   }
 }
 
@@ -1242,15 +1189,15 @@ const closeModal = () => {
 // 게임 타입별 카드 스타일 (심플/플랫)
 function getCardClass(game) {
   if (game.type === 'sent') {
-    return 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+    return 'border-gray-800 hover:border-blue-300 hover:shadow-md'
   } else if (game.type === 'my-game') {
     // 시작 가능한 게임은 초록색 강조
     if (game.isOwner && canStart(game)) {
       return 'border-green-400 shadow-md shadow-green-100'
     }
-    return 'border-gray-200 hover:border-orange-300 hover:shadow-md'
+    return 'border-gray-800 hover:border-orange-300 hover:shadow-md'
   }
-  return 'border-gray-200'
+  return 'border-gray-800'
 }
 
 // 타입 텍스트 색상
@@ -1263,17 +1210,17 @@ function getTypeTextClass(game) {
     }
     return 'text-orange-600'
   }
-  return 'text-gray-600'
+  return 'text-gray-400'
 }
 
 // 타입 라벨
 function getTypeLabel(game) {
-  if (game.type === 'sent') return '신청한 게임'
+  if (game.type === 'sent') return '신청한 경기'
   if (game.type === 'my-game') {
     if (game.isOwner && canStart(game)) return '시작 가능'
-    return '내 게임'
+    return '내 경기'
   }
-  return '게임'
+  return '경기'
 }
 
 // 경기 삭제 관련
@@ -1314,26 +1261,28 @@ function openRuleDetail(game) {
 function closeRuleDetail() {
   selectedGame.value = null
 }
+
+// 뒤로가기는 열린 모달부터 닫는다
+useBackClose(showApplicantsModal, showLocationConfirmModal, showAddressModal, showAddressErrorModal, showCameraModal, showDeleteModal)
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 
 .highlight-orange {
   animation: highlight-orange-fade 1s cubic-bezier(0.49, 0.38, 0.27, 1.18);
 }
 @keyframes highlight-orange-fade {
   0% {
-    background: #ffe4ba;
+    background: rgba(249,115,22,.3);
   }
   40% {
-    background: #ffa565;
+    background: rgba(249,115,22,.4);
   }
   70% {
-    background: #ffa565;
+    background: rgba(249,115,22,.4);
   }
   100% {
-    background: white;
+    background: #171717;
   }
 }
 </style>

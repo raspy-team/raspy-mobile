@@ -42,7 +42,7 @@
         <div>
           <h2
             id="account-section"
-            class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400"
+            class="mb-2 text-xs font-medium uppercase tracking-wider text-gray-400"
           >
             계정
           </h2>
@@ -112,7 +112,7 @@
 
         <!-- 정보 -->
         <div>
-          <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">정보</h2>
+          <h2 class="mb-2 text-xs font-medium uppercase tracking-wider text-gray-400">정보</h2>
           <ul class="divide-y divide-gray-600 rounded-2xl border border-gray-600">
             <!-- 법적 고지사항 -->
             <li>
@@ -158,7 +158,7 @@
       <div class="mt-6 flex justify-center">
         <button
           @click="openInstagram"
-          class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 rounded-full text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+          class="flex items-center gap-2 px-6 py-3 bg-pink-500 rounded-full text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
           aria-label="인스타그램 방문"
         >
           <i class="fab fa-instagram text-xl"></i>

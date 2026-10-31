@@ -4,7 +4,7 @@
       :has-referer="true"
       :show-bell="false"
       :show-dm="false"
-      custom-class="bg-white border-0"
+      custom-class="bg-gray-900 border-0"
     />
     <div class="flex pt-20">
       <!-- Left: Brand -->
@@ -17,9 +17,9 @@
         </div>
       </div>
       <!-- Right: Login -->
-      <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-white px-6 lg:px-24">
+      <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-gray-900 px-6 lg:px-24">
         <div class="w-full max-w-md space-y-8">
-          <h2 class="text-2xl font-bold text-gray-900 text-left">{{ isSignup ? '가입하기' : '로그인' }}</h2>
+          <h2 class="text-2xl font-bold text-white text-left">{{ isSignup ? '가입하기' : '로그인' }}</h2>
           <form @submit.prevent="isSignup ? handleSignup() : handleLogin()" class="space-y-4">
             <!-- Email -->
             <div class="relative">
@@ -30,7 +30,7 @@
                 v-model="email"
                 type="text"
                 placeholder="아이디"
-                class="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-50"
+                class="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-800 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-800"
                 :class="{ 'border-red-500': emailError }"
               />
             </div>
@@ -44,7 +44,7 @@
                 :type="showPassword ? 'text' : 'password'"
                 v-model="password"
                 placeholder="비밀번호 (8~20자)"
-                class="w-full pl-11 pr-12 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-50"
+                class="w-full pl-11 pr-12 py-3 rounded-lg border border-gray-800 focus:ring-2 focus:ring-[var(--point-color)] focus:border-[var(--point-color)] transition text-base bg-gray-800"
                 :class="{ 'border-red-500': passwordError }"
               />
               <button

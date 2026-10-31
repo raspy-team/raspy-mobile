@@ -1,12 +1,12 @@
 <template>
   <div class="flex flex-col min-h-full px-5 pt-[20%]">
     <div class="mb-4">
-      <span class="text-xl font-bold text-gray-900">기존 규칙 선택</span>
+      <span class="text-xl font-bold text-white">기존 규칙 선택</span>
     </div>
     <input
       v-model="search"
       placeholder="키워드로 검색"
-      class="w-full bg-gray-100 border-none rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition outline-none mb-4"
+      class="w-full bg-gray-800 border-none rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition outline-none mb-4"
     />
     <div v-if="loading" class="text-center py-10">
       <i class="fas fa-spinner fa-spin text-2xl text-orange-400"></i>
@@ -16,9 +16,9 @@
         @click="rule.showRuleDetail = true"
         v-for="rule in filteredRules"
         :key="rule.id"
-        class="bg-white rounded-xl border p-4 mb-3 shadow-sm flex flex-col gap-1"
+        class="bg-gray-900 rounded-xl border p-4 mb-3 shadow-sm flex flex-col gap-1"
       >
-        <span class="text-base font-bold text-gray-900">{{ rule.ruleTitle }}</span>
+        <span class="text-base font-bold text-white">{{ rule.ruleTitle }}</span>
         <span class="text-sm text-orange-500"
           >{{ rule.majorCategory }} &gt; {{ rule.minorCategory }}</span
         >

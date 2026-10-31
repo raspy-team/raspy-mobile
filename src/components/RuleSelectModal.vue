@@ -1,31 +1,31 @@
 <template>
   <div class="fixed h-full inset-0 z-50 bg-black/30 flex items-end sm:items-center justify-center">
-    <div class="bg-white w-full h-[90%] sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-lg pb-safe flex flex-col relative overflow-hidden">
+    <div class="bg-gray-900 w-full h-[90%] sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-lg pb-safe flex flex-col relative overflow-hidden">
       <!-- 헤더 -->
       <button @click="$emit('close')" class="absolute right-4 top-4 text-gray-400 hover:text-gray-500">
         <i class="fas fa-xmark text-2xl"></i>
       </button>
-      <div class="pt-6 pb-3 px-5 border-b border-gray-100 flex flex-col gap-1">
-        <h2 class="text-lg font-md text-gray-900 tracking-tight mb-2 flex items-center gap-2">
+      <div class="pt-6 pb-3 px-5 border-b border-gray-800 flex flex-col gap-1">
+        <h2 class="text-lg font-md text-white tracking-tight mb-2 flex items-center gap-2">
           <i class="fas fa-bolt text-orange-500"></i>
           규칙 선택하기
         </h2>
         <div class="flex gap-2">
 <div class="flex-1">
   <div class="relative">
-    <details ref="majorDropdown" class="group w-full bg-gray-100 rounded-lg" :open="false">
+    <details ref="majorDropdown" class="group w-full bg-gray-800 rounded-lg" :open="false">
       <summary
-        class="list-none px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer rounded-lg flex justify-between items-center"
+        class="list-none px-3 py-2 text-sm font-medium text-gray-200 cursor-pointer rounded-lg flex justify-between items-center"
       >
         {{ major || '주 카테고리' }}
         <i class="fas fa-chevron-down text-xs text-gray-400"></i>
       </summary>
-      <ul class="mt-1 bg-white shadow-lg rounded-lg border absolute z-10 w-full max-h-[240px] overflow-y-auto">
+      <ul class="mt-1 bg-gray-900 shadow-lg rounded-lg border absolute z-10 w-full max-h-[240px] overflow-y-auto">
         <li
           v-for="m in majors"
           :key="m"
           @click="selectMajor(m)"
-          class="px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer"
+          class="px-3 py-2 text-sm text-gray-200 hover:bg-orange-500/10 cursor-pointer"
         >
           {{ m }}
         </li>
@@ -37,19 +37,19 @@
 <div class="flex-1">
   <div class="relative">
     <!-- 대체된 보조카테고리 드롭다운 -->
-    <details ref="minorDropdown" class="group w-full bg-gray-100 rounded-lg" :open="false">
+    <details ref="minorDropdown" class="group w-full bg-gray-800 rounded-lg" :open="false">
       <summary
-        class="list-none px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer rounded-lg flex justify-between items-center"
+        class="list-none px-3 py-2 text-sm font-medium text-gray-200 cursor-pointer rounded-lg flex justify-between items-center"
       >
         {{ minor || '보조 카테고리' }}
         <i class="fas fa-chevron-down text-xs text-gray-400"></i>
       </summary>
-      <ul class="mt-1 bg-white shadow-lg rounded-lg border absolute z-10 w-full">
+      <ul class="mt-1 bg-gray-900 shadow-lg rounded-lg border absolute z-10 w-full">
         <li
           v-for="n in minors"
           :key="n"
           @click="selectMinor(n)"
-          class="px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer"
+          class="px-3 py-2 text-sm text-gray-200 hover:bg-orange-500/10 cursor-pointer"
         >
           {{ n }}
         </li>
@@ -61,21 +61,21 @@
         </div>
         <input v-model="search"
           placeholder="키워드로 검색"
-          class="mt-2 w-full bg-gray-100 border-none rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition outline-none"
+          class="mt-2 w-full bg-gray-800 border-none rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition outline-none"
         />
         <div class="mt-2">
           <button
             @click="toggleSort"
-            class="w-full flex items-center text-sm justify-center bg-white border border-gray-200 rounded-lg py-2 font-[400] text-gray-500 shadow-sm active:bg-gray-50"
+            class="w-full flex items-center text-sm justify-center bg-gray-900 border border-gray-800 rounded-lg py-2 font-[400] text-gray-500 shadow-sm active:bg-gray-800"
           >
             <i class="fas fa-sort text-orange-400 mr-2"></i>
             {{ sortOptions.find(o => o.value === sort)?.label || '정렬' }}
             <i class="fas fa-chevron-down text-xs ml-1"></i>
           </button>
-          <ul v-if="showSortOptions" class="absolute left-5 right-5 z-20 mt-1 bg-white border rounded-lg shadow-lg text-sm">
+          <ul v-if="showSortOptions" class="absolute left-5 right-5 z-20 mt-1 bg-gray-900 border rounded-lg shadow-lg text-sm">
             <li v-for="o in sortOptions" :key="o.value"
                 @click="selectSort(o.value)"
-                class="px-4 py-2 hover:bg-orange-50 cursor-pointer text-gray-500">
+                class="px-4 py-2 hover:bg-orange-500/10 cursor-pointer text-gray-500">
               {{ o.label }}
             </li>
           </ul>
@@ -83,17 +83,17 @@
       </div>
 
       <!-- 룰 리스트 -->
-      <div class="flex-1 overflow-y-auto px-2 pt-2 pb-3 bg-white min-h-[36vh] max-h-[65vh]">
+      <div class="flex-1 overflow-y-auto px-2 pt-2 pb-3 bg-gray-900 min-h-[36vh] max-h-[65vh]">
         <div v-if="loading" class="py-16 text-center text-orange-500">
           <i class="fas fa-spinner fa-spin text-2xl"></i>
         </div>
         <ul v-else-if="rules.length" class="flex flex-col gap-3">
           <li v-for="rule in rules" :key="rule.id"
-              class="bg-gray-50 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-0.5 px-4 py-4 active:bg-orange-50 transition">
+              class="bg-gray-800 rounded-2xl shadow-sm border border-gray-800 flex flex-col gap-0.5 px-4 py-4 active:bg-orange-500/10 transition">
             <div class="flex justify-between items-center mb-1">
-              <span class="text-base font-extrabold text-gray-900 truncate">{{ rule.ruleTitle }}</span>
+              <span class="text-base font-bold text-white truncate">{{ rule.ruleTitle }}</span>
               <button @click="selectRule(rule)"
-                class="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-1 text-xs font-semibold shadow">
+                class="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-1 text-xs font-medium shadow">
                 선택
               </button>
             </div>
@@ -110,7 +110,7 @@
                   </button>
                 </div>
               </div>
-              <div class="flex flex-col gap-1 mt-2 text-[13px]">
+              <div class="flex flex-col gap-1 mt-2 text-sm">
               <div class="flex items-center gap-2 p-2 rounded-lg">
                 <i class="fas fa-trophy text-orange-400 text-base"></i>
                 <span class="text-gray-500 font-light w-28 shrink-0">한세트 승리에 필요한 점수</span>
@@ -136,7 +136,7 @@
                 </span>
               </div>
               <div class="flex items-center gap-2 p-2 rounded-lg">
-                <i class="fas fa-crown text-orange-400 text-base text-[0.85rem]"></i>
+                <i class="fas fa-crown text-orange-400 text-base text-sm"></i>
                 <span class="text-gray-500 font-light w-28 shrink-0">승리 조건</span>
                 <span class="text-gray-500 font-normal flex-1">{{ formatWinBy(rule.winBy) }}</span>
               </div>
@@ -280,7 +280,7 @@ watch(search, () => {
 </script>
 
 <style scoped>
-html, body { background: #fff !important; }
+html, body { background: #171717 !important; }
 ::-webkit-scrollbar { width: 0px !important; background: transparent; }
 button, select, input { outline: none !important; }
 .px-5, .px-4 { box-sizing: border-box; }

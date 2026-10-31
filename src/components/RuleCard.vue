@@ -13,7 +13,7 @@
           </div>
         </div>
         <div>
-          <span class="text-base font-extrabold text-gray-200 truncate block">
+          <span class="text-base font-bold text-gray-200 truncate block">
             {{ rule.ruleTitle }}
           </span>
           <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -34,7 +34,7 @@
             {{ rule.createdBy.nickname }}
           </span>
         </div>
-        <div class="text-[0.7rem] flex justify-end py-2 pl-2">
+        <div class="text-xs flex justify-end py-2 pl-2">
           <button @click.stop="onReportClick" class="text-red-400 hover:text-red-300 transition-colors">신고하기</button>
         </div>
       </div>
@@ -50,7 +50,7 @@
         <div class="text-center flex justify-center items-center font-semibold gap-2">생성</div>
       </button>
 
-      <div class="flex flex-col items-start text-xs text-gray-400 font-semibold gap-1">
+      <div class="flex flex-col items-start text-xs text-gray-400 font-medium gap-1">
         <span class="flex items-center gap-1">
           <i class="fas fa-star text-purple-500 text-xs"></i>
           <span v-if="rule.averageRating && rule.averageRating > 0">
@@ -91,7 +91,7 @@
           아래 규칙으로<br />
           <b class="text-orange-400 text-base">{{ rule.ruleTitle }}</b
           ><br />
-          게임을 생성하시겠습니까?
+          경기를 생성하시겠습니까?
         </div>
         <div class="flex gap-3 w-full">
           <button
@@ -130,7 +130,7 @@
         </div>
         <textarea
           v-model="reportReason"
-          class="border-2 border-gray-600 rounded-xl p-3 w-full mb-3 text-[15px] bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
+          class="border-2 border-gray-600 rounded-xl p-3 w-full mb-3 text-base bg-gray-700 text-white placeholder-gray-400 focus:border-orange-400 outline-none transition"
           rows="3"
           maxlength="100"
           placeholder="신고 사유를 입력해주세요"
@@ -220,14 +220,12 @@ async function submitReport() {
 
 <style scoped>
 .card-style {
-  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  background: #404040;
   border-radius: 1.3rem;
-  box-shadow:
-    0 4px 20px 0 rgba(31, 41, 55, 0.08),
-    0 2px 8px 0 rgba(251, 146, 60, 0.04);
+  box-shadow: none;
   padding: 1.45rem 1.15rem 1.4rem 1.15rem;
   margin-bottom: 1.05rem;
-  border: 1.2px solid #4b5563;
+  border: 1.2px solid #404040;
   transition:
     box-shadow 0.3s ease,
     border-color 0.3s ease,
@@ -235,14 +233,12 @@ async function submitReport() {
   position: relative;
 }
 .card-style:hover {
-  box-shadow:
-    0 12px 40px 0 rgba(251, 146, 60, 0.15),
-    0 4px 16px 0 rgba(0, 0, 0, 0.1);
-  border-color: #fed7aa;
+  box-shadow: none;
+  border-color: #9a3412;
   transform: translateY(-2px);
 }
 .desc-block {
-  background: #f8fafc;
+  background: #262626;
   border-radius: 0.75em;
   min-height: 2.3em;
   position: relative;
@@ -252,7 +248,7 @@ async function submitReport() {
 }
 .desc-text {
   font-size: 15px;
-  color: #363636;
+  color: #f5f5f5;
   letter-spacing: -0.008em;
   line-height: 1.65;
   transition: color 0.12s;
@@ -260,15 +256,15 @@ async function submitReport() {
   word-break: break-word;
 }
 .desc-text-expanded {
-  color: #ce7a1c;
+  color: #fb923c;
   font-weight: 500;
 }
 .desc-mini-btn {
-  background: #f3f4f6;
+  background: #262626;
   color: #f59e42;
   border-radius: 2rem;
   font-size: 12px;
-  border: 1px solid #ffe4bb;
+  border: 1px solid #9a3412;
   font-weight: 500;
   padding: 0.2rem 0.8rem;
   display: flex;
@@ -282,7 +278,7 @@ async function submitReport() {
 }
 .desc-mini-btn:hover,
 .desc-mini-btn.copied {
-  background: #ffe7c7;
+  background: rgba(249,115,22,.2);
   color: #f97316;
   border-color: #f97316;
 }
@@ -294,7 +290,7 @@ async function submitReport() {
   overflow: hidden;
 }
 .game-cta {
-  background: linear-gradient(135deg, #fb923c 0%, #f59e42 50%, #fb923c 100%);
+  background: #fb923c;
   color: #fff;
   font-size: 15px;
   font-weight: 600;
@@ -302,7 +298,7 @@ async function submitReport() {
   text-align: center;
   border-radius: 15px;
   border: none;
-  box-shadow: 0 4px 12px 0 rgba(251, 146, 60, 0.2);
+  box-shadow: none;
   transition:
     background 0.3s ease,
     transform 0.2s ease,
@@ -312,9 +308,9 @@ async function submitReport() {
   gap: 0.22rem;
 }
 .game-cta:hover {
-  background: linear-gradient(135deg, #f59e42 0%, #fb923c 50%, #f59e42 100%);
+  background: #f59e42;
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px 0 rgba(251, 146, 60, 0.3);
+  box-shadow: none;
 }
 .fade-enter-active,
 .fade-leave-active {
@@ -325,7 +321,7 @@ async function submitReport() {
   opacity: 0;
 }
 mark {
-  background: #fff7ed;
+  background: rgba(249,115,22,.15);
   color: #f97316;
   padding: 0 2px;
   border-radius: 2px;

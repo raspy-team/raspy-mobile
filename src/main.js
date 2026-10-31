@@ -6,6 +6,7 @@ import  { setRouter } from './api/api'
 import autocomplete from './utils/autocomplete'
 
 import DefaultAvatar from './assets/default.png'
+import { useToast } from './composable/useToast'
 
 setRouter(router) // api.js에 router 주입
 
@@ -22,6 +23,10 @@ window.addEventListener(
   },
   true,
 )
+
+// 브라우저 기본 알림창("…vercel.app 내용:")은 흐름을 끊는다. 앱 안의 한 줄 알림으로 바꾼다
+const { showToast } = useToast()
+window.alert = (msg) => showToast(msg)
 
 createApp(App)
   .use(router) 

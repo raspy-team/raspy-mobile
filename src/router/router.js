@@ -36,14 +36,12 @@ const routes = [
     path: '/init',
     component: Init
   },
-  {
-    path: '/game-list',
-    component: GameList
-  },
+  // 첫 화면은 참가할 수 있는 경기. 피드(남의 경기 결과)는 /feed
   {
     path: '/',
-    component: Feed
+    component: GameList
   },
+  { path: '/game-list', redirect: '/' },
 
   {
     path: '/oauth/callback',

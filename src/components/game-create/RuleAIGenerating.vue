@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-full bg-white">
+  <div class="flex flex-col items-center justify-center min-h-full bg-gray-900">
     <div class="ai-circle-loader mb-6"></div>
     <div class="text-lg font-bold text-orange-500 mb-2">AI가 규칙 제목과 카테고리를 생성 중...</div>
     <div class="text-base text-gray-400">최적의 규칙명을 만들고 있어요!</div>

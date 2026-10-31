@@ -5,13 +5,12 @@
       title="메시지"
       :show-bell="false"
       :show-dm="false"
-      custom-class="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 backdrop-blur-xl border-b border-white/10"
+      custom-class=" bg-gray-900 backdrop-blur-xl border-b border-white/10"
     />
     <div class="w-full px-10 mx-auto pt-14 pb-24">
       <!-- 로딩 상태 -->
       <div v-if="loading" class="flex justify-center items-center py-40">
         <div class="relative">
-          <div class="absolute inset-0 bg-orange-500/20 rounded-full blur-xl animate-pulse"></div>
           <i class="fas fa-spinner fa-spin text-4xl text-orange-500 relative"></i>
         </div>
       </div>
@@ -19,9 +18,8 @@
       <!-- DM 없음 상태 -->
       <div v-else-if="dmList.length === 0" class="flex flex-col items-center justify-center py-32">
         <div class="relative mb-6">
-          <div class="absolute inset-0 bg-orange-500/20 rounded-full blur-2xl"></div>
           <div
-            class="relative bg-gradient-to-br from-gray-800 to-gray-700 p-8 rounded-full border border-white/10 shadow-2xl"
+            class="relative bg-gray-800 p-8 rounded-full border border-white/10 shadow-2xl"
           >
             <i class="fas fa-comment-dots text-5xl text-orange-400"></i>
           </div>
@@ -66,11 +64,11 @@
               <p v-if="dm.lastMessageContent" class="text-sm text-gray-400 truncate">
                 {{ dm.lastMessageContent }}
               </p>
-              <p v-else class="text-sm text-gray-600 italic">메시지를 보내보세요</p>
+              <p v-else class="text-sm text-gray-400 italic">메시지를 보내보세요</p>
             </div>
 
             <!-- 화살표 표시 (옵션) -->
-            <i class="fas fa-chevron-right text-gray-600 text-sm flex-shrink-0"></i>
+            <i class="fas fa-chevron-right text-gray-400 text-sm flex-shrink-0"></i>
           </div>
 
           <!-- 구분선 (마지막 아이템 제외) -->
@@ -86,7 +84,7 @@
     <transition name="slide-down">
       <div v-if="showError" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-sm w-auto">
         <div
-          class="bg-gradient-to-br from-red-600 to-red-700 text-white px-6 py-3 rounded-2xl shadow-2xl border border-red-500/50 backdrop-blur-xl"
+          class=" bg-red-600 text-white px-6 py-3 rounded-2xl shadow-2xl border border-red-500/50 backdrop-blur-xl"
         >
           <div class="flex items-center gap-3">
             <i class="fas fa-exclamation-circle text-xl"></i>

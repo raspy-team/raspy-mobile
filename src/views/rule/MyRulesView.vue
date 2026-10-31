@@ -15,7 +15,7 @@
         :key="tab.value"
         @click="selectedTab = tab.value"
         :class="[
-          'px-4 py-2 rounded-lg font-semibold text-sm transition',
+          'px-4 py-2 rounded-lg font-medium text-sm transition',
           selectedTab === tab.value
             ? 'bg-orange-500 text-white shadow'
             : 'bg-gray-700 text-gray-300 hover:bg-gray-600',
@@ -198,5 +198,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 </style>

@@ -1,14 +1,14 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="bg-white w-[90%] max-h-[95%] overflow-auto max-w-md rounded-2xl p-6 shadow-2xl animate-fade-in pt-8">
-      <button @click="$emit('close')" class="absolute top-4 right-4 text-gray-600 hover:text-black text-[2rem] font-bold">×</button>
-      <h2 class="text-lg font-md text-gray-900 tracking-tight mb-4 flex items-center gap-2">
+    <div class="bg-gray-900 w-[90%] max-h-[95%] overflow-auto max-w-md rounded-2xl p-6 shadow-2xl animate-fade-in pt-8">
+      <button @click="$emit('close')" class="absolute top-4 right-4 text-gray-600 hover:text-black text-3xl font-bold">×</button>
+      <h2 class="text-lg font-md text-white tracking-tight mb-4 flex items-center gap-2">
         <i class="fas fa-bolt text-orange-500"></i>
         규칙 생성하기
       </h2>
       <form @submit.prevent="handleSubmit" class="space-y-5">
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">규칙 설명</label>
+          <label class="block text-sm font-medium text-gray-400 mb-1">규칙 설명</label>
           <textarea
             v-model="form.ruleDescription"
             class="modern-input text-sm whitespace-pre-line"
@@ -23,7 +23,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">한세트 승리에 필요한 점수</label>
+          <label class="block text-sm font-medium text-gray-400 mb-1">한세트 승리에 필요한 점수</label>
           <div class="flex gap-2 mt-2 mb-3">
             <button type="button" @click="setPointsUnlimited" :class="pointsUnlimited ? activeTab : inactiveTab">제한 없음</button>
             <button type="button" @click="setPointsCustom" :class="!pointsUnlimited ? activeTab : inactiveTab">직접 입력</button>
@@ -33,12 +33,12 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">총 세트(과반 세트 승리 시 경기 승리)</label>
+          <label class="block text-sm font-medium text-gray-400 mb-1">총 세트(과반 세트 승리 시 경기 승리)</label>
           <input v-model.number="form.setsToWin" type="number" class="modern-input text-xs" min="1" placeholder="세트 수 입력" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">세트 제한시간 (초)</label>
+          <label class="block text-sm font-medium text-gray-400 mb-1">세트 제한시간 (초)</label>
           <div class="flex gap-2 mt-2 mb-3">
             <button type="button" @click="setTimeUnlimited" :class="timeUnlimited ? activeTab : inactiveTab">제한 없음</button>
             <button type="button" @click="setTimeCustom" :class="!timeUnlimited ? activeTab : inactiveTab">직접 입력</button>
@@ -48,7 +48,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">세트 승리 기준</label>
+          <label class="block text-sm font-medium text-gray-400 mb-1">세트 승리 기준</label>
           <select v-model="form.winBy" class="modern-input text-xs">
             <option disabled value="">기준 선택</option>
             <option value="SETS_HALF_WIN" :disabled="disableHalfWin">점수 달성 (미달성 시 무승부)</option>
@@ -56,13 +56,13 @@
           </select>
         </div>
 
-        <div v-if="invalidMessage" class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11a.75.75 0 011.5 0v4a.75.75 0 01-1.5 0V7zm0 6a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"/></svg>
+        <div v-if="invalidMessage" class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg flex items-center gap-2">
+          <i class="fas fa-circle-exclamation"></i>
           <span>{{ invalidMessage }}</span>
         </div>
 
         <div>
-          <div class="text-xs text-gray-600 pb-2">[규칙 제목]과 [카테고리]는 설명을 바탕으로 AI로 자동 생성됩니다.</div>
+          <div class="text-xs text-gray-400 pb-2">[규칙 제목]과 [카테고리]는 설명을 바탕으로 AI로 자동 생성됩니다.</div>
           <button type="submit" :disabled="loading || !isValid" class="w-full bg-orange-500 text-white py-2 rounded-md font-semibold shadow hover:brightness-110 transition disabled:opacity-50">
             {{ showAIGenerating ? '생성 중...' : '생성하기' }}
           </button>
@@ -93,8 +93,8 @@ const pointsUnlimited = ref(true), timeUnlimited = ref(true)
 const disableHalfWin = ref(false), disableMostPoints = ref(false)
 const showAIGenerating = ref(false), loading = ref(false)
 
-const activeTab = 'px-4 py-2 bg-orange-500 text-white text-sm font-semibold rounded-full shadow'
-const inactiveTab = 'px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-full'
+const activeTab = 'px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-full shadow'
+const inactiveTab = 'px-4 py-2 bg-gray-800 text-gray-400 text-sm font-medium rounded-full'
 
 const placeholder = `예시)
 목표:

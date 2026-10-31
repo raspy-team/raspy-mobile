@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-screen h-screen flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
+    class="w-screen h-screen flex-shrink-0 relative overflow-hidden bg-orange-400 "
   >
     <!-- 애니메이션 배경 -->
     <div class="absolute inset-0">
@@ -8,7 +8,7 @@
         <div
           v-for="i in 6"
           :key="i"
-          class="absolute rounded-full bg-white animate-float"
+          class="absolute rounded-full bg-gray-900 animate-float"
           :class="`float-${i}`"
           :style="{
             width: Math.random() * 100 + 50 + 'px',
@@ -36,7 +36,7 @@
 
         <!-- 메인 텍스트 -->
         <div class="mb-8">
-          <h1 class="text-white font-black text-3xl mb-4 leading-tight">
+          <h1 class="text-white font-bold text-3xl mb-4 leading-tight">
             친구를 초대하고,<br />
             더 많은 컨텐츠를<br />
             확인하세요!
@@ -79,7 +79,7 @@
             @mousedown.stop
             @mousemove.stop
             @mouseup.stop
-            class="w-full py-4 bg-white text-purple-600 font-bold text-lg rounded-2xl shadow-2xl hover:bg-gray-50 transition-all duration-200 transform hover:scale-[1.02]"
+            class="w-full py-4 bg-gray-900 text-purple-600 font-bold text-lg rounded-2xl shadow-2xl hover:bg-gray-800 transition-all duration-200 transform hover:scale-[1.02]"
           >
             친구 초대하기
           </button>

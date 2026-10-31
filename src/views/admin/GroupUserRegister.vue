@@ -11,7 +11,7 @@
     <!-- 오른쪽: 회원가입 폼 -->
     <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-white px-6 lg:px-24">
       <div class="w-full max-w-md space-y-6">
-        <h2 class="text-3xl font-extrabold text-gray-900 mb-2">유저 생성하기</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">유저 생성하기</h2>
         <form @submit.prevent="handleRegister" class="space-y-5">
           <div>
             <label class="block mb-1 text-sm font-medium text-gray-700">아이디</label>

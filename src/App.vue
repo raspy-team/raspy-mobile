@@ -1,7 +1,5 @@
 <template>
   <div class="h-full">
-    <!-- 피드 온보딩 (/ 경로 최초 접속 시) -->
-    <FeedOnboarding :show="showFeedOnboarding" @complete="onOnboardingComplete" />
 
     <!-- Splash 화면 (anroid는 네이티브 위임, ios일때만 보임.) -->
     <transition name="fade">
@@ -10,7 +8,7 @@
           v-if="false && isIos && showSplash"
           class="fixed overflow-hidden inset-0 flex items-center justify-center bg-black z-[100]"
         >
-          <span class="raspy text-5xl font-extrabold tracking-wider text-orange-500 font-kanit;">
+          <span class="raspy text-5xl font-bold tracking-wider text-orange-500 font-kanit;">
             <img class="w-[50dvw]" :src="MatchLogo" />
           </span>
         </div>
@@ -19,6 +17,12 @@
 
     <!-- 실제 라우터 뷰 -->
     <RouterView class="h-full" :key="route.fullPath" />
+
+    <!-- 하단 탭: 어느 화면에서든 큰 갈래로 돌아갈 수 있게 앱 전체에서 한 번만 그린다 -->
+    <FooterNav v-if="footerTab !== null" :tab="footerTab" />
+
+    <!-- 앱 전체 알림 한 줄 (window.alert도 여기로 온다) -->
+    <CustomToast />
 
     <!-- 펜딩 리뷰 알림 (전역) - 우선순위가 더 높음 -->
     <Transition name="fade">
@@ -30,16 +34,15 @@
         <Transition name="slide-up">
           <div
             v-if="showPendingReviewModal && pendingReviewGameId"
-            class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+            class="w-full max-w-md bg-gray-900 rounded-3xl shadow-2xl overflow-hidden"
           >
             <!-- 헤더 -->
             <div
-              class="relative px-6 py-8 bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 text-white"
+              class="relative px-6 py-8 bg-purple-500 text-white"
             >
               <div class="text-center">
                 <div class="inline-flex items-center justify-center mb-4">
                   <div class="relative">
-                    <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
                     <div
                       class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30"
                     >
@@ -47,7 +50,7 @@
                     </div>
                   </div>
                 </div>
-                <h2 class="text-2xl font-black mb-2 tracking-tight">경기 평가가 필요해요!</h2>
+                <h2 class="text-2xl font-bold mb-2 tracking-tight">경기 평가가 필요해요!</h2>
                 <p class="text-white/90 text-sm font-medium">
                   종료된 경기에 대한 리뷰를 작성해주세요
                 </p>
@@ -61,11 +64,11 @@
                   class="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full border border-purple-200"
                 >
                   <i class="fas fa-clipboard-check text-purple-500"></i>
-                  <span class="text-sm font-bold text-purple-700">상대방 평가 및 규칙 평가</span>
+                  <span class="text-sm font-medium text-purple-700">상대방 평가 및 규칙 평가</span>
                 </div>
               </div>
 
-              <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed">
+              <div class="bg-gray-800 rounded-xl p-4 text-sm text-gray-200 leading-relaxed">
                 <p class="mb-2">
                   <i class="fas fa-info-circle text-purple-500 mr-2"></i>경기가 종료되었습니다.
                 </p>
@@ -77,7 +80,7 @@
             <div class="px-6 pb-6 space-y-3">
               <button
                 @click="goToPendingReview"
-                class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold active:scale-95 transition-all shadow-lg"
+                class="w-full py-3 px-6 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-bold active:scale-95 transition-all shadow-lg"
               >
                 <i class="fas fa-arrow-right mr-2"></i>평가하러 가기
               </button>
@@ -97,16 +100,15 @@
         <Transition name="slide-up">
           <div
             v-if="activeGame && activeGame.gameId"
-            class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+            class="w-full max-w-md bg-gray-900 rounded-3xl shadow-2xl overflow-hidden"
           >
             <!-- 헤더 -->
             <div
-              class="relative px-6 py-8 bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 text-white"
+              class="relative px-6 py-8 bg-orange-500 text-white"
             >
               <div class="text-center">
                 <div class="inline-flex items-center justify-center mb-4">
                   <div class="relative">
-                    <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
                     <div
                       class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30"
                     >
@@ -114,7 +116,7 @@
                     </div>
                   </div>
                 </div>
-                <h2 class="text-2xl font-black mb-2 tracking-tight">경기 시작!</h2>
+                <h2 class="text-2xl font-bold mb-2 tracking-tight">경기 시작!</h2>
                 <p class="text-white/90 text-sm font-medium">참여하신 경기가 시작되었습니다</p>
               </div>
             </div>
@@ -124,10 +126,10 @@
               <!-- 규칙 제목 -->
               <div class="text-center">
                 <div
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full border border-orange-200"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/10 rounded-full border border-orange-500/30"
                 >
                   <i class="fas fa-gamepad text-orange-500"></i>
-                  <span class="text-sm font-bold text-orange-700">{{
+                  <span class="text-sm font-medium text-orange-400">{{
                     activeGame.ruleTitle || '경기'
                   }}</span>
                 </div>
@@ -137,33 +139,33 @@
               <div class="flex items-center justify-center gap-3 py-4">
                 <div class="flex flex-col items-center flex-1">
                   <div
-                    class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
+                    class="w-16 h-16 rounded-full bg-blue-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
                   >
                     {{ getInitial(activeGame.player1?.nickname) }}
                   </div>
-                  <p class="text-sm font-bold text-gray-800 truncate max-w-[80px]">
+                  <p class="text-sm font-medium text-gray-100 truncate max-w-[80px]">
                     {{ activeGame.player1?.nickname }}
                   </p>
                 </div>
 
                 <div class="flex flex-col items-center justify-center px-3">
-                  <div class="text-3xl font-black text-orange-500 animate-pulse">VS</div>
+                  <div class="text-3xl font-bold text-orange-500">VS</div>
                 </div>
 
                 <div class="flex flex-col items-center flex-1">
                   <div
-                    class="w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
+                    class="w-16 h-16 rounded-full bg-red-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
                   >
                     {{ getInitial(activeGame.player2?.nickname) }}
                   </div>
-                  <p class="text-sm font-bold text-gray-800 truncate max-w-[80px]">
+                  <p class="text-sm font-medium text-gray-100 truncate max-w-[80px]">
                     {{ activeGame.player2?.nickname }}
                   </p>
                 </div>
               </div>
 
               <!-- 시작 시각 -->
-              <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <div class="flex items-center justify-center gap-2 text-sm text-gray-400">
                 <i class="fas fa-clock text-gray-400"></i>
                 <span>{{ formatStartTime(activeGame.startedAt) }}</span>
               </div>
@@ -203,7 +205,7 @@
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
                       <span
-                        class="text-3xl font-black"
+                        class="text-3xl font-bold"
                         :class="
                           gameCountdown <= 2
                             ? 'text-red-500'
@@ -224,7 +226,7 @@
             <div class="px-6 pb-6">
               <button
                 @click="dismissActiveGame"
-                class="w-full py-3 px-6 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold active:scale-95 transition-all"
+                class="w-full py-3 px-6 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-semibold active:scale-95 transition-all"
               >
                 참여하지 않을래요
               </button>
@@ -237,18 +239,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MatchLogo from './assets/Match.png'
 import { socket } from './websocket'
 import api from './api/api'
-import FeedOnboarding from './components/FeedOnboarding.vue'
+import FooterNav from './components/FooterNav.vue'
+import CustomToast from './components/CustomToast.vue'
 // import GameStartNotification from './components/GameStartNotificationSimple.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 
 const showSplash = ref(true)
-const showFeedOnboarding = ref(false)
 const route = useRoute()
+
+// 하단 탭을 보여줄 화면과 그때 켜질 탭. null이면 탭을 숨긴다 (가입·경기 진행·채팅처럼 한 가지에 집중하는 화면)
+const footerTab = computed(() => {
+  const p = route.path
+  if (p === '/') return 'home'
+  if (p === '/feed') return route.query.userId ? null : 'feed'
+  if (p === '/game') return 'game'
+  if (p === '/profile/0' || p === '/settings') return 'profile'
+  if (p.startsWith('/profile/')) return ''
+  if (p === '/rules' && route.query.fromGameCreate) return null
+  if (p === '/rules' || p === '/rules/my-rules' || /^\/rules\/\d+\/ranking$/.test(p)) return 'home'
+  if (p === '/dm' || /^\/games\/\d+\/result$/.test(p)) return ''
+  return null
+})
 // 진행 중인 게임 폴링 (명시적으로 초기화)
 const activeGamePolling = useActiveGamePolling()
 const activeGame = activeGamePolling.activeGame || ref(null)
@@ -422,29 +438,6 @@ const stopGameCountdown = () => {
 
 // router 필요
 const router = useRouter()
-
-// 온보딩 완료 핸들러
-const onOnboardingComplete = () => {
-  console.log('Feed onboarding completed')
-  showFeedOnboarding.value = false
-}
-
-// 라우트 변경 감지하여 / 경로일 때 온보딩 체크
-watch(
-  () => route.path,
-  (path) => {
-    if (path === '/') {
-      const completed = localStorage.getItem('feedOnboardingCompleted2')
-      if (completed !== 'true') {
-        // 온보딩을 즉시 표시 (FeedView의 초기 애니메이션보다 먼저)
-        showFeedOnboarding.value = true
-      }
-    } else {
-      showFeedOnboarding.value = false
-    }
-  },
-  { immediate: true },
-)
 
 function getChatUrlFromPath(path) {
   // /chat/xxx 또는 /games/xxx/play 등 다양한 방 라우트 패턴 지원

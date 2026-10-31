@@ -1,41 +1,4 @@
 <template>
-  <!-- 온보딩 오버레이 -->
-  <transition name="fade-overlay">
-    <div
-      v-if="showOnboarding"
-      class="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center"
-      @click="completeOnboarding"
-      @touchstart="completeOnboarding"
-    >
-      <div class="flex flex-col items-center justify-center space-y-8 px-8">
-        <!-- 메인 텍스트 -->
-        <div class="text-center space-y-4">
-          <h2 class="text-3xl font-bold text-white animate-fade-in-up">피드를 탐색해보세요</h2>
-          <p class="text-lg text-white/80 animate-fade-in-up animation-delay-200">
-            상하좌우로 넘겨보세요
-          </p>
-        </div>
-
-        <!-- 스와이프 애니메이션 아이콘 -->
-        <div class="relative w-32 h-32 animate-fade-in-up animation-delay-400">
-          <!-- 상하 스와이프 -->
-          <div class="absolute inset-0 flex items-center justify-center">
-            <i class="fas fa-hand-pointer text-white text-5xl animate-swipe-vertical"></i>
-          </div>
-          <!-- 좌우 스와이프 -->
-          <div class="absolute inset-0 flex items-center justify-center">
-            <i class="fas fa-hand-pointer text-white/60 text-5xl animate-swipe-horizontal"></i>
-          </div>
-        </div>
-
-        <!-- 탭하여 시작 -->
-        <div class="text-center animate-fade-in-up animation-delay-600">
-          <p class="text-sm text-white/60 animate-pulse">화면을 탭하여 시작</p>
-        </div>
-      </div>
-    </div>
-  </transition>
-
   <HeaderComp
     :has-referer="isUserFeedMode"
     :show-bell="true"
@@ -120,11 +83,11 @@
           v-if="
             prevPost.type === 'upcoming_game' || (prevPost.type === 'game' && !prevPost.isCompleted)
           "
-          class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
+          class="absolute inset-0 bg-violet-600/80 "
         ></div>
         <div
           v-else-if="prevPost.type === 'invite'"
-          class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
+          class="absolute inset-0 bg-orange-400 "
         ></div>
 
         <div v-if="prevPost.type !== 'game' || !prevPost.isCompleted" class="ambient-overlay"></div>
@@ -168,9 +131,9 @@
               </div>
               <div class="text-center">
                 <div
-                  class="w-14 h-14 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
+                  class="w-14 h-14 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
                 >
-                  <i class="fas fa-user-plus text-gray-600 text-lg"></i>
+                  <i class="fas fa-user-plus text-gray-400 text-lg"></i>
                 </div>
                 <div class="text-white/70 text-xs">참가자 모집</div>
               </div>
@@ -204,11 +167,11 @@
           v-if="
             nextPost.type === 'upcoming_game' || (nextPost.type === 'game' && !nextPost.isCompleted)
           "
-          class="absolute inset-0 bg-gradient-to-br from-violet-600/80 via-purple-600/60 to-fuchsia-700/40"
+          class="absolute inset-0 bg-violet-600/80 "
         ></div>
         <div
           v-else-if="nextPost.type === 'invite'"
-          class="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
+          class="absolute inset-0 bg-orange-400 "
         ></div>
 
         <div v-if="nextPost.type !== 'game' || !nextPost.isCompleted" class="ambient-overlay"></div>
@@ -252,9 +215,9 @@
               </div>
               <div class="text-center">
                 <div
-                  class="w-14 h-14 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
+                  class="w-14 h-14 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
                 >
-                  <i class="fas fa-user-plus text-gray-600 text-lg"></i>
+                  <i class="fas fa-user-plus text-gray-400 text-lg"></i>
                 </div>
                 <div class="text-white/70 text-xs">참가자 모집</div>
               </div>
@@ -418,7 +381,7 @@
             >
               <div class="mb-5 flex justify-center">
                 <span
-                  class="cursor-pointer px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
+                  class="cursor-pointer px-3 py-1 rounded-full bg-orange-400 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
                   @click="showRuleModal = true"
                   title="규칙 상세 보기"
                 >
@@ -475,7 +438,7 @@
                           : 'border-white/20'
                       "
                     />
-                    <div class="text-white font-semibold text-sm truncate">
+                    <div class="text-white font-medium text-sm truncate">
                       {{ post.players[1].name }}
                     </div>
                     <div
@@ -519,20 +482,20 @@
                       :src="post.players[0]?.avatar"
                       class="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-blue-400"
                     />
-                    <div class="text-white font-semibold text-sm">{{ post.players[0]?.name }}</div>
+                    <div class="text-white font-medium text-sm">{{ post.players[0]?.name }}</div>
                     <div class="text-blue-300 text-xs font-medium">주최자</div>
                   </div>
 
                   <div class="text-center">
-                    <div class="text-3xl font-black text-white/90">VS</div>
+                    <div class="text-3xl font-bold text-white/90">VS</div>
                     <div class="text-xs text-white/60 mt-1">예정</div>
                   </div>
 
                   <div class="text-center">
                     <div
-                      class="w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
+                      class="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center border-2 border-white/30"
                     >
-                      <i class="fas fa-user-plus text-gray-600 text-xl"></i>
+                      <i class="fas fa-user-plus text-gray-400 text-xl"></i>
                     </div>
                     <div class="text-white/70 text-sm">참가자 모집</div>
                   </div>
@@ -557,7 +520,7 @@
                   <button
                     v-if="!post.isAppliedByMe"
                     @click="handleJoin(post.id)"
-                    class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    class="w-full py-3 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
                     경기 참가하기
                   </button>
@@ -584,11 +547,11 @@
                   <div v-if="showSetDetails">
                     <div class="grid grid-cols-2 gap-2 text-xs text-white/80 mb-2">
                       <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                        <span class="inline-block w-4 h-4" v-html="icons.trophy" />
+                        <span class="inline-flex w-4 h-4 items-center justify-center text-xs" v-html="icons.trophy" />
                         <span>세트수 {{ post.result.sets }}</span>
                       </div>
                       <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                        <span class="inline-block w-4 h-4" v-html="icons.clock" />
+                        <span class="inline-flex w-4 h-4 items-center justify-center text-xs" v-html="icons.clock" />
                         <span>총 시간 {{ post.result.duration }}</span>
                       </div>
                     </div>
@@ -608,7 +571,7 @@
 
               <div
                 v-if="post.type === 'game' && post.isCompleted"
-                class="mt-3 text-[11px] text-white/70 flex items-center justify-between"
+                class="mt-3 text-xs text-white/70 flex items-center justify-between"
               >
                 <span>{{ post.meta.place }}</span>
                 <span>
@@ -642,7 +605,7 @@
                       "
                       class="w-8 h-8 rounded-full object-cover"
                     />
-                    <div class="text-xs font-semibold text-white/90">
+                    <div class="text-xs font-medium text-white/90">
                       {{ post.reviews[0]?.author?.name || '익명' }}님의 한마디
                     </div>
                   </div>
@@ -667,7 +630,7 @@
                       "
                       class="w-8 h-8 rounded-full object-cover"
                     />
-                    <div class="text-xs font-semibold text-white/90">
+                    <div class="text-xs font-medium text-white/90">
                       {{ post.reviews[1]?.author?.name || '익명' }}님의 한마디
                     </div>
                   </div>
@@ -689,7 +652,7 @@
               <!-- 랭킹 데이터가 있는 경우 -->
               <template v-if="currentRankingStatus === 'available' && currentRanking.length > 0">
                 <div class="flex items-center justify-between mb-2">
-                  <div class="text-xl font-extrabold">규칙 랭킹</div>
+                  <div class="text-xl font-bold">규칙 랭킹</div>
                   <div class="text-xs text-white/70">총 {{ currentRanking.length }}명</div>
                 </div>
                 <div
@@ -723,12 +686,12 @@
                         <div class="truncate font-semibold">{{ r.nickname }}</div>
                         <div
                           v-if="r.isPlayer"
-                          class="px-1.5 py-0.5 bg-blue-400/20 border border-blue-300/30 text-blue-200 text-[10px] rounded-full flex-shrink-0"
+                          class="px-1.5 py-0.5 bg-blue-400/20 border border-blue-300/30 text-blue-200 text-xs rounded-full flex-shrink-0"
                         >
                           참여자
                         </div>
                       </div>
-                      <div class="text-[10px] text-white/70 truncate mt-0.5">
+                      <div class="text-xs text-white/70 truncate mt-0.5">
                         레이팅 {{ r.ratingAfter }}
                         <span
                           v-if="r.ratingChange !== 0"
@@ -745,7 +708,7 @@
                       >
                         <i
                           :class="r.rankChange > 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"
-                          class="text-[10px]"
+                          class="text-xs"
                         ></i>
                         {{ Math.abs(r.rankChange) }}
                       </div>
@@ -756,7 +719,7 @@
                 <!-- 전체 랭킹 보기 버튼 -->
                 <button
                   @click="openRankingModal"
-                  class="w-full mt-4 px-6 py-3 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
+                  class="w-full mt-4 px-6 py-3 bg-amber-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
                 >
                   <i class="fas fa-trophy text-white/90"></i>
                   <span>전체 랭킹 보기</span>
@@ -767,7 +730,7 @@
               <!-- 랭킹 시스템 도입 전 경기인 경우 -->
               <template v-else-if="currentRankingStatus === 'unavailable'">
                 <div class="flex items-center justify-between mb-2">
-                  <div class="text-xl font-extrabold">게임 랭킹</div>
+                  <div class="text-xl font-bold">경기 랭킹</div>
                 </div>
                 <div
                   class="bg-white/10 border border-white/15 rounded-2xl backdrop-blur-md p-8 text-center"
@@ -843,11 +806,11 @@
           class="flex flex-col items-center active:scale-95 transition"
         >
           <span
-            class="w-8 h-8"
+            class="w-8 h-8 flex items-center justify-center text-2xl"
             :class="[post?.isLiked ? 'text-red-500' : '', likeBump ? 'like-bump' : '']"
             v-html="post?.isLiked ? icons.heartFill : icons.heart"
           ></span>
-          <span class="text-[10px] mt-1">
+          <span class="text-xs mt-1">
             {{ post.likeCount }}
           </span>
         </button>
@@ -856,24 +819,24 @@
           @click="onDoWithMe"
           class="flex flex-col items-center active:scale-95 transition"
         >
-          <span class="w-8 h-8" v-html="icons.trophy"></span>
-          <span class="text-[10px] mt-1">도전</span>
+          <span class="w-8 h-8 flex items-center justify-center text-2xl" v-html="icons.trophy"></span>
+          <span class="text-xs mt-1">도전</span>
         </button>
         <button
           v-if="post.type !== 'invite' && post.type !== 'friend-invite'"
           @click="onComment"
           class="flex flex-col items-center active:scale-95 transition"
         >
-          <span class="w-8 h-8" v-html="icons.comment"></span>
-          <span class="text-[10px] mt-1">{{ post.commentCount || 0 }}</span>
+          <span class="w-8 h-8 flex items-center justify-center text-2xl" v-html="icons.comment"></span>
+          <span class="text-xs mt-1">{{ post.commentCount || 0 }}</span>
         </button>
         <button
           v-if="post.type !== 'invite' && post.type !== 'friend-invite'"
           @click="onShare"
           class="flex flex-col items-center active:scale-95 transition"
         >
-          <span class="w-8 h-8" v-html="icons.share"></span>
-          <span class="text-[10px] mt-1">공유</span>
+          <span class="w-8 h-8 flex items-center justify-center text-2xl" v-html="icons.share"></span>
+          <span class="text-xs mt-1">공유</span>
         </button>
         <button
           v-if="post.type !== 'invite' && post.type !== 'friend-invite'"
@@ -881,8 +844,8 @@
           class="flex flex-col items-center active:scale-95 transition"
           :class="{ 'opacity-50': isReported(post.id) }"
         >
-          <span class="w-8 h-8" v-html="icons.flag"></span>
-          <span class="text-[10px] mt-1">신고</span>
+          <span class="w-8 h-8 flex items-center justify-center text-2xl" v-html="icons.flag"></span>
+          <span class="text-xs mt-1">신고</span>
         </button>
       </div>
     </div>
@@ -891,7 +854,7 @@
   <div v-if="showRuleModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm">
     <div class="h-full flex flex-col">
       <div
-        class="flex-shrink-0 px-6 py-4 bg-gradient-to-r from-slate-900/95 to-gray-900/95 border-b border-white/10"
+        class="flex-shrink-0 px-6 py-4 bg-slate-900/95 border-b border-white/10"
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -925,7 +888,7 @@
         <div class="h-full overflow-y-auto scrollbar-hidden" style="scroll-behavior: smooth">
           <div class="px-6 py-6 space-y-6">
             <div
-              class="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl overflow-hidden"
+              class=" bg-blue-500/10 border border-blue-500/20 rounded-2xl overflow-hidden"
             >
               <div class="px-5 py-4 bg-blue-500/10 border-b border-blue-500/20">
                 <div class="flex items-center gap-2">
@@ -943,7 +906,7 @@
             </div>
 
             <div
-              class="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl overflow-hidden"
+              class=" bg-emerald-500/10 border border-emerald-500/20 rounded-2xl overflow-hidden"
             >
               <div class="px-5 py-4 bg-emerald-500/10 border-b border-emerald-500/20">
                 <div class="flex items-center gap-2">
@@ -963,7 +926,7 @@
             </div>
 
             <div
-              class="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl overflow-hidden"
+              class=" bg-orange-500/10 border border-orange-500/20 rounded-2xl overflow-hidden"
             >
               <div class="px-5 py-4 bg-orange-500/10 border-b border-orange-500/20">
                 <div class="flex items-center gap-2">
@@ -981,7 +944,7 @@
             </div>
 
             <div
-              class="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl overflow-hidden"
+              class=" bg-purple-500/10 border border-purple-500/20 rounded-2xl overflow-hidden"
             >
               <div class="px-5 py-4 bg-purple-500/10 border-b border-purple-500/20">
                 <div class="flex items-center gap-2">
@@ -999,7 +962,7 @@
             </div>
 
             <div
-              class="bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl overflow-hidden"
+              class=" bg-indigo-500/10 border border-indigo-500/20 rounded-2xl overflow-hidden"
             >
               <div class="px-5 py-4 bg-indigo-500/10 border-b border-indigo-500/20">
                 <div class="flex items-center gap-2">
@@ -1017,7 +980,7 @@
             </div>
 
             <div
-              class="bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-2xl overflow-hidden"
+              class=" bg-red-500/10 border border-red-500/20 rounded-2xl overflow-hidden"
             >
               <div class="px-5 py-4 bg-red-500/10 border-b border-red-500/20">
                 <div class="flex items-center gap-2">
@@ -1036,7 +999,7 @@
 
             <div
               v-if="post?.rule?.ruleExtraInfo"
-              class="bg-gradient-to-br from-gray-500/10 to-slate-500/10 border border-gray-500/20 rounded-2xl overflow-hidden"
+              class=" bg-gray-500/10 border border-gray-500/20 rounded-2xl overflow-hidden"
             >
               <div class="px-5 py-4 bg-gray-500/10 border-b border-gray-500/20">
                 <div class="flex items-center gap-2">
@@ -1079,7 +1042,6 @@
     </div>
   </div>
 
-  <Footer v-if="!isUserFeedMode" tab="feed" />
   <CustomToast />
 
   <div
@@ -1088,39 +1050,39 @@
     @click="closePlayerSelectModal"
   >
     <div
-      class="bg-white rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto relative"
+      class="bg-gray-900 rounded-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto relative"
       @click.stop
     >
       <button
         @click="closePlayerSelectModal"
-        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2"
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-400 transition p-2"
         style="z-index: 10"
         aria-label="닫기"
       >
         <i class="fas fa-times text-xl"></i>
       </button>
       <div class="p-6 pt-8">
-        <p class="text-sm text-gray-600 mb-4">내가 도전할 상대는?</p>
+        <p class="text-sm text-gray-400 mb-4">내가 도전할 상대는?</p>
         <div class="space-y-3">
           <div
             v-for="player in post?.players || []"
             :key="player.id"
-            class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-100 transition group select-none"
+            class="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-800 transition group select-none"
           >
             <img
               :src="player.avatar || '/assets/default.png'"
               :alt="player.name"
-              class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 transition"
+              class="w-12 h-12 rounded-full object-cover border-2 border-gray-800 transition"
             />
             <div class="flex-1 text-left">
-              <div class="font-semibold text-gray-900 transition">
+              <div class="font-semibold text-white transition">
                 {{ player.name }}
               </div>
               <div class="text-sm text-gray-500">플레이어</div>
             </div>
             <button
               @click="sendPlayWithMeRequest(player)"
-              class="ml-2 text-gray-400 hover:text-orange-500 transition p-2 rounded-full hover:bg-orange-100"
+              class="ml-2 text-gray-400 hover:text-orange-500 transition p-2 rounded-full hover:bg-orange-500/15"
               aria-label="요청 보내기"
             >
               <i class="fas fa-chevron-right text-lg"></i>
@@ -1139,15 +1101,15 @@
 
       <!-- 말풍선 모달 - 좋아요 버튼(맨 위) 바로 왼쪽에 위치 -->
       <div class="fixed right-[72px] bottom-[calc(25%+192px)] z-[51]" @click.stop>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-[280px]">
+        <div class="relative bg-gray-900 rounded-2xl shadow-2xl w-[280px]">
           <!-- 말풍선 꼬리 (오른쪽 중앙, 좋아요 버튼을 가리킴) -->
           <div
-            class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rotate-45 shadow-md"
+            class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-gray-900 rotate-45 shadow-md"
           ></div>
 
           <div class="p-4 space-y-3">
             <div class="text-center">
-              <div class="text-sm font-bold text-gray-900 mb-2">
+              <div class="text-sm font-medium text-white mb-2">
                 {{ likersData.totalCount || 0 }}명이 또 보고싶어합니다
               </div>
             </div>
@@ -1160,7 +1122,7 @@
                 v-for="liker in likersData.recentLikers"
                 :key="liker.userId"
                 @click="(goToProfile(liker.userId), closeLikersModal())"
-                class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 active:bg-gray-800 transition cursor-pointer"
               >
                 <!--이거 내가 서버에서 Nickname, profileImageUrl 반대로 값 넣어줘서 이렇게해야함.-->
                 <img
@@ -1170,11 +1132,11 @@
                 />
                 <div
                   v-else
-                  class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                  class="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-medium flex-shrink-0"
                 >
                   {{ liker.profileImageUrl.charAt(0) }}
                 </div>
-                <div class="flex-1 text-sm font-medium text-gray-900 truncate">
+                <div class="flex-1 text-sm font-medium text-white truncate">
                   {{ liker.profileImageUrl }}
                 </div>
               </div>
@@ -1207,6 +1169,8 @@
 </template>
 
 <script setup>
+import { useBackClose } from '../../composable/useBackClose'
+
 // 피드 하단 날짜 포맷: 올해면 월/일만, 아니면 연도 포함
 function formatFeedDate(dateStr) {
   if (!dateStr) return ''
@@ -1224,7 +1188,6 @@ function formatFeedDate(dateStr) {
 const showSetDetails = ref(false)
 import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import Footer from '../../components/FooterNav.vue'
 import HeaderComp from '../../components/HeaderComp.vue'
 import api, { playWithMeTooAPI } from '../../api/api'
 import featureFlags from '../../config/features'
@@ -1249,14 +1212,6 @@ const isUserFeedMode = computed(() => !!route.query.userId)
 const { loading, sortedFeed, loadFeed } = useFeed()
 
 // 온보딩 상태 관리
-const showOnboarding = ref(false)
-
-// 온보딩 완료 처리
-function completeOnboarding() {
-  showOnboarding.value = false
-  localStorage.setItem('feedOnboardingCompleted2', 'true')
-  console.log('[FeedView] 온보딩 완료 - GIF는 자동으로 재생됨')
-}
 
 // 나랑도해 상태 관리
 const playWithMeRequests = ref(new Map()) // userId -> boolean (요청 상태)
@@ -1364,13 +1319,6 @@ onMounted(() => {
   console.log('loadFeed 호출 예정')
   loadFeed(router.currentRoute.value)
 
-  // 최초 접속 시에만 온보딩 표시
-  const hasCompletedOnboarding = localStorage.getItem('feedOnboardingCompleted2') === 'true'
-  if (!hasCompletedOnboarding) {
-    setTimeout(() => {
-      showOnboarding.value = true
-    }, 500)
-  }
 })
 
 // 현재 표시 중인 피드 인덱스 (gameId가 있으면 sortedFeed computed에서 자동으로 맨 위로 정렬됨)
@@ -2310,33 +2258,26 @@ function tryVibrate(ms) {
   }
 }
 
-// Icons (inline SVG)
+// 아이콘은 앱 전체와 같은 Font Awesome을 쓴다
 const icons = {
-  heart:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"/></svg>',
-  heartFill:
-    '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"/></svg>',
-  handshake:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M8.5 13.5 10 15a2.828 2.828 0 0 0 4 0l3.5-3.5m-5-5 2 2m-7 7 2 2"/><path d="M3 8.5 8.5 3 12 6.5l3.5-3.5L21 8.5l-6.5 6.5"/></svg>',
-  comment:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0Z"/></svg>',
-  share:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6 12 2 8 6"/><path d="M12 2v14"/></svg>',
-  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="M4 21V4"/><path d="M4 6h10l4 4-4 4H4"/></svg>',
-  camera:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="M3 7h3l2-3h8l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="4"/></svg>',
-  star: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="m12 3 2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9L12 3Z"/></svg>',
-  starFill:
-    '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="m12 3 2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9L12 3Z"/></svg>',
-  trophy:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><path d="M8 21h8M12 17a5 5 0 0 0 5-5V4H7v8a5 5 0 0 0 5 5Z"/><path d="M5 4H3v2a4 4 0 0 0 4 4"/><path d="M19 4h2v2a4 4 0 0 1-4 4"/></svg>',
-  clock:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
-  chevron:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"/></svg>',
+  heart: '<i class="far fa-heart"></i>',
+  heartFill: '<i class="fas fa-heart"></i>',
+  handshake: '<i class="far fa-handshake"></i>',
+  comment: '<i class="far fa-comment"></i>',
+  share: '<i class="fas fa-share"></i>',
+  flag: '<i class="far fa-flag"></i>',
+  camera: '<i class="fas fa-camera"></i>',
+  star: '<i class="far fa-star"></i>',
+  starFill: '<i class="fas fa-star"></i>',
+  trophy: '<i class="fas fa-trophy"></i>',
+  clock: '<i class="far fa-clock"></i>',
+  chevron: '<i class="fas fa-chevron-down"></i>',
 }
 
 onBeforeUnmount(() => {})
+
+// 뒤로가기는 열린 모달부터 닫는다
+useBackClose(showSetDetails, showPlayerSelectModal, showLikersModal, showRuleModal, showRankingModal)
 </script>
 
 <style scoped>
@@ -2508,7 +2449,7 @@ onBeforeUnmount(() => {})
 :deep(header .fa-bell + span) {
   background-color: white !important;
   border-color: transparent !important;
-  color: #1f2937 !important;
+  color: #262626 !important;
 }
 
 /* 온보딩 애니메이션 */

@@ -262,7 +262,7 @@
       <div v-else-if="step === 9" class="screen-inner">
         <div class="content center">
           <i class="fas fa-circle-check icon-large"></i>
-          <h1 class="text-center font-extrabold text-orange-500 mt-2 text-2xl">설정 완료!</h1>
+          <h1 class="text-center font-bold text-orange-500 mt-2 text-2xl">설정 완료!</h1>
           <div class="text-orange-500 mt-3 font-[300]">지금부터 Match를 이용하실 수 있습니다</div>
         </div>
         <div class="p-5">
@@ -607,7 +607,7 @@ function toHome() {
 
 <style scoped>
 .app-container {
-  background: #fff;
+  background: #171717;
   height: full;
   display: flex;
   flex-direction: column;
@@ -628,7 +628,7 @@ function toHome() {
 }
 .back-btn {
   font-size: 22px;
-  color: #333;
+  color: #f5f5f5;
   background: none;
   border: none;
   padding: 12px;
@@ -649,14 +649,14 @@ function toHome() {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #eee;
+  background: #262626;
   border-radius: 3px;
   position: relative;
   overflow: hidden;
 }
 .progress {
   height: 100%;
-  background: #f77f00;
+  background: #f97316;
   border-radius: 3px;
   transition: width 0.3s;
 }
@@ -692,19 +692,19 @@ function toHome() {
   padding-left: 1rem;
   font-weight: bold;
   margin-bottom: 8px;
-  color: #333;
+  color: #f5f5f5;
   text-align: left;
 }
 .subtext {
   font-size: 14px;
   padding-left: 1rem;
-  color: #888;
+  color: #a3a3a3;
   text-align: left;
   margin-bottom: 8px;
 }
 .icon-large {
   font-size: 48px;
-  color: #f77f00;
+  color: #f97316;
   margin-bottom: 10px;
 }
 .input-box {
@@ -712,13 +712,13 @@ function toHome() {
   padding: 14px;
   font-size: 18px;
   margin-top: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #262626;
   border-radius: 8px;
 }
 .error-text {
   margin-top: 8px;
   font-size: 14px;
-  color: #e63946;
+  color: #f87171;
 }
 .footer,
 .footer-col {
@@ -735,16 +735,16 @@ function toHome() {
   border: none;
 }
 .btn-primary {
-  background: #f77f00;
+  background: #f97316;
   color: #fff;
 }
 .btn-primary:disabled {
-  background: #f1a663;
+  background: #fb923c;
 }
 .btn-outline {
-  background: #fff;
-  border: 1px solid #f77f00;
-  color: #f77f00;
+  background: #171717;
+  border: 1px solid #f97316;
+  color: #f97316;
 }
 .mb-3 {
   margin-bottom: 18px;
@@ -761,7 +761,7 @@ function toHome() {
   border-radius: 50%;
   margin-top: 16px;
   object-fit: cover;
-  box-shadow: 0 0 0 3px #f77f0044;
+  box-shadow: none;
 }
 .image-label {
   display: flex;
@@ -775,11 +775,11 @@ function toHome() {
 }
 .upload-text {
   font-size: 16px;
-  color: #f77f00;
-  border: 1px solid #f77f00;
+  color: #f97316;
+  border: 1px solid #f97316;
   border-radius: 8px;
   padding: 8px 18px;
-  background: #fff;
+  background: #171717;
 }
 .img-preview-area {
   position: relative;
@@ -793,28 +793,28 @@ function toHome() {
   right: -8px;
   width: 32px;
   height: 32px;
-  background: #fff;
+  background: #171717;
   border-radius: 50%;
-  border: 1px solid #eee;
-  color: #d33;
+  border: 1px solid #262626;
+  color: #f87171;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 8px #0001;
+  box-shadow: none;
   cursor: pointer;
   z-index: 10;
 }
 
 /* === EULA 약관 동의 추가 스타일 === */
 .eula-box {
-  background: #f9f9fa;
+  background: #262626;
   border-radius: 16px;
   padding: 24px 16px 16px 16px;
   margin: 0 auto;
   max-width: 420px;
   width: 100%;
-  box-shadow: 0 3px 24px #0001;
+  box-shadow: none;
   transition: box-shadow 0.25s;
 }
 .checkbox-row {
@@ -832,16 +832,16 @@ function toHome() {
 .fake-checkbox {
   width: 22px;
   height: 22px;
-  border: 2px solid #f77f00;
+  border: 2px solid #f97316;
   border-radius: 7px;
-  background: #fff;
+  background: #171717;
   display: inline-block;
   margin-right: 8px;
   position: relative;
 }
 .checkbox-row input[type='checkbox']:checked + .fake-checkbox {
-  background: #f77f00;
-  border-color: #f77f00;
+  background: #f97316;
+  border-color: #f97316;
 }
 .checkbox-row input[type='checkbox']:checked + .fake-checkbox::after {
   content: '';
@@ -856,26 +856,26 @@ function toHome() {
 }
 .checkbox-row .all-label {
   font-weight: 600;
-  color: #f77f00;
+  color: #f97316;
   margin-left: 2px;
 }
 .checkbox-row.term .see-detail {
   margin-left: auto;
   background: none;
   border: none;
-  color: #aaa;
+  color: #a3a3a3;
   font-size: 13px;
   text-decoration: underline;
   cursor: pointer;
   padding: 0 6px;
 }
 .checkbox-row .required {
-  color: #e63946;
+  color: #f87171;
   font-size: 13px;
   margin-left: 4px;
 }
 .divide {
-  border-top: 1px solid #eee;
+  border-top: 1px solid #262626;
   margin: 8px 0 4px 0;
 }
 .eula-desc {
@@ -895,13 +895,13 @@ function toHome() {
   animation: modal-in 0.16s;
 }
 .modal-content {
-  background: #fff;
+  background: #171717;
   border-radius: 14px;
   max-width: 90vw;
   width: 370px;
   max-height: 75vh;
   overflow: auto;
-  box-shadow: 0 8px 32px #0003;
+  box-shadow: none;
   padding: 28px 20px 24px 20px;
   display: flex;
   flex-direction: column;
@@ -909,17 +909,17 @@ function toHome() {
 }
 .modal-title {
   font-size: 19px;
-  color: #222;
+  color: #f5f5f5;
 }
 .modal-body {
-  color: #555;
+  color: #d4d4d4;
   font-size: 15px;
   margin-bottom: 8px;
 }
 .modal-close-btn {
   width: 100%;
   padding: 12px 0;
-  background: #f77f00;
+  background: #f97316;
   color: #fff;
   font-size: 16px;
   border-radius: 8px;

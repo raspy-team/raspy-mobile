@@ -12,15 +12,15 @@
           @click="searchUsers"
           class="flex items-center gap-2 px-2 py-1 text-gray-300 hover:text-orange-500 pt-3"
         >
-          <i @click="searchUsers" class="fas fa-search text-xl text-orange-500"></i>
+          <i @click="searchUsers" class="fas fa-search text-xl text-gray-200"></i>
         </button>
 
         <button
           @click="goSettings"
           class="flex items-center gap-2 px-2 py-1 text-gray-300 hover:text-orange-500 pt-3"
         >
-          <i class="fas fa-cog text-xl text-orange-500"></i>
-          <span class="font-semibold text-sm hidden sm:inline">설정</span>
+          <i class="fas fa-cog text-xl text-gray-200"></i>
+          <span class="font-medium text-sm hidden sm:inline">설정</span>
         </button>
       </div>
     </div>
@@ -106,7 +106,7 @@
           <div class="w-full flex items-center justify-center my-5 -ml-2">
             <div class="w-full h-36 bg-gray-700 rounded-xl"></div>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-[0.97rem]">
+          <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-base">
             <div class="w-24 h-5 bg-gray-700 rounded"></div>
             <div class="w-12 h-5 bg-gray-700 rounded justify-self-end"></div>
             <div class="w-24 h-5 bg-gray-700 rounded"></div>
@@ -133,28 +133,19 @@
     <template v-else>
       <main class="flex-1 overflow-hidden flex flex-col pt-14">
         <section
-          class="w-full mx-auto bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-3xl shadow-2xl mb-6 px-5 pt-8 pb-6 flex flex-col gap-4 relative overflow-hidden flex-shrink-0"
+          class="w-full mx-auto mb-6 px-5 pt-8 pb-6 flex flex-col gap-4 relative overflow-hidden flex-shrink-0"
         >
           <!-- Decorative background -->
-          <div
-            class="absolute -top-20 -right-20 w-40 h-40 bg-orange-900/20 rounded-full blur-3xl"
-          ></div>
-          <div
-            class="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-900/15 rounded-full blur-3xl"
-          ></div>
 
           <!-- Profile Section - Improved -->
           <div class="flex flex-col items-center gap-5 relative z-10">
             <!-- Avatar with glow effect -->
             <div class="relative">
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full blur-xl opacity-30 animate-pulse"
-              ></div>
               <div class="relative">
                 <img
                   :src="user.avatar ? user.avatar : Default"
                   alt="avatar"
-                  class="w-32 h-32 rounded-full object-cover border-4 border-gray-700 shadow-2xl relative z-10 ring-4 ring-orange-900"
+                  class="w-28 h-28 rounded-full object-cover relative z-10"
                 />
                 <!-- Status badge -->
                 <div
@@ -168,14 +159,14 @@
             <div class="flex flex-col items-center gap-2 w-full">
               <div class="flex gap-2 items-center">
                 <h1
-                  class="text-4xl font-black bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 bg-clip-text text-transparent"
+                  class="text-3xl font-bold text-white"
                 >
                   {{ user.nickname }}
                 </h1>
                 <button
                   v-if="!user.isMe"
                   @click="blockUser"
-                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 active:bg-red-700 transition shadow-md"
+                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-medium hover:bg-red-600 active:bg-red-700 transition shadow-md"
                 >
                   <i class="fas fa-ban text-xs"></i>
                 </button>
@@ -185,19 +176,19 @@
               <!-- Info tags with icons -->
               <div class="flex gap-2 flex-wrap justify-center mt-2">
                 <span
-                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-600 text-sm px-4 py-2 rounded-full font-bold border border-orange-200 shadow-sm"
+                  class="inline-flex items-center gap-1.5 bg-gray-800 text-gray-300 text-sm px-3 py-1.5 rounded-full"
                 >
                   <i class="fas fa-birthday-cake text-xs"></i>
                   {{ user.age ? user.age + '세' : '연령 -' }}
                 </span>
                 <span
-                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-gray-700 to-gray-800 text-gray-300 text-sm px-4 py-2 rounded-full font-bold border border-gray-600 shadow-sm"
+                  class="inline-flex items-center gap-1.5 bg-gray-800 text-gray-300 text-sm px-3 py-1.5 rounded-full"
                 >
                   <i class="fas fa-venus-mars text-xs"></i>
                   {{ user.gender && user.gender != '비공개' ? user.gender : '성별 -' }}
                 </span>
                 <span
-                  class="inline-flex items-center gap-1.5 bg-gradient-to-br from-blue-900 to-blue-800 text-blue-300 text-sm px-4 py-2 rounded-full font-bold border border-blue-700 shadow-sm"
+                  class="inline-flex items-center gap-1.5 bg-gray-800 text-gray-300 text-sm px-3 py-1.5 rounded-full"
                 >
                   <i class="fas fa-map-marker-alt text-xs"></i>
                   {{
@@ -232,13 +223,13 @@
                   v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
                 >
                   <button
-                    class="flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                    class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                     @click="sendFriendRequest"
                   >
                     <i class="fas fa-user-plus mr-2"></i> 친구추가
                   </button>
                   <button
-                    class="flex justify-center items-center bg-white border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                    class="flex justify-center items-center bg-gray-900 border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
                     @click="goChat"
                   >
                     <i class="fas fa-comment-dots mr-2"></i> DM
@@ -261,7 +252,7 @@
                 <template v-else-if="friendStatus.received && !friendStatus.isFriend">
                   <div class="flex gap-3">
                     <button
-                      class="flex-1 flex justify-center items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
+                      class="flex-1 flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
                       @click="acceptFriendRequest"
                     >
                       <i class="fas fa-user-check mr-2"></i> 승인
@@ -358,7 +349,7 @@
                   <span
                     v-for="(champ, idx) in user.myChampions"
                     :key="idx"
-                    class="p-5 relative flex items-center rounded-[25px] shadow-md px-6 py-3 space-x-1 overflow-hidden bg-gradient-animate animate-pulse-slow"
+                    class="p-5 relative flex items-center rounded-xl shadow-md px-6 py-3 space-x-1 overflow-hidden bg-gradient-animate"
                     title="챔피언"
                   >
                     <i class="fas fa-crown text-white text-sm z-10"></i>
@@ -377,11 +368,11 @@
 
           <!-- 기존 친구추가/DM 버튼 영역 제거 -->
         </section>
-        <section class="w-full mx-auto px-4 bg-gradient-to-b from-gray-800 to-gray-900 pb-0">
+        <section class="w-full mx-auto px-4 bg-gray-800 pb-0">
           <div v-if="false" class="flex items-center gap-2 mb-4 mt-2"></div>
           <div v-if="statMode === 'rule'" class="pb-4">
             @click="showRuleModal = true" class="w-full py-3 rounded-xl bg-orange-100
-            text-orange-600 text-sm font-bold shadow flex items-center justify-center gap-2" >
+            text-orange-600 text-sm font-medium shadow flex items-center justify-center gap-2" >
             <i class="fas fa-list-alt"></i>
             {{ selectedRule?.ruleTitle || '경기 규칙 선택' }}
             placeholder="주 카테고리" />
@@ -411,18 +402,18 @@
               >명
             </template>
           </div>
-          <!-- <div class="rounded-2xl bg-white shadow p-5 mb-0">
+          <!-- <div class="rounded-2xl bg-gray-900 shadow p-5 mb-0">
           <div class="flex justify-between items-center mb-3">
-            <span class="font-bold text-gray-900 text-base flex items-center gap-2">
+            <span class="font-bold text-white text-base flex items-center gap-2">
               <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
             </span>
             <div class="flex items-center gap-2">
               <span
-                class="px-3 py-1 rounded-full bg-orange-500 text-white font-black text-xs shadow"
+                class="px-3 py-1 rounded-full bg-orange-500 text-white font-medium text-xs shadow"
                 >랭킹 -위</span
               >
               <span
-                class="px-2 py-1 rounded-full bg-white text-orange-500 text-xs font-semibold border border-orange-400"
+                class="px-2 py-1 rounded-full bg-gray-900 text-orange-500 text-xs font-medium border border-orange-400"
                 >상위 -%</span
               >
             </div>
@@ -434,11 +425,11 @@
               퍼포먼스 그래프를 표시할 수 없습니다.
             </div>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-[0.97rem]">
+          <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-base">
             <div class="font-semibold text-gray-500">퍼포먼스 평균</div>
-            <div class="text-right font-bold text-gray-900">{{ stat.performance.toFixed(1) }}</div>
+            <div class="text-right font-bold text-white">{{ stat.performance.toFixed(1) }}</div>
             <div class="font-semibold text-gray-500">승/무/패</div>
-            <div class="text-right text-gray-600">
+            <div class="text-right text-gray-400">
               {{ stat.wins }}승 {{ stat.draws }}무 {{ stat.losses }}패
             </div>
             <div class="font-semibold text-gray-500">승률</div>
@@ -462,14 +453,14 @@
             <div class="absolute top-3 right-3 z-10">
               <span
                 :class="{
-                  'bg-gradient-to-r from-orange-500 to-orange-600 text-white':
-                    user.recentGames[0].result === 'win',
-                  'bg-gradient-to-r from-blue-500 to-blue-600 text-white':
-                    user.recentGames[0].result === 'loss',
-                  'bg-gradient-to-r from-gray-400 to-gray-500 text-white':
-                    user.recentGames[0].result === 'draw',
-                }"
-                class="px-3 py-1.5 rounded-full text-xs text-white font-bold shadow-lg"
+' bg-orange-500 text-white':
+ user.recentGames[0].result ==='win',
+' bg-blue-500 text-white':
+ user.recentGames[0].result ==='loss',
+' bg-gray-400 text-white':
+ user.recentGames[0].result ==='draw',
+ }"
+                class="px-3 py-1.5 rounded-full text-xs text-white font-medium shadow-lg"
               >
                 {{
                   user.recentGames[0].result === 'win'
@@ -483,7 +474,7 @@
 
             <div class="flex">
               <div
-                class="relative flex-shrink-0 w-32 h-full bg-gradient-to-br from-gray-700 to-gray-800 overflow-hidden"
+                class="relative flex-shrink-0 w-32 h-full bg-gray-700 overflow-hidden"
               >
                 <img
                   :src="user.recentGames[0].startPhotoUrl"
@@ -501,7 +492,7 @@
                   <div class="flex items-center gap-3 text-base">
                     <div class="flex items-center gap-2">
                       <span
-                        class="text-2xl font-black text-white"
+                        class="text-2xl font-bold text-white"
                         :class="{
                           'text-orange-500': user.recentGames[0].result === 'win',
                           'text-blue-500': user.recentGames[0].result === 'loss',
@@ -511,7 +502,7 @@
                         {{ user.recentGames[0].myScore }}
                       </span>
                       <span class="text-gray-400 font-bold">:</span>
-                      <span class="text-2xl font-black text-white">
+                      <span class="text-2xl font-bold text-white">
                         {{ user.recentGames[0].opponentScore }}
                       </span>
                     </div>
@@ -540,13 +531,13 @@
           <div class="bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-600 p-8">
             <div class="text-center">
               <div class="mb-4">
-                <i class="fas fa-trophy text-gray-600 text-5xl"></i>
+                <i class="fas fa-trophy text-gray-400 text-5xl"></i>
               </div>
               <h4 class="text-lg font-bold text-gray-300 mb-2">아직 경기 기록이 없어요</h4>
               <p class="text-sm text-gray-500 mb-6">첫 경기를 시작해보세요!</p>
               <button
-                @click="$router.push('/game-list')"
-                class="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+                @click="$router.push('/')"
+                class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
               >
                 <i class="fas fa-plus mr-2"></i>
                 경기 참여하기
@@ -583,7 +574,7 @@
               <button
                 v-for="rule in filteredRules"
                 :key="rule.id"
-                class="flex flex-col items-start gap-1 p-3 bg-gray-700 hover:bg-orange-900 rounded-xl text-sm font-bold text-gray-300 transition"
+                class="flex flex-col items-start gap-1 p-3 bg-gray-700 hover:bg-orange-900 rounded-xl text-sm font-medium text-gray-300 transition"
                 :class="{ 'bg-orange-800 text-orange-300': selectedRuleId === rule.id }"
                 @click="selectRule(rule.id)"
               >
@@ -598,7 +589,7 @@
                 </div>
               </button>
             </div>
-            <div v-else>플레이한 게임이 없습니다.</div>
+            <div v-else>플레이한 경기가 없습니다.</div>
           </div>
         </div>
       </transition>
@@ -609,7 +600,7 @@
           @click="closeUserModal"
         >
           <div
-            class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl shadow-2xl max-w-md w-full mx-auto overflow-hidden border border-gray-700"
+            class=" bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full mx-auto overflow-hidden border border-gray-700"
             @click.stop
           >
             <!-- 헤더 -->
@@ -656,9 +647,9 @@
                 v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''"
                 class="text-center py-12"
               >
-                <i class="fas fa-user-slash text-4xl text-gray-600 mb-3"></i>
+                <i class="fas fa-user-slash text-4xl text-gray-400 mb-3"></i>
                 <p class="text-gray-400 text-base">검색 결과가 없습니다</p>
-                <p class="text-gray-600 text-sm mt-1">다른 키워드로 시도해보세요</p>
+                <p class="text-gray-400 text-sm mt-1">다른 키워드로 시도해보세요</p>
               </div>
 
               <!-- 검색 결과 리스트 -->
@@ -674,7 +665,7 @@
                     class="w-12 h-12 rounded-full border-2 border-gray-700 group-hover:border-orange-500 object-cover transition-all"
                   />
                   <div class="flex-1 text-left min-w-0">
-                    <div class="font-semibold text-white text-sm truncate group-hover:text-orange-400 transition-colors">
+                    <div class="font-medium text-white text-sm truncate group-hover:text-orange-400 transition-colors">
                       {{ user.nickname }}
                     </div>
                     <div class="text-xs text-gray-400 truncate">@{{ user.username }}</div>
@@ -682,13 +673,13 @@
                       {{ user.intro }}
                     </div>
                   </div>
-                  <i class="fas fa-chevron-right text-gray-600 group-hover:text-orange-500 transition-colors"></i>
+                  <i class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500 transition-colors"></i>
                 </button>
               </div>
 
               <!-- 초기 상태 (검색 전) -->
               <div v-else class="text-center py-12">
-                <i class="fas fa-search text-4xl text-gray-700 mb-3"></i>
+                <i class="fas fa-search text-4xl text-gray-200 mb-3"></i>
                 <p class="text-gray-500 text-sm">검색어를 입력하세요</p>
               </div>
             </div>
@@ -760,8 +751,8 @@
                     class="w-10 h-10 rounded-full object-cover border"
                   />
                   <div class="flex-1 text-left min-w-0">
-                    <div class="font-bold text-gray-200 text-sm truncate">{{ f.nickname }}</div>
-                    <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+                    <div class="font-medium text-gray-200 text-sm truncate">{{ f.nickname }}</div>
+                    <div class="text-sm truncate">@{{ f.username }}</div>
                     <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
                   </div>
                 </button>
@@ -781,8 +772,8 @@
                     class="w-10 h-10 rounded-full object-cover border"
                   />
                   <div class="flex-1 text-left min-w-0">
-                    <div class="font-bold text-gray-200 text-sm truncate">{{ f.nickname }}</div>
-                    <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+                    <div class="font-medium text-gray-200 text-sm truncate">{{ f.nickname }}</div>
+                    <div class="text-sm truncate">@{{ f.username }}</div>
                     <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
                   </div>
                 </button>
@@ -801,19 +792,19 @@
                     class="w-10 h-10 rounded-full object-cover border"
                   />
                   <div @click="gotoUser(f.id)" class="flex-1 text-left min-w-0">
-                    <div class="font-bold text-gray-200 text-sm truncate">{{ f.nickname }}</div>
-                    <div class="text-[0.8rem] truncate">@{{ f.username }}</div>
+                    <div class="font-medium text-gray-200 text-sm truncate">{{ f.nickname }}</div>
+                    <div class="text-sm truncate">@{{ f.username }}</div>
                     <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
                   </div>
                   <div class="flex gap-1 ml-2">
                     <button
-                      class="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold shadow"
+                      class="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-medium shadow"
                       @click="onAcceptRequest(f.id)"
                     >
                       승인
                     </button>
                     <button
-                      class="px-5 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-xs font-bold shadow border border-gray-600"
+                      class="px-5 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-xs font-medium shadow border border-gray-600"
                       @click="onRejectRequest(f.id)"
                     >
                       거부
@@ -850,7 +841,6 @@
     <div class="pb-[130px]"></div>
     <CustomToast />
   </div>
-  <Footer tab="profile" />
 
   <!-- 친구 끊기 확인 모달 -->
   <transition name="fade">
@@ -894,10 +884,11 @@
 </template>
 
 <script setup>
+import { useBackClose } from '../../composable/useBackClose'
+
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
-import Footer from '../../components/FooterNav.vue'
 import CustomSelect from './CustomSelect.vue'
 import Default from '../../assets/default.png'
 import api from '../../api/api'
@@ -1409,12 +1400,14 @@ watch([statMode, selectedRuleId, selectedMainCategory, selectedSubCategory], upd
 watch(showStatsModal, (newValue) => {
   console.log('showStatsModal changed:', newValue)
 })
+
+// 뒤로가기는 열린 모달부터 닫는다
+useBackClose(showFriendModal, showRuleModal, showChampions, showStatsModal, showConfirm, showUnfriendConfirm, showUserModal)
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 body {
-  background: #f8f9fa !important;
+  background: #000 !important;
 }
 .line-clamp-2 {
   display: -webkit-box;
@@ -1446,7 +1439,7 @@ body {
   }
 }
 .bg-gradient-animate {
-  background: linear-gradient(90deg, #f97316, #fbbf24, #f97316 80%);
+  background: #f97316;
   background-size: 200% 200%;
   animation: gradientShift 4s ease-in-out infinite;
   opacity: 0.82;
@@ -1491,11 +1484,9 @@ body {
 
 .champ-card {
   /* 모던 플랫 카드 */
-  background: #fff;
+  background: #171717;
   border-radius: 1.2rem;
-  box-shadow:
-    0 2px 18px 0 rgba(80, 80, 80, 0.07),
-    0 1.5px 8px 0 rgba(230, 130, 60, 0.09);
+  box-shadow: none;
   border: 1px solid #f2f3f6;
   transition: box-shadow 0.18s;
 }

@@ -1,24 +1,16 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen px-3 bg-neutral-50">
-    <div
-      class="w-full max-w-sm bg-white rounded-2xl shadow-md px-7 py-10 flex flex-col items-center"
-    >
-      <i class="fas fa-trophy text-4xl text-orange-400 mb-2 animate-pop"></i>
-      <div class="text-2xl font-extrabold text-gray-900 mb-2 text-center tracking-tight">
-        경기 생성 완료!
-      </div>
-      <div class="text-sm text-gray-500 mb-8 text-center">
-        이제 새로운 경기를 시작할 수 있습니다.
-      </div>
-
-      <button
-        @click="goHome"
-        class="w-full py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 text-lg font-bold rounded-xl transition"
-      >
-        <i class="fas fa-home mr-2"></i>
-        내 경기 화면 가기
-      </button>
+  <div class="flex flex-col justify-center min-h-screen px-5 bg-gray-900">
+    <i class="fas fa-check text-3xl text-orange-500 mb-4"></i>
+    <div class="text-2xl font-bold text-white mb-2">경기가 열렸어요</div>
+    <div class="text-base text-gray-400 mb-10">
+      상대가 신청하면 알려드려요. 내 경기에서 신청을 받고 장소와 시간을 정하면 돼요.
     </div>
+    <button
+      @click="goHome"
+      class="w-full py-4 bg-orange-500 active:bg-orange-600 text-white text-base font-bold rounded-xl"
+    >
+      내 경기 보기
+    </button>
   </div>
 </template>
 

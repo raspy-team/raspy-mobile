@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col items-center justify-center h-screen bg-gray-50">
+  <div class="flex flex-col items-center justify-center h-screen bg-gray-800">
     <div class="flex flex-col items-center gap-4">
       <i class="fas fa-spinner fa-spin text-4xl text-orange-500"></i>
-      <p class="text-gray-600 text-lg">페이지로 이동 중...</p>
+      <p class="text-gray-400 text-lg">페이지로 이동 중...</p>
     </div>
   </div>
 </template>

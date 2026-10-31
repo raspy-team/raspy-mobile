@@ -1,199 +1,88 @@
 <template>
-  <HeaderComp
-    :has-referer="true"
-    title="내 규칙"
-    :show-bell="false"
-    :show-dm="false"
-    custom-class="bg-gray-900"
-  />
+  <div class="min-h-dvh bg-canvas">
+    <UiTopBar title="내 규칙" back="/rules">
+      <template #right>
+        <UiIconButton icon="fas fa-plus" label="규칙 만들기" @click="router.push('/rules/create')" />
+      </template>
+    </UiTopBar>
 
-  <!-- 필터 탭 -->
-  <div class="mt-14 pt-4 px-4 bg-gray-900 sticky top-14 z-40 border-b border-gray-700">
-    <div class="flex gap-2 pb-3">
-      <button
-        v-for="tab in tabs"
-        :key="tab.value"
-        @click="selectedTab = tab.value"
-        :class="[
-          'px-4 py-2 rounded-lg font-medium text-sm transition',
-          selectedTab === tab.value
-            ? 'bg-orange-500 text-white shadow'
-            : 'bg-gray-700 text-gray-300 hover:bg-gray-600',
-        ]"
-      >
-        {{ tab.label }}
-        <span v-if="getCo(tab.value) > 0" class="ml-1 text-xs"> ({{ getCount(tab.value) }}) </span>
-      </button>
-    </div>
-  </div>
-
-  <!-- 규칙 목록 -->
-  <div class="max-w-2xl mx-auto px-5 pt-6 pb-20 bg-gray-900 min-h-screen">
-    <div v-if="loading" class="py-32 text-center text-orange-500">
-      <i class="fas fa-spinner fa-spin text-3xl"></i>
-      <div class="mt-4 text-base">로딩 중입니다…</div>
-    </div>
-
-    <template v-else-if="filteredRules.length > 0">
-      <MyRuleCard
-        v-for="rule in filteredRules"
-        :key="rule.id"
-        :rule="rule"
-        @edit-rule="onEditRule"
-        @create-game="onCreateGame"
-        @cancel-edit-request="onCancelEditRequest"
-      />
-    </template>
-
-    <div v-else class="py-32 text-center text-gray-500">
-      <i class="fas fa-inbox text-4xl mb-3"></i>
-      <div class="text-base">{{ getEmptyMessage() }}</div>
-    </div>
-  </div>
-
-  <!-- 수정 요청 취소 확인 모달 -->
-  <div
-    v-if="showCancelModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
-  >
-    <div class="bg-gray-800 p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
-      <div class="text-center mb-4">
-        <i class="fas fa-question-circle text-orange-500 text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold text-white mb-2">수정 요청 취소</h3>
-        <p class="text-sm text-gray-300">정말로 수정 요청을 취소하시겠습니까?</p>
+    <main class="max-w-2xl mx-auto px-4 pb-16">
+      <div v-if="loading" class="divide-y divide-line">
+        <div v-for="n in 3" :key="n" class="flex gap-4 py-4">
+          <UiSkeleton class="w-16 h-16 rounded-xl" />
+          <div class="flex-1 space-y-2 pt-1">
+            <UiSkeleton class="h-4 w-1/2" />
+            <UiSkeleton class="h-3 w-1/3" />
+          </div>
+        </div>
       </div>
-      <div class="flex gap-2">
-        <button
-          @click="showCancelModal = false"
-         class="flex-1 bg-gray-700 text-gray-300 font-medium py-3 rounded-xl hover:bg-gray-600 transition"
-        >
-          아니오
-        </button>
-        <button
-          @click="confirmCancelEditRequest"
-         class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition shadow"
-        >
-          취소하기
-        </button>
-      </div>
-    </div>
-  </div>
 
+      <UiEmptyState v-else-if="!rules.length" class="pt-16" icon="far fa-folder-open" title="아직 만든 규칙이 없어요" description="우리끼리 하던 방식을 규칙으로 만들면, 다른 사람과도 겨룰 수 있어요">
+        <UiButton to="/rules/create">규칙 만들기</UiButton>
+      </UiEmptyState>
+
+      <div v-else class="divide-y divide-line">
+        <div v-for="rule in rules" :key="rule.id">
+          <RuleListCard :rule="rule" />
+          <!-- 수정 요청 상태: 있을 때만 -->
+          <div v-if="rule.editRequestStatus === 'PENDING'" class="flex items-center gap-2 pb-4 -mt-1">
+            <UiBadge>수정 요청 확인 중</UiBadge>
+            <div class="flex-1"></div>
+            <UiButton size="sm" variant="ghost" :loading="cancelingId === rule.id" @click="cancelEdit(rule)">요청 취소</UiButton>
+          </div>
+          <div v-else-if="rule.editRequestStatus === 'REJECTED'" class="pb-4 -mt-1">
+            <div class="flex items-center gap-2">
+              <UiBadge tone="danger">수정 요청 거절</UiBadge>
+              <div class="flex-1"></div>
+              <UiButton size="sm" variant="ghost" :to="`/rules/edit/${rule.id}`">다시 요청</UiButton>
+            </div>
+            <p v-if="rule.rejectionReason" class="t-caption mt-2">{{ rule.rejectionReason }}</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+// 내가 만든 규칙. 수정 요청 상태는 해당 규칙 아래에만 보인다
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
-import HeaderComp from '../../components/HeaderComp.vue'
-import MyRuleCard from '../../components/MyRuleCard.vue'
+import RuleListCard from '../../components/rule/RuleListCard.vue'
+import { UiBadge, UiButton, UiEmptyState, UiIconButton, UiSkeleton, UiTopBar } from '../../components/ui'
+import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
 
 const router = useRouter()
 const { showToast } = useToast()
-
-const loading = ref(false)
 const rules = ref([])
-const selectedTab = ref('all')
-const showCancelModal = ref(false)
-const ruleToCancel = ref(null)
+const loading = ref(true)
+const cancelingId = ref(null)
 
-const tabs = [
-  { label: '전체', value: 'all' },
-  { label: '수정 대기', value: 'pending' },
-  { label: '수정 거절', value: 'rejected' },
-]
-
-const filteredRules = computed(() => {
-  if (selectedTab.value === 'all') return rules.value
-  if (selectedTab.value === 'pending') {
-    return rules.value.filter((r) => r.editRequestStatus === 'PENDING')
-  }
-  if (selectedTab.value === 'rejected') {
-    return rules.value.filter((r) => r.editRequestStatus === 'REJECTED')
-  }
-  return rules.value
-})
-
-function getCount(tabValue) {
-  if (tabValue === 'all') return rules.value.length
-  if (tabValue === 'pending') {
-    return rules.value.filter((r) => r.editRequestStatus === 'PENDING').length
-  }
-  if (tabValue === 'rejected') {
-    return rules.value.filter((r) => r.editRequestStatus === 'REJECTED').length
-  }
-  return 0
-}
-
-function getCo(tabValue) {
-  return getCount(tabValue)
-}
-
-function getEmptyMessage() {
-  switch (selectedTab.value) {
-    case 'pending':
-      return '수정 대기 중인 규칙이 없습니다'
-    case 'rejected':
-      return '수정이 거절된 규칙이 없습니다'
-    default:
-      return '생성한 규칙이 없습니다'
-  }
-}
-
-async function fetchMyRules() {
-  loading.value = true
+async function load() {
   try {
-    const res = await api.get('/api/rules/my-rules')
-    rules.value = res.data
-  } catch (e) {
-    console.error('Failed to fetch my rules:', e)
-    showToast('규칙 목록을 불러오는데 실패했습니다')
+    rules.value = (await api.get('/api/rules/my-rules')).data
+  } catch {
+    showToast('규칙을 불러오지 못했어요. 잠시 뒤 다시 시도해주세요')
   } finally {
     loading.value = false
   }
 }
 
-function onEditRule(rule) {
-  router.push(`/rules/edit/${rule.id}`)
-}
-
-function onCreateGame(rule) {
-  router.push({ path: '/create-game', query: { ruleId: rule.id } })
-}
-
-function onCancelEditRequest(rule) {
-  ruleToCancel.value = rule
-  showCancelModal.value = true
-}
-
-async function confirmCancelEditRequest() {
-  if (!ruleToCancel.value) return
-
+async function cancelEdit(rule) {
+  if (!(await confirmDialog({ title: '수정 요청을 취소할까요?', message: '규칙은 지금 모습 그대로 남아요', confirmText: '요청 취소' }))) return
+  cancelingId.value = rule.id
   try {
-    await api.post(`/api/rules/edit-requests/${ruleToCancel.value.editRequestId}/cancel`)
-    showToast('수정 요청이 취소되었습니다')
-
-    // 목록에서 상태 업데이트
-    const rule = rules.value.find((r) => r.id === ruleToCancel.value.id)
-    if (rule) {
-      rule.editRequestStatus = null
-      rule.editRequestId = null
-      rule.rejectionReason = null
-    }
-
-    showCancelModal.value = false
-    ruleToCancel.value = null
+    await api.post(`/api/rules/edit-requests/${rule.editRequestId}/cancel`)
+    showToast('수정 요청을 취소했어요')
+    await load()
   } catch (e) {
-    console.error('Failed to cancel edit request:', e)
-    showToast('수정 요청 취소에 실패했습니다')
+    showToast(e.response?.data?.message || '취소하지 못했어요')
+  } finally {
+    cancelingId.value = null
   }
 }
 
-onMounted(() => {
-  fetchMyRules()
-})
+onMounted(load)
 </script>
-
-<style scoped>
-</style>

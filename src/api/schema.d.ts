@@ -2039,7 +2039,6 @@ export interface components {
         UserSummaryDto: {
             /** Format: int64 */
             id?: number;
-            email: string;
             nickname: string;
             profile?: components["schemas"]["UserProfileDto"];
         };

@@ -18,7 +18,7 @@ const Rule = () => import('../views/RuleView.vue')
 const RuleCreate = () => import('../views/rule/RuleCreateView.vue')
 const RuleRanking = () => import('../views/rule/RuleRankingView.vue')
 const MyRules = () => import('../views/rule/MyRulesView.vue')
-const RuleEdit = () => import('../views/rule/RuleEditView.vue')
+const RuleDetail = () => import('../views/rule/RuleDetailView.vue')
 const DmRoomList = () => import('../views/DmRoomList.vue')
 const OauthCallback = () => import('../views/OauthCallBack.vue')
 const Onboarding = () => import('../views/auth/OnboardingView.vue')
@@ -109,7 +109,9 @@ const routes = [
   { path: '/rules', component:  Rule},
   { path: '/rules/create', component: RuleCreate},
   { path: '/rules/my-rules', component: MyRules},
-  { path: '/rules/edit/:id', component: RuleEdit, props: true},
+  // 수정은 만들기 화면을 그대로 쓴다 (수정 요청으로 보낸다)
+  { path: '/rules/edit/:id', component: RuleCreate, props: (r) => ({ editId: Number(r.params.id) }) },
+  { path: '/rules/:ruleId(\\d+)', component: RuleDetail },
   { path: '/rules/:ruleId/ranking', component: RuleRanking, props: true},
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/group/login', component: GroupUserLogin},

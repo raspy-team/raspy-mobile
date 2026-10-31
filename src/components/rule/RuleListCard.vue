@@ -1,0 +1,41 @@
+<template>
+  <RouterLink :to="`/rules/${rule.id}`" class="flex gap-4 py-4 active:opacity-70 transition-opacity">
+    <span class="w-16 h-16 rounded-xl bg-surface-2 flex items-center justify-center flex-shrink-0">
+      <img v-if="!imageFailed" :src="categoryImage(rule)" alt="" data-fallback="1" class="w-10 h-10" @error="imageFailed = true" />
+      <i v-else class="fas fa-trophy text-fg-subtle text-xl" aria-hidden="true"></i>
+    </span>
+
+    <span class="flex-1 min-w-0">
+      <span class="flex items-start gap-2">
+        <span class="flex-1 t-heading truncate">{{ rule.ruleTitle }}</span>
+        <span v-if="rating" class="flex items-center gap-1 text-sm text-fg flex-shrink-0">
+          <i class="fas fa-star text-xs" aria-hidden="true"></i>{{ rating }}
+          <span class="text-fg-subtle">({{ rule.ratingCount }})</span>
+        </span>
+        <UiBadge v-else-if="isNew">새 규칙</UiBadge>
+      </span>
+      <span class="block t-caption mt-0.5 truncate">{{ [rule.minorCategory, winSummary(rule)].filter(Boolean).join(' · ') }}</span>
+      <span v-if="rule.ruleGoal" class="block t-caption mt-1 line-clamp-2">{{ rule.ruleGoal }}</span>
+      <span class="flex items-center gap-1.5 mt-2 t-micro">
+        <template v-if="rule.currentChampion">
+          <i class="fas fa-crown text-primary" aria-hidden="true"></i>
+          <span class="truncate">챔피언 {{ rule.currentChampion.nickname }}</span>
+          <span aria-hidden="true">·</span>
+        </template>
+        <span class="flex-shrink-0">{{ rule.playCount ? `경기 ${rule.playCount}번` : '아직 경기 없음' }}</span>
+      </span>
+    </span>
+  </RouterLink>
+</template>
+
+<script setup>
+// 규칙 목록의 한 줄: 그림 → 이름·평점 → 종목·승리 조건 → 한 줄 설명 → 챔피언·경기 수. 누르면 상세
+import { ref, computed, defineProps } from 'vue'
+import { UiBadge } from '../ui'
+import { categoryImage, ratingText, winSummary } from '../../utils/rule'
+
+const props = defineProps({ rule: { type: Object, required: true } })
+const imageFailed = ref(false)
+const rating = computed(() => ratingText(props.rule))
+const isNew = computed(() => !props.rule.playCount && !props.rule.ratingCount)
+</script>

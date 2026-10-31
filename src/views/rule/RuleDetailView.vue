@@ -1,0 +1,231 @@
+<template>
+  <div class="min-h-dvh bg-canvas">
+    <UiTopBar back>
+      <template #right>
+        <UiIconButton icon="fas fa-arrow-up-from-bracket" label="공유" @click="share" />
+        <UiIconButton icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
+      </template>
+    </UiTopBar>
+
+    <main v-if="loading" class="max-w-2xl mx-auto px-4 pt-2 space-y-4">
+      <UiSkeleton class="h-44 w-full rounded-2xl" />
+      <UiSkeleton class="h-7 w-2/3" />
+      <UiSkeleton class="h-4 w-1/3" />
+      <UiSkeleton class="h-20 w-full" />
+    </main>
+
+    <main v-else-if="!rule" class="max-w-2xl mx-auto px-4 pt-10">
+      <UiEmptyState icon="fas fa-circle-question" title="규칙을 찾을 수 없어요" description="지워졌거나 주소가 잘못됐어요">
+        <UiButton to="/rules">다른 규칙 보기</UiButton>
+      </UiEmptyState>
+    </main>
+
+    <main v-else class="max-w-2xl mx-auto px-4 pt-2 pb-32">
+      <!-- 대표 그림 -->
+      <div class="h-44 rounded-2xl bg-surface-2 flex items-center justify-center">
+        <img v-if="!imageFailed" :src="categoryImage(rule)" alt="" data-fallback="1" class="w-24 h-24" @error="imageFailed = true" />
+        <i v-else class="fas fa-trophy text-5xl text-fg-subtle" aria-hidden="true"></i>
+      </div>
+
+      <!-- 이름 -->
+      <h1 class="t-title mt-6">{{ rule.ruleTitle }}</h1>
+      <p class="t-caption mt-1">{{ [rule.majorCategory, rule.minorCategory].filter(Boolean).join(' · ') }}</p>
+
+      <!-- 숫자 세 칸 -->
+      <div class="mt-6 grid grid-cols-3 border border-line rounded-xl divide-x divide-line text-center">
+        <div class="py-3">
+          <p class="t-heading">
+            <template v-if="rating"><i class="fas fa-star text-sm" aria-hidden="true"></i> {{ rating }}</template>
+            <template v-else>–</template>
+          </p>
+          <p class="t-micro mt-0.5">{{ rule.ratingCount ? `평가 ${rule.ratingCount}개` : '평가 없음' }}</p>
+        </div>
+        <div class="py-3">
+          <p class="t-heading">{{ rule.playCount || 0 }}</p>
+          <p class="t-micro mt-0.5">경기</p>
+        </div>
+        <button type="button" class="py-3" @click="router.push(`/rules/${rule.id}/ranking`)">
+          <p class="t-heading">{{ myRank ? `${myRank}위` : '–' }}</p>
+          <p class="t-micro mt-0.5">내 순위 <i class="fas fa-chevron-right text-[10px]" aria-hidden="true"></i></p>
+        </button>
+      </div>
+
+      <!-- 만든 사람 -->
+      <button type="button" class="w-full flex items-center gap-3 py-5 mt-2 border-b border-line text-left" @click="router.push('/profile/' + rule.createdBy.id)">
+        <UiAvatar :src="rule.createdBy.profile?.profilePicture" :name="rule.createdBy.nickname" size="md" />
+        <span class="flex-1 min-w-0">
+          <span class="block t-heading truncate">{{ rule.createdBy.nickname }}님이 만들었어요</span>
+          <span v-if="rule.lastPlayedAt" class="block t-caption mt-0.5">마지막 경기 {{ timeAgo(rule.lastPlayedAt) }}</span>
+        </span>
+        <i class="fas fa-chevron-right text-fg-subtle text-sm" aria-hidden="true"></i>
+      </button>
+
+      <!-- 챔피언 -->
+      <div class="flex items-center gap-3 py-5 border-b border-line">
+        <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="rule.currentChampion ? 'bg-primary-soft text-primary' : 'bg-surface-2 text-fg-subtle'" aria-hidden="true">
+          <i class="fas fa-crown"></i>
+        </span>
+        <span class="flex-1 min-w-0">
+          <span class="block t-heading truncate">{{ rule.currentChampion ? `챔피언 ${rule.currentChampion.nickname}` : '아직 챔피언이 없어요' }}</span>
+          <span class="block t-caption mt-0.5">{{ rule.currentChampion ? '챔피언을 이기면 자리를 가져와요' : '이 규칙으로 처음 이기면 챔피언이 돼요' }}</span>
+        </span>
+      </div>
+
+      <!-- 규칙 내용 -->
+      <div class="pt-8">
+        <h2 class="t-title mb-6">규칙</h2>
+        <RuleBody :rule="rule" />
+      </div>
+
+      <!-- 랭킹 미리보기 -->
+      <section v-if="top.length" class="mt-10 pt-8 border-t border-line">
+        <h2 class="t-title mb-4">랭킹</h2>
+        <UiList>
+          <UiListItem
+            v-for="r in top"
+            :key="r.userId"
+            :title="r.userName"
+            :subtitle="`${r.rating}점 · 경기 ${r.playCount}번`"
+            @click="router.push('/profile/' + r.userId)"
+          >
+            <template #leading>
+              <span class="w-6 text-center t-heading tabular-nums">{{ r.rank }}</span>
+              <UiAvatar :src="r.userAvatar" :name="r.userName" size="sm" />
+            </template>
+          </UiListItem>
+        </UiList>
+        <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">랭킹 전체 보기</UiButton>
+      </section>
+
+      <button type="button" class="mt-10 flex items-center gap-2 t-caption underline underline-offset-2" @click="openReport">
+        <i class="far fa-flag" aria-hidden="true"></i> 이 규칙 신고하기
+      </button>
+    </main>
+
+    <!-- 아래 고정: 요약 + 경기 열기 -->
+    <div v-if="rule" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+      <div class="max-w-2xl mx-auto px-4 py-3 flex items-center gap-4">
+        <div class="flex-1 min-w-0">
+          <p class="t-heading truncate">{{ winSummary(rule) }}</p>
+          <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : '첫 경기를 열어보세요' }}</p>
+        </div>
+        <UiButton size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 열기</UiButton>
+      </div>
+    </div>
+
+    <!-- 더보기 -->
+    <UiSheet v-model="menuOpen">
+      <UiList>
+        <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share" />
+        <UiListItem v-if="isMine" icon="fas fa-pen" title="수정 요청하기" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
+        <UiListItem icon="fas fa-ranking-star" title="랭킹 보기" @click="goRanking" />
+        <UiListItem v-if="!isMine" icon="far fa-flag" title="신고하기" danger @click="openReport" />
+      </UiList>
+    </UiSheet>
+
+    <!-- 신고 -->
+    <UiSheet v-model="reportOpen" title="이 규칙을 신고할까요?">
+      <p class="t-caption mb-4">어떤 문제인지 알려주시면 확인 후 조치할게요.</p>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
+      </div>
+      <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어주세요" />
+      <template #footer>
+        <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고하기</UiButton>
+      </template>
+    </UiSheet>
+  </div>
+</template>
+
+<script setup>
+// 규칙 상세 (/rules/:ruleId): 그림 → 이름 → 숫자 → 만든 사람·챔피언 → 규칙 → 랭킹. 주 행동은 아래 '경기 열기' 하나
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import api from '../../api/api'
+import RuleBody from '../../components/rule/RuleBody.vue'
+import {
+  UiAvatar, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiSheet, UiSkeleton, UiTopBar,
+} from '../../components/ui'
+import { useToast } from '../../composable/useToast'
+import { copyText } from '../../utils/clipboard'
+import { timeAgo } from '../../utils/format'
+import { categoryImage, ratingText, winSummary } from '../../utils/rule'
+
+const REPORT_REASONS = ['욕설·비방', '위험한 규칙', '광고·스팸', '기타']
+
+const route = useRoute()
+const router = useRouter()
+const { showToast } = useToast()
+
+const rule = ref(null)
+const loading = ref(true)
+const imageFailed = ref(false)
+const myId = ref(null)
+const top = ref([])
+const myRank = ref(null)
+const menuOpen = ref(false)
+const reportOpen = ref(false)
+const reportReason = ref('')
+const reportDetail = ref('')
+const reporting = ref(false)
+
+const rating = computed(() => (rule.value ? ratingText(rule.value) : ''))
+const isMine = computed(() => rule.value?.createdBy?.id === myId.value)
+
+async function share() {
+  menuOpen.value = false
+  const url = `${window.location.origin}/rules/${rule.value.id}`
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: rule.value.ruleTitle, url })
+      return
+    } catch (e) {
+      if (e?.name === 'AbortError') return
+    }
+  }
+  showToast((await copyText(url)) ? '링크를 복사했어요' : '복사하지 못했어요')
+}
+function goEdit() {
+  menuOpen.value = false
+  router.push(`/rules/edit/${rule.value.id}`)
+}
+function goRanking() {
+  menuOpen.value = false
+  router.push(`/rules/${rule.value.id}/ranking`)
+}
+function openReport() {
+  menuOpen.value = false
+  reportReason.value = ''
+  reportDetail.value = ''
+  reportOpen.value = true
+}
+async function submitReport() {
+  reporting.value = true
+  try {
+    const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
+    await api.post('/api/reports', { targetType: 'RULE', targetId: rule.value.id, reason })
+    showToast('신고를 접수했어요. 확인 후 조치할게요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '이미 신고한 규칙이에요')
+  } finally {
+    reporting.value = false
+    reportOpen.value = false
+  }
+}
+
+onMounted(async () => {
+  const id = route.params.ruleId
+  const [ruleRes, meRes, rankRes] = await Promise.allSettled([
+    api.get(`/api/rules/${id}`),
+    api.get('/api/auth/current-user-id'),
+    api.get(`/api/rules/${id}/rankings`),
+  ])
+  if (ruleRes.status === 'fulfilled') rule.value = ruleRes.value.data
+  if (meRes.status === 'fulfilled') myId.value = meRes.value.data
+  if (rankRes.status === 'fulfilled') {
+    top.value = (rankRes.value.data.rankings || []).slice(0, 3)
+    myRank.value = rankRes.value.data.currentUserRanking?.rank || null
+  }
+  loading.value = false
+})
+</script>

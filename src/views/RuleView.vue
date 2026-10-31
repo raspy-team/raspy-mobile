@@ -1,340 +1,183 @@
 <template>
-  <HeaderComp
-    :has-referer="true"
-    :show-bell="false"
-    :show-dm="false"
-    title="규칙"
-    custom-class="bg-gray-900 z-[444444]"
-    :customGoBack="handleGoBack"
-  >
-    <template #right-after>
-      <button
-        @click="onMyRulesClick"
-        class="px-3 py-2 text-sm text-gray-200"
-      >
-        내 규칙
-      </button>
-      <button
-        @click="onPlusClick"
-        class="ml-1 px-3 py-2 text-sm text-gray-200"
-        aria-label="규칙 만들기"
-      >
-        만들기
-      </button>
-    </template>
-  </HeaderComp>
+  <div class="min-h-dvh bg-canvas">
+    <UiTopBar title="규칙" back="/">
+      <template #right>
+        <UiIconButton icon="far fa-folder" label="내 규칙" @click="router.push('/rules/my-rules')" />
+        <UiIconButton icon="fas fa-plus" label="규칙 만들기" @click="router.push('/rules/create')" />
+      </template>
+    </UiTopBar>
 
-  <!-- 규칙 리스트가 표시될 때만 검색/필터 -->
-  <nav
-    v-if="major && minor"
-    class="bg-gray-900 border-b border-gray-700 px-4 pb-3 flex items-center mt-14 pt-5 gap-3 raspy-top sticky top-0 z-50"
-  >
-    <input
-      v-model="search"
-      type="search"
-      placeholder="검색어"
-      class="filter-input border border-gray-600 rounded-lg px-4 py-2 w-40 focus:border-orange-400 transition"
-      aria-label="검색"
-      @keyup.enter="onSubmitSearch"
-      autocomplete="off"
-      style="margin-right: 12px"
-    />
-    <button
-      @click="onSubmitSearch"
-     class="ml-1 px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition flex items-center justify-center"
-      aria-label="검색"
-    >
-      <i class="fas fa-search"></i>
-    </button>
-    <div class="relative flex items-center gap-2">
-      <button
-        @click="toggleSort"
-        class="filter-sort flex items-center px-3 py-2 border border-gray-600 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300"
-        :aria-expanded="showSortOptions"
-      >
-        <i class="fas fa-sort text-orange-400 mr-1"></i>
-        <span>{{ selectedSortLabel }}</span>
-      </button>
-      <ul
-        v-if="showSortOptions"
-        class="sort-menu absolute left-0 mt-2 bg-gray-800 rounded-xl shadow-lg border border-gray-600 py-2 px-1 min-w-[120px]"
-      >
-        <li
-          v-for="o in sortOptions"
-          :key="o.value"
-          @click="selectSort(o.value)"
-         class="sort-option px-4 py-2 cursor-pointer rounded-lg font-medium text-gray-300 hover:bg-gray-700 transition"
-          :aria-selected="sort === o.value"
-          :style="sort === o.value ? 'color:#fb923c;background:rgba(249,115,22,.15);' : ''"
+    <!-- 검색 + 종류 (스크롤해도 위에 붙어 있다) -->
+    <div class="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-header bg-canvas border-b border-line">
+      <div class="max-w-2xl mx-auto px-4 pt-3">
+        <label class="flex items-center gap-3 h-12 px-4 rounded-full bg-surface border border-line focus-within:border-line-strong">
+          <i class="fas fa-magnifying-glass text-fg-subtle" aria-hidden="true"></i>
+          <input
+            v-model="q"
+            type="search"
+            enterkeyhint="search"
+            placeholder="규칙 이름이나 종목으로 찾기"
+            aria-label="규칙 찾기"
+            class="flex-1 min-w-0 bg-transparent text-base text-fg placeholder:text-fg-subtle outline-none"
+          />
+          <button v-if="q" type="button" class="-mr-2 w-9 h-9 flex items-center justify-center text-fg-subtle" aria-label="검색어 지우기" @click="q = ''">
+            <i class="fas fa-circle-xmark" aria-hidden="true"></i>
+          </button>
+        </label>
+      </div>
+
+      <!-- 종류: 아이콘 탭 (가로로 넘긴다) -->
+      <div class="max-w-2xl mx-auto flex gap-6 px-4 mt-1 overflow-x-auto no-scrollbar" role="tablist" aria-label="종류">
+        <button
+          v-for="m in ['', ...majors]"
+          :key="m || 'all'"
+          type="button"
+          role="tab"
+          :aria-selected="major === m"
+          class="flex flex-col items-center gap-1 pt-3 pb-2.5 border-b-2 flex-shrink-0 transition-colors"
+          :class="major === m ? 'border-fg text-fg' : 'border-transparent text-fg-subtle'"
+          @click="pickMajor(m)"
         >
-          <i class="fas fa-check mr-2" v-if="sort === o.value"></i>
-          {{ o.label }}
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <!-- Step 1: Major Category Fullscreen -->
-  <div
-    v-if="!major"
-    class="fixed inset-0 bg-gray-900 z-40 flex flex-col items-center justify-center"
-  >
-    <div class="text-xl text-white font-bold mb-6">어떤 종류로 겨룰까요?</div>
-    <div v-if="loadingMajors" class="py-32 text-center text-orange-500">
-      <i class="fas fa-spinner fa-spin text-3xl"></i>
-      <div class="mt-4 text-base">로딩 중입니다…</div>
-    </div>
-    <div v-else class="flex flex-col gap-4 w-full px-6">
-      <div
-        v-for="m in majors"
-        :key="m"
-        @click="selectMajor(m)"
-        class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-gray-700 rounded-xl transition justify-center"
-        :class="major === m ? 'border-4 border-orange-400' : ''"
-        style="min-width: 90px"
-      >
-        <img :src="`/category-picture/${m}.png`" alt="카테고리 아이콘" class="w-14 h-14 mr-4" />
-        <span class="text-base font-medium text-gray-300">{{ m }}</span>
+          <img v-if="m" :src="`/category-picture/${m}.png`" alt="" data-fallback="1" class="w-6 h-6" :class="major === m ? '' : 'opacity-60'" />
+          <i v-else class="fas fa-border-all text-lg h-6 leading-6" aria-hidden="true"></i>
+          <span class="text-xs font-medium whitespace-nowrap">{{ m || '전체' }}</span>
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Step 2: Minor Category Fullscreen -->
-  <div
-    v-else-if="!minor"
-    class="fixed inset-0 bg-gray-900 z-40 flex flex-col items-center justify-center"
-  >
-    <button
-      @click="major = ''"
-     class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
-    >
-      <i class="fas fa-arrow-left"></i>
-      <span>뒤로</span>
-    </button>
-    <div class="text-lg text-white font-bold mb-6">서브 카테고리를 선택하세요.</div>
-    <div v-if="loadingMinors" class="py-32 text-center text-orange-500">
-      <i class="fas fa-spinner fa-spin text-3xl"></i>
-      <div class="mt-4 text-base">로딩 중입니다…</div>
-    </div>
-    <div v-else class="flex flex-col gap-4 w-full px-6 overflow-y-auto" style="max-height: 60vh">
-      <div
-        v-for="n in minors"
-        :key="n"
-        @click="selectMinor(n)"
-        class="flex flex-row items-center cursor-pointer px-4 py-4 hover:bg-gray-700 rounded-xl transition justify-center"
-        :class="minor === n ? 'border-4 border-orange-400' : ''"
-        style="min-width: 90px"
-      >
-        <img :src="`/category-picture/${n}.png`" alt="서브카테고리 아이콘" class="w-14 h-14 mr-4" />
-        <span class="text-base font-medium text-gray-300">{{ n }}</span>
+    <main class="max-w-2xl mx-auto px-4 pb-16">
+      <!-- 세부 종목 -->
+      <div v-if="major && minors.length" class="flex gap-2 pt-4 overflow-x-auto no-scrollbar -mx-4 px-4">
+        <UiChip class="flex-shrink-0 whitespace-nowrap" :selected="!minor" @click="pickMinor('')">전체</UiChip>
+        <UiChip v-for="n in minors" :key="n" class="flex-shrink-0 whitespace-nowrap" :selected="minor === n" @click="pickMinor(n)">{{ n }}</UiChip>
       </div>
-    </div>
-  </div>
 
-  <!-- Step 3: Rule List (below search/filter bar) -->
-  <div v-else class="max-w-2xl mx-auto bg-gray-900 px-5 pt-6 flex flex-col gap-0 min-h-screen">
-    <button
-      @click="minor = ''"
-     class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
-    >
-      <i class="fas fa-arrow-left"></i>
-      <span>뒤로</span>
-    </button>
-    <div v-if="loading" class="py-32 text-center text-orange-500">
-      <i class="fas fa-spinner fa-spin text-3xl"></i>
-      <div class="mt-4 text-base">로딩 중입니다…</div>
-    </div>
-    <template v-else-if="rules.length">
-      <RuleCard
-        v-for="rule in rules"
-        :key="rule.id"
-        :rule="rule"
-        :search="search"
-        :copiedId="copiedId"
-        :expanded="expanded"
-        :menuOpen="menuOpen"
-        @toggleExpand="toggleExpand"
-        @copyDescription="copyDescription"
-        @openMenu="openMenu"
-      />
-    </template>
-    <div v-else class="py-32 text-center text-gray-500">조건에 맞는 규칙이 없습니다 😥</div>
-    <div class="h-10"><br /></div>
-    <!-- Toaster -->
-    <transition name="fade">
-      <div
-        v-if="toastMsg"
-       class="fixed left-1/2 bottom-10 z-[120] -translate-x-1/2 bg-orange-500 text-white px-6 py-2 rounded-xl shadow-lg font-medium"
-        aria-live="polite"
-      >
-        {{ toastMsg }}
+      <!-- 개수 + 정렬 -->
+      <div class="flex items-center justify-between pt-4">
+        <p class="t-caption">{{ loading ? '찾는 중…' : `규칙 ${rules.length}개` }}</p>
+        <div class="flex -mr-2" role="radiogroup" aria-label="정렬">
+          <button
+            v-for="o in SORTS"
+            :key="o.value"
+            type="button"
+            role="radio"
+            :aria-checked="sort === o.value"
+            class="px-2 h-9 text-sm"
+            :class="sort === o.value ? 'text-fg font-bold' : 'text-fg-subtle'"
+            @click="setQuery({ sort: o.value })"
+          >
+            {{ o.label }}
+          </button>
+        </div>
       </div>
-    </transition>
-  </div>
 
-  <!-- 맨 위로 버튼 -->
-  <button
-    v-if="showScrollTop"
-    @click="scrollToTop"
-    class="fixed z-[99] bottom-20 right-6 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-xl w-12 h-12 flex items-center justify-center transition"
-    aria-label="맨 위로"
-    style="box-shadow: 0 6px 18px 0 rgba(255, 115, 0, 0.12)"
-  >
-    <i class="fas fa-arrow-up text-xl"></i>
-  </button>
+      <!-- 목록 -->
+      <div v-if="loading && !rules.length" class="divide-y divide-line">
+        <div v-for="n in 5" :key="n" class="flex gap-4 py-4">
+          <UiSkeleton class="w-16 h-16 rounded-xl" />
+          <div class="flex-1 space-y-2 pt-1">
+            <UiSkeleton class="h-4 w-1/2" />
+            <UiSkeleton class="h-3 w-1/3" />
+            <UiSkeleton class="h-3 w-3/4" />
+          </div>
+        </div>
+      </div>
+
+      <UiEmptyState
+        v-else-if="!rules.length"
+        class="pt-16"
+        icon="fas fa-magnifying-glass"
+        title="맞는 규칙이 없어요"
+        :description="q || major ? '검색어나 종류를 바꿔보거나, 직접 만들어보세요' : '첫 규칙을 만들어보세요'"
+      >
+        <div class="flex gap-2">
+          <UiButton v-if="q || major" variant="secondary" @click="clearFilters">조건 지우기</UiButton>
+          <UiButton to="/rules/create">규칙 만들기</UiButton>
+        </div>
+      </UiEmptyState>
+
+      <div v-else class="divide-y divide-line" :class="{ 'opacity-60': loading }">
+        <RuleListCard v-for="rule in rules" :key="rule.id" :rule="rule" />
+      </div>
+    </main>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+// 규칙 둘러보기: 검색 + 종류 탭 + 목록. 고른 조건은 주소(?major=&minor=&q=&sort=)에 남겨
+// 상세에서 돌아와도, 링크로 공유해도 같은 목록이 나온다
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
-import HeaderComp from '../components/HeaderComp.vue'
-import RuleCard from '../components/RuleCard.vue'
+import RuleListCard from '../components/rule/RuleListCard.vue'
+import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSkeleton, UiTopBar } from '../components/ui'
 
-import { useRouter } from 'vue-router'
-import { useRoute } from 'vue-router'
+const SORTS = [
+  { value: 'popular', label: '인기순' },
+  { value: 'recent', label: '최신순' },
+]
 
-const router = useRouter()
 const route = useRoute()
+const router = useRouter()
 
-const showScrollTop = ref(false)
 const majors = ref([])
 const minors = ref([])
 const rules = ref([])
-const loading = ref(false)
-const loadingMajors = ref(false)
-const loadingMinors = ref(false)
-const showSortOptions = ref(false)
-const major = ref('')
-const minor = ref('')
-const search = ref('')
-const sort = ref('popular')
-const sortOptions = [
-  { label: '최신순', value: 'recent' },
-  { label: '인기순', value: 'popular' },
-]
-const copiedId = ref(null)
-const expanded = ref([])
-const toastMsg = ref('')
+const loading = ref(true)
 
-const selectedSortLabel = computed(
-  () => sortOptions.find((o) => o.value === sort.value)?.label || '정렬',
-)
+const major = computed(() => route.query.major || '')
+const minor = computed(() => route.query.minor || '')
+const sort = computed(() => route.query.sort || 'popular')
+const q = ref(route.query.q || '')
 
-const handleGoBack = () => {
-  // fromGameCreate 쿼리 파라미터가 있으면 GameListView로 이동
-  if (route.query.fromGameCreate === 'true') {
-    router.push('/')
-  }
-  // 규칙 생성에서 돌아온 경우 피드로 이동
-  else if (route.query.fromRuleCreate === 'true') {
-    router.push('/')
-  }
-  else {
-    // 히스토리 길이가 1 이하면 (첫 페이지) 피드로 이동
-    if (window.history.length <= 1) {
-      router.push('/');
-    } else {
-      router.back();
-    }
-  }
+function setQuery(patch) {
+  const next = { ...route.query, ...patch }
+  Object.keys(next).forEach((k) => !next[k] && delete next[k])
+  router.replace({ query: next })
+}
+function pickMajor(m) {
+  setQuery({ major: m, minor: '' })
+}
+function pickMinor(n) {
+  setQuery({ minor: n })
+}
+function clearFilters() {
+  q.value = ''
+  setQuery({ major: '', minor: '', q: '' })
 }
 
-const handleScroll = () => {
-  showScrollTop.value = window.scrollY > 120
-}
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-  fetchMajors()
-  onSubmitSearch()
-})
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+// 글자를 칠 때마다 부르지 않고 잠깐 멈췄을 때 찾는다
+let typing
+watch(q, (v) => {
+  clearTimeout(typing)
+  typing = setTimeout(() => setQuery({ q: v.trim() }), 300)
 })
 
-const fetchMajors = async () => {
-  loadingMajors.value = true
-  try {
-    const res = await api.get('/api/rules/categories')
-    majors.value = res.data.majors
-  } finally {
-    loadingMajors.value = false
-  }
-}
-async function fetchMinors() {
-  if (!major.value) {
-    minors.value = []
-    minor.value = ''
-    return
-  }
-  loadingMinors.value = true
-  try {
-    const res = await api.get(`/api/rules/categories/${major.value}`)
-    minors.value = res.data
-  } finally {
-    loadingMinors.value = false
-  }
-}
-
-function selectMajor(m) {
-  major.value = m
-  minor.value = ''
-  fetchMinors()
-}
-
-function selectMinor(n) {
-  minor.value = n
-  onSubmitSearch()
-}
-const onSubmitSearch = async () => {
+let seq = 0
+async function load() {
+  const mine = ++seq
   loading.value = true
   try {
     const params = { sort: sort.value }
     if (major.value) params.major = major.value
     if (minor.value) params.minor = minor.value
-    if (search.value) params.search = search.value
-    const res = await api.get('/api/rules/list', { params })
-    rules.value = res.data
-  } finally {
-    loading.value = false
-  }
-}
-const toggleSort = () => {
-  showSortOptions.value = !showSortOptions.value
-}
-const onPlusClick = () => {
-  router.push('/rules/create')
-}
-const onMyRulesClick = () => {
-  router.push('/rules/my-rules')
-}
-const selectSort = (v) => {
-  sort.value = v
-  showSortOptions.value = false
-  onSubmitSearch()
-}
-const showToast = (msg) => {
-  toastMsg.value = msg
-  setTimeout(() => {
-    toastMsg.value = ''
-  }, 1200)
-}
-const copyDescription = async (rule) => {
-  try {
-    await navigator.clipboard.writeText(rule.ruleDescription)
-    copiedId.value = rule.id
-    showToast('복사되었습니다!')
+    if (route.query.q) params.search = route.query.q
+    const { data } = await api.get('/api/rules/list', { params })
+    if (mine === seq) rules.value = data
   } catch {
-    showToast('복사 실패')
+    if (mine === seq) rules.value = []
+  } finally {
+    if (mine === seq) loading.value = false
   }
 }
-const toggleExpand = (id) => {
-  if (expanded.value.includes(id)) {
-    expanded.value = expanded.value.filter((e) => e !== id)
-  } else {
-    expanded.value.push(id)
-  }
-}
+
+watch(major, async (m) => {
+  minors.value = m ? (await api.get(`/api/rules/categories/${m}`).catch(() => ({ data: [] }))).data : []
+}, { immediate: true })
+watch(() => [major.value, minor.value, sort.value, route.query.q], load)
+
+onMounted(async () => {
+  load()
+  majors.value = (await api.get('/api/rules/categories').catch(() => ({ data: {} }))).data.majors || []
+})
 </script>

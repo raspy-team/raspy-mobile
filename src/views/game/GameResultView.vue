@@ -3,13 +3,13 @@
   <UiTopBar title="경기 결과" back="/game" />
 
   <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
-  <main v-if="!isLoading && resultError" class="px-4 pt-[72px] max-w-xl mx-auto">
+  <main v-if="!isLoading && resultError" class="px-4 pt-4 max-w-xl mx-auto">
     <UiEmptyState icon="fas fa-flag-checkered" :title="resultError" description="경기가 끝나면 여기서 결과를 볼 수 있어요">
       <UiButton to="/game">내 경기로</UiButton>
     </UiEmptyState>
   </main>
 
-  <main v-else class="px-4 pt-[72px] max-w-xl mx-auto space-y-8" :class="isParticipant ? 'pb-32' : 'pb-12'">
+  <main v-else class="px-4 pt-4 max-w-xl mx-auto space-y-8" :class="isParticipant ? 'pb-32' : 'pb-12'">
     <!-- 불러오는 중 -->
     <div v-if="isLoading" class="space-y-4 pt-6">
       <UiSkeleton class="h-8 w-1/2 mx-auto" />

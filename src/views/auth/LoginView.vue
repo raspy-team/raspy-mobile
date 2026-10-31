@@ -2,8 +2,8 @@
   <div class="min-h-dvh bg-canvas">
     <UiTopBar back="/init" />
 
-    <main class="max-w-md mx-auto px-4 pt-[72px] pb-12">
-      <h1 class="t-title mt-4">{{ isSignup ? '가입하기' : '로그인' }}</h1>
+    <main class="max-w-md mx-auto px-4 pt-4 pb-12">
+      <h1 class="t-title">{{ isSignup ? '가입하기' : '로그인' }}</h1>
       <p class="t-body text-fg-muted mt-2">
         {{ isSignup ? '아이디와 비밀번호만 있으면 돼요.' : '다시 만나서 반가워요.' }}
       </p>

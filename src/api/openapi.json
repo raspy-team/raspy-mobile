@@ -3718,7 +3718,6 @@
       },
       "UserSummaryDto": {
         "required": [
-          "email",
           "nickname"
         ],
         "type": "object",
@@ -3726,9 +3725,6 @@
           "id": {
             "type": "integer",
             "format": "int64"
-          },
-          "email": {
-            "type": "string"
           },
           "nickname": {
             "type": "string"

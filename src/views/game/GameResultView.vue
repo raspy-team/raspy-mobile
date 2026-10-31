@@ -9,7 +9,7 @@
     </UiEmptyState>
   </main>
 
-  <main v-else class="px-4 pt-4 max-w-xl mx-auto space-y-8" :class="isParticipant ? 'pb-32' : 'pb-12'">
+  <main v-else class="px-4 pt-4 max-w-xl mx-auto space-y-8" :class="isParticipant && (confirmed || pending.canAnswer) ? 'pb-32' : 'pb-12'">
     <!-- 불러오는 중 -->
     <div v-if="isLoading" class="space-y-4 pt-6">
       <UiSkeleton class="h-8 w-1/2 mx-auto" />
@@ -59,6 +59,20 @@
         </div>
       </section>
 
+      <!-- 상대 확인을 기다리는 결과 -->
+      <UiCard v-if="!confirmed" class="space-y-3">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-full bg-surface-2 text-fg-muted flex items-center justify-center flex-shrink-0" aria-hidden="true">
+            <i class="fas fa-hourglass-half"></i>
+          </span>
+          <div class="min-w-0">
+            <p class="t-heading">{{ pending.title }}</p>
+            <p class="t-caption mt-0.5">{{ pending.description }}</p>
+          </div>
+        </div>
+        <UiButton v-if="pending.canAnswer" variant="ghost" block :loading="isAnswering === 'reject'" @click="rejectResult">점수가 달라요, 다시 맞출게요</UiButton>
+      </UiCard>
+
       <!-- 새 챔피언 -->
       <UiCard v-if="championUser" class="flex items-center gap-3">
         <span class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center flex-shrink-0" aria-hidden="true">
@@ -76,7 +90,7 @@
         <UiButton variant="secondary" icon="fas fa-share" class="flex-1" @click="onShare">공유하기</UiButton>
       </div>
 
-      <template v-if="isParticipant">
+      <template v-if="isParticipant && confirmed">
         <!-- 사진·동영상 -->
         <UiSection title="경기 사진·동영상">
           <template #action><span class="t-micro">{{ allPictures.length }}/5</span></template>
@@ -212,8 +226,13 @@
     </template>
   </main>
 
-  <!-- 하단 고정: 참가자만 제출 -->
-  <div v-if="isParticipant && !isLoading && !resultError" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+  <!-- 하단 고정: 확인할 사람은 확인, 확정된 뒤에는 참가자만 평가 제출 -->
+  <div v-if="pending.canAnswer && !isLoading" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+    <div class="max-w-xl mx-auto px-4 py-3">
+      <UiButton block size="lg" :loading="isAnswering === 'confirm'" @click="confirmResult">결과가 맞아요</UiButton>
+    </div>
+  </div>
+  <div v-else-if="isParticipant && confirmed && !isLoading && !resultError" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
     <div class="max-w-xl mx-auto px-4 py-3">
       <UiButton block size="lg" :loading="isSubmitting" :disabled="!review.manner || !review.performance" @click="submitReviewAndGoHome">
         {{ review.manner && review.performance ? '평가 보내기' : '매너와 실력에 별을 눌러주세요' }}
@@ -231,9 +250,12 @@
 <script setup>
 // 경기 결과: 누가 이겼나 → 사진 고르기 → 상대·규칙 평가 → 보내기. 평가는 경기에 뛴 사람에게만 보인다
 
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
+import { POST } from '../../api/client'
+import { refreshOnChange } from '../../websocket/userChannel'
+import { matchTime } from '../../utils/format'
 import {
   UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar,
 } from '../../components/ui'
@@ -329,6 +351,11 @@ const winnerIdx = ref(0)
 const currentUserId = ref(0)
 const championIdx = ref(0)
 const idxCorrect = ref(true)
+// 상대 확인 전 결과 (확인 전에는 전적·레이팅·챔피언에 반영되지 않는다)
+const confirmed = ref(true)
+const resultSubmittedById = ref(null)
+const autoConfirmAt = ref(null)
+const isAnswering = ref('')
 
 // 사진 관련 상태
 const allPictures = ref([])
@@ -364,17 +391,65 @@ const headline = computed(() => {
   if (!isParticipant.value) return { text: `${winner.nickname}님 승리`, tone: 'text-fg' }
   return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-primary' } : { text: '졌어요', tone: 'text-fg-muted' }
 })
+const pending = computed(() => {
+  if (confirmed.value) return { canAnswer: false }
+  const submitter = [user1.value, user2.value].find((u) => u.id === resultSubmittedById.value)
+  const until = autoConfirmAt.value ? `${matchTime(autoConfirmAt.value)}까지` : '24시간 안에'
+  if (!isParticipant.value) return { canAnswer: false, title: '확인 중인 결과예요', description: '두 선수가 확인하면 기록돼요' }
+  if (resultSubmittedById.value === currentUserId.value) {
+    return { canAnswer: false, title: `${opponent.value.nickname}님의 확인을 기다려요`, description: `확인하면 전적과 레이팅에 반영돼요. ${until} 답이 없으면 그대로 확정돼요` }
+  }
+  return {
+    canAnswer: true,
+    title: `${submitter?.nickname || '상대'}님이 낸 결과예요. 맞나요?`,
+    description: `맞으면 전적과 레이팅에 반영돼요. ${until} 확인하지 않으면 그대로 확정돼요`,
+  }
+})
+
+async function confirmResult() {
+  isAnswering.value = 'confirm'
+  try {
+    await POST('/api/games/{id}/result/confirm', { path: { id: Number(gameId) } })
+    await load()
+  } catch (e) {
+    showToast(e.response?.data?.message || '확인하지 못했어요. 다시 시도해 주세요')
+  } finally {
+    isAnswering.value = ''
+  }
+}
+
+async function rejectResult() {
+  const ok = await confirmDialog({
+    title: '결과를 돌려보낼까요?',
+    message: `경기가 다시 진행 중이 돼요. ${opponent.value.nickname}님과 점수를 맞춰 다시 내주세요.`,
+    confirmText: '돌려보내기',
+  })
+  if (!ok) return
+  isAnswering.value = 'reject'
+  try {
+    await POST('/api/games/{id}/result/reject', { path: { id: Number(gameId) } })
+    router.replace(`/games/${gameId}/play`)
+  } catch (e) {
+    showToast(e.response?.data?.message || '돌려보내지 못했어요. 다시 시도해 주세요')
+  } finally {
+    isAnswering.value = ''
+  }
+}
+
 const reviewRows = computed(() => [
   { key: 'manner', label: '매너', value: review.value.manner, set: setManner },
   { key: 'performance', label: '실력', value: review.value.performance, set: setPerformance },
 ])
 
-onMounted(async () => {
+async function load() {
   try {
     const myIdRes = await api.get('/api/auth/current-user-id')
     currentUserId.value = myIdRes.data
 
     const res = await api.get(`/api/games/${gameId}/result`)
+    confirmed.value = res.data.confirmed !== false
+    resultSubmittedById.value = res.data.resultSubmittedById
+    autoConfirmAt.value = res.data.autoConfirmAt
     game.value = res.data.gameSummary
     startDate.value = res.data.startDate
     setResults.value = res.data.setResults
@@ -401,12 +476,21 @@ onMounted(async () => {
     // 저장된 사진 불러오기
     allPictures.value = await getGamePictures(gameId)
   } catch (err) {
-    console.error(err)
     resultError.value = err.response?.data?.message || '결과를 불러오지 못했어요'
   } finally {
     isLoading.value = false
   }
+}
+
+let stopWatching = null
+onMounted(() => {
+  load()
+  // 확인을 기다리는 동안 상대가 확인하거나 돌려보내면 다시 불러온다
+  stopWatching = refreshOnChange(() => {
+    if (!confirmed.value) load()
+  })
 })
+onUnmounted(() => stopWatching?.())
 
 // 카메라 열기
 const openCamera = () => {

@@ -14,7 +14,7 @@
 
     <!-- 끝난 경기 평가 요청. '나중에'를 누르면 그 경기는 다시 묻지 않는다 -->
     <UiDialog
-      :model-value="showPendingReviewModal && !!pendingReviewGameId"
+      :model-value="showPendingReviewModal && !!pendingReviewGameId && !route.path.endsWith('/result')"
       title="경기는 어땠나요?"
       message="상대와 규칙을 평가해주세요. 다음 매칭과 규칙 순위에 반영돼요."
       confirm-text="평가하기"
@@ -160,7 +160,6 @@ watch(
   pendingReviewGameIds,
   (newIds) => {
     if (newIds && newIds.length > 0) {
-      // 결과 페이지에 있지 않을 때만 모달 표시
       // 결과 화면에 있거나 '나중에'를 누른 경기는 다시 띄우지 않는다
       const next = newIds.find((id) => !dismissedReviewIds.includes(id))
       if (next && !route.fullPath.includes('/result')) {

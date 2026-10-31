@@ -183,9 +183,13 @@ const allGames = computed(() => [
   ...sentGames.value.map((g) => ({ ...g, type: 'sent' })),
 ])
 
-// 할 일: 진행 중, 내가 시작해야 하는 확정 경기, 승인 기다리는 신청자가 있는 경기
+// 할 일: 진행 중, 상대가 낸 결과 확인, 내가 시작해야 하는 확정 경기, 승인 기다리는 신청자가 있는 경기
 function bucket(g) {
   if (g.status === 'IN_PROGRESS' || g.gameStatus === 'IN_PROGRESS') return 'todo'
+  // 결과 확인: 상대가 낸 결과는 내 할 일, 내가 낸 결과는 기다리는 중
+  if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
+    return g.resultSubmittedById === (g.myId ?? me.value.id) ? 'waiting' : 'todo'
+  }
   if (g.type === 'my-game') {
     if (g.status === 'COMPLETED' || g.status === 'CANCELED') return 'done'
     if (g.status === 'SCHEDULED' && g.isOwner !== false) return 'todo'

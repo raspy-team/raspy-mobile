@@ -6,6 +6,7 @@
       <h1 class="flex-1 min-w-0 truncate t-body font-bold">{{ game.rule?.ruleTitle }}</h1>
       <UiIconButton icon="fas fa-book-open" label="규칙 보기" @click="game.showRuleDetail = true" />
       <UiIconButton icon="fas fa-list" label="경기 기록" @click="showLogModal = true" />
+      <UiIconButton icon="fas fa-pen-to-square" label="결과만 입력" @click="showResultEntry = true" />
     </header>
 
     <!-- 규칙 요약 한 줄 + 시계 -->
@@ -68,7 +69,7 @@
         <UiButton variant="ghost" class="flex-1" icon="fas fa-rotate-left" @click="openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터')">
           처음부터
         </UiButton>
-        <UiButton variant="danger" class="flex-1" icon="fas fa-stop" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, '지금 점수로 결과가 기록돼요.', '경기 끝내기')">
+        <UiButton variant="danger" class="flex-1" icon="fas fa-stop" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${user2.nickname}님이 확인하면 기록돼요.`, '경기 끝내기')">
           경기 끝내기
         </UiButton>
       </div>
@@ -76,7 +77,7 @@
 
     <!-- 세트 시작 전: 화면 전체에서 시작 버튼 하나만 -->
     <div
-      v-if="showStartButton || (isSetOver && !isGameOver) || isCountingDown"
+      v-if="(showStartButton || (isSetOver && !isGameOver) || isCountingDown) && !showResultEntry"
       class="fixed inset-0 z-dialog bg-canvas/90 flex flex-col items-center justify-center px-8 text-center"
     >
       <template v-if="isCountingDown">
@@ -89,6 +90,10 @@
         <p class="t-caption mt-2">{{ currentScore1 || currentScore2 || currentSet > 1 ? `${user1SetsWon} : ${user2SetsWon}` : '두 사람이 준비되면 시작하세요' }}</p>
         <UiButton block size="lg" class="mt-8 max-w-sm" @click="showStartButton ? (startSet(), (showStartButton = false)) : socket_nextSet()">
           {{ currentSet }}세트 시작
+        </UiButton>
+        <!-- 점수판은 원하는 사람만. 끝나고 점수만 넣어도 된다 -->
+        <UiButton v-if="currentSet === 1 && !currentScore1 && !currentScore2" variant="ghost" class="mt-2" @click="showResultEntry = true">
+          점수판 없이 결과만 입력
         </UiButton>
       </template>
     </div>
@@ -108,6 +113,14 @@
   <input ref="cameraInputRef" type="file" accept="image/*" capture="environment" class="hidden" @change="onCameraChange" />
   <input ref="videoInputRef" type="file" accept="video/mp4,video/quicktime,video/*" class="hidden" @change="onVideoChange" />
 
+  <ResultEntrySheet
+    v-model="showResultEntry"
+    :game-id="gameId"
+    :opponent-name="user2?.nickname"
+    :set-count="game?.rule?.setsToWin || 1"
+    @submitted="goToResult"
+  />
+
   <!-- 경기 기록 -->
   <UiSheet v-model="showLogModal" title="경기 기록">
     <UiEmptyState v-if="!logs.length" icon="fas fa-list" title="아직 기록이 없어요" />
@@ -126,6 +139,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { socket } from '../../websocket'
 import MatchModal from '../../components/MatchModal.vue'
+import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiSheet, UiSpinner } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
@@ -167,6 +181,7 @@ const user1 = ref(null)
 const user2 = ref(null)
 const gameWinner = ref('')
 const showLogModal = ref(false)
+const showResultEntry = ref(false)
 const showStartButton = ref(false)
 const countdown = ref(0)
 const isCountingDown = ref(false)

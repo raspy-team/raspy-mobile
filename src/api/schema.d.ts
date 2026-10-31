@@ -372,6 +372,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 결과만 입력
+         * @description 점수판을 쓰지 않고 끝난 뒤 세트별 점수(내 점수, 상대 점수)를 냅니다. 상대가 확인하면 확정됩니다.
+         */
+        post: operations["enterResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{id}/result/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 결과 다시 확인 요청
+         * @description 상대가 낸 결과가 틀렸다고 돌려보냅니다. 경기는 다시 진행 중이 됩니다.
+         */
+        post: operations["rejectResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{id}/result/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 결과 확인
+         * @description 상대가 낸 결과가 맞다고 확인합니다. 이때 전적·레이팅·챔피언에 반영됩니다.
+         */
+        post: operations["confirmResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/review": {
         parameters: {
             query?: never;
@@ -2189,6 +2249,15 @@ export interface components {
             roadAddress: string;
             detailAddress?: string;
         };
+        EnterResultRequest: {
+            sets: components["schemas"]["SetScoreInput"][];
+        };
+        SetScoreInput: {
+            /** Format: int32 */
+            myScore: number;
+            /** Format: int32 */
+            opponentScore: number;
+        };
         GameReviewRequest: {
             /** Format: int32 */
             manner: number;
@@ -2487,298 +2556,7 @@ export interface components {
             /** Format: int64 */
             gameId?: number;
             /** @enum {string} */
-            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
-        };
-        ChallengeRequestEntity: {
-            /** Format: int64 */
-            id: number;
-            fromUser: components["schemas"]["UserEntity"];
-            toUser: components["schemas"]["UserEntity"];
-            game?: components["schemas"]["GameEntity"];
-            rule?: components["schemas"]["RuleEntity"];
-            /** @enum {string} */
-            status: "REQUESTED" | "ACCEPTED" | "REJECTED" | "CANCELED";
-            message?: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            decidedAt?: string;
-        };
-        ChatRoomEntity: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            type: "GAME" | "DM";
-            /** Format: date-time */
-            createdAt: string;
-            game?: components["schemas"]["GameEntity"];
-            dmUsers: components["schemas"]["UserEntity"][];
-        };
-        CommentEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            author: components["schemas"]["UserEntity"];
-            content: string;
-            parent?: components["schemas"]["CommentEntity"];
-            /** Format: int32 */
-            depth: number;
-            imageUrl?: string;
-            /** Format: int32 */
-            likeCount: number;
-            /** Format: int32 */
-            dislikeCount: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            editedAt?: string;
-            /** Format: date-time */
-            deletedAt?: string;
-            deleted: boolean;
-            /** Format: int32 */
-            reportCount: number;
-            mentionUserNickname?: string;
-        };
-        GameEntity: {
-            /** Format: int64 */
-            id: number;
-            rule: components["schemas"]["RuleEntity"];
-            /** Format: date-time */
-            matchDate?: string;
-            placeRoad?: string;
-            placeDetail?: string;
-            participations: components["schemas"]["ParticipationEntity"][];
-            /** Format: int32 */
-            maxPlayers: number;
-            createdBy: components["schemas"]["UserEntity"];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            modifiedAt: string;
-            /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
-            /** Format: date-time */
-            startedAt?: string;
-            /** Format: date-time */
-            confirmedAt?: string;
-            startPhotoUrl?: string;
-            gameRecord?: components["schemas"]["GameRecordEntity"];
-            isFriendMatch: boolean;
-            playerReviews: components["schemas"]["PlayerReviewEntity"][];
-            gameLikes: components["schemas"]["GameLikeEntity"][];
-            gamePictures: components["schemas"]["GamePictureEntity"][];
-            gameRankingSnapshots: components["schemas"]["GameRankingSnapshotEntity"][];
-            setLogs: components["schemas"]["SetLogEntity"][];
-            scoreLogs: components["schemas"]["ScoreLogEntity"][];
-            resetLogs: components["schemas"]["ResetLogEntity"][];
-            chatRoom?: components["schemas"]["ChatRoomEntity"];
-            gameMedia: components["schemas"]["GameMediaEntity"][];
-            challengeRequests: components["schemas"]["ChallengeRequestEntity"][];
-            comments: components["schemas"]["CommentEntity"][];
-            participants: components["schemas"]["UserEntity"][];
-        };
-        GameLikeEntity: {
-            /** Format: int64 */
-            id: number;
-            user: components["schemas"]["UserEntity"];
-            game: components["schemas"]["GameEntity"];
-            /** Format: date-time */
-            createdAt: string;
-        };
-        GameMediaEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            user?: components["schemas"]["UserEntity"];
-            mediaUrl: string;
-            /** @enum {string} */
-            mediaType: "PHOTO" | "CERTIFICATION" | "RESULT_CARD";
-            /** Format: date-time */
-            createdAt: string;
-        };
-        GamePictureEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            imageUrl: string;
-            /** @enum {string} */
-            mediaType: "IMAGE" | "VIDEO";
-            /** Format: int32 */
-            displayOrder: number;
-            /** Format: date-time */
-            uploadedAt: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        GameRankingSnapshotEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            user: components["schemas"]["UserEntity"];
-            /** Format: int32 */
-            ratingBefore: number;
-            /** Format: int32 */
-            rankBefore?: number;
-            /** Format: int32 */
-            ratingAfter: number;
-            /** Format: int32 */
-            rankAfter: number;
-            /** Format: int32 */
-            ratingChange: number;
-            /** Format: int32 */
-            rankChange?: number;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        GameRecordEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            players: components["schemas"]["UserEntity"][];
-            winner?: components["schemas"]["UserEntity"];
-            /** Format: date-time */
-            recordTime: string;
-            isDraw: boolean;
-        };
-        ParticipationEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            user: components["schemas"]["UserEntity"];
-            /** @enum {string} */
-            status: "REQUESTED" | "APPROVED";
-            /** Format: date-time */
-            joinedAt: string;
-            /** Format: date-time */
-            leftAt?: string;
-        };
-        PlayWithMeTooEntity: {
-            /** Format: int64 */
-            id: number;
-            requester: components["schemas"]["UserEntity"];
-            targetUser: components["schemas"]["UserEntity"];
-            rule: components["schemas"]["RuleEntity"];
-            /** Format: date-time */
-            createdAt: string;
-            /** @enum {string} */
-            status: "PENDING" | "ACCEPTED" | "CANCELLED" | "REJECTED";
-            game?: components["schemas"]["GameEntity"];
-        };
-        PlayerReviewEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            evaluator: components["schemas"]["UserEntity"];
-            target: components["schemas"]["UserEntity"];
-            reviewComment?: string;
-        };
-        ResetLogEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            actor: components["schemas"]["UserEntity"];
-            /** Format: date-time */
-            timestamp: string;
-        };
-        RuleDescription: {
-            ruleGoal: string;
-            ruleScoreDefinition: string;
-            rulePreparation: string;
-            ruleOrder: string;
-            ruleDecision: string;
-            ruleFoul: string;
-            ruleExtraInfo?: string;
-        };
-        RuleEntity: {
-            /** Format: int64 */
-            id: number;
-            isFriendGame: boolean;
-            ruleTitle: string;
-            ruleGoal: string;
-            ruleScoreDefinition: string;
-            rulePreparation: string;
-            ruleOrder: string;
-            ruleDecision: string;
-            ruleFoul: string;
-            ruleExtraInfo?: string;
-            majorCategory: string;
-            minorCategory: string;
-            /** Format: int32 */
-            pointsToWin: number;
-            /** Format: int32 */
-            setsToWin: number;
-            /** Format: int32 */
-            duration: number;
-            /** @enum {string} */
-            winBy: "SETS_HALF_WIN" | "MOST_SETS_AND_POINTS";
-            createdBy: components["schemas"]["UserEntity"];
-            /** Format: int64 */
-            useCount: number;
-            /** Format: date-time */
-            lastPlayedAt?: string;
-            /** Format: double */
-            rating: number;
-            friendGame?: boolean;
-            ruleDescription: components["schemas"]["RuleDescription"];
-        };
-        ScoreLogEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            actor: components["schemas"]["UserEntity"];
-            target: components["schemas"]["UserEntity"];
-            /** Format: int32 */
-            scoreDelta: number;
-            /** Format: int32 */
-            setIndex: number;
-            /** Format: date-time */
-            timestamp: string;
-        };
-        SetLogEntity: {
-            /** Format: int64 */
-            id: number;
-            game: components["schemas"]["GameEntity"];
-            actor: components["schemas"]["UserEntity"];
-            /** Format: int32 */
-            totalSetIndex: number;
-            /** Format: date-time */
-            startedAt: string;
-        };
-        UserEntity: {
-            /** Format: int64 */
-            id?: number;
-            appleUserId?: string;
-            email: string;
-            password?: string;
-            /** @enum {string} */
-            provider: "GOOGLE" | "KAKAO" | "APPLE" | "INITIAL_GROUP" | "GROUP";
-            username: string;
-            nickname: string;
-            roles: ("ROLE_USER" | "ROLE_ADMIN")[];
-            profile?: components["schemas"]["UserProfileEntity"];
-            /** Format: date-time */
-            registeredAt: string;
-            isBot: boolean;
-            /** Format: date-time */
-            termsAgreedAt?: string;
-            /** Format: date-time */
-            onboardedAt?: string;
-            bot?: boolean;
-        };
-        UserProfileEntity: {
-            /** Format: int64 */
-            id?: number;
-            user: components["schemas"]["UserEntity"];
-            profilePicture: string;
-            region?: string;
-            bio?: string;
-            /** Format: int32 */
-            age?: number;
-            /** @enum {string} */
-            gender?: "M" | "F" | "O";
-            affiliation?: string;
+            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -2787,7 +2565,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -2815,7 +2593,7 @@ export interface components {
             opponentNickname?: string;
             opponentProfileUrl?: string;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
             /** Format: date-time */
             startedAt?: string;
             /** Format: int64 */
@@ -2865,7 +2643,7 @@ export interface components {
             limitSeconds: number;
             chatRoomId: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
         };
         ApplicantInfo: {
             /** Format: int64 */
@@ -2894,6 +2672,11 @@ export interface components {
             startDate: string;
             /** Format: int32 */
             newChampionIdx: number;
+            confirmed: boolean;
+            /** Format: int64 */
+            resultSubmittedById?: number;
+            /** Format: date-time */
+            autoConfirmAt?: string;
         };
         GameSummaryResponse: {
             /** Format: int64 */
@@ -2913,7 +2696,7 @@ export interface components {
             ownerNickname: string;
             ownerProfileUrl?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
             /** Format: double */
             mannerScore: number;
             /** Format: int64 */
@@ -3024,7 +2807,9 @@ export interface components {
             matchDate?: string;
             matchLocation?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            /** Format: int64 */
+            resultSubmittedById?: number;
             /** @enum {string} */
             status: "REQUESTED" | "APPROVED";
             /** Format: int64 */
@@ -3059,9 +2844,11 @@ export interface components {
             /** Format: double */
             opponentRating?: number;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
             /** Format: date-time */
             startedAt?: string;
+            /** Format: int64 */
+            resultSubmittedById?: number;
             /** Format: int64 */
             championId?: number;
         };
@@ -3074,7 +2861,7 @@ export interface components {
             matchLocation?: string;
             applicants: components["schemas"]["ApplicantInfo"][];
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
             myProfileUrl?: string;
             /** Format: int64 */
             myId: number;
@@ -3697,6 +3484,76 @@ export interface operations {
                 "application/json": components["schemas"]["GameRegionRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    enterResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnterResultRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    rejectResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    confirmResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -4929,7 +4786,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PlayWithMeTooEntity"][];
+                    "*/*": components["schemas"]["PlayWithMeTooResponse"][];
                 };
             };
         };
@@ -4949,7 +4806,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PlayWithMeTooEntity"][];
+                    "*/*": components["schemas"]["PlayWithMeTooResponse"][];
                 };
             };
         };

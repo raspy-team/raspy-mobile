@@ -85,6 +85,11 @@ const state = computed(() => {
   const g = props.game
   const live = g.status === 'IN_PROGRESS' || g.gameStatus === 'IN_PROGRESS'
   if (live) return { label: '진행 중', tone: 'success', action: 'play', actionLabel: '경기로 돌아가기', actionVariant: 'primary' }
+  if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
+    return g.resultSubmittedById === me.value?.id
+      ? { label: '확인 대기', tone: 'neutral', hint: '상대가 확인하면 기록돼요', action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }
+      : { label: '결과 확인', tone: 'primary', action: 'result', actionLabel: '결과 확인하기', actionVariant: 'tonal' }
+  }
   if (isMine.value) {
     const n = (g.applicants || []).length
     if (g.status === 'COMPLETED') return { label: '끝남', tone: 'neutral', action: 'result', actionLabel: '결과 보기', actionVariant: 'secondary' }

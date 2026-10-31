@@ -642,6 +642,115 @@
         }
       }
     },
+    "/api/games/{id}/result": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "결과만 입력",
+        "description": "점수판을 쓰지 않고 끝난 뒤 세트별 점수(내 점수, 상대 점수)를 냅니다. 상대가 확인하면 확정됩니다.",
+        "operationId": "enterResult",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnterResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/result/reject": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "결과 다시 확인 요청",
+        "description": "상대가 낸 결과가 틀렸다고 돌려보냅니다. 경기는 다시 진행 중이 됩니다.",
+        "operationId": "rejectResult",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/result/confirm": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "결과 확인",
+        "description": "상대가 낸 결과가 맞다고 확인합니다. 이때 전적·레이팅·챔피언에 반영됩니다.",
+        "operationId": "confirmResult",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/review": {
       "post": {
         "tags": [
@@ -2328,7 +2437,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PlayWithMeTooEntity"
+                    "$ref": "#/components/schemas/PlayWithMeTooResponse"
                   }
                 }
               }
@@ -2353,7 +2462,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PlayWithMeTooEntity"
+                    "$ref": "#/components/schemas/PlayWithMeTooResponse"
                   }
                 }
               }
@@ -4034,6 +4143,37 @@
           }
         }
       },
+      "EnterResultRequest": {
+        "required": [
+          "sets"
+        ],
+        "type": "object",
+        "properties": {
+          "sets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SetScoreInput"
+            }
+          }
+        }
+      },
+      "SetScoreInput": {
+        "required": [
+          "myScore",
+          "opponentScore"
+        ],
+        "type": "object",
+        "properties": {
+          "myScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "opponentScore": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "GameReviewRequest": {
         "required": [
           "manner",
@@ -4961,978 +5101,11 @@
               "MATCHING",
               "SCHEDULED",
               "IN_PROGRESS",
+              "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
               "DELETED"
             ]
-          }
-        }
-      },
-      "ChallengeRequestEntity": {
-        "required": [
-          "createdAt",
-          "fromUser",
-          "id",
-          "status",
-          "toUser"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "fromUser": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "toUser": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "rule": {
-            "$ref": "#/components/schemas/RuleEntity"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "REQUESTED",
-              "ACCEPTED",
-              "REJECTED",
-              "CANCELED"
-            ]
-          },
-          "message": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "decidedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ChatRoomEntity": {
-        "required": [
-          "createdAt",
-          "dmUsers",
-          "id",
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "GAME",
-              "DM"
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "dmUsers": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserEntity"
-            }
-          }
-        }
-      },
-      "CommentEntity": {
-        "required": [
-          "author",
-          "content",
-          "createdAt",
-          "deleted",
-          "depth",
-          "dislikeCount",
-          "game",
-          "id",
-          "likeCount",
-          "reportCount"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "author": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "content": {
-            "type": "string"
-          },
-          "parent": {
-            "$ref": "#/components/schemas/CommentEntity"
-          },
-          "depth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "imageUrl": {
-            "type": "string"
-          },
-          "likeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "dislikeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "editedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deletedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deleted": {
-            "type": "boolean"
-          },
-          "reportCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "mentionUserNickname": {
-            "type": "string"
-          }
-        }
-      },
-      "GameEntity": {
-        "required": [
-          "challengeRequests",
-          "comments",
-          "createdAt",
-          "createdBy",
-          "gameLikes",
-          "gameMedia",
-          "gamePictures",
-          "gameRankingSnapshots",
-          "gameStatus",
-          "id",
-          "isFriendMatch",
-          "maxPlayers",
-          "modifiedAt",
-          "participants",
-          "participations",
-          "playerReviews",
-          "resetLogs",
-          "rule",
-          "scoreLogs",
-          "setLogs"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "rule": {
-            "$ref": "#/components/schemas/RuleEntity"
-          },
-          "matchDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "placeRoad": {
-            "type": "string"
-          },
-          "placeDetail": {
-            "type": "string"
-          },
-          "participations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ParticipationEntity"
-            }
-          },
-          "maxPlayers": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdBy": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "gameStatus": {
-            "type": "string",
-            "enum": [
-              "MATCHING",
-              "SCHEDULED",
-              "IN_PROGRESS",
-              "COMPLETED",
-              "CANCELED",
-              "DELETED"
-            ]
-          },
-          "startedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "confirmedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "startPhotoUrl": {
-            "type": "string"
-          },
-          "gameRecord": {
-            "$ref": "#/components/schemas/GameRecordEntity"
-          },
-          "isFriendMatch": {
-            "type": "boolean"
-          },
-          "playerReviews": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PlayerReviewEntity"
-            }
-          },
-          "gameLikes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GameLikeEntity"
-            }
-          },
-          "gamePictures": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GamePictureEntity"
-            }
-          },
-          "gameRankingSnapshots": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GameRankingSnapshotEntity"
-            }
-          },
-          "setLogs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SetLogEntity"
-            }
-          },
-          "scoreLogs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ScoreLogEntity"
-            }
-          },
-          "resetLogs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ResetLogEntity"
-            }
-          },
-          "chatRoom": {
-            "$ref": "#/components/schemas/ChatRoomEntity"
-          },
-          "gameMedia": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GameMediaEntity"
-            }
-          },
-          "challengeRequests": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ChallengeRequestEntity"
-            }
-          },
-          "comments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CommentEntity"
-            }
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserEntity"
-            }
-          }
-        }
-      },
-      "GameLikeEntity": {
-        "required": [
-          "createdAt",
-          "game",
-          "id",
-          "user"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "GameMediaEntity": {
-        "required": [
-          "createdAt",
-          "game",
-          "id",
-          "mediaType",
-          "mediaUrl"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "mediaUrl": {
-            "type": "string"
-          },
-          "mediaType": {
-            "type": "string",
-            "enum": [
-              "PHOTO",
-              "CERTIFICATION",
-              "RESULT_CARD"
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "GamePictureEntity": {
-        "required": [
-          "createdAt",
-          "displayOrder",
-          "game",
-          "id",
-          "imageUrl",
-          "mediaType",
-          "updatedAt",
-          "uploadedAt"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "imageUrl": {
-            "type": "string"
-          },
-          "mediaType": {
-            "type": "string",
-            "enum": [
-              "IMAGE",
-              "VIDEO"
-            ]
-          },
-          "displayOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "uploadedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "GameRankingSnapshotEntity": {
-        "required": [
-          "createdAt",
-          "game",
-          "id",
-          "rankAfter",
-          "ratingAfter",
-          "ratingBefore",
-          "ratingChange",
-          "user"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "ratingBefore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rankBefore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ratingAfter": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rankAfter": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ratingChange": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rankChange": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "GameRecordEntity": {
-        "required": [
-          "game",
-          "id",
-          "isDraw",
-          "players",
-          "recordTime"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "players": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserEntity"
-            }
-          },
-          "winner": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "recordTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "isDraw": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ParticipationEntity": {
-        "required": [
-          "game",
-          "id",
-          "joinedAt",
-          "status",
-          "user"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "REQUESTED",
-              "APPROVED"
-            ]
-          },
-          "joinedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "leftAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PlayWithMeTooEntity": {
-        "required": [
-          "createdAt",
-          "id",
-          "requester",
-          "rule",
-          "status",
-          "targetUser"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "requester": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "targetUser": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "rule": {
-            "$ref": "#/components/schemas/RuleEntity"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PENDING",
-              "ACCEPTED",
-              "CANCELLED",
-              "REJECTED"
-            ]
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          }
-        }
-      },
-      "PlayerReviewEntity": {
-        "required": [
-          "evaluator",
-          "game",
-          "id",
-          "target"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "evaluator": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "target": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "reviewComment": {
-            "type": "string"
-          }
-        }
-      },
-      "ResetLogEntity": {
-        "required": [
-          "actor",
-          "game",
-          "id",
-          "timestamp"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "actor": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RuleDescription": {
-        "required": [
-          "ruleDecision",
-          "ruleFoul",
-          "ruleGoal",
-          "ruleOrder",
-          "rulePreparation",
-          "ruleScoreDefinition"
-        ],
-        "type": "object",
-        "properties": {
-          "ruleGoal": {
-            "type": "string"
-          },
-          "ruleScoreDefinition": {
-            "type": "string"
-          },
-          "rulePreparation": {
-            "type": "string"
-          },
-          "ruleOrder": {
-            "type": "string"
-          },
-          "ruleDecision": {
-            "type": "string"
-          },
-          "ruleFoul": {
-            "type": "string"
-          },
-          "ruleExtraInfo": {
-            "type": "string"
-          }
-        }
-      },
-      "RuleEntity": {
-        "required": [
-          "createdBy",
-          "duration",
-          "id",
-          "isFriendGame",
-          "majorCategory",
-          "minorCategory",
-          "pointsToWin",
-          "rating",
-          "ruleDecision",
-          "ruleDescription",
-          "ruleFoul",
-          "ruleGoal",
-          "ruleOrder",
-          "rulePreparation",
-          "ruleScoreDefinition",
-          "ruleTitle",
-          "setsToWin",
-          "useCount",
-          "winBy"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "isFriendGame": {
-            "type": "boolean"
-          },
-          "ruleTitle": {
-            "type": "string"
-          },
-          "ruleGoal": {
-            "type": "string"
-          },
-          "ruleScoreDefinition": {
-            "type": "string"
-          },
-          "rulePreparation": {
-            "type": "string"
-          },
-          "ruleOrder": {
-            "type": "string"
-          },
-          "ruleDecision": {
-            "type": "string"
-          },
-          "ruleFoul": {
-            "type": "string"
-          },
-          "ruleExtraInfo": {
-            "type": "string"
-          },
-          "majorCategory": {
-            "type": "string"
-          },
-          "minorCategory": {
-            "type": "string"
-          },
-          "pointsToWin": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "setsToWin": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "duration": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "winBy": {
-            "type": "string",
-            "enum": [
-              "SETS_HALF_WIN",
-              "MOST_SETS_AND_POINTS"
-            ]
-          },
-          "createdBy": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "useCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastPlayedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "rating": {
-            "type": "number",
-            "format": "double"
-          },
-          "friendGame": {
-            "type": "boolean",
-            "writeOnly": true
-          },
-          "ruleDescription": {
-            "$ref": "#/components/schemas/RuleDescription"
-          }
-        }
-      },
-      "ScoreLogEntity": {
-        "required": [
-          "actor",
-          "game",
-          "id",
-          "scoreDelta",
-          "setIndex",
-          "target",
-          "timestamp"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "actor": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "target": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "scoreDelta": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "setIndex": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "SetLogEntity": {
-        "required": [
-          "actor",
-          "game",
-          "id",
-          "startedAt",
-          "totalSetIndex"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "game": {
-            "$ref": "#/components/schemas/GameEntity"
-          },
-          "actor": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "totalSetIndex": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "startedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "UserEntity": {
-        "required": [
-          "email",
-          "isBot",
-          "nickname",
-          "provider",
-          "registeredAt",
-          "roles",
-          "username"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "appleUserId": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          },
-          "provider": {
-            "type": "string",
-            "enum": [
-              "GOOGLE",
-              "KAKAO",
-              "APPLE",
-              "INITIAL_GROUP",
-              "GROUP"
-            ]
-          },
-          "username": {
-            "type": "string"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "roles": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "ROLE_USER",
-                "ROLE_ADMIN"
-              ]
-            }
-          },
-          "profile": {
-            "$ref": "#/components/schemas/UserProfileEntity"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "isBot": {
-            "type": "boolean"
-          },
-          "termsAgreedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "onboardedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "bot": {
-            "type": "boolean",
-            "writeOnly": true
-          }
-        }
-      },
-      "UserProfileEntity": {
-        "required": [
-          "profilePicture",
-          "user"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserEntity"
-          },
-          "profilePicture": {
-            "type": "string"
-          },
-          "region": {
-            "type": "string"
-          },
-          "bio": {
-            "type": "string"
-          },
-          "age": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "gender": {
-            "type": "string",
-            "enum": [
-              "M",
-              "F",
-              "O"
-            ]
-          },
-          "affiliation": {
-            "type": "string"
           }
         }
       },
@@ -5965,6 +5138,8 @@
             "enum": [
               "GAME_START",
               "GAME_END",
+              "GAME_RESULT_CHECK",
+              "GAME_RESULT_REJECTED",
               "GAME_COMMENT",
               "COMMENT_REPLY",
               "INBOX",
@@ -6076,6 +5251,7 @@
               "MATCHING",
               "SCHEDULED",
               "IN_PROGRESS",
+              "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
               "DELETED"
@@ -6228,6 +5404,7 @@
               "MATCHING",
               "SCHEDULED",
               "IN_PROGRESS",
+              "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
               "DELETED"
@@ -6264,6 +5441,7 @@
       },
       "GameResultResponse": {
         "required": [
+          "confirmed",
           "drawCount",
           "gameSummary",
           "newChampionIdx",
@@ -6320,6 +5498,17 @@
           "newChampionIdx": {
             "type": "integer",
             "format": "int32"
+          },
+          "confirmed": {
+            "type": "boolean"
+          },
+          "resultSubmittedById": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "autoConfirmAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -6381,6 +5570,7 @@
               "MATCHING",
               "SCHEDULED",
               "IN_PROGRESS",
+              "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
               "DELETED"
@@ -6727,10 +5917,15 @@
               "MATCHING",
               "SCHEDULED",
               "IN_PROGRESS",
+              "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
               "DELETED"
             ]
+          },
+          "resultSubmittedById": {
+            "type": "integer",
+            "format": "int64"
           },
           "status": {
             "type": "string",
@@ -6834,6 +6029,7 @@
               "MATCHING",
               "SCHEDULED",
               "IN_PROGRESS",
+              "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
               "DELETED"
@@ -6842,6 +6038,10 @@
           "startedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "resultSubmittedById": {
+            "type": "integer",
+            "format": "int64"
           },
           "championId": {
             "type": "integer",
@@ -6887,6 +6087,7 @@
               "MATCHING",
               "SCHEDULED",
               "IN_PROGRESS",
+              "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
               "DELETED"

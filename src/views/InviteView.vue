@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col items-center justify-center h-screen bg-gray-800">
     <div class="flex flex-col items-center gap-4">
-      <i class="fas fa-spinner fa-spin text-4xl text-orange-500"></i>
-      <p class="text-gray-400 text-lg">페이지로 이동 중...</p>
+      <UiSpinner size="lg" class="text-fg-muted" label="이동하는 중" />
     </div>
   </div>
 </template>
 
 <script setup>
+import { UiSpinner } from '../components/ui'
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 

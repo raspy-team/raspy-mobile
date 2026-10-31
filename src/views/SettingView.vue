@@ -290,9 +290,7 @@
         <i class="fas fa-times"></i>
       </button>
       <h2 class="text-xl font-bold mb-4 text-gray-200">내가 차단한 사용자</h2>
-      <div v-if="isLoadingBlocked" class="py-4 text-center text-sm text-gray-400">
-        불러오는 중...
-      </div>
+      <UiListSkeleton v-if="isLoadingBlocked" :rows="3" />
       <ul v-else class="space-y-2 max-h-80 overflow-auto">
         <li
           v-for="user in blockedUsers"
@@ -327,6 +325,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton } from '../components/ui'
 import { ref, watch, onMounted, defineOptions } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '../components/HeaderComp.vue'

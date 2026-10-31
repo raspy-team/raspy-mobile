@@ -37,16 +37,7 @@
         <!-- Content -->
         <div class="max-h-[65svh] overflow-y-auto">
           <!-- Loading skeleton -->
-          <ul v-if="loading" class="divide-y divide-gray-700">
-            <li v-for="i in 6" :key="i" class="flex items-center gap-3 py-4 px-6 animate-pulse">
-              <div class="w-10 h-10 rounded-full bg-gray-700"></div>
-              <div class="flex-1">
-                <div class="h-3 w-32 bg-gray-700 rounded mb-2"></div>
-                <div class="h-3 w-48 bg-gray-600 rounded"></div>
-              </div>
-              <div class="h-9 w-20 rounded-lg bg-gray-700"></div>
-            </li>
-          </ul>
+          <UiListSkeleton v-if="loading" :rows="6" class="px-6" />
 
           <!-- Error state -->
           <div v-else-if="error" class="px-6 py-12 text-center">
@@ -165,6 +156,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton } from '../ui'
 import { ref, computed, onMounted, onUnmounted, nextTick, defineEmits } from 'vue'
 import api from '../../api/api'
 import Default from '../../assets/default.png'

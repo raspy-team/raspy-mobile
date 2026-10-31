@@ -21,7 +21,7 @@
         <UiButton to="/rules/create">규칙 만들기</UiButton>
       </UiEmptyState>
 
-      <div v-else class="divide-y divide-line">
+      <div v-else class="divide-y divide-line ui-appear">
         <div v-for="rule in rules" :key="rule.id">
           <RuleListCard :rule="rule" />
           <!-- 수정 요청 상태: 있을 때만 -->

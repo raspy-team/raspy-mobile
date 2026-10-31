@@ -8,9 +8,7 @@
       placeholder="키워드로 검색"
       class="w-full bg-gray-800 border-none rounded-lg px-3 py-3 text-sm font-medium focus:ring-2 focus:ring-orange-300 transition outline-none mb-4"
     />
-    <div v-if="loading" class="text-center py-10">
-      <i class="fas fa-spinner fa-spin text-2xl text-orange-400"></i>
-    </div>
+    <UiListSkeleton v-if="loading" :rows="5" shape="tile" />
     <ul v-else>
       <li
         @click="rule.showRuleDetail = true"
@@ -36,6 +34,7 @@
   </div>
 </template>
 <script setup>
+import { UiListSkeleton } from '../ui'
 import { ref, computed, onMounted } from 'vue'
 import api from '../../api/api'
 import MatchModal from '../MatchModal.vue'

@@ -96,7 +96,7 @@
         </div>
       </UiEmptyState>
 
-      <div v-else class="divide-y divide-line" :class="{ 'opacity-60': loading }">
+      <div v-else class="divide-y divide-line ui-appear transition-opacity" :class="{ 'opacity-60': loading }">
         <RuleListCard v-for="rule in rules" :key="rule.id" :rule="rule" />
       </div>
     </main>

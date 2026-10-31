@@ -96,7 +96,7 @@
     <!-- 연결이 끊겼을 때 -->
     <div v-if="socketStatus === 'connecting'" class="fixed inset-x-0 top-0 z-toast pt-safe">
       <div class="mx-4 mt-2 rounded-xl bg-surface-2 border border-line-strong px-4 py-3 flex items-center gap-3 text-sm">
-        <i class="fas fa-spinner fa-spin text-fg-muted" aria-hidden="true"></i>
+        <UiSpinner size="sm" class="text-fg-muted" label="다시 연결하는 중" />
         다시 연결하는 중이에요. 점수는 연결되면 맞춰져요
       </div>
     </div>
@@ -126,7 +126,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { socket } from '../../websocket'
 import MatchModal from '../../components/MatchModal.vue'
-import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiSheet } from '../../components/ui'
+import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiSheet, UiSpinner } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
 import {

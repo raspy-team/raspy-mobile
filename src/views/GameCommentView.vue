@@ -36,13 +36,7 @@
         >
           <!-- 댓글 내용 -->
           <template v-if="isLoading">
-            <div v-for="i in 5" :key="i" class="flex gap-3 py-2 animate-pulse">
-              <div class="w-9 h-9 rounded-full bg-gray-700"></div>
-              <div class="flex-1 space-y-2">
-                <div class="h-3 w-1/4 bg-gray-700 rounded"></div>
-                <div class="h-3 w-full bg-gray-700 rounded"></div>
-              </div>
-            </div>
+            <UiListSkeleton :rows="5" />
           </template>
           <template v-else-if="threadedComments.length">
             <CommentItem
@@ -142,6 +136,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton } from '../components/ui'
 import {
   ref,
   watch,

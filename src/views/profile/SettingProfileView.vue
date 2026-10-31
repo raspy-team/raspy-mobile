@@ -1,551 +1,187 @@
 <template>
-  <div class="min-h-full bg-black pt-20">
-    <Header v-if="!afterLogin" :hasReferer="true" title="프로필 설정" />
+  <div class="min-h-dvh bg-canvas">
+    <UiTopBar title="프로필 편집" back="/profile/0" />
 
-    <div class="raspy-top pb-28 px-5 sm:px-8 max-w-md mx-auto">
-      <h2 v-if="afterLogin" class="text-2xl font-bold mb-2 text-gray-200 text-center">
-        환영합니다! 당신을 알려주세요
-      </h2>
-      <p v-if="afterLogin" class="text-sm text-gray-400 text-center mb-6">
-        필수 아님. 건너뛰기 가능
-      </p>
+    <main v-if="loading" class="max-w-md mx-auto px-4 pt-6 space-y-6" role="status" aria-label="불러오는 중">
+      <UiSkeleton class="w-24 h-24 rounded-full mx-auto" />
+      <UiSkeleton v-for="n in 4" :key="n" class="h-16 w-full" />
+    </main>
 
-      <div class="bg-gray-800 rounded-2xl shadow-lg border border-gray-600 overflow-hidden">
-        <!-- 상단: 프로필 아바타 -->
-        <div
-          class="px-6 pt-6 pb-4 border-b border-gray-600 bg-gradient-to-r from-orange-900/20 to-transparent"
-        >
-          <div class="flex items-center gap-4">
-            <div class="relative shrink-0">
-              <img
-                v-if="previewImage || form.profilePictureUrl"
-                :src="previewImage || form.profilePictureUrl"
-                class="w-20 h-20 rounded-full object-cover ring-2 ring-orange-500/80"
-                alt="프로필"
-              />
-              <div
-                v-else
-                class="w-20 h-20 rounded-full bg-gray-700 grid place-items-center text-gray-400 text-xl ring-2 ring-orange-200"
-              >
-                👤
-              </div>
-              <label
-                class="absolute bottom-0 right-0 grid place-items-center w-8 h-8 rounded-full bg-gray-800 border border-gray-600 shadow cursor-pointer hover:bg-gray-700"
-                title="이미지 변경"
-              >
-                <input
-                  ref="fileInputRef"
-                  type="file"
-                  class="hidden"
-                  accept="image/*"
-                  capture="environment"
-                  @change="onImageChange"
-                />
-                <span class="text-xs text-gray-300">편집</span>
-              </label>
-            </div>
-            <div class="min-w-0">
-              <p class="text-sm text-gray-300">프로필 사진</p>
-              <p class="text-xs text-gray-400 truncate">10MB 이하. 정사각형 권장</p>
-              <div class="mt-2 flex gap-2">
-                <button
-                  v-if="previewImage || form.profilePictureUrl"
-                  type="button"
-                  @click="clearProfilePicture"
-                  class="px-3 py-1.5 text-xs rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700"
-                >
-                  삭제
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- 지금 값을 못 불러오면 저장하지 않는다 (빈 칸으로 덮어쓰지 않게) -->
+    <main v-else-if="loadError" class="max-w-md mx-auto px-4 pt-16">
+      <UiEmptyState icon="fas fa-triangle-exclamation" title="프로필을 불러오지 못했어요" description="잠시 뒤 다시 시도해주세요">
+        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+      </UiEmptyState>
+    </main>
 
-        <!-- 로딩 -->
-        <div v-if="loading" class="p-6 space-y-4 animate-pulse">
-          <div class="h-5 w-28 bg-gray-700 rounded"></div>
-          <div class="h-12 w-full bg-gray-700 rounded"></div>
-          <div class="h-5 w-20 bg-gray-700 rounded"></div>
-          <div class="h-12 w-full bg-gray-700 rounded"></div>
-          <div class="h-5 w-24 bg-gray-700 rounded"></div>
-          <div class="h-24 w-full bg-gray-700 rounded"></div>
-        </div>
-
-        <!-- 폼 -->
-        <form v-else @submit.prevent="submitProfile" class="p-6 space-y-7" @input="markDirty">
-          <!-- 기본 정보 -->
-          <fieldset class="space-y-4">
-            <legend class="block text-sm font-medium text-gray-200 mb-1">기본 정보</legend>
-
-            <!-- 닉네임 -->
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <label for="nickname" class="text-sm text-gray-300"
-                  >닉네임 <span class="text-gray-400 text-xs">(선택)</span></label
-                >
-                <button
-                  type="button"
-                  class="text-xs text-gray-400 hover:text-gray-200"
-                  @click="((form.nickname = ''), (errors.nickname = ''))"
-                >
-                  지우기
-                </button>
-              </div>
-              <input
-                id="nickname"
-                v-model.trim="form.nickname"
-                type="text"
-                maxlength="8"
-                class="w-full px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-base bg-gray-800 text-gray-200 placeholder-gray-500"
-                placeholder="닉네임을 입력하세요 (최대 8자)"
-                @input="errors.nickname = ''"
-                :aria-invalid="!!errors.nickname"
-                :aria-describedby="errors.nickname ? 'nickname-err' : 'nickname-help'"
-              />
-              <p v-if="errors.nickname" id="nickname-err" class="mt-1 text-xs text-red-600">
-                {{ errors.nickname }}
-              </p>
-              <p v-else id="nickname-help" class="mt-1 text-xs text-gray-400">
-                {{ form.nickname.length }} / 8자
-              </p>
-            </div>
-
-            <!-- 나이 -->
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <label for="age" class="text-sm text-gray-300"
-                  >나이 <span class="text-gray-400 text-xs">(선택)</span></label
-                >
-                <button
-                  type="button"
-                  class="text-xs text-gray-400 hover:text-gray-200"
-                  @click="((form.age = ''), (errors.age = ''))"
-                >
-                  지우기
-                </button>
-              </div>
-              <input
-                id="age"
-                v-model.number="form.age"
-                type="number"
-                min="0"
-                max="150"
-                inputmode="numeric"
-                class="w-full px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-base bg-gray-800 text-gray-200 placeholder-gray-500"
-                placeholder="나이를 입력하세요"
-                @input="errors.age = ''"
-                :aria-invalid="!!errors.age"
-                :aria-describedby="errors.age ? 'age-err' : 'age-help'"
-              />
-              <p v-if="errors.age" id="age-err" class="mt-1 text-xs text-red-600">
-                {{ errors.age }}
-              </p>
-              <p v-else id="age-help" class="mt-1 text-xs text-gray-400">0~150 사이만 허용</p>
-            </div>
-
-            <!-- 성별 -->
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-sm text-gray-300"
-                  >성별 <span class="text-gray-400 text-xs">(선택)</span></span
-                >
-                <button
-                  type="button"
-                  class="text-xs text-gray-400 hover:text-gray-200"
-                  @click="form.gender = ''"
-                >
-                  지우기
-                </button>
-              </div>
-              <div class="grid grid-cols-3 gap-2">
-                <button
-                  v-for="g in genders"
-                  :key="g.value"
-                  type="button"
-                  @click="((form.gender = g.value), markDirty())"
-                  :aria-pressed="form.gender === g.value"
-                  :class="[
-                    'py-3 rounded-lg border transition font-medium text-sm',
-                    form.gender === g.value
-                      ? 'bg-orange-500 border-orange-500 text-white shadow'
-                      : 'border-gray-600 text-gray-300 hover:bg-gray-700 bg-gray-800',
-                  ]"
-                >
-                  {{ g.label }}
-                </button>
-              </div>
-            </div>
-          </fieldset>
-
-          <!-- 지역 -->
-          <fieldset class="space-y-3">
-            <legend class="block text-sm font-medium text-gray-200 mb-1">
-              지역 <span class="text-gray-400 text-xs">(선택)</span>
-            </legend>
-            <div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
-              <select
-                v-model="selectedPrimary"
-                @change="(handlePrimaryChange(), markDirty())"
-                class="flex-1 px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-base bg-gray-800 text-gray-200"
-              >
-                <option value="" disabled>시/도 선택</option>
-                <option v-for="(subs, primary) in regionMap" :key="primary" :value="primary">
-                  {{ primary }}
-                </option>
-              </select>
-              <select
-                v-model="selectedSecondary"
-                :disabled="!selectedPrimary"
-                class="flex-1 px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition disabled:opacity-50 text-base bg-gray-800 text-gray-200"
-                @change="markDirty"
-              >
-                <option value="" disabled>시/군/구 선택</option>
-                <option v-for="sub in regionMap[selectedPrimary]" :key="sub" :value="sub">
-                  {{ sub }}
-                </option>
-              </select>
-            </div>
-            <p v-if="errors.region" class="mt-1 text-xs text-red-600">{{ errors.region }}</p>
-            <p v-else class="mt-1 text-xs text-gray-400">둘 다 선택 시 저장됨</p>
-            <button
-              type="button"
-              class="text-xs text-gray-400 hover:text-gray-200"
-              @click="clearRegion"
-            >
-              지우기
-            </button>
-          </fieldset>
-
-          <!-- 자기소개 -->
-          <fieldset class="space-y-2">
-            <legend class="block text-sm font-medium text-gray-200 mb-1">
-              자기소개 <span class="text-gray-400 text-xs">(선택)</span>
-            </legend>
-            <textarea
-              v-model="form.bio"
-              class="w-full px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-base bg-gray-800 text-gray-200 placeholder-gray-500"
-              rows="4"
-              maxlength="100"
-              placeholder="간단히 소개해 주세요"
-              @input="markDirty"
-            ></textarea>
-            <p class="text-xs" :class="bioCountColor">{{ form.bio.length }} / 100자</p>
-          </fieldset>
-
-          <!-- 소속 -->
-          <fieldset class="space-y-2">
-            <legend class="block text-sm font-medium text-gray-200 mb-1">
-              소속 <span class="text-gray-400 text-xs">(선택)</span>
-            </legend>
-            <input
-              v-model="form.affiliation"
-              type="text"
-              maxlength="100"
-              class="w-full px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-base bg-gray-800 text-gray-200 placeholder-gray-500"
-              placeholder="예: 서울대학교, ABC회사, 런닝크루 등"
-              @input="markDirty"
-            />
-            <p class="text-xs text-gray-400">{{ form.affiliation.length }} / 100자</p>
-          </fieldset>
-
-          <!-- 저장 -->
-          <div class="pt-2">
-            <button
-              type="submit"
-              :disabled="isSubmitting || !dirty || !validateSilent"
-              class="w-full py-3 rounded-lg bg-orange-500 text-white font-medium text-base hover:bg-orange-600 disabled:opacity-60 transition focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <span v-if="!isSubmitting">저장하기</span>
-              <span v-else>저장 중...</span>
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div v-if="afterLogin" class="mt-6 flex flex-col items-center gap-4">
-        <label
-          class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border border-gray-600 bg-gray-800/80 shadow-sm"
-        >
-          <input
-            type="checkbox"
-            class="w-5 h-5 rounded border-gray-500 bg-gray-900 text-orange-500 focus:ring-orange-400"
-          />
-          <span class="text-sm text-gray-200 font-medium">
-            주변 유저들과 경기하고 소식을 공유하시겠습니까?
+    <form v-else class="max-w-md mx-auto px-4 pt-6 pb-32 space-y-6 ui-appear" novalidate @submit.prevent="save">
+      <!-- 사진 -->
+      <div class="flex flex-col items-center gap-2">
+        <button type="button" class="relative" aria-label="프로필 사진 바꾸기" @click="fileInput?.click()">
+          <UiAvatar :src="preview" :name="form.nickname || '나'" size="xl" />
+          <span class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-surface-2 border border-line text-fg flex items-center justify-center text-sm">
+            <i class="fas fa-camera" aria-hidden="true"></i>
           </span>
-        </label>
-        <button @click="router.push('/')" class="text-sm text-gray-400 hover:underline">
-          건너뛰기
         </button>
+        <UiButton v-if="preview" variant="ghost" size="sm" @click="removePhoto">사진 빼기</UiButton>
+        <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhoto" />
       </div>
 
-    </div>
+      <UiInput v-model="form.nickname" label="닉네임" :maxlength="NICKNAME_MAX" :hint="`다른 사람에게 보이는 이름. ${NICKNAME_MAX}자까지`" :error="errors.nickname" />
+      <UiInput v-model="form.username" label="아이디" icon="fas fa-at" :maxlength="12" hint="영문 소문자·숫자·밑줄(_). 친구가 나를 찾을 때 써요" :error="errors.username" />
+      <UiField label="활동 지역" optional hint="가까운 경기를 먼저 보여드려요">
+        <div class="grid grid-cols-2 gap-2">
+          <UiSelect v-model="region1" :options="region1Options" placeholder="시·도" />
+          <UiSelect v-model="region2" :options="region2Options" placeholder="구·시·군" :disabled="!region1" />
+        </div>
+      </UiField>
+      <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
+      <UiInput v-model="form.affiliation" label="소속" optional :maxlength="100" placeholder="예: 성수 러닝크루" />
 
-    <!-- 하단 고정 저장 바 -->
-    <div
-      v-show="dirty"
-      class="fixed bottom-0 inset-x-0 z-40 bg-gray-800/95 backdrop-blur border-t border-gray-600"
-    >
-      <div class="max-w-md mx-auto px-5 py-3 flex items-center justify-between gap-3">
-        <p class="text-sm text-gray-400 truncate">변경 사항이 있습니다</p>
-        <div class="flex">
-          <button
-            type="button"
-            class="px-8 py-3 text-sm rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-60"
-            @click="submitProfile"
-            :disabled="isSubmitting || !validateSilent"
-          >
-            <span v-if="!isSubmitting">저장</span>
-            <span v-else>저장 중...</span>
-          </button>
+      <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+        <div class="max-w-md mx-auto px-4 py-3">
+          <UiButton type="submit" block size="lg" :disabled="!dirty" :loading="saving">{{ dirty ? '저장' : '바뀐 내용이 없어요' }}</UiButton>
         </div>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+// 프로필 편집: 사진·닉네임·아이디·지역·소개·소속. 나이·성별은 받지 않는다 (예전 값은 건드리지 않고 그대로 둔다)
+import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../../api/api'
+import regionMap from '../../assets/regionMap.json'
+import { UiAvatar, UiButton, UiEmptyState, UiField, UiInput, UiSelect, UiSkeleton, UiTopBar } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
-import fullRegionMap from '../../assets/regionMap.json'
-import Header from '../../components/HeaderComp.vue'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
+import { containsProfanity } from '../../utils/profanity'
 
-const regionMap = {}
-Object.entries(fullRegionMap).forEach(([primary, subs]) => {
-  if (primary !== '전국') regionMap[primary] = subs
-})
+const NICKNAME_MAX = 10
+const USERNAME_PATTERN = /^[a-z0-9_]{1,12}$/
 
-const { showToast } = useToast()
 const router = useRouter()
-const route = useRoute()
-const afterLogin = computed(() => route.query.init === '1')
+const { showToast } = useToast()
 
-const form = ref({
-  nickname: '',
-  age: '',
-  gender: '',
-  region: '',
-  bio: '',
-  affiliation: '',
-  profilePictureUrl: '',
-})
-const serverSnapshot = ref(null)
-const errors = ref({ nickname: '', age: '', region: '' })
-const genders = [
-  { value: 'M', label: '남성' },
-  { value: 'F', label: '여성' },
-  { value: 'O', label: '기타' },
-]
-const selectedPrimary = ref('')
-const selectedSecondary = ref('')
-const profilePicture = ref(null)
-const previewImage = ref(null)
-const fileInputRef = ref(null)
 const loading = ref(true)
-const isSubmitting = ref(false)
-const dirty = ref(false)
-// 이미지 변경 상태: 'unchanged' | 'updated' | 'deleted'
-const imageState = ref('unchanged')
+const loadError = ref(false)
+const saving = ref(false)
+const form = reactive({ nickname: '', username: '', bio: '', affiliation: '' })
+const errors = reactive({ nickname: '', username: '' })
+const region1 = ref('')
+const region2 = ref('')
+const region1Options = Object.keys(regionMap).filter((r) => r !== '전국')
+const region2Options = computed(() => regionMap[region1.value] || [])
+const fileInput = ref(null)
+const preview = ref('')
+const photo = ref(null)
+const photoState = ref('unchanged') // unchanged | updated | deleted
+let original = null // 불러온 값 (바뀐 게 있는지, 나이·성별 유지용)
 
-const bioCountColor = computed(() => {
-  const len = form.value.bio.length
-  if (len > 90) return 'text-red-500'
-  if (len > 75) return 'text-orange-500'
-  return 'text-gray-400'
+const region = computed(() => (region1.value && region2.value ? `${region1.value} ${region2.value}` : ''))
+const dirty = computed(() => {
+  if (!original) return false
+  return (
+    photoState.value !== 'unchanged' ||
+    form.nickname !== original.nickname ||
+    form.username !== original.username ||
+    form.bio !== (original.bio || '') ||
+    form.affiliation !== (original.affiliation || '') ||
+    region.value !== (original.region || '')
+  )
 })
 
-const handlePrimaryChange = () => {
-  selectedSecondary.value = ''
+watch(region1, (v, old) => old !== undefined && v !== old && (region2.value = ''))
+watch(() => form.nickname, () => (errors.nickname = ''))
+watch(() => form.username, (v) => {
+  errors.username = ''
+  if (v !== v.toLowerCase()) form.username = v.toLowerCase()
+})
+
+async function onPhoto(e) {
+  const file = e.target.files?.[0]
+  e.target.value = ''
+  if (!file) return
+  if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라주세요')
+  const dataUrl = await new Promise((resolve) => {
+    const r = new FileReader()
+    r.onload = () => resolve(r.result)
+    r.onerror = () => resolve(null)
+    r.readAsDataURL(file)
+  })
+  if (!dataUrl) return showToast('사진을 읽지 못했어요. 다른 사진을 골라주세요')
+  preview.value = await compressImage(dataUrl)
+  photo.value = dataUrlToFile(preview.value, file.name)
+  photoState.value = 'updated'
+}
+function removePhoto() {
+  preview.value = ''
+  photo.value = null
+  photoState.value = 'deleted'
 }
 
-onMounted(async () => {
+async function save() {
+  const nick = form.nickname.trim()
+  const name = form.username.trim()
+  if (!nick || nick.length > NICKNAME_MAX) return (errors.nickname = `닉네임을 1~${NICKNAME_MAX}자로 적어주세요`)
+  if (!USERNAME_PATTERN.test(name)) return (errors.username = '영문 소문자·숫자·밑줄(_)로 12자까지 적어주세요')
+  if (containsProfanity([nick, name, form.bio, form.affiliation].join(' '))) return showToast('쓰면 안 되는 말이 들어 있어요')
+
+  saving.value = true
+  try {
+    // 아이디·닉네임이 바뀌었으면 먼저 (아이디가 겹치면 여기서 멈춘다)
+    if (nick !== original.nickname || name !== original.username) {
+      try {
+        await api.post('/api/auth/complete', { username: name, nickname: nick })
+      } catch (e) {
+        if (e.response?.status === 409) errors.username = '이미 누가 쓰는 아이디예요. 다른 걸 적어주세요'
+        else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 시도해주세요')
+        return
+      }
+    }
+    const fd = new FormData()
+    fd.append('nickname', nick)
+    fd.append('region', region.value)
+    fd.append('bio', form.bio.trim())
+    fd.append('affiliation', form.affiliation.trim())
+    // 화면에서 받지 않는 나이·성별은 예전 값 그대로 보낸다 (지워지지 않게)
+    if (original.age != null) fd.append('age', original.age)
+    if (original.gender) fd.append('gender', original.gender)
+    if (photoState.value === 'updated' && photo.value) fd.append('profile_picture', photo.value)
+    else if (photoState.value === 'deleted') fd.append('profile_picture', 'null')
+    await api.patch('/api/user-profile/save', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    showToast('저장했어요')
+    router.replace('/profile/0')
+  } catch (e) {
+    showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 시도해주세요')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function load() {
+  loading.value = true
+  loadError.value = false
   try {
     const { data } = await api.get('/api/user-profile/my/profile')
-    if (data) {
-      form.value.nickname = data.nickname || ''
-      form.value.age = data.age || ''
-      form.value.gender = data.gender || ''
-      form.value.bio = data.bio || ''
-      form.value.affiliation = data.affiliation || ''
-      if (data.region) {
-        const [primary = '', secondary = ''] = String(data.region).split(' ')
-        selectedPrimary.value = primary
-        selectedSecondary.value = secondary
-      }
-      form.value.profilePictureUrl = data.profilePicture || ''
-      imageState.value = 'unchanged'
-    }
-    serverSnapshot.value = snapshot()
-  } catch (err) {
-    // no-op
-  }
-  loading.value = false
-  if (afterLogin.value && localStorage.getItem('hello-raspy')) {
-    router.push('/')
-  } else {
-    localStorage.setItem('hello-raspy', true)
-  }
-})
-
-const snapshot = () => ({
-  nickname: form.value.nickname,
-  age: form.value.age,
-  gender: form.value.gender,
-  bio: form.value.bio,
-  affiliation: form.value.affiliation,
-  primary: selectedPrimary.value,
-  secondary: selectedSecondary.value,
-  profilePictureUrl: form.value.profilePictureUrl,
-})
-
-const markDirty = () => {
-  dirty.value = JSON.stringify(snapshot()) !== JSON.stringify(serverSnapshot.value)
-}
-
-watch(
-  [
-    () => form.value.nickname,
-    () => form.value.age,
-    () => form.value.gender,
-    () => form.value.bio,
-    () => form.value.affiliation,
-    selectedPrimary,
-    selectedSecondary,
-  ],
-  markDirty,
-)
-
-const onImageChange = async (e) => {
-  const file = e.target.files?.[0]
-  if (!file) return
-  if (file.size > 10 * 1024 * 1024) {
-    showToast('파일은 10MB 이하여야 합니다.')
-    return
-  }
-
-  // 이미지를 base64로 읽기
-  const reader = new FileReader()
-  reader.onload = async () => {
-    try {
-      // 이미지 압축 (화질 30%)
-      const compressedDataUrl = await compressImage(reader.result)
-      previewImage.value = compressedDataUrl
-
-      // 압축된 이미지를 File 객체로 변환
-      profilePicture.value = dataUrlToFile(compressedDataUrl, file.name)
-      imageState.value = 'updated'
-      dirty.value = true
-    } catch (error) {
-      console.error('이미지 압축 실패:', error)
-      showToast('이미지 처리 중 오류가 발생했습니다.')
-    }
-  }
-  reader.readAsDataURL(file)
-
-  // 같은 파일을 연속 선택해도 change 이벤트가 발생하도록 값 리셋
-  if (fileInputRef.value) fileInputRef.value.value = ''
-}
-
-const validate = () => {
-  let valid = true
-  errors.value.nickname = ''
-  errors.value.age = ''
-  errors.value.region = ''
-
-  if (form.value.nickname && form.value.nickname.length > 8) {
-    errors.value.nickname = '닉네임은 최대 8자입니다'
-    valid = false
-  }
-  if (form.value.age !== '' && (form.value.age < 0 || form.value.age > 150)) {
-    errors.value.age = '나이는 0~150 사이여야 합니다'
-    valid = false
-  }
-  if (selectedPrimary.value && !selectedSecondary.value) {
-    errors.value.region = '시/군/구까지 선택해주세요'
-    valid = false
-  }
-  if (!selectedPrimary.value && selectedSecondary.value) {
-    errors.value.region = '시/도를 먼저 선택해주세요'
-    valid = false
-  }
-  return valid
-}
-
-const validateSilent = computed(() => {
-  if (form.value.nickname && form.value.nickname.length > 8) return false
-  if (form.value.age !== '' && (form.value.age < 0 || form.value.age > 150)) return false
-  if (
-    (selectedPrimary.value && !selectedSecondary.value) ||
-    (!selectedPrimary.value && selectedSecondary.value)
-  )
-    return false
-  return true
-})
-
-const submitProfile = async () => {
-  if (!validate()) return
-  try {
-    isSubmitting.value = true
-    const formData = new FormData()
-    formData.append('nickname', form.value.nickname || '')
-    formData.append('age', form.value.age)
-    formData.append('gender', form.value.gender)
-    const region =
-      selectedPrimary.value && selectedSecondary.value
-        ? `${selectedPrimary.value} ${selectedSecondary.value}`
-        : ''
-    formData.append('region', region)
-    formData.append('bio', form.value.bio || '')
-    formData.append('affiliation', form.value.affiliation || '')
-    // 이미지 파라미터 rule
-    // - updated: 새 파일 업로드
-    // - deleted: null 전달
-    // - unchanged: 파라미터 자체를 보내지 않음
-    if (imageState.value === 'updated' && profilePicture.value) {
-      formData.append('profile_picture', profilePicture.value)
-    } else if (imageState.value === 'deleted') {
-      formData.append('profile_picture', 'null')
-    }
-    await api.patch('/api/user-profile/save', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    showToast('프로필이 저장되었습니다!')
-    serverSnapshot.value = snapshot()
-    dirty.value = false
-    imageState.value = 'unchanged'
-    router.push('/profile/0')
-  } catch (err) {
-    showToast('입력값을 다시 확인해주세요.')
+    original = data
+    form.nickname = data.nickname || ''
+    form.username = data.username || ''
+    form.bio = data.bio || ''
+    form.affiliation = data.affiliation || ''
+    const [p = '', s = ''] = String(data.region || '').split(' ')
+    region1.value = regionMap[p] ? p : ''
+    await nextTick() // 시·도를 바꾸면 구·군을 비우는 watch가 먼저 돌고 나서 채운다
+    region2.value = region1.value && (regionMap[p] || []).includes(s) ? s : ''
+    preview.value = data.profilePicture && !data.profilePicture.includes('default') ? data.profilePicture : ''
+    photoState.value = 'unchanged'
+  } catch {
+    loadError.value = true
   } finally {
-    isSubmitting.value = false
+    loading.value = false
   }
 }
 
-const clearRegion = () => {
-  selectedPrimary.value = ''
-  selectedSecondary.value = ''
-  errors.value.region = ''
-  markDirty()
-}
-
-const clearProfilePicture = () => {
-  profilePicture.value = null
-  previewImage.value = null
-  form.value.profilePictureUrl = ''
-  imageState.value = 'deleted'
-  if (fileInputRef.value) fileInputRef.value.value = ''
-  markDirty()
-}
+onMounted(load)
 </script>
-
-<style scoped>
-input,
-select,
-textarea {
-  font-family: 'Noto Sans KR', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
-}
-</style>

@@ -9,11 +9,7 @@
     />
     <div class="w-full px-10 mx-auto pt-14 pb-24">
       <!-- 로딩 상태 -->
-      <div v-if="loading" class="flex justify-center items-center py-40">
-        <div class="relative">
-          <i class="fas fa-spinner fa-spin text-4xl text-orange-500 relative"></i>
-        </div>
-      </div>
+      <UiListSkeleton v-if="loading" :rows="6" class="px-4" />
 
       <!-- DM 없음 상태 -->
       <div v-else-if="dmList.length === 0" class="flex flex-col items-center justify-center py-32">
@@ -97,6 +93,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton } from '../components/ui'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/api'

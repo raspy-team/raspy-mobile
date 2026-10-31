@@ -1,4 +1,5 @@
 <script setup>
+import { UiSkeleton } from '../../components/ui'
 import { refreshOnChange } from '../../websocket/userChannel'
 import DefaultProfile from '../../assets/default.png'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
@@ -512,13 +513,15 @@ const closeErrorModal = () => {
       :style="{ paddingTop: `${headerTop + (headerInfo.show ? 190 : 70)}px` }"
     >
       <!-- 로딩 상태 -->
-      <div v-if="isLoadingMessages" class="h-full flex items-center justify-center">
-        <div class="relative">
-          <div class="relative flex flex-col items-center gap-3">
-            <i class="fas fa-spinner fa-spin text-4xl text-orange-500"></i>
-            <p class="text-sm text-gray-400 font-medium">메시지를 불러오는 중...</p>
-          </div>
-        </div>
+      <!-- 말풍선 모양 자리 표시 (주고받는 모양 그대로) -->
+      <div v-if="isLoadingMessages" class="h-full flex flex-col justify-end gap-3 pb-4" role="status" aria-label="메시지 불러오는 중">
+        <UiSkeleton
+          v-for="(w, i) in [48, 62, 36, 54, 40]"
+          :key="i"
+          class="h-10 rounded-2xl"
+          :class="i % 2 ? 'self-end' : 'self-start'"
+          :style="{ width: w + '%' }"
+        />
       </div>
 
       <div v-else ref="chatBox" class="h-full overflow-auto space-y-3 pb-2">

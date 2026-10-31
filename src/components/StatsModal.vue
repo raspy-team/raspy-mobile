@@ -264,10 +264,7 @@
 
         <!-- Friends List View -->
         <div v-else-if="currentView === 'friends'" class="max-h-96 overflow-y-auto">
-          <div v-if="loadingFriends" class="text-center py-10">
-            <i class="fas fa-spinner fa-spin text-orange-500 text-3xl"></i>
-            <p class="text-sm text-gray-500 mt-3">친구 목록을 불러오는 중...</p>
-          </div>
+          <UiListSkeleton v-if="loadingFriends" :rows="4" />
           <div v-else-if="friendsList && friendsList.length > 0" class="space-y-3">
             <div
               v-for="friend in friendsList"
@@ -350,6 +347,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton } from './ui'
 import { computed, defineProps, defineEmits, onMounted, watch, ref } from 'vue'
 import api from '../api/api'
 

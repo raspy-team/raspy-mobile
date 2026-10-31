@@ -5,16 +5,20 @@
     :type="to ? undefined : type"
     :disabled="to ? undefined : disabled || loading"
     :aria-busy="loading || undefined"
-    class="inline-flex items-center justify-center gap-2 rounded-xl select-none transition-colors disabled:opacity-40 disabled:pointer-events-none"
-    :class="[VARIANTS[variant], SIZES[size], block ? 'w-full' : '']"
+    class="relative inline-flex items-center justify-center gap-2 rounded-xl select-none transition-[background-color,color,transform] active:scale-[0.98] disabled:pointer-events-none"
+    :class="[VARIANTS[variant], SIZES[size], block ? 'w-full' : '', disabled && !loading ? 'opacity-40' : '']"
   >
-    <i v-if="loading" class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-    <i v-else-if="icon" :class="icon" aria-hidden="true"></i>
-    <slot />
+    <!-- 기다리는 동안 글자 자리는 그대로 두고 그 위에 스피너 (버튼 폭이 흔들리지 않게) -->
+    <span v-if="loading" class="absolute inset-0 flex items-center justify-center"><UiSpinner size="sm" /></span>
+    <span class="inline-flex items-center justify-center gap-2" :class="{ invisible: loading }">
+      <i v-if="icon" :class="icon" aria-hidden="true"></i>
+      <slot />
+    </span>
   </component>
 </template>
 
 <script setup>
+import UiSpinner from './UiSpinner.vue'
 // 앱의 모든 버튼. 화면에서 버튼 색·크기를 직접 정하지 말고 variant/size로 고른다
 // - primary: 화면의 주 행동 (한 화면에 하나)
 // - secondary: 나란히 놓이는 보조 행동

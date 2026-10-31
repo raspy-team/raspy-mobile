@@ -43,3 +43,36 @@
   .pt-safe { padding-top: env(safe-area-inset-top); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 }
+
+/* 불러오는 동안의 움직임. 한 벌만 쓴다 (깜빡임 대신 빛이 지나가는 자리 표시, 얇은 원형 스피너, 나타날 때 살짝 올라오기) */
+@layer components {
+  .ui-skeleton {
+    @apply relative overflow-hidden bg-surface-2 rounded-lg;
+  }
+  .ui-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+    animation: ui-shimmer 1.4s ease-in-out infinite;
+  }
+  .ui-appear {
+    /* backwards: 끝나면 transform을 남기지 않는다 (남으면 안의 fixed 요소가 화면 대신 이 요소에 붙는다) */
+    animation: ui-appear 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+}
+@keyframes ui-shimmer {
+  100% { transform: translateX(100%); }
+}
+@keyframes ui-appear {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ui-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton::after { animation: none; }
+  .ui-appear { animation: none; }
+}

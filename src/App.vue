@@ -10,6 +10,7 @@
     <!-- 앱 전체 알림 한 줄 (window.alert도 여기로 온다) -->
     <CustomToast />
     <UiConfirmHost />
+    <RouteProgress />
 
     <!-- 끝난 경기 평가 요청. '나중에'를 누르면 그 경기는 다시 묻지 않는다 -->
     <UiDialog
@@ -40,6 +41,7 @@ import api from './api/api'
 import FooterNav from './components/FooterNav.vue'
 import CustomToast from './components/CustomToast.vue'
 import UiConfirmHost from './components/ui/UiConfirmHost.vue'
+import RouteProgress from './components/RouteProgress.vue'
 import UiDialog from './components/ui/UiDialog.vue'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'

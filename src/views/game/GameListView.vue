@@ -50,7 +50,7 @@
         </UiEmptyState>
       </UiCard>
 
-      <div v-else class="space-y-3">
+      <div v-else class="space-y-3 ui-appear">
         <OpenGameCard
           v-for="game in games"
           :key="game.id"

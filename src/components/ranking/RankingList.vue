@@ -1,11 +1,9 @@
 <template>
   <div class="px-4 max-w-lg mx-auto space-y-6 py-6">
     <!-- Loading State -->
-    <div v-if="loading" class="animate-pulse space-y-4">
-      <div class="h-32 bg-gray-700 rounded-2xl"></div>
-      <div class="space-y-3">
-        <div v-for="i in 5" :key="i" class="h-20 bg-gray-700 rounded-xl"></div>
-      </div>
+    <div v-if="loading" class="space-y-4">
+      <UiSkeleton class="h-32 rounded-2xl" />
+      <UiListSkeleton :rows="5" />
     </div>
 
     <!-- Error State -->
@@ -287,6 +285,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton, UiSkeleton } from '../ui'
 import { defineEmits, defineProps } from 'vue'
 
 defineProps({

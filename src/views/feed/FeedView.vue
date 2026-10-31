@@ -11,16 +11,15 @@
     v-if="loading"
     class="relative inset-0 h-full w-full bg-black text-white overflow-hidden select-none"
   >
-    <div class="flex items-center justify-center h-full">
-      <div class="text-center">
-        <div class="space-y-4 max-w-sm mx-auto p-6">
-          <div class="h-4 bg-white/10 rounded animate-pulse"></div>
-          <div class="h-20 bg-white/10 rounded animate-pulse"></div>
-          <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
-          <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
-        </div>
-        <p class="mt-6 text-white/70 text-base">피드를 불러오는 중...</p>
+    <!-- 피드 한 장과 같은 모양: 사진 자리 + 아래 작성자·글 줄 -->
+    <div class="absolute inset-0 ui-skeleton rounded-none" role="status" aria-label="피드 불러오는 중"></div>
+    <div class="absolute inset-x-0 bottom-0 p-5 pb-28 space-y-3">
+      <div class="flex items-center gap-3">
+        <UiSkeleton class="w-10 h-10 rounded-full" />
+        <UiSkeleton class="h-4 w-28" />
       </div>
+      <UiSkeleton class="h-4 w-3/4" />
+      <UiSkeleton class="h-4 w-1/2" />
     </div>
   </div>
 
@@ -232,6 +231,7 @@
 </template>
 
 <script setup>
+import { UiSkeleton } from '../../components/ui'
 import FeedPostPreview from '../../components/feed/FeedPostPreview.vue'
 import FeedHeadlineSlide from '../../components/feed/FeedHeadlineSlide.vue'
 import FeedGameInfoSlide from '../../components/feed/FeedGameInfoSlide.vue'

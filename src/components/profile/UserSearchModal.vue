@@ -42,8 +42,7 @@
       <div class="px-6 pb-6 max-h-[60vh] overflow-y-auto">
         <!-- 로딩 상태 -->
         <div v-if="userSearching" class="text-center py-12">
-          <i class="fas fa-spinner fa-spin text-3xl text-orange-500 mb-3"></i>
-          <p class="text-gray-400 text-sm">검색 중...</p>
+          <UiListSkeleton :rows="3" class="text-left" />
         </div>
 
         <!-- 검색 결과 없음 -->
@@ -92,6 +91,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton } from '../ui'
 // 닉네임·아이디로 유저를 찾는 모달. 입력을 멈추고 0.35초 뒤에 검색한다
 import { ref, onMounted, defineEmits } from 'vue'
 import { useRouter } from 'vue-router'

@@ -82,7 +82,7 @@
               class="clear-all-btn text-xs font-medium text-gray-400 hover:text-orange-400 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               title="알림 모두 지우기"
             >
-              <i v-if="clearingNotifications" class="fas fa-spinner fa-spin mr-1 text-xs"></i>
+              <UiSpinner v-if="clearingNotifications" size="sm" class="mr-1" />
               <i v-else class="fas fa-trash-alt mr-1 text-xs"></i>
               모두 지우기
             </button>
@@ -139,7 +139,7 @@
                         :disabled="request.processing"
                         class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <i v-if="request.processing" class="fas fa-spinner fa-spin mr-0.5 text-xs"></i>
+                        <UiSpinner v-if="request.processing" size="sm" class="mr-0.5" />
                         수락
                       </button>
                       <button
@@ -210,6 +210,7 @@
 </template>
 
 <script setup>
+import { UiSpinner } from './ui'
 import { ref, defineProps, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api/api'

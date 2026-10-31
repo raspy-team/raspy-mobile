@@ -2074,7 +2074,7 @@ export interface components {
         };
         ReportRequest: {
             /** @enum {string} */
-            targetType: "GAME" | "COMMENT" | "RULE";
+            targetType: "GAME" | "COMMENT" | "RULE" | "USER";
             /** Format: int64 */
             targetId: number;
             reason: string;
@@ -2301,6 +2301,7 @@ export interface components {
         };
         MyProfileResponse: {
             nickname: string;
+            username: string;
             /** Format: int32 */
             age?: number;
             gender?: string;

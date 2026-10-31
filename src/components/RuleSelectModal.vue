@@ -84,9 +84,7 @@
 
       <!-- 룰 리스트 -->
       <div class="flex-1 overflow-y-auto px-2 pt-2 pb-3 bg-gray-900 min-h-[36vh] max-h-[65vh]">
-        <div v-if="loading" class="py-16 text-center text-orange-500">
-          <i class="fas fa-spinner fa-spin text-2xl"></i>
-        </div>
+        <UiListSkeleton v-if="loading" :rows="5" shape="tile" class="px-2" />
         <ul v-else-if="rules.length" class="flex flex-col gap-3">
           <li v-for="rule in rules" :key="rule.id"
               class="bg-gray-800 rounded-2xl shadow-sm border border-gray-800 flex flex-col gap-0.5 px-4 py-4 active:bg-orange-500/10 transition">
@@ -162,6 +160,7 @@
 </template>
 
 <script setup>
+import { UiListSkeleton } from './ui'
 import { ref, onMounted, defineEmits, watch , nextTick} from 'vue'
 import api from '../api/api'
 

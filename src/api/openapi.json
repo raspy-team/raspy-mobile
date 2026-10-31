@@ -3848,7 +3848,8 @@
             "enum": [
               "GAME",
               "COMMENT",
-              "RULE"
+              "RULE",
+              "USER"
             ]
           },
           "targetId": {
@@ -4564,11 +4565,15 @@
       },
       "MyProfileResponse": {
         "required": [
-          "nickname"
+          "nickname",
+          "username"
         ],
         "type": "object",
         "properties": {
           "nickname": {
+            "type": "string"
+          },
+          "username": {
             "type": "string"
           },
           "age": {

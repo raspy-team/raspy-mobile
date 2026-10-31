@@ -38,7 +38,7 @@
         </p>
         <button
          class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full transition-colors"
-          @click="$router.push('/games')"
+          @click="$router.push('/create-game')"
         >
           경기 만들기
         </button>
@@ -1034,7 +1034,7 @@
         <p class="text-white/70 text-sm leading-relaxed">첫 번째 경기를 만들어보세요!</p>
         <button
           class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition-colors"
-          @click="$router.push('/games')"
+          @click="$router.push('/create-game')"
         >
           경기 만들기
         </button>
@@ -1042,7 +1042,6 @@
     </div>
   </div>
 
-  <CustomToast />
 
   <div
     v-if="showPlayerSelectModal"
@@ -1192,7 +1191,6 @@ import HeaderComp from '../../components/HeaderComp.vue'
 import api, { playWithMeTooAPI } from '../../api/api'
 import featureFlags from '../../config/features'
 import { useToast } from '../../composable/useToast'
-import CustomToast from '../../components/CustomToast.vue'
 import AppInvitePost from '../../components/feed/AppInvitePost.vue'
 import { useFeed } from '../../composables/useFeed.js'
 import Comment from '../GameCommentView.vue'

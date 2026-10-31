@@ -279,7 +279,6 @@
         </button>
       </div>
 
-      <CustomToast />
     </div>
 
     <!-- 하단 고정 저장 바 -->
@@ -310,7 +309,6 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
-import CustomToast from '../../components/CustomToast.vue'
 import fullRegionMap from '../../assets/regionMap.json'
 import Header from '../../components/HeaderComp.vue'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'

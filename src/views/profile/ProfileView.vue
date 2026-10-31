@@ -839,7 +839,6 @@
       </div>
     </div>
     <div class="pb-[130px]"></div>
-    <CustomToast />
   </div>
 
   <!-- 친구 끊기 확인 모달 -->
@@ -892,7 +891,6 @@ import Chart from 'chart.js/auto'
 import CustomSelect from './CustomSelect.vue'
 import Default from '../../assets/default.png'
 import api from '../../api/api'
-import CustomToast from '../../components/CustomToast.vue'
 import StatsModal from '../../components/StatsModal.vue'
 // import CountUp from './CountUp.vue'
 import TopRuleCard from '../../components/TopRuleCard.vue'

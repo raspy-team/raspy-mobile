@@ -664,7 +664,6 @@
     </div>
   </div>
 
-  <CustomToast />
 
   <!-- 규칙 모달 -->
   <MatchRuleModal v-if="selectedGame" :rule="selectedGame.rule" @close="closeRuleDetail" />
@@ -692,7 +691,6 @@ import { useRouter } from 'vue-router'
 import client from '../../api/api'
 import Header from '../../components/HeaderComp.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
-import CustomToast from '../../components/CustomToast.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
 import { useToast } from '../../composable/useToast'
 import { parseRegion } from '../../utils/regionParser'

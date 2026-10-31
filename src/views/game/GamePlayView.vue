@@ -503,7 +503,6 @@
     </div>
   </div>
 
-  <CustomToast />
 </template>
 
 <script setup>
@@ -513,7 +512,6 @@ import api from '../../api/api'
 import { socket } from '../../websocket'
 import DefaultImage from '../../assets/default.png'
 import MatchModal from '../../components/MatchModal.vue'
-import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 import {
   addGamePicture,

@@ -79,7 +79,6 @@
     </div>
   </div>
 
-  <CustomToast />
 </template>
 
 <script setup>
@@ -88,7 +87,6 @@ import { useRouter } from 'vue-router'
 import api from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import MyRuleCard from '../../components/MyRuleCard.vue'
-import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 
 const router = useRouter()

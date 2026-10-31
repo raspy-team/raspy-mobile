@@ -47,21 +47,6 @@
             계정
           </h2>
           <ul class="divide-y divide-gray-600 rounded-2xl border border-gray-600">
-            <!-- 알림 설정 -->
-            <li>
-              <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-                @click="goNotifications"
-                aria-label="알림 설정"
-              >
-                <i class="fas fa-bell text-base text-gray-400" aria-hidden="true"></i>
-                <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-gray-200">알림 설정</p>
-                  <p class="truncate text-xs text-gray-500">푸시 알림 수신 관리</p>
-                </div>
-                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
-              </button>
-            </li>
             <!-- 차단한 유저 보기 -->
             <li>
               <button
@@ -129,30 +114,9 @@
                 <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
               </button>
             </li>
-            <!-- 앱 정보 -->
-            <li>
-              <button
-                class="group flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-                @click="openAbout"
-                aria-label="앱 정보"
-              >
-                <i class="fas fa-info-circle text-base text-gray-400" aria-hidden="true"></i>
-                <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-gray-200">앱 정보</p>
-                  <p class="truncate text-xs text-gray-500">버전, 빌드, 오픈소스 라이선스</p>
-                </div>
-                <i class="fas fa-chevron-right text-xs text-gray-500" aria-hidden="true"></i>
-              </button>
-            </li>
           </ul>
         </div>
       </section>
-
-      <!-- Sticky secondary actions -->
-      <div class="mt-8 flex items-center justify-between">
-        <button @click="openHelp" class="text-sm underline">도움말</button>
-        <button @click="openContact" class="text-sm underline">문의하기</button>
-      </div>
 
       <!-- Instagram Link -->
       <div class="mt-6 flex justify-center">
@@ -400,10 +364,6 @@ const logout = async () => {
 }
 
 const goToSetProfile = () => router.push('/set-profile')
-const goNotifications = () => router.push('/settings/notifications')
-const openAbout = () => router.push('/settings/about')
-const openHelp = () => router.push('/help')
-const openContact = () => router.push('/contact')
 const openInstagram = () => window.open('https://www.instagram.com/matchmobileapp/', '_blank')
 
 const openBlockList = () => {

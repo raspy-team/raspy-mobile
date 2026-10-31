@@ -615,7 +615,6 @@
       </div>
     </div>
 
-    <CustomToast />
   </div>
 </template>
 
@@ -626,7 +625,6 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import defaultImg from '../../assets/default.png'
-import CustomToast from '../../components/CustomToast.vue'
 import { useToast } from '../../composable/useToast'
 import {
   getGamePictures,

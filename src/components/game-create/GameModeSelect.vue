@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-3">
       <button
         @click="$emit('mode', 'random')"
-        class="w-full py-4 px-5 bg-orange-500 active:bg-orange-600 text-white text-left rounded-xl"
+        class="w-full py-4 px-5 bg-primary active:bg-primary-press text-primary-on text-left rounded-xl"
       >
         <div class="text-lg font-bold">아무나</div>
         <div class="text-sm text-white/80 mt-1">경기 목록에 올려서 신청을 받아요</div>

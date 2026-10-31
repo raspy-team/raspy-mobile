@@ -22,7 +22,7 @@
         >
         <p class="text-sm text-gray-500 mb-2">{{ rule.ruleGoal }}</p>
         <button
-          class="w-full py-2 bg-orange-500 text-white rounded-xl mt-1"
+          class="w-full py-2 bg-primary text-primary-on rounded-xl mt-1"
           @click="$emit('select', rule)"
         >
           선택

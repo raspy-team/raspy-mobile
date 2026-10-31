@@ -13,7 +13,7 @@
     <div class="w-full">
       <button
         @click="goHome"
-        class="w-full justify-center flex items-center bg-orange-500 text-white px-5 py-3 rounded-lg shadow hover:bg-orange-600 transition"
+        class="w-full justify-center flex items-center bg-primary text-primary-on px-5 py-3 rounded-lg shadow hover:bg-primary-press transition"
       >
         <i class="fas fa-home mr-2"></i> 홈으로
       </button>

@@ -29,7 +29,7 @@
               </span>
               <span class="flex items-center gap-2 mt-0.5">
                 <span class="flex-1 truncate text-sm" :class="dm.unreadCount ? 'text-fg' : 'text-fg-muted'">{{ dm.lastMessageContent || '대화를 시작해보세요' }}</span>
-                <span v-if="dm.unreadCount" class="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-fg text-xs font-bold leading-5 text-center flex-shrink-0" :aria-label="`안 읽은 메시지 ${dm.unreadCount}개`">
+                <span v-if="dm.unreadCount" class="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-on text-xs font-bold leading-5 text-center flex-shrink-0" :aria-label="`안 읽은 메시지 ${dm.unreadCount}개`">
                   {{ dm.unreadCount > 99 ? '99+' : dm.unreadCount }}
                 </span>
               </span>

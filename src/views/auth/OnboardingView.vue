@@ -31,7 +31,7 @@
           class="w-full flex items-center gap-3 px-4 h-14 text-left"
           @click="toggleAll"
         >
-          <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" :class="allAgreed ? 'bg-primary text-primary-fg' : 'border-2 border-line-strong'">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" :class="allAgreed ? 'bg-primary text-primary-on' : 'border-2 border-line-strong'">
             <i v-if="allAgreed" class="fas fa-check text-xs" aria-hidden="true"></i>
           </span>
           <span class="t-heading">모두 동의</span>

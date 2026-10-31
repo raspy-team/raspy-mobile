@@ -35,7 +35,7 @@
               <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" size="lg" />
               <span
                 v-if="side.champion"
-                class="absolute -top-2 -right-1 w-6 h-6 rounded-full bg-primary text-primary-fg flex items-center justify-center text-xs"
+                class="absolute -top-2 -right-1 w-6 h-6 rounded-full bg-primary text-primary-on flex items-center justify-center text-xs"
                 aria-label="새 챔피언"
               >
                 <i class="fas fa-crown" aria-hidden="true"></i>
@@ -126,7 +126,7 @@
                 >
                   <img v-if="pic.type === 'image'" :src="pic.dataUrl" alt="" class="w-full h-full object-cover pointer-events-none" />
                   <video v-else :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
-                  <span class="absolute top-1 left-1 min-w-6 h-6 px-1.5 rounded-full bg-primary text-primary-fg text-xs font-bold flex items-center justify-center">{{ index + 1 }}</span>
+                  <span class="absolute top-1 left-1 min-w-6 h-6 px-1.5 rounded-full bg-primary text-primary-on text-xs font-bold flex items-center justify-center">{{ index + 1 }}</span>
                   <span v-if="pic.type === 'video'" class="absolute bottom-1 left-1 px-1.5 rounded bg-black/60 text-white text-xs">{{ formatDuration(pic.duration) }}</span>
                   <button
                     type="button"

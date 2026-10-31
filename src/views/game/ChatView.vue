@@ -435,7 +435,7 @@ const closeErrorModal = () => {
                       }}</span>
                       <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
                       <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-500 text-white shadow-md"
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary text-primary-on shadow-md"
                       >
                         {{ challengeStatus?.minorCategory || '경기' }}
                       </span>
@@ -484,7 +484,7 @@ const closeErrorModal = () => {
                   </button>
                   <button
                     @click.stop="handleAccept"
-                    class="flex-1 py-3 px-4 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
+                    class="flex-1 py-3 px-4 bg-primary hover:bg-primary-press text-primary-on text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
                   >
                     <i class="fas fa-check mr-2"></i>
                     수락
@@ -561,7 +561,7 @@ const closeErrorModal = () => {
               <div v-if="msg.senderId === currentUserId" class="flex items-end gap-2 max-w-[75%]">
                 <span class="text-xs text-gray-500 mb-1">{{ formatTime(msg.timestamp) }}</span>
                 <div
-                  class="p-3.5 rounded-2xl break-words bg-orange-500 text-white rounded-br-md shadow-lg"
+                  class="p-3.5 rounded-2xl break-words bg-primary text-primary-on rounded-br-md shadow-lg"
                 >
                   <p class="whitespace-pre-line leading-relaxed text-sm">{{ msg.content }}</p>
                 </div>
@@ -611,7 +611,7 @@ const closeErrorModal = () => {
             aria-label="보내기"
             @mousedown.prevent="keepFocus"
             :disabled="!newMsg.trim()"
-            class="p-3 bg-orange-500 text-white rounded-full shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none"
+            class="p-3 bg-primary text-primary-on rounded-full shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none"
           >
             <i class="fas fa-paper-plane text-lg w-6 h-6 flex items-center justify-center"></i>
           </button>
@@ -636,7 +636,7 @@ const closeErrorModal = () => {
         </div>
         <button
           @click="closeErrorModal"
-          class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
+          class="w-full bg-primary hover:bg-primary-press text-primary-on font-bold py-3.5 rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
         >
           확인
         </button>

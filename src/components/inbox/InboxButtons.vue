@@ -2,7 +2,7 @@
   <span class="flex items-center">
     <span class="relative">
       <UiIconButton icon="far fa-paper-plane" :label="dmUnread ? `메시지, 안 읽은 ${dmUnread}개` : '메시지'" @click="router.push('/dm')" />
-      <span v-if="dmUnread" class="absolute top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-fg text-[11px] font-bold leading-[18px] text-center pointer-events-none" aria-hidden="true">{{ dmUnread > 99 ? '99+' : dmUnread }}</span>
+      <span v-if="dmUnread" class="absolute top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-on text-[11px] font-bold leading-[18px] text-center pointer-events-none" aria-hidden="true">{{ dmUnread > 99 ? '99+' : dmUnread }}</span>
     </span>
     <span class="relative">
       <UiIconButton icon="far fa-bell" :label="unreadNotifications ? `알림, 새 알림 ${unreadNotifications}개` : '알림'" @click="router.push('/notifications')" />

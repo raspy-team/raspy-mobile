@@ -26,7 +26,7 @@
       <p class="text-lg font-bold mb-2 text-white">Match 경기 정보를 확인하세요</p>
       <button
         @click="openApp"
-       class="w-full py-3 mb-2 rounded-xl bg-orange-500 text-white font-bold text-base shadow hover:bg-orange-600 transition"
+       class="w-full py-3 mb-2 rounded-xl bg-primary text-primary-on font-bold text-base shadow hover:bg-primary-press transition"
       >
         Match 앱에서 열기
       </button>

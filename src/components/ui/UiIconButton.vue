@@ -9,7 +9,7 @@
     <i :class="icon" class="text-lg" aria-hidden="true"></i>
     <span
       v-if="badge"
-      class="absolute top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center"
+      class="absolute top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-on text-[11px] font-bold flex items-center justify-center"
     >
       {{ badge > 9 ? '9+' : badge }}
     </span>

@@ -201,7 +201,7 @@
         </button>
         <button
           @click="openApproveModal"
-          class="flex-1 py-3 bg-primary text-white font-bold rounded-xl transition"
+          class="flex-1 py-3 bg-primary text-primary-on font-bold rounded-xl transition"
         >
           <i class="fas fa-check mr-1"></i>승인
         </button>
@@ -239,7 +239,7 @@
           </button>
           <button
             @click="confirmApprove"
-            class="flex-1 py-3 bg-primary text-white font-bold rounded-xl transition"
+            class="flex-1 py-3 bg-primary text-primary-on font-bold rounded-xl transition"
           >
             승인
           </button>

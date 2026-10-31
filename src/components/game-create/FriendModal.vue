@@ -144,7 +144,7 @@
             </button>
             <button
               @click="confirmProceed"
-             class="h-12 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 active:scale-95 transition shadow"
+             class="h-12 rounded-xl bg-primary text-primary-on font-bold hover:bg-primary-press active:scale-95 transition shadow"
             >
               확인
             </button>

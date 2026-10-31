@@ -89,3 +89,9 @@
   .page-forward-enter-active,
   .page-back-enter-active { transition: none; }
 }
+
+/* 키보드로 옮겨 다닐 때 지금 어디에 있는지 보이게 (손가락으로 누를 때는 안 보인다) */
+:where(a, button, [role='button'], [role='tab'], [role='radio'], summary):focus-visible {
+  outline: 2px solid theme('colors.primary.DEFAULT');
+  outline-offset: 2px;
+}

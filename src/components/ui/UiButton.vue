@@ -39,7 +39,7 @@ defineProps({
 })
 
 const VARIANTS = {
-  primary: 'bg-primary text-white font-bold active:bg-primary-press',
+  primary: 'bg-primary text-primary-on font-bold active:bg-primary-press',
   secondary: 'bg-surface-2 text-fg font-medium active:bg-line-strong',
   ghost: 'bg-transparent text-fg-muted font-medium active:bg-surface-2',
   tonal: 'bg-primary-soft text-primary-fg font-bold active:bg-primary/25',

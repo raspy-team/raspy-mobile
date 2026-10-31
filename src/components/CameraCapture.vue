@@ -44,7 +44,7 @@
         <button
           v-if="!capturedImage"
           @click.stop="triggerCamera"
-         class="w-full py-4 px-6 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
+         class="w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-press text-primary-on font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
         >
           <i class="fas fa-camera text-2xl"></i>
           <span class="text-lg">사진 촬영하기</span>
@@ -59,7 +59,7 @@
           </button>
           <button
             @click="confirm"
-           class="py-3 px-4 rounded-xl bg-orange-500 text-white font-bold shadow-lg active:scale-95 transition-all"
+           class="py-3 px-4 rounded-xl bg-primary text-primary-on font-bold shadow-lg active:scale-95 transition-all"
           >
             <i class="fas fa-check mr-2"></i>사용하기
           </button>

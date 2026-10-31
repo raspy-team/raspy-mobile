@@ -49,8 +49,9 @@ module.exports = {
         'line-strong': colors.neutral[700],
         fg: '#ffffff', // 본문 글자
         'fg-muted': colors.neutral[400], // 보조 글자
-        'fg-subtle': colors.neutral[500], // 더 약한 글자 (시간, 개수)
-        primary: { DEFAULT: brand[500], press: brand[600], soft: 'rgba(249,115,22,0.15)', fg: brand[400] },
+        'fg-subtle': '#8c8c8c', // 더 약한 글자 (시간, 개수). 카드 위에서도 대비 4.5:1을 넘게 neutral-500보다 조금 밝다
+        // on: 주황 바탕 위의 글자. 흰 글자는 대비가 2.8:1이라 읽기 어렵다 (검은 글자는 7:1)
+        primary: { DEFAULT: brand[500], press: brand[600], soft: 'rgba(249,115,22,0.15)', fg: brand[400], on: '#0a0a0a' },
         danger: { DEFAULT: colors.red[500], soft: 'rgba(239,68,68,0.15)', fg: colors.red[400] },
         success: { DEFAULT: colors.green[500], soft: 'rgba(34,197,94,0.15)', fg: colors.green[400] },
 

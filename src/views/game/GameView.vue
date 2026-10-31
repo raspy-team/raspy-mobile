@@ -1,415 +1,118 @@
 <template>
-  <Header :has-referer="false" title="내 경기" class="z-50 bg-black" />
+  <HeaderComp title="내 경기" />
 
-  <div class="flex-1 w-full min-h-full pt-[4rem] pb-28 px-4 space-y-4 bg-black text-white">
-    <!-- 로딩 상태 -->
-    <div v-if="loading" class="space-y-5">
-      <div
-        v-for="i in 3"
-        :key="i"
-        class="p-5 border bg-gray-900 rounded-2xl shadow space-y-5 animate-pulse"
-      >
-        <div class="flex justify-between items-start">
-          <div class="space-y-2 w-full">
-            <div class="mb-1 flex">
-              <span class="font-medium text-gray-500 block w-32 h-5 bg-gray-700 rounded"></span>
-              <span class="flex ml-3 w-6 h-6 bg-gray-700 rounded-full"></span>
-            </div>
-            <div class="text-xs flex gap-1 items-center">
-              <span class="block w-16 h-3 bg-gray-700 rounded"></span>
-              <span class="mx-1 text-gray-500">&gt;</span>
-              <span class="block w-12 h-3 bg-gray-700 rounded"></span>
-            </div>
+  <main class="px-4 pt-[72px] pb-32 max-w-xl mx-auto space-y-8">
+    <UiPullIndicator :pull="pull" :refreshing="refreshing" />
+
+    <div v-if="loading" class="space-y-3">
+      <UiCard v-for="n in 2" :key="n">
+        <div class="flex gap-3">
+          <UiSkeleton class="w-10 h-10" />
+          <div class="flex-1 space-y-2">
+            <UiSkeleton class="h-4 w-2/3" />
+            <UiSkeleton class="h-3 w-1/2" />
           </div>
-          <span class="text-xs font-medium px-2 py-2 rounded-full w-[5rem] bg-gray-700"></span>
         </div>
-        <div class="w-full h-10 bg-gray-700 rounded-md"></div>
-      </div>
+        <UiSkeleton class="h-11 w-full mt-4" />
+      </UiCard>
     </div>
 
-    <!-- 게임 목록 -->
+    <UiCard v-else-if="!allGames.length">
+      <UiEmptyState icon="fas fa-calendar-check" title="아직 잡힌 경기가 없어요" description="열린 경기에 신청하거나 직접 만들어보세요">
+        <UiButton to="/">경기 찾기</UiButton>
+      </UiEmptyState>
+    </UiCard>
+
     <template v-else>
-      <div v-if="allGames.length" class="space-y-4">
-        <div
-          v-for="game in allGames"
-          :key="game.id"
-          :id="'game-' + game.id"
-          :class="[
-            'relative p-5 rounded-xl bg-gray-900 border border-gray-700 space-y-4 transition-all',
-            getCardClass(game),
-          ]"
-        >
-          <!-- 규칙(게임명, 카테고리) 정보 최상단 + 타입/상태 라벨 우측 배치 -->
-          <div
-            class="flex justify-between items-start mb-2 cursor-pointer hover:bg-gray-800 rounded-lg p-2 transition-colors"
-            @click="openRuleDetail(game)"
-          >
-            <div class="min-w-0 flex items-center gap-2">
-              <div>
-                <img
-                  class="w-10"
-                  :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
-                  alt="카테고리 이미지"
-                />
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <span class="text-base font-medium text-gray-100 truncate block">
-                    {{ game.rule.ruleTitle }}
-                  </span>
-                  <i class="fas fa-info-circle text-orange-400 text-sm"></i>
-                </div>
-                <div class="flex gap-1 items-center mt-1 text-sm text-orange-400 font-normal">
-                  {{ game.rule.majorCategory }}
-                  <span v-if="game.rule.minorCategory" class="mx-1 text-orange-400">&gt;</span>
-                  <span v-if="game.rule.minorCategory">{{ game.rule.minorCategory }}</span>
-                </div>
-              </div>
-            </div>
-            <!-- 타입/상태 라벨 우측 배치 -->
-            <div class="flex flex-col items-end gap-1 ml-2">
-              <span :class="['text-sm font-medium text-gray-100', getTypeTextClass(game)]">
-                {{ getTypeLabel(game) }}
-              </span>
-              <span class="text-sm font-medium text-gray-400" :class="getStatusClass(game)">
-                {{ getStatusText(game) }}
-              </span>
-            </div>
-          </div>
-
-          <div class="mb-2">
-            <!-- Owner vs Opponent Profile Row -->
-            <div class="flex justify-between items-center mt-3 mb-1">
-              <!-- Owner -->
-              <div class="flex flex-col items-center flex-1">
-                <img
-                  :src="game.ownerProfileUrl || game.myProfileUrl || '/default.png'"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-orange-500 shadow cursor-pointer hover:opacity-80 transition-opacity"
-                  alt="Owner Profile"
-                  @click="router.push('/profile/' + (game.ownerId || game.myId))"
-                />
-                <span
-                  class="mt-1 text-sm font-medium text-gray-100 truncate max-w-[4.5rem] text-center"
-                >
-                  {{ game.ownerNickname || game.myNickname }}
-                </span>
-              </div>
-
-              <!-- VS -->
-              <div class="flex flex-col items-center flex-1 justify-center">
-                <span class="text-3xl font-bold text-gray-500 leading-none"> VS </span>
-              </div>
-
-              <!-- Opponent -->
-              <div class="flex flex-col items-center flex-1">
-                <img
-                  v-if="getOpponentProfileUrl(game)"
-                  :src="getOpponentProfileUrl(game)"
-                  class="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow cursor-pointer hover:opacity-80 transition-opacity"
-                  alt="Opponent Profile"
-                  @click="router.push('/profile/' + getOpponentUserId(game))"
-                />
-                <div
-                  v-else
-                  class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600 shadow"
-                >
-                  <i class="fas fa-user text-2xl text-gray-500"></i>
-                </div>
-                <span
-                  class="mt-1 text-sm font-normal text-gray-100 truncate max-w-[4.5rem] text-center"
-                >
-                  {{ getOpponentNickname(game) }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 도전자(신청자) 목록 모달 -->
-          <ApplicantsModal
-            v-if="showApplicantsModal && selectedApplicantsGame && selectedApplicantsGame.id === game.id"
-            :game="selectedApplicantsGame"
-            @close="closeApplicantsModal"
-            @approve="approve"
-            @cancel="cancelApproval"
+      <UiSection v-for="g in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
+        <div class="space-y-3">
+          <MyGameCard
+            v-for="game in g.items"
+            :key="game.type + game.id"
+            :game="game"
+            :me="me"
+            @profile="(id) => id && router.push('/profile/' + id)"
+            @play="router.push(`/games/${game.id}/play`)"
+            @result="router.push(`/games/${game.id}/result`)"
+            @start="openStart(game)"
+            @applicants="applicantsGame = game"
+            @share="share(game)"
+            @cancel-request="cancelRequest(game)"
+            @more="menuGame = game"
           />
-
-          <!-- 장소 & 날짜 -->
-          <div
-            class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
-          >
-            <div class="flex items-center gap-2">
-              <span>{{
-                !game.matchLocation || game.matchLocation.trim() === ''
-                  ? '장소 미정'
-                  : game.matchLocation
-              }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span>{{ formatDate(game.matchDate) }}</span>
-            </div>
-          </div>
-
-          <!-- 신청한 게임: 소유자 정보 -->
-          <div v-if="game.type === 'sent'" class="pt-3">
-            <div class="flex gap-2 pt-3">
-              <button
-                v-if="game.gameStatus === 'IN_PROGRESS'"
-                @click.stop="joinGame(game.id)"
-               class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
-              >
-                <i class="fas fa-sign-in-alt mr-2"></i>경기 참여
-              </button>
-              <button
-                v-else-if="game.status === 'REQUESTED'"
-                @click.stop="cancelRequest(game.id)"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-red-400 text-sm border-[1px] border-red-400 py-3 px-0 rounded-xl"
-              >
-                <i class="fas fa-xmark"></i> 신청 취소
-              </button>
-              <button
-                v-else-if="game.status === 'APPROVED'"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-green-500 text-sm text-white border-[1px] py-3 px-0 rounded-xl opacity-70 cursor-not-allowed"
-                disabled
-              >
-                <i class="fas fa-check"></i> 승인됨
-              </button>
-              <button
-                v-else-if="game.status === 'REJECTED'"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 bg-[#afafaf] text-sm text-white border-[1px] py-3 px-0 rounded-xl opacity-70 cursor-not-allowed"
-                disabled
-              >
-                승인 거부됨
-              </button>
-              <button
-                v-if="game.status !== 'IN_PROGRESS'"
-                @click.stop="goDM(game.ownerId || game.myId)"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-xl"
-              >
-                <i class="fas fa-paper-plane"></i> DM
-              </button>
-              <button
-                v-if="game.status !== 'IN_PROGRESS'"
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-xl font-medium text-sm hover:bg-blue-200 transition"
-                @click.stop="openApplicantsModal(game)"
-              >
-                신청자 {{ game.applicants.length }}명
-              </button>
-            </div>
-          </div>
-
-          <!-- 내 게임: 게임 시작 버튼만 표시 -->
-          <div v-else-if="game.type === 'my-game'" class="space-y-3">
-            <div class="pt-3 flex gap-2">
-              <button
-                v-if="game.status === 'IN_PROGRESS'"
-               class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
-                @click.stop="joinGame(game.id)"
-              >
-                <i class="fas fa-sign-in-alt mr-2"></i>경기 참여
-              </button>
-              <button
-                v-else-if="game.isOwner && canStart(game)"
-               class="flex-1 min-w-0 bg-[#56b97b] text-white font-medium rounded-xl py-3 px-0 shadow transition active:scale-95"
-                @click.stop="openStartModal(game)"
-              >
-                <i class="fas fa-play mr-2"></i>경기 시작
-              </button>
-              <button
-                v-else-if="game.isOwner && !game.opponentNickname"
-               class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow transition active:scale-95"
-                @click.stop="shareGame(game.id)"
-              >
-                <i class="fas fa-share mr-2"></i>공유
-              </button>
-              <button
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 text-sm text-white bg-blue-400 py-3 px-0 rounded-xl"
-                @click.stop="goDM(game.opponentId || game.ownerId || game.myId)"
-              >
-                <i class="fas fa-paper-plane"></i> DM
-              </button>
-              <button
-                class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-xl font-medium text-sm hover:bg-blue-200 transition"
-                @click.stop="openApplicantsModal(game)"
-              >
-                신청자 {{ game.applicants.length }}명
-              </button>
-              <button
-                v-if="game.isOwner && game.status !== 'IN_PROGRESS' && game.status !== 'COMPLETED'"
-                @click.stop="openDeleteModal(game)"
-                class="flex items-center justify-center w-12 py-3 px-0 bg-red-500/15 text-red-600 rounded-xl hover:bg-red-200 transition"
-                title="경기 삭제"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
         </div>
-      </div>
+      </UiSection>
+    </template>
+  </main>
 
-      <!-- 빈 상태 -->
-      <div v-else class="py-16 text-center">
-        <p class="text-base text-white">아직 잡힌 경기가 없어요</p>
-        <p class="text-sm text-gray-400 mt-2">열린 경기에 신청하거나 직접 만들어보세요</p>
-        <button
-          @click="router.push('/')"
-         class="mt-6 px-6 py-3 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
-        >
-          경기 찾기
-        </button>
+  <!-- 신청자: 한 명을 승인하면 경기가 확정된다 -->
+  <UiSheet :model-value="!!applicantsGame" :title="`신청자 ${applicantsGame?.applicants?.length || 0}명`" @update:model-value="applicantsGame = null">
+    <p class="t-caption mb-4">한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.</p>
+    <UiList v-if="applicantsGame?.applicants?.length">
+      <UiListItem
+        v-for="a in applicantsGame.applicants"
+        :key="a.userId"
+        :title="a.applicantNickname"
+        :subtitle="`${a.applicantGameStatisticsDTO?.ruleRating || 1500}점 · ${record(a.applicantGameStatisticsDTO)}`"
+        @click="router.push('/profile/' + a.userId)"
+      >
+        <template #leading><UiAvatar :src="a.applicantProfileUrl" :name="a.applicantNickname" size="sm" /></template>
+        <template #trailing>
+          <UiButton v-if="a.approved" size="sm" variant="secondary" :loading="busy" @click.stop="cancelApproval(applicantsGame, a)">승인 취소</UiButton>
+          <UiButton v-else size="sm" :disabled="hasApproved(applicantsGame)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
+        </template>
+      </UiListItem>
+    </UiList>
+    <UiEmptyState v-else icon="fas fa-user-group" title="아직 신청한 사람이 없어요" description="링크를 공유하면 더 빨리 모여요" />
+  </UiSheet>
+
+  <!-- 더보기 -->
+  <UiSheet :model-value="!!menuGame" @update:model-value="menuGame = null">
+    <UiList v-if="menuGame">
+      <UiListItem icon="fas fa-book-open" title="규칙 보기" @click="openRule(menuGame)" />
+      <UiListItem v-if="dmTarget(menuGame)" icon="far fa-paper-plane" :title="`${dmTarget(menuGame).name}에게 메시지`" @click="router.push('/chat/' + dmTarget(menuGame).id)" />
+      <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
+      <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
+    </UiList>
+  </UiSheet>
+
+  <!-- 경기 시작 ① 정해둔 장소가 있으면 그대로 시작할지 -->
+  <UiSheet v-model="showPlaceConfirm" title="이 장소에서 하나요?">
+    <UiCard class="flex items-center gap-3">
+      <i class="fas fa-location-dot text-fg-muted" aria-hidden="true"></i>
+      <span class="t-body">{{ startGame?.matchLocation }}</span>
+    </UiCard>
+    <template #footer>
+      <div class="flex gap-2">
+        <UiButton variant="secondary" block @click="openPlaceForm">장소 바꾸기</UiButton>
+        <UiButton block @click="goCamera">이 장소로 시작</UiButton>
       </div>
     </template>
-  </div>
+  </UiSheet>
 
-
-  <!-- 게임 시작 모달들 -->
-
-  <LocationConfirmModal
-    v-if="showLocationConfirmModal"
-    :location="currentGameLocation"
-    @close="showLocationConfirmModal = false"
-    @change="changeLocation"
-    @continue="continueWithExistingLocation"
-  />
-
-  <!-- 장소 설정 모달 -->
-  <div
-    v-if="showAddressModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
-  >
-    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
-      <h2 class="text-lg font-bold mb-4">어디서 하나요?</h2>
-      <!-- 지역: 챔피언이 지역 단위라 꼭 필요하다. 장소 검색으로 고르면 자동으로 채워진다 -->
-      <div v-if="!selectedPlace" class="grid grid-cols-2 gap-2 mb-4">
-        <select v-model="manualRegion1" class="px-3 py-3 bg-gray-900 rounded-xl border border-gray-800 text-base">
-          <option value="" disabled>시·도</option>
-          <option v-for="r in region1Options" :key="r" :value="r">{{ r }}</option>
-        </select>
-        <select v-model="manualRegion2" :disabled="!manualRegion1" class="px-3 py-3 bg-gray-900 rounded-xl border border-gray-800 text-base disabled:opacity-50">
-          <option value="" disabled>구·시·군</option>
-          <option v-for="r in region2Options" :key="r" :value="r">{{ r }}</option>
-        </select>
+  <!-- 경기 시작 ② 장소 정하기: 지역(챔피언 단위) + 장소 이름. Google 자동완성은 키가 있을 때 덤 -->
+  <UiSheet v-model="showPlaceForm" title="어디서 하나요?">
+    <div class="space-y-4">
+      <div v-if="!selectedPlace" class="grid grid-cols-2 gap-2">
+        <UiSelect v-model="manualRegion1" :options="region1Options" placeholder="시·도" />
+        <UiSelect v-model="manualRegion2" :options="region2Options" placeholder="구·시·군" :disabled="!manualRegion1" />
       </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-200 mb-2">장소 이름</label>
-        <div class="relative">
-          <input
-            ref="addressInputModal"
-            v-model="searchQuery"
-            class="w-full text-base px-4 py-3 bg-black rounded-xl border-2 border-gray-800 outline-none focus:border-orange-400 transition"
-            placeholder="장소명 또는 주소 입력 (예: 서초탁구장)"
-            autocomplete="off"
-          />
-          <i
-            v-if="!searchQuery"
-            class="fas fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"
-          ></i>
+      <UiInput ref="placeInput" v-model="searchQuery" label="장소 이름" placeholder="예: 관악구민체육센터" icon="fas fa-location-dot" />
+      <UiCard v-if="selectedPlace" class="flex items-start gap-3">
+        <div class="flex-1 min-w-0">
+          <p class="t-body truncate">{{ selectedPlace.name }}</p>
+          <p class="t-micro truncate">{{ selectedPlace.address }}</p>
         </div>
-
-      </div>
-
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-200 mb-2">
-          <i class="fas fa-map-pin mr-1 text-orange-500"></i>
-          상세 장소 (선택)
-        </label>
-        <input
-          v-model="detailedPlace"
-          class="w-full text-base px-4 py-3 bg-gray-900 rounded-xl border-2 border-gray-800 outline-none focus:border-orange-400 transition"
-          placeholder="상세 장소를 입력하세요 (예: 3층, A코트)"
-          autocomplete="off"
-        />
-        <p class="text-xs text-gray-400 mt-2">
-          <i class="fas fa-info-circle text-blue-400 mr-1"></i>
-          추가 정보를 입력하면 장소에 함께 표시됩니다
-        </p>
-      </div>
-
-      <div v-if="selectedPlace" class="mb-4 p-4 bg-orange-500/10 rounded-xl border border-orange-500/30">
-        <div class="flex items-start gap-3">
-          <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
-          <div class="flex-1 min-w-0">
-            <p class="font-medium text-gray-100 mb-1">{{ selectedPlace.name }}</p>
-            <p class="text-sm text-gray-400">{{ selectedPlace.address }}</p>
-          </div>
-          <button @click="clearSelection" class="text-gray-400 hover:text-gray-400 transition">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-
-
-      <div class="flex justify-end mt-6 space-x-2">
-        <button
-          @click="closeModal"
-          class="px-4 py-2 rounded-xl bg-gray-800 text-gray-200 text-sm hover:bg-gray-700 transition"
-        >
-          취소
-        </button>
-        <button
-          :disabled="!canSubmitPlace"
-          class="px-5 py-2 rounded-xl bg-orange-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition shadow-md"
-          @click="submitAndStartGame"
-        >
-          <i class="fas fa-play mr-1"></i>
-          경기 진행
-        </button>
-      </div>
+        <UiIconButton icon="fas fa-xmark" label="다시 고르기" @click="clearSelection" />
+      </UiCard>
+      <UiInput v-model="detailedPlace" label="자세한 위치" optional placeholder="예: 3층, A코트" />
     </div>
-  </div>
+    <template #footer>
+      <UiButton block :disabled="!canSubmitPlace" :loading="busy" @click="submitPlace">다음</UiButton>
+    </template>
+  </UiSheet>
 
-  <div
-    v-if="showCountdownModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100050]"
-  >
-    <div class="bg-black p-7 m-5 rounded-2xl w-full max-w-md shadow-2xl text-center">
-      <h2 class="text-xl font-bold text-white mb-3 tracking-tight">경기 시작 전 확인</h2>
-      <p class="text-sm text-gray-500 mb-1">이 경기는 다음 시간 동안 진행됩니다:</p>
-      <div class="text-4xl font-bold text-orange-500 py-4 mb-4 mt-3">
-        {{ countdownDurationText }}
-      </div>
-      <p class="text-xs text-gray-400 mb-5">
-        아래 <span class="font-medium text-orange-500">"바로 시작하기"</span> 버튼을 누르면 즉시
-        경기가 시작되고 상대방에게도 표시됩니다.
-      </p>
-      <div class="flex justify-end gap-2">
-        <button
-          @click="showCountdownModal = false"
-          class="px-4 py-2 rounded bg-gray-800 text-gray-400 text-sm"
-        >
-          취소
-        </button>
-        <button
-          @click="confirmStartGame"
-          class="px-5 py-2 rounded bg-orange-500 text-white text-sm font-medium shadow hover:bg-orange-400 transition active:scale-95"
-        >
-          바로 시작하기
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div
-    v-if="showAddressErrorModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100100]"
-  >
-    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
-      <div class="text-center mb-4">
-        <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold text-white mb-2">장소를 찾을 수 없습니다</h3>
-        <p class="text-sm text-gray-400">
-          더 구체적인 장소를 입력해주세요.<br />
-          <span class="text-xs text-gray-500 mt-2 block">예: 서초탁구장, 강남체육관</span>
-        </p>
-      </div>
-      <button
-        @click="showAddressErrorModal = false"
-       class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition shadow"
-      >
-        확인
-      </button>
-    </div>
-  </div>
-
+  <!-- 경기 시작 ③ 인증샷 (선택) -->
   <CameraCapture
     :is-visible="showCameraModal"
     title="경기 시작 인증샷"
@@ -417,476 +120,195 @@
     allow-skip
     @capture="onPhotoCapture"
     @skip="onPhotoCapture(null)"
-    @cancel="onCameraCancel"
+    @cancel="showCameraModal = false"
   />
 
-  <!-- 경기 삭제 확인 모달 -->
-  <div
-    v-if="showDeleteModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100200]"
-  >
-    <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
-      <div class="text-center mb-4">
-        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold text-white mb-2">경기 삭제</h3>
-        <p class="text-sm text-gray-400">
-          정말로 이 경기를 삭제하시겠습니까?<br />
-          <span class="text-xs text-red-500 mt-2 block">이 작업은 되돌릴 수 없습니다.</span>
-        </p>
-      </div>
-      <div class="flex gap-2">
-        <button
-          @click="showDeleteModal = false"
-         class="flex-1 bg-gray-800 text-gray-200 font-medium py-3 rounded-xl hover:bg-gray-700 transition"
-        >
-          취소
-        </button>
-        <button
-          @click="confirmDeleteGame"
-         class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition shadow"
-        >
-          삭제
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- 경기 시작 ④ 마지막 확인 -->
+  <UiDialog
+    v-model="showStartConfirm"
+    title="경기를 시작할까요?"
+    :message="startMessage"
+    confirm-text="시작하기"
+    :loading="busy"
+    @confirm="confirmStart"
+  />
 
-
-  <!-- 규칙 모달 -->
-  <MatchRuleModal v-if="selectedGame" :rule="selectedGame.rule" @close="closeRuleDetail" />
+  <MatchRuleModal v-if="ruleGame" :rule="ruleGame.rule" @close="ruleGame = null" />
 </template>
 
 <script setup>
-import regionMap from '../../assets/regionMap.json'
-import ApplicantsModal from '../../components/game/ApplicantsModal.vue'
-import LocationConfirmModal from '../../components/game/LocationConfirmModal.vue'
-import { refreshOnChange } from '../../websocket/userChannel'
-import { useBackClose } from '../../composable/useBackClose'
-
-// 도전자(신청자) 모달 상태
-const showApplicantsModal = ref(false)
-const selectedApplicantsGame = ref(null)
-
-function openApplicantsModal(game) {
-  selectedApplicantsGame.value = game
-  showApplicantsModal.value = true
-}
-
-function closeApplicantsModal() {
-  showApplicantsModal.value = false
-  selectedApplicantsGame.value = null
-}
-import { ref, onMounted, onBeforeUnmount, onUnmounted, computed, nextTick, watch } from 'vue'
+// 내 경기: 할 일(시작·승인·참여) / 기다리는 중 / 끝난 경기로 나눠 보여준다
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import client from '../../api/api'
-import Header from '../../components/HeaderComp.vue'
+import api from '../../api/api'
+import HeaderComp from '../../components/HeaderComp.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
+import MyGameCard from '../../components/game/MyGameCard.vue'
+import {
+  UiAvatar, UiButton, UiCard, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
+  UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton,
+} from '../../components/ui'
+import regionMap from '../../assets/regionMap.json'
 import { useToast } from '../../composable/useToast'
+import { usePullToRefresh } from '../../composables/usePullToRefresh'
+import { confirmDialog } from '../../composables/useConfirm'
+import { refreshOnChange } from '../../websocket/userChannel'
 import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
+import { copyText } from '../../utils/clipboard'
+import { record } from '../../utils/format'
 
-const { showToast } = useToast()
 const router = useRouter()
-// const route = useRoute()
+const { showToast } = useToast()
 
-const sentGames = ref([]) // 신청한 게임
-const myGames = ref([]) // 내 게임
-const applicantsMap = ref({}) // 각 게임의 신청자 목록 (gameId -> applicants)
 const loading = ref(true)
-let stopWatching = null // 변경 신호 구독 해제
+const busy = ref(false)
+const sentGames = ref([])
+const myGames = ref([])
+const applicantsMap = ref({})
+const me = ref({ name: '나' })
+const applicantsGame = ref(null)
+const menuGame = ref(null)
+const ruleGame = ref(null)
 
-// 게임 시작 관련
-const showLocationConfirmModal = ref(false) // 기존 장소 확인 모달
-const showAddressModal = ref(false)
-const searchQuery = ref('')
-const selectedPlace = ref(null)
-const detailedPlace = ref('')
-const currentGameId = ref(null)
-const currentGameLocation = ref('') // 기존 장소 저장
-const showCountdownModal = ref(false)
-const countdownDurationText = ref('')
-const showAddressErrorModal = ref(false)
-const showCameraModal = ref(false)
-const capturedPhotoFile = ref(null)
-const addressInputModal = ref(null)
-let autocompleteModal = null
+// ---------- 목록 ----------
 
-// 경기 삭제 관련
-const showDeleteModal = ref(false)
-const gameToDelete = ref(null)
+const allGames = computed(() => [
+  ...myGames.value.map((g) => ({ ...g, type: 'my-game', applicants: applicantsMap.value[g.id] || [] })),
+  ...sentGames.value.map((g) => ({ ...g, type: 'sent' })),
+])
 
-// 규칙 모달 관련
-const selectedGame = ref(null)
+// 할 일: 진행 중, 내가 시작해야 하는 확정 경기, 승인 기다리는 신청자가 있는 경기
+function bucket(g) {
+  if (g.status === 'IN_PROGRESS' || g.gameStatus === 'IN_PROGRESS') return 'todo'
+  if (g.type === 'my-game') {
+    if (g.status === 'COMPLETED' || g.status === 'CANCELED') return 'done'
+    if (g.status === 'SCHEDULED' && g.isOwner !== false) return 'todo'
+    if (g.status === 'MATCHING' && g.applicants.length) return 'todo'
+    return 'waiting'
+  }
+  return g.status === 'REJECTED' ? 'done' : 'waiting'
+}
+const byTime = (a, b) => new Date(a.matchDate || a.startedAt || 0) - new Date(b.matchDate || b.startedAt || 0)
+const groups = computed(() =>
+  [
+    { key: 'todo', title: '할 일' },
+    { key: 'waiting', title: '기다리는 중' },
+    { key: 'done', title: '끝난 경기' },
+  ]
+    .map((g) => ({ ...g, items: allGames.value.filter((x) => bucket(x) === g.key).sort(byTime) }))
+    .filter((g) => g.items.length),
+)
 
-// 모든 게임을 최신순으로 합쳐서 보여주기 (신청한 게임 + 내 게임)
-// 내 게임에는 신청자 목록도 함께 포함
-const allGames = computed(() => {
-  const sent = sentGames.value.map((g) => ({
-    ...g,
-    type: 'sent',
-    timestamp: g.matchDate || g.createdAt,
-  }))
-  const my = myGames.value.map((g) => ({
-    ...g,
-    type: 'my-game',
-    timestamp: g.matchDate || g.startedAt || g.createdAt,
-    applicants: applicantsMap.value[g.id] || [], // 신청자 목록 추가
-  }))
-
-  const all = [...sent, ...my]
-  all.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-
-  return all
-})
-
-// 게임 데이터를 가져오는 함수
-const fetchGames = async () => {
+async function fetchGames() {
   try {
-    const [applicantsRes, sentRes, myGamesRes] = await Promise.all([
-      client.get('/api/games/my-games/applicants'), // 내 게임의 신청자 목록
-      client.get('/api/games/my-requests'), // 신청한 게임
-      client.get('/api/games/my-games'), // 내 게임
+    const [applicantsRes, sentRes, myRes] = await Promise.all([
+      api.get('/api/games/my-games/applicants'),
+      api.get('/api/games/my-requests'),
+      api.get('/api/games/my-games'),
     ])
+    applicantsMap.value = Object.fromEntries(applicantsRes.data.map((g) => [g.gameId, g.applicants || []]))
+    sentGames.value = sentRes.data
+    myGames.value = myRes.data
+    // 열려 있는 신청자 시트도 새 값으로
+    if (applicantsGame.value) applicantsGame.value = allGames.value.find((g) => g.type === 'my-game' && g.id === applicantsGame.value.id) || null
+  } finally {
+    loading.value = false
+  }
+}
+const { pull, refreshing } = usePullToRefresh(fetchGames)
 
-    // 신청자 목록을 gameId로 매핑
-    const applicantsData = applicantsRes.data
-    const newApplicantsMap = {}
-    applicantsData.forEach((game) => {
-      newApplicantsMap[game.gameId] = game.applicants || []
-    })
-    applicantsMap.value = newApplicantsMap
+// ---------- 신청·승인 ----------
 
-    sentGames.value = sentRes.data.map((g) => ({ ...g }))
-    myGames.value = myGamesRes.data.map((g) => ({ ...g }))
+const hasApproved = (game) => (game.applicants || []).some((a) => a.approved)
+
+async function approve(game, a) {
+  busy.value = true
+  try {
+    await api.post('/api/games/approve', { gameId: game.id, userId: a.userId })
+    showToast(`${a.applicantNickname}님과 경기가 확정됐어요`)
+    applicantsGame.value = null
+    await fetchGames()
   } catch (e) {
-    console.error('Failed to load games:', e)
+    showToast(e.response?.data?.message || '승인하지 못했어요')
+  } finally {
+    busy.value = false
   }
 }
 
-// 폴링 정리 함수
-const stopPolling = () => {
-  stopWatching?.()
-  stopWatching = null
+async function cancelApproval(game, a) {
+  busy.value = true
+  try {
+    await api.post('/api/games/cancel-approve', { gameId: game.id, userId: a.userId })
+    showToast('승인을 취소했어요. 다시 신청을 받아요')
+    await fetchGames()
+  } finally {
+    busy.value = false
+  }
 }
 
-// 컴포넌트 마운트 시: 데이터 로드 및 폴링 시작
-onMounted(async () => {
-  console.log('[GameView] 마운트: 데이터 로드 및 폴링 시작')
-  loading.value = true
-
-  // iOS 네이티브 카메라 콜백 등록
-  if (typeof window !== 'undefined') {
-    const handleCameraResult = async (base64Image) => {
-      try {
-        console.log('Received photo from native camera')
-        const compressedDataUrl = await compressImage(base64Image)
-        const file = dataUrlToFile(compressedDataUrl, 'camera-photo.jpg')
-        capturedPhotoFile.value = file
-        showCameraModal.value = false
-
-        // 카운트다운 모달 표시
-        const game = myGames.value.find((g) => g.id === currentGameId.value)
-        const dur = game?.rule?.duration
-
-        if (dur === -1) {
-          countdownDurationText.value = '제한 없음'
-        } else {
-          const min = Math.floor(dur / 60)
-          const sec = dur % 60
-          countdownDurationText.value = (min ? `${min}분 ` : '') + (sec ? `${sec}초` : '')
-        }
-        showCountdownModal.value = true
-      } catch (error) {
-        console.error('Failed to process camera image:', error)
-        showToast('사진 저장에 실패했습니다.')
-      }
-    }
-
-    // 여러 콜백 이름을 모두 등록 (iOS 호환성)
-    window.onCameraResult = handleCameraResult
-    window.onGameViewCameraResult = handleCameraResult
-  }
-
-  // 첫 데이터 로드
-  await fetchGames()
-  loading.value = false
-
-  // 신청·승인·시작·종료 신호가 오거나 앱으로 돌아왔을 때만 다시 불러온다 (예전엔 3초마다)
-  stopWatching = refreshOnChange(fetchGames)
-})
-
-// 컴포넌트가 언마운트되기 직전: 폴링 중지
-onBeforeUnmount(() => {
-  console.log('[GameView] 언마운트 직전: 폴링 중지')
-  stopPolling()
-})
-
-// 컴포넌트 언마운트 후: 최종 정리 (안전장치)
-onUnmounted(() => {
-  console.log('[GameView] 언마운트 완료: 최종 정리')
-  stopPolling()
-
-  // iOS 네이티브 카메라 콜백 정리
-  if (typeof window !== 'undefined') {
-    window.onCameraResult = null
-    window.onGameViewCameraResult = null
-  }
-})
-
-function formatDate(dateStr) {
-  if (!dateStr) return '시간 미정'
-  const date = new Date(dateStr)
-  return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
+async function cancelRequest(game) {
+  if (!(await confirmDialog({ title: '신청을 취소할까요?', confirmText: '신청 취소' }))) return
+  await api.post('/api/games/cancel-request', { gameId: game.id })
+  sentGames.value = sentGames.value.filter((g) => g.id !== game.id)
+  showToast('신청을 취소했어요')
 }
 
-function getStatusClass(game) {
-  if (game.type === 'sent') {
-    if (game.status === 'APPROVED') return 'text-blue-600'
-    if (game.status === 'REQUESTED') return 'text-gray-500'
-    if (game.status === 'REJECTED') return 'text-red-500'
-  } else if (game.type === 'my-game') {
-    if (game.status === 'IN_PROGRESS') return 'text-green-500'
-    if (game.status === 'SCHEDULED') return 'text-orange-500'
-    if (game.status === 'MATCHING') return 'text-orange-400'
-    if (game.status === 'COMPLETED') return 'text-gray-400'
-    if (game.status === 'CANCELED') return 'text-red-400'
-  }
-  return 'text-gray-500'
-}
+// ---------- 더보기 ----------
 
-function getStatusText(game) {
-  if (game.type === 'sent') {
-    if (game.gameStatus === 'IN_PROGRESS') return '경기 진행 중'
-    if (game.status === 'APPROVED') return '승인됨 - 시작 대기 중'
-    if (game.status === 'REQUESTED') return '대기 중'
-    if (game.status === 'REJECTED') return '거절됨'
-  } else if (game.type === 'my-game') {
-    if (game.status === 'MATCHING') return '매칭 중'
-    if (game.status === 'SCHEDULED') return '진행 예정'
-    if (game.status === 'IN_PROGRESS') return '진행 중'
-    if (game.status === 'COMPLETED') return '완료됨'
-    if (game.status === 'CANCELED') return '취소됨'
-  }
-  return '알 수 없음'
-}
-
-function getOpponentNickname(game) {
-  if (game.opponentNickname) {
-    return game.opponentNickname
-  }
-  if (
-    (game.status === 'APPROVED' || game.status === 'SCHEDULED') &&
-    game.applicants &&
-    game.applicants.length > 0
-  ) {
-    const approvedApplicant = game.applicants.find((a) => a.approved)
-    if (approvedApplicant) {
-      return approvedApplicant.applicantNickname
-    }
-  }
-  return '미정'
-}
-
-function getOpponentProfileUrl(game) {
-  if (game.opponentProfileUrl) {
-    return game.opponentProfileUrl
-  }
-  if (
-    (game.status === 'APPROVED' || game.status === 'SCHEDULED') &&
-    game.applicants &&
-    game.applicants.length > 0
-  ) {
-    const approvedApplicant = game.applicants.find((a) => a.approved)
-    if (approvedApplicant) {
-      return approvedApplicant.applicantProfileUrl
-    }
-  }
+function dmTarget(g) {
+  if (g.type === 'sent') return { id: g.ownerId, name: g.ownerNickname }
+  if (g.opponentId) return { id: g.opponentId, name: g.opponentNickname }
   return null
 }
+const canDelete = (g) => g.type === 'my-game' && g.isOwner !== false && ['MATCHING', 'SCHEDULED'].includes(g.status)
 
-function getOpponentUserId(game) {
-  if (game.opponentId) {
-    return game.opponentId
-  }
-  if (
-    (game.status === 'APPROVED' || game.status === 'SCHEDULED') &&
-    game.applicants &&
-    game.applicants.length > 0
-  ) {
-    const approvedApplicant = game.applicants.find((a) => a.approved)
-    if (approvedApplicant) {
-      return approvedApplicant.userId
-    }
-  }
-  return null
+function openRule(g) {
+  menuGame.value = null
+  ruleGame.value = g
 }
 
-async function approve(gameId, userId) {
+async function share(g) {
+  menuGame.value = null
   try {
-    await client.post(`/api/games/approve`, { gameId, userId })
-    const applicants = applicantsMap.value[gameId]
-    const user = applicants?.find((a) => a.userId === userId)
-    if (user) user.approved = true
-
-    const game = myGames.value.find((g) => g.id === gameId)
-    if (game) {
-      game.status = 'SCHEDULED'
-      game.opponentNickname = user?.applicantNickname || ''
-    }
-
-    showToast(`@${user?.applicantNickname || '사용자'}님을 승인했습니다!`)
-  } catch (err) {
-    if (err.response?.data?.message?.includes('한 명만 승인 가능')) {
-      alert('이미 다른 사용자가 승인되었습니다.')
-    } else {
-      console.error(err)
-      alert('승인 중 오류가 발생했습니다.')
-    }
+    const { data } = await api.post('/api/invite', null, { params: { gameId: g.id } })
+    showToast((await copyText(data.url)) ? '링크를 복사했어요. 같이 할 사람에게 보내보세요' : '복사하지 못했어요')
+  } catch {
+    showToast('링크를 만들지 못했어요')
   }
 }
 
-async function cancelApproval(gameId, userId) {
-  await client.post(`/api/games/cancel-approve`, { gameId, userId })
-  const applicants = applicantsMap.value[gameId]
-  const user = applicants?.find((a) => a.userId === userId)
-  if (user) user.approved = false
-
-  const game = myGames.value.find((g) => g.id === gameId)
-  if (game) {
-    game.status = 'MATCHING'
-    game.opponentNickname = ''
-  }
-
-  showToast(`${user?.applicantNickname || '사용자'}님의 참여를 취소했습니다!`)
-}
-
-async function cancelRequest(gameId) {
-  await client.post('/api/games/cancel-request', { gameId })
-  sentGames.value = sentGames.value.filter((g) => g.id !== gameId)
-  showToast('신청을 취소했습니다.')
-}
-
-function goDM(userId) {
-  router.push('/chat/' + userId)
-}
-
-// 내 게임 관련 함수들
-const joinGame = (id) => router.push(`/games/${id}/play`)
-const canStart = (g) => g.status === 'SCHEDULED' && !!g.opponentNickname
-
-async function shareGame(gameId) {
-  showToast('공유 링크가 복사되었습니다!')
-  const res = await client.post('/api/invite', null, { params: { gameId } })
-  const url = res.data.url
-
-  if (
-    window.webkit &&
-    window.webkit.messageHandlers &&
-    window.webkit.messageHandlers.clipboardCopy
-  ) {
-    window.webkit.messageHandlers.clipboardCopy.postMessage(url)
-    return
-  }
-
-  try {
-    await navigator.clipboard.writeText(url)
-    return
-  } catch (err) {
-    try {
-      const input = document.createElement('input')
-      input.value = url
-      document.body.appendChild(input)
-      input.select()
-      const success = document.execCommand('copy')
-      document.body.removeChild(input)
-      if (!success) {
-        showToast('복사에 실패했습니다!')
-      }
-    } catch (err2) {
-      showToast('복사에 실패했습니다!')
-    }
-  }
-}
-
-const initGoogleAutocomplete = () => {
-  if (window.google?.maps?.places && addressInputModal.value) {
-    autocompleteModal = new window.google.maps.places.Autocomplete(addressInputModal.value, {
-      componentRestrictions: { country: 'kr' },
-      fields: ['formatted_address', 'address_components', 'geometry', 'name'],
-      types: ['establishment', 'geocode'],
-    })
-
-    autocompleteModal.addListener('place_changed', () => {
-      const place = autocompleteModal.getPlace()
-      if (place.geometry && place.formatted_address) {
-        const parsed = parseRegion(place.formatted_address)
-
-        if (!parsed) {
-          showAddressErrorModal.value = true
-          searchQuery.value = ''
-          selectedPlace.value = null
-          return
-        }
-
-        selectedPlace.value = {
-          name: place.name || '',
-          address: parsed.fullAddress,
-          region1: parsed.region1,
-          region2: parsed.region2,
-          geometry: place.geometry,
-        }
-      }
-    })
-  }
-}
-
-const clearSelection = () => {
-  selectedPlace.value = null
-  searchQuery.value = ''
-  detailedPlace.value = ''
-}
-
-const openStartModal = (game) => {
-  currentGameId.value = game.id
-
-  // 기존 장소가 있는지 확인
-  if (game.matchLocation && game.matchLocation.trim() !== '') {
-    // 기존 장소가 있으면 확인 모달 표시
-    currentGameLocation.value = game.matchLocation
-    showLocationConfirmModal.value = true
-  } else {
-    // 기존 장소가 없으면 바로 장소 설정 모달 표시
-    openAddressModal()
-  }
-}
-
-// 장소 설정 모달 열기
-const openAddressModal = () => {
-  showAddressModal.value = true
-  searchQuery.value = ''
-  selectedPlace.value = null
-  detailedPlace.value = ''
-
-  nextTick(() => {
-    initGoogleAutocomplete()
+async function removeGame(g) {
+  menuGame.value = null
+  const ok = await confirmDialog({
+    title: '경기를 삭제할까요?',
+    message: '신청한 사람들에게서도 사라져요.',
+    confirmText: '삭제',
+    danger: true,
   })
+  if (!ok) return
+  try {
+    await api.delete(`/api/games/${g.id}/delete`)
+    myGames.value = myGames.value.filter((x) => x.id !== g.id)
+    showToast('경기를 삭제했어요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '삭제하지 못했어요')
+  }
 }
 
-// 기존 장소로 계속하기
-const continueWithExistingLocation = () => {
-  showLocationConfirmModal.value = false
-  // set-region API 호출 없이 바로 사진 촬영으로 이동
-  showCameraModal.value = true
-}
+// ---------- 경기 시작: 장소 → 인증샷(선택) → 확인 ----------
 
-// 장소 변경하기
-const changeLocation = () => {
-  showLocationConfirmModal.value = false
-  openAddressModal()
-}
-
-// 장소 직접 입력: 지역(시·도, 구) + 장소 이름. Google 키가 없어도 경기를 시작할 수 있어야 한다
+const startGame = ref(null)
+const showPlaceConfirm = ref(false)
+const showPlaceForm = ref(false)
+const showCameraModal = ref(false)
+const showStartConfirm = ref(false)
+const capturedPhotoFile = ref(null)
+const searchQuery = ref('')
+const detailedPlace = ref('')
+const selectedPlace = ref(null)
+const placeInput = ref(null)
 const manualRegion1 = ref('')
 const manualRegion2 = ref('')
 const region1Options = Object.keys(regionMap).filter((r) => r !== '전국')
@@ -896,181 +318,120 @@ const canSubmitPlace = computed(
   () => !!selectedPlace.value || !!(manualRegion1.value && manualRegion2.value && searchQuery.value.trim()),
 )
 
-const submitAndStartGame = async () => {
-  if (!selectedPlace.value) {
-    if (!canSubmitPlace.value) return alert('지역과 장소 이름을 입력해주세요.')
-    selectedPlace.value = {
-      name: searchQuery.value.trim(),
-      address: `${manualRegion1.value} ${manualRegion2.value}`,
-    }
-  }
+const startMessage = computed(() => {
+  const dur = startGame.value?.rule?.duration
+  const time = !dur || dur < 0 ? '시간 제한 없이' : `${Math.floor(dur / 60) ? Math.floor(dur / 60) + '분 ' : ''}${dur % 60 ? (dur % 60) + '초 ' : ''}동안`
+  return `${time} 진행돼요. 시작하면 상대에게도 바로 보여요.`
+})
 
-  // Google API 장소 이름과 상세 장소를 공백으로 합침
-  const combinedDetailAddress = detailedPlace.value
-    ? `${selectedPlace.value.name} ${detailedPlace.value}`
-    : selectedPlace.value.name
+function openStart(game) {
+  startGame.value = game
+  if (game.matchLocation && game.matchLocation.trim()) showPlaceConfirm.value = true
+  else openPlaceForm()
+}
 
-  await client.post(`/api/games/${currentGameId.value}/set-region`, {
-    roadAddress: selectedPlace.value.address,
-    detailAddress: combinedDetailAddress,
+function openPlaceForm() {
+  showPlaceConfirm.value = false
+  searchQuery.value = ''
+  detailedPlace.value = ''
+  selectedPlace.value = null
+  manualRegion1.value = ''
+  showPlaceForm.value = true
+  nextTick(initGoogleAutocomplete)
+}
+
+// Google 장소 자동완성 (키가 있을 때만). 고르면 지역까지 자동으로 정해진다
+function initGoogleAutocomplete() {
+  const el = placeInput.value?.el
+  if (!window.google?.maps?.places || !el) return
+  const ac = new window.google.maps.places.Autocomplete(el, {
+    componentRestrictions: { country: 'kr' },
+    fields: ['formatted_address', 'name', 'geometry'],
+    types: ['establishment', 'geocode'],
   })
+  ac.addListener('place_changed', () => {
+    const p = ac.getPlace()
+    const parsed = p.formatted_address && parseRegion(p.formatted_address)
+    if (!parsed) return showToast('지역을 알 수 없는 주소예요. 지역을 직접 골라주세요')
+    selectedPlace.value = { name: p.name || '', address: parsed.fullAddress }
+  })
+}
 
-  showAddressModal.value = false
+function clearSelection() {
+  selectedPlace.value = null
+  searchQuery.value = ''
+}
+
+async function submitPlace() {
+  const placeInfo = selectedPlace.value || {
+    name: searchQuery.value.trim(),
+    address: `${manualRegion1.value} ${manualRegion2.value}`,
+  }
+  busy.value = true
+  try {
+    await api.post(`/api/games/${startGame.value.id}/set-region`, {
+      roadAddress: placeInfo.address,
+      detailAddress: detailedPlace.value ? `${placeInfo.name} ${detailedPlace.value}` : placeInfo.name,
+    })
+    showPlaceForm.value = false
+    goCamera()
+  } catch (e) {
+    showToast(e.response?.data?.message || '장소를 저장하지 못했어요')
+  } finally {
+    busy.value = false
+  }
+}
+
+function goCamera() {
+  showPlaceConfirm.value = false
+  capturedPhotoFile.value = null
   showCameraModal.value = true
 }
 
-const onPhotoCapture = (photoFile) => {
-  capturedPhotoFile.value = photoFile
+function onPhotoCapture(file) {
+  capturedPhotoFile.value = file
   showCameraModal.value = false
-
-  const game = myGames.value.find((g) => g.id === currentGameId.value)
-  const dur = game?.rule?.duration
-
-  if (dur === -1) {
-    countdownDurationText.value = '제한 없음'
-  } else {
-    const min = Math.floor(dur / 60)
-    const sec = dur % 60
-    countdownDurationText.value = (min ? `${min}분 ` : '') + (sec ? `${sec}초` : '')
-  }
-  showCountdownModal.value = true
+  showStartConfirm.value = true
 }
 
-const onCameraCancel = () => {
-  showCameraModal.value = false
-  capturedPhotoFile.value = null
-}
-
-const confirmStartGame = async () => {
+async function confirmStart() {
+  busy.value = true
   try {
-    // 인증샷은 선택. 찍었으면 함께 보낸다
-    const formData = new FormData()
-    if (capturedPhotoFile.value) formData.append('photo', capturedPhotoFile.value)
-
-    await client.post(`/api/games/${currentGameId.value}/start`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-
-    router.push(`/games/${currentGameId.value}/play`)
-    showCountdownModal.value = false
+    const form = new FormData()
+    if (capturedPhotoFile.value) form.append('photo', capturedPhotoFile.value)
+    await api.post(`/api/games/${startGame.value.id}/start`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
+    showStartConfirm.value = false
+    router.push(`/games/${startGame.value.id}/play`)
   } catch (e) {
-    alert('경기 시작 실패: ' + (e.response?.data?.message ?? e.message))
+    showToast(e.response?.data?.message || '경기를 시작하지 못했어요')
+  } finally {
+    busy.value = false
   }
 }
 
-const closeModal = () => {
-  showAddressModal.value = false
-  searchQuery.value = ''
-  selectedPlace.value = null
-  detailedPlace.value = ''
-  currentGameId.value = null
-}
-
-// 게임 타입별 카드 스타일 (심플/플랫)
-function getCardClass(game) {
-  if (game.type === 'sent') {
-    return 'border-gray-800 hover:border-blue-300 hover:shadow-md'
-  } else if (game.type === 'my-game') {
-    // 시작 가능한 게임은 초록색 강조
-    if (game.isOwner && canStart(game)) {
-      return 'border-green-400 shadow-md shadow-green-100'
-    }
-    return 'border-gray-800 hover:border-orange-300 hover:shadow-md'
-  }
-  return 'border-gray-800'
-}
-
-// 타입 텍스트 색상
-function getTypeTextClass(game) {
-  if (game.type === 'sent') {
-    return 'text-blue-600'
-  } else if (game.type === 'my-game') {
-    if (game.isOwner && canStart(game)) {
-      return 'text-green-600'
-    }
-    return 'text-orange-600'
-  }
-  return 'text-gray-400'
-}
-
-// 타입 라벨
-function getTypeLabel(game) {
-  if (game.type === 'sent') return '신청한 경기'
-  if (game.type === 'my-game') {
-    if (game.isOwner && canStart(game)) return '시작 가능'
-    return '내 경기'
-  }
-  return '경기'
-}
-
-// 경기 삭제 관련
-function openDeleteModal(game) {
-  gameToDelete.value = game
-  showDeleteModal.value = true
-}
-
-async function confirmDeleteGame() {
-  if (!gameToDelete.value) return
-
+// iOS 앱의 네이티브 카메라는 결과를 전역 콜백으로 돌려준다
+async function handleNativeCamera(base64Image) {
   try {
-    await client.delete(`/api/games/${gameToDelete.value.id}/delete`)
-
-    // 목록에서 제거
-    myGames.value = myGames.value.filter((g) => g.id !== gameToDelete.value.id)
-
-    showToast('경기가 삭제되었습니다.')
-    showDeleteModal.value = false
-    gameToDelete.value = null
-  } catch (e) {
-    if (e.response?.status === 403) {
-      showToast('본인이 생성한 경기만 삭제할 수 있습니다.')
-    } else if (e.response?.status === 404) {
-      showToast('존재하지 않는 경기입니다.')
-    } else {
-      showToast('경기 삭제에 실패했습니다.')
-    }
-    console.error('Failed to delete game:', e)
+    onPhotoCapture(dataUrlToFile(await compressImage(base64Image), 'camera-photo.jpg'))
+  } catch {
+    showToast('사진을 저장하지 못했어요')
   }
 }
 
-// 규칙 모달 관련
-function openRuleDetail(game) {
-  selectedGame.value = game
-}
+// ---------- 시작·정리 ----------
 
-function closeRuleDetail() {
-  selectedGame.value = null
-}
-
-// 뒤로가기는 열린 모달부터 닫는다
-useBackClose(showApplicantsModal, showLocationConfirmModal, showAddressModal, showAddressErrorModal, showCameraModal, showDeleteModal)
+let stopWatching = null
+onMounted(async () => {
+  window.onCameraResult = handleNativeCamera
+  window.onGameViewCameraResult = handleNativeCamera
+  api.get('/api/user-profile/0').then(({ data }) => (me.value = { id: data.id, name: data.nickname, avatar: data.avatar })).catch(() => {})
+  await fetchGames()
+  // 신청·승인·시작·종료 신호가 오거나 앱으로 돌아왔을 때 다시 불러온다
+  stopWatching = refreshOnChange(fetchGames)
+})
+onBeforeUnmount(() => {
+  stopWatching?.()
+  if (window.onCameraResult === handleNativeCamera) window.onCameraResult = null
+  if (window.onGameViewCameraResult === handleNativeCamera) window.onGameViewCameraResult = null
+})
 </script>
-
-<style scoped>
-
-.highlight-orange {
-  animation: highlight-orange-fade 1s cubic-bezier(0.49, 0.38, 0.27, 1.18);
-}
-@keyframes highlight-orange-fade {
-  0% {
-    background: rgba(249,115,22,.3);
-  }
-  40% {
-    background: rgba(249,115,22,.4);
-  }
-  70% {
-    background: rgba(249,115,22,.4);
-  }
-  100% {
-    background: #171717;
-  }
-}
-</style>
-
-<style>
-.pac-container {
-  z-index: 100010 !important;
-}
-</style>

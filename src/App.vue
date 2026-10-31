@@ -182,9 +182,10 @@ const goToPendingReview = () => {
   }
 }
 
-// 진행 중 경기 띠: 경기·결과 화면에 있거나 평가 창이 떠 있으면 숨긴다
+// 진행 중 경기 띠: 경기·결과·내 경기 화면에 있거나 평가 창이 떠 있으면 숨긴다
+// 내 경기 화면은 카드에 이미 '경기로 돌아가기'가 있어서 띠를 띄우지 않는다
 const showActiveBanner = computed(
-  () => !showPendingReviewModal.value && !/^\/games\/\d+\/(play|result)/.test(route.path),
+  () => !showPendingReviewModal.value && route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path),
 )
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)

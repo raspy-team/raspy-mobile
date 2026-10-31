@@ -52,5 +52,5 @@ defineProps({
 })
 const emit = defineEmits(['update:modelValue', 'enter'])
 const inputRef = ref(null)
-defineExpose({ focus: () => inputRef.value?.focus() })
+defineExpose({ focus: () => inputRef.value?.focus(), el: inputRef })
 </script>

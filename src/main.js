@@ -37,7 +37,23 @@ window.addEventListener(
 const { showToast } = useToast()
 window.alert = (msg) => showToast(msg)
 
-createApp(App)
+const app = createApp(App)
+
+// 운영 에러 추적. VITE_SENTRY_DSN이 있을 때만 켠다
+// 켤 때만 불러와서 첫 화면 번들에 싣지 않는다
+if (import.meta.env.VITE_SENTRY_DSN) {
+  import('@sentry/vue').then((Sentry) =>
+    Sentry.init({
+      app,
+      dsn: import.meta.env.VITE_SENTRY_DSN,
+      environment: import.meta.env.MODE,
+      integrations: [Sentry.browserTracingIntegration({ router })],
+      tracesSampleRate: 0.1,
+    }),
+  )
+}
+
+app
   .use(router) 
   .directive('autocomplete', autocomplete)
   .mount('#app')

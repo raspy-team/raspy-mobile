@@ -377,55 +377,13 @@
 
           <!-- Fullscreen review modal -->
           <transition name="modal-fade">
-            <div
+            <ReviewTextModal
               v-if="showReviewModal"
-              class="fixed inset-0 z-[60]"
-            >
-              <!-- 블러 배경 -->
-              <div class="absolute inset-0 bg-black/90 backdrop-blur-md" @click="showReviewModal = false"></div>
-
-              <!-- 모달 컨텐츠 -->
-              <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden flex flex-col max-h-[85vh]">
-                <!-- 헤더 -->
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gray-800/80 ">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center">
-                      <i class="fas fa-comment-dots text-gray-400"></i>
-                    </div>
-                    <span class="font-bold text-lg text-white">상대방 리뷰</span>
-                  </div>
-                  <button
-                    @click="showReviewModal = false"
-                    class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all flex items-center justify-center"
-                  >
-                    <i class="fas fa-times text-sm"></i>
-                  </button>
-                </div>
-
-                <!-- 텍스트 영역 -->
-                <div class="flex-1 p-5 overflow-y-auto">
-                  <textarea
-                    v-model="review.text"
-                    class="w-full h-full min-h-[300px] text-base text-white focus:outline-none resize-none bg-transparent placeholder-gray-500"
-                    placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요..."
-                    autofocus
-                  ></textarea>
-                </div>
-
-                <!-- 푸터 -->
-                <div class="px-5 py-4 border-t border-gray-800 bg-gray-900/50">
-                  <div class="flex items-center justify-between text-xs text-gray-500">
-                    <span>{{ review.text?.length || 0 }}자</span>
-                    <button
-                      @click="showReviewModal = false"
-                      class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-medium transition-all"
-                    >
-                      완료
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+              v-model="review.text"
+              title="상대방 리뷰"
+              placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요"
+              @close="showReviewModal = false"
+            />
           </transition>
         </div>
 
@@ -480,55 +438,13 @@
 
           <!-- Fullscreen rule review modal -->
           <transition name="modal-fade">
-            <div
+            <ReviewTextModal
               v-if="showRuleReviewModal"
-              class="fixed inset-0 z-[60]"
-            >
-              <!-- 블러 배경 -->
-              <div class="absolute inset-0 bg-black/90 backdrop-blur-md" @click="showRuleReviewModal = false"></div>
-
-              <!-- 모달 컨텐츠 -->
-              <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden flex flex-col max-h-[85vh]">
-                <!-- 헤더 -->
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gray-800/80 ">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center">
-                      <i class="fas fa-comment-dots text-purple-400"></i>
-                    </div>
-                    <span class="font-bold text-lg text-white">규칙 평가 의견</span>
-                  </div>
-                  <button
-                    @click="showRuleReviewModal = false"
-                    class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all flex items-center justify-center"
-                  >
-                    <i class="fas fa-times text-sm"></i>
-                  </button>
-                </div>
-
-                <!-- 텍스트 영역 -->
-                <div class="flex-1 p-5 overflow-y-auto">
-                  <textarea
-                    v-model="ruleReview"
-                    class="w-full h-full min-h-[300px] text-base text-white focus:outline-none resize-none bg-transparent placeholder-gray-500"
-                    placeholder="규칙의 장단점, 개선할 점 등을 자유롭게 작성해주세요..."
-                    autofocus
-                  ></textarea>
-                </div>
-
-                <!-- 푸터 -->
-                <div class="px-5 py-4 border-t border-gray-800 bg-gray-900/50">
-                  <div class="flex items-center justify-between text-xs text-gray-500">
-                    <span>{{ ruleReview?.length || 0 }}자</span>
-                    <button
-                      @click="showRuleReviewModal = false"
-                      class="px-4 py-2 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-medium transition-all"
-                    >
-                      완료
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+              v-model="ruleReview"
+              title="규칙 평가 의견"
+              placeholder="규칙의 장단점, 개선할 점 등을 자유롭게 작성해주세요"
+              @close="showRuleReviewModal = false"
+            />
           </transition>
         </div>
 
@@ -619,6 +535,7 @@
 </template>
 
 <script setup>
+import ReviewTextModal from '../../components/game/ReviewTextModal.vue'
 import { useBackClose } from '../../composable/useBackClose'
 
 import { ref, onMounted, computed } from 'vue'

@@ -1,8 +1,7 @@
 <script setup>
-import { UiSkeleton } from '../../components/ui'
+import { UiAvatar, UiBadge, UiButton, UiDialog, UiEmptyState, UiIconButton, UiSkeleton } from '../../components/ui'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { refreshInbox } from '../../stores/inbox'
-import DefaultProfile from '../../assets/default.png'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { playWithMeTooAPI } from '../../api/api'
@@ -18,6 +17,13 @@ const currentUserId = ref(null)
 const roomId = ref('')
 const messages = ref([])
 const headerTop = ref(0)
+// 위(상대·도전 카드)와 아래(입력칸) 높이. 도전 카드 유무·글자 크기에 따라 달라서 직접 잰다
+const topRef = ref(null)
+const bottomRef = ref(null)
+const topHeight = ref(56)
+const bottomHeight = ref(64)
+const STATUS_TONE = { green: 'success', orange: 'primary', red: 'danger', gray: 'neutral', blue: 'neutral' }
+let sizeObserver = null
 
 const targetUserNickname = ref('')
 const targetUserProfileUrl = ref('')
@@ -65,6 +71,12 @@ const visibleMessages = computed(() => {
 })
 
 onMounted(async () => {
+  sizeObserver = new ResizeObserver(() => {
+    topHeight.value = topRef.value?.offsetHeight || 56
+    bottomHeight.value = bottomRef.value?.offsetHeight || 64
+  })
+  if (topRef.value) sizeObserver.observe(topRef.value)
+  if (bottomRef.value) sizeObserver.observe(bottomRef.value)
   try {
     const { data } = await api.post('/api/chat-room/dm-room', null, {
       params: { targetUserId },
@@ -130,6 +142,7 @@ function onEnter(e) {
 }
 
 onBeforeUnmount(() => {
+  sizeObserver?.disconnect()
   refreshInbox() // 나가면 메시지 배지를 다시 센다
   stopWatchingStatus?.()
   stopWatchingStatus = null
@@ -177,7 +190,6 @@ function formatDateOnly(ts) {
   const weekDay = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()]
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${weekDay})`
 }
-const defaultProfileUrl = DefaultProfile
 
 // 헤더 표시 조건을 계산하는 computed
 const headerInfo = computed(() => {
@@ -325,207 +337,50 @@ const closeErrorModal = () => {
 </script>
 
 <template>
-  <div class="overflow-hidden bg-gray-950">
-    <!-- 기본 네비게이션 헤더 -->
-    <div class="fixed left-0 w-full h-[83px] z-30" :style="{ top: `${headerTop}px` }">
-      <div
-        class="h-full flex items-center justify-between px-4 bg-gray-900 backdrop-blur-xl shadow-lg border-b border-white/10"
-      >
-        <div class="flex items-center gap-3">
-          <button
-            @click="goBack()"
-            class="text-gray-400 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-all duration-200 active:scale-95"
-          >
-            <i class="fas fa-chevron-left text-xl w-6 h-6 flex items-center justify-center"></i>
-          </button>
-          <div class="flex items-center gap-3 cursor-pointer" @click="goToProfile">
-            <div class="relative">
-              <img
-                :src="targetUserProfileUrl || defaultProfileUrl"
-                alt="상대방 프로필"
-                class="w-11 h-11 rounded-full border-2 border-orange-500/30 object-cover ring-2 ring-orange-500/20 shadow-lg"
-              />
+  <div class="overflow-hidden bg-canvas">
+    <!-- 위: 상대 + (있으면) 도전 카드. 키보드가 올라와도 화면 위에 붙어 있게 visualViewport 기준으로 둔다 -->
+    <div ref="topRef" class="fixed left-0 w-full z-header bg-canvas" :style="{ top: `${headerTop}px` }">
+      <header class="h-14 flex items-center gap-1 px-2 border-b border-line pt-safe box-content">
+        <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack()" />
+        <button type="button" class="flex items-center gap-3 min-w-0" @click="goToProfile">
+          <UiAvatar :src="targetUserProfileUrl" :name="targetUserNickname" size="sm" />
+          <span class="t-heading truncate">{{ targetUserNickname }}</span>
+        </button>
+      </header>
+
+      <!-- 도전 상태 -->
+      <div v-if="headerInfo.show" class="px-3 py-2 border-b border-line">
+        <div class="flex items-start gap-3">
+          <img
+            class="w-11 h-11 rounded-lg object-cover bg-surface-2 flex-shrink-0"
+            :src="`/category-picture/${challengeStatus?.minorCategory || '미분류'}.png`"
+            alt=""
+          />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <p class="t-body font-medium text-fg truncate">{{ challengeStatus?.ruleTitle || '경기' }}</p>
+              <UiBadge :tone="STATUS_TONE[headerInfo.statusColor] || 'neutral'">{{ headerInfo.title }}</UiBadge>
             </div>
-            <div class="flex flex-col py-3">
-              <span class="font-bold text-lg text-white">{{ targetUserNickname }}</span>
-            </div>
+            <p class="t-caption mt-0.5">{{ headerInfo.description }}</p>
           </div>
+        </div>
+
+        <div v-if="headerInfo.showActions" class="flex gap-2 mt-3">
+          <template v-if="headerInfo.actionType === 'accept_reject'">
+            <UiButton variant="secondary" size="sm" class="flex-1" @click="handleReject">거절</UiButton>
+            <UiButton size="sm" class="flex-1" @click="handleAccept">수락</UiButton>
+          </template>
+          <UiButton v-else-if="headerInfo.actionType === 'go_to_game'" size="sm" block icon="fas fa-play" @click="handleGoToGame">경기로 가기</UiButton>
+          <UiButton v-else-if="headerInfo.actionType === 'view_result'" variant="secondary" size="sm" block icon="fas fa-trophy" @click="handleViewResult">결과 보기</UiButton>
         </div>
       </div>
     </div>
 
-    <!-- 도전 상태 헤더 -->
+    <!-- 대화 -->
     <div
-      v-if="headerInfo.show"
-      class="fixed left-0 w-full z-20"
-      :style="{ top: `${headerTop + 70}px` }"
+      class="fixed top-0 left-0 w-full h-full px-3 bg-canvas"
+      :style="{ paddingTop: `${headerTop + topHeight}px`, paddingBottom: `${bottomHeight}px` }"
     >
-      <div class="mx-3 my-2">
-        <div
-          class=" bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
-        >
-          <!-- 상태 표시 헤더 바 -->
-          <div
-            class="h-1.5 w-full"
-            :class="{
-' bg-green-400':
- headerInfo.statusColor ==='green',
-' bg-orange-400':
- headerInfo.statusColor ==='orange',
-' bg-gray-500':
- headerInfo.statusColor ==='gray',
-' bg-blue-400':
- headerInfo.statusColor ==='blue',
-' bg-red-400':
- headerInfo.statusColor ==='red',
- }"
-          ></div>
-
-          <div class="p-4">
-            <!-- 메인 콘텐츠 영역 -->
-            <div class="flex items-start gap-4">
-              <!-- 경기 정보 카드 -->
-              <div
-                class="flex-shrink-0 relative group"
-                :class="{
-                  'animate-pulse': headerInfo.type === 'challenge_received',
-                }"
-              >
-                <div class="relative">
-                  <div
-                    class="absolute inset-0 bg-orange-500/20 rounded-xl blur-md"
-                  ></div>
-                  <img
-                    class="relative w-14 h-14 rounded-xl object-cover shadow-xl border-2 border-white/10"
-                    :src="`/category-picture/${challengeStatus?.minorCategory || '미분류'}.png`"
-                    :alt="challengeStatus?.minorCategory"
-                  />
-                  <!-- 상태 배지 -->
-                  <div
-                    class="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-gray-900 shadow-lg animate-pulse"
-                    :class="{
-' bg-green-400':
- headerInfo.statusColor ==='green',
-' bg-orange-400':
- headerInfo.statusColor ==='orange',
-' bg-gray-400':
- headerInfo.statusColor ==='gray',
-' bg-blue-400':
- headerInfo.statusColor ==='blue',
-' bg-red-400':
- headerInfo.statusColor ==='red',
- }"
-                  ></div>
-                </div>
-              </div>
-
-              <!-- 정보 및 상태 영역 -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between">
-                  <div class="flex-1 min-w-0">
-                    <!-- 경기 제목 -->
-                    <h3 class="text-base font-bold text-white truncate mb-1.5">
-                      {{ challengeStatus?.ruleTitle || '경기' }}
-                    </h3>
-
-                    <!-- 카테고리 -->
-                    <div class="flex items-center gap-1.5 mb-2.5">
-                      <span class="text-xs text-gray-400 font-medium">{{
-                        challengeStatus?.majorCategory || '스포츠'
-                      }}</span>
-                      <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                      <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary text-primary-on shadow-md"
-                      >
-                        {{ challengeStatus?.minorCategory || '경기' }}
-                      </span>
-                    </div>
-
-                    <!-- 상태 정보 -->
-                    <div class="space-y-1.5">
-                      <div class="flex items-center gap-2">
-                        <div
-                          class="w-2 h-2 rounded-full animate-pulse"
-                          :class="{
-                            'bg-green-400 shadow-lg shadow-green-500/50':
-                              headerInfo.statusColor === 'green',
-                            'bg-orange-400 shadow-lg shadow-orange-500/50':
-                              headerInfo.statusColor === 'orange',
-                            'bg-gray-400 shadow-lg shadow-gray-500/50':
-                              headerInfo.statusColor === 'gray',
-                            'bg-blue-400 shadow-lg shadow-blue-500/50':
-                              headerInfo.statusColor === 'blue',
-                            'bg-red-400 shadow-lg shadow-red-500/50':
-                              headerInfo.statusColor === 'red',
-                          }"
-                        ></div>
-                        <span class="text-sm font-medium text-white">{{ headerInfo.title }}</span>
-                      </div>
-                      <p class="text-xs text-gray-400 leading-relaxed pl-4">
-                        {{ headerInfo.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 액션 버튼들 -->
-            <div v-if="headerInfo.showActions" class="mt-4 pt-3 border-t border-white/10">
-              <!-- 수락/거절 버튼 (PENDING, 수신자) -->
-              <template v-if="headerInfo.actionType === 'accept_reject'">
-                <div class="flex gap-3">
-                  <button
-                    @click.stop="handleReject"
-                    class="flex-1 py-3 px-4 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/10 shadow-lg hover:shadow-xl active:scale-95"
-                  >
-                    <i class="fas fa-times mr-2"></i>
-                    거절
-                  </button>
-                  <button
-                    @click.stop="handleAccept"
-                    class="flex-1 py-3 px-4 bg-primary hover:bg-primary-press text-primary-on text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
-                  >
-                    <i class="fas fa-check mr-2"></i>
-                    수락
-                  </button>
-                </div>
-              </template>
-
-              <!-- 경기 바로가기 버튼 (ACCEPTED, 진행 중) -->
-              <template v-else-if="headerInfo.actionType === 'go_to_game'">
-                <button
-                  @click.stop="handleGoToGame"
-                  class="w-full py-3 px-4 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-green-500/50 active:scale-95 flex items-center justify-center gap-2"
-                >
-                  <i class="fas fa-gamepad"></i>
-                  경기 바로가기
-                </button>
-              </template>
-
-              <!-- 결과 보기 버튼 (ACCEPTED, COMPLETED) -->
-              <template v-else-if="headerInfo.actionType === 'view_result'">
-                <button
-                  @click.stop="handleViewResult"
-                  class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 active:scale-95 flex items-center justify-center gap-2"
-                >
-                  <i class="fas fa-trophy"></i>
-                  경기 결과 보기
-                </button>
-              </template>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 채팅 영역 -->
-    <div
-      style="height: 100%"
-      class="fixed top-0 left-0 w-full pb-[81px] px-3 z-10 bg-gray-950"
-      :style="{ paddingTop: `${headerTop + (headerInfo.show ? 190 : 70)}px` }"
-    >
-      <!-- 로딩 상태 -->
       <!-- 말풍선 모양 자리 표시 (주고받는 모양 그대로) -->
       <div v-if="isLoadingMessages" class="h-full flex flex-col justify-end gap-3 pb-4" role="status" aria-label="메시지 불러오는 중">
         <UiSkeleton
@@ -537,111 +392,63 @@ const closeErrorModal = () => {
         />
       </div>
 
-      <div v-else ref="chatBox" class="h-full overflow-auto space-y-3 pb-2">
-        <div v-if="visibleMessages.length > 0" class="flex justify-center py-4">
-          <div
-            class=" bg-orange-500/20 backdrop-blur-sm text-orange-400 rounded-full px-5 py-2 text-xs font-medium shadow-lg border border-orange-500/30"
-          >
-            대화의 첫 부분입니다
-          </div>
-        </div>
+      <div v-else-if="!visibleMessages.length" class="h-full flex items-center justify-center">
+        <UiEmptyState icon="far fa-comment" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="인사를 건네거나 경기 이야기를 해보세요" />
+      </div>
+
+      <div v-else ref="chatBox" class="h-full overflow-auto space-y-2 pb-2" role="log" aria-live="polite">
+        <p class="text-center t-micro py-4">대화의 시작이에요</p>
         <template v-for="(msg, idx) in visibleMessages" :key="msg._key">
-          <div v-if="shouldShowDate(idx, visibleMessages)" class="flex justify-center my-3">
-            <div
-              class="bg-gray-800/60 backdrop-blur-sm border border-white/10 px-4 py-1.5 rounded-full text-xs text-gray-300 shadow-lg font-medium"
-            >
-              {{ formatDateOnly(msg.timestamp) }}
+          <p v-if="shouldShowDate(idx, visibleMessages)" class="text-center t-micro py-2">{{ formatDateOnly(msg.timestamp) }}</p>
+
+          <template v-if="msg.messageType === 'TALK'">
+            <div v-if="msg.senderId === currentUserId" class="flex justify-end items-end gap-1.5 pl-12">
+              <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>
+              <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words">{{ msg.content }}</p>
             </div>
-          </div>
-          <div
-            class="flex px-2"
-            :class="msg.senderId === currentUserId ? 'justify-end' : 'justify-start'"
-          >
-            <template v-if="msg.messageType === 'TALK'">
-              <div v-if="msg.senderId === currentUserId" class="flex items-end gap-2 max-w-[75%]">
-                <span class="text-xs text-gray-500 mb-1">{{ formatTime(msg.timestamp) }}</span>
-                <div
-                  class="p-3.5 rounded-2xl break-words bg-primary text-primary-on rounded-br-md shadow-lg"
-                >
-                  <p class="whitespace-pre-line leading-relaxed text-sm">{{ msg.content }}</p>
-                </div>
-              </div>
-              <div
-                v-else
-                class="max-w-[75%] p-3.5 rounded-2xl break-words bg-gray-800 text-gray-100 rounded-bl-md shadow-lg border border-white/10"
-              >
-                <p class="whitespace-pre-line leading-relaxed text-sm">{{ msg.content }}</p>
-                <p class="text-xs mt-1.5 text-gray-400">
-                  {{ formatTime(msg.timestamp) }}
-                </p>
-              </div>
-            </template>
-            <template v-else>
-              <div
-                class="mx-auto bg-gray-800/50 backdrop-blur-sm px-3 py-1.5 rounded-lg text-gray-400 text-xs shadow-md border border-white/10"
-              >
-                {{ msg.content }}
-              </div>
-            </template>
-          </div>
+            <div v-else class="flex justify-start items-end gap-1.5 pr-12">
+              <p class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words">{{ msg.content }}</p>
+              <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>
+            </div>
+          </template>
+          <p v-else class="text-center t-micro py-1">{{ msg.content }}</p>
         </template>
       </div>
     </div>
 
-    <!-- 메시지 입력 영역 -->
-    <div
-      class="fixed bottom-0 w-full z-20 bg-gray-900 backdrop-blur-xl border-t border-white/10 shadow-2xl"
-    >
-      <div class="p-3 flex items-center gap-2">
-        <form @submit.prevent="sendMsg" class="flex items-center w-full gap-2">
-          <div class="flex-1 relative">
-            <textarea
-              ref="messageInput "
-              v-model="newMsg"
-              rows="1"
-              class="w-full resize-none bg-gray-800 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 text-white placeholder-gray-500 shadow-inner transition-all duration-200"
-              placeholder="메시지 보내기"
-              enterkeyhint="send"
-              aria-label="메시지"
-              @keydown.enter.exact="onEnter"
-            />
-          </div>
-          <button
-            type="submit"
-            aria-label="보내기"
-            @mousedown.prevent="keepFocus"
-            :disabled="!newMsg.trim()"
-            class="p-3 bg-primary text-primary-on rounded-full shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none"
-          >
-            <i class="fas fa-paper-plane text-lg w-6 h-6 flex items-center justify-center"></i>
-          </button>
-        </form>
-      </div>
+    <!-- 입력 -->
+    <div ref="bottomRef" class="fixed bottom-0 w-full z-header bg-canvas border-t border-line pb-safe">
+      <form class="px-3 py-2 flex items-end gap-2" @submit.prevent="sendMsg">
+        <textarea
+          v-model="newMsg"
+          rows="1"
+          class="ui-control py-3 resize-none flex-1"
+          placeholder="메시지 보내기"
+          enterkeyhint="send"
+          aria-label="메시지"
+          @keydown.enter.exact="onEnter"
+        />
+        <button
+          type="submit"
+          aria-label="보내기"
+          :disabled="!newMsg.trim()"
+          class="w-12 h-12 flex-shrink-0 rounded-full bg-primary text-primary-on flex items-center justify-center active:bg-primary-press disabled:bg-surface-2 disabled:text-fg-subtle transition-colors"
+          @mousedown.prevent="keepFocus"
+        >
+          <i class="fas fa-paper-plane" aria-hidden="true"></i>
+        </button>
+      </form>
     </div>
 
-    <!-- 에러 모달 -->
-    <div
-      v-if="showErrorModal"
-      class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-    >
-      <div
-        class=" bg-gray-900 border border-white/10 rounded-2xl shadow-2xl p-6 max-w-sm w-full"
-      >
-        <div class="text-center mb-5">
-          <div class="mb-4 relative inline-block">
-            <i class="fas fa-exclamation-triangle text-orange-500 text-5xl mb-3 relative"></i>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">알림</h3>
-          <p class="text-sm text-gray-300 leading-relaxed">{{ errorMessage }}</p>
-        </div>
-        <button
-          @click="closeErrorModal"
-          class="w-full bg-primary hover:bg-primary-press text-primary-on font-bold py-3.5 rounded-xl transition-all duration-200 shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 active:scale-95"
-        >
-          확인
-        </button>
-      </div>
-    </div>
+    <UiDialog
+      :model-value="showErrorModal"
+      title="메시지를 보낼 수 없어요"
+      :message="errorMessage"
+      confirm-text="돌아가기"
+      cancel-text=""
+      @confirm="closeErrorModal"
+      @update:model-value="(v) => !v && closeErrorModal()"
+    />
   </div>
 </template>
 

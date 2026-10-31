@@ -92,7 +92,7 @@
       <section class="mt-10">
         <div class="flex items-center justify-between mb-1">
           <h2 class="t-heading">많이 한 규칙</h2>
-          <UiButton v-if="stats.totalGames" size="sm" variant="ghost" class="-mr-2" @click="showStats = true">기록 자세히</UiButton>
+          <UiButton v-if="stats.totalGames" size="sm" variant="ghost" class="-mr-2" :to="`/profile/${user.id}/stats`">기록 자세히</UiButton>
         </div>
         <UiList v-if="user.top3Rules?.length">
           <UiListItem
@@ -104,9 +104,7 @@
             @click="router.push(`/rules/${r.ruleId}`)"
           >
             <template #leading>
-              <span class="w-11 h-11 rounded-xl bg-surface-2 flex items-center justify-center flex-shrink-0">
-                <img :src="`/category-picture/${r.minorCategory || '기타'}.png`" alt="" data-fallback="1" class="w-7 h-7" />
-              </span>
+              <RuleThumb :minor="r.minorCategory" />
             </template>
             <template #trailing>
               <UiBadge v-if="r.myRank" :tone="r.myRank === 1 ? 'primary' : 'neutral'">{{ r.myRank }}위 / {{ r.totalPlayers }}명</UiBadge>
@@ -193,28 +191,17 @@
     </UiSheet>
 
     <UserSearchModal v-if="showSearch" @close="showSearch = false" />
-    <StatsModal
-      v-if="showStats"
-      :stats="user.stats"
-      :nickname="user.nickname"
-      :play-time="user.playTime"
-      :my-champions="user.myChampions"
-      :manner="user.mannerScore"
-      :user-id="user.id"
-      @close="showStats = false"
-      @navigate-to-profile="goFriend"
-    />
   </div>
 </template>
 
 <script setup>
+import RuleThumb from '../../components/rule/RuleThumb.vue'
 // 프로필 (/profile/0 = 나, /profile/:id = 다른 사람)
 // 누구인지 → 숫자 한 줄 → 주 행동(나: 편집 / 남: 친구·메시지) → 챔피언 → 많이 한 규칙 → 최근 경기
 // 신고·차단·친구 끊기는 더보기 안에. 빈 값(나이·성별·지역 없음)은 보여주지 않는다
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import StatsModal from '../../components/StatsModal.vue'
 import UserSearchModal from '../../components/profile/UserSearchModal.vue'
 import {
   UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiListSkeleton,
@@ -251,7 +238,6 @@ const friendsOpen = ref(false)
 const friendsLoading = ref(false)
 const friends = ref([])
 const showSearch = ref(false)
-const showStats = ref(false)
 const highlightId = ref(Number(route.query.id) || null)
 const gameRefs = {}
 
@@ -344,7 +330,6 @@ async function openFriends() {
 }
 function goFriend(id) {
   friendsOpen.value = false
-  showStats.value = false
   router.push('/profile/' + id)
 }
 

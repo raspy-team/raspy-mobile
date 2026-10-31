@@ -103,6 +103,7 @@ const routes = [
     path: '/invite/:encodedUrl',
     component: InviteView,
   },
+  { path: '/profile/:id/stats', component: () => import('../views/profile/RecordView.vue') },
   { path: '/profile/:id', component: Profile },
 
   { path: '/settings', component:  Setting},

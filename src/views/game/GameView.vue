@@ -1,7 +1,9 @@
 <template>
-  <HeaderComp title="내 경기" />
+  <UiTopBar title="내 경기">
+    <template #right><InboxButtons /></template>
+  </UiTopBar>
 
-  <main class="px-4 pt-[72px] pb-32 max-w-xl mx-auto space-y-8">
+  <main class="px-4 pt-4 pb-32 max-w-xl mx-auto space-y-8">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
     <div v-if="loading" class="space-y-3">
@@ -54,9 +56,11 @@
         :key="a.userId"
         :title="a.applicantNickname"
         :subtitle="`${a.applicantGameStatisticsDTO?.ruleRating || 1500}점 · ${record(a.applicantGameStatisticsDTO)}`"
-        @click="router.push('/profile/' + a.userId)"
+        plain
       >
-        <template #leading><UiAvatar :src="a.applicantProfileUrl" :name="a.applicantNickname" size="sm" /></template>
+        <template #leading>
+          <button type="button" :aria-label="`${a.applicantNickname} 프로필`" @click="router.push('/profile/' + a.userId)"><UiAvatar :src="a.applicantProfileUrl" :name="a.applicantNickname" size="sm" /></button>
+        </template>
         <template #trailing>
           <UiButton v-if="a.approved" size="sm" variant="secondary" :loading="busy" @click.stop="cancelApproval(applicantsGame, a)">승인 취소</UiButton>
           <UiButton v-else size="sm" :disabled="hasApproved(applicantsGame)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
@@ -141,13 +145,13 @@
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
-import HeaderComp from '../../components/HeaderComp.vue'
+import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
 import MyGameCard from '../../components/game/MyGameCard.vue'
 import {
   UiAvatar, UiButton, UiCard, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
-  UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton,
+  UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton, UiTopBar
 } from '../../components/ui'
 import regionMap from '../../assets/regionMap.json'
 import { useToast } from '../../composable/useToast'

@@ -1,6 +1,7 @@
 <script setup>
 import { UiSkeleton } from '../../components/ui'
 import { refreshOnChange } from '../../websocket/userChannel'
+import { refreshInbox } from '../../stores/inbox'
 import DefaultProfile from '../../assets/default.png'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -69,6 +70,8 @@ onMounted(async () => {
     roomId.value = data.roomId
     socket.onMessage((msg) => {
       messages.value.push(msg)
+      // 보고 있는 방에 온 메시지는 바로 읽음으로 (목록·배지에 안 읽음으로 남지 않게)
+      if (msg.senderId !== currentUserId.value) api.post(`/api/chat-room/${roomId.value}/read`).catch(() => {})
       scrollToBottom()
       // 도전 신청·수락·거절은 이 방에 메시지로 온다. 그때 상태를 다시 불러온다
       if (msg.messageType === 'PLAY_WITH_ME_TOO') fetchChallengeStatus()
@@ -115,7 +118,15 @@ onMounted(async () => {
   }
 })
 
+// 엔터로 보내기 (줄바꿈은 Shift+엔터). 한글 조합 중의 엔터는 글자 확정이라 보내지 않는다
+function onEnter(e) {
+  if (e.isComposing || e.keyCode === 229) return
+  e.preventDefault()
+  sendMsg()
+}
+
 onBeforeUnmount(() => {
+  refreshInbox() // 나가면 메시지 배지를 다시 센다
   stopWatchingStatus?.()
   stopWatchingStatus = null
 
@@ -329,9 +340,6 @@ const closeErrorModal = () => {
                 alt="상대방 프로필"
                 class="w-11 h-11 rounded-full border-2 border-orange-500/30 object-cover ring-2 ring-orange-500/20 shadow-lg"
               />
-              <div
-                class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-gray-900 rounded-full"
-              ></div>
             </div>
             <div class="flex flex-col py-3">
               <span class="font-bold text-lg text-white">{{ targetUserNickname }}</span>
@@ -587,12 +595,15 @@ const closeErrorModal = () => {
               v-model="newMsg"
               rows="1"
               class="w-full resize-none bg-gray-800 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 text-white placeholder-gray-500 shadow-inner transition-all duration-200"
-              placeholder="메시지를 입력하세요..."
+              placeholder="메시지 보내기"
+              enterkeyhint="send"
+              aria-label="메시지"
+              @keydown.enter.exact="onEnter"
             />
           </div>
           <button
             type="submit"
-            @click="sendMsg"
+            aria-label="보내기"
             @mousedown.prevent="keepFocus"
             :disabled="!newMsg.trim()"
             class="p-3 bg-orange-500 text-white rounded-full shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none"

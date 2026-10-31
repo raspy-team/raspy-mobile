@@ -1,12 +1,7 @@
 <template>
-  <HeaderComp
-    :has-referer="true"
-    :show-bell="false"
-    :show-dm="false"
-    custom-class="bg-gray-900"
-  />
+  <UiTopBar title="경기 만들기" back />
 
-  <div class="pt-7 raspy-top h-full">
+  <div class="pt-2 h-full">
     <!-- 규칙은 /rules에서 고르고 돌아온다. 여기서는 상대만 정하면 경기가 열린다.
          장소·시간은 상대가 정해진 뒤 함께 정한다 (장소는 경기 시작 때 다시 고른다) -->
     <RuleSelectPage v-if="step === 2" @select="onRuleSelected" @back="goToRuleView" />
@@ -22,6 +17,7 @@ import RuleSelectPage from '../../components/game-create/RuleSelectPage.vue'
 import GameModeSelect from '../../components/game-create/GameModeSelect.vue'
 import GameFinalPage from '../../components/game-create/GameFinalPage.vue'
 import api from '../../api/api'
+import { UiTopBar } from '../../components/ui'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()

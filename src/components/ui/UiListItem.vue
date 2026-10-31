@@ -1,9 +1,10 @@
 <template>
   <component
-    :is="to ? 'router-link' : 'button'"
+    :is="to ? 'router-link' : plain ? 'div' : 'button'"
     :to="to"
-    :type="to ? undefined : 'button'"
-    class="w-full flex items-center gap-3 px-4 min-h-[56px] py-3 text-left active:bg-surface-2 transition-colors"
+    :type="to || plain ? undefined : 'button'"
+    class="w-full flex items-center gap-3 px-4 min-h-[56px] py-3 text-left transition-colors"
+    :class="{ 'active:bg-surface-2': !plain }"
   >
     <slot name="leading">
       <i v-if="icon" class="w-5 text-center" :class="[icon, danger ? 'text-danger-fg' : 'text-fg-muted']" aria-hidden="true"></i>
@@ -28,5 +29,7 @@ defineProps({
   to: { type: [String, Object], default: null },
   chevron: { type: Boolean, default: false },
   danger: { type: Boolean, default: false },
+  // 줄 안에 버튼이 따로 있을 때: 줄 자체는 누를 수 없게 (버튼 안에 버튼이 들어가지 않게)
+  plain: { type: Boolean, default: false },
 })
 </script>

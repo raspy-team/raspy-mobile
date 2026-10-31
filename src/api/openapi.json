@@ -27,6 +27,51 @@
     }
   ],
   "paths": {
+    "/api/notification-settings/{category}": {
+      "put": {
+        "tags": [
+          "Notification"
+        ],
+        "summary": "알림 설정 바꾸기",
+        "description": "끄면 그 종류의 휴대폰 푸시를 보내지 않는다. 앱 안 알림 목록에는 남는다",
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GAME",
+                "CHALLENGE",
+                "FRIEND",
+                "FRIEND_ACTIVITY",
+                "RULE",
+                "COMMENT",
+                "LIKE",
+                "DM"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/login/oauth2/apple/notify": {
       "post": {
         "tags": [
@@ -433,6 +478,21 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/notifications/read-all": {
+      "post": {
+        "tags": [
+          "Notification"
+        ],
+        "summary": "알림 모두 읽음",
+        "description": "최근 일주일 알림을 모두 읽음으로 바꿉니다.",
+        "operationId": "markAllAsRead",
         "responses": {
           "200": {
             "description": "OK"
@@ -1159,6 +1219,32 @@
             "schema": {
               "type": "integer",
               "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/chat-room/{roomId}/read": {
+      "post": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "summary": "DM 읽음 표시",
+        "description": "열어 둔 방에서 새 메시지를 받았을 때 여기까지 읽었다고 적는다",
+        "operationId": "markRead",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -2334,6 +2420,31 @@
         }
       }
     },
+    "/api/notification-settings": {
+      "get": {
+        "tags": [
+          "Notification"
+        ],
+        "summary": "알림 설정 목록",
+        "description": "종류별 푸시 켜기·끄기 상태. 기본은 모두 켜짐",
+        "operationId": "getSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SettingDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/media/{id}": {
       "get": {
         "tags": [
@@ -3160,6 +3271,32 @@
         }
       }
     },
+    "/api/chat-room/unread-count": {
+      "get": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "summary": "안 읽은 DM 수",
+        "description": "모든 DM 방의 안 읽은 메시지 합. 탭 배지용",
+        "operationId": "unreadCount",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat-room/my-dm-rooms": {
       "get": {
         "tags": [
@@ -3518,6 +3655,17 @@
   },
   "components": {
     "schemas": {
+      "UpdateRequest": {
+        "required": [
+          "enabled"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
       "Unit": {
         "type": "object"
       },
@@ -5845,6 +5993,39 @@
           }
         }
       },
+      "SettingDto": {
+        "required": [
+          "category",
+          "description",
+          "enabled",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "GAME",
+              "CHALLENGE",
+              "FRIEND",
+              "FRIEND_ACTIVITY",
+              "RULE",
+              "COMMENT",
+              "LIKE",
+              "DM"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
       "InvitedGameResponse": {
         "required": [
           "id",
@@ -6820,6 +7001,7 @@
           "id",
           "isCompleted",
           "isFriend",
+          "isLiked",
           "isMyGame",
           "meta",
           "photos",
@@ -6886,6 +7068,9 @@
           "likeCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "isLiked": {
+            "type": "boolean"
           },
           "commentCount": {
             "type": "integer",
@@ -7092,7 +7277,8 @@
       "DmRoomPreviewDto": {
         "required": [
           "targetUserId",
-          "targetUserNickname"
+          "targetUserNickname",
+          "unreadCount"
         ],
         "type": "object",
         "properties": {
@@ -7112,6 +7298,10 @@
           "lastMessageTimestamp": {
             "type": "string",
             "format": "date-time"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

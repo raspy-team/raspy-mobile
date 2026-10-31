@@ -1,14 +1,14 @@
 <template>
   <div
     v-if="modalVisible"
-    class="fixed inset-0 z-[123123912] flex items-end justify-center bg-black/50 raspy-top"
+    class="fixed inset-0 z-sheet flex items-end justify-center bg-black/50 raspy-top"
     @click.self="closeModal"
   >
     <transition name="slide-up" @after-leave="afterLeave">
       <div
         v-show="showModal"
         ref="sheet"
-        class="w-full raspy-bot max-w-md flex flex-col rounded-t-2xl bg-gray-800 shadow-xl"
+        class="w-full raspy-bot max-w-md flex flex-col rounded-t-2xl bg-surface shadow-xl"
         :style="{
           height: `${sheetHeight}px`,
           display: 'flex',
@@ -20,7 +20,7 @@
         @mousedown="onMouseDown"
       >
         <!-- 드래그바 -->
-        <div class="mx-auto mt-2 mb-2 w-10 h-1.5 rounded bg-gray-600" />
+        <div class="mx-auto mt-2 mb-2 w-10 h-1.5 rounded bg-line-strong" />
 
         <!-- 댓글 리스트 영역 -->
         <div
@@ -51,13 +51,16 @@
               @img-click="onImagePreview"
             />
           </template>
-          <p v-else class="text-gray-300 text-center text-base mt-16">아직 댓글이 없습니다.</p>
+          <div v-else class="text-center mt-16 px-6">
+            <p class="t-heading">아직 댓글이 없어요</p>
+            <p class="t-caption mt-1">첫 댓글로 응원이나 한마디를 남겨보세요</p>
+          </div>
         </div>
 
         <!-- 입력창 (항상 바텀) -->
         <form
           @submit.prevent="submitInput"
-          class="flex gap-2 items-center border-t border-gray-600 pt-2 pb-2 px-3 bg-gray-800"
+          class="flex gap-2 items-center border-t border-line pt-2 pb-2 px-3 bg-surface"
           ref="inputForm"
           :style="{
             minHeight: `${inputAreaHeight}px`,
@@ -65,7 +68,7 @@
           }"
         >
           <div
-            class="flex items-center flex-1 min-w-0 bg-gray-700 rounded-full px-3 py-2 focus-within:bg-gray-800 focus-within:border-gray-600 transition border"
+            class="flex items-center flex-1 min-w-0 bg-surface-2 rounded-full px-3 py-2 focus-within:bg-surface focus-within:border-line transition border"
           >
             <span
               v-if="replyingToId"
@@ -89,7 +92,7 @@
           <button
             type="button"
             @click="triggerImageInput"
-            class="text-gray-400 px-2 flex items-center justify-center"
+            class="text-fg-muted px-2 flex items-center justify-center"
             style="height: 38px; width: 38px"
             title="사진첨부"
           >
@@ -98,7 +101,7 @@
           <button
             type="submit"
             :disabled="!canSubmit || isLoading"
-           class="px-4 py-2 rounded-full text-white bg-orange-500 disabled:bg-gray-600 font-bold text-base transition flex items-center justify-center"
+           class="px-4 py-2 rounded-full text-white bg-primary disabled:bg-line-strong font-bold text-base transition flex items-center justify-center"
             style="height: 38px"
           >
             게시
@@ -115,17 +118,17 @@
         <!-- 입력 이미지 프리뷰 (있을 때만) -->
         <div
           v-if="inputImagePreview"
-          class="flex items-center gap-2 px-4 pt-1 pb-2 bg-gray-800 border-t border-gray-600"
+          class="flex items-center gap-2 px-4 pt-1 pb-2 bg-surface border-t border-line"
         >
           <img :src="inputImagePreview" class="w-14 h-14 rounded-lg object-cover border" />
-          <button @click="removeInputImage" type="button" class="text-gray-400 hover:text-red-400">
+          <button @click="removeInputImage" type="button" class="text-fg-muted hover:text-red-400">
             <i class="fas fa-times text-lg"></i>
           </button>
         </div>
         <!-- 이미지 확대 모달 -->
         <div
           v-if="previewImg"
-          class="fixed inset-0 z-[999] flex items-center justify-center bg-black/80"
+          class="fixed inset-0 z-dialog flex items-center justify-center bg-black/80"
           @click="previewImg = null"
         >
           <img :src="previewImg" class="max-h-[80vh] max-w-full rounded-xl shadow-lg" />

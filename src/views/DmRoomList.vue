@@ -1,190 +1,111 @@
 <template>
-  <div class="bg-gray-950 min-h-screen">
-    <HeaderComp
-      :has-referer="true"
-      title="메시지"
-      :show-bell="false"
-      :show-dm="false"
-      custom-class=" bg-gray-900 backdrop-blur-xl border-b border-white/10"
-    />
-    <div class="w-full px-10 mx-auto pt-14 pb-24">
-      <!-- 로딩 상태 -->
-      <UiListSkeleton v-if="loading" :rows="6" class="px-4" />
+  <div class="min-h-dvh bg-canvas">
+    <UiTopBar title="메시지" back>
+      <template #right>
+        <UiIconButton icon="fas fa-pen-to-square" label="새 메시지" @click="openFriends" />
+      </template>
+    </UiTopBar>
 
-      <!-- DM 없음 상태 -->
-      <div v-else-if="dmList.length === 0" class="flex flex-col items-center justify-center py-32">
-        <div class="relative mb-6">
-          <div
-            class="relative bg-gray-800 p-8 rounded-full border border-white/10 shadow-2xl"
-          >
-            <i class="fas fa-comment-dots text-5xl text-orange-400"></i>
-          </div>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-2">메시지가 없습니다</h3>
-        <p class="text-sm text-gray-400">새로운 대화를 시작해보세요</p>
-      </div>
+    <main class="max-w-2xl mx-auto px-4 pb-16">
+      <UiPullIndicator :pull="pull" :refreshing="refreshing" />
+      <UiListSkeleton v-if="loading" :rows="6" />
 
-      <!-- DM 리스트 -->
-      <div v-else class="mt-6 -mx-4 w-full">
-        <div
-          v-for="(dm, index) in dmList"
-          :key="dm.targetUserId"
-          @click="goToChat(dm.targetUserId)"
-          class="relative w-full active:bg-white/5 transition-colors duration-150"
-        >
-          <!-- 메인 콘텐츠 -->
-          <div class="flex w-full items-center py-4 gap-4 px-4">
-            <!-- 프로필 이미지 -->
-            <div class="relative flex-shrink-0">
-              <img
-                :src="dm.targetUserProfileUrl || defaultProfileUrl"
-                class="w-14 h-14 rounded-full object-cover"
-                :alt="dm.targetUserNickname"
-              />
-              <!-- 온라인 상태 표시 -->
-              <div
-                class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-gray-950 rounded-full"
-              ></div>
-            </div>
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" title="메시지를 불러오지 못했어요" description="잠시 뒤 다시 시도해주세요">
+        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+      </UiEmptyState>
 
-            <!-- 메시지 정보 -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-baseline justify-between mb-1">
-                <h3 class="font-bold text-white text-base truncate">
-                  {{ dm.targetUserNickname }}
-                </h3>
-                <span class="text-xs text-gray-500 ml-3 flex-shrink-0">
-                  {{ relativeTime(dm.lastMessageTimestamp) }}
+      <UiEmptyState v-else-if="!rooms.length" class="pt-16" icon="far fa-paper-plane" title="아직 주고받은 메시지가 없어요" description="경기 약속을 잡거나 친구에게 먼저 말을 걸어보세요">
+        <UiButton @click="openFriends">친구에게 메시지 보내기</UiButton>
+      </UiEmptyState>
+
+      <ul v-else class="ui-appear">
+        <li v-for="dm in rooms" :key="dm.targetUserId">
+          <button type="button" class="w-full flex items-center gap-3 py-3 text-left rounded-lg -mx-2 px-2 active:bg-surface-2 transition-colors" @click="router.push(`/chat/${dm.targetUserId}`)">
+            <UiAvatar :src="dm.targetUserProfileUrl" :name="dm.targetUserNickname" size="md" />
+            <span class="flex-1 min-w-0">
+              <span class="flex items-baseline gap-2">
+                <span class="flex-1 truncate" :class="dm.unreadCount ? 't-heading' : 't-body'">{{ dm.targetUserNickname }}</span>
+                <span class="t-micro flex-shrink-0">{{ dm.lastMessageTimestamp ? timeAgo(dm.lastMessageTimestamp) : '' }}</span>
+              </span>
+              <span class="flex items-center gap-2 mt-0.5">
+                <span class="flex-1 truncate text-sm" :class="dm.unreadCount ? 'text-fg' : 'text-fg-muted'">{{ dm.lastMessageContent || '대화를 시작해보세요' }}</span>
+                <span v-if="dm.unreadCount" class="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-fg text-xs font-bold leading-5 text-center flex-shrink-0" :aria-label="`안 읽은 메시지 ${dm.unreadCount}개`">
+                  {{ dm.unreadCount > 99 ? '99+' : dm.unreadCount }}
                 </span>
-              </div>
-              <p v-if="dm.lastMessageContent" class="text-sm text-gray-400 truncate">
-                {{ dm.lastMessageContent }}
-              </p>
-              <p v-else class="text-sm text-gray-400 italic">메시지를 보내보세요</p>
-            </div>
+              </span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </main>
 
-            <!-- 화살표 표시 (옵션) -->
-            <i class="fas fa-chevron-right text-gray-400 text-sm flex-shrink-0"></i>
-          </div>
-
-          <!-- 구분선 (마지막 아이템 제외) -->
-          <div
-            v-if="index < dmList.length - 1"
-            class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent ml-[72px] mr-4"
-          ></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 에러 토스트 -->
-    <transition name="slide-down">
-      <div v-if="showError" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-sm w-auto">
-        <div
-          class=" bg-red-600 text-white px-6 py-3 rounded-2xl shadow-2xl border border-red-500/50 backdrop-blur-xl"
-        >
-          <div class="flex items-center gap-3">
-            <i class="fas fa-exclamation-circle text-xl"></i>
-            <span class="font-medium">{{ errorMessage }}</span>
-          </div>
-        </div>
-      </div>
-    </transition>
+    <!-- 새 메시지: 친구 고르기 -->
+    <UiSheet v-model="friendsOpen" title="누구에게 보낼까요?">
+      <UiListSkeleton v-if="friendsLoading" :rows="4" />
+      <UiList v-else-if="friends.length">
+        <UiListItem v-for="f in friends" :key="f.id" :title="f.nickname" :subtitle="`@${f.username}`" chevron @click="startChat(f.id)">
+          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" size="sm" /></template>
+        </UiListItem>
+      </UiList>
+      <UiEmptyState v-else icon="fas fa-user-group" title="아직 친구가 없어요" description="경기를 함께한 사람의 프로필에서 메시지를 보낼 수 있어요" />
+    </UiSheet>
   </div>
 </template>
 
 <script setup>
-import { UiListSkeleton } from '../components/ui'
-import { ref, onMounted } from 'vue'
+// 메시지 목록: 안 읽은 방은 굵게 + 개수. 새 메시지가 오면(서버 신호) 다시 불러온다
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/api/api'
-import HeaderComp from '@/components/HeaderComp.vue'
-import DefaultProfile from '@/assets/default.png'
+import api from '../api/api'
+import {
+  UiAvatar, UiButton, UiEmptyState, UiIconButton, UiList, UiListItem, UiListSkeleton, UiPullIndicator, UiSheet, UiTopBar,
+} from '../components/ui'
+import { usePullToRefresh } from '../composables/usePullToRefresh'
+import { refreshInbox } from '../stores/inbox'
+import { timeAgo } from '../utils/format'
+import { refreshOnChange } from '../websocket/userChannel'
 
 const router = useRouter()
-const dmList = ref([])
+const rooms = ref([])
 const loading = ref(true)
-const defaultProfileUrl = DefaultProfile
+const error = ref(false)
+const friendsOpen = ref(false)
+const friendsLoading = ref(false)
+const friends = ref([])
 
-const showError = ref(false)
-const errorMessage = ref('')
-
-async function fetchDmList() {
-  loading.value = true
+async function load() {
+  error.value = false
   try {
-    const res = await api.get('/api/chat-room/my-dm-rooms')
-    dmList.value = res.data
-  } catch (e) {
-    dmList.value = []
-    errorMessage.value = 'DM 목록을 불러올 수 없습니다'
-    showError.value = true
-    setTimeout(() => {
-      showError.value = false
-    }, 3000)
+    rooms.value = (await api.get('/api/chat-room/my-dm-rooms')).data
+  } catch {
+    error.value = true
+  } finally {
+    loading.value = false
   }
-  loading.value = false
+}
+const { pull, refreshing } = usePullToRefresh(load)
+
+async function openFriends() {
+  friendsOpen.value = true
+  friendsLoading.value = true
+  try {
+    friends.value = (await api.get('/api/friends/my', { params: { userId: 0 } })).data
+  } catch {
+    friends.value = []
+  } finally {
+    friendsLoading.value = false
+  }
+}
+function startChat(id) {
+  friendsOpen.value = false
+  router.push(`/chat/${id}`)
 }
 
-function goToChat(userId) {
-  router.push(`/chat/${userId}`)
-}
-
-function relativeTime(date) {
-  if (!date) return ''
-  const now = new Date()
-  const target = new Date(date)
-  const diff = (now - target) / 1000
-  if (diff < 60) return '방금 전'
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`
-  return target.toLocaleDateString('ko-KR')
-}
-
-onMounted(fetchDmList)
+let stop = null
+onMounted(() => {
+  load()
+  refreshInbox()
+  stop = refreshOnChange(load)
+})
+onBeforeUnmount(() => stop?.())
 </script>
-
-<style scoped>
-/* 커스텀 스크롤바 - 다크모드 */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(107, 114, 128, 0.3);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.5);
-}
-
-/* 토스트 애니메이션 */
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.slide-down-enter-from {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-20px);
-}
-
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-20px);
-}
-
-/* 버튼 활성화 효과 */
-.active\:scale-98:active {
-  transform: scale(0.98);
-}
-
-/* 부드러운 스크롤 */
-* {
-  scroll-behavior: smooth;
-}
-</style>

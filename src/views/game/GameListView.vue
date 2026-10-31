@@ -1,7 +1,9 @@
 <template>
-  <HeaderComp title="경기" />
+  <UiTopBar title="경기">
+    <template #right><InboxButtons /></template>
+  </UiTopBar>
 
-  <main class="px-4 pt-[72px] pb-32 max-w-xl mx-auto">
+  <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
     <!-- 첫 설정을 막 마친 사람에게 한 번 -->
@@ -124,13 +126,13 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import HeaderComp from '../../components/HeaderComp.vue'
+import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import Comment from '../GameCommentView.vue'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
-  UiPullIndicator, UiSection, UiSheet, UiSkeleton,
+  UiPullIndicator, UiSection, UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'

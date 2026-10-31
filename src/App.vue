@@ -42,6 +42,7 @@ import FooterNav from './components/FooterNav.vue'
 import CustomToast from './components/CustomToast.vue'
 import UiConfirmHost from './components/ui/UiConfirmHost.vue'
 import RouteProgress from './components/RouteProgress.vue'
+import { startInbox } from './stores/inbox'
 import UiDialog from './components/ui/UiDialog.vue'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
@@ -109,6 +110,7 @@ onMounted(() => {
     // 로그인된 사용자면 게임 폴링 시작
     if (token) {
       startPolling(() => route.fullPath)
+      startInbox()
       // 하루 최초 접속 API 호출
       checkAndSendDailyFirst()
     }
@@ -220,13 +222,9 @@ watch(
 
     let roomId = false
 
-    if (chatUrl) {
-      const chatId = await chatUrl[1]
-      const { data } = await api.post('/api/chat-room/dm-room', null, {
-        params: { chatId },
-      })
-      roomId = data.roomId
-    } else if (gameUrl) {
+    // 채팅 화면은 스스로 방을 만들고 연결한다 (여기서 끊으면 채팅 연결이 끊긴다)
+    if (chatUrl) return
+    if (gameUrl) {
       const gameId = await gameUrl[1]
       const res = await api.get(`/api/games/${gameId}/detail`)
 

@@ -107,6 +107,8 @@ const routes = [
   { path: '/profile/:id', component: Profile },
 
   { path: '/settings', component:  Setting},
+  { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
+  { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/rules', component:  Rule},
   { path: '/rules/create', component: RuleCreate},
   { path: '/rules/my-rules', component: MyRules},

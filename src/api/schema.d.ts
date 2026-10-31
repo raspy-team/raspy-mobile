@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/notification-settings/{category}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 알림 설정 바꾸기
+         * @description 끄면 그 종류의 휴대폰 푸시를 보내지 않는다. 앱 안 알림 목록에는 남는다
+         */
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login/oauth2/apple/notify": {
         parameters: {
             query?: never;
@@ -246,6 +266,26 @@ export interface paths {
          * @description 특정 알림을 읽음 상태로 처리합니다.
          */
         post: operations["markAsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 알림 모두 읽음
+         * @description 최근 일주일 알림을 모두 읽음으로 바꿉니다.
+         */
+        post: operations["markAllAsRead"];
         delete?: never;
         options?: never;
         head?: never;
@@ -630,6 +670,26 @@ export interface paths {
          * @description 해당 댓글에 싫어요 추가
          */
         post: operations["dislikeComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat-room/{roomId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * DM 읽음 표시
+         * @description 열어 둔 방에서 새 메시지를 받았을 때 여기까지 읽었다고 적는다
+         */
+        post: operations["markRead"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1268,6 +1328,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notification-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 알림 설정 목록
+         * @description 종류별 푸시 켜기·끄기 상태. 기본은 모두 켜짐
+         */
+        get: operations["getSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/media/{id}": {
         parameters: {
             query?: never;
@@ -1748,6 +1828,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat-room/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 안 읽은 DM 수
+         * @description 모든 DM 방의 안 읽은 메시지 합. 탭 배지용
+         */
+        get: operations["unreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat-room/my-dm-rooms": {
         parameters: {
             query?: never;
@@ -1972,6 +2072,9 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        UpdateRequest: {
+            enabled: boolean;
+        };
         Unit: Record<string, never>;
         RuleDto: {
             ruleGoal: string;
@@ -2689,6 +2792,13 @@ export interface components {
             createdAt: string;
             isRead: boolean;
         };
+        SettingDto: {
+            /** @enum {string} */
+            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM";
+            label: string;
+            description: string;
+            enabled: boolean;
+        };
         InvitedGameResponse: {
             /** Format: int64 */
             id: number;
@@ -3012,6 +3122,7 @@ export interface components {
             isCompleted: boolean;
             /** Format: int32 */
             likeCount?: number;
+            isLiked: boolean;
             /** Format: int32 */
             commentCount: number;
             isMyGame: boolean;
@@ -3081,6 +3192,8 @@ export interface components {
             lastMessageContent?: string;
             /** Format: date-time */
             lastMessageTimestamp?: string;
+            /** Format: int32 */
+            unreadCount: number;
         };
         BodyBuilder: Record<string, never>;
         OnboardingStatus: {
@@ -3146,6 +3259,30 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     notify: {
         parameters: {
             query?: never;
@@ -3444,6 +3581,24 @@ export interface operations {
             path: {
                 id: number;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    markAllAsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -3956,6 +4111,26 @@ export interface operations {
             header?: never;
             path: {
                 commentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    markRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: string;
             };
             cookie?: never;
         };
@@ -4821,6 +4996,26 @@ export interface operations {
             };
         };
     };
+    getSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SettingDto"][];
+                };
+            };
+        };
+    };
     get: {
         parameters: {
             query?: never;
@@ -5375,6 +5570,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ChatMessage"][];
+                };
+            };
+        };
+    };
+    unreadCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: number;
+                    };
                 };
             };
         };

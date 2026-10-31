@@ -8,7 +8,7 @@
   >
     <!-- 신고 버튼 (우측 상단) -->
     <button
-      class="absolute text-red-500 text-xs right-0 top-2 z-10 text-gray-300 hover:text-orange-500 p-1"
+      class="absolute text-red-500 text-xs right-0 top-2 z-10 text-fg-muted hover:text-primary p-1"
       @click.stop="openReportModal"
       title="댓글 신고"
     >
@@ -19,7 +19,7 @@
     <router-link :to="`/profile/${comment.author.id}`" class="w-9 h-9 flex-shrink-0" tabindex="-1">
       <img
         :src="comment.author.profileImageUrl || defaultProfile"
-        class="w-9 h-9 rounded-full object-cover bg-gray-700 border"
+        class="w-9 h-9 rounded-full object-cover bg-surface-2 border"
         alt="profile"
       />
     </router-link>
@@ -32,10 +32,10 @@
         >
           {{ comment.author.nickname }}
         </router-link>
-        <span class="text-gray-400 text-xs select-none">
+        <span class="text-fg-muted text-xs select-none">
           {{ timeAgo(comment.createdAt) }}
         </span>
-        <span v-if="comment.editedAt" class="text-xs text-gray-400 ml-1">(수정됨)</span>
+        <span v-if="comment.editedAt" class="text-xs text-fg-muted ml-1">(수정됨)</span>
         <span v-if="comment.deleted" class="text-xs text-red-400 ml-1">[삭제됨]</span>
       </div>
       <div class="whitespace-pre-wrap break-all text-base mt-1 leading-snug">
@@ -54,7 +54,7 @@
           @click="emitImgClick(comment.imageUrl)"
         />
       </div>
-      <div class="flex items-center gap-2 mt-2 text-gray-500 text-sm">
+      <div class="flex items-center gap-2 mt-2 text-fg-subtle text-sm">
         <button
           class="focus:outline-none transition flex items-center justify-center"
           style="height: 26px; width: 26px"
@@ -63,7 +63,7 @@
           <i
             :class="[
               'fa-heart fa-lg align-middle',
-              comment.myLikeType === 'LIKE' ? 'fas text-pink-500' : 'far text-gray-400',
+              comment.myLikeType === 'LIKE' ? 'fas text-pink-500' : 'far text-fg-muted',
             ]"
           ></i>
         </button>
@@ -106,7 +106,7 @@
           @click.stop
         >
           <div class="font-bold text-lg mb-2 text-white">댓글 신고하기</div>
-          <div class="text-gray-500 text-sm mb-3 leading-snug">
+          <div class="text-fg-subtle text-sm mb-3 leading-snug">
             신고는 <b>24시간 내에 처리</b>되며, 신고해주셔서 감사합니다.
           </div>
           <textarea
@@ -126,7 +126,7 @@
           >
             {{ reportLoading ? '신고 중...' : '신고하기' }}
           </button>
-          <button @click.stop="closeReportModal" class="w-full mt-2 text-gray-400 text-sm">
+          <button @click.stop="closeReportModal" class="w-full mt-2 text-fg-muted text-sm">
             취소
           </button>
           <p v-if="reportError" class="text-red-500 mt-2 text-sm text-center">{{ reportError }}</p>

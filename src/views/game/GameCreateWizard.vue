@@ -1,132 +1,159 @@
 <template>
-  <UiTopBar title="경기 만들기" back />
+  <div>
+    <UiTopBar title="경기 만들기" back />
 
-  <div class="pt-2 h-full">
-    <!-- 규칙은 /rules에서 고르고 돌아온다. 여기서는 상대만 정하면 경기가 열린다.
-         장소·시간은 상대가 정해진 뒤 함께 정한다 (장소는 경기 시작 때 다시 고른다) -->
-    <RuleSelectPage v-if="step === 2" @select="onRuleSelected" @back="goToRuleView" />
-    <GameModeSelect v-if="step === 3" @mode="onModeSelect" :is-contest="isContest" />
-    <GameFinalPage v-if="step === 6" :game="gameForm" />
+    <main class="px-4 pt-4 pb-12 max-w-xl mx-auto">
+      <!-- 열렸어요: 서버가 만든 뒤에만 보인다 -->
+      <section v-if="created" class="pt-16 text-center ui-appear">
+        <span class="mx-auto w-14 h-14 rounded-full bg-primary-soft text-primary flex items-center justify-center text-2xl" aria-hidden="true">
+          <i class="fas fa-check"></i>
+        </span>
+        <h1 class="t-title mt-5">경기가 열렸어요</h1>
+        <p class="t-caption mt-2">
+          {{ friend ? `${friend.nickname}님에게 알렸어요. 장소와 시간은 내 경기에서 함께 정해요.` : '신청이 오면 알려드려요. 내 경기에서 승인하고 장소와 시간을 정해요.' }}
+        </p>
+        <UiButton block size="lg" class="mt-10" to="/game">내 경기 보기</UiButton>
+      </section>
+
+      <!-- 누구와 -->
+      <template v-else>
+        <UiCard v-if="rule" class="flex items-center gap-3 mb-8">
+          <span class="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center text-fg-muted flex-shrink-0" aria-hidden="true">
+            <i class="fas fa-trophy"></i>
+          </span>
+          <div class="flex-1 min-w-0">
+            <p class="t-micro">규칙</p>
+            <p class="t-heading truncate">{{ rule.ruleTitle }}</p>
+          </div>
+          <UiButton variant="ghost" size="sm" @click="router.push('/rules?fromGameCreate=true')">바꾸기</UiButton>
+        </UiCard>
+
+        <h1 class="t-title">누구와 겨룰까요?</h1>
+        <p class="t-caption mt-1 mb-5">장소와 시간은 상대가 정해진 뒤 함께 정해요.</p>
+
+        <div class="space-y-2">
+          <button
+            v-for="opt in OPTIONS"
+            :key="opt.value"
+            type="button"
+            class="w-full flex items-center gap-4 p-4 rounded-xl bg-surface border border-line text-left active:bg-surface-2 disabled:opacity-50"
+            :disabled="creating"
+            @click="opt.value === 'anyone' ? create(null) : (friendsOpen = true)"
+          >
+            <span class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-fg-muted flex-shrink-0" aria-hidden="true">
+              <i :class="opt.icon"></i>
+            </span>
+            <span class="flex-1 min-w-0">
+              <span class="block t-heading">{{ opt.title }}</span>
+              <span class="block t-caption mt-0.5">{{ opt.description }}</span>
+            </span>
+            <UiSpinner v-if="creating && opt.value === 'anyone' && !friend" size="sm" label="여는 중" />
+            <i v-else class="fas fa-chevron-right text-fg-subtle" aria-hidden="true"></i>
+          </button>
+        </div>
+      </template>
+    </main>
+
+    <!-- 친구 고르기 -->
+    <UiSheet v-model="friendsOpen" title="누구와 할까요?">
+      <UiInput v-model="q" icon="fas fa-magnifying-glass" placeholder="닉네임이나 아이디" class="mb-3" />
+      <UiListSkeleton v-if="friendsLoading" :rows="4" />
+      <UiEmptyState
+        v-else-if="!friends.length"
+        icon="fas fa-user-group"
+        title="아직 친구가 없어요"
+        description="'아무나'로 열거나, 경기를 한 상대에게 친구 요청을 보내보세요"
+      />
+      <UiEmptyState v-else-if="!filteredFriends.length" icon="fas fa-magnifying-glass" title="찾는 친구가 없어요" />
+      <UiList v-else>
+        <UiListItem
+          v-for="f in filteredFriends"
+          :key="f.id"
+          :title="f.nickname"
+          :subtitle="'@' + f.username"
+          :disabled="creating"
+          @click="create(f)"
+        >
+          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" size="sm" /></template>
+        </UiListItem>
+      </UiList>
+    </UiSheet>
   </div>
-
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import RuleSelectPage from '../../components/game-create/RuleSelectPage.vue'
-import GameModeSelect from '../../components/game-create/GameModeSelect.vue'
-import GameFinalPage from '../../components/game-create/GameFinalPage.vue'
-import api from '../../api/api'
-import { UiTopBar } from '../../components/ui'
+// 경기 만들기: 규칙은 /rules에서 고르고 돌아온다. 여기서는 상대(아무나 / 친구)만 정하면 경기가 열린다.
+// 장소·시간은 상대가 정해진 뒤 내 경기에서 함께 정한다
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import api from '../../api/api'
+import { useToast } from '../../composable/useToast'
+import { haptic } from '../../utils/haptics'
+import {
+  UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
+} from '../../components/ui'
+
 const route = useRoute()
 const router = useRouter()
+const { showToast } = useToast()
 
-const step = ref(1)
+const OPTIONS = [
+  { value: 'anyone', icon: 'fas fa-users', title: '아무나', description: '경기 목록에 올려서 신청을 받아요' },
+  { value: 'friend', icon: 'fas fa-user-group', title: '친구와', description: '친구 한 명과 바로 경기를 잡아요' },
+]
 
-const gameForm = reactive({
-  ruleId: null,
-  friendId: null,
-  placeRoad: '',
-  placeDetail: '',
-  time: '',
+const ruleId = Number(route.query.ruleId)
+const rule = ref(null)
+const friend = ref(null)
+const creating = ref(false)
+const created = ref(false)
+
+const friendsOpen = ref(false)
+const friendsLoading = ref(false)
+const friends = ref([])
+const q = ref('')
+const filteredFriends = computed(() => {
+  const k = q.value.trim().toLowerCase()
+  if (!k) return friends.value
+  return friends.value.filter((f) => f.nickname?.toLowerCase().includes(k) || f.username?.toLowerCase().includes(k))
 })
 
-const isContest = ref(false)
+async function create(target) {
+  if (creating.value) return
+  creating.value = true
+  friend.value = target
+  try {
+    const payload = { referencedRuleId: ruleId, friendId: target?.id ?? null }
+    await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
+    friendsOpen.value = false
+    created.value = true
+    haptic('success')
+  } catch (e) {
+    friend.value = null
+    showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 시도해 주세요')
+  } finally {
+    creating.value = false
+  }
+}
+
+async function loadFriends() {
+  friendsLoading.value = true
+  try {
+    friends.value = (await api.get('/api/friends/my')).data || []
+  } catch {
+    showToast('친구 목록을 불러오지 못했어요')
+  } finally {
+    friendsLoading.value = false
+  }
+}
 
 onMounted(() => {
-  // 최초 마운트 시 쿼리 파라미터 체크
-  const ruleId = route.query.ruleId
-  const contest = route.query.contest
-
-  if (contest === 'true') {
-    isContest.value = true
+  // 규칙 없이 들어오면 규칙부터 고른다
+  if (!ruleId) {
+    router.replace('/rules?fromGameCreate=true')
+    return
   }
-
-  if (ruleId && !isNaN(Number(ruleId))) {
-    gameForm.ruleId = Number(ruleId)
-    step.value = 3 // GameModeSelect로 바로 이동
-  } else {
-    // ruleId가 없으면 바로 RuleView로 이동
-    router.push('/rules?fromGameCreate=true')
-  }
+  api.get(`/api/rules/${ruleId}`).then(({ data }) => (rule.value = data)).catch(() => {})
+  loadFriends()
 })
-
-function goToRuleView() {
-  router.push('/rules?fromGameCreate=true')
-}
-
-function onRuleSelected(rule) {
-  gameForm.ruleId = rule.id
-  step.value = 3 // GameModeSelect로 이동
-}
-
-/**
- *
- * @param mode friend game일 땐 friend의 userId가 넘어온다.
- */
-function onModeSelect(mode) {
-  if (mode != 'random') {
-    // 친구를 선택한 경우: friendId만 저장하고 다음 단계로 진행
-    gameForm.friendId = mode // mode는 userId임
-  } else {
-    // 건너뛰기를 선택한 경우: friendId는 null로 유지
-    gameForm.friendId = null
-  }
-  // 장소·시간은 비워서 연다: 장소는 프로필 지역으로 표시되고, 시간은 '시간 미정'
-  gameForm.placeRoad = null
-  gameForm.placeDetail = null
-  gameForm.time = null
-  step.value = 6 // GameFinalPage로 이동
-  createGame()
-}
-
-async function createGame() {
-  try {
-    const payload = {
-      referencedRuleId: gameForm.ruleId,
-      friendId: gameForm.friendId,
-      placeRoad: gameForm.placeRoad,
-      placeDetail: gameForm.placeDetail,
-      matchDate: gameForm.time,
-    }
-
-    // friendId가 있으면 친구와의 경기 생성, 없으면 일반 경기 생성
-    const endpoint = gameForm.friendId
-      ? '/api/games/create-friend-game'
-      : '/api/games/create'
-
-    const gameIdRes = await api.post(endpoint, payload)
-    return gameIdRes.data
-  } catch (e) {
-    alert('경기 생성 실패: ' + (e.response?.data?.message ?? e.message))
-  }
-}
-
 </script>
-
-<style scoped>
-.raspy-top {
-  background: #262626;
-}
-
-.progress-bar-outer {
-  width: 92dvw;
-  height: 7px;
-  background: #737373;
-  border-radius: 5px;
-  overflow: hidden;
-  position: fixed;
-  top: 8%;
-  z-index: 100;
-  margin: 0px 4dvw;
-  box-sizing: border-box;
-  transition: background 0.3s;
-}
-.progress-bar-inner {
-  height: 100%;
-  background: linear-gradient(90deg, #ff8521 70%, #ff681c 100%);
-  border-radius: 5px 0 0 5px;
-  transition: width 0.25s cubic-bezier(0.6, 0, 0.3, 1);
-}
-</style>

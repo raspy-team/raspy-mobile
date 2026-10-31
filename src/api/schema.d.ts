@@ -936,6 +936,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/reports/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 신고 처리 완료 (관리자 전용)
+         * @description 같은 대상에 들어온 처리 전 신고를 모두 처리한 것으로 표시합니다.
+         */
+        post: operations["resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/access/daily-first": {
         parameters: {
             query?: never;
@@ -2052,6 +2072,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 신고 목록 (관리자 전용)
+         * @description 최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.
+         */
+        get: operations["list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/leave": {
         parameters: {
             query?: never;
@@ -2988,6 +3028,7 @@ export interface components {
             onboarded: boolean;
             username: string;
             nickname: string;
+            isAdmin: boolean;
         };
         AdminUserResponse: {
             /** Format: int64 */
@@ -3036,6 +3077,26 @@ export interface components {
             id: number;
             nickname: string;
             email: string;
+        };
+        AdminReportResponse: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            targetType: "GAME" | "COMMENT" | "RULE" | "USER";
+            /** Format: int64 */
+            targetId: number;
+            targetLabel?: string;
+            targetPath?: string;
+            reason: string;
+            /** Format: date-time */
+            reportedAt: string;
+            /** Format: int64 */
+            reporterId: number;
+            reporterNickname: string;
+            /** Format: date-time */
+            handledAt?: string;
+            /** Format: int32 */
+            sameTargetCount: number;
         };
     };
     responses: never;
@@ -4249,6 +4310,28 @@ export interface operations {
         };
     };
     approveEditRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    resolve: {
         parameters: {
             query?: never;
             header?: never;
@@ -5633,6 +5716,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["EditRequestDetailResponse"][];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminReportResponse"][];
                 };
             };
         };

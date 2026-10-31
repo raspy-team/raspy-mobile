@@ -1,24 +1,24 @@
 <template>
   <div
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-dialog p-4 overflow-y-auto"
     @click.self="$emit('close')"
   >
-    <div class="bg-white rounded-2xl max-w-6xl w-full my-8 max-h-[90vh] overflow-y-auto">
+    <div class="bg-surface rounded-2xl max-w-6xl w-full my-8 max-h-[90vh] overflow-y-auto">
       <!-- 헤더 -->
-      <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10 rounded-t-2xl">
+      <div class="sticky top-0 bg-surface border-b border-line px-6 py-4 z-10 rounded-t-2xl">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">규칙 수정 내용 비교</h2>
-            <p class="text-sm text-gray-600 mt-1">
+            <h2 class="text-2xl font-bold text-fg">규칙 수정 내용 비교</h2>
+            <p class="text-sm text-fg-muted mt-1">
               <i class="fas fa-user mr-1"></i>
               {{ request.requestedBy?.nickname || '알 수 없음' }} · {{ formatDate(request.createdAt) }}
             </p>
           </div>
           <button
             @click="$emit('close')"
-            class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+            class="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-2 transition"
           >
-            <i class="fas fa-times text-xl text-gray-600"></i>
+            <i class="fas fa-times text-xl text-fg-muted"></i>
           </button>
         </div>
       </div>
@@ -27,8 +27,8 @@
       <div class="p-6 space-y-6">
         <!-- 로딩 상태 -->
         <div v-if="loading" class="text-center py-12">
-          <i class="fas fa-spinner fa-spin text-3xl text-orange-500 mb-3"></i>
-          <p class="text-gray-600">원본 규칙 로딩 중...</p>
+          <i class="fas fa-spinner fa-spin text-3xl text-primary mb-3"></i>
+          <p class="text-fg-muted">원본 규칙 로딩 중...</p>
         </div>
 
         <!-- 상태 배지 -->
@@ -42,10 +42,10 @@
             {{ getStatusText(request.status) }}
           </span>
           <div class="flex gap-2">
-            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
+            <span class="px-3 py-1 bg-surface-2 text-fg-muted rounded-lg text-sm font-medium">
               {{ request.majorCategory || '-' }}
             </span>
-            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium">
+            <span class="px-3 py-1 bg-surface-2 text-fg-muted rounded-lg text-sm font-medium">
               {{ request.minorCategory || '-' }}
             </span>
           </div>
@@ -54,12 +54,12 @@
         <!-- 거절 사유 (거절된 경우) -->
         <div
           v-if="request.status === 'REJECTED' && request.rejectionReason"
-          class="bg-red-50 border-2 border-red-200 rounded-xl p-4"
+          class="bg-danger-soft border-2 border-danger rounded-xl p-4"
         >
-          <p class="text-sm font-medium text-red-700 mb-2">
+          <p class="text-sm font-medium text-danger-fg mb-2">
             <i class="fas fa-exclamation-circle mr-1"></i>거절 사유
           </p>
-          <p class="text-sm text-red-600">{{ request.rejectionReason }}</p>
+          <p class="text-sm text-danger-fg">{{ request.rejectionReason }}</p>
         </div>
 
         <!-- 필드별 비교 -->
@@ -187,33 +187,33 @@
       <!-- 액션 버튼 (대기 중인 경우) -->
       <div
         v-if="!loading && request.status === 'PENDING'"
-        class="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex gap-3 rounded-b-2xl"
+        class="sticky bottom-0 bg-surface border-t border-line px-6 py-4 flex gap-3 rounded-b-2xl"
       >
         <button
           @click="$emit('close')"
-          class="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+          class="flex-1 py-3 bg-surface-2 text-fg font-semibold rounded-xl active:bg-surface-2 transition"
         >
           닫기
         </button>
         <button
           @click="openRejectModal"
-          class="flex-1 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition"
+          class="flex-1 py-3 bg-danger text-white font-bold rounded-xl transition"
         >
           <i class="fas fa-times mr-1"></i>거절
         </button>
         <button
           @click="openApproveModal"
-          class="flex-1 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition"
+          class="flex-1 py-3 bg-primary text-white font-bold rounded-xl transition"
         >
           <i class="fas fa-check mr-1"></i>승인
         </button>
       </div>
 
       <!-- 닫기 버튼 (승인/거절된 경우 또는 로딩 완료) -->
-      <div v-if="!loading && request.status !== 'PENDING'" class="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+      <div v-if="!loading && request.status !== 'PENDING'" class="sticky bottom-0 bg-surface border-t border-line px-6 py-4">
         <button
           @click="$emit('close')"
-          class="w-full py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+          class="w-full py-3 bg-surface-2 text-fg font-semibold rounded-xl active:bg-surface-2 transition"
         >
           닫기
         </button>
@@ -226,22 +226,22 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
       @click.self="closeApproveModal"
     >
-      <div class="bg-white rounded-2xl p-6 max-w-md w-full">
-        <h3 class="text-xl font-bold text-gray-900 mb-3">수정 요청 승인</h3>
-        <p class="text-gray-600 mb-6">
+      <div class="bg-surface rounded-2xl p-6 max-w-md w-full">
+        <h3 class="text-xl font-bold text-fg mb-3">수정 요청 승인</h3>
+        <p class="text-fg-muted mb-6">
           이 수정 요청을 승인하시겠습니까?<br />
           승인 즉시 원본 규칙에 변경사항이 반영됩니다.
         </p>
         <div class="flex gap-3">
           <button
             @click="closeApproveModal"
-            class="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+            class="flex-1 py-3 bg-surface-2 text-fg font-semibold rounded-xl active:bg-surface-2 transition"
           >
             취소
           </button>
           <button
             @click="confirmApprove"
-            class="flex-1 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition"
+            class="flex-1 py-3 bg-primary text-white font-bold rounded-xl transition"
           >
             승인
           </button>
@@ -255,26 +255,26 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
       @click.self="closeRejectModal"
     >
-      <div class="bg-white rounded-2xl p-6 max-w-md w-full">
-        <h3 class="text-xl font-bold text-gray-900 mb-3">수정 요청 거절</h3>
-        <p class="text-gray-600 mb-4">거절 사유를 입력해주세요.</p>
+      <div class="bg-surface rounded-2xl p-6 max-w-md w-full">
+        <h3 class="text-xl font-bold text-fg mb-3">수정 요청 거절</h3>
+        <p class="text-fg-muted mb-4">거절 사유를 입력해주세요.</p>
         <textarea
           v-model="rejectionReason"
-          class="w-full border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
+          class="w-full border border-line-strong rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
           rows="4"
           placeholder="예: 규칙 내용이 부적절합니다."
         ></textarea>
         <div class="flex gap-3 mt-4">
           <button
             @click="closeRejectModal"
-            class="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
+            class="flex-1 py-3 bg-surface-2 text-fg font-semibold rounded-xl active:bg-surface-2 transition"
           >
             취소
           </button>
           <button
             @click="confirmReject"
             :disabled="!rejectionReason.trim()"
-            class="flex-1 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-1 py-3 bg-danger text-white font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             거절
           </button>
@@ -317,13 +317,13 @@ onMounted(async () => {
 function getStatusClass(status) {
   switch (status) {
     case 'PENDING':
-      return 'bg-yellow-100 text-yellow-700'
+      return 'bg-primary-soft text-primary-fg'
     case 'APPROVED':
-      return 'bg-green-100 text-green-700'
+      return 'bg-success-soft text-success-fg'
     case 'REJECTED':
-      return 'bg-red-100 text-red-700'
+      return 'bg-danger-soft text-danger-fg'
     default:
-      return 'bg-gray-100 text-gray-700'
+      return 'bg-surface-2 text-fg'
   }
 }
 

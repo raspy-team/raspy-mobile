@@ -1,135 +1,54 @@
 <template>
-    <Header :has-referer="true" title="그룹 계정 생성" />
-  <div class="flex">
-    <!-- 왼쪽: 브랜드 타이틀 & 소개 -->
-    <div class="hidden lg:flex w-1/2 bg-[#191919] items-center justify-center">
-      <div class="text-center space-y-8 px-8">
-        <span class="raspy">RASPY</span>
-        <p class="brand-desc">그룹 계정을 생성하세요</p>
-      </div>
-    </div>
-    <!-- 오른쪽: 회원가입 폼 -->
-    <div class="flex flex-col w-full lg:w-1/2 items-center justify-center bg-white px-6 lg:px-24">
-      <div class="w-full max-w-md space-y-6">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">유저 생성하기</h2>
-        <form @submit.prevent="handleRegister" class="space-y-5">
-          <div>
-            <label class="block mb-1 text-sm font-medium text-gray-700">아이디</label>
-            <input v-model="email" type="text" placeholder="raspyinc"
-              class="w-full px-5 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--point-color)] transition"
-              :class="{ 'border-red-500': emailError }" />
-            <p v-if="emailError" class="text-red-500 text-sm mt-1">{{ emailError }}</p>
-          </div>
-          <div>
-            <label class="block mb-1 text-sm font-medium text-gray-700">비밀번호</label>
-            <input v-model="password" type="text" placeholder="8~20자 입력"
-              class="w-full px-5 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--point-color)] transition"
-              :class="{ 'border-red-500': passwordError }" />
-            <p v-if="passwordError" class="text-red-500 text-sm mt-1">{{ passwordError }}</p>
-          </div>
-          <button type="submit"
-            class="w-full bg-[var(--point-color)] hover:bg-opacity-90 text-white py-3 rounded-lg font-semibold shadow-md transition duration-200">
-            회원가입
-          </button>
-          <p v-if="submitError" class="text-center text-red-500 text-sm mt-3 animate-fade">
-            {{ submitError }}
-          </p>
-        </form>
-      </div>
-    </div>
+  <div>
+    <UiTopBar title="그룹 계정 만들기" back="/admin" />
+
+    <main class="px-4 pt-4 pb-12 max-w-xl mx-auto">
+      <p class="t-caption mb-6">운영진이 나눠줄 계정을 만들어요. 받은 사람은 이 아이디와 비밀번호로 로그인해요.</p>
+      <form class="space-y-5" @submit.prevent="handleRegister">
+        <UiInput v-model="email" label="아이디" placeholder="raspyinc" :maxlength="50" :error="emailError" />
+        <UiInput v-model="password" label="비밀번호" placeholder="8~20자" :maxlength="20" hint="받은 사람에게 그대로 전해주세요" :error="passwordError" />
+        <p v-if="submitError" class="text-sm text-danger-fg" role="alert">{{ submitError }}</p>
+        <UiButton type="submit" block size="lg" :loading="submitting">계정 만들기</UiButton>
+      </form>
+    </main>
   </div>
 </template>
 
 <script setup>
+// 관리자가 그룹(단체) 계정을 만든다. 서버가 관리자만 허용한다
 import { ref } from 'vue'
-import Header from "../../components/HeaderComp.vue"
 import api from '../../api/api'
+import { UiButton, UiInput, UiTopBar } from '../../components/ui'
+import { useToast } from '../../composable/useToast'
 
-// 포인트 컬러와 배경 변수
-const pointColor = '#ff6f1f'
-document.documentElement.style.setProperty('--point-color', pointColor)
-
-// form 데이터/에러 상태
+const { showToast } = useToast()
 const email = ref('')
 const password = ref('')
-
 const emailError = ref('')
 const passwordError = ref('')
-const passwordConfirmError = ref('')
-const nicknameError = ref('')
 const submitError = ref('')
+const submitting = ref(false)
 
-
-const validate = () => {
-  emailError.value = ''
-  passwordError.value = ''
-  passwordConfirmError.value = ''
-  nicknameError.value = ''
-  let valid = true
-
-  if (!email.value) {
-    emailError.value = '아이디를 입력해주세요'
-    valid = false
-  } else if (email.value.length > 50) {
-    emailError.value = '아이디는 50자 이하로 입력해주세요'
-    valid = false
-  }
-  if (!password.value || password.value.length < 8 || password.value.length > 20) {
-    passwordError.value = '비밀번호는 8자 이상 20자 이하로 설정해주세요'
-    valid = false
-  }
-  return valid
+function validate() {
+  emailError.value = email.value ? '' : '아이디를 넣어주세요'
+  passwordError.value = password.value.length >= 8 && password.value.length <= 20 ? '' : '비밀번호는 8~20자로 정해주세요'
+  return !emailError.value && !passwordError.value
 }
 
-const handleRegister = async () => {
+async function handleRegister() {
+  submitError.value = ''
   if (!validate()) return
+  submitting.value = true
   try {
-    await api.post('/api/auth/register', {
-      email: email.value,
-      password: password.value,
-    })
-    alert("등록되었습니다. 계정을 잘 저장해두세요.")
+    await api.post('/api/auth/register', { email: email.value, password: password.value })
+    showToast('계정을 만들었어요. 아이디와 비밀번호를 잘 전해주세요')
+    email.value = ''
+    password.value = ''
   } catch (err) {
-    if (err.response?.status === 409) {
-      const msg = err.response.data?.message || ''
-    if (msg.toLowerCase().includes('email')) {
-        emailError.value = '이미 사용 중인 아이디입니다'
-      } else {
-        submitError.value = '회원가입 실패: 중복된 항목이 있습니다'
-      }
-    } else {
-      submitError.value = '회원가입 실패: Admin만 생성 가능합니다.'
-    }
+    if (err.response?.status === 409) emailError.value = '이미 쓰는 아이디예요'
+    else submitError.value = '만들지 못했어요. 관리자 계정인지 확인해 주세요'
+  } finally {
+    submitting.value = false
   }
 }
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600&display=swap');
-
-.raspy {
-  font-family: 'Kanit', sans-serif;
-  font-weight: 700;
-  font-size: 4rem;
-  letter-spacing: 0.05em;
-  color: var(--point-color);
-  display: block;
-}
-.brand-desc {
-  color: #fff;
-  font-family: 'Kanit', sans-serif;
-  font-size: 1.18rem;
-  letter-spacing: 0.01em;
-}
-.brand-desc .font-bold {
-  font-weight: 700;
-}
-
-@keyframes fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-fade {
-  animation: fade 0.5s ease-in-out;
-}
-</style>

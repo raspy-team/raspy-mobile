@@ -21,6 +21,12 @@
         </UiList>
       </UiSection>
 
+      <UiSection v-if="isAdmin" title="운영">
+        <UiList>
+          <UiListItem icon="fas fa-shield-halved" title="관리자" subtitle="신고·규칙 수정 요청" chevron @click="router.push('/admin')" />
+        </UiList>
+      </UiSection>
+
       <UiSection title="도움말과 정보">
         <UiList>
           <UiListItem icon="far fa-envelope" title="문의하기" subtitle="admin@raspyapp.com" chevron @click="contact" />
@@ -148,7 +154,10 @@ function openInstagram() {
   window.open('https://www.instagram.com/matchmobileapp/', '_blank', 'noopener')
 }
 
+const isAdmin = ref(false)
+
 onMounted(async () => {
+  api.get('/api/auth/onboarding').then(({ data }) => (isAdmin.value = !!data.isAdmin)).catch(() => {})
   const { data } = await api.get('/api/user-profile/my/profile').catch(() => ({ data: {} }))
   me.value = { nickname: data.nickname, username: data.username, avatar: data.profilePicture }
 })

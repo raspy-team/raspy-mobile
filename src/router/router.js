@@ -78,7 +78,8 @@ const routes = [
     path: '/games/:gameId/comments',
     name: 'GameComments',
     component: GameComment,
-    props: true
+    // 댓글 시트는 id를 받는다. 주소로 바로 들어와도 열리게 넘겨준다
+    props: (route) => ({ id: route.params.gameId })
   },
     {
     path: '/games/:gameId/play',

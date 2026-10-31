@@ -152,7 +152,7 @@
               <button @click="openChallengersModal(game)">
                 신청자 {{ game.challengers?.length || 0 }}명
               </button>
-              <button @click="$router.push(`/games/${game.id}/comments`)" aria-label="댓글">
+              <button @click="commentId = game.id" aria-label="댓글">
                 <i class="far fa-comment"></i>
               </button>
               <button @click="goToDM(game.ownerId)" aria-label="메시지">

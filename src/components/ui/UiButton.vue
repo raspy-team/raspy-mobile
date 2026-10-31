@@ -19,6 +19,7 @@
 // - primary: 화면의 주 행동 (한 화면에 하나)
 // - secondary: 나란히 놓이는 보조 행동
 // - ghost: 글자만 있는 가벼운 행동 (취소, 더 보기)
+// - tonal: 목록 안에서 반복되는 행동 (카드마다 있는 '신청'). 주 행동과 다투지 않게 옅게
 // - danger: 되돌릴 수 없는 행동 (삭제, 탈퇴)
 import { defineProps } from 'vue'
 
@@ -37,6 +38,7 @@ const VARIANTS = {
   primary: 'bg-primary text-white font-bold active:bg-primary-press',
   secondary: 'bg-surface-2 text-fg font-medium active:bg-line-strong',
   ghost: 'bg-transparent text-fg-muted font-medium active:bg-surface-2',
+  tonal: 'bg-primary-soft text-primary-fg font-bold active:bg-primary/25',
   danger: 'bg-danger-soft text-danger-fg font-medium active:bg-danger/25',
 }
 // 높이는 손가락으로 누르기 쉬운 크기 이상 (sm도 36px)

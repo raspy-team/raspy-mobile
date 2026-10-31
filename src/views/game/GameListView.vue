@@ -1,834 +1,227 @@
 <template>
-  <HeaderComp title="경기" custom-class="bg-gray-900" />
+  <HeaderComp title="경기" />
 
-  <div
-    class="bg-gray-900 h-full pb-24 pt-14"
-    ref="containerRef"
-    @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove"
-    @touchend="handleTouchEnd"
-    @mousedown="handleMouseDown"
-    @mousemove="handleMouseMove"
-    @mouseup="handleMouseUp"
-    @mouseleave="handleMouseUp"
-  >
-    <!-- Status Bar -->
-    <div class="bg-gray-900 h-6 w-full"></div>
+  <main class="px-4 pt-[72px] pb-32 max-w-xl mx-auto">
+    <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
-    <!-- Pull to Refresh Indicator (새로고침 중) -->
-    <transition name="pull-fade">
-      <div
-        v-if="pullTriggered"
-        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-orange-500 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
-      >
-        <div class="relative w-5 h-5">
-          <i class="fas fa-spinner fa-spin text-white text-lg"></i>
-        </div>
-        <span class="text-sm font-medium text-white">새로고침 중...</span>
-      </div>
-    </transition>
+    <!-- 이 화면의 주 행동은 하나: 경기 만들기 -->
+    <UiButton block size="lg" icon="fas fa-plus" to="/create-game">경기 만들기</UiButton>
+    <UiButton variant="ghost" size="sm" to="/rules" class="mt-2 -ml-2">
+      어떤 규칙이 있는지 보기 <i class="fas fa-chevron-right text-xs" aria-hidden="true"></i>
+    </UiButton>
 
-    <!-- Pull to Refresh Complete (완료) -->
-    <transition name="pull-fade">
-      <div
-        v-if="refreshComplete"
-        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500 rounded-full shadow-xl px-6 py-3 flex items-center gap-3"
-      >
-        <div class="relative w-5 h-5 flex items-center justify-center">
-          <i class="fas fa-check text-white text-lg animate-bounce-in"></i>
-        </div>
-        <span class="text-sm font-medium text-white">새로고침 완료!</span>
-      </div>
-    </transition>
+    <UiSection title="열린 경기" class="mt-6">
+      <template #action>
+        <span v-if="games.length" class="t-micro">{{ games.length }}개</span>
+      </template>
 
-    <!-- Pull Indicator (당기는 중) -->
-    <transition name="pull-slide">
-      <div
-        v-if="isPulling && pullDistance > 20 && !pullTriggered"
-        class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-800 rounded-full shadow-2xl px-6 py-3 flex items-center gap-3 border-2 border-gray-600"
-        :class="pullDistance > 80 ? 'border-orange-500' : 'border-gray-600'"
-        :style="{
-          opacity: Math.min(pullDistance / 80, 1),
-          transform: `translate(-50%, ${Math.min(pullDistance / 3, 30)}px)`,
-        }"
-      >
-        <div class="relative w-5 h-5 flex items-center justify-center">
-          <i
-            class="fas text-lg transition-all duration-300"
-            :class="pullDistance > 80 ? 'fa-sync text-orange-500' : 'fa-arrow-down text-gray-400'"
-            :style="{
-              transform: pullDistance > 80 ? 'rotate(180deg)' : 'rotate(0deg)',
-              animation: pullDistance > 80 ? 'pulse 0.8s infinite' : 'none',
-            }"
-          ></i>
-        </div>
-        <span
-          class="text-sm font-medium transition-colors"
-          :class="pullDistance > 80 ? 'text-orange-500' : 'text-gray-400'"
-        >
-          {{ pullDistance > 80 ? '놓아서 새로고침!' : '아래로 당기세요...' }}
-        </span>
-      </div>
-    </transition>
-
-    <!-- Main Content -->
-    <main class="pt-3 px-4 pb-4">
-      <!-- 게임리스트 -->
-      <div class="space-y-4">
-        <!-- 이 화면의 주 행동은 하나: 경기 만들기. 규칙은 그 아래 보조 링크 -->
-        <div class="flex flex-col gap-3 mb-4">
-          <button
-            @click="$router.push('/create-game')"
-           class="w-full py-4 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
-          >
-            경기 만들기
-          </button>
-          <button @click="$router.push('/rules')" class="self-start text-sm text-gray-400">
-            어떤 규칙이 있는지 보기 <i class="fas fa-chevron-right text-xs ml-1"></i>
-          </button>
-        </div>
-
-        <div v-if="games.length > 0">
-          <!-- 카드 한 장 = 경기 하나. 무엇을(규칙) → 어디서·언제 → 누구와 순서로 읽히고, 신청은 카드에서 바로 -->
-          <div
-            v-for="(game, index) in games"
-            :key="index"
-            class="bg-gray-900 rounded-xl border border-gray-800 mb-3 p-4"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <button class="flex items-center gap-3 min-w-0 text-left" @click="openModal(game)">
-                <img
-                  class="w-8 h-8 flex-shrink-0"
-                  :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
-                  alt=""
-                />
-                <span class="text-lg font-bold text-white truncate">{{ game.rule.ruleTitle }}</span>
-              </button>
-              <span class="text-xs text-gray-500 flex-shrink-0 mt-1.5">{{ formatTimeAgo(game.createdAt) }}</span>
-            </div>
-            <div class="mt-2 text-sm text-gray-400 truncate">
-              {{ !game.matchLocation || !game.matchLocation.trim() ? '장소 미정' : game.matchLocation }}
-              · {{ !game.matchDate || !String(game.matchDate).trim() ? '시간 미정' : formatDate(game.matchDate) }}
-            </div>
-
-            <div class="mt-4 flex items-center gap-3">
-              <button
-                class="flex flex-1 min-w-0 items-center gap-2 text-left"
-                @click="$router.push('/profile/' + game.ownerId)"
-              >
-                <img
-                  :src="game.ownerProfileUrl || Default"
-                  class="w-8 h-8 rounded-full flex-shrink-0 object-cover"
-                  alt=""
-                />
-                <span class="min-w-0">
-                  <span class="block text-sm text-gray-100 truncate">{{ game.ownerNickname }}</span>
-                  <span class="block text-xs text-gray-500">
-                    {{ game.ruleStatisticsOfOwner?.ruleRating || 0 }}점 ·
-                    {{ game.ruleStatisticsOfOwner?.wins || 0 }}승
-                    {{ game.ruleStatisticsOfOwner?.draws || 0 }}무
-                    {{ game.ruleStatisticsOfOwner?.losses || 0 }}패
-                  </span>
-                </span>
-              </button>
-              <button
-                v-if="!game.isAppliedByMe"
-                @click="applyDirect(game)"
-               class="flex-shrink-0 px-5 py-2.5 rounded-xl bg-gray-800 active:bg-gray-700 text-orange-400 text-sm font-bold"
-              >
-                신청
-              </button>
-              <button
-                v-else
-                @click="cancelApply(game)"
-                class="flex-shrink-0 px-4 py-2.5 rounded-xl bg-gray-800 text-gray-300 text-sm"
-              >
-                신청 취소
-              </button>
-            </div>
-
-            <!-- 보조 행동은 작게 한 줄로 -->
-            <div class="mt-3 pt-3 border-t border-gray-800 flex items-center gap-5 text-sm text-gray-500">
-              <button @click="openChallengersModal(game)">
-                신청자 {{ game.challengers?.length || 0 }}명
-              </button>
-              <button @click="commentId = game.id" aria-label="댓글">
-                <i class="far fa-comment"></i>
-              </button>
-              <button @click="goToDM(game.ownerId)" aria-label="메시지">
-                <i class="far fa-paper-plane"></i>
-              </button>
-              <div class="relative ml-auto">
-                <button @click="game.showMoreMenu = !game.showMoreMenu" aria-label="더보기">
-                  <i class="fas fa-ellipsis"></i>
-                </button>
-                <div
-                  v-if="game.showMoreMenu"
-                  class="absolute right-0 bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-lg z-30 w-32 overflow-hidden"
-                >
-                  <button
-                    @click="(shareGame(game.id), (game.showMoreMenu = false))"
-                    class="block w-full text-left px-4 py-2 text-gray-200"
-                  >
-                    공유하기
-                  </button>
-                  <button
-                    @click="(onClickReport(game.id), (game.showMoreMenu = false))"
-                    class="block w-full text-left px-4 py-2 text-red-400"
-                  >
-                    신고하기
-                  </button>
-                </div>
-              </div>
+      <!-- 불러오는 중 -->
+      <div v-if="loading && !games.length" class="space-y-3">
+        <UiCard v-for="n in 3" :key="n">
+          <div class="flex gap-3">
+            <UiSkeleton class="w-10 h-10" />
+            <div class="flex-1 space-y-2">
+              <UiSkeleton class="h-4 w-2/3" />
+              <UiSkeleton class="h-3 w-1/2" />
             </div>
           </div>
-        </div>
-        <div v-else>
-          <!-- 스켈레톤 or 없음 표시 -->
-          <template v-if="!timerDone">
-            <!-- 스켈레톤 UI: 카드 3개 정도 반복 -->
-            <div
-              v-for="n in 3"
-              :key="n"
-              class="bg-gray-900 rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 animate-pulse"
-            >
-              <div class="flex justify-between items-start">
-                <div class="flex flex-col w-full justify-between">
-                  <div class="h-5 bg-gray-700 rounded w-2/3 mb-2"></div>
-                  <div class="h-3 bg-gray-800 rounded w-1/3"></div>
-                </div>
-                <div class="h-4 bg-gray-800 rounded w-12"></div>
-              </div>
-              <div class="flex justify-between items-center px-7 pt-1 pb-4">
-                <div class="flex-1 flex flex-col items-center gap-1">
-                  <div class="h-8"></div>
-                  <div class="relative">
-                    <div class="w-14 h-14 rounded-full bg-gray-800 border-2 border-gray-800"></div>
-                  </div>
-                  <div class="h-4 w-16 bg-gray-800 rounded mt-2"></div>
-                  <div class="h-3 w-10 bg-gray-800 rounded"></div>
-                </div>
-                <div class="vs-area flex flex-col gap-1 items-center justify-center mx-3 mt-5">
-                  <div class="h-6 w-8 bg-gray-700 rounded"></div>
-                  <div class="h-4 w-10 bg-gray-800 rounded"></div>
-                </div>
-                <div
-                  class="flex-1 min-h-[60px] flex flex-col justify-center mt-6 items-center gap-2"
-                >
-                  <div>
-                    <div
-                      class="w-14 h-14 bg-gray-800 rounded-full border border-gray-800 flex items-center justify-center"
-                    ></div>
-                    <div class="flex justify-center gap-1 mt-2">
-                      <div class="w-3 h-3 bg-gray-800 rounded"></div>
-                      <div class="w-3 h-3 bg-gray-800 rounded"></div>
-                      <div class="w-3 h-3 bg-gray-800 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="mt-3 flex flex-col justify-start items-start text-sm text-gray-500 gap-1 mb-2"
-              >
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 bg-gray-800 rounded"></div>
-                  <div class="h-3 w-16 bg-gray-800 rounded"></div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-4 h-4 bg-gray-800 rounded"></div>
-                  <div class="h-3 w-12 bg-gray-800 rounded"></div>
-                </div>
-              </div>
-              <div class="mt-4 flex items-center gap-2">
-                <div class="h-11 flex-grow rounded-full bg-gray-700"></div>
-                <div class="w-11 h-11 bg-gray-700 rounded-full"></div>
-                <div class="w-11 h-11 bg-gray-700 rounded-full"></div>
-              </div>
-            </div>
-          </template>
-          <div v-else class="py-16 text-center">
-            <p class="text-base text-white">아직 열린 경기가 없어요</p>
-            <p class="text-sm text-gray-400 mt-2">첫 경기를 만들면 여기에 올라가요</p>
+          <div class="flex items-center gap-2.5 mt-4">
+            <UiSkeleton class="w-8 h-8 rounded-full" />
+            <UiSkeleton class="h-3 w-24" />
           </div>
-        </div>
+        </UiCard>
       </div>
-    </main>
 
+      <UiCard v-else-if="!games.length">
+        <UiEmptyState icon="fas fa-trophy" title="아직 열린 경기가 없어요" description="첫 경기를 만들면 여기에 올라가요">
+          <UiButton to="/create-game">경기 만들기</UiButton>
+        </UiEmptyState>
+      </UiCard>
 
-    <!-- CustomAlert 확정 모달 제거 -->
-  </div>
+      <div v-else class="space-y-3">
+        <OpenGameCard
+          v-for="game in games"
+          :key="game.id"
+          :game="game"
+          :is-mine="game.ownerId === myId"
+          :busy="busyId === game.id"
+          @rule="ruleGame = game"
+          @profile="router.push('/profile/' + game.ownerId)"
+          @apply="apply(game)"
+          @cancel="cancelApply(game)"
+          @challengers="challengersGame = game"
+          @comment="commentId = game.id"
+          @dm="router.push('/chat/' + game.ownerId)"
+          @more="menuGame = game"
+        />
+      </div>
+    </UiSection>
+  </main>
 
-  <!-- 맨 위로 버튼 (스크롤 시에만) -->
-  <button
-    v-if="showScrollTop"
-    @click="scrollToTop"
-    class="fixed z-[99] bottom-20 right-6 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-xl w-12 h-12 flex items-center justify-center transition"
-    aria-label="맨 위로"
-    style="box-shadow: 0 6px 18px 0 rgba(255, 115, 0, 0.12)"
-  >
-    <i class="fas fa-arrow-up text-xl"></i>
-  </button>
-
-  <!-- 신고 입력 모달 -->
-  <div
-    v-if="showReportModal"
-    class="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center p-4"
-  >
-    <div class="bg-gray-900 rounded-lg max-w-sm w-full p-6 shadow-lg relative">
-      <button
-        class="absolute top-3 right-3 text-gray-400"
-        @click="showReportModal = false"
-        aria-label="닫기"
+  <!-- 신청자 -->
+  <UiSheet :model-value="!!challengersGame" :title="`신청자 ${challengersGame?.challengers?.length || 0}명`" @update:model-value="challengersGame = null">
+    <UiList v-if="challengersGame?.challengers?.length">
+      <UiListItem
+        v-for="c in challengersGame.challengers"
+        :key="c.userId"
+        :title="c.applicantNickname"
+        :subtitle="`${c.applicantGameStatisticsDTO?.ruleRating || 1500}점 · ${record(c.applicantGameStatisticsDTO)}`"
+        chevron
+        @click="router.push('/profile/' + c.userId)"
       >
-        <i class="fas fa-times"></i>
-      </button>
-      <h2 class="text-xl font-bold mb-3">신고하기</h2>
-      <p class="text-gray-200 mb-4">신고 사유를 입력해주세요:</p>
-      <textarea
-        v-model="reportReason"
-        class="w-full border rounded p-2 text-sm mb-4"
-        rows="4"
-        placeholder="신고 사유를 작성하세요"
-      ></textarea>
-      <div class="flex justify-end gap-2">
-        <button
-          @click="cancelReport"
-          class="px-4 py-2 bg-gray-700 text-gray-100 rounded hover:bg-gray-300"
-        >
-          취소
-        </button>
-        <button
-          @click="confirmReport"
-          :disabled="!reportReason.trim()"
-          class="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
-        >
-          신고하기
-        </button>
-      </div>
-    </div>
-  </div>
+        <template #leading><UiAvatar :src="c.applicantProfileUrl" :name="c.applicantNickname" size="sm" /></template>
+      </UiListItem>
+    </UiList>
+    <UiEmptyState v-else icon="fas fa-user-group" title="아직 신청한 사람이 없어요" />
+  </UiSheet>
 
-  <!-- 신고 완료 모달 -->
-  <div
-    v-if="showThankModal"
-    class="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center p-4"
-  >
-    <div class="bg-gray-900 rounded-lg max-w-sm w-full p-6 shadow-lg relative">
-      <button
-        class="absolute top-3 right-3 text-gray-400"
-        @click="showThankModal = false"
-        aria-label="닫기"
-      >
-        <i class="fas fa-times"></i>
-      </button>
-      <h2 class="text-xl font-bold text-green-600 mb-3">신고 접수 완료</h2>
-      <p class="text-gray-200 mb-4">
-        신고해 주셔서 감사합니다.<br />
-        제출하신 내용은 24시간 이내에 처리됩니다.
-      </p>
-      <div class="text-right">
-        <button
-          @click="showThankModal = false"
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          확인
-        </button>
-      </div>
+  <!-- 더보기 -->
+  <UiSheet :model-value="!!menuGame" @update:model-value="menuGame = null">
+    <UiList>
+      <UiListItem icon="fas fa-share" title="공유하기" subtitle="링크를 복사해요" @click="share(menuGame)" />
+      <UiListItem v-if="menuGame?.ownerId !== myId" icon="far fa-flag" title="신고하기" danger @click="openReport(menuGame)" />
+    </UiList>
+  </UiSheet>
+
+  <!-- 신고 -->
+  <UiSheet :model-value="!!reportGame" title="이 경기를 신고할까요?" @update:model-value="reportGame = null">
+    <p class="t-caption mb-4">어떤 문제인지 알려주시면 확인 후 조치할게요.</p>
+    <div class="flex flex-wrap gap-2 mb-4">
+      <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
     </div>
-  </div>
+    <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어주세요" />
+    <template #footer>
+      <UiButton
+        block
+        variant="danger"
+        :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())"
+        :loading="reporting"
+        @click="submitReport"
+      >
+        신고하기
+      </UiButton>
+    </template>
+  </UiSheet>
 
   <Comment v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
-
-  <!-- 도전자 목록 모달 -->
-  <div
-    v-if="showChallengersModal"
-    class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
-    @click.self="closeChallengersModal"
-  >
-    <div
-      class="bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto"
-    >
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-gray-100">신청자</h3>
-        <button
-          @click="closeChallengersModal"
-          class="text-gray-500 hover:text-gray-300 transition"
-          aria-label="닫기"
-        >
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div v-if="selectedChallengers && selectedChallengers.length > 0" class="space-y-3">
-        <div
-          v-for="challenger in selectedChallengers"
-          :key="challenger.userId"
-          class="p-3 bg-gray-700 rounded-xl flex items-center gap-3"
-        >
-          <img
-            :src="challenger.applicantProfileUrl || Default"
-            class="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
-            alt="Challenger Profile"
-          />
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-100">{{ challenger.applicantNickname }}</p>
-            <p class="text-xs text-gray-400">
-              {{ challenger.applicantGameStatisticsDTO?.wins || 0 }}승
-              {{ challenger.applicantGameStatisticsDTO?.draws || 0 }}무
-              {{ challenger.applicantGameStatisticsDTO?.losses || 0 }}패 · 레이팅
-              {{ challenger.applicantGameStatisticsDTO?.ruleRating || 0 }}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div v-else class="text-center text-gray-500 text-sm py-6">아직 신청자가 없어요.</div>
-    </div>
-  </div>
-
-  <MatchRuleModal
-    v-if="selectedGame && selectedGame.showRuleDetail"
-    :rule="selectedGame.rule"
-    @close="selectedGame.showRuleDetail = false"
-  />
+  <MatchRuleModal v-if="ruleGame" :rule="ruleGame.rule" @close="ruleGame = null" />
 </template>
 
 <script setup>
-import { useBackClose } from '../../composable/useBackClose'
-
-import { ref, onMounted, onUnmounted } from 'vue'
+// 첫 화면: 참가할 수 있는 열린 경기 목록. 주 행동은 '경기 만들기' 하나
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import HeaderComp from '../../components/HeaderComp.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
-
-import { useToast } from '../../composable/useToast'
-import { useRouter } from 'vue-router'
-import { useRoute } from 'vue-router'
-const route = useRoute()
-
-import Default from '../../assets/default.png'
+import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import Comment from '../GameCommentView.vue'
+import {
+  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem,
+  UiPullIndicator, UiSection, UiSheet, UiSkeleton,
+} from '../../components/ui'
+import { useToast } from '../../composable/useToast'
+import { usePullToRefresh } from '../../composables/usePullToRefresh'
+import { refreshOnChange } from '../../websocket/userChannel'
+import { record } from '../../utils/format'
+import { copyText } from '../../utils/clipboard'
 
-const showScrollTop = ref(false)
+const REPORT_REASONS = ['욕설·비방', '거짓 경기', '광고·스팸', '기타']
 
-// Pull to Refresh 상태
-const pullTriggered = ref(false)
-const refreshComplete = ref(false)
-const startY = ref(0)
-const isPulling = ref(false)
-const pullDistance = ref(0)
-const containerRef = ref(null)
-const isMouseDown = ref(false)
-
-// 터치 이벤트
-const handleTouchStart = (e) => {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-
-  if (scrollTop <= 0) {
-    startY.value = e.touches[0].clientY
-    isPulling.value = true
-    pullDistance.value = 0
-  }
-}
-
-const handleTouchMove = (e) => {
-  if (!startY.value) return
-
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-
-  if (scrollTop > 0) {
-    isPulling.value = false
-    pullDistance.value = 0
-    return
-  }
-
-  const currentY = e.touches[0].clientY
-  const diff = currentY - startY.value
-
-  if (diff > 5) {
-    isPulling.value = true
-    pullDistance.value = Math.min(diff, 150)
-    e.preventDefault()
-  } else {
-    pullDistance.value = 0
-  }
-}
-
-const handleTouchEnd = async () => {
-  if (isPulling.value && pullDistance.value > 80) {
-    pullTriggered.value = true
-    await fetchGames()
-    pullTriggered.value = false
-
-    // 완료 메시지 표시
-    refreshComplete.value = true
-    setTimeout(() => {
-      refreshComplete.value = false
-    }, 1500)
-  }
-
-  isPulling.value = false
-  pullDistance.value = 0
-  startY.value = 0
-}
-
-// 마우스 이벤트 (PC 테스트용)
-const handleMouseDown = (e) => {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-
-  if (scrollTop <= 0) {
-    startY.value = e.clientY
-    isMouseDown.value = true
-    isPulling.value = true
-    pullDistance.value = 0
-  }
-}
-
-const handleMouseMove = (e) => {
-  if (!isMouseDown.value || !startY.value) return
-
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-
-  if (scrollTop > 0) {
-    isPulling.value = false
-    pullDistance.value = 0
-    return
-  }
-
-  const currentY = e.clientY
-  const diff = currentY - startY.value
-
-  if (diff > 5) {
-    isPulling.value = true
-    pullDistance.value = Math.min(diff, 150)
-    e.preventDefault()
-  } else {
-    pullDistance.value = 0
-  }
-}
-
-const handleMouseUp = async () => {
-  if (!isMouseDown.value) return
-
-  if (isPulling.value && pullDistance.value > 80) {
-    pullTriggered.value = true
-    await fetchGames()
-    pullTriggered.value = false
-
-    // 완료 메시지 표시
-    refreshComplete.value = true
-    setTimeout(() => {
-      refreshComplete.value = false
-    }, 1500)
-  }
-
-  isMouseDown.value = false
-  isPulling.value = false
-  pullDistance.value = 0
-  startY.value = 0
-}
-
-const handleScroll = () => {
-  showScrollTop.value = window.scrollY > 120
-
-  // 스크롤 중에는 pull 상태 초기화
-  if (window.scrollY > 0) {
-    isPulling.value = false
-    pullDistance.value = 0
-  }
-}
-
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
-
-function formatTimeAgo(dateString) {
-  const now = new Date()
-  const createdAt = new Date(dateString)
-  const diff = (now - createdAt) / 1000
-  if (diff < 60) return `방금 전`
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}일 전`
-  if (diff < 31104000) return `${Math.floor(diff / 2592000)}개월 전`
-  return `${Math.floor(diff / 31104000)}년 전`
-}
+const route = useRoute()
 const router = useRouter()
-
-const commentId = ref(0)
-
-// 초대 딥링크 복사
-async function shareGame(gameId) {
-  showToast('공유 링크가 복사되었습니다!')
-
-  const res = await api.post('/api/invite', null, { params: { gameId } })
-  const url = res.data.url
-
-  // iOS WebView (WKWebView)
-  if (
-    window.webkit &&
-    window.webkit.messageHandlers &&
-    window.webkit.messageHandlers.clipboardCopy
-  ) {
-    window.webkit.messageHandlers.clipboardCopy.postMessage(url)
-    return
-  }
-
-  // (Android WebView는 그대로. clipboard 잘 동작하니 아래 코드 유지)
-  try {
-    await navigator.clipboard.writeText(url)
-    return
-  } catch (err) {
-    // Safari 등 일부 환경에서 clipboard API가 막힌 경우 fallback
-    try {
-      const input = document.createElement('input')
-      input.value = url
-      document.body.appendChild(input)
-      input.select()
-      const success = document.execCommand('copy')
-      document.body.removeChild(input)
-      if (!success) {
-        showToast('복사에 실패했습니다!')
-      }
-    } catch (err2) {
-      showToast('복사에 실패했습니다!')
-    }
-  }
-}
-
 const { showToast } = useToast()
 
-const requestCount = ref(0)
-
-// const menuItems = [
-//   { name: '규칙 탐색', icon: 'fas fa-book-open', link: '/rules' },
-
-//   { name: '경기 생성', icon: 'fas fa-plus', link: '/create-game' },
-//   { name: '경기 요청', icon: 'fas fa-envelope', link: '/inbox' },
-// ]
 const games = ref([])
 const loading = ref(true)
-// const alertMsg = ref('')
-const selectedGame = ref(null)
-const sortOption = ref('latest')
-// ...showFilterMenu 변수 제거됨
-const selectedPrimary = ref('전국')
-const selectedSecondary = ref('전국')
-const timerDone = ref(false)
-const fetchGames = async () => {
-  loading.value = true
+const myId = ref(null)
+const busyId = ref(null)
+const commentId = ref(0)
+const ruleGame = ref(null)
+const challengersGame = ref(null)
+const menuGame = ref(null)
+const reportGame = ref(null)
+const reportReason = ref('')
+const reportDetail = ref('')
+const reporting = ref(false)
+
+async function fetchGames() {
   try {
-    const requestCountRes = await api.get('/api/games/request-count')
-    requestCount.value = requestCountRes.data
-
-    const res = await api.get('/api/games/list', {
-      params: {
-        region:
-          selectedPrimary.value && selectedSecondary.value
-            ? `${selectedPrimary.value} ${selectedSecondary.value}`
-            : null,
-        sort: sortOption.value,
-      },
-    })
-    games.value = res.data.map((game) => ({
-      ...game,
-      showRuleDetail: false,
-    }))
-
-    setTimeout(() => (timerDone.value = true), 1200)
-  } catch (err) {
-    console.error('게임 목록 로드 실패', err)
-    setTimeout(() => (timerDone.value = true), 1200)
+    const { data } = await api.get('/api/games/list', { params: { sort: 'latest' } })
+    games.value = data
   } finally {
     loading.value = false
   }
 }
 
-function openModal(game) {
-  if (game.showRuleDetail == true) return
-  selectedGame.value = game
-  game.showRuleDetail = true
-}
+const { pull, refreshing } = usePullToRefresh(fetchGames)
 
-// ...setSort 함수 제거됨
-const formatDate = (dateStr) => {
-  if (!dateStr) return '미정'
-  const date = new Date(dateStr)
-  return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
-}
-const applyDirect = async (game) => {
-  if (!game) return
+async function apply(game) {
+  busyId.value = game.id
   try {
     await api.post(`/api/games/${game.id}/apply`)
     game.isAppliedByMe = true
-    showToast('신청이 완료되었습니다!')
-    requestCount.value += 1
-  } catch (err) {
-    showToast(err.response?.data?.message || '신청 실패. 다시 시도해주세요.')
+    showToast('신청했어요. 주최자가 승인하면 알려드려요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 시도해주세요')
+  } finally {
+    busyId.value = null
   }
 }
 
-const showReportModal = ref(false)
-const showThankModal = ref(false)
-const reportReason = ref('')
-let reportTarget = ref(null)
-
-function onClickReport(targetId) {
-  reportTarget.value = targetId
-  reportReason.value = ''
-  showReportModal.value = true
-}
-
-function cancelReport() {
-  showReportModal.value = false
-}
-
-async function confirmReport() {
-  if (!reportReason.value.trim()) return
-  try {
-    await api.post('/api/reports', {
-      targetType: 'GAME',
-      targetId: reportTarget.value,
-      reason: reportReason.value,
-    })
-    showReportModal.value = false
-    showThankModal.value = true
-  } catch (err) {
-    console.error('신고 실패', err)
-    showToast('신고 접수가 완료된 경기입니다.')
-    showReportModal.value = false
-  }
-}
-
-// 도전자 모달 관련
-const showChallengersModal = ref(false)
-const selectedChallengers = ref([])
-
-const openChallengersModal = (game) => {
-  selectedChallengers.value = game.challengers || []
-  showChallengersModal.value = true
-}
-
-const closeChallengersModal = () => {
-  showChallengersModal.value = false
-  selectedChallengers.value = []
-}
-
-// 신청 취소 함수
-const cancelApply = async (game) => {
+async function cancelApply(game) {
+  busyId.value = game.id
   try {
     await api.post('/api/games/cancel-request', { gameId: game.id })
     game.isAppliedByMe = false
-    showToast('신청이 취소되었습니다!')
-  } catch (err) {
-    showToast(err.response?.data?.message || '취소에 실패했습니다.')
+    showToast('신청을 취소했어요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '취소하지 못했어요')
+  } finally {
+    busyId.value = null
   }
 }
 
-// DM으로 이동
-const goToDM = (ownerId) => {
-  router.push(`/chat/${ownerId}`)
+async function share(game) {
+  menuGame.value = null
+  try {
+    const { data } = await api.post('/api/invite', null, { params: { gameId: game.id } })
+    showToast((await copyText(data.url)) ? '링크를 복사했어요' : '복사하지 못했어요')
+  } catch {
+    showToast('링크를 만들지 못했어요')
+  }
 }
 
-onMounted(() => {
+function openReport(game) {
+  menuGame.value = null
+  reportReason.value = ''
+  reportDetail.value = ''
+  reportGame.value = game
+}
+
+async function submitReport() {
+  reporting.value = true
+  try {
+    const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
+    await api.post('/api/reports', { targetType: 'GAME', targetId: reportGame.value.id, reason })
+    showToast('신고를 접수했어요. 확인 후 조치할게요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '이미 신고한 경기예요')
+  } finally {
+    reporting.value = false
+    reportGame.value = null
+  }
+}
+
+let stopWatching = null
+onMounted(async () => {
+  myId.value = (await api.get('/api/auth/current-user-id').catch(() => ({ data: null }))).data
   fetchGames()
-  const commentQueryId = route.query.commentId
-  if (commentQueryId && !isNaN(Number(commentQueryId))) {
-    commentId.value = Number(commentQueryId)
-  }
+  // 신청·승인 같은 변화가 생기면 다시 불러온다
+  stopWatching = refreshOnChange(fetchGames)
+  // 링크로 들어온 댓글 (/?commentId=)
+  const q = Number(route.query.commentId)
+  if (q) commentId.value = q
 })
-
-// 뒤로가기는 열린 모달부터 닫는다
-useBackClose(showReportModal, showThankModal, showChallengersModal)
+onBeforeUnmount(() => stopWatching?.())
 </script>
-<style scoped>
-input:focus {
-  outline: none;
-}
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.text-overflow-ellipsis {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-/* Pull to Refresh 애니메이션 */
-.pull-fade-enter-active,
-.pull-fade-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.pull-fade-enter-from {
-  opacity: 0;
-  transform: translate(-50%, -20px) scale(0.9);
-}
-.pull-fade-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -10px) scale(0.95);
-}
-
-.pull-slide-enter-active,
-.pull-slide-leave-active {
-  transition: all 0.2s ease-out;
-}
-.pull-slide-enter-from,
-.pull-slide-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -10px);
-}
-
-@keyframes bounce-in {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.animate-bounce-in {
-  animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1);
-  }
-}
-</style>

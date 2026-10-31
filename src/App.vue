@@ -1,20 +1,6 @@
 <template>
   <div class="h-full">
 
-    <!-- Splash 화면 (anroid는 네이티브 위임, ios일때만 보임.) -->
-    <transition name="fade">
-      <div class="overflow-hidden">
-        <div
-          v-if="false && isIos && showSplash"
-          class="fixed overflow-hidden inset-0 flex items-center justify-center bg-black z-[100]"
-        >
-          <span class="raspy text-5xl font-bold tracking-wider text-orange-500 font-kanit;">
-            <img class="w-[50dvw]" :src="MatchLogo" />
-          </span>
-        </div>
-      </div>
-    </transition>
-
     <!-- 실제 라우터 뷰 -->
     <RouterView class="h-full" :key="route.fullPath" />
 
@@ -25,236 +11,39 @@
     <CustomToast />
     <UiConfirmHost />
 
-    <!-- 펜딩 리뷰 알림 (전역) - 우선순위가 더 높음 -->
-    <Transition name="fade">
-      <div
-        v-if="showPendingReviewModal && pendingReviewGameId"
-        class="fixed inset-0 bg-black/70 backdrop-blur-md z-[9999999] flex items-center justify-center p-4"
-        @click.self="dismissPendingReview"
-      >
-        <Transition name="slide-up">
-          <div
-            v-if="showPendingReviewModal && pendingReviewGameId"
-            class="w-full max-w-md bg-gray-900 rounded-3xl shadow-2xl overflow-hidden"
-          >
-            <!-- 헤더 -->
-            <div
-              class="relative px-6 py-8 bg-purple-500 text-white"
-            >
-              <div class="text-center">
-                <div class="inline-flex items-center justify-center mb-4">
-                  <div class="relative">
-                    <div
-                      class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30"
-                    >
-                      <i class="fas fa-star text-4xl"></i>
-                    </div>
-                  </div>
-                </div>
-                <h2 class="text-2xl font-bold mb-2 tracking-tight">경기 평가가 필요해요!</h2>
-                <p class="text-white/90 text-sm font-medium">
-                  종료된 경기에 대한 리뷰를 작성해주세요
-                </p>
-              </div>
-            </div>
+    <!-- 끝난 경기 평가 요청. '나중에'를 누르면 그 경기는 다시 묻지 않는다 -->
+    <UiDialog
+      :model-value="showPendingReviewModal && !!pendingReviewGameId"
+      title="경기는 어땠나요?"
+      message="상대와 규칙을 평가해주세요. 다음 매칭과 규칙 순위에 반영돼요."
+      confirm-text="평가하기"
+      cancel-text="나중에"
+      @confirm="goToPendingReview"
+      @update:model-value="(v) => !v && dismissPendingReview()"
+    />
 
-            <!-- 내용 -->
-            <div class="px-6 py-6 space-y-4">
-              <div class="text-center">
-                <div
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-full border border-purple-200"
-                >
-                  <i class="fas fa-clipboard-check text-purple-500"></i>
-                  <span class="text-sm font-medium text-purple-700">상대방 평가 및 규칙 평가</span>
-                </div>
-              </div>
-
-              <div class="bg-gray-800 rounded-xl p-4 text-sm text-gray-200 leading-relaxed">
-                <p class="mb-2">
-                  <i class="fas fa-info-circle text-purple-500 mr-2"></i>경기가 종료되었습니다.
-                </p>
-                <p>상대방과 규칙에 대한 평가를 남겨주세요.</p>
-              </div>
-            </div>
-
-            <!-- 버튼 -->
-            <div class="px-6 pb-6 space-y-3">
-              <button
-                @click="goToPendingReview"
-               class="w-full py-3 px-6 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-medium active:scale-95 transition-all shadow-lg"
-              >
-                <i class="fas fa-arrow-right mr-2"></i>평가하러 가기
-              </button>
-              <button @click="dismissPendingReview" class="w-full py-3 text-sm text-gray-400">
-                나중에 할게요
-              </button>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </Transition>
-
-    <!-- 게임 시작 알림 (전역) -->
-    <Transition name="fade">
-      <div
-        v-if="!showPendingReviewModal && activeGame && activeGame.gameId"
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4"
-        @click.self="dismissActiveGame"
-      >
-        <Transition name="slide-up">
-          <div
-            v-if="activeGame && activeGame.gameId"
-            class="w-full max-w-md bg-gray-900 rounded-3xl shadow-2xl overflow-hidden"
-          >
-            <!-- 헤더 -->
-            <div
-              class="relative px-6 py-8 bg-orange-500 text-white"
-            >
-              <div class="text-center">
-                <div class="inline-flex items-center justify-center mb-4">
-                  <div class="relative">
-                    <div
-                      class="relative bg-white/20 backdrop-blur-sm rounded-full p-4 border-2 border-white/30"
-                    >
-                      <i class="fas fa-trophy text-4xl"></i>
-                    </div>
-                  </div>
-                </div>
-                <h2 class="text-2xl font-bold mb-2 tracking-tight">경기 시작!</h2>
-                <p class="text-white/90 text-sm font-medium">참여하신 경기가 시작되었습니다</p>
-              </div>
-            </div>
-
-            <!-- 게임 정보 -->
-            <div class="px-6 py-6 space-y-4">
-              <!-- 규칙 제목 -->
-              <div class="text-center">
-                <div
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/10 rounded-full border border-orange-500/30"
-                >
-                  <i class="fas fa-gamepad text-orange-500"></i>
-                  <span class="text-sm font-medium text-orange-400">{{
-                    activeGame.ruleTitle || '경기'
-                  }}</span>
-                </div>
-              </div>
-
-              <!-- 플레이어 VS -->
-              <div class="flex items-center justify-center gap-3 py-4">
-                <div class="flex flex-col items-center flex-1">
-                  <div
-                   class="w-16 h-16 rounded-full bg-blue-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
-                  >
-                    {{ getInitial(activeGame.player1?.nickname) }}
-                  </div>
-                  <p class="text-sm font-medium text-gray-100 truncate max-w-[80px]">
-                    {{ activeGame.player1?.nickname }}
-                  </p>
-                </div>
-
-                <div class="flex flex-col items-center justify-center px-3">
-                  <div class="text-3xl font-bold text-orange-500">VS</div>
-                </div>
-
-                <div class="flex flex-col items-center flex-1">
-                  <div
-                   class="w-16 h-16 rounded-full bg-red-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
-                  >
-                    {{ getInitial(activeGame.player2?.nickname) }}
-                  </div>
-                  <p class="text-sm font-medium text-gray-100 truncate max-w-[80px]">
-                    {{ activeGame.player2?.nickname }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- 시작 시각 -->
-              <div class="flex items-center justify-center gap-2 text-sm text-gray-400">
-                <i class="fas fa-clock text-gray-400"></i>
-                <span>{{ formatStartTime(activeGame.startedAt) }}</span>
-              </div>
-
-              <!-- 카운트다운 -->
-              <div class="text-center py-4">
-                <div class="inline-flex flex-col items-center gap-2">
-                  <p class="text-xs text-gray-500 font-medium">자동 참여까지</p>
-                  <div class="relative">
-                    <svg class="transform -rotate-90" width="80" height="80">
-                      <circle
-                        cx="40"
-                        cy="40"
-                        r="36"
-                        stroke="#fee2e2"
-                        stroke-width="6"
-                        fill="none"
-                      />
-                      <circle
-                        cx="40"
-                        cy="40"
-                        r="36"
-                        :stroke="
-                          gameCountdown <= 2
-                            ? '#ef4444'
-                            : gameCountdown <= 3
-                              ? '#f97316'
-                              : '#22c55e'
-                        "
-                        stroke-width="6"
-                        fill="none"
-                        stroke-linecap="round"
-                        :stroke-dasharray="226"
-                        :stroke-dashoffset="226 * (1 - gameCountdown / 5)"
-                        class="transition-all duration-1000 ease-linear"
-                      />
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                      <span
-                       class="text-3xl font-bold"
-                        :class="
-                          gameCountdown <= 2
-                            ? 'text-red-500'
-                            : gameCountdown <= 3
-                              ? 'text-orange-500'
-                              : 'text-green-500'
-                        "
-                      >
-                        {{ gameCountdown }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 버튼 -->
-            <div class="px-6 pb-6">
-              <button
-                @click="dismissActiveGame"
-               class="w-full py-3 px-6 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-medium active:scale-95 transition-all"
-              >
-                참여하지 않을래요
-              </button>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </Transition>
+    <!-- 진행 중인 내 경기. 경기 화면에 있을 때는 숨긴다 -->
+    <ActiveGameBanner
+      :game="showActiveBanner ? activeGame : null"
+      :with-nav="footerTab !== null"
+      @open="openActiveGame"
+      @dismiss="dismissActiveGame"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import MatchLogo from './assets/Match.png'
 import { socket } from './websocket'
 import api from './api/api'
 import FooterNav from './components/FooterNav.vue'
 import CustomToast from './components/CustomToast.vue'
 import UiConfirmHost from './components/ui/UiConfirmHost.vue'
-// import GameStartNotification from './components/GameStartNotificationSimple.vue'
+import UiDialog from './components/ui/UiDialog.vue'
+import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 
-const showSplash = ref(true)
 const route = useRoute()
 
 // 하단 탭을 보여줄 화면과 그때 켜질 탭. null이면 탭을 숨긴다 (가입·경기 진행·채팅처럼 한 가지에 집중하는 화면)
@@ -282,11 +71,6 @@ const dismissActiveGame = activeGamePolling.dismissActiveGame
 const showPendingReviewModal = ref(false)
 const pendingReviewGameId = ref(null)
 
-const isIos = ref(false)
-const ua = navigator.userAgent.toLowerCase()
-if (ua.includes('raspy-ios')) {
-  isIos.value = true
-}
 // 하루에 한 번만 daily-first API 호출
 const checkAndSendDailyFirst = async () => {
   try {
@@ -310,9 +94,6 @@ const checkAndSendDailyFirst = async () => {
 }
 
 onMounted(() => {
-  setTimeout(() => {
-    showSplash.value = false
-  }, 2000) //
 
   if (localStorage.getItem('251105match') != 1) {
     localStorage.removeItem('raspy_access_token2')
@@ -322,9 +103,6 @@ onMounted(() => {
 
   try {
     const token = localStorage.getItem('raspy_access_token2')
-    setTimeout(() => {
-      showSplash.value = false
-    }, 2000) //
 
     // 로그인된 사용자면 게임 폴링 시작
     if (token) {
@@ -355,28 +133,6 @@ onMounted(() => {
 window.addEventListener('error', (event) => {
   console.error('Uncaught Error:', event.error)
 })
-
-// 게임 시작 알림 관련 함수들
-const gameCountdown = ref(5)
-let gameCountdownTimer = null
-
-// 닉네임 첫 글자 추출
-const getInitial = (nickname) => {
-  if (!nickname) return '?'
-  return nickname.charAt(0).toUpperCase()
-}
-
-// 시작 시각 포맷
-const formatStartTime = (startedAt) => {
-  if (!startedAt) return ''
-  const date = new Date(startedAt)
-  return date.toLocaleString('ko-KR', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 // '나중에 할게요': 이 경기는 다시 묻지 않는다 (평가는 결과 화면에서 언제든 할 수 있다)
 const dismissedReviewIds = (() => {
@@ -426,41 +182,12 @@ const goToPendingReview = () => {
   }
 }
 
-// activeGame 변경 감지하여 카운트다운 시작
-watch(activeGame, (newGame) => {
-  if (newGame && newGame.gameId) {
-    // 펜딩 리뷰가 없을 때만 게임 시작 알림 표시
-    if (!showPendingReviewModal.value) {
-      startGameCountdown()
-    }
-  } else {
-    stopGameCountdown()
-  }
-})
-
-const startGameCountdown = () => {
-  stopGameCountdown()
-  gameCountdown.value = 5
-
-  gameCountdownTimer = setInterval(() => {
-    gameCountdown.value--
-
-    if (gameCountdown.value <= 0) {
-      stopGameCountdown()
-      // 자동으로 게임 화면으로 이동
-      if (activeGame.value?.gameId) {
-        router.push(`/games/${activeGame.value.gameId}/play`)
-        dismissActiveGame()
-      }
-    }
-  }, 1000)
-}
-
-const stopGameCountdown = () => {
-  if (gameCountdownTimer) {
-    clearInterval(gameCountdownTimer)
-    gameCountdownTimer = null
-  }
+// 진행 중 경기 띠: 경기·결과 화면에 있거나 평가 창이 떠 있으면 숨긴다
+const showActiveBanner = computed(
+  () => !showPendingReviewModal.value && !/^\/games\/\d+\/(play|result)/.test(route.path),
+)
+const openActiveGame = () => {
+  if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)
 }
 
 // router 필요
@@ -503,16 +230,10 @@ watch(
       roomId = res.data.chatRoomId
     }
 
-    if (roomId) {
-      if (roomId) {
-        // 방에 들어왔을 때만 연결!
-        socket.connect(roomId)
-      } else {
-        // 방에서 나갔을 때 완전 해제!
-        socket.disconnect({ clearRoomId: true })
-        console.log('disconnect all sockets. bye.')
-      }
-    }
+    // 채팅·경기 방에 들어오면 그 방에 연결하고, 나가면 끊는다
+    // (예전에는 끊는 쪽 분기에 도달할 수 없어서 방을 나가도 연결이 남았다)
+    if (roomId) socket.connect(roomId)
+    else socket.disconnect({ clearRoomId: true })
   },
   { immediate: true },
 )

@@ -671,6 +671,7 @@
 </template>
 
 <script setup>
+import { refreshOnChange } from '../../websocket/userChannel'
 import { useBackClose } from '../../composable/useBackClose'
 
 // 도전자(신청자) 모달 상태
@@ -705,7 +706,7 @@ const sentGames = ref([]) // 신청한 게임
 const myGames = ref([]) // 내 게임
 const applicantsMap = ref({}) // 각 게임의 신청자 목록 (gameId -> applicants)
 const loading = ref(true)
-const pollingInterval = ref(null) // 폴링 인터벌 ID (ref로 관리)
+let stopWatching = null // 변경 신호 구독 해제
 
 // 게임 시작 관련
 const showLocationConfirmModal = ref(false) // 기존 장소 확인 모달
@@ -777,13 +778,8 @@ const fetchGames = async () => {
 
 // 폴링 정리 함수
 const stopPolling = () => {
-  if (pollingInterval.value) {
-    console.log('[GameView] 폴링 중지, interval ID:', pollingInterval.value)
-    clearInterval(pollingInterval.value)
-    pollingInterval.value = null
-  } else {
-    console.log('[GameView] 폴링 중지 시도했으나 이미 null')
-  }
+  stopWatching?.()
+  stopWatching = null
 }
 
 // 컴포넌트 마운트 시: 데이터 로드 및 폴링 시작
@@ -828,12 +824,8 @@ onMounted(async () => {
   await fetchGames()
   loading.value = false
 
-  // 3초마다 자동 갱신 시작
-  pollingInterval.value = setInterval(async () => {
-    console.log('[GameView] 폴링 실행 중...')
-    await fetchGames()
-  }, 3000)
-  console.log('[GameView] 폴링 시작됨, interval ID:', pollingInterval.value)
+  // 신청·승인·시작·종료 신호가 오거나 앱으로 돌아왔을 때만 다시 불러온다 (예전엔 3초마다)
+  stopWatching = refreshOnChange(fetchGames)
 })
 
 // 컴포넌트가 언마운트되기 직전: 폴링 중지

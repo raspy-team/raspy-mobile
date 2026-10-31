@@ -1,20 +1,20 @@
 /**
- * 진행 중인 경기 폴링 서비스
- * 5초마다 서버에서 내가 참여 중인 경기를 확인하고
- * 경기가 시작되면 알림을 표시합니다.
+ * 진행 중인 경기 감시
+ * 처음 한 번 확인하고, 이후에는 서버의 "바뀜" 신호(내 채널)나 앱으로 돌아왔을 때만 다시 확인한다.
+ * 경기가 시작되면 알림을 표시한다. (예전에는 5초마다 서버에 물었다)
  */
 
 import { ref } from 'vue'
 import api from '../api/api'
+import { openUserChannel, refreshOnChange } from '../websocket/userChannel'
 
-const POLLING_INTERVAL = 5000 // 5초
 
 // 전역 상태 (모든 컴포넌트가 공유)
 const activeGame = ref(null)
 const pendingReviewGameIds = ref([])
 const isPolling = ref(false)
 const dismissedGameIds = ref(new Set()) // 사용자가 거부한 게임 ID들
-let pollingTimer = null
+let stopWatching = null
 
 export function useActiveGamePolling() {
   // API 호출 함수
@@ -76,19 +76,16 @@ export function useActiveGamePolling() {
     isPolling.value = true
     console.log('🎮 Active game polling started')
 
-    // 즉시 한 번 실행
-    checkActiveGame(getCurrentPath ? getCurrentPath() : null)
-
-    // 5초마다 반복
-    pollingTimer = setInterval(() => {
-      checkActiveGame(getCurrentPath ? getCurrentPath() : null)
-    }, POLLING_INTERVAL)
+    const check = () => checkActiveGame(getCurrentPath ? getCurrentPath() : null)
+    check()
+    openUserChannel()
+    stopWatching = refreshOnChange(check)
   }
 
   const stopPolling = () => {
-    if (pollingTimer) {
-      clearInterval(pollingTimer)
-      pollingTimer = null
+    if (stopWatching) {
+      stopWatching()
+      stopWatching = null
     }
     isPolling.value = false
     console.log('🎮 Active game polling stopped')

@@ -1,4 +1,5 @@
 <script setup>
+import { refreshOnChange } from '../../websocket/userChannel'
 import DefaultProfile from '../../assets/default.png'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -26,8 +27,9 @@ const errorMessage = ref('')
 // 로딩 상태
 const isLoadingMessages = ref(true)
 
-// 폴링 인터벌
-let statusPollingInterval = null
+// 도전 상태 변경 신호 구독 해제
+let stopWatchingStatus = null
+let fetchChallengeStatus = async () => {}
 
 function updateHeaderPosition() {
   if (window.visualViewport) {
@@ -67,6 +69,8 @@ onMounted(async () => {
     socket.onMessage((msg) => {
       messages.value.push(msg)
       scrollToBottom()
+      // 도전 신청·수락·거절은 이 방에 메시지로 온다. 그때 상태를 다시 불러온다
+      if (msg.messageType === 'PLAY_WITH_ME_TOO') fetchChallengeStatus()
     })
 
     socket.connect(roomId.value)
@@ -78,7 +82,7 @@ onMounted(async () => {
     targetUserProfileUrl.value = data.targetUserProfileUrl
 
     // 도전 상태 확인 함수
-    const fetchChallengeStatus = async () => {
+    fetchChallengeStatus = async () => {
       try {
         const statusData = await playWithMeTooAPI.getStatusWithUser(targetUserId)
         if (statusData) {
@@ -92,8 +96,8 @@ onMounted(async () => {
     // 첫 도전 상태 확인
     await fetchChallengeStatus()
 
-    // 5초마다 도전 상태 폴링 시작
-    statusPollingInterval = setInterval(fetchChallengeStatus, 5000)
+    // 그 밖의 변경(내 채널 신호)이나 앱으로 돌아왔을 때도 다시 불러온다 (예전엔 5초마다)
+    stopWatchingStatus = refreshOnChange(fetchChallengeStatus)
 
     const res = await api.get(`/api/chat-room/${roomId.value}/chat-messages`)
     messages.value = res.data
@@ -111,12 +115,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  // 폴링 중지
-  if (statusPollingInterval) {
-    clearInterval(statusPollingInterval)
-    statusPollingInterval = null
-    console.log('[ChatView] 도전 상태 폴링 중지')
-  }
+  stopWatchingStatus?.()
+  stopWatchingStatus = null
 
   // visualViewport 이벤트 리스너 제거
   if (window.visualViewport) {

@@ -1,5 +1,6 @@
 import { rememberReturnTo } from '../utils/authRedirect'
 import axios from 'axios'
+import { markServer } from '../stores/server'
 import { API_BASE_URL } from '@/config/server'
 
 let routerInstance = null
@@ -10,7 +11,9 @@ export const setRouter = (router) => {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true
+  withCredentials: true,
+  // 서버가 다시 켜지는 동안 요청이 끝없이 기다리지 않게 (배포 직후 등)
+  timeout: 15000,
 })
 
 // 요청 인터셉터: 토큰 자동 포함
@@ -26,8 +29,12 @@ api.interceptors.request.use(config => {
 
 
 api.interceptors.response.use(
-  response => response,
+  response => {
+    markServer(null)
+    return response
+  },
   async error => {
+    markServer(error)
     const config = error.config
 
     // 재시도 횟수 제한

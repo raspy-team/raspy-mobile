@@ -19,7 +19,8 @@ export function installOnboardingGuard(router) {
       return '/init'
     }
     try {
-      const { data } = await api.get('/api/auth/onboarding')
+      // 첫 화면을 그리기 전에 묻는 것이라 짧게 기다린다. 답이 없으면 막지 않고 들여보낸다
+      const { data } = await api.get('/api/auth/onboarding', { timeout: 6000 })
       if (data.termsAgreed && data.onboarded) {
         done = true
         return true

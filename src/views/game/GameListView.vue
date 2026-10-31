@@ -46,6 +46,12 @@
         </UiCard>
       </div>
 
+      <UiCard v-else-if="loadFailed && !games.length">
+        <UiEmptyState icon="fas fa-rotate-right" title="경기를 불러오지 못했어요" description="연결이 돌아오면 다시 시도해 주세요">
+          <UiButton variant="secondary" @click="retry">다시 시도</UiButton>
+        </UiEmptyState>
+      </UiCard>
+
       <UiCard v-else-if="!games.length">
         <UiEmptyState icon="fas fa-trophy" title="아직 열린 경기가 없어요" description="첫 경기를 만들면 여기에 올라가요">
           <UiButton to="/create-game">경기 만들기</UiButton>
@@ -160,16 +166,25 @@ const reportReason = ref('')
 const reportDetail = ref('')
 const reporting = ref(false)
 
+// 못 불러온 것과 비어 있는 것을 구분한다 (서버가 꺼졌는데 '열린 경기가 없어요'로 보이지 않게)
+const loadFailed = ref(false)
 async function fetchGames() {
   try {
     const { data } = await api.get('/api/games/list', { params: { sort: 'latest' } })
     games.value = data
+    loadFailed.value = false
+  } catch {
+    loadFailed.value = true
   } finally {
     loading.value = false
   }
 }
 
 const { pull, refreshing } = usePullToRefresh(fetchGames)
+function retry() {
+  loading.value = true
+  fetchGames()
+}
 
 async function apply(game) {
   busyId.value = game.id

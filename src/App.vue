@@ -12,6 +12,15 @@
     <!-- 하단 탭: 어느 화면에서든 큰 갈래로 돌아갈 수 있게 앱 전체에서 한 번만 그린다 -->
     <FooterNav v-if="footerTab !== null" :tab="footerTab" />
 
+    <!-- 서버에 닿지 않을 때: 화면마다 기다리게 두지 않고 위에 한 줄로 알린다 -->
+    <div v-if="serverDown" class="fixed inset-x-0 top-0 z-toast pt-safe" role="alert">
+      <div class="mx-4 mt-2 rounded-xl bg-surface-2 border border-line-strong px-4 py-3 flex items-center gap-3 text-sm">
+        <i class="fas fa-plug-circle-exclamation text-fg-muted" aria-hidden="true"></i>
+        <span class="flex-1 text-fg">서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요</span>
+        <button type="button" class="text-primary font-bold flex-shrink-0 px-1 py-2" @click="reload">다시 시도</button>
+      </div>
+    </div>
+
     <!-- 앱 전체 알림 한 줄 (window.alert도 여기로 온다) -->
     <CustomToast />
     <UiConfirmHost />
@@ -51,8 +60,10 @@ import { startInbox } from './stores/inbox'
 import UiDialog from './components/ui/UiDialog.vue'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
+import { serverDown } from './stores/server'
 
 const route = useRoute()
+const reload = () => window.location.reload()
 const router = useRouter()
 
 // 하단 탭을 보여줄 화면과 그때 켜질 탭. null이면 탭을 숨긴다 (가입·경기 진행·채팅처럼 한 가지에 집중하는 화면)

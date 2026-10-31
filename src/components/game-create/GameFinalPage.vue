@@ -7,7 +7,7 @@
     </div>
     <button
       @click="goHome"
-      class="w-full py-4 bg-orange-500 active:bg-orange-600 text-white text-base font-bold rounded-xl"
+     class="w-full py-4 bg-orange-500 active:bg-orange-600 text-white text-base font-bold rounded-xl"
     >
       내 경기 보기
     </button>

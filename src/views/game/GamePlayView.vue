@@ -39,11 +39,11 @@
           >
             <div class="flex flex-col items-center justify-center gap-1">
               <div
-                class="flex items-center justify-center font-semibold"
+               class="flex items-center justify-center font-medium"
                 style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)"
               >
                 <i class="fas fa-bullseye"></i>
-                <span class="ml-1 text-gray-100 font-semibold">세트 승점</span>
+                <span class="ml-1 text-gray-100 font-medium">세트 승점</span>
               </div>
               <div
                 class="flex items-center justify-center text-orange-400 font-extrabold"
@@ -62,11 +62,11 @@
           >
             <div class="flex flex-col items-center justify-center gap-1">
               <div
-                class="flex items-center justify-center font-semibold"
+               class="flex items-center justify-center font-medium"
                 style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)"
               >
                 <i class="fas fa-layer-group"></i>
-                <span class="ml-1 text-gray-100 font-semibold">세트 수</span>
+                <span class="ml-1 text-gray-100 font-medium">세트 수</span>
               </div>
               <div
                 class="flex items-center justify-center text-orange-400 font-extrabold"
@@ -85,11 +85,11 @@
           >
             <div class="flex flex-col items-center justify-center gap-1">
               <div
-                class="flex items-center justify-center font-semibold"
+               class="flex items-center justify-center font-medium"
                 style="font-size: clamp(0.65rem, 1.3vh, 0.75rem)"
               >
                 <i class="far fa-clock"></i>
-                <span class="ml-1 text-gray-100 font-semibold">세트 시간</span>
+                <span class="ml-1 text-gray-100 font-medium">세트 시간</span>
               </div>
               <div
                 class="flex items-center justify-center text-orange-400 font-extrabold"
@@ -107,7 +107,7 @@
       >
         <button
           @click="showLogModal = true"
-          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-lg font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
+         class="bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-lg font-medium shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
           style="
             padding: clamp(0.375rem, 1.2vh, 0.5rem) clamp(0.625rem, 2.5vw, 0.875rem);
             font-size: clamp(0.7rem, 2vw, 0.8rem);
@@ -116,7 +116,7 @@
           <i class="fas fa-list mr-1"></i>로그 보기
         </button>
         <button
-          class="bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-lg font-bold shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
+         class="bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-lg font-medium shadow-md hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200"
           style="
             padding: clamp(0.375rem, 1.2vh, 0.5rem) clamp(0.625rem, 2.5vw, 0.875rem);
             font-size: clamp(0.7rem, 2vw, 0.8rem);
@@ -131,7 +131,7 @@
     <div class="flex-1 flex flex-col items-center justify-center relative min-h-0 py-0">
       <div class="flex flex-col items-center" style="gap: clamp(0.125rem, 0.5vh, 0.25rem)">
         <div
-          class="font-bold"
+         class="font-medium"
           style="font-size: clamp(1.125rem, 3vh, 1.5rem)"
           :class="
             game.limitSeconds !== -1 && elapsedSeconds >= game.limitSeconds
@@ -161,7 +161,7 @@
                 >{{ currentScore1 }}</span
               >
               <span
-                class="font-bold text-orange-400"
+               class="font-medium text-orange-400"
                 style="
                   position: relative;
                   top: 0.1em;
@@ -175,7 +175,7 @@
               class="flex items-center"
               style="margin-left: clamp(0.5rem, 2vw, 1rem); margin-right: clamp(0.5rem, 2vw, 1rem)"
             >
-              <span class="font-bold text-orange-500" style="font-size: clamp(2.5rem, 7vh, 5rem)"
+              <span class="font-medium text-orange-500" style="font-size: clamp(2.5rem, 7vh, 5rem)"
                 >:</span
               >
             </div>
@@ -186,7 +186,7 @@
                 >{{ currentScore2 }}</span
               >
               <span
-                class="font-bold text-orange-400"
+               class="font-medium text-orange-400"
                 style="
                   position: relative;
                   top: 0.1em;
@@ -211,7 +211,7 @@
                   margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
                 "
               />
-              <div class="font-bold mb-1" style="font-size: clamp(0.875rem, 2.5vh, 1.125rem)">
+              <div class="font-medium mb-1" style="font-size: clamp(0.875rem, 2.5vh, 1.125rem)">
                 {{ user1.nickname }}
               </div>
               <div
@@ -221,7 +221,7 @@
                 <button
                   @click="socket_sendScore(1, 1)"
                   :disabled="isSetOver || isGameOver || isCountingDown"
-                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
+                 class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-medium max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -256,7 +256,7 @@
                   margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
                 "
               />
-              <div class="font-bold mb-1" style="font-size: clamp(0.875rem, 2.5vh, 1.125rem)">
+              <div class="font-medium mb-1" style="font-size: clamp(0.875rem, 2.5vh, 1.125rem)">
                 {{ user2.nickname }}
               </div>
               <div
@@ -266,7 +266,7 @@
                 <button
                   @click="socket_sendScore(2, 1)"
                   :disabled="isSetOver || isGameOver || isCountingDown"
-                  class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-bold max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
+                 class="bg-gray-700 text-gray-100 w-[28vw] sm:w-[38dvw] py-2 sm:py-3 rounded-t-xl rounded-b-none shadow hover:scale-110 transition text-[2rem] sm:text-[2.8rem] font-medium max-w-[140px] sm:max-w-[180px] min-w-[64px] sm:min-w-[90px] disabled:opacity-50 disabled:cursor-not-allowed"
                   style="
                     border-top-left-radius: 0.5rem;
                     border-top-right-radius: 0.5rem;
@@ -306,7 +306,7 @@
         <button
           v-if="!isSetOver && !isGameOver && !isCountingDown"
           @click="manualFinishSet"
-          class="flex-1 bg-orange-600 text-white rounded-xl font-bold shadow-lg hover:brightness-110 transition"
+         class="flex-1 bg-orange-600 text-white rounded-xl font-bold shadow-lg hover:brightness-110 transition"
           style="
             padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem);
             font-size: clamp(0.875rem, 2.5vh, 1.125rem);
@@ -347,7 +347,7 @@
       <div class="w-full grid grid-cols-2 mb-10" style="gap: clamp(0.375rem, 1vw, 0.5rem)">
         <button
           @click="openConfirm('정말로 경기를 재시작 하겠습니까?', socket_resetGame)"
-          class=" bg-blue-500 text-white rounded-xl font-bold shadow-lg hover:bg-blue-600 hover:scale-105 transition-all duration-200"
+         class=" bg-blue-500 text-white rounded-xl font-medium shadow-lg hover:bg-blue-600 hover:scale-105 transition-all duration-200"
           style="
             padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem);
             font-size: clamp(0.875rem, 2.5vh, 1.125rem);
@@ -357,7 +357,7 @@
         </button>
         <button
           @click="openConfirm('정말로 경기를 즉시 종료합니까?', socket_finishGame)"
-          class=" bg-red-500 text-white rounded-xl font-bold shadow-lg hover:bg-red-600 hover:scale-105 transition-all duration-200"
+         class=" bg-red-500 text-white rounded-xl font-bold shadow-lg hover:bg-red-600 hover:scale-105 transition-all duration-200"
           style="
             padding: clamp(0.75rem, 2vh, 1rem) clamp(0.75rem, 2vw, 1rem);
             font-size: clamp(0.875rem, 2.5vh, 1.125rem);
@@ -376,7 +376,7 @@
             광고
           </div>
           <div class="flex-1 flex items-center justify-center text-gray-200 text-xs font-medium">
-            클래시오브클랜 <span class="text-orange-500 font-semibold">회원</span> 모집중!
+            클래시오브클랜 <span class="text-orange-500 font-medium">회원</span> 모집중!
           </div>
         </div>
       </div> -->
@@ -388,10 +388,10 @@
       class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60]"
     >
       <div class="text-center">
-        <div class="text-orange-400 text-xl sm:text-2xl font-semibold mb-4">
+        <div class="text-orange-400 text-xl sm:text-2xl font-bold mb-4">
           세트 {{ currentSet }} 시작까지
         </div>
-        <div class="text-orange-500 text-[25vw] sm:text-[30vw] font-bold animate-countdown">
+        <div class="text-orange-500 text-[25vw] sm:text-[30vw] font-medium animate-countdown">
           {{ countdown }}
         </div>
         <div class="text-gray-400 text-base sm:text-lg mt-4">준비하세요!</div>
@@ -407,7 +407,7 @@
       >
         <button
           @click="(startSet(), (showStartButton = false))"
-          class=" bg-blue-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-blue-600 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+         class=" bg-blue-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-blue-600 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
           1세트 시작
         </button>
@@ -423,7 +423,7 @@
       >
         <button
           @click="socket_nextSet"
-          class=" bg-orange-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-orange-600 transition-all duration-200 hover:scale-105 whitespace-nowrap"
+         class=" bg-orange-500 w-full min-w-[240px] sm:min-w-[320px] text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-orange-600 transition-all duration-200 hover:scale-105 whitespace-nowrap"
         >
           {{ currentSet }}세트 시작
         </button>

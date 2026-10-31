@@ -30,7 +30,7 @@
       </div>
       <button
         @click="showAddressErrorModal = false"
-        class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition shadow"
+       class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition shadow"
       >
         확인
       </button>

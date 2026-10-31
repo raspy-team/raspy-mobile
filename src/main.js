@@ -10,7 +10,7 @@ import { useToast } from './composable/useToast'
 
 setRouter(router) // api.js에 router 주입
 
-// 깨진 이미지가 alt 글자로 화면에 새지 않게: 동그란 프로필 이미지는 기본 아바타로, 나머지는 숨긴다
+// 깨진 이미지가 alt 글자로 화면에 새지 않게: 동그란 프로필 이미지는 기본 아바타로, 나머지는 자리까지 접는다
 window.addEventListener(
   'error',
   (e) => {
@@ -19,7 +19,7 @@ window.addEventListener(
     img.dataset.fallback = '1'
     img.alt = ''
     if (img.classList.contains('rounded-full')) img.src = DefaultAvatar
-    else img.style.visibility = 'hidden'
+    else img.style.display = 'none'
   },
   true,
 )

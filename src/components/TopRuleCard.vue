@@ -16,7 +16,7 @@
 
     <!-- Content Section -->
     <div class="flex-1 min-w-0 relative">
-      <h4 class="text-base font-bold text-gray-200 truncate mb-1">
+      <h4 class="text-base font-medium text-gray-200 truncate mb-1">
         {{ rule.ruleTitle }}
       </h4>
       <div class="flex items-center gap-3 flex-wrap">

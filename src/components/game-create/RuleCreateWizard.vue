@@ -11,13 +11,13 @@
       <div class="fixed bottom-10 w-full p-5 flex gap-2">
         <button
           @click="$emit('back')"
-          class="w-full py-4 text-gray-300 bg-gray-800 border border-gray-600 text-lg font-bold rounded-xl hover:bg-gray-700 transition"
+         class="w-full py-4 text-gray-300 bg-gray-800 border border-gray-600 text-lg font-bold rounded-xl hover:bg-gray-700 transition"
         >
           이전
         </button>
         <button
           @click="$emit('next', form)"
-          class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl hover:bg-orange-600 transition"
+         class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl hover:bg-orange-600 transition"
         >
           다음
         </button>
@@ -39,14 +39,14 @@
       <div class="flex w-full gap-3">
         <button
           @click="goBackStep()"
-          class="flex-1 py-4 text-lg font-bold rounded-xl border border-gray-600 bg-gray-800 text-gray-300 hover:bg-gray-700 transition"
+         class="flex-1 py-4 text-lg font-bold rounded-xl border border-gray-600 bg-gray-800 text-gray-300 hover:bg-gray-700 transition"
         >
           이전
         </button>
         <button
           @click="handleNext"
           :disabled="!isValid"
-          class="flex-1 py-4 text-lg font-bold rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition"
+         class="flex-1 py-4 text-lg font-bold rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition"
           :class="{ 'opacity-60': !isValid }"
         >
           {{ step === 14 ? (isEditMode ? '수정 요청' : '제출') : '다음' }}

@@ -11,7 +11,7 @@
     <!-- Error State -->
     <div v-else-if="error" class="bg-red-900/20 border border-red-600 rounded-2xl p-6 text-center">
       <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-3"></i>
-      <p class="text-red-300 font-semibold mb-2">데이터를 불러올 수 없습니다</p>
+      <p class="text-red-300 font-medium mb-2">데이터를 불러올 수 없습니다</p>
       <p class="text-red-400 text-sm">{{ error }}</p>
       <button
         @click="$emit('retry')"
@@ -54,14 +54,14 @@
         </div>
         <div class="flex items-center justify-between pt-3 border-t border-white/30">
           <span class="text-sm opacity-90">플레이 횟수</span>
-          <span class="font-semibold">{{ currentUserRanking.playCount }}회</span>
+          <span class="font-medium">{{ currentUserRanking.playCount }}회</span>
         </div>
       </div>
 
       <!-- No Ranking for Current User -->
       <div v-else class=" bg-gray-700 rounded-2xl p-6 text-center">
         <i class="fas fa-trophy text-gray-400 text-3xl mb-2"></i>
-        <p class="text-gray-300 font-semibold mb-1">나는 아직 이 규칙으로 플레이한 기록이 없어요</p>
+        <p class="text-gray-300 font-medium mb-1">나는 아직 이 규칙으로 플레이한 기록이 없어요</p>
         <p class="text-gray-400 text-sm">첫 경기를 시작해보세요!</p>
       </div>
 
@@ -127,7 +127,7 @@
                 <i class="fas fa-user text-yellow-600 text-xl"></i>
               </div>
               <div
-                class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold shadow-lg"
+               class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-yellow-400 text-white flex items-center justify-center font-medium shadow-lg"
               >
                 <i class="fas fa-crown text-sm"></i>
               </div>
@@ -205,7 +205,7 @@
               </div>
             </div>
             <div class="flex-1">
-              <p class="font-semibold text-white">{{ ranking.userName }}</p>
+              <p class="font-medium text-white">{{ ranking.userName }}</p>
               <p class="text-sm text-gray-300">{{ ranking.playCount }}회 플레이</p>
             </div>
             <div class="text-right">
@@ -279,7 +279,7 @@
       <!-- Empty State -->
       <div v-if="rankings.length === 0" class="bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
         <i class="fas fa-users-slash text-gray-400 text-5xl mb-4"></i>
-        <p class="text-gray-300 font-semibold mb-2">아직 랭킹 정보가 없습니다</p>
+        <p class="text-gray-300 font-medium mb-2">아직 랭킹 정보가 없습니다</p>
         <p class="text-gray-400 text-sm">이 규칙으로 첫 경기를 시작해보세요!</p>
       </div>
     </template>

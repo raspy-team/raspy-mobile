@@ -13,7 +13,7 @@
           </div>
         </div>
         <div>
-          <span class="text-base font-bold text-gray-200 truncate block">
+          <span class="text-base font-medium text-gray-200 truncate block">
             {{ rule.ruleTitle }}
           </span>
           <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -47,7 +47,7 @@
     <!-- CTA & Info -->
     <div class="flex justify-center items-center text-center mt-4 gap-4">
       <button class="game-cta text-center px-6" @click.stop="onGameCtaClick">
-        <div class="text-center flex justify-center items-center font-semibold gap-2">생성</div>
+        <div class="text-center flex justify-center items-center font-medium gap-2">생성</div>
       </button>
 
       <div class="flex flex-col items-start text-xs text-gray-400 font-medium gap-1">
@@ -96,13 +96,13 @@
         <div class="flex gap-3 w-full">
           <button
             @click="confirmVisible = false"
-            class="flex-1 py-3 bg-gray-700 text-gray-300 rounded-xl font-bold text-base hover:bg-gray-600 active:scale-98 transition-all duration-200"
+           class="flex-1 py-3 bg-gray-700 text-gray-300 rounded-xl font-medium text-base hover:bg-gray-600 active:scale-98 transition-all duration-200"
           >
             취소
           </button>
           <button
             @click="onGameCreateConfirm"
-            class="flex-1 py-3 bg-orange-500 text-white rounded-xl font-bold text-base hover:bg-orange-600 active:scale-98 transition-all duration-200"
+           class="flex-1 py-3 bg-orange-500 text-white rounded-xl font-bold text-base hover:bg-orange-600 active:scale-98 transition-all duration-200"
           >
             생성
           </button>
@@ -141,7 +141,7 @@
         <button
           @click.stop="submitReport"
           :disabled="!reportReason.trim() || reportLoading"
-          class="w-full bg-red-500 text-white py-3 rounded-xl font-bold mt-1 disabled:bg-gray-600 hover:bg-red-600 active:scale-98 transition-all duration-200"
+         class="w-full bg-red-500 text-white py-3 rounded-xl font-bold mt-1 disabled:bg-gray-600 hover:bg-red-600 active:scale-98 transition-all duration-200"
         >
           {{ reportLoading ? '신고 중...' : '신고하기' }}
         </button>

@@ -11,7 +11,7 @@
           />
         </div>
         <div>
-          <span class="text-base font-bold text-white truncate block">
+          <span class="text-base font-medium text-white truncate block">
             {{ rule.ruleTitle }}
           </span>
           <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -65,15 +65,15 @@
       <div class="flex flex-col text-xs text-gray-400 gap-1.5">
         <div class="flex items-center gap-1.5">
           <i class="fas fa-star text-yellow-500"></i>
-          <span class="font-semibold">평점: {{ rule.rating ? rule.rating.toFixed(1) : '-' }}</span>
+          <span class="font-medium">평점: {{ rule.rating ? rule.rating.toFixed(1) : '-' }}</span>
         </div>
         <div class="flex items-center gap-1.5">
           <i class="fas fa-gamepad text-orange-500"></i>
-          <span class="font-semibold">플레이: {{ rule.playCount || 0 }}회</span>
+          <span class="font-medium">플레이: {{ rule.playCount || 0 }}회</span>
         </div>
         <div class="flex items-center gap-1.5">
           <i class="fas fa-clock text-blue-500"></i>
-          <span class="font-semibold text-gray-500">
+          <span class="font-medium text-gray-500">
             {{ rule.lastPlayedAt ? formatDate(rule.lastPlayedAt) : '플레이 기록 없음' }}
           </span>
         </div>
@@ -83,14 +83,14 @@
         <button
           v-if="!rule.editRequestStatus || rule.editRequestStatus === 'REJECTED'"
           @click.stop="$emit('editRule', rule)"
-          class="px-4 py-2.5 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition shadow-sm flex items-center gap-1.5"
+         class="px-4 py-2.5 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition shadow-sm flex items-center gap-1.5"
         >
           <i class="fas fa-edit text-sm"></i>
           <span>수정</span>
         </button>
         <button
           @click.stop="$emit('createGame', rule)"
-          class="px-4 py-2.5 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition shadow-sm flex items-center gap-1.5"
+         class="px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition shadow-sm flex items-center gap-1.5"
         >
           <i class="fas fa-play text-sm"></i>
           <span>생성</span>

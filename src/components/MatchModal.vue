@@ -21,7 +21,7 @@
               />
             </div>
             <div>
-              <div class="text-base font-bold text-white mb-1 truncate">
+              <div class="text-base font-medium text-white mb-1 truncate">
                 {{ rule.ruleTitle }}
               </div>
               <div class="flex gap-1 items-center mt-1 text-xs text-orange-400 font-medium">
@@ -73,19 +73,19 @@
           <div class="pt-2 space-y-3 text-base text-gray-300 border-t border-gray-600">
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-400 font-medium">세트 승리 기준</span>
-              <span class="text-white font-semibold">{{ rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달' }}</span>
+              <span class="text-white font-medium">{{ rule.winBy === 'SETS_HALF_WIN' ? '점수 달성' : '시간 도달' }}</span>
             </div>
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-400 font-medium">한 세트 승리 점수</span>
-              <span class="text-white font-semibold">{{ rule.pointsToWin === -1 ? '제한 없음' : rule.pointsToWin + '점' }}</span>
+              <span class="text-white font-medium">{{ rule.pointsToWin === -1 ? '제한 없음' : rule.pointsToWin + '점' }}</span>
             </div>
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-400 font-medium">총 세트 수</span>
-              <span class="text-white font-semibold">{{ rule.setsToWin }}세트</span>
+              <span class="text-white font-medium">{{ rule.setsToWin }}세트</span>
             </div>
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-400 font-medium">세트 제한 시간</span>
-              <span class="text-white font-semibold">{{ formatDuration(rule.duration) }}</span>
+              <span class="text-white font-medium">{{ formatDuration(rule.duration) }}</span>
             </div>
           </div>
         </div>

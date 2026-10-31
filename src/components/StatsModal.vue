@@ -29,7 +29,7 @@
 
         <!-- Title -->
         <div class="flex flex-col gap-2 items-center mb-5 mt-1">
-          <span class="text-base font-bold text-gray-100 text-center">
+          <span class="text-base font-medium text-gray-100 text-center">
             <template v-if="currentView === 'main'">{{ nickname }}님의 통계</template>
             <template v-else-if="currentView === 'champions'">챔피언 목록</template>
             <template v-else-if="currentView === 'friends'">친구 목록</template>
@@ -170,7 +170,7 @@
               </svg>
             </span>
             <span
-              class="block text-lg font-bold drop-shadow mt-1"
+             class="block text-lg font-bold drop-shadow mt-1"
               :style="championCount > 0 ? 'color : #F5C542' : 'color : #4d4d4d'"
               >{{ championCount }}</span
             >
@@ -333,13 +333,13 @@
         <div class="flex gap-3">
           <button
             @click="cancelUnfriend"
-            class="flex-1 py-3 px-4 bg-gray-800 text-gray-200 font-semibold rounded-xl hover:bg-gray-700 transition-all"
+           class="flex-1 py-3 px-4 bg-gray-800 text-gray-200 font-medium rounded-xl hover:bg-gray-700 transition-all"
           >
             취소
           </button>
           <button
             @click="confirmUnfriend"
-            class="flex-1 py-3 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all"
+           class="flex-1 py-3 px-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all"
           >
             끊기
           </button>

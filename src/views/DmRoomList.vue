@@ -54,7 +54,7 @@
             <!-- 메시지 정보 -->
             <div class="flex-1 min-w-0">
               <div class="flex items-baseline justify-between mb-1">
-                <h3 class="font-semibold text-white text-base truncate">
+                <h3 class="font-bold text-white text-base truncate">
                   {{ dm.targetUserNickname }}
                 </h3>
                 <span class="text-xs text-gray-500 ml-3 flex-shrink-0">
@@ -88,7 +88,7 @@
         >
           <div class="flex items-center gap-3">
             <i class="fas fa-exclamation-circle text-xl"></i>
-            <span class="font-semibold">{{ errorMessage }}</span>
+            <span class="font-medium">{{ errorMessage }}</span>
           </div>
         </div>
       </div>

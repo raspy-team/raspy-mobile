@@ -27,7 +27,7 @@
             >
               <h2
                 v-if="winnerIdx == 1"
-                class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
+               class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
                 style="animation: gradient-x 2.5s linear infinite"
               >
                 승리하셨습니다!
@@ -48,7 +48,7 @@
             >
               <h2
                 v-if="winnerIdx == 2"
-                class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
+               class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
                 style="animation: gradient-x 2.5s linear infinite"
               >
                 승리하셨습니다!
@@ -89,32 +89,32 @@
         <!-- 점수판 -->
         <div class="flex justify-around items-center py-4">
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-bold text-orange-500 mb-3 leading-none">
+            <p class="text-[7rem] sm:text-[10rem] font-bold text-white mb-3 leading-none">
               {{ user1SetCount }}
             </p>
             <img
               :src="user1.profileUrl || defaultImg"
-              class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
+              class="w-16 h-16 rounded-full mb-1"
             />
             <p class="text-sm font-medium text-white">{{ user1.nickname }}</p>
           </div>
           <div class="flex flex-col items-center mx-6 sm:mx-20">
-            <span class="text-base sm:text-xl font-bold text-orange-900 mb-2 select-none"
+            <span class="text-base sm:text-xl font-medium text-gray-500 mb-2 select-none"
               >경기 종료</span
             >
             <span
-              class="text-[5rem] sm:text-[8rem] font-bold text-orange-300 select-none leading-none self-center flex items-center"
+             class="text-[5rem] sm:text-[8rem] font-medium text-gray-600 select-none leading-none self-center flex items-center"
               style="line-height: 1"
               >:</span
             >
           </div>
           <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-bold text-orange-500 mb-3 leading-none">
+            <p class="text-[7rem] sm:text-[10rem] font-bold text-white mb-3 leading-none">
               {{ user2SetCount }}
             </p>
             <img
               :src="user2.profileUrl || defaultImg"
-              class="w-16 h-16 rounded-full mb-1 border-2 border-orange-500"
+              class="w-16 h-16 rounded-full mb-1"
             />
             <p class="text-sm font-medium text-white">{{ user2.nickname }}</p>
           </div>
@@ -127,20 +127,20 @@
           </h3>
 
           <!-- 촬영/선택된 미디어가 없을 때 -->
-          <div v-if="allPictures.length === 0" class="text-center py-6 text-gray-400 bg-gray-700 rounded-lg">
+          <div v-if="allPictures.length === 0" class="text-center py-6 text-gray-400 bg-gray-900 border border-gray-800 rounded-xl">
 
             <i class="fas fa-images text-4xl mb-2"></i>
             <p class="text-sm mb-3">촬영된 미디어가 없습니다</p>
             <div class="flex gap-2 justify-center">
               <button
                 @click="openCamera"
-                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:brightness-110 transition"
+                class="bg-gray-700 text-gray-100 px-4 py-2 rounded-lg text-sm font-medium"
               >
                 <i class="fas fa-camera mr-1"></i> 사진 촬영
               </button>
               <button
                 @click="openVideoRecorder"
-                class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:brightness-110 transition"
+                class="bg-gray-700 text-gray-100 px-4 py-2 rounded-lg text-sm font-medium"
               >
                 <i class="fas fa-video mr-1"></i> 동영상 촬영
               </button>
@@ -289,13 +289,13 @@
             <div v-if="allPictures.length < 5" class="flex gap-2">
               <button
                 @click="openCamera"
-                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
+                class="flex-1 border-2 border-dashed border-gray-600 text-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
               >
                 <i class="fas fa-camera mr-1"></i> 사진 추가 ({{ allPictures.length }}/5)
               </button>
               <button
                 @click="openVideoRecorder"
-                class="flex-1 border-2 border-dashed border-orange-300 text-orange-500 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
+                class="flex-1 border-2 border-dashed border-gray-600 text-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
               >
                 <i class="fas fa-video mr-1"></i> 동영상 추가 ({{ allPictures.length }}/5)
               </button>
@@ -308,10 +308,10 @@
           class="p-5 space-y-5 text-left bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50"
         >
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-              <i class="fas fa-user-friends text-orange-400 text-sm"></i>
+            <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center">
+              <i class="fas fa-user-friends text-gray-400 text-sm"></i>
             </div>
-            <h3 class="text-base font-semibold text-white">
+            <h3 class="text-base font-bold text-white">
               {{ user1.id == currentUserId ? user2.nickname : user1.nickname }} 님을 평가해주세요
             </h3>
           </div>
@@ -319,7 +319,7 @@
           <div class="space-y-4">
             <div class="space-y-2.5">
               <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
-                <i class="fas fa-heart text-orange-400 text-xs"></i>
+                <i class="fas fa-heart text-gray-400 text-xs"></i>
                 매너
               </label>
               <div class="flex gap-2 items-center">
@@ -340,7 +340,7 @@
 
             <div class="space-y-2.5">
               <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
-                <i class="fas fa-fire text-orange-400 text-xs"></i>
+                <i class="fas fa-fire text-gray-400 text-xs"></i>
                 퍼포먼스
               </label>
               <div class="flex gap-2 items-center">
@@ -389,10 +389,10 @@
                 <!-- 헤더 -->
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-800 bg-gray-800/80 ">
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-orange-500/15 flex items-center justify-center">
-                      <i class="fas fa-comment-dots text-orange-400"></i>
+                    <div class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center">
+                      <i class="fas fa-comment-dots text-gray-400"></i>
                     </div>
-                    <span class="font-semibold text-lg text-white">상대방 리뷰</span>
+                    <span class="font-bold text-lg text-white">상대방 리뷰</span>
                   </div>
                   <button
                     @click="showReviewModal = false"
@@ -437,7 +437,7 @@
             <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
               <i class="fas fa-book text-purple-400 text-sm"></i>
             </div>
-            <h3 class="text-base font-semibold text-white">이 규칙은 어떠셨나요?</h3>
+            <h3 class="text-base font-bold text-white">이 규칙은 어떠셨나요?</h3>
           </div>
           <p class="text-xs text-gray-400 -mt-2">
             규칙의 재미, 명확성, 밸런스를 평가해주세요. 여러분의 평가는 다른 사용자들에게 도움이
@@ -495,7 +495,7 @@
                     <div class="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center">
                       <i class="fas fa-comment-dots text-purple-400"></i>
                     </div>
-                    <span class="font-semibold text-lg text-white">규칙 평가 의견</span>
+                    <span class="font-bold text-lg text-white">규칙 평가 의견</span>
                   </div>
                   <button
                     @click="showRuleReviewModal = false"
@@ -533,10 +533,10 @@
         </div>
 
         <div class="flex justify-center gap-3 mt-6">
-          <button @click="sendFriendRequest" class="px-5 py-2.5 rounded-xl bg-blue-500/20 text-blue-400 font-semibold border border-blue-500/30 hover:bg-blue-500/30 transition-all">
+          <button @click="sendFriendRequest" class="px-5 py-2.5 rounded-xl bg-blue-500/20 text-blue-400 font-medium border border-blue-500/30 hover:bg-blue-500/30 transition-all">
             <i class="fas fa-user-plus mr-1.5 text-sm"></i>친구 추가
           </button>
-          <button @click="onShare" class="px-5 py-2.5 rounded-xl bg-green-500/20 text-green-400 font-semibold border border-green-500/30 hover:bg-green-500/30 transition-all">
+          <button @click="onShare" class="px-5 py-2.5 rounded-xl bg-green-500/20 text-green-400 font-bold border border-green-500/30 hover:bg-green-500/30 transition-all">
             <i class="fas fa-share-alt mr-1.5 text-sm"></i>결과 공유
           </button>
 
@@ -548,7 +548,7 @@
     <button
       @click="submitReviewAndGoHome"
       :disabled="isSubmitting"
-      class="flex-shrink-0 w-full text-gray-100 py-4 bg-orange-500 text-white font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+     class="flex-shrink-0 w-full text-gray-100 py-4 bg-orange-500 text-white font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
     >
       제출하기
     </button>
@@ -563,7 +563,7 @@
       <div
         class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500 border-orange-500/30 mb-4"
       ></div>
-      <p class="text-lg font-semibold text-gray-200">제출 중...</p>
+      <p class="text-lg font-bold text-gray-200">제출 중...</p>
       <p class="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
     </div>
 

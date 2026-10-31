@@ -12,7 +12,7 @@
         <div class="text-center space-y-8 px-8">
           <span class="raspy">Match</span>
           <p class="brand-desc">
-            즐기고, 경쟁하는 <span class="text-[var(--point-color)] font-bold">스포츠 플랫폼</span>
+            즐기고, 경쟁하는 <span class="text-[var(--point-color)] font-medium">스포츠 플랫폼</span>
           </p>
         </div>
       </div>
@@ -61,7 +61,7 @@
             <!-- Button -->
             <button
               type="submit"
-              class="w-full py-3 bg-[var(--point-color)] text-white rounded-lg font-semibold hover:bg-opacity-90 transition text-base mt-2"
+             class="w-full py-3 bg-[var(--point-color)] text-white rounded-lg font-medium hover:bg-opacity-90 transition text-base mt-2"
             >
               {{ isSignup ? '가입하고 시작하기' : '로그인' }}
             </button>
@@ -72,7 +72,7 @@
           <!-- 가입/로그인 전환 -->
           <p class="text-center text-sm text-gray-500">
             {{ isSignup ? '이미 계정이 있나요?' : '처음이세요?' }}
-            <button type="button" class="font-semibold text-[var(--point-color)] ml-1" @click="toggleMode">
+            <button type="button" class="font-medium text-[var(--point-color)] ml-1" @click="toggleMode">
               {{ isSignup ? '로그인' : '가입하기' }}
             </button>
           </p>

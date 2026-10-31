@@ -104,7 +104,7 @@
           <button
             type="submit"
             :disabled="!canSubmit || isLoading"
-            class="px-4 py-2 rounded-full text-white bg-orange-500 disabled:bg-gray-600 font-semibold text-base transition flex items-center justify-center"
+           class="px-4 py-2 rounded-full text-white bg-orange-500 disabled:bg-gray-600 font-bold text-base transition flex items-center justify-center"
             style="height: 38px"
           >
             게시

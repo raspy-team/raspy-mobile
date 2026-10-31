@@ -12,7 +12,7 @@
         <div class="flex justify-between items-start">
           <div class="space-y-2 w-full">
             <div class="mb-1 flex">
-              <span class="font-bold text-gray-500 block w-32 h-5 bg-gray-700 rounded"></span>
+              <span class="font-medium text-gray-500 block w-32 h-5 bg-gray-700 rounded"></span>
               <span class="flex ml-3 w-6 h-6 bg-gray-700 rounded-full"></span>
             </div>
             <div class="text-xs flex gap-1 items-center">
@@ -54,7 +54,7 @@
               </div>
               <div class="flex-1">
                 <div class="flex items-center gap-2">
-                  <span class="text-base font-bold text-gray-100 truncate block">
+                  <span class="text-base font-medium text-gray-100 truncate block">
                     {{ game.rule.ruleTitle }}
                   </span>
                   <i class="fas fa-info-circle text-orange-400 text-sm"></i>
@@ -141,7 +141,7 @@
                 <i class="fas fa-times text-xl"></i>
               </button>
 
-              <h2 class="text-xl font-bold mb-6 text-white pr-8">도전자 목록</h2>
+              <h2 class="text-xl font-bold mb-6 text-white pr-8">신청자</h2>
 
               <!-- 생성자 정보 (신청한 게임의 경우) -->
               <template v-if="selectedApplicantsGame.type === 'sent'">
@@ -162,7 +162,7 @@
                     />
                     <div class="flex-1">
                       <p
-                        class="text-base font-bold flex items-center gap-2 text-white"
+                       class="text-base font-medium flex items-center gap-2 text-white"
                         :class="
                           selectedApplicantsGame.championId ==
                           (selectedApplicantsGame.ownerId || selectedApplicantsGame.myId)
@@ -222,7 +222,7 @@
               >
                 <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
                   <i class="fas fa-users text-orange-400 mr-2"></i>
-                  도전자 ({{ selectedApplicantsGame.applicants.length }}명)
+                  신청자 ({{ selectedApplicantsGame.applicants.length }}명)
                 </h3>
                 <div class="space-y-3">
                   <div
@@ -241,7 +241,7 @@
                         />
                         <div class="flex-1">
                           <p
-                            class="text-base font-bold flex items-center gap-2 text-white"
+                           class="text-base font-medium flex items-center gap-2 text-white"
                             :class="
                               selectedApplicantsGame.championId == user.userId
                                 ? 'text-yellow-400'
@@ -293,7 +293,7 @@
               </div>
               <div v-else class="text-center text-gray-400 text-sm py-8">
                 <i class="fas fa-users text-3xl text-gray-400 mb-3"></i>
-                <p>아직 도전자가 없습니다.</p>
+                <p>아직 신청자가 없어요.</p>
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@
               <button
                 v-if="game.gameStatus === 'IN_PROGRESS'"
                 @click.stop="joinGame(game.id)"
-                class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
+               class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
               >
                 <i class="fas fa-sign-in-alt mr-2"></i>경기 참여
               </button>
@@ -357,7 +357,7 @@
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-xl font-medium text-sm hover:bg-blue-200 transition"
                 @click.stop="openApplicantsModal(game)"
               >
-                도전자 {{ game.applicants.length }}명
+                신청자 {{ game.applicants.length }}명
               </button>
             </div>
           </div>
@@ -367,21 +367,21 @@
             <div class="pt-3 flex gap-2">
               <button
                 v-if="game.status === 'IN_PROGRESS'"
-                class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
+               class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow hover:bg-orange-400 transition active:scale-95"
                 @click.stop="joinGame(game.id)"
               >
                 <i class="fas fa-sign-in-alt mr-2"></i>경기 참여
               </button>
               <button
                 v-else-if="game.isOwner && canStart(game)"
-                class="flex-1 min-w-0 bg-[#56b97b] text-white font-bold rounded-xl py-3 px-0 shadow transition active:scale-95"
+               class="flex-1 min-w-0 bg-[#56b97b] text-white font-medium rounded-xl py-3 px-0 shadow transition active:scale-95"
                 @click.stop="openStartModal(game)"
               >
                 <i class="fas fa-play mr-2"></i>경기 시작
               </button>
               <button
                 v-else-if="game.isOwner && !game.opponentNickname"
-                class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow transition active:scale-95"
+               class="flex-1 min-w-0 bg-orange-500 text-white font-bold rounded-xl py-3 px-0 shadow transition active:scale-95"
                 @click.stop="shareGame(game.id)"
               >
                 <i class="fas fa-share mr-2"></i>공유
@@ -396,7 +396,7 @@
                 class="flex-1 min-w-0 flex items-center justify-center gap-2 py-3 px-0 bg-blue-100 text-blue-700 rounded-xl font-medium text-sm hover:bg-blue-200 transition"
                 @click.stop="openApplicantsModal(game)"
               >
-                도전자 {{ game.applicants.length }}명
+                신청자 {{ game.applicants.length }}명
               </button>
               <button
                 v-if="game.isOwner && game.status !== 'IN_PROGRESS' && game.status !== 'COMPLETED'"
@@ -417,7 +417,7 @@
         <p class="text-sm text-gray-400 mt-2">열린 경기에 신청하거나 직접 만들어보세요</p>
         <button
           @click="router.push('/')"
-          class="mt-6 px-6 py-3 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
+         class="mt-6 px-6 py-3 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
         >
           경기 찾기
         </button>
@@ -454,7 +454,7 @@
             <i class="fas fa-location-dot text-orange-600 text-xl"></i>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-base font-bold text-white mb-1 break-words">
+            <p class="text-base font-medium text-white mb-1 break-words">
               {{ currentGameLocation }}
             </p>
             <p class="text-xs text-orange-600 font-medium">
@@ -468,13 +468,13 @@
       <div class="space-y-3">
         <button
           @click="continueWithExistingLocation"
-          class="w-full py-4 px-6 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all"
+         class="w-full py-4 px-6 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all"
         >
           <i class="fas fa-check-circle mr-2"></i>이 장소로 계속하기
         </button>
         <button
           @click="changeLocation"
-          class="w-full py-3 px-6 rounded-xl bg-gray-900 border-2 border-gray-800 hover:border-orange-300 hover:bg-orange-500/10 text-gray-200 font-semibold active:scale-95 transition-all"
+         class="w-full py-3 px-6 rounded-xl bg-gray-900 border-2 border-gray-800 hover:border-orange-300 hover:bg-orange-500/10 text-gray-200 font-bold active:scale-95 transition-all"
         >
           <i class="fas fa-edit mr-2"></i>다른 장소로 변경
         </button>
@@ -494,7 +494,7 @@
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100000]"
   >
     <div class="bg-black p-6 m-5 rounded-2xl w-full max-w-md shadow-lg">
-      <h2 class="text-lg font-semibold mb-4">경기 장소 설정</h2>
+      <h2 class="text-lg font-bold mb-4">경기 장소 설정</h2>
       <div class="mb-4">
         <label class="block text-sm font-medium text-gray-200 mb-2">
           <i class="fas fa-search mr-1 text-orange-500"></i>
@@ -540,7 +540,7 @@
         <div class="flex items-start gap-3">
           <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-100 mb-1">{{ selectedPlace.name }}</p>
+            <p class="font-medium text-gray-100 mb-1">{{ selectedPlace.name }}</p>
             <p class="text-sm text-gray-400">{{ selectedPlace.address }}</p>
           </div>
           <button @click="clearSelection" class="text-gray-400 hover:text-gray-400 transition">
@@ -583,7 +583,7 @@
         {{ countdownDurationText }}
       </div>
       <p class="text-xs text-gray-400 mb-5">
-        아래 <span class="font-semibold text-orange-500">"바로 시작하기"</span> 버튼을 누르면 즉시
+        아래 <span class="font-medium text-orange-500">"바로 시작하기"</span> 버튼을 누르면 즉시
         경기가 시작되고 상대방에게도 표시됩니다.
       </p>
       <div class="flex justify-end gap-2">
@@ -618,7 +618,7 @@
       </div>
       <button
         @click="showAddressErrorModal = false"
-        class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition shadow"
+       class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition shadow"
       >
         확인
       </button>
@@ -650,13 +650,13 @@
       <div class="flex gap-2">
         <button
           @click="showDeleteModal = false"
-          class="flex-1 bg-gray-800 text-gray-200 font-semibold py-3 rounded-xl hover:bg-gray-700 transition"
+         class="flex-1 bg-gray-800 text-gray-200 font-medium py-3 rounded-xl hover:bg-gray-700 transition"
         >
           취소
         </button>
         <button
           @click="confirmDeleteGame"
-          class="flex-1 bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition shadow"
+         class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition shadow"
         >
           삭제
         </button>

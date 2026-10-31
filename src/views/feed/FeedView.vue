@@ -37,7 +37,7 @@
           새로운 도전이 기다리고 있습니다.
         </p>
         <button
-          class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full transition-colors"
+         class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full transition-colors"
           @click="$router.push('/games')"
         >
           경기 만들기
@@ -381,7 +381,7 @@
             >
               <div class="mb-5 flex justify-center">
                 <span
-                  class="cursor-pointer px-3 py-1 rounded-full bg-orange-400 text-white font-bold shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
+                 class="cursor-pointer px-3 py-1 rounded-full bg-orange-400 text-white font-medium shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150"
                   @click="showRuleModal = true"
                   title="규칙 상세 보기"
                 >
@@ -419,7 +419,7 @@
                   </div>
                   <div class="text-center">
                     <div
-                      class="font-bold text-white tracking-wide leading-none text-lg whitespace-nowrap"
+                     class="font-bold text-white tracking-wide leading-none text-lg whitespace-nowrap"
                     >
                       {{ post.result.scoreA }}<span class="text-white/50"> : </span
                       >{{ post.result.scoreB }}
@@ -520,14 +520,14 @@
                   <button
                     v-if="!post.isAppliedByMe"
                     @click="handleJoin(post.id)"
-                    class="w-full py-3 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                   class="w-full py-3 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
                     경기 참가하기
                   </button>
                   <button
                     v-else
                     disabled
-                    class="w-full py-3 bg-gray-500 text-white font-semibold rounded-xl cursor-not-allowed opacity-60"
+                   class="w-full py-3 bg-gray-500 text-white font-medium rounded-xl cursor-not-allowed opacity-60"
                   >
                     <i class="fas fa-check mr-2"></i>신청 완료
                   </button>
@@ -561,8 +561,8 @@
                         :key="'set-' + idx"
                         class="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90"
                       >
-                        <div class="font-semibold">{{ sc.set }}세트</div>
-                        <div class="font-bold">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
+                        <div class="font-medium">{{ sc.set }}세트</div>
+                        <div class="font-medium">{{ sc.scoreA }} : {{ sc.scoreB }}</div>
                       </div>
                     </div>
                   </div>
@@ -669,7 +669,7 @@
                     @click="goToProfile(r.userId)"
                   >
                     <div
-                      class="w-10 text-center font-bold flex-shrink-0"
+                     class="w-10 text-center font-medium flex-shrink-0"
                       :class="r.rankAfter <= 3 ? 'text-amber-300' : 'text-white'"
                     >
                       {{ r.rankAfter }}
@@ -683,7 +683,7 @@
                     />
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
-                        <div class="truncate font-semibold">{{ r.nickname }}</div>
+                        <div class="truncate font-medium">{{ r.nickname }}</div>
                         <div
                           v-if="r.isPlayer"
                           class="px-1.5 py-0.5 bg-blue-400/20 border border-blue-300/30 text-blue-200 text-xs rounded-full flex-shrink-0"
@@ -719,7 +719,7 @@
                 <!-- 전체 랭킹 보기 버튼 -->
                 <button
                   @click="openRankingModal"
-                  class="w-full mt-4 px-6 py-3 bg-amber-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
+                 class="w-full mt-4 px-6 py-3 bg-amber-500 text-white font-medium rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2"
                 >
                   <i class="fas fa-trophy text-white/90"></i>
                   <span>전체 랭킹 보기</span>
@@ -895,7 +895,7 @@
                   <div class="w-6 h-6 bg-blue-500/20 rounded-lg flex items-center justify-center">
                     <i class="fas fa-target text-blue-400 text-xs"></i>
                   </div>
-                  <h3 class="font-semibold text-white">경기 목표</h3>
+                  <h3 class="font-bold text-white">경기 목표</h3>
                 </div>
               </div>
               <div class="px-5 py-4">
@@ -915,7 +915,7 @@
                   >
                     <i class="fas fa-calculator text-emerald-400 text-xs"></i>
                   </div>
-                  <h3 class="font-semibold text-white">점수 계산</h3>
+                  <h3 class="font-bold text-white">점수 계산</h3>
                 </div>
               </div>
               <div class="px-5 py-4">
@@ -933,7 +933,7 @@
                   <div class="w-6 h-6 bg-orange-500/20 rounded-lg flex items-center justify-center">
                     <i class="fas fa-tools text-orange-400 text-xs"></i>
                   </div>
-                  <h3 class="font-semibold text-white">경기 준비</h3>
+                  <h3 class="font-bold text-white">경기 준비</h3>
                 </div>
               </div>
               <div class="px-5 py-4">
@@ -951,7 +951,7 @@
                   <div class="w-6 h-6 bg-purple-500/20 rounded-lg flex items-center justify-center">
                     <i class="fas fa-list-ol text-purple-400 text-xs"></i>
                   </div>
-                  <h3 class="font-semibold text-white">경기 순서</h3>
+                  <h3 class="font-bold text-white">경기 순서</h3>
                 </div>
               </div>
               <div class="px-5 py-4">
@@ -969,7 +969,7 @@
                   <div class="w-6 h-6 bg-indigo-500/20 rounded-lg flex items-center justify-center">
                     <i class="fas fa-gavel text-indigo-400 text-xs"></i>
                   </div>
-                  <h3 class="font-semibold text-white">판정 기준</h3>
+                  <h3 class="font-bold text-white">판정 기준</h3>
                 </div>
               </div>
               <div class="px-5 py-4">
@@ -987,7 +987,7 @@
                   <div class="w-6 h-6 bg-red-500/20 rounded-lg flex items-center justify-center">
                     <i class="fas fa-exclamation-triangle text-red-400 text-xs"></i>
                   </div>
-                  <h3 class="font-semibold text-white">반칙</h3>
+                  <h3 class="font-bold text-white">반칙</h3>
                 </div>
               </div>
               <div class="px-5 py-4">
@@ -1006,7 +1006,7 @@
                   <div class="w-6 h-6 bg-gray-500/20 rounded-lg flex items-center justify-center">
                     <i class="fas fa-info-circle text-gray-400 text-xs"></i>
                   </div>
-                  <h3 class="font-semibold text-white">추가 정보</h3>
+                  <h3 class="font-bold text-white">추가 정보</h3>
                 </div>
               </div>
               <div class="px-5 py-4">
@@ -1030,7 +1030,7 @@
     <div class="flex items-center justify-center h-full">
       <div class="text-center max-w-sm mx-auto p-6">
         <i class="fas fa-trophy text-4xl text-white/30 mb-4"></i>
-        <h3 class="text-lg font-semibold mb-2">아직 경기가 없어요</h3>
+        <h3 class="text-lg font-bold mb-2">아직 경기가 없어요</h3>
         <p class="text-white/70 text-sm leading-relaxed">첫 번째 경기를 만들어보세요!</p>
         <button
           class="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition-colors"
@@ -1075,7 +1075,7 @@
               class="w-12 h-12 rounded-full object-cover border-2 border-gray-800 transition"
             />
             <div class="flex-1 text-left">
-              <div class="font-semibold text-white transition">
+              <div class="font-medium text-white transition">
                 {{ player.name }}
               </div>
               <div class="text-sm text-gray-500">플레이어</div>

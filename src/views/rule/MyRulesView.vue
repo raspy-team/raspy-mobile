@@ -65,13 +65,13 @@
       <div class="flex gap-2">
         <button
           @click="showCancelModal = false"
-          class="flex-1 bg-gray-700 text-gray-300 font-semibold py-3 rounded-xl hover:bg-gray-600 transition"
+         class="flex-1 bg-gray-700 text-gray-300 font-medium py-3 rounded-xl hover:bg-gray-600 transition"
         >
           아니오
         </button>
         <button
           @click="confirmCancelEditRequest"
-          class="flex-1 bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition shadow"
+         class="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition shadow"
         >
           취소하기
         </button>

@@ -5,7 +5,7 @@
     <!-- Raspy 브랜드 -->
     <div class="flex flex-col items-center mb-12">
       <span class="text-4xl font-bold tracking-tight text-orange-500 mb-2">Match</span>
-      <span class="text-base text-gray-500 font-semibold">스포츠로 연결되는 순간</span>
+      <span class="text-base text-gray-500 font-medium">스포츠로 연결되는 순간</span>
     </div>
 
     <!-- 일러스트 (SVG) -->
@@ -26,7 +26,7 @@
       <p class="text-lg font-bold mb-2 text-white">Match 경기 정보를 확인하세요</p>
       <button
         @click="openApp"
-        class="w-full py-3 mb-2 rounded-xl bg-orange-500 text-white font-semibold text-base shadow hover:bg-orange-600 transition"
+       class="w-full py-3 mb-2 rounded-xl bg-orange-500 text-white font-bold text-base shadow hover:bg-orange-600 transition"
       >
         Match 앱에서 열기
       </button>

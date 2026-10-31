@@ -4,7 +4,7 @@
       class="w-full max-w-md bg-gray-900 rounded-2xl border border-orange-500/30 px-6 py-8"
       style="max-height: 75%"
     >
-      <div class="mb-5 text-orange-600 text-lg font-semibold tracking-tight">
+      <div class="mb-5 text-orange-600 text-lg font-bold tracking-tight">
         ✓ 규칙 생성 완료
       </div>
       <div class="min-w-0 flex items-center gap-2 mb-5">
@@ -18,7 +18,7 @@
           </div>
         </div>
         <div>
-          <span class="text-base font-bold text-white truncate block">
+          <span class="text-base font-medium text-white truncate block">
             {{ result.ruleTitle }}
           </span>
           <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -41,7 +41,7 @@
       </div>
       <button
         @click="$emit('next')"
-        class="w-full py-3 mt-2 bg-orange-500 hover:bg-orange-600 text-white text-base font-bold rounded-xl transition"
+       class="w-full py-3 mt-2 bg-orange-500 hover:bg-orange-600 text-white text-base font-bold rounded-xl transition"
       >
         다음
       </button>

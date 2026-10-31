@@ -28,7 +28,7 @@
       <div class="flex items-center gap-2">
         <router-link
           :to="`/profile/${comment.author.id}`"
-          class="font-semibold text-base hover:underline focus:underline focus:outline-none"
+         class="font-medium text-base hover:underline focus:underline focus:outline-none"
         >
           {{ comment.author.nickname }}
         </router-link>
@@ -122,7 +122,7 @@
           <button
             @click.stop="submitReport"
             :disabled="!reportReason.trim() || reportLoading"
-            class="w-full bg-red-500 text-white py-2 rounded-xl font-bold mt-1 disabled:bg-gray-300"
+           class="w-full bg-red-500 text-white py-2 rounded-xl font-bold mt-1 disabled:bg-gray-300"
           >
             {{ reportLoading ? '신고 중...' : '신고하기' }}
           </button>

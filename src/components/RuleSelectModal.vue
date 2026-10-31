@@ -91,7 +91,7 @@
           <li v-for="rule in rules" :key="rule.id"
               class="bg-gray-800 rounded-2xl shadow-sm border border-gray-800 flex flex-col gap-0.5 px-4 py-4 active:bg-orange-500/10 transition">
             <div class="flex justify-between items-center mb-1">
-              <span class="text-base font-bold text-white truncate">{{ rule.ruleTitle }}</span>
+              <span class="text-base font-medium text-white truncate">{{ rule.ruleTitle }}</span>
               <button @click="selectRule(rule)"
                 class="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-1 text-xs font-medium shadow">
                 선택

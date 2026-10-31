@@ -10,13 +10,13 @@
     <div class="w-full flex flex-col gap-4">
       <button
         @click="$emit('select', 'create')"
-        class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl shadow active:scale-98 transition"
+       class="w-full py-4 bg-orange-500 text-white text-lg font-bold rounded-xl shadow active:scale-98 transition"
       >
         새로운 규칙 만들기
       </button>
       <button
         @click="router.push('/rules?creating')"
-        class="w-full py-4 bg-gray-900 text-orange-500 text-lg font-bold rounded-xl border border-orange-300 active:scale-98 transition"
+       class="w-full py-4 bg-gray-900 text-orange-500 text-lg font-bold rounded-xl border border-orange-300 active:scale-98 transition"
       >
         다른 유저가 생성한 규칙 선택하기
       </button>

@@ -10,19 +10,19 @@
     <div class="absolute right-6 top-6 z-10">
       <span
         v-if="isWin"
-        class="bg-orange-500 text-white text-base px-4 py-1.5 rounded-full font-bold shadow-lg border-2 border-orange-500 drop-shadow"
+       class="bg-orange-500 text-white text-base px-4 py-1.5 rounded-full font-medium shadow-lg border-2 border-orange-500 drop-shadow"
         style="letter-spacing: 0.06em"
         >승리</span
       >
       <span
         v-else-if="isDraw"
-        class="bg-gray-300 text-gray-200 text-base px-4 py-1.5 rounded-full font-bold border shadow"
+       class="bg-gray-300 text-gray-200 text-base px-4 py-1.5 rounded-full font-medium border shadow"
         style="letter-spacing: 0.05em"
         >무승부</span
       >
       <span
         v-else
-        class="bg-blue-400 text-white text-base px-4 py-1.5 rounded-full font-bold border shadow"
+       class="bg-blue-400 text-white text-base px-4 py-1.5 rounded-full font-medium border shadow"
         style="letter-spacing: 0.05em"
         >패배</span
       >
@@ -38,7 +38,7 @@
                     </div>
                   </div>
                   <div>
-                    <span class="text-base font-bold text-white truncate block">
+                    <span class="text-base font-medium text-white truncate block">
                       {{ game.ruleTitle }}
                     </span>
                     <div class="flex gap-1 items-center mt-1 text-xs text-orange-500 font-medium">
@@ -51,7 +51,7 @@
     <div class="flex flex-col items-center mt-0">
       <div class="flex flex-col items-center w-full justify-center">
         <span
-          class="text-4xl font-bold w-full"
+         class="text-4xl font-bold w-full"
           :class="isWin ? 'text-orange-500' : isDraw ? 'text-gray-500' : 'text-blue-500'"
         >
           <div class="flex justify-between items-center">
@@ -67,7 +67,7 @@
                   나
                 </div>
               </div>
-              <div class="font-bold w-[20%]">
+              <div class="font-medium w-[20%]">
                 {{ game.myScore }}
               </div>
             </div>
@@ -75,7 +75,7 @@
             <div class="flex justify-center font-bold text-2xl w-[16%]">:</div>
 
             <div class="flex items-center gap-3 justify-end w-[42%]">
-              <div class="font-bold w-[20%]">
+              <div class="font-medium w-[20%]">
                 {{ game.opponentScore }}
               </div>
               <div class="flex flex-col items-center pt-7 w-[80%]">
@@ -98,7 +98,7 @@
       <button
         type="button"
         @click.stop="showSetResults = !showSetResults"
-        class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-gray-700 border border-gray-600 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-semibold text-base text-white transition active:bg-gray-600 hover:bg-gray-600 select-none cursor-pointer outline-none focus:outline-none"
+       class="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-gray-700 border border-gray-600 shadow-[0_1.5px_8px_0_rgba(20,22,23,0.06)] font-medium text-base text-white transition active:bg-gray-600 hover:bg-gray-600 select-none cursor-pointer outline-none focus:outline-none"
         style="outline: none"
       >
         <span
@@ -122,7 +122,7 @@
           <div
             v-for="(set, i) in setResults"
             :key="i"
-            class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-700 font-semibold shadow-sm mt-2"
+           class="w-full px-3 py-2 rounded-xl flex items-center justify-between border bg-gray-700 font-medium shadow-sm mt-2"
             :class="
               set.winnerIdx === 1
                 ? 'border-orange-500/30'
@@ -133,7 +133,7 @@
           >
             <span class="text-xs font-medium text-gray-500 flex-1">{{ set.setIdx }}세트</span>
             <span
-              class="text-lg font-bold"
+             class="text-lg font-bold"
               :class="
                 set.winnerIdx === 1
                   ? 'text-orange-500'
@@ -145,7 +145,7 @@
               {{ set.user1Score == null ? 0 : set.user1Score }} :
               {{ set.user2Score == null ? 0 : set.user2Score }}
             </span>
-            <span class="flex items-center gap-1 font-semibold flex-1 justify-end">
+            <span class="flex items-center gap-1 font-medium flex-1 justify-end">
               <i
                 :class="
                   set.winnerIdx === 1
@@ -189,7 +189,7 @@
           <div class="flex items-center gap-1">
             <span class="text-xs text-gray-400">매너 :</span>
             <span
-              class="font-bold text-base"
+             class="font-medium text-base"
               :class="[
                 game.mannerScore >= 4
                   ? 'text-green-500'
@@ -206,7 +206,7 @@
           <div class="flex items-center gap-1">
             <span class="text-xs text-gray-400">퍼포먼스 :</span>
             <span
-              class="font-bold text-base"
+             class="font-medium text-base"
               :class="[
                 game.performanceScore >= 4
                   ? 'text-green-500'
@@ -243,7 +243,7 @@
     <div class="flex justify-between items-center pt-2 mt-2 border-t border-gray-600">
       <div v-if="likeCount > 0" class="flex items-center gap-2 text-sm text-gray-500">
         <i class="fas fa-heart text-red-500"></i>
-        <span class="text-gray-400 font-bold">{{ likeCount }}명이 또 보고싶어해요</span>
+        <span class="text-gray-400 font-medium">{{ likeCount }}명이 또 보고싶어해요</span>
       </div>
       <div v-else></div>
 

@@ -79,7 +79,7 @@
             @mousedown.stop
             @mousemove.stop
             @mouseup.stop
-            class="w-full py-4 bg-gray-900 text-purple-600 font-bold text-lg rounded-2xl shadow-2xl hover:bg-gray-800 transition-all duration-200 transform hover:scale-[1.02]"
+           class="w-full py-4 bg-gray-900 text-purple-600 font-bold text-lg rounded-2xl shadow-2xl hover:bg-gray-800 transition-all duration-200 transform hover:scale-[1.02]"
           >
             친구 초대하기
           </button>

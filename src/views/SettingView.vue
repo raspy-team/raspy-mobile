@@ -22,7 +22,7 @@
           </div>
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm text-gray-400">로그인된 계정</p>
-            <p class="truncate font-semibold text-gray-200">
+            <p class="truncate font-medium text-gray-200">
               {{ myNickname || (currentUserLabel ? '@' + currentUserLabel : '') }}
             </p>
             <p v-if="myIntro" class="truncate text-xs text-gray-500">{{ myIntro }}</p>
@@ -158,7 +158,7 @@
       <div class="mt-6 flex justify-center">
         <button
           @click="openInstagram"
-          class="flex items-center gap-2 px-6 py-3 bg-pink-500 rounded-full text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+         class="flex items-center gap-2 px-6 py-3 bg-pink-500 rounded-full text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
           aria-label="인스타그램 방문"
         >
           <i class="fab fa-instagram text-xl"></i>
@@ -291,7 +291,7 @@
       </div>
       <h3 class="mb-3 text-lg font-bold text-red-600">계정 삭제 안내</h3>
       <p class="text-sm text-gray-300">
-        정말로 계정을 <span class="font-semibold text-red-600">삭제</span>하시겠습니까? 이 작업은
+        정말로 계정을 <span class="font-medium text-red-600">삭제</span>하시겠습니까? 이 작업은
         되돌릴 수 없습니다.<br /><br />
         단, 언제든지 재가입 할 수 있습니다.
       </p>

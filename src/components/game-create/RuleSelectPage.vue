@@ -18,7 +18,7 @@
         :key="rule.id"
         class="bg-gray-900 rounded-xl border p-4 mb-3 shadow-sm flex flex-col gap-1"
       >
-        <span class="text-base font-bold text-white">{{ rule.ruleTitle }}</span>
+        <span class="text-base font-medium text-white">{{ rule.ruleTitle }}</span>
         <span class="text-sm text-orange-500"
           >{{ rule.majorCategory }} &gt; {{ rule.minorCategory }}</span
         >

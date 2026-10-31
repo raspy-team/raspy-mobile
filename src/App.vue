@@ -80,7 +80,7 @@
             <div class="px-6 pb-6 space-y-3">
               <button
                 @click="goToPendingReview"
-                class="w-full py-3 px-6 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-bold active:scale-95 transition-all shadow-lg"
+               class="w-full py-3 px-6 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-medium active:scale-95 transition-all shadow-lg"
               >
                 <i class="fas fa-arrow-right mr-2"></i>평가하러 가기
               </button>
@@ -139,7 +139,7 @@
               <div class="flex items-center justify-center gap-3 py-4">
                 <div class="flex flex-col items-center flex-1">
                   <div
-                    class="w-16 h-16 rounded-full bg-blue-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
+                   class="w-16 h-16 rounded-full bg-blue-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
                   >
                     {{ getInitial(activeGame.player1?.nickname) }}
                   </div>
@@ -154,7 +154,7 @@
 
                 <div class="flex flex-col items-center flex-1">
                   <div
-                    class="w-16 h-16 rounded-full bg-red-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
+                   class="w-16 h-16 rounded-full bg-red-400 flex items-center justify-center text-white text-xl font-bold mb-2 shadow-lg"
                   >
                     {{ getInitial(activeGame.player2?.nickname) }}
                   </div>
@@ -205,7 +205,7 @@
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
                       <span
-                        class="text-3xl font-bold"
+                       class="text-3xl font-bold"
                         :class="
                           gameCountdown <= 2
                             ? 'text-red-500'
@@ -226,7 +226,7 @@
             <div class="px-6 pb-6">
               <button
                 @click="dismissActiveGame"
-                class="w-full py-3 px-6 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-semibold active:scale-95 transition-all"
+               class="w-full py-3 px-6 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-medium active:scale-95 transition-all"
               >
                 참여하지 않을래요
               </button>

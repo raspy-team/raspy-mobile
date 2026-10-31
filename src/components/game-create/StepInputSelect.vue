@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div class="mb-3 text-base font-bold">{{ label }}</div>
+    <div class="mb-3 text-base font-medium">{{ label }}</div>
     <!-- 기존 스포츠 카테고리일 때만 규칙 토글 노출 -->
     <div v-if="canShowPreset" class="flex flex-col gap-3 mb-3">
       <label
         class="flex items-center gap-3 bg-gray-800 p-3 rounded-lg shadow-sm cursor-pointer transition hover:bg-orange-500/10"
       >
         <input type="checkbox" v-model="checkedPreset" class="accent-orange-500 w-5 h-5" />
-        <span class="text-base font-semibold text-gray-200">기존 스포츠 규칙을 따릅니다.</span>
+        <span class="text-base font-medium text-gray-200">기존 스포츠 규칙을 따릅니다.</span>
       </label>
     </div>
     <!-- 직접입력 (항상 노출) -->

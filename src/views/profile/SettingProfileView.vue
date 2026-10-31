@@ -3,7 +3,7 @@
     <Header v-if="!afterLogin" :hasReferer="true" title="프로필 설정" />
 
     <div class="raspy-top pb-28 px-5 sm:px-8 max-w-md mx-auto">
-      <h2 v-if="afterLogin" class="text-2xl font-semibold mb-2 text-gray-200 text-center">
+      <h2 v-if="afterLogin" class="text-2xl font-bold mb-2 text-gray-200 text-center">
         환영합니다! 당신을 알려주세요
       </h2>
       <p v-if="afterLogin" class="text-sm text-gray-400 text-center mb-6">

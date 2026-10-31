@@ -63,7 +63,7 @@
 
         <div>
           <div class="text-xs text-gray-400 pb-2">[규칙 제목]과 [카테고리]는 설명을 바탕으로 AI로 자동 생성됩니다.</div>
-          <button type="submit" :disabled="loading || !isValid" class="w-full bg-orange-500 text-white py-2 rounded-md font-semibold shadow hover:brightness-110 transition disabled:opacity-50">
+          <button type="submit" :disabled="loading || !isValid" class="w-full bg-orange-500 text-white py-2 rounded-md font-bold shadow hover:brightness-110 transition disabled:opacity-50">
             {{ showAIGenerating ? '생성 중...' : '생성하기' }}
           </button>
         </div>

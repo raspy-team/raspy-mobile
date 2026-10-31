@@ -1,7 +1,7 @@
 <template>
   <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
     <div class="modal-content bg-gray-900 border border-gray-800 px-8 py-6 rounded-2xl w-[92vw] max-w-md text-center animate-modal-in">
-      <p class="text-white text-lg font-semibold mb-6">{{ message }}</p>
+      <p class="text-white text-lg font-bold mb-6">{{ message }}</p>
       <div class="flex justify-center gap-3">
         <button
           @click="$emit('confirm')"

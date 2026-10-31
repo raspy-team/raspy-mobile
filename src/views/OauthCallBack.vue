@@ -274,7 +274,7 @@
     <transition name="modal-fade">
       <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
         <div class="modal-content">
-          <div class="modal-title font-bold text-base mb-2">{{ modalTerm.title }}</div>
+          <div class="modal-title font-medium text-base mb-2">{{ modalTerm.title }}</div>
           <div class="modal-body text-sm whitespace-pre-line" v-html="modalTerm.body"></div>
           <button class="modal-close-btn mt-6" @click="closeModal">확인</button>
         </div>

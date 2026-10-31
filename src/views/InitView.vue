@@ -10,7 +10,7 @@
     <div class="text-center flex-2 mt-20 fixed left-0 w-full text-center top-[30dvh]">
       <span class="raspy mb-4">Match</span>
       <p class="tagline mb-0">
-        즐기고 경쟁하는, <span class="text-[var(--point-color)] font-bold">스포츠 플랫폼</span>
+        즐기고 경쟁하는, <span class="text-[var(--point-color)] font-medium">스포츠 플랫폼</span>
       </p>
     </div>
     <div class="oauth-container flex flex-col gap-2 pb-10 w-full max-w-sm">
@@ -63,7 +63,7 @@
         </button>
         <!-- Group Login -->
         <button class="oauth-btn bg-orange-500 text-white justify-center" @click="signup">
-          <span class="w-full text-center font-semibold">시작하기</span>
+          <span class="w-full text-center font-medium">시작하기</span>
         </button>
         <button class="w-full text-center text-sm text-gray-500 py-2" @click="loginGroup">이미 계정이 있어요</button>
 
@@ -85,7 +85,7 @@
             @click.self="showTermsModal = false"
           >
             <div class="bg-gray-900 rounded-2xl shadow-2xl w-[90vw] max-w-md p-6">
-              <div class="font-bold mb-2">이용약관</div>
+              <div class="font-medium mb-2">이용약관</div>
               <div class="max-h-64 overflow-auto text-sm space-y-2">
                 <b>Match 서비스 이용약관</b>
                 <br /><br />
@@ -182,7 +182,7 @@
             @click.self="showPrivacyModal = false"
           >
             <div class="bg-gray-900 rounded-2xl shadow-2xl w-[90vw] max-w-md p-6">
-              <div class="font-bold mb-2">개인정보처리방침</div>
+              <div class="font-medium mb-2">개인정보처리방침</div>
               <div class="max-h-64 overflow-auto text-sm space-y-2">
                 <b>Match 개인정보처리방침</b>
                 <br /><br />

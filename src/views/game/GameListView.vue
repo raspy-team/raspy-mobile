@@ -79,7 +79,7 @@
         <div class="flex flex-col gap-3 mb-4">
           <button
             @click="$router.push('/create-game')"
-            class="w-full py-4 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
+           class="w-full py-4 rounded-xl bg-orange-500 active:bg-orange-600 text-white text-base font-bold"
           >
             경기 만들기
           </button>
@@ -89,159 +89,97 @@
         </div>
 
         <div v-if="games.length > 0">
+          <!-- 카드 한 장 = 경기 하나. 무엇을(규칙) → 어디서·언제 → 누구와 순서로 읽히고, 신청은 카드에서 바로 -->
           <div
             v-for="(game, index) in games"
             :key="index"
-            class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 mb-3 p-0 overflow-hidden cursor-pointer"
-            @click="selectedGame = game"
-            :class="selectedGame && selectedGame.id === game.id ? 'ring-2 ring-orange-400' : ''"
+            class="bg-gray-900 rounded-xl border border-gray-800 mb-3 p-4"
           >
-            <!-- 생성자 영역: 유저네임과 같은 줄에 전적/점수 -->
-            <div class="flex items-center px-3 py-3 gap-2">
-              <div
-                class="flex flex-1 min-w-0 items-center gap-3 cursor-pointer hover:bg-gray-600 rounded-lg p-2 transition-colors"
-                @click.stop="
-                  selectedGame &&
-                  selectedGame.id === game.id &&
-                  $router.push('/profile/' + game.ownerId)
-                "
+            <div class="flex items-start justify-between gap-3">
+              <button class="flex items-center gap-3 min-w-0 text-left" @click="openModal(game)">
+                <img
+                  class="w-8 h-8 flex-shrink-0"
+                  :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
+                  alt=""
+                />
+                <span class="text-lg font-bold text-white truncate">{{ game.rule.ruleTitle }}</span>
+              </button>
+              <span class="text-xs text-gray-500 flex-shrink-0 mt-1.5">{{ formatTimeAgo(game.createdAt) }}</span>
+            </div>
+            <div class="mt-2 text-sm text-gray-400 truncate">
+              {{ !game.matchLocation || !game.matchLocation.trim() ? '장소 미정' : game.matchLocation }}
+              · {{ !game.matchDate || !String(game.matchDate).trim() ? '시간 미정' : formatDate(game.matchDate) }}
+            </div>
+
+            <div class="mt-4 flex items-center gap-3">
+              <button
+                class="flex flex-1 min-w-0 items-center gap-2 text-left"
+                @click="$router.push('/profile/' + game.ownerId)"
               >
                 <img
                   :src="game.ownerProfileUrl || Default"
-                  class="w-10 h-10 rounded-full flex-shrink-0 object-cover"
+                  class="w-8 h-8 rounded-full flex-shrink-0 object-cover"
+                  alt=""
                 />
-                <div class="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
-                  <div class="font-medium text-sm text-gray-100 truncate">
-                    {{ game.ownerNickname }}
-                  </div>
-                  <div
-                    class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gray-600 border border-gray-500 flex-shrink-0"
-                  >
-                    <span class="text-xs font-medium text-green-400">{{
-                      game.ruleStatisticsOfOwner?.wins || 0
-                    }}</span>
-                    <span class="text-xs font-medium text-gray-300">{{
-                      game.ruleStatisticsOfOwner?.draws || 0
-                    }}</span>
-                    <span class="text-xs font-medium text-red-400">{{
-                      game.ruleStatisticsOfOwner?.losses || 0
-                    }}</span>
-                    <span class="text-xs text-gray-400">|</span>
-                    <div class="flex items-center gap-1">
-                      <i class="fas fa-trophy text-yellow-500 text-xs"></i>
-                      <span class="text-xs font-medium text-orange-400">{{
-                        game.ruleStatisticsOfOwner?.ruleRating || 0
-                      }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="text-gray-400 text-xs text-right flex-shrink-0 whitespace-nowrap">
-                {{ formatTimeAgo(game.createdAt) }}
-              </div>
+                <span class="min-w-0">
+                  <span class="block text-sm text-gray-100 truncate">{{ game.ownerNickname }}</span>
+                  <span class="block text-xs text-gray-500">
+                    {{ game.ruleStatisticsOfOwner?.ruleRating || 0 }}점 ·
+                    {{ game.ruleStatisticsOfOwner?.wins || 0 }}승
+                    {{ game.ruleStatisticsOfOwner?.draws || 0 }}무
+                    {{ game.ruleStatisticsOfOwner?.losses || 0 }}패
+                  </span>
+                </span>
+              </button>
+              <button
+                v-if="!game.isAppliedByMe"
+                @click="applyDirect(game)"
+               class="flex-shrink-0 px-5 py-2.5 rounded-xl bg-gray-800 active:bg-gray-700 text-orange-400 text-sm font-bold"
+              >
+                신청
+              </button>
+              <button
+                v-else
+                @click="cancelApply(game)"
+                class="flex-shrink-0 px-4 py-2.5 rounded-xl bg-gray-800 text-gray-300 text-sm"
+              >
+                신청 취소
+              </button>
             </div>
-            <!-- 규칙 영역: 규칙명 왼쪽에 카테고리 아이콘 표시 -->
-            <div class="px-4 py-3 border-b border-gray-600 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <img
-                  class="w-8 h-8"
-                  :src="`/category-picture/${game.rule.minorCategory || '미분류'}.png`"
-                  :alt="game.rule.minorCategory || '카테고리'"
-                />
+
+            <!-- 보조 행동은 작게 한 줄로 -->
+            <div class="mt-3 pt-3 border-t border-gray-800 flex items-center gap-5 text-sm text-gray-500">
+              <button @click="openChallengersModal(game)">
+                신청자 {{ game.challengers?.length || 0 }}명
+              </button>
+              <button @click="$router.push(`/games/${game.id}/comments`)" aria-label="댓글">
+                <i class="far fa-comment"></i>
+              </button>
+              <button @click="goToDM(game.ownerId)" aria-label="메시지">
+                <i class="far fa-paper-plane"></i>
+              </button>
+              <div class="relative ml-auto">
+                <button @click="game.showMoreMenu = !game.showMoreMenu" aria-label="더보기">
+                  <i class="fas fa-ellipsis"></i>
+                </button>
                 <div
-                  class="font-bold text-lg text-white cursor-pointer"
-                  @click.stop="selectedGame && selectedGame.id === game.id && openModal(game)"
+                  v-if="game.showMoreMenu"
+                  class="absolute right-0 bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-lg z-30 w-32 overflow-hidden"
                 >
-                  {{ game.rule.ruleTitle }}
-                  <i class="fas fa-info-circle text-gray-500 text-sm ml-2"></i>
+                  <button
+                    @click="(shareGame(game.id), (game.showMoreMenu = false))"
+                    class="block w-full text-left px-4 py-2 text-gray-200"
+                  >
+                    공유하기
+                  </button>
+                  <button
+                    @click="(onClickReport(game.id), (game.showMoreMenu = false))"
+                    class="block w-full text-left px-4 py-2 text-red-400"
+                  >
+                    신고하기
+                  </button>
                 </div>
               </div>
-              <button
-                @click.stop="openChallengersModal(game)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-700 text-gray-200 text-xs font-medium active:scale-95"
-              >
-                <i class="fas fa-users text-xs"></i>
-                <span>도전자 {{ game.challengers?.length || 0 }}명</span>
-              </button>
-            </div>
-            <div class="px-4 text-gray-400 text-sm mt-2 truncate">
-              {{ game.rule.ruleDescription }}
-            </div>
-            <!-- 경기 조건 영역: 장소와 시간을 각각 한 줄씩 -->
-            <div class="px-4 py-2 text-sm text-gray-300 flex flex-col gap-1 items-start">
-              <span>
-                {{
-                  game.matchLocation == ' ' || game.matchLocation == ''
-                    ? '장소 미정'
-                    : game.matchLocation
-                }}
-              </span>
-              <span>
-                {{
-                  !game.matchDate || game.matchDate == ' '
-                    ? '시간 미정'
-                    : formatDate(game.matchDate)
-                }}
-              </span>
-            </div>
-            <!-- 전적 영역: 생성자 줄로 이동했으므로 제거 -->
-          </div>
-        </div>
-        <!-- 하단 고정 버튼 영역 -->
-        <div
-          v-if="selectedGame"
-          class="fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-700 z-50 flex justify-center gap-4 py-3 shadow-lg"
-        >
-          <button
-            v-if="!selectedGame.isAppliedByMe"
-            @click="applyDirect(selectedGame)"
-            class="w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white bg-orange-500 hover:bg-orange-600 cursor-pointer"
-          >
-            신청
-          </button>
-          <button
-            v-else
-            @click="cancelApply(selectedGame)"
-            class="w-14 h-14 flex items-center justify-center font-semibold rounded-full transition text-white bg-red-500 hover:bg-red-600 cursor-pointer"
-          >
-            취소
-          </button>
-          <button
-            @click="goToDM(selectedGame.ownerId)"
-            class="w-14 h-14 flex items-center justify-center bg-blue-400 text-white rounded-full hover:bg-blue-500 transition"
-          >
-            <i class="fas fa-paper-plane"></i>
-          </button>
-          <button
-            @click="toggleComment(selectedGame.id)"
-            class="w-14 h-14 flex items-center justify-center bg-gray-700 text-gray-400 rounded-full hover:bg-gray-300 transition"
-          >
-            <i class="fas fa-comment"></i>
-          </button>
-          <div class="relative">
-            <button
-              @click="selectedGame.showMoreMenu = !selectedGame.showMoreMenu"
-              class="w-14 h-14 flex items-center justify-center rounded-full bg-gray-700 text-gray-400 hover:bg-gray-300 transition"
-              aria-label="더보기"
-            >
-              <span class="text-2xl">⋯</span>
-            </button>
-            <div
-              v-if="selectedGame.showMoreMenu"
-              class="absolute right-0 bottom-full mb-2 bg-gray-900 border rounded shadow-md z-30 w-32"
-            >
-              <button
-                @click="(onClickReport(selectedGame.id), (selectedGame.showMoreMenu = false))"
-                class="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-800"
-              >
-                신고하기
-              </button>
-              <button
-                @click="(shareGame(selectedGame.id), (selectedGame.showMoreMenu = false))"
-                class="block w-full text-left px-4 py-2 text-gray-200 hover:bg-gray-800"
-              >
-                공유하기
-              </button>
             </div>
           </div>
         </div>
@@ -346,7 +284,7 @@
             초대 코드로 빠른 참가
           </div>
           <div class="text-gray-500 text-xs mt-1 text-center">
-            친구에게 받은 <span class="text-orange-500 font-semibold">4자리 코드</span>를
+            친구에게 받은 <span class="text-orange-500 font-medium">4자리 코드</span>를
             입력하세요.
           </div>
         </div>
@@ -358,7 +296,7 @@
             maxlength="4"
             inputmode="numeric"
             placeholder="0000"
-            class="w-full text-center text-2xl font-bold border-0 border-b-2 border-gray-800 focus:border-orange-500 focus:ring-0 transition placeholder-gray-300 tracking-widest bg-transparent py-2 mb-2"
+           class="w-full text-center text-2xl font-bold border-0 border-b-2 border-gray-800 focus:border-orange-500 focus:ring-0 transition placeholder-gray-300 tracking-widest bg-transparent py-2 mb-2"
             @keyup.enter="submitInvite"
             autocomplete="one-time-code"
           />
@@ -373,14 +311,14 @@
         <div v-if="!inviteGame" class="flex w-full mt-5 gap-2 px-7">
           <button
             @click="closeInviteModal"
-            class="flex-1 py-2.5 rounded-xl border border-gray-800 bg-gray-800 hover:bg-gray-800 text-gray-500 font-semibold transition"
+           class="flex-1 py-2.5 rounded-xl border border-gray-800 bg-gray-800 hover:bg-gray-800 text-gray-500 font-medium transition"
           >
             취소
           </button>
           <button
             @click="submitInvite"
             :disabled="inviteLoading || inviteInput.length !== 4"
-            class="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold transition flex justify-center items-center disabled:opacity-50"
+           class="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold transition flex justify-center items-center disabled:opacity-50"
           >
             <span v-if="!inviteLoading">확인</span>
             <i v-else class="fas fa-spinner fa-spin"></i>
@@ -483,7 +421,7 @@
               <!-- 모달 Content -->
               <div class="bg-gray-900 rounded-xl py-6 max-w-lg w-full relative z-[1000000000]">
                 <div class="flex gap-3 mb-3 items-center">
-                  <div class="font-semibold text-gray-200">
+                  <div class="font-medium text-gray-200">
                     {{ inviteGame.ruleTitle }}
                   </div>
                   <div class="text-xs text-orange-500 font-medium flex gap-1 items-center">
@@ -656,7 +594,7 @@
       @click.self="shareModal = false"
     >
       <div class="bg-gray-900 rounded-xl shadow-lg p-6 w-80 mx-4">
-        <h3 class="text-lg font-semibold text-gray-100 mb-4 text-center">초대 코드</h3>
+        <h3 class="text-lg font-bold text-gray-100 mb-4 text-center">초대 코드</h3>
         <div class="text-3xl font-bold text-orange-600 mb-2 tracking-widest text-center">
           {{ inviteCode }}
         </div>
@@ -771,7 +709,7 @@
       class="bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto"
     >
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-100">도전자 목록</h3>
+        <h3 class="text-lg font-bold text-gray-100">신청자</h3>
         <button
           @click="closeChallengersModal"
           class="text-gray-500 hover:text-gray-300 transition"
@@ -802,7 +740,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="text-center text-gray-500 text-sm py-6">도전자가 없습니다.</div>
+      <div v-else class="text-center text-gray-500 text-sm py-6">아직 신청자가 없어요.</div>
     </div>
   </div>
 

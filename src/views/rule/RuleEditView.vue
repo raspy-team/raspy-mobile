@@ -43,7 +43,7 @@
     <!-- AI 처리 중 -->
     <div v-if="step === 15" class="flex flex-col items-center justify-center h-screen">
       <i class="fas fa-spinner fa-spin text-4xl text-orange-500 mb-4"></i>
-      <p class="text-gray-300 text-lg font-semibold">수정 요청 제출 중...</p>
+      <p class="text-gray-300 text-lg font-bold">수정 요청 제출 중...</p>
     </div>
 
     <!-- 수정 요청 완료 -->
@@ -65,7 +65,7 @@
         </div>
         <button
           @click="goToMyRules"
-          class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition shadow"
+         class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition shadow"
         >
           내 규칙으로 이동
         </button>

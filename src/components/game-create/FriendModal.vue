@@ -64,7 +64,7 @@
             <div class="mx-auto mb-4 grid place-items-center w-16 h-16 rounded-2xl bg-gray-700">
               🧑‍🤝‍🧑
             </div>
-            <p class="text-white font-semibold mb-1">친구가 없습니다</p>
+            <p class="text-white font-medium mb-1">친구가 없습니다</p>
             <p class="text-gray-400 text-sm">상단 검색을 확인하거나, 친구를 먼저 추가해보세요.</p>
           </div>
 
@@ -130,7 +130,7 @@
               class="w-12 h-12 rounded-full object-cover border border-gray-600 bg-gray-600"
             />
             <div class="min-w-0">
-              <p class="text-base font-bold text-white truncate">
+              <p class="text-base font-medium text-white truncate">
                 {{ selectedFriend?.nickname || selectedFriend?.username }}
               </p>
               <p class="text-xs text-gray-400 truncate">
@@ -141,8 +141,8 @@
           <p class="text-sm text-gray-300 leading-relaxed mb-4 py-2">
             <strong>{{ selectedFriend?.nickname || selectedFriend?.username }}</strong> 님과 경기를
             시작하시겠습니까?<br />
-            확인을 누르면 <span class="font-semibold text-orange-400">경기 진행 화면</span>으로 이동하며, 바로
-            <span class="font-semibold text-orange-400">"경기 시작"</span>을 누를 수 있어요.
+            확인을 누르면 <span class="font-medium text-orange-400">경기 진행 화면</span>으로 이동하며, 바로
+            <span class="font-medium text-orange-400">"경기 시작"</span>을 누를 수 있어요.
           </p>
           <div class="grid grid-cols-2 gap-3">
             <button
@@ -153,7 +153,7 @@
             </button>
             <button
               @click="confirmProceed"
-              class="h-12 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 active:scale-95 transition shadow"
+             class="h-12 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 active:scale-95 transition shadow"
             >
               확인
             </button>

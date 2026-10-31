@@ -159,7 +159,7 @@
             <div class="flex flex-col items-center gap-2 w-full">
               <div class="flex gap-2 items-center">
                 <h1
-                  class="text-3xl font-bold text-white"
+                 class="text-3xl font-bold text-white"
                 >
                   {{ user.nickname }}
                 </h1>
@@ -223,13 +223,13 @@
                   v-if="!friendStatus.isFriend && !friendStatus.sent && !friendStatus.received"
                 >
                   <button
-                    class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                   class="flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3.5 w-full rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                     @click="sendFriendRequest"
                   >
                     <i class="fas fa-user-plus mr-2"></i> 친구추가
                   </button>
                   <button
-                    class="flex justify-center items-center bg-gray-900 border-2 border-blue-400 text-blue-500 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
+                   class="flex justify-center items-center bg-gray-900 border-2 border-blue-400 text-blue-500 font-medium py-3.5 w-full rounded-xl shadow-md hover:bg-blue-50 transition-all ml-2"
                     @click="goChat"
                   >
                     <i class="fas fa-comment-dots mr-2"></i> DM
@@ -237,13 +237,13 @@
                 </template>
                 <template v-else-if="friendStatus.sent && !friendStatus.isFriend">
                   <button
-                    class="flex justify-center items-center bg-gray-700 border-2 border-orange-400 text-orange-300 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all"
+                   class="flex justify-center items-center bg-gray-700 border-2 border-orange-400 text-orange-300 font-medium py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all"
                     @click="sendFriendCancelRequest"
                   >
                     <i class="fas fa-hourglass-half mr-2"></i> 요청취소
                   </button>
                   <button
-                    class="flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
+                   class="flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-medium py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
                     @click="goChat"
                   >
                     <i class="fas fa-comment-dots mr-2"></i> DM
@@ -252,19 +252,19 @@
                 <template v-else-if="friendStatus.received && !friendStatus.isFriend">
                   <div class="flex gap-3">
                     <button
-                      class="flex-1 flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
+                     class="flex-1 flex justify-center items-center bg-orange-500 hover:bg-orange-400 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all"
                       @click="acceptFriendRequest"
                     >
                       <i class="fas fa-user-check mr-2"></i> 승인
                     </button>
                     <button
-                      class="flex-1 flex justify-center items-center bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-3.5 rounded-xl shadow-md transition-all border-2 border-gray-600"
+                     class="flex-1 flex justify-center items-center bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-3.5 rounded-xl shadow-md transition-all border-2 border-gray-600"
                       @click="rejectFriendRequest"
                     >
                       <i class="fas fa-user-times mr-2"></i> 거부
                     </button>
                     <button
-                      class="flex-1 flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-bold py-3.5 rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
+                     class="flex-1 flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-medium py-3.5 rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
                       @click="goChat"
                     >
                       <i class="fas fa-comment-dots mr-2"></i> DM
@@ -273,13 +273,13 @@
                 </template>
                 <template v-else-if="friendStatus.isFriend">
                   <button
-                    class="flex justify-center items-center bg-gray-700 border-2 border-red-400 text-red-400 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all"
+                   class="flex justify-center items-center bg-gray-700 border-2 border-red-400 text-red-400 font-medium py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all"
                     @click="showUnfriendConfirm = true"
                   >
                     <i class="fas fa-user-minus mr-2"></i> 친구 끊기
                   </button>
                   <button
-                    class="flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-bold py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
+                   class="flex justify-center items-center bg-gray-700 border-2 border-blue-400 text-blue-300 font-medium py-3.5 w-full rounded-xl shadow-md hover:bg-gray-600 transition-all ml-2"
                     @click="goChat"
                   >
                     <i class="fas fa-comment-dots mr-2"></i> DM
@@ -297,7 +297,7 @@
               </h3>
               <button
                 @click="showStatsModal = true"
-                class="rounded-xl bg-gray-700 border border-gray-600 py-2 px-4 font-bold text-gray-300 text-base shadow hover:bg-gray-600 transition-all ml-2"
+               class="rounded-xl bg-gray-700 border border-gray-600 py-2 px-4 font-medium text-gray-300 text-base shadow hover:bg-gray-600 transition-all ml-2"
               >
                 통계 더보기
               </button>
@@ -341,7 +341,7 @@
               >
                 <div class="flex items-center mb-4">
                   <i class="fas fa-crown text-yellow-400 text-lg mr-2"></i>
-                  <span class="font-bold text-gray-200 text-base">
+                  <span class="font-medium text-gray-200 text-base">
                     {{ user.nickname }}님이 획득한 챔피언
                   </span>
                 </div>
@@ -353,7 +353,7 @@
                     title="챔피언"
                   >
                     <i class="fas fa-crown text-white text-sm z-10"></i>
-                    <span class="text-md font-semibold text-white z-10 truncate">
+                    <span class="text-md font-medium text-white z-10 truncate">
                       {{ champ.region?.split(' ').slice(-1)[0] }} {{ champ.ruleTitle }} 챔피언
                     </span>
                   </span>
@@ -404,7 +404,7 @@
           </div>
           <!-- <div class="rounded-2xl bg-gray-900 shadow p-5 mb-0">
           <div class="flex justify-between items-center mb-3">
-            <span class="font-bold text-white text-base flex items-center gap-2">
+            <span class="font-medium text-white text-base flex items-center gap-2">
               <i class="fas fa-chart-line text-orange-500"></i> 퍼포먼스 그래프
             </span>
             <div class="flex items-center gap-2">
@@ -426,14 +426,14 @@
             </div>
           </div>
           <div class="mt-3 grid grid-cols-2 gap-y-2 gap-x-6 text-base">
-            <div class="font-semibold text-gray-500">퍼포먼스 평균</div>
-            <div class="text-right font-bold text-white">{{ stat.performance.toFixed(1) }}</div>
-            <div class="font-semibold text-gray-500">승/무/패</div>
+            <div class="font-medium text-gray-500">퍼포먼스 평균</div>
+            <div class="text-right font-medium text-white">{{ stat.performance.toFixed(1) }}</div>
+            <div class="font-medium text-gray-500">승/무/패</div>
             <div class="text-right text-gray-400">
               {{ stat.wins }}승 {{ stat.draws }}무 {{ stat.losses }}패
             </div>
-            <div class="font-semibold text-gray-500">승률</div>
-            <div class="text-right text-orange-500 font-bold">{{ stat.winRate }}%</div>
+            <div class="font-medium text-gray-500">승률</div>
+            <div class="text-right text-orange-500 font-medium">{{ stat.winRate }}%</div>
           </div>
         </div> -->
         </section>
@@ -492,7 +492,7 @@
                   <div class="flex items-center gap-3 text-base">
                     <div class="flex items-center gap-2">
                       <span
-                        class="text-2xl font-bold text-white"
+                       class="text-2xl font-bold text-white"
                         :class="{
                           'text-orange-500': user.recentGames[0].result === 'win',
                           'text-blue-500': user.recentGames[0].result === 'loss',
@@ -501,7 +501,7 @@
                       >
                         {{ user.recentGames[0].myScore }}
                       </span>
-                      <span class="text-gray-400 font-bold">:</span>
+                      <span class="text-gray-400 font-medium">:</span>
                       <span class="text-2xl font-bold text-white">
                         {{ user.recentGames[0].opponentScore }}
                       </span>
@@ -537,7 +537,7 @@
               <p class="text-sm text-gray-500 mb-6">첫 경기를 시작해보세요!</p>
               <button
                 @click="$router.push('/')"
-                class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+               class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
               >
                 <i class="fas fa-plus mr-2"></i>
                 경기 참여하기
@@ -579,7 +579,7 @@
                 @click="selectRule(rule.id)"
               >
                 <div class="flex items-center gap-2">
-                  <span class="font-bold text-base">{{ rule.ruleTitle }}</span>
+                  <span class="font-medium text-base">{{ rule.ruleTitle }}</span>
                   <span class="text-xs px-2 py-0.5 bg-gray-600 rounded"
                     >{{ rule.majorCategory }} > {{ rule.minorCategory }}</span
                   >
@@ -823,7 +823,7 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
     >
       <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
-        <h2 class="text-lg font-semibold mb-4 text-gray-200">유저 차단</h2>
+        <h2 class="text-lg font-bold mb-4 text-gray-200">유저 차단</h2>
         <p class="mb-6 text-gray-300">정말로 이 사용자를 차단하시겠어요?</p>
         <div class="flex justify-end gap-3">
           <button @click="cancel" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-300">
@@ -867,13 +867,13 @@
         <div class="flex gap-3">
           <button
             @click="showUnfriendConfirm = false"
-            class="flex-1 py-3 px-4 bg-gray-700 text-gray-300 font-semibold rounded-xl hover:bg-gray-600 transition-all"
+           class="flex-1 py-3 px-4 bg-gray-700 text-gray-300 font-medium rounded-xl hover:bg-gray-600 transition-all"
           >
             취소
           </button>
           <button
             @click="confirmUnfriend"
-            class="flex-1 py-3 px-4 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all"
+           class="flex-1 py-3 px-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all"
           >
             끊기
           </button>

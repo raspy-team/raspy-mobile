@@ -20,7 +20,7 @@
       <!-- 하위 화면: 뒤로가기 옆 가운데 제목 -->
       <div
         v-if="props.hasReferer == true && props.title"
-        class="absolute left-1/2 transform -translate-x-1/2 text-white text-base font-semibold"
+       class="absolute left-1/2 transform -translate-x-1/2 text-white text-base font-medium"
       >
         {{ props.title }}
       </div>

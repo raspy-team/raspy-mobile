@@ -31,7 +31,7 @@
             <i class="fas fa-camera text-orange-500 text-4xl"></i>
           </div>
           <div class="space-y-2">
-            <p class="text-gray-200 font-semibold">사진을 촬영하세요</p>
+            <p class="text-gray-200 font-medium">사진을 촬영하세요</p>
             <p class="text-gray-500 text-sm">
               촬영한 사진은 피드의 첫 화면에 노출되며<br />실제로 경기를 진행했음을 증명해요
             </p>
@@ -44,7 +44,7 @@
         <button
           v-if="!capturedImage"
           @click.stop="triggerCamera"
-          class="w-full py-4 px-6 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
+         class="w-full py-4 px-6 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
         >
           <i class="fas fa-camera text-2xl"></i>
           <span class="text-lg">사진 촬영하기</span>
@@ -53,13 +53,13 @@
         <div v-else class="grid grid-cols-2 gap-3">
           <button
             @click="retake"
-            class="py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold active:scale-95 transition-all"
+           class="py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium active:scale-95 transition-all"
           >
             <i class="fas fa-redo mr-2"></i>다시 촬영
           </button>
           <button
             @click="confirm"
-            class="py-3 px-4 rounded-xl bg-orange-500 text-white font-bold shadow-lg active:scale-95 transition-all"
+           class="py-3 px-4 rounded-xl bg-orange-500 text-white font-bold shadow-lg active:scale-95 transition-all"
           >
             <i class="fas fa-check mr-2"></i>사용하기
           </button>
@@ -67,7 +67,7 @@
 
         <button
           @click="$emit('cancel')"
-          class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-semibold active:scale-95 transition-all"
+         class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-medium active:scale-95 transition-all"
         >
           취소
         </button>

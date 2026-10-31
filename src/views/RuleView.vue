@@ -41,7 +41,7 @@
     />
     <button
       @click="onSubmitSearch"
-      class="ml-1 px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition flex items-center justify-center"
+     class="ml-1 px-3 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow transition flex items-center justify-center"
       aria-label="검색"
     >
       <i class="fas fa-search"></i>
@@ -63,7 +63,7 @@
           v-for="o in sortOptions"
           :key="o.value"
           @click="selectSort(o.value)"
-          class="sort-option px-4 py-2 cursor-pointer rounded-lg font-semibold text-gray-300 hover:bg-gray-700 transition"
+         class="sort-option px-4 py-2 cursor-pointer rounded-lg font-medium text-gray-300 hover:bg-gray-700 transition"
           :aria-selected="sort === o.value"
           :style="sort === o.value ? 'color:#fb923c;background:rgba(249,115,22,.15);' : ''"
         >
@@ -94,7 +94,7 @@
         style="min-width: 90px"
       >
         <img :src="`/category-picture/${m}.png`" alt="카테고리 아이콘" class="w-14 h-14 mr-4" />
-        <span class="text-base font-semibold text-gray-300">{{ m }}</span>
+        <span class="text-base font-medium text-gray-300">{{ m }}</span>
       </div>
     </div>
   </div>
@@ -106,7 +106,7 @@
   >
     <button
       @click="major = ''"
-      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
+     class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
     >
       <i class="fas fa-arrow-left"></i>
       <span>뒤로</span>
@@ -126,7 +126,7 @@
         style="min-width: 90px"
       >
         <img :src="`/category-picture/${n}.png`" alt="서브카테고리 아이콘" class="w-14 h-14 mr-4" />
-        <span class="text-base font-semibold text-gray-300">{{ n }}</span>
+        <span class="text-base font-medium text-gray-300">{{ n }}</span>
       </div>
     </div>
   </div>
@@ -135,7 +135,7 @@
   <div v-else class="max-w-2xl mx-auto bg-gray-900 px-5 pt-6 flex flex-col gap-0 min-h-screen">
     <button
       @click="minor = ''"
-      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
+     class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-full px-6 py-3 shadow font-bold text-lg flex items-center gap-2"
     >
       <i class="fas fa-arrow-left"></i>
       <span>뒤로</span>
@@ -164,7 +164,7 @@
     <transition name="fade">
       <div
         v-if="toastMsg"
-        class="fixed left-1/2 bottom-10 z-[120] -translate-x-1/2 bg-orange-500 text-white px-6 py-2 rounded-xl shadow-lg font-semibold"
+       class="fixed left-1/2 bottom-10 z-[120] -translate-x-1/2 bg-orange-500 text-white px-6 py-2 rounded-xl shadow-lg font-medium"
         aria-live="polite"
       >
         {{ toastMsg }}

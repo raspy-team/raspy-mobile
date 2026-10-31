@@ -23,6 +23,7 @@
 
     <!-- 앱 전체 알림 한 줄 (window.alert도 여기로 온다) -->
     <CustomToast />
+    <UiConfirmHost />
 
     <!-- 펜딩 리뷰 알림 (전역) - 우선순위가 더 높음 -->
     <Transition name="fade">
@@ -249,6 +250,7 @@ import { socket } from './websocket'
 import api from './api/api'
 import FooterNav from './components/FooterNav.vue'
 import CustomToast from './components/CustomToast.vue'
+import UiConfirmHost from './components/ui/UiConfirmHost.vue'
 // import GameStartNotification from './components/GameStartNotificationSimple.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 

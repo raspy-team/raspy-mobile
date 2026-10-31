@@ -12,7 +12,7 @@ const tabs = [
 </script>
 
 <template>
-  <nav class="fixed bottom-0 left-0 w-full bg-black border-t border-gray-800 z-40 pb-safe">
+  <nav class="fixed bottom-0 left-0 w-full bg-canvas border-t border-line z-nav pb-safe">
     <div class="max-w-4xl mx-auto h-16 grid grid-cols-4 text-xs">
       <router-link
         v-for="t in tabs"
@@ -21,9 +21,9 @@ const tabs = [
         :aria-label="t.label"
         :aria-current="tab === t.key ? 'page' : undefined"
         class="flex flex-col items-center justify-center gap-1"
-        :class="tab === t.key ? 'text-white' : 'text-gray-500'"
+        :class="tab === t.key ? 'text-fg' : 'text-fg-subtle'"
       >
-        <i class="fas text-xl" :class="[t.icon, tab === t.key ? 'text-orange-500' : '']"></i>
+        <i class="fas text-xl" :class="[t.icon, tab === t.key ? 'text-primary' : '']"></i>
         <span>{{ t.label }}</span>
       </router-link>
     </div>

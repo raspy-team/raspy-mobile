@@ -9,7 +9,7 @@ const quiet = colors.neutral
 
 module.exports = {
   content: [
-    "./public/index.html",
+    "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {
@@ -32,7 +32,28 @@ module.exports = {
     extend: {
       // 'border'만 쓴 곳의 기본 선 색. 검은 바탕에 맞춘다
       borderColor: { DEFAULT: colors.neutral[800] },
+      // 겹치는 층의 순서. 숫자를 직접 쓰지 말고 이 이름으로 쓴다 (z-header, z-sheet ...)
+      zIndex: {
+        header: '30',
+        nav: '40',
+        sheet: '50',
+        dialog: '60',
+        toast: '70',
+      },
       colors: {
+        // 의미 이름 토큰. 새 코드는 이 이름만 쓴다 (bg-surface, text-fg-muted, bg-primary ...)
+        canvas: '#000000', // 화면 바탕
+        surface: colors.neutral[900], // 카드·시트
+        'surface-2': colors.neutral[800], // 카드 안의 칸, 눌린 상태, 보조 버튼
+        line: colors.neutral[800], // 구분선·테두리
+        'line-strong': colors.neutral[700],
+        fg: '#ffffff', // 본문 글자
+        'fg-muted': colors.neutral[400], // 보조 글자
+        'fg-subtle': colors.neutral[500], // 더 약한 글자 (시간, 개수)
+        primary: { DEFAULT: brand[500], press: brand[600], soft: 'rgba(249,115,22,0.15)', fg: brand[400] },
+        danger: { DEFAULT: colors.red[500], soft: 'rgba(239,68,68,0.15)', fg: colors.red[400] },
+        success: { DEFAULT: colors.green[500], soft: 'rgba(34,197,94,0.15)', fg: colors.green[400] },
+
         gray: colors.neutral,
         slate: colors.neutral,
         amber: brand,

@@ -44,6 +44,8 @@ const routes = [
     component: GameList
   },
   { path: '/game-list', redirect: '/' },
+  // 개발할 때만: 공통 UI 부품 모음
+  ...(import.meta.env.DEV ? [{ path: '/dev/ui', component: () => import('../views/dev/UiGallery.vue') }] : []),
 
   {
     path: '/oauth/callback',

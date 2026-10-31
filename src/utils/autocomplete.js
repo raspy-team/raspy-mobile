@@ -1,7 +1,7 @@
 export default {
   mounted(el, binding) {
     if (!window.google?.maps?.places) {
-      console.error('Google Places API가 로드되지 않았습니다.')
+      console.error('Google Places API가 로드되지 않았어요')
       return
     }
 

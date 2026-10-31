@@ -495,7 +495,7 @@ onUnmounted(() => stopWatching?.())
 // 카메라 열기
 const openCamera = () => {
   if (allPictures.value.length >= 5) {
-    showToast('최대 5개까지 촬영할 수 있습니다.')
+    showToast('사진·동영상은 5개까지 남길 수 있어요')
     return
   }
   cameraInputRef.value?.click()
@@ -504,7 +504,7 @@ const openCamera = () => {
 // 동영상 촬영기 열기
 const openVideoRecorder = () => {
   if (allPictures.value.length >= 5) {
-    showToast('최대 5개까지 촬영할 수 있습니다.')
+    showToast('사진·동영상은 5개까지 남길 수 있어요')
     return
   }
   videoInputRef.value?.click()
@@ -516,7 +516,7 @@ const onCameraChange = async (e) => {
   if (!file) return
 
   if (allPictures.value.length >= 5) {
-    showToast('최대 5개까지 촬영할 수 있습니다.')
+    showToast('사진·동영상은 5개까지 남길 수 있어요')
     e.target.value = ''
     return
   }
@@ -536,20 +536,20 @@ const onCameraChange = async (e) => {
       // 목록 갱신
       allPictures.value = await getGamePictures(gameId)
 
-      showToast('사진이 저장되었습니다!')
+      showToast('사진을 저장했어요')
     } catch (error) {
       console.error('사진 저장 실패:', error)
       if (error.message === 'QUOTA_EXCEEDED') {
         showToast('저장 공간이 부족합니다. 일부 사진을 삭제한 후 다시 시도해주세요.')
       } else {
-        showToast('사진 저장에 실패했습니다.')
+        showToast('사진을 저장하지 못했어요')
       }
     }
   }
 
   reader.onerror = () => {
     console.error('파일 읽기 실패')
-    showToast('사진 저장에 실패했습니다.')
+    showToast('사진을 저장하지 못했어요')
   }
 
   reader.readAsDataURL(file)
@@ -564,22 +564,12 @@ const onVideoChange = async (e) => {
   if (!file) return
 
   if (allPictures.value.length >= 5) {
-    showToast('최대 5개까지 촬영할 수 있습니다.')
+    showToast('사진·동영상은 5개까지 남길 수 있어요')
     e.target.value = ''
     return
   }
 
-  // 파일 형식 체크
-  const fileType = file.type.toLowerCase()
-  // WebM이 아닌 경우 경고
-  if (!fileType.includes('webm')) {
-    showToast(
-      `⚠️ 주의: ${fileType || '알 수 없는 형식'} 파일입니다. 서버 업로드 시 WebM으로 변환이 필요할 수 있습니다.`,
-    )
-    console.warn('[GameResultView] Non-WebM video detected:', file.type)
-  }
-
-  showToast('동영상 처리 중...')
+  showToast('동영상을 저장하는 중이에요')
 
   try {
     // 동영상 압축 (최대 2분)
@@ -591,13 +581,13 @@ const onVideoChange = async (e) => {
     // 목록 갱신
     allPictures.value = await getGamePictures(gameId)
 
-    showToast(`동영상이 저장되었습니다! (${Math.floor(duration)}초)`)
+    showToast(`동영상을 저장했어요 (${Math.floor(duration)}초)`)
   } catch (error) {
     console.error('동영상 저장 실패:', error)
     if (error.message === 'QUOTA_EXCEEDED') {
       showToast('저장 공간이 부족합니다. 일부 미디어를 삭제한 후 다시 시도해주세요.')
     } else {
-      showToast('동영상 저장에 실패했습니다.')
+      showToast('동영상을 저장하지 못했어요')
     }
   }
 
@@ -616,7 +606,7 @@ const formatDuration = (seconds) => {
 // 사진 선택
 const selectPicture = (pic) => {
   if (selectedPictures.value.length >= 5) {
-    showToast('최대 5장까지 선택할 수 있습니다.')
+    showToast('5개까지 고를 수 있어요')
     return
   }
   selectedPictures.value.push(pic)
@@ -755,7 +745,7 @@ async function sendFriendRequest() {
   try {
     const opponentId = user1.value.id === currentUserId.value ? user2.value.id : user1.value.id
     await api.post(`/api/friends/request/${opponentId}`)
-    showToast('친구 요청을 보냈습니다!')
+    showToast('친구 요청을 보냈어요')
   } catch (e) {
     if (e?.response?.data?.message) showToast(e.response.data.message)
     else showToast('이미 요청했거나 친구 상태입니다.')

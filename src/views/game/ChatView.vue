@@ -7,8 +7,10 @@ import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { playWithMeTooAPI } from '../../api/api'
 import { socket } from '../../websocket'
+import { useToast } from '../../composable/useToast'
 
 const route = useRoute()
+const { showToast } = useToast()
 const targetUserId = Number(route.params.targetUserId)
 const newMsg = ref('')
 const chatBox = ref(null)
@@ -112,8 +114,10 @@ onMounted(async () => {
     console.error(e)
     isLoadingMessages.value = false
     if (e.response?.data?.message?.includes('자기 자신과의 DM')) {
-      errorMessage.value = '자기 자신과의 DM은 생성할 수 없습니다.'
+      errorMessage.value = '나에게는 메시지를 보낼 수 없어요'
       showErrorModal.value = true
+    } else {
+      showToast('메시지를 불러오지 못했어요')
     }
   }
 })
@@ -198,7 +202,7 @@ const headerInfo = computed(() => {
         show: true,
         type: 'challenge_sent',
         title: '도전 대기 중',
-        description: `${targetUserNickname.value}님의 응답을 기다리고 있습니다`,
+        description: `${targetUserNickname.value}님의 답을 기다리고 있어요`,
         showActions: false,
         statusColor: 'gray',
       }
@@ -207,7 +211,7 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'challenge_received',
-        title: '도전 요청을 받았습니다',
+        title: '도전 요청을 받았어요',
         description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
         showActions: true,
         actionType: 'accept_reject',
@@ -229,7 +233,7 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'game_completed',
-        title: `${challengerNickname} 도전한 경기가 종료되었습니다`,
+        title: `${challengerNickname} 도전한 경기가 끝났어요`,
         description: '경기 결과를 확인하세요',
         showActions: true,
         actionType: 'view_result',
@@ -257,8 +261,8 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'challenge_rejected',
-        title: '도전이 거절되었습니다',
-        description: `${targetUserNickname.value}님이 도전을 거절했습니다`,
+        title: '도전이 거절됐어요',
+        description: `${targetUserNickname.value}님이 도전을 거절했어요`,
         showActions: false,
         statusColor: 'red',
       }
@@ -266,8 +270,8 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'challenge_rejected',
-        title: '도전을 거절했습니다',
-        description: `${targetUserNickname.value}님의 도전 요청을 거절했습니다`,
+        title: '도전을 거절했어요',
+        description: `${targetUserNickname.value}님의 도전 요청을 거절했어요`,
         showActions: false,
         statusColor: 'red',
       }
@@ -285,6 +289,7 @@ const handleAccept = async () => {
     await playWithMeTooAPI.acceptRequest(challengeStatus.value.fromUserId)
   } catch (error) {
     console.error('도전 요청 수락 중 오류:', error)
+    showToast(error.response?.data?.message || '수락하지 못했어요. 다시 시도해 주세요')
   }
 }
 
@@ -296,6 +301,7 @@ const handleReject = async () => {
     challengeStatus.value.status = 'REJECTED'
   } catch (error) {
     console.error('도전 요청 거절 중 오류:', error)
+    showToast(error.response?.data?.message || '거절하지 못했어요. 다시 시도해 주세요')
   }
 }
 

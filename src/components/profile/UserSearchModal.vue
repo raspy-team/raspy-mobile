@@ -51,7 +51,7 @@
           class="text-center py-12"
         >
           <i class="fas fa-user-slash text-4xl text-gray-400 mb-3"></i>
-          <p class="text-gray-400 text-base">검색 결과가 없습니다</p>
+          <p class="text-gray-400 text-base">찾는 사람이 없어요</p>
           <p class="text-gray-400 text-sm mt-1">다른 키워드로 시도해보세요</p>
         </div>
 

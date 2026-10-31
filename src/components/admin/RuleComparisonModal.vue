@@ -26,10 +26,8 @@
       <!-- 내용 -->
       <div class="p-6 space-y-6">
         <!-- 로딩 상태 -->
-        <div v-if="loading" class="text-center py-12">
-          <i class="fas fa-spinner fa-spin text-3xl text-primary mb-3"></i>
-          <p class="text-fg-muted">원본 규칙 로딩 중...</p>
-        </div>
+        <UiSkeleton v-if="loading" class="h-40 w-full" />
+        <p v-if="loadError" class="text-sm text-danger-fg" role="alert">{{ loadError }}</p>
 
         <!-- 상태 배지 -->
         <div v-else class="flex items-center justify-between">
@@ -288,6 +286,7 @@
 import { ref, onMounted, defineProps, defineEmits } from 'vue'
 import api from '../../api/api'
 import ComparisonField from './ComparisonField.vue'
+import { UiSkeleton } from '../ui'
 
 const props = defineProps(['request'])
 const emit = defineEmits(['close', 'approve', 'reject'])
@@ -297,6 +296,7 @@ const showRejectModal = ref(false)
 const rejectionReason = ref('')
 const originalRule = ref({})
 const loading = ref(true)
+const loadError = ref('')
 
 // 원본 규칙 데이터 가져오기
 onMounted(async () => {
@@ -306,6 +306,7 @@ onMounted(async () => {
       originalRule.value = data
     } catch (e) {
       console.error('Failed to load original rule:', e)
+      loadError.value = '원래 규칙을 불러오지 못했어요'
     } finally {
       loading.value = false
     }

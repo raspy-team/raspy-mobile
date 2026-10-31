@@ -131,10 +131,6 @@ onMounted(() => {
   }
 })
 
-window.addEventListener('error', (event) => {
-  console.error('Uncaught Error:', event.error)
-})
-
 // '나중에 할게요': 이 경기는 다시 묻지 않는다 (평가는 결과 화면에서 언제든 할 수 있다)
 const dismissedReviewIds = (() => {
   try {

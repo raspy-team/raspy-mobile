@@ -55,7 +55,7 @@
             <div class="mx-auto mb-4 grid place-items-center w-16 h-16 rounded-2xl bg-gray-700">
               🧑‍🤝‍🧑
             </div>
-            <p class="text-white font-medium mb-1">친구가 없습니다</p>
+            <p class="text-white font-medium mb-1">아직 친구가 없어요</p>
             <p class="text-gray-400 text-sm">상단 검색을 확인하거나, 친구를 먼저 추가해보세요.</p>
           </div>
 

@@ -399,7 +399,7 @@ function addLog(log) {
   } else if (log.type === 'RESET') {
     message = `${log.userSummary.nickname} 경기를 리셋함`
   } else if (log.type === 'FINISH') {
-    message = `경기가 종료되었습니다!`
+    message = `경기를 끝냈어요`
   } else {
     message = '알 수 없는 이벤트'
   }
@@ -420,13 +420,13 @@ onMounted(async () => {
       try {
         const compressed = await compressImage(base64Image)
         await addGamePicture(gameId, compressed)
-        showToast('사진이 저장되었습니다!')
+        showToast('사진을 저장했어요')
       } catch (error) {
         console.error('Failed to process camera image:', error)
         if (error.message === 'QUOTA_EXCEEDED') {
           showToast('저장 공간이 부족합니다.')
         } else {
-          showToast('사진 저장에 실패했습니다.')
+          showToast('사진을 저장하지 못했어요')
         }
       }
     }
@@ -436,13 +436,13 @@ onMounted(async () => {
       try {
         // duration은 밀리초 단위로 전달된다고 가정
         await addGameVideo(gameId, base64Video, duration || 0)
-        showToast('동영상이 저장되었습니다!')
+        showToast('동영상을 저장했어요')
       } catch (error) {
         console.error('Failed to process video:', error)
         if (error.message === 'QUOTA_EXCEEDED') {
           showToast('저장 공간이 부족합니다.')
         } else {
-          showToast('동영상 저장에 실패했습니다.')
+          showToast('동영상을 저장하지 못했어요')
         }
       }
     }
@@ -690,20 +690,20 @@ async function onCameraChange(e) {
       // IndexedDB에 저장
       await addGamePicture(gameId, compressed)
 
-      showToast('사진이 저장되었습니다!')
+      showToast('사진을 저장했어요')
     } catch (error) {
       console.error('사진 저장 실패:', error)
       if (error.message === 'QUOTA_EXCEEDED') {
         showToast('저장 공간이 부족합니다. 일부 사진을 삭제한 후 다시 시도해주세요.')
       } else {
-        showToast('사진 저장에 실패했습니다.')
+        showToast('사진을 저장하지 못했어요')
       }
     }
   }
 
   reader.onerror = () => {
     console.error('파일 읽기 실패')
-    showToast('사진 저장에 실패했습니다.')
+    showToast('사진을 저장하지 못했어요')
   }
 
   reader.readAsDataURL(file)
@@ -726,13 +726,13 @@ async function onVideoChange(e) {
     // IndexedDB에 저장
     await addGameVideo(gameId, dataUrl, duration)
 
-    showToast(`동영상이 저장되었습니다! (${Math.floor(duration)}초)`)
+    showToast(`동영상을 저장했어요 (${Math.floor(duration)}초)`)
   } catch (error) {
     console.error('동영상 저장 실패:', error)
     if (error.message === 'QUOTA_EXCEEDED') {
       showToast('저장 공간이 부족합니다. 일부 미디어를 삭제한 후 다시 시도해주세요.')
     } else {
-      showToast('동영상 저장에 실패했습니다.')
+      showToast('동영상을 저장하지 못했어요')
     }
   }
 

@@ -594,228 +594,7 @@
         </div>
       </transition>
       <transition name="fade">
-        <div
-          v-if="showUserModal"
-          class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex justify-center items-center p-4"
-          @click="closeUserModal"
-        >
-          <div
-            class=" bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full mx-auto overflow-hidden border border-gray-700"
-            @click.stop
-          >
-            <!-- 헤더 -->
-            <div class="px-6 py-5 border-b border-gray-700/50 bg-gradient-to-r from-orange-500/10 to-transparent">
-              <div class="flex items-center justify-between">
-                <h3 class="font-bold text-xl text-white flex items-center gap-2">
-                  <i class="fas fa-search text-orange-500"></i>
-                  유저 찾기
-                </h3>
-                <button
-                  class="w-9 h-9 rounded-full bg-gray-700/50 hover:bg-gray-700 text-gray-400 hover:text-white transition-all flex items-center justify-center"
-                  @click="closeUserModal"
-                >
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- 검색 입력 -->
-            <div class="px-6 py-4">
-              <div class="relative">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                <input
-                  v-model="userSearch"
-                  @input="onUserSearch"
-                  ref="userinput"
-                  type="text"
-                  class="w-full bg-gray-900/50 border border-gray-700 rounded-2xl pl-11 pr-4 py-3.5 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
-                  placeholder="이름 또는 유저네임 검색..."
-                />
-              </div>
-            </div>
-
-            <!-- 검색 결과 -->
-            <div class="px-6 pb-6 max-h-[60vh] overflow-y-auto">
-              <!-- 로딩 상태 -->
-              <div v-if="userSearching" class="text-center py-12">
-                <i class="fas fa-spinner fa-spin text-3xl text-orange-500 mb-3"></i>
-                <p class="text-gray-400 text-sm">검색 중...</p>
-              </div>
-
-              <!-- 검색 결과 없음 -->
-              <div
-                v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''"
-                class="text-center py-12"
-              >
-                <i class="fas fa-user-slash text-4xl text-gray-400 mb-3"></i>
-                <p class="text-gray-400 text-base">검색 결과가 없습니다</p>
-                <p class="text-gray-400 text-sm mt-1">다른 키워드로 시도해보세요</p>
-              </div>
-
-              <!-- 검색 결과 리스트 -->
-              <div v-else-if="userSearchResult.length > 0" class="space-y-2">
-                <button
-                  v-for="user in userSearchResult"
-                  :key="user.id"
-                  @click="gotoUser(user.id)"
-                  class="w-full flex items-center gap-3 p-3 rounded-2xl bg-gray-900/30 hover:bg-gradient-to-r hover:from-orange-500/20 hover:to-transparent border border-transparent hover:border-orange-500/30 transition-all group"
-                >
-                  <img
-                    :src="user.avatar ? user.avatar : Default"
-                    class="w-12 h-12 rounded-full border-2 border-gray-700 group-hover:border-orange-500 object-cover transition-all"
-                  />
-                  <div class="flex-1 text-left min-w-0">
-                    <div class="font-medium text-white text-sm truncate group-hover:text-orange-400 transition-colors">
-                      {{ user.nickname }}
-                    </div>
-                    <div class="text-xs text-gray-400 truncate">@{{ user.username }}</div>
-                    <div v-if="user.intro" class="text-xs text-gray-500 mt-0.5 truncate">
-                      {{ user.intro }}
-                    </div>
-                  </div>
-                  <i class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500 transition-colors"></i>
-                </button>
-              </div>
-
-              <!-- 초기 상태 (검색 전) -->
-              <div v-else class="text-center py-12">
-                <i class="fas fa-search text-4xl text-gray-200 mb-3"></i>
-                <p class="text-gray-500 text-sm">검색어를 입력하세요</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
-      <transition name="fade h-full">
-        <div
-          v-if="showFriendModal"
-          class="h-full fixed inset-0 z-50 bg-black/40 flex justify-center items-end sm:items-center"
-        >
-          <div
-            class="bg-gray-800 h-[60%] rounded-t-3xl sm:rounded-3xl max-w-md w-full mx-auto pb-4 pt-4 px-4 relative shadow-2xl"
-            style="padding: 2rem 1.2rem 2.2rem 1.2rem; overflow-y: auto"
-          >
-            <button
-              class="absolute right-5 top-4 text-xl text-gray-500 hover:text-orange-500"
-              @click="closeFriendModal"
-            >
-              <i class="fas fa-times"></i>
-            </button>
-            <div class="flex gap-2 mb-5 mt-2">
-              <button
-                :class="
-                  friendTab === 'friends'
-                    ? 'font-bold border-b-2 border-orange-500 text-orange-400'
-                    : 'text-gray-400'
-                "
-                class="flex-1 py-2 text-base transition"
-                @click="friendTab = 'friends'"
-              >
-                친구
-              </button>
-              <button
-                v-if="user?.isMe"
-                :class="
-                  friendTab === 'sent'
-                    ? 'font-bold border-b-2 border-orange-500 text-orange-400'
-                    : 'text-gray-400'
-                "
-                class="flex-1 py-2 text-base transition"
-                @click="friendTab = 'sent'"
-              >
-                요청됨
-              </button>
-              <button
-                v-if="user?.isMe"
-                :class="
-                  friendTab === 'received'
-                    ? 'font-bold border-b-2 border-orange-500 text-orange-400'
-                    : 'text-gray-400'
-                "
-                class="flex-1 py-2 text-base transition"
-                @click="friendTab = 'received'"
-              >
-                요청받음
-              </button>
-            </div>
-            <div v-if="friendTab === 'friends'">
-              <div v-if="friends.length" class="flex flex-col gap-3 overflow-y-auto">
-                <button
-                  v-for="f in friends"
-                  :key="f.id"
-                  class="flex items-center gap-3 p-3 hover:bg-orange-900 rounded-xl border border-transparent hover:border-orange-700 transition"
-                  @click="gotoUser(f.id)"
-                >
-                  <img
-                    :src="f.avatar || Default"
-                    class="w-10 h-10 rounded-full object-cover border"
-                  />
-                  <div class="flex-1 text-left min-w-0">
-                    <div class="font-medium text-gray-200 text-sm truncate">{{ f.nickname }}</div>
-                    <div class="text-sm truncate">@{{ f.username }}</div>
-                    <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
-                  </div>
-                </button>
-              </div>
-              <div v-else class="text-gray-500 text-center py-8">친구가 없습니다.</div>
-            </div>
-            <div v-if="friendTab === 'sent' && user?.isMe">
-              <div v-if="friendRequestsSent.length" class="flex flex-col gap-3 overflow-y-auto">
-                <button
-                  v-for="f in friendRequestsSent"
-                  :key="f.id"
-                  class="flex items-center gap-3 p-3 hover:bg-orange-900 rounded-xl border border-transparent hover:border-orange-700 transition"
-                  @click="gotoUser(f.id)"
-                >
-                  <img
-                    :src="f.avatar || Default"
-                    class="w-10 h-10 rounded-full object-cover border"
-                  />
-                  <div class="flex-1 text-left min-w-0">
-                    <div class="font-medium text-gray-200 text-sm truncate">{{ f.nickname }}</div>
-                    <div class="text-sm truncate">@{{ f.username }}</div>
-                    <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
-                  </div>
-                </button>
-              </div>
-              <div v-else class="text-gray-500 text-center py-8">요청한 친구가 없습니다.</div>
-            </div>
-            <div v-if="friendTab === 'received' && user?.isMe">
-              <div v-if="friendRequestsReceived.length" class="flex flex-col gap-3 overflow-y-auto">
-                <div
-                  v-for="f in friendRequestsReceived"
-                  :key="f.id"
-                  class="flex items-center gap-3 p-3 hover:bg-orange-900 rounded-xl border border-transparent hover:border-orange-700 transition"
-                >
-                  <img
-                    :src="f.avatar || Default"
-                    class="w-10 h-10 rounded-full object-cover border"
-                  />
-                  <div @click="gotoUser(f.id)" class="flex-1 text-left min-w-0">
-                    <div class="font-medium text-gray-200 text-sm truncate">{{ f.nickname }}</div>
-                    <div class="text-sm truncate">@{{ f.username }}</div>
-                    <div class="text-xs text-gray-400 truncate">{{ f.intro }}</div>
-                  </div>
-                  <div class="flex gap-1 ml-2">
-                    <button
-                      class="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-medium shadow"
-                      @click="onAcceptRequest(f.id)"
-                    >
-                      승인
-                    </button>
-                    <button
-                      class="px-5 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-xs font-medium shadow border border-gray-600"
-                      @click="onRejectRequest(f.id)"
-                    >
-                      거부
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="text-gray-500 text-center py-8">받은 친구 요청이 없습니다.</div>
-            </div>
-          </div>
-        </div>
+        <UserSearchModal v-if="showUserModal" @close="showUserModal = false" />
       </transition>
     </template>
     <div
@@ -883,6 +662,7 @@
 </template>
 
 <script setup>
+import UserSearchModal from '../../components/profile/UserSearchModal.vue'
 import { useBackClose } from '../../composable/useBackClose'
 
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
@@ -903,11 +683,6 @@ function formatDate(str) {
   return d.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
 }
 
-const showFriendModal = ref(false)
-const friendTab = ref('friends') // friends | sent | received
-const friends = ref([])
-const friendRequestsSent = ref([])
-const friendRequestsReceived = ref([])
 
 const chartRef = ref(null)
 let chartInstance = null
@@ -961,27 +736,6 @@ const goChat = () => {
 
 const sent = ref(false)
 
-async function onAcceptRequest(friendId) {
-  try {
-    await api.post(`/api/friends/accept/${friendId}`)
-    showToast('친구 요청을 승인했습니다!')
-    // 바로 리스트 갱신
-    loadFriends()
-    fetchFriendStatus()
-  } catch (e) {
-    showToast('승인에 실패했습니다.')
-  }
-}
-async function onRejectRequest(friendId) {
-  try {
-    await api.post(`/api/friends/reject/${friendId}`)
-    showToast('친구 요청을 거부했습니다.')
-    loadFriends()
-    fetchFriendStatus()
-  } catch (e) {
-    showToast('거부에 실패했습니다.')
-  }
-}
 
 async function sendFriendRequest() {
   try {
@@ -1121,30 +875,6 @@ const filteredCategoryPlayers = computed(() => {
 //   }
 //   return []
 // })
-async function loadFriends() {
-  try {
-    // 내 친구 목록
-    const res = await api.get('/api/friends/my?userId=' + userId)
-    friends.value = res.data
-    // 요청 보냄/받음 (본인 프로필인 경우에만)
-    if (user.value?.isMe) {
-      const res2 = await api.get('/api/friends/my/sent')
-      friendRequestsSent.value = res2.data
-      const res3 = await api.get('/api/friends/my/received')
-      friendRequestsReceived.value = res3.data
-    }
-  } catch (e) {
-    showToast('친구 목록을 불러오지 못했습니다.')
-  }
-}
-// function openFriendModal() {
-//   friendTab.value = 'friends'
-//   showFriendModal.value = true
-//   loadFriends()
-// }
-// function closeFriendModal() {
-//   showFriendModal.value = false
-// }
 
 // function onTabChange(item) {
 //   statMode.value = item.id
@@ -1245,44 +975,10 @@ const updateChart = async () => {
   })
 }
 
-// 유저 검색 모달 및 검색 API
+// 유저 검색 모달 (검색 상태와 API는 UserSearchModal 안에)
 const showUserModal = ref(false)
-const userSearch = ref('')
-const userSearching = ref(false)
-const userSearchResult = ref([])
-let searchTimeout
-
-const userinput = ref(null)
-
 function searchUsers() {
   showUserModal.value = true
-  userSearch.value = ''
-  userSearchResult.value = []
-  nextTick(() => {
-    userinput.value?.focus()
-  })
-}
-function closeUserModal() {
-  showUserModal.value = false
-}
-async function onUserSearch() {
-  clearTimeout(searchTimeout)
-  if (!userSearch.value.trim()) {
-    userSearchResult.value = []
-    return
-  }
-  userSearching.value = true
-  searchTimeout = setTimeout(async () => {
-    const res = await api.get(
-      `/api/user-profile/search?keyword=${encodeURIComponent(userSearch.value)}`,
-    )
-    userSearchResult.value = res.data
-    userSearching.value = false
-  }, 350)
-}
-function gotoUser(userId) {
-  closeUserModal()
-  router.push(`/profile/${userId}`)
 }
 
 // 데이터 로딩 및 예외처리
@@ -1400,7 +1096,7 @@ watch(showStatsModal, (newValue) => {
 })
 
 // 뒤로가기는 열린 모달부터 닫는다
-useBackClose(showFriendModal, showRuleModal, showChampions, showStatsModal, showConfirm, showUnfriendConfirm, showUserModal)
+useBackClose(showRuleModal, showChampions, showStatsModal, showConfirm, showUnfriendConfirm, showUserModal)
 </script>
 
 <style scoped>

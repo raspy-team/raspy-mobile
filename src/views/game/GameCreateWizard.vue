@@ -14,28 +14,6 @@
     <GameFinalPage v-if="step === 6" :game="gameForm" />
   </div>
 
-  <!-- 주소 오류 모달 -->
-  <div
-    v-if="showAddressErrorModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-  >
-    <div class="bg-gray-800 p-6 m-5 rounded-2xl w-full max-w-sm shadow-2xl">
-      <div class="text-center mb-4">
-        <i class="fas fa-exclamation-triangle text-orange-500 text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold text-gray-100 mb-2">장소를 찾을 수 없습니다</h3>
-        <p class="text-sm text-gray-400">
-          더 구체적인 장소를 입력해주세요.<br />
-          <span class="text-xs text-gray-500 mt-2 block">예: 서초탁구장, 강남체육관</span>
-        </p>
-      </div>
-      <button
-        @click="showAddressErrorModal = false"
-       class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition shadow"
-      >
-        확인
-      </button>
-    </div>
-  </div>
 </template>
 
 <script setup>
@@ -58,7 +36,6 @@ const gameForm = reactive({
   time: '',
 })
 
-const showAddressErrorModal = ref(false)
 const isContest = ref(false)
 
 onMounted(() => {

@@ -6,11 +6,13 @@
     "serve": "vite",
     "serve:dev": "cross-env VUE_APP_ENV=dev vite",
     "serve:prod": "cross-env VUE_APP_ENV=prod vite",
-    "build": "cross-env VUE_APP_ENV=prod vite build",
+    "build": "node scripts/check-api.mjs && vue-tsc --noEmit && cross-env VUE_APP_ENV=prod vite build",
     "build:dev": "cross-env VUE_APP_ENV=dev vite build",
     "preview": "vite preview --port 8081",
     "typecheck": "vue-tsc --noEmit",
-    "lint": "eslint --ext .js,.ts,.vue src"
+    "lint": "eslint --ext .js,.ts,.vue src",
+    "api:check": "node scripts/check-api.mjs",
+    "api:sync": "node scripts/sync-api.mjs"
   },
   "dependencies": {
     "@sentry/vue": "^8.38.0",
@@ -27,6 +29,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^8.7.1",
+    "openapi-typescript": "^7.4.4",
     "postcss": "^8.4.49",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.17",

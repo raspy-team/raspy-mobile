@@ -1283,7 +1283,7 @@ function closeLikersModal() {
   feedAnimating.value = false
 }
 
-function onReport() {
+async function onReport() {
   // 피드 터치 상태 리셋
   feedIsPointerDown.value = false
   feedAnimating.value = false
@@ -1296,13 +1296,18 @@ function onReport() {
     return
   }
 
-  // 신고 완료 처리
+  // 피드 게시물 = 경기. 서버에 신고를 남긴다 (예전에는 화면에만 '완료'라고 보이고 서버로 가지 않았다)
+  try {
+    await api.post('/api/reports', { targetType: 'GAME', targetId: postId, reason: '피드에서 신고' })
+  } catch (e) {
+    if (e.response?.status !== 409) {
+      showToast('신고에 실패했어요. 잠시 뒤 다시 시도해주세요')
+      return
+    }
+  }
   reportedPosts.value.add(postId)
   localStorage.setItem('reportedPosts', JSON.stringify([...reportedPosts.value]))
   showToast('신고가 완료되었습니다')
-
-  // TODO: 나중에 API 연결
-  // await api.post(`/api/posts/${postId}/report`)
 }
 
 // 프로필 클릭 핸들러

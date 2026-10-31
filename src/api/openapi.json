@@ -1,0 +1,7196 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "tags": [
+    {
+      "name": "Report",
+      "description": "신고 관련 API"
+    },
+    {
+      "name": "일일 접속 추적",
+      "description": "유저의 일일 첫 접속을 추적하고 알림을 전송하는 API"
+    },
+    {
+      "name": "Notification",
+      "description": "인앱 알림 API"
+    },
+    {
+      "name": "Block",
+      "description": "유저 차단 기능 API"
+    },
+    {
+      "name": "Admin User Management",
+      "description": "관리자 전용 유저 관리 API"
+    }
+  ],
+  "paths": {
+    "/login/oauth2/apple/notify": {
+      "post": {
+        "tags": [
+          "apple-mobile-auth-controller"
+        ],
+        "operationId": "notify",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/remove": {
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "removeUser",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/rules": {
+      "post": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "게임 규칙 생성",
+        "description": "입력된 규칙 설명을 기반으로 AI가 제목/카테고리를 생성하여 새로운 Rule을 생성합니다.",
+        "operationId": "createRule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullRuleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/{ruleId}/rating": {
+      "post": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "규칙 평가 제출",
+        "description": "게임 완료 후 사용한 규칙에 대한 평가(0~5점)를 제출합니다. 같은 사용자가 다른 게임에서 같은 규칙을 여러 번 평가할 수 있습니다.",
+        "operationId": "submitRuleRating",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRuleRatingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleRatingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/edit-requests": {
+      "post": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "규칙 수정 요청 제출",
+        "description": "본인이 생성한 규칙에 대한 수정 요청을 제출합니다. 관리자 승인 후 원본 규칙이 업데이트됩니다.",
+        "operationId": "createEditRequest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEditRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/edit-requests/{id}/cancel": {
+      "post": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "수정 요청 취소",
+        "description": "본인의 PENDING 상태 수정 요청을 취소합니다.",
+        "operationId": "cancelEditRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports": {
+      "post": {
+        "tags": [
+          "Report"
+        ],
+        "summary": "컨텐츠 신고",
+        "description": "게임/댓글/룰을 신고합니다.",
+        "operationId": "report",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/push/remove-device": {
+      "post": {
+        "tags": [
+          "push-controller"
+        ],
+        "operationId": "removeCurrentDeviceToken",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/push/register": {
+      "post": {
+        "tags": [
+          "push-controller"
+        ],
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/play-with-me-too/request": {
+      "post": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "도전 요청 보내기",
+        "description": "특정 유저에게 특정 룰로 도전 요청을 보냅니다.",
+        "operationId": "sendPlayWithMeTooRequest",
+        "parameters": [
+          {
+            "name": "targetUserId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "도전 요청 취소",
+        "description": "특정 유저에게 보낸 도전 요청을 취소합니다.",
+        "operationId": "cancelPlayWithMeTooRequest",
+        "parameters": [
+          {
+            "name": "targetUserId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play-with-me-too/reject": {
+      "post": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "도전 요청 거절",
+        "description": "특정 유저로부터 받은 도전 요청을 거절합니다.",
+        "operationId": "rejectPlayWithMeTooRequest",
+        "parameters": [
+          {
+            "name": "requesterId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play-with-me-too/accept": {
+      "post": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "도전 요청 수락",
+        "description": "특정 유저로부터 받은 도전 요청을 수락하고 게임을 생성합니다.",
+        "operationId": "acceptPlayWithMeTooRequest",
+        "parameters": [
+          {
+            "name": "requesterId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications/{id}/read": {
+      "post": {
+        "tags": [
+          "Notification"
+        ],
+        "summary": "알림 읽음 처리",
+        "description": "특정 알림을 읽음 상태로 처리합니다.",
+        "operationId": "markAsRead",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/notifications/clear": {
+      "post": {
+        "tags": [
+          "Notification"
+        ],
+        "summary": "알림 전체 삭제",
+        "description": "로그인한 사용자의 모든 알림을 삭제합니다.",
+        "operationId": "clearAllNotifications",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/invite": {
+      "post": {
+        "tags": [
+          "invite-controller"
+        ],
+        "summary": "초대 링크 생성",
+        "description": "게임 ID로 브랜치 초대 링크를 생성합니다.",
+        "operationId": "createInvite",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/start": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Start Game",
+        "description": "경기 주최자가 해당 게임을 시작 상태로 변경합니다. 게임 시작 사진이 필수입니다.",
+        "operationId": "startGame",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "photo"
+                ],
+                "type": "object",
+                "properties": {
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/set-region": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Set Region",
+        "description": "경기 주최자가 해당 게임을 시작 상태로 변경하기 전, 경기 장소를 (재)설정합니다.",
+        "operationId": "setGameRegion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameRegionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/review": {
+      "post": {
+        "tags": [
+          "review-controller"
+        ],
+        "summary": "경기 리뷰 등록",
+        "description": "특정 경기(gameId)에 대한 리뷰를 작성한다",
+        "operationId": "postGameReview",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/pictures": {
+      "get": {
+        "tags": [
+          "game-picture-controller"
+        ],
+        "summary": "게임 사진 조회",
+        "description": "게임에 업로드된 사진 목록을 displayOrder 순서대로 반환합니다.",
+        "operationId": "getGamePictures",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GamePictureResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "game-picture-controller"
+        ],
+        "summary": "게임 미디어 업로드",
+        "description": "게임 결과 페이지에서 사용자가 선택한 사진과 동영상을 업로드합니다. 최대 5개까지 가능합니다 (사진 + 동영상 합계). 동영상 지원 형식: MP4, MOV, WebM, AVI, MPEG, 3GP, WMV",
+        "operationId": "uploadGameMedia",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pictures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  },
+                  "videos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "미디어 업로드 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PictureUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 (미디어 개수 초과, 게임 없음 등)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PictureUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/like": {
+      "get": {
+        "tags": [
+          "game-like-controller"
+        ],
+        "operationId": "getGameLikeStatus",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameLikeStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "game-like-controller"
+        ],
+        "operationId": "toggleGameLike",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameLikeToggleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/comments": {
+      "get": {
+        "tags": [
+          "comment-controller"
+        ],
+        "summary": "게임별 댓글 목록 조회 (최신순)",
+        "description": "해당 게임에 작성된 모든 댓글을 평면 리스트로 반환합니다. (트리 구조는 /comments/tree 사용)",
+        "operationId": "getComments",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommentResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "comment-controller"
+        ],
+        "summary": "댓글 등록 (대댓글/이미지 지원, multipart)",
+        "description": "새 댓글/대댓글을 등록합니다. 이미지 파일/parentId/멘션 등 multipart로 지원.",
+        "operationId": "addComment",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "req": {
+                    "$ref": "#/components/schemas/CreateCommentRequest"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/apply": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "게임 참가 신청",
+        "description": "현재 로그인한 사용자가 해당 게임에 참가 신청을 보냅니다.",
+        "operationId": "applyToJoin",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/create": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Create Custom Game",
+        "description": "사용자가 커스텀한 스포츠 경기를 생성합니다.",
+        "operationId": "createGame",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/create-friend-game": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Create Custom Game",
+        "description": "사용자가 커스텀한 스포츠 경기를 생성합니다.",
+        "operationId": "createFriendGame",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/cancel-request": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "게임 신청 취소",
+        "description": "지원자가 게임 신청을 취소합니다.",
+        "operationId": "cancelGameRequest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelGameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/games/cancel-approve": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "참가 승인 취소",
+        "description": "참가자의 승인을 취소합니다.",
+        "operationId": "cancelApprove",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/games/approve": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "참가 신청 승인",
+        "description": "특정 게임에 지원한 사용자의 참가 신청을 승인합니다.",
+        "operationId": "approveApplicant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/friends/request/{targetId}": {
+      "post": {
+        "tags": [
+          "friend-controller"
+        ],
+        "summary": "친구 요청",
+        "description": "타 유저에게 친구 요청을 보냅니다. 이미 요청된 상태거나 친구이면 에러.",
+        "operationId": "requestFriend",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/friends/reject/{requesterId}": {
+      "post": {
+        "tags": [
+          "friend-controller"
+        ],
+        "summary": "친구 요청 거절",
+        "description": "받은 친구 요청을 거절합니다.",
+        "operationId": "rejectFriend",
+        "parameters": [
+          {
+            "name": "requesterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/friends/accept/{requesterId}": {
+      "post": {
+        "tags": [
+          "friend-controller"
+        ],
+        "summary": "친구 요청 수락",
+        "description": "받은 친구 요청을 수락합니다. 역방향도 추가하여 양방향 친구 관계를 만듭니다.",
+        "operationId": "acceptFriend",
+        "parameters": [
+          {
+            "name": "requesterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/comments/{commentId}/like": {
+      "post": {
+        "tags": [
+          "comment-controller"
+        ],
+        "summary": "댓글 좋아요",
+        "description": "해당 댓글에 좋아요 추가",
+        "operationId": "likeComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/comments/{commentId}/dislike": {
+      "post": {
+        "tags": [
+          "comment-controller"
+        ],
+        "summary": "댓글 싫어요",
+        "description": "해당 댓글에 싫어요 추가",
+        "operationId": "dislikeComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/chat-room/dm-room": {
+      "post": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "summary": "DM 채팅방 ID 조회 또는 생성",
+        "description": "두 유저 간 DM 채팅방 ID를 반환합니다. 채팅방이 없다면 새로 생성합니다.",
+        "operationId": "getOrCreateDmRoom",
+        "parameters": [
+          {
+            "name": "targetUserId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DmRoomDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/block/{targetId}": {
+      "post": {
+        "tags": [
+          "Block"
+        ],
+        "summary": "유저 차단",
+        "description": "현재 로그인한 사용자가 특정 유저를 차단합니다.",
+        "operationId": "blockUser",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Block"
+        ],
+        "summary": "유저 차단 해제",
+        "description": "현재 로그인한 사용자가 특정 유저에 대한 차단을 해제합니다.",
+        "operationId": "unblockUser",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "summary": "어드민에 의한 그룹 등록",
+        "description": "계정이름, 비밀번호를 받아 신규 유저를 생성합니다.",
+        "operationId": "register_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "회원가입 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 (입력값 검증 실패)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "중복된 이메일",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "summary": "그룹 유저 로그인",
+        "description": "이메일과 비밀번호를 받아 로그인 후 JWT 토큰을 발급합니다.",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "로그인 성공, JWT 토큰 반환",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 (입력값 검증 실패)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패 (잘못된 이메일 또는 비밀번호)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/complete": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "completeOauth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteOauthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/check-username": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "checkUsername",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckUsernameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/rules/edit-requests/{id}/reject": {
+      "post": {
+        "tags": [
+          "rule-edit-request-admin-controller"
+        ],
+        "summary": "수정 요청 거절 (관리자 전용)",
+        "description": "PENDING 상태의 수정 요청을 거절합니다. 거절 사유를 입력해야 합니다.",
+        "operationId": "rejectEditRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectEditRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/rules/edit-requests/{id}/approve": {
+      "post": {
+        "tags": [
+          "rule-edit-request-admin-controller"
+        ],
+        "summary": "수정 요청 승인 (관리자 전용)",
+        "description": "PENDING 상태의 수정 요청을 승인하고, 원본 규칙을 업데이트합니다.",
+        "operationId": "approveEditRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/access/daily-first": {
+      "post": {
+        "tags": [
+          "일일 접속 추적"
+        ],
+        "summary": "일일 첫 접속 기록",
+        "description": "클라이언트가 매일 최초 1회 호출. 첫 접속이면 디스코드 알림 전송",
+        "operationId": "recordDailyFirstAccess",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyAccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuator/health": {
+      "get": {
+        "tags": [
+          "actuator-controller"
+        ],
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "actuator-controller"
+        ],
+        "operationId": "healthPost",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user-profile/save": {
+      "patch": {
+        "tags": [
+          "user-profile-controller"
+        ],
+        "summary": "사용자 프로필 저장",
+        "description": "나이, 성별, 지역, 자기소개, 프로필 사진을 저장하거나 수정합니다. *이 request는 multipart/form-data 입니다.",
+        "operationId": "saveUserProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "$ref": "#/components/schemas/UserProfileRequest"
+                  },
+                  "profile_picture": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/comments/{commentId}": {
+      "delete": {
+        "tags": [
+          "comment-controller"
+        ],
+        "summary": "댓글 삭제 (Soft Delete)",
+        "description": "본인 댓글만 삭제 가능. 실제 삭제 대신 soft delete 처리.",
+        "operationId": "deleteComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "comment-controller"
+        ],
+        "summary": "댓글 수정",
+        "description": "본인 댓글만 수정 가능합니다. 내용, 이미지 교체/삭제 가능.",
+        "operationId": "updateComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/login/oauth2/kakao/token": {
+      "get": {
+        "tags": [
+          "kakao-mobile-auth-controller"
+        ],
+        "operationId": "kakaoTokenLogin",
+        "parameters": [
+          {
+            "name": "access_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/login/oauth2/google/token": {
+      "get": {
+        "tags": [
+          "google-mobile-auth-controller"
+        ],
+        "operationId": "googleTokenLogin",
+        "parameters": [
+          {
+            "name": "id_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/login/oauth2/apple/token": {
+      "get": {
+        "tags": [
+          "apple-mobile-auth-controller"
+        ],
+        "operationId": "appleTokenLogin",
+        "parameters": [
+          {
+            "name": "id_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user-profile/{userId}": {
+      "get": {
+        "tags": [
+          "user-profile-controller"
+        ],
+        "summary": "유저 프로필 조회",
+        "description": "특정 유저의 프로필과 종합 통계, 플레이한 규칙, 누적 통계를 반환한다.",
+        "operationId": "getUserProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user-profile/{userId}/games": {
+      "get": {
+        "tags": [
+          "user-profile-controller"
+        ],
+        "summary": "유저 경기 기록 조회",
+        "description": "특정 유저가 플레이한 경기 리스트(요약)를 반환한다.",
+        "operationId": "getUserGames",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FullGameSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user-profile/search": {
+      "get": {
+        "tags": [
+          "user-profile-controller"
+        ],
+        "summary": "유저 검색",
+        "description": "닉네임으로 유저를 부분검색한다. 최대 20명.",
+        "operationId": "searchUsers",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSearchResultDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user-profile/my/profile": {
+      "get": {
+        "tags": [
+          "user-profile-controller"
+        ],
+        "operationId": "getMyProfile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/{ruleId}/rankings": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "특정 규칙의 유저별 랭킹 조회",
+        "description": "특정 규칙을 플레이한 모든 유저의 레이팅, 플레이 횟수, 랭킹을 레이팅 순으로 정렬하여 반환합니다. 현재 유저의 랭킹도 포함됩니다.",
+        "operationId": "getRuleRankings",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleRankingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/{id}": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "특정 규칙 단건 조회",
+        "description": "id로 규칙 상세 정보 반환",
+        "operationId": "getRuleById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullRuleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/top-played-categories/{userId}": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "topPlayedMinorCategories",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/my-rules": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "내가 생성한 규칙 목록 조회",
+        "description": "현재 로그인한 사용자가 생성한 규칙 목록과 수정 요청 상태를 반환합니다.",
+        "operationId": "getMyRules",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FullRuleResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/list": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "룰 목록 조회",
+        "description": "카테고리, 검색, 정렬 조건으로 룰 조회",
+        "operationId": "listRules",
+        "parameters": [
+          {
+            "name": "major",
+            "in": "query",
+            "description": "메이저 카테고리",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minor",
+            "in": "query",
+            "description": "마이너 카테고리",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "검색어",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "정렬 기준(recent 또는 popular)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "recent"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FullRuleResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/categories": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "categories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/categories/{major}": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "minors",
+        "parameters": [
+          {
+            "name": "major",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rankings": {
+      "get": {
+        "tags": [
+          "ranking-controller"
+        ],
+        "summary": "유저 랭킹/레이팅 조회",
+        "description": "총점, 카테고리, 규칙별 랭킹 및 상위 퍼센트를 반환함.",
+        "operationId": "getUserRankings",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "minorCategory",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play-with-me-too/status-with-user": {
+      "get": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "특정 유저와의 도전 상태 확인",
+        "description": "특정 유저와의 도전 요청 상태를 확인합니다 (모든 상태 포함, 게임 정보 포함).",
+        "operationId": "getStatusWithUser",
+        "parameters": [
+          {
+            "name": "otherUserId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayWithMeTooResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play-with-me-too/sent-requests": {
+      "get": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "보낸 도전 요청들",
+        "description": "현재 유저가 보낸 모든 대기 중인 도전 요청들을 조회합니다.",
+        "operationId": "getSentRequests",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayWithMeTooEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play-with-me-too/received-requests": {
+      "get": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "받은 도전 요청들",
+        "description": "현재 유저가 받은 모든 대기 중인 도전 요청들을 조회합니다.",
+        "operationId": "getReceivedRequests",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayWithMeTooEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play-with-me-too/check-request": {
+      "get": {
+        "tags": [
+          "play-with-me-too-controller"
+        ],
+        "summary": "도전 요청 확인",
+        "description": "특정 유저가 나에게 도전 요청을 했는지 확인하고, 있다면 룰 정보를 반환합니다.",
+        "operationId": "checkPlayWithMeTooRequest",
+        "parameters": [
+          {
+            "name": "fromUserId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullRuleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "tags": [
+          "Notification"
+        ],
+        "summary": "알림 목록 조회",
+        "description": "로그인한 사용자의 알림 목록을 최신순으로 조회합니다.",
+        "operationId": "getNotifications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invite/{gameId}": {
+      "get": {
+        "tags": [
+          "invite-controller"
+        ],
+        "summary": "초대 정보 조회",
+        "description": "gameId로 초대받은 게임 정보를 조회합니다.",
+        "operationId": "getInviteById",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitedGameResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/game-logs": {
+      "get": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "게임 로그 조회",
+        "description": "특정 게임 ID의 플레이 로그 메시지를 리스트 형태로 반환합니다.",
+        "operationId": "getGameLogs",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LogMessage"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/detail": {
+      "get": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "게임 상세 조회",
+        "description": "특정 게임 ID에 대한 상세 정보를 조회합니다.",
+        "operationId": "getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/result": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "게임 결과 조회",
+        "description": "지정한 게임의 최종 결과를 반환합니다.",
+        "operationId": "getGameResult",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameResultResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/ranking": {
+      "get": {
+        "tags": [
+          "game-ranking-snapshot-controller"
+        ],
+        "summary": "게임 랭킹 스냅샷 조회",
+        "description": "종료된 게임의 랭킹 스냅샷을 조회합니다. '게임 참여자들과 그들의 친구들 <교집합> 나' 유저들의 레이팅 변화와 등수 변화를 확인할 수 있습니다.",
+        "operationId": "getGameRanking",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "랭킹 스냅샷 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameRankingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "랭킹 스냅샷을 찾을 수 없음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameRankingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/participants/{email}": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "참가 신청 ID 조회",
+        "description": "gameId와 email로 참가 신청 엔티티의 ID를 조회합니다.",
+        "operationId": "getParticipationIdByGameAndEmail",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/like/users": {
+      "get": {
+        "tags": [
+          "game-like-controller"
+        ],
+        "operationId": "getGameLikers",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameLikersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/comments/tree": {
+      "get": {
+        "tags": [
+          "comment-controller"
+        ],
+        "summary": "게임별 계층형(트리) 댓글 조회",
+        "description": "해당 게임의 댓글을 대댓글 포함 트리 형태로 반환합니다.",
+        "operationId": "getCommentsTree",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommentResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/summary": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "게임 간략 정보 조회",
+        "description": "게임 ID를 기반으로 간략한 게임 정보를 반환합니다.",
+        "operationId": "gameInfo",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "게임 정보 반환 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/request-count": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "경기 요청 개수 조회",
+        "description": "나의 경기 참가 신청 개수와 내가 받은 경기 참가 신청 개수를 반환합니다.",
+        "operationId": "getRequestCount",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/my-requests": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "내가 신청한 게임 목록 조회",
+        "description": "현재 로그인한 사용자가 참가 신청한 게임 목록(요약)을 반환합니다.",
+        "operationId": "getMyRequestedGames",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequestedGameResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/my-games": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "내 게임 전체 조회",
+        "description": "내가 참가자로 속한 모든 게임 정보를 반환합니다. (진행 예정, 완료 포함)",
+        "operationId": "getMyGames",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyGameResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/my-games/applicants": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "내가 생성한 게임에 지원한 유저 목록 조회",
+        "description": "로그인한 사용자가 만든 게임에 신청한 유저 정보를 그룹별로 조회합니다.",
+        "operationId": "getApplicantsForMyGames",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameApplicantsResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/list": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "게임 리스트 조회",
+        "description": "선택한 지역 및 정렬 기준에 따라 현재 참여 가능한 게임 방의 요약 정보를 반환합니다.",
+        "operationId": "listGames",
+        "parameters": [
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "게임 리스트 반환 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/active/{gameId}": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "진행 중인 게임 정보 조회",
+        "description": "특정 게임이 현재 진행 중인지 확인하고, 진행 중이면 해당 게임 정보를 반환합니다. 클라이언트가 폴링하여 경기 상태를 실시간으로 확인할 수 있습니다.",
+        "operationId": "getActiveGame",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveGameResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/active/my": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "내 게임 상태 조회",
+        "description": "현재 진행 중인 게임과 리뷰 대기 중인 게임 목록을 반환합니다. 클라이언트가 폴링하여 경기 상태를 확인하고 리뷰 작성이 필요한지 파악할 수 있습니다.",
+        "operationId": "getMyActiveGame",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyGameStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/status/{targetId}": {
+      "get": {
+        "tags": [
+          "friend-controller"
+        ],
+        "summary": "특정 유저와의 친구 상태 조회",
+        "description": "내가 해당 유저에게 친구 요청을 보냈는지, 친구 관계인지, 또는 상대가 나에게 친구 요청을 보냈는지 반환",
+        "operationId": "getFriendStatus",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendStatusDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/my": {
+      "get": {
+        "tags": [
+          "friend-controller"
+        ],
+        "summary": "내 친구 목록 조회",
+        "description": "내가 추가한 친구 목록을 조회합니다.",
+        "operationId": "getMyFriends",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSearchResultDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/my/sent": {
+      "get": {
+        "tags": [
+          "friend-controller"
+        ],
+        "operationId": "getMyFriendRequestsSent",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSearchResultDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/my/received": {
+      "get": {
+        "tags": [
+          "friend-controller"
+        ],
+        "operationId": "getMyFriendRequestsReceived",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSearchResultDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feed": {
+      "get": {
+        "tags": [
+          "feed-controller"
+        ],
+        "summary": "Get Feed",
+        "description": "피드를 조회합니다. 친구의 경기 -> 모든 경기 순으로 정렬되어 반환됩니다. userId: 특정 유저의 게임만 필터링 (선택), page: 페이지 번호 (0부터 시작, 기본값 0), size: 페이지당 아이템 수 (기본값 20)",
+        "operationId": "getFeed",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "피드 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feed/user/{userId}/completed": {
+      "get": {
+        "tags": [
+          "feed-controller"
+        ],
+        "summary": "Get User's Completed Game Feeds",
+        "description": "특정 유저가 참가한 모든 종료된 게임의 피드를 조회합니다. 최신 경기 순으로 정렬되어 반환됩니다. userId가 0이면 현재 로그인한 유저의 피드를 조회합니다.",
+        "operationId": "getUserCompletedGameFeeds",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "유저의 종료된 게임 피드 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feed/game/{gameId}": {
+      "get": {
+        "tags": [
+          "feed-controller"
+        ],
+        "summary": "Get Feed Item by Game ID",
+        "description": "특정 게임 ID로 피드 아이템을 단건 조회합니다.",
+        "operationId": "getFeedItemByGameId",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "피드 아이템 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedItemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "게임을 찾을 수 없음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat-room/{roomId}/chat-messages": {
+      "get": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "getChatMessages",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessage"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat-room/my-dm-rooms": {
+      "get": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "getMyDmRooms",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DmRoomPreviewDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat-room/by-game/{gameId}": {
+      "get": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "getChatRoomIdByGameId",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/block": {
+      "get": {
+        "tags": [
+          "Block"
+        ],
+        "summary": "차단 유저 목록 조회",
+        "description": "현재 로그인한 사용자가 차단한 유저의 ID 목록을 조회합니다.",
+        "operationId": "getBlockedUserIds",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "uniqueItems": true,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/requestWithdraw": {
+      "get": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "requestWithdraw",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyBuilder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/current-user-id": {
+      "get": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "getCurrentUserId",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "Admin User Management"
+        ],
+        "summary": "전체 유저 목록 조회 (관리자 전용)",
+        "description": "시스템에 등록된 모든 유저 목록을 조회합니다. 관리자 권한이 필요합니다.",
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminUserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminUserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한 필요",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminUserResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/rules/edit-requests": {
+      "get": {
+        "tags": [
+          "rule-edit-request-admin-controller"
+        ],
+        "summary": "모든 수정 요청 목록 조회 (관리자 전용)",
+        "description": "모든 규칙 수정 요청 목록을 조회합니다. status 파라미터로 필터링 가능합니다.",
+        "operationId": "getAllEditRequests",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED",
+                "CANCELLED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EditRequestDetailResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/leave": {
+      "delete": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "게임 나가기",
+        "description": "현재 로그인한 사용자를 해당 게임에서 제외합니다.",
+        "operationId": "leaveGame",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/delete": {
+      "delete": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "게임 삭제",
+        "description": "사용자가 본인이 생성한 게임을 삭제합니다.",
+        "operationId": "deleteGame",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends/{friendId}": {
+      "delete": {
+        "tags": [
+          "friend-controller"
+        ],
+        "summary": "친구 삭제",
+        "description": "친구 관계를 삭제합니다. 양방향 관계가 모두 삭제됩니다.",
+        "operationId": "deleteFriend",
+        "parameters": [
+          {
+            "name": "friendId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/friends/cancel/{targetId}": {
+      "delete": {
+        "tags": [
+          "friend-controller"
+        ],
+        "operationId": "cancelFriendRequest",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Unit": {
+        "type": "object"
+      },
+      "RuleDto": {
+        "required": [
+          "duration",
+          "pointsToWin",
+          "ruleDecision",
+          "ruleFoul",
+          "ruleGoal",
+          "ruleOrder",
+          "rulePreparation",
+          "ruleScoreDefinition",
+          "setsToWin",
+          "winBy"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleGoal": {
+            "type": "string"
+          },
+          "ruleScoreDefinition": {
+            "type": "string"
+          },
+          "rulePreparation": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "type": "string"
+          },
+          "ruleDecision": {
+            "type": "string"
+          },
+          "ruleFoul": {
+            "type": "string"
+          },
+          "ruleExtraInfo": {
+            "type": "string"
+          },
+          "pointsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winBy": {
+            "type": "string"
+          }
+        }
+      },
+      "FullRuleResponse": {
+        "required": [
+          "createdBy",
+          "duration",
+          "id",
+          "majorCategory",
+          "minorCategory",
+          "playCount",
+          "pointsToWin",
+          "rating",
+          "ratingCount",
+          "ruleDecision",
+          "ruleFoul",
+          "ruleGoal",
+          "ruleOrder",
+          "rulePreparation",
+          "ruleScoreDefinition",
+          "ruleTitle",
+          "setsToWin",
+          "useCount",
+          "winBy"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "ruleGoal": {
+            "type": "string"
+          },
+          "ruleScoreDefinition": {
+            "type": "string"
+          },
+          "rulePreparation": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "type": "string"
+          },
+          "ruleDecision": {
+            "type": "string"
+          },
+          "ruleFoul": {
+            "type": "string"
+          },
+          "ruleExtraInfo": {
+            "type": "string"
+          },
+          "majorCategory": {
+            "type": "string"
+          },
+          "minorCategory": {
+            "type": "string"
+          },
+          "pointsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winBy": {
+            "type": "string",
+            "enum": [
+              "SETS_HALF_WIN",
+              "MOST_SETS_AND_POINTS"
+            ]
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/UserSummaryDto"
+          },
+          "useCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currentChampion": {
+            "$ref": "#/components/schemas/UserSummaryDto"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "ratingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "playCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastPlayedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "editRequestStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "CANCELLED"
+            ]
+          },
+          "editRequestId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectionReason": {
+            "type": "string"
+          }
+        }
+      },
+      "UserProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "profilePicture": {
+            "type": "string"
+          }
+        }
+      },
+      "UserSummaryDto": {
+        "required": [
+          "email",
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "email": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfileDto"
+          }
+        }
+      },
+      "CreateRuleRatingRequest": {
+        "required": [
+          "gameId",
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rating": {
+            "maximum": 5,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "RuleRatingResponse": {
+        "required": [
+          "message",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateEditRequestDto": {
+        "required": [
+          "duration",
+          "originalRuleId",
+          "pointsToWin",
+          "ruleDecision",
+          "ruleFoul",
+          "ruleGoal",
+          "ruleOrder",
+          "rulePreparation",
+          "ruleScoreDefinition",
+          "setsToWin",
+          "winBy"
+        ],
+        "type": "object",
+        "properties": {
+          "originalRuleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleGoal": {
+            "type": "string"
+          },
+          "ruleScoreDefinition": {
+            "type": "string"
+          },
+          "rulePreparation": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "type": "string"
+          },
+          "ruleDecision": {
+            "type": "string"
+          },
+          "ruleFoul": {
+            "type": "string"
+          },
+          "ruleExtraInfo": {
+            "type": "string"
+          },
+          "pointsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winBy": {
+            "type": "string",
+            "enum": [
+              "SETS_HALF_WIN",
+              "MOST_SETS_AND_POINTS"
+            ]
+          }
+        }
+      },
+      "ReportRequest": {
+        "required": [
+          "reason",
+          "targetId",
+          "targetType"
+        ],
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "GAME",
+              "COMMENT",
+              "RULE"
+            ]
+          },
+          "targetId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterTokenRequest": {
+        "required": [
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "GameRegionRequest": {
+        "required": [
+          "roadAddress"
+        ],
+        "type": "object",
+        "properties": {
+          "roadAddress": {
+            "type": "string"
+          },
+          "detailAddress": {
+            "type": "string"
+          }
+        }
+      },
+      "GameReviewRequest": {
+        "required": [
+          "manner",
+          "performance",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "manner": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "performance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "PictureUploadResponse": {
+        "required": [
+          "message",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "uploadedCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "GameLikeToggleResponse": {
+        "required": [
+          "isLiked",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "isLiked": {
+            "type": "boolean"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CreateCommentRequest": {
+        "required": [
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CreateGameRequest": {
+        "required": [
+          "referencedRuleId"
+        ],
+        "type": "object",
+        "properties": {
+          "referencedRuleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "placeRoad": {
+            "type": "string"
+          },
+          "placeDetail": {
+            "type": "string"
+          },
+          "friendId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CancelGameRequest": {
+        "required": [
+          "gameId"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApproveRequest": {
+        "required": [
+          "gameId",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DmRoomDto": {
+        "required": [
+          "myNickname",
+          "roomId",
+          "targetUserId",
+          "targetUserNickname"
+        ],
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "targetUserNickname": {
+            "type": "string"
+          },
+          "targetUserProfileUrl": {
+            "type": "string"
+          },
+          "myNickname": {
+            "type": "string"
+          },
+          "roomId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 20,
+            "minLength": 8,
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 20,
+            "minLength": 8,
+            "type": "string"
+          }
+        }
+      },
+      "CompleteOauthRequest": {
+        "required": [
+          "nickname",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckUsernameRequest": {
+        "required": [
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "RejectEditRequestDto": {
+        "required": [
+          "rejectionReason"
+        ],
+        "type": "object",
+        "properties": {
+          "rejectionReason": {
+            "type": "string"
+          }
+        }
+      },
+      "DailyAccessResponse": {
+        "required": [
+          "accessOrder",
+          "isFirstAccess",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "isFirstAccess": {
+            "type": "boolean"
+          },
+          "accessOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UserProfileRequest": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F",
+              "O"
+            ]
+          },
+          "region": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "affiliation": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCommentRequest": {
+        "required": [
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "imageUrl": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ChampionTitleDto": {
+        "required": [
+          "region",
+          "ruleTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string"
+          },
+          "ruleTitle": {
+            "type": "string"
+          }
+        }
+      },
+      "RecentGameSummaryDto": {
+        "required": [
+          "gameId",
+          "myScore",
+          "opponentNickname",
+          "opponentScore",
+          "result",
+          "ruleTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "myScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "opponentScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "opponentNickname": {
+            "type": "string"
+          },
+          "startPhotoUrl": {
+            "type": "string"
+          },
+          "playedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Top3RuleStatsDto": {
+        "required": [
+          "majorCategory",
+          "minorCategory",
+          "playCount",
+          "rating",
+          "ruleId",
+          "ruleTitle",
+          "totalPlayers"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "majorCategory": {
+            "type": "string"
+          },
+          "minorCategory": {
+            "type": "string"
+          },
+          "myRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPlayers": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UserProfileResponse": {
+        "required": [
+          "id",
+          "isMe",
+          "mannerScore",
+          "myChampions",
+          "nickname",
+          "playTime",
+          "playedRules",
+          "recentGames",
+          "stats",
+          "top3Rules",
+          "totalPlayers",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isMe": {
+            "type": "boolean"
+          },
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "affiliation": {
+            "type": "string"
+          },
+          "mannerScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "playTime": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/UserStatsDto"
+          },
+          "playedRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FullRuleResponse"
+            }
+          },
+          "myChampions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChampionTitleDto"
+            }
+          },
+          "top3Rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Top3RuleStatsDto"
+            }
+          },
+          "recentGames": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentGameSummaryDto"
+            }
+          }
+        }
+      },
+      "UserStatsDto": {
+        "required": [
+          "draws",
+          "friends",
+          "losses",
+          "totalGames",
+          "winRate",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "draws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "friends": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winRate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalGames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "performance": {
+            "type": "number",
+            "format": "double"
+          },
+          "performanceHistory": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        }
+      },
+      "FullGameSummaryResponse": {
+        "required": [
+          "date",
+          "id",
+          "me",
+          "myScore",
+          "opponent",
+          "opponentScore",
+          "result",
+          "rule",
+          "setCount",
+          "setResults"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "location": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "result": {
+            "type": "string"
+          },
+          "myScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "opponentScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SetResult"
+            }
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/PlayerDto"
+          },
+          "me": {
+            "$ref": "#/components/schemas/PlayerDto"
+          },
+          "review": {
+            "type": "string"
+          },
+          "mannerScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "performanceScore": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "PlayerDto": {
+        "required": [
+          "id",
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          }
+        }
+      },
+      "SetResult": {
+        "required": [
+          "setIdx",
+          "user1Score",
+          "user2Score",
+          "winnerIdx"
+        ],
+        "type": "object",
+        "properties": {
+          "setIdx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user1Score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user2Score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winnerIdx": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UserSearchResultDto": {
+        "required": [
+          "id",
+          "nickname",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          }
+        }
+      },
+      "MyProfileResponse": {
+        "required": [
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          },
+          "affiliation": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleRankingResponse": {
+        "required": [
+          "rankings",
+          "ruleId",
+          "ruleName"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "rankings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserRankingDto"
+            }
+          },
+          "currentUserRanking": {
+            "$ref": "#/components/schemas/UserRankingDto"
+          },
+          "ruleStatistics": {
+            "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          }
+        }
+      },
+      "UserGameStatisticsDTO": {
+        "required": [
+          "draws",
+          "losses",
+          "rating",
+          "totalGameCount",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "draws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalGameCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "UserRankingDto": {
+        "required": [
+          "isCurrentUser",
+          "playCount",
+          "rank",
+          "rating",
+          "userId",
+          "userName"
+        ],
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "userAvatar": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isCurrentUser": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RankingResponse": {
+        "required": [
+          "totalPercent",
+          "totalRank"
+        ],
+        "type": "object",
+        "properties": {
+          "totalRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPercent": {
+            "type": "number",
+            "format": "double"
+          },
+          "minorCategoryRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minorCategoryPercent": {
+            "type": "number",
+            "format": "double"
+          },
+          "ruleRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rulePercent": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "PlayWithMeTooResponse": {
+        "required": [
+          "createdAt",
+          "fromUserId",
+          "fromUserNickname",
+          "id",
+          "majorCategory",
+          "minorCategory",
+          "ruleId",
+          "ruleTitle",
+          "status",
+          "toUserId",
+          "toUserNickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fromUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fromUserNickname": {
+            "type": "string"
+          },
+          "fromUserAvatar": {
+            "type": "string"
+          },
+          "toUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "toUserNickname": {
+            "type": "string"
+          },
+          "toUserAvatar": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "CANCELLED",
+              "REJECTED"
+            ]
+          },
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "majorCategory": {
+            "type": "string"
+          },
+          "minorCategory": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gameStatus": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          }
+        }
+      },
+      "ChallengeRequestEntity": {
+        "required": [
+          "createdAt",
+          "fromUser",
+          "id",
+          "status",
+          "toUser"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fromUser": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "toUser": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/RuleEntity"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "ACCEPTED",
+              "REJECTED",
+              "CANCELED"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChatRoomEntity": {
+        "required": [
+          "createdAt",
+          "dmUsers",
+          "id",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "GAME",
+              "DM"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "dmUsers": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserEntity"
+            }
+          }
+        }
+      },
+      "CommentEntity": {
+        "required": [
+          "author",
+          "content",
+          "createdAt",
+          "deleted",
+          "depth",
+          "dislikeCount",
+          "game",
+          "id",
+          "likeCount",
+          "reportCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "author": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "content": {
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/CommentEntity"
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dislikeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "editedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "reportCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mentionUserNickname": {
+            "type": "string"
+          }
+        }
+      },
+      "GameEntity": {
+        "required": [
+          "challengeRequests",
+          "comments",
+          "createdAt",
+          "createdBy",
+          "gameLikes",
+          "gameMedia",
+          "gamePictures",
+          "gameRankingSnapshots",
+          "gameStatus",
+          "id",
+          "isFriendMatch",
+          "maxPlayers",
+          "modifiedAt",
+          "participants",
+          "participations",
+          "playerReviews",
+          "resetLogs",
+          "rule",
+          "scoreLogs",
+          "setLogs"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/RuleEntity"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "placeRoad": {
+            "type": "string"
+          },
+          "placeDetail": {
+            "type": "string"
+          },
+          "participations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParticipationEntity"
+            }
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gameStatus": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startPhotoUrl": {
+            "type": "string"
+          },
+          "gameRecord": {
+            "$ref": "#/components/schemas/GameRecordEntity"
+          },
+          "isFriendMatch": {
+            "type": "boolean"
+          },
+          "playerReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerReviewEntity"
+            }
+          },
+          "gameLikes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameLikeEntity"
+            }
+          },
+          "gamePictures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GamePictureEntity"
+            }
+          },
+          "gameRankingSnapshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameRankingSnapshotEntity"
+            }
+          },
+          "setLogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SetLogEntity"
+            }
+          },
+          "scoreLogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScoreLogEntity"
+            }
+          },
+          "resetLogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResetLogEntity"
+            }
+          },
+          "chatRoom": {
+            "$ref": "#/components/schemas/ChatRoomEntity"
+          },
+          "gameMedia": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameMediaEntity"
+            }
+          },
+          "challengeRequests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChallengeRequestEntity"
+            }
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentEntity"
+            }
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserEntity"
+            }
+          }
+        }
+      },
+      "GameLikeEntity": {
+        "required": [
+          "createdAt",
+          "game",
+          "id",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GameMediaEntity": {
+        "required": [
+          "createdAt",
+          "game",
+          "id",
+          "mediaType",
+          "mediaUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "mediaUrl": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "PHOTO",
+              "CERTIFICATION",
+              "RESULT_CARD"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GamePictureEntity": {
+        "required": [
+          "createdAt",
+          "displayOrder",
+          "game",
+          "id",
+          "imageUrl",
+          "mediaType",
+          "updatedAt",
+          "uploadedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "IMAGE",
+              "VIDEO"
+            ]
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GameRankingSnapshotEntity": {
+        "required": [
+          "createdAt",
+          "game",
+          "id",
+          "rankAfter",
+          "ratingAfter",
+          "ratingBefore",
+          "ratingChange",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "ratingBefore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankBefore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ratingAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ratingChange": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankChange": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GameRecordEntity": {
+        "required": [
+          "game",
+          "id",
+          "isDraw",
+          "players",
+          "recordTime"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserEntity"
+            }
+          },
+          "winner": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "recordTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDraw": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ParticipationEntity": {
+        "required": [
+          "game",
+          "id",
+          "joinedAt",
+          "status",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "APPROVED"
+            ]
+          },
+          "joinedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "leftAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlayWithMeTooEntity": {
+        "required": [
+          "createdAt",
+          "id",
+          "requester",
+          "rule",
+          "status",
+          "targetUser"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requester": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "targetUser": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/RuleEntity"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "CANCELLED",
+              "REJECTED"
+            ]
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          }
+        }
+      },
+      "PlayerReviewEntity": {
+        "required": [
+          "evaluator",
+          "game",
+          "id",
+          "target"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "evaluator": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "target": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "reviewComment": {
+            "type": "string"
+          }
+        }
+      },
+      "ResetLogEntity": {
+        "required": [
+          "actor",
+          "game",
+          "id",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RuleDescription": {
+        "required": [
+          "ruleDecision",
+          "ruleFoul",
+          "ruleGoal",
+          "ruleOrder",
+          "rulePreparation",
+          "ruleScoreDefinition"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleGoal": {
+            "type": "string"
+          },
+          "ruleScoreDefinition": {
+            "type": "string"
+          },
+          "rulePreparation": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "type": "string"
+          },
+          "ruleDecision": {
+            "type": "string"
+          },
+          "ruleFoul": {
+            "type": "string"
+          },
+          "ruleExtraInfo": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleEntity": {
+        "required": [
+          "createdBy",
+          "duration",
+          "id",
+          "isFriendGame",
+          "majorCategory",
+          "minorCategory",
+          "pointsToWin",
+          "rating",
+          "ruleDecision",
+          "ruleDescription",
+          "ruleFoul",
+          "ruleGoal",
+          "ruleOrder",
+          "rulePreparation",
+          "ruleScoreDefinition",
+          "ruleTitle",
+          "setsToWin",
+          "useCount",
+          "winBy"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isFriendGame": {
+            "type": "boolean"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "ruleGoal": {
+            "type": "string"
+          },
+          "ruleScoreDefinition": {
+            "type": "string"
+          },
+          "rulePreparation": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "type": "string"
+          },
+          "ruleDecision": {
+            "type": "string"
+          },
+          "ruleFoul": {
+            "type": "string"
+          },
+          "ruleExtraInfo": {
+            "type": "string"
+          },
+          "majorCategory": {
+            "type": "string"
+          },
+          "minorCategory": {
+            "type": "string"
+          },
+          "pointsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winBy": {
+            "type": "string",
+            "enum": [
+              "SETS_HALF_WIN",
+              "MOST_SETS_AND_POINTS"
+            ]
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "useCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastPlayedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "friendGame": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "ruleDescription": {
+            "$ref": "#/components/schemas/RuleDescription"
+          }
+        }
+      },
+      "ScoreLogEntity": {
+        "required": [
+          "actor",
+          "game",
+          "id",
+          "scoreDelta",
+          "setIndex",
+          "target",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "target": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "scoreDelta": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SetLogEntity": {
+        "required": [
+          "actor",
+          "game",
+          "id",
+          "startedAt",
+          "totalSetIndex"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameEntity"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "totalSetIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserEntity": {
+        "required": [
+          "email",
+          "isBot",
+          "nickname",
+          "provider",
+          "registeredAt",
+          "roles",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "appleUserId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "GOOGLE",
+              "KAKAO",
+              "APPLE",
+              "INITIAL_GROUP",
+              "GROUP"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "roles": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ROLE_USER",
+                "ROLE_ADMIN"
+              ]
+            }
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfileEntity"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isBot": {
+            "type": "boolean"
+          },
+          "bot": {
+            "type": "boolean",
+            "writeOnly": true
+          }
+        }
+      },
+      "UserProfileEntity": {
+        "required": [
+          "profilePicture",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserEntity"
+          },
+          "profilePicture": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F",
+              "O"
+            ]
+          },
+          "affiliation": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationResponse": {
+        "required": [
+          "createdAt",
+          "id",
+          "isRead",
+          "message",
+          "title",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "GAME_START",
+              "GAME_END",
+              "GAME_COMMENT",
+              "COMMENT_REPLY",
+              "INBOX",
+              "MY_GAME",
+              "DM",
+              "FRIEND_REQUEST",
+              "FRIEND_APPROVE",
+              "FRIEND_REJECT",
+              "FRIEND_CREATE_GAME",
+              "FRIEND_GAME_START",
+              "FRIEND_GAME_FINISH",
+              "GAME_LIKE",
+              "GAME_CONFIRMED",
+              "CREATOR_NEW_GAME",
+              "PLAY_WITH_ME_TOO_REQUEST",
+              "PLAY_WITH_ME_TOO_ACCEPT",
+              "PLAY_WITH_ME_TOO_REJECT"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isRead": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InvitedGameResponse": {
+        "required": [
+          "id",
+          "ownerId",
+          "ownerNickname",
+          "rule",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "matchLocation": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "ownerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ownerNickname": {
+            "type": "string"
+          },
+          "ownerProfileUrl": {
+            "type": "string"
+          },
+          "opponentId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "opponentNickname": {
+            "type": "string"
+          },
+          "opponentProfileUrl": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "championId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogMessage": {
+        "required": [
+          "delta",
+          "targetId",
+          "time",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ENTER",
+              "TALK",
+              "LEAVE",
+              "SCORE",
+              "SET",
+              "RESET",
+              "FINISH",
+              "PLAY_WITH_ME_TOO"
+            ]
+          },
+          "userSummary": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "delta": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "UserSummary": {
+        "required": [
+          "id",
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "GameDetailResponse": {
+        "required": [
+          "chatRoomId",
+          "currentSet",
+          "gameStatus",
+          "id",
+          "limitSeconds",
+          "place",
+          "rule",
+          "score1",
+          "score2",
+          "set1",
+          "set2",
+          "user1",
+          "user2"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "place": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalGameStartedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "setStartedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user1": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "user2": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "score1": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "score2": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentSet": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "set1": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "set2": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limitSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chatRoomId": {
+            "type": "string"
+          },
+          "gameStatus": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          }
+        }
+      },
+      "ApplicantInfo": {
+        "required": [
+          "applicantGameStatisticsDTO",
+          "applicantNickname",
+          "approved",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "applicantProfileUrl": {
+            "type": "string"
+          },
+          "applicantNickname": {
+            "type": "string"
+          },
+          "applicantGameStatisticsDTO": {
+            "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          },
+          "approved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GameResultResponse": {
+        "required": [
+          "drawCount",
+          "gameSummary",
+          "newChampionIdx",
+          "setResults",
+          "startDate",
+          "totalSetCount",
+          "user1",
+          "user1SetCount",
+          "user2",
+          "user2SetCount",
+          "winnerIdx"
+        ],
+        "type": "object",
+        "properties": {
+          "gameSummary": {
+            "$ref": "#/components/schemas/GameSummaryResponse"
+          },
+          "user1": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "user2": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "setResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SetResult"
+            }
+          },
+          "totalSetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user1SetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user2SetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "drawCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winnerIdx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "newChampionIdx": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "GameSummaryResponse": {
+        "required": [
+          "challengers",
+          "createdAt",
+          "currentParticipantCounts",
+          "gameStatus",
+          "id",
+          "isAppliedByMe",
+          "mannerScore",
+          "maxPlayers",
+          "ownerId",
+          "ownerNickname",
+          "rule"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currentParticipantCounts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "matchLocation": {
+            "type": "string"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ownerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ownerNickname": {
+            "type": "string"
+          },
+          "ownerProfileUrl": {
+            "type": "string"
+          },
+          "gameStatus": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          },
+          "mannerScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "championId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleStatisticsOfOwner": {
+            "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          },
+          "challengers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicantInfo"
+            }
+          },
+          "isAppliedByMe": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GameRankingResponse": {
+        "required": [
+          "gameId",
+          "rankings"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rankings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankingItemDto"
+            }
+          }
+        }
+      },
+      "RankingItemDto": {
+        "required": [
+          "isPlayer",
+          "nickname",
+          "rankAfter",
+          "ratingAfter",
+          "ratingBefore",
+          "ratingChange",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          },
+          "ratingBefore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ratingAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ratingChange": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankBefore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankChange": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isPlayer": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GamePictureResponse": {
+        "required": [
+          "displayOrder",
+          "id",
+          "imageUrl",
+          "mediaType",
+          "uploadedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "IMAGE",
+              "VIDEO"
+            ]
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GameLikeStatusResponse": {
+        "required": [
+          "isLiked",
+          "recentLikers",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "isLiked": {
+            "type": "boolean"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recentLikers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserLikeInfo"
+            }
+          }
+        }
+      },
+      "UserLikeInfo": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          }
+        }
+      },
+      "GameLikerInfo": {
+        "required": [
+          "likedAt",
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileUrl": {
+            "type": "string"
+          },
+          "likedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "GameLikersResponse": {
+        "required": [
+          "likers",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "likers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameLikerInfo"
+            }
+          }
+        }
+      },
+      "AuthorSummary": {
+        "required": [
+          "id",
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "CommentResponse": {
+        "required": [
+          "author",
+          "content",
+          "createdAt",
+          "deleted",
+          "depth",
+          "dislikeCount",
+          "gameId",
+          "id",
+          "likeCount",
+          "reportCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "author": {
+            "$ref": "#/components/schemas/AuthorSummary"
+          },
+          "content": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mentionUserNickname": {
+            "type": "string"
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dislikeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myLikeType": {
+            "type": "string",
+            "enum": [
+              "LIKE",
+              "DISLIKE"
+            ]
+          },
+          "reportCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "editedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RequestedGameResponse": {
+        "required": [
+          "applicants",
+          "gameStatus",
+          "id",
+          "ownerId",
+          "ownerNickname",
+          "ownerStatistics",
+          "rule",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "matchLocation": {
+            "type": "string"
+          },
+          "gameStatus": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "APPROVED"
+            ]
+          },
+          "ownerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ownerNickname": {
+            "type": "string"
+          },
+          "ownerProfileUrl": {
+            "type": "string"
+          },
+          "ownerStatistics": {
+            "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          },
+          "championId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "applicants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicantInfo"
+            }
+          }
+        }
+      },
+      "MyGameResponse": {
+        "required": [
+          "id",
+          "isOwner",
+          "myId",
+          "myNickname",
+          "myRating",
+          "myStatistics",
+          "rule",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "matchLocation": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "myId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "myNickname": {
+            "type": "string"
+          },
+          "myProfileUrl": {
+            "type": "string"
+          },
+          "opponentId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "opponentNickname": {
+            "type": "string"
+          },
+          "opponentProfileUrl": {
+            "type": "string"
+          },
+          "myStatistics": {
+            "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          },
+          "myRating": {
+            "type": "number",
+            "format": "double"
+          },
+          "opponentStatistics": {
+            "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          },
+          "opponentRating": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "championId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "GameApplicantsResponse": {
+        "required": [
+          "applicants",
+          "gameId",
+          "gameStatus",
+          "myGameStatisticsDTO",
+          "myId",
+          "myNickname",
+          "rule"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "matchLocation": {
+            "type": "string"
+          },
+          "applicants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicantInfo"
+            }
+          },
+          "gameStatus": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED"
+            ]
+          },
+          "myProfileUrl": {
+            "type": "string"
+          },
+          "myId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "myNickname": {
+            "type": "string"
+          },
+          "myGameStatisticsDTO": {
+            "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          },
+          "championId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ActiveGameResponse": {
+        "required": [
+          "gameId",
+          "player1",
+          "player2",
+          "ruleTitle",
+          "startedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "player1": {
+            "$ref": "#/components/schemas/PlayerInfo"
+          },
+          "player2": {
+            "$ref": "#/components/schemas/PlayerInfo"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlayerInfo": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          }
+        }
+      },
+      "MyGameStatusResponse": {
+        "required": [
+          "pendingReviewGameIds"
+        ],
+        "type": "object",
+        "properties": {
+          "activeGame": {
+            "$ref": "#/components/schemas/ActiveGameResponse"
+          },
+          "pendingReviewGameIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "FriendStatusDto": {
+        "required": [
+          "isFriend",
+          "received",
+          "sent"
+        ],
+        "type": "object",
+        "properties": {
+          "sent": {
+            "type": "boolean"
+          },
+          "isFriend": {
+            "type": "boolean"
+          },
+          "received": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FeedItemResponse": {
+        "required": [
+          "caption",
+          "commentCount",
+          "date",
+          "id",
+          "isCompleted",
+          "isFriend",
+          "isMyGame",
+          "meta",
+          "photos",
+          "players",
+          "reviews",
+          "rule",
+          "ruleStatisticsList",
+          "tags",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoDto"
+            }
+          },
+          "caption": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaDto"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerDto"
+            }
+          },
+          "result": {
+            "$ref": "#/components/schemas/ResultDto"
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewDto"
+            }
+          },
+          "rule": {
+            "$ref": "#/components/schemas/FullRuleResponse"
+          },
+          "type": {
+            "type": "string"
+          },
+          "isFriend": {
+            "type": "boolean"
+          },
+          "isCompleted": {
+            "type": "boolean"
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "commentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isMyGame": {
+            "type": "boolean"
+          },
+          "ruleStatisticsList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserGameStatisticsDTO"
+            }
+          }
+        }
+      },
+      "FeedResponse": {
+        "required": [
+          "currentPage",
+          "items",
+          "pageSize",
+          "totalElements",
+          "totalPages"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedItemResponse"
+            }
+          },
+          "nextCursor": {
+            "type": "string"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MetaDto": {
+        "required": [
+          "place",
+          "time"
+        ],
+        "type": "object",
+        "properties": {
+          "place": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          }
+        }
+      },
+      "PhotoDto": {
+        "required": [
+          "mediaType",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultDto": {
+        "required": [
+          "duration",
+          "scoreA",
+          "scoreB",
+          "setScores",
+          "sets"
+        ],
+        "type": "object",
+        "properties": {
+          "scoreA": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scoreB": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winner": {
+            "type": "string"
+          },
+          "sets": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "string"
+          },
+          "setScores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SetScoreDto"
+            }
+          }
+        }
+      },
+      "ReviewDto": {
+        "required": [
+          "author",
+          "createdAt",
+          "id",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "author": {
+            "$ref": "#/components/schemas/PlayerDto"
+          },
+          "text": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SetScoreDto": {
+        "required": [
+          "scoreA",
+          "scoreB",
+          "set"
+        ],
+        "type": "object",
+        "properties": {
+          "set": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scoreA": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scoreB": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChatMessage": {
+        "required": [
+          "messageType",
+          "sender",
+          "senderId",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "senderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sender": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "messageType": {
+            "type": "string",
+            "enum": [
+              "ENTER",
+              "TALK",
+              "LEAVE",
+              "SCORE",
+              "SET",
+              "RESET",
+              "FINISH",
+              "PLAY_WITH_ME_TOO"
+            ]
+          }
+        }
+      },
+      "DmRoomPreviewDto": {
+        "required": [
+          "targetUserId",
+          "targetUserNickname"
+        ],
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "targetUserNickname": {
+            "type": "string"
+          },
+          "targetUserProfileUrl": {
+            "type": "string"
+          },
+          "lastMessageContent": {
+            "type": "string"
+          },
+          "lastMessageTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BodyBuilder": {
+        "type": "object"
+      },
+      "AdminUserResponse": {
+        "required": [
+          "id",
+          "nickname",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          }
+        }
+      },
+      "EditRequestDetailResponse": {
+        "required": [
+          "createdAt",
+          "duration",
+          "id",
+          "majorCategory",
+          "minorCategory",
+          "originalRuleId",
+          "originalRuleTitle",
+          "pointsToWin",
+          "requestedBy",
+          "ruleDecision",
+          "ruleFoul",
+          "ruleGoal",
+          "ruleOrder",
+          "rulePreparation",
+          "ruleScoreDefinition",
+          "ruleTitle",
+          "setsToWin",
+          "status",
+          "winBy"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "originalRuleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "originalRuleTitle": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "$ref": "#/components/schemas/UserInfo"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "ruleGoal": {
+            "type": "string"
+          },
+          "ruleScoreDefinition": {
+            "type": "string"
+          },
+          "rulePreparation": {
+            "type": "string"
+          },
+          "ruleOrder": {
+            "type": "string"
+          },
+          "ruleDecision": {
+            "type": "string"
+          },
+          "ruleFoul": {
+            "type": "string"
+          },
+          "ruleExtraInfo": {
+            "type": "string"
+          },
+          "majorCategory": {
+            "type": "string"
+          },
+          "minorCategory": {
+            "type": "string"
+          },
+          "pointsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsToWin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winBy": {
+            "type": "string",
+            "enum": [
+              "SETS_HALF_WIN",
+              "MOST_SETS_AND_POINTS"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "CANCELLED"
+            ]
+          },
+          "rejectionReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedBy": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "UserInfo": {
+        "required": [
+          "email",
+          "id",
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

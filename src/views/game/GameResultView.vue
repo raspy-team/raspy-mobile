@@ -1,197 +1,107 @@
 <template>
-  <div class="h-dvh w-dvw flex flex-col relative overflow-hidden bg-gray-900">
+  <div>
+  <UiTopBar title="경기 결과" back="/game" />
 
-    <!-- 📌 로딩 오버레이 -->
-    <div
-      v-if="isLoading"
-      class="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-70"
-    >
-      <div class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500"></div>
+  <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
+  <main v-if="!isLoading && resultError" class="px-4 pt-[72px] max-w-xl mx-auto">
+    <UiEmptyState icon="fas fa-flag-checkered" :title="resultError" description="경기가 끝나면 여기서 결과를 볼 수 있어요">
+      <UiButton to="/game">내 경기로</UiButton>
+    </UiEmptyState>
+  </main>
+
+  <main v-else class="px-4 pt-[72px] max-w-xl mx-auto space-y-8" :class="isParticipant ? 'pb-32' : 'pb-12'">
+    <!-- 불러오는 중 -->
+    <div v-if="isLoading" class="space-y-4 pt-6">
+      <UiSkeleton class="h-8 w-1/2 mx-auto" />
+      <UiSkeleton class="h-40 w-full" />
     </div>
 
-    <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
-    <div
-      v-if="!isLoading && resultError"
-      class="fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-gray-900 px-6 text-center"
-    >
-      <p class="text-lg font-bold text-white">{{ resultError }}</p>
-      <button @click="$router.push('/game')" class="px-6 py-3 rounded-xl bg-orange-500 text-white font-bold">
-        내 경기로
-      </button>
-    </div>
+    <template v-else>
+      <!-- 결과 한 줄 + 점수판 -->
+      <section class="text-center">
+        <p class="t-caption">{{ game.rule?.ruleTitle }}</p>
+        <h1 class="t-display mt-1" :class="headline.tone">{{ headline.text }}</h1>
 
-    <!-- 🎉 게임 결과 화면 -->
-    <div v-else class="flex-1 overflow-y-auto px-4 py-4">
-      <div class="max-w-xl mx-auto space-y-4 text-center pb-20">
-        <!-- 승패 결과 -->
-        <div v-if="winnerIdx != 0" class="space-y-0.5">
-          <div v-if="user1.id == currentUserId">
-            <template
-              v-if="
-                !(
-                  (championIdx == 1 && idxCorrect) ||
-                  (championIdx == 2 && !idxCorrect) ||
-                  (championIdx == 2 && idxCorrect) ||
-                  (championIdx == 1 && !idxCorrect)
-                )
-              "
-            >
-              <h2
-                v-if="winnerIdx == 1"
-               class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
-                style="animation: gradient-x 2.5s linear infinite"
+        <div class="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <button
+            v-for="(side, i) in sides"
+            :key="side.user.id || i"
+            type="button"
+            class="flex flex-col items-center gap-2 min-w-0"
+            :class="i === 1 ? 'order-3' : 'order-1'"
+            @click="router.push('/profile/' + side.user.id)"
+          >
+            <span class="relative">
+              <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" size="lg" />
+              <span
+                v-if="side.champion"
+                class="absolute -top-2 -right-1 w-6 h-6 rounded-full bg-primary text-primary-fg flex items-center justify-center text-xs"
+                aria-label="새 챔피언"
               >
-                승리하셨습니다!
-              </h2>
-              <h2 v-else class="text-3xl font-bold text-gray-500">패배하셨습니다.</h2>
-            </template>
-          </div>
-          <div v-else-if="user2.id == currentUserId">
-            <template
-              v-if="
-                !(
-                  (championIdx == 1 && idxCorrect) ||
-                  (championIdx == 2 && !idxCorrect) ||
-                  (championIdx == 2 && idxCorrect) ||
-                  (championIdx == 1 && !idxCorrect)
-                )
-              "
-            >
-              <h2
-                v-if="winnerIdx == 2"
-               class="text-3xl font-bold bg-blue-400 bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x"
-                style="animation: gradient-x 2.5s linear infinite"
-              >
-                승리하셨습니다!
-              </h2>
-              <h2 v-else class="text-3xl font-bold text-gray-500">패배하셨습니다.</h2>
-            </template>
-          </div>
+                <i class="fas fa-crown" aria-hidden="true"></i>
+              </span>
+            </span>
+            <span class="text-sm text-fg truncate max-w-full">{{ side.user.nickname }}<span v-if="side.isMe" class="text-fg-subtle"> (나)</span></span>
+            <span class="text-6xl font-bold tabular-nums leading-none" :class="side.won ? 'text-fg' : 'text-fg-subtle'">{{ side.sets }}</span>
+          </button>
+          <span class="order-2 t-micro px-2 self-end pb-3">세트</span>
         </div>
 
-        <div v-else>
-          <i class="fas fa-handshake text-5xl text-gray-400 mb-2"></i>
-          <h2 class="text-3xl font-bold text-gray-400">무승부</h2>
+        <!-- 세트별 점수 -->
+        <div v-if="setResults.length" class="mt-6 flex flex-wrap justify-center gap-2">
+          <span
+            v-for="s in setResults"
+            :key="s.setIdx"
+            class="px-3 h-8 rounded-lg bg-surface-2 text-sm text-fg-muted flex items-center tabular-nums"
+          >
+            {{ s.setIdx }}세트 {{ idxCorrect ? s.user1Score : s.user2Score }}:{{ idxCorrect ? s.user2Score : s.user1Score }}
+          </span>
         </div>
+      </section>
 
-        <!-- 챔피언 여부 카드: 승/패 모두 동일 문구와 스타일 -->
-        <div
-          v-if="
-            (championIdx == 1 && idxCorrect) ||
-            (championIdx == 2 && !idxCorrect) ||
-            (championIdx == 2 && idxCorrect) ||
-            (championIdx == 1 && !idxCorrect)
-          "
-          class="relative max-w-md mx-auto my-6 px-6 py-8 rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center champion-card-glow"
-        >
-          <div class="absolute inset-0 z-0 pointer-events-none champion-card-bg"></div>
-          <div
-            class="absolute inset-0 rounded-2xl border-2 border-white border-opacity-50 z-10"
-            style="backdrop-filter: blur(2px)"
-          ></div>
-          <div class="relative z-20 flex flex-col items-center">
-            <i class="fas fa-crown text-5xl mb-3 text-white drop-shadow champion-glow-anim"></i>
-            <h2 class="text-2xl font-bold text-white mb-1 drop-shadow champion-glow-anim">
-              오늘 새로운 챔피언이 탄생합니다.
-            </h2>
-          </div>
+      <!-- 새 챔피언 -->
+      <UiCard v-if="championUser" class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <i class="fas fa-crown"></i>
+        </span>
+        <div class="min-w-0">
+          <p class="t-heading">{{ championUser.id === currentUserId ? '새 챔피언이 됐어요' : `${championUser.nickname}님이 새 챔피언이에요` }}</p>
+          <p class="t-caption mt-0.5">이 규칙의 챔피언 자리는 다음 승자에게 넘어가요</p>
         </div>
+      </UiCard>
 
-        <!-- 점수판 -->
-        <div class="flex justify-around items-center py-4">
-          <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-bold text-white mb-3 leading-none">
-              {{ user1SetCount }}
-            </p>
-            <img
-              :src="user1.profileUrl || defaultImg"
-              class="w-16 h-16 rounded-full mb-1"
-            />
-            <p class="text-sm font-medium text-white">{{ user1.nickname }}</p>
-          </div>
-          <div class="flex flex-col items-center mx-6 sm:mx-20">
-            <span class="text-base sm:text-xl font-medium text-gray-500 mb-2 select-none"
-              >경기 종료</span
-            >
-            <span
-             class="text-[5rem] sm:text-[8rem] font-medium text-gray-600 select-none leading-none self-center flex items-center"
-              style="line-height: 1"
-              >:</span
-            >
-          </div>
-          <div class="flex flex-col items-center">
-            <p class="text-[7rem] sm:text-[10rem] font-bold text-white mb-3 leading-none">
-              {{ user2SetCount }}
-            </p>
-            <img
-              :src="user2.profileUrl || defaultImg"
-              class="w-16 h-16 rounded-full mb-1"
-            />
-            <p class="text-sm font-medium text-white">{{ user2.nickname }}</p>
-          </div>
-        </div>
+      <!-- 친구 · 공유 -->
+      <div class="flex gap-2">
+        <UiButton v-if="isParticipant" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
+        <UiButton variant="secondary" icon="fas fa-share" class="flex-1" @click="onShare">공유하기</UiButton>
+      </div>
 
-        <!-- 경기 사진/동영상 섹션 -->
-        <div class="p-2 space-y-2 text-left">
-          <h3 class="text-lg font-bold text-gray-100">
-            경기 사진/동영상 (최대 5개)
-          </h3>
+      <template v-if="isParticipant">
+        <!-- 사진·동영상 -->
+        <UiSection title="경기 사진·동영상">
+          <template #action><span class="t-micro">{{ allPictures.length }}/5</span></template>
 
-          <!-- 촬영/선택된 미디어가 없을 때 -->
-          <div v-if="allPictures.length === 0" class="text-center py-6 text-gray-400 bg-gray-900 border border-gray-800 rounded-xl">
+          <UiCard v-if="allPictures.length === 0">
+            <UiEmptyState icon="fas fa-images" title="남길 사진이 없어요" description="경기 장면을 찍어 피드에 함께 올려보세요">
+              <div class="flex gap-2">
+                <UiButton variant="secondary" icon="fas fa-camera" @click="openCamera">사진</UiButton>
+                <UiButton variant="secondary" icon="fas fa-video" @click="openVideoRecorder">동영상</UiButton>
+              </div>
+            </UiEmptyState>
+          </UiCard>
 
-            <i class="fas fa-images text-4xl mb-2"></i>
-            <p class="text-sm mb-3">촬영된 미디어가 없습니다</p>
-            <div class="flex gap-2 justify-center">
-              <button
-                @click="openCamera"
-                class="bg-gray-700 text-gray-100 px-4 py-2 rounded-lg text-sm font-medium"
-              >
-                <i class="fas fa-camera mr-1"></i> 사진 촬영
-              </button>
-              <button
-                @click="openVideoRecorder"
-                class="bg-gray-700 text-gray-100 px-4 py-2 rounded-lg text-sm font-medium"
-              >
-                <i class="fas fa-video mr-1"></i> 동영상 촬영
-              </button>
-            </div>
-          </div>
-
-          <!-- 사진 목록 -->
           <div v-else class="space-y-4">
-            <!-- 안내 메시지 -->
-            <div v-if="selectedPictures.length === 0 && allPictures.length > 0" class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 flex items-start gap-3">
-              <i class="fas fa-info-circle text-blue-400 text-lg mt-0.5"></i>
-              <div class="flex-1">
-                <p class="text-sm text-blue-300 font-medium mb-1">사진을 클릭하여 선택해주세요</p>
-                <p class="text-xs text-blue-400/70">아래 사진을 탭하면 제출할 미디어로 선택됩니다 (최대 5개)</p>
-              </div>
-            </div>
-
-            <!-- 선택된 미디어 (드래그로 순서 변경 가능) -->
-            <div v-if="selectedPictures.length > 0">
-              <div class="flex items-center justify-between mb-2">
-                <p class="text-sm font-medium text-green-400">
-                  <i class="fas fa-check-circle mr-1"></i>
-                  선택됨 ({{ selectedPictures.length }}/5)
-                </p>
-                <p class="text-xs text-gray-500">드래그로 순서 변경</p>
-              </div>
+            <!-- 올릴 것 (끌어서 순서 바꾸기) -->
+            <div v-if="selectedPictures.length">
+              <p class="t-label mb-2">올릴 것 {{ selectedPictures.length }}개 <span class="t-micro">· 끌어서 순서 바꾸기</span></p>
               <div class="grid grid-cols-3 gap-2">
                 <div
                   v-for="(pic, index) in selectedPictures"
                   :key="pic.id"
                   :data-index="index"
-                  :class="[
-                    'relative aspect-square rounded-lg overflow-hidden border-2 cursor-move touch-none transition-all duration-150',
-                    isDragging && draggedIndex === index
-                      ? 'opacity-50 scale-95 border-orange-300'
-                      : touchCurrentIndex === index && isDragging
-                        ? 'border-blue-500 scale-105'
-                        : 'border-orange-500',
-                  ]"
                   draggable="true"
+                  class="relative aspect-square rounded-lg overflow-hidden bg-surface-2 ring-2 ring-primary"
+                  :class="{ 'opacity-50': isDragging && (draggedIndex === index || touchStartIndex === index) }"
                   @dragstart="handleDragStart(index)"
                   @dragover.prevent="handleDragOver"
                   @drop="handleDrop(index)"
@@ -200,359 +110,136 @@
                   @touchmove.prevent="handleTouchMove($event)"
                   @touchend="handleTouchEnd(index)"
                 >
-                  <!-- 이미지 -->
-                  <img
-                    v-if="pic.type === 'image'"
-                    :src="pic.dataUrl"
-                    class="w-full h-full object-cover pointer-events-none"
-                  />
-
-                  <!-- 동영상 -->
-                  <div v-else-if="pic.type === 'video'" class="relative w-full h-full">
-                    <video
-                      :src="pic.dataUrl"
-                      class="w-full h-full object-cover pointer-events-none"
-                    />
-                    <div
-                      class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 pointer-events-none"
-                    >
-                      <i class="fas fa-play-circle text-white text-3xl"></i>
-                    </div>
-                    <div
-                      class="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded pointer-events-none"
-                    >
-                      {{ formatDuration(pic.duration) }}
-                    </div>
-                  </div>
-
-                  <div
-                    class="absolute top-1 left-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium pointer-events-none"
-                  >
-                    {{ index + 1 }}
-                  </div>
+                  <img v-if="pic.type === 'image'" :src="pic.dataUrl" alt="" class="w-full h-full object-cover pointer-events-none" />
+                  <video v-else :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
+                  <span class="absolute top-1 left-1 min-w-6 h-6 px-1.5 rounded-full bg-primary text-primary-fg text-xs font-bold flex items-center justify-center">{{ index + 1 }}</span>
+                  <span v-if="pic.type === 'video'" class="absolute bottom-1 left-1 px-1.5 rounded bg-black/60 text-white text-xs">{{ formatDuration(pic.duration) }}</span>
                   <button
+                    type="button"
+                    class="absolute top-0 right-0 w-11 h-11 flex items-start justify-end p-1.5"
+                    aria-label="올리지 않기"
                     @click.stop="deselectPicture(pic.id)"
-                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition z-10"
                   >
-                    <i class="fas fa-times text-xs"></i>
+                    <span class="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs"><i class="fas fa-xmark" aria-hidden="true"></i></span>
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- 선택 가능한 미디어들 -->
-            <div v-if="unselectedPictures.length > 0">
-              <div class="flex items-center justify-between mb-2">
-                <p class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
-                  <i class="fas fa-hand-pointer text-orange-400 text-xs"></i>
-                  탭하여 선택
-                </p>
-                <p class="text-xs text-gray-500">최대 5개</p>
-              </div>
-              <div class="grid grid-cols-4 gap-2">
+            <!-- 찍은 것 -->
+            <div v-if="unselectedPictures.length">
+              <p class="t-label mb-2">{{ selectedPictures.length ? '찍은 것' : '올릴 사진을 눌러 고르세요' }}</p>
+              <div class="grid grid-cols-3 gap-2">
                 <div
                   v-for="pic in unselectedPictures"
                   :key="pic.id"
-                  class="relative aspect-square rounded-lg overflow-hidden border-2 border-dashed border-gray-600 cursor-pointer hover:border-orange-400 hover:scale-105 transition-all duration-200 group"
-                  @click="selectPicture(pic)"
+                  class="relative aspect-square rounded-lg overflow-hidden bg-surface-2"
                 >
-                  <!-- 이미지 -->
-                  <img
-                    v-if="pic.type === 'image'"
-                    :src="pic.dataUrl"
-                    class="w-full h-full object-cover"
-                  />
-
-                  <!-- 동영상 -->
-                  <div v-else-if="pic.type === 'video'" class="relative w-full h-full">
-                    <video :src="pic.dataUrl" class="w-full h-full object-cover" />
-                    <div
-                      class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30"
-                    >
-                      <i class="fas fa-play-circle text-white text-2xl"></i>
-                    </div>
-                    <div
-                      class="absolute bottom-0.5 left-0.5 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded"
-                    >
-                      {{ formatDuration(pic.duration) }}
-                    </div>
-                  </div>
-
-                  <!-- 선택하기 오버레이 (hover 시) -->
-                  <div class="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/80 transition-all duration-200 flex items-center justify-center">
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-1">
-                      <i class="fas fa-plus-circle text-white text-2xl"></i>
-                      <span class="text-white text-xs font-medium">선택</span>
-                    </div>
-                  </div>
-
+                  <button type="button" class="w-full h-full" :aria-label="pic.type === 'video' ? '동영상 고르기' : '사진 고르기'" @click="selectPicture(pic)">
+                    <img v-if="pic.type === 'image'" :src="pic.dataUrl" alt="" class="w-full h-full object-cover" />
+                    <video v-else :src="pic.dataUrl" class="w-full h-full object-cover" />
+                  </button>
+                  <span v-if="pic.type === 'video'" class="absolute bottom-1 left-1 px-1.5 rounded bg-black/60 text-white text-xs pointer-events-none">{{ formatDuration(pic.duration) }}</span>
                   <button
+                    type="button"
+                    class="absolute top-0 right-0 w-11 h-11 flex items-start justify-end p-1.5"
+                    aria-label="삭제"
                     @click.stop="deletePicture(pic.id)"
-                    class="absolute top-1 right-1 bg-gray-800 bg-opacity-70 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 transition z-10"
                   >
-                    <i class="fas fa-trash text-xs"></i>
+                    <span class="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs"><i class="fas fa-trash" aria-hidden="true"></i></span>
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- 추가 촬영 버튼 (5개 미만일 때만 표시) -->
             <div v-if="allPictures.length < 5" class="flex gap-2">
-              <button
-                @click="openCamera"
-                class="flex-1 border-2 border-dashed border-gray-600 text-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
-              >
-                <i class="fas fa-camera mr-1"></i> 사진 추가 ({{ allPictures.length }}/5)
-              </button>
-              <button
-                @click="openVideoRecorder"
-                class="flex-1 border-2 border-dashed border-gray-600 text-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition"
-              >
-                <i class="fas fa-video mr-1"></i> 동영상 추가 ({{ allPictures.length }}/5)
-              </button>
+              <UiButton variant="secondary" icon="fas fa-camera" class="flex-1" @click="openCamera">사진 추가</UiButton>
+              <UiButton variant="secondary" icon="fas fa-video" class="flex-1" @click="openVideoRecorder">동영상 추가</UiButton>
             </div>
           </div>
-        </div>
+        </UiSection>
 
-        <!-- 상대방 평가 섹션 -->
-        <div
-          class="p-5 space-y-5 text-left bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50"
-        >
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center">
-              <i class="fas fa-user-friends text-gray-400 text-sm"></i>
-            </div>
-            <h3 class="text-base font-bold text-white">
-              {{ user1.id == currentUserId ? user2.nickname : user1.nickname }} 님을 평가해주세요
-            </h3>
-          </div>
-
-          <div class="space-y-4">
-            <div class="space-y-2.5">
-              <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
-                <i class="fas fa-heart text-gray-400 text-xs"></i>
-                매너
-              </label>
-              <div class="flex gap-2 items-center">
-                <i
+        <!-- 상대 평가 -->
+        <UiSection :title="`${opponent.nickname || '상대'}님은 어땠나요?`">
+          <UiCard class="space-y-5">
+            <div v-for="row in reviewRows" :key="row.key">
+              <p class="t-label mb-1">{{ row.label }}</p>
+              <div class="flex items-center -ml-2" role="radiogroup" :aria-label="row.label">
+                <button
                   v-for="n in 5"
-                  :key="'manner' + n"
-                  @click="setManner(n)"
-                  :class="
-                    n <= review.manner ? 'fas fa-star text-orange-400' : 'far fa-star text-gray-400'
-                  "
-                  class="text-2xl cursor-pointer hover:scale-110 hover:text-orange-300 transition-all"
-                ></i>
-                <span v-if="review.manner > 0" class="text-sm font-medium text-orange-400 ml-1"
-                  >{{ review.manner }}/5</span
+                  :key="n"
+                  type="button"
+                  role="radio"
+                  :aria-checked="row.value === n"
+                  :aria-label="`${n}점`"
+                  class="w-11 h-11 flex items-center justify-center text-2xl"
+                  :class="n <= row.value ? 'text-primary' : 'text-line-strong'"
+                  @click="row.set(n)"
                 >
+                  <i :class="n <= row.value ? 'fas fa-star' : 'far fa-star'" aria-hidden="true"></i>
+                </button>
+                <span v-if="row.value" class="t-caption ml-1">{{ row.value }}/5</span>
               </div>
             </div>
+            <UiInput v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
+          </UiCard>
+        </UiSection>
 
-            <div class="space-y-2.5">
-              <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
-                <i class="fas fa-fire text-gray-400 text-xs"></i>
-                퍼포먼스
-              </label>
-              <div class="flex gap-2 items-center">
-                <i
-                  v-for="n in 5"
-                  :key="'perf' + n"
-                  @click="setPerformance(n)"
-                  :class="
-                    n <= review.performance
-                      ? 'fas fa-star text-orange-400'
-                      : 'far fa-star text-gray-400'
-                  "
-                  class="text-2xl cursor-pointer hover:scale-110 hover:text-orange-300 transition-all"
-                ></i>
-                <span v-if="review.performance > 0" class="text-sm font-medium text-orange-400 ml-1"
-                  >{{ review.performance }}/5</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <button
-            @click="showReviewModal = true"
-            class="w-full border border-gray-700 rounded-xl p-3.5 text-sm text-left bg-gray-800/50 hover:bg-gray-700/50 transition-all"
-          >
-            <div class="flex items-center gap-2.5">
-              <i class="fas fa-comment-dots text-gray-400"></i>
-              <span v-if="review.text && review.text.length > 0" class="flex-1 text-gray-200">{{
-                review.text
-              }}</span>
-              <span v-else class="text-gray-500 flex-1">텍스트 리뷰 (선택)</span>
-            </div>
-          </button>
-
-          <!-- Fullscreen review modal -->
-          <transition name="modal-fade">
-            <ReviewTextModal
-              v-if="showReviewModal"
-              v-model="review.text"
-              title="상대방 리뷰"
-              placeholder="상대방에게 남기고 싶은 말을 자유롭게 입력하세요"
-              @close="showReviewModal = false"
-            />
-          </transition>
-        </div>
-
-        <!-- 규칙 평가 섹션 -->
-        <div
-          class="p-5 space-y-5 text-left bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50"
-        >
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <i class="fas fa-book text-purple-400 text-sm"></i>
-            </div>
-            <h3 class="text-base font-bold text-white">이 규칙은 어떠셨나요?</h3>
-          </div>
-          <p class="text-xs text-gray-400 -mt-2">
-            규칙의 재미, 명확성, 밸런스를 평가해주세요. 여러분의 평가는 다른 사용자들에게 도움이
-            됩니다.
-          </p>
-
-          <div class="space-y-2.5">
-            <label class="text-sm font-medium text-gray-300 flex items-center gap-1.5">
-              <i class="fas fa-star text-purple-400 text-xs"></i>
-              규칙 평가
-            </label>
-            <div class="flex gap-2 items-center">
-              <i
+        <!-- 규칙 평가 -->
+        <UiSection title="이 규칙은 어땠나요?">
+          <UiCard class="space-y-4">
+            <p class="t-caption">재미·명확함·균형을 생각해 별을 눌러주세요. 다음 사람이 규칙을 고를 때 참고해요.</p>
+            <div class="flex items-center -ml-2" role="radiogroup" aria-label="규칙 평가">
+              <button
                 v-for="n in 5"
-                :key="'rule' + n"
+                :key="n"
+                type="button"
+                role="radio"
+                :aria-checked="ruleRating === n"
+                :aria-label="`${n}점`"
+                class="w-11 h-11 flex items-center justify-center text-2xl"
+                :class="n <= ruleRating ? 'text-primary' : 'text-line-strong'"
                 @click="setRuleRating(n)"
-                :class="
-                  n <= ruleRating ? 'fas fa-star text-purple-400' : 'far fa-star text-gray-400'
-                "
-                class="text-2xl cursor-pointer hover:scale-110 hover:text-purple-300 transition-all"
-              ></i>
-              <span v-if="ruleRating > 0" class="text-sm font-medium text-purple-400 ml-1"
-                >{{ ruleRating }}/5</span
               >
+                <i :class="n <= ruleRating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true"></i>
+              </button>
+              <span class="t-caption ml-1">{{ ruleRating ? `${ruleRating}/5` : '선택' }}</span>
             </div>
-          </div>
+            <UiInput v-if="ruleRating" v-model="ruleReview" multiline :rows="2" label="규칙 의견" optional placeholder="고치면 좋을 점이 있나요?" />
+          </UiCard>
+        </UiSection>
+      </template>
+    </template>
+  </main>
 
-          <button
-            @click="showRuleReviewModal = true"
-            class="w-full border border-gray-700 rounded-xl p-3.5 text-sm text-left bg-gray-800/50 hover:bg-gray-700/50 transition-all"
-          >
-            <div class="flex items-center gap-2.5">
-              <i class="fas fa-comment-dots text-gray-400"></i>
-              <span v-if="ruleReview && ruleReview.length > 0" class="flex-1 text-gray-200">{{
-                ruleReview
-              }}</span>
-              <span v-else class="text-gray-500 flex-1">규칙에 대한 의견 (선택)</span>
-            </div>
-          </button>
-
-          <!-- Fullscreen rule review modal -->
-          <transition name="modal-fade">
-            <ReviewTextModal
-              v-if="showRuleReviewModal"
-              v-model="ruleReview"
-              title="규칙 평가 의견"
-              placeholder="규칙의 장단점, 개선할 점 등을 자유롭게 작성해주세요"
-              @close="showRuleReviewModal = false"
-            />
-          </transition>
-        </div>
-
-        <div class="flex justify-center gap-3 mt-6">
-          <button @click="sendFriendRequest" class="px-5 py-2.5 rounded-xl bg-blue-500/20 text-blue-400 font-medium border border-blue-500/30 hover:bg-blue-500/30 transition-all">
-            <i class="fas fa-user-plus mr-1.5 text-sm"></i>친구 추가
-          </button>
-          <button @click="onShare" class="px-5 py-2.5 rounded-xl bg-green-500/20 text-green-400 font-bold border border-green-500/30 hover:bg-green-500/30 transition-all">
-            <i class="fas fa-share-alt mr-1.5 text-sm"></i>결과 공유
-          </button>
-
-        </div>
-      </div>
+  <!-- 하단 고정: 참가자만 제출 -->
+  <div v-if="isParticipant && !isLoading && !resultError" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+    <div class="max-w-xl mx-auto px-4 py-3">
+      <UiButton block size="lg" :loading="isSubmitting" :disabled="!review.manner || !review.performance" @click="submitReviewAndGoHome">
+        {{ review.manner && review.performance ? '평가 보내기' : '매너와 실력에 별을 눌러주세요' }}
+      </UiButton>
     </div>
+  </div>
 
-    <!-- 하단 고정 버튼 -->
-    <button
-      @click="submitReviewAndGoHome"
-      :disabled="isSubmitting"
-     class="flex-shrink-0 w-full text-gray-100 py-4 bg-orange-500 text-white font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      제출하기
-    </button>
-
-    <!-- 제출 확인 모달 제거 -->
-
-    <!-- 제출 중 로딩 오버레이 -->
-    <div
-      v-if="isSubmitting"
-      class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-900 bg-opacity-95"
-    >
-      <div
-        class="animate-spin rounded-full h-16 w-16 border-4 border-t-orange-500 border-orange-500/30 mb-4"
-      ></div>
-      <p class="text-lg font-bold text-gray-200">제출 중...</p>
-      <p class="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
-    </div>
-
-    <!-- 숨겨진 카메라 input -->
-    <input
-      ref="cameraInputRef"
-      type="file"
-      accept="image/*"
-      capture="environment"
-      @change="onCameraChange"
-      class="hidden"
-    />
-
-    <!-- 숨겨진 동영상 input -->
-    <input
-      ref="videoInputRef"
-      type="file"
-      accept="video/*"
-      capture="environment"
-      @change="onVideoChange"
-      class="hidden"
-    />
-
-    <!-- 사진 삭제 확인 모달 -->
-    <div
-      v-if="showDeleteConfirm"
-      class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
-    >
-      <div class="bg-gray-800 w-full max-w-xs rounded-xl shadow-lg p-6 text-center mx-4">
-        <div class="mb-5">
-          <i class="fas fa-trash-alt text-4xl text-red-500 mb-3"></i>
-          <div class="text-lg font-bold text-gray-100 mb-2">사진을 삭제하시겠습니까?</div>
-          <p class="text-sm text-gray-400">삭제된 사진은 복구할 수 없습니다.</p>
-        </div>
-        <div class="flex justify-center gap-3">
-          <button
-            @click="cancelDeletePicture"
-            class="flex-1 px-4 py-2.5 bg-gray-700 text-gray-300 rounded-lg font-medium text-sm hover:bg-gray-600 transition"
-          >
-            취소
-          </button>
-          <button
-            @click="confirmDeletePicture"
-            class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-medium text-sm shadow hover:bg-red-600 transition"
-          >
-            삭제
-          </button>
-        </div>
-      </div>
-    </div>
-
+  <!-- 숨겨진 카메라·동영상 입력 -->
+  <input ref="cameraInputRef" type="file" accept="image/*" capture="environment" class="hidden" @change="onCameraChange" />
+  <input ref="videoInputRef" type="file" accept="video/*" capture="environment" class="hidden" @change="onVideoChange" />
   </div>
 </template>
 
+
 <script setup>
-import ReviewTextModal from '../../components/game/ReviewTextModal.vue'
-import { useBackClose } from '../../composable/useBackClose'
+// 경기 결과: 누가 이겼나 → 사진 고르기 → 상대·규칙 평가 → 보내기. 평가는 경기에 뛴 사람에게만 보인다
 
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import defaultImg from '../../assets/default.png'
+import {
+  UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar,
+} from '../../components/ui'
+import { confirmDialog } from '../../composables/useConfirm'
+import { containsProfanity } from '../../utils/profanity'
+import { copyText } from '../../utils/clipboard'
 import { useToast } from '../../composable/useToast'
 import {
   getGamePictures,
@@ -564,13 +251,9 @@ import {
 } from '../../utils/gamePictureStorage'
 
 const { showToast } = useToast()
-const showReviewModal = ref(false)
-const showRuleReviewModal = ref(false) // 규칙 평가 모달
 const isSubmitting = ref(false)
 const cameraInputRef = ref(null)
 const videoInputRef = ref(null)
-const showDeleteConfirm = ref(false)
-const pictureToDelete = ref(null)
 
 // 자동 제출 함수들
 function setManner(n) {
@@ -586,71 +269,11 @@ function setRuleRating(n) {
 function submitReviewAndGoHome() {
   // 리뷰 제출 전 유효성 검사
   if (review.value.manner === 0 || review.value.performance === 0) {
-    showToast('매너와 퍼포먼스 평점을 모두 입력해주세요.')
+    showToast('매너와 실력에 별을 눌러주세요')
     return
   }
-  const bannedWords = [
-    'fuck',
-    'shit',
-    'asshole',
-    'bitch',
-    'bastard',
-    'dick',
-    'fucking',
-    'fucker',
-    'cunt',
-    'nigger',
-    'slut',
-    'whore',
-    'sex',
-    'sexy',
-    'nazi',
-    'motherfucker',
-    '씨발',
-    '시발',
-    '씨바',
-    'ㅆㅂ',
-    'ㅅㅂ',
-    'ㅂㅅ',
-    '병신',
-    '새끼',
-    '좆',
-    '애미',
-    '개새끼',
-    '지랄',
-    '염병',
-    '꺼져',
-    '죽어',
-    '멍청',
-    '저능',
-    '존나',
-    'ㅄ',
-    'ㄱㅐ',
-    'ㅈㄴ',
-    '개같',
-    '더럽',
-    '섹스',
-    '자지',
-    '보지',
-    '딸딸이',
-    '빨아',
-    '꼬추',
-    '보빨',
-    '조까',
-    '좇',
-    '애비',
-    '년놈',
-    '암캐',
-    '걸레',
-    '쓰레기',
-    '창녀',
-    '미친놈',
-    '미친년',
-  ]
-  const lowerText = (review.value.text || '').toLowerCase()
-  const found = bannedWords.find((word) => lowerText.includes(word))
-  if (found) {
-    showToast(`비속어("${found}")가 포함되어 있어 등록할 수 없습니다.`)
+  if (containsProfanity(review.value.text) || containsProfanity(ruleReview.value)) {
+    showToast('쓰면 안 되는 말이 들어 있어요. 고쳐서 다시 보내주세요')
     return
   }
 
@@ -673,7 +296,7 @@ function submitReviewAndGoHome() {
       return Promise.resolve()
     })
     .then(() => {
-      showToast('리뷰가 제출되었습니다.')
+      showToast('평가를 보냈어요')
       setTimeout(() => {
         goHome()
       }, 500)
@@ -681,7 +304,7 @@ function submitReviewAndGoHome() {
     .catch((error) => {
       isSubmitting.value = false
       console.error('제출 실패:', error)
-      showToast('잘못된 접근입니다.')
+      showToast(error.response?.data?.message || '보내지 못했어요. 잠시 뒤 다시 시도해주세요')
     })
 }
 
@@ -723,6 +346,29 @@ const unselectedPictures = computed(() => {
 
 const resultError = ref('')
 
+// 화면 계산: user1이 나(참가자면), winnerIdx 1·2도 user1·user2 기준으로 맞춰져 있다
+const isParticipant = computed(() => !!currentUserId.value && (user1.value.id === currentUserId.value || user2.value.id === currentUserId.value))
+const opponent = computed(() => (user1.value.id === currentUserId.value ? user2.value : user1.value))
+// newChampionIdx는 서버 기준 순서라 화면 순서로 바꾼다
+const championUser = computed(() => {
+  if (!championIdx.value) return null
+  return (championIdx.value === 1) === idxCorrect.value ? user1.value : user2.value
+})
+const sides = computed(() => [
+  { user: user1.value, sets: user1SetCount.value, won: winnerIdx.value === 1, isMe: user1.value.id === currentUserId.value, champion: championUser.value?.id === user1.value.id },
+  { user: user2.value, sets: user2SetCount.value, won: winnerIdx.value === 2, isMe: user2.value.id === currentUserId.value, champion: championUser.value?.id === user2.value.id },
+])
+const headline = computed(() => {
+  if (winnerIdx.value === 0) return { text: '무승부', tone: 'text-fg' }
+  const winner = winnerIdx.value === 1 ? user1.value : user2.value
+  if (!isParticipant.value) return { text: `${winner.nickname}님 승리`, tone: 'text-fg' }
+  return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-primary' } : { text: '졌어요', tone: 'text-fg-muted' }
+})
+const reviewRows = computed(() => [
+  { key: 'manner', label: '매너', value: review.value.manner, set: setManner },
+  { key: 'performance', label: '실력', value: review.value.performance, set: setPerformance },
+])
+
 onMounted(async () => {
   try {
     const myIdRes = await api.get('/api/auth/current-user-id')
@@ -736,7 +382,8 @@ onMounted(async () => {
     drawCount.value = res.data.drawCount
     winnerIdx.value = res.data.winnerIdx
     championIdx.value = res.data.newChampionIdx
-    idxCorrect.value = res.data.user1.id === currentUserId.value
+    // 내가 user2일 때만 순서를 뒤집어 나를 왼쪽에 둔다 (구경하는 사람은 서버 순서 그대로)
+    idxCorrect.value = res.data.user2.id !== currentUserId.value
 
     if (idxCorrect.value) {
       user1.value = res.data.user1
@@ -898,27 +545,12 @@ const deselectPicture = (picId) => {
   selectedPictures.value = selectedPictures.value.filter((p) => p.id !== picId)
 }
 
-// 사진 삭제 확인 모달 열기
-const deletePicture = (picId) => {
-  pictureToDelete.value = picId
-  showDeleteConfirm.value = true
-}
-
-// 사진 삭제 확정
-const confirmDeletePicture = async () => {
-  if (pictureToDelete.value) {
-    allPictures.value = await removeGamePicture(gameId, pictureToDelete.value)
-    selectedPictures.value = selectedPictures.value.filter((p) => p.id !== pictureToDelete.value)
-    showToast('사진이 삭제되었습니다.')
-  }
-  showDeleteConfirm.value = false
-  pictureToDelete.value = null
-}
-
-// 사진 삭제 취소
-const cancelDeletePicture = () => {
-  showDeleteConfirm.value = false
-  pictureToDelete.value = null
+// 사진 삭제 (기기에만 있던 것이라 되돌릴 수 없다)
+const deletePicture = async (picId) => {
+  const ok = await confirmDialog({ title: '삭제할까요?', message: '지우면 되돌릴 수 없어요', confirmText: '삭제', danger: true })
+  if (!ok) return
+  allPictures.value = await removeGamePicture(gameId, picId)
+  selectedPictures.value = selectedPictures.value.filter((p) => p.id !== picId)
 }
 
 // 드래그 시작 (마우스)
@@ -1060,107 +692,10 @@ async function onShare() {
     if (navigator.share) {
       await navigator.share({ title: 'Match', text, url })
     } else {
-      await navigator.clipboard.writeText(url)
-      showToast('링크를 복사했어요!')
+      showToast((await copyText(url)) ? '링크를 복사했어요' : '복사하지 못했어요')
     }
   } catch (e) {
-    console.log(e)
-    if (e?.message !== 'Share canceled') {
-      showToast('공유에 실패했습니다.')
-    }
+    if (e?.name !== 'AbortError' && e?.message !== 'Share canceled') showToast('링크를 만들지 못했어요')
   }
 }
-
-// 뒤로가기는 열린 모달부터 닫는다
-useBackClose(showReviewModal, showRuleReviewModal, showDeleteConfirm)
 </script>
-
-<style scoped>
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.champion-card-bg {
-  background: linear-gradient(135deg, #fdba74 10%, #fb923c 70%, #f59e42 100%);
-  filter: blur(0px) brightness(1.05) saturate(1.2);
-  opacity: 0.98;
-  animation: champion-bg-move 7s ease-in-out infinite alternate;
-}
-
-@keyframes champion-bg-move {
-  0% {
-    background-position: 0% 50%;
-    filter: blur(0px) brightness(1.1) saturate(1.3);
-  }
-  50% {
-    background-position: 100% 60%;
-    filter: blur(2px) brightness(1.18) saturate(1.6);
-  }
-  100% {
-    background-position: 0% 40%;
-    filter: blur(0px) brightness(1.1) saturate(1.2);
-  }
-}
-
-.champion-card-glow {
-  box-shadow:
-    0 0 64px 8px #fdba7477,
-    0 0 0 4px #fb923c55 inset;
-  position: relative;
-}
-
-.champion-glow-anim {
-  filter: drop-shadow(0 0 12px #fff7) drop-shadow(0 0 16px #fdba74bb);
-  animation: champion-glow-anim 1.8s ease-in-out infinite alternate;
-}
-
-@keyframes champion-glow-anim {
-  0% {
-    filter: drop-shadow(0 0 16px #fff9) drop-shadow(0 0 8px #fdba74cc);
-  }
-  100% {
-    filter: drop-shadow(0 0 28px #fff) drop-shadow(0 0 18px #fdba74);
-  }
-}
-
-@keyframes gradient-x {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-.animate-gradient-x {
-  animation: gradient-x 2.5s linear infinite;
-}
-
-/* 모달 트랜지션 */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
-
-.modal-fade-enter-from .fixed,
-.modal-fade-leave-to .fixed {
-  transform: translate(-50%, -50%) scale(0.9) !important;
-}
-
-.modal-fade-enter-active .fixed,
-.modal-fade-leave-active .fixed {
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-</style>

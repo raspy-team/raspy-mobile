@@ -56,7 +56,7 @@ const footerTab = computed(() => {
   if (p.startsWith('/profile/')) return ''
   if (p === '/rules' && route.query.fromGameCreate) return null
   if (p === '/rules' || p === '/rules/my-rules' || /^\/rules\/\d+\/ranking$/.test(p)) return 'home'
-  if (p === '/dm' || /^\/games\/\d+\/result$/.test(p)) return ''
+  if (p === '/dm') return ''
   return null
 })
 // 진행 중인 게임 폴링 (명시적으로 초기화)

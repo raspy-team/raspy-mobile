@@ -21,7 +21,6 @@ export const socket = {
     }
     if (currentRoomId === roomId && stompClient && stompClient.connected) {
       // 이미 같은 방에 연결돼있으면 무시
-      console.log('[stomp] already connected to', roomId)
       if (_onConnected) _onConnected()
       return
     }
@@ -36,7 +35,8 @@ export const socket = {
       brokerURL: WS_URL,
       connectHeaders: { token },
       reconnectDelay: 5000,
-      debug: str => console.log('[stomp-debug]', str),
+      // 프레임마다 찍던 디버그 로그(메시지 본문 포함)는 끈다
+      debug: () => {},
       onConnect: () => {
         if (_onConnected) _onConnected()
         socket._subscribe(currentRoomId)
@@ -61,7 +61,6 @@ export const socket = {
    */
   _subscribe(roomId) {
     if (!stompClient || !stompClient.connected) {
-      console.log('[stomp] subscribe SKIPPED (no client or not connected)')
       return
     }
     if (!roomId) {
@@ -71,17 +70,14 @@ export const socket = {
     if (subscription) {
       try {
         subscription.unsubscribe()
-        console.log('[stomp] previous subscription cleaned')
-      } catch (e) {
-        console.log('failed to unsubcribe')
+      } catch {
+        // 이미 끊긴 구독이면 그냥 넘어간다
       }
       subscription = null
     }
     subscription = stompClient.subscribe(`/topic/ws/${roomId}`, ({ body }) => {
-      console.log('[stomp] message RECEIVED', body)
       if (_onMessage) _onMessage(JSON.parse(body))
     })
-    console.log('[stomp] subscribed', roomId, subscription)
   },
 
   /**
@@ -108,8 +104,8 @@ export const socket = {
     if (subscription) {
       try {
         subscription.unsubscribe()
-      } catch (e) {
-        console.log('failed to unsubcribe')
+      } catch {
+        // 이미 끊긴 구독이면 그냥 넘어간다
       }
       subscription = null
     }
@@ -121,7 +117,6 @@ export const socket = {
       currentRoomId = null
     }
     if (_onDisconnected) _onDisconnected()
-    console.log('[stomp] disconnected')
   },
 
   sendChat(roomId, content) {

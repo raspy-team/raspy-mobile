@@ -22,8 +22,6 @@ export function useActiveGamePolling() {
     try {
       const response = await api.get('/api/games/active/my')
       const data = response.data
-      console.log('🎮 Active game data:', data)
-
       // pendingReviewGameIds 업데이트
       if (data.pendingReviewGameIds && Array.isArray(data.pendingReviewGameIds)) {
         pendingReviewGameIds.value = data.pendingReviewGameIds
@@ -37,26 +35,22 @@ export function useActiveGamePolling() {
       if (game && game.gameId) {
         // 현재 해당 게임의 플레이 화면에 있는지 확인
         if (currentPath && currentPath.includes(`/games/${game.gameId}/play`)) {
-          console.log('🎮 Already on game play screen, auto-dismissing:', game.gameId)
           dismissedGameIds.value.add(game.gameId)
           return
         }
 
         // 사용자가 이미 거부한 게임인지 확인
         if (dismissedGameIds.value.has(game.gameId)) {
-          console.log('🎮 Game already dismissed:', game.gameId)
           return
         }
 
         // 이전에 감지한 게임과 같은지 확인 (중복 알림 방지)
         if (!activeGame.value || activeGame.value.gameId !== game.gameId) {
-          console.log('🎮 New active game detected:', game)
           activeGame.value = game
         }
       } else {
         // 진행 중인 게임이 없음
         if (activeGame.value) {
-          console.log('🎮 Active game ended')
           activeGame.value = null
         }
       }
@@ -74,8 +68,6 @@ export function useActiveGamePolling() {
     if (isPolling.value) return // 이미 폴링 중이면 무시
 
     isPolling.value = true
-    console.log('🎮 Active game polling started')
-
     const check = () => checkActiveGame(getCurrentPath ? getCurrentPath() : null)
     check()
     openUserChannel()
@@ -88,13 +80,11 @@ export function useActiveGamePolling() {
       stopWatching = null
     }
     isPolling.value = false
-    console.log('🎮 Active game polling stopped')
   }
 
   // 게임 알림 해제 (사용자가 "참여하지 않을래요" 선택 시 또는 참여 시)
   const dismissActiveGame = () => {
     if (activeGame.value?.gameId) {
-      console.log('🎮 Dismissing game:', activeGame.value.gameId)
       dismissedGameIds.value.add(activeGame.value.gameId)
       activeGame.value = null
     }

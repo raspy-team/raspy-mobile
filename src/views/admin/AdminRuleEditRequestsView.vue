@@ -351,9 +351,7 @@ function formatDate(dateStr) {
 }
 
 function openComparisonModal(request) {
-  console.log('Opening comparison modal for request:', request)
   selectedRequest.value = request
-  console.log('selectedRequest set to:', selectedRequest.value)
 }
 
 function closeComparisonModal() {

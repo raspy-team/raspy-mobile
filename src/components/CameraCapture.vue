@@ -139,7 +139,6 @@ const triggerCamera = () => {
   // 안드로이드 웹뷰에서는 네이티브 카메라 사용
   if (isAndroidWebView()) {
     try {
-      console.log('Calling Android native camera...')
       window.AndroidApp.openCamera()
       // 콜백은 window.onCameraResult로 받음
     } catch (error) {
@@ -151,7 +150,6 @@ const triggerCamera = () => {
     try {
       cameraInputRef.value.click()
 
-      // console.log('Calling iOS native camera...')
       // window.webkit.messageHandlers.iosBridge.postMessage({
       //   action: 'openCamera',
       //   type: 'photo',
@@ -166,7 +164,6 @@ const triggerCamera = () => {
     // PC 또는 일반 웹에서는 파일 입력 사용
     if (cameraInputRef.value) {
       try {
-        console.log('Triggering camera input on PC/Web...')
         cameraInputRef.value.click()
       } catch (error) {
         console.error('Failed to trigger camera:', error)
@@ -182,7 +179,6 @@ onMounted(() => {
   if (typeof window !== 'undefined') {
     window.onCameraResult = async (base64Image) => {
       try {
-        console.log('Received image from native camera (CameraCapture)')
         // base64 이미지를 받아서 처리
         const compressedDataUrl = await compressImage(base64Image)
         capturedImage.value = compressedDataUrl

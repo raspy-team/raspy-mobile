@@ -261,7 +261,6 @@ const goBack = () => {
 const fetchNotifications = async () => {
   const res = await api.get('/api/notifications')
   notifications.value = res.data
-  console.log(res.data)
   unreadCount.value = notifications.value.filter((n) => !n.isRead).length
 }
 

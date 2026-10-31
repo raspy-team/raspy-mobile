@@ -487,8 +487,6 @@ const onVideoChange = async (e) => {
 
   // 파일 형식 체크
   const fileType = file.type.toLowerCase()
-  console.log('[GameResultView] 동영상 파일 형식:', fileType, file.name)
-
   // WebM이 아닌 경우 경고
   if (!fileType.includes('webm')) {
     showToast(

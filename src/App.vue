@@ -87,9 +87,6 @@ const checkAndSendDailyFirst = async () => {
       // 오늘 아직 호출하지 않았으면 호출
       await api.post('/api/access/daily-first')
       localStorage.setItem('daily_first_last_call', today)
-      console.log('Daily first access recorded:', today)
-    } else {
-      console.log('Daily first access already recorded today:', today)
     }
   } catch (error) {
     console.error('Failed to send daily-first:', error)
@@ -129,8 +126,8 @@ onMounted(() => {
         })
       }
     }, 5000)
-  } catch (e) {
-    console.log('welcome [web] user')
+  } catch {
+    // 웹에서는 앱 브리지가 없다
   }
 })
 

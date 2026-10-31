@@ -403,7 +403,6 @@ onMounted(async () => {
     // 사진 촬영 콜백 핸들러
     const handleCameraResult = async (base64Image) => {
       try {
-        console.log('Received photo from native camera')
         const compressed = await compressImage(base64Image)
         await addGamePicture(gameId, compressed)
         showToast('사진이 저장되었습니다!')
@@ -420,7 +419,6 @@ onMounted(async () => {
     // 동영상 촬영 콜백 핸들러
     const handleVideoCameraResult = async (base64Video, duration) => {
       try {
-        console.log('Received video from native camera')
         // duration은 밀리초 단위로 전달된다고 가정
         await addGameVideo(gameId, base64Video, duration || 0)
         showToast('동영상이 저장되었습니다!')
@@ -605,7 +603,6 @@ function isIOSWebView() {
 function triggerPhotoCapture() {
   if (isAndroidWebView()) {
     try {
-      console.log('Calling Android native camera for photo...')
       window.AndroidApp.openCamera()
       // 콜백은 window.onGameCameraResult로 받음
     } catch (error) {
@@ -615,7 +612,6 @@ function triggerPhotoCapture() {
     }
   } else if (isIOSWebView()) {
     try {
-      console.log('Calling iOS native camera for photo...')
       window.webkit.messageHandlers.iosBridge.postMessage({
         action: 'openCamera',
         type: 'photo',
@@ -636,7 +632,6 @@ function triggerPhotoCapture() {
 function triggerVideoCapture() {
   if (isAndroidWebView()) {
     try {
-      console.log('Calling Android native camera for video...')
       window.AndroidApp.openVideoCamera()
       // 콜백은 window.onGameVideoCameraResult로 받음
     } catch (error) {
@@ -646,7 +641,6 @@ function triggerVideoCapture() {
     }
   } else if (isIOSWebView()) {
     try {
-      console.log('Calling iOS native camera for video...')
       window.webkit.messageHandlers.iosBridge.postMessage({
         action: 'openCamera',
         type: 'video',

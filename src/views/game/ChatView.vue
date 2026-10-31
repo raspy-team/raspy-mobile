@@ -293,7 +293,6 @@ const handleReject = async () => {
 
   try {
     await playWithMeTooAPI.rejectRequest(challengeStatus.value.fromUserId)
-    console.log('도전 요청 거절됨')
     challengeStatus.value.status = 'REJECTED'
   } catch (error) {
     console.error('도전 요청 거절 중 오류:', error)

@@ -10,6 +10,15 @@ import { useToast } from './composable/useToast'
 
 setRouter(router) // api.js에 router 주입
 
+// 장소 자동완성(Google Places). 키가 있을 때만 불러온다. 쓰는 쪽은 window.google이 생겼는지 확인한다
+const placesKey = import.meta.env.VUE_APP_GOOGLE_PLACES_API_KEY
+if (placesKey) {
+  const script = document.createElement('script')
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${placesKey}&libraries=places&language=ko`
+  script.async = true
+  document.head.appendChild(script)
+}
+
 // 깨진 이미지가 alt 글자로 화면에 새지 않게: 동그란 프로필 이미지는 기본 아바타로, 나머지는 자리까지 접는다
 window.addEventListener(
   'error',

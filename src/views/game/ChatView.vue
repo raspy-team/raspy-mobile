@@ -1,4 +1,5 @@
 <script setup>
+import DefaultProfile from '../../assets/default.png'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { playWithMeTooAPI } from '../../api/api'
@@ -160,7 +161,7 @@ function formatDateOnly(ts) {
   const weekDay = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()]
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${weekDay})`
 }
-const defaultProfileUrl = require('../../assets/default.png')
+const defaultProfileUrl = DefaultProfile
 
 // 헤더 표시 조건을 계산하는 computed
 const headerInfo = computed(() => {

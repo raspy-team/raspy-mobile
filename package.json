@@ -2,30 +2,24 @@
   "name": "raspy-mobile",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "serve": "vue-cli-service serve",
-  "serve:dev": "cross-env VUE_APP_ENV=dev vue-cli-service serve",
-  "serve:prod": "cross-env VUE_APP_ENV=prod vue-cli-service serve",
-  "prod": "cross-env VUE_APP_ENV=prod vue-cli-service serve",
-  "build": "cross-env VUE_APP_ENV=prod vue-cli-service build",
-  "build:dev": "cross-env VUE_APP_ENV=dev vue-cli-service build",
-  "lint": "vue-cli-service lint"
-},
+  "scripts": {
+    "serve": "vite",
+    "serve:dev": "cross-env VUE_APP_ENV=dev vite",
+    "serve:prod": "cross-env VUE_APP_ENV=prod vite",
+    "build": "cross-env VUE_APP_ENV=prod vite build",
+    "build:dev": "cross-env VUE_APP_ENV=dev vite build",
+    "preview": "vite preview --port 8081",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint --ext .js,.ts,.vue src"
+  },
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",
     "axios": "^1.9.0",
     "chart.js": "^4.5.0",
-    "core-js": "^3.8.3",
-    "sockjs-client": "^1.6.1",
     "vue": "^3.5.18",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
     "autoprefixer": "^10.4.20",
     "cross-env": "^10.0.0",
     "eslint": "^7.32.0",
@@ -33,26 +27,28 @@
     "eslint-plugin-vue": "^8.7.1",
     "postcss": "^8.4.49",
     "prettier": "^3.6.2",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.11",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.6.3",
+    "vue-tsc": "^2.1.10"
   },
   "eslintConfig": {
     "root": true,
     "env": {
-      "node": true
+      "browser": true,
+      "node": true,
+      "es2022": true
     },
     "extends": [
       "plugin:vue/vue3-essential",
       "eslint:recommended"
     ],
     "parserOptions": {
-      "parser": "@babel/eslint-parser"
+      "ecmaVersion": 2022,
+      "sourceType": "module"
     },
     "rules": {}
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ]
+  "type": "module"
 }

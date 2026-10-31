@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="ko">
 
 <head>
   <meta charset="utf-8">
@@ -8,16 +8,13 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
  <meta property="og:title" content="Match 경기에 초대되었어요!" />
  <meta property="og:description" content="클릭하여 Match 앱에서 확인해보세요." />
- <meta property="og:image" content="https://raspy-mobile-fork.vercel.app/og-image.png" />
+ <meta property="og:image" content="https://raspy-mobile.vercel.app/og-image.png" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- or black -->
-  <% if (process.env.VUE_APP_GOOGLE_PLACES_API_KEY) { %>
-  <script src="https://maps.googleapis.com/maps/api/js?key=<%= process.env.VUE_APP_GOOGLE_PLACES_API_KEY %>&libraries=places&language=ko"></script>
-  <% } %>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <link rel="icon" href="/favicon.ico">
   <title>
     Match
   </title>
@@ -111,11 +108,11 @@ a {
 
 <body>
   <noscript>
-    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
-        Please enable it to continue.</strong>
+    <strong>Match는 JavaScript가 켜져 있어야 동작해요.
+    </strong>
   </noscript>
   <div id="app" class="h-full"></div>
-  <!-- built files will be auto injected -->
+  <script type="module" src="/src/main.js"></script>
 </body>
 
 </html>

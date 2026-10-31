@@ -3,8 +3,8 @@ const PROD_API_URL = 'https://raspy-api.fly.dev'
 const DEV_API_URL = 'http://localhost:8080'
 
 export const API_BASE_URL = (
-  process.env.VUE_APP_API_URL ||
-  (process.env.VUE_APP_ENV === 'prod' ? PROD_API_URL : DEV_API_URL)
+  import.meta.env.VUE_APP_API_URL ||
+  (import.meta.env.VUE_APP_ENV === 'prod' ? PROD_API_URL : DEV_API_URL)
 ).replace(/\/$/, '')
 
 // http → ws, https → wss

@@ -1,35 +1,37 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Init from "../views/InitView.vue"
+// 첫 화면(경기 목록)만 바로 싣고, 나머지 화면은 들어갈 때 받는다
+
+const Init = () => import('../views/InitView.vue')
 import GameList from "../views/game/GameListView.vue"
-import GameChatView from "../views/game/ChatView.vue"
-import CreateGame from "../views/game/GameCreateWizard.vue"
-import SettingProfile from "../views/profile/SettingProfileView.vue"
-import GameComment from "../views/GameCommentView.vue"
-import GamePlay from "../views/game/GamePlayView.vue"
-import GameResult from "../views/game/GameResultView.vue"
-import Profile from "../views/profile/ProfileView.vue"
-import NotFoundView from "../views/NotFoundView.vue"
-import InstagramShare from "../components/InstagramShare.vue"
-import Setting from "../views/SettingView.vue"
-import Rule from "../views/RuleView.vue"
-import RuleCreate from "../views/rule/RuleCreateView.vue"
-import RuleRanking from "../views/rule/RuleRankingView.vue"
-import MyRules from "../views/rule/MyRulesView.vue"
-import RuleEdit from "../views/rule/RuleEditView.vue"
-import DmRoomList from '../views/DmRoomList.vue'
-import OauthCallback from '../views/OauthCallBack.vue'
+const GameChatView = () => import('../views/game/ChatView.vue')
+const CreateGame = () => import('../views/game/GameCreateWizard.vue')
+const SettingProfile = () => import('../views/profile/SettingProfileView.vue')
+const GameComment = () => import('../views/GameCommentView.vue')
+const GamePlay = () => import('../views/game/GamePlayView.vue')
+const GameResult = () => import('../views/game/GameResultView.vue')
+const Profile = () => import('../views/profile/ProfileView.vue')
+const NotFoundView = () => import('../views/NotFoundView.vue')
+const InstagramShare = () => import('../components/InstagramShare.vue')
+const Setting = () => import('../views/SettingView.vue')
+const Rule = () => import('../views/RuleView.vue')
+const RuleCreate = () => import('../views/rule/RuleCreateView.vue')
+const RuleRanking = () => import('../views/rule/RuleRankingView.vue')
+const MyRules = () => import('../views/rule/MyRulesView.vue')
+const RuleEdit = () => import('../views/rule/RuleEditView.vue')
+const DmRoomList = () => import('../views/DmRoomList.vue')
+const OauthCallback = () => import('../views/OauthCallBack.vue')
 
-import GroupUserLogin from "../views/auth/LoginView.vue"
-import GroupUserRegister from "../views/admin/GroupUserRegister.vue"
-import InviteView from "../views/InviteView.vue"
-import InviteDeep from "../views/InviteDeep.vue"
+const GroupUserLogin = () => import('../views/auth/LoginView.vue')
+const GroupUserRegister = () => import('../views/admin/GroupUserRegister.vue')
+const InviteView = () => import('../views/InviteView.vue')
+const InviteDeep = () => import('../views/InviteDeep.vue')
 
-import Feed from "../views/feed/FeedView.vue"
-import GameView from "../views/game/GameView.vue"
+const Feed = () => import('../views/feed/FeedView.vue')
+const GameView = () => import('../views/game/GameView.vue')
 
-import AdminDashboard from "../views/admin/AdminDashboard.vue"
-import AdminRuleEditRequests from "../views/admin/AdminRuleEditRequestsView.vue"
+const AdminDashboard = () => import('../views/admin/AdminDashboard.vue')
+const AdminRuleEditRequests = () => import('../views/admin/AdminRuleEditRequestsView.vue')
 
 const routes = [
   {

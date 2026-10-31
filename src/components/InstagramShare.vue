@@ -53,6 +53,15 @@
   </div>
 </template>
 <script setup>
+import resultCard1 from '../assets/result-cards/1.png'
+import resultCard2 from '../assets/result-cards/2.png'
+import resultCard3 from '../assets/result-cards/3.png'
+import resultCard4 from '../assets/result-cards/4.png'
+import resultCard5 from '../assets/result-cards/5.png'
+import resultCard6 from '../assets/result-cards/6.png'
+import resultCard7 from '../assets/result-cards/7.png'
+import resultCard8 from '../assets/result-cards/8.png'
+import resultCard9 from '../assets/result-cards/9.png'
 import { ref, defineEmits, defineProps, onMounted } from 'vue'
 import defaultAvatar from '../assets/default.png'
 import winnerCrown from '../assets/winner-crown.png'
@@ -60,15 +69,15 @@ import winnerCrownBlack from '../assets/winner-crown-black.png'
 import matchLogo from '../assets/Match.png'
 
 const palette = [
-  { image: require('../assets/result-cards/1.png') },
-  { image: require('../assets/result-cards/2.png') },
-  { image: require('../assets/result-cards/3.png') },
-  { image: require('../assets/result-cards/4.png') },
-  { image: require('../assets/result-cards/5.png') },
-  { image: require('../assets/result-cards/6.png') },
-  { image: require('../assets/result-cards/7.png') },
-  { image: require('../assets/result-cards/8.png') },
-  { image: require('../assets/result-cards/9.png') },
+  { image: resultCard1 },
+  { image: resultCard2 },
+  { image: resultCard3 },
+  { image: resultCard4 },
+  { image: resultCard5 },
+  { image: resultCard6 },
+  { image: resultCard7 },
+  { image: resultCard8 },
+  { image: resultCard9 },
 ]
 const selectedImage = ref(palette[0].image)
 

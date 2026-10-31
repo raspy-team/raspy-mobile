@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import api from '@/api/api.js'
 
-const FEED_MODE =(process.env.VUE_APP_FEED_MODE || 'prod').toString().toLowerCase()
+const FEED_MODE =(import.meta.env.VUE_APP_FEED_MODE || 'prod').toString().toLowerCase()
 
 
 // 테스트용 더미 데이터

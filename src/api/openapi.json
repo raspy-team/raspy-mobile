@@ -5365,6 +5365,14 @@
           "targetId": {
             "type": "integer",
             "format": "int64"
+          },
+          "setIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setStartedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -5400,6 +5408,7 @@
           "score2",
           "set1",
           "set2",
+          "setStarted",
           "user1",
           "user2"
         ],
@@ -5424,6 +5433,13 @@
             "format": "date-time"
           },
           "setStartedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "setStarted": {
+            "type": "boolean"
+          },
+          "serverNow": {
             "type": "string",
             "format": "date-time"
           },

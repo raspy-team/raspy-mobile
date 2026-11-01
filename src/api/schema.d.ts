@@ -2649,6 +2649,10 @@ export interface components {
             delta: number;
             /** Format: int64 */
             targetId: number;
+            /** Format: int32 */
+            setIndex?: number;
+            /** Format: date-time */
+            setStartedAt?: string;
         };
         UserSummary: {
             /** Format: int64 */
@@ -2667,6 +2671,9 @@ export interface components {
             totalGameStartedAt?: string;
             /** Format: date-time */
             setStartedAt?: string;
+            setStarted: boolean;
+            /** Format: date-time */
+            serverNow?: string;
             user1: components["schemas"]["UserSummary"];
             user2: components["schemas"]["UserSummary"];
             /** Format: int32 */

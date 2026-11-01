@@ -88,7 +88,7 @@
       <template v-else>
         <p class="t-title">{{ currentSet }}세트</p>
         <p class="t-caption mt-2">{{ currentScore1 || currentScore2 || currentSet > 1 ? `${user1SetsWon} : ${user2SetsWon}` : '두 사람이 준비되면 시작하세요' }}</p>
-        <UiButton block size="lg" class="mt-8 max-w-sm" @click="showStartButton ? (startSet(), (showStartButton = false)) : socket_nextSet()">
+        <UiButton block size="lg" class="mt-8 max-w-sm" @click="showStartButton ? socket_startSet() : socket_nextSet()">
           {{ currentSet }}세트 시작
         </UiButton>
         <!-- 점수판은 원하는 사람만. 끝나고 점수만 넣어도 된다 -->
@@ -177,6 +177,11 @@ const elapsedSeconds = ref(0)
 const elapsedTimeStr = ref('00:00')
 const limitTimeStr = ref('')
 const timerRef = ref(null)
+// 서버 시각 - 이 폰 시각. 세트 시작 시각(서버 기준)을 이 폰 시계로 바꿔서, 두 폰의 타이머가 같은 순간에 시작하게 한다
+let clockOffset = 0
+const toLocalMs = (serverTime) => new Date(serverTime).getTime() - clockOffset
+let countdownTimer = null
+let startedSetIndex = 0 // 이미 시작한 세트. 같은 세트의 시작 신호가 또 와도 점수를 지우지 않는다
 const logs = ref([])
 const user1 = ref(null)
 const user2 = ref(null)
@@ -203,33 +208,41 @@ const setDots = computed(() => Math.floor((game.rule?.setsToWin || 1) / 2) + 1)
 const scoreLocked = computed(() => isSetOver.value || isGameOver.value || isCountingDown.value || showStartButton.value)
 const isOvertime = computed(() => game.limitSeconds !== -1 && game.limitSeconds != null && elapsedSeconds.value >= game.limitSeconds)
 
-function startSet() {
-  currentScore1.value = 0
-  currentScore2.value = 0
+// 서버가 정한 시각(startAtMs, 이 폰 시계 기준)에 세트를 시작한다. 그때까지는 두 폰이 같은 카운트다운을 보여준다
+function startSet(setIndex, startAtMs) {
+  if (setIndex !== startedSetIndex) {
+    currentScore1.value = 0
+    currentScore2.value = 0
+    currentSet.value = setIndex
+    startedSetIndex = setIndex
+  }
   isSetOver.value = false
+  showStartButton.value = false
   showFinishModal.value = false
   winner.value = '-'
+  timeOverNotified.value = false
 
-  // 5초 카운트다운 시작
-  isCountingDown.value = true
-  countdown.value = 5
-
-  const countdownInterval = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(countdownInterval)
-      isCountingDown.value = false
-      // 카운트다운 종료 후 세트 시작
-      game.setStartedAt = new Date()
-      elapsedSeconds.value = 0
-      updateElapsed()
-      startTimer()
+  clearInterval(countdownTimer)
+  const tick = () => {
+    const left = Math.ceil((startAtMs - Date.now()) / 1000)
+    if (left > 0) {
+      isCountingDown.value = true
+      countdown.value = left
+      return
     }
-  }, 1000)
+    clearInterval(countdownTimer)
+    isCountingDown.value = false
+    game.setStartedAt = new Date(startAtMs)
+    elapsedSeconds.value = 0
+    startTimer()
+  }
+  tick()
+  if (isCountingDown.value) countdownTimer = setInterval(tick, 250)
 }
 
 function addScore(userIdx, delta) {
-  if (isSetOver.value || isGameOver.value || isCountingDown.value) return
+  // 카운트다운 중에 온 점수는 버리지 않는다. 버리면 두 폰의 점수가 달라져 한쪽만 경기가 끝난다
+  if (isSetOver.value || isGameOver.value) return
 
   if (userIdx == user1.value.id) {
     // pointsToWin이 설정되어 있으면 그 이상으로 증가 불가
@@ -344,13 +357,7 @@ function updateElapsed() {
     timeOverNotified.value = true
     // 진동
     haptic('alert')
-    // 소리 (브라우저 기본 알림음 사용, 파일이 없으면 무시)
-    try {
-      const audio = new Audio('/notification.mp3')
-      audio.play()
-    } catch (e) {
-      // 무시
-    }
+    // 소리는 넣지 않는다. 있던 /notification.mp3 파일이 없어 매번 오류만 났다 (진동으로 알린다)
   }
 }
 
@@ -363,7 +370,10 @@ function getTimeStr(seconds) {
 }
 
 function goToResult() {
-  router.push(`/games/${gameId}/result`)
+  // 이미 이 경기 점수판을 떠났으면 그대로 둔다 (내가 끝내고 넘어간 뒤 '끝' 신호가 또 올 때)
+  if (!router.currentRoute.value.path.endsWith(`/games/${gameId}/play`)) return
+  // 결과에서 뒤로 가면 끝난 점수판이 아니라 그 전 화면으로
+  router.replace(`/games/${gameId}/result`)
 }
 
 function goBack() {
@@ -395,7 +405,7 @@ function addLog(log) {
   if (log.type === 'SCORE') {
     message = `${log.targetId == user1.value.id ? user1.value.nickname : user2.value.nickname} ${log.delta}점 ${log.delta > 0 ? '득점' : '실점'} (변경자 - ${log.userSummary.nickname})`
   } else if (log.type === 'SET') {
-    message = `${log.userSummary.nickname} 세트를 증가시킴`
+    message = `${log.userSummary?.nickname || ''}님이 ${log.setIndex ? log.setIndex + '세트를 ' : '세트를 '}시작`
   } else if (log.type === 'RESET') {
     message = `${log.userSummary.nickname} 경기를 리셋함`
   } else if (log.type === 'FINISH') {
@@ -465,6 +475,8 @@ onMounted(async () => {
   // reactive에 직접 대입 (전체 덮어쓰기)
   Object.assign(game, res.data)
   game.showRuleDetail = false
+  if (res.data.serverNow) clockOffset = new Date(res.data.serverNow).getTime() - Date.now()
+  if (res.data.setStartedAt) game.setStartedAt = new Date(toLocalMs(res.data.setStartedAt))
 
   chatRoomId.value = res.data.chatRoomId
 
@@ -505,16 +517,18 @@ onMounted(async () => {
   } else {
     isSetOver.value = false
     isGameOver.value = false
-    updateElapsed()
-    // 시간 제한 없는 경우에만 자동 시작
-    if (game.limitSeconds === -1) {
+    const startAtMs = game.setStartedAt ? game.setStartedAt.getTime() : Date.now()
+    if (g.setStarted === false && game.limitSeconds !== -1) {
+      // 시간 제한이 있는 1세트는 둘이 준비되면 시작 버튼으로
+      showStartButton.value = true
+    } else if (startAtMs > Date.now()) {
+      // 카운트다운 중에 새로고침했으면 남은 카운트다운부터
+      startSet(currentSet.value, startAtMs)
+    } else {
+      // 이미 진행 중인 세트면 타이머를 이어서 (새로고침해도 시작 버튼이 다시 뜨지 않게)
+      startedSetIndex = currentSet.value
       startTimer()
     }
-  }
-
-  // 시간 제한 있는 경우 세트 시작 버튼 표시
-  if (game.limitSeconds !== -1 && !isSetOver.value) {
-    showStartButton.value = true
   }
 
   const logResponse = await api.get(`/api/games/${gameId}/game-logs`)
@@ -537,8 +551,9 @@ onMounted(async () => {
       addScore(payload.targetId, payload.delta)
       addLog(payload)
     } else if (payload.type === 'SET') {
-      // setStartedAt는 startSet() 내부의 카운트다운이 끝난 후 설정됨
-      startSet()
+      // 시작 시각은 서버가 정한다. 보낸 시각(time)으로 이 폰 시계와의 차이를 다시 맞춘다
+      if (payload.time) clockOffset = new Date(payload.time).getTime() - Date.now()
+      startSet(payload.setIndex || currentSet.value, payload.setStartedAt ? toLocalMs(payload.setStartedAt) : Date.now() + 5000)
       addLog(payload)
     } else if (payload.type === 'FINISH') {
       isGameOver.value = true
@@ -558,6 +573,10 @@ onMounted(async () => {
       } else {
         gameWinner.value = '무승부'
       }
+      // 상대가 끝냈어도 결과 화면으로 간다. 거기서 결과를 확인(또는 돌려보내기)하고 평가한다
+      // (전엔 점수판에 그대로 남아, 뒤로 가면 확인·평가 기회 없이 나가게 됐다)
+      clearInterval(timerRef.value)
+      setTimeout(goToResult, 600)
     } else if (payload.type === 'RESET') {
       router.replace({
         path: route.fullPath,
@@ -578,6 +597,15 @@ function socket_sendScore(userIndex, scoreDelta) {
     userId: userIndex === 1 ? user1.value.id : user2.value.id,
     setIndex: currentSet.value,
     scoreDelta: scoreDelta,
+  })
+}
+
+function socket_startSet() {
+  socket.sendGameEvent(chatRoomId.value, {
+    type: 'START',
+    setIndex: currentSet.value,
+    userId: 0,
+    scoreDelta: 0,
   })
 }
 
@@ -743,6 +771,7 @@ async function onVideoChange(e) {
 
 onUnmounted(() => {
   clearInterval(timerRef.value)
+  clearInterval(countdownTimer)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
 
   // 안드로이드 네이티브 카메라 콜백 정리

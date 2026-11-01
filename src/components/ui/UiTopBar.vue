@@ -9,8 +9,9 @@
       <div class="flex items-center"><slot name="right" /></div>
     </div>
   </header>
-  <!-- 고정된 바 높이만큼 내용을 밀어낸다 -->
-  <div class="h-14 pt-safe" aria-hidden="true"></div>
+  <!-- 고정된 바 높이만큼 내용을 밀어낸다. box-content: 노치 여백을 h-14 안이 아니라 위에 더한다
+       (border-box면 홈 화면 앱에서 노치 높이만큼 내용이 바 밑에 가려진다) -->
+  <div class="h-14 pt-safe box-content" aria-hidden="true"></div>
 </template>
 
 <script setup>

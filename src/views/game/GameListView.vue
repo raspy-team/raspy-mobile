@@ -70,8 +70,6 @@
           @apply="apply(game)"
           @cancel="cancelApply(game)"
           @challengers="challengersGame = game"
-          @comment="commentId = game.id"
-          @dm="router.push('/chat/' + game.ownerId)"
           @more="menuGame = game"
         />
       </div>
@@ -85,7 +83,7 @@
         v-for="c in challengersGame.challengers"
         :key="c.userId"
         :title="c.applicantNickname"
-        :subtitle="`${c.applicantGameStatisticsDTO?.ruleRating || 1500}점 · ${record(c.applicantGameStatisticsDTO)}`"
+        :subtitle="ratingLine(c.applicantGameStatisticsDTO) || '첫 경기를 앞두고 있어요'"
         chevron
         @click="router.push('/profile/' + c.userId)"
       >
@@ -98,7 +96,9 @@
   <!-- 더보기 -->
   <UiSheet :model-value="!!menuGame" @update:model-value="menuGame = null">
     <UiList>
-      <UiListItem icon="fas fa-share" title="공유하기" subtitle="링크를 복사해요" @click="share(menuGame)" />
+      <UiListItem icon="far fa-comment" title="댓글" @click="openComments(menuGame)" />
+      <UiListItem v-if="menuGame?.ownerId !== myId" icon="far fa-paper-plane" title="주최자에게 메시지" @click="router.push('/chat/' + menuGame.ownerId)" />
+      <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share(menuGame)" />
       <UiListItem v-if="menuGame?.ownerId !== myId" icon="far fa-flag" title="신고하기" danger @click="openReport(menuGame)" />
     </UiList>
   </UiSheet>
@@ -144,7 +144,7 @@ import {
 import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
-import { record } from '../../utils/format'
+import { ratingLine } from '../../utils/format'
 import { copyText } from '../../utils/clipboard'
 import { haptic } from '../../utils/haptics'
 
@@ -243,6 +243,11 @@ async function submitReport() {
     reporting.value = false
     reportGame.value = null
   }
+}
+
+function openComments(game) {
+  menuGame.value = null
+  commentId.value = game.id
 }
 
 let stopWatching = null

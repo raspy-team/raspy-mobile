@@ -1,6 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 한국어는 어절 단위로 줄을 바꾼다. 기본값은 글자 단위라 '모여/요'처럼 한 글자가 다음 줄로 떨어졌다.
+   띄어쓰기 없는 긴 글(링크·아이디)만 아무 데서나 끊는다 */
+@layer base {
+  html { word-break: keep-all; overflow-wrap: anywhere; }
+  h1, h2, h3, .t-display, .t-title, .t-heading { text-wrap: balance; }
+  p { text-wrap: pretty; }
+}
 /* 여러 화면에서 쓰는 스크롤 유틸리티 */
 @layer utilities {
   .no-scrollbar {

@@ -63,6 +63,18 @@ export function ratingText(rule) {
   return rule.ratingCount > 0 && rule.rating > 0 ? rule.rating.toFixed(1) : ''
 }
 
+// public/category-picture/에 실제로 있는 그림. 없는 이름을 부르면 깨진 그림이나 트로피가 떠서, 있는 것 중에서 고른다
+const PICTURES = new Set(['간단', '검도', '균형', '근력', '기존 스포츠', '기타', '논리·추리력', '농구', '당구', '두뇌', '라크로스', '런닝', '미식축구', '배드민턴', '복싱', '볼링', '상식', '속도', '속도·반응', '수영', '순발력', '술게임', '신체', '심리·블러핑', '심폐지구력', '아이스브레이킹', '암기력', '야구', '유도', '유연성', '전략·계획', '정확성', '즉흥 공연', '창의성', '축구', '커플 게임', '크로스핏', '클라이밍', '탁구', '태권도', '테니스', '펜싱', '표현력'])
+// 종목 이름이 제목에만 있는 규칙(예: '탁구 11점')을 위해 제목 안에서도 찾는다. 분류 이름(두뇌·신체 ...)은 빼고
+const CATEGORY_LEVEL = new Set(['기존 스포츠', '두뇌', '신체', '기타', '간단'])
+
+// 종목 그림 주소: 세부 종목 → 제목 → 큰 분류 → 기타 순서
 export function categoryImage(rule) {
-  return `/category-picture/${rule.minorCategory || '기타'}.png`
+  const exact = [rule?.minorCategory, rule?.ruleTitle, rule?.majorCategory]
+    .map((n) => n?.trim())
+    .find((n) => n && PICTURES.has(n))
+  const inTitle = !exact && rule?.ruleTitle
+    ? [...PICTURES].find((n) => !CATEGORY_LEVEL.has(n) && rule.ruleTitle.includes(n))
+    : null
+  return `/category-picture/${exact || inTitle || '기타'}.png`
 }

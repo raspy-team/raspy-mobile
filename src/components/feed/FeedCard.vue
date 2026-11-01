@@ -17,7 +17,7 @@
     <!-- 결과: 이 카드의 주인공 -->
     <button type="button" class="w-full mt-3 rounded-2xl bg-surface border border-line p-4 text-left" @click="emit('rule')">
       <span class="flex items-center gap-2 t-caption">
-        <RuleThumb :minor="post.rule?.minorCategory" :size="24" class="!rounded-md" />
+        <RuleThumb :rule="post.rule" :size="24" class="!rounded-md" />
         <span class="truncate">{{ post.rule?.ruleTitle }}</span>
         <span v-if="post.meta?.place" class="truncate text-fg-subtle">· {{ post.meta.place }}</span>
       </span>
@@ -27,7 +27,9 @@
             {{ side.name }}<i v-if="side.won" class="fas fa-crown text-primary text-xs ml-1" aria-label="승리"></i>
           </span>
         </span>
-        <span class="order-2 text-4xl font-bold tabular-nums tracking-tight text-fg">
+        <!-- 세트 점수 없이 승패만 남긴 경기는 0:0 대신 vs (승자는 왕관으로) -->
+        <span v-if="!hasScore" class="order-2 text-sm text-fg-subtle">vs</span>
+        <span v-else class="order-2 text-4xl font-bold tabular-nums tracking-tight text-fg">
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span>
           <span class="text-fg-subtle mx-1">:</span>
           <span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
@@ -106,6 +108,7 @@ const sides = computed(() => {
   ]
 })
 // 세트 점수: "1세트 11:7 · 2세트 9:11"
+const hasScore = computed(() => (props.post.result?.sets || 0) > 0)
 const setLine = computed(() => {
   const s = props.post.result?.setScores || []
   if (s.length < 2) return ''

@@ -104,7 +104,7 @@
             @click="router.push(`/rules/${r.ruleId}`)"
           >
             <template #leading>
-              <RuleThumb :minor="r.minorCategory" />
+              <RuleThumb :rule="r" />
             </template>
             <template #trailing>
               <UiBadge v-if="r.myRank" :tone="r.myRank === 1 ? 'primary' : 'neutral'">{{ r.myRank }}위 / {{ r.totalPlayers }}명</UiBadge>
@@ -144,7 +144,7 @@
               </span>
             </template>
             <template #trailing>
-              <span class="t-heading tabular-nums">{{ g.myScore }}:{{ g.opponentScore }}</span>
+              <span v-if="g.myScore || g.opponentScore" class="t-heading tabular-nums">{{ g.myScore }}:{{ g.opponentScore }}</span>
             </template>
           </UiListItem>
         </UiList>

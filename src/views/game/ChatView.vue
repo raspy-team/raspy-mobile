@@ -1,4 +1,5 @@
 <script setup>
+import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { UiAvatar, UiBadge, UiButton, UiDialog, UiEmptyState, UiIconButton, UiSkeleton } from '../../components/ui'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { refreshInbox } from '../../stores/inbox'
@@ -351,11 +352,7 @@ const closeErrorModal = () => {
       <!-- 도전 상태 -->
       <div v-if="headerInfo.show" class="px-3 py-2 border-b border-line">
         <div class="flex items-start gap-3">
-          <img
-            class="w-11 h-11 rounded-lg object-cover bg-surface-2 flex-shrink-0"
-            :src="`/category-picture/${challengeStatus?.minorCategory || '미분류'}.png`"
-            alt=""
-          />
+          <RuleThumb :rule="{ minorCategory: challengeStatus?.minorCategory, ruleTitle: challengeStatus?.ruleTitle }" :size="44" class="!rounded-lg" />
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
               <p class="t-body font-medium text-fg truncate">{{ challengeStatus?.ruleTitle || '경기' }}</p>

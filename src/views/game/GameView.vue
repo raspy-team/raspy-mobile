@@ -55,7 +55,7 @@
         v-for="a in applicantsGame.applicants"
         :key="a.userId"
         :title="a.applicantNickname"
-        :subtitle="`${a.applicantGameStatisticsDTO?.ruleRating || 1500}점 · ${record(a.applicantGameStatisticsDTO)}`"
+        :subtitle="ratingLine(a.applicantGameStatisticsDTO) || '첫 경기를 앞두고 있어요'"
         plain
       >
         <template #leading>
@@ -161,7 +161,7 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { copyText } from '../../utils/clipboard'
-import { record } from '../../utils/format'
+import { ratingLine } from '../../utils/format'
 
 const router = useRouter()
 const { showToast } = useToast()

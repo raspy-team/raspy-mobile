@@ -39,6 +39,12 @@ export function place(value) {
 }
 
 /** 전적: '3승 1무 2패' (모두 0이면 '첫 경기 전') */
+// 레이팅과 전적 한 줄. 아직 안 해 본 사람은 빈 문자열 (기본값 '1500점 · 첫 경기 전'은 정보가 아니다)
+export function ratingLine(stats) {
+  const played = (stats?.wins || 0) + (stats?.draws || 0) + (stats?.losses || 0)
+  return played ? `${stats.ruleRating || 1500}점 · ${record(stats)}` : ''
+}
+
 export function record(stats) {
   const w = stats?.wins || 0
   const d = stats?.draws || 0

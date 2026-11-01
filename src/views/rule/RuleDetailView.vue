@@ -8,7 +8,7 @@
     </UiTopBar>
 
     <main v-if="loading" class="max-w-2xl mx-auto px-4 pt-2 space-y-4">
-      <UiSkeleton class="h-44 w-full rounded-2xl" />
+      <UiSkeleton class="h-16 w-16 rounded-xl" />
       <UiSkeleton class="h-7 w-2/3" />
       <UiSkeleton class="h-4 w-1/3" />
       <UiSkeleton class="h-20 w-full" />
@@ -21,18 +21,17 @@
     </main>
 
     <main v-else class="max-w-2xl mx-auto px-4 pt-2 pb-32">
-      <!-- 대표 그림 -->
-      <div class="h-44 rounded-2xl bg-surface-2 flex items-center justify-center">
-        <img v-if="!imageFailed" :src="categoryImage(rule)" alt="" data-fallback="1" class="w-24 h-24" @error="imageFailed = true" />
-        <i v-else class="fas fa-trophy text-5xl text-fg-subtle" aria-hidden="true"></i>
+      <!-- 그림 · 이름 (대표 사진이 없어 큰 빈 상자 대신 한 줄로) -->
+      <div class="flex items-center gap-4 mt-2">
+        <RuleThumb :rule="rule" :size="64" />
+        <div class="min-w-0">
+          <h1 class="t-title">{{ rule.ruleTitle }}</h1>
+          <p class="t-caption mt-1">{{ [rule.majorCategory, rule.minorCategory].filter(Boolean).join(' · ') }}</p>
+        </div>
       </div>
 
-      <!-- 이름 -->
-      <h1 class="t-title mt-6">{{ rule.ruleTitle }}</h1>
-      <p class="t-caption mt-1">{{ [rule.majorCategory, rule.minorCategory].filter(Boolean).join(' · ') }}</p>
-
-      <!-- 숫자 세 칸 -->
-      <div class="mt-6 grid grid-cols-3 border border-line rounded-xl divide-x divide-line text-center">
+      <!-- 숫자 세 칸. 아직 아무도 안 해 본 규칙이면 '– 0 –'만 남아 빼고, 아래 챔피언 줄이 첫 경기를 안내한다 -->
+      <div v-if="rule.playCount || rating" class="mt-6 grid grid-cols-3 border border-line rounded-xl divide-x divide-line text-center">
         <div class="py-3">
           <p class="t-heading">
             <template v-if="rating"><i class="fas fa-star text-sm" aria-hidden="true"></i> {{ rating }}</template>
@@ -150,7 +149,8 @@ import {
 import { useToast } from '../../composable/useToast'
 import { copyText } from '../../utils/clipboard'
 import { timeAgo } from '../../utils/format'
-import { categoryImage, ratingText, winSummary } from '../../utils/rule'
+import { ratingText, winSummary } from '../../utils/rule'
+import RuleThumb from '../../components/rule/RuleThumb.vue'
 
 const REPORT_REASONS = ['욕설·비방', '위험한 규칙', '광고·스팸', '기타']
 
@@ -160,7 +160,6 @@ const { showToast } = useToast()
 
 const rule = ref(null)
 const loading = ref(true)
-const imageFailed = ref(false)
 const myId = ref(null)
 const top = ref([])
 const myRank = ref(null)

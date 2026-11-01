@@ -1,8 +1,9 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="규칙" back="/">
+    <!-- 경기 만들기에서 왔으면 지금 무엇을 하는 중인지 제목으로 말한다 -->
+    <UiTopBar :title="picking ? '어떤 규칙으로 할까요?' : '규칙'" back="/">
       <template #right>
-        <UiIconButton icon="far fa-folder" label="내 규칙" @click="router.push('/rules/my-rules')" />
+        <UiButton v-if="!picking" variant="ghost" size="sm" to="/rules/my-rules">내 규칙</UiButton>
         <UiIconButton icon="fas fa-plus" label="규칙 만들기" @click="router.push('/rules/create')" />
       </template>
     </UiTopBar>
@@ -119,6 +120,7 @@ const SORTS = [
 
 const route = useRoute()
 const router = useRouter()
+const picking = computed(() => !!route.query.fromGameCreate)
 
 const majors = ref([])
 const minors = ref([])

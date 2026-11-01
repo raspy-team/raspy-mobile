@@ -1,24 +1,17 @@
 <template>
   <UiCard :pad="false">
     <!-- 무엇을 · 어디서 언제 -->
-    <button type="button" class="w-full flex items-start gap-3 p-4 pb-3 text-left" @click="emit('rule')">
-      <img
-        v-if="!imageFailed"
-        :src="categoryImage"
-        alt=""
-        data-fallback="1"
-        class="w-10 h-10 rounded-lg bg-surface-2 p-1.5 flex-shrink-0"
-        @error="imageFailed = true"
-      />
-      <span v-else class="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-        <i class="fas fa-trophy text-fg-subtle"></i>
-      </span>
-      <span class="flex-1 min-w-0">
-        <span class="block t-heading truncate">{{ game.rule?.ruleTitle }}</span>
-        <span class="block t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</span>
-      </span>
-      <span class="t-micro flex-shrink-0 mt-1">{{ timeAgo(game.createdAt) }}</span>
-    </button>
+    <div class="flex items-start gap-3 p-4 pb-3">
+      <button type="button" class="flex-1 min-w-0 flex items-start gap-3 text-left" @click="emit('rule')">
+        <RuleThumb :rule="game.rule" :size="40" class="!rounded-lg" />
+        <span class="flex-1 min-w-0">
+          <span class="block t-heading truncate">{{ game.rule?.ruleTitle }}</span>
+          <span class="block t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</span>
+        </span>
+      </button>
+      <!-- 댓글·메시지·공유·신고는 여기로 (카드마다 아이콘 줄을 두지 않는다) -->
+      <UiIconButton icon="fas fa-ellipsis" label="더보기" class="-mt-2 -mr-2" @click="emit('more')" />
+    </div>
 
     <!-- 누구와 · 신청 -->
     <div class="flex items-center gap-3 px-4 pb-4">
@@ -26,40 +19,37 @@
         <UiAvatar :src="game.ownerProfileUrl" :name="game.ownerNickname" size="sm" />
         <span class="min-w-0">
           <span class="block text-sm text-fg truncate">{{ game.ownerNickname }}</span>
-          <span class="block t-micro truncate">
-            {{ game.ruleStatisticsOfOwner?.ruleRating || 1500 }}점 · {{ record(game.ruleStatisticsOfOwner) }}
-          </span>
+          <!-- 아직 안 해 본 사람의 '1500점 · 첫 경기 전'은 정보가 아니라 소음이라 뺀다 -->
+          <span class="block t-micro truncate">{{ ownerLine }}</span>
         </span>
+      </button>
+      <button v-if="applicants" type="button" class="t-micro underline underline-offset-2 flex-shrink-0" @click="emit('challengers')">
+        {{ applicants }}명 신청
       </button>
       <UiBadge v-if="isMine">내 경기</UiBadge>
       <UiButton v-else-if="game.isAppliedByMe" size="sm" variant="secondary" :loading="busy" @click="emit('cancel')">신청 취소</UiButton>
       <UiButton v-else size="sm" variant="tonal" :loading="busy" @click="emit('apply')">신청</UiButton>
-    </div>
-
-    <!-- 보조 행동 -->
-    <div class="flex items-center gap-1 px-2 h-12 border-t border-line">
-      <UiButton size="sm" variant="ghost" @click="emit('challengers')">신청자 {{ game.challengers?.length || 0 }}명</UiButton>
-      <div class="flex-1"></div>
-      <UiIconButton icon="far fa-comment" label="댓글" @click="emit('comment')" />
-      <UiIconButton v-if="!isMine" icon="far fa-paper-plane" label="주최자에게 메시지" @click="emit('dm')" />
-      <UiIconButton icon="fas fa-ellipsis" label="더보기" @click="emit('more')" />
     </div>
   </UiCard>
 </template>
 
 <script setup>
 // 홈의 열린 경기 카드: 무엇을(규칙) → 어디서·언제 → 누구와 → 신청
-import { ref, computed, defineProps, defineEmits } from 'vue'
+import RuleThumb from '../rule/RuleThumb.vue'
+import { computed, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
-import { matchTime, place, record, timeAgo } from '../../utils/format'
+import { matchTime, place, ratingLine, timeAgo } from '../../utils/format'
 
 const props = defineProps({
   game: { type: Object, required: true },
   isMine: { type: Boolean, default: false },
   busy: { type: Boolean, default: false },
 })
-const emit = defineEmits(['rule', 'profile', 'apply', 'cancel', 'challengers', 'comment', 'dm', 'more'])
-// 카테고리 그림이 없으면 같은 자리에 기본 아이콘 (제목 줄이 카드마다 어긋나지 않게)
-const imageFailed = ref(false)
-const categoryImage = computed(() => `/category-picture/${props.game.rule?.minorCategory || '기타'}.png`)
+const emit = defineEmits(['rule', 'profile', 'apply', 'cancel', 'challengers', 'more'])
+
+const applicants = computed(() => props.game.challengers?.length || 0)
+// 올린 지 얼마나 됐는지는 경기 시간보다 덜 중요해서 위 줄이 아니라 여기에
+const ownerLine = computed(() =>
+  [ratingLine(props.game.ruleStatisticsOfOwner), props.game.createdAt && `${timeAgo(props.game.createdAt)} 올림`].filter(Boolean).join(' · '),
+)
 </script>

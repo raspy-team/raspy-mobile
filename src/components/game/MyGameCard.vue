@@ -1,17 +1,7 @@
 <template>
   <UiCard :pad="false">
     <div class="flex items-start gap-3 p-4 pb-3">
-      <img
-        v-if="!imageFailed"
-        :src="`/category-picture/${game.rule?.minorCategory || '기타'}.png`"
-        alt=""
-        data-fallback="1"
-        class="w-10 h-10 rounded-lg bg-surface-2 p-1.5 flex-shrink-0"
-        @error="imageFailed = true"
-      />
-      <span v-else class="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-        <i class="fas fa-trophy text-fg-subtle"></i>
-      </span>
+      <RuleThumb :rule="game.rule" :size="40" class="!rounded-lg" />
       <div class="flex-1 min-w-0">
         <p class="t-heading truncate">{{ game.rule?.ruleTitle }}</p>
         <p class="t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</p>
@@ -52,7 +42,8 @@
 
 <script setup>
 // 내 경기 카드. 상태에 따라 배지 하나와 '지금 할 일' 버튼 하나만 보여준다
-import { ref, computed, defineProps, defineEmits } from 'vue'
+import RuleThumb from '../rule/RuleThumb.vue'
+import { computed, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
 import { matchTime, place } from '../../utils/format'
 
@@ -61,7 +52,6 @@ const props = defineProps({
   me: { type: Object, default: () => ({ name: '나' }) }, // { id, name, avatar }
 })
 const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more'])
-const imageFailed = ref(false)
 
 const isMine = computed(() => props.game.type === 'my-game')
 const approved = computed(() => (props.game.applicants || []).find((a) => a.approved))

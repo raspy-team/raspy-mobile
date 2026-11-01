@@ -18,6 +18,7 @@
         <UiList>
           <UiListItem icon="far fa-bell" title="알림 설정" subtitle="경기·도전·친구·댓글·좋아요·메시지" chevron @click="router.push('/settings/notifications')" />
           <UiListItem icon="fas fa-ban" title="차단한 사람" chevron @click="openBlocked" />
+          <UiListItem v-if="!installed" icon="download" title="홈 화면에 추가" subtitle="앱처럼 아이콘을 눌러 바로 열어요" chevron @click="addToHome" />
           <UiListItem icon="sun-moon" title="화면" :subtitle="THEME_OPTIONS.find((o) => o.value === theme).label" chevron @click="themeOpen = true" />
         </UiList>
       </UiSection>
@@ -42,6 +43,17 @@
         <p class="text-center t-micro pt-2">Match {{ version }}</p>
       </div>
     </main>
+
+    <!-- 홈 화면에 추가 (설치 창을 띄울 수 없는 브라우저: 아이폰 사파리 등) -->
+    <UiSheet v-model="installOpen" title="홈 화면에 추가">
+      <ol class="bg-surface-2 rounded-xl divide-y divide-line">
+        <li v-for="(step, i) in installSteps" :key="i" class="flex items-baseline gap-4 px-4 py-3.5">
+          <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
+          <span class="t-body">{{ step }}</span>
+        </li>
+      </ol>
+      <p class="t-caption mt-3">추가하면 홈 화면의 매치 얼굴 아이콘으로 바로 열려요.</p>
+    </UiSheet>
 
     <!-- 화면 모드 -->
     <UiSheet v-model="themeOpen" title="화면">
@@ -83,6 +95,7 @@ import {
 } from '../components/ui'
 import { TERMS } from '../content/legal'
 import { theme, setTheme, THEME_OPTIONS } from '../utils/theme'
+import { isIOS, isStandalone, promptInstall } from '../utils/install'
 import { confirmDialog } from '../composables/useConfirm'
 import { useToast } from '../composable/useToast'
 import { stopInbox } from '../stores/inbox'
@@ -97,6 +110,14 @@ const version = pkg.version
 const me = ref({})
 const openTerm = ref(null)
 const themeOpen = ref(false)
+const installed = isStandalone()
+const installOpen = ref(false)
+const installSteps = isIOS()
+  ? ['Safari 아래쪽 가운데의 공유 버튼(네모에 위 화살표)을 눌러요', "목록에서 '홈 화면에 추가'를 눌러요", "오른쪽 위 '추가'를 눌러요"]
+  : ['브라우저 오른쪽 위의 메뉴(점 세 개)를 눌러요', "'홈 화면에 추가' 또는 '앱 설치'를 눌러요", "'추가'를 눌러요"]
+async function addToHome() {
+  if (!(await promptInstall())) installOpen.value = true
+}
 const blockedOpen = ref(false)
 const blockedLoading = ref(false)
 const blocked = ref([])

@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
 import UiIcon from './components/ui/UiIcon.vue'
+// 설치 창 신호(beforeinstallprompt)는 앱이 뜨자마자 오므로 처음부터 듣는다
+import './utils/install'
 import App from './App.vue'
 import './assets/tailwind.css'
 import router from './router/router.js'

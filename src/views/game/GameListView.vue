@@ -132,6 +132,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
+import { getMyId } from '@/utils/me'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
@@ -246,7 +247,7 @@ async function submitReport() {
 
 let stopWatching = null
 onMounted(async () => {
-  myId.value = (await api.get('/api/auth/current-user-id').catch(() => ({ data: null }))).data
+  myId.value = await getMyId().catch(() => null)
   fetchGames()
   // 신청·승인 같은 변화가 생기면 다시 불러온다
   stopWatching = refreshOnChange(fetchGames)

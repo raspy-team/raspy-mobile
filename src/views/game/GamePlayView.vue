@@ -138,6 +138,7 @@ import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { haptic } from '../../utils/haptics'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
+import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
 import MatchModal from '../../components/MatchModal.vue'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
@@ -464,8 +465,7 @@ onMounted(async () => {
     window.onGameVideoCameraResult = handleVideoCameraResult
   }
 
-  const userRes = await api.get('/api/auth/current-user-id')
-  const currentUserId = userRes.data
+  const currentUserId = await getMyId()
 
   const res = await api.get(`/api/games/${gameId}/detail`)
   if (res.data.gameStatus != 'IN_PROGRESS') {

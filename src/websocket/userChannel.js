@@ -2,7 +2,7 @@
 // 서버가 "바뀜" 신호(type, gameId)를 보내면 구독한 화면이 필요한 것만 다시 불러온다. 몇 초마다 묻는 폴링을 대신한다.
 import { Client } from '@stomp/stompjs'
 import { WS_URL } from '@/config/server'
-import api from '@/api/api'
+import { getMyId } from '@/utils/me'
 
 let client = null
 const listeners = new Set()
@@ -13,7 +13,7 @@ export async function openUserChannel() {
   if (!token) return
   let myId
   try {
-    myId = (await api.get('/api/auth/current-user-id')).data
+    myId = await getMyId()
   } catch {
     return
   }

@@ -5,6 +5,7 @@ import { refreshInbox } from '../../stores/inbox'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { playWithMeTooAPI } from '../../api/api'
+import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
 import { useToast } from '../../composable/useToast'
 
@@ -93,8 +94,7 @@ onMounted(async () => {
 
     socket.connect(roomId.value)
 
-    const res1 = await api.get('/api/auth/current-user-id')
-    currentUserId.value = res1.data
+    currentUserId.value = await getMyId()
 
     targetUserNickname.value = data.targetUserNickname
     targetUserProfileUrl.value = data.targetUserProfileUrl

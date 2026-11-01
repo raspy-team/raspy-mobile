@@ -142,6 +142,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
+import { getMyId } from '@/utils/me'
 import RuleBody from '../../components/rule/RuleBody.vue'
 import {
   UiAvatar, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiSheet, UiSkeleton, UiTopBar,
@@ -217,11 +218,11 @@ onMounted(async () => {
   const id = route.params.ruleId
   const [ruleRes, meRes, rankRes] = await Promise.allSettled([
     api.get(`/api/rules/${id}`),
-    api.get('/api/auth/current-user-id'),
+    getMyId(),
     api.get(`/api/rules/${id}/rankings`),
   ])
   if (ruleRes.status === 'fulfilled') rule.value = ruleRes.value.data
-  if (meRes.status === 'fulfilled') myId.value = meRes.value.data
+  if (meRes.status === 'fulfilled') myId.value = meRes.value
   if (rankRes.status === 'fulfilled') {
     top.value = (rankRes.value.data.rankings || []).slice(0, 3)
     myRank.value = rankRes.value.data.currentUserRanking?.rank || null

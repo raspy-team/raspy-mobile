@@ -254,6 +254,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { haptic } from '../../utils/haptics'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
+import { getMyId } from '@/utils/me'
 import { POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { matchTime } from '../../utils/format'
@@ -445,8 +446,7 @@ const reviewRows = computed(() => [
 
 async function load() {
   try {
-    const myIdRes = await api.get('/api/auth/current-user-id')
-    currentUserId.value = myIdRes.data
+    currentUserId.value = await getMyId()
 
     const res = await api.get(`/api/games/${gameId}/result`)
     confirmed.value = res.data.confirmed !== false

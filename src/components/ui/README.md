@@ -49,6 +49,8 @@
 | `UiSection` | 화면 안의 묶음 (제목 + 오른쪽 행동) |
 | `UiChip` / `UiBadge` / `UiTabs` | 고르기 / 상태 / 보기 바꾸기 |
 | `UiAvatar` | 프로필 사진. 없으면 이름마다 정해지는 차분한 그라데이션 + 첫 글자 |
+| `BrandFace` / `BrandMark` | 매치 얼굴(셔틀콕 머리·축구공 눈·농구공 솔기·볼트 입) / 얼굴 + `match` 글자. 표정 `mood`: smile·neutral·wow. 당겨서 새로고침, 404, 이긴 순간, 빈 화면(`UiEmptyState face`)에 쓴다 |
+| `UiRollNumber` | 결과 점수·승률처럼 '나온 순간'이 중요한 숫자. 점수판처럼 굴러 올라온다 |
 | `UiIcon` | 모든 아이콘. `name="plus"` (예전 `fas fa-plus`도 받는다), 켜진 하트·별은 `filled` |
 | `UiEmptyState` | 비었을 때: 무엇이 없는지 + 다음 행동 |
 | `UiSkeleton` / `UiListSkeleton` | 불러오는 동안 실제 모양 그대로 자리 표시 (빛이 지나간다) |

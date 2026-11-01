@@ -1,33 +1,28 @@
 <template>
-  <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="flex flex-col items-center justify-between  bg-gray-800 p-6 text-center">
-    <UiIcon name="fas fa-arrow-left" class="self-start text-xl text-gray-400 mb-4" @click="goBack" />
-
-
-    <div>
-    <h1 class=" text-4xl font-bold text-gray-100 mb-2">Oops!<br> <span class="text-2xl font-bold">페이지를 찾을 수 없어요</span></h1>
-    <p class="mt-12 text-gray-500 mb-6 px-4">
-      죄송해요, 요청하신 페이지가 없거나 이동되었어요.
-      홈으로 다시 가볼까요?
-    </p>
-</div>
-    <div class="w-full">
-      <button
-        @click="goHome"
-        class="w-full justify-center flex items-center bg-primary text-primary-on px-5 py-3 rounded-lg shadow hover:bg-primary-press transition"
-      >
-        <UiIcon name="fas fa-home" class="mr-2" /> 홈으로
-      </button>
-    </div>
+  <div class="min-h-dvh bg-canvas flex flex-col pt-safe pb-safe">
+    <UiTopBar back />
+    <main class="flex-1 w-full max-w-md mx-auto px-6 flex flex-col">
+      <div class="flex-1 flex flex-col justify-center">
+        <span class="text-fg face-wobble inline-block w-fit"><BrandFace :size="72" mood="wow" /></span>
+        <p class="t-mono mt-8">404</p>
+        <h1 class="t-display mt-2">이 페이지는<br />없어요</h1>
+        <p class="t-body text-fg-muted mt-4">주소가 바뀌었거나 지워졌어요.</p>
+      </div>
+      <div class="pb-6">
+        <UiButton block size="lg" to="/">경기 보러 가기</UiButton>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-const router = useRouter()
-
-const goBack = () => history.back()
-const goHome = () => router.push('/')
+// 없는 주소. 매치 얼굴이 놀란 표정으로 살짝 흔들린다
+import BrandFace from '../components/BrandFace.vue'
+import { UiButton, UiTopBar } from '../components/ui'
 </script>
 
-<style scoped>
+<style>
+.face-wobble { animation: face-wobble 1.6s ease-in-out 0.2s 2 both; transform-origin: 50% 90%; }
+@keyframes face-wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+@media (prefers-reduced-motion: reduce) { .face-wobble { animation: none; } }
 </style>

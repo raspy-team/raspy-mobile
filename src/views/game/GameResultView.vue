@@ -19,6 +19,8 @@
     <template v-else>
       <!-- 결과 한 줄 + 점수판: 이 앱에서 감정이 가장 실리는 순간이라 글자와 숫자로 크게 -->
       <section>
+        <!-- 이긴 순간: 매치 얼굴이 통통 튀어 오른다 -->
+        <span v-if="headline.mark && isParticipant" class="block w-fit mx-auto mb-4 text-fg win-bounce"><BrandFace :size="48" /></span>
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<span v-if="playedOn" class="t-mono ml-2">{{ playedOn }}</span></p>
         <h1 class="t-display text-center mt-3" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
 
@@ -269,6 +271,7 @@ import { getMyId } from '@/utils/me'
 import { POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { matchTime } from '../../utils/format'
+import BrandFace from '../../components/BrandFace.vue'
 import {
   UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'
@@ -790,3 +793,13 @@ async function onShare() {
   }
 }
 </script>
+
+<style>
+.win-bounce { animation: win-bounce 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both; }
+@keyframes win-bounce {
+  0% { transform: translateY(16px) scale(0.6); opacity: 0; }
+  60% { transform: translateY(-6px) scale(1.08); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .win-bounce { animation: none; } }
+</style>

@@ -12,6 +12,7 @@ import { UiSpinner } from '../components/ui'
 import { useRoute, useRouter } from 'vue-router'
 import { takeReturnTo } from '../utils/authRedirect'
 import { registerFcmToken } from '../utils/nativeBridge'
+import { trackVisit } from '../utils/visit'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,6 +22,7 @@ onMounted(() => {
   const token = localStorage.getItem('raspy_access_token2')
   if (!token) return router.replace('/init')
   registerFcmToken(token)
+  trackVisit() // 로그인 전에 남긴 방문에 이 사람을 붙인다
   router.replace(takeReturnTo() || '/')
 })
 </script>

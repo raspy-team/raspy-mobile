@@ -2,6 +2,8 @@ import { createApp } from 'vue'
 import UiIcon from './components/ui/UiIcon.vue'
 // 설치 창 신호(beforeinstallprompt)는 앱이 뜨자마자 오므로 처음부터 듣는다
 import './utils/install'
+// 유입 측정: 첫 화면 주소(utm 꼬리표)를 라우터가 바꾸기 전에 잡는다
+import { trackVisit } from './utils/visit'
 import App from './App.vue'
 import './assets/tailwind.css'
 import router from './router/router.js'
@@ -62,3 +64,5 @@ app
   .use(router) 
   .directive('autocomplete', autocomplete)
   .mount('#app')
+
+trackVisit()

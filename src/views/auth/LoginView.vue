@@ -54,6 +54,7 @@ import api from '../../api/api'
 import { UiButton, UiInput, UiTopBar } from '../../components/ui'
 import { takeReturnTo } from '../../utils/authRedirect'
 import { registerFcmToken } from '../../utils/nativeBridge'
+import { trackVisit } from '../../utils/visit'
 
 const router = useRouter()
 const route = useRoute()
@@ -108,6 +109,7 @@ async function submit() {
     }
     localStorage.setItem('raspy_access_token2', token)
     registerFcmToken(token)
+    trackVisit() // 로그인 전에 남긴 방문에 이 사람을 붙인다
     // 약관·첫 설정이 남았으면 라우터 가드가 /welcome으로 보낸다
     router.replace(takeReturnTo() || '/')
   } finally {

@@ -56,6 +56,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/track/visit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 방문 기록
+         * @description 앱이 뜰 때 하루 한 번, 로그인 직후 한 번 부른다. 로그인 없이도 부를 수 있고, 토큰이 있으면 그 사람을 붙인다
+         */
+        post: operations["visit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules": {
         parameters: {
             query?: never;
@@ -2092,6 +2112,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/acquisition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 채널별 유입 (관리자)
+         * @description 최근 days일 동안 처음 온 사람을 채널별로 센다. 로봇·봇 계정·기존 사용자는 뺀다
+         */
+        get: operations["report_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/leave": {
         parameters: {
             query?: never;
@@ -2176,6 +2216,15 @@ export interface components {
             enabled: boolean;
         };
         Unit: Record<string, never>;
+        VisitInput: {
+            visitorId: string;
+            source?: string;
+            medium?: string;
+            campaign?: string;
+            referrer?: string;
+            landingPath?: string;
+            standalone: boolean;
+        };
         RuleDto: {
             ruleGoal: string;
             ruleScoreDefinition: string;
@@ -3105,6 +3154,29 @@ export interface components {
             /** Format: int32 */
             sameTargetCount: number;
         };
+        ChannelRow: {
+            channel: string;
+            /** Format: int32 */
+            visitors: number;
+            /** Format: int32 */
+            signups: number;
+            /** Format: int32 */
+            played: number;
+            /** Format: int32 */
+            returned: number;
+            /** Format: int32 */
+            homescreen: number;
+        };
+        Report: {
+            /** Format: date */
+            since: string;
+            rows: components["schemas"]["ChannelRow"][];
+            total: components["schemas"]["ChannelRow"];
+            /** Format: int32 */
+            existingUsers: number;
+            /** Format: int32 */
+            botVisits: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -3177,6 +3249,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    visit: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VisitInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
             };
         };
     };
@@ -5743,6 +5841,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminReportResponse"][];
+                };
+            };
+        };
+    };
+    report_1: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Report"];
                 };
             };
         };

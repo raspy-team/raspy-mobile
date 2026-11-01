@@ -45,6 +45,36 @@
         </ul>
       </UiSection>
 
+      <!-- 유입: 홍보 채널별로 와서 → 가입 → 경기 → 다시 왔는지. 로봇·봇 계정·기존 사용자는 뺀다 -->
+      <UiSection title="유입">
+        <UiTabs v-model="acqDays" :options="acqTabs" class="mb-3" />
+        <UiListSkeleton v-if="!acq" :rows="3" />
+        <UiCard v-else-if="!acq.rows.length">
+          <UiEmptyState icon="fas fa-chart-simple" title="아직 들어온 사람이 없어요" description="홍보 링크에 ?utm_source=instagram 처럼 꼬리표를 달면 채널별로 나눠 셀 수 있어요" />
+        </UiCard>
+        <UiCard v-else class="!p-0 overflow-x-auto">
+          <table class="w-full text-sm tabular-nums">
+            <thead>
+              <tr class="t-micro text-left">
+                <th class="font-normal py-2.5 pl-4 pr-2">채널</th>
+                <th v-for="c in ACQ_COLS" :key="c.key" class="font-normal py-2.5 px-2 text-right last:pr-4">{{ c.label }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in [...acq.rows, acq.total]" :key="row.channel" class="border-t border-line" :class="row === acq.total ? 'font-semibold' : ''">
+                <td class="py-2.5 pl-4 pr-2 max-w-[8rem] truncate">{{ row.channel }}</td>
+                <td v-for="c in ACQ_COLS" :key="c.key" class="py-2.5 px-2 text-right last:pr-4 whitespace-nowrap">
+                  {{ row[c.key] }}<span v-if="c.key !== 'visitors' && row.visitors" class="t-micro ml-1">{{ pct(row[c.key], row.visitors) }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </UiCard>
+        <p v-if="acq" class="t-micro mt-2">
+          {{ acq.since }}부터 처음 온 사람 · 기존 사용자 {{ acq.existingUsers }}명, 로봇 방문 {{ acq.botVisits }}번은 뺐어요
+        </p>
+      </UiSection>
+
       <!-- 규칙 수정 요청 -->
       <UiSection title="규칙 수정 요청">
         <template #action>
@@ -105,8 +135,8 @@
 </template>
 
 <script setup>
-// 관리자: 신고 처리 → 규칙 수정 요청 → 도구. 권한이 없으면 서버가 403을 주고 홈으로 보낸다
-import { ref, computed, onMounted } from 'vue'
+// 관리자: 신고 처리 → 유입 → 규칙 수정 요청 → 도구. 권한이 없으면 서버가 403을 주고 홈으로 보낸다
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
 import { GET, POST } from '../../api/client'
@@ -139,6 +169,33 @@ const ruleStats = ref([
   { status: 'REJECTED', label: '거절', count: 0 },
 ])
 const recentRequests = ref([])
+
+const ACQ_COLS = [
+  { key: 'visitors', label: '방문' },
+  { key: 'signups', label: '가입' },
+  { key: 'played', label: '경기' },
+  { key: 'returned', label: '재방문' },
+  { key: 'homescreen', label: '홈 화면' },
+]
+const acqTabs = [
+  { value: 7, label: '7일' },
+  { value: 30, label: '30일' },
+  { value: 90, label: '90일' },
+]
+const acqDays = ref(30)
+const acq = ref(null)
+const pct = (n, total) => `${Math.round((n / total) * 100)}%`
+
+async function loadAcquisition() {
+  acq.value = null
+  try {
+    acq.value = (await GET('/api/admin/acquisition', { query: { days: acqDays.value } })).data
+  } catch {
+    showToast('유입을 불러오지 못했어요')
+  }
+}
+
+watch(acqDays, loadAcquisition)
 
 const showUsers = ref(false)
 const loadingUsers = ref(false)
@@ -193,5 +250,8 @@ async function openUsers() {
   }
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  loadAcquisition()
+})
 </script>

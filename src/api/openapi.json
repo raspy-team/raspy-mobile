@@ -14,6 +14,10 @@
       "description": "신고 관련 API"
     },
     {
+      "name": "유입 측정",
+      "description": "채널별 유입 → 가입 → 첫 경기 → 재방문"
+    },
+    {
       "name": "일일 접속 추적",
       "description": "유저의 일일 첫 접속을 추적하고 알림을 전송하는 API"
     },
@@ -114,6 +118,48 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/track/visit": {
+      "post": {
+        "tags": [
+          "유입 측정"
+        ],
+        "summary": "방문 기록",
+        "description": "앱이 뜰 때 하루 한 번, 로그인 직후 한 번 부른다. 로그인 없이도 부를 수 있고, 토큰이 있으면 그 사람을 붙인다",
+        "operationId": "visit",
+        "parameters": [
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VisitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
           }
         }
       }
@@ -3707,6 +3753,40 @@
         }
       }
     },
+    "/api/admin/acquisition": {
+      "get": {
+        "tags": [
+          "유입 측정"
+        ],
+        "summary": "채널별 유입 (관리자)",
+        "description": "최근 days일 동안 처음 온 사람을 채널별로 센다. 로봇·봇 계정·기존 사용자는 뺀다",
+        "operationId": "report_1",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/leave": {
       "delete": {
         "tags": [
@@ -3839,6 +3919,36 @@
       },
       "Unit": {
         "type": "object"
+      },
+      "VisitInput": {
+        "required": [
+          "standalone",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "medium": {
+            "type": "string"
+          },
+          "campaign": {
+            "type": "string"
+          },
+          "referrer": {
+            "type": "string"
+          },
+          "landingPath": {
+            "type": "string"
+          },
+          "standalone": {
+            "type": "boolean"
+          }
+        }
       },
       "RuleDto": {
         "required": [
@@ -6827,6 +6937,75 @@
             "format": "date-time"
           },
           "sameTargetCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChannelRow": {
+        "required": [
+          "channel",
+          "homescreen",
+          "played",
+          "returned",
+          "signups",
+          "visitors"
+        ],
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "visitors": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "signups": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "played": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "homescreen": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Report": {
+        "required": [
+          "botVisits",
+          "existingUsers",
+          "rows",
+          "since",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "since": {
+            "type": "string",
+            "format": "date"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelRow"
+            }
+          },
+          "total": {
+            "$ref": "#/components/schemas/ChannelRow"
+          },
+          "existingUsers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "botVisits": {
             "type": "integer",
             "format": "int32"
           }

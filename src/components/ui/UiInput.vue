@@ -1,7 +1,7 @@
 <template>
   <UiField :label="label" :hint="hint" :error="error" :optional="optional">
     <div class="relative">
-      <i v-if="icon" :class="icon" class="absolute left-4 top-1/2 -translate-y-1/2 text-fg-subtle" aria-hidden="true"></i>
+      <UiIcon v-if="icon" :name="icon" class="absolute left-4 top-1/2 -translate-y-1/2 text-fg-subtle" aria-hidden="true" />
       <textarea
         v-if="multiline"
         :value="modelValue"

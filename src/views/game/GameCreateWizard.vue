@@ -6,7 +6,7 @@
       <!-- 열렸어요: 서버가 만든 뒤에만 보인다 -->
       <section v-if="created" class="pt-16 text-center ui-appear">
         <span class="mx-auto w-14 h-14 rounded-full bg-primary-soft text-primary flex items-center justify-center text-2xl" aria-hidden="true">
-          <i class="fas fa-check"></i>
+          <UiIcon name="fas fa-check" />
         </span>
         <h1 class="t-title mt-5">경기가 열렸어요</h1>
         <p class="t-caption mt-2">
@@ -19,7 +19,7 @@
       <template v-else>
         <UiCard v-if="rule" class="flex items-center gap-3 mb-8">
           <span class="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center text-fg-muted flex-shrink-0" aria-hidden="true">
-            <i class="fas fa-trophy"></i>
+            <UiIcon name="fas fa-trophy" />
           </span>
           <div class="flex-1 min-w-0">
             <p class="t-micro">규칙</p>
@@ -41,14 +41,14 @@
             @click="opt.value === 'anyone' ? create(null) : (friendsOpen = true)"
           >
             <span class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-fg-muted flex-shrink-0" aria-hidden="true">
-              <i :class="opt.icon"></i>
+              <UiIcon :name="opt.icon" />
             </span>
             <span class="flex-1 min-w-0">
               <span class="block t-heading">{{ opt.title }}</span>
               <span class="block t-caption mt-0.5">{{ opt.description }}</span>
             </span>
             <UiSpinner v-if="creating && opt.value === 'anyone' && !friend" size="sm" label="여는 중" />
-            <i v-else class="fas fa-chevron-right text-fg-subtle" aria-hidden="true"></i>
+            <UiIcon name="fas fa-chevron-right" class="text-fg-subtle" v-else  aria-hidden="true" />
           </button>
         </div>
       </template>

@@ -67,7 +67,7 @@
 
       <div>
         <UiButton variant="ghost" size="sm" class="-ml-2" @click="showMore = !showMore">
-          더 자세히 적기 (선택) <i class="fas text-xs" :class="showMore ? 'fa-chevron-up' : 'fa-chevron-down'" aria-hidden="true"></i>
+          더 자세히 적기 (선택) <UiIcon :name="showMore ? 'chevron-up' : 'chevron-down'" class="text-xs" />
         </UiButton>
         <div v-if="showMore" class="space-y-5 mt-4">
           <UiInput v-model="form.rulePreparation" label="준비물" optional placeholder="예: 라켓, 공" />

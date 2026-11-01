@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-surface border border-line rounded-xl overflow-hidden divide-y divide-line">
+  <div class="bg-surface rounded-xl overflow-hidden divide-y divide-line">
     <slot />
   </div>
 </template>

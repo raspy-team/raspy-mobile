@@ -11,7 +11,7 @@
           <span class="block t-caption truncate">{{ me.username ? `@${me.username}` : '' }}</span>
         </span>
         <span class="t-caption">프로필 편집</span>
-        <i class="fas fa-chevron-right text-fg-subtle text-sm" aria-hidden="true"></i>
+        <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
       </button>
 
       <UiSection title="알림과 사람">

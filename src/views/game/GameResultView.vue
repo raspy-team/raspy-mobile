@@ -17,17 +17,17 @@
     </div>
 
     <template v-else>
-      <!-- 결과 한 줄 + 점수판 -->
-      <section class="text-center">
-        <p class="t-caption">{{ game.rule?.ruleTitle }}</p>
-        <h1 class="t-display mt-1" :class="headline.tone">{{ headline.text }}</h1>
+      <!-- 결과 한 줄 + 점수판: 이 앱에서 감정이 가장 실리는 순간이라 글자와 숫자로 크게 -->
+      <section>
+        <p class="t-mono text-center">{{ [game.rule?.ruleTitle, playedOn].filter(Boolean).join(' · ') }}</p>
+        <h1 class="t-display text-center mt-3" :class="headline.tone">{{ headline.text }}</h1>
 
-        <div class="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div class="mt-10 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <button
             v-for="(side, i) in sides"
             :key="side.user.id || i"
             type="button"
-            class="flex flex-col items-center gap-2 min-w-0"
+            class="flex flex-col items-center gap-2.5 min-w-0"
             :class="i === 1 ? 'order-3' : 'order-1'"
             @click="router.push('/profile/' + side.user.id)"
           >
@@ -35,35 +35,46 @@
               <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" size="lg" />
               <span
                 v-if="side.champion"
-                class="absolute -top-2 -right-1 w-6 h-6 rounded-full bg-primary text-primary-on flex items-center justify-center text-xs"
+                class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-signal text-signal-on flex items-center justify-center text-sm"
                 aria-label="새 챔피언"
               >
-                <i class="fas fa-crown" aria-hidden="true"></i>
+                <UiIcon name="crown" />
               </span>
             </span>
-            <span class="text-sm text-fg truncate max-w-full">{{ side.user.nickname }}<span v-if="side.isMe" class="text-fg-subtle"> (나)</span></span>
-            <span class="text-6xl font-bold tabular-nums leading-none" :class="side.won ? 'text-fg' : 'text-fg-subtle'">{{ side.sets }}</span>
+            <span class="text-sm truncate max-w-full" :class="side.won || !winnerIdx ? 'text-fg font-medium' : 'text-fg-muted'">
+              {{ side.user.nickname }}<span v-if="side.isMe" class="text-fg-subtle"> (나)</span>
+            </span>
           </button>
-          <span class="order-2 t-micro px-2 self-end pb-3">세트</span>
+          <!-- 세트 점수 없이 결과만 남긴 경기는 숫자 대신 vs -->
+          <p v-if="setResults.length" class="order-2 font-mono text-[64px] leading-none tracking-[-0.06em] tabular-nums" :aria-label="`세트 ${sides[0].sets} 대 ${sides[1].sets}`">
+            <span :class="sides[0].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].sets }}</span><span class="text-fg-subtle mx-1.5">:</span><span :class="sides[1].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].sets }}</span>
+          </p>
+          <p v-else class="order-2 t-mono">vs</p>
         </div>
 
-        <!-- 세트별 점수 -->
-        <div v-if="setResults.length" class="mt-6 flex flex-wrap justify-center gap-2">
-          <span
-            v-for="s in setResults"
-            :key="s.setIdx"
-            class="px-3 h-8 rounded-lg bg-surface-2 text-sm text-fg-muted flex items-center tabular-nums"
-          >
-            {{ s.setIdx }}세트 {{ idxCorrect ? s.user1Score : s.user2Score }}:{{ idxCorrect ? s.user2Score : s.user1Score }}
-          </span>
+        <!-- 세트별 점수: 표로 -->
+        <div v-if="setResults.length" class="mt-10 rounded-xl bg-surface divide-y divide-line">
+          <div class="grid grid-cols-[3rem_1fr_auto_1fr] items-center px-4 h-10 t-mono">
+            <span>세트</span>
+            <span class="text-right truncate">{{ sides[0].user.nickname }}</span>
+            <span class="w-6"></span>
+            <span class="truncate">{{ sides[1].user.nickname }}</span>
+          </div>
+          <div v-for="s in setResults" :key="s.setIdx" class="grid grid-cols-[3rem_1fr_auto_1fr] items-center px-4 h-12 font-mono tabular-nums">
+            <span class="text-fg-subtle text-sm">{{ s.setIdx }}</span>
+            <span class="text-right text-lg" :class="setLeft(s) >= setRight(s) ? 'text-fg' : 'text-fg-subtle'">{{ setLeft(s) }}</span>
+            <span class="w-6 text-center text-fg-subtle">:</span>
+            <span class="text-lg" :class="setRight(s) >= setLeft(s) ? 'text-fg' : 'text-fg-subtle'">{{ setRight(s) }}</span>
+          </div>
         </div>
+        <p v-else class="t-caption text-center mt-6">세트 점수 없이 승패만 기록한 경기예요</p>
       </section>
 
       <!-- 상대 확인을 기다리는 결과 -->
       <UiCard v-if="!confirmed" class="space-y-3">
         <div class="flex items-start gap-3">
           <span class="w-10 h-10 rounded-full bg-surface-2 text-fg-muted flex items-center justify-center flex-shrink-0" aria-hidden="true">
-            <i class="fas fa-hourglass-half"></i>
+            <UiIcon name="fas fa-hourglass-half" />
           </span>
           <div class="min-w-0">
             <p class="t-heading">{{ pending.title }}</p>
@@ -75,8 +86,8 @@
 
       <!-- 새 챔피언 -->
       <UiCard v-if="championUser" class="flex items-center gap-3">
-        <span class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center flex-shrink-0" aria-hidden="true">
-          <i class="fas fa-crown"></i>
+        <span class="w-10 h-10 rounded-full bg-signal-soft text-signal flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <UiIcon name="crown" />
         </span>
         <div class="min-w-0">
           <p class="t-heading">{{ championUser.id === currentUserId ? '새 챔피언이 됐어요' : `${championUser.nickname}님이 새 챔피언이에요` }}</p>
@@ -87,7 +98,7 @@
       <!-- 친구 · 공유 -->
       <div class="flex gap-2">
         <UiButton v-if="isParticipant" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
-        <UiButton variant="secondary" icon="fas fa-share" class="flex-1" @click="onShare">공유하기</UiButton>
+        <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유하기</UiButton>
       </div>
 
       <template v-if="isParticipant && confirmed">
@@ -134,7 +145,7 @@
                     aria-label="올리지 않기"
                     @click.stop="deselectPicture(pic.id)"
                   >
-                    <span class="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs"><i class="fas fa-xmark" aria-hidden="true"></i></span>
+                    <span class="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs"><UiIcon name="fas fa-xmark" aria-hidden="true" /></span>
                   </button>
                 </div>
               </div>
@@ -160,7 +171,7 @@
                     aria-label="삭제"
                     @click.stop="deletePicture(pic.id)"
                   >
-                    <span class="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs"><i class="fas fa-trash" aria-hidden="true"></i></span>
+                    <span class="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs"><UiIcon name="fas fa-trash" aria-hidden="true" /></span>
                   </button>
                 </div>
               </div>
@@ -190,7 +201,7 @@
                   :class="n <= row.value ? 'text-primary' : 'text-line-strong'"
                   @click="row.set(n)"
                 >
-                  <i :class="n <= row.value ? 'fas fa-star' : 'far fa-star'" aria-hidden="true"></i>
+                  <UiIcon :name="n <= row.value ? 'fas fa-star' : 'far fa-star'" aria-hidden="true" />
                 </button>
                 <span v-if="row.value" class="t-caption ml-1">{{ row.value }}/5</span>
               </div>
@@ -215,7 +226,7 @@
                 :class="n <= ruleRating ? 'text-primary' : 'text-line-strong'"
                 @click="setRuleRating(n)"
               >
-                <i :class="n <= ruleRating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true"></i>
+                <UiIcon :name="n <= ruleRating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true" />
               </button>
               <span class="t-caption ml-1">{{ ruleRating ? `${ruleRating}/5` : '선택' }}</span>
             </div>
@@ -387,11 +398,16 @@ const sides = computed(() => [
   { user: user1.value, sets: user1SetCount.value, won: winnerIdx.value === 1, isMe: user1.value.id === currentUserId.value, champion: championUser.value?.id === user1.value.id },
   { user: user2.value, sets: user2SetCount.value, won: winnerIdx.value === 2, isMe: user2.value.id === currentUserId.value, champion: championUser.value?.id === user2.value.id },
 ])
+const setLeft = (s) => (idxCorrect.value ? s.user1Score : s.user2Score)
+const setRight = (s) => (idxCorrect.value ? s.user2Score : s.user1Score)
+const playedOn = computed(() =>
+  startDate.value ? new Date(startDate.value).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '',
+)
 const headline = computed(() => {
   if (winnerIdx.value === 0) return { text: '무승부', tone: 'text-fg' }
   const winner = winnerIdx.value === 1 ? user1.value : user2.value
   if (!isParticipant.value) return { text: `${winner.nickname}님 승리`, tone: 'text-fg' }
-  return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-primary' } : { text: '졌어요', tone: 'text-fg-muted' }
+  return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-fg' } : { text: '졌어요', tone: 'text-fg-muted' }
 })
 const pending = computed(() => {
   if (confirmed.value) return { canAnswer: false }

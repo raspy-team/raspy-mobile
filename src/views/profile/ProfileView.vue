@@ -59,7 +59,7 @@
         </div>
         <button type="button" class="py-3" @click="openFriends">
           <p class="t-heading tabular-nums">{{ stats.friends || 0 }}</p>
-          <p class="t-micro mt-0.5">친구 <i class="fas fa-chevron-right text-[10px]" aria-hidden="true"></i></p>
+          <p class="t-micro mt-0.5">친구 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </button>
       </div>
 
@@ -82,8 +82,8 @@
       <section v-if="user.myChampions?.length" class="mt-10">
         <h2 class="t-heading mb-3">챔피언</h2>
         <div class="flex flex-wrap gap-2">
-          <span v-for="(c, i) in user.myChampions" :key="i" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary-soft text-primary-fg text-sm">
-            <i class="fas fa-crown text-xs" aria-hidden="true"></i>{{ [c.region, c.ruleTitle].filter(Boolean).join(' ') }}
+          <span v-for="(c, i) in user.myChampions" :key="i" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-line-strong text-fg text-sm">
+            <UiIcon name="crown" class="text-signal" />{{ [c.region, c.ruleTitle].filter(Boolean).join(' ') }}
           </span>
         </div>
       </section>
@@ -213,8 +213,8 @@ import { matchTime } from '../../utils/format'
 
 const REPORT_REASONS = ['욕설·비방', '노쇼·비매너', '사칭', '기타']
 const RESULT = {
-  win: { label: '승', class: 'bg-success-soft text-success-fg' },
-  lose: { label: '패', class: 'bg-danger-soft text-danger-fg' },
+  win: { label: '승', class: 'bg-fg text-canvas' },
+  lose: { label: '패', class: 'border border-line-strong text-fg-subtle' },
   draw: { label: '무', class: 'bg-surface-2 text-fg-muted' },
 }
 const resultKey = (r) => (r === 'win' ? 'win' : r === 'lose' || r === 'loss' ? 'lose' : 'draw')

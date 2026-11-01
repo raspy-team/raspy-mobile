@@ -3,7 +3,7 @@
     :is="to ? 'router-link' : interactive ? 'button' : 'div'"
     :to="to"
     :type="interactive && !to ? 'button' : undefined"
-    class="block w-full text-left bg-surface border border-line rounded-xl"
+    class="block w-full text-left bg-surface rounded-xl"
     :class="[pad ? 'p-4' : '', interactive || to ? 'active:bg-surface-2 transition-colors' : '']"
   >
     <slot />

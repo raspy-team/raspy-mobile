@@ -20,7 +20,7 @@
         <button type="button" class="relative" aria-label="프로필 사진 바꾸기" @click="fileInput?.click()">
           <UiAvatar :src="preview" :name="form.nickname || '나'" size="xl" />
           <span class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-surface-2 border border-line text-fg flex items-center justify-center text-sm">
-            <i class="fas fa-camera" aria-hidden="true"></i>
+            <UiIcon name="fas fa-camera" aria-hidden="true" />
           </span>
         </button>
         <UiButton v-if="preview" variant="ghost" size="sm" @click="removePhoto">사진 빼기</UiButton>

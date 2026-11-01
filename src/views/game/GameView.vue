@@ -83,7 +83,7 @@
   <!-- 경기 시작 ① 정해둔 장소가 있으면 그대로 시작할지 -->
   <UiSheet v-model="showPlaceConfirm" title="이 장소에서 하나요?">
     <UiCard class="flex items-center gap-3">
-      <i class="fas fa-location-dot text-fg-muted" aria-hidden="true"></i>
+      <UiIcon name="fas fa-location-dot" class="text-fg-muted" aria-hidden="true" />
       <span class="t-body">{{ startGame?.matchLocation }}</span>
     </UiCard>
     <template #footer>

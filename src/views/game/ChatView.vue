@@ -432,7 +432,7 @@ const closeErrorModal = () => {
           class="w-12 h-12 flex-shrink-0 rounded-full bg-primary text-primary-on flex items-center justify-center active:bg-primary-press disabled:bg-surface-2 disabled:text-fg-subtle transition-colors"
           @mousedown.prevent="keepFocus"
         >
-          <i class="fas fa-paper-plane" aria-hidden="true"></i>
+          <UiIcon name="fas fa-paper-plane" aria-hidden="true" />
         </button>
       </form>
     </div>

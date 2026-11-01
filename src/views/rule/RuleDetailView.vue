@@ -34,7 +34,7 @@
       <div v-if="rule.playCount || rating" class="mt-6 grid grid-cols-3 border border-line rounded-xl divide-x divide-line text-center">
         <div class="py-3">
           <p class="t-heading">
-            <template v-if="rating"><i class="fas fa-star text-sm" aria-hidden="true"></i> {{ rating }}</template>
+            <template v-if="rating"><UiIcon name="fas fa-star" class="text-sm" aria-hidden="true" /> {{ rating }}</template>
             <template v-else>–</template>
           </p>
           <p class="t-micro mt-0.5">{{ rule.ratingCount ? `평가 ${rule.ratingCount}개` : '평가 없음' }}</p>
@@ -45,7 +45,7 @@
         </div>
         <button type="button" class="py-3" @click="router.push(`/rules/${rule.id}/ranking`)">
           <p class="t-heading">{{ myRank ? `${myRank}위` : '–' }}</p>
-          <p class="t-micro mt-0.5">내 순위 <i class="fas fa-chevron-right text-[10px]" aria-hidden="true"></i></p>
+          <p class="t-micro mt-0.5">내 순위 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </button>
       </div>
 
@@ -56,13 +56,13 @@
           <span class="block t-heading truncate">{{ rule.createdBy.nickname }}님이 만들었어요</span>
           <span v-if="rule.lastPlayedAt" class="block t-caption mt-0.5">마지막 경기 {{ timeAgo(rule.lastPlayedAt) }}</span>
         </span>
-        <i class="fas fa-chevron-right text-fg-subtle text-sm" aria-hidden="true"></i>
+        <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
       </button>
 
       <!-- 챔피언 -->
       <div class="flex items-center gap-3 py-5 border-b border-line">
-        <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="rule.currentChampion ? 'bg-primary-soft text-primary' : 'bg-surface-2 text-fg-subtle'" aria-hidden="true">
-          <i class="fas fa-crown"></i>
+        <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="rule.currentChampion ? 'bg-signal-soft text-signal' : 'bg-surface-2 text-fg-subtle'" aria-hidden="true">
+          <UiIcon name="fas fa-crown" />
         </span>
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ rule.currentChampion ? `챔피언 ${rule.currentChampion.nickname}` : '아직 챔피언이 없어요' }}</span>
@@ -97,7 +97,7 @@
       </section>
 
       <button type="button" class="mt-10 flex items-center gap-2 t-caption underline underline-offset-2" @click="openReport">
-        <i class="far fa-flag" aria-hidden="true"></i> 이 규칙 신고하기
+        <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고하기
       </button>
     </main>
 

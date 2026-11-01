@@ -32,14 +32,14 @@
           @click="toggleAll"
         >
           <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" :class="allAgreed ? 'bg-primary text-primary-on' : 'border-2 border-line-strong'">
-            <i v-if="allAgreed" class="fas fa-check text-xs" aria-hidden="true"></i>
+            <UiIcon name="fas fa-check" class="text-xs" v-if="allAgreed"  aria-hidden="true" />
           </span>
           <span class="t-heading">모두 동의</span>
         </button>
         <div class="border-t border-line">
           <div v-for="t in TERMS" :key="t.id" class="flex items-center pl-4 pr-1 h-12">
             <button type="button" role="checkbox" :aria-checked="agreed[t.id]" class="flex-1 flex items-center gap-3 h-full text-left" @click="agreed[t.id] = !agreed[t.id]">
-              <i class="fas fa-check w-6 text-center" :class="agreed[t.id] ? 'text-primary' : 'text-line-strong'" aria-hidden="true"></i>
+              <UiIcon name="fas fa-check" class="w-6 text-center" :class="agreed[t.id] ? 'text-primary' : 'text-line-strong'" aria-hidden="true" />
               <span class="text-sm text-fg">{{ t.title }} <span class="text-fg-subtle">(필수)</span></span>
             </button>
             <UiButton variant="ghost" size="sm" @click="openTerm = t">보기</UiButton>
@@ -57,7 +57,7 @@
         <button type="button" class="relative" aria-label="프로필 사진 고르기" @click="fileInput?.click()">
           <UiAvatar :src="preview" :name="nickname || '나'" size="xl" />
           <span class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-surface-2 border border-line text-fg flex items-center justify-center text-sm">
-            <i class="fas fa-camera" aria-hidden="true"></i>
+            <UiIcon name="fas fa-camera" aria-hidden="true" />
           </span>
         </button>
         <UiButton v-if="preview" variant="ghost" size="sm" @click="clearPhoto">사진 빼기</UiButton>

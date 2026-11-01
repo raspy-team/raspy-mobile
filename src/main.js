@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import UiIcon from './components/ui/UiIcon.vue'
 import App from './App.vue'
 import './assets/tailwind.css'
 import router from './router/router.js'
@@ -38,6 +39,8 @@ const { showToast } = useToast()
 window.alert = (msg) => showToast(msg)
 
 const app = createApp(App)
+// 아이콘은 어디서나 쓰므로 화면마다 불러오지 않게 앱 전체에 등록한다
+app.component('UiIcon', UiIcon)
 
 // 운영 에러 추적. VITE_SENTRY_DSN이 있을 때만 켠다
 // 켤 때만 불러와서 첫 화면 번들에 싣지 않는다

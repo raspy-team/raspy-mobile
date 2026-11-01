@@ -3,7 +3,7 @@
     <!-- 이기는 법: 아이콘 줄 -->
     <ul class="space-y-5">
       <li v-for="f in facts" :key="f.title" class="flex items-start gap-4">
-        <i :class="f.icon" class="w-6 text-center text-lg text-fg mt-0.5" aria-hidden="true"></i>
+        <UiIcon :name="f.icon" class="w-6 text-center text-lg text-fg mt-0.5" aria-hidden="true" />
         <span>
           <span class="block t-heading">{{ f.title }}</span>
           <span class="block t-caption mt-0.5">{{ f.body }}</span>

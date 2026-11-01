@@ -6,10 +6,10 @@
     :aria-label="label"
     class="relative w-11 h-11 inline-flex items-center justify-center rounded-full text-fg active:bg-surface-2 transition-colors"
   >
-    <i :class="icon" class="text-lg" aria-hidden="true"></i>
+    <UiIcon :name="icon" class="text-[22px]" />
     <span
       v-if="badge"
-      class="absolute top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-on text-[11px] font-bold flex items-center justify-center"
+      class="absolute top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-signal text-signal-on text-xs font-semibold tabular-nums flex items-center justify-center"
     >
       {{ badge > 9 ? '9+' : badge }}
     </span>

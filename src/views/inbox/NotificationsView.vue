@@ -28,7 +28,7 @@
             <span class="block t-caption truncate">{{ inbox.friendRequests.map((r) => r.nickname).join(', ') }}</span>
           </span>
           <span class="w-2 h-2 rounded-full bg-primary" aria-hidden="true"></span>
-          <i class="fas fa-chevron-right text-fg-subtle text-sm" aria-hidden="true"></i>
+          <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
         </button>
 
         <UiEmptyState
@@ -49,7 +49,7 @@
                 @click="open(item)"
               >
                 <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="kind(item.head.type).bg">
-                  <i :class="kind(item.head.type).icon" aria-hidden="true"></i>
+                  <UiIcon :name="kind(item.head.type).icon" aria-hidden="true" />
                 </span>
                 <span class="flex-1 min-w-0">
                   <span class="block text-sm leading-snug" :class="item.unread ? 'text-fg font-medium' : 'text-fg-muted'">{{ item.head.title }}</span>

@@ -1,56 +1,25 @@
 <template>
-  <div
-    class="flex flex-col justify-center items-center bg-orange-500/10 px-5 py-8 relative"
-  >
-    <!-- Raspy 브랜드 -->
-    <div class="flex flex-col items-center mb-12">
-      <span class="text-4xl font-bold tracking-tight text-orange-500 mb-2">Match</span>
-      <span class="text-base text-gray-500 font-medium">스포츠로 연결되는 순간</span>
-    </div>
+  <div class="min-h-dvh bg-canvas flex flex-col pt-safe pb-safe">
+    <main class="flex-1 w-full max-w-md mx-auto px-6 flex flex-col">
+      <div class="flex-1 flex flex-col justify-center py-10">
+        <BrandMark size="22px" />
+        <h1 class="t-display text-[40px] mt-10">경기에<br />초대받았어요</h1>
+        <p class="t-body text-fg-muted mt-4">앱에서 열면 경기 정보를 바로 볼 수 있어요.</p>
+      </div>
 
-    <!-- 일러스트 (SVG) -->
-    <div class="mb-10 animate-fadeInUp">
-      <svg width="110" height="110" fill="none" viewBox="0 0 110 110">
-        <circle cx="55" cy="55" r="50" fill="#FDBA74" opacity="0.18" />
-        <circle cx="55" cy="55" r="38" fill="#FFEDD5" />
-        <path d="M35 63c6-8 34-8 40 0" stroke="#F97316" stroke-width="3" stroke-linecap="round" />
-        <circle cx="45" cy="48" r="5" fill="#F97316" />
-        <circle cx="65" cy="48" r="5" fill="#F97316" />
-      </svg>
-    </div>
-
-    <!-- 안내 및 앱 이동 -->
-    <div
-      class="w-full max-w-xs bg-white/90 rounded-2xl shadow-xl flex flex-col items-center py-8 px-6 mb-5 border border-orange-500/30"
-    >
-      <p class="text-lg font-bold mb-2 text-white">Match 경기 정보를 확인하세요</p>
-      <button
-        @click="openApp"
-       class="w-full py-3 mb-2 rounded-xl bg-primary text-primary-on font-bold text-base shadow hover:bg-primary-press transition"
-      >
-        Match 앱에서 열기
-      </button>
-      <button
-        @click="goToStore"
-        class="w-full py-2 rounded-xl border border-orange-500/30 text-orange-500 font-medium text-sm hover:bg-orange-500/10 mt-1 transition"
-      >
-        앱이 설치되지 않았나요?
-      </button>
-      <p v-if="showTip" class="mt-4 text-xs text-gray-400 text-center">
-        앱이 자동으로 열리지 않으면<br />
-        위 버튼을 눌러주세요.
-      </p>
-    </div>
-
-    <!-- 하단: 카피라이트 -->
-    <span class="absolute bottom-5 left-0 right-0 text-center text-gray-300 text-xs tracking-wide">
-      © 2025 Match
-    </span>
+      <div class="pb-6 space-y-2">
+        <UiButton block size="lg" @click="openApp">앱에서 열기</UiButton>
+        <UiButton block variant="ghost" @click="goToStore">앱이 없나요?</UiButton>
+        <p v-if="showTip" class="t-micro text-center pt-2">앱이 저절로 열리지 않으면 위 버튼을 눌러 주세요</p>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import BrandMark from '../components/BrandMark.vue'
+import { UiButton } from '../components/ui'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()

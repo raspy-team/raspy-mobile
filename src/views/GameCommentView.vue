@@ -76,7 +76,7 @@
               @click="resetInput"
             >
               {{ replyNickname }}
-              <i class="fas fa-times ml-1 text-xs" />
+              <UiIcon name="fas fa-times" class="ml-1 text-xs" />
             </span>
             <input
               v-model="inputContent"
@@ -96,7 +96,7 @@
             style="height: 38px; width: 38px"
             title="사진첨부"
           >
-            <i class="fas fa-camera text-lg"></i>
+            <UiIcon name="fas fa-camera" class="text-lg" />
           </button>
           <button
             type="submit"
@@ -122,7 +122,7 @@
         >
           <img :src="inputImagePreview" class="w-14 h-14 rounded-lg object-cover border" />
           <button @click="removeInputImage" type="button" class="text-fg-muted hover:text-red-400">
-            <i class="fas fa-times text-lg"></i>
+            <UiIcon name="fas fa-times" class="text-lg" />
           </button>
         </div>
         <!-- 이미지 확대 모달 -->

@@ -1,6 +1,6 @@
 <template>
   <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md text-xs font-medium whitespace-nowrap" :class="TONES[tone]">
-    <i v-if="icon" :class="icon" aria-hidden="true"></i>
+    <UiIcon v-if="icon" :name="icon" aria-hidden="true" />
     <slot />
   </span>
 </template>
@@ -10,8 +10,8 @@
 import { defineProps } from 'vue'
 defineProps({ tone: { type: String, default: 'neutral' }, icon: { type: String, default: '' } })
 const TONES = {
-  neutral: 'bg-surface-2 text-fg-muted',
-  primary: 'bg-primary-soft text-primary-fg',
+  neutral: 'bg-surface-3 text-fg-muted',
+  primary: 'bg-fg text-canvas',
   success: 'bg-success-soft text-success-fg',
   danger: 'bg-danger-soft text-danger-fg',
 }

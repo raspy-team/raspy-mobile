@@ -29,14 +29,15 @@
         <div class="flex items-end justify-between">
           <div>
             <p class="t-caption">승률</p>
-            <p class="text-5xl font-bold text-fg tabular-nums leading-none mt-1">{{ total.rate }}<span class="t-title">%</span></p>
+            <p class="t-display text-[56px] font-mono tracking-[-0.06em] leading-none mt-2">{{ total.rate }}<span class="text-2xl text-fg-muted ml-0.5">%</span></p>
           </div>
           <p class="t-body text-fg-muted tabular-nums">{{ total.win }}승 {{ total.draw }}무 {{ total.lose }}패</p>
         </div>
         <div class="flex h-2.5 mt-4 rounded-full overflow-hidden bg-surface-2" role="img" :aria-label="`${total.win}승 ${total.draw}무 ${total.lose}패`">
-          <span class="bg-success" :style="{ width: pct(total.win) }"></span>
-          <span class="bg-line-strong" :style="{ width: pct(total.draw) }"></span>
-          <span class="bg-danger" :style="{ width: pct(total.lose) }"></span>
+          <!-- 승패는 색이 아니라 밝기로: 승은 흰색, 무는 회색, 패는 빈칸 -->
+          <span class="bg-fg" :style="{ width: pct(total.win) }"></span>
+          <span class="bg-ink-600" :style="{ width: pct(total.draw) }"></span>
+          <span class="bg-surface-3" :style="{ width: pct(total.lose) }"></span>
         </div>
       </section>
 
@@ -44,7 +45,7 @@
       <section>
         <div class="flex items-center justify-between mb-3">
           <h2 class="t-heading">최근 {{ recent.length }}경기</h2>
-          <UiBadge v-if="streak.count >= 2" :tone="streak.kind === 'win' ? 'success' : streak.kind === 'lose' ? 'danger' : 'neutral'">
+          <UiBadge v-if="streak.count >= 2" :tone="streak.kind === 'win' ? 'success' : 'neutral'">
             {{ streak.count }}{{ streak.kind === 'win' ? '연승' : streak.kind === 'lose' ? '연패' : '연속 무승부' }} 중
           </UiBadge>
         </div>
@@ -65,7 +66,7 @@
 
       <!-- 숫자 -->
       <section class="grid grid-cols-2 gap-3">
-        <div v-for="c in cards" :key="c.label" class="rounded-xl border border-line p-4 [&:last-child:nth-child(odd)]:col-span-2">
+        <div v-for="c in cards" :key="c.label" class="rounded-xl bg-surface p-4 [&:last-child:nth-child(odd)]:col-span-2">
           <p class="t-caption">{{ c.label }}</p>
           <p class="t-title tabular-nums mt-1">{{ c.value }}</p>
           <p v-if="c.hint" class="t-micro mt-0.5">{{ c.hint }}</p>
@@ -85,7 +86,7 @@
             @click="router.push(`/rules/${r.id}`)"
           >
             <template #leading>
-              <RuleThumb :minor="r.minor" />
+              <RuleThumb :rule="{ minorCategory: r.minor, ruleTitle: r.title }" />
             </template>
             <template #trailing>
               <span class="t-heading tabular-nums">{{ r.rate }}%</span>
@@ -144,9 +145,9 @@ import { UiAvatar, UiBadge, UiButton, UiEmptyState, UiList, UiListItem, UiListSk
 import { timeAgo } from '../../utils/format'
 
 const RESULT = {
-  win: { label: '승', class: 'bg-success-soft text-success-fg' },
-  lose: { label: '패', class: 'bg-danger-soft text-danger-fg' },
-  draw: { label: '무', class: 'bg-surface-2 text-fg-muted' },
+  win: { label: '승', class: 'bg-fg text-canvas' },
+  lose: { label: '패', class: 'border border-line-strong text-fg-subtle' },
+  draw: { label: '무', class: 'bg-surface-3 text-fg-muted' },
 }
 const norm = (r) => (r === 'win' ? 'win' : r === 'lose' || r === 'loss' ? 'lose' : 'draw')
 

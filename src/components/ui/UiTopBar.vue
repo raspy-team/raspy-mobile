@@ -1,10 +1,10 @@
 <template>
-  <header class="fixed top-0 inset-x-0 z-header bg-canvas border-b border-line pt-safe">
+  <header class="fixed top-0 inset-x-0 z-header bg-canvas pt-safe">
     <div class="max-w-4xl mx-auto h-14 px-2 flex items-center gap-1">
       <button v-if="back" type="button" class="w-11 h-11 flex items-center justify-center text-fg" aria-label="뒤로" @click="goBack">
-        <i class="fas fa-chevron-left text-lg" aria-hidden="true"></i>
+        <UiIcon name="chevron-left" class="text-[22px]" />
       </button>
-      <h1 v-if="title" class="flex-1 min-w-0 truncate" :class="back ? 't-body font-bold' : 't-title px-2'">{{ title }}</h1>
+      <h1 v-if="title" class="flex-1 min-w-0 truncate" :class="back ? 'text-base font-semibold tracking-[-0.02em]' : 't-title px-2'">{{ title }}</h1>
       <div v-else class="flex-1"></div>
       <div class="flex items-center"><slot name="right" /></div>
     </div>

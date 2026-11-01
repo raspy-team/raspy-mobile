@@ -12,7 +12,7 @@
     <div class="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-header bg-canvas border-b border-line">
       <div class="max-w-2xl mx-auto px-4 pt-3">
         <label class="flex items-center gap-3 h-12 px-4 rounded-full bg-surface border border-line focus-within:border-line-strong">
-          <i class="fas fa-magnifying-glass text-fg-subtle" aria-hidden="true"></i>
+          <UiIcon name="fas fa-magnifying-glass" class="text-fg-subtle" aria-hidden="true" />
           <input
             v-model="q"
             type="search"
@@ -22,7 +22,7 @@
             class="flex-1 min-w-0 bg-transparent text-base text-fg placeholder:text-fg-subtle outline-none"
           />
           <button v-if="q" type="button" class="-mr-2 w-9 h-9 flex items-center justify-center text-fg-subtle" aria-label="검색어 지우기" @click="q = ''">
-            <i class="fas fa-circle-xmark" aria-hidden="true"></i>
+            <UiIcon name="fas fa-circle-xmark" aria-hidden="true" />
           </button>
         </label>
       </div>
@@ -39,8 +39,8 @@
           :class="major === m ? 'border-fg text-fg' : 'border-transparent text-fg-subtle'"
           @click="pickMajor(m)"
         >
-          <img v-if="m" :src="`/category-picture/${m}.png`" alt="" data-fallback="1" class="w-6 h-6" :class="major === m ? '' : 'opacity-60'" />
-          <i v-else class="fas fa-border-all text-lg h-6 leading-6" aria-hidden="true"></i>
+          <CategoryIcon v-if="m" :name="m" />
+          <UiIcon v-else name="border-all" class="text-2xl" />
           <span class="text-xs font-medium whitespace-nowrap">{{ m || '전체' }}</span>
         </button>
       </div>
@@ -111,6 +111,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
 import RuleListCard from '../components/rule/RuleListCard.vue'
+import CategoryIcon from '../components/rule/CategoryIcon.vue'
 import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSkeleton, UiTopBar } from '../components/ui'
 
 const SORTS = [

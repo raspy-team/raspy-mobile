@@ -3,9 +3,9 @@
     type="button"
     :aria-pressed="selected"
     class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-sm transition-colors"
-    :class="selected ? 'bg-fg text-canvas font-medium' : 'bg-surface text-fg-muted border border-line active:bg-surface-2'"
+    :class="selected ? 'bg-fg text-canvas font-medium' : 'bg-transparent text-fg-muted border border-line-strong active:bg-surface-2'"
   >
-    <i v-if="icon" :class="icon" class="text-xs" aria-hidden="true"></i>
+    <UiIcon v-if="icon" :name="icon" class="text-xs" aria-hidden="true" />
     <slot />
   </button>
 </template>

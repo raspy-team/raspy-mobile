@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="ui-fade">
-      <div v-if="modelValue" class="fixed inset-0 z-sheet bg-black/60" @click="close" aria-hidden="true"></div>
+      <div v-if="modelValue" class="fixed inset-0 z-sheet bg-black/70" @click="close" aria-hidden="true"></div>
     </Transition>
     <Transition name="ui-sheet">
       <div
@@ -9,7 +9,7 @@
         role="dialog"
         aria-modal="true"
         :aria-label="title || undefined"
-        class="fixed inset-x-0 bottom-0 z-sheet max-w-xl mx-auto bg-surface border-t border-line rounded-t-2xl flex flex-col max-h-[88dvh] pb-safe"
+        class="fixed inset-x-0 bottom-0 z-sheet max-w-xl mx-auto bg-surface rounded-t-2xl flex flex-col max-h-[88dvh] pb-safe"
       >
         <div class="pt-2.5 pb-1 flex justify-center" aria-hidden="true">
           <span class="w-10 h-1 rounded-full bg-line-strong"></span>
@@ -17,7 +17,7 @@
         <div v-if="title" class="flex items-center justify-between px-5 pt-2 pb-3">
           <h2 class="t-heading">{{ title }}</h2>
           <button type="button" class="w-9 h-9 -mr-2 flex items-center justify-center text-fg-muted" aria-label="닫기" @click="close">
-            <i class="fas fa-xmark" aria-hidden="true"></i>
+            <UiIcon name="xmark" class="text-xl" />
           </button>
         </div>
         <div class="flex-1 overflow-y-auto overscroll-contain px-5 pb-5"><slot /></div>

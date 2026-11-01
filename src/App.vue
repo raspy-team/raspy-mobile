@@ -15,7 +15,7 @@
     <!-- 서버에 닿지 않을 때: 화면마다 기다리게 두지 않고 위에 한 줄로 알린다 -->
     <div v-if="serverDown" class="fixed inset-x-0 top-0 z-toast pt-safe" role="alert">
       <div class="mx-4 mt-2 rounded-xl bg-surface-2 border border-line-strong px-4 py-3 flex items-center gap-3 text-sm">
-        <i class="fas fa-plug-circle-exclamation text-fg-muted" aria-hidden="true"></i>
+        <UiIcon name="fas fa-plug-circle-exclamation" class="text-fg-muted" aria-hidden="true" />
         <span class="flex-1 text-fg">서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요</span>
         <button type="button" class="text-primary font-bold flex-shrink-0 px-1 py-2" @click="reload">다시 시도</button>
       </div>
@@ -264,19 +264,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600&display=swap');
-
-/* Kanit 폰트 클래스 추가 */
-@font-face {
-  font-family: 'Kanit';
-  font-style: normal;
-  font-weight: 600;
-  src:
-    local('Kanit SemiBold'),
-    local('Kanit-SemiBold'),
-    url('https://fonts.gstatic.com/s/kanit/v20/nKKLRXYHTvRiG61aDCxHo_zY.woff2') format('woff2');
-}
-
 /* fade transition */
 .fade-enter-active,
 .fade-leave-active {

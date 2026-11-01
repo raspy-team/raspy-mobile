@@ -1,6 +1,6 @@
 <template>
   <div style="min-height: calc(var(--real-vh, 1vh) * 100)" class="flex flex-col items-center justify-between  bg-gray-800 p-6 text-center">
-    <i class="fas fa-arrow-left self-start text-xl text-gray-400 mb-4" @click="goBack"></i>
+    <UiIcon name="fas fa-arrow-left" class="self-start text-xl text-gray-400 mb-4" @click="goBack" />
 
 
     <div>
@@ -15,7 +15,7 @@
         @click="goHome"
         class="w-full justify-center flex items-center bg-primary text-primary-on px-5 py-3 rounded-lg shadow hover:bg-primary-press transition"
       >
-        <i class="fas fa-home mr-2"></i> 홈으로
+        <UiIcon name="fas fa-home" class="mr-2" /> 홈으로
       </button>
     </div>
   </div>

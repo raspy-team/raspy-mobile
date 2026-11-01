@@ -11,7 +11,7 @@
 | 프레임워크 | Vue 3, Vue Router |
 | 빌드 | Vite (포트 8081) |
 | 언어 | JavaScript + TypeScript (새 코드는 TS 권장) |
-| 스타일 | Tailwind, 공통 부품 [`src/components/ui/`](src/components/ui/README.md) |
+| 스타일 | Tailwind(색은 직접 만든 잉크·시그널), 서체 Geist·Pretendard·Geist Mono, 아이콘 Lucide, 공통 부품 [`src/components/ui/`](src/components/ui/README.md) |
 | 실시간 | STOMP WebSocket |
 | 에러 추적 | Sentry (`VITE_SENTRY_DSN`이 있을 때만) |
 
@@ -46,7 +46,7 @@ npm run api:sync             # 로컬 백엔드에서 API 문서·타입을 다�
 - **새 코드는 API를 `src/api/client.ts`의 `GET`/`POST`로 부른다.** 주소·변수·본문이 타입으로 검사된다. 기존 화면의 `api.js` 호출은 일부러 옮기지 않는다
 - 빌드는 백엔드에 없는 API를 부르면 실패한다 (`scripts/check-api.mjs`)
 - 서버에 반복해서 묻지(폴링) 않는다. 변경 신호는 `src/websocket/userChannel.js`의 `refreshOnChange`로 받는다
-- 화면은 `src/components/ui/`의 부품으로 만든다. 주황 바탕 글자는 `text-primary-on`(검은색). 흰 글자로 되돌리지 않는다(대비 2.8:1)
+- 화면은 `src/components/ui/`의 부품으로 만든다. 흑백이 기본이고 색은 시그널 하나뿐이다. 규칙은 [`src/components/ui/README.md`](src/components/ui/README.md)
 - 말투는 "~해요"
 
 ## 환경변수

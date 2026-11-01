@@ -10,7 +10,7 @@
           <div>
             <h2 class="text-2xl font-bold text-fg">규칙 수정 내용 비교</h2>
             <p class="text-sm text-fg-muted mt-1">
-              <i class="fas fa-user mr-1"></i>
+              <UiIcon name="fas fa-user" class="mr-1" />
               {{ request.requestedBy?.nickname || '알 수 없음' }} · {{ formatDate(request.createdAt) }}
             </p>
           </div>
@@ -18,7 +18,7 @@
             @click="$emit('close')"
             class="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-2 transition"
           >
-            <i class="fas fa-times text-xl text-fg-muted"></i>
+            <UiIcon name="fas fa-times" class="text-xl text-fg-muted" />
           </button>
         </div>
       </div>
@@ -55,7 +55,7 @@
           class="bg-danger-soft border-2 border-danger rounded-xl p-4"
         >
           <p class="text-sm font-medium text-danger-fg mb-2">
-            <i class="fas fa-exclamation-circle mr-1"></i>거절 사유
+            <UiIcon name="fas fa-exclamation-circle" class="mr-1" />거절 사유
           </p>
           <p class="text-sm text-danger-fg">{{ request.rejectionReason }}</p>
         </div>
@@ -197,13 +197,13 @@
           @click="openRejectModal"
           class="flex-1 py-3 bg-danger text-white font-bold rounded-xl transition"
         >
-          <i class="fas fa-times mr-1"></i>거절
+          <UiIcon name="fas fa-times" class="mr-1" />거절
         </button>
         <button
           @click="openApproveModal"
           class="flex-1 py-3 bg-primary text-primary-on font-bold rounded-xl transition"
         >
-          <i class="fas fa-check mr-1"></i>승인
+          <UiIcon name="fas fa-check" class="mr-1" />승인
         </button>
       </div>
 

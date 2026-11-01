@@ -1,5 +1,5 @@
 <template>
-  <div class="flex p-1 bg-surface rounded-xl border border-line" role="tablist">
+  <div class="flex p-1 bg-surface rounded-xl" role="tablist">
     <button
       v-for="o in options"
       :key="o.value"
@@ -7,7 +7,7 @@
       role="tab"
       :aria-selected="modelValue === o.value"
       class="flex-1 h-9 rounded-lg text-sm transition-colors"
-      :class="modelValue === o.value ? 'bg-surface-2 text-fg font-bold' : 'text-fg-muted'"
+      :class="modelValue === o.value ? 'bg-surface-3 text-fg font-semibold' : 'text-fg-muted'"
       @click="emit('update:modelValue', o.value)"
     >
       {{ o.label }}<span v-if="o.count" class="ml-1 text-fg-subtle">{{ o.count }}</span>

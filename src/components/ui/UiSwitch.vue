@@ -6,10 +6,10 @@
     :aria-label="label"
     :disabled="disabled"
     class="relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:opacity-40"
-    :class="modelValue ? 'bg-primary' : 'bg-line-strong'"
+    :class="modelValue ? 'bg-fg' : 'bg-line-strong'"
     @click="emit('update:modelValue', !modelValue)"
   >
-    <span class="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform" :class="modelValue ? 'translate-x-5' : ''"></span>
+    <span class="absolute top-0.5 left-0.5 w-6 h-6 rounded-full transition-transform" :class="modelValue ? 'translate-x-5 bg-canvas' : 'bg-fg'"></span>
   </button>
 </template>
 

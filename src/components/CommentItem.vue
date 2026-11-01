@@ -60,12 +60,12 @@
           style="height: 26px; width: 26px"
           @click="emitLike(comment.id)"
         >
-          <i
-            :class="[
-              'fa-heart fa-lg align-middle',
-              comment.myLikeType === 'LIKE' ? 'fas text-pink-500' : 'far text-fg-muted',
-            ]"
-          ></i>
+          <UiIcon
+            name="heart"
+            :filled="comment.myLikeType === 'LIKE'"
+            class="text-lg align-middle"
+            :class="comment.myLikeType === 'LIKE' ? 'text-danger-fg' : 'text-fg-muted'"
+          />
         </button>
         <span v-if="comment.likeCount > 0" class="min-w-[16px] text-sm select-none">{{
           comment.likeCount

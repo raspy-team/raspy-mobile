@@ -2,7 +2,7 @@
   <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
     <!-- 누구 vs 누구 · 언제 -->
     <header class="flex items-center gap-3">
-      <span class="flex -space-x-3 flex-shrink-0">
+      <span class="flex -space-x-2 flex-shrink-0">
         <UiAvatar v-for="pl in players" :key="pl.id" :src="pl.avatar" :name="pl.name" size="sm" class="ring-2 ring-canvas" />
       </span>
       <p class="flex-1 min-w-0 text-sm text-fg truncate">
@@ -15,7 +15,7 @@
     </header>
 
     <!-- 결과: 이 카드의 주인공 -->
-    <button type="button" class="w-full mt-3 rounded-2xl bg-surface border border-line p-4 text-left" @click="emit('rule')">
+    <button type="button" class="w-full mt-3 rounded-xl bg-surface p-4 text-left" @click="emit('rule')">
       <span class="flex items-center gap-2 t-caption">
         <RuleThumb :rule="post.rule" :size="24" class="!rounded-md" />
         <span class="truncate">{{ post.rule?.ruleTitle }}</span>
@@ -24,7 +24,7 @@
       <span class="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <span v-for="(side, i) in sides" :key="i" class="min-w-0" :class="i === 0 ? 'text-left order-1' : 'text-right order-3'">
           <span class="block truncate text-sm" :class="side.won ? 'text-fg font-bold' : 'text-fg-muted'">
-            {{ side.name }}<i v-if="side.won" class="fas fa-crown text-primary text-xs ml-1" aria-label="승리"></i>
+            {{ side.name }}<UiIcon v-if="side.won" name="crown" class="text-signal text-sm ml-1" aria-label="승리" />
           </span>
         </span>
         <!-- 세트 점수 없이 승패만 남긴 경기는 0:0 대신 vs (승자는 왕관으로) -->
@@ -70,11 +70,11 @@
     <!-- 반응 + 이어지는 행동 -->
     <footer class="flex items-center mt-2 -ml-3">
       <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm" :class="post.isLiked ? 'text-danger' : 'text-fg-muted'" :aria-pressed="post.isLiked" aria-label="좋아요" @click="emit('like')">
-        <i :class="post.isLiked ? 'fas fa-heart' : 'far fa-heart'" class="text-lg" aria-hidden="true"></i>
+        <UiIcon :name="post.isLiked ? 'fas fa-heart' : 'far fa-heart'" class="text-lg" aria-hidden="true" />
         <span v-if="post.likeCount" class="tabular-nums">{{ post.likeCount }}</span>
       </button>
       <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm text-fg-muted" aria-label="댓글" @click="emit('comment')">
-        <i class="far fa-comment text-lg" aria-hidden="true"></i>
+        <UiIcon name="far fa-comment" class="text-lg" aria-hidden="true" />
         <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
       </button>
       <div class="flex-1"></div>

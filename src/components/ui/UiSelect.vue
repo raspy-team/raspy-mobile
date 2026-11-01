@@ -10,7 +10,7 @@
         <option value="" disabled>{{ placeholder }}</option>
         <option v-for="o in normalized" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
-      <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs text-fg-subtle pointer-events-none" aria-hidden="true"></i>
+      <UiIcon name="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 text-base text-fg-subtle pointer-events-none" aria-hidden="true" />
     </div>
   </UiField>
 </template>

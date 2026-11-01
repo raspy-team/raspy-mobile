@@ -5,7 +5,7 @@
       <div class="flex items-center justify-between w-full mb-3">
         <span class="text-base font-medium">경기 결과 저장</span>
         <button @click="$emit('close')" class="p-1 text-gray-600 hover:text-gray-800">
-          <i class="fas fa-times"></i>
+          <UiIcon name="fas fa-times" />
         </button>
       </div>
       <!-- 이미지 팔레트 -->
@@ -41,11 +41,11 @@
       <div class="flex justify-center w-full">
         <button v-if="!saved" @click="downloadImage" :disabled="downloading || !imageReady"
           class="flex items-center gap-1 text-sm text-orange-500 hover:text-orange-600">
-          <i class="fas fa-download"></i>
+          <UiIcon name="fas fa-download" />
           <span class="font-medium">저장</span>
         </button>
         <button v-else disabled class="ml-3 flex items-center gap-1 text-sm text-green-500">
-          <i class="fas fa-check font-medium"></i>
+          <UiIcon name="fas fa-check" class="font-medium" />
           <span class="font-medium">저장됨</span>
         </button>
       </div>

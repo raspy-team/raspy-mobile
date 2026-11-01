@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
     <div class="flex items-center gap-2 mb-3">
-      <i :class="['fas', icon, 'text-orange-500']"></i>
+      <UiIcon :name="'fas ' + icon" class="text-fg-muted" />
       <h3 class="font-bold text-gray-900">{{ label }}</h3>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -50,7 +50,7 @@
 
     <!-- 변경 사항 표시 -->
     <div v-if="hasChanged" class="mt-2 flex items-center gap-2 text-xs text-orange-600">
-      <i class="fas fa-arrow-right"></i>
+      <UiIcon name="fas fa-arrow-right" />
       <span class="font-semibold">변경됨</span>
     </div>
   </div>

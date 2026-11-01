@@ -7,14 +7,14 @@
     :class="{ 'active:bg-surface-2': !plain }"
   >
     <slot name="leading">
-      <i v-if="icon" class="w-5 text-center" :class="[icon, danger ? 'text-danger-fg' : 'text-fg-muted']" aria-hidden="true"></i>
+      <UiIcon v-if="icon" :name="icon" class="text-lg" :class="danger ? 'text-danger-fg' : 'text-fg-muted'" />
     </slot>
     <span class="flex-1 min-w-0">
       <span class="block truncate" :class="danger ? 'text-danger-fg' : 'text-fg'">{{ title }}</span>
       <span v-if="subtitle" class="block truncate t-micro mt-0.5">{{ subtitle }}</span>
     </span>
     <slot name="trailing">
-      <i v-if="chevron" class="fas fa-chevron-right text-xs text-fg-subtle" aria-hidden="true"></i>
+      <UiIcon v-if="chevron" name="chevron-right" class="text-base text-fg-subtle" />
     </slot>
   </component>
 </template>

@@ -6,7 +6,7 @@
       <span class="flex items-start gap-2">
         <span class="flex-1 t-heading truncate">{{ rule.ruleTitle }}</span>
         <span v-if="rating" class="flex items-center gap-1 text-sm text-fg flex-shrink-0">
-          <i class="fas fa-star text-xs" aria-hidden="true"></i>{{ rating }}
+          <UiIcon name="fas fa-star" class="text-xs" aria-hidden="true" />{{ rating }}
           <span class="text-fg-subtle">({{ rule.ratingCount }})</span>
         </span>
       </span>
@@ -14,7 +14,7 @@
       <span v-if="rule.ruleGoal" class="block t-caption mt-1 line-clamp-2">{{ rule.ruleGoal }}</span>
       <span class="flex items-center gap-1.5 mt-2 t-micro">
         <template v-if="rule.currentChampion">
-          <i class="fas fa-crown text-primary" aria-hidden="true"></i>
+          <UiIcon name="crown" class="text-signal" />
           <span class="truncate">챔피언 {{ rule.currentChampion.nickname }}</span>
           <span aria-hidden="true">·</span>
         </template>

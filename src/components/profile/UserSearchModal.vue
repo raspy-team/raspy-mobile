@@ -11,14 +11,14 @@
       <div class="px-6 py-5 border-b border-gray-700/50 bg-gradient-to-r from-orange-500/10 to-transparent">
         <div class="flex items-center justify-between">
           <h3 class="font-bold text-xl text-white flex items-center gap-2">
-            <i class="fas fa-search text-orange-500"></i>
+            <UiIcon name="fas fa-search" class="text-orange-500" />
             유저 찾기
           </h3>
           <button
             class="w-9 h-9 rounded-full bg-gray-700/50 hover:bg-gray-700 text-gray-400 hover:text-white transition-all flex items-center justify-center"
             @click="emit('close')"
           >
-            <i class="fas fa-times"></i>
+            <UiIcon name="fas fa-times" />
           </button>
         </div>
       </div>
@@ -26,7 +26,7 @@
       <!-- 검색 입력 -->
       <div class="px-6 py-4">
         <div class="relative">
-          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+          <UiIcon name="fas fa-search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             v-model="userSearch"
             @input="onUserSearch"
@@ -50,7 +50,7 @@
           v-else-if="userSearchResult.length === 0 && userSearch.trim() !== ''"
           class="text-center py-12"
         >
-          <i class="fas fa-user-slash text-4xl text-gray-400 mb-3"></i>
+          <UiIcon name="fas fa-user-slash" class="text-4xl text-gray-400 mb-3" />
           <p class="text-gray-400 text-base">찾는 사람이 없어요</p>
           <p class="text-gray-400 text-sm mt-1">다른 키워드로 시도해보세요</p>
         </div>
@@ -76,13 +76,13 @@
                 {{ user.intro }}
               </div>
             </div>
-            <i class="fas fa-chevron-right text-gray-400 group-hover:text-orange-500 transition-colors"></i>
+            <UiIcon name="fas fa-chevron-right" class="text-gray-400 group-hover:text-orange-500 transition-colors" />
           </button>
         </div>
 
         <!-- 초기 상태 (검색 전) -->
         <div v-else class="text-center py-12">
-          <i class="fas fa-search text-4xl text-gray-200 mb-3"></i>
+          <UiIcon name="fas fa-search" class="text-4xl text-gray-200 mb-3" />
           <p class="text-gray-500 text-sm">검색어를 입력하세요</p>
         </div>
       </div>

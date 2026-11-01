@@ -3,21 +3,20 @@
     <main class="flex-1 w-full max-w-md mx-auto px-6 flex flex-col">
       <!-- 무슨 앱인지 -->
       <div class="flex-1 flex flex-col justify-center py-10">
-        <p class="text-primary font-bold text-lg tracking-tight">Match</p>
-        <h1 class="t-display mt-3">오늘 한 판,<br />붙어볼래요?</h1>
-        <p class="t-body text-fg-muted mt-3">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
+        <BrandMark size="22px" />
+        <h1 class="t-display text-[44px] mt-10">오늘 한 판,<br />붙어볼래요?</h1>
+        <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
 
-        <ul class="mt-10 space-y-5">
-          <li v-for="f in FEATURES" :key="f.title" class="flex items-start gap-4">
-            <span class="w-10 h-10 rounded-xl bg-surface-2 text-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
-              <i :class="f.icon"></i>
-            </span>
+        <!-- 아이콘 상자 대신 번호와 글자로 (장식보다 내용) -->
+        <ol class="mt-12 border-t border-line">
+          <li v-for="(f, i) in FEATURES" :key="f.title" class="flex items-baseline gap-4 py-4 border-b border-line">
+            <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
             <span>
-              <span class="block t-heading">{{ f.title }}</span>
+              <span class="block text-[15px] font-semibold text-fg tracking-[-0.02em]">{{ f.title }}</span>
               <span class="block t-caption mt-0.5">{{ f.body }}</span>
             </span>
           </li>
-        </ul>
+        </ol>
       </div>
 
       <!-- 시작 -->
@@ -54,6 +53,7 @@
 </template>
 
 <script setup>
+import BrandMark from '../components/BrandMark.vue'
 // 시작 화면: 무슨 앱인지 한눈에 + 시작하기. 약관 동의는 가입 뒤 /welcome에서 받는다
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'

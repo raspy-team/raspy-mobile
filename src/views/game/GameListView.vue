@@ -9,7 +9,7 @@
     <!-- 첫 설정을 막 마친 사람에게 한 번 -->
     <UiCard v-if="route.query.welcome" class="mb-4 flex items-start gap-3">
       <span class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center flex-shrink-0" aria-hidden="true">
-        <i class="fas fa-hand"></i>
+        <UiIcon name="fas fa-hand" />
       </span>
       <div class="flex-1 min-w-0">
         <p class="t-heading">준비됐어요!</p>
@@ -21,7 +21,7 @@
     <!-- 이 화면의 주 행동은 하나: 경기 만들기 -->
     <UiButton block size="lg" icon="fas fa-plus" to="/create-game">경기 만들기</UiButton>
     <UiButton variant="ghost" size="sm" to="/rules" class="mt-2 -ml-2">
-      어떤 규칙이 있는지 보기 <i class="fas fa-chevron-right text-xs" aria-hidden="true"></i>
+      어떤 규칙이 있는지 보기 <UiIcon name="fas fa-chevron-right" class="text-xs" aria-hidden="true" />
     </UiButton>
 
     <UiSection title="열린 경기" class="mt-6">

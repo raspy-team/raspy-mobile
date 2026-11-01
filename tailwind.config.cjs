@@ -1,11 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 const colors = require('tailwindcss/colors')
 
-// 브랜드 색은 주황 하나이고, 화면의 주 행동과 켜진 탭에만 쓴다.
-// 보조로 쓰이던 파랑·보라·분홍 계열은 무채색으로 모아 주 행동과 다투지 않게 한다.
-// 빨강(패배·삭제), 초록(승리·완료), 노랑(금메달)은 의미가 있는 색이라 그대로 둔다.
-const brand = colors.orange
-const quiet = colors.neutral
+// 매치 색 체계 (2026-11-01 새로 만듦). Tailwind 기본 팔레트를 쓰지 않는다.
+// - 바탕은 흑백(잉크). 순검정·순백은 대비가 너무 세서 OLED에서 번지므로 아주 조금 띄운다
+// - 주 버튼은 흰 바탕 + 검은 글씨. 색으로 강조하지 않고 명도로 강조한다
+// - 색은 '시그널(볼트)' 하나뿐이고 작게만 쓴다: 승리, 진행 중, 안 읽음, 챔피언
+// - 빨강은 위험(삭제·신고·오류)에만
+const ink = {
+  50: '#f7f7f8',
+  100: '#ededef', // 본문 글자
+  200: '#d4d4d8',
+  300: '#b4b4bb',
+  400: '#a0a0a8', // 보조 글자
+  500: '#8b8b93', // 약한 글자 (카드 위에서도 대비 4.5:1 이상)
+  600: '#5c5c64',
+  700: '#2c2c31', // 강한 선
+  800: '#1f1f23', // 선, 눌린 상태
+  850: '#19191c', // 입력칸, 카드 안의 칸
+  900: '#111113', // 카드·시트
+  950: '#0a0a0b', // 화면 바탕
+}
+const volt = '#d2ff4d'
 
 module.exports = {
   content: [
@@ -13,26 +28,38 @@ module.exports = {
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {
-    // 모서리는 두 가지뿐: 작은 것(칩·입력칸) 8px, 나머지(카드·버튼·모달) 12px, 그리고 원
+    // 모서리: 작은 것(칩·배지) 8px, 버튼·입력칸·카드 12px, 시트 16px, 원
     borderRadius: {
       none: '0',
-      sm: '8px',
+      sm: '6px',
       DEFAULT: '8px',
       md: '8px',
       lg: '12px',
       xl: '12px',
-      '2xl': '12px',
-      '3xl': '12px',
+      '2xl': '16px',
+      '3xl': '16px',
       full: '9999px',
     },
-    // 그림자 없이 평평하게. 층은 배경 밝기와 테두리로 나눈다
+    // 그림자 없이 평평하게. 층은 바탕 밝기로 나눈다 (선은 아껴 쓴다)
     boxShadow: {
       sm: 'none', DEFAULT: 'none', md: 'none', lg: 'none', xl: 'none', '2xl': 'none', inner: 'none', none: 'none',
     },
+    fontFamily: {
+      // 라틴·숫자는 Geist, 한글은 Pretendard가 받는다
+      sans: ['Geist', '"Pretendard Variable"', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+      mono: ['"Geist Mono"', '"Pretendard Variable"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+    },
+    // 굵기는 아껴 쓴다. 예전 화면의 font-bold(700)가 많아 한 단계 가볍게(620) 받아준다
+    fontWeight: {
+      normal: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '620',
+      extrabold: '680',
+      black: '700',
+    },
     extend: {
-      // 'border'만 쓴 곳의 기본 선 색. 검은 바탕에 맞춘다
-      borderColor: { DEFAULT: colors.neutral[800] },
-      // 겹치는 층의 순서. 숫자를 직접 쓰지 말고 이 이름으로 쓴다 (z-header, z-sheet ...)
+      borderColor: { DEFAULT: ink[800] },
       zIndex: {
         header: '30',
         nav: '40',
@@ -41,31 +68,39 @@ module.exports = {
         toast: '70',
       },
       colors: {
-        // 의미 이름 토큰. 새 코드는 이 이름만 쓴다 (bg-surface, text-fg-muted, bg-primary ...)
-        canvas: '#000000', // 화면 바탕
-        surface: colors.neutral[900], // 카드·시트
-        'surface-2': colors.neutral[800], // 카드 안의 칸, 눌린 상태, 보조 버튼
-        line: colors.neutral[800], // 구분선·테두리
-        'line-strong': colors.neutral[700],
-        fg: '#ffffff', // 본문 글자
-        'fg-muted': colors.neutral[400], // 보조 글자
-        'fg-subtle': '#8c8c8c', // 더 약한 글자 (시간, 개수). 카드 위에서도 대비 4.5:1을 넘게 neutral-500보다 조금 밝다
-        // on: 주황 바탕 위의 글자. 흰 글자는 대비가 2.8:1이라 읽기 어렵다 (검은 글자는 7:1)
-        primary: { DEFAULT: brand[500], press: brand[600], soft: 'rgba(249,115,22,0.15)', fg: brand[400], on: '#0a0a0a' },
-        danger: { DEFAULT: colors.red[500], soft: 'rgba(239,68,68,0.15)', fg: colors.red[400] },
-        success: { DEFAULT: colors.green[500], soft: 'rgba(34,197,94,0.15)', fg: colors.green[400] },
+        // 의미 이름 토큰. 화면은 이 이름만 쓴다 (bg-surface, text-fg-muted, bg-primary ...)
+        canvas: ink[950],
+        surface: ink[900],
+        'surface-2': ink[850],
+        'surface-3': ink[800],
+        line: ink[800],
+        'line-strong': ink[700],
+        fg: ink[100],
+        'fg-muted': ink[400],
+        'fg-subtle': ink[500],
+        // 주 행동: 흰 바탕 + 검은 글씨
+        primary: { DEFAULT: ink[100], press: ink[300], soft: 'rgba(237,237,239,0.08)', fg: ink[100], on: ink[950] },
+        signal: { DEFAULT: volt, soft: 'rgba(210,255,77,0.12)', fg: volt, on: ink[950] },
+        danger: { DEFAULT: '#ff5c5c', soft: 'rgba(255,92,92,0.12)', fg: '#ff7a7a' },
+        // '완료·승리'는 시그널 색으로
+        success: { DEFAULT: volt, soft: 'rgba(210,255,77,0.12)', fg: volt },
 
-        gray: colors.neutral,
-        slate: colors.neutral,
-        amber: brand,
+        // 옛 화면에 남은 색 이름은 잉크로 모은다 (주황·파랑·보라가 다시 새어 나오지 않게)
+        ink,
+        gray: ink,
+        neutral: ink,
+        slate: ink,
+        zinc: ink,
+        orange: ink,
+        amber: ink,
+        pink: ink,
         rose: colors.red,
-        pink: quiet,
-        fuchsia: quiet,
-        purple: quiet,
-        violet: quiet,
-        indigo: quiet,
-        blue: quiet,
-        sky: quiet,
+        fuchsia: ink,
+        purple: ink,
+        violet: ink,
+        indigo: ink,
+        blue: ink,
+        sky: ink,
       },
     },
   },

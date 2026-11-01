@@ -100,9 +100,11 @@ const isDraw = computed(() => !props.post.result?.winner)
 const sides = computed(() => {
   const r = props.post.result || {}
   const [a, b] = players.value
+  // 단판이면 세트 수(1:0) 대신 그 판의 점수(21:15)를 크게
+  const single = r.setScores?.length === 1 ? r.setScores[0] : null
   return [
-    { name: a?.name || '', score: r.scoreA ?? 0, won: !!r.winner && r.winner === a?.name },
-    { name: b?.name || '', score: r.scoreB ?? 0, won: !!r.winner && r.winner === b?.name },
+    { name: a?.name || '', score: single ? single.scoreA : r.scoreA ?? 0, won: !!r.winner && r.winner === a?.name },
+    { name: b?.name || '', score: single ? single.scoreB : r.scoreB ?? 0, won: !!r.winner && r.winner === b?.name },
   ]
 })
 // 세트 점수: "1세트 11:7 · 2세트 9:11"

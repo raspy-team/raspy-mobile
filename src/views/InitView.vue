@@ -4,7 +4,7 @@
       <!-- 무슨 앱인지 -->
       <div class="flex-1 flex flex-col justify-center py-10">
         <BrandMark size="22px" />
-        <h1 class="t-display text-[44px] mt-10">오늘 한 판,<br />붙어볼래요?</h1>
+        <h1 class="t-display text-[44px] mt-10">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
         <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
 
         <!-- 아이콘 상자 대신 번호와 글자로 (장식보다 내용) -->

@@ -55,7 +55,7 @@
             v-for="s in ruleStats"
             :key="s.status"
             :to="`/admin/rule-edit-requests?status=${s.status}`"
-            class="rounded-xl bg-surface border border-line p-3 text-center active:bg-surface-2"
+            class="rounded-xl bg-surface p-3 text-center active:bg-surface-2"
           >
             <p class="t-title tabular-nums" :class="s.status === 'PENDING' && s.count ? 'text-primary' : 'text-fg'">{{ s.count }}</p>
             <p class="t-caption mt-0.5">{{ s.label }}</p>

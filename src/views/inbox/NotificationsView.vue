@@ -31,13 +31,16 @@
           <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
         </button>
 
-        <UiEmptyState
-          v-if="!groups.length && !inbox.friendRequests.length"
-          class="pt-16"
-          icon="far fa-bell"
-          title="새 알림이 없어요"
-          description="경기 신청·승인, 댓글, 친구 요청이 오면 여기에 모여요"
-        />
+        <!-- 비었을 때: 무엇이 오는지 보여주고 설정으로 -->
+        <section v-if="!groups.length && !inbox.friendRequests.length" class="pt-10">
+          <UiEmptyState icon="far fa-bell" title="새 알림이 없어요" description="이럴 때 알려드려요" class="!pb-6" />
+          <UiList>
+            <UiListItem plain icon="user-plus" title="누가 내 경기에 신청했을 때" />
+            <UiListItem plain icon="clipboard-check" title="상대가 결과를 확인해 달라고 할 때" />
+            <UiListItem plain icon="comment" title="댓글·친구 요청·메시지가 왔을 때" />
+          </UiList>
+          <UiButton block variant="ghost" class="mt-3" to="/settings/notifications">알림 설정</UiButton>
+        </section>
 
         <section v-for="g in groups" :key="g.label" class="pt-6 ui-appear">
           <h2 class="t-label mb-1">{{ g.label }}</h2>

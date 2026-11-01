@@ -31,7 +31,7 @@
       </div>
 
       <!-- 숫자 세 칸. 아직 아무도 안 해 본 규칙이면 '– 0 –'만 남아 빼고, 아래 챔피언 줄이 첫 경기를 안내한다 -->
-      <div v-if="rule.playCount || rating" class="mt-6 grid grid-cols-3 border border-line rounded-xl divide-x divide-line text-center">
+      <div v-if="rule.playCount || rating" class="mt-6 grid grid-cols-3 bg-surface rounded-xl divide-x divide-line text-center">
         <div class="py-3">
           <p class="t-heading">
             <template v-if="rating"><UiIcon name="fas fa-star" class="text-sm" aria-hidden="true" /> {{ rating }}</template>
@@ -61,7 +61,7 @@
 
       <!-- 챔피언 -->
       <div class="flex items-center gap-3 py-5 border-b border-line">
-        <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="rule.currentChampion ? 'bg-signal-soft text-signal' : 'bg-surface-2 text-fg-subtle'" aria-hidden="true">
+        <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="rule.currentChampion ? 'bg-signal-soft text-signal-fg' : 'bg-surface-2 text-fg-subtle'" aria-hidden="true">
           <UiIcon name="fas fa-crown" />
         </span>
         <span class="flex-1 min-w-0">
@@ -72,13 +72,13 @@
 
       <!-- 규칙 내용 -->
       <div class="pt-8">
-        <h2 class="t-title mb-6">규칙</h2>
+        <h2 class="t-heading mb-4">규칙</h2>
         <RuleBody :rule="rule" />
       </div>
 
       <!-- 랭킹 미리보기 -->
       <section v-if="top.length" class="mt-10 pt-8 border-t border-line">
-        <h2 class="t-title mb-4">랭킹</h2>
+        <h2 class="t-heading mb-3">랭킹</h2>
         <UiList>
           <UiListItem
             v-for="r in top"

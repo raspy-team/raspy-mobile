@@ -18,11 +18,11 @@
       <UiIconButton icon="fas fa-xmark" label="닫기" class="-mt-2 -mr-2" @click="router.replace({ query: {} })" />
     </UiCard>
 
-    <!-- 이 화면의 주 행동은 하나: 경기 만들기 -->
-    <UiButton block size="lg" icon="fas fa-plus" to="/create-game">경기 만들기</UiButton>
-    <UiButton variant="ghost" size="sm" to="/rules" class="mt-2 -ml-2">
-      어떤 규칙이 있는지 보기 <UiIcon name="fas fa-chevron-right" class="text-xs" aria-hidden="true" />
-    </UiButton>
+    <!-- 주 행동은 경기 만들기 하나. 화면에서 가장 밝은 덩어리가 내용보다 앞서지 않게 작게 -->
+    <div class="flex items-center gap-1">
+      <UiButton size="sm" icon="plus" to="/create-game">경기 만들기</UiButton>
+      <UiButton size="sm" variant="ghost" to="/rules">규칙 둘러보기</UiButton>
+    </div>
 
     <UiSection title="열린 경기" class="mt-6">
       <template #action>

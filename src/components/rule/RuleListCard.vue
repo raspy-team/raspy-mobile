@@ -14,7 +14,7 @@
       <span v-if="rule.ruleGoal" class="block t-caption mt-1 line-clamp-2">{{ rule.ruleGoal }}</span>
       <span class="flex items-center gap-1.5 mt-2 t-micro">
         <template v-if="rule.currentChampion">
-          <UiIcon name="crown" class="text-signal" />
+          <UiIcon name="crown" class="text-signal-fg" />
           <span class="truncate">챔피언 {{ rule.currentChampion.nickname }}</span>
           <span aria-hidden="true">·</span>
         </template>

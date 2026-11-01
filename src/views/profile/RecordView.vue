@@ -29,14 +29,14 @@
         <div class="flex items-end justify-between">
           <div>
             <p class="t-caption">승률</p>
-            <p class="t-display text-[56px] font-mono tracking-[-0.06em] leading-none mt-2">{{ total.rate }}<span class="text-2xl text-fg-muted ml-0.5">%</span></p>
+            <p class="t-display text-[56px] font-mono tracking-[-0.06em] leading-none mt-2"><UiRollNumber :value="total.rate" /><span class="text-2xl text-fg-muted ml-0.5">%</span></p>
           </div>
           <p class="t-body text-fg-muted tabular-nums">{{ total.win }}승 {{ total.draw }}무 {{ total.lose }}패</p>
         </div>
         <div class="flex h-2.5 mt-4 rounded-full overflow-hidden bg-surface-2" role="img" :aria-label="`${total.win}승 ${total.draw}무 ${total.lose}패`">
           <!-- 승패는 색이 아니라 밝기로: 승은 흰색, 무는 회색, 패는 빈칸 -->
           <span class="bg-fg" :style="{ width: pct(total.win) }"></span>
-          <span class="bg-ink-600" :style="{ width: pct(total.draw) }"></span>
+          <span class="bg-fg-subtle" :style="{ width: pct(total.draw) }"></span>
           <span class="bg-surface-3" :style="{ width: pct(total.lose) }"></span>
         </div>
       </section>
@@ -86,7 +86,7 @@
             @click="router.push(`/rules/${r.id}`)"
           >
             <template #leading>
-              <RuleThumb :rule="{ minorCategory: r.minor, ruleTitle: r.title }" />
+              <RuleThumb :rule="{ minorCategory: r.minor, ruleTitle: r.title }" :size="36" bare />
             </template>
             <template #trailing>
               <span class="t-heading tabular-nums">{{ r.rate }}%</span>
@@ -124,7 +124,7 @@
       <section v-if="reviews.length">
         <h2 class="t-heading mb-3">받은 한마디</h2>
         <ul class="space-y-3">
-          <li v-for="g in reviews" :key="g.id" class="rounded-xl bg-surface p-4 border border-line">
+          <li v-for="g in reviews" :key="g.id" class="rounded-xl bg-surface p-4">
             <p class="t-body whitespace-pre-line break-words">“{{ g.review }}”</p>
             <p class="t-micro mt-2">{{ g.opponent.nickname }} · {{ g.rule.ruleTitle }} · {{ timeAgo(g.date) }}</p>
           </li>
@@ -141,7 +141,7 @@ import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import { UiAvatar, UiBadge, UiButton, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiAvatar, UiBadge, UiButton, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiRollNumber, UiSkeleton, UiTopBar } from '../../components/ui'
 import { timeAgo } from '../../utils/format'
 
 const RESULT = {

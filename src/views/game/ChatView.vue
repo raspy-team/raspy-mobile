@@ -1,6 +1,6 @@
 <script setup>
 import RuleThumb from '../../components/rule/RuleThumb.vue'
-import { UiAvatar, UiBadge, UiButton, UiDialog, UiEmptyState, UiIconButton, UiSkeleton } from '../../components/ui'
+import { UiAvatar, UiBadge, UiButton, UiChip, UiDialog, UiEmptyState, UiIconButton, UiSkeleton } from '../../components/ui'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { refreshInbox } from '../../stores/inbox'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
@@ -166,6 +166,12 @@ function goToProfile() {
 }
 function goBack() {
   router.go(-1)
+}
+
+const QUICK_REPLIES = ['안녕하세요! 반가워요', '한 판 하실래요?', '언제 시간 괜찮으세요?', '어디서 할까요?']
+function sendQuick(text) {
+  newMsg.value = text
+  sendMsg()
 }
 
 function sendMsg() {
@@ -389,8 +395,12 @@ const closeErrorModal = () => {
         />
       </div>
 
-      <div v-else-if="!visibleMessages.length" class="h-full flex items-center justify-center">
-        <UiEmptyState icon="far fa-comment" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="인사를 건네거나 경기 이야기를 해보세요" />
+      <div v-else-if="!visibleMessages.length" class="h-full flex flex-col items-center justify-center">
+        <UiEmptyState icon="far fa-comment" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="첫마디가 어려우면 하나 골라 보내보세요" />
+        <!-- 빠른 첫마디: 누르면 바로 보낸다 -->
+        <div class="flex flex-wrap justify-center gap-2 px-6 -mt-6">
+          <UiChip v-for="q in QUICK_REPLIES" :key="q" @click="sendQuick(q)">{{ q }}</UiChip>
+        </div>
       </div>
 
       <div v-else ref="chatBox" class="h-full overflow-auto space-y-2 pb-2" role="log" aria-live="polite">

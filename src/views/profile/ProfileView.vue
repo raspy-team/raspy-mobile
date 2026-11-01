@@ -44,7 +44,7 @@
       <p v-if="user.intro" class="t-body text-fg-muted mt-4 whitespace-pre-line break-words">{{ user.intro }}</p>
 
       <!-- 숫자 한 줄 -->
-      <div class="mt-6 grid grid-cols-4 border border-line rounded-xl divide-x divide-line text-center">
+      <div class="mt-6 grid grid-cols-4 bg-surface rounded-xl divide-x divide-line text-center">
         <div class="py-3">
           <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
           <p class="t-micro mt-0.5">경기</p>
@@ -83,7 +83,7 @@
         <h2 class="t-heading mb-3">챔피언</h2>
         <div class="flex flex-wrap gap-2">
           <span v-for="(c, i) in user.myChampions" :key="i" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-line-strong text-fg text-sm">
-            <UiIcon name="crown" class="text-signal" />{{ [c.region, c.ruleTitle].filter(Boolean).join(' ') }}
+            <UiIcon name="crown" class="text-signal-fg" />{{ [c.region, c.ruleTitle].filter(Boolean).join(' ') }}
           </span>
         </div>
       </section>
@@ -104,7 +104,7 @@
             @click="router.push(`/rules/${r.ruleId}`)"
           >
             <template #leading>
-              <RuleThumb :rule="r" />
+              <RuleThumb :rule="r" :size="36" bare />
             </template>
             <template #trailing>
               <UiBadge v-if="r.myRank" :tone="r.myRank === 1 ? 'primary' : 'neutral'">{{ r.myRank }}위 / {{ r.totalPlayers }}명</UiBadge>

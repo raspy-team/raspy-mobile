@@ -1,7 +1,7 @@
 <template>
   <span
     class="relative inline-flex flex-shrink-0 items-center justify-center rounded-full overflow-hidden text-fg/90 font-semibold tracking-[-0.02em]"
-    :style="{ width: px + 'px', height: px + 'px', fontSize: Math.round(px * 0.38) + 'px', background: (src && !failed) ? '#19191c' : tint }"
+    :style="{ width: px + 'px', height: px + 'px', fontSize: Math.round(px * 0.38) + 'px', background: (src && !failed) ? 'rgb(var(--c-surface-2))' : tint }"
   >
     <img
       v-if="src && !failed"
@@ -18,7 +18,8 @@
 
 <script setup>
 // 프로필 사진. 사진이 없거나 깨지면 닉네임 첫 글자를 보여준다.
-// 빈 회색 원은 '덜 만든 앱'처럼 보여서, 이름마다 정해지는 차분한 색 그라데이션을 깐다 (같은 이름이면 늘 같은 색)
+// 빈 회색 원은 '덜 만든 앱'처럼 보여서, 이름마다 정해지는 무채색 그라데이션을 깐다 (같은 이름이면 늘 같은 모양).
+// 색을 넣으면 흑백 화면에서 탁해 보여서 밝기·방향만 바꾼다. 라이트·다크 모두 바탕색에서 섞어 만든다
 import { ref, computed, watch, defineProps } from 'vue'
 
 const props = defineProps({
@@ -36,10 +37,13 @@ function hash(s) {
   for (const c of s) h = (h * 31 + c.codePointAt(0)) >>> 0
   return h
 }
-// 채도를 낮게 묶어 흑백 화면과 다투지 않게 한다
 const tint = computed(() => {
-  const h = hash(props.name || '?') % 360
-  return `linear-gradient(140deg, hsl(${h} 16% 34%), hsl(${(h + 48) % 360} 14% 17%))`
+  const n = hash(props.name || '?')
+  const angle = n % 360
+  const a = 14 + (n % 5) * 4 // 글자색을 14~30% 섞은 밝은 쪽
+  const b = 4 + ((n >>> 3) % 4) * 2 // 4~10% 섞은 어두운 쪽 (>>>: 큰 해시에서 음수가 되지 않게)
+  const mix = (p) => `color-mix(in srgb, rgb(var(--c-fg)) ${p}%, rgb(var(--c-canvas)))`
+  return `linear-gradient(${angle}deg, ${mix(a)}, ${mix(b)})`
 })
 watch(() => props.src, () => (failed.value = false))
 </script>

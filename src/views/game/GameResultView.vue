@@ -19,8 +19,8 @@
     <template v-else>
       <!-- 결과 한 줄 + 점수판: 이 앱에서 감정이 가장 실리는 순간이라 글자와 숫자로 크게 -->
       <section>
-        <p class="t-mono text-center">{{ [game.rule?.ruleTitle, playedOn].filter(Boolean).join(' · ') }}</p>
-        <h1 class="t-display text-center mt-3" :class="headline.tone">{{ headline.text }}</h1>
+        <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<span v-if="playedOn" class="t-mono ml-2">{{ playedOn }}</span></p>
+        <h1 class="t-display text-center mt-3" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
 
         <div class="mt-10 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <button
@@ -47,14 +47,14 @@
           </button>
           <!-- 세트 점수 없이 결과만 남긴 경기는 숫자 대신 vs -->
           <p v-if="setResults.length" class="order-2 font-mono text-[64px] leading-none tracking-[-0.06em] tabular-nums" :aria-label="`세트 ${sides[0].sets} 대 ${sides[1].sets}`">
-            <span :class="sides[0].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].sets }}</span><span class="text-fg-subtle mx-1.5">:</span><span :class="sides[1].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].sets }}</span>
+            <UiRollNumber :value="sides[0].sets" :class="sides[0].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'" /><span class="text-fg-subtle mx-1.5">:</span><UiRollNumber :value="sides[1].sets" :delay="140" :class="sides[1].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'" />
           </p>
           <p v-else class="order-2 t-mono">vs</p>
         </div>
 
         <!-- 세트별 점수: 표로 -->
         <div v-if="setResults.length" class="mt-10 rounded-xl bg-surface divide-y divide-line">
-          <div class="grid grid-cols-[3rem_1fr_auto_1fr] items-center px-4 h-10 t-mono">
+          <div class="grid grid-cols-[3rem_1fr_auto_1fr] items-center px-4 h-10 t-micro">
             <span>세트</span>
             <span class="text-right truncate">{{ sides[0].user.nickname }}</span>
             <span class="w-6"></span>
@@ -86,7 +86,7 @@
 
       <!-- 새 챔피언 -->
       <UiCard v-if="championUser" class="flex items-center gap-3">
-        <span class="w-10 h-10 rounded-full bg-signal-soft text-signal flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
           <UiIcon name="crown" />
         </span>
         <div class="min-w-0">
@@ -270,7 +270,7 @@ import { POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { matchTime } from '../../utils/format'
 import {
-  UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar,
+  UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'
@@ -401,13 +401,14 @@ const sides = computed(() => [
 const setLeft = (s) => (idxCorrect.value ? s.user1Score : s.user2Score)
 const setRight = (s) => (idxCorrect.value ? s.user2Score : s.user1Score)
 const playedOn = computed(() =>
-  startDate.value ? new Date(startDate.value).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '',
+  // 고정폭에는 숫자만: 2026.10.31
+  startDate.value ? (() => { const d = new Date(startDate.value); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}` })() : '',
 )
 const headline = computed(() => {
   if (winnerIdx.value === 0) return { text: '무승부', tone: 'text-fg' }
   const winner = winnerIdx.value === 1 ? user1.value : user2.value
-  if (!isParticipant.value) return { text: `${winner.nickname}님 승리`, tone: 'text-fg' }
-  return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-fg' } : { text: '졌어요', tone: 'text-fg-muted' }
+  if (!isParticipant.value) return { text: `${winner.nickname}님 승리`, tone: 'text-fg', mark: true }
+  return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-fg', mark: true } : { text: '졌어요', tone: 'text-fg-muted' }
 })
 const pending = computed(() => {
   if (confirmed.value) return { canAnswer: false }

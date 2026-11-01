@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col items-center text-center py-14 px-6">
-    <span v-if="icon" class="w-14 h-14 mb-5 rounded-2xl border border-line-strong flex items-center justify-center text-fg-muted" aria-hidden="true">
+    <span v-if="icon" class="w-14 h-14 mb-5 rounded-2xl bg-surface-2 flex items-center justify-center text-fg-muted" aria-hidden="true">
       <UiIcon :name="icon" class="text-[26px]" />
     </span>
     <p class="t-heading">{{ title }}</p>

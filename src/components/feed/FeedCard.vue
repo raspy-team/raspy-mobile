@@ -1,43 +1,41 @@
 <template>
   <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
-    <!-- 누구 vs 누구 · 언제 -->
+    <!-- 무엇을 · 어디서 · 언제 (이름은 아래 결과에 한 번만) -->
     <header class="flex items-center gap-3">
       <span class="flex -space-x-2 flex-shrink-0">
         <UiAvatar v-for="pl in players" :key="pl.id" :src="pl.avatar" :name="pl.name" size="sm" class="ring-2 ring-canvas" />
       </span>
-      <p class="flex-1 min-w-0 text-sm text-fg truncate">
-        <button type="button" class="font-bold" @click="emit('profile', players[0]?.id)">{{ players[0]?.name }}</button>
-        <span class="text-fg-subtle"> vs </span>
-        <button v-if="players[1]" type="button" class="font-bold" @click="emit('profile', players[1].id)">{{ players[1].name }}</button>
-      </p>
-      <span class="t-micro flex-shrink-0">{{ when }}</span>
+      <button type="button" class="flex-1 min-w-0 text-left" @click="emit('rule')">
+        <span class="flex items-center gap-1.5 text-sm font-semibold text-fg truncate">
+          <RuleThumb :rule="post.rule" :size="18" bare />{{ post.rule?.ruleTitle }}
+        </span>
+        <span class="block t-micro truncate">{{ [post.meta?.place, when].filter(Boolean).join(' · ') }}</span>
+      </button>
       <UiIconButton icon="fas fa-ellipsis" label="더보기" class="-mr-3 flex-shrink-0" @click="emit('more')" />
     </header>
 
-    <!-- 결과: 이 카드의 주인공 -->
-    <button type="button" class="w-full mt-3 rounded-xl bg-surface p-4 text-left" @click="emit('rule')">
-      <span class="flex items-center gap-2 t-caption">
-        <RuleThumb :rule="post.rule" :size="24" class="!rounded-md" />
-        <span class="truncate">{{ post.rule?.ruleTitle }}</span>
-        <span v-if="post.meta?.place" class="truncate text-fg-subtle">· {{ post.meta.place }}</span>
-      </span>
-      <span class="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <span v-for="(side, i) in sides" :key="i" class="min-w-0" :class="i === 0 ? 'text-left order-1' : 'text-right order-3'">
-          <span class="block truncate text-sm" :class="side.won ? 'text-fg font-bold' : 'text-fg-muted'">
-            {{ side.name }}<UiIcon v-if="side.won" name="crown" class="text-signal text-sm ml-1" aria-label="승리" />
-          </span>
+    <!-- 결과: 이 카드의 주인공. 승자 이름에 형광펜 -->
+    <div class="mt-3 rounded-xl bg-surface px-4 py-5">
+      <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <button
+          v-for="(side, i) in sides"
+          :key="i"
+          type="button"
+          class="min-w-0 truncate text-[15px]"
+          :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
+          @click="emit('profile', players[i]?.id)"
+        >
+          <span :class="side.won ? 'hl' : ''">{{ side.name }}</span>
+        </button>
+        <!-- 세트 점수 없이 승패만 남긴 경기는 0:0 대신 vs -->
+        <span v-if="!hasScore" class="order-2 t-mono">vs</span>
+        <span v-else class="order-2 font-mono text-[34px] leading-none tracking-[-0.05em] tabular-nums">
+          <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
         </span>
-        <!-- 세트 점수 없이 승패만 남긴 경기는 0:0 대신 vs (승자는 왕관으로) -->
-        <span v-if="!hasScore" class="order-2 text-sm text-fg-subtle">vs</span>
-        <span v-else class="order-2 text-4xl font-bold tabular-nums tracking-tight text-fg">
-          <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span>
-          <span class="text-fg-subtle mx-1">:</span>
-          <span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
-        </span>
-      </span>
-      <span v-if="setLine" class="block text-center t-micro mt-2">{{ setLine }}</span>
-      <span v-else-if="isDraw" class="block text-center t-micro mt-2">무승부</span>
-    </button>
+      </div>
+      <p v-if="setLine" class="text-center t-mono normal-case mt-3">{{ setLine }}</p>
+      <p v-else-if="isDraw" class="text-center t-micro mt-3">무승부</p>
+    </div>
 
     <!-- 사진·영상 (있을 때만) -->
     <div v-if="post.photos?.length" class="mt-3 -mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory">
@@ -112,7 +110,7 @@ const hasScore = computed(() => (props.post.result?.sets || 0) > 0)
 const setLine = computed(() => {
   const s = props.post.result?.setScores || []
   if (s.length < 2) return ''
-  return s.map((x) => `${x.set}세트 ${x.scoreA}:${x.scoreB}`).join(' · ')
+  return s.map((x) => `${x.scoreA}:${x.scoreB}`).join(' · ') // 고정폭 줄이라 숫자만
 })
 const when = computed(() => (props.post.date ? timeAgo(props.post.date) : ''))
 </script>

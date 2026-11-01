@@ -6,7 +6,7 @@
       :class="withNav ? 'bottom-[calc(64px+env(safe-area-inset-bottom)+8px)]' : 'bottom-[calc(env(safe-area-inset-bottom)+12px)]'"
     >
       <div class="max-w-xl mx-auto flex items-center gap-3 bg-surface-2 border border-line-strong rounded-xl pl-4 pr-1 py-1">
-        <span class="w-2 h-2 rounded-full bg-signal animate-pulse flex-shrink-0" aria-hidden="true"></span>
+        <span class="w-2 h-2 rounded-full bg-signal-fg animate-pulse flex-shrink-0" aria-hidden="true"></span>
         <div class="flex-1 min-w-0">
           <p class="text-sm text-fg font-medium truncate">경기가 진행 중이에요</p>
           <p class="t-micro truncate">{{ game.ruleTitle }} · {{ game.player1?.nickname }} vs {{ game.player2?.nickname }}</p>

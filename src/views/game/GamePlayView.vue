@@ -25,7 +25,7 @@
       <div v-for="side in sides" :key="side.idx" class="flex flex-col min-h-0">
         <button
           type="button"
-          class="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface border border-line active:bg-surface-2 transition-colors disabled:opacity-50"
+          class="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface active:bg-surface-2 transition-colors disabled:opacity-50"
           :disabled="scoreLocked"
           :aria-label="`${side.user.nickname} 1점 올리기`"
           @click="socket_sendScore(side.idx, 1)"

@@ -1,7 +1,7 @@
 <template>
   <UiCard :pad="false">
     <div class="flex items-start gap-3 p-4 pb-3">
-      <RuleThumb :rule="game.rule" :size="40" class="!rounded-lg" />
+      <RuleThumb :rule="game.rule" :size="36" bare />
       <div class="flex-1 min-w-0">
         <p class="t-heading truncate">{{ game.rule?.ruleTitle }}</p>
         <p class="t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</p>

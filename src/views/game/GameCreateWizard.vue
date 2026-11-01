@@ -18,7 +18,7 @@
       <!-- 누구와 -->
       <template v-else>
         <UiCard v-if="rule" class="flex items-center gap-3 mb-8">
-          <RuleThumb :rule="rule" :size="40" class="!rounded-lg" />
+          <RuleThumb :rule="rule" :size="36" bare />
           <div class="flex-1 min-w-0">
             <p class="t-micro">규칙</p>
             <p class="t-heading truncate">{{ rule.ruleTitle }}</p>
@@ -34,7 +34,7 @@
             v-for="opt in OPTIONS"
             :key="opt.value"
             type="button"
-            class="w-full flex items-center gap-4 p-4 rounded-xl bg-surface border border-line text-left active:bg-surface-2 disabled:opacity-50"
+            class="w-full flex items-center gap-4 p-4 rounded-xl bg-surface text-left active:bg-surface-2 disabled:opacity-50"
             :disabled="creating"
             @click="opt.value === 'anyone' ? create(null) : (friendsOpen = true)"
           >

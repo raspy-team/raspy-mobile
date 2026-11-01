@@ -258,7 +258,7 @@
         <p class="text-fg-muted mb-4">거절 사유를 입력해주세요.</p>
         <textarea
           v-model="rejectionReason"
-          class="w-full border border-line-strong rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
+          class="w-full border border-line-strong rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-fg/30"
           rows="4"
           placeholder="예: 규칙 내용이 부적절합니다."
         ></textarea>

@@ -19,11 +19,24 @@
       </UiCard>
     </div>
 
-    <UiCard v-else-if="!allGames.length">
-      <UiEmptyState icon="fas fa-calendar-check" title="아직 잡힌 경기가 없어요" description="열린 경기에 신청하거나 직접 만들어보세요">
-        <UiButton to="/">경기 찾기</UiButton>
-      </UiEmptyState>
-    </UiCard>
+    <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
+    <section v-else-if="!allGames.length" class="pt-6">
+      <h2 class="t-title">첫 경기를 잡아볼까요</h2>
+      <p class="t-caption mt-2">잡힌 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
+      <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
+        <li v-for="(s, i) in FIRST_STEPS" :key="s.title" class="flex items-baseline gap-4 px-4 py-4">
+          <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
+          <span>
+            <span class="block text-[15px] font-semibold text-fg">{{ s.title }}</span>
+            <span class="block t-caption mt-0.5">{{ s.body }}</span>
+          </span>
+        </li>
+      </ol>
+      <div class="flex gap-2 mt-6">
+        <UiButton class="flex-1" to="/">열린 경기 보기</UiButton>
+        <UiButton class="flex-1" variant="secondary" to="/create-game">경기 만들기</UiButton>
+      </div>
+    </section>
 
     <template v-else>
       <UiSection v-for="g in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
@@ -162,6 +175,12 @@ import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { copyText } from '../../utils/clipboard'
 import { ratingLine } from '../../utils/format'
+
+const FIRST_STEPS = [
+  { title: '열린 경기에 신청하거나 직접 열기', body: '규칙을 고르면 누구나 신청할 수 있게 올라가요' },
+  { title: '상대가 정해지면 장소·시간 맞추기', body: '채팅으로 정하고, 그날 경기 화면에서 시작해요' },
+  { title: '끝나면 결과 남기기', body: '상대가 확인하면 레이팅과 챔피언에 반영돼요' },
+]
 
 const router = useRouter()
 const { showToast } = useToast()

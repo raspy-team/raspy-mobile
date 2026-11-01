@@ -4,7 +4,69 @@
 
 /* 한국어는 어절 단위로 줄을 바꾼다. 기본값은 글자 단위라 '모여/요'처럼 한 글자가 다음 줄로 떨어졌다.
    띄어쓰기 없는 긴 글(링크·아이디)만 아무 데서나 끊는다 */
+/* 색 두 벌 (tailwind.config.cjs가 이 이름을 쓴다). 값은 'R G B'.
+   기본은 폰 설정을 따르고, html[data-theme]이 있으면 그것을 따른다 (설정 > 화면) */
 @layer base {
+  :root, html[data-theme='light'] {
+    color-scheme: light;
+    --c-canvas: 247 247 245;     /* 종이처럼 아주 조금 따뜻한 흰색 */
+    --c-surface: 255 255 255;
+    --c-surface-2: 240 240 237;
+    --c-surface-3: 232 232 228;
+    --c-line: 228 228 223;
+    --c-line-strong: 208 208 202;
+    --c-fg: 17 17 19;
+    --c-fg-muted: 92 92 100;
+    --c-fg-subtle: 112 112 120;  /* 흰 바탕에서 4.5:1 이상 */
+    --c-primary-press: 60 60 66;
+    --c-signal: 210 255 77;      /* 볼트. 칠할 때 */
+    --c-signal-fg: 77 107 0;     /* 흰 바탕에서 읽히는 볼트 (글자·아이콘) */
+    --c-signal-on: 17 17 19;
+    --signal-soft: 0.35;
+    --c-danger: 220 38 38;
+    --c-danger-fg: 200 30 30;
+  }
+  html[data-theme='dark'] {
+    color-scheme: dark;
+    --c-canvas: 10 10 11;
+    --c-surface: 17 17 19;
+    --c-surface-2: 25 25 28;
+    --c-surface-3: 31 31 35;
+    --c-line: 31 31 35;
+    --c-line-strong: 44 44 49;
+    --c-fg: 237 237 239;
+    --c-fg-muted: 160 160 168;
+    --c-fg-subtle: 139 139 147;
+    --c-primary-press: 180 180 187;
+    --c-signal: 210 255 77;
+    --c-signal-fg: 210 255 77;
+    --c-signal-on: 10 10 11;
+    --signal-soft: 0.12;
+    --c-danger: 255 92 92;
+    --c-danger-fg: 255 122 122;
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme='light']) {
+      color-scheme: dark;
+      --c-canvas: 10 10 11;
+      --c-surface: 17 17 19;
+      --c-surface-2: 25 25 28;
+      --c-surface-3: 31 31 35;
+      --c-line: 31 31 35;
+      --c-line-strong: 44 44 49;
+      --c-fg: 237 237 239;
+      --c-fg-muted: 160 160 168;
+      --c-fg-subtle: 139 139 147;
+      --c-primary-press: 180 180 187;
+      --c-signal: 210 255 77;
+      --c-signal-fg: 210 255 77;
+      --c-signal-on: 10 10 11;
+      --signal-soft: 0.12;
+      --c-danger: 255 92 92;
+      --c-danger-fg: 255 122 122;
+    }
+  }
+
   html {
     @apply font-sans bg-canvas text-fg;
     word-break: keep-all;
@@ -48,6 +110,25 @@
   .t-micro { @apply text-xs text-fg-subtle; }                                                /* 시간, 개수 */
   /* 기록·메타 정보 (Nous식 고정폭 라벨): 섹션 머리, 숫자 단위, 상태 */
   .t-mono { @apply font-mono text-xs text-fg-subtle tracking-normal uppercase; }
+}
+
+/* 매치의 서명: 볼트 형광펜. 승자 이름, 큰 제목의 핵심 낱말에만 (한 화면에 한두 곳)
+   글자 뒤에 띠를 깔고 글자는 어둡게 → 라이트·다크 모두 대비가 높다. .hl-draw는 왼쪽에서 오른쪽으로 그어진다 */
+@layer components {
+  .hl {
+    color: rgb(var(--c-signal-on));
+    background-image: linear-gradient(rgb(var(--c-signal)), rgb(var(--c-signal)));
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: 100% 100%; /* 글자 높이 전체 (한글은 획이 위로 길다) */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding: 0 0.12em;
+    margin: 0 -0.04em;
+  }
+  .hl-draw { animation: hl-draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
+  @keyframes hl-draw { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+  @media (prefers-reduced-motion: reduce) { .hl-draw { animation: none; } }
 }
 
 /* 입력칸 공통 모양 (UiInput, UiSelect) */

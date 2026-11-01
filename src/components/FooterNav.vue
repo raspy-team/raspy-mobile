@@ -4,8 +4,8 @@ defineProps({ tab: String })
 
 // 앱의 본질은 경기를 하는 것이라 첫 탭은 '경기'(참가할 수 있는 경기). 피드는 결과를 구경하는 곳
 const tabs = [
-  { key: 'home', to: '/', icon: 'swords', label: '경기' },
-  { key: 'feed', to: '/feed', icon: 'activity', label: '피드' },
+  { key: 'home', to: '/', icon: 'versus', label: '경기' },
+  { key: 'feed', to: '/feed', icon: 'feed', label: '피드' },
   { key: 'game', to: '/game', icon: 'calendar-check', label: '내 경기' },
   { key: 'profile', to: '/profile/0', icon: 'user', label: '내 정보' },
 ]

@@ -18,6 +18,7 @@
         <UiList>
           <UiListItem icon="far fa-bell" title="알림 설정" subtitle="경기·도전·친구·댓글·좋아요·메시지" chevron @click="router.push('/settings/notifications')" />
           <UiListItem icon="fas fa-ban" title="차단한 사람" chevron @click="openBlocked" />
+          <UiListItem icon="sun-moon" title="화면" :subtitle="THEME_OPTIONS.find((o) => o.value === theme).label" chevron @click="themeOpen = true" />
         </UiList>
       </UiSection>
 
@@ -41,6 +42,15 @@
         <p class="text-center t-micro pt-2">Match {{ version }}</p>
       </div>
     </main>
+
+    <!-- 화면 모드 -->
+    <UiSheet v-model="themeOpen" title="화면">
+      <UiList>
+        <UiListItem v-for="o in THEME_OPTIONS" :key="o.value" :title="o.label" @click="setTheme(o.value); themeOpen = false">
+          <template #trailing><UiIcon v-if="theme === o.value" name="check" class="text-lg" /></template>
+        </UiListItem>
+      </UiList>
+    </UiSheet>
 
     <!-- 차단한 사람 -->
     <UiSheet v-model="blockedOpen" title="차단한 사람">
@@ -72,6 +82,7 @@ import {
   UiAvatar, UiButton, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiSection, UiSheet, UiTopBar,
 } from '../components/ui'
 import { TERMS } from '../content/legal'
+import { theme, setTheme, THEME_OPTIONS } from '../utils/theme'
 import { confirmDialog } from '../composables/useConfirm'
 import { useToast } from '../composable/useToast'
 import { stopInbox } from '../stores/inbox'
@@ -85,6 +96,7 @@ const { showToast } = useToast()
 const version = pkg.version
 const me = ref({})
 const openTerm = ref(null)
+const themeOpen = ref(false)
 const blockedOpen = ref(false)
 const blockedLoading = ref(false)
 const blocked = ref([])

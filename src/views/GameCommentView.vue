@@ -72,7 +72,7 @@
           >
             <span
               v-if="replyingToId"
-              class="inline-block px-2 py-0.5 mr-2 bg-blue-100 text-blue-600 font-medium rounded-full text-sm whitespace-nowrap cursor-pointer select-none"
+              class="inline-block px-2 py-0.5 mr-2 bg-surface-3 text-fg font-medium rounded-full text-sm whitespace-nowrap cursor-pointer select-none"
               @click="resetInput"
             >
               {{ replyNickname }}

@@ -41,7 +41,7 @@
       <div class="whitespace-pre-wrap break-all text-base mt-1 leading-snug">
         <span
           v-if="comment.mentionUserNickname"
-          class="inline-block px-2 py-0.5 bg-blue-100 text-blue-600 font-medium rounded-full mr-1 text-sm align-middle"
+          class="inline-block px-2 py-0.5 bg-surface-3 text-fg font-medium rounded-full mr-1 text-sm align-middle"
         >
           {{ comment.mentionUserNickname }}
         </span>
@@ -105,7 +105,7 @@
           class="bg-gray-900 rounded-2xl shadow-lg px-6 py-6 w-full max-w-xs flex flex-col items-stretch"
           @click.stop
         >
-          <div class="font-bold text-lg mb-2 text-white">댓글 신고하기</div>
+          <div class="font-bold text-lg mb-2 text-fg">댓글 신고하기</div>
           <div class="text-fg-subtle text-sm mb-3 leading-snug">
             신고는 <b>24시간 내에 처리</b>되며, 신고해주셔서 감사합니다.
           </div>
@@ -122,7 +122,7 @@
           <button
             @click.stop="submitReport"
             :disabled="!reportReason.trim() || reportLoading"
-           class="w-full bg-red-500 text-white py-2 rounded-xl font-bold mt-1 disabled:bg-gray-300"
+           class="w-full bg-danger text-white py-2 rounded-xl font-bold mt-1 disabled:opacity-40"
           >
             {{ reportLoading ? '신고 중...' : '신고하기' }}
           </button>
@@ -168,7 +168,7 @@ function autoLink(text) {
   if (!text) return ''
   return text.replace(
     /((http|https):\/\/[^\s]+)/g,
-    '<a class="text-blue-500 hover:underline" href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+    '<a class="underline underline-offset-2" href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
   )
 }
 function emitLike(commentId) {

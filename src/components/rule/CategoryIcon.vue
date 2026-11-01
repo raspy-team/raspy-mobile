@@ -1,26 +1,30 @@
 <template>
-  <!-- 그림의 모양만 쓰고 색은 글자색을 따른다 (주황 그림이 흑백 화면과 따로 놀지 않게) -->
-  <span
-    class="inline-block bg-current flex-shrink-0"
-    :style="{
-      width: size, height: size,
-      WebkitMaskImage: `url('${src}')`, maskImage: `url('${src}')`,
-      WebkitMaskSize: 'contain', maskSize: 'contain',
-      WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
-      WebkitMaskPosition: 'center', maskPosition: 'center',
-    }"
+  <svg
+    v-if="icon.svg"
+    viewBox="0 0 24 24"
+    :width="size"
+    :height="size"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="flex-shrink-0"
     aria-hidden="true"
-  ></span>
+    v-html="icon.svg"
+  ></svg>
+  <component :is="icon.component" v-else :size="size" :stroke-width="1.75" class="flex-shrink-0" aria-hidden="true" />
 </template>
 
 <script setup>
-// 종목 그림 (public/category-picture). 그림 파일은 모양 틀로만 쓴다
+// 종목 아이콘. 앱의 다른 아이콘과 같은 선 굵기로 그린다 (sportIcons.js). 색은 글자색을 따른다
 import { computed, defineProps } from 'vue'
-import { categoryImage } from '../../utils/rule'
+import { categoryKey } from '../../utils/rule'
+import { sportIcon } from './sportIcons'
 const props = defineProps({
   rule: { type: Object, default: null },
-  name: { type: String, default: '' }, // 큰 분류 이름처럼 그림 이름을 바로 줄 때
+  name: { type: String, default: '' }, // 큰 분류 이름처럼 이름을 바로 줄 때
   size: { type: String, default: '1.5rem' },
 })
-const src = computed(() => (props.name ? `/category-picture/${props.name}.png` : categoryImage(props.rule)))
+const icon = computed(() => sportIcon(props.name || categoryKey(props.rule)))
 </script>

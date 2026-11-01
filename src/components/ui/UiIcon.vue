@@ -34,7 +34,7 @@ import {
   Folder, FolderOpen, Gavel, Hand, Heading, Heart, Hourglass, House, Images, Inbox, Info, Instagram, Layers,
   LayoutGrid, List, ListOrdered, LogOut, Mail, MapPin, MessageCircle, Pencil, Play, Plus, RotateCcw, RotateCw,
   Search, Send, Settings, Share, ShieldHalf, Square, SquarePen, Star, Target, Timer, TriangleAlert, Trophy, Trash2,
-  Unplug, User, Swords, Activity, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper,
+  Unplug, User, Swords, Activity, Globe, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -63,7 +63,7 @@ const ICONS = {
   'shield-halved': ShieldHalf, star: Star, stop: Square, stopwatch: Timer, times: X, xmark: X,
   trash: Trash2, 'triangle-exclamation': TriangleAlert, trophy: Trophy,
   user: User, 'user-check': UserCheck, 'user-group': Users, users: Users, 'user-minus': UserMinus,
-  'user-plus': UserPlus, 'user-slash': UserX, video: Video, swords: Swords, activity: Activity,
+  'user-plus': UserPlus, 'user-slash': UserX, video: Video, swords: Swords, activity: Activity, globe: Globe,
 }
 
 // Lucide에 없는 상표 아이콘

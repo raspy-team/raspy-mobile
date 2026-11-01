@@ -18,9 +18,7 @@
       <!-- 누구와 -->
       <template v-else>
         <UiCard v-if="rule" class="flex items-center gap-3 mb-8">
-          <span class="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center text-fg-muted flex-shrink-0" aria-hidden="true">
-            <UiIcon name="fas fa-trophy" />
-          </span>
+          <RuleThumb :rule="rule" :size="40" class="!rounded-lg" />
           <div class="flex-1 min-w-0">
             <p class="t-micro">규칙</p>
             <p class="t-heading truncate">{{ rule.ruleTitle }}</p>
@@ -85,6 +83,7 @@
 // 경기 만들기: 규칙은 /rules에서 고르고 돌아온다. 여기서는 상대(아무나 / 친구)만 정하면 경기가 열린다.
 // 장소·시간은 상대가 정해진 뒤 내 경기에서 함께 정한다
 import { ref, computed, onMounted } from 'vue'
+import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
@@ -98,8 +97,8 @@ const router = useRouter()
 const { showToast } = useToast()
 
 const OPTIONS = [
-  { value: 'anyone', icon: 'fas fa-users', title: '아무나', description: '경기 목록에 올려서 신청을 받아요' },
-  { value: 'friend', icon: 'fas fa-user-group', title: '친구와', description: '친구 한 명과 바로 경기를 잡아요' },
+  { value: 'anyone', icon: 'globe', title: '아무나', description: '경기 목록에 올려서 신청을 받아요' },
+  { value: 'friend', icon: 'user-check', title: '친구와', description: '친구 한 명과 바로 경기를 잡아요' },
 ]
 
 const ruleId = Number(route.query.ruleId)

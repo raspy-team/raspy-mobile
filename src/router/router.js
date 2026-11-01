@@ -12,7 +12,6 @@ const GamePlay = () => import('../views/game/GamePlayView.vue')
 const GameResult = () => import('../views/game/GameResultView.vue')
 const Profile = () => import('../views/profile/ProfileView.vue')
 const NotFoundView = () => import('../views/NotFoundView.vue')
-const InstagramShare = () => import('../components/InstagramShare.vue')
 const Setting = () => import('../views/SettingView.vue')
 const Rule = () => import('../views/RuleView.vue')
 const RuleCreate = () => import('../views/rule/RuleCreateView.vue')
@@ -75,11 +74,6 @@ const routes = [
   {
     path: '/create-game',
     component: CreateGame,
-  },
-  // temp
-  {
-    path: '/insta',
-    component: InstagramShare,
   },
   //
     {

@@ -1,79 +1,28 @@
 <template>
-  <!-- 모달 UI -->
-  <div
-    v-if="isVisible"
-    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center"
-  >
-    <div class="w-full max-w-md mx-4 bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
-      <!-- 헤더 -->
-      <div class="px-6 py-5 bg-orange-500 ">
-        <h2 class="text-white text-xl font-bold text-center">
-          {{ title || '경기 시작 인증샷' }}
-        </h2>
-        <p class="text-white/90 text-sm text-center mt-2">
-          {{ subtitle || '피드에 표시될 사진을 선택해주세요' }}
-        </p>
+  <!-- 가운데 창 (UiDialog 모양) -->
+  <div v-if="isVisible" class="fixed inset-0 bg-black/70 z-dialog flex items-center justify-center p-6">
+    <div class="w-full max-w-sm bg-surface border border-line rounded-2xl overflow-hidden">
+      <div class="px-6 pt-6">
+        <h2 class="t-heading">{{ title || '경기 시작 사진' }}</h2>
+        <p class="t-caption mt-1">{{ subtitle || '피드 맨 앞에 보이고, 실제로 경기했다는 표시가 돼요' }}</p>
       </div>
 
-      <!-- 이미지 프리뷰 -->
-      <div v-if="capturedImage" class="p-4">
-        <img
-          :src="capturedImage"
-          class="w-full aspect-square object-cover rounded-xl border-2 border-gray-800"
-          alt="Selected"
-        />
-      </div>
-
-      <!-- 설명 -->
-      <div v-else class="p-8">
-        <div class="flex flex-col items-center justify-center gap-4 text-center">
-          <div class="w-24 h-24 rounded-full bg-orange-500/15 flex items-center justify-center">
-            <UiIcon name="fas fa-camera" class="text-orange-500 text-4xl" />
-          </div>
-          <div class="space-y-2">
-            <p class="text-gray-200 font-medium">사진을 촬영하세요</p>
-            <p class="text-gray-500 text-sm">
-              촬영한 사진은 피드의 첫 화면에 노출되며<br />실제로 경기를 진행했음을 증명해요
-            </p>
-          </div>
+      <div class="p-6">
+        <img v-if="capturedImage" :src="capturedImage" class="w-full aspect-square object-cover rounded-xl bg-surface-2" alt="찍은 사진" />
+        <div v-else class="w-full aspect-square rounded-xl border border-dashed border-line-strong flex flex-col items-center justify-center gap-3 text-fg-muted">
+          <UiIcon name="camera" class="text-[32px]" />
+          <span class="t-caption">두 사람이 함께 나오면 좋아요</span>
         </div>
       </div>
 
-      <!-- 버튼 영역 -->
-      <div class="px-4 pb-4 space-y-3">
-        <button
-          v-if="!capturedImage"
-          @click.stop="triggerCamera"
-         class="w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-press text-primary-on font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
-        >
-          <UiIcon name="fas fa-camera" class="text-2xl" />
-          <span class="text-lg">사진 촬영하기</span>
-        </button>
-
-        <div v-else class="grid grid-cols-2 gap-3">
-          <button
-            @click="retake"
-           class="py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium active:scale-95 transition-all"
-          >
-            <UiIcon name="fas fa-redo" class="mr-2" />다시 촬영
-          </button>
-          <button
-            @click="confirm"
-           class="py-3 px-4 rounded-xl bg-primary text-primary-on font-bold shadow-lg active:scale-95 transition-all"
-          >
-            <UiIcon name="fas fa-check" class="mr-2" />사용하기
-          </button>
+      <div class="px-6 pb-6 space-y-2">
+        <UiButton v-if="!capturedImage" block size="lg" icon="camera" @click.stop="triggerCamera">사진 찍기</UiButton>
+        <div v-else class="grid grid-cols-2 gap-2">
+          <UiButton variant="secondary" icon="rotate-left" @click="retake">다시 찍기</UiButton>
+          <UiButton icon="check" @click="confirm">이 사진 쓰기</UiButton>
         </div>
-
-        <button v-if="allowSkip && !capturedImage" @click="$emit('skip')" class="w-full py-3 text-sm text-gray-300">
-          사진 없이 시작
-        </button>
-        <button
-          @click="$emit('cancel')"
-         class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-medium active:scale-95 transition-all"
-        >
-          취소
-        </button>
+        <UiButton v-if="allowSkip && !capturedImage" block variant="ghost" @click="$emit('skip')">사진 없이 시작</UiButton>
+        <UiButton block variant="ghost" @click="$emit('cancel')">취소</UiButton>
       </div>
     </div>
   </div>
@@ -92,6 +41,7 @@
 <script setup>
 import { ref, watch, defineProps, defineEmits, onMounted, onUnmounted } from 'vue'
 import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
+import { UiButton } from './ui'
 
 const props = defineProps({
   // 인증샷 없이도 진행할 수 있으면 '사진 없이 시작'을 보여준다

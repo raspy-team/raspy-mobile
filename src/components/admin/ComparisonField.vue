@@ -1,57 +1,29 @@
 <template>
-  <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+  <div class="bg-surface rounded-xl p-4">
     <div class="flex items-center gap-2 mb-3">
       <UiIcon :name="'fas ' + icon" class="text-fg-muted" />
-      <h3 class="font-bold text-gray-900">{{ label }}</h3>
+      <h3 class="t-heading text-base">{{ label }}</h3>
+      <span v-if="hasChanged" class="t-mono text-signal ml-auto">바뀜</span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- 원본 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- 원본: 바뀌었으면 흐리게 지운 줄 -->
       <div>
-        <p class="text-xs font-medium text-gray-500 mb-2">원본</p>
-        <div
-          :class="[
-            'bg-white border-2 rounded-lg p-3',
-            hasChanged ? 'border-red-200' : 'border-gray-200',
-          ]"
-        >
-          <p
-            :class="[
-              'text-sm',
-              multiline ? 'whitespace-pre-wrap' : 'truncate',
-              hasChanged ? 'text-red-600 line-through' : 'text-gray-700',
-            ]"
-          >
+        <p class="t-mono mb-1.5">원본</p>
+        <div class="rounded-lg bg-surface-2 p-3">
+          <p class="text-sm" :class="[multiline ? 'whitespace-pre-wrap' : 'truncate', hasChanged ? 'text-fg-subtle line-through' : 'text-fg-muted']">
             {{ original || '없음' }}
           </p>
         </div>
       </div>
-
-      <!-- 수정본 -->
+      <!-- 수정본: 바뀌었으면 시그널 테두리 -->
       <div>
-        <p class="text-xs font-medium text-gray-500 mb-2">수정본</p>
-        <div
-          :class="[
-            'bg-white border-2 rounded-lg p-3',
-            hasChanged ? 'border-green-200 bg-green-50' : 'border-gray-200',
-          ]"
-        >
-          <p
-            :class="[
-              'text-sm font-medium',
-              multiline ? 'whitespace-pre-wrap' : 'truncate',
-              hasChanged ? 'text-green-700' : 'text-gray-700',
-            ]"
-          >
+        <p class="t-mono mb-1.5">수정본</p>
+        <div class="rounded-lg bg-surface-2 p-3 border" :class="hasChanged ? 'border-signal/60' : 'border-transparent'">
+          <p class="text-sm" :class="[multiline ? 'whitespace-pre-wrap' : 'truncate', hasChanged ? 'text-fg' : 'text-fg-muted']">
             {{ modified || '없음' }}
           </p>
         </div>
       </div>
-    </div>
-
-    <!-- 변경 사항 표시 -->
-    <div v-if="hasChanged" class="mt-2 flex items-center gap-2 text-xs text-orange-600">
-      <UiIcon name="fas fa-arrow-right" />
-      <span class="font-semibold">변경됨</span>
     </div>
   </div>
 </template>

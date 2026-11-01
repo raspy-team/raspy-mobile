@@ -6,6 +6,15 @@
   </UiTopBar>
 
   <main class="px-4 pb-32 pt-4 space-y-10">
+    <UiSection title="종목 아이콘">
+      <div class="grid grid-cols-4 gap-2">
+        <div v-for="n in sportNames" :key="n" class="rounded-xl bg-surface flex flex-col items-center gap-2 py-3">
+          <CategoryIcon :name="n" size="28px" />
+          <span class="t-micro truncate max-w-full px-1">{{ n }}</span>
+        </div>
+      </div>
+    </UiSection>
+
     <UiSection title="글자 역할">
       <div class="space-y-2">
         <p class="t-display">21 : 18</p>
@@ -131,6 +140,9 @@
 <script setup>
 // 개발할 때만 열리는 부품 모음 (/dev/ui). 새 부품을 만들면 여기에도 하나 놓는다
 import { ref } from 'vue'
+import CategoryIcon from '../../components/rule/CategoryIcon.vue'
+import { SPORT_NAMES } from '../../components/rule/sportIcons'
+const sportNames = [...SPORT_NAMES]
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
   UiSection, UiSelect, UiSheet, UiSkeleton, UiTabs, UiTopBar,

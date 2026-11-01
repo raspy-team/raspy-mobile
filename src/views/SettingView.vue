@@ -29,7 +29,7 @@
 
       <UiSection title="도움말과 정보">
         <UiList>
-          <UiListItem icon="far fa-envelope" title="문의하기" subtitle="admin@raspyapp.com" chevron @click="contact" />
+          <UiListItem icon="far fa-envelope" title="문의하기" subtitle="yeonkoh@protonmail.com" chevron @click="contact" />
           <UiListItem icon="fab fa-instagram" title="인스타그램" subtitle="@matchmobileapp" chevron @click="openInstagram" />
           <UiListItem v-for="t in TERMS" :key="t.id" icon="far fa-file-lines" :title="t.title" chevron @click="openTerm = t" />
         </UiList>
@@ -148,7 +148,7 @@ async function unblock(u) {
 }
 
 function contact() {
-  window.location.href = 'mailto:admin@raspyapp.com?subject=' + encodeURIComponent('[Match] 문의')
+  window.location.href = 'mailto:yeonkoh@protonmail.com?subject=' + encodeURIComponent('[Match] 문의')
 }
 function openInstagram() {
   window.open('https://www.instagram.com/matchmobileapp/', '_blank', 'noopener')

@@ -4,7 +4,11 @@
       <RuleThumb :rule="game.rule" :size="36" bare />
       <div class="flex-1 min-w-0">
         <p class="t-heading truncate">{{ game.rule?.ruleTitle }}</p>
-        <p class="t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</p>
+        <button v-if="canSchedule" type="button" class="flex items-center gap-1.5 max-w-full text-left mt-0.5" @click="emit('schedule')">
+          <span class="t-caption truncate">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</span>
+          <span class="t-micro underline underline-offset-2 flex-shrink-0">{{ needsSchedule ? '정하기' : '바꾸기' }}</span>
+        </button>
+        <p v-else class="t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</p>
       </div>
       <UiBadge :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
     </div>
@@ -51,7 +55,15 @@ const props = defineProps({
   game: { type: Object, required: true },
   me: { type: Object, default: () => ({ name: '나' }) }, // { id, name, avatar }
 })
-const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more'])
+const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule'])
+
+// 시작 전이면 선수(주최자·확정된 상대)가 시간·장소를 정하고 바꾼다
+const canSchedule = computed(() => {
+  const g = props.game
+  if (g.type === 'my-game') return ['MATCHING', 'SCHEDULED'].includes(g.status)
+  return g.status === 'APPROVED' && ['MATCHING', 'SCHEDULED'].includes(g.gameStatus)
+})
+const needsSchedule = computed(() => !props.game.matchDate || !props.game.matchLocation)
 
 const isMine = computed(() => props.game.type === 'my-game')
 const approved = computed(() => (props.game.applicants || []).find((a) => a.approved))
@@ -85,6 +97,7 @@ const state = computed(() => {
     if (g.status === 'COMPLETED') return { label: '끝남', tone: 'neutral', action: 'result', actionLabel: '결과 보기', actionVariant: 'secondary' }
     if (g.status === 'CANCELED') return { label: '취소됨', tone: 'neutral', hint: '취소된 경기예요' }
     if (g.status === 'SCHEDULED') {
+      if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: '시간·장소 정하기', actionVariant: 'tonal' }
       return g.isOwner === false
         ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려드려요' }
         : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
@@ -93,7 +106,11 @@ const state = computed(() => {
     return { label: '상대 구하는 중', tone: 'neutral', action: 'share', actionLabel: '링크 공유하기', actionVariant: 'secondary' }
   }
   if (g.status === 'REQUESTED') return { label: '승인 대기', tone: 'neutral', action: 'cancel-request', actionLabel: '신청 취소', actionVariant: 'secondary' }
-  if (g.status === 'APPROVED') return { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려드려요' }
+  if (g.status === 'APPROVED') {
+    return needsSchedule.value
+      ? { label: '확정', tone: 'primary', action: 'schedule', actionLabel: '시간·장소 정하기', actionVariant: 'tonal' }
+      : { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려드려요' }
+  }
   if (g.status === 'REJECTED') return { label: '거절됨', tone: 'danger', hint: '다른 경기를 찾아보세요' }
   return { label: '대기', tone: 'neutral', hint: '' }
 })

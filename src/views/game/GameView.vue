@@ -54,6 +54,7 @@
             @share="share(game)"
             @cancel-request="cancelRequest(game)"
             @more="menuGame = game"
+            @schedule="openSchedule(game)"
           />
         </div>
       </UiSection>
@@ -91,6 +92,30 @@
       <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
       <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
     </UiList>
+  </UiSheet>
+
+  <!-- 시간·장소 정하기 (시작 전 언제든). 보낸 칸만 바뀌고 상대에게 알림이 간다 -->
+  <UiSheet :model-value="!!scheduleGame" title="언제, 어디서 할까요?" @update:model-value="scheduleGame = null">
+    <div class="space-y-5">
+      <div>
+        <p class="t-label mb-2">시간</p>
+        <div class="flex flex-wrap gap-2 mb-2">
+          <UiChip v-for="w in quick" :key="w.label" :selected="schedTime === w.date()" @click="schedTime = w.date()">{{ w.label }}</UiChip>
+        </div>
+        <UiInput v-model="schedTime" type="datetime-local" />
+      </div>
+      <div>
+        <p class="t-label mb-2">장소</p>
+        <div class="grid grid-cols-2 gap-2">
+          <UiSelect v-model="schedRegion1" :options="region1Options" placeholder="시·도" />
+          <UiSelect v-model="schedRegion2" :options="schedRegion2Options" placeholder="구·시·군" :disabled="!schedRegion1" />
+        </div>
+        <UiInput v-model="schedPlace" class="mt-2" placeholder="장소 이름 (예: 관악구민체육센터 3층)" />
+      </div>
+    </div>
+    <template #footer>
+      <UiButton block :disabled="!schedTime && !(schedRegion1 && schedRegion2)" :loading="busy" @click="submitSchedule">정하기</UiButton>
+    </template>
   </UiSheet>
 
   <!-- 경기 시작 ① 정해둔 장소가 있으면 그대로 시작할지 -->
@@ -163,7 +188,7 @@ import MatchRuleModal from '../../components/MatchModal.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
 import MyGameCard from '../../components/game/MyGameCard.vue'
 import {
-  UiAvatar, UiButton, UiCard, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
+  UiAvatar, UiButton, UiCard, UiChip, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
   UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton, UiTopBar
 } from '../../components/ui'
 import regionMap from '../../assets/regionMap.json'
@@ -175,6 +200,7 @@ import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { copyText } from '../../utils/clipboard'
 import { ratingLine } from '../../utils/format'
+import { quickTimes } from '../../utils/when'
 
 const FIRST_STEPS = [
   { title: '열린 경기에 신청하거나 직접 열기', body: '규칙을 고르면 누구나 신청할 수 있게 올라가요' },
@@ -336,6 +362,44 @@ const searchQuery = ref('')
 const detailedPlace = ref('')
 const selectedPlace = ref(null)
 const placeInput = ref(null)
+// ---------- 시간·장소 정하기 ----------
+const scheduleGame = ref(null)
+const quick = quickTimes()
+const schedTime = ref('')
+const schedRegion1 = ref('')
+const schedRegion2 = ref('')
+const schedPlace = ref('')
+const schedRegion2Options = computed(() => (regionMap[schedRegion1.value] || []).filter((r) => r !== '전체'))
+watch(schedRegion1, () => (schedRegion2.value = ''))
+
+function openSchedule(g) {
+  scheduleGame.value = g
+  schedTime.value = g.matchDate ? String(g.matchDate).slice(0, 16) : ''
+  const parsed = g.matchLocation ? parseRegion(g.matchLocation) : null
+  schedRegion1.value = parsed?.region1 || ''
+  nextTick(() => (schedRegion2.value = parsed?.region2 || ''))
+  schedPlace.value = ''
+}
+
+async function submitSchedule() {
+  busy.value = true
+  try {
+    const hasPlace = schedRegion1.value && schedRegion2.value
+    await api.post(`/api/games/${scheduleGame.value.id}/schedule`, {
+      matchDate: schedTime.value ? (schedTime.value.length === 16 ? `${schedTime.value}:00` : schedTime.value) : null,
+      roadAddress: hasPlace ? `${schedRegion1.value} ${schedRegion2.value}` : null,
+      detailAddress: hasPlace ? schedPlace.value.trim() || null : null,
+    })
+    scheduleGame.value = null
+    showToast('정했어요. 상대에게 알렸어요')
+    await fetchGames()
+  } catch (e) {
+    showToast(e.response?.data?.message || '정하지 못했어요')
+  } finally {
+    busy.value = false
+  }
+}
+
 const manualRegion1 = ref('')
 const manualRegion2 = ref('')
 const region1Options = Object.keys(regionMap).filter((r) => r !== '전국')

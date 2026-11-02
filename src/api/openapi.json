@@ -692,6 +692,49 @@
         }
       }
     },
+    "/api/games/{id}/schedule": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "시간·장소 정하기",
+        "description": "경기 시작 전(상대 구하는 중·확정)에 주최자나 확정된 상대가 시간·장소를 정하거나 바꾼다. 보낸 칸만 바꾸고, 상대에게 알린다.",
+        "operationId": "schedule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameScheduleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{id}/result": {
       "post": {
         "tags": [
@@ -4099,11 +4142,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -4933,6 +4976,21 @@
         ],
         "type": "object",
         "properties": {
+          "roadAddress": {
+            "type": "string"
+          },
+          "detailAddress": {
+            "type": "string"
+          }
+        }
+      },
+      "GameScheduleRequest": {
+        "type": "object",
+        "properties": {
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "roadAddress": {
             "type": "string"
           },
@@ -6309,7 +6367,8 @@
               "PLAY_WITH_ME_TOO_REJECT",
               "APP_DUEL_RESULT",
               "APP_PLAY_JUDGED",
-              "APP_VOTE_STARTED"
+              "APP_VOTE_STARTED",
+              "GAME_SCHEDULED"
             ]
           },
           "createdAt": {

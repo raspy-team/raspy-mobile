@@ -35,7 +35,7 @@
         </div>
 
         <h1 class="t-title">누구와 겨룰까요?</h1>
-        <p class="t-caption mt-1 mb-5">정확한 장소와 시간은 상대가 정해진 뒤 함께 정해요.</p>
+        <p class="t-caption mt-1 mb-5">시간·장소는 나중에 내 경기에서 언제든 정하거나 바꿀 수 있어요.</p>
 
         <div class="space-y-2">
           <button
@@ -97,6 +97,7 @@ import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
 import { haptic } from '../../utils/haptics'
 import { shareLink } from '../../utils/share'
+import { quickTimes } from '../../utils/when'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
 } from '../../components/ui'
@@ -110,25 +111,7 @@ const OPTIONS = [
   { value: 'friend', icon: 'user-check', title: '친구와', description: '친구 한 명과 바로 경기를 잡아요' },
 ]
 
-/** 로컬 시각 문자열 (서버는 Asia/Seoul LocalDateTime) */
-function at(d) {
-  const p = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:00`
-}
-function dayAt(addDays, hour) {
-  const d = new Date()
-  d.setDate(d.getDate() + addDays)
-  d.setHours(hour, 0, 0, 0)
-  return d
-}
-const now = new Date()
-const toSaturday = (6 - now.getDay() + 7) % 7 // 오늘이 토요일이면 0
-const WHEN = [
-  ...(now.getHours() < 18 ? [{ label: '오늘 저녁', date: () => at(dayAt(0, 19)) }] : []),
-  { label: '내일 저녁', date: () => at(dayAt(1, 19)) },
-  ...(now.getDay() === 0 ? [] : [{ label: '이번 주말', date: () => at(dayAt(toSaturday, 14)) }]),
-  { label: '나중에 정하기', date: () => null },
-]
+const WHEN = [...quickTimes(), { label: '나중에 정하기', date: () => null }]
 const when = ref('나중에 정하기')
 
 const ruleId = Number(route.query.ruleId)

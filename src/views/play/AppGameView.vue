@@ -251,6 +251,7 @@
 <script setup lang="ts">
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
+import { liveRoute } from '@/utils/battle'
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -344,7 +345,7 @@ function begin(p: Play) {
 
 async function start() {
   // 실시간 게임은 대기실 화면으로
-  if (game.value?.playMode === 'REALTIME') return router.push(`/play/${key.value}/live`)
+  if (game.value?.playMode === 'REALTIME') return router.push(game.value.battle ? `/play/${key.value}/battle` : liveRoute(key.value))
   starting.value = true
   startError.value = ''
   try {

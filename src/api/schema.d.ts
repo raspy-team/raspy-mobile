@@ -1016,6 +1016,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/battle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 실시간 대전 대기실 들어가기
+         * @description 퐁처럼 서버가 판을 계속 계산하는 게임. 짝이 지어지면 topic으로 판이 온다
+         */
+        post: operations["battleJoin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/votes/{gameId}": {
         parameters: {
             query?: never;
@@ -1191,6 +1211,38 @@ export interface paths {
          * @description 같은 문제로 바로 플레이를 시작한다.
          */
         post: operations["acceptChallenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/battle/{gameId}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["battleLeave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/battle/{gameId}/bot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["battleBot"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2538,6 +2590,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/battle/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["battle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/users": {
         parameters: {
             query?: never;
@@ -3052,6 +3120,33 @@ export interface components {
             matched: boolean;
             /** Format: date-time */
             serverNow: string;
+        };
+        BattleStateResponse: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            me: components["schemas"]["AppPlayer"];
+            /** Format: int32 */
+            meIndex: number;
+            opponent?: components["schemas"]["AppPlayer"];
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            serverNow: string;
+            /** Format: date-time */
+            waitingSince: string;
+            /** Format: int32 */
+            botAfterSeconds: number;
+            topic: string;
+            /** Format: int64 */
+            tickMillis: number;
+            /** Format: double */
+            myScore?: number;
+            /** Format: double */
+            opponentScore?: number;
+            /** @enum {string} */
+            result?: "WIN" | "LOSE" | "DRAW";
         };
         VoteRequest: {
             /** Format: int64 */
@@ -3964,6 +4059,7 @@ export interface components {
             available: boolean;
             /** Format: int32 */
             dailyLimit?: number;
+            battle: boolean;
         };
         AppRecordBoard: {
             key: string;
@@ -5407,6 +5503,28 @@ export interface operations {
             };
         };
     };
+    battleJoin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
+                };
+            };
+        };
+    };
     voteCard: {
         parameters: {
             query?: never;
@@ -5639,6 +5757,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppPlayResponse"];
+                };
+            };
+        };
+    };
+    battleLeave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
+                };
+            };
+        };
+    };
+    battleBot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
                 };
             };
         };
@@ -7255,6 +7417,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppChallenge"];
+                };
+            };
+        };
+    };
+    battle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
                 };
             };
         };

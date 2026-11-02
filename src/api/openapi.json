@@ -1894,6 +1894,38 @@
         }
       }
     },
+    "/api/app-games/{key}/battle": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "실시간 대전 대기실 들어가기",
+        "description": "퐁처럼 서버가 판을 계속 계산하는 게임. 짝이 지어지면 topic으로 판이 온다",
+        "operationId": "battleJoin",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/votes/{gameId}": {
       "get": {
         "tags": [
@@ -2254,6 +2286,68 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AppPlayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/battle/{gameId}/leave": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "battleLeave",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/battle/{gameId}/bot": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "battleBot",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
                 }
               }
             }
@@ -4346,11 +4440,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -4556,6 +4650,37 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AppChallenge"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/battle/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "battle",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
                 }
               }
             }
@@ -5972,6 +6097,82 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "BattleStateResponse": {
+        "required": [
+          "botAfterSeconds",
+          "gameId",
+          "key",
+          "me",
+          "meIndex",
+          "serverNow",
+          "status",
+          "tickMillis",
+          "topic",
+          "waitingSince"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "me": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "meIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waitingSince": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "botAfterSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "tickMillis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "myScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "opponentScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "WIN",
+              "LOSE",
+              "DRAW"
+            ]
           }
         }
       },
@@ -8931,6 +9132,7 @@
       "AppGameSummary": {
         "required": [
           "available",
+          "battle",
           "icon",
           "judge",
           "key",
@@ -9026,6 +9228,9 @@
           "dailyLimit": {
             "type": "integer",
             "format": "int32"
+          },
+          "battle": {
+            "type": "boolean"
           }
         }
       },

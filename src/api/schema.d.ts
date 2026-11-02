@@ -966,6 +966,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동호회 만들기
+         * @description 만든 사람의 지금 동네로 만든다. 만든 사람이 첫 멤버
+         */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/{id}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동호회 나가기
+         * @description 만든 사람이 나가면 가장 오래된 멤버가 이어받는다. 혼자였으면 동호회가 없어진다
+         */
+        post: operations["leave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동호회 들어가기
+         * @description 초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로
+         */
+        post: operations["join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat-room/{roomId}/read": {
         parameters: {
             query?: never;
@@ -1280,7 +1340,7 @@ export interface paths {
          * 나가기
          * @description 대기 중이면 방을 닫고, 하는 중이면 진다.
          */
-        post: operations["leave"];
+        post: operations["leave_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2591,6 +2651,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clubs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 동호회 보기
+         * @description 멤버·동호회 경기. 초대 코드는 멤버에게만
+         */
+        get: operations["detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/nearby": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 우리 동네 동호회
+         * @description 내 동네 범위에서 아직 안 든 동호회, 멤버 많은 순
+         */
+        get: operations["nearby"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 내 동호회 */
+        get: operations["mine_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/invite/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 초대 링크로 동호회 보기 */
+        get: operations["byInvite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat-room/{roomId}/chat-messages": {
         parameters: {
             query?: never;
@@ -3445,6 +3579,8 @@ export interface components {
             maxPlayers?: number;
             /** @enum {string} */
             venue: "IN_PERSON" | "VIDEO" | "ONLINE";
+            /** Format: int64 */
+            clubId?: number;
         };
         CancelGameRequest: {
             /** Format: int64 */
@@ -3455,6 +3591,49 @@ export interface components {
             gameId: number;
             /** Format: int64 */
             userId: number;
+        };
+        CreateClubRequest: {
+            name: string;
+            intro?: string;
+        };
+        ClubDetail: {
+            club: components["schemas"]["ClubSummary"];
+            members: components["schemas"]["ClubMember"][];
+            games: components["schemas"]["ClubGame"][];
+            inviteCode?: string;
+        };
+        ClubGame: {
+            /** Format: int64 */
+            gameId: number;
+            title: string;
+            status: string;
+            /** Format: date-time */
+            matchDate?: string;
+            placeRoad?: string;
+            hostNickname: string;
+        };
+        ClubMember: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
+            isOwner: boolean;
+        };
+        ClubSummary: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            intro?: string;
+            dongName?: string;
+            /** Format: int32 */
+            memberCount: number;
+            isMember: boolean;
+            isOwner: boolean;
+        };
+        JoinClubRequest: {
+            /** Format: int64 */
+            clubId?: number;
+            code?: string;
         };
         DmRoomDto: {
             /** Format: int64 */
@@ -5965,6 +6144,76 @@ export interface operations {
             };
         };
     };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateClubRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinClubRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
     markRead: {
         parameters: {
             query?: never;
@@ -6389,7 +6638,7 @@ export interface operations {
             };
         };
     };
-    leave: {
+    leave_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -7999,6 +8248,90 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FeedItemResponse"];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    nearby: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubSummary"][];
+                };
+            };
+        };
+    };
+    mine_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubSummary"][];
+                };
+            };
+        };
+    };
+    byInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubSummary"];
                 };
             };
         };

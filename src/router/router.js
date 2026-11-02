@@ -106,6 +106,10 @@ const routes = [
   { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },
+  // 동호회 (club/): 목록·만들기, 한 곳, 초대 링크
+  { path: '/clubs', component: () => import('../views/club/ClubListView.vue') },
+  { path: '/clubs/:id', component: () => import('../views/club/ClubView.vue') },
+  { path: '/club/join/:code', component: () => import('../views/club/ClubJoinView.vue') },
   { path: '/games/:gameId(\\d+)', component: () => import('../views/game/OpenGameView.vue') },
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },

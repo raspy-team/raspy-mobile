@@ -3,7 +3,7 @@
 import api from '../api/api'
 import { rememberReturnTo } from '../utils/authRedirect'
 
-const OPEN = ['/init', '/group/login', '/oauth/callback', '/welcome', '/invite', '/invite-fall-back', '/dev']
+const OPEN = ['/init', '/group/login', '/oauth/callback', '/welcome', '/invite', '/invite-fall-back', '/dev', '/club/join']
 let done = false
 
 export function markOnboarded() {

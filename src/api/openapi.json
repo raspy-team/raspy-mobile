@@ -1800,6 +1800,103 @@
         }
       }
     },
+    "/api/clubs": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 만들기",
+        "description": "만든 사람의 지금 동네로 만든다. 만든 사람이 첫 멤버",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClubRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/{id}/leave": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 나가기",
+        "description": "만든 사람이 나가면 가장 오래된 멤버가 이어받는다. 혼자였으면 동호회가 없어진다",
+        "operationId": "leave",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/join": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 들어가기",
+        "description": "초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로",
+        "operationId": "join",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinClubRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat-room/{roomId}/read": {
       "post": {
         "tags": [
@@ -2387,7 +2484,7 @@
         ],
         "summary": "나가기",
         "description": "대기 중이면 방을 닫고, 하는 중이면 진다.",
-        "operationId": "leave",
+        "operationId": "leave_1",
         "parameters": [
           {
             "name": "gameId",
@@ -4815,6 +4912,119 @@
         }
       }
     },
+    "/api/clubs/{id}": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 보기",
+        "description": "멤버·동호회 경기. 초대 코드는 멤버에게만",
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/nearby": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "우리 동네 동호회",
+        "description": "내 동네 범위에서 아직 안 든 동호회, 멤버 많은 순",
+        "operationId": "nearby",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClubSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/mine": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "내 동호회",
+        "operationId": "mine_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClubSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/invite/{code}": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "초대 링크로 동호회 보기",
+        "operationId": "byInvite",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat-room/{roomId}/chat-messages": {
       "get": {
         "tags": [
@@ -5127,11 +5337,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -6700,6 +6910,10 @@
               "VIDEO",
               "ONLINE"
             ]
+          },
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -6729,6 +6943,149 @@
           "userId": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "CreateClubRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubDetail": {
+        "required": [
+          "club",
+          "games",
+          "members"
+        ],
+        "type": "object",
+        "properties": {
+          "club": {
+            "$ref": "#/components/schemas/ClubSummary"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMember"
+            }
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubGame"
+            }
+          },
+          "inviteCode": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubGame": {
+        "required": [
+          "gameId",
+          "hostNickname",
+          "status",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "placeRoad": {
+            "type": "string"
+          },
+          "hostNickname": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubMember": {
+        "required": [
+          "isOwner",
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          },
+          "isOwner": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ClubSummary": {
+        "required": [
+          "id",
+          "isMember",
+          "isOwner",
+          "memberCount",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "dongName": {
+            "type": "string"
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isMember": {
+            "type": "boolean"
+          },
+          "isOwner": {
+            "type": "boolean"
+          }
+        }
+      },
+      "JoinClubRequest": {
+        "type": "object",
+        "properties": {
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code": {
+            "type": "string"
           }
         }
       },

@@ -109,6 +109,7 @@ const routes = [
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },
   { path: '/play/:key/battle', component: () => import('../views/play/BattleView.vue') },
   { path: '/play/:key/board', component: () => import('../views/play/SharedBoardView.vue') },
+  { path: '/watch/:gameId', component: () => import('../views/play/WatchView.vue') },
   { path: '/vote/:gameId', component: () => import('../views/play/VoteView.vue') },
   { path: '/challenge/:gameId', component: () => import('../views/play/ChallengeView.vue') },
   { path: '/rules', component:  Rule},

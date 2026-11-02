@@ -1173,6 +1173,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/realtime/{gameId}/cheer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 응원하기
+         * @description 하는 중인 판에서 한쪽(0·1). 한 사람 한 표, 다시 누르면 바꾼다. 선수는 못 한다
+         */
+        post: operations["cheer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/realtime/{gameId}/bot": {
         parameters: {
             query?: never;
@@ -2591,6 +2611,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/realtime/{gameId}/watch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 관전하기
+         * @description 말 배틀처럼 보는 사람이 응원해 승패를 정하는 실시간 게임. 선수가 아니어도 본다
+         */
+        get: operations["watch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/plays/{playId}/dialog": {
         parameters: {
             query?: never;
@@ -3159,6 +3199,7 @@ export interface components {
             result?: "WIN" | "LOSE" | "DRAW";
             simultaneous: boolean;
             race: boolean;
+            liveJudged: boolean;
             /** Format: int32 */
             round: number;
             view?: components["schemas"]["TurnView"];
@@ -3284,6 +3325,32 @@ export interface components {
         };
         MoveRequest: {
             word: string;
+        };
+        CheerRequest: {
+            /** Format: int32 */
+            side: number;
+        };
+        WatchState: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            subject: string;
+            players: components["schemas"]["AppPlayer"][];
+            moves: components["schemas"]["RealtimeMove"][];
+            votes: number[];
+            /** Format: int32 */
+            myVote?: number;
+            player: boolean;
+            /** Format: int64 */
+            turnUserId?: number;
+            /** Format: date-time */
+            turnEndsAt?: string;
+            /** Format: date-time */
+            serverNow: string;
+            /** Format: int64 */
+            winnerId?: number;
+            topic: string;
         };
         SubmitPlayRequest: {
             answer: string;
@@ -5831,6 +5898,32 @@ export interface operations {
             };
         };
     };
+    cheer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
     callBot: {
         parameters: {
             query?: never;
@@ -7545,6 +7638,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    watch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchState"];
                 };
             };
         };

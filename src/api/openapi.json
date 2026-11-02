@@ -2214,6 +2214,49 @@
         }
       }
     },
+    "/api/app-games/realtime/{gameId}/cheer": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "응원하기",
+        "description": "하는 중인 판에서 한쪽(0·1). 한 사람 한 표, 다시 누르면 바꾼다. 선수는 못 한다",
+        "operationId": "cheer",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/realtime/{gameId}/bot": {
       "post": {
         "tags": [
@@ -4683,6 +4726,39 @@
         }
       }
     },
+    "/api/app-games/realtime/{gameId}/watch": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "관전하기",
+        "description": "말 배틀처럼 보는 사람이 응원해 승패를 정하는 실시간 게임. 선수가 아니어도 본다",
+        "operationId": "watch",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/plays/{playId}/dialog": {
       "get": {
         "tags": [
@@ -6027,6 +6103,7 @@
           "botAfterSeconds",
           "gameId",
           "key",
+          "liveJudged",
           "lobbySeconds",
           "me",
           "meFirst",
@@ -6116,6 +6193,9 @@
             "type": "boolean"
           },
           "race": {
+            "type": "boolean"
+          },
+          "liveJudged": {
             "type": "boolean"
           },
           "round": {
@@ -6503,6 +6583,93 @@
         "type": "object",
         "properties": {
           "word": {
+            "type": "string"
+          }
+        }
+      },
+      "CheerRequest": {
+        "required": [
+          "side"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WatchState": {
+        "required": [
+          "gameId",
+          "key",
+          "moves",
+          "player",
+          "players",
+          "serverNow",
+          "status",
+          "subject",
+          "topic",
+          "votes"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppPlayer"
+            }
+          },
+          "moves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RealtimeMove"
+            }
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "myVote": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "player": {
+            "type": "boolean"
+          },
+          "turnUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "turnEndsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "winnerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "topic": {
             "type": "string"
           }
         }

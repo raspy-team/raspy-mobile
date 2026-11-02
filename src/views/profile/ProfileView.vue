@@ -92,6 +92,16 @@
         </div>
       </section>
 
+      <!-- 많이 한 능력 (규칙의 '잘하려면'을 판 수로 센다). 누르면 그 능력 게임 둘러보기 -->
+      <section v-if="abilities.length" class="mt-10">
+        <h2 class="t-heading mb-3">많이 쓴 능력</h2>
+        <div class="flex flex-wrap gap-2">
+          <UiChip v-for="a in abilities" :key="a.key" @click="router.push({ path: '/rules', query: { ability: a.key } })">
+            {{ a.label }}<span class="text-fg-subtle">{{ a.games }}판</span>
+          </UiChip>
+        </div>
+      </section>
+
       <!-- 많이 한 규칙 -->
       <section class="mt-10">
         <div class="flex items-center justify-between mb-1">
@@ -201,10 +211,11 @@
 <script setup>
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 // 프로필 (/profile/0 = 나, /profile/:id = 다른 사람)
-// 누구인지 → 숫자 한 줄 → 주 행동(나: 편집 / 남: 친구·메시지) → 챔피언 → 많이 한 규칙 → 최근 경기
+// 누구인지(동네) → 숫자 한 줄 → 주 행동(나: 편집 / 남: 친구·메시지) → 챔피언 → 많이 쓴 능력 → 많이 한 규칙 → 최근 경기
 // 신고·차단·친구 끊기는 더보기 안에. 빈 값(나이·성별·지역 없음)은 보여주지 않는다
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { GET } from '@/api/client'
 import api from '../../api/api'
 import UserSearchModal from '../../components/profile/UserSearchModal.vue'
 import {
@@ -338,6 +349,8 @@ function goFriend(id) {
   router.push('/profile/' + id)
 }
 
+const abilities = ref([])
+
 onMounted(async () => {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
@@ -347,6 +360,10 @@ onMounted(async () => {
     loading.value = false
   }
   await loadFriendStatus()
+  // 많이 쓴 능력 (없어도 화면은 그대로)
+  if (user.value) {
+    abilities.value = (await GET('/api/rules/top-played-abilities/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data
+  }
   // 경기 결과를 보내고 넘어온 경우(?id=경기) 그 경기를 보여준다
   if (highlightId.value) {
     await nextTick()

@@ -2966,12 +2966,14 @@
         }
       }
     },
-    "/api/rules/top-played-categories/{userId}": {
+    "/api/rules/top-played-abilities/{userId}": {
       "get": {
         "tags": [
           "rule-controller"
         ],
-        "operationId": "topPlayedMinorCategories",
+        "summary": "많이 한 능력",
+        "description": "끝난 경기 규칙의 능력을 판 수로 센다. 5개까지. userId 0은 나",
+        "operationId": "topPlayedAbilities",
         "parameters": [
           {
             "name": "userId",
@@ -2991,7 +2993,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/PlayedAbility"
                   }
                 }
               }
@@ -3163,6 +3165,16 @@
                 "CREATIVITY",
                 "HUMOR"
               ]
+            }
+          },
+          {
+            "name": "withApp",
+            "in": "query",
+            "description": "앱 게임도 넣기 (둘러보기). 경기를 열 규칙을 고를 때는 false",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -7227,6 +7239,30 @@
           },
           "isCurrentUser": {
             "type": "boolean"
+          }
+        }
+      },
+      "PlayedAbility": {
+        "required": [
+          "games",
+          "group",
+          "key",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "games": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

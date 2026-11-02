@@ -1595,14 +1595,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/rules/top-played-categories/{userId}": {
+    "/api/rules/top-played-abilities/{userId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["topPlayedMinorCategories"];
+        /**
+         * 많이 한 능력
+         * @description 끝난 경기 규칙의 능력을 판 수로 센다. 5개까지. userId 0은 나
+         */
+        get: operations["topPlayedAbilities"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3465,6 +3469,13 @@ export interface components {
             /** Format: int64 */
             playCount: number;
             isCurrentUser: boolean;
+        };
+        PlayedAbility: {
+            key: string;
+            label: string;
+            group: string;
+            /** Format: int64 */
+            games: number;
         };
         CategoryOptions: {
             faces: components["schemas"]["CategoryValue"][];
@@ -6214,7 +6225,7 @@ export interface operations {
             };
         };
     };
-    topPlayedMinorCategories: {
+    topPlayedAbilities: {
         parameters: {
             query?: never;
             header?: never;
@@ -6231,7 +6242,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": string[];
+                    "*/*": components["schemas"]["PlayedAbility"][];
                 };
             };
         };
@@ -6277,6 +6288,8 @@ export interface operations {
                 gear?: "NONE" | "PHONE" | "ITEMS" | "FOOD";
                 /** @description 잘하려면 (Ability 이름) */
                 ability?: "STRENGTH" | "ENDURANCE" | "SPEED" | "PRECISION" | "BALANCE" | "FLEXIBILITY" | "RHYTHM" | "EXPRESSION" | "READING" | "SPATIAL" | "MEMORY" | "KNOWLEDGE" | "LANGUAGE" | "CALCULATION" | "SENSE" | "SOCIAL" | "PERSUASION" | "TEAMWORK" | "GRIT" | "CONSISTENCY" | "CREATIVITY" | "HUMOR";
+                /** @description 앱 게임도 넣기 (둘러보기). 경기를 열 규칙을 고를 때는 false */
+                withApp?: boolean;
             };
             header?: never;
             path?: never;

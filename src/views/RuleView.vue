@@ -187,7 +187,8 @@ async function load() {
   const mine = ++seq
   loading.value = true
   try {
-    const params = { sort: sort.value }
+    // 둘러보기는 앱 게임도 보여 준다. 경기를 열 규칙을 고를 때만 뺀다
+    const params = { sort: sort.value, withApp: !picking.value }
     FILTER_KEYS.forEach((k) => route.query[k] && (params[k] = route.query[k]))
     if (route.query.q) params.search = route.query.q
     const { data } = await api.get('/api/rules/list', { params })

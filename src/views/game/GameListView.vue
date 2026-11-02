@@ -27,6 +27,11 @@
       <UiButton size="sm" variant="ghost" to="/rules">규칙 둘러보기</UiButton>
     </div>
 
+    <!-- 지금 상황으로 찾기 (docs/direction.md '찾기': 홈에는 자주 쓰는 조합을 줄로) -->
+    <div class="flex gap-2 mt-5 -mx-4 px-4 overflow-x-auto no-scrollbar" role="group" aria-label="상황으로 찾기">
+      <UiChip v-for="s in SITUATIONS" :key="s.label" class="flex-shrink-0 whitespace-nowrap" :icon="s.icon" @click="router.push({ path: '/rules', query: s.query })">{{ s.label }}</UiChip>
+    </div>
+
     <AppGameStrip class="mt-6" />
 
     <UiSection title="열린 경기" class="mt-6">
@@ -156,6 +161,14 @@ import { copyText } from '../../utils/clipboard'
 import { haptic } from '../../utils/haptics'
 
 const REPORT_REASONS = ['욕설·비방', '거짓 경기', '광고·스팸', '기타']
+// 홈의 상황 줄. 값은 규칙 둘러보기 주소(?place=&party=&length=)와 같다
+const SITUATIONS = [
+  { label: '지금 폰만 있으면', icon: 'bolt', query: { place: 'PHONE' } },
+  { label: '친구랑 둘이', icon: 'user-group', query: { party: 'DUO' } },
+  { label: '술자리·모임에서', icon: 'users', query: { place: 'GATHERING' } },
+  { label: '1분이면', icon: 'stopwatch', query: { length: 'MINUTE' } },
+  { label: '집에서', icon: 'home', query: { place: 'HOME' } },
+]
 
 const route = useRoute()
 const router = useRouter()

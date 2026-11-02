@@ -3859,11 +3859,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -6933,6 +6933,62 @@
           }
         }
       },
+      "AppDuelFeedDto": {
+        "required": [
+          "gameId",
+          "judge",
+          "key",
+          "scoreUnit",
+          "scores",
+          "texts",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "judge": {
+            "type": "string",
+            "enum": [
+              "CONFIRM",
+              "APP",
+              "AI",
+              "VOTE"
+            ]
+          },
+          "scoreUnit": {
+            "type": "string"
+          },
+          "winnerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "votingEndsAt": {
+            "type": "string"
+          }
+        }
+      },
       "FeedItemResponse": {
         "required": [
           "caption",
@@ -7024,6 +7080,9 @@
             "items": {
               "$ref": "#/components/schemas/UserGameStatisticsDTO"
             }
+          },
+          "appDuel": {
+            "$ref": "#/components/schemas/AppDuelFeedDto"
           }
         }
       },

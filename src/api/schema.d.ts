@@ -3210,6 +3210,20 @@ export interface components {
             isFriend: boolean;
             received: boolean;
         };
+        AppDuelFeedDto: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            title: string;
+            /** @enum {string} */
+            judge: "CONFIRM" | "APP" | "AI" | "VOTE";
+            scoreUnit: string;
+            /** Format: int64 */
+            winnerId?: number;
+            scores: number[];
+            texts: string[];
+            votingEndsAt?: string;
+        };
         FeedItemResponse: {
             id: string;
             date: string;
@@ -3231,6 +3245,7 @@ export interface components {
             commentCount: number;
             isMyGame: boolean;
             ruleStatisticsList: components["schemas"]["UserGameStatisticsDTO"][];
+            appDuel?: components["schemas"]["AppDuelFeedDto"];
         };
         FeedResponse: {
             items: components["schemas"]["FeedItemResponse"][];

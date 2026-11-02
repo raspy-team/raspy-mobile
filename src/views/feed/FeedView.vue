@@ -44,9 +44,19 @@
       </UiEmptyState>
 
       <div v-else class="ui-appear">
+        <template v-for="p in visible" :key="p.id">
+        <AppDuelFeedCard
+          v-if="p.appDuel"
+          :post="p"
+          :highlight="String(p.id) === String(focusId)"
+          :data-game="p.id"
+          @profile="(id) => id && router.push('/profile/' + id)"
+          @like="toggleLike(p)"
+          @comment="commentId = Number(p.id)"
+          @play="router.push(`/play/${p.appDuel.key}`)"
+        />
         <FeedCard
-          v-for="p in visible"
-          :key="p.id"
+          v-else
           :post="p"
           :highlight="String(p.id) === String(focusId)"
           :data-game="p.id"
@@ -57,6 +67,7 @@
           @play="router.push(`/create-game?ruleId=${p.rule.id}`)"
           @more="menuPost = p"
         />
+        </template>
         <!-- 끝에 닿으면 다음 장 -->
         <div ref="sentinel" class="h-16 flex items-center justify-center">
           <UiSpinner v-if="loading" class="text-fg-subtle" />
@@ -99,6 +110,7 @@ import { haptic } from '../../utils/haptics'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import FeedCard from '../../components/feed/FeedCard.vue'
+import AppDuelFeedCard from '../../components/feed/AppDuelFeedCard.vue'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
   UiButton, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
@@ -137,7 +149,8 @@ const reportDetail = ref('')
 const reporting = ref(false)
 
 // 끝난 경기만 (열린 경기는 홈에서 본다)
-const finished = (list) => list.filter((p) => p.type === 'game' && p.isCompleted)
+// 끝난 오프라인 경기 + 앱 대결(끝난 것·투표 중인 것). 열린(예정) 경기는 홈에서 본다
+const finished = (list) => list.filter((p) => (p.type === 'game' && p.isCompleted) || p.type === 'app_duel' || p.type === 'app_vote')
 const visible = computed(() => (tab.value === 'friends' && !userId ? posts.value.filter((p) => p.isFriend || p.isMyGame) : posts.value))
 
 function addPosts(list) {

@@ -9,5 +9,5 @@ export function structureLabel(playMode?: string) {
 }
 
 export function judgeLabel(judge?: string) {
-  return ({ APP: '앱이 판정', AI: 'AI 채점', VOTE: '투표' } as Record<string, string>)[judge ?? ''] ?? ''
+  return ({ APP: '앱이 판정', AI: 'AI 채점', VOTE: '투표', OUTCOME: '실제 결과' } as Record<string, string>)[judge ?? ''] ?? ''
 }

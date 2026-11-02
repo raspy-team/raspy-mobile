@@ -3889,7 +3889,7 @@ export interface components {
             /** Format: int64 */
             gameId?: number;
             /** @enum {string} */
-            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -3932,7 +3932,7 @@ export interface components {
             opponentNickname?: string;
             opponentProfileUrl?: string;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** Format: date-time */
             startedAt?: string;
             /** Format: int64 */
@@ -3989,7 +3989,7 @@ export interface components {
             limitSeconds: number;
             chatRoomId: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** @enum {string} */
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             sides: components["schemas"]["SideScore"][];
@@ -4071,7 +4071,7 @@ export interface components {
             ownerNickname: string;
             ownerProfileUrl?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** Format: double */
             mannerScore: number;
             /** Format: int64 */
@@ -4213,7 +4213,7 @@ export interface components {
             matchDate?: string;
             matchLocation?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** Format: int64 */
             resultSubmittedById?: number;
             /** @enum {string} */
@@ -4259,7 +4259,7 @@ export interface components {
             /** Format: double */
             opponentRating?: number;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** Format: date-time */
             startedAt?: string;
             /** Format: int64 */
@@ -4283,7 +4283,7 @@ export interface components {
             matchLocation?: string;
             applicants: components["schemas"]["ApplicantInfo"][];
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             myProfileUrl?: string;
             /** Format: int64 */
             myId: number;
@@ -4321,7 +4321,7 @@ export interface components {
             key: string;
             title: string;
             /** @enum {string} */
-            judge: "CONFIRM" | "APP" | "AI" | "VOTE";
+            judge: "CONFIRM" | "APP" | "AI" | "VOTE" | "OUTCOME";
             scoreUnit: string;
             icon: string;
             /** Format: int64 */
@@ -4451,7 +4451,7 @@ export interface components {
             /** @enum {string} */
             playMode: "OFFLINE" | "REALTIME" | "NON_REALTIME";
             /** @enum {string} */
-            judge: "CONFIRM" | "APP" | "AI" | "VOTE";
+            judge: "CONFIRM" | "APP" | "AI" | "VOTE" | "OUTCOME";
             recordable: boolean;
             /** Format: int32 */
             timeLimitSeconds: number;

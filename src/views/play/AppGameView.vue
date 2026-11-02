@@ -29,6 +29,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <PredictPlay
+          v-else-if="key === 'predict'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <DialogPlay
           v-else-if="key === 'debate'"
           :play-id="play.playId"
@@ -69,6 +76,13 @@
             <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : `${judgeName}가 채점하고 있어요` }}</p>
             <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 알림으로 알려 드릴게요</p>
           </template>
+          <!-- 스코어 맞히기: 둘 다 냈고 실제 경기가 끝나길 기다린다 -->
+          <template v-else-if="result.status === 'AWAITING_RESULT'">
+            <p class="t-title">경기 결과를 기다려요</p>
+            <p class="t-caption mt-1">{{ kickoffLabel(fixtureOf(result.problem).kickoff) }} 경기가 끝나면 채점하고 알려 드릴게요</p>
+            <p class="t-body mt-5">내 예상 <b class="tabular-nums">{{ predictionLine(result.problem, result.myAnswer) }}</b></p>
+            <p v-if="result.opponentAnswer" class="t-caption mt-1">{{ result.opponent?.nickname }}님 예상 {{ predictionLine(result.problem, result.opponentAnswer) }}</p>
+          </template>
           <template v-else-if="result.status === 'VOTING'">
             <p class="t-title">투표 중이에요</p>
             <p class="t-caption mt-1">{{ until(result.votingEndsAt) }}까지 사람들이 투표해요. 끝나면 알려 드릴게요</p>
@@ -76,6 +90,11 @@
           </template>
           <template v-else-if="result.status === 'CANCELED'">
             <p class="t-title">취소된 대결이에요</p>
+          </template>
+          <template v-else-if="key === 'predict' && result.status === 'WAITING'">
+            <p class="t-heading">내 예상 {{ predictionLine(result.problem, result.myAnswer) }}</p>
+            <p class="t-caption mt-1">같은 경기를 맞힐 상대를 찾고 있어요. 경기가 끝나면 채점해요</p>
+            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
           <template v-else-if="isVote">
             <p class="t-heading">{{ (result.myScore ?? 0) > 0 ? '문장이 올라갔어요' : '투표에 올리지 못했어요' }}</p>
@@ -93,7 +112,7 @@
         <!-- 다음 행동은 결과 바로 밑에. 긴 답·한마디는 그 아래 -->
         <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
-        <UiCard v-if="result.myFeedback" class="mt-3">
+        <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : '알림' }}</p>
           <p class="t-body mt-1">{{ result.myFeedback }}</p>
         </UiCard>
@@ -262,6 +281,8 @@ import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
+import PredictPlay from '../../components/appgame/PredictPlay.vue'
+import { fixtureOf, kickoffLabel, predictionLine } from '@/utils/predict'
 import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import { copyText } from '../../utils/clipboard'
@@ -438,6 +459,7 @@ function duelSubtitle(d: Duel) {
   if (d.status === 'COMPLETED') return `${d.myScore ?? 0} : ${d.opponentScore ?? 0}${unit}`
   if (d.status === 'CANCELED') return d.myFeedback || '시간 안에 내지 않아 취소됐어요'
   if (d.status === 'VOTING') return `투표 마감 ${until(d.votingEndsAt)}`
+  if (d.status === 'AWAITING_RESULT' || (key.value === 'predict' && d.myAnswer)) return `내 예상 ${predictionLine(d.problem, d.myAnswer)}`
   if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : 'AI 셰프가 채점하고 있어요'
   if (isVote.value) return d.myAnswer ?? ''
   return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : '아직 내지 않았어요'
@@ -446,6 +468,7 @@ function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']
   if (d.status === 'CANCELED') return '취소'
   if (d.status === 'VOTING') return '투표 중'
+  if (d.status === 'AWAITING_RESULT') return '결과 기다림'
   if (d.myJudging) return isVote.value ? '확인 중' : '채점 중'
   return d.opponent ? '상대 차례' : '기다리는 중'
 }

@@ -8342,7 +8342,8 @@
               "DELETED",
               "WAITING",
               "PLAYING",
-              "VOTING"
+              "VOTING",
+              "AWAITING_RESULT"
             ]
           }
         }
@@ -8526,7 +8527,8 @@
               "DELETED",
               "WAITING",
               "PLAYING",
-              "VOTING"
+              "VOTING",
+              "AWAITING_RESULT"
             ]
           },
           "startedAt": {
@@ -8700,7 +8702,8 @@
               "DELETED",
               "WAITING",
               "PLAYING",
-              "VOTING"
+              "VOTING",
+              "AWAITING_RESULT"
             ]
           },
           "format": {
@@ -8973,7 +8976,8 @@
               "DELETED",
               "WAITING",
               "PLAYING",
-              "VOTING"
+              "VOTING",
+              "AWAITING_RESULT"
             ]
           },
           "mannerScore": {
@@ -9432,7 +9436,8 @@
               "DELETED",
               "WAITING",
               "PLAYING",
-              "VOTING"
+              "VOTING",
+              "AWAITING_RESULT"
             ]
           },
           "resultSubmittedById": {
@@ -9581,7 +9586,8 @@
               "DELETED",
               "WAITING",
               "PLAYING",
-              "VOTING"
+              "VOTING",
+              "AWAITING_RESULT"
             ]
           },
           "startedAt": {
@@ -9668,7 +9674,8 @@
               "DELETED",
               "WAITING",
               "PLAYING",
-              "VOTING"
+              "VOTING",
+              "AWAITING_RESULT"
             ]
           },
           "myProfileUrl": {
@@ -9801,7 +9808,8 @@
               "CONFIRM",
               "APP",
               "AI",
-              "VOTE"
+              "VOTE",
+              "OUTCOME"
             ]
           },
           "scoreUnit": {
@@ -10276,7 +10284,8 @@
               "CONFIRM",
               "APP",
               "AI",
-              "VOTE"
+              "VOTE",
+              "OUTCOME"
             ]
           },
           "recordable": {

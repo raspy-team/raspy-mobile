@@ -268,6 +268,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/points/cheer/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 경기 응원 현황
+         * @description 쪽마다 응원한 사람 수와 포인트, 내 응원
+         */
+        get: operations["pointCheerState"];
+        put?: never;
+        /**
+         * 응원하기
+         * @description 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번). 이기면 +50%를 더해 돌려받는다
+         */
+        post: operations["cheerWithPoints"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/play-with-me-too/request": {
         parameters: {
             query?: never;
@@ -1987,6 +2011,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/points/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 포인트
+         * @description 잔액, 오늘 번 양과 하루 한도, 최근 30줄. 포인트는 사고팔거나 바꾸거나 넘길 수 없다
+         */
+        get: operations["myPoints"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/play-with-me-too/status-with-user": {
         parameters: {
             query?: never;
@@ -3369,6 +3413,31 @@ export interface components {
         RegisterTokenRequest: {
             token: string;
         };
+        PointCheerRequest: {
+            /** Format: int64 */
+            sideUserId: number;
+            /** Format: int32 */
+            amount: number;
+        };
+        CheerSide: {
+            /** Format: int64 */
+            userId: number;
+            /** Format: int32 */
+            cheerers: number;
+            /** Format: int32 */
+            points: number;
+        };
+        CheerState: {
+            sides: components["schemas"]["CheerSide"][];
+            mine?: components["schemas"]["MyCheer"];
+        };
+        MyCheer: {
+            /** Format: int64 */
+            sideUserId: number;
+            /** Format: int32 */
+            amount: number;
+            settled: boolean;
+        };
         VerifyRequest: {
             /** Format: double */
             lat: number;
@@ -4068,6 +4137,24 @@ export interface components {
             provisional: boolean;
             points: components["schemas"]["RatingPoint"][];
         };
+        PointLine: {
+            /** Format: int32 */
+            amount: number;
+            label: string;
+            /** Format: int64 */
+            gameId?: number;
+            /** Format: date-time */
+            at: string;
+        };
+        PointSummary: {
+            /** Format: int64 */
+            balance: number;
+            /** Format: int64 */
+            earnedToday: number;
+            /** Format: int32 */
+            dailyLimit: number;
+            history: components["schemas"]["PointLine"][];
+        };
         PlayWithMeTooResponse: {
             /** Format: int64 */
             id: number;
@@ -4308,6 +4395,7 @@ export interface components {
             ownerTemperature?: number;
             /** Format: int32 */
             myWinChance?: number;
+            players?: components["schemas"]["SummaryPlayer"][];
             ownerTrustLabel?: string;
             /** Format: int64 */
             championId?: number;
@@ -4337,6 +4425,11 @@ export interface components {
             scores: number[];
             /** Format: int32 */
             winner: number;
+        };
+        SummaryPlayer: {
+            /** Format: int64 */
+            id: number;
+            nickname: string;
         };
         GameRankingResponse: {
             /** Format: int64 */
@@ -5152,6 +5245,54 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    pointCheerState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CheerState"];
+                };
+            };
+        };
+    };
+    cheerWithPoints: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PointCheerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CheerState"];
+                };
             };
         };
     };
@@ -7421,6 +7562,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RuleRatingHistory"][];
+                };
+            };
+        };
+    };
+    myPoints: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PointSummary"];
                 };
             };
         };

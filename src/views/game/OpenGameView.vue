@@ -29,6 +29,14 @@
           </template>
           <template v-else>신청하면 {{ game.ownerNickname }}님이 승인하고, 장소와 시간을 함께 정해요.</template>
         </p>
+        <!-- 상대가 정해진 남의 경기: 한쪽을 응원 (포인트) -->
+        <CheerBar
+          v-if="canCheer"
+          class="mt-6"
+          :game-id="game.id"
+          :players="game.players"
+          :closed="!['SCHEDULED', 'IN_PROGRESS'].includes(game.gameStatus)"
+        />
         <UiButton v-if="game.ownerId === myId" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>
         <UiButton v-else block variant="ghost" class="mt-4" to="/">다른 열린 경기 보기</UiButton>
       </template>
@@ -38,13 +46,14 @@
 
 <script setup>
 // 공유 링크로 들어온 열린 경기 하나 (/games/:gameId). 피드는 끝난 경기만 보여 줘서 예전엔 링크를 받아도 신청할 곳이 없었다
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { haptic } from '../../utils/haptics'
 import { useToast } from '../../composable/useToast'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
+import CheerBar from '../../components/point/CheerBar.vue'
 import { UiButton, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
 
 const route = useRoute()
@@ -54,6 +63,11 @@ const game = ref(null)
 const error = ref('')
 const busy = ref(false)
 const myId = ref(null)
+const canCheer = computed(() => {
+  const g = game.value
+  return g && g.rule?.judge !== 'OUTCOME' && (g.players?.length || 0) >= 2 && !g.players.some((p) => p.id === myId.value)
+    && ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED'].includes(g.gameStatus)
+})
 
 async function load() {
   try {

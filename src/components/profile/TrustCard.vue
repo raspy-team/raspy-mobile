@@ -18,7 +18,7 @@
         <template v-if="trust.mannerCount">매너 <b class="text-fg tabular-nums">{{ trust.mannerAverage }}</b> ({{ trust.mannerCount }}명)</template>
         <template v-else>매너 평가 아직 없음</template>
       </li>
-      <li class="flex items-center gap-1.5" :class="trust.disputes ? 'text-danger-fg' : ''"><UiIcon name="scale-unbalanced" class="w-4 text-center" aria-hidden="true" />결과 이견 <b class="tabular-nums">{{ trust.disputes }}명</b></li>
+      <li class="flex items-center gap-1.5" :class="trust.disputes ? 'text-danger-fg' : ''"><UiIcon name="scale-unbalanced" class="w-4 text-center" aria-hidden="true" />결과 이견 <b class="tabular-nums">{{ trust.disputes ? `${trust.disputes}명` : '없음' }}</b></li>
       <li class="flex items-center gap-1.5"><UiIcon name="calendar" class="w-4 text-center" aria-hidden="true" />가입 {{ joined }}</li>
       <li class="flex items-center gap-1.5" :class="trust.dongVerified ? '' : 'text-fg-subtle'"><UiIcon :name="trust.dongVerified ? 'circle-check' : 'circle'" class="w-4 text-center" aria-hidden="true" />동네 인증</li>
       <li class="flex items-center gap-1.5" :class="trust.socialVerified ? '' : 'text-fg-subtle'"><UiIcon :name="trust.socialVerified ? 'circle-check' : 'circle'" class="w-4 text-center" aria-hidden="true" />소셜 계정 확인</li>

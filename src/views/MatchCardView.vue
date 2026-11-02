@@ -16,7 +16,7 @@
 
       <!-- 나이를 넣지 않았거나 만 19세 미만 -->
       <UiEmptyState v-else-if="blocked" class="mt-16" icon="shield-halved" :title="blocked" description="처음 보는 사람과 만나는 기능이라 성인만 쓸 수 있어요">
-        <UiButton variant="secondary" to="/set-profile">내 정보에서 나이 넣기</UiButton>
+        <UiButton variant="secondary" to="/set-profile#age">내 정보에서 나이 넣기</UiButton>
       </UiEmptyState>
 
       <!-- 처음: 내 카드도 보이게 켜야 시작한다 (본인 모르게 남의 덱에 오르지 않게) -->

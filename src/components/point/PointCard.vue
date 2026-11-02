@@ -11,7 +11,9 @@
       <p class="t-title tabular-nums">{{ data.balance.toLocaleString() }}P</p>
       <p class="t-caption mt-1">오늘 {{ data.earnedToday }} / {{ data.dailyLimit }}P 벌었어요</p>
 
-      <ul class="mt-4 space-y-1.5 t-caption">
+      <p class="t-body mt-4">경기를 마치면 쌓이고, 남의 경기를 응원하는 데 써요.</p>
+      <button type="button" class="t-micro underline underline-offset-2 mt-1" :aria-expanded="more" @click="more = !more">{{ more ? '접기' : '자세히' }}</button>
+      <ul v-if="more" class="mt-3 space-y-1.5 t-caption">
         <li>· 경기를 마치면 20P, 이기면 10P 더 (앱 게임은 5P·3P)</li>
         <li>· 시작 전인 남의 경기에 10~100P를 걸어 응원할 수 있어요 (만 19세 이상). 응원한 쪽이 이기면 돌려받고 <b class="text-fg">보너스</b>(최대 50%, 유력한 쪽일수록 작고 선수와 아는 사이면 없음)</li>
         <li>· 같은 상대와 일주일에 4번째 판부터는 쌓이지 않고, 응원 보너스까지 하루 100P까지예요</li>
@@ -40,6 +42,7 @@ import { timeAgo } from '../../utils/format'
 
 const data = ref<components['schemas']['PointSummary'] | null>(null)
 const open = ref(false)
+const more = ref(false)
 
 onMounted(async () => {
   data.value = (await GET('/api/points/me').catch(() => ({ data: null }))).data

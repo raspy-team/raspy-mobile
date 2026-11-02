@@ -46,7 +46,7 @@
       <div v-else class="ui-appear">
         <template v-for="p in visible" :key="p.id">
         <p v-if="p.id === firstElsewhere && tab === 'near'" class="t-caption pt-6 pb-1 flex items-center gap-2" role="separator">
-          <UiIcon name="location-dot" aria-hidden="true" />다른 동네 경기 <span class="text-fg-subtle">· 동네 경기가 늘면 줄어요</span>
+          <UiIcon name="location-dot" aria-hidden="true" />우리 동네 경기가 아직 적어서 다른 동네 경기도 보여요
         </p>
         <!-- 지금 하는 경기: 중계로 -->
         <RouterLink v-if="p.live" :to="`/live/${p.id}`" class="flex items-center gap-3 py-4 border-b border-line" :data-game="p.id">

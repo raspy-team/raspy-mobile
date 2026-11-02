@@ -13,7 +13,9 @@
       </span>
       <div class="flex-1 min-w-0">
         <p class="t-heading">준비됐어요!</p>
-        <p class="t-caption mt-0.5">아래 열린 경기에 신청하거나, 원하는 규칙으로 직접 경기를 열어보세요.</p>
+        <!-- 처음 성공까지 가장 빠른 길(앱 게임, 15초 안에 상대)을 먼저 권한다 (세션 B 흐름 검토) -->
+        <p class="t-caption mt-0.5">폰만 있으면 지금 바로 한 판 할 수 있어요. 15초 안에 상대가 없으면 연습 상대와 붙어요.</p>
+        <UiButton size="sm" class="mt-3" icon="bolt" to="/games">앱 게임 한 판 하기</UiButton>
       </div>
       <UiIconButton icon="fas fa-xmark" label="닫기" class="-mt-2 -mr-2" @click="router.replace({ query: {} })" />
     </UiCard>

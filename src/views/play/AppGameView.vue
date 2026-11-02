@@ -29,6 +29,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <SquatPlay
+          v-else-if="key === 'squat'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit-video="submitVideo"
+        />
         <PredictPlay
           v-else-if="key === 'predict'"
           :problem="play.problem"
@@ -138,7 +145,7 @@
             <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
-        <template v-else-if="game?.judge === 'AI'">
+        <template v-else-if="key === 'recipe'">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 요리</p>
             <p class="t-heading mt-1">{{ dish(result.myAnswer).name }}</p>
@@ -274,6 +281,7 @@ import { liveRoute } from '@/utils/battle'
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
+import api from '../../api/api'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import BrandFace from '../../components/BrandFace.vue'
@@ -282,6 +290,7 @@ import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
+import SquatPlay from '../../components/appgame/SquatPlay.vue'
 import { fixtureOf, kickoffLabel, predictionLine } from '@/utils/predict'
 import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
@@ -397,6 +406,25 @@ async function submit(answer: string) {
   }
 }
 
+/** 기록 인증(스쿼트): 영상을 올리면 서버가 AI에게 세게 하고, 영상은 남기지 않는다 */
+async function submitVideo(video: Blob) {
+  if (!play.value) return
+  submitting.value = true
+  try {
+    const fd = new FormData()
+    fd.append('video', video, video.type.includes('mp4') ? 'proof.mp4' : 'proof.webm')
+    result.value = (await api.post(`/api/app-games/plays/${play.value.playId}/proof`, fd, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 })).data
+    play.value = null
+    load()
+  } catch (e) {
+    submitError.value = errorMessage(e, '영상을 올리지 못했어요')
+    play.value = null
+    load()
+  } finally {
+    submitting.value = false
+  }
+}
+
 /** 이어서 하는 판은 서버의 마감까지 남은 만큼만 */
 function secondsLeft(p: Play) {
   const left = Math.floor((new Date(p.deadlineAt).getTime() - (Date.now() + offset)) / 1000)
@@ -430,7 +458,7 @@ async function shareVote(gameId: number) {
 
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
 // AI가 채점하는 게임마다 심판 이름
-const judgeName = computed(() => (key.value === 'debate' ? 'AI 심판' : 'AI 셰프'))
+const judgeName = computed(() => (key.value === 'recipe' ? 'AI 셰프' : 'AI 심판'))
 
 function dish(answer: string) {
   const [name, ...rest] = answer.split('\n')
@@ -460,7 +488,7 @@ function duelSubtitle(d: Duel) {
   if (d.status === 'CANCELED') return d.myFeedback || '시간 안에 내지 않아 취소됐어요'
   if (d.status === 'VOTING') return `투표 마감 ${until(d.votingEndsAt)}`
   if (d.status === 'AWAITING_RESULT' || (key.value === 'predict' && d.myAnswer)) return `내 예상 ${predictionLine(d.problem, d.myAnswer)}`
-  if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : 'AI 셰프가 채점하고 있어요'
+  if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : `${judgeName.value}가 채점하고 있어요`
   if (isVote.value) return d.myAnswer ?? ''
   return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : '아직 내지 않았어요'
 }

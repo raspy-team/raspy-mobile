@@ -2534,6 +2534,57 @@
         }
       }
     },
+    "/api/app-games/plays/{playId}/proof": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "기록 인증 영상 내기",
+        "description": "스쿼트 30초처럼 영상으로 내는 게임. 영상은 저장하지 않고 AI 채점에만 쓴다. 10MB까지",
+        "operationId": "submitProof",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "video"
+                ],
+                "type": "object",
+                "properties": {
+                  "video": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDuelResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/duels/{gameId}/challenge": {
       "post": {
         "tags": [
@@ -4967,11 +5018,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {

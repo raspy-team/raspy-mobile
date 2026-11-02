@@ -1347,6 +1347,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/plays/{playId}/proof": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 기록 인증 영상 내기
+         * @description 스쿼트 30초처럼 영상으로 내는 게임. 영상은 저장하지 않고 AI 채점에만 쓴다. 10MB까지
+         */
+        post: operations["submitProof"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/duels/{gameId}/challenge": {
         parameters: {
             query?: never;
@@ -6342,6 +6362,35 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppDialogResponse"];
+                };
+            };
+        };
+    };
+    submitProof: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    video: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDuelResponse"];
                 };
             };
         };

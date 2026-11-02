@@ -1529,6 +1529,57 @@
         }
       }
     },
+    "/api/games/{gameId}/apply-pair": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "친구와 둘이 신청",
+        "description": "팀 경기에서 친구와 같은 팀에 함께 신청한다. 주최자가 한 사람을 받으면 짝도 함께 받는다",
+        "operationId": "applyAsPair",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "team",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "partnerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/create": {
       "post": {
         "tags": [
@@ -5000,6 +5051,7 @@
           "club-controller"
         ],
         "summary": "초대 링크로 동호회 보기",
+        "description": "로그인 전에도 볼 수 있다 (가입하고 돌아와 들어간다)",
         "operationId": "byInvite",
         "parameters": [
           {
@@ -9331,6 +9383,10 @@
           "team": {
             "type": "integer",
             "format": "int32"
+          },
+          "partnerId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

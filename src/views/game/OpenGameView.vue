@@ -14,10 +14,12 @@
           @rule="router.push(`/rules/${game.rule.id}`)"
           @profile="router.push('/profile/' + game.ownerId)"
           @apply="apply"
+          @pair="pairOpen = true"
           @cancel="cancel"
           @challengers="() => {}"
           @more="() => {}"
         />
+        <PairApplySheet :game="pairOpen ? game : null" @close="pairOpen = false" @done="() => { game.isAppliedByMe = true; pairOpen = false }" />
         <p class="t-caption mt-4">
           <template v-if="game.gameStatus !== 'MATCHING'">{{ game.format && game.format !== 'DUEL' ? '이미 사람이 다 모인 경기예요.' : '이미 상대가 정해진 경기예요.' }}</template>
           <template v-else-if="game.ownerId === myId">신청이 오면 알려 드려요. 내 경기에서 승인해요.</template>
@@ -45,6 +47,7 @@ import { getMyId } from '@/utils/me'
 import { haptic } from '../../utils/haptics'
 import { useToast } from '../../composable/useToast'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
+import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import { UiButton, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
 
 const route = useRoute()
@@ -53,6 +56,7 @@ const { showToast } = useToast()
 const game = ref(null)
 const error = ref('')
 const busy = ref(false)
+const pairOpen = ref(false)
 const myId = ref(null)
 
 async function load() {

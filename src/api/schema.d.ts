@@ -766,6 +766,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/apply-pair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 친구와 둘이 신청
+         * @description 팀 경기에서 친구와 같은 팀에 함께 신청한다. 주최자가 한 사람을 받으면 짝도 함께 받는다
+         */
+        post: operations["applyAsPair"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/create": {
         parameters: {
             query?: never;
@@ -2715,7 +2735,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** 초대 링크로 동호회 보기 */
+        /**
+         * 초대 링크로 동호회 보기
+         * @description 로그인 전에도 볼 수 있다 (가입하고 돌아와 들어간다)
+         */
         get: operations["byInvite"];
         put?: never;
         post?: never;
@@ -4311,6 +4334,8 @@ export interface components {
             approved: boolean;
             /** Format: int32 */
             team?: number;
+            /** Format: int64 */
+            partnerId?: number;
         };
         GameResultResponse: {
             gameSummary: components["schemas"]["GameSummaryResponse"];
@@ -5910,6 +5935,31 @@ export interface operations {
             query?: {
                 /** @description 팀 경기에서 들어갈 팀 (0·1). 다른 경기는 비운다 */
                 team?: number;
+            };
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    applyAsPair: {
+        parameters: {
+            query: {
+                team: number;
+                partnerId: number;
             };
             header?: never;
             path: {

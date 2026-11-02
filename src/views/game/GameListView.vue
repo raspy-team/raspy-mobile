@@ -79,6 +79,7 @@
           @rule="ruleGame = game"
           @profile="router.push('/profile/' + game.ownerId)"
           @apply="(team) => apply(game, team)"
+          @pair="pairGame = game"
           @cancel="cancelApply(game)"
           @challengers="challengersGame = game"
           @more="menuGame = game"
@@ -86,6 +87,9 @@
       </div>
     </UiSection>
   </main>
+
+  <!-- 친구와 둘이 신청 (팀 경기) -->
+  <PairApplySheet :game="pairGame" @close="pairGame = null" @done="(g) => { g.isAppliedByMe = true; pairGame = null }" />
 
   <!-- 신청자 -->
   <UiSheet :model-value="!!challengersGame" :title="`신청자 ${challengersGame?.challengers?.length || 0}명`" @update:model-value="challengersGame = null">
@@ -147,6 +151,7 @@ import { getMyId } from '@/utils/me'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
+import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import AppGameStrip from '../../components/appgame/AppGameStrip.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import Comment from '../GameCommentView.vue'
@@ -179,6 +184,7 @@ const games = ref([])
 const loading = ref(true)
 const myId = ref(null)
 const busyId = ref(null)
+const pairGame = ref(null)
 const commentId = ref(0)
 const ruleGame = ref(null)
 const challengersGame = ref(null)

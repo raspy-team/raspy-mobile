@@ -48,6 +48,8 @@
           :loading="busy"
           @click="emit('apply', team)"
         >{{ TEAM_NAMES[team] }} {{ left > 0 ? `${left}자리` : '꽉 참' }}</UiButton>
+        <!-- 친구와 둘이: 두 자리가 남은 팀이 있을 때 -->
+        <UiButton v-if="(game.teamSeatsLeft || []).some((n) => n >= 2)" size="sm" variant="ghost" icon="user-group" :loading="busy" @click="emit('pair')">둘이</UiButton>
       </span>
       <UiButton v-else-if="!game.joinBlockedReason" size="sm" variant="tonal" :loading="busy" @click="emit('apply')">신청</UiButton>
     </div>
@@ -67,7 +69,7 @@ const props = defineProps({
   isMine: { type: Boolean, default: false },
   busy: { type: Boolean, default: false },
 })
-const emit = defineEmits(['rule', 'profile', 'apply', 'cancel', 'challengers', 'more'])
+const emit = defineEmits(['rule', 'profile', 'apply', 'pair', 'cancel', 'challengers', 'more'])
 
 // 신청이 막 된 순간만 축하 모양을 잠깐 보여준다
 const multi = computed(() => props.game.format && props.game.format !== 'DUEL')

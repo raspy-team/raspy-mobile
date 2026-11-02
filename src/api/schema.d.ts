@@ -2597,7 +2597,7 @@ export interface paths {
         };
         /**
          * Get Feed
-         * @description 피드를 조회합니다. 친구의 경기 -> 모든 경기 순으로 정렬되어 반환됩니다. userId: 특정 유저의 게임만 필터링 (선택), page: 페이지 번호 (0부터 시작, 기본값 0), size: 페이지당 아이템 수 (기본값 20)
+         * @description 피드. 동네 먼저(동네 글이 적으면 다른 동네로 채움), 신선도 × 가까움 순. userId: 특정 유저의 게임만 필터링 (선택), page: 페이지 번호 (0부터 시작, 기본값 0), size: 페이지당 아이템 수 (기본값 20)
          */
         get: operations["getFeed"];
         put?: never;
@@ -4587,6 +4587,8 @@ export interface components {
             isMyGame: boolean;
             ruleStatisticsList: components["schemas"]["UserGameStatisticsDTO"][];
             appDuel?: components["schemas"]["AppDuelFeedDto"];
+            dongCode?: string;
+            elsewhere: boolean;
         };
         FeedResponse: {
             items: components["schemas"]["FeedItemResponse"][];
@@ -8095,6 +8097,8 @@ export interface operations {
                 userId?: number;
                 page?: number;
                 size?: number;
+                /** @description near(기본: 동네 먼저, 적으면 다른 동네로 채움) · friends · all */
+                scope?: string;
             };
             header?: never;
             path?: never;

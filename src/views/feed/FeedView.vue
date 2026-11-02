@@ -34,7 +34,7 @@
         description="함께 겨룬 사람에게 친구를 걸거나, 친구를 초대해보세요"
       >
         <div class="flex gap-2">
-          <UiButton variant="secondary" @click="tab = 'all'">전체 보기</UiButton>
+          <UiButton variant="secondary" @click="tab = 'near'">동네 보기</UiButton>
           <UiButton @click="inviteFriends">친구 초대</UiButton>
         </div>
       </UiEmptyState>
@@ -45,6 +45,9 @@
 
       <div v-else class="ui-appear">
         <template v-for="p in visible" :key="p.id">
+        <p v-if="p.id === firstElsewhere && tab === 'near'" class="t-caption pt-6 pb-1 flex items-center gap-2" role="separator">
+          <UiIcon name="location-dot" aria-hidden="true" />다른 동네 경기 <span class="text-fg-subtle">· 동네 경기가 늘면 줄어요</span>
+        </p>
         <AppDuelFeedCard
           v-if="p.appDuel"
           :post="p"
@@ -66,6 +69,7 @@
           @comment="commentId = Number(p.id)"
           @play="router.push(`/create-game?ruleId=${p.rule.id}`)"
           @more="menuPost = p"
+          @photo="pickPhoto(p)"
         />
         </template>
         <!-- 끝에 닿으면 다음 장 -->
@@ -97,13 +101,14 @@
       </template>
     </UiSheet>
 
+    <input ref="photoInput" type="file" accept="image/*" capture="environment" class="hidden" @change="uploadPhoto" />
     <Comment v-if="commentId" :id="commentId" @close="commentId = 0" />
   </div>
 </template>
 
 <script setup>
 // 피드: 끝난 경기를 카드로 훑어본다 (예전의 한 장씩 넘기는 릴스 방식 대신)
-// - 친구 / 전체. 서버가 친구 경기를 앞에 주므로 '친구'는 받은 것에서 고른다
+// - 동네(기본) / 친구 / 전국. 서버가 범위·순서를 정한다 (FeedService.getFeed). 동네 글이 적으면 아래에 '다른 동네' 줄
 // - ?gameId= 링크·알림으로 온 경기는 맨 위에 강조, ?userId= 는 그 사람의 경기만
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { haptic } from '../../utils/haptics'
@@ -113,16 +118,18 @@ import FeedCard from '../../components/feed/FeedCard.vue'
 import AppDuelFeedCard from '../../components/feed/AppDuelFeedCard.vue'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
-  UiButton, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
+  UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { copyText } from '../../utils/clipboard'
 import Comment from '../GameCommentView.vue'
 
+// 동네(기본): 내 동네 범위 먼저, 동네 글이 적으면 서버가 다른 동네 글을 아래에 채운다 (elsewhere). 친구: 친구·내 경기. 전국: 전부
 const TABS = [
+  { value: 'near', label: '동네' },
   { value: 'friends', label: '친구' },
-  { value: 'all', label: '전체' },
+  { value: 'all', label: '전국' },
 ]
 const REPORT_REASONS = ['욕설·비방', '거짓 경기', '부적절한 사진', '기타']
 const PAGE = 20
@@ -134,7 +141,7 @@ const { showToast } = useToast()
 const userId = route.query.userId ? Number(route.query.userId) : null
 const focusId = route.query.gameId || null
 const userName = ref('')
-const tab = ref(route.query.tab === 'friends' ? 'friends' : 'all')
+const tab = ref(['friends', 'all'].includes(route.query.tab) ? route.query.tab : 'near')
 const posts = ref([])
 const page = ref(0)
 const done = ref(false)
@@ -151,7 +158,9 @@ const reporting = ref(false)
 // 끝난 경기만 (열린 경기는 홈에서 본다)
 // 끝난 오프라인 경기 + 앱 대결(끝난 것·투표 중인 것). 열린(예정) 경기는 홈에서 본다
 const finished = (list) => list.filter((p) => (p.type === 'game' && p.isCompleted) || p.type === 'app_duel' || p.type === 'app_vote')
-const visible = computed(() => (tab.value === 'friends' && !userId ? posts.value.filter((p) => p.isFriend || p.isMyGame) : posts.value))
+const visible = computed(() => posts.value)
+// 다른 동네 글이 시작되는 곳에 줄을 긋는다
+const firstElsewhere = computed(() => posts.value.find((p) => p.elsewhere)?.id)
 
 function addPosts(list) {
   const seen = new Set(posts.value.map((p) => String(p.id)))
@@ -169,13 +178,10 @@ async function loadMore() {
       userName.value = posts.value[0]?.players?.find((p) => p.id === userId)?.name || ''
       done.value = true
     } else {
-      const { data } = await api.get('/api/feed', { params: { page: page.value, size: PAGE } })
-      const before = visible.value.length
+      const { data } = await api.get('/api/feed', { params: { page: page.value, size: PAGE, scope: tab.value } })
       addPosts(data.items || [])
       page.value++
       done.value = data.nextCursor == null || !(data.items || []).length
-      // '친구' 탭에서 이번 장에 친구 경기가 하나도 없으면 더 받아도 없다 (서버가 친구 경기를 앞에 준다)
-      if (tab.value === 'friends' && visible.value.length === before && page.value > 1) done.value = true
     }
   } catch {
     error.value = true
@@ -205,10 +211,33 @@ async function loadFocus() {
 }
 
 watch(tab, (t) => {
-  router.replace({ query: { ...route.query, tab: t === 'friends' ? 'friends' : undefined } })
-  if (t === 'all' && !done.value && visible.value.length < 5) loadMore()
-  if (t === 'friends') done.value = false
+  router.replace({ query: { ...route.query, tab: t === 'near' ? undefined : t } })
+  reload()
 })
+
+// 사진 한 장 남기기: 고르거나 찍으면 바로 올리고 카드에 보인다 (서버 피드는 1분 안에 따라온다)
+const photoInput = ref(null)
+const photoPost = ref(null)
+function pickPhoto(p) {
+  photoPost.value = p
+  photoInput.value?.click()
+}
+async function uploadPhoto(e) {
+  const file = e.target.files?.[0]
+  e.target.value = ''
+  const p = photoPost.value
+  if (!file || !p) return
+  const form = new FormData()
+  form.append('pictures', file)
+  try {
+    const { data } = await api.post(`/api/games/${p.id}/pictures`, form)
+    if (data?.success === false) throw new Error(data.message)
+    p.photos = [{ url: URL.createObjectURL(file), mediaType: 'IMAGE' }]
+    showToast('사진을 올렸어요')
+  } catch (err) {
+    showToast(err?.response?.data?.message || err?.message || '사진을 올리지 못했어요')
+  }
+}
 
 async function toggleLike(p) {
   const was = p.isLiked

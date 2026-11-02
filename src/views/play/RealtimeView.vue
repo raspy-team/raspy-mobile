@@ -137,7 +137,7 @@ const route = useRoute()
 const { showToast } = useToast()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀' }
+const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀', 'thirty-one': '서른하나', 'last-stone': '마지막 돌', 'card-duel': '숫자 카드 대결', auction: '칩 경매', 'drop-four': '사목 떨어뜨리기', flip: '뒤집기', 'number-baseball': '숫자 야구', 'number-bomb': '숫자 폭탄', 'math-race': '암산 먼저', chosung: '초성 먼저' }
 const title = computed(() => TITLES[key.value] ?? '실시간 대결')
 const state = ref<State | null>(null)
 const error = ref('')

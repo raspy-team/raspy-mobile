@@ -38,7 +38,7 @@
     </section>
 
     <!-- 버튼: 가위바위보처럼 고르는 게임 -->
-    <div v-if="view.choices?.length" class="grid gap-2 mt-6" :style="{ gridTemplateColumns: `repeat(${view.choices.length}, minmax(0, 1fr))` }">
+    <div v-if="view.choices?.length" class="grid gap-2 mt-6" :style="{ gridTemplateColumns: `repeat(${Math.min(view.choices.length, view.choices.length > 4 ? 3 : 4)}, minmax(0, 1fr))` }">
       <UiButton v-for="c in view.choices" :key="c.value" size="lg" variant="secondary" :icon="c.icon || undefined" :disabled="!myTurn" :loading="sending && picked === c.value" @click="pick(c.value)">
         {{ c.label }}
       </UiButton>

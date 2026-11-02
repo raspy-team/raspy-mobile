@@ -51,6 +51,15 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <WritePlay
+          v-else-if="WRITING[key]"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          :guide="WRITING[key].guide"
+          :placeholder="WRITING[key].placeholder"
+          @submit="submit"
+        />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
       </template>
 
@@ -289,6 +298,13 @@ import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
+import WritePlay from '../../components/appgame/WritePlay.vue'
+
+// 글로 겨루는 게임: 같은 화면(WritePlay)에 안내만 다르게
+const WRITING: Record<string, { guide: string; placeholder: string }> = {
+  excuse: { guide: '이 상황에서 빠져나갈 한 줄 변명', placeholder: '그럴듯하고 웃긴 변명' },
+  balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
+}
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
 import SquatPlay from '../../components/appgame/SquatPlay.vue'
 import { fixtureOf, kickoffLabel, predictionLine } from '@/utils/predict'

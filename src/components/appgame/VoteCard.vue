@@ -1,9 +1,10 @@
 <template>
   <UiCard>
     <div class="flex items-center justify-between gap-2">
-      <div class="flex flex-wrap gap-1.5">
+      <div v-if="card.key === 'sentence'" class="flex flex-wrap gap-1.5">
         <UiBadge v-for="w in card.problem.split(', ')" :key="w">{{ w }}</UiBadge>
       </div>
+      <p v-else class="t-label break-keep">{{ card.problem }}</p>
       <span class="t-micro flex-shrink-0">{{ card.closed ? '마감' : `${until(card.votingEndsAt)}까지` }}</span>
     </div>
 
@@ -26,7 +27,7 @@
       <template v-if="card.isMine">내 대결이라 투표할 수 없어요</template>
       <template v-else-if="card.myVote">투표했어요. 결과는 마감 뒤에 나와요</template>
       <template v-else-if="card.closed">투표가 끝났어요</template>
-      <template v-else>더 마음이 가는 문장을 눌러 주세요. 한 번만 할 수 있어요</template>
+      <template v-else>더 마음이 가는 글을 눌러 주세요. 한 번만 할 수 있어요</template>
     </p>
     <p v-if="error" class="t-caption text-danger mt-1">{{ error }}</p>
   </UiCard>

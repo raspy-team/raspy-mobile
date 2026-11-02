@@ -1967,6 +1967,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rankings/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 규칙별 레이팅과 흐름
+         * @description 기록 화면용. 규칙마다 지금 점수, 오차(±), 잠정 여부, 경기마다 바뀐 점수(최근 30개)
+         */
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/play-with-me-too/status-with-user": {
         parameters: {
             query?: never;
@@ -4030,6 +4050,23 @@ export interface components {
             ruleRank: number;
             /** Format: double */
             rulePercent: number;
+        };
+        RatingPoint: {
+            /** Format: date-time */
+            at: string;
+            /** Format: int32 */
+            rating: number;
+        };
+        RuleRatingHistory: {
+            /** Format: int64 */
+            ruleId: number;
+            ruleTitle: string;
+            /** Format: int32 */
+            rating: number;
+            /** Format: int32 */
+            margin: number;
+            provisional: boolean;
+            points: components["schemas"]["RatingPoint"][];
         };
         PlayWithMeTooResponse: {
             /** Format: int64 */
@@ -7358,6 +7395,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RankingResponse"];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query: {
+                userId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RuleRatingHistory"][];
                 };
             };
         };

@@ -73,6 +73,29 @@
         </div>
       </section>
 
+      <!-- 레이팅 흐름: 규칙마다 점수는 따로다. 많이 한 규칙부터 고른다 -->
+      <section v-if="ratings.length">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="t-heading">레이팅</h2>
+          <span v-if="picked?.provisional" class="t-micro">판이 쌓이면 범위가 좁아져요</span>
+        </div>
+        <div v-if="ratings.length > 1" class="flex gap-2 -mx-4 px-4 mb-3 overflow-x-auto no-scrollbar" role="tablist" aria-label="규칙 고르기">
+          <UiChip v-for="r in ratings" :key="r.ruleId" class="flex-shrink-0 whitespace-nowrap" :selected="picked?.ruleId === r.ruleId" @click="pickedId = r.ruleId">{{ r.ruleTitle }}</UiChip>
+        </div>
+        <div v-if="picked" class="rounded-xl bg-surface p-4">
+          <div class="flex items-baseline gap-2">
+            <p class="t-title tabular-nums">{{ picked.rating }}점</p>
+            <p class="t-caption tabular-nums">±{{ picked.margin }}</p>
+            <UiBadge v-if="picked.provisional" class="ml-auto">잠정</UiBadge>
+            <p v-else-if="trend" class="t-caption tabular-nums ml-auto" :class="trend > 0 ? 'text-signal-fg' : ''">최근 {{ trend > 0 ? '+' : '' }}{{ trend }}</p>
+          </div>
+          <svg v-if="spark" viewBox="0 0 300 64" class="w-full h-16 mt-3" role="img" :aria-label="`${picked.ruleTitle} 레이팅 흐름, 처음 ${picked.points[0].rating}점에서 지금 ${picked.rating}점`">
+            <polyline :points="spark" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="text-fg" />
+          </svg>
+          <p class="t-micro mt-2">±는 실제 실력이 있을 법한 범위예요 (95%). 오래 쉬면 다시 넓어져요</p>
+        </div>
+      </section>
+
       <!-- 규칙별 -->
       <section>
         <h2 class="t-heading mb-1">규칙별 기록</h2>
@@ -81,7 +104,7 @@
             v-for="r in allRules ? byRule : byRule.slice(0, 5)"
             :key="r.id"
             :title="r.title"
-            :subtitle="[`${r.games}경기 · ${r.win}승 ${r.draw ? r.draw + '무 ' : ''}${r.lose}패`, r.rating && `${r.rating}점`, r.rank && `${r.rank}위`].filter(Boolean).join(' · ')"
+            :subtitle="[`${r.games}경기 · ${r.win}승 ${r.draw ? r.draw + '무 ' : ''}${r.lose}패`, r.rating && `${r.rating}점${r.provisional ? ' 잠정' : ''}`, r.rank && `${r.rank}위`].filter(Boolean).join(' · ')"
             chevron
             @click="router.push(`/rules/${r.id}`)"
           >
@@ -136,12 +159,13 @@
 
 <script setup>
 import RuleThumb from '../../components/rule/RuleThumb.vue'
-// 기록 자세히 (/profile/:id/stats): 승률 → 최근 흐름 → 숫자 → 규칙별 → 자주 만난 상대 → 받은 한마디
+// 기록 자세히 (/profile/:id/stats): 승률 → 최근 흐름 → 숫자 → 레이팅(규칙별 점수·범위·흐름) → 규칙별 → 자주 만난 상대 → 받은 한마디
 // 서버의 경기 목록(/user-profile/:id/games)에서 화면이 계산한다. 값이 없는 칸은 보여주지 않는다
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import { UiAvatar, UiBadge, UiButton, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiRollNumber, UiSkeleton, UiTopBar } from '../../components/ui'
+import { GET } from '@/api/client'
+import { UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiRollNumber, UiSkeleton, UiTopBar } from '../../components/ui'
 import { timeAgo } from '../../utils/format'
 
 const RESULT = {
@@ -203,7 +227,10 @@ const byRule = computed(() => {
   })
   const top = new Map((user.value?.top3Rules || []).map((r) => [r.ruleId, r]))
   return [...map.values()]
-    .map((r) => ({ ...r, ...tally(r.list), rating: top.get(r.id)?.rating, rank: top.get(r.id)?.myRank }))
+    .map((r) => {
+      const h = ratings.value.find((x) => x.ruleId === r.id)
+      return { ...r, ...tally(r.list), rating: h?.rating ?? top.get(r.id)?.rating, provisional: h?.provisional, rank: top.get(r.id)?.myRank }
+    })
     .sort((a, b) => b.games - a.games)
 })
 
@@ -218,6 +245,22 @@ const rivals = computed(() => {
   return [...map.values()].map((o) => ({ ...o, ...tally(o.list) })).sort((a, b) => b.games - a.games).slice(0, 3)
 })
 
+// 규칙별 레이팅과 흐름 (/api/rankings/history): 점수 ± 범위, 잠정, 경기마다 바뀐 점수
+const ratings = ref([])
+const pickedId = ref(null)
+const picked = computed(() => ratings.value.find((r) => r.ruleId === pickedId.value) || ratings.value[0])
+const trend = computed(() => {
+  const p = picked.value?.points || []
+  return p.length >= 2 ? p[p.length - 1].rating - p[Math.max(0, p.length - 6)].rating : 0
+})
+const spark = computed(() => {
+  const p = picked.value?.points || []
+  if (p.length < 2) return ''
+  const ys = p.map((x) => x.rating)
+  const lo = Math.min(...ys), hi = Math.max(...ys), span = Math.max(hi - lo, 20)
+  return ys.map((y, i) => `${((i / (ys.length - 1)) * 296 + 2).toFixed(1)},${(62 - ((y - lo) / span) * 60).toFixed(1)}`).join(' ')
+})
+
 const reviews = computed(() => games.value.filter((g) => g.review && g.review.trim()).slice(-5).reverse())
 
 async function load() {
@@ -226,6 +269,7 @@ async function load() {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
     const { data } = await api.get(`/api/user-profile/${user.value.id}/games`)
+    ratings.value = (await GET('/api/rankings/history', { query: { userId: user.value.id } }).catch(() => ({ data: [] }))).data
     games.value = data.map((g) => ({ ...g, r: norm(g.result) })).sort((a, b) => new Date(a.date) - new Date(b.date))
   } catch (e) {
     error.value = e.response?.data?.message || '기록을 불러오지 못했어요'

@@ -2957,6 +2957,12 @@ export interface components {
             botAfterSeconds: number;
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
+            simultaneous: boolean;
+            /** Format: int32 */
+            round: number;
+            view?: components["schemas"]["TurnView"];
+            /** Format: int32 */
+            lobbySeconds: number;
         };
         RealtimeStone: {
             /** Format: int32 */
@@ -2967,6 +2973,25 @@ export interface components {
             /** Format: double */
             y: number;
             alive: boolean;
+        };
+        TurnBoard: {
+            title: string;
+            /** Format: int32 */
+            rows: number;
+            /** Format: int32 */
+            cols: number;
+            cells: string[];
+            playable: boolean;
+        };
+        TurnChoice: {
+            value: string;
+            label: string;
+            icon?: string;
+        };
+        TurnView: {
+            boards: components["schemas"]["TurnBoard"][];
+            choices: components["schemas"]["TurnChoice"][];
+            note?: string;
         };
         AppPlayResponse: {
             /** Format: int64 */
@@ -3319,7 +3344,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;

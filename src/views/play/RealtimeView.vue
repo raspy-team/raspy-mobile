@@ -13,9 +13,14 @@
         <UiCard class="text-center py-10">
           <UiSpinner class="mx-auto" />
           <p class="t-heading mt-4">상대를 찾고 있어요</p>
-          <p class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
+          <p v-if="longLobby" class="t-caption mt-1">상대가 오면 알려 드려요. 이 화면을 닫아도 돼요</p>
+          <p v-else class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
         </UiCard>
-        <UiButton block variant="ghost" class="mt-4" @click="leave">그만 찾기</UiButton>
+        <!-- 하루 기다리는 게임은 봇을 저절로 부르지 않는다: 원하면 바로 봇과 -->
+        <UiButton v-if="longLobby" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
+          {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 봇과 할 수 있어요` : '기다리지 않고 봇과 하기' }}
+        </UiButton>
+        <UiButton block variant="ghost" class="mt-2" @click="leave">그만 찾기</UiButton>
       </template>
 
       <!-- 짝이 지어지면 3·2·1 (첫 차례 시간은 그 뒤부터) -->
@@ -30,15 +35,21 @@
       <!-- 판 -->
       <template v-else-if="state?.status === 'PLAYING'">
         <div class="flex items-center justify-between">
-          <span class="t-heading">{{ myTurn ? '내 차례' : `${state.opponent?.nickname}님 차례` }}</span>
-          <span class="t-mono tabular-nums" :class="left <= 5 ? 'text-danger' : 'text-fg-muted'">{{ left }}s</span>
+          <span class="t-heading">{{ turnLine }}</span>
+          <span class="t-mono tabular-nums" :class="left <= 5 ? 'text-danger' : 'text-fg-muted'">{{ leftText }}</span>
         </div>
         <div class="h-1 rounded-full bg-surface-3 mt-2 overflow-hidden">
           <div class="h-full bg-fg transition-[width] duration-200" :style="{ width: `${(left / state.turnSeconds) * 100}%` }" />
         </div>
 
+        <!-- 서버가 준 판 (가위바위보·편지 오목·배틀십) -->
+        <template v-if="state.view">
+          <TurnViewPanel class="mt-4" :view="state.view" :my-turn="myTurn && !counting" :sending="sending" @move="shoot" />
+          <p v-if="moveError" class="t-caption text-danger mt-2 text-center">{{ moveError }}</p>
+        </template>
+
         <!-- 알까기: 판 -->
-        <template v-if="state.stones">
+        <template v-else-if="state.stones">
         <AlkkagiBoard
           class="mt-4"
           :stones="state.stones"
@@ -83,13 +94,15 @@
         <UiCard class="text-center py-8">
           <template v-if="state.status === 'COMPLETED'">
             <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
-            <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : '졌어요' }}</p>
-            <p v-if="state.stones" class="t-caption mt-2">{{ state.opponent?.nickname }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
+            <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
+            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ state.opponent?.nickname }}님과 · {{ state.view.note }}</p>
+            <p v-else-if="state.stones" class="t-caption mt-2">{{ state.opponent?.nickname }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ state.opponent?.nickname }}님과 {{ state.moves.length }}번 이었어요</p>
           </template>
           <p v-else class="t-title">대결이 끝났어요</p>
         </UiCard>
-        <UiCard v-if="state.moves.length && !state.stones" class="mt-3">
+        <TurnViewPanel v-if="state.view?.boards?.length" class="mt-3" :view="{ ...state.view, note: undefined, choices: [] }" :my-turn="false" :sending="false" />
+        <UiCard v-if="state.moves.length && !state.stones && !state.view" class="mt-3">
           <p class="t-caption">{{ [state.startWord, ...state.moves.map((m) => m.word)].join(' → ') }}</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" @click="again">한 판 더</UiButton>
@@ -111,6 +124,7 @@ import { confirmDialog } from '../../composables/useConfirm'
 import BrandFace from '../../components/BrandFace.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import AlkkagiBoard from '../../components/appgame/AlkkagiBoard.vue'
+import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'
 import { UiButton, UiCard, UiEmptyState, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['RealtimeState']
@@ -118,7 +132,7 @@ type State = components['schemas']['RealtimeState']
 const route = useRoute()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기' }
+const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십' }
 const title = computed(() => TITLES[key.value] ?? '실시간 대결')
 const state = ref<State | null>(null)
 const error = ref('')
@@ -141,6 +155,29 @@ const left = computed(() => {
   const end = state.value?.turnEndsAt ? new Date(state.value.turnEndsAt).getTime() : 0
   return Math.max(0, Math.ceil((end - serverNow.value) / 1000))
 })
+// 남은 시간: 15초짜리는 초로, 하루짜리(편지 오목)는 "23시간 12분"으로
+const leftText = computed(() => {
+  const l = left.value
+  if (l < 120) return `${l}s`
+  const h = Math.floor(l / 3600)
+  const m = Math.floor((l % 3600) / 60)
+  return h ? `${h}시간 ${m}분` : `${m}분`
+})
+// 같이 내는 게임(가위바위보)은 '골라 주세요' / '상대가 고르는 중'
+const turnLine = computed(() => {
+  const s = state.value
+  if (!s) return ''
+  if (s.simultaneous) return myTurn.value ? `${(s.round ?? 0) + 1}판 · 골라 주세요` : `${s.opponent?.nickname}님이 고르는 중`
+  return myTurn.value ? '내 차례' : `${s.opponent?.nickname}님 차례`
+})
+const longLobby = computed(() => (state.value?.lobbySeconds ?? 30) > 120)
+
+async function callBot() {
+  const s = state.value
+  if (!s) return
+  apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
+}
+
 const waited = computed(() => {
   const since = state.value?.waitingSince ? new Date(state.value.waitingSince).getTime() : serverNow.value
   return Math.max(0, Math.floor((serverNow.value - since) / 1000))
@@ -225,7 +262,7 @@ const timer = setInterval(async () => {
   now.value = Date.now()
   const s = state.value
   if (!s) return
-  if (s.status === 'WAITING' && !botCalled && waited.value >= s.botAfterSeconds) {
+  if (s.status === 'WAITING' && !botCalled && !longLobby.value && waited.value >= s.botAfterSeconds) {
     botCalled = true
     apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
   }
@@ -256,6 +293,7 @@ onBeforeUnmount(() => {
   clearInterval(timer)
   stop?.()
   // 대기실에 둔 채 나가면 방을 닫는다 (하는 중이면 돌아와서 이어 할 수 있게 그대로 둔다)
-  if (state.value?.status === 'WAITING') POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: state.value.gameId } }).catch(() => {})
+  // 하루 기다리는 게임(편지 오목)은 닫지 않는다: 상대가 오면 알림이 간다
+  if (state.value?.status === 'WAITING' && !longLobby.value) POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: state.value.gameId } }).catch(() => {})
 })
 </script>

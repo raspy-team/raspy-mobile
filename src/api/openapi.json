@@ -4303,11 +4303,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -5636,10 +5636,13 @@
           "botAfterSeconds",
           "gameId",
           "key",
+          "lobbySeconds",
           "me",
           "meFirst",
           "moves",
+          "round",
           "serverNow",
+          "simultaneous",
           "startWord",
           "status",
           "turnSeconds",
@@ -5716,6 +5719,20 @@
               "LOSE",
               "DRAW"
             ]
+          },
+          "simultaneous": {
+            "type": "boolean"
+          },
+          "round": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "view": {
+            "$ref": "#/components/schemas/TurnView"
+          },
+          "lobbySeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -5746,6 +5763,80 @@
           },
           "alive": {
             "type": "boolean"
+          }
+        }
+      },
+      "TurnBoard": {
+        "required": [
+          "cells",
+          "cols",
+          "playable",
+          "rows",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cols": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "playable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TurnChoice": {
+        "required": [
+          "label",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        }
+      },
+      "TurnView": {
+        "required": [
+          "boards",
+          "choices"
+        ],
+        "type": "object",
+        "properties": {
+          "boards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TurnBoard"
+            }
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TurnChoice"
+            }
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
@@ -6899,6 +6990,7 @@
               "MY_GAME",
               "DM",
               "GAME_JOIN_APPROVED",
+              "APP_TURN",
               "FRIEND_REQUEST",
               "FRIEND_APPROVE",
               "FRIEND_REJECT",

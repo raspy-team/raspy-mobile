@@ -376,7 +376,8 @@ function submitReviewAndGoHome() {
   submitPictures()
     .then(() => {
       // 상대방 리뷰 제출
-      return api.post(`/api/games/${gameId}/review`, review.value)
+      // 화면이 "○○님은 어땠나요?"라고 묻는 그 사람을 평가한다 (팀·각자 경기는 서버가 대상을 꼭 받는다)
+      return api.post(`/api/games/${gameId}/review`, { ...review.value, targetId: opponent.value.id })
     })
     .then(() => {
       // 규칙 평가 제출 (점수가 있을 때만)

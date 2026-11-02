@@ -144,6 +144,8 @@ const userName = ref('')
 const tab = ref(['friends', 'all'].includes(route.query.tab) ? route.query.tab : 'near')
 const posts = ref([])
 const page = ref(0)
+// 첫 장이 매긴 기준 시각. 다음 장도 같은 기준으로 받아야 순서가 흔들리지 않는다
+const asOf = ref('')
 const done = ref(false)
 const loading = ref(false)
 const error = ref(false)
@@ -178,7 +180,8 @@ async function loadMore() {
       userName.value = posts.value[0]?.players?.find((p) => p.id === userId)?.name || ''
       done.value = true
     } else {
-      const { data } = await api.get('/api/feed', { params: { page: page.value, size: PAGE, scope: tab.value } })
+      const { data } = await api.get('/api/feed', { params: { page: page.value, size: PAGE, scope: tab.value, asOf: asOf.value || undefined } })
+      if (page.value === 0) asOf.value = data.asOf || ''
       addPosts(data.items || [])
       page.value++
       done.value = data.nextCursor == null || !(data.items || []).length
@@ -193,6 +196,7 @@ async function loadMore() {
 async function reload() {
   posts.value = []
   page.value = 0
+  asOf.value = ''
   done.value = false
   await loadFocus()
   await loadMore()

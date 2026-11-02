@@ -510,6 +510,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/match-cards/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 내 카드 켜기·끄기
+         * @description 켠 사람(만 19세 이상)만 덱을 보고 남의 덱에 나온다
+         */
+        post: operations["join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/invite": {
         parameters: {
             query?: never;
@@ -3498,6 +3518,12 @@ export interface components {
             partnerId?: number;
             partnerNickname?: string;
         };
+        JoinRequest: {
+            joined: boolean;
+        };
+        MatchDeckStatus: {
+            joined: boolean;
+        };
         GameRegionRequest: {
             roadAddress: string;
             detailAddress?: string;
@@ -3531,6 +3557,8 @@ export interface components {
             /** Format: int32 */
             performance: number;
             text: string;
+            /** Format: int64 */
+            targetId?: number;
         };
         PictureUploadResponse: {
             success: boolean;
@@ -4222,6 +4250,7 @@ export interface components {
             /** Format: int32 */
             likesLeft: number;
             areaName?: string;
+            joined: boolean;
         };
         MatchedPerson: {
             /** Format: int64 */
@@ -4694,6 +4723,7 @@ export interface components {
             currentPage: number;
             /** Format: int32 */
             pageSize: number;
+            asOf?: string;
         };
         MetaDto: {
             place: string;
@@ -5559,6 +5589,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SwipeResult"];
+                };
+            };
+        };
+    };
+    join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MatchDeckStatus"];
                 };
             };
         };
@@ -8260,6 +8314,8 @@ export interface operations {
                 size?: number;
                 /** @description near(기본: 동네 먼저, 적으면 다른 동네로 채움) · friends · all */
                 scope?: string;
+                /** @description 첫 장이 돌려준 asOf (다음 장의 순서를 첫 장과 맞춘다) */
+                asOf?: string;
             };
             header?: never;
             path?: never;

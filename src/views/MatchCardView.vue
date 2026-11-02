@@ -7,12 +7,29 @@
     </UiTopBar>
 
     <main class="flex-1 flex flex-col max-w-md w-full mx-auto px-4 pt-2 pb-10">
-      <p class="t-caption">
+      <p v-if="deck?.joined" class="t-caption">
         <template v-if="deck?.areaName">{{ deck.areaName }}, 최근에 들어온 사람부터.</template>
         서로 붙어 보고 싶어야 연결돼요. 넘기면 상대는 몰라요.
       </p>
 
       <div v-if="loading" class="mt-4 flex-1"><UiSkeleton class="h-[26rem] w-full rounded-2xl" /></div>
+
+      <!-- 나이를 넣지 않았거나 만 19세 미만 -->
+      <UiEmptyState v-else-if="blocked" class="mt-16" icon="shield-halved" :title="blocked" description="처음 보는 사람과 만나는 기능이라 성인만 쓸 수 있어요">
+        <UiButton variant="secondary" to="/set-profile">내 정보에서 나이 넣기</UiButton>
+      </UiEmptyState>
+
+      <!-- 처음: 내 카드도 보이게 켜야 시작한다 (본인 모르게 남의 덱에 오르지 않게) -->
+      <div v-else-if="deck && !deck.joined" class="mt-10 text-center">
+        <UiIcon name="swords" class="text-4xl" aria-hidden="true" />
+        <h1 class="t-title mt-4">동네에서 한 판 붙을 사람 찾기</h1>
+        <ul class="t-body text-fg-muted mt-4 space-y-2 text-left max-w-xs mx-auto">
+          <li>· 켜면 내 카드(닉네임·동네·온도·많이 쓴 능력)가 동네 사람에게 보여요</li>
+          <li>· 서로 '붙어 보고 싶어요'를 눌러야만 연결돼요. 넘기면 상대는 몰라요</li>
+          <li>· 만 19세 이상만 쓸 수 있고, 언제든 끌 수 있어요</li>
+        </ul>
+        <UiButton class="mt-8" :loading="busy" @click="setJoined(true)">켜고 시작하기</UiButton>
+      </div>
 
       <UiEmptyState
         v-else-if="!current"
@@ -102,6 +119,7 @@
         </UiListItem>
       </UiList>
       <p v-else class="t-caption py-6 text-center">아직 매치한 사람이 없어요</p>
+      <UiButton block variant="ghost" class="mt-4" @click="setJoined(false)">내 카드 끄기</UiButton>
     </UiSheet>
   </div>
 </template>
@@ -109,6 +127,7 @@
 <script setup lang="ts">
 // 맞붙기 카드 (/match, 사용자 11/3 '틴더에서 배울 점'): 동네 사람을 한 장씩 보고 붙어 보고 싶으면 오른쪽, 아니면 왼쪽.
 // 둘 다 원해야 매치 (거절당할 걱정 없음), 넘기기는 알리지 않는다, 하루 20번. 매치되면 서버가 두 사람에게 알리고 DM 방을 연다
+// 만 19세 이상, 스스로 켠 사람만 (처음엔 '켜고 시작하기'). 고른 건 되돌리지 않는다
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -132,6 +151,7 @@ const current = computed<Card | undefined>(() => deck.value?.cards[index.value])
 const matched = ref<{ userId: number; nickname: string; avatar?: string } | null>(null)
 const matches = ref<Matched[]>([])
 const matchesOpen = ref(false)
+const blocked = ref('')
 
 function seenText(day?: string) {
   if (!day) return ''
@@ -184,11 +204,28 @@ async function choose(like: boolean) {
 
 async function load() {
   loading.value = true
+  blocked.value = ''
   try {
     deck.value = (await GET('/api/match-cards')).data
     index.value = 0
+  } catch (e: any) {
+    if (e.response?.status === 400) blocked.value = e.response.data?.message || '쓸 수 없어요'
   } finally {
     loading.value = false
+  }
+}
+
+async function setJoined(joined: boolean) {
+  busy.value = true
+  try {
+    await POST('/api/match-cards/join', { body: { joined } })
+    matchesOpen.value = false
+    if (!joined) showToast('내 카드를 껐어요. 동네 사람의 덱에서 빠져요')
+    await load()
+  } catch (e: any) {
+    showToast(e.response?.data?.message || '다시 시도해 주세요')
+  } finally {
+    busy.value = false
   }
 }
 

@@ -924,6 +924,38 @@
         }
       }
     },
+    "/api/match-cards/join": {
+      "post": {
+        "tags": [
+          "match-card-controller"
+        ],
+        "summary": "내 카드 켜기·끄기",
+        "description": "켠 사람(만 19세 이상)만 덱을 보고 남의 덱에 나온다",
+        "operationId": "join",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchDeckStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/invite": {
       "post": {
         "tags": [
@@ -4920,6 +4952,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "description": "첫 장이 돌려준 asOf (다음 장의 순서를 첫 장과 맞춘다)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6787,6 +6828,28 @@
           }
         }
       },
+      "JoinRequest": {
+        "required": [
+          "joined"
+        ],
+        "type": "object",
+        "properties": {
+          "joined": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MatchDeckStatus": {
+        "required": [
+          "joined"
+        ],
+        "type": "object",
+        "properties": {
+          "joined": {
+            "type": "boolean"
+          }
+        }
+      },
       "GameRegionRequest": {
         "required": [
           "roadAddress"
@@ -6891,6 +6954,10 @@
           },
           "text": {
             "type": "string"
+          },
+          "targetId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -9154,6 +9221,7 @@
       "MatchDeck": {
         "required": [
           "cards",
+          "joined",
           "likesLeft"
         ],
         "type": "object",
@@ -9170,6 +9238,9 @@
           },
           "areaName": {
             "type": "string"
+          },
+          "joined": {
+            "type": "boolean"
           }
         }
       },
@@ -10743,6 +10814,9 @@
           "pageSize": {
             "type": "integer",
             "format": "int32"
+          },
+          "asOf": {
+            "type": "string"
           }
         }
       },

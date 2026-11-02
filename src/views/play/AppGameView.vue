@@ -67,12 +67,14 @@
           <template v-else-if="isVote">
             <p class="t-heading">{{ (result.myScore ?? 0) > 0 ? '문장이 올라갔어요' : '투표에 올리지 못했어요' }}</p>
             <p class="t-caption mt-1">{{ (result.myScore ?? 0) > 0 ? '같은 제시어로 다른 사람이 쓰면 24시간 투표가 시작돼요' : '' }}</p>
+            <UiButton v-if="(result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
           <template v-else>
             <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
             <p class="t-caption">{{ game?.scoreUnit }}</p>
             <p class="t-heading mt-6">상대를 찾고 있어요</p>
             <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
+            <UiButton v-if="(result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
         </UiCard>
         <UiCard v-if="result.myFeedback" class="mt-3">
@@ -303,6 +305,20 @@ function until(at?: string) {
   return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+/** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
+const challenging = ref(false)
+async function sendChallenge(gameId: number) {
+  challenging.value = true
+  try {
+    await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
+    showToast((await copyText(`${window.location.origin}/challenge/${gameId}`)) ? '도전장 링크를 복사했어요. 하루 동안 친구만 받을 수 있어요' : '복사하지 못했어요')
+  } catch (e) {
+    showToast(errorMessage(e, '도전장을 만들지 못했어요'))
+  } finally {
+    challenging.value = false
+  }
+}
+
 /** 투표 공유 링크: 친구에게 보내 표를 받는다 */
 async function shareVote(gameId: number) {
   showToast((await copyText(`${window.location.origin}/vote/${gameId}`)) ? '투표 링크를 복사했어요' : '복사하지 못했어요')
@@ -344,6 +360,16 @@ watch(period, loadBoard)
 let stop: (() => void) | undefined
 onMounted(async () => {
   await load()
+  // 도전 링크로 왔으면 그 문제로 바로 시작
+  const challengeId = Number(route.query.challenge)
+  if (challengeId) {
+    try {
+      play.value = (await POST('/api/app-games/challenges/{gameId}/accept', { path: { gameId: challengeId } })).data
+    } catch (e) {
+      startError.value = errorMessage(e, '도전을 받지 못했어요')
+    }
+    router.replace({ query: {} })
+  }
   const duelId = Number(route.query.duel)
   if (duelId) {
     result.value = duels.value.find((d) => d.gameId === duelId)

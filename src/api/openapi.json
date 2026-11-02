@@ -2013,6 +2013,72 @@
         }
       }
     },
+    "/api/app-games/duels/{gameId}/challenge": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "도전 링크 만들기",
+        "description": "먼저 끝낸 대결을 친구에게 보낸다. 하루 동안은 링크로만 받을 수 있고, 지나면 아무나 붙는 대기로 간다.",
+        "operationId": "openChallenge",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppChallenge"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/challenges/{gameId}/accept": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "도전 받기",
+        "description": "같은 문제로 바로 플레이를 시작한다.",
+        "operationId": "acceptChallenge",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppPlayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/rules/edit-requests/{id}/reject": {
       "post": {
         "tags": [
@@ -4161,6 +4227,38 @@
         }
       }
     },
+    "/api/app-games/challenges/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "도전 정보 (링크로 들어온 사람)",
+        "operationId": "challenge",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppChallenge"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/users": {
       "get": {
         "tags": [
@@ -5409,6 +5507,46 @@
             "format": "date-time"
           },
           "votingEndsAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AppChallenge": {
+        "required": [
+          "challenger",
+          "gameId",
+          "key",
+          "mine",
+          "open",
+          "summary",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "challenger": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "open": {
+            "type": "boolean"
+          },
+          "challengeUntil": {
             "type": "string",
             "format": "date-time"
           }
@@ -7643,13 +7781,17 @@
       },
       "AppGameSummary": {
         "required": [
+          "ability",
           "available",
           "judge",
           "key",
+          "kind",
+          "kindLabel",
           "myDraws",
           "myLosses",
           "myRating",
           "myWins",
+          "playCount",
           "playMode",
           "recordable",
           "ruleId",
@@ -7668,6 +7810,30 @@
           },
           "summary": {
             "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SPEED",
+              "ACCURACY",
+              "MEMORY",
+              "KNOWLEDGE",
+              "WORDS",
+              "CREATIVE",
+              "STRATEGY",
+              "DEXTERITY",
+              "MIND"
+            ]
+          },
+          "kindLabel": {
+            "type": "string"
+          },
+          "ability": {
+            "type": "string"
+          },
+          "playCount": {
+            "type": "integer",
+            "format": "int64"
           },
           "playMode": {
             "type": "string",

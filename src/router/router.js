@@ -106,6 +106,7 @@ const routes = [
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },
   { path: '/vote/:gameId', component: () => import('../views/play/VoteView.vue') },
+  { path: '/challenge/:gameId', component: () => import('../views/play/ChallengeView.vue') },
   { path: '/rules', component:  Rule},
   { path: '/rules/create', component: RuleCreate},
   { path: '/rules/my-rules', component: MyRules},

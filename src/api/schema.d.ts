@@ -1077,6 +1077,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/duels/{gameId}/challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 도전 링크 만들기
+         * @description 먼저 끝낸 대결을 친구에게 보낸다. 하루 동안은 링크로만 받을 수 있고, 지나면 아무나 붙는 대기로 간다.
+         */
+        post: operations["openChallenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/challenges/{gameId}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 도전 받기
+         * @description 같은 문제로 바로 플레이를 시작한다.
+         */
+        post: operations["acceptChallenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/rules/edit-requests/{id}/reject": {
         parameters: {
             query?: never;
@@ -2324,6 +2364,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/challenges/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 도전 정보 (링크로 들어온 사람) */
+        get: operations["challenge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/users": {
         parameters: {
             query?: never;
@@ -2791,6 +2848,18 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             votingEndsAt?: string;
+        };
+        AppChallenge: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            title: string;
+            summary: string;
+            challenger: components["schemas"]["AppPlayer"];
+            mine: boolean;
+            open: boolean;
+            /** Format: date-time */
+            challengeUntil?: string;
         };
         RejectEditRequestDto: {
             rejectionReason: string;
@@ -3475,6 +3544,12 @@ export interface components {
             key: string;
             title: string;
             summary: string;
+            /** @enum {string} */
+            kind: "SPEED" | "ACCURACY" | "MEMORY" | "KNOWLEDGE" | "WORDS" | "CREATIVE" | "STRATEGY" | "DEXTERITY" | "MIND";
+            kindLabel: string;
+            ability: string;
+            /** Format: int64 */
+            playCount: number;
             /** @enum {string} */
             playMode: "OFFLINE" | "REALTIME" | "NON_REALTIME";
             /** @enum {string} */
@@ -5026,6 +5101,50 @@ export interface operations {
             };
         };
     };
+    openChallenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppChallenge"];
+                };
+            };
+        };
+    };
+    acceptChallenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppPlayResponse"];
+                };
+            };
+        };
+    };
     rejectEditRequest: {
         parameters: {
             query?: never;
@@ -6531,6 +6650,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppDuelResponse"];
+                };
+            };
+        };
+    };
+    challenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppChallenge"];
                 };
             };
         };

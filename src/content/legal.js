@@ -63,6 +63,7 @@ export const TERMS = [
 
 2. 수집하는 개인정보 항목
 - 회원가입 시: 이메일
+- 소셜 로그인(Google·카카오·Apple) 시: 해당 계정의 이메일 주소와 계정 식별값만 받습니다. 연락처, 사진, 다른 Google 데이터에는 접근하지 않습니다. 받은 정보는 회원 가입·로그인과 계정 식별에만 쓰고, 광고에 쓰거나 다른 곳에 팔거나 넘기지 않습니다
 - 프로필 설정 시: 나이, 성별, 지역, 자기소개, 프로필사진 등
 - 동네 인증 시: 현재 위치(GPS 좌표). 어느 행정동인지 확인하는 데만 쓰고 저장하지 않습니다. 저장하는 것은 인증한 행정동과 인증 일시입니다
 - 서비스 이용 시 자동 수집: 기기마다 무작위로 만든 방문자 식별값, 방문 경로(유입 링크의 꼬리표, 이전 사이트 주소), 방문 일자, 브라우저 정보. 어느 홍보 채널로 들어와 서비스를 이용하는지 세는 데만 씁니다
@@ -86,6 +87,7 @@ export const TERMS = [
 - Vercel Inc. (미국): 앱 화면(웹) 제공 / 처리 위치 미국 및 전 세계 전송망 / 접속 기록(IP 주소 등)
 - Functional Software, Inc. (Sentry, 미국): 오류 추적 / 처리 위치 미국 / 오류 내용, 기기·브라우저 종류, 오류가 난 요청 정보. 오류 내용에 이용자를 알아볼 수 있는 정보가 섞일 수 있습니다.
 - Cloudflare, Inc. (미국): 사진 저장(R2) / 처리 위치 아시아·태평양 / 프로필·경기 사진
+- Google LLC (Firebase Cloud Messaging, 미국): 앱 푸시 알림 / 처리 위치 미국 / 기기 알림 토큰
 - Google LLC (Gemini API, 미국): AI 채점·규칙 분류 / 처리 위치 미국 / 규칙 설명, 게임에 낸 답(요리·문장·대화), 기록 인증 영상. 기록 인증 영상은 채점에만 쓰고 회사가 저장하지 않습니다.
 - 국외 이전을 원하지 않으면 회원 탈퇴로 거부할 수 있습니다. 다만 위 업체 없이는 서비스를 제공할 수 없습니다.
 
@@ -108,6 +110,7 @@ export const TERMS = [
 - 2026년 11월 2일: 2항에 자동 수집 항목(방문자 식별값, 방문 경로) 추가
 - 2026년 11월 2일: 2항에 동네 인증(위치) 항목 추가
 - 2026년 11월 2일: 6항에 Cloudflare(사진 저장)·Google(AI 채점, 기록 인증 영상) 추가
+- 2026년 11월 2일: 2항에 소셜 로그인으로 받는 정보, 6항에 Firebase(푸시 알림) 추가
     `,
   },
   {
@@ -145,6 +148,16 @@ export const TERMS = [
     `,
   },
 ]
+
+// 공개 처리방침 페이지(/privacy)에 붙이는 영어 요약. Google OAuth 심사가 Google 사용자 데이터 사용을 확인한다
+export const PRIVACY_EN = `
+Match (matchapp.me) uses Google Sign-In, Kakao Login and Sign in with Apple only to create and sign in to your account.
+- Data we receive: your email address and an account identifier. We do not access your contacts, photos, files or any other Google user data.
+- Use: account creation, sign-in and identifying your account in the service. Nothing else.
+- Sharing: we do not sell, rent or share this data, and we do not use it for advertising. It is stored with our processors listed in section 6 only to run the service.
+- Retention and deletion: kept until your account is deleted. To delete your account and its data, email yeonkoh@protonmail.com from the address you signed in with; we delete it without delay.
+- Match's use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.
+`
 
 // 가입 때 동의받는 것 (법적 고지사항은 읽기만)
 export const AGREEMENTS = TERMS.filter((t) => t.id !== 'notice')

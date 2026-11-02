@@ -6,7 +6,7 @@
     "serve": "vite",
     "serve:dev": "cross-env VUE_APP_ENV=dev vite",
     "serve:prod": "cross-env VUE_APP_ENV=prod vite",
-    "build": "node scripts/check-api.mjs && vue-tsc --noEmit && cross-env VUE_APP_ENV=prod vite build",
+    "build": "node scripts/check-api.mjs && vue-tsc --noEmit && cross-env VUE_APP_ENV=prod vite build && node scripts/build-legal.mjs",
     "build:dev": "cross-env VUE_APP_ENV=dev vite build",
     "preview": "vite preview --port 8081",
     "typecheck": "vue-tsc --noEmit",

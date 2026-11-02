@@ -2426,8 +2426,8 @@
         "tags": [
           "ranking-controller"
         ],
-        "summary": "유저 랭킹/레이팅 조회",
-        "description": "총점, 카테고리, 규칙별 랭킹 및 상위 퍼센트를 반환함.",
+        "summary": "유저 규칙별 순위 조회",
+        "description": "규칙(게임)별 순위와 상위 퍼센트를 반환함. 종합·분류별 순위는 없앴다.",
         "operationId": "getUserRankings",
         "parameters": [
           {
@@ -2440,17 +2440,9 @@
             }
           },
           {
-            "name": "minorCategory",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "ruleId",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -5166,27 +5158,11 @@
       },
       "RankingResponse": {
         "required": [
-          "totalPercent",
-          "totalRank"
+          "rulePercent",
+          "ruleRank"
         ],
         "type": "object",
         "properties": {
-          "totalRank": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPercent": {
-            "type": "number",
-            "format": "double"
-          },
-          "minorCategoryRank": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "minorCategoryPercent": {
-            "type": "number",
-            "format": "double"
-          },
           "ruleRank": {
             "type": "integer",
             "format": "int32"

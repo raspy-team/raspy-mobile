@@ -1316,8 +1316,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 유저 랭킹/레이팅 조회
-         * @description 총점, 카테고리, 규칙별 랭킹 및 상위 퍼센트를 반환함.
+         * 유저 규칙별 순위 조회
+         * @description 규칙(게임)별 순위와 상위 퍼센트를 반환함. 종합·분류별 순위는 없앴다.
          */
         get: operations["getUserRankings"];
         put?: never;
@@ -2610,17 +2610,9 @@ export interface components {
         };
         RankingResponse: {
             /** Format: int32 */
-            totalRank: number;
+            ruleRank: number;
             /** Format: double */
-            totalPercent: number;
-            /** Format: int32 */
-            minorCategoryRank?: number;
-            /** Format: double */
-            minorCategoryPercent?: number;
-            /** Format: int32 */
-            ruleRank?: number;
-            /** Format: double */
-            rulePercent?: number;
+            rulePercent: number;
         };
         PlayWithMeTooResponse: {
             /** Format: int64 */
@@ -4917,8 +4909,7 @@ export interface operations {
         parameters: {
             query: {
                 userId: number;
-                minorCategory?: string;
-                ruleId?: number;
+                ruleId: number;
             };
             header?: never;
             path?: never;

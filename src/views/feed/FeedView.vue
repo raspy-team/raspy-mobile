@@ -48,8 +48,17 @@
         <p v-if="p.id === firstElsewhere && tab === 'near'" class="t-caption pt-6 pb-1 flex items-center gap-2" role="separator">
           <UiIcon name="location-dot" aria-hidden="true" />다른 동네 경기 <span class="text-fg-subtle">· 동네 경기가 늘면 줄어요</span>
         </p>
+        <!-- 지금 하는 경기: 중계로 -->
+        <RouterLink v-if="p.live" :to="`/live/${p.id}`" class="flex items-center gap-3 py-4 border-b border-line" :data-game="p.id">
+          <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-danger text-white text-xs font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse" aria-hidden="true"></span>LIVE</span>
+          <span class="flex-1 min-w-0">
+            <span class="block t-heading truncate">{{ p.players.map((x) => x.name).join(' vs ') }}</span>
+            <span class="block t-caption truncate">{{ p.rule?.ruleTitle }}{{ p.meta?.place ? ` · ${p.meta.place}` : '' }}</span>
+          </span>
+          <span class="t-caption flex items-center gap-1 flex-shrink-0">보러 가기<UiIcon name="chevron-right" aria-hidden="true" /></span>
+        </RouterLink>
         <AppDuelFeedCard
-          v-if="p.appDuel"
+          v-else-if="p.appDuel"
           :post="p"
           :highlight="String(p.id) === String(focusId)"
           :data-game="p.id"
@@ -159,7 +168,8 @@ const reporting = ref(false)
 
 // 끝난 경기만 (열린 경기는 홈에서 본다)
 // 끝난 오프라인 경기 + 앱 대결(끝난 것·투표 중인 것). 열린(예정) 경기는 홈에서 본다
-const finished = (list) => list.filter((p) => (p.type === 'game' && p.isCompleted) || p.type === 'app_duel' || p.type === 'app_vote')
+// 지금 하는 경기(LIVE)는 끝나지 않았어도 보여 준다 → 중계(/live)로
+const finished = (list) => list.filter((p) => p.live || (p.type === 'game' && p.isCompleted) || p.type === 'app_duel' || p.type === 'app_vote')
 const visible = computed(() => posts.value)
 // 다른 동네 글이 시작되는 곳에 줄을 긋는다
 const firstElsewhere = computed(() => posts.value.find((p) => p.elsewhere)?.id)

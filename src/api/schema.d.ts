@@ -5077,6 +5077,7 @@ export interface components {
             appDuel?: components["schemas"]["AppDuelFeedDto"];
             dongCode?: string;
             elsewhere: boolean;
+            live: boolean;
         };
         FeedResponse: {
             items: components["schemas"]["FeedItemResponse"][];

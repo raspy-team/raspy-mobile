@@ -36,6 +36,8 @@
         <span v-for="n in 8" :key="n" class="apply-spark" :style="{ '--a': n * 45 + 'deg' }" aria-hidden="true"></span>
       </span>
       <UiButton v-else-if="game.isAppliedByMe" size="sm" variant="secondary" :loading="busy" @click="emit('cancel')">신청 취소</UiButton>
+      <!-- 상대가 다 정해졌거나 시작한 경기는 신청할 수 없다 (공유 링크로 들어온 경기 화면) -->
+      <UiBadge v-else-if="game.gameStatus && game.gameStatus !== 'MATCHING'">{{ STATUS_LABEL[game.gameStatus] || '모집 끝' }}</UiBadge>
       <!-- 다른 동네 경기(공유 링크)는 신청 버튼 대신 경기 화면이 이유를 보여 준다 -->
       <!-- 팀 경기는 들어갈 팀을 골라 신청한다 (자리가 남은 팀만) -->
       <span v-else-if="game.format === 'TEAMS' && !game.joinBlockedReason" class="flex gap-1.5 flex-shrink-0">
@@ -58,6 +60,7 @@
 
 <script setup>
 // 홈의 열린 경기 카드: 무엇을(규칙) → 어디서·언제 → 누구와 → 신청
+const STATUS_LABEL = { SCHEDULED: '상대 정해짐', IN_PROGRESS: '경기 중', RESULT_PENDING: '결과 확인 중', COMPLETED: '끝남', CANCELED: '취소됨' }
 import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'

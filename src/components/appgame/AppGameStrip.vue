@@ -1,35 +1,30 @@
 <template>
   <UiSection v-if="games.length" title="앱 게임">
+    <template #action>
+      <UiButton size="sm" variant="ghost" to="/games">모두 보기{{ games.length > SHOWN ? ` ${games.length}` : '' }}</UiButton>
+    </template>
     <div class="space-y-2">
-      <UiCard v-for="g in games" :key="g.key" :to="`/play/${g.key}`" interactive class="flex items-center gap-3">
-        <span class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-          <UiIcon :name="ICON[g.key] || 'play'" />
-        </span>
-        <span class="flex-1 min-w-0">
-          <span class="block t-heading">{{ g.title }}</span>
-          <span class="block t-caption mt-0.5">{{ g.summary }}</span>
-        </span>
-        <UiBadge v-if="!g.available">준비 중</UiBadge>
-        <span v-else class="text-right flex-shrink-0">
-          <span class="block t-mono">{{ g.myRating }}</span>
-          <span class="block t-micro">레이팅</span>
-        </span>
-      </UiCard>
+      <AppGameRow v-for="g in shown" :key="g.key" :game="g" />
     </div>
   </UiSection>
 </template>
 
 <script setup lang="ts">
-// 홈의 앱 게임 칸: 상대를 기다리지 않고 바로 한 판 하는 게임들
-import { ref, onMounted } from 'vue'
+// 홈의 앱 게임 칸: 게임이 많아져도 세 개만. 할 수 있는 게임 중 최근에 한 것 먼저, 그다음 많이 하는 것. 나머지는 '모두 보기'
+import { ref, computed, onMounted } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
-import { UiBadge, UiCard, UiIcon, UiSection } from '../ui'
+import AppGameRow from './AppGameRow.vue'
+import { UiButton, UiSection } from '../ui'
 
 type AppGameSummary = components['schemas']['AppGameSummary']
-
-const ICON: Record<string, string> = { typing: 'keyboard', recipe: 'chef-hat', sentence: 'pen', wordchain: 'comment' }
+const SHOWN = 3
 const games = ref<AppGameSummary[]>([])
+const shown = computed(() =>
+  [...games.value]
+    .sort((a, b) => Number(b.available) - Number(a.available) || (b.myLastPlayedAt ?? '').localeCompare(a.myLastPlayedAt ?? '') || b.playCount - a.playCount)
+    .slice(0, SHOWN),
+)
 
 onMounted(async () => {
   try {

@@ -75,7 +75,7 @@ const footerTab = computed(() => {
   if (p === '/profile/0' || p === '/settings') return 'profile'
   if (p.startsWith('/profile/')) return ''
   if (p === '/rules' && route.query.fromGameCreate) return null
-  if (p === '/rules' || p === '/rules/my-rules' || /^\/rules\/\d+\/ranking$/.test(p)) return 'home'
+  if (p === '/rules' || p === '/rules/my-rules' || p === '/games' || /^\/rules\/\d+\/ranking$/.test(p)) return 'home'
   if (p === '/dm') return ''
   return null
 })

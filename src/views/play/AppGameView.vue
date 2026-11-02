@@ -35,7 +35,9 @@
           <template v-if="result.status === 'COMPLETED'">
             <BrandFace v-if="result.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ VERDICT[result.result || 'DRAW'] }}</p>
-            <p class="t-caption mt-2">{{ result.opponent?.nickname }}님과 대결</p>
+            <p class="t-caption mt-2">
+              <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ result.opponent.nickname }}</router-link>님과 대결
+            </p>
             <div class="flex items-center justify-center gap-6 mt-6">
               <span>
                 <UiRollNumber class="t-title tabular-nums" :value="result.myScore ?? 0" />
@@ -160,6 +162,29 @@
             <UiEmptyState v-else icon="fas fa-trophy" title="아직 대결이 없어요" description="첫 판을 해 보세요" />
           </UiSection>
 
+          <UiSection title="레이팅 순위" class="mt-8">
+            <template #action>
+              <UiButton size="sm" variant="ghost" :to="`/rules/${game.ruleId}/ranking`">전체 보기</UiButton>
+            </template>
+            <UiList v-if="ranking.length">
+              <UiListItem
+                v-for="r in ranking"
+                :key="r.userId"
+                :title="r.isCurrentUser ? `${r.userName} (나)` : r.userName"
+                :subtitle="`${r.playCount}판`"
+                chevron
+                @click="router.push('/profile/' + r.userId)"
+              >
+                <template #leading>
+                  <span class="w-6 t-mono text-center">{{ r.rank }}</span>
+                  <UiAvatar :src="r.userAvatar" :name="r.userName" size="sm" />
+                </template>
+                <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
+              </UiListItem>
+            </UiList>
+            <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 없어요" description="5판 넘게 한 사람부터 순위에 올라요" />
+          </UiSection>
+
           <UiSection v-if="isVote" title="투표하기" class="mt-8">
             <div v-if="votes.length" class="space-y-3">
               <VoteCard v-for="(c, i) in votes" :key="c.gameId" :card="c" @voted="votes[i] = $event" />
@@ -233,6 +258,7 @@ const period = ref<'WEEK' | 'ALL'>('WEEK')
 const play = ref<Play | null>(null)
 const result = ref<Duel | null>(null)
 const votes = ref<Schemas['AppVoteCard'][]>([])
+const ranking = ref<Schemas['UserRankingDto'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const { showToast } = useToast()
 const starting = ref(false)
@@ -249,6 +275,7 @@ async function load() {
   duels.value = mine.data
   // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
   if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
+  if (game.value) ranking.value = ((await GET('/api/rules/{ruleId}/rankings', { path: { ruleId: game.value.ruleId } })).data.rankings ?? []).slice(0, 10)
   if (game.value?.recordable) await loadBoard()
   if (game.value?.judge === 'VOTE') votes.value = (await GET('/api/app-games/{key}/votes', { path: { key: key.value } })).data
 }

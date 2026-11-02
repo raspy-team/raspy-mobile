@@ -1,0 +1,74 @@
+<template>
+  <div class="min-h-dvh bg-canvas">
+    <UiTopBar title="앱 게임" back />
+
+    <main class="max-w-xl mx-auto px-4 pt-3 pb-16">
+      <UiInput v-model="query" icon="search" placeholder="게임 찾기" />
+      <div class="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
+        <UiChip :selected="!structure" @click="structure = ''">전체 {{ games.length }}</UiChip>
+        <UiChip v-for="s in STRUCTURES" :key="s.value" :selected="structure === s.value" @click="structure = structure === s.value ? '' : s.value">
+          {{ s.label }}
+        </UiChip>
+      </div>
+      <p v-if="structure" class="t-caption mt-2">{{ STRUCTURES.find((s) => s.value === structure)?.hint }}</p>
+
+      <div v-if="loading" class="space-y-2 mt-5">
+        <UiSkeleton v-for="n in 4" :key="n" class="h-20 w-full" />
+      </div>
+
+      <template v-else>
+        <!-- 최근에 한 게임: 찾지 않고 바로 다시 -->
+        <UiSection v-if="recent.length && !query && !structure" title="최근에 한 게임" class="mt-6">
+          <div class="space-y-2">
+            <AppGameRow v-for="g in recent" :key="g.key" :game="g" />
+          </div>
+        </UiSection>
+
+        <UiSection :title="query || structure ? `찾은 게임 ${filtered.length}` : '많이 하는 게임'" class="mt-6">
+          <div v-if="filtered.length" class="space-y-2">
+            <AppGameRow v-for="g in filtered" :key="g.key" :game="g" />
+          </div>
+          <UiEmptyState v-else icon="search" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
+        </UiSection>
+      </template>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+// 모든 앱 게임 (/games). 게임이 100개가 되어도: 검색 + 구조(지금 바로 붙기 / 편할 때 하기) + 최근에 한 게임 + 많이 하는 순
+import { ref, computed, onMounted } from 'vue'
+import { GET } from '@/api/client'
+import type { components } from '@/api/schema'
+import { STRUCTURES } from '@/utils/appGame'
+import AppGameRow from '../../components/appgame/AppGameRow.vue'
+import { UiChip, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
+
+type AppGameSummary = components['schemas']['AppGameSummary']
+const games = ref<AppGameSummary[]>([])
+const loading = ref(true)
+const query = ref('')
+const structure = ref('')
+
+const recent = computed(() =>
+  games.value
+    .filter((g) => g.myLastPlayedAt)
+    .sort((a, b) => (b.myLastPlayedAt ?? '').localeCompare(a.myLastPlayedAt ?? ''))
+    .slice(0, 3),
+)
+const filtered = computed(() => {
+  const q = query.value.trim()
+  return games.value
+    .filter((g) => !structure.value || g.playMode === structure.value)
+    .filter((g) => !q || g.title.includes(q) || g.summary.includes(q))
+    .sort((a, b) => Number(b.available) - Number(a.available) || b.playCount - a.playCount)
+})
+
+onMounted(async () => {
+  try {
+    games.value = (await GET('/api/app-games')).data
+  } finally {
+    loading.value = false
+  }
+})
+</script>

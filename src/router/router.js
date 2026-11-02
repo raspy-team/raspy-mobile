@@ -103,6 +103,7 @@ const routes = [
   { path: '/settings', component:  Setting},
   { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
+  { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },
   { path: '/vote/:gameId', component: () => import('../views/play/VoteView.vue') },

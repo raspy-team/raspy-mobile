@@ -6071,6 +6071,9 @@
           },
           "ruleStatistics": {
             "$ref": "#/components/schemas/UserGameStatisticsDTO"
+          },
+          "appGameKey": {
+            "type": "string"
           }
         }
       },
@@ -7381,6 +7384,7 @@
       "AppDuelFeedDto": {
         "required": [
           "gameId",
+          "icon",
           "judge",
           "key",
           "scoreUnit",
@@ -7410,6 +7414,9 @@
             ]
           },
           "scoreUnit": {
+            "type": "string"
+          },
+          "icon": {
             "type": "string"
           },
           "winnerId": {
@@ -7782,6 +7789,7 @@
       "AppGameSummary": {
         "required": [
           "available",
+          "icon",
           "judge",
           "key",
           "myDraws",
@@ -7811,6 +7819,13 @@
           "playCount": {
             "type": "integer",
             "format": "int64"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "myLastPlayedAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "playMode": {
             "type": "string",

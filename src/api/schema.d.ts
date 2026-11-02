@@ -3025,6 +3025,7 @@ export interface components {
             rankings: components["schemas"]["UserRankingDto"][];
             currentUserRanking?: components["schemas"]["UserRankingDto"];
             ruleStatistics?: components["schemas"]["UserGameStatisticsDTO"];
+            appGameKey?: string;
         };
         UserGameStatisticsDTO: {
             /** Format: int64 */
@@ -3436,6 +3437,7 @@ export interface components {
             /** @enum {string} */
             judge: "CONFIRM" | "APP" | "AI" | "VOTE";
             scoreUnit: string;
+            icon: string;
             /** Format: int64 */
             winnerId?: number;
             scores: number[];
@@ -3546,6 +3548,9 @@ export interface components {
             summary: string;
             /** Format: int64 */
             playCount: number;
+            icon: string;
+            /** Format: date-time */
+            myLastPlayedAt?: string;
             /** @enum {string} */
             playMode: "OFFLINE" | "REALTIME" | "NON_REALTIME";
             /** @enum {string} */

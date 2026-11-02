@@ -2,7 +2,7 @@
   <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
     <header class="flex items-center gap-3">
       <span class="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-        <UiIcon :name="ICON[duel.key] || 'play'" />
+        <UiIcon :name="duel.icon" />
       </span>
       <button type="button" class="flex-1 min-w-0 text-left" @click="emit('play')">
         <span class="block text-sm font-semibold text-fg truncate">{{ duel.title }}</span>
@@ -71,7 +71,6 @@ type Post = components['schemas']['FeedItemResponse']
 const props = defineProps<{ post: Post; highlight?: boolean }>()
 const emit = defineEmits<{ profile: [id?: number]; like: []; comment: []; play: [] }>()
 
-const ICON: Record<string, string> = { typing: 'keyboard', recipe: 'chef-hat', sentence: 'pen', wordchain: 'comment' }
 const duel = computed(() => props.post.appDuel!)
 const voting = computed(() => props.post.type === 'app_vote')
 const card = ref<components['schemas']['AppVoteCard'] | null>(null)

@@ -27,7 +27,9 @@
               <span class="block t-heading">아직 순위가 없어요</span>
               <span class="block t-caption mt-0.5">이 규칙으로 5판 하면 순위에 올라가요</span>
             </span>
-            <UiButton size="sm" variant="tonal" :to="`/create-game?ruleId=${ruleId}`">경기 열기</UiButton>
+            <UiButton size="sm" variant="tonal" :to="appGameKey ? `/play/${appGameKey}` : `/create-game?ruleId=${ruleId}`">
+              {{ appGameKey ? '한 판 하기' : '경기 열기' }}
+            </UiButton>
           </template>
         </UiCard>
 
@@ -67,6 +69,7 @@ const route = useRoute()
 const router = useRouter()
 const ruleId = route.params.ruleId
 const ruleName = ref('')
+const appGameKey = ref('')
 const rankings = ref([])
 const me = ref(null)
 const loading = ref(true)
@@ -78,6 +81,7 @@ async function load() {
   try {
     const { data } = await api.get(`/api/rules/${ruleId}/rankings`)
     ruleName.value = data.ruleName || ''
+    appGameKey.value = data.appGameKey || ''
     rankings.value = data.rankings || []
     me.value = data.currentUserRanking || null
   } catch (e) {

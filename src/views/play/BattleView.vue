@@ -15,7 +15,24 @@
           <p class="t-heading mt-4">상대를 찾고 있어요</p>
           <p class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
         </UiCard>
+        <!-- 흔들기는 판이 시작되기 전에 센서를 켜 둔다 (시작한 뒤에 누르면 그만큼 손해) -->
+        <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">센서 미리 켜기</UiButton>
         <UiButton block variant="ghost" class="mt-4" @click="leave">그만 찾기</UiButton>
+      </template>
+
+      <!-- 흔들기 대결: 폰을 흔든 횟수를 서버가 센다 -->
+      <template v-else-if="state?.status === 'PLAYING' && key === 'shake'">
+        <div class="text-center pt-6">
+          <p class="t-caption">{{ counting ? '곧 시작해요' : `${shakeLeft}초 남음` }}</p>
+          <p class="t-display tabular-nums mt-4">{{ score[0] }}</p>
+          <p class="t-caption">나 · {{ state.opponent?.nickname }} {{ score[1] }}</p>
+          <p v-if="counting" class="t-display tabular-nums mt-8">{{ countdown }}</p>
+          <p v-else class="t-title mt-8">폰을 흔드세요!</p>
+          <!-- 아이폰은 센서를 쓰려면 한 번 눌러 허락을 받아야 한다 -->
+          <UiButton v-if="sensor === 'ask'" block size="lg" class="mt-6" @click="askSensor">센서 켜기</UiButton>
+          <UiButton v-else-if="sensor === 'none'" block size="lg" class="mt-6" :disabled="counting" @click="sendShake">흔들 수 없으면 눌러서</UiButton>
+        </div>
+        <UiButton block variant="ghost" class="mt-6" @click="leave">그만두기 (지게 돼요)</UiButton>
       </template>
 
       <!-- 판: 내 라켓이 늘 아래. 판 위 어디든 손가락을 대고 좌우로 움직인다 -->
@@ -47,7 +64,7 @@
           <template v-if="state.status === 'COMPLETED'">
             <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
-            <p class="t-caption mt-2">{{ state.opponent?.nickname }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}</p>
+            <p class="t-caption mt-2">{{ state.opponent?.nickname }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
           </template>
           <p v-else class="t-title">대결이 끝났어요</p>
         </UiCard>
@@ -73,7 +90,8 @@ import BrandFace from '../../components/BrandFace.vue'
 import { UiButton, UiCard, UiEmptyState, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['BattleStateResponse']
-type Snapshot = { b: [number, number]; p: [number, number]; s: [number, number]; serve: boolean; over: boolean }
+// 퐁: b 공, p 라켓, s 점수. 흔들기: c 횟수, left 남은 초
+type Snapshot = { b?: [number, number]; p?: [number, number]; s?: [number, number]; c?: [number, number]; left?: number; serve?: boolean; over: boolean }
 
 // 서버 PongGame과 같은 판 크기 (가로 1, 세로 HEIGHT)
 const HEIGHT = 1.6
@@ -84,7 +102,7 @@ const BALL_R = 0.02
 const route = useRoute()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const title = computed(() => ({ pong: '퐁' } as Record<string, string>)[key.value] ?? '실시간 대전')
+const title = computed(() => ({ pong: '퐁', shake: '흔들기 대결' } as Record<string, string>)[key.value] ?? '실시간 대전')
 const state = ref<State | null>(null)
 const error = ref('')
 const snap = ref<Snapshot | null>(null)
@@ -104,7 +122,7 @@ const waited = computed(() => {
 })
 // 점수: [나, 상대]
 const score = computed(() => {
-  const s = snap.value?.s ?? [0, 0]
+  const s = snap.value?.s ?? snap.value?.c ?? [0, 0]
   return flip.value ? [s[1], s[0]] : [s[0], s[1]]
 })
 
@@ -114,7 +132,7 @@ const py = (y: number) => ((flip.value ? HEIGHT - y : y) / HEIGHT) * 100
 function paddleStyle(who: 0 | 1) {
   // who: 0이 나, 1이 상대
   const idx = flip.value ? 1 - who : who
-  const x = snap.value?.p[idx] ?? 0.5
+  const x = snap.value?.p?.[idx] ?? 0.5
   return { left: `${px(x) - PADDLE_HALF * 100}%`, width: `${PADDLE_HALF * 200}%`, top: `calc(${py(PADDLE_Y[idx])}% - 4px)`, height: '8px' }
 }
 const ballStyle = computed(() => {
@@ -159,6 +177,40 @@ function aim(e: PointerEvent) {
   const rect = el.getBoundingClientRect()
   const x = (e.clientX - rect.left) / rect.width
   client.publish({ destination: `/app/battle/${state.value.gameId}`, body: JSON.stringify({ x: String(flip.value ? 1 - x : x) }) })
+}
+
+// ---------- 흔들기: 폰 센서 (기기 실시간 측정) ----------
+// 흔들림만 골라 "1"을 보낸다. 너무 촘촘한 흔들기는 서버가 거른다
+const shakeLeft = computed(() => Math.ceil(snap.value?.left ?? 10))
+type MotionPermission = { requestPermission?: () => Promise<string> }
+const sensor = ref<'ask' | 'on' | 'none'>(
+  typeof window === 'undefined' || !('DeviceMotionEvent' in window) ? 'none'
+    : typeof (window.DeviceMotionEvent as unknown as MotionPermission).requestPermission === 'function' ? 'ask' : 'on',
+)
+let lastShake = 0
+function sendShake() {
+  if (!client?.connected || !state.value || counting.value) return
+  client.publish({ destination: `/app/battle/${state.value.gameId}`, body: JSON.stringify({ x: '1' }) })
+}
+function onMotion(e: DeviceMotionEvent) {
+  const a = e.accelerationIncludingGravity
+  if (!a || a.x == null || a.y == null || a.z == null) return
+  // 중력(9.8)을 빼고 크게 흔들렸을 때만, 120ms에 한 번까지
+  const force = Math.abs(Math.hypot(a.x, a.y, a.z) - 9.8)
+  const t = Date.now()
+  if (force > 12 && t - lastShake > 120) {
+    lastShake = t
+    sendShake()
+  }
+}
+async function askSensor() {
+  try {
+    const answer = await (window.DeviceMotionEvent as unknown as MotionPermission).requestPermission?.()
+    sensor.value = answer === 'granted' ? 'on' : 'none'
+  } catch {
+    sensor.value = 'none'
+  }
+  if (sensor.value === 'on') window.addEventListener('devicemotion', onMotion)
 }
 
 // ---------- 대기실·결과 ----------
@@ -211,10 +263,12 @@ const timer = setInterval(async () => {
 
 let stop: (() => void) | undefined
 onMounted(async () => {
+  if (key.value === 'shake' && sensor.value === 'on') window.addEventListener('devicemotion', onMotion)
   await join()
   stop = refreshOnChange(reload)
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('devicemotion', onMotion)
   clearInterval(timer)
   stop?.()
   disconnect()

@@ -16,12 +16,13 @@ if (!PW || PW.length < 8) {
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+// 동네: 경기를 열고 신청하려면 동네 인증이 있어야 해서(neighborhood/) 다섯 명 모두 마포구 가까운 동네에 둔다 (동 중심 좌표)
 const PEOPLE = {
-  demo: { id: 'matchdemo', username: 'matchdemo', nickname: '주말 스매셔', region: '서울 마포구', bio: '주말마다 탁구·배드민턴 쳐요. 한 판 하실 분!' },
-  minjun: { id: 'demo_minjun', username: 'minjun_tt', nickname: '민준', region: '서울 마포구', bio: '회사 탁구 동호회 3년차' },
-  seoyeon: { id: 'demo_seoyeon', username: 'seoyeon_b', nickname: '서연', region: '서울 성동구', bio: '배드민턴 좋아해요' },
-  jiho: { id: 'demo_jiho', username: 'jiho_hoops', nickname: '지호', region: '서울 강남구', bio: '점심시간 농구파' },
-  hayun: { id: 'demo_hayun', username: 'hayun_play', nickname: '하윤', region: '서울 마포구', bio: '뭐든 한 판 좋아요' },
+  demo: { id: 'matchdemo', username: 'matchdemo', nickname: '주말 스매셔', at: [37.54691, 126.90934], bio: '주말마다 탁구·배드민턴 쳐요. 한 판 하실 분!' }, // 합정동
+  minjun: { id: 'demo_minjun', username: 'minjun_tt', nickname: '민준', at: [37.55477, 126.92094], bio: '회사 탁구 동호회 3년차' }, // 서교동
+  seoyeon: { id: 'demo_seoyeon', username: 'seoyeon_b', nickname: '서연', at: [37.56303, 126.92154], bio: '배드민턴 좋아해요' }, // 연남동
+  jiho: { id: 'demo_jiho', username: 'jiho_hoops', nickname: '지호', at: [37.54681, 126.92599], bio: '점심시간 농구파' }, // 서강동
+  hayun: { id: 'demo_hayun', username: 'hayun_play', nickname: '하윤', at: [37.55347, 126.90033], bio: '뭐든 한 판 좋아요' }, // 망원1동
 }
 
 async function call(who, method, path, body, form) {
@@ -50,15 +51,17 @@ async function setupPerson(key) {
   p.userId = JSON.parse(Buffer.from(token.split('.')[1], 'base64url')).userId
   await call(p, 'POST', '/api/auth/terms')
   await call(p, 'POST', '/api/auth/complete', { username: p.username, nickname: p.nickname })
-  await call(p, 'PATCH', '/api/user-profile/save', undefined, { nickname: p.nickname, region: p.region, bio: p.bio })
+  await call(p, 'PATCH', '/api/user-profile/save', undefined, { nickname: p.nickname, bio: p.bio })
+  // 활동 지역(서울 마포구)은 동네 인증이 채운다
+  await call(p, 'POST', '/api/neighborhoods/verify', { lat: p.at[0], lon: p.at[1], accuracy: 20 })
   console.log('user', key, p.userId)
   return p
 }
 
 const PLACES = [
   ['서울 마포구 월드컵로 240', '망원 한강공원 체육관'],
-  ['서울 성동구 왕십리로 222', '성동구민 체육센터'],
-  ['서울 강남구 테헤란로 152', '역삼 야외 농구장'],
+  ['서울 마포구 마포대로 212', '마포구민 체육센터'],
+  ['서울 마포구 성미산로 70', '연남 야외 농구장'],
 ]
 
 async function createGame(owner, ruleId, place, daysFromNow = 0) {
@@ -149,7 +152,7 @@ async function main() {
   await playGame({ owner: minjun, guest: demo, ruleId: tt.id, place: PLACES[0], submitter: minjun, sets: [[11, 9], [11, 6]], likes: [jiho] })
   await playGame({ owner: demo, guest: jiho, ruleId: tt.id, place: PLACES[0], submitter: demo, sets: [[11, 3], [11, 4]], likes: [minjun] })
   await playGame({ owner: demo, guest: seoyeon, ruleId: bd.id, place: PLACES[1], submitter: seoyeon, sets: [[17, 21]],
-    chat: [['owner', '셔틀콕은 제가 가져갈게요'], ['guest', '좋아요 ㅎㅎ 성동구민체육센터 B코트 예약했어요']],
+    chat: [['owner', '셔틀콕은 제가 가져갈게요'], ['guest', '좋아요 ㅎㅎ 마포구민체육센터 B코트 예약했어요']],
     likes: [minjun, hayun], comments: [[seoyeon, '스매시 너무 세요...']] })
   await playGame({ owner: seoyeon, guest: demo, ruleId: bd.id, place: PLACES[1], submitter: seoyeon, sets: [[21, 19]], likes: [hayun] })
   await playGame({ owner: jiho, guest: demo, ruleId: ft.id, place: PLACES[2], submitter: jiho, sets: [[5, 7], [7, 4], [6, 7]],

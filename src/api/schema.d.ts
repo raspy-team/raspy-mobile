@@ -3290,6 +3290,11 @@ export interface components {
             region: string;
             ruleTitle: string;
         };
+        PublicDong: {
+            name: string;
+            shortName: string;
+            verified: boolean;
+        };
         RecentGameSummaryDto: {
             /** Format: int64 */
             gameId: number;
@@ -3328,6 +3333,7 @@ export interface components {
             gender?: string;
             intro?: string;
             location?: string;
+            dong?: components["schemas"]["PublicDong"];
             /** Format: int32 */
             age?: number;
             avatar?: string;

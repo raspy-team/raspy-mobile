@@ -29,11 +29,13 @@
 
       <UiInput v-model="form.nickname" label="닉네임" :maxlength="NICKNAME_MAX" :hint="`다른 사람에게 보이는 이름. ${NICKNAME_MAX}자까지`" :error="errors.nickname" />
       <UiInput v-model="form.username" label="아이디" icon="fas fa-at" :maxlength="12" hint="영문 소문자·숫자·밑줄(_). 친구가 나를 찾을 때 써요" :error="errors.username" />
-      <UiField label="활동 지역" optional hint="가까운 경기를 먼저 보여드려요">
-        <div class="grid grid-cols-2 gap-2">
-          <UiSelect v-model="region1" :options="region1Options" placeholder="시·도" />
-          <UiSelect v-model="region2" :options="region2Options" placeholder="구·시·군" :disabled="!region1" />
-        </div>
+      <!-- 활동 지역은 고르지 않고 동네 인증으로 정한다 (GPS) -->
+      <UiField label="동네" hint="지금 있는 곳으로 인증해요. 내 동네 근처 경기가 보여요">
+        <RouterLink to="/neighborhood" class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
+          <UiIcon name="location-dot" aria-hidden="true" />
+          <span class="flex-1 t-body">{{ form.region || '동네 인증하기' }}</span>
+          <UiIcon name="chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
+        </RouterLink>
       </UiField>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
       <UiInput v-model="form.affiliation" label="소속" optional :maxlength="100" placeholder="예: 성수 러닝크루" />
@@ -49,11 +51,10 @@
 
 <script setup>
 // 프로필 편집: 사진·닉네임·아이디·지역·소개·소속. 나이·성별은 받지 않는다 (예전 값은 건드리지 않고 그대로 둔다)
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
-import regionMap from '../../assets/regionMap.json'
-import { UiAvatar, UiButton, UiEmptyState, UiField, UiInput, UiSelect, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiAvatar, UiButton, UiEmptyState, UiField, UiInput, UiSkeleton, UiTopBar } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { containsProfanity } from '../../utils/profanity'
@@ -67,19 +68,15 @@ const { showToast } = useToast()
 const loading = ref(true)
 const loadError = ref(false)
 const saving = ref(false)
-const form = reactive({ nickname: '', username: '', bio: '', affiliation: '' })
+// region은 보여 주기만 한다 (동네 인증이 채운다)
+const form = reactive({ nickname: '', username: '', bio: '', affiliation: '', region: '' })
 const errors = reactive({ nickname: '', username: '' })
-const region1 = ref('')
-const region2 = ref('')
-const region1Options = Object.keys(regionMap).filter((r) => r !== '전국')
-const region2Options = computed(() => regionMap[region1.value] || [])
 const fileInput = ref(null)
 const preview = ref('')
 const photo = ref(null)
 const photoState = ref('unchanged') // unchanged | updated | deleted
 let original = null // 불러온 값 (바뀐 게 있는지, 나이·성별 유지용)
 
-const region = computed(() => (region1.value && region2.value ? `${region1.value} ${region2.value}` : ''))
 const dirty = computed(() => {
   if (!original) return false
   return (
@@ -87,12 +84,10 @@ const dirty = computed(() => {
     form.nickname !== original.nickname ||
     form.username !== original.username ||
     form.bio !== (original.bio || '') ||
-    form.affiliation !== (original.affiliation || '') ||
-    region.value !== (original.region || '')
+    form.affiliation !== (original.affiliation || '')
   )
 })
 
-watch(region1, (v, old) => old !== undefined && v !== old && (region2.value = ''))
 watch(() => form.nickname, () => (errors.nickname = ''))
 watch(() => form.username, (v) => {
   errors.username = ''
@@ -142,7 +137,6 @@ async function save() {
     }
     const fd = new FormData()
     fd.append('nickname', nick)
-    fd.append('region', region.value)
     fd.append('bio', form.bio.trim())
     fd.append('affiliation', form.affiliation.trim())
     // 화면에서 받지 않는 나이·성별은 예전 값 그대로 보낸다 (지워지지 않게)
@@ -170,10 +164,7 @@ async function load() {
     form.username = data.username || ''
     form.bio = data.bio || ''
     form.affiliation = data.affiliation || ''
-    const [p = '', s = ''] = String(data.region || '').split(' ')
-    region1.value = regionMap[p] ? p : ''
-    await nextTick() // 시·도를 바꾸면 구·군을 비우는 watch가 먼저 돌고 나서 채운다
-    region2.value = region1.value && (regionMap[p] || []).includes(s) ? s : ''
+    form.region = data.region || ''
     preview.value = data.profilePicture && !data.profilePicture.includes('default') ? data.profilePicture : ''
     photoState.value = 'unchanged'
   } catch {

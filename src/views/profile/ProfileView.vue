@@ -38,6 +38,10 @@
         <div class="flex-1 min-w-0">
           <h1 class="t-title truncate">{{ user.nickname }}</h1>
           <p class="t-caption truncate mt-0.5">@{{ user.username }}</p>
+          <!-- 동네 (당근의 '합정동 · 동네 인증'). 인증이 지났으면 표시를 뺀다 -->
+          <p v-if="user.dong" class="t-caption truncate mt-0.5 flex items-center gap-1">
+            <UiIcon name="location-dot" class="text-xs" aria-hidden="true" />{{ user.dong.name }}<span v-if="user.dong.verified" class="text-fg-subtle">· 동네 인증</span>
+          </p>
           <p v-if="subline" class="t-caption truncate mt-0.5">{{ subline }}</p>
         </div>
       </div>
@@ -243,7 +247,8 @@ const gameRefs = {}
 
 const stats = computed(() => user.value?.stats || {})
 // 지역·소속 중 있는 것만 한 줄로
-const subline = computed(() => [user.value?.location, user.value?.affiliation].filter((v) => v && v.trim()).join(' · '))
+// 동네가 있으면 예전 활동 지역(시·구)은 겹치니 뺀다
+const subline = computed(() => [user.value?.dong ? '' : user.value?.location, user.value?.affiliation].filter((v) => v && v.trim()).join(' · '))
 
 function setGameRef(el, id) {
   if (el) gameRefs[id] = el.$el || el

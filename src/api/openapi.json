@@ -6691,6 +6691,25 @@
           }
         }
       },
+      "PublicDong": {
+        "required": [
+          "name",
+          "shortName",
+          "verified"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        }
+      },
       "RecentGameSummaryDto": {
         "required": [
           "gameId",
@@ -6813,6 +6832,9 @@
           },
           "location": {
             "type": "string"
+          },
+          "dong": {
+            "$ref": "#/components/schemas/PublicDong"
           },
           "age": {
             "type": "integer",

@@ -33,7 +33,8 @@
         <span v-for="n in 8" :key="n" class="apply-spark" :style="{ '--a': n * 45 + 'deg' }" aria-hidden="true"></span>
       </span>
       <UiButton v-else-if="game.isAppliedByMe" size="sm" variant="secondary" :loading="busy" @click="emit('cancel')">신청 취소</UiButton>
-      <UiButton v-else size="sm" variant="tonal" :loading="busy" @click="emit('apply')">신청</UiButton>
+      <!-- 다른 동네 경기(공유 링크)는 신청 버튼 대신 경기 화면이 이유를 보여 준다 -->
+      <UiButton v-else-if="!game.joinBlockedReason" size="sm" variant="tonal" :loading="busy" @click="emit('apply')">신청</UiButton>
     </div>
   </UiCard>
 </template>

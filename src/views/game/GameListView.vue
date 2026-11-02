@@ -77,7 +77,7 @@
           :busy="busyId === game.id"
           @rule="ruleGame = game"
           @profile="router.push('/profile/' + game.ownerId)"
-          @apply="apply(game)"
+          @apply="(team) => apply(game, team)"
           @cancel="cancelApply(game)"
           @challengers="challengersGame = game"
           @more="menuGame = game"
@@ -207,10 +207,10 @@ function retry() {
   fetchGames()
 }
 
-async function apply(game) {
+async function apply(game, team) {
   busyId.value = game.id
   try {
-    await api.post(`/api/games/${game.id}/apply`)
+    await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
     game.isAppliedByMe = true
     haptic('success')
     showToast('신청했어요. 주최자가 승인하면 알려드려요')

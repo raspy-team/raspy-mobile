@@ -566,6 +566,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{id}/result/peer-vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["peerVote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{id}/result/peer-vote/open": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 참가자 투표로 결과 정하기
+         * @description 셋 이상이 각자 겨룬 경기. 함께 한 사람들이 자기 말고 한 명을 뽑고, 모두 뽑거나 24시간이 지나면 표 순서로 등수가 정해진다
+         */
+        post: operations["openPeerVote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{id}/result/confirm": {
         parameters: {
             query?: never;
@@ -1110,6 +1146,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/board": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 공유 판 들어가기
+         * @description 땅따먹기 판처럼 여럿이 며칠 동안 같은 판을 바꾸는 게임. 하던 판이 있으면 그 판
+         */
+        post: operations["boardJoin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/{key}/battle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 실시간 대전 대기실 들어가기
+         * @description 퐁처럼 서버가 판을 계속 계산하는 게임. 짝이 지어지면 topic으로 판이 온다
+         */
+        post: operations["battleJoin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/votes/{gameId}": {
         parameters: {
             query?: never;
@@ -1231,6 +1307,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/plays/{playId}/say": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 대화형 판에서 한 마디 하기
+         * @description AI가 받아친다(몇 초). 마지막 말에는 받아치지 않는다. 끝내려면 답 내기(빈 답)
+         */
+        post: operations["say"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/duels/{gameId}/challenge": {
         parameters: {
             query?: never;
@@ -1265,6 +1361,54 @@ export interface paths {
          * @description 같은 문제로 바로 플레이를 시작한다.
          */
         post: operations["acceptChallenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/board/{gameId}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["boardMove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/battle/{gameId}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["battleLeave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/battle/{gameId}/bot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["battleBot"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2585,6 +2729,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/plays/{playId}/dialog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 대화형 판의 주고받은 말
+         * @description AI 첫마디부터. 남은 말할 횟수와 함께
+         */
+        get: operations["dialog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/duels/{gameId}": {
         parameters: {
             query?: never;
@@ -2628,6 +2792,38 @@ export interface paths {
         };
         /** 도전 정보 (링크로 들어온 사람) */
         get: operations["challenge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/board/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["board"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/battle/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["battle"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3038,13 +3234,21 @@ export interface components {
             detailAddress?: string;
         };
         EnterResultRequest: {
-            sets: components["schemas"]["SetScoreInput"][];
+            sets?: components["schemas"]["SetScoreInput"][];
+            sideSets?: number[][];
+            places?: {
+                [key: string]: number;
+            };
         };
         SetScoreInput: {
             /** Format: int32 */
             myScore: number;
             /** Format: int32 */
             opponentScore: number;
+        };
+        PeerVoteRequest: {
+            /** Format: int64 */
+            targetId: number;
         };
         GameReviewRequest: {
             /** Format: int32 */
@@ -3078,6 +3282,12 @@ export interface components {
             placeDetail?: string;
             /** Format: int64 */
             friendId?: number;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** Format: int32 */
+            maxPlayers?: number;
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
         };
         CancelGameRequest: {
             /** Format: int64 */
@@ -3151,6 +3361,13 @@ export interface components {
             botAfterSeconds: number;
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
+            simultaneous: boolean;
+            race: boolean;
+            /** Format: int32 */
+            round: number;
+            view?: components["schemas"]["TurnView"];
+            /** Format: int32 */
+            lobbySeconds: number;
         };
         RealtimeStone: {
             /** Format: int32 */
@@ -3161,6 +3378,27 @@ export interface components {
             /** Format: double */
             y: number;
             alive: boolean;
+        };
+        TurnBoard: {
+            title: string;
+            /** Format: int32 */
+            rows: number;
+            /** Format: int32 */
+            cols: number;
+            cells: string[];
+            playable: boolean;
+        };
+        TurnChoice: {
+            value: string;
+            label: string;
+            icon?: string;
+        };
+        TurnView: {
+            boards: components["schemas"]["TurnBoard"][];
+            choices: components["schemas"]["TurnChoice"][];
+            note?: string;
+            prompt?: string;
+            input?: string;
         };
         AppPlayResponse: {
             /** Format: int64 */
@@ -3178,6 +3416,53 @@ export interface components {
             matched: boolean;
             /** Format: date-time */
             serverNow: string;
+        };
+        SharedBoardState: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            players: components["schemas"]["AppPlayer"][];
+            /** Format: int32 */
+            meIndex: number;
+            /** Format: int32 */
+            maxPlayers: number;
+            view: components["schemas"]["TurnView"];
+            /** Format: date-time */
+            endsAt: string;
+            /** Format: date-time */
+            nextMoveAt?: string;
+            /** Format: date-time */
+            serverNow: string;
+            /** Format: int32 */
+            myPlace?: number;
+        };
+        BattleStateResponse: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            me: components["schemas"]["AppPlayer"];
+            /** Format: int32 */
+            meIndex: number;
+            opponent?: components["schemas"]["AppPlayer"];
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            serverNow: string;
+            /** Format: date-time */
+            waitingSince: string;
+            /** Format: int32 */
+            botAfterSeconds: number;
+            topic: string;
+            /** Format: int64 */
+            tickMillis: number;
+            /** Format: double */
+            myScore?: number;
+            /** Format: double */
+            opponentScore?: number;
+            /** @enum {string} */
+            result?: "WIN" | "LOSE" | "DRAW";
         };
         VoteRequest: {
             /** Format: int64 */
@@ -3239,6 +3524,23 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             votingEndsAt?: string;
+        };
+        DialogSayRequest: {
+            text: string;
+        };
+        AppDialogResponse: {
+            /** Format: int64 */
+            playId: number;
+            lines: components["schemas"]["DialogLine"][];
+            /** Format: int32 */
+            turnsLeft: number;
+            /** Format: int32 */
+            maxChars: number;
+            submitted: boolean;
+        };
+        DialogLine: {
+            mine: boolean;
+            text: string;
         };
         AppChallenge: {
             /** Format: int64 */
@@ -3528,7 +3830,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -3620,6 +3922,18 @@ export interface components {
             chatRoomId: string;
             /** @enum {string} */
             gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            sides: components["schemas"]["SideScore"][];
+        };
+        SideScore: {
+            /** Format: int32 */
+            key: number;
+            members: components["schemas"]["UserSummary"][];
+            /** Format: int32 */
+            score: number;
+            /** Format: int32 */
+            sets: number;
         };
         ApplicantInfo: {
             /** Format: int64 */
@@ -3628,6 +3942,8 @@ export interface components {
             applicantNickname: string;
             applicantGameStatisticsDTO: components["schemas"]["UserGameStatisticsDTO"];
             approved: boolean;
+            /** Format: int32 */
+            team?: number;
         };
         GameResultResponse: {
             gameSummary: components["schemas"]["GameSummaryResponse"];
@@ -3656,6 +3972,16 @@ export interface components {
             /** Format: int32 */
             rejectsLeft: number;
             disputed: boolean;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            sides: components["schemas"]["SideResult"][];
+            sideSetResults: components["schemas"]["SideSetResult"][];
+            placesEntered: boolean;
+            peerVoting: boolean;
+            /** Format: int32 */
+            peerVotes: number;
+            /** Format: int64 */
+            myPeerVoteTargetId?: number;
         };
         GameSummaryResponse: {
             /** Format: int64 */
@@ -3685,6 +4011,29 @@ export interface components {
             ruleStatisticsOfOwner?: components["schemas"]["UserGameStatisticsDTO"];
             challengers: components["schemas"]["ApplicantInfo"][];
             isAppliedByMe: boolean;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
+            teamSeatsLeft?: number[];
+        };
+        SideResult: {
+            /** Format: int32 */
+            key: number;
+            members: components["schemas"]["UserSummary"][];
+            /** Format: int32 */
+            place: number;
+            /** Format: int32 */
+            setsWon: number;
+            /** Format: int32 */
+            points: number;
+        };
+        SideSetResult: {
+            /** Format: int32 */
+            setIdx: number;
+            scores: number[];
+            /** Format: int32 */
+            winner: number;
         };
         GameRankingResponse: {
             /** Format: int64 */
@@ -3780,6 +4129,14 @@ export interface components {
             /** Format: date-time */
             deletedAt?: string;
         };
+        GamePlayer: {
+            /** Format: int64 */
+            id: number;
+            nickname: string;
+            profileUrl?: string;
+            /** Format: int32 */
+            team?: number;
+        };
         RequestedGameResponse: {
             /** Format: int64 */
             id: number;
@@ -3801,6 +4158,15 @@ export interface components {
             /** Format: int64 */
             championId?: number;
             applicants: components["schemas"]["ApplicantInfo"][];
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** Format: int32 */
+            maxPlayers: number;
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
+            players: components["schemas"]["GamePlayer"][];
+            /** Format: int32 */
+            myTeam?: number;
         };
         MyGameResponse: {
             /** Format: int64 */
@@ -3832,6 +4198,13 @@ export interface components {
             resultSubmittedById?: number;
             /** Format: int64 */
             championId?: number;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** Format: int32 */
+            maxPlayers: number;
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
+            players: components["schemas"]["GamePlayer"][];
         };
         GameApplicantsResponse: {
             /** Format: int64 */
@@ -3932,6 +4305,13 @@ export interface components {
             url: string;
             mediaType: string;
         };
+        RankDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int32 */
+            place: number;
+        };
         ResultDto: {
             /** Format: int32 */
             scoreA: number;
@@ -3942,6 +4322,10 @@ export interface components {
             sets: number;
             duration: string;
             setScores: components["schemas"]["SetScoreDto"][];
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            sideNames?: string[];
+            ranking?: components["schemas"]["RankDto"][];
         };
         ReviewDto: {
             /** Format: int64 */
@@ -4019,6 +4403,8 @@ export interface components {
             available: boolean;
             /** Format: int32 */
             dailyLimit?: number;
+            battle: boolean;
+            shared: boolean;
         };
         AppRecordBoard: {
             key: string;
@@ -4835,6 +5221,54 @@ export interface operations {
             };
         };
     };
+    peerVote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PeerVoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    openPeerVote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
     confirmResult: {
         parameters: {
             query?: never;
@@ -5061,7 +5495,10 @@ export interface operations {
     };
     applyToJoin: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 팀 경기에서 들어갈 팀 (0·1). 다른 경기는 비운다 */
+                team?: number;
+            };
             header?: never;
             path: {
                 gameId: number;
@@ -5579,6 +6016,50 @@ export interface operations {
             };
         };
     };
+    boardJoin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SharedBoardState"];
+                };
+            };
+        };
+    };
+    battleJoin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
+                };
+            };
+        };
+    };
     voteCard: {
         parameters: {
             query?: never;
@@ -5745,6 +6226,32 @@ export interface operations {
             };
         };
     };
+    say: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DialogSayRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDialogResponse"];
+                };
+            };
+        };
+    };
     openChallenge: {
         parameters: {
             query?: never;
@@ -5785,6 +6292,76 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppPlayResponse"];
+                };
+            };
+        };
+    };
+    boardMove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DialogSayRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SharedBoardState"];
+                };
+            };
+        };
+    };
+    battleLeave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
+                };
+            };
+        };
+    };
+    battleBot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
                 };
             };
         };
@@ -7377,6 +7954,28 @@ export interface operations {
             };
         };
     };
+    dialog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDialogResponse"];
+                };
+            };
+        };
+    };
     duel: {
         parameters: {
             query?: never;
@@ -7437,6 +8036,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppChallenge"];
+                };
+            };
+        };
+    };
+    board: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SharedBoardState"];
+                };
+            };
+        };
+    };
+    battle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BattleStateResponse"];
                 };
             };
         };

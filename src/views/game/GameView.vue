@@ -67,13 +67,13 @@
 
   <!-- 신청자: 한 명을 승인하면 경기가 확정된다 -->
   <UiSheet :model-value="!!applicantsGame" :title="`신청자 ${applicantsGame?.applicants?.length || 0}명`" @update:model-value="applicantsGame = null">
-    <p class="t-caption mb-4">한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.</p>
+    <p class="t-caption mb-4">{{ applicantsHint(applicantsGame) }}</p>
     <UiList v-if="applicantsGame?.applicants?.length">
       <UiListItem
         v-for="a in applicantsGame.applicants"
         :key="a.userId"
         :title="a.applicantNickname"
-        :subtitle="ratingLine(a.applicantGameStatisticsDTO) || '첫 경기를 앞두고 있어요'"
+        :subtitle="(a.team != null ? TEAM_NAMES[a.team] + ' · ' : '') + (ratingLine(a.applicantGameStatisticsDTO) || '첫 경기를 앞두고 있어요')"
         plain
       >
         <template #leading>
@@ -81,7 +81,7 @@
         </template>
         <template #trailing>
           <UiButton v-if="a.approved" size="sm" variant="secondary" :loading="busy" @click.stop="cancelApproval(applicantsGame, a)">승인 취소</UiButton>
-          <UiButton v-else size="sm" :disabled="hasApproved(applicantsGame)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
+          <UiButton v-else size="sm" :disabled="!canApprove(applicantsGame, a)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
         </template>
       </UiListItem>
     </UiList>
@@ -99,7 +99,7 @@
   </UiSheet>
 
   <!-- 시간·장소 정하기 (시작 전 언제든). 보낸 칸만 바뀌고 상대에게 알림이 간다 -->
-  <UiSheet :model-value="!!scheduleGame" title="언제, 어디서 할까요?" @update:model-value="scheduleGame = null">
+  <UiSheet :model-value="!!scheduleGame" :title="isRemote(scheduleGame?.venue) ? '언제 할까요?' : '언제, 어디서 할까요?'" @update:model-value="scheduleGame = null">
     <div class="space-y-5">
       <div>
         <p class="t-label mb-2">시간</p>
@@ -108,7 +108,12 @@
         </div>
         <UiInput v-model="schedTime" type="datetime-local" />
       </div>
-      <div>
+      <!-- 화상·다른 게임은 주소 대신 어디서인지만 -->
+      <div v-if="isRemote(scheduleGame?.venue)">
+        <p class="t-label mb-2">어디서</p>
+        <UiInput v-model="schedPlace" :placeholder="VENUES.find((v) => v.value === scheduleGame?.venue)?.placeholder" />
+      </div>
+      <div v-else>
         <p class="t-label mb-2">장소</p>
         <div class="grid grid-cols-2 gap-2">
           <UiSelect v-model="schedRegion1" :options="region1Options" placeholder="시·도" />
@@ -118,7 +123,7 @@
       </div>
     </div>
     <template #footer>
-      <UiButton block :disabled="!schedTime && !(schedRegion1 && schedRegion2)" :loading="busy" @click="submitSchedule">정하기</UiButton>
+      <UiButton block :disabled="!schedTime && !(schedRegion1 && schedRegion2) && !(isRemote(scheduleGame?.venue) && schedPlace.trim())" :loading="busy" @click="submitSchedule">정하기</UiButton>
     </template>
   </UiSheet>
 
@@ -184,6 +189,7 @@
 
 <script setup>
 // 내 경기: 할 일(시작·승인·참여) / 기다리는 중 / 끝난 경기로 나눠 보여준다
+import { TEAM_NAMES, VENUES, isRemote } from '../../utils/gameFormat'
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -245,7 +251,7 @@ function bucket(g) {
   if (g.type === 'my-game') {
     if (g.status === 'COMPLETED' || g.status === 'CANCELED') return 'done'
     if (g.status === 'SCHEDULED' && g.isOwner !== false) return 'todo'
-    if (g.status === 'MATCHING' && g.applicants.length) return 'todo'
+    if (g.status === 'MATCHING' && g.applicants.some((a) => !a.approved)) return 'todo'
     return 'waiting'
   }
   return g.status === 'REJECTED' ? 'done' : 'waiting'
@@ -284,13 +290,27 @@ const { pull, refreshing } = usePullToRefresh(fetchGames)
 
 // ---------- 신청·승인 ----------
 
-const hasApproved = (game) => (game.applicants || []).some((a) => a.approved)
+const isMulti = (game) => !!game?.format && game.format !== 'DUEL'
+// 승인할 자리가 남았나. 1:1은 한 명, 여럿은 다 찰 때까지 (팀 경기는 그 팀 자리)
+function canApprove(game, a) {
+  const players = game.players || []
+  if (!isMulti(game)) return !(game.applicants || []).some((x) => x.approved)
+  if (players.length >= game.maxPlayers) return false
+  if (game.format === 'TEAMS') return players.filter((p) => p.team === a.team).length < game.maxPlayers / 2
+  return true
+}
+function applicantsHint(game) {
+  if (!isMulti(game)) return '한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.'
+  const n = (game.players || []).length
+  return `${game.maxPlayers}명이 모이면 경기가 확정돼요. 지금 ${n}명이에요.`
+}
 
 async function approve(game, a) {
   busy.value = true
   try {
     await api.post('/api/games/approve', { gameId: game.id, userId: a.userId })
-    showToast(`${a.applicantNickname}님과 경기가 확정됐어요`)
+    const full = !isMulti(game) || (game.players || []).length + 1 >= game.maxPlayers
+    showToast(full ? `${a.applicantNickname}님과 경기가 확정됐어요` : `${a.applicantNickname}님을 승인했어요`)
     applicantsGame.value = null
     await fetchGames()
   } catch (e) {
@@ -388,17 +408,19 @@ function openSchedule(g) {
   const parsed = g.matchLocation ? parseRegion(g.matchLocation) : null
   schedRegion1.value = parsed?.region1 || ''
   nextTick(() => (schedRegion2.value = parsed?.region2 || ''))
-  schedPlace.value = ''
+  schedPlace.value = isRemote(g.venue) ? g.matchLocation || '' : ''
 }
 
 async function submitSchedule() {
   busy.value = true
   try {
-    const hasPlace = schedRegion1.value && schedRegion2.value
+    const remote = isRemote(scheduleGame.value.venue)
+    const hasPlace = !remote && schedRegion1.value && schedRegion2.value
     await api.post(`/api/games/${scheduleGame.value.id}/schedule`, {
       matchDate: schedTime.value ? (schedTime.value.length === 16 ? `${schedTime.value}:00` : schedTime.value) : null,
       roadAddress: hasPlace ? `${schedRegion1.value} ${schedRegion2.value}` : null,
-      detailAddress: hasPlace ? schedPlace.value.trim() || null : null,
+      // 화상·다른 게임은 어디서인지만 보낸다 (서버가 주소 없이 받는다)
+      detailAddress: remote ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || null : null,
     })
     scheduleGame.value = null
     showToast('정했어요. 상대에게 알렸어요')
@@ -427,6 +449,8 @@ const startMessage = computed(() => {
 
 function openStart(game) {
   startGame.value = game
+  // 화상·다른 게임은 장소를 묻지 않는다
+  if (isRemote(game.venue)) return goCamera()
   if (game.matchLocation && game.matchLocation.trim()) showPlaceConfirm.value = true
   else openPlaceForm()
 }

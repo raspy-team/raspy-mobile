@@ -10,10 +10,10 @@
         </span>
         <h1 class="t-title mt-5">경기가 열렸어요</h1>
         <p class="t-caption mt-2">
-          {{ friend ? `${friend.nickname}님에게 알렸어요. 장소와 시간은 내 경기에서 함께 정해요.` : '열린 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
+          {{ friend ? `${friend.nickname}님에게 알렸어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '열린 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
         <!-- 아무나로 열었으면, 기다리기만 하기보다 아는 사람을 먼저 부르게 -->
-        <UiButton v-if="!friend && createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">링크 보내서 상대 부르기</UiButton>
+        <UiButton v-if="!friend && createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">{{ format === 'DUEL' ? '링크 보내서 상대 부르기' : '링크 보내서 같이 할 사람 부르기' }}</UiButton>
         <UiButton block size="lg" :variant="!friend && createdId ? 'ghost' : 'primary'" :class="!friend && createdId ? 'mt-2' : 'mt-10'" to="/game">내 경기 보기</UiButton>
       </section>
 
@@ -27,6 +27,8 @@
           </div>
           <UiButton variant="ghost" size="sm" @click="router.push('/rules?fromGameCreate=true')">바꾸기</UiButton>
         </UiCard>
+        <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
+        <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
 
         <!-- 언제쯤: 열린 경기를 보는 사람이 신청할지 정하는 데 가장 필요한 정보. 정확한 시간은 상대와 함께 -->
         <h1 class="t-title">언제쯤 할까요?</h1>
@@ -34,12 +36,36 @@
           <UiChip v-for="w in WHEN" :key="w.label" :selected="when === w.label" @click="when = w.label">{{ w.label }}</UiChip>
         </div>
 
-        <h1 class="t-title">누구와 겨룰까요?</h1>
+        <!-- 어디서: 만나서 / 화상으로 / 다른 게임에서. 화상·다른 게임은 동네 없이 전국에 보인다 -->
+        <h1 class="t-title">어디서 할까요?</h1>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <UiChip v-for="v in VENUES" :key="v.value" :selected="venue === v.value" @click="venue = v.value">{{ v.label }}</UiChip>
+        </div>
+        <UiInput v-if="isRemote(venue)" v-model="venueDetail" class="mt-3" :placeholder="VENUES.find((v) => v.value === venue)?.placeholder" />
+        <p v-if="isRemote(venue)" class="t-caption mt-2">장소가 없어서 어느 동네에서든 보여요.</p>
+        <div class="mb-8"></div>
+
+        <!-- 몇 명이서: 규칙이 팀·여럿을 받을 때만 보인다 -->
+        <template v-if="formats.length > 1">
+          <h1 class="t-title">몇 명이서 할까요?</h1>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <UiChip v-for="f in formats" :key="f.value" :selected="format === f.value" @click="pickFormat(f.value)">{{ f.label }}</UiChip>
+          </div>
+          <p class="t-caption mt-2">{{ formats.find((f) => f.value === format)?.description }}</p>
+          <div v-if="format !== 'DUEL'" class="flex flex-wrap gap-2 mt-3">
+            <UiChip v-for="n in sizes" :key="n" :selected="size === n" @click="size = n">
+              {{ format === 'TEAMS' ? `${n}:${n}` : `${n}명` }}
+            </UiChip>
+          </div>
+          <div class="mb-8"></div>
+        </template>
+
+        <h1 class="t-title">{{ format === 'DUEL' ? '누구와 겨룰까요?' : '어떻게 모을까요?' }}</h1>
         <p class="t-caption mt-1 mb-5">시간·장소는 나중에 내 경기에서 언제든 정하거나 바꿀 수 있어요.</p>
 
         <div class="space-y-2">
           <button
-            v-for="opt in OPTIONS"
+            v-for="opt in options"
             :key="opt.value"
             type="button"
             class="w-full flex items-center gap-4 p-4 rounded-xl bg-surface text-left active:bg-surface-2 disabled:opacity-50"
@@ -98,6 +124,7 @@ import { useToast } from '../../composable/useToast'
 import { haptic } from '../../utils/haptics'
 import { shareLink } from '../../utils/share'
 import { quickTimes } from '../../utils/when'
+import { allowedFormats, TEAM_SIZES, GROUP_SIZES, VENUES, isRemote } from '../../utils/gameFormat'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
 } from '../../components/ui'
@@ -110,6 +137,24 @@ const OPTIONS = [
   { value: 'anyone', icon: 'globe', title: '아무나', description: '경기 목록에 올려서 신청을 받아요' },
   { value: 'friend', icon: 'user-check', title: '친구와', description: '친구 한 명과 바로 경기를 잡아요' },
 ]
+
+// 친구와 바로 잡는 경기는 1:1만 된다 (여럿은 열어서 신청을 받는다)
+const options = computed(() => (format.value === 'DUEL' ? OPTIONS : OPTIONS.filter((o) => o.value === 'anyone')))
+
+const venue = ref('IN_PERSON')
+const venueDetail = ref('')
+
+const formats = computed(() => allowedFormats(rule.value))
+const dangerous = computed(() => (rule.value?.category?.traits || []).some((t) => t.key === 'DANGER'))
+const format = ref('DUEL')
+const size = ref(2)
+const sizes = computed(() => (format.value === 'TEAMS' ? TEAM_SIZES : GROUP_SIZES))
+function pickFormat(value) {
+  format.value = value
+  size.value = value === 'TEAMS' ? 2 : 3
+}
+// 서버에 보내는 인원: 팀은 두 팀 합
+const maxPlayers = computed(() => (format.value === 'TEAMS' ? size.value * 2 : format.value === 'FREE_FOR_ALL' ? size.value : 2))
 
 const WHEN = [...quickTimes(), { label: '나중에 정하기', date: () => null }]
 const when = ref('나중에 정하기')
@@ -168,7 +213,10 @@ async function create(target) {
   friend.value = target
   try {
     const matchDate = WHEN.find((w) => w.label === when.value)?.date() ?? null
-    const payload = { referencedRuleId: ruleId, friendId: target?.id ?? null, matchDate }
+    const payload = {
+      referencedRuleId: ruleId, friendId: target?.id ?? null, matchDate, format: format.value, maxPlayers: maxPlayers.value,
+      venue: venue.value, placeDetail: isRemote(venue.value) ? venueDetail.value.trim() || null : null,
+    }
     const { data } = await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
     createdId.value = data
     friendsOpen.value = false

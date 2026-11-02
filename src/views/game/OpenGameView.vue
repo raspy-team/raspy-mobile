@@ -19,7 +19,7 @@
           @more="() => {}"
         />
         <p class="t-caption mt-4">
-          <template v-if="game.gameStatus !== 'MATCHING'">이미 상대가 정해진 경기예요.</template>
+          <template v-if="game.gameStatus !== 'MATCHING'">{{ game.format && game.format !== 'DUEL' ? '이미 사람이 다 모인 경기예요.' : '이미 상대가 정해진 경기예요.' }}</template>
           <template v-else-if="game.ownerId === myId">신청이 오면 알려 드려요. 내 경기에서 승인해요.</template>
           <template v-else-if="game.isAppliedByMe">신청했어요. {{ game.ownerNickname }}님이 승인하면 알려 드려요.</template>
           <!-- 공유 링크로 다른 동네 경기에 들어온 경우: 누르기 전에 이유를 보여 준다 -->
@@ -63,10 +63,10 @@ async function load() {
   }
 }
 
-async function apply() {
+async function apply(team) {
   busy.value = true
   try {
-    await api.post(`/api/games/${game.value.id}/apply`)
+    await api.post(`/api/games/${game.value.id}/apply`, null, { params: team === undefined ? {} : { team } })
     haptic('success')
     await load()
   } catch (e) {

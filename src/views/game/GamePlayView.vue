@@ -1,5 +1,29 @@
 <template>
-  <div v-if="game && user1 && user2" class="h-dvh flex flex-col bg-canvas text-fg overflow-hidden pt-safe pb-safe">
+  <!-- 셋 이상이 각자: 점수판 없이, 끝나면 등수나 점수를 낸다 -->
+  <div v-if="game && game.format === 'FREE_FOR_ALL'" class="min-h-dvh flex flex-col bg-canvas text-fg pt-safe pb-safe">
+    <header class="flex items-center gap-1 px-2 h-14 flex-shrink-0">
+      <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack" />
+      <h1 class="flex-1 min-w-0 truncate t-body font-bold">{{ game.rule?.ruleTitle }}</h1>
+      <UiIconButton icon="fas fa-book-open" label="규칙 보기" @click="game.showRuleDetail = true" />
+    </header>
+    <main class="flex-1 px-4 pt-6 max-w-xl mx-auto w-full">
+      <p class="t-caption">{{ game.sides?.length }}명이 각자 · 시작한 지 {{ elapsedTimeStr }}</p>
+      <ul class="mt-4 bg-surface rounded-xl divide-y divide-line">
+        <li v-for="s in game.sides" :key="s.key" class="flex items-center gap-3 px-4 py-3">
+          <UiAvatar :src="s.members[0].profileUrl" :name="s.members[0].nickname" size="sm" />
+          <span class="text-sm text-fg truncate">{{ s.members[0].nickname }}</span>
+        </li>
+      </ul>
+      <p class="t-caption mt-4">앱 밖에서 겨룬 뒤, 한 사람이 등수나 점수를 내요. 다른 사람 한 명이 확인하면 기록돼요.</p>
+    </main>
+    <footer class="px-4 pb-4 space-y-2 max-w-xl mx-auto w-full">
+      <UiButton block size="lg" icon="fas fa-flag-checkered" @click="showResultEntry = true">결과 내기</UiButton>
+      <UiButton block variant="ghost" icon="fas fa-xmark" @click="openConfirm('경기를 취소할까요?', cancelGame, '사람이 다 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소')">경기 취소</UiButton>
+    </footer>
+    <MatchModal v-if="game.showRuleDetail" :rule="game.rule" @close="game.showRuleDetail = false" />
+  </div>
+
+  <div v-else-if="game && user1 && user2" class="h-dvh flex flex-col bg-canvas text-fg overflow-hidden pt-safe pb-safe">
     <!-- 위: 뒤로 · 규칙 이름 · 규칙/로그 -->
     <header class="flex items-center gap-1 px-2 h-14 flex-shrink-0">
       <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack" />
@@ -72,7 +96,7 @@
         <UiButton v-else variant="ghost" class="flex-1" icon="fas fa-rotate-left" @click="openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터')">
           처음부터
         </UiButton>
-        <UiButton variant="danger" class="flex-1" icon="fas fa-stop" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${user2.nickname}님이 확인하면 기록돼요.`, '경기 끝내기')">
+        <UiButton variant="danger" class="flex-1" icon="fas fa-stop" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기')">
           경기 끝내기
         </UiButton>
       </div>
@@ -90,7 +114,7 @@
       </template>
       <template v-else>
         <p class="t-title">{{ currentSet }}세트</p>
-        <p class="t-caption mt-2">{{ currentScore1 || currentScore2 || currentSet > 1 ? `${user1SetsWon} : ${user2SetsWon}` : '두 사람이 준비되면 시작하세요' }}</p>
+        <p class="t-caption mt-2">{{ currentScore1 || currentScore2 || currentSet > 1 ? `${user1SetsWon} : ${user2SetsWon}` : (game.format === 'TEAMS' ? '두 팀이' : '두 사람이') + ' 준비되면 시작하세요' }}</p>
         <UiButton block size="lg" class="mt-8 max-w-sm" @click="showStartButton ? socket_startSet() : socket_nextSet()">
           {{ currentSet }}세트 시작
         </UiButton>
@@ -122,6 +146,10 @@
   <ResultEntrySheet
     v-model="showResultEntry"
     :game-id="gameId"
+    :format="game?.format"
+    :sides="game?.sides || []"
+    :my-side="mySideIndex"
+    :my-name="game?.format === 'TEAMS' ? '우리 팀' : '나'"
     :opponent-name="user2?.nickname"
     :set-count="game?.rule?.setsToWin || 1"
     @submitted="goToResult"
@@ -140,6 +168,7 @@
 </template>
 
 <script setup>
+import { TEAM_NAMES } from '../../utils/gameFormat'
 import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { haptic } from '../../utils/haptics'
 import { useRoute, useRouter } from 'vue-router'
@@ -192,6 +221,8 @@ let startedSetIndex = 0 // 이미 시작한 세트. 같은 세트의 시작 신�
 const logs = ref([])
 const user1 = ref(null)
 const user2 = ref(null)
+// 서버 sides 안에서 내 편의 자리 (결과 입력이 편 순서로 보낸다)
+const mySideIndex = ref(0)
 const gameWinner = ref('')
 const showLogModal = ref(false)
 const showResultEntry = ref(false)
@@ -491,15 +522,34 @@ onMounted(async () => {
   chatRoomId.value = res.data.chatRoomId
 
   const g = res.data
-  const isLeftUser1 = g.user1.id == currentUserId
-  user1.value = isLeftUser1 ? g.user1 : g.user2
-  user2.value = isLeftUser1 ? g.user2 : g.user1
+  if (g.format === 'TEAMS' && g.sides?.length === 2) {
+    // 팀 경기: 팀마다 첫 사람에게 점수를 붙이고(서버가 팀으로 합친다) 칸에는 팀 이름을 보인다. 내 팀이 왼쪽
+    const mine = g.sides.findIndex((s) => s.members.some((m) => m.id == currentUserId))
+    mySideIndex.value = Math.max(0, mine)
+    const [left, right] = mySideIndex.value === 0 ? g.sides : [g.sides[1], g.sides[0]]
+    const asUser = (side) => ({
+      id: side.members[0].id,
+      nickname: `${TEAM_NAMES[side.key] || '팀'} · ${side.members.map((m) => m.nickname).join('·')}`,
+      profileUrl: side.members[0].profileUrl,
+    })
+    user1.value = asUser(left)
+    user2.value = asUser(right)
+    currentScore1.value = left.score
+    currentScore2.value = right.score
+    user1SetsWon.value = left.sets
+    user2SetsWon.value = right.sets
+  } else {
+    const isLeftUser1 = g.user1.id == currentUserId
+    user1.value = isLeftUser1 ? g.user1 : g.user2
+    user2.value = isLeftUser1 ? g.user2 : g.user1
 
-  currentScore1.value = isLeftUser1 ? g.score1 : g.score2
-  currentScore2.value = isLeftUser1 ? g.score2 : g.score1
+    currentScore1.value = isLeftUser1 ? g.score1 : g.score2
+    currentScore2.value = isLeftUser1 ? g.score2 : g.score1
 
-  user1SetsWon.value = isLeftUser1 ? g.set1 : g.set2
-  user2SetsWon.value = isLeftUser1 ? g.set2 : g.set1
+    user1SetsWon.value = isLeftUser1 ? g.set1 : g.set2
+    user2SetsWon.value = isLeftUser1 ? g.set2 : g.set1
+    mySideIndex.value = g.sides?.findIndex((s) => s.members.some((m) => m.id == currentUserId)) ?? 0
+  }
   currentSet.value = g.currentSet || 0
 
   if (game.rule.pointsToWin != -1 && currentScore1.value >= game.rule.pointsToWin) {

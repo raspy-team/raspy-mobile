@@ -1022,6 +1022,80 @@
         }
       }
     },
+    "/api/games/{id}/result/peer-vote": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "operationId": "peerVote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeerVoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/result/peer-vote/open": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "참가자 투표로 결과 정하기",
+        "description": "셋 이상이 각자 겨룬 경기. 함께 한 사람들이 자기 말고 한 명을 뽑고, 모두 뽑거나 24시간이 지나면 표 순서로 등수가 정해진다",
+        "operationId": "openPeerVote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{id}/result/confirm": {
       "post": {
         "tags": [
@@ -1387,6 +1461,16 @@
             "schema": {
               "type": "integer",
               "format": "int64"
+            }
+          },
+          {
+            "name": "team",
+            "in": "query",
+            "description": "팀 경기에서 들어갈 팀 (0·1). 다른 경기는 비운다",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -2042,6 +2126,70 @@
         }
       }
     },
+    "/api/app-games/{key}/board": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "공유 판 들어가기",
+        "description": "땅따먹기 판처럼 여럿이 며칠 동안 같은 판을 바꾸는 게임. 하던 판이 있으면 그 판",
+        "operationId": "boardJoin",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedBoardState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/{key}/battle": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "실시간 대전 대기실 들어가기",
+        "description": "퐁처럼 서버가 판을 계속 계산하는 게임. 짝이 지어지면 topic으로 판이 온다",
+        "operationId": "battleJoin",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/votes/{gameId}": {
       "get": {
         "tags": [
@@ -2300,6 +2448,49 @@
         }
       }
     },
+    "/api/app-games/plays/{playId}/say": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "대화형 판에서 한 마디 하기",
+        "description": "AI가 받아친다(몇 초). 마지막 말에는 받아치지 않는다. 끝내려면 답 내기(빈 답)",
+        "operationId": "say",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DialogSayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDialogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/duels/{gameId}/challenge": {
       "post": {
         "tags": [
@@ -2359,6 +2550,109 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AppPlayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/board/{gameId}/move": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "boardMove",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DialogSayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedBoardState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/battle/{gameId}/leave": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "battleLeave",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/battle/{gameId}/bot": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "battleBot",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
                 }
               }
             }
@@ -4726,6 +5020,39 @@
         }
       }
     },
+    "/api/app-games/plays/{playId}/dialog": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "대화형 판의 주고받은 말",
+        "description": "AI 첫마디부터. 남은 말할 횟수와 함께",
+        "operationId": "dialog",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDialogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/duels/{gameId}": {
       "get": {
         "tags": [
@@ -4807,6 +5134,68 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AppChallenge"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/board/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "board",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedBoardState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/battle/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "battle",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleStateResponse"
                 }
               }
             }
@@ -5878,15 +6267,29 @@
         }
       },
       "EnterResultRequest": {
-        "required": [
-          "sets"
-        ],
         "type": "object",
         "properties": {
           "sets": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SetScoreInput"
+            }
+          },
+          "sideSets": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          "places": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         }
@@ -5905,6 +6308,18 @@
           "opponentScore": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "PeerVoteRequest": {
+        "required": [
+          "targetId"
+        ],
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -5981,7 +6396,9 @@
       },
       "CreateGameRequest": {
         "required": [
-          "referencedRuleId"
+          "format",
+          "referencedRuleId",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -6002,6 +6419,26 @@
           "friendId": {
             "type": "integer",
             "format": "int64"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
+            ]
           }
         }
       },
@@ -6166,10 +6603,14 @@
           "botAfterSeconds",
           "gameId",
           "key",
+          "lobbySeconds",
           "me",
           "meFirst",
           "moves",
+          "race",
+          "round",
           "serverNow",
+          "simultaneous",
           "startWord",
           "status",
           "turnSeconds",
@@ -6246,6 +6687,23 @@
               "LOSE",
               "DRAW"
             ]
+          },
+          "simultaneous": {
+            "type": "boolean"
+          },
+          "race": {
+            "type": "boolean"
+          },
+          "round": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "view": {
+            "$ref": "#/components/schemas/TurnView"
+          },
+          "lobbySeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -6276,6 +6734,86 @@
           },
           "alive": {
             "type": "boolean"
+          }
+        }
+      },
+      "TurnBoard": {
+        "required": [
+          "cells",
+          "cols",
+          "playable",
+          "rows",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cols": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "playable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TurnChoice": {
+        "required": [
+          "label",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        }
+      },
+      "TurnView": {
+        "required": [
+          "boards",
+          "choices"
+        ],
+        "type": "object",
+        "properties": {
+          "boards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TurnBoard"
+            }
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TurnChoice"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "input": {
+            "type": "string"
           }
         }
       },
@@ -6325,6 +6863,141 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "SharedBoardState": {
+        "required": [
+          "endsAt",
+          "gameId",
+          "key",
+          "maxPlayers",
+          "meIndex",
+          "players",
+          "serverNow",
+          "status",
+          "view"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppPlayer"
+            }
+          },
+          "meIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "view": {
+            "$ref": "#/components/schemas/TurnView"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextMoveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "myPlace": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BattleStateResponse": {
+        "required": [
+          "botAfterSeconds",
+          "gameId",
+          "key",
+          "me",
+          "meIndex",
+          "serverNow",
+          "status",
+          "tickMillis",
+          "topic",
+          "waitingSince"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "me": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "meIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waitingSince": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "botAfterSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "tickMillis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "myScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "opponentScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "WIN",
+              "LOSE",
+              "DRAW"
+            ]
           }
         }
       },
@@ -6515,6 +7188,65 @@
           "votingEndsAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "DialogSayRequest": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "AppDialogResponse": {
+        "required": [
+          "lines",
+          "maxChars",
+          "playId",
+          "submitted",
+          "turnsLeft"
+        ],
+        "type": "object",
+        "properties": {
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DialogLine"
+            }
+          },
+          "turnsLeft": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxChars": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "submitted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DialogLine": {
+        "required": [
+          "mine",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "mine": {
+            "type": "boolean"
+          },
+          "text": {
+            "type": "string"
           }
         }
       },
@@ -7481,6 +8213,8 @@
               "INBOX",
               "MY_GAME",
               "DM",
+              "GAME_JOIN_APPROVED",
+              "APP_TURN",
               "FRIEND_REQUEST",
               "FRIEND_APPROVE",
               "FRIEND_REJECT",
@@ -7705,6 +8439,7 @@
         "required": [
           "chatRoomId",
           "currentSet",
+          "format",
           "gameStatus",
           "id",
           "limitSeconds",
@@ -7715,6 +8450,7 @@
           "set1",
           "set2",
           "setStarted",
+          "sides",
           "user1",
           "user2"
         ],
@@ -7796,6 +8532,49 @@
               "PLAYING",
               "VOTING"
             ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SideScore"
+            }
+          }
+        }
+      },
+      "SideScore": {
+        "required": [
+          "key",
+          "members",
+          "score",
+          "sets"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummary"
+            }
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sets": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7823,6 +8602,10 @@
           },
           "approved": {
             "type": "boolean"
+          },
+          "team": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7831,10 +8614,16 @@
           "confirmed",
           "disputed",
           "drawCount",
+          "format",
           "gameSummary",
           "newChampionIdx",
+          "peerVotes",
+          "peerVoting",
+          "placesEntered",
           "rejectsLeft",
           "setResults",
+          "sideSetResults",
+          "sides",
           "startDate",
           "totalSetCount",
           "user1",
@@ -7905,6 +8694,40 @@
           },
           "disputed": {
             "type": "boolean"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SideResult"
+            }
+          },
+          "sideSetResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SideSetResult"
+            }
+          },
+          "placesEntered": {
+            "type": "boolean"
+          },
+          "peerVoting": {
+            "type": "boolean"
+          },
+          "peerVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myPeerVoteTargetId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -7913,6 +8736,7 @@
           "challengers",
           "createdAt",
           "currentParticipantCounts",
+          "format",
           "gameStatus",
           "id",
           "isAppliedByMe",
@@ -7920,7 +8744,8 @@
           "maxPlayers",
           "ownerId",
           "ownerNickname",
-          "rule"
+          "rule",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -8000,6 +8825,88 @@
           },
           "isAppliedByMe": {
             "type": "boolean"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
+            ]
+          },
+          "teamSeatsLeft": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "SideResult": {
+        "required": [
+          "key",
+          "members",
+          "place",
+          "points",
+          "setsWon"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummary"
+            }
+          },
+          "place": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsWon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "points": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SideSetResult": {
+        "required": [
+          "scores",
+          "setIdx",
+          "winner"
+        ],
+        "type": "object",
+        "properties": {
+          "setIdx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "winner": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -8289,16 +9196,43 @@
           }
         }
       },
+      "GamePlayer": {
+        "required": [
+          "id",
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileUrl": {
+            "type": "string"
+          },
+          "team": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RequestedGameResponse": {
         "required": [
           "applicants",
+          "format",
           "gameStatus",
           "id",
+          "maxPlayers",
           "ownerId",
           "ownerNickname",
           "ownerStatistics",
+          "players",
           "rule",
-          "status"
+          "status",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -8364,19 +9298,53 @@
             "items": {
               "$ref": "#/components/schemas/ApplicantInfo"
             }
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
+            ]
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GamePlayer"
+            }
+          },
+          "myTeam": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
       "MyGameResponse": {
         "required": [
+          "format",
           "id",
           "isOwner",
+          "maxPlayers",
           "myId",
           "myNickname",
           "myRating",
           "myStatistics",
+          "players",
           "rule",
-          "status"
+          "status",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -8457,6 +9425,32 @@
           "championId": {
             "type": "integer",
             "format": "int64"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
+            ]
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GamePlayer"
+            }
           }
         }
       },
@@ -8832,9 +9826,31 @@
           }
         }
       },
+      "RankDto": {
+        "required": [
+          "id",
+          "name",
+          "place"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "place": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "ResultDto": {
         "required": [
           "duration",
+          "format",
           "scoreA",
           "scoreB",
           "setScores",
@@ -8864,6 +9880,26 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SetScoreDto"
+            }
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "sideNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ranking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankDto"
             }
           }
         }
@@ -9016,6 +10052,7 @@
       "AppGameSummary": {
         "required": [
           "available",
+          "battle",
           "icon",
           "judge",
           "key",
@@ -9028,6 +10065,7 @@
           "recordable",
           "ruleId",
           "scoreUnit",
+          "shared",
           "summary",
           "timeLimitSeconds",
           "title"
@@ -9111,6 +10149,12 @@
           "dailyLimit": {
             "type": "integer",
             "format": "int32"
+          },
+          "battle": {
+            "type": "boolean"
+          },
+          "shared": {
+            "type": "boolean"
           }
         }
       },

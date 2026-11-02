@@ -16,14 +16,23 @@
 
     <!-- 결과: 이 카드의 주인공. 승자 이름에 형광펜 -->
     <div class="mt-3 rounded-xl bg-surface px-4 py-5">
-      <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+      <!-- 셋 이상이 각자: 등수 줄 -->
+      <ol v-if="ranking.length" class="space-y-1.5">
+        <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3">
+          <span class="t-mono w-8" :class="r.place === 1 ? 'text-fg font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
+          <button type="button" class="min-w-0 truncate text-[15px] text-left" :class="r.place === 1 ? 'text-fg font-semibold' : 'text-fg-muted'" @click="emit('profile', r.id)">
+            <span :class="r.place === 1 ? 'hl' : ''">{{ r.name }}</span>
+          </button>
+        </li>
+      </ol>
+      <div v-else class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <button
           v-for="(side, i) in sides"
           :key="i"
           type="button"
           class="min-w-0 truncate text-[15px]"
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
-          @click="emit('profile', players[i]?.id)"
+          @click="emit('profile', sideFirst(i)?.id)"
         >
           <span :class="side.won ? 'hl' : ''">{{ side.name }}</span>
         </button>
@@ -33,8 +42,8 @@
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
         </span>
       </div>
-      <p v-if="setLine" class="text-center t-mono normal-case mt-3">{{ setLine }}</p>
-      <p v-else-if="isDraw" class="text-center t-micro mt-3">무승부</p>
+      <p v-if="setLine && !ranking.length" class="text-center t-mono normal-case mt-3">{{ setLine }}</p>
+      <p v-else-if="isDraw && !ranking.length" class="text-center t-micro mt-3">무승부</p>
     </div>
 
     <!-- 사진·영상 (있을 때만) -->
@@ -96,10 +105,14 @@ const props = defineProps({
 const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'play', 'more'])
 
 const players = computed(() => props.post.players || [])
+const ranking = computed(() => props.post.result?.ranking || [])
+// 칸의 첫 사람. 팀 경기의 선수 목록은 [앞 팀..., 뒤 팀...] 순서다
+const sideFirst = (i) => (props.post.result?.sideNames?.length === 2 && i === 1 ? players.value[players.value.length / 2] : players.value[i])
 const isDraw = computed(() => !props.post.result?.winner)
 const sides = computed(() => {
   const r = props.post.result || {}
-  const [a, b] = players.value
+  // 팀 경기는 두 팀의 팀원 이름이 한 칸씩 (누르면 그 팀 첫 사람 프로필)
+  const [a, b] = r.sideNames?.length === 2 ? r.sideNames.map((name) => ({ name })) : players.value
   // 단판이면 세트 수(1:0) 대신 그 판의 점수(21:15)를 크게
   const single = r.setScores?.length === 1 ? r.setScores[0] : null
   return [

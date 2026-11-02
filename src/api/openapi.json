@@ -4303,6 +4303,30 @@
         }
       }
     },
+    "/api/app-games/duels/active": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "모든 앱 게임에서 아직 안 끝난 내 대결",
+        "operationId": "myUnfinishedDuels",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppDuelResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/challenges/{gameId}": {
       "get": {
         "tags": [
@@ -5368,6 +5392,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "serverNow": {
             "type": "string",
             "format": "date-time"
@@ -5398,6 +5426,7 @@
           "matched",
           "playId",
           "problem",
+          "serverNow",
           "startedAt",
           "timeLimitSeconds"
         ],
@@ -5431,6 +5460,10 @@
           },
           "matched": {
             "type": "boolean"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -5531,10 +5564,13 @@
         "required": [
           "createdAt",
           "gameId",
+          "icon",
           "key",
           "myJudging",
+          "playMode",
           "problem",
-          "status"
+          "status",
+          "title"
         ],
         "type": "object",
         "properties": {
@@ -5544,6 +5580,24 @@
           },
           "key": {
             "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "playMode": {
+            "type": "string",
+            "enum": [
+              "OFFLINE",
+              "REALTIME",
+              "NON_REALTIME"
+            ]
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "status": {
             "type": "string"

@@ -18,6 +18,15 @@
         <UiButton block variant="ghost" class="mt-4" @click="leave">그만 찾기</UiButton>
       </template>
 
+      <!-- 짝이 지어지면 3·2·1 (첫 차례 시간은 그 뒤부터) -->
+      <AppCountdown
+        v-else-if="state?.status === 'PLAYING' && counting"
+        :until="startsAt"
+        :offset="offset"
+        :opponent="state.opponent?.nickname"
+        @done="now = Date.now()"
+      />
+
       <!-- 판 -->
       <template v-else-if="state?.status === 'PLAYING'">
         <div class="flex items-center justify-between">
@@ -72,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-// 실시간 대결 (/play/:key/live). 대기실 → 판 → 결과가 한 화면에서 바뀐다.
+// 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -81,6 +90,7 @@ import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
 import BrandFace from '../../components/BrandFace.vue'
+import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import { UiButton, UiCard, UiEmptyState, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['RealtimeState']
@@ -96,14 +106,16 @@ const moveError = ref('')
 const sending = ref(false)
 const input = ref<{ focus: () => void } | null>(null)
 const now = ref(Date.now())
-let offset = 0 // 서버 시각 - 기기 시각
+const offset = ref(0) // 서버 시각 - 기기 시각
 
 const myTurn = computed(() => state.value?.turnUserId === state.value?.me.userId)
 const lastChar = computed(() => {
   const moves = state.value?.moves ?? []
   return (moves[moves.length - 1]?.word ?? state.value?.startWord ?? '').slice(-1)
 })
-const serverNow = computed(() => now.value + offset)
+const serverNow = computed(() => now.value + offset.value)
+const startsAt = computed(() => (state.value?.startsAt ? new Date(state.value.startsAt).getTime() : 0))
+const counting = computed(() => startsAt.value > serverNow.value)
 const left = computed(() => {
   const end = state.value?.turnEndsAt ? new Date(state.value.turnEndsAt).getTime() : 0
   return Math.max(0, Math.ceil((end - serverNow.value) / 1000))
@@ -118,7 +130,7 @@ function message(e: unknown, fallback: string) {
 }
 
 function apply(s: State) {
-  offset = new Date(s.serverNow).getTime() - Date.now()
+  offset.value = new Date(s.serverNow).getTime() - Date.now()
   state.value = s
 }
 
@@ -186,8 +198,9 @@ const timer = setInterval(async () => {
   }
 }, 250)
 
-watch(myTurn, async (mine) => {
-  if (mine) {
+// 내 차례가 되거나, 내 차례로 3·2·1이 끝나면 입력칸에 바로 친다
+watch([myTurn, counting], async ([mine, waiting]) => {
+  if (mine && !waiting) {
     moveError.value = ''
     await nextTick()
     input.value?.focus()

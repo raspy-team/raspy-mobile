@@ -20,7 +20,7 @@
     </div>
 
     <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
-    <section v-else-if="!allGames.length" class="pt-6">
+    <section v-else-if="!allGames.length && !appDuels.length" class="pt-6">
       <h2 class="t-title">첫 경기를 잡아볼까요</h2>
       <p class="t-caption mt-2">잡힌 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
       <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
@@ -39,6 +39,10 @@
     </section>
 
     <template v-else>
+      <!-- 앱 게임에서 아직 안 끝난 대결: 게임마다 흩어지지 않게 여기 모은다 -->
+      <UiSection v-if="appDuels.length" :title="`앱 대결 ${appDuels.length}`">
+        <AppDuelList :duels="appDuels" />
+      </UiSection>
       <UiSection v-for="g in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
         <div class="space-y-3">
           <MyGameCard
@@ -187,6 +191,8 @@ import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
 import MyGameCard from '../../components/game/MyGameCard.vue'
+import AppDuelList from '../../components/appgame/AppDuelList.vue'
+import { GET } from '@/api/client'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
   UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton, UiTopBar
@@ -216,6 +222,7 @@ const busy = ref(false)
 const sentGames = ref([])
 const myGames = ref([])
 const applicantsMap = ref({})
+const appDuels = ref([])
 const me = ref({ name: '나' })
 const applicantsGame = ref(null)
 const menuGame = ref(null)
@@ -256,11 +263,14 @@ const groups = computed(() =>
 
 async function fetchGames() {
   try {
-    const [applicantsRes, sentRes, myRes] = await Promise.all([
+    const [applicantsRes, sentRes, myRes, duels] = await Promise.all([
       api.get('/api/games/my-games/applicants'),
       api.get('/api/games/my-requests'),
       api.get('/api/games/my-games'),
+      // 앱 대결은 못 불러와도 오프라인 경기 목록은 보여 준다
+      GET('/api/app-games/duels/active').then(({ data }) => data).catch(() => null),
     ])
+    if (duels) appDuels.value = duels
     applicantsMap.value = Object.fromEntries(applicantsRes.data.map((g) => [g.gameId, g.applicants || []]))
     sentGames.value = sentRes.data
     myGames.value = myRes.data

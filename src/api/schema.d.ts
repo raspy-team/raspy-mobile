@@ -2404,6 +2404,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/duels/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 모든 앱 게임에서 아직 안 끝난 내 대결 */
+        get: operations["myUnfinishedDuels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/challenges/{gameId}": {
         parameters: {
             query?: never;
@@ -2817,6 +2834,8 @@ export interface components {
             /** Format: int32 */
             turnSeconds: number;
             /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
             serverNow: string;
             /** Format: date-time */
             waitingSince: string;
@@ -2839,6 +2858,8 @@ export interface components {
             /** Format: int32 */
             timeLimitSeconds: number;
             matched: boolean;
+            /** Format: date-time */
+            serverNow: string;
         };
         VoteRequest: {
             /** Format: int64 */
@@ -2872,6 +2893,12 @@ export interface components {
             /** Format: int64 */
             gameId: number;
             key: string;
+            title: string;
+            icon: string;
+            /** @enum {string} */
+            playMode: "OFFLINE" | "REALTIME" | "NON_REALTIME";
+            /** Format: date-time */
+            deadlineAt?: string;
             status: string;
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
@@ -6745,6 +6772,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppDuelResponse"];
+                };
+            };
+        };
+    };
+    myUnfinishedDuels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDuelResponse"][];
                 };
             };
         };

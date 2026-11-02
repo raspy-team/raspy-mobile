@@ -3,8 +3,11 @@
     <UiTopBar :title="game?.title || '게임'" back />
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
+      <!-- 시작 전 3·2·1: 끝날 때까지 문제를 가린다 -->
+      <AppCountdown v-if="play && counting" :until="new Date(play.startedAt).getTime()" :offset="offset" @done="counting = false" />
+
       <!-- 플레이 중: 게임마다 다른 판 -->
-      <template v-if="play">
+      <template v-else-if="play">
         <TypingPlay
           v-if="key === 'typing'"
           :problem="play.problem"
@@ -79,6 +82,9 @@
             <UiButton v-if="(result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
         </UiCard>
+        <!-- 다음 행동은 결과 바로 밑에. 긴 답·한마디는 그 아래 -->
+        <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
+        <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <UiCard v-if="result.myFeedback" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? 'AI 셰프 한마디' : '알림' }}</p>
           <p class="t-body mt-1">{{ result.myFeedback }}</p>
@@ -106,8 +112,6 @@
             <p v-if="result.opponentFeedback" class="t-caption mt-2">AI 셰프: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
-        <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
-        <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
       </template>
 
       <!-- 게임 첫 화면 -->
@@ -145,74 +149,79 @@
           </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
 
-          <UiSection title="내 대결" class="mt-8">
-            <UiList v-if="duels.length">
-              <UiListItem
-                v-for="d in duels"
-                :key="d.gameId"
-                :title="duelTitle(d)"
-                :subtitle="duelSubtitle(d)"
-                @click="result = d"
-              >
+          <!-- 아직 안 끝난 내 대결은 시작 버튼 바로 밑에 -->
+          <UiSection v-if="unfinished.length" title="진행 중" class="mt-8">
+            <UiList>
+              <UiListItem v-for="d in unfinished" :key="d.gameId" :title="duelTitle(d)" :subtitle="duelSubtitle(d)" @click="result = d">
+                <template #trailing><UiBadge>{{ duelBadge(d) }}</UiBadge></template>
+              </UiListItem>
+            </UiList>
+          </UiSection>
+
+          <!-- 나머지는 탭 하나로: 순위 · 내 대결 · 투표 -->
+          <UiTabs v-model="tab" :options="tabs" class="mt-8" />
+
+          <section v-if="tab === 'rank'" class="mt-4">
+            <UiTabs v-if="game.recordable" v-model="boardKind" :options="BOARDS" class="mb-3" />
+            <template v-if="boardKind === 'RATING'">
+              <UiList v-if="ranking.length">
+                <UiListItem
+                  v-for="r in ranking"
+                  :key="r.userId"
+                  :title="r.isCurrentUser ? `${r.userName} (나)` : r.userName"
+                  :subtitle="`${r.playCount}판`"
+                  chevron
+                  @click="router.push('/profile/' + r.userId)"
+                >
+                  <template #leading>
+                    <span class="w-6 t-mono text-center">{{ r.rank }}</span>
+                    <UiAvatar :src="r.userAvatar" :name="r.userName" size="sm" />
+                  </template>
+                  <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
+                </UiListItem>
+              </UiList>
+              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 없어요" description="5판 넘게 한 사람부터 순위에 올라요" />
+              <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">레이팅 순위 전체 보기</UiButton>
+            </template>
+            <template v-else>
+              <UiList v-if="board?.entries.length">
+                <UiListItem
+                  v-for="e in board.entries"
+                  :key="e.player.userId"
+                  :title="e.player.userId === board.mine?.player.userId ? `${e.player.nickname} (나)` : e.player.nickname"
+                  @click="router.push('/profile/' + e.player.userId)"
+                >
+                  <template #leading>
+                    <span class="w-6 t-mono text-center">{{ e.rank }}</span>
+                    <UiAvatar :src="e.player.profilePicture" :name="e.player.nickname" size="sm" />
+                  </template>
+                  <template #trailing><span class="t-mono">{{ e.score }}{{ game.scoreUnit }}</span></template>
+                </UiListItem>
+              </UiList>
+              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 기록이 없어요" description="첫 기록의 주인공이 되어 보세요" />
+              <p v-if="board?.mine && !board.entries.some((e) => e.player.userId === board?.mine?.player.userId)" class="t-caption mt-3">
+                내 순위 {{ board.mine.rank }}위 · {{ board.mine.score }}{{ game.scoreUnit }}
+              </p>
+            </template>
+          </section>
+
+          <section v-else-if="tab === 'mine'" class="mt-4">
+            <UiList v-if="finished.length">
+              <UiListItem v-for="d in finished" :key="d.gameId" :title="duelTitle(d)" :subtitle="duelSubtitle(d)" @click="result = d">
                 <template #trailing>
                   <UiBadge :tone="d.result === 'WIN' ? 'primary' : 'neutral'">{{ duelBadge(d) }}</UiBadge>
                 </template>
               </UiListItem>
             </UiList>
-            <UiEmptyState v-else icon="fas fa-trophy" title="아직 대결이 없어요" description="첫 판을 해 보세요" />
-          </UiSection>
+            <UiEmptyState v-else icon="fas fa-trophy" title="아직 끝난 대결이 없어요" description="첫 판을 해 보세요" />
+          </section>
 
-          <UiSection title="레이팅 순위" class="mt-8">
-            <template #action>
-              <UiButton size="sm" variant="ghost" :to="`/rules/${game.ruleId}/ranking`">전체 보기</UiButton>
-            </template>
-            <UiList v-if="ranking.length">
-              <UiListItem
-                v-for="r in ranking"
-                :key="r.userId"
-                :title="r.isCurrentUser ? `${r.userName} (나)` : r.userName"
-                :subtitle="`${r.playCount}판`"
-                chevron
-                @click="router.push('/profile/' + r.userId)"
-              >
-                <template #leading>
-                  <span class="w-6 t-mono text-center">{{ r.rank }}</span>
-                  <UiAvatar :src="r.userAvatar" :name="r.userName" size="sm" />
-                </template>
-                <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
-              </UiListItem>
-            </UiList>
-            <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 없어요" description="5판 넘게 한 사람부터 순위에 올라요" />
-          </UiSection>
-
-          <UiSection v-if="isVote" title="투표하기" class="mt-8">
+          <section v-else class="mt-4">
             <div v-if="votes.length" class="space-y-3">
               <VoteCard v-for="(c, i) in votes" :key="c.gameId" :card="c" @voted="votes[i] = $event" />
             </div>
             <UiEmptyState v-else icon="fas fa-check" title="지금 투표할 대결이 없어요" description="다른 사람들의 문장이 모이면 여기에 올라와요" />
-          </UiSection>
-
-          <UiSection v-if="game.recordable" title="기록 순위" class="mt-8">
-            <UiTabs v-model="period" :options="PERIODS" class="mb-3" />
-            <UiList v-if="board?.entries.length">
-              <UiListItem
-                v-for="e in board.entries"
-                :key="e.player.userId"
-                :title="e.player.userId === board.mine?.player.userId ? `${e.player.nickname} (나)` : e.player.nickname"
-                @click="router.push('/profile/' + e.player.userId)"
-              >
-                <template #leading>
-                  <span class="w-6 t-mono text-center">{{ e.rank }}</span>
-                  <UiAvatar :src="e.player.profilePicture" :name="e.player.nickname" size="sm" />
-                </template>
-                <template #trailing><span class="t-mono">{{ e.score }}{{ game.scoreUnit }}</span></template>
-              </UiListItem>
-            </UiList>
-            <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 기록이 없어요" description="첫 기록의 주인공이 되어 보세요" />
-            <p v-if="board?.mine && !board.entries.some((e) => e.player.userId === board?.mine?.player.userId)" class="t-caption mt-3">
-              내 순위 {{ board.mine.rank }}위 · {{ board.mine.score }}{{ game.scoreUnit }}
-            </p>
-          </UiSection>
+          </section>
         </template>
       </template>
     </main>
@@ -220,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-// 앱 게임 한 개 (/play/:key): 대결 시작 → 플레이 → 결과. 아래에 내 대결과 기록 순위
+// 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -232,6 +241,7 @@ import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import VoteCard from '../../components/appgame/VoteCard.vue'
+import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import { copyText } from '../../utils/clipboard'
 import { useToast } from '../../composable/useToast'
 import {
@@ -243,10 +253,12 @@ type Duel = Schemas['AppDuelResponse']
 type Play = Schemas['AppPlayResponse']
 
 const VERDICT = { WIN: '이겼어요', LOSE: '졌어요', DRAW: '비겼어요' } as const
-const PERIODS = [
-  { value: 'WEEK', label: '이번 주' },
-  { value: 'ALL', label: '전체' },
+const BOARDS = [
+  { value: 'RATING', label: '레이팅' },
+  { value: 'WEEK', label: '이번 주 기록' },
+  { value: 'ALL', label: '전체 기록' },
 ]
+const DONE = ['COMPLETED', 'CANCELED']
 
 const route = useRoute()
 const router = useRouter()
@@ -254,12 +266,23 @@ const key = computed(() => String(route.params.key))
 const game = ref<Schemas['AppGameSummary'] | null>(null)
 const duels = ref<Duel[]>([])
 const board = ref<Schemas['AppRecordBoard'] | null>(null)
-const period = ref<'WEEK' | 'ALL'>('WEEK')
+const boardKind = ref<'RATING' | 'WEEK' | 'ALL'>('RATING')
 const play = ref<Play | null>(null)
+const counting = ref(false)
+let offset = 0 // 서버 시각 - 기기 시각
 const result = ref<Duel | null>(null)
 const votes = ref<Schemas['AppVoteCard'][]>([])
 const ranking = ref<Schemas['UserRankingDto'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
+const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))
+const finished = computed(() => duels.value.filter((d) => DONE.includes(d.status)))
+// 투표 게임은 투표가 먼저 (남의 글에 표를 주는 게 이 게임의 절반)
+const tab = ref<'rank' | 'mine' | 'vote'>('rank')
+const tabs = computed(() => [
+  ...(isVote.value ? [{ value: 'vote', label: '투표', count: votes.value.length || undefined }] : []),
+  { value: 'rank', label: '순위' },
+  { value: 'mine', label: '내 대결', count: finished.value.length || undefined },
+])
 const { showToast } = useToast()
 const starting = ref(false)
 const submitting = ref(false)
@@ -271,7 +294,9 @@ async function load() {
     GET('/api/app-games'),
     GET('/api/app-games/{key}/duels', { path: { key: key.value } }),
   ])
+  const first = !game.value
   game.value = games.data.find((g) => g.key === key.value) ?? null
+  if (first && game.value?.judge === 'VOTE') tab.value = 'vote'
   duels.value = mine.data
   // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
   if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
@@ -281,11 +306,19 @@ async function load() {
 }
 
 async function loadBoard() {
-  board.value = (await GET('/api/app-games/{key}/records', { path: { key: key.value }, query: { period: period.value } })).data
+  if (boardKind.value === 'RATING') return
+  board.value = (await GET('/api/app-games/{key}/records', { path: { key: key.value }, query: { period: boardKind.value } })).data
 }
 
 function errorMessage(e: unknown, fallback: string) {
   return (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
+}
+
+/** 판을 받는다. 서버가 정한 시작 시각이 아직이면 3·2·1부터 (이어서 하는 판은 바로) */
+function begin(p: Play) {
+  offset = new Date(p.serverNow).getTime() - Date.now()
+  counting.value = new Date(p.startedAt).getTime() > Date.now() + offset
+  play.value = p
 }
 
 async function start() {
@@ -294,7 +327,7 @@ async function start() {
   starting.value = true
   startError.value = ''
   try {
-    play.value = (await POST('/api/app-games/{key}/plays', { path: { key: key.value } })).data
+    begin((await POST('/api/app-games/{key}/plays', { path: { key: key.value } })).data)
     result.value = null
     submitError.value = ''
   } catch (e) {
@@ -322,7 +355,7 @@ async function submit(answer: string) {
 
 /** 이어서 하는 판은 서버의 마감까지 남은 만큼만 */
 function secondsLeft(p: Play) {
-  const left = Math.floor((new Date(p.deadlineAt).getTime() - Date.now()) / 1000)
+  const left = Math.floor((new Date(p.deadlineAt).getTime() - (Date.now() + offset)) / 1000)
   return Math.max(1, Math.min(p.timeLimitSeconds, left))
 }
 
@@ -357,13 +390,22 @@ function dish(answer: string) {
   return { name, steps: rest.join('\n') }
 }
 
+/**
+ * 주소의 ?challenge·?resume를 지운다 (새로고침해도 다시 받지 않게).
+ * router.replace를 쓰면 화면이 주소마다 새로 만들어져(App.vue) 방금 받은 판이 사라진다
+ */
+function dropQuery() {
+  window.history.replaceState(window.history.state, '', route.path)
+}
+
 function closeResult() {
   result.value = null
   if (route.query.duel) router.replace({ query: {} })
 }
 
 function duelTitle(d: Duel) {
-  return d.opponent ? `${d.opponent.nickname}님과` : '상대를 찾는 중'
+  if (d.opponent) return `${d.opponent.nickname}님과`
+  return d.status === 'CANCELED' ? '상대 없이 끝난 대결' : '상대를 찾는 중'
 }
 function duelSubtitle(d: Duel) {
   const unit = game.value?.scoreUnit ?? ''
@@ -379,10 +421,10 @@ function duelBadge(d: Duel) {
   if (d.status === 'CANCELED') return '취소'
   if (d.status === 'VOTING') return '투표 중'
   if (d.myJudging) return isVote.value ? '확인 중' : '채점 중'
-  return '기다리는 중'
+  return d.opponent ? '상대 차례' : '기다리는 중'
 }
 
-watch(period, loadBoard)
+watch(boardKind, loadBoard)
 
 let stop: (() => void) | undefined
 onMounted(async () => {
@@ -391,11 +433,16 @@ onMounted(async () => {
   const challengeId = Number(route.query.challenge)
   if (challengeId) {
     try {
-      play.value = (await POST('/api/app-games/challenges/{gameId}/accept', { path: { gameId: challengeId } })).data
+      begin((await POST('/api/app-games/challenges/{gameId}/accept', { path: { gameId: challengeId } })).data)
     } catch (e) {
       startError.value = errorMessage(e, '도전을 받지 못했어요')
     }
-    router.replace({ query: {} })
+    dropQuery()
+  }
+  // 내 경기의 '이어서 하기'로 왔으면 내지 않은 판을 바로 이어서 (서버가 같은 판을 돌려준다)
+  if (route.query.resume) {
+    dropQuery()
+    await start()
   }
   const duelId = Number(route.query.duel)
   if (duelId) {

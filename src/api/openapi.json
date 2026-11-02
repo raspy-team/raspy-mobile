@@ -1723,6 +1723,79 @@
         }
       }
     },
+    "/api/app-games/votes/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "투표 카드 하나 (공유 링크)",
+        "operationId": "voteCard",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVoteCard"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "투표하기",
+        "description": "한 사람이 대결 하나에 한 표. 당사자와 봇은 못 한다.",
+        "operationId": "vote",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVoteCard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/plays/{playId}/submit": {
       "post": {
         "tags": [
@@ -3728,6 +3801,41 @@
         }
       }
     },
+    "/api/app-games/{key}/votes": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "투표할 수 있는 대결",
+        "description": "내 대결은 빼고 마감이 가까운 순. 글 순서는 보는 사람마다 섞고, 쓴 사람과 표 수는 가린다.",
+        "operationId": "openVotes",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppVoteCard"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/{key}/records": {
       "get": {
         "tags": [
@@ -3751,11 +3859,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -4822,6 +4930,77 @@
           }
         }
       },
+      "VoteRequest": {
+        "required": [
+          "playId"
+        ],
+        "type": "object",
+        "properties": {
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AppVoteCard": {
+        "required": [
+          "closed",
+          "gameId",
+          "isMine",
+          "key",
+          "options",
+          "problem"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "votingEndsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VoteOption"
+            }
+          },
+          "myVote": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isMine": {
+            "type": "boolean"
+          },
+          "closed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "VoteOption": {
+        "required": [
+          "playId",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
       "SubmitPlayRequest": {
         "required": [
           "answer"
@@ -4900,6 +5079,10 @@
             "format": "int32"
           },
           "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "votingEndsAt": {
             "type": "string",
             "format": "date-time"
           }
@@ -5622,7 +5805,8 @@
               "CANCELED",
               "DELETED",
               "WAITING",
-              "PLAYING"
+              "PLAYING",
+              "VOTING"
             ]
           }
         }
@@ -5676,7 +5860,8 @@
               "PLAY_WITH_ME_TOO_ACCEPT",
               "PLAY_WITH_ME_TOO_REJECT",
               "APP_DUEL_RESULT",
-              "APP_PLAY_JUDGED"
+              "APP_PLAY_JUDGED",
+              "APP_VOTE_STARTED"
             ]
           },
           "createdAt": {
@@ -5776,7 +5961,8 @@
               "CANCELED",
               "DELETED",
               "WAITING",
-              "PLAYING"
+              "PLAYING",
+              "VOTING"
             ]
           },
           "startedAt": {
@@ -5947,7 +6133,8 @@
               "CANCELED",
               "DELETED",
               "WAITING",
-              "PLAYING"
+              "PLAYING",
+              "VOTING"
             ]
           }
         }
@@ -6115,7 +6302,8 @@
               "CANCELED",
               "DELETED",
               "WAITING",
-              "PLAYING"
+              "PLAYING",
+              "VOTING"
             ]
           },
           "mannerScore": {
@@ -6464,7 +6652,8 @@
               "CANCELED",
               "DELETED",
               "WAITING",
-              "PLAYING"
+              "PLAYING",
+              "VOTING"
             ]
           },
           "resultSubmittedById": {
@@ -6578,7 +6767,8 @@
               "CANCELED",
               "DELETED",
               "WAITING",
-              "PLAYING"
+              "PLAYING",
+              "VOTING"
             ]
           },
           "startedAt": {
@@ -6638,7 +6828,8 @@
               "CANCELED",
               "DELETED",
               "WAITING",
-              "PLAYING"
+              "PLAYING",
+              "VOTING"
             ]
           },
           "myProfileUrl": {

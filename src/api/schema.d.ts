@@ -936,6 +936,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/votes/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 투표 카드 하나 (공유 링크) */
+        get: operations["voteCard"];
+        put?: never;
+        /**
+         * 투표하기
+         * @description 한 사람이 대결 하나에 한 표. 당사자와 봇은 못 한다.
+         */
+        post: operations["vote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/plays/{playId}/submit": {
         parameters: {
             query?: never;
@@ -2112,6 +2133,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/votes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 투표할 수 있는 대결
+         * @description 내 대결은 빼고 마감이 가까운 순. 글 순서는 보는 사람마다 섞고, 쓴 사람과 표 수는 가린다.
+         */
+        get: operations["openVotes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/{key}/records": {
         parameters: {
             query?: never;
@@ -2544,6 +2585,28 @@ export interface components {
             timeLimitSeconds: number;
             matched: boolean;
         };
+        VoteRequest: {
+            /** Format: int64 */
+            playId: number;
+        };
+        AppVoteCard: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            problem: string;
+            /** Format: date-time */
+            votingEndsAt?: string;
+            options: components["schemas"]["VoteOption"][];
+            /** Format: int64 */
+            myVote?: number;
+            isMine: boolean;
+            closed: boolean;
+        };
+        VoteOption: {
+            /** Format: int64 */
+            playId: number;
+            text: string;
+        };
         SubmitPlayRequest: {
             answer: string;
         };
@@ -2571,6 +2634,8 @@ export interface components {
             ratingChange?: number;
             /** Format: date-time */
             createdAt: string;
+            /** Format: date-time */
+            votingEndsAt?: string;
         };
         AppPlayer: {
             /** Format: int64 */
@@ -2801,7 +2866,7 @@ export interface components {
             /** Format: int64 */
             gameId?: number;
             /** @enum {string} */
-            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
+            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -2810,7 +2875,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -2838,7 +2903,7 @@ export interface components {
             opponentNickname?: string;
             opponentProfileUrl?: string;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
             /** Format: date-time */
             startedAt?: string;
             /** Format: int64 */
@@ -2895,7 +2960,7 @@ export interface components {
             limitSeconds: number;
             chatRoomId: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
         };
         ApplicantInfo: {
             /** Format: int64 */
@@ -2948,7 +3013,7 @@ export interface components {
             ownerNickname: string;
             ownerProfileUrl?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
             /** Format: double */
             mannerScore: number;
             /** Format: int64 */
@@ -3059,7 +3124,7 @@ export interface components {
             matchDate?: string;
             matchLocation?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
             /** Format: int64 */
             resultSubmittedById?: number;
             /** @enum {string} */
@@ -3096,7 +3161,7 @@ export interface components {
             /** Format: double */
             opponentRating?: number;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
             /** Format: date-time */
             startedAt?: string;
             /** Format: int64 */
@@ -3113,7 +3178,7 @@ export interface components {
             matchLocation?: string;
             applicants: components["schemas"]["ApplicantInfo"][];
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
             myProfileUrl?: string;
             /** Format: int64 */
             myId: number;
@@ -4609,6 +4674,54 @@ export interface operations {
             };
         };
     };
+    voteCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppVoteCard"];
+                };
+            };
+        };
+    };
+    vote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppVoteCard"];
+                };
+            };
+        };
+    };
     submit: {
         parameters: {
             query?: never;
@@ -6027,6 +6140,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppGameSummary"][];
+                };
+            };
+        };
+    };
+    openVotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppVoteCard"][];
                 };
             };
         };

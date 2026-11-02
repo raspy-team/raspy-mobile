@@ -19,6 +19,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <SentencePlay
+          v-else-if="key === 'sentence'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
       </template>
 
@@ -32,12 +39,12 @@
             <div class="flex items-center justify-center gap-6 mt-6">
               <span>
                 <UiRollNumber class="t-title tabular-nums" :value="result.myScore ?? 0" />
-                <span class="block t-micro">나</span>
+                <span class="block t-micro">나{{ isVote ? ' (표)' : '' }}</span>
               </span>
               <span class="t-caption">:</span>
               <span>
                 <span class="block t-title tabular-nums text-fg-muted">{{ result.opponentScore ?? 0 }}</span>
-                <span class="block t-micro">상대</span>
+                <span class="block t-micro">상대{{ isVote ? ' (표)' : '' }}</span>
               </span>
             </div>
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
@@ -46,8 +53,20 @@
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
-            <p class="t-heading mt-4">AI 셰프가 채점하고 있어요</p>
+            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : 'AI 셰프가 채점하고 있어요' }}</p>
             <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 알림으로 알려 드릴게요</p>
+          </template>
+          <template v-else-if="result.status === 'VOTING'">
+            <p class="t-title">투표 중이에요</p>
+            <p class="t-caption mt-1">{{ until(result.votingEndsAt) }}까지 사람들이 투표해요. 끝나면 알려 드릴게요</p>
+            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 복사</UiButton>
+          </template>
+          <template v-else-if="result.status === 'CANCELED'">
+            <p class="t-title">취소된 대결이에요</p>
+          </template>
+          <template v-else-if="isVote">
+            <p class="t-heading">{{ (result.myScore ?? 0) > 0 ? '문장이 올라갔어요' : '투표에 올리지 못했어요' }}</p>
+            <p class="t-caption mt-1">{{ (result.myScore ?? 0) > 0 ? '같은 제시어로 다른 사람이 쓰면 24시간 투표가 시작돼요' : '' }}</p>
           </template>
           <template v-else>
             <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
@@ -57,9 +76,19 @@
           </template>
         </UiCard>
         <UiCard v-if="result.myFeedback" class="mt-3">
-          <p class="t-micro">{{ game?.judge === 'AI' ? 'AI 셰프 한마디' : '한마디' }}</p>
+          <p class="t-micro">{{ game?.judge === 'AI' ? 'AI 셰프 한마디' : '알림' }}</p>
           <p class="t-body mt-1">{{ result.myFeedback }}</p>
         </UiCard>
+        <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
+          <UiCard v-if="result.myAnswer" class="mt-3">
+            <p class="t-micro">내 문장</p>
+            <p class="t-body mt-1">{{ result.myAnswer }}</p>
+          </UiCard>
+          <UiCard v-if="result.opponentAnswer" class="mt-3">
+            <p class="t-micro">상대 문장</p>
+            <p class="t-body mt-1">{{ result.opponentAnswer }}</p>
+          </UiCard>
+        </template>
         <template v-if="game?.judge === 'AI'">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 요리</p>
@@ -129,6 +158,13 @@
             <UiEmptyState v-else icon="fas fa-trophy" title="아직 대결이 없어요" description="첫 판을 해 보세요" />
           </UiSection>
 
+          <UiSection v-if="isVote" title="투표하기" class="mt-8">
+            <div v-if="votes.length" class="space-y-3">
+              <VoteCard v-for="(c, i) in votes" :key="c.gameId" :card="c" @voted="votes[i] = $event" />
+            </div>
+            <UiEmptyState v-else icon="fas fa-check" title="지금 투표할 대결이 없어요" description="다른 사람들의 문장이 모이면 여기에 올라와요" />
+          </UiSection>
+
           <UiSection v-if="game.recordable" title="기록 순위" class="mt-8">
             <UiTabs v-model="period" :options="PERIODS" class="mb-3" />
             <UiList v-if="board?.entries.length">
@@ -167,6 +203,10 @@ import { refreshOnChange } from '@/websocket/userChannel'
 import BrandFace from '../../components/BrandFace.vue'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
+import SentencePlay from '../../components/appgame/SentencePlay.vue'
+import VoteCard from '../../components/appgame/VoteCard.vue'
+import { copyText } from '../../utils/clipboard'
+import { useToast } from '../../composable/useToast'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
@@ -190,6 +230,9 @@ const board = ref<Schemas['AppRecordBoard'] | null>(null)
 const period = ref<'WEEK' | 'ALL'>('WEEK')
 const play = ref<Play | null>(null)
 const result = ref<Duel | null>(null)
+const votes = ref<Schemas['AppVoteCard'][]>([])
+const isVote = computed(() => game.value?.judge === 'VOTE')
+const { showToast } = useToast()
 const starting = ref(false)
 const submitting = ref(false)
 const startError = ref('')
@@ -205,6 +248,7 @@ async function load() {
   // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
   if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
   if (game.value?.recordable) await loadBoard()
+  if (game.value?.judge === 'VOTE') votes.value = (await GET('/api/app-games/{key}/votes', { path: { key: key.value } })).data
 }
 
 async function loadBoard() {
@@ -251,6 +295,17 @@ function secondsLeft(p: Play) {
   return Math.max(1, Math.min(p.timeLimitSeconds, left))
 }
 
+function until(at?: string) {
+  if (!at) return ''
+  const d = new Date(at)
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+/** 투표 공유 링크: 친구에게 보내 표를 받는다 */
+async function shareVote(gameId: number) {
+  showToast((await copyText(`${window.location.origin}/vote/${gameId}`)) ? '투표 링크를 복사했어요' : '복사하지 못했어요')
+}
+
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
 function dish(answer: string) {
   const [name, ...rest] = answer.split('\n')
@@ -269,13 +324,16 @@ function duelSubtitle(d: Duel) {
   const unit = game.value?.scoreUnit ?? ''
   if (d.status === 'COMPLETED') return `${d.myScore ?? 0} : ${d.opponentScore ?? 0}${unit}`
   if (d.status === 'CANCELED') return d.myFeedback || '시간 안에 내지 않아 취소됐어요'
-  if (d.myJudging) return 'AI 셰프가 채점하고 있어요'
+  if (d.status === 'VOTING') return `투표 마감 ${until(d.votingEndsAt)}`
+  if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : 'AI 셰프가 채점하고 있어요'
+  if (isVote.value) return d.myAnswer ?? ''
   return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : '아직 내지 않았어요'
 }
 function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']
   if (d.status === 'CANCELED') return '취소'
-  if (d.myJudging) return '채점 중'
+  if (d.status === 'VOTING') return '투표 중'
+  if (d.myJudging) return isVote.value ? '확인 중' : '채점 중'
   return '기다리는 중'
 }
 

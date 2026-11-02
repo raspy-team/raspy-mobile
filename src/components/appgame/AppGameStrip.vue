@@ -28,7 +28,7 @@ import { UiBadge, UiCard, UiIcon, UiSection } from '../ui'
 
 type AppGameSummary = components['schemas']['AppGameSummary']
 
-const ICON: Record<string, string> = { typing: 'keyboard', recipe: 'chef-hat' }
+const ICON: Record<string, string> = { typing: 'keyboard', recipe: 'chef-hat', sentence: 'pen' }
 const games = ref<AppGameSummary[]>([])
 
 onMounted(async () => {

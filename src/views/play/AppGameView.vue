@@ -44,6 +44,11 @@
               레이팅 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
           </template>
+          <template v-else-if="result.myJudging">
+            <UiSpinner class="mx-auto" />
+            <p class="t-heading mt-4">AI 셰프가 채점하고 있어요</p>
+            <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 알림으로 알려 드릴게요</p>
+          </template>
           <template v-else>
             <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
             <p class="t-caption">{{ game?.scoreUnit }}</p>
@@ -163,7 +168,7 @@ import BrandFace from '../../components/BrandFace.vue'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import {
-  UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiTabs, UiTopBar,
+  UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
 
 type Schemas = components['schemas']
@@ -263,12 +268,14 @@ function duelTitle(d: Duel) {
 function duelSubtitle(d: Duel) {
   const unit = game.value?.scoreUnit ?? ''
   if (d.status === 'COMPLETED') return `${d.myScore ?? 0} : ${d.opponentScore ?? 0}${unit}`
-  if (d.status === 'CANCELED') return '시간 안에 내지 않아 취소됐어요'
+  if (d.status === 'CANCELED') return d.myFeedback || '시간 안에 내지 않아 취소됐어요'
+  if (d.myJudging) return 'AI 셰프가 채점하고 있어요'
   return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : '아직 내지 않았어요'
 }
 function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']
   if (d.status === 'CANCELED') return '취소'
+  if (d.myJudging) return '채점 중'
   return '기다리는 중'
 }
 

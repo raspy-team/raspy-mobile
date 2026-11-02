@@ -4838,6 +4838,7 @@
           "createdAt",
           "gameId",
           "key",
+          "myJudging",
           "problem",
           "status"
         ],
@@ -4867,6 +4868,9 @@
           "myScore": {
             "type": "number",
             "format": "double"
+          },
+          "myJudging": {
+            "type": "boolean"
           },
           "myAnswer": {
             "type": "string"
@@ -5671,7 +5675,8 @@
               "PLAY_WITH_ME_TOO_REQUEST",
               "PLAY_WITH_ME_TOO_ACCEPT",
               "PLAY_WITH_ME_TOO_REJECT",
-              "APP_DUEL_RESULT"
+              "APP_DUEL_RESULT",
+              "APP_PLAY_JUDGED"
             ]
           },
           "createdAt": {

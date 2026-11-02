@@ -15,13 +15,13 @@
       <UiInput v-model="steps" label="만드는 법" multiline :rows="7" :maxlength="500" placeholder="재료를 어떻게 손질하고 익히는지 적어 주세요" />
     </div>
     <UiButton block size="lg" class="mt-4" :loading="submitting" :disabled="!name.trim() || steps.trim().length < 10" @click="finish">
-      {{ submitting ? 'AI 셰프가 맛보는 중' : '다 만들었어요' }}
+      다 만들었어요
     </UiButton>
   </div>
 </template>
 
 <script setup lang="ts">
-// 레시피 대결 한 판. 시간이 다 되면 적은 데까지 낸다. 채점은 서버의 AI 셰프가 한다 (몇 초 걸린다)
+// 레시피 대결 한 판. 시간이 다 되면 적은 데까지 낸다. 채점은 서버의 AI 셰프가 뒤에서 하고, 끝나면 알림이 온다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton, UiChip, UiInput } from '../ui'
 

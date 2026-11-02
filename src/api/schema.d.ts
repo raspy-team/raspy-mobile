@@ -1217,6 +1217,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/rules/categories/backfill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 분류 안 된 규칙을 AI로 분류 (관리자 전용)
+         * @description apply=false면 미리보기만. true면 저장하고, 받지 않을 규칙은 신고 목록에 올린다
+         */
+        post: operations["run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/reports/{id}/resolve": {
         parameters: {
             query?: never;
@@ -1529,6 +1549,26 @@ export interface paths {
          * @description 카테고리, 검색, 정렬 조건으로 룰 조회
          */
         get: operations["listRules"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rules/category-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 카테고리 값 목록
+         * @description 규칙 만들기·찾기 화면이 쓰는 카테고리 값과 한국어 이름 (docs/direction.md '카테고리')
+         */
+        get: operations["categoryOptions"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2498,6 +2538,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/rules/categories/remaining": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 분류 안 된 규칙 수 (관리자 전용) */
+        get: operations["remaining"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/reports": {
         parameters: {
             query?: never;
@@ -2650,6 +2707,11 @@ export interface components {
             majorCategory?: string;
             minorCategory?: string;
         };
+        CategoryValue: {
+            key: string;
+            label: string;
+            group?: string;
+        };
         FullRuleResponse: {
             /** Format: int64 */
             id: number;
@@ -2689,6 +2751,18 @@ export interface components {
             editRequestId?: number;
             rejectionReason?: string;
             appGameKey?: string;
+            category?: components["schemas"]["GameCategoryView"];
+        };
+        GameCategoryView: {
+            face: components["schemas"]["CategoryValue"];
+            abilities: components["schemas"]["CategoryValue"][];
+            traits: components["schemas"]["CategoryValue"][];
+            luck: components["schemas"]["CategoryValue"];
+            places: components["schemas"]["CategoryValue"][];
+            parties: components["schemas"]["CategoryValue"][];
+            length: components["schemas"]["CategoryValue"];
+            gears: components["schemas"]["CategoryValue"][];
+            sport?: string;
         };
         UserProfileDto: {
             /** Format: int64 */
@@ -2977,6 +3051,21 @@ export interface components {
         RejectEditRequestDto: {
             rejectionReason: string;
         };
+        Item: {
+            /** Format: int64 */
+            ruleId: number;
+            title: string;
+            category?: components["schemas"]["GameCategoryView"];
+            blocked?: string;
+            error?: string;
+        };
+        Result: {
+            items: components["schemas"]["Item"][];
+            /** Format: int64 */
+            remaining: number;
+            applied: boolean;
+            stoppedByLimit: boolean;
+        };
         DailyAccessResponse: {
             isFirstAccess: boolean;
             /** Format: int32 */
@@ -3168,6 +3257,19 @@ export interface components {
             /** Format: int64 */
             playCount: number;
             isCurrentUser: boolean;
+        };
+        CategoryOptions: {
+            faces: components["schemas"]["CategoryValue"][];
+            abilityGroups: components["schemas"]["CategoryValue"][];
+            abilities: components["schemas"]["CategoryValue"][];
+            traits: components["schemas"]["CategoryValue"][];
+            lucks: components["schemas"]["CategoryValue"][];
+            places: components["schemas"]["CategoryValue"][];
+            parties: components["schemas"]["CategoryValue"][];
+            lengths: components["schemas"]["CategoryValue"][];
+            gears: components["schemas"]["CategoryValue"][];
+            /** Format: int32 */
+            maxAbilities: number;
         };
         RankingResponse: {
             /** Format: int32 */
@@ -5388,6 +5490,29 @@ export interface operations {
             };
         };
     };
+    run: {
+        parameters: {
+            query?: {
+                apply?: boolean;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Result"];
+                };
+            };
+        };
+    };
     resolve: {
         parameters: {
             query?: never;
@@ -5817,6 +5942,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FullRuleResponse"][];
+                };
+            };
+        };
+    };
+    categoryOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryOptions"];
                 };
             };
         };
@@ -6947,6 +7092,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["EditRequestDetailResponse"][];
+                };
+            };
+        };
+    };
+    remaining: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": number;
                 };
             };
         };

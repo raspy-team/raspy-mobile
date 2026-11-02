@@ -103,6 +103,33 @@
         </UiList>
       </UiSection>
 
+      <!-- 예전 규칙에 카테고리 붙이기: 미리보기로 AI 답을 보고, 괜찮으면 적용 -->
+      <UiSection title="규칙 분류">
+        <p class="t-caption mb-3">
+          카테고리가 없는 규칙 <span class="t-mono">{{ classify.remaining ?? '-' }}</span>개.
+          미리보기는 저장하지 않아요. 적용하면 받지 않을 규칙은 지우지 않고 위 신고 목록에 올려요.
+        </p>
+        <div class="flex gap-2">
+          <UiButton size="sm" variant="secondary" :loading="classify.busy === 'preview'" :disabled="!classify.remaining" @click="runClassify(false)">10개 미리보기</UiButton>
+          <UiButton size="sm" :loading="classify.busy === 'apply'" :disabled="!classify.remaining" @click="runClassify(true)">10개 적용</UiButton>
+        </div>
+        <UiList v-if="classify.items.length" class="mt-3">
+          <UiListItem
+            v-for="it in classify.items"
+            :key="it.ruleId"
+            :title="it.title"
+            :subtitle="it.blocked || it.error || classifyLine(it.category)"
+            :to="`/rules/${it.ruleId}`"
+            chevron
+          >
+            <template #trailing>
+              <UiBadge :tone="it.blocked || it.error ? 'neutral' : 'primary'">{{ it.blocked ? '거름' : it.error ? '실패' : classify.applied ? '적용' : '미리보기' }}</UiBadge>
+            </template>
+          </UiListItem>
+        </UiList>
+        <p v-if="classify.stopped" class="t-caption mt-2">AI 1분 요청 한도에 걸려 여기까지 했어요. 잠시 뒤 다시 눌러 주세요</p>
+      </UiSection>
+
       <!-- 사람 · 도구 -->
       <UiSection title="도구">
         <UiList>
@@ -197,6 +224,35 @@ async function loadAcquisition() {
 
 watch(acqDays, loadAcquisition)
 
+// 규칙 분류 (카테고리 개편 전 규칙)
+const classify = ref({ remaining: null, items: [], applied: false, stopped: false, busy: '' })
+async function loadClassifyRemaining() {
+  try {
+    classify.value.remaining = (await GET('/api/admin/rules/categories/remaining')).data
+  } catch {
+    classify.value.remaining = null
+  }
+}
+async function runClassify(apply) {
+  classify.value.busy = apply ? 'apply' : 'preview'
+  try {
+    const { data } = await POST('/api/admin/rules/categories/backfill', { query: { apply, limit: 10 } })
+    classify.value = { ...classify.value, items: data.items, applied: data.applied, stopped: data.stoppedByLimit, remaining: data.remaining }
+    if (apply) load()
+  } catch (e) {
+    showToast(e.response?.data?.message || '분류하지 못했어요')
+  } finally {
+    classify.value.busy = ''
+  }
+}
+/** 분류 한 줄: 맞닿는 방식 · 능력 · 성질 · 운 */
+function classifyLine(c) {
+  if (!c) return '분류 못 함'
+  return [c.face.label, c.abilities.map((a) => a.label).join('·'), c.traits.map((t) => t.label).join('·'), c.luck.key === 'NONE' ? '' : `운 ${c.luck.label}`]
+    .filter(Boolean)
+    .join(' · ')
+}
+
 const showUsers = ref(false)
 const loadingUsers = ref(false)
 const users = ref([])
@@ -253,5 +309,6 @@ async function openUsers() {
 onMounted(() => {
   load()
   loadAcquisition()
+  loadClassifyRemaining()
 })
 </script>

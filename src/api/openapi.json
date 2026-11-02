@@ -2284,6 +2284,49 @@
         }
       }
     },
+    "/api/admin/rules/categories/backfill": {
+      "post": {
+        "tags": [
+          "admin-rule-category-controller"
+        ],
+        "summary": "분류 안 된 규칙을 AI로 분류 (관리자 전용)",
+        "description": "apply=false면 미리보기만. true면 저장하고, 받지 않을 규칙은 신고 목록에 올린다",
+        "operationId": "run",
+        "parameters": [
+          {
+            "name": "apply",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/reports/{id}/resolve": {
       "post": {
         "tags": [
@@ -2872,6 +2915,28 @@
                   "items": {
                     "$ref": "#/components/schemas/FullRuleResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/category-options": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "카테고리 값 목록",
+        "description": "규칙 만들기·찾기 화면이 쓰는 카테고리 값과 한국어 이름 (docs/direction.md '카테고리')",
+        "operationId": "categoryOptions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryOptions"
                 }
               }
             }
@@ -4504,6 +4569,28 @@
         }
       }
     },
+    "/api/admin/rules/categories/remaining": {
+      "get": {
+        "tags": [
+          "admin-rule-category-controller"
+        ],
+        "summary": "분류 안 된 규칙 수 (관리자 전용)",
+        "operationId": "remaining",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/reports": {
       "get": {
         "tags": [
@@ -4788,6 +4875,24 @@
           }
         }
       },
+      "CategoryValue": {
+        "required": [
+          "key",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          }
+        }
+      },
       "FullRuleResponse": {
         "required": [
           "createdBy",
@@ -4908,6 +5013,66 @@
             "type": "string"
           },
           "appGameKey": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/GameCategoryView"
+          }
+        }
+      },
+      "GameCategoryView": {
+        "required": [
+          "abilities",
+          "face",
+          "gears",
+          "length",
+          "luck",
+          "parties",
+          "places",
+          "traits"
+        ],
+        "type": "object",
+        "properties": {
+          "face": {
+            "$ref": "#/components/schemas/CategoryValue"
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "traits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "luck": {
+            "$ref": "#/components/schemas/CategoryValue"
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "parties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "length": {
+            "$ref": "#/components/schemas/CategoryValue"
+          },
+          "gears": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "sport": {
             "type": "string"
           }
         }
@@ -5828,6 +5993,58 @@
           }
         }
       },
+      "Item": {
+        "required": [
+          "ruleId",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/GameCategoryView"
+          },
+          "blocked": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "Result": {
+        "required": [
+          "applied",
+          "items",
+          "remaining",
+          "stoppedByLimit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "remaining": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "applied": {
+            "type": "boolean"
+          },
+          "stoppedByLimit": {
+            "type": "boolean"
+          }
+        }
+      },
       "DailyAccessResponse": {
         "required": [
           "accessOrder",
@@ -6417,6 +6634,81 @@
           },
           "isCurrentUser": {
             "type": "boolean"
+          }
+        }
+      },
+      "CategoryOptions": {
+        "required": [
+          "abilities",
+          "abilityGroups",
+          "faces",
+          "gears",
+          "lengths",
+          "lucks",
+          "maxAbilities",
+          "parties",
+          "places",
+          "traits"
+        ],
+        "type": "object",
+        "properties": {
+          "faces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "abilityGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "traits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "lucks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "parties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "lengths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "gears": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryValue"
+            }
+          },
+          "maxAbilities": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

@@ -5,18 +5,23 @@
     :class="bare ? '' : 'rounded-xl bg-surface-3'"
     :style="{ width: size + 'px', height: size + 'px' }"
   >
-    <CategoryIcon :rule="rule || { minorCategory: minor }" :size="size * (bare ? 0.7 : 0.56) + 'px'" />
+    <!-- 앱 게임은 게임 아이콘 (규칙 목록에 앱 게임도 나온다) -->
+    <UiIcon v-if="appIcon" :name="appIcon" :style="{ fontSize: size * (bare ? 0.6 : 0.46) + 'px' }" />
+    <CategoryIcon v-else :rule="rule || { minorCategory: minor }" :size="size * (bare ? 0.7 : 0.56) + 'px'" />
   </span>
 </template>
 
 <script setup>
 // 규칙 종목 그림. 앱 전체가 이것 하나를 쓴다
-import { defineProps } from 'vue'
+import { computed, defineProps } from 'vue'
 import CategoryIcon from './CategoryIcon.vue'
-defineProps({
+import { useAppGameIcons } from '@/utils/appGames'
+const props = defineProps({
   rule: { type: Object, default: null },
   minor: { type: String, default: '' },
   size: { type: Number, default: 44 },
   bare: { type: Boolean, default: false },
 })
+const appIcons = props.rule?.appGameKey ? useAppGameIcons() : null
+const appIcon = computed(() => (props.rule?.appGameKey && appIcons?.value[props.rule.appGameKey]) || '')
 </script>

@@ -42,7 +42,7 @@
           <UiChip v-for="v in VENUES" :key="v.value" :selected="venue === v.value" @click="venue = v.value">{{ v.label }}</UiChip>
         </div>
         <UiInput v-if="isRemote(venue)" v-model="venueDetail" class="mt-3" :placeholder="VENUES.find((v) => v.value === venue)?.placeholder" />
-        <p v-if="isRemote(venue)" class="t-caption mt-2">장소가 없어서 어느 동네에서든 보여요.</p>
+        <p v-if="isRemote(venue)" class="t-caption mt-2">장소가 없어서 동네와 상관없이 전국에서 보여요.</p>
         <div class="mb-8"></div>
 
         <!-- 몇 명이서: 규칙이 팀·여럿을 받을 때만 보인다 -->
@@ -194,13 +194,15 @@ const filteredFriends = computed(() => {
 // ('친구와'는 아는 사람과 바로 잡는 경기라 동네와 상관없다)
 const dong = ref(null) // { name, expired } | null, 불러오기 전 undefined
 const anyoneLine = computed(() => {
+  // 화상·다른 게임은 동네와 상관없이 전국 목록에 올라간다
+  if (isRemote(venue.value)) return '전국 경기 목록에 올려서 신청을 받아요'
   if (dong.value === undefined) return OPTIONS[0].description
   if (!dong.value) return '동네를 인증하면 내 동네 경기 목록에 올릴 수 있어요'
   if (dong.value.expired) return `${dong.value.name} 인증이 지났어요. 다시 인증하면 열 수 있어요`
   return `${dong.value.name} 근처 경기 목록에 올려서 신청을 받아요`
 })
 function createAnyone() {
-  if (dong.value === null || dong.value?.expired) {
+  if (!isRemote(venue.value) && (dong.value === null || dong.value?.expired)) {
     router.push({ path: '/neighborhood', query: { back: route.fullPath, reason: anyoneLine.value } })
     return
   }

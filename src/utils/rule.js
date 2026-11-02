@@ -11,6 +11,8 @@ export function durationText(sec) {
 
 // 한 줄 요약: "11점 · 3세트" / "10분 · 3세트"
 export function winSummary(rule) {
+  // 앱 게임은 점수·세트 대신 (규칙의 시간 칸은 앱이 재는 값이라 '20초 · 단판'처럼 엉뚱하게 보였다)
+  if (rule.appGameKey) return '앱 게임 · 바로 한 판'
   const parts = []
   if (rule.pointsToWin > 0) parts.push(`${rule.pointsToWin}점`)
   else if (rule.duration > 0) parts.push(durationText(rule.duration))

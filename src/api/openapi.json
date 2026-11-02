@@ -1894,6 +1894,38 @@
         }
       }
     },
+    "/api/app-games/{key}/board": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "공유 판 들어가기",
+        "description": "땅따먹기 판처럼 여럿이 며칠 동안 같은 판을 바꾸는 게임. 하던 판이 있으면 그 판",
+        "operationId": "boardJoin",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedBoardState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/{key}/battle": {
       "post": {
         "tags": [
@@ -2286,6 +2318,47 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AppPlayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/board/{gameId}/move": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "boardMove",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DialogSayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedBoardState"
                 }
               }
             }
@@ -4657,6 +4730,37 @@
         }
       }
     },
+    "/api/app-games/board/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "operationId": "board",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedBoardState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/battle/{gameId}": {
       "get": {
         "tags": [
@@ -6097,6 +6201,65 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "SharedBoardState": {
+        "required": [
+          "endsAt",
+          "gameId",
+          "key",
+          "maxPlayers",
+          "meIndex",
+          "players",
+          "serverNow",
+          "status",
+          "view"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppPlayer"
+            }
+          },
+          "meIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "view": {
+            "$ref": "#/components/schemas/TurnView"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextMoveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "myPlace": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -9145,6 +9308,7 @@
           "recordable",
           "ruleId",
           "scoreUnit",
+          "shared",
           "summary",
           "timeLimitSeconds",
           "title"
@@ -9230,6 +9394,9 @@
             "format": "int32"
           },
           "battle": {
+            "type": "boolean"
+          },
+          "shared": {
             "type": "boolean"
           }
         }

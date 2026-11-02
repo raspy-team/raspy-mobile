@@ -345,6 +345,7 @@ function begin(p: Play) {
 
 async function start() {
   // 실시간 게임은 대기실 화면으로
+  if (game.value?.shared) return router.push(`/play/${key.value}/board`)
   if (game.value?.playMode === 'REALTIME') return router.push(game.value.battle ? `/play/${key.value}/battle` : liveRoute(key.value))
   starting.value = true
   startError.value = ''

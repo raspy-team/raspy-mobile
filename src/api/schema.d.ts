@@ -1016,6 +1016,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/board": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 공유 판 들어가기
+         * @description 땅따먹기 판처럼 여럿이 며칠 동안 같은 판을 바꾸는 게임. 하던 판이 있으면 그 판
+         */
+        post: operations["boardJoin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/{key}/battle": {
         parameters: {
             query?: never;
@@ -1211,6 +1231,22 @@ export interface paths {
          * @description 같은 문제로 바로 플레이를 시작한다.
          */
         post: operations["acceptChallenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/board/{gameId}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["boardMove"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2590,6 +2626,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/board/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["board"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/battle/{gameId}": {
         parameters: {
             query?: never;
@@ -3120,6 +3172,26 @@ export interface components {
             matched: boolean;
             /** Format: date-time */
             serverNow: string;
+        };
+        SharedBoardState: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            players: components["schemas"]["AppPlayer"][];
+            /** Format: int32 */
+            meIndex: number;
+            /** Format: int32 */
+            maxPlayers: number;
+            view: components["schemas"]["TurnView"];
+            /** Format: date-time */
+            endsAt: string;
+            /** Format: date-time */
+            nextMoveAt?: string;
+            /** Format: date-time */
+            serverNow: string;
+            /** Format: int32 */
+            myPlace?: number;
         };
         BattleStateResponse: {
             /** Format: int64 */
@@ -4060,6 +4132,7 @@ export interface components {
             /** Format: int32 */
             dailyLimit?: number;
             battle: boolean;
+            shared: boolean;
         };
         AppRecordBoard: {
             key: string;
@@ -5503,6 +5576,28 @@ export interface operations {
             };
         };
     };
+    boardJoin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SharedBoardState"];
+                };
+            };
+        };
+    };
     battleJoin: {
         parameters: {
             query?: never;
@@ -5757,6 +5852,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppPlayResponse"];
+                };
+            };
+        };
+    };
+    boardMove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DialogSayRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SharedBoardState"];
                 };
             };
         };
@@ -7417,6 +7538,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppChallenge"];
+                };
+            };
+        };
+    };
+    board: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SharedBoardState"];
                 };
             };
         };

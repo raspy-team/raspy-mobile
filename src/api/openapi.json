@@ -1691,6 +1691,38 @@
         }
       }
     },
+    "/api/app-games/{key}/realtime": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "실시간 대기실 들어가기",
+        "description": "기다리는 방이 있으면 바로 붙고, 없으면 방을 연다. 이미 하는 중이면 그 판을 준다.",
+        "operationId": "joinRealtime",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/{key}/plays": {
       "post": {
         "tags": [
@@ -1789,6 +1821,148 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AppVoteCard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/timeout": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "시간 초과 알리기",
+        "description": "차례 시간이 정말 지났으면 그 차례인 사람이 진다.",
+        "operationId": "timeout",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/move": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "한 수 두기",
+        "description": "규칙에 맞지 않으면 400과 이유. 시간 안이면 다시 낼 수 있다.",
+        "operationId": "move",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/leave": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "나가기",
+        "description": "대기 중이면 방을 닫고, 하는 중이면 진다.",
+        "operationId": "leave",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/bot": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "봇 부르기",
+        "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.",
+        "operationId": "callBot",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
                 }
               }
             }
@@ -3923,6 +4097,38 @@
         }
       }
     },
+    "/api/app-games/realtime/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "실시간 판 상태",
+        "operationId": "realtime",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/duels/{gameId}": {
       "get": {
         "tags": [
@@ -4886,6 +5092,115 @@
           }
         }
       },
+      "AppPlayer": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          }
+        }
+      },
+      "RealtimeMove": {
+        "required": [
+          "userId",
+          "word"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "word": {
+            "type": "string"
+          }
+        }
+      },
+      "RealtimeState": {
+        "required": [
+          "botAfterSeconds",
+          "gameId",
+          "key",
+          "me",
+          "moves",
+          "serverNow",
+          "startWord",
+          "status",
+          "turnSeconds",
+          "waitingSince"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "me": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "startWord": {
+            "type": "string"
+          },
+          "moves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RealtimeMove"
+            }
+          },
+          "turnUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "turnEndsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "turnSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waitingSince": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "botAfterSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "WIN",
+              "LOSE",
+              "DRAW"
+            ]
+          }
+        }
+      },
       "AppPlayResponse": {
         "required": [
           "deadlineAt",
@@ -5001,6 +5316,17 @@
           }
         }
       },
+      "MoveRequest": {
+        "required": [
+          "word"
+        ],
+        "type": "object",
+        "properties": {
+          "word": {
+            "type": "string"
+          }
+        }
+      },
       "SubmitPlayRequest": {
         "required": [
           "answer"
@@ -5085,25 +5411,6 @@
           "votingEndsAt": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "AppPlayer": {
-        "required": [
-          "nickname",
-          "userId"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "profilePicture": {
-            "type": "string"
           }
         }
       },

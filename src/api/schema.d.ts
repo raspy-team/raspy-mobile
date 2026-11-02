@@ -916,6 +916,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/realtime": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 실시간 대기실 들어가기
+         * @description 기다리는 방이 있으면 바로 붙고, 없으면 방을 연다. 이미 하는 중이면 그 판을 준다.
+         */
+        post: operations["joinRealtime"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/{key}/plays": {
         parameters: {
             query?: never;
@@ -951,6 +971,86 @@ export interface paths {
          * @description 한 사람이 대결 하나에 한 표. 당사자와 봇은 못 한다.
          */
         post: operations["vote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/{gameId}/timeout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 시간 초과 알리기
+         * @description 차례 시간이 정말 지났으면 그 차례인 사람이 진다.
+         */
+        post: operations["timeout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/{gameId}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 한 수 두기
+         * @description 규칙에 맞지 않으면 400과 이유. 시간 안이면 다시 낼 수 있다.
+         */
+        post: operations["move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/{gameId}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 나가기
+         * @description 대기 중이면 방을 닫고, 하는 중이면 진다.
+         */
+        post: operations["leave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/{gameId}/bot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 봇 부르기
+         * @description 방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.
+         */
+        post: operations["callBot"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2190,6 +2290,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/realtime/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 실시간 판 상태 */
+        get: operations["realtime"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/duels/{gameId}": {
         parameters: {
             query?: never;
@@ -2570,6 +2687,41 @@ export interface components {
         CheckUsernameRequest: {
             username: string;
         };
+        AppPlayer: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
+        };
+        RealtimeMove: {
+            /** Format: int64 */
+            userId: number;
+            word: string;
+        };
+        RealtimeState: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            me: components["schemas"]["AppPlayer"];
+            opponent?: components["schemas"]["AppPlayer"];
+            startWord: string;
+            moves: components["schemas"]["RealtimeMove"][];
+            /** Format: int64 */
+            turnUserId?: number;
+            /** Format: date-time */
+            turnEndsAt?: string;
+            /** Format: int32 */
+            turnSeconds: number;
+            /** Format: date-time */
+            serverNow: string;
+            /** Format: date-time */
+            waitingSince: string;
+            /** Format: int32 */
+            botAfterSeconds: number;
+            /** @enum {string} */
+            result?: "WIN" | "LOSE" | "DRAW";
+        };
         AppPlayResponse: {
             /** Format: int64 */
             playId: number;
@@ -2607,6 +2759,9 @@ export interface components {
             playId: number;
             text: string;
         };
+        MoveRequest: {
+            word: string;
+        };
         SubmitPlayRequest: {
             answer: string;
         };
@@ -2636,12 +2791,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             votingEndsAt?: string;
-        };
-        AppPlayer: {
-            /** Format: int64 */
-            userId: number;
-            nickname: string;
-            profilePicture?: string;
         };
         RejectEditRequestDto: {
             rejectionReason: string;
@@ -4667,6 +4816,28 @@ export interface operations {
             };
         };
     };
+    joinRealtime: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
     start: {
         parameters: {
             query?: never;
@@ -4733,6 +4904,98 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppVoteCard"];
+                };
+            };
+        };
+    };
+    timeout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    callBot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
                 };
             };
         };
@@ -6224,6 +6487,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppDuelResponse"][];
+                };
+            };
+        };
+    };
+    realtime: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
                 };
             };
         };

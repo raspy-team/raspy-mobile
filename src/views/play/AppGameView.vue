@@ -260,6 +260,8 @@ function errorMessage(e: unknown, fallback: string) {
 }
 
 async function start() {
+  // 실시간 게임은 대기실 화면으로
+  if (game.value?.playMode === 'REALTIME') return router.push(`/play/${key.value}/live`)
   starting.value = true
   startError.value = ''
   try {

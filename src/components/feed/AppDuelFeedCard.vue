@@ -71,7 +71,7 @@ type Post = components['schemas']['FeedItemResponse']
 const props = defineProps<{ post: Post; highlight?: boolean }>()
 const emit = defineEmits<{ profile: [id?: number]; like: []; comment: []; play: [] }>()
 
-const ICON: Record<string, string> = { typing: 'keyboard', recipe: 'chef-hat', sentence: 'pen' }
+const ICON: Record<string, string> = { typing: 'keyboard', recipe: 'chef-hat', sentence: 'pen', wordchain: 'comment' }
 const duel = computed(() => props.post.appDuel!)
 const voting = computed(() => props.post.type === 'app_vote')
 const card = ref<components['schemas']['AppVoteCard'] | null>(null)

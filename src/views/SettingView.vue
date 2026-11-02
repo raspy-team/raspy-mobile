@@ -143,7 +143,7 @@ async function logout() {
 async function deleteAccount() {
   const ok = await confirmDialog({
     title: '계정을 삭제할까요?',
-    message: '경기 기록·규칙·친구가 모두 지워지고 되돌릴 수 없어요',
+    message: '이메일·닉네임·프로필·동네·친구가 지워지고 되돌릴 수 없어요. 함께 한 경기 기록과 글은 상대를 위해 "탈퇴한 사용자"로 남아요',
     confirmText: '삭제',
     danger: true,
   })

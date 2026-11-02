@@ -73,6 +73,7 @@ export const TERMS = [
 
 4. 개인정보의 보유 및 이용 기간
 - 회원 탈퇴 또는 개인정보 수집 및 이용 목적 달성 시까지 보유 및 이용
+- 탈퇴는 앱의 설정 > 계정 삭제에서 할 수 있습니다. 탈퇴하면 이메일, 소셜 로그인 식별값, 닉네임, 프로필(사진·나이·성별·지역·소개), 인증한 동네, 친구, 알림 토큰을 바로 지웁니다. 다른 회원과 함께 한 경기 기록, 게시물, 채팅은 상대의 기록을 위해 남기되 작성자를 "탈퇴한 사용자"로 바꿔 누구인지 알 수 없게 합니다
 - 단, 관련법령(전자상거래 등 소비자 보호법 등)에 따라 일정 기간 보관 필요 시 그에 따름
 
 5. 개인정보의 제3자 제공
@@ -111,6 +112,7 @@ export const TERMS = [
 - 2026년 11월 2일: 2항에 동네 인증(위치) 항목 추가
 - 2026년 11월 2일: 6항에 Cloudflare(사진 저장)·Google(AI 채점, 기록 인증 영상) 추가
 - 2026년 11월 2일: 2항에 소셜 로그인으로 받는 정보, 6항에 Firebase(푸시 알림) 추가
+- 2026년 11월 2일: 4항에 회원 탈퇴 방법과 지우는 항목 추가
     `,
   },
   {
@@ -155,7 +157,7 @@ Match (matchapp.me) uses Google Sign-In, Kakao Login and Sign in with Apple only
 - Data we receive: your email address and an account identifier. We do not access your contacts, photos, files or any other Google user data.
 - Use: account creation, sign-in and identifying your account in the service. Nothing else.
 - Sharing: we do not sell, rent or share this data, and we do not use it for advertising. It is stored with our processors listed in section 6 only to run the service.
-- Retention and deletion: kept until your account is deleted. To delete your account and its data, email yeonkoh@protonmail.com from the address you signed in with; we delete it without delay.
+- Retention and deletion: kept until you delete your account in the app (Settings > Delete account). Your email, sign-in identifier, nickname and profile are erased immediately; match records shared with other players stay, shown as a deleted user. You can also ask at yeonkoh@protonmail.com.
 - Match's use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.
 `
 

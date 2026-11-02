@@ -26,7 +26,7 @@
         <RuleThumb :rule="rule" :size="64" />
         <div class="min-w-0">
           <h1 class="t-title">{{ rule.ruleTitle }}</h1>
-          <p class="t-caption mt-1">{{ [rule.majorCategory, rule.minorCategory].filter(Boolean).join(' · ') }}</p>
+          <p class="t-caption mt-1">{{ subtitle }}</p>
         </div>
       </div>
 
@@ -69,6 +69,9 @@
           <span class="block t-caption mt-0.5">{{ rule.currentChampion ? '챔피언을 이기면 자리를 가져와요' : '이 규칙으로 처음 이기면 챔피언이 돼요' }}</span>
         </span>
       </div>
+
+      <!-- 카테고리 (분류한 규칙만) -->
+      <RuleCategory v-if="rule.category" :category="rule.category" />
 
       <!-- 규칙 내용 -->
       <div class="pt-8">
@@ -168,6 +171,7 @@ import { copyText } from '../../utils/clipboard'
 import { timeAgo } from '../../utils/format'
 import { ratingText, winSummary } from '../../utils/rule'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
+import RuleCategory from '../../components/rule/RuleCategory.vue'
 
 const REPORT_REASONS = ['욕설·비방', '위험한 규칙', '광고·스팸', '기타']
 
@@ -190,6 +194,12 @@ const suggestText = ref('')
 const suggesting = ref(false)
 
 const rating = computed(() => (rule.value ? ratingText(rule.value) : ''))
+// 이름 아래 한 줄: 분류한 규칙은 바탕 종목 · 능력, 아직이면 예전 종목 분류
+const subtitle = computed(() => {
+  const r = rule.value
+  const parts = r?.category ? [r.category.sport, ...r.category.abilities.map((a) => a.label)] : [r?.majorCategory, r?.minorCategory]
+  return parts.filter(Boolean).join(' · ')
+})
 const isMine = computed(() => rule.value?.createdBy?.id === myId.value)
 
 async function share() {

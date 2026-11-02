@@ -45,7 +45,7 @@ import { computed, defineProps } from 'vue'
 import {
   ArrowDown, ArrowLeft, ArrowRight, Award, Ban, Bell, BookOpen, Calendar, CalendarCheck, Camera, ChartBar,
   ChartLine, ChartNoAxesColumn, Check, ChefHat, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CircleAlert, CircleHelp,
-  CircleX, ClipboardCheck, Clock, Crown, Dices, Download, Ellipsis, Eye, EyeOff, FileText, Flag, FlagTriangleRight,
+  CircleX, ClipboardCheck, Clock, Coins, Crown, Dices, Download, Ellipsis, Eye, EyeOff, FileText, Flag, FlagTriangleRight,
   Folder, FolderOpen, Gavel, Hand, Heading, Heart, Hourglass, House, Keyboard, Images, Inbox, Info, Instagram, Layers,
   LayoutGrid, List, ListOrdered, LogOut, Mail, MapPin, MessageCircle, Pencil, Play, Plus, RotateCcw, RotateCw,
   Search, Send, Settings, Share, ShieldHalf, Square, SquarePen, Star, Target, Timer, TriangleAlert, Trophy, Trash2,
@@ -65,7 +65,7 @@ const ICONS = {
   bullseye: Target, calendar: Calendar, 'calendar-check': CalendarCheck, camera: Camera,
   'chart-bar': ChartBar, 'chart-line': ChartLine, 'chart-simple': ChartNoAxesColumn,
   check: Check, 'chef-hat': ChefHat, 'chevron-down': ChevronDown, 'chevron-left': ChevronLeft, 'chevron-right': ChevronRight, 'chevron-up': ChevronUp,
-  'circle-question': CircleHelp, 'circle-xmark': CircleX, 'clipboard-check': ClipboardCheck, clock: Clock,
+  'circle-question': CircleHelp, 'circle-xmark': CircleX, 'clipboard-check': ClipboardCheck, clock: Clock, coins: Coins,
   comment: MessageCircle, crown: Crown, dice: Dices, download: Download, ellipsis: Ellipsis, envelope: Mail,
   'exclamation-circle': CircleAlert, eye: Eye, 'eye-slash': EyeOff, 'file-lines': FileText,
   flag: Flag, 'flag-checkered': FlagTriangleRight, folder: Folder, 'folder-open': FolderOpen,

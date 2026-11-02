@@ -164,11 +164,16 @@ function timeAgo(isoString) {
   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
+// 댓글 글자를 HTML로 그리기 전에 먼저 이스케이프한다. 예전엔 그대로 v-html이라 댓글에 심은 스크립트가 보는 사람의 로그인 토큰을 가져갈 수 있었다 (11/3 밤 리뷰)
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+}
 function autoLink(text) {
   if (!text) return ''
-  return text.replace(
-    /((http|https):\/\/[^\s]+)/g,
-    '<a class="underline underline-offset-2" href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+  // 이스케이프한 뒤 http(s) 주소만 링크로. 주소 안의 따옴표·꺾쇠는 이미 바뀌어 속성을 깨지 못한다
+  return escapeHtml(text).replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer nofollow" class="text-fg underline underline-offset-2 break-all">$1</a>',
   )
 }
 function emitLike(commentId) {

@@ -98,13 +98,15 @@ async function submit() {
       }
     }
     let token
+    let tooMany = false
     try {
       token = (await api.post('/api/auth/login', { email: id, password: password.value })).data?.token
-    } catch {
+    } catch (err) {
       token = null
+      tooMany = err.response?.status === 429 // 15분에 8번 넘게 틀림 (서버 LoginThrottle)
     }
     if (!token) {
-      submitError.value = '아이디나 비밀번호가 맞지 않아요'
+      submitError.value = tooMany ? '로그인 시도가 너무 많아요. 15분 뒤 다시 해 주세요' : '아이디나 비밀번호가 맞지 않아요'
       return
     }
     localStorage.setItem('raspy_access_token2', token)

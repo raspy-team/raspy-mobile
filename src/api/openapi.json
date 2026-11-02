@@ -844,6 +844,39 @@
         }
       }
     },
+    "/api/games/{id}/cancel": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "경기 취소",
+        "description": "시작은 했지만 점수가 하나도 없을 때(상대가 안 왔을 때) 취소한다. 기록·레이팅에 남지 않는다.",
+        "operationId": "cancelLive",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/review": {
       "post": {
         "tags": [
@@ -4142,11 +4175,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {

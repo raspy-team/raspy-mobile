@@ -127,12 +127,15 @@ export const socket = {
       })
     }
   },
+  /** 보냈으면 true. 연결이 끊겨 있으면 보내지 못하고 false (예전엔 조용히 버렸다) */
   sendGameEvent(roomId, payload) {
     if (stompClient && stompClient.connected) {
       stompClient.publish({
         destination: `/app/score/${roomId}`,
         body: JSON.stringify(payload),
       })
+      return true
     }
+    return false
   },
 }

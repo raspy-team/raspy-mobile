@@ -66,7 +66,10 @@
         </UiButton>
       </div>
       <div class="flex gap-2">
-        <UiButton variant="ghost" class="flex-1" icon="fas fa-rotate-left" @click="openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터')">
+        <UiButton v-if="nothingScored" variant="ghost" class="flex-1" icon="fas fa-xmark" @click="openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소')">
+          경기 취소
+        </UiButton>
+        <UiButton v-else variant="ghost" class="flex-1" icon="fas fa-rotate-left" @click="openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터')">
           처음부터
         </UiButton>
         <UiButton variant="danger" class="flex-1" icon="fas fa-stop" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${user2.nickname}님이 확인하면 기록돼요.`, '경기 끝내기')">
@@ -95,14 +98,17 @@
         <UiButton v-if="currentSet === 1 && !currentScore1 && !currentScore2" variant="ghost" class="mt-2" @click="showResultEntry = true">
           점수판 없이 결과만 입력
         </UiButton>
+        <UiButton v-if="nothingScored" variant="ghost" class="mt-1 text-fg-muted" @click="openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소')">
+          경기 취소
+        </UiButton>
       </template>
     </div>
 
     <!-- 연결이 끊겼을 때 -->
-    <div v-if="socketStatus === 'connecting'" class="fixed inset-x-0 top-0 z-toast pt-safe">
+    <div v-if="socketStatus !== 'connected'" class="fixed inset-x-0 top-0 z-toast pt-safe">
       <div class="mx-4 mt-2 rounded-xl bg-surface-2 border border-line-strong px-4 py-3 flex items-center gap-3 text-sm">
         <UiSpinner size="sm" class="text-fg-muted" label="다시 연결하는 중" />
-        다시 연결하는 중이에요. 점수는 연결되면 맞춰져요
+        연결이 끊겼어요. 다시 연결되면 두 폰의 점수를 서버 기록으로 맞춰요. 그동안 점수는 잠가 둘게요
       </div>
     </div>
 
@@ -206,7 +212,10 @@ const sides = computed(() => [
 ])
 // 세트 승리 표시 점 개수: 과반 세트
 const setDots = computed(() => Math.floor((game.rule?.setsToWin || 1) / 2) + 1)
-const scoreLocked = computed(() => isSetOver.value || isGameOver.value || isCountingDown.value || showStartButton.value)
+// 연결이 끊긴 동안에도 막는다: 누른 점수가 서버로 가지 않고 사라지기 때문
+const scoreLocked = computed(() => isSetOver.value || isGameOver.value || isCountingDown.value || showStartButton.value || socketStatus.value !== 'connected')
+// 아직 아무 점수도 없다: 이때만 경기를 취소할 수 있다 (상대가 안 왔을 때). 점수가 있으면 '경기 끝내기'로
+const nothingScored = computed(() => currentSet.value === 1 && !currentScore1.value && !currentScore2.value && !logs.value.some((l) => l.type === 'SCORE'))
 const isOvertime = computed(() => game.limitSeconds !== -1 && game.limitSeconds != null && elapsedSeconds.value >= game.limitSeconds)
 
 // 서버가 정한 시각(startAtMs, 이 폰 시계 기준)에 세트를 시작한다. 그때까지는 두 폰이 같은 카운트다운을 보여준다
@@ -383,6 +392,7 @@ function goBack() {
 
 function handleVisibilityChange() {
   if (document.visibilityState === 'visible') {
+    keepScreenOn() // 다른 앱에 다녀오면 화면 켜짐 유지가 풀린다
     // 페이지가 다시 활성화될 때 소켓 연결을 시도합니다.
     // socket.connect 내부 로직에 의해 이미 연결된 상태라면 아무 작업도 수행하지 않습니다.
     socket.connect(chatRoomId.value)
@@ -539,8 +549,12 @@ onMounted(async () => {
   socket.onConnecting(() => {
     socketStatus.value = 'connecting'
   })
+  let everConnected = false
   socket.onConnected(() => {
     socketStatus.value = 'connected'
+    // 끊긴 사이 상대 폰에서 오른 점수를 놓쳤을 수 있다. 다시 연결되면 서버 기록으로 화면을 다시 만든다
+    if (everConnected) router.replace({ path: route.path, query: { ...route.query, reload: Date.now() } })
+    everConnected = true
   })
   socket.onDisconnected(() => {
     socketStatus.value = 'disconnected'
@@ -577,6 +591,9 @@ onMounted(async () => {
       // (전엔 점수판에 그대로 남아, 뒤로 가면 확인·평가 기회 없이 나가게 됐다)
       clearInterval(timerRef.value)
       setTimeout(goToResult, 600)
+    } else if (payload.type === 'CANCELED') {
+      showToast(`${payload.nickname}님이 경기를 취소했어요`)
+      router.replace('/game')
     } else if (payload.type === 'RESET') {
       router.replace({
         path: route.fullPath,
@@ -588,16 +605,43 @@ onMounted(async () => {
   socket.connect(chatRoomId.value)
 
   document.addEventListener('visibilitychange', handleVisibilityChange)
+  keepScreenOn()
 })
 
 function socket_sendScore(userIndex, scoreDelta) {
-  haptic('tap')
-  socket.sendGameEvent(chatRoomId.value, {
+  const sent = socket.sendGameEvent(chatRoomId.value, {
     type: 'SCORE',
     userId: userIndex === 1 ? user1.value.id : user2.value.id,
     setIndex: currentSet.value,
     scoreDelta: scoreDelta,
   })
+  if (sent) return haptic('tap')
+  haptic('error')
+  showToast('연결이 끊겨 점수가 올라가지 않았어요. 연결되면 다시 눌러 주세요')
+}
+
+// 시작은 했지만 점수가 하나도 없을 때: 상대가 안 왔거나 못 하게 됐다. 기록에 남지 않는다
+async function cancelGame() {
+  try {
+    await api.post(`/api/games/${gameId}/cancel`)
+    showToast('경기를 취소했어요')
+    router.replace('/game')
+  } catch (e) {
+    showToast(e.response?.data?.message || '취소하지 못했어요')
+  }
+}
+
+// 경기 중 화면이 꺼지지 않게 (점수를 누르는 사이 폰이 잠기면 경기 흐름이 끊긴다)
+let wakeLock = null
+async function keepScreenOn() {
+  try {
+    if (document.visibilityState === 'visible' && !wakeLock) {
+      wakeLock = await navigator.wakeLock?.request('screen')
+      wakeLock?.addEventListener('release', () => (wakeLock = null))
+    }
+  } catch {
+    // 지원하지 않는 기기·저전력 모드는 넘어간다
+  }
 }
 
 function socket_startSet() {
@@ -773,6 +817,7 @@ onUnmounted(() => {
   clearInterval(timerRef.value)
   clearInterval(countdownTimer)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+  wakeLock?.release().catch(() => {})
 
   // 안드로이드 네이티브 카메라 콜백 정리
   if (typeof window !== 'undefined') {

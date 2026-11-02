@@ -472,6 +472,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 경기 취소
+         * @description 시작은 했지만 점수가 하나도 없을 때(상대가 안 왔을 때) 취소한다. 기록·레이팅에 남지 않는다.
+         */
+        post: operations["cancelLive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/review": {
         parameters: {
             query?: never;
@@ -4267,6 +4287,28 @@ export interface operations {
         };
     };
     confirmResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    cancelLive: {
         parameters: {
             query?: never;
             header?: never;

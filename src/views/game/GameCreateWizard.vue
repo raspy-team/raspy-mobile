@@ -10,9 +10,11 @@
         </span>
         <h1 class="t-title mt-5">경기가 열렸어요</h1>
         <p class="t-caption mt-2">
-          {{ friend ? `${friend.nickname}님에게 알렸어요. 장소와 시간은 내 경기에서 함께 정해요.` : '신청이 오면 알려드려요. 내 경기에서 승인하고 장소와 시간을 정해요.' }}
+          {{ friend ? `${friend.nickname}님에게 알렸어요. 장소와 시간은 내 경기에서 함께 정해요.` : '열린 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
-        <UiButton block size="lg" class="mt-10" to="/game">내 경기 보기</UiButton>
+        <!-- 아무나로 열었으면, 기다리기만 하기보다 아는 사람을 먼저 부르게 -->
+        <UiButton v-if="!friend && createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">링크 보내서 상대 부르기</UiButton>
+        <UiButton block size="lg" :variant="!friend && createdId ? 'ghost' : 'primary'" :class="!friend && createdId ? 'mt-2' : 'mt-10'" to="/game">내 경기 보기</UiButton>
       </section>
 
       <!-- 누구와 -->
@@ -26,8 +28,14 @@
           <UiButton variant="ghost" size="sm" @click="router.push('/rules?fromGameCreate=true')">바꾸기</UiButton>
         </UiCard>
 
+        <!-- 언제쯤: 열린 경기를 보는 사람이 신청할지 정하는 데 가장 필요한 정보. 정확한 시간은 상대와 함께 -->
+        <h1 class="t-title">언제쯤 할까요?</h1>
+        <div class="flex flex-wrap gap-2 mt-3 mb-8">
+          <UiChip v-for="w in WHEN" :key="w.label" :selected="when === w.label" @click="when = w.label">{{ w.label }}</UiChip>
+        </div>
+
         <h1 class="t-title">누구와 겨룰까요?</h1>
-        <p class="t-caption mt-1 mb-5">장소와 시간은 상대가 정해진 뒤 함께 정해요.</p>
+        <p class="t-caption mt-1 mb-5">정확한 장소와 시간은 상대가 정해진 뒤 함께 정해요.</p>
 
         <div class="space-y-2">
           <button
@@ -88,8 +96,9 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
 import { haptic } from '../../utils/haptics'
+import { shareLink } from '../../utils/share'
 import {
-  UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
+  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
 } from '../../components/ui'
 
 const route = useRoute()
@@ -101,7 +110,43 @@ const OPTIONS = [
   { value: 'friend', icon: 'user-check', title: '친구와', description: '친구 한 명과 바로 경기를 잡아요' },
 ]
 
+/** 로컬 시각 문자열 (서버는 Asia/Seoul LocalDateTime) */
+function at(d) {
+  const p = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:00`
+}
+function dayAt(addDays, hour) {
+  const d = new Date()
+  d.setDate(d.getDate() + addDays)
+  d.setHours(hour, 0, 0, 0)
+  return d
+}
+const now = new Date()
+const toSaturday = (6 - now.getDay() + 7) % 7 // 오늘이 토요일이면 0
+const WHEN = [
+  ...(now.getHours() < 18 ? [{ label: '오늘 저녁', date: () => at(dayAt(0, 19)) }] : []),
+  { label: '내일 저녁', date: () => at(dayAt(1, 19)) },
+  ...(now.getDay() === 0 ? [] : [{ label: '이번 주말', date: () => at(dayAt(toSaturday, 14)) }]),
+  { label: '나중에 정하기', date: () => null },
+]
+const when = ref('나중에 정하기')
+
 const ruleId = Number(route.query.ruleId)
+const createdId = ref(null)
+const sharing = ref(false)
+
+async function shareGame() {
+  sharing.value = true
+  try {
+    const { data } = await api.post('/api/invite', null, { params: { gameId: createdId.value } })
+    const msg = await shareLink(data.url, `${rule.value?.ruleTitle || '경기'} 한 판 할래요? 매치에서 신청해 주세요`)
+    if (msg) showToast(msg)
+  } catch {
+    showToast('링크를 만들지 못했어요')
+  } finally {
+    sharing.value = false
+  }
+}
 const rule = ref(null)
 const friend = ref(null)
 const creating = ref(false)
@@ -122,8 +167,10 @@ async function create(target) {
   creating.value = true
   friend.value = target
   try {
-    const payload = { referencedRuleId: ruleId, friendId: target?.id ?? null }
-    await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
+    const matchDate = WHEN.find((w) => w.label === when.value)?.date() ?? null
+    const payload = { referencedRuleId: ruleId, friendId: target?.id ?? null, matchDate }
+    const { data } = await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
+    createdId.value = data
     friendsOpen.value = false
     created.value = true
     haptic('success')

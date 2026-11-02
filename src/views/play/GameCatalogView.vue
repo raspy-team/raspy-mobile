@@ -17,6 +17,8 @@
       </div>
 
       <template v-else>
+        <!-- 지금 기다리는 사람: 한 번에 붙기 (사람이 적을 때 흩어지지 않게) -->
+        <WaitingNow v-if="!query && !structure" class="mt-6" />
         <!-- 최근에 한 게임: 찾지 않고 바로 다시 -->
         <UiSection v-if="recent.length && !query && !structure" title="최근에 한 게임" class="mt-6">
           <div class="space-y-2">
@@ -42,6 +44,7 @@ import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import { STRUCTURES } from '@/utils/appGame'
 import AppGameRow from '../../components/appgame/AppGameRow.vue'
+import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import { UiChip, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type AppGameSummary = components['schemas']['AppGameSummary']

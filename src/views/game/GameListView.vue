@@ -22,10 +22,12 @@
     <NeighborhoodBar class="mb-3" @changed="fetchGames" />
 
     <!-- 주 행동은 경기 만들기 하나. 화면에서 가장 밝은 덩어리가 내용보다 앞서지 않게 작게 -->
-    <div class="flex items-center gap-1">
+    <!-- 버튼이 늘어 한 줄에 다 안 들어가면 옆으로 민다 (줄바꿈하면 '동호/회'처럼 깨진다) -->
+    <div class="flex items-center gap-1 -mx-4 px-4 overflow-x-auto no-scrollbar [&>*]:flex-shrink-0 [&>*]:whitespace-nowrap">
       <UiButton size="sm" icon="plus" to="/create-game">경기 만들기</UiButton>
-      <UiButton size="sm" variant="ghost" to="/rules">규칙 둘러보기</UiButton>
+      <UiButton size="sm" variant="ghost" to="/rules">규칙</UiButton>
       <UiButton size="sm" variant="ghost" to="/match">맞붙기 카드</UiButton>
+      <UiButton size="sm" variant="ghost" to="/clubs">동호회</UiButton>
     </div>
 
     <!-- 지금 상황으로 찾기 (docs/direction.md '찾기': 홈에는 자주 쓰는 조합을 줄로) -->
@@ -33,6 +35,8 @@
       <UiChip v-for="s in SITUATIONS" :key="s.label" class="flex-shrink-0 whitespace-nowrap" :icon="s.icon" @click="router.push({ path: '/rules', query: s.query })">{{ s.label }}</UiChip>
     </div>
 
+    <!-- 누가 지금 앱 게임에서 상대를 기다리면 홈에서 바로 붙는다 (없으면 안 보인다) -->
+    <WaitingNow class="mt-6" />
     <AppGameStrip class="mt-6" />
 
     <UiSection title="열린 경기" class="mt-6">
@@ -79,6 +83,7 @@
           @rule="ruleGame = game"
           @profile="router.push('/profile/' + game.ownerId)"
           @apply="(team) => apply(game, team)"
+          @pair="pairGame = game"
           @cancel="cancelApply(game)"
           @challengers="challengersGame = game"
           @more="menuGame = game"
@@ -86,6 +91,9 @@
       </div>
     </UiSection>
   </main>
+
+  <!-- 친구와 둘이 신청 (팀 경기) -->
+  <PairApplySheet :game="pairGame" @close="pairGame = null" @done="(g) => { g.isAppliedByMe = true; pairGame = null }" />
 
   <!-- 신청자 -->
   <UiSheet :model-value="!!challengersGame" :title="`신청자 ${challengersGame?.challengers?.length || 0}명`" @update:model-value="challengersGame = null">
@@ -147,7 +155,9 @@ import { getMyId } from '@/utils/me'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
+import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import AppGameStrip from '../../components/appgame/AppGameStrip.vue'
+import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import Comment from '../GameCommentView.vue'
 import {
@@ -179,6 +189,7 @@ const games = ref([])
 const loading = ref(true)
 const myId = ref(null)
 const busyId = ref(null)
+const pairGame = ref(null)
 const commentId = ref(0)
 const ruleGame = ref(null)
 const challengersGame = ref(null)

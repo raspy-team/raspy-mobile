@@ -51,6 +51,22 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <QuizSetPlay
+          v-else-if="key === 'daily-chosung'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
+        <WritePlay
+          v-else-if="WRITING[key]"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          :guide="WRITING[key].guide"
+          :placeholder="WRITING[key].placeholder"
+          @submit="submit"
+        />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
       </template>
 
@@ -123,6 +139,8 @@
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : '알림' }}</p>
           <p class="t-body mt-1">{{ result.myFeedback }}</p>
         </UiCard>
+        <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
+        <UiButton v-if="key === 'daily-chosung' && result.myFeedback" block variant="secondary" icon="share" class="mt-3" @click="shareDaily(result.myFeedback)">오늘 결과 공유</UiButton>
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 문장</p>
@@ -289,6 +307,16 @@ import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
+import { shareLink } from '@/utils/share'
+import WritePlay from '../../components/appgame/WritePlay.vue'
+import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
+
+// 글로 겨루는 게임: 같은 화면(WritePlay)에 안내만 다르게
+const WRITING: Record<string, { guide: string; placeholder: string }> = {
+  excuse: { guide: '이 상황에서 빠져나갈 한 줄 변명', placeholder: '그럴듯하고 웃긴 변명' },
+  balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
+  trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
+}
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
 import SquatPlay from '../../components/appgame/SquatPlay.vue'
 import { fixtureOf, kickoffLabel, predictionLine } from '@/utils/predict'
@@ -451,6 +479,14 @@ async function sendChallenge(gameId: number) {
   }
 }
 
+/** 오늘의 초성 결과: "4/5 맞힘 · 38초" → 칸 그림과 함께. 같은 날이면 친구도 같은 문제를 푼다 */
+async function shareDaily(feedback: string) {
+  const right = Number(feedback.match(/(\d)\/5/)?.[1] ?? 0)
+  const boxes = '■'.repeat(right) + '□'.repeat(5 - right)
+  const msg = await shareLink(`${window.location.origin}/play/daily-chosung`, `오늘의 초성 ${feedback}\n${boxes}\n같은 문제로 붙어 봐요`)
+  if (msg) showToast(msg)
+}
+
 /** 투표 공유 링크: 친구에게 보내 표를 받는다 */
 async function shareVote(gameId: number) {
   showToast((await copyText(`${window.location.origin}/vote/${gameId}`)) ? '투표 링크를 복사했어요' : '복사하지 못했어요')
@@ -458,7 +494,7 @@ async function shareVote(gameId: number) {
 
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
 // AI가 채점하는 게임마다 심판 이름
-const judgeName = computed(() => (key.value === 'recipe' ? 'AI 셰프' : 'AI 심판'))
+const judgeName = computed(() => (key.value === 'recipe' ? 'AI 셰프' : key.value === 'trial' ? 'AI 판사' : 'AI 심판'))
 
 function dish(answer: string) {
   const [name, ...rest] = answer.split('\n')

@@ -770,6 +770,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/live/watch-off": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 구경 끄기·켜기
+         * @description 선수만. 끄면 선수 말고는 못 본다
+         */
+        post: operations["watchOff"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live/react": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 반응 보내기
+         * @description 이모지 한 개. 저장하지 않고 보는 사람들에게 흘려보낸다 (한 사람 1초에 한 번)
+         */
+        post: operations["react"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live/cheer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 응원하기
+         * @description 어느 편인지 한 번. 다른 편을 누르면 바뀐다. 선수는 못 한다
+         */
+        post: operations["cheer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/like": {
         parameters: {
             query?: never;
@@ -824,6 +884,26 @@ export interface paths {
          * @description 현재 로그인한 사용자가 해당 게임에 참가 신청을 보냅니다.
          */
         post: operations["applyToJoin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/apply-pair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 친구와 둘이 신청
+         * @description 팀 경기에서 친구와 같은 팀에 함께 신청한다. 주최자가 한 사람을 받으면 짝도 함께 받는다
+         */
+        post: operations["applyAsPair"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1024,6 +1104,66 @@ export interface paths {
          * @description 해당 댓글에 싫어요 추가
          */
         post: operations["dislikeComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동호회 만들기
+         * @description 만든 사람의 지금 동네로 만든다. 만든 사람이 첫 멤버
+         */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/{id}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동호회 나가기
+         * @description 만든 사람이 나가면 가장 오래된 멤버가 이어받는다. 혼자였으면 동호회가 없어진다
+         */
+        post: operations["leave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동호회 들어가기
+         * @description 초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로
+         */
+        post: operations["join_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1344,7 +1484,7 @@ export interface paths {
          * 나가기
          * @description 대기 중이면 방을 닫고, 하는 중이면 진다.
          */
-        post: operations["leave"];
+        post: operations["leave_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1364,7 +1504,27 @@ export interface paths {
          * 응원하기
          * @description 하는 중인 판에서 한쪽(0·1). 한 사람 한 표, 다시 누르면 바꾼다. 선수는 못 한다
          */
-        post: operations["cheer"];
+        post: operations["cheer_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/{gameId}/call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 친구 부르기
+         * @description 내 대기실에 수락한 친구들을 푸시로 부른다. 대기실마다 한 번
+         */
+        post: operations["callFriends"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2384,6 +2544,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 경기 중계 보기
+         * @description 만나서 하는 경기의 지금 점수·세트·응원 수. 바뀌면 /topic/game-live/{gameId}로 알린다
+         */
+        get: operations["live"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/like/users": {
         parameters: {
             query?: never;
@@ -2712,6 +2892,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clubs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 동호회 보기
+         * @description 멤버·동호회 경기. 초대 코드는 멤버에게만
+         */
+        get: operations["detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/nearby": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 우리 동네 동호회
+         * @description 내 동네 범위에서 아직 안 든 동호회, 멤버 많은 순
+         */
+        get: operations["nearby"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 내 동호회 */
+        get: operations["mine_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/invite/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 초대 링크로 동호회 보기
+         * @description 로그인 전에도 볼 수 있다 (가입하고 돌아와 들어간다)
+         */
+        get: operations["byInvite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat-room/{roomId}/chat-messages": {
         parameters: {
             query?: never;
@@ -2978,6 +3235,26 @@ export interface paths {
          * @description 말 배틀처럼 보는 사람이 응원해 승패를 정하는 실시간 게임. 선수가 아니어도 본다
          */
         get: operations["watch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/lobbies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 지금 기다리는 사람
+         * @description 실시간 게임마다 지금 상대를 기다리는 방. 누르면 그 게임에 들어가 바로 붙는다. 바뀌면 /topic/lobbies로 알린다
+         */
+        get: operations["lobbies"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3566,6 +3843,46 @@ export interface components {
             /** Format: int32 */
             uploadedCount?: number;
         };
+        WatchOffRequest: {
+            off: boolean;
+        };
+        LiveGame: {
+            /** Format: int64 */
+            gameId: number;
+            title: string;
+            status: string;
+            /** Format: int32 */
+            setIndex: number;
+            sides: components["schemas"]["LiveSide"][];
+            /** Format: int32 */
+            myCheer?: number;
+            isPlayer: boolean;
+            watchOff: boolean;
+        };
+        LivePlayer: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
+        };
+        LiveSide: {
+            /** Format: int32 */
+            side: number;
+            players: components["schemas"]["LivePlayer"][];
+            /** Format: int32 */
+            score: number;
+            /** Format: int32 */
+            setsWon: number;
+            /** Format: int32 */
+            cheers: number;
+        };
+        ReactRequest: {
+            emoji: string;
+        };
+        CheerRequest: {
+            /** Format: int32 */
+            side: number;
+        };
         GameLikeToggleResponse: {
             isLiked: boolean;
             /** Format: int64 */
@@ -3591,6 +3908,8 @@ export interface components {
             maxPlayers?: number;
             /** @enum {string} */
             venue: "IN_PERSON" | "VIDEO" | "ONLINE";
+            /** Format: int64 */
+            clubId?: number;
         };
         CancelGameRequest: {
             /** Format: int64 */
@@ -3601,6 +3920,49 @@ export interface components {
             gameId: number;
             /** Format: int64 */
             userId: number;
+        };
+        CreateClubRequest: {
+            name: string;
+            intro?: string;
+        };
+        ClubDetail: {
+            club: components["schemas"]["ClubSummary"];
+            members: components["schemas"]["ClubMember"][];
+            games: components["schemas"]["ClubGame"][];
+            inviteCode?: string;
+        };
+        ClubGame: {
+            /** Format: int64 */
+            gameId: number;
+            title: string;
+            status: string;
+            /** Format: date-time */
+            matchDate?: string;
+            placeRoad?: string;
+            hostNickname: string;
+        };
+        ClubMember: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
+            isOwner: boolean;
+        };
+        ClubSummary: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            intro?: string;
+            dongName?: string;
+            /** Format: int32 */
+            memberCount: number;
+            isMember: boolean;
+            isOwner: boolean;
+        };
+        JoinClubRequest: {
+            /** Format: int64 */
+            clubId?: number;
+            code?: string;
         };
         DmRoomDto: {
             /** Format: int64 */
@@ -3793,10 +4155,6 @@ export interface components {
         MoveRequest: {
             word: string;
         };
-        CheerRequest: {
-            /** Format: int32 */
-            side: number;
-        };
         WatchState: {
             /** Format: int64 */
             gameId: number;
@@ -3818,6 +4176,10 @@ export interface components {
             /** Format: int64 */
             winnerId?: number;
             topic: string;
+        };
+        CallResult: {
+            /** Format: int32 */
+            called: number;
         };
         SubmitPlayRequest: {
             answer: string;
@@ -4215,7 +4577,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -4358,6 +4720,8 @@ export interface components {
             /** Format: double */
             temperature?: number;
             trustLabel?: string;
+            /** Format: int64 */
+            partnerId?: number;
         };
         GameResultResponse: {
             gameSummary: components["schemas"]["GameSummaryResponse"];
@@ -4853,6 +5217,24 @@ export interface components {
             player: components["schemas"]["AppPlayer"];
             /** Format: double */
             score: number;
+        };
+        LobbyCard: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            title: string;
+            icon: string;
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            /** Format: int32 */
+            waitedSeconds: number;
+        };
+        LobbyList: {
+            lobbies: components["schemas"]["LobbyCard"][];
+            goldenHour: boolean;
+            /** Format: int32 */
+            goldenHourStart: number;
         };
         AdminUserResponse: {
             /** Format: int64 */
@@ -5952,6 +6334,84 @@ export interface operations {
             };
         };
     };
+    watchOff: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WatchOffRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveGame"];
+                };
+            };
+        };
+    };
+    react: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReactRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    cheer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveGame"];
+                };
+            };
+        };
+    };
     getGameLikeStatus: {
         parameters: {
             query?: never;
@@ -6051,6 +6511,31 @@ export interface operations {
             query?: {
                 /** @description 팀 경기에서 들어갈 팀 (0·1). 다른 경기는 비운다 */
                 team?: number;
+            };
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    applyAsPair: {
+        parameters: {
+            query: {
+                team: number;
+                partnerId: number;
             };
             header?: never;
             path: {
@@ -6282,6 +6767,76 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateClubRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    join_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinClubRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
             };
         };
     };
@@ -6709,7 +7264,7 @@ export interface operations {
             };
         };
     };
-    leave: {
+    leave_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6731,7 +7286,7 @@ export interface operations {
             };
         };
     };
-    cheer: {
+    cheer_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6753,6 +7308,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    callFriends: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CallResult"];
                 };
             };
         };
@@ -8011,6 +8588,28 @@ export interface operations {
             };
         };
     };
+    live: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveGame"];
+                };
+            };
+        };
+    };
     getGameLikers: {
         parameters: {
             query?: never;
@@ -8387,6 +8986,90 @@ export interface operations {
             };
         };
     };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    nearby: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubSummary"][];
+                };
+            };
+        };
+    };
+    mine_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubSummary"][];
+                };
+            };
+        };
+    };
+    byInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubSummary"];
+                };
+            };
+        };
+    };
     getChatMessages: {
         parameters: {
             query?: never;
@@ -8704,6 +9387,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    lobbies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LobbyList"];
                 };
             };
         };

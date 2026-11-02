@@ -1497,6 +1497,135 @@
         }
       }
     },
+    "/api/games/{gameId}/live/watch-off": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "구경 끄기·켜기",
+        "description": "선수만. 끄면 선수 말고는 못 본다",
+        "operationId": "watchOff",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchOffRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveGame"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live/react": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "반응 보내기",
+        "description": "이모지 한 개. 저장하지 않고 보는 사람들에게 흘려보낸다 (한 사람 1초에 한 번)",
+        "operationId": "react",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live/cheer": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "응원하기",
+        "description": "어느 편인지 한 번. 다른 편을 누르면 바뀐다. 선수는 못 한다",
+        "operationId": "cheer",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveGame"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/like": {
       "get": {
         "tags": [
@@ -1661,6 +1790,57 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/apply-pair": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "친구와 둘이 신청",
+        "description": "팀 경기에서 친구와 같은 팀에 함께 신청한다. 주최자가 한 사람을 받으면 짝도 함께 받는다",
+        "operationId": "applyAsPair",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "team",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "partnerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
@@ -1945,6 +2125,103 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/clubs": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 만들기",
+        "description": "만든 사람의 지금 동네로 만든다. 만든 사람이 첫 멤버",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClubRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/{id}/leave": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 나가기",
+        "description": "만든 사람이 나가면 가장 오래된 멤버가 이어받는다. 혼자였으면 동호회가 없어진다",
+        "operationId": "leave",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/join": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 들어가기",
+        "description": "초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로",
+        "operationId": "join_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinClubRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
           }
         }
       }
@@ -2536,7 +2813,7 @@
         ],
         "summary": "나가기",
         "description": "대기 중이면 방을 닫고, 하는 중이면 진다.",
-        "operationId": "leave",
+        "operationId": "leave_1",
         "parameters": [
           {
             "name": "gameId",
@@ -2569,7 +2846,7 @@
         ],
         "summary": "응원하기",
         "description": "하는 중인 판에서 한쪽(0·1). 한 사람 한 표, 다시 누르면 바꾼다. 선수는 못 한다",
-        "operationId": "cheer",
+        "operationId": "cheer_1",
         "parameters": [
           {
             "name": "gameId",
@@ -2598,6 +2875,39 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WatchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/call": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "친구 부르기",
+        "description": "내 대기실에 수락한 친구들을 푸시로 부른다. 대기실마다 한 번",
+        "operationId": "callFriends",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallResult"
                 }
               }
             }
@@ -4494,6 +4804,39 @@
         }
       }
     },
+    "/api/games/{gameId}/live": {
+      "get": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "경기 중계 보기",
+        "description": "만나서 하는 경기의 지금 점수·세트·응원 수. 바뀌면 /topic/game-live/{gameId}로 알린다",
+        "operationId": "live",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveGame"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/like/users": {
       "get": {
         "tags": [
@@ -5053,6 +5396,120 @@
         }
       }
     },
+    "/api/clubs/{id}": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 보기",
+        "description": "멤버·동호회 경기. 초대 코드는 멤버에게만",
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/nearby": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "우리 동네 동호회",
+        "description": "내 동네 범위에서 아직 안 든 동호회, 멤버 많은 순",
+        "operationId": "nearby",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClubSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/mine": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "내 동호회",
+        "operationId": "mine_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClubSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/invite/{code}": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "초대 링크로 동호회 보기",
+        "description": "로그인 전에도 볼 수 있다 (가입하고 돌아와 들어간다)",
+        "operationId": "byInvite",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat-room/{roomId}/chat-messages": {
       "get": {
         "tags": [
@@ -5487,6 +5944,28 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WatchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/lobbies": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "지금 기다리는 사람",
+        "description": "실시간 게임마다 지금 상대를 기다리는 방. 누르면 그 게임에 들어가 바로 붙는다. 바뀌면 /topic/lobbies로 알린다",
+        "operationId": "lobbies",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LobbyList"
                 }
               }
             }
@@ -6980,6 +7459,137 @@
           }
         }
       },
+      "WatchOffRequest": {
+        "required": [
+          "off"
+        ],
+        "type": "object",
+        "properties": {
+          "off": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LiveGame": {
+        "required": [
+          "gameId",
+          "isPlayer",
+          "setIndex",
+          "sides",
+          "status",
+          "title",
+          "watchOff"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "setIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveSide"
+            }
+          },
+          "myCheer": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isPlayer": {
+            "type": "boolean"
+          },
+          "watchOff": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LivePlayer": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          }
+        }
+      },
+      "LiveSide": {
+        "required": [
+          "cheers",
+          "players",
+          "score",
+          "setsWon",
+          "side"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LivePlayer"
+            }
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsWon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cheers": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReactRequest": {
+        "required": [
+          "emoji"
+        ],
+        "type": "object",
+        "properties": {
+          "emoji": {
+            "type": "string"
+          }
+        }
+      },
+      "CheerRequest": {
+        "required": [
+          "side"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "GameLikeToggleResponse": {
         "required": [
           "isLiked",
@@ -7056,6 +7666,10 @@
               "VIDEO",
               "ONLINE"
             ]
+          },
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -7085,6 +7699,149 @@
           "userId": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "CreateClubRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubDetail": {
+        "required": [
+          "club",
+          "games",
+          "members"
+        ],
+        "type": "object",
+        "properties": {
+          "club": {
+            "$ref": "#/components/schemas/ClubSummary"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMember"
+            }
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubGame"
+            }
+          },
+          "inviteCode": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubGame": {
+        "required": [
+          "gameId",
+          "hostNickname",
+          "status",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "placeRoad": {
+            "type": "string"
+          },
+          "hostNickname": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubMember": {
+        "required": [
+          "isOwner",
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          },
+          "isOwner": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ClubSummary": {
+        "required": [
+          "id",
+          "isMember",
+          "isOwner",
+          "memberCount",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "dongName": {
+            "type": "string"
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isMember": {
+            "type": "boolean"
+          },
+          "isOwner": {
+            "type": "boolean"
+          }
+        }
+      },
+      "JoinClubRequest": {
+        "type": "object",
+        "properties": {
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code": {
+            "type": "string"
           }
         }
       },
@@ -7704,18 +8461,6 @@
           }
         }
       },
-      "CheerRequest": {
-        "required": [
-          "side"
-        ],
-        "type": "object",
-        "properties": {
-          "side": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "WatchState": {
         "required": [
           "gameId",
@@ -7788,6 +8533,18 @@
           },
           "topic": {
             "type": "string"
+          }
+        }
+      },
+      "CallResult": {
+        "required": [
+          "called"
+        ],
+        "type": "object",
+        "properties": {
+          "called": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -9093,6 +9850,7 @@
               "DM",
               "GAME_JOIN_APPROVED",
               "APP_TURN",
+              "REALTIME_CALL",
               "FRIEND_REQUEST",
               "FRIEND_APPROVE",
               "FRIEND_REJECT",
@@ -9582,6 +10340,10 @@
           },
           "trustLabel": {
             "type": "string"
+          },
+          "partnerId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -11252,6 +12014,67 @@
           "score": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "LobbyCard": {
+        "required": [
+          "gameId",
+          "icon",
+          "key",
+          "nickname",
+          "title",
+          "userId",
+          "waitedSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "waitedSeconds": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LobbyList": {
+        "required": [
+          "goldenHour",
+          "goldenHourStart",
+          "lobbies"
+        ],
+        "type": "object",
+        "properties": {
+          "lobbies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LobbyCard"
+            }
+          },
+          "goldenHour": {
+            "type": "boolean"
+          },
+          "goldenHourStart": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

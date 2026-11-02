@@ -20,7 +20,11 @@
         <UiButton v-if="longLobby" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
           {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 봇과 할 수 있어요` : '기다리지 않고 봇과 하기' }}
         </UiButton>
+        <UiButton v-if="!called" block variant="secondary" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
+        <p v-else class="t-caption text-center mt-2">{{ called }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">그만 찾기</UiButton>
+        <!-- 다른 게임에서 기다리는 사람이 있으면 그쪽으로 붙는 게 빠르다 -->
+        <WaitingNow class="mt-6" title="다른 게임에서 기다리는 사람" :exclude-game-id="state.gameId" />
       </template>
 
       <!-- 짝이 지어지면 3·2·1 (첫 차례 시간은 그 뒤부터) -->
@@ -127,6 +131,7 @@ import BrandFace from '../../components/BrandFace.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import AlkkagiBoard from '../../components/appgame/AlkkagiBoard.vue'
 import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'
+import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import { shareLink } from '../../utils/share'
 import { useToast } from '../../composable/useToast'
 import { UiButton, UiCard, UiEmptyState, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
@@ -137,7 +142,7 @@ const route = useRoute()
 const { showToast } = useToast()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀' }
+const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀', 'thirty-one': '서른하나', 'last-stone': '마지막 돌', 'card-duel': '숫자 카드 대결', auction: '칩 경매', 'drop-four': '사목 떨어뜨리기', flip: '뒤집기', 'number-baseball': '숫자 야구', 'number-bomb': '숫자 폭탄', 'math-race': '암산 먼저', chosung: '초성 먼저' }
 const title = computed(() => TITLES[key.value] ?? '실시간 대결')
 const state = ref<State | null>(null)
 const error = ref('')
@@ -183,6 +188,32 @@ async function shareWatch() {
   const msg = await shareLink(`${window.location.origin}/watch/${state.value.gameId}`, `${title.value} 하는 중! 보고 응원해 주세요`)
   if (msg) showToast(msg)
 }
+
+// 친구 부르기: 수락한 친구에게 푸시. 대기실마다 한 번
+const calling = ref(false)
+const called = ref('')
+async function callFriends() {
+  if (!state.value) return
+  calling.value = true
+  try {
+    const n = (await POST('/api/app-games/realtime/{gameId}/call', { path: { gameId: state.value.gameId } })).data.called
+    called.value = n ? `친구 ${n}명에게 알렸어요` : '아직 친구가 없어요. 친구를 맺으면 부를 수 있어요'
+  } catch (e) {
+    called.value = message(e, '부르지 못했어요')
+  } finally {
+    calling.value = false
+  }
+}
+
+// 다른 게임에서 기다리는 사람에게 붙으러 가면 같은 화면이 다시 쓰인다: 지금 대기실은 닫고 새 게임에 들어간다
+watch(key, async (_, before) => {
+  const old = state.value
+  if (old?.status === 'WAITING') await POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: old.gameId } }).catch(() => {})
+  state.value = null
+  botCalled = false
+  called.value = ''
+  if (before) await join()
+})
 
 async function callBot() {
   const s = state.value

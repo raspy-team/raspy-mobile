@@ -7,7 +7,11 @@
 
     <ol class="mt-4 space-y-3">
       <li v-for="(q, i) in questions" :key="i">
-        <p class="t-label">{{ i + 1 }}. {{ q }}</p>
+        <p class="flex items-baseline gap-2">
+          <span class="t-micro tabular-nums">{{ i + 1 }}</span>
+          <span class="t-title tracking-widest">{{ q.split(' · ')[0] }}</span>
+          <span class="t-caption">{{ q.split(' · ')[1] }}</span>
+        </p>
         <UiInput v-model="answers[i]" class="mt-1" :maxlength="20" placeholder="정답" @enter="next(i)" />
       </li>
     </ol>

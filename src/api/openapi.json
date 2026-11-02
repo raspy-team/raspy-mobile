@@ -153,6 +153,8 @@
         "tags": [
           "user-controller"
         ],
+        "summary": "회원 탈퇴",
+        "description": "개인정보(이메일·닉네임·프로필·동네·친구·푸시 토큰)를 지우고 계정은 '탈퇴한 사용자'로 남긴다. 경기 기록은 상대 기록을 위해 익명으로 남는다. 되돌릴 수 없다",
         "operationId": "removeUser",
         "responses": {
           "200": {
@@ -2447,6 +2449,39 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WatchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/call": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "친구 부르기",
+        "description": "내 대기실에 수락한 친구들을 푸시로 부른다. 대기실마다 한 번",
+        "operationId": "callFriends",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallResult"
                 }
               }
             }
@@ -5092,11 +5127,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -5214,6 +5249,28 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WatchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/lobbies": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "지금 기다리는 사람",
+        "description": "실시간 게임마다 지금 상대를 기다리는 방. 누르면 그 게임에 들어가 바로 붙는다. 바뀌면 /topic/lobbies로 알린다",
+        "operationId": "lobbies",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LobbyList"
                 }
               }
             }
@@ -7378,6 +7435,18 @@
           }
         }
       },
+      "CallResult": {
+        "required": [
+          "called"
+        ],
+        "type": "object",
+        "properties": {
+          "called": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "SubmitPlayRequest": {
         "required": [
           "answer"
@@ -8511,6 +8580,7 @@
               "DM",
               "GAME_JOIN_APPROVED",
               "APP_TURN",
+              "REALTIME_CALL",
               "FRIEND_REQUEST",
               "FRIEND_APPROVE",
               "FRIEND_REJECT",
@@ -10531,6 +10601,67 @@
           "score": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "LobbyCard": {
+        "required": [
+          "gameId",
+          "icon",
+          "key",
+          "nickname",
+          "title",
+          "userId",
+          "waitedSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "waitedSeconds": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LobbyList": {
+        "required": [
+          "goldenHour",
+          "goldenHourStart",
+          "lobbies"
+        ],
+        "type": "object",
+        "properties": {
+          "lobbies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LobbyCard"
+            }
+          },
+          "goldenHour": {
+            "type": "boolean"
+          },
+          "goldenHourStart": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

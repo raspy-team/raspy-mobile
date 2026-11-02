@@ -65,6 +65,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * 회원 탈퇴
+         * @description 개인정보(이메일·닉네임·프로필·동네·친구·푸시 토큰)를 지우고 계정은 '탈퇴한 사용자'로 남긴다. 경기 기록은 상대 기록을 위해 익명으로 남는다. 되돌릴 수 없다
+         */
         post: operations["removeUser"];
         delete?: never;
         options?: never;
@@ -1297,6 +1301,26 @@ export interface paths {
          * @description 하는 중인 판에서 한쪽(0·1). 한 사람 한 표, 다시 누르면 바꾼다. 선수는 못 한다
          */
         post: operations["cheer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/{gameId}/call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 친구 부르기
+         * @description 내 대기실에 수락한 친구들을 푸시로 부른다. 대기실마다 한 번
+         */
+        post: operations["callFriends"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2841,6 +2865,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/realtime/lobbies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 지금 기다리는 사람
+         * @description 실시간 게임마다 지금 상대를 기다리는 방. 누르면 그 게임에 들어가 바로 붙는다. 바뀌면 /topic/lobbies로 알린다
+         */
+        get: operations["lobbies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/plays/{playId}/dialog": {
         parameters: {
             query?: never;
@@ -3629,6 +3673,10 @@ export interface components {
             winnerId?: number;
             topic: string;
         };
+        CallResult: {
+            /** Format: int32 */
+            called: number;
+        };
         SubmitPlayRequest: {
             answer: string;
         };
@@ -3970,7 +4018,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -4565,6 +4613,24 @@ export interface components {
             player: components["schemas"]["AppPlayer"];
             /** Format: double */
             score: number;
+        };
+        LobbyCard: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            title: string;
+            icon: string;
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            /** Format: int32 */
+            waitedSeconds: number;
+        };
+        LobbyList: {
+            lobbies: components["schemas"]["LobbyCard"][];
+            goldenHour: boolean;
+            /** Format: int32 */
+            goldenHourStart: number;
         };
         AdminUserResponse: {
             /** Format: int64 */
@@ -6367,6 +6433,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    callFriends: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CallResult"];
                 };
             };
         };
@@ -8232,6 +8320,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    lobbies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LobbyList"];
                 };
             };
         };

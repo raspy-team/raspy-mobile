@@ -6,6 +6,7 @@ import { getMyId } from '@/utils/me'
 
 let client = null
 const listeners = new Set()
+const lobbyListeners = new Set()
 
 export async function openUserChannel() {
   if (client) return
@@ -26,6 +27,8 @@ export async function openUserChannel() {
         const event = JSON.parse(body)
         listeners.forEach((cb) => cb(event))
       })
+      // 지금 기다리는 사람 목록이 바뀌었다 (모두에게 같은 신호). 목록을 보는 화면만 다시 불러온다
+      client.subscribe('/topic/lobbies', () => lobbyListeners.forEach((cb) => cb()))
       // 끊겨 있던 사이 놓친 신호가 있을 수 있으니 다시 붙으면 한 번 새로고침하게 알린다
       listeners.forEach((cb) => cb({ type: 'RECONNECTED' }))
     },
@@ -56,4 +59,10 @@ export function refreshOnChange(refresh) {
     off()
     document.removeEventListener('visibilitychange', onVisible)
   }
+}
+
+/** 지금 기다리는 사람 목록이 바뀔 때. 돌려받은 함수로 해제한다 */
+export function onLobbyChange(cb) {
+  lobbyListeners.add(cb)
+  return () => lobbyListeners.delete(cb)
 }

@@ -1348,6 +1348,135 @@
         }
       }
     },
+    "/api/games/{gameId}/live/watch-off": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "구경 끄기·켜기",
+        "description": "선수만. 끄면 선수 말고는 못 본다",
+        "operationId": "watchOff",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchOffRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveGame"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live/react": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "반응 보내기",
+        "description": "이모지 한 개. 저장하지 않고 보는 사람들에게 흘려보낸다 (한 사람 1초에 한 번)",
+        "operationId": "react",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live/cheer": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "응원하기",
+        "description": "어느 편인지 한 번. 다른 편을 누르면 바뀐다. 선수는 못 한다",
+        "operationId": "cheer",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveGame"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/like": {
       "get": {
         "tags": [
@@ -2568,7 +2697,7 @@
         ],
         "summary": "응원하기",
         "description": "하는 중인 판에서 한쪽(0·1). 한 사람 한 표, 다시 누르면 바꾼다. 선수는 못 한다",
-        "operationId": "cheer",
+        "operationId": "cheer_1",
         "parameters": [
           {
             "name": "gameId",
@@ -4422,6 +4551,39 @@
         }
       }
     },
+    "/api/games/{gameId}/live": {
+      "get": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "경기 중계 보기",
+        "description": "만나서 하는 경기의 지금 점수·세트·응원 수. 바뀌면 /topic/game-live/{gameId}로 알린다",
+        "operationId": "live",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveGame"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/like/users": {
       "get": {
         "tags": [
@@ -5389,11 +5551,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -6886,6 +7048,137 @@
           }
         }
       },
+      "WatchOffRequest": {
+        "required": [
+          "off"
+        ],
+        "type": "object",
+        "properties": {
+          "off": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LiveGame": {
+        "required": [
+          "gameId",
+          "isPlayer",
+          "setIndex",
+          "sides",
+          "status",
+          "title",
+          "watchOff"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "setIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveSide"
+            }
+          },
+          "myCheer": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isPlayer": {
+            "type": "boolean"
+          },
+          "watchOff": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LivePlayer": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          }
+        }
+      },
+      "LiveSide": {
+        "required": [
+          "cheers",
+          "players",
+          "score",
+          "setsWon",
+          "side"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LivePlayer"
+            }
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsWon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cheers": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReactRequest": {
+        "required": [
+          "emoji"
+        ],
+        "type": "object",
+        "properties": {
+          "emoji": {
+            "type": "string"
+          }
+        }
+      },
+      "CheerRequest": {
+        "required": [
+          "side"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "GameLikeToggleResponse": {
         "required": [
           "isLiked",
@@ -7754,18 +8047,6 @@
         "properties": {
           "word": {
             "type": "string"
-          }
-        }
-      },
-      "CheerRequest": {
-        "required": [
-          "side"
-        ],
-        "type": "object",
-        "properties": {
-          "side": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },

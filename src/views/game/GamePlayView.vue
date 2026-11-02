@@ -29,6 +29,8 @@
       <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack" />
       <h1 class="flex-1 min-w-0 truncate t-body font-bold">{{ game.rule?.ruleTitle }}</h1>
       <UiIconButton icon="fas fa-book-open" label="규칙 보기" @click="game.showRuleDetail = true" />
+      <!-- 중계: 구경 링크 보내기·구경 끄기 (응원 수도 여기서) -->
+      <UiIconButton icon="eye" label="중계" @click="router.push(`/live/${gameId}`)" />
       <UiIconButton icon="fas fa-list" label="경기 기록" @click="showLogModal = true" />
       <UiIconButton icon="fas fa-pen-to-square" label="결과만 입력" @click="showResultEntry = true" />
     </header>

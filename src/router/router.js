@@ -110,6 +110,8 @@ const routes = [
   { path: '/clubs', component: () => import('../views/club/ClubListView.vue') },
   { path: '/clubs/:id', component: () => import('../views/club/ClubView.vue') },
   { path: '/club/join/:code', component: () => import('../views/club/ClubJoinView.vue') },
+  // 만나서 하는 경기 중계 (live/): 점수·응원·반응. 앱 게임 관전은 /watch
+  { path: '/live/:gameId', component: () => import('../views/live/LiveWatchView.vue') },
   { path: '/games/:gameId(\\d+)', component: () => import('../views/game/OpenGameView.vue') },
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },

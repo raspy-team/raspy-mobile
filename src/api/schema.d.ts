@@ -706,6 +706,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/live/watch-off": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 구경 끄기·켜기
+         * @description 선수만. 끄면 선수 말고는 못 본다
+         */
+        post: operations["watchOff"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live/react": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 반응 보내기
+         * @description 이모지 한 개. 저장하지 않고 보는 사람들에게 흘려보낸다 (한 사람 1초에 한 번)
+         */
+        post: operations["react"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live/cheer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 응원하기
+         * @description 어느 편인지 한 번. 다른 편을 누르면 바뀐다. 선수는 못 한다
+         */
+        post: operations["cheer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/like": {
         parameters: {
             query?: never;
@@ -1380,7 +1440,7 @@ export interface paths {
          * 응원하기
          * @description 하는 중인 판에서 한쪽(0·1). 한 사람 한 표, 다시 누르면 바꾼다. 선수는 못 한다
          */
-        post: operations["cheer"];
+        post: operations["cheer_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2335,6 +2395,26 @@ export interface paths {
          * @description gameId와 email로 참가 신청 엔티티의 ID를 조회합니다.
          */
         get: operations["getParticipationIdByGameAndEmail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 경기 중계 보기
+         * @description 만나서 하는 경기의 지금 점수·세트·응원 수. 바뀌면 /topic/game-live/{gameId}로 알린다
+         */
+        get: operations["live"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3577,6 +3657,46 @@ export interface components {
             /** Format: int32 */
             uploadedCount?: number;
         };
+        WatchOffRequest: {
+            off: boolean;
+        };
+        LiveGame: {
+            /** Format: int64 */
+            gameId: number;
+            title: string;
+            status: string;
+            /** Format: int32 */
+            setIndex: number;
+            sides: components["schemas"]["LiveSide"][];
+            /** Format: int32 */
+            myCheer?: number;
+            isPlayer: boolean;
+            watchOff: boolean;
+        };
+        LivePlayer: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
+        };
+        LiveSide: {
+            /** Format: int32 */
+            side: number;
+            players: components["schemas"]["LivePlayer"][];
+            /** Format: int32 */
+            score: number;
+            /** Format: int32 */
+            setsWon: number;
+            /** Format: int32 */
+            cheers: number;
+        };
+        ReactRequest: {
+            emoji: string;
+        };
+        CheerRequest: {
+            /** Format: int32 */
+            side: number;
+        };
         GameLikeToggleResponse: {
             isLiked: boolean;
             /** Format: int64 */
@@ -3848,10 +3968,6 @@ export interface components {
         };
         MoveRequest: {
             word: string;
-        };
-        CheerRequest: {
-            /** Format: int32 */
-            side: number;
         };
         WatchState: {
             /** Format: int64 */
@@ -5836,6 +5952,84 @@ export interface operations {
             };
         };
     };
+    watchOff: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WatchOffRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveGame"];
+                };
+            };
+        };
+    };
+    react: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReactRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    cheer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveGame"];
+                };
+            };
+        };
+    };
     getGameLikeStatus: {
         parameters: {
             query?: never;
@@ -6710,7 +6904,7 @@ export interface operations {
             };
         };
     };
-    cheer: {
+    cheer_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -7926,6 +8120,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": number;
+                };
+            };
+        };
+    };
+    live: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveGame"];
                 };
             };
         };

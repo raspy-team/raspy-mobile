@@ -51,6 +51,14 @@ api.interceptors.response.use(
       return api(config)
     }
 
+  // 428: 동네 인증이 필요하다 (경기 열기·신청). 내 동네 화면으로 보내고, 인증하면 보던 화면으로 돌아온다
+  if (error.response && error.response.status === 428 && routerInstance) {
+    const here = routerInstance.currentRoute.value
+    if (here.path !== '/neighborhood') {
+      routerInstance.push({ path: '/neighborhood', query: { back: here.fullPath, reason: error.response.data?.message } })
+    }
+  }
+
   // 401 처리
   if (error.response && error.response.status === 401) {
     // 요청 URL 추출

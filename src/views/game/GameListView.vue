@@ -18,6 +18,9 @@
       <UiIconButton icon="fas fa-xmark" label="닫기" class="-mt-2 -mr-2" @click="router.replace({ query: {} })" />
     </UiCard>
 
+    <!-- 지금 동네 (경기 목록이 이 동네 범위를 따른다) -->
+    <NeighborhoodBar class="mb-3" @changed="fetchGames" />
+
     <!-- 주 행동은 경기 만들기 하나. 화면에서 가장 밝은 덩어리가 내용보다 앞서지 않게 작게 -->
     <div class="flex items-center gap-1">
       <UiButton size="sm" icon="plus" to="/create-game">경기 만들기</UiButton>
@@ -55,7 +58,7 @@
       </UiCard>
 
       <UiCard v-else-if="!games.length">
-        <UiEmptyState icon="fas fa-trophy" title="아직 열린 경기가 없어요" description="첫 경기를 만들면 여기에 올라가요">
+        <UiEmptyState icon="fas fa-trophy" title="아직 열린 경기가 없어요" description="첫 경기를 만들면 동네 사람들에게 보여요">
           <UiButton to="/create-game">경기 만들기</UiButton>
         </UiEmptyState>
       </UiCard>
@@ -139,6 +142,7 @@ import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import AppGameStrip from '../../components/appgame/AppGameStrip.vue'
+import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import Comment from '../GameCommentView.vue'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,

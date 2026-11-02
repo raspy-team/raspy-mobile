@@ -372,6 +372,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/neighborhoods/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동네 인증
+         * @description GPS 좌표로 지금 있는 동네를 인증하고 지금 동네로 고른다. 이미 2개면 replaceCode로 바꿀 동네를 준다
+         */
+        post: operations["verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neighborhoods/select": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 지금 동네 고르기 */
+        post: operations["select"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neighborhoods/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 동네 지우기 */
+        post: operations["remove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neighborhoods/range": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동네 범위 바꾸기
+         * @description 0 내 동네만 · 1 가까운 동네 · 2 조금 먼 동네 · 3 먼 동네
+         */
+        post: operations["range"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/invite": {
         parameters: {
             query?: never;
@@ -1769,6 +1843,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/neighborhoods/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 동네
+         * @description 인증한 동네(최대 2개), 범위 선택지, 인증 유효 기간
+         */
+        get: operations["mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neighborhoods/locate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 좌표의 동네 보기
+         * @description 인증 전에 '여기는 합정동이에요'를 보여 준다. 저장하지 않는다. 못 찾으면 null
+         */
+        get: operations["locate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/media/{id}": {
         parameters: {
             query?: never;
@@ -2861,6 +2975,53 @@ export interface components {
         RegisterTokenRequest: {
             token: string;
         };
+        VerifyRequest: {
+            /** Format: double */
+            lat: number;
+            /** Format: double */
+            lon: number;
+            /** Format: double */
+            accuracy?: number;
+            replaceCode?: string;
+        };
+        MyNeighborhoods: {
+            neighborhoods: components["schemas"]["NeighborhoodView"][];
+            ranges: components["schemas"]["RangeOption"][];
+            /** Format: int32 */
+            maxCount: number;
+            /** Format: int32 */
+            validDays: number;
+        };
+        NeighborhoodView: {
+            code: string;
+            name: string;
+            shortName: string;
+            fullName: string;
+            active: boolean;
+            /** Format: int32 */
+            rangeLevel: number;
+            /** Format: int32 */
+            nearbyCount: number;
+            nearbyNames: string[];
+            /** Format: date-time */
+            verifiedAt: string;
+            /** Format: date-time */
+            expiresAt: string;
+            expired: boolean;
+        };
+        RangeOption: {
+            /** Format: int32 */
+            level: number;
+            label: string;
+        };
+        CodeRequest: {
+            code: string;
+        };
+        RangeRequest: {
+            code: string;
+            /** Format: int32 */
+            level: number;
+        };
         GameRegionRequest: {
             roadAddress: string;
             detailAddress?: string;
@@ -3266,6 +3427,8 @@ export interface components {
             currentUserRanking?: components["schemas"]["UserRankingDto"];
             ruleStatistics?: components["schemas"]["UserGameStatisticsDTO"];
             appGameKey?: string;
+            scope: string;
+            areaName?: string;
         };
         UserGameStatisticsDTO: {
             /** Format: int64 */
@@ -3358,6 +3521,12 @@ export interface components {
             label: string;
             description: string;
             enabled: boolean;
+        };
+        DongView: {
+            code: string;
+            name: string;
+            shortName: string;
+            fullName: string;
         };
         InvitedGameResponse: {
             /** Format: int64 */
@@ -3480,6 +3649,7 @@ export interface components {
             /** Format: date-time */
             matchDate?: string;
             matchLocation?: string;
+            dongName?: string;
             rule: components["schemas"]["FullRuleResponse"];
             /** Format: date-time */
             createdAt: string;
@@ -4390,6 +4560,102 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    verify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyNeighborhoods"];
+                };
+            };
+        };
+    };
+    select: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyNeighborhoods"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyNeighborhoods"];
+                };
+            };
+        };
+    };
+    range: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RangeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyNeighborhoods"];
+                };
             };
         };
     };
@@ -5895,7 +6161,10 @@ export interface operations {
     };
     getRuleRankings: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description dong(내 동네 범위) 또는 all(전국). 비우면 앱 밖 경기는 동네, 앱 게임은 전국 */
+                scope?: string;
+            };
             header?: never;
             path: {
                 ruleId: number;
@@ -6225,6 +6494,49 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SettingDto"][];
+                };
+            };
+        };
+    };
+    mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyNeighborhoods"];
+                };
+            };
+        };
+    };
+    locate: {
+        parameters: {
+            query: {
+                lat: number;
+                lon: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DongView"];
                 };
             };
         };

@@ -6,7 +6,7 @@
         <RuleThumb :rule="game.rule" :size="36" bare />
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ game.rule?.ruleTitle }}</span>
-          <span class="block t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</span>
+          <span class="block t-caption truncate mt-0.5">{{ [game.dongName, place(game.matchLocation), matchTime(game.matchDate)].filter(Boolean).join(' · ') }}</span>
         </span>
       </button>
       <!-- 댓글·메시지·공유·신고는 여기로 (카드마다 아이콘 줄을 두지 않는다) -->

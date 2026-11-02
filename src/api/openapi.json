@@ -640,6 +640,132 @@
         }
       }
     },
+    "/api/neighborhoods/verify": {
+      "post": {
+        "tags": [
+          "neighborhood-controller"
+        ],
+        "summary": "동네 인증",
+        "description": "GPS 좌표로 지금 있는 동네를 인증하고 지금 동네로 고른다. 이미 2개면 replaceCode로 바꿀 동네를 준다",
+        "operationId": "verify",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyNeighborhoods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neighborhoods/select": {
+      "post": {
+        "tags": [
+          "neighborhood-controller"
+        ],
+        "summary": "지금 동네 고르기",
+        "operationId": "select",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyNeighborhoods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neighborhoods/remove": {
+      "post": {
+        "tags": [
+          "neighborhood-controller"
+        ],
+        "summary": "동네 지우기",
+        "operationId": "remove",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyNeighborhoods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neighborhoods/range": {
+      "post": {
+        "tags": [
+          "neighborhood-controller"
+        ],
+        "summary": "동네 범위 바꾸기",
+        "description": "0 내 동네만 · 1 가까운 동네 · 2 조금 먼 동네 · 3 먼 동네",
+        "operationId": "range",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyNeighborhoods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/invite": {
       "post": {
         "tags": [
@@ -2782,6 +2908,15 @@
               "type": "integer",
               "format": "int64"
             }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "description": "dong(내 동네 범위) 또는 all(전국). 비우면 앱 밖 경기는 동네, 앱 게임은 전국",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3330,6 +3465,70 @@
                   "items": {
                     "$ref": "#/components/schemas/SettingDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neighborhoods/me": {
+      "get": {
+        "tags": [
+          "neighborhood-controller"
+        ],
+        "summary": "내 동네",
+        "description": "인증한 동네(최대 2개), 범위 선택지, 인증 유효 기간",
+        "operationId": "mine",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyNeighborhoods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neighborhoods/locate": {
+      "get": {
+        "tags": [
+          "neighborhood-controller"
+        ],
+        "summary": "좌표의 동네 보기",
+        "description": "인증 전에 '여기는 합정동이에요'를 보여 준다. 저장하지 않는다. 못 찾으면 null",
+        "operationId": "locate",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DongView"
                 }
               }
             }
@@ -5478,6 +5677,162 @@
           }
         }
       },
+      "VerifyRequest": {
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
+          },
+          "accuracy": {
+            "type": "number",
+            "format": "double"
+          },
+          "replaceCode": {
+            "type": "string"
+          }
+        }
+      },
+      "MyNeighborhoods": {
+        "required": [
+          "maxCount",
+          "neighborhoods",
+          "ranges",
+          "validDays"
+        ],
+        "type": "object",
+        "properties": {
+          "neighborhoods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeighborhoodView"
+            }
+          },
+          "ranges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RangeOption"
+            }
+          },
+          "maxCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "validDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "NeighborhoodView": {
+        "required": [
+          "active",
+          "code",
+          "expired",
+          "expiresAt",
+          "fullName",
+          "name",
+          "nearbyCount",
+          "nearbyNames",
+          "rangeLevel",
+          "shortName",
+          "verifiedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "rangeLevel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nearbyCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nearbyNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RangeOption": {
+        "required": [
+          "label",
+          "level"
+        ],
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "CodeRequest": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "RangeRequest": {
+        "required": [
+          "code",
+          "level"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "GameRegionRequest": {
         "required": [
           "roadAddress"
@@ -6737,7 +7092,8 @@
         "required": [
           "rankings",
           "ruleId",
-          "ruleName"
+          "ruleName",
+          "scope"
         ],
         "type": "object",
         "properties": {
@@ -6761,6 +7117,12 @@
             "$ref": "#/components/schemas/UserGameStatisticsDTO"
           },
           "appGameKey": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "areaName": {
             "type": "string"
           }
         }
@@ -7117,6 +7479,29 @@
           },
           "enabled": {
             "type": "boolean"
+          }
+        }
+      },
+      "DongView": {
+        "required": [
+          "code",
+          "fullName",
+          "name",
+          "shortName"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
           }
         }
       },
@@ -7495,6 +7880,9 @@
             "format": "date-time"
           },
           "matchLocation": {
+            "type": "string"
+          },
+          "dongName": {
             "type": "string"
           },
           "rule": {

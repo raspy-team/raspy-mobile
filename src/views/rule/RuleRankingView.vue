@@ -3,7 +3,7 @@
     <UiTopBar :title="ruleName ? `${ruleName} 랭킹` : '랭킹'" back />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
-      <div v-if="loading" class="space-y-3">
+      <div v-if="loading && !rankings.length" class="space-y-3">
         <UiSkeleton class="h-20 w-full" />
         <UiSkeleton v-for="n in 5" :key="n" class="h-14 w-full" />
       </div>
@@ -13,6 +13,9 @@
       </UiEmptyState>
 
       <template v-else>
+        <!-- 동네 / 전국 (동네가 있을 때만) -->
+        <UiTabs v-if="areaName" class="mb-4" :model-value="scope" :options="[{ value: 'dong', label: areaName }, { value: 'all', label: '전국' }]" @update:model-value="setScope" />
+
         <!-- 내 자리 -->
         <UiCard class="flex items-center gap-4">
           <template v-if="me">
@@ -59,11 +62,11 @@
 </template>
 
 <script setup>
-// 규칙 랭킹: 내 자리 먼저, 그다음 전체 순위
+// 규칙 랭킹: 동네/전국 → 내 자리 → 순위. 처음에는 서버가 정한 범위(앱 밖 경기는 동네, 앱 게임은 전국)
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import { UiAvatar, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiAvatar, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiSkeleton, UiTabs, UiTopBar } from '../../components/ui'
 
 const route = useRoute()
 const router = useRouter()
@@ -74,12 +77,21 @@ const rankings = ref([])
 const me = ref(null)
 const loading = ref(true)
 const error = ref('')
+const scope = ref('')
+const areaName = ref('')
+
+function setScope(v) {
+  scope.value = v
+  load()
+}
 
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await api.get(`/api/rules/${ruleId}/rankings`)
+    const { data } = await api.get(`/api/rules/${ruleId}/rankings`, { params: scope.value ? { scope: scope.value } : {} })
+    scope.value = data.scope
+    areaName.value = data.areaName || ''
     ruleName.value = data.ruleName || ''
     appGameKey.value = data.appGameKey || ''
     rankings.value = data.rankings || []

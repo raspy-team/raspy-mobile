@@ -101,6 +101,8 @@ const routes = [
   { path: '/profile/:id', component: Profile },
 
   { path: '/settings', component:  Setting},
+  // 동네 인증·범위 (docs/direction.md '동네')
+  { path: '/neighborhood', component: () => import('../views/NeighborhoodView.vue') },
   { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },

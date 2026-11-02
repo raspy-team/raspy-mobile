@@ -3,9 +3,8 @@
     <!-- 단계 표시 (두 단계일 때만) -->
     <div class="pt-safe">
       <div class="max-w-md mx-auto px-4 h-14 flex items-center gap-1">
-        <div v-if="twoSteps" class="flex-1 flex gap-1.5 px-2" aria-hidden="true">
-          <span class="h-1 flex-1 rounded-full bg-primary"></span>
-          <span class="h-1 flex-1 rounded-full" :class="step === 'profile' ? 'bg-primary' : 'bg-line-strong'"></span>
+        <div v-if="steps.length > 1" class="flex-1 flex gap-1.5 px-2" aria-hidden="true">
+          <span v-for="(s, i) in steps" :key="s" class="h-1 flex-1 rounded-full" :class="i <= steps.indexOf(step) ? 'bg-primary' : 'bg-line-strong'"></span>
         </div>
       </div>
     </div>
@@ -48,7 +47,14 @@
       </UiCard>
     </main>
 
-    <!-- 2. 닉네임 · 지역 · 사진 -->
+    <!-- 3. 동네 (건너뛸 수 있다) -->
+    <main v-else-if="step === 'neighborhood'" class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
+      <h1 class="t-title">어느 동네에서 겨룰까요?</h1>
+      <p class="t-body text-fg-muted mt-2">만나서 하는 경기는 내 동네 근처 사람들과 해요. 앱 안 게임은 동네와 상관없이 바로 할 수 있어요.</p>
+      <NeighborhoodVerify class="mt-4" @verified="onNeighborhood" />
+    </main>
+
+    <!-- 2. 닉네임 · 사진 -->
     <main v-else class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
       <h1 class="t-title">어떻게 불러드릴까요?</h1>
       <p class="t-body text-fg-muted mt-2">경기 상대에게 보이는 정보예요.</p>
@@ -85,12 +91,6 @@
           :error="usernameError"
           autocomplete="username"
         />
-        <UiField label="활동 지역" hint="가까운 경기를 먼저 보여드려요">
-          <div class="grid grid-cols-2 gap-2">
-            <UiSelect v-model="region1" :options="region1Options" placeholder="시·도" />
-            <UiSelect v-model="region2" :options="region2Options" placeholder="구·시·군" :disabled="!region1" />
-          </div>
-        </UiField>
       </div>
     </main>
 
@@ -100,7 +100,8 @@
         <UiButton v-if="step === 'terms'" block size="lg" :disabled="!allAgreed" :loading="saving" @click="submitTerms">
           동의하고 {{ needProfile ? '다음' : '계속하기' }}
         </UiButton>
-        <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">시작하기</UiButton>
+        <UiButton v-else-if="step === 'neighborhood'" block size="lg" variant="ghost" @click="finish">나중에 할게요</UiButton>
+        <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">다음</UiButton>
       </div>
     </div>
 
@@ -115,14 +116,15 @@
 </template>
 
 <script setup>
-// 첫 설정: ① 약관 동의 ② 닉네임·아이디·지역(+사진). 필요한 단계만 보여준다
+// 첫 설정: ① 약관 동의 ② 닉네임·아이디(+사진) ③ 동네 인증(건너뛸 수 있다). 필요한 단계만 보여준다.
+// 동네는 GPS로 인증하고, 예전 '활동 지역'(시·도 구)은 서버가 동네에서 채운다
 // 나이·성별·소개·소속은 묻지 않는다 (프로필에서 나중에 채운다)
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
-import regionMap from '../../assets/regionMap.json'
 import { AGREEMENTS as TERMS } from '../../content/legal'
-import { UiAvatar, UiButton, UiCard, UiField, UiInput, UiSelect, UiSheet, UiSkeleton } from '../../components/ui'
+import { UiAvatar, UiButton, UiCard, UiInput, UiSheet, UiSkeleton } from '../../components/ui'
+import NeighborhoodVerify from '../../components/neighborhood/NeighborhoodVerify.vue'
 import { useToast } from '../../composable/useToast'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { containsProfanity } from '../../utils/profanity'
@@ -140,7 +142,7 @@ const saving = ref(false)
 const needTerms = ref(true)
 const needProfile = ref(true)
 const step = ref('terms')
-const twoSteps = ref(false) // 처음에 두 단계였는지 (단계 표시용)
+const steps = ref([]) // 처음에 보여 줄 단계들 (단계 표시용)
 
 // 약관
 const agreed = reactive(Object.fromEntries(TERMS.map((t) => [t.id, false])))
@@ -160,17 +162,12 @@ const nickname = ref('')
 const username = ref('')
 const nicknameError = ref('')
 const usernameError = ref('')
-const region1 = ref('')
-const region2 = ref('')
-const region1Options = Object.keys(regionMap).filter((r) => r !== '전국')
-const region2Options = computed(() => regionMap[region1.value] || [])
-watch(region1, () => (region2.value = ''))
 
 const fileInput = ref(null)
 const photo = ref(null)
 const preview = ref('')
 
-const canFinish = computed(() => nickname.value.trim() && username.value.trim() && region1.value && region2.value)
+const canFinish = computed(() => nickname.value.trim() && username.value.trim())
 watch(nickname, () => (nicknameError.value = ''))
 watch(username, (v) => {
   usernameError.value = ''
@@ -227,16 +224,23 @@ async function submitProfile() {
     else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 시도해주세요')
     return
   }
-  // 지역·사진은 프로필 저장 API로. 실패해도 설정은 끝난 것으로 두고 알려만 준다
-  try {
-    const fd = new FormData()
-    fd.append('region', `${region1.value} ${region2.value}`)
-    if (photo.value) fd.append('profile_picture', photo.value)
-    await api.patch('/api/user-profile/save', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-  } catch {
-    showToast('지역·사진은 저장하지 못했어요. 내 정보에서 다시 넣어주세요')
+  // 사진은 프로필 저장 API로. 실패해도 설정은 끝난 것으로 두고 알려만 준다
+  if (photo.value) {
+    try {
+      const fd = new FormData()
+      fd.append('profile_picture', photo.value)
+      await api.patch('/api/user-profile/save', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    } catch {
+      showToast('사진은 저장하지 못했어요. 내 정보에서 다시 넣어주세요')
+    }
   }
   saving.value = false
+  markOnboarded()
+  step.value = 'neighborhood'
+}
+
+function onNeighborhood(data) {
+  showToast(`${data.neighborhoods.find((n) => n.active)?.name ?? '동네'} 인증을 마쳤어요`)
   finish()
 }
 
@@ -253,7 +257,7 @@ onMounted(async () => {
     needProfile.value = !data.onboarded
     if (!needTerms.value && !needProfile.value) return finish()
     step.value = needTerms.value ? 'terms' : 'profile'
-    twoSteps.value = needTerms.value && needProfile.value
+    steps.value = [needTerms.value && 'terms', ...(needProfile.value ? ['profile', 'neighborhood'] : [])].filter(Boolean)
     // 자동으로 붙은 아이디(u_...)는 비워 두고, 사람이 정한 것만 채운다
     username.value = data.username?.startsWith('u_') ? '' : data.username || ''
   } catch {

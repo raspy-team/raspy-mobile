@@ -7,7 +7,7 @@
       <UiEmptyState
         icon="fas fa-check"
         :title="editId ? '수정 요청을 보냈어요' : '규칙을 만들었어요'"
-        :description="editId ? '관리자가 확인하면 바뀌어요. 내 규칙에서 상태를 볼 수 있어요' : `${done.ruleTitle} · ${done.minorCategory}`"
+        :description="editId ? '관리자가 확인하면 바뀌어요. 내 규칙에서 상태를 볼 수 있어요' : [done.ruleTitle, ...(done.category?.abilities ?? []).map((a) => a.label)].join(' · ')"
       >
         <div class="w-full space-y-2">
           <UiButton v-if="!editId" block size="lg" :to="`/create-game?ruleId=${done.id}`">이 규칙으로 경기 열기</UiButton>
@@ -18,24 +18,39 @@
       </UiEmptyState>
     </main>
 
+    <!-- 2단계: AI가 채운 분류를 확인하고 고친다 (만들 때만) -->
+    <form v-else-if="step === 'confirm'" class="max-w-xl mx-auto px-4 pt-4 pb-32 space-y-8" novalidate @submit.prevent="submit">
+      <UiCard v-if="blocked" class="border border-danger">
+        <p class="t-heading">이 규칙은 올릴 수 없어요</p>
+        <p class="t-caption mt-1">{{ blocked }}</p>
+        <UiButton variant="secondary" size="sm" class="mt-3" @click="step = 'write'">설명 고치기</UiButton>
+      </UiCard>
+      <template v-else>
+        <div>
+          <p class="t-title">{{ aiAvailable ? '이렇게 분류했어요' : '어떤 게임인지 골라 주세요' }}</p>
+          <p class="t-caption mt-1">{{ aiAvailable ? '틀린 곳만 고치면 돼요. 이 분류로 게임을 찾고, 능력치가 쌓여요' : '이 분류로 게임을 찾고, 능력치가 쌓여요' }}</p>
+        </div>
+        <UiInput v-model="form.ruleTitle" label="규칙 이름" :maxlength="20" placeholder="예: 탁구 11점 3판 2선승" />
+        <CategoryEditor v-model="category" />
+        <p v-if="error" class="text-sm text-danger" role="alert">{{ error }}</p>
+        <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+          <div class="max-w-xl mx-auto px-4 py-3 flex gap-2">
+            <UiButton variant="secondary" size="lg" @click="step = 'write'">이전</UiButton>
+            <UiButton type="submit" class="flex-1" size="lg" :loading="submitting">규칙 만들기</UiButton>
+          </div>
+        </div>
+      </template>
+    </form>
+
     <main v-else-if="loading" class="max-w-xl mx-auto px-4 pt-4 space-y-6">
       <UiSkeleton v-for="n in 4" :key="n" class="h-16 w-full" />
     </main>
 
     <!-- 한 화면에서 끝나는 규칙 만들기. 꼭 필요한 것만 위에, 나머지는 '더 자세히' 안에 -->
-    <form v-else class="max-w-xl mx-auto px-4 pt-4 pb-32 space-y-8" novalidate @submit.prevent="submit">
+    <form v-else class="max-w-xl mx-auto px-4 pt-4 pb-32 space-y-8" novalidate @submit.prevent="editId ? submit() : next()">
       <p v-if="editId" class="t-caption">바꿀 부분만 고치면 돼요. 관리자가 확인한 뒤 반영돼요.</p>
 
-      <UiInput v-model="form.ruleTitle" label="규칙 이름" :maxlength="20" placeholder="예: 탁구 11점 3판 2선승" />
-
-      <UiField label="종류">
-        <div class="flex flex-wrap gap-2">
-          <UiChip v-for="m in majors" :key="m" :selected="form.majorCategory === m" @click="pickMajor(m)">{{ m }}</UiChip>
-        </div>
-        <div v-if="minors.length" class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-line">
-          <UiChip v-for="m in minors" :key="m" :selected="form.minorCategory === m" @click="form.minorCategory = m">{{ m }}</UiChip>
-        </div>
-      </UiField>
+      <UiInput v-if="editId" v-model="form.ruleTitle" label="규칙 이름" :maxlength="20" placeholder="예: 탁구 11점 3판 2선승" />
 
       <UiInput v-model="form.ruleGoal" label="어떤 경기인가요?" multiline :rows="3" placeholder="예: 탁구대에서 공을 주고받아 11점을 먼저 내는 사람이 세트를 가져가요" />
       <UiInput v-model="form.ruleScoreDefinition" label="점수는 어떻게 얻나요?" placeholder="예: 상대가 공을 못 넘기면 1점" />
@@ -82,7 +97,7 @@
 
       <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
         <div class="max-w-xl mx-auto px-4 py-3">
-          <UiButton type="submit" block size="lg" :loading="submitting">{{ editId ? '수정 요청 보내기' : '규칙 만들기' }}</UiButton>
+          <UiButton type="submit" block size="lg" :loading="submitting">{{ editId ? '수정 요청 보내기' : '다음' }}</UiButton>
         </div>
       </div>
     </form>
@@ -90,11 +105,15 @@
 </template>
 
 <script setup>
-// 규칙 만들기 / 수정 요청 (한 화면). 이름·종류는 만든 사람이 고르고, 꼭 필요한 것만 위에 둔다.
-// 수정(editId)은 기존 값을 채워 두고 /api/rules/edit-requests로 보낸다 (관리자 승인 후 반영)
+// 규칙 만들기: ① 경기를 설명한다 → ② AI가 이름·분류를 채워 보여 주고 만든 사람이 고친다 → 저장.
+// 올릴 수 없는 규칙(외모·동의 없는 대상·실력 없음)은 ②에서 이유를 보여 준다. 서버도 저장할 때 다시 거른다.
+// 수정(editId)은 한 화면: 기존 값을 채워 두고 /api/rules/edit-requests로 보낸다 (관리자 승인 때 다시 분류)
 import { ref, reactive, onMounted, defineProps } from 'vue'
 import api from '../../api/api'
-import { UiButton, UiChip, UiEmptyState, UiField, UiInput, UiSkeleton, UiTopBar } from '../../components/ui'
+import { POST } from '@/api/client'
+import CategoryEditor from '../../components/rule/CategoryEditor.vue'
+import { emptyCategory, toInput, missing } from '@/utils/category'
+import { UiButton, UiCard, UiEmptyState, UiField, UiInput, UiSkeleton, UiTopBar } from '../../components/ui'
 import { containsProfanity } from '../../utils/profanity'
 
 const props = defineProps({ editId: { type: Number, default: 0 } })
@@ -106,8 +125,6 @@ const WIN_MODES = [
 
 const form = reactive({
   ruleTitle: '',
-  majorCategory: '',
-  minorCategory: '',
   ruleGoal: '',
   ruleScoreDefinition: '',
   rulePreparation: '',
@@ -121,26 +138,17 @@ const points = ref(11)
 const minutes = ref(10)
 const sets = ref(3)
 const showMore = ref(false)
-const majors = ref([])
-const minors = ref([])
 const error = ref('')
+const step = ref('write') // write: 설명 쓰기 / confirm: 분류 확인
+const category = ref(emptyCategory())
+const blocked = ref('')
+const aiAvailable = ref(true)
 const submitting = ref(false)
 const loading = ref(!!props.editId)
 const done = ref(null)
 
-async function loadMinors(major) {
-  minors.value = major ? (await api.get(`/api/rules/categories/${major}`).catch(() => ({ data: [] }))).data || [] : []
-}
-function pickMajor(m) {
-  if (form.majorCategory === m) return
-  form.majorCategory = m
-  form.minorCategory = ''
-  loadMinors(m)
-}
-
 function validate() {
-  if (!form.ruleTitle.trim()) return '규칙 이름을 적어주세요'
-  if (!form.majorCategory || !form.minorCategory) return '종류를 골라주세요'
+  if (props.editId && !form.ruleTitle.trim()) return '규칙 이름을 적어주세요'
   if (!form.ruleGoal.trim()) return '어떤 경기인지 적어주세요'
   if (winMode.value === 'points' && !(points.value >= 1)) return '세트 승리 점수를 1 이상으로 적어주세요'
   if (winMode.value === 'time' && !(minutes.value >= 1)) return '세트 시간을 1분 이상으로 적어주세요'
@@ -149,11 +157,8 @@ function validate() {
   return ''
 }
 
-async function submit() {
-  error.value = validate()
-  if (error.value) return
-  submitting.value = true
-  const body = {
+function body() {
+  return {
     ...form,
     ruleTitle: form.ruleTitle.trim(),
     pointsToWin: winMode.value === 'points' ? points.value : -1,
@@ -161,12 +166,38 @@ async function submit() {
     setsToWin: sets.value,
     winBy: winMode.value === 'points' ? 'SETS_HALF_WIN' : 'MOST_SETS_AND_POINTS',
   }
+}
+
+/** ① → ②: AI가 이름·분류를 미리 채운다. AI를 못 쓰면 빈 칸에서 직접 고른다 */
+async function next() {
+  error.value = validate()
+  if (error.value) return
+  submitting.value = true
+  try {
+    const { data } = await POST('/api/rules/classify', { body: body() })
+    aiAvailable.value = data.aiAvailable
+    blocked.value = data.blocked ?? ''
+    if (data.title && !form.ruleTitle.trim()) form.ruleTitle = data.title
+    category.value = data.category ? toInput(data.category) : emptyCategory()
+    step.value = 'confirm'
+    window.scrollTo(0, 0)
+  } catch (e) {
+    error.value = e.response?.data?.message || '잠시 뒤 다시 시도해주세요'
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function submit() {
+  error.value = props.editId ? validate() : !form.ruleTitle.trim() ? '규칙 이름을 적어주세요' : missing(category.value)
+  if (error.value) return
+  submitting.value = true
   try {
     if (props.editId) {
-      await api.post('/api/rules/edit-requests', { ...body, originalRuleId: props.editId })
+      await api.post('/api/rules/edit-requests', { ...body(), originalRuleId: props.editId })
       done.value = { id: props.editId }
     } else {
-      done.value = (await api.post('/api/rules', body)).data
+      done.value = (await api.post('/api/rules', { ...body(), category: category.value })).data
     }
     window.scrollTo(0, 0)
   } catch (e) {
@@ -177,7 +208,6 @@ async function submit() {
 }
 
 onMounted(async () => {
-  majors.value = (await api.get('/api/rules/categories').catch(() => ({ data: {} }))).data.majors || []
   if (!props.editId) return
   try {
     const { data } = await api.get(`/api/rules/${props.editId}`)
@@ -191,10 +221,6 @@ onMounted(async () => {
     }
     sets.value = data.setsToWin || 1
     showMore.value = ['rulePreparation', 'ruleOrder', 'ruleDecision', 'ruleFoul', 'ruleExtraInfo'].some((k) => form[k])
-    // 지금 목록에 없는 옛 종류여도 고른 상태로 보이게
-    if (form.majorCategory && !majors.value.includes(form.majorCategory)) majors.value.push(form.majorCategory)
-    await loadMinors(form.majorCategory)
-    if (form.minorCategory && !minors.value.includes(form.minorCategory)) minors.value.push(form.minorCategory)
   } catch {
     error.value = '규칙을 불러오지 못했어요'
   } finally {

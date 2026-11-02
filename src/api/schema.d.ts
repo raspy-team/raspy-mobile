@@ -176,6 +176,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rules/classify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 규칙 분류 미리보기
+         * @description 저장하지 않고 AI가 이름·카테고리를 본다. 올릴 수 없는 규칙이면 blocked에 이유
+         */
+        post: operations["classifyPreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/reports": {
         parameters: {
             query?: never;
@@ -2688,6 +2708,17 @@ export interface components {
             landingPath?: string;
             standalone: boolean;
         };
+        CategoryInput: {
+            face: string;
+            abilities: string[];
+            traits: string[];
+            luck: string;
+            places: string[];
+            parties: string[];
+            length: string;
+            gears: string[];
+            sport?: string;
+        };
         RuleDto: {
             ruleGoal: string;
             ruleScoreDefinition: string;
@@ -2706,6 +2737,7 @@ export interface components {
             ruleTitle?: string;
             majorCategory?: string;
             minorCategory?: string;
+            category?: components["schemas"]["CategoryInput"];
         };
         CategoryValue: {
             key: string;
@@ -2812,6 +2844,12 @@ export interface components {
             duration: number;
             /** @enum {string} */
             winBy: "SETS_HALF_WIN" | "MOST_SETS_AND_POINTS";
+        };
+        ClassifyPreview: {
+            title?: string;
+            category?: components["schemas"]["GameCategoryView"];
+            blocked?: string;
+            aiAvailable: boolean;
         };
         ReportRequest: {
             /** @enum {string} */
@@ -4120,6 +4158,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    classifyPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClassifyPreview"];
                 };
             };
         };

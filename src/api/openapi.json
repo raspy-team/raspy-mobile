@@ -351,6 +351,38 @@
         }
       }
     },
+    "/api/rules/classify": {
+      "post": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "규칙 분류 미리보기",
+        "description": "저장하지 않고 AI가 이름·카테고리를 본다. 올릴 수 없는 규칙이면 blocked에 이유",
+        "operationId": "classifyPreview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassifyPreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/reports": {
       "post": {
         "tags": [
@@ -4813,6 +4845,63 @@
           }
         }
       },
+      "CategoryInput": {
+        "required": [
+          "abilities",
+          "face",
+          "gears",
+          "length",
+          "luck",
+          "parties",
+          "places",
+          "traits"
+        ],
+        "type": "object",
+        "properties": {
+          "face": {
+            "type": "string"
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "traits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "luck": {
+            "type": "string"
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "length": {
+            "type": "string"
+          },
+          "gears": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sport": {
+            "type": "string"
+          }
+        }
+      },
       "RuleDto": {
         "required": [
           "duration",
@@ -4872,6 +4961,9 @@
           },
           "minorCategory": {
             "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryInput"
           }
         }
       },
@@ -5232,6 +5324,26 @@
               "SETS_HALF_WIN",
               "MOST_SETS_AND_POINTS"
             ]
+          }
+        }
+      },
+      "ClassifyPreview": {
+        "required": [
+          "aiAvailable"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/GameCategoryView"
+          },
+          "blocked": {
+            "type": "string"
+          },
+          "aiAvailable": {
+            "type": "boolean"
           }
         }
       },

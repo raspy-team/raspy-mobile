@@ -86,6 +86,8 @@
           <UiButton block size="lg" class="mt-3" :disabled="!myTurn || !word.trim()" :loading="sending" @click="send">내기</UiButton>
         </form>
         </template>
+        <!-- 실시간 심사: 보는 사람들이 응원해 승패가 정해진다 -->
+        <UiButton v-if="state.liveJudged" block variant="secondary" icon="share" class="mt-4" @click="shareWatch">관전 링크 보내기 (응원으로 승패가 정해져요)</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="leave">그만두기 (지게 돼요)</UiButton>
       </template>
 
@@ -125,14 +127,17 @@ import BrandFace from '../../components/BrandFace.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import AlkkagiBoard from '../../components/appgame/AlkkagiBoard.vue'
 import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'
+import { shareLink } from '../../utils/share'
+import { useToast } from '../../composable/useToast'
 import { UiButton, UiCard, UiEmptyState, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['RealtimeState']
 
 const route = useRoute()
+const { showToast } = useToast()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기' }
+const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀' }
 const title = computed(() => TITLES[key.value] ?? '실시간 대결')
 const state = ref<State | null>(null)
 const error = ref('')
@@ -172,6 +177,12 @@ const turnLine = computed(() => {
   return myTurn.value ? '내 차례' : `${s.opponent?.nickname}님 차례`
 })
 const longLobby = computed(() => (state.value?.lobbySeconds ?? 30) > 120)
+
+async function shareWatch() {
+  if (!state.value) return
+  const msg = await shareLink(`${window.location.origin}/watch/${state.value.gameId}`, `${title.value} 하는 중! 보고 응원해 주세요`)
+  if (msg) showToast(msg)
+}
 
 async function callBot() {
   const s = state.value

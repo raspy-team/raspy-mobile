@@ -24,6 +24,19 @@
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<span v-if="playedOn" class="t-mono ml-2">{{ playedOn }}</span></p>
         <h1 class="t-display text-center mt-3" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
 
+        <!-- 셋 이상이 각자: 등수 표 -->
+        <ol v-if="format === 'FREE_FOR_ALL'" class="mt-10 rounded-xl bg-surface divide-y divide-line">
+          <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3 px-4 h-14">
+            <span class="t-mono w-8 text-fg" :class="r.place === 1 ? 'font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
+            <button type="button" class="flex items-center gap-2.5 min-w-0 flex-1 text-left" @click="router.push('/profile/' + r.id)">
+              <UiAvatar :src="r.profileUrl" :name="r.nickname" size="sm" />
+              <span class="text-sm truncate" :class="r.place === 1 ? 'text-fg font-medium' : 'text-fg-muted'">{{ r.nickname }}<span v-if="r.id === currentUserId" class="text-fg-subtle"> (나)</span></span>
+            </button>
+            <span v-if="!placesEntered" class="font-mono tabular-nums text-fg-muted">{{ r.points }}</span>
+          </li>
+        </ol>
+
+        <template v-else>
         <div class="mt-10 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <button
             v-for="(side, i) in sides"
@@ -70,6 +83,7 @@
           </div>
         </div>
         <p v-else class="t-caption text-center mt-6">세트 점수 없이 승패만 기록한 경기예요</p>
+        </template>
       </section>
 
       <!-- 끝내 맞지 않은 결과 -->
@@ -110,11 +124,11 @@
 
       <!-- 친구 · 공유 -->
       <div class="flex gap-2">
-        <UiButton v-if="isParticipant" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
+        <UiButton v-if="isParticipant && format === 'DUEL'" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
         <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유하기</UiButton>
       </div>
 
-      <template v-if="isParticipant && confirmed">
+      <template v-if="isParticipant && confirmed && format === 'DUEL'">
         <!-- 사진·동영상 -->
         <UiSection title="경기 사진·동영상">
           <template #action><span class="t-micro">{{ allPictures.length }}/5</span></template>
@@ -256,7 +270,7 @@
       <UiButton block size="lg" :loading="isAnswering === 'confirm'" @click="confirmResult">결과가 맞아요</UiButton>
     </div>
   </div>
-  <div v-else-if="isParticipant && confirmed && !isLoading && !resultError" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+  <div v-else-if="isParticipant && confirmed && !isLoading && !resultError && format === 'DUEL'" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
     <div class="max-w-xl mx-auto px-4 py-3">
       <UiButton block size="lg" :loading="isSubmitting" :disabled="!review.manner || !review.performance" @click="submitReviewAndGoHome">
         {{ review.manner && review.performance ? '평가 보내기' : '매너와 실력에 별을 눌러주세요' }}
@@ -269,8 +283,12 @@
     v-model="showCounter"
     counter
     :game-id="gameId"
-    :opponent-name="opponent.nickname"
+    :opponent-name="format === 'TEAMS' ? '상대 팀' : opponent.nickname"
     :initial="mySetScores"
+    :format="format"
+    :sides="resSides"
+    :my-side="mySide"
+    :my-name="format === 'TEAMS' ? '우리 팀' : '나'"
     :warning="rejectsLeft <= 1 ? '이번에 돌려보내면 결과가 끝내 맞지 않은 것으로 보고 이 경기는 기록하지 않아요' : ''"
     @submitted="onCountered"
   />
@@ -293,6 +311,7 @@ import { getMyId } from '@/utils/me'
 import { POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { matchTime } from '../../utils/format'
+import { TEAM_NAMES } from '../../utils/gameFormat'
 import BrandFace from '../../components/BrandFace.vue'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import {
@@ -416,16 +435,32 @@ const unselectedPictures = computed(() => {
 const resultError = ref('')
 
 // 화면 계산: user1이 나(참가자면), winnerIdx 1·2도 user1·user2 기준으로 맞춰져 있다
-const isParticipant = computed(() => !!currentUserId.value && (user1.value.id === currentUserId.value || user2.value.id === currentUserId.value))
+// 팀·각자 경기: 서버의 편(sides) 순서, 등수만 낸 결과인지
+const format = ref('DUEL')
+const resSides = ref([])
+const placesEntered = ref(false)
+const mySide = computed(() => resSides.value.findIndex((s) => s.members.some((m) => m.id === currentUserId.value)))
+const ranking = computed(() =>
+  resSides.value.map((s) => ({ ...s.members[0], place: s.place, points: s.points })).sort((a, b) => a.place - b.place),
+)
+const submitterSide = computed(() => resSides.value.findIndex((s) => s.members.some((m) => m.id === resultSubmittedById.value)))
+
+const isParticipant = computed(() => !!currentUserId.value && (format.value === 'DUEL'
+  ? user1.value.id === currentUserId.value || user2.value.id === currentUserId.value
+  : mySide.value >= 0))
 const opponent = computed(() => (user1.value.id === currentUserId.value ? user2.value : user1.value))
 // newChampionIdx는 서버 기준 순서라 화면 순서로 바꾼다
 const championUser = computed(() => {
   if (!championIdx.value) return null
   return (championIdx.value === 1) === idxCorrect.value ? user1.value : user2.value
 })
+// 이 칸이 나(팀 경기면 내 팀)인가. 팀 칸의 id는 그 팀 첫 사람이다
+const isMine = (u) => (format.value === 'TEAMS'
+  ? resSides.value.some((side) => side.members[0].id === u.id && side.members.some((m) => m.id === currentUserId.value))
+  : u.id === currentUserId.value)
 const sides = computed(() => [
-  { user: user1.value, sets: user1SetCount.value, won: winnerIdx.value === 1, isMe: user1.value.id === currentUserId.value, champion: championUser.value?.id === user1.value.id },
-  { user: user2.value, sets: user2SetCount.value, won: winnerIdx.value === 2, isMe: user2.value.id === currentUserId.value, champion: championUser.value?.id === user2.value.id },
+  { user: user1.value, sets: user1SetCount.value, won: winnerIdx.value === 1, isMe: isMine(user1.value), champion: championUser.value?.id === user1.value.id },
+  { user: user2.value, sets: user2SetCount.value, won: winnerIdx.value === 2, isMe: isMine(user2.value), champion: championUser.value?.id === user2.value.id },
 ])
 const setLeft = (s) => (idxCorrect.value ? s.user1Score : s.user2Score)
 const setRight = (s) => (idxCorrect.value ? s.user2Score : s.user1Score)
@@ -435,18 +470,29 @@ const playedOn = computed(() =>
 )
 const headline = computed(() => {
   if (disputed.value) return { text: '기록하지 않은 경기', tone: 'text-fg-muted' }
+  if (format.value === 'FREE_FOR_ALL') {
+    const first = ranking.value.filter((r) => r.place === 1)
+    if (first.length === ranking.value.length) return { text: '모두 같은 등수', tone: 'text-fg' }
+    if (!isParticipant.value) return { text: `${first.map((r) => r.nickname).join('·')}님 1등`, tone: 'text-fg', mark: true }
+    const me = ranking.value.find((r) => r.id === currentUserId.value)
+    return me?.place === 1 ? { text: '1등이에요', tone: 'text-fg', mark: true } : { text: `${me?.place}등`, tone: 'text-fg-muted' }
+  }
   if (winnerIdx.value === 0) return { text: '무승부', tone: 'text-fg' }
   const winner = winnerIdx.value === 1 ? user1.value : user2.value
-  if (!isParticipant.value) return { text: `${winner.nickname}님 승리`, tone: 'text-fg', mark: true }
-  return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-fg', mark: true } : { text: '졌어요', tone: 'text-fg-muted' }
+  if (!isParticipant.value) return { text: `${winner.nickname}${format.value === 'TEAMS' ? '' : '님'} 승리`, tone: 'text-fg', mark: true }
+  return isMine(winner) ? { text: '이겼어요', tone: 'text-fg', mark: true } : { text: '졌어요', tone: 'text-fg-muted' }
 })
 const pending = computed(() => {
   if (confirmed.value || disputed.value) return { canAnswer: false }
-  const submitter = [user1.value, user2.value].find((u) => u.id === resultSubmittedById.value)
+  const submitter = resSides.value.flatMap((s) => s.members).find((u) => u.id === resultSubmittedById.value)
+    || [user1.value, user2.value].find((u) => u.id === resultSubmittedById.value)
   const until = autoConfirmAt.value ? `${matchTime(autoConfirmAt.value)}까지` : '24시간 안에'
   if (!isParticipant.value) return { canAnswer: false, title: '확인 중인 결과예요', description: '두 선수가 확인하면 기록돼요' }
-  if (resultSubmittedById.value === currentUserId.value) {
-    return { canAnswer: false, title: `${opponent.value.nickname}님의 확인을 기다려요`, description: `확인하면 전적과 레이팅에 반영돼요. ${until} 답이 없으면 그대로 확정돼요` }
+  // 팀 경기는 상대 팀이, 각자 경기는 낸 사람 말고 누구든 확인한다
+  const waitingFor = format.value === 'TEAMS' ? '상대 팀' : format.value === 'FREE_FOR_ALL' ? '다른 사람' : `${opponent.value.nickname}님`
+  const sameTeam = format.value === 'TEAMS' && mySide.value === submitterSide.value
+  if (resultSubmittedById.value === currentUserId.value || sameTeam) {
+    return { canAnswer: false, title: `${waitingFor}의 확인을 기다려요`, description: `확인하면 전적과 레이팅에 반영돼요. ${until} 답이 없으면 그대로 확정돼요` }
   }
   return {
     canAnswer: true,
@@ -474,7 +520,8 @@ const mySetScores = computed(() => setResults.value.map((s) => (sides.value[0].i
 async function onCountered() {
   haptic('success')
   await load()
-  showToast(disputed.value ? '결과가 맞지 않아 이 경기는 기록하지 않아요' : `고친 점수를 보냈어요. ${opponent.value.nickname}님이 확인해요`)
+  const who = format.value === 'TEAMS' ? '상대 팀이' : format.value === 'FREE_FOR_ALL' ? '다른 사람이' : `${opponent.value.nickname}님이`
+  showToast(disputed.value ? '결과가 맞지 않아 이 경기는 기록하지 않아요' : `고친 결과를 보냈어요. ${who} 확인해요`)
 }
 
 const reviewRows = computed(() => [
@@ -499,8 +546,17 @@ async function load() {
     drawCount.value = res.data.drawCount
     winnerIdx.value = res.data.winnerIdx
     championIdx.value = res.data.newChampionIdx
-    // 내가 user2일 때만 순서를 뒤집어 나를 왼쪽에 둔다 (구경하는 사람은 서버 순서 그대로)
-    idxCorrect.value = res.data.user2.id !== currentUserId.value
+    format.value = res.data.format || 'DUEL'
+    resSides.value = res.data.sides || []
+    placesEntered.value = !!res.data.placesEntered
+    // 팀 경기: 두 팀을 두 사람처럼 보인다 (이름은 팀 이름과 팀원, 누르면 첫 사람 프로필)
+    if (format.value === 'TEAMS' && resSides.value.length === 2) {
+      const asUser = (side) => ({ ...side.members[0], nickname: `${TEAM_NAMES[side.key] || '팀'} · ${side.members.map((m) => m.nickname).join('·')}` })
+      res.data.user1 = asUser(resSides.value[0])
+      res.data.user2 = asUser(resSides.value[1])
+    }
+    // 내가 user2(팀 경기는 내 팀이 둘째 편)일 때만 순서를 뒤집어 나를 왼쪽에 둔다 (구경하는 사람은 서버 순서 그대로)
+    idxCorrect.value = format.value === 'TEAMS' ? mySide.value !== 1 : res.data.user2.id !== currentUserId.value
 
     if (idxCorrect.value) {
       user1.value = res.data.user1

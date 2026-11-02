@@ -7,6 +7,8 @@
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ game.rule?.ruleTitle }}</span>
           <span class="block t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</span>
+          <!-- 여럿이 하는 경기: 형식과 모인 인원 -->
+          <span v-if="multi" class="block t-micro mt-0.5">{{ formatLabel(game.format, game.maxPlayers) }} · {{ game.currentParticipantCounts }}/{{ game.maxPlayers }}명 모임</span>
         </span>
       </button>
       <!-- 댓글·메시지·공유·신고는 여기로 (카드마다 아이콘 줄을 두지 않는다) -->
@@ -33,6 +35,18 @@
         <span v-for="n in 8" :key="n" class="apply-spark" :style="{ '--a': n * 45 + 'deg' }" aria-hidden="true"></span>
       </span>
       <UiButton v-else-if="game.isAppliedByMe" size="sm" variant="secondary" :loading="busy" @click="emit('cancel')">신청 취소</UiButton>
+      <!-- 팀 경기는 들어갈 팀을 골라 신청한다 (자리가 남은 팀만) -->
+      <span v-else-if="game.format === 'TEAMS'" class="flex gap-1.5 flex-shrink-0">
+        <UiButton
+          v-for="(left, team) in game.teamSeatsLeft || []"
+          :key="team"
+          size="sm"
+          variant="tonal"
+          :disabled="left <= 0"
+          :loading="busy"
+          @click="emit('apply', team)"
+        >{{ TEAM_NAMES[team] }} {{ left > 0 ? `${left}자리` : '꽉 참' }}</UiButton>
+      </span>
       <UiButton v-else size="sm" variant="tonal" :loading="busy" @click="emit('apply')">신청</UiButton>
     </div>
   </UiCard>
@@ -44,6 +58,7 @@ import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
 import { matchTime, place, ratingLine, timeAgo } from '../../utils/format'
+import { formatLabel, TEAM_NAMES } from '../../utils/gameFormat'
 
 const props = defineProps({
   game: { type: Object, required: true },
@@ -53,6 +68,8 @@ const props = defineProps({
 const emit = defineEmits(['rule', 'profile', 'apply', 'cancel', 'challengers', 'more'])
 
 // 신청이 막 된 순간만 축하 모양을 잠깐 보여준다
+const multi = computed(() => props.game.format && props.game.format !== 'DUEL')
+
 const justApplied = ref(false)
 watch(() => props.game.isAppliedByMe, (now, before) => {
   if (now && before === false) {

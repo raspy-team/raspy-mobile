@@ -1230,6 +1230,16 @@
               "type": "integer",
               "format": "int64"
             }
+          },
+          {
+            "name": "team",
+            "in": "query",
+            "description": "팀 경기에서 들어갈 팀 (0·1). 다른 경기는 비운다",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {
@@ -5302,15 +5312,29 @@
         }
       },
       "EnterResultRequest": {
-        "required": [
-          "sets"
-        ],
         "type": "object",
         "properties": {
           "sets": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SetScoreInput"
+            }
+          },
+          "sideSets": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          "places": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         }
@@ -5405,6 +5429,7 @@
       },
       "CreateGameRequest": {
         "required": [
+          "format",
           "referencedRuleId"
         ],
         "type": "object",
@@ -5426,6 +5451,18 @@
           "friendId": {
             "type": "integer",
             "format": "int64"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -6852,6 +6889,7 @@
               "INBOX",
               "MY_GAME",
               "DM",
+              "GAME_JOIN_APPROVED",
               "FRIEND_REQUEST",
               "FRIEND_APPROVE",
               "FRIEND_REJECT",
@@ -7053,6 +7091,7 @@
         "required": [
           "chatRoomId",
           "currentSet",
+          "format",
           "gameStatus",
           "id",
           "limitSeconds",
@@ -7063,6 +7102,7 @@
           "set1",
           "set2",
           "setStarted",
+          "sides",
           "user1",
           "user2"
         ],
@@ -7144,6 +7184,49 @@
               "PLAYING",
               "VOTING"
             ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SideScore"
+            }
+          }
+        }
+      },
+      "SideScore": {
+        "required": [
+          "key",
+          "members",
+          "score",
+          "sets"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummary"
+            }
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sets": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7171,6 +7254,10 @@
           },
           "approved": {
             "type": "boolean"
+          },
+          "team": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7179,10 +7266,14 @@
           "confirmed",
           "disputed",
           "drawCount",
+          "format",
           "gameSummary",
           "newChampionIdx",
+          "placesEntered",
           "rejectsLeft",
           "setResults",
+          "sideSetResults",
+          "sides",
           "startDate",
           "totalSetCount",
           "user1",
@@ -7253,6 +7344,29 @@
           },
           "disputed": {
             "type": "boolean"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SideResult"
+            }
+          },
+          "sideSetResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SideSetResult"
+            }
+          },
+          "placesEntered": {
+            "type": "boolean"
           }
         }
       },
@@ -7261,6 +7375,7 @@
           "challengers",
           "createdAt",
           "currentParticipantCounts",
+          "format",
           "gameStatus",
           "id",
           "isAppliedByMe",
@@ -7342,6 +7457,80 @@
           },
           "isAppliedByMe": {
             "type": "boolean"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "teamSeatsLeft": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "SideResult": {
+        "required": [
+          "key",
+          "members",
+          "place",
+          "points",
+          "setsWon"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummary"
+            }
+          },
+          "place": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setsWon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "points": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SideSetResult": {
+        "required": [
+          "scores",
+          "setIdx",
+          "winner"
+        ],
+        "type": "object",
+        "properties": {
+          "setIdx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "winner": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7631,14 +7820,40 @@
           }
         }
       },
+      "GamePlayer": {
+        "required": [
+          "id",
+          "nickname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileUrl": {
+            "type": "string"
+          },
+          "team": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RequestedGameResponse": {
         "required": [
           "applicants",
+          "format",
           "gameStatus",
           "id",
+          "maxPlayers",
           "ownerId",
           "ownerNickname",
           "ownerStatistics",
+          "players",
           "rule",
           "status"
         ],
@@ -7706,17 +7921,42 @@
             "items": {
               "$ref": "#/components/schemas/ApplicantInfo"
             }
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GamePlayer"
+            }
+          },
+          "myTeam": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
       "MyGameResponse": {
         "required": [
+          "format",
           "id",
           "isOwner",
+          "maxPlayers",
           "myId",
           "myNickname",
           "myRating",
           "myStatistics",
+          "players",
           "rule",
           "status"
         ],
@@ -7799,6 +8039,24 @@
           "championId": {
             "type": "integer",
             "format": "int64"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GamePlayer"
+            }
           }
         }
       },
@@ -8174,9 +8432,31 @@
           }
         }
       },
+      "RankDto": {
+        "required": [
+          "id",
+          "name",
+          "place"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "place": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "ResultDto": {
         "required": [
           "duration",
+          "format",
           "scoreA",
           "scoreB",
           "setScores",
@@ -8206,6 +8486,26 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SetScoreDto"
+            }
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "DUEL",
+              "TEAMS",
+              "FREE_FOR_ALL"
+            ]
+          },
+          "sideNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ranking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankDto"
             }
           }
         }

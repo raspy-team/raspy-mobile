@@ -13,8 +13,21 @@
       <UiBadge :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
     </div>
 
+    <!-- 여럿이 하는 경기: 팀(또는 모두)의 얼굴과 빈자리 -->
+    <div v-if="multi" class="px-4 pb-4 space-y-2">
+      <div v-for="row in rows" :key="row.key" class="flex items-center gap-2 min-w-0">
+        <span v-if="row.name" class="t-micro w-9 flex-shrink-0">{{ row.name }}</span>
+        <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+          <button v-for="p in row.players" :key="p.id" type="button" :aria-label="p.nickname" @click="emit('profile', p.id)">
+            <UiAvatar :src="p.profileUrl" :name="p.nickname" size="sm" />
+          </button>
+          <span v-for="n in row.empty" :key="'e' + n" class="w-8 h-8 rounded-full border border-dashed border-line-strong" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- 나 vs 상대 -->
-    <div class="flex items-center gap-3 px-4 pb-4">
+    <div v-else class="flex items-center gap-3 px-4 pb-4">
       <button type="button" class="flex items-center gap-2 min-w-0 flex-1" @click="emit('profile', me.id)">
         <UiAvatar :src="me.avatar" :name="me.name" size="sm" />
         <span class="text-sm text-fg truncate">{{ me.name }}</span>
@@ -50,6 +63,7 @@ import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
 import { matchTime, place } from '../../utils/format'
+import { TEAM_NAMES } from '../../utils/gameFormat'
 
 const props = defineProps({
   game: { type: Object, required: true },
@@ -81,6 +95,29 @@ const opponent = computed(() => {
   return null
 })
 
+// 팀·각자 경기: 선수 목록은 players (나 포함)
+const multi = computed(() => !!props.game.format && props.game.format !== 'DUEL')
+const players = computed(() => props.game.players || [])
+const rows = computed(() => {
+  const g = props.game
+  if (g.format === 'TEAMS') {
+    return [0, 1].map((team) => {
+      const ps = players.value.filter((p) => p.team === team)
+      return { key: team, name: TEAM_NAMES[team], players: ps, empty: Math.max(0, g.maxPlayers / 2 - ps.length) }
+    })
+  }
+  return [{ key: 'all', name: '', players: players.value, empty: Math.max(0, (g.maxPlayers || 0) - players.value.length) }]
+})
+// 결과를 확인할 수 있나: 낸 사람이 아니고, 팀 경기면 낸 사람과 다른 팀 (서버 canConfirm과 같다)
+const canConfirm = computed(() => {
+  const g = props.game
+  if (g.resultSubmittedById === me.value?.id) return false
+  if (g.format !== 'TEAMS') return true
+  const teamOf = (id) => players.value.find((p) => p.id === id)?.team
+  return teamOf(me.value?.id) !== teamOf(g.resultSubmittedById)
+})
+const gathered = computed(() => `${players.value.length}/${props.game.maxPlayers}명`)
+
 // 상태 → 배지 + 할 일 (한 곳에서 정한다)
 // 주황(primary)은 진행 중인 경기로 돌아가기만. 나머지 할 일은 tonal로 옅게 (카드마다 주황이 반복되지 않게)
 const state = computed(() => {
@@ -88,12 +125,12 @@ const state = computed(() => {
   const live = g.status === 'IN_PROGRESS' || g.gameStatus === 'IN_PROGRESS'
   if (live) return { label: '진행 중', tone: 'success', action: 'play', actionLabel: '경기로 돌아가기', actionVariant: 'primary' }
   if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
-    return g.resultSubmittedById === me.value?.id
-      ? { label: '확인 대기', tone: 'neutral', hint: '상대가 확인하면 기록돼요', action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }
+    return !canConfirm.value
+      ? { label: '확인 대기', tone: 'neutral', hint: multi.value ? '상대 쪽에서 확인하면 기록돼요' : '상대가 확인하면 기록돼요', action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }
       : { label: '결과 확인', tone: 'primary', action: 'result', actionLabel: '결과 확인하기', actionVariant: 'tonal' }
   }
   if (isMine.value) {
-    const n = (g.applicants || []).length
+    const n = (g.applicants || []).filter((a) => !a.approved || !multi.value).length
     if (g.status === 'COMPLETED') return { label: '끝남', tone: 'neutral', action: 'result', actionLabel: '결과 보기', actionVariant: 'secondary' }
     if (g.status === 'CANCELED') return { label: '취소됨', tone: 'neutral', hint: '취소된 경기예요' }
     if (g.status === 'SCHEDULED') {
@@ -103,9 +140,14 @@ const state = computed(() => {
         : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
     }
     if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청자 보고 승인하기', actionVariant: 'tonal' }
+    if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 보내서 더 부르기', actionVariant: 'secondary' }
     return { label: '상대 구하는 중', tone: 'neutral', action: 'share', actionLabel: '링크 공유하기', actionVariant: 'secondary' }
   }
   if (g.status === 'REQUESTED') return { label: '승인 대기', tone: 'neutral', action: 'cancel-request', actionLabel: '신청 취소', actionVariant: 'secondary' }
+  // 여럿이 하는 경기는 승인돼도 다 모일 때까지 확정이 아니다
+  if (g.status === 'APPROVED' && multi.value && g.gameStatus === 'MATCHING') {
+    return { label: '승인됨', tone: 'neutral', hint: `${gathered.value} 모였어요. 다 모이면 확정돼요` }
+  }
   if (g.status === 'APPROVED') {
     return needsSchedule.value
       ? { label: '확정', tone: 'primary', action: 'schedule', actionLabel: '시간·장소 정하기', actionVariant: 'tonal' }

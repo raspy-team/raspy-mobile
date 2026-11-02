@@ -2834,7 +2834,11 @@ export interface components {
             detailAddress?: string;
         };
         EnterResultRequest: {
-            sets: components["schemas"]["SetScoreInput"][];
+            sets?: components["schemas"]["SetScoreInput"][];
+            sideSets?: number[][];
+            places?: {
+                [key: string]: number;
+            };
         };
         SetScoreInput: {
             /** Format: int32 */
@@ -2874,6 +2878,10 @@ export interface components {
             placeDetail?: string;
             /** Format: int64 */
             friendId?: number;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** Format: int32 */
+            maxPlayers?: number;
         };
         CancelGameRequest: {
             /** Format: int64 */
@@ -3309,7 +3317,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -3395,6 +3403,18 @@ export interface components {
             chatRoomId: string;
             /** @enum {string} */
             gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING";
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            sides: components["schemas"]["SideScore"][];
+        };
+        SideScore: {
+            /** Format: int32 */
+            key: number;
+            members: components["schemas"]["UserSummary"][];
+            /** Format: int32 */
+            score: number;
+            /** Format: int32 */
+            sets: number;
         };
         ApplicantInfo: {
             /** Format: int64 */
@@ -3403,6 +3423,8 @@ export interface components {
             applicantNickname: string;
             applicantGameStatisticsDTO: components["schemas"]["UserGameStatisticsDTO"];
             approved: boolean;
+            /** Format: int32 */
+            team?: number;
         };
         GameResultResponse: {
             gameSummary: components["schemas"]["GameSummaryResponse"];
@@ -3431,6 +3453,11 @@ export interface components {
             /** Format: int32 */
             rejectsLeft: number;
             disputed: boolean;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            sides: components["schemas"]["SideResult"][];
+            sideSetResults: components["schemas"]["SideSetResult"][];
+            placesEntered: boolean;
         };
         GameSummaryResponse: {
             /** Format: int64 */
@@ -3458,6 +3485,27 @@ export interface components {
             ruleStatisticsOfOwner?: components["schemas"]["UserGameStatisticsDTO"];
             challengers: components["schemas"]["ApplicantInfo"][];
             isAppliedByMe: boolean;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            teamSeatsLeft?: number[];
+        };
+        SideResult: {
+            /** Format: int32 */
+            key: number;
+            members: components["schemas"]["UserSummary"][];
+            /** Format: int32 */
+            place: number;
+            /** Format: int32 */
+            setsWon: number;
+            /** Format: int32 */
+            points: number;
+        };
+        SideSetResult: {
+            /** Format: int32 */
+            setIdx: number;
+            scores: number[];
+            /** Format: int32 */
+            winner: number;
         };
         GameRankingResponse: {
             /** Format: int64 */
@@ -3553,6 +3601,14 @@ export interface components {
             /** Format: date-time */
             deletedAt?: string;
         };
+        GamePlayer: {
+            /** Format: int64 */
+            id: number;
+            nickname: string;
+            profileUrl?: string;
+            /** Format: int32 */
+            team?: number;
+        };
         RequestedGameResponse: {
             /** Format: int64 */
             id: number;
@@ -3574,6 +3630,13 @@ export interface components {
             /** Format: int64 */
             championId?: number;
             applicants: components["schemas"]["ApplicantInfo"][];
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** Format: int32 */
+            maxPlayers: number;
+            players: components["schemas"]["GamePlayer"][];
+            /** Format: int32 */
+            myTeam?: number;
         };
         MyGameResponse: {
             /** Format: int64 */
@@ -3605,6 +3668,11 @@ export interface components {
             resultSubmittedById?: number;
             /** Format: int64 */
             championId?: number;
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** Format: int32 */
+            maxPlayers: number;
+            players: components["schemas"]["GamePlayer"][];
         };
         GameApplicantsResponse: {
             /** Format: int64 */
@@ -3705,6 +3773,13 @@ export interface components {
             url: string;
             mediaType: string;
         };
+        RankDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int32 */
+            place: number;
+        };
         ResultDto: {
             /** Format: int32 */
             scoreA: number;
@@ -3715,6 +3790,10 @@ export interface components {
             sets: number;
             duration: string;
             setScores: components["schemas"]["SetScoreDto"][];
+            /** @enum {string} */
+            format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            sideNames?: string[];
+            ranking?: components["schemas"]["RankDto"][];
         };
         ReviewDto: {
             /** Format: int64 */
@@ -4714,7 +4793,10 @@ export interface operations {
     };
     applyToJoin: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 팀 경기에서 들어갈 팀 (0·1). 다른 경기는 비운다 */
+                team?: number;
+            };
             header?: never;
             path: {
                 gameId: number;

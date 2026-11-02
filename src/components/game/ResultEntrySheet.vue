@@ -1,12 +1,42 @@
 <template>
   <UiSheet :model-value="modelValue" :title="counter ? '내가 생각하는 점수' : '결과만 입력'" @update:model-value="emit('update:modelValue', $event)">
-    <p v-if="counter" class="t-caption mb-4">고친 점수가 새 결과가 되고, 이번엔 {{ opponentName }}님이 확인해요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
-    <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워두세요. {{ opponentName }}님이 확인하면 기록돼요.</p>
+    <p v-if="counter" class="t-caption mb-4">고친 결과가 새 결과가 되고, 이번엔 {{ isGroup ? '다른 사람' : opponentName + (format === 'TEAMS' ? '' : '님') }}이 확인해요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
+    <p v-else-if="isGroup" class="t-caption mb-4">다른 사람 한 명이 확인하면 기록돼요.</p>
+    <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워두세요. {{ opponentName }}{{ format === 'TEAMS' ? '' : '님' }}이 확인하면 기록돼요.</p>
     <p v-if="warning" class="text-sm text-danger-fg mb-4">{{ warning }}</p>
 
+    <!-- 셋 이상이 각자: 등수로 또는 점수로 -->
+    <template v-if="isGroup">
+      <div class="flex gap-2 mb-4">
+        <UiChip :selected="groupMode === 'place'" @click="groupMode = 'place'">등수로</UiChip>
+        <UiChip :selected="groupMode === 'score'" @click="groupMode = 'score'">점수로</UiChip>
+      </div>
+      <ol class="space-y-2">
+        <li v-for="p in people" :key="p.id" class="grid grid-cols-[1fr_6rem] items-center gap-3">
+          <span class="text-sm text-fg truncate">{{ p.nickname }}</span>
+          <select v-if="groupMode === 'place'" v-model.number="p.place" class="ui-control h-12 text-center" :aria-label="`${p.nickname} 등수`">
+            <option :value="null" disabled>등수</option>
+            <option v-for="n in people.length" :key="n" :value="n">{{ n }}등</option>
+          </select>
+          <input
+            v-else
+            v-model.number="p.score"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            max="999"
+            class="ui-control h-12 text-center tabular-nums"
+            :aria-label="`${p.nickname} 점수`"
+          />
+        </li>
+      </ol>
+      <p class="t-caption mt-3">{{ groupMode === 'place' ? '같이 들어오면 같은 등수를 고르세요.' : '점수가 높은 순서로 등수가 매겨져요.' }}</p>
+    </template>
+
+    <template v-else>
     <div class="grid grid-cols-[3rem_1fr_1fr_2.75rem] items-center gap-2 mb-1">
       <span></span>
-      <span class="t-label text-center truncate">나</span>
+      <span class="t-label text-center truncate">{{ myName }}</span>
       <span class="t-label text-center truncate">{{ opponentName }}</span>
       <span></span>
     </div>
@@ -35,6 +65,7 @@
       </li>
     </ol>
     <UiButton v-if="sets.length < 9" variant="ghost" icon="fas fa-plus" class="mt-2" @click="addSet">세트 추가</UiButton>
+    </template>
     <p v-if="error" class="text-sm text-danger-fg mt-3" role="alert">{{ error }}</p>
 
     <template #footer>
@@ -46,9 +77,9 @@
 <script setup>
 // 점수판 없이, 경기가 끝난 뒤 세트별 점수만 낸다. 상대가 확인하면 확정된다
 // counter: 상대가 낸 결과를 돌려보내며 내가 생각하는 점수를 낸다 (initial: 지금 결과를 [내 점수, 상대 점수]로)
-import { ref, watch, defineProps, defineEmits } from 'vue'
+import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { POST } from '../../api/client'
-import { UiButton, UiIconButton, UiSheet } from '../ui'
+import { UiButton, UiChip, UiIconButton, UiSheet } from '../ui'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -58,6 +89,11 @@ const props = defineProps({
   counter: { type: Boolean, default: false },
   initial: { type: Array, default: () => [] },
   warning: { type: String, default: '' },
+  // 팀·각자 경기: 서버 detail·result의 sides 순서 그대로 ({ members: [{ id, nickname }] }), 내 편의 자리
+  format: { type: String, default: 'DUEL' },
+  sides: { type: Array, default: () => [] },
+  mySide: { type: Number, default: 0 },
+  myName: { type: String, default: '나' },
 })
 const emit = defineEmits(['update:modelValue', 'submitted'])
 
@@ -83,19 +119,28 @@ watch(
 
 const addSet = () => sets.value.push(blank())
 
-async function submit() {
-  const valid = (n) => Number.isInteger(n) && n >= 0 && n <= 999
-  const empty = (n) => n === null || n === ''
-  // 두 칸 다 빈 세트는 안 한 세트로 본다 (칸은 넉넉히 두므로)
-  const played = sets.value.filter((s) => !(empty(s.my) && empty(s.opponent)))
-  if (!played.length || !played.every((s) => valid(s.my) && valid(s.opponent))) {
-    error.value = played.length ? '세트마다 두 사람 점수를 0~999 사이로 넣어주세요' : '한 세트 이상 점수를 넣어주세요'
-    return
-  }
+// 셋 이상이 각자 하는 경기: 사람마다 등수나 점수 하나
+const isGroup = computed(() => props.format === 'FREE_FOR_ALL')
+const groupMode = ref('place')
+const people = ref([])
+watch(
+  () => [props.modelValue, props.sides],
+  ([open]) => {
+    if (!open || !isGroup.value) return
+    people.value = props.sides.map((s) => ({ id: s.members[0].id, nickname: s.members[0].nickname, place: null, score: null }))
+  },
+  { immediate: true },
+)
+
+// 편 순서대로의 점수 [내 편 점수, 상대 편 점수] → 서버의 sideSets 순서로
+function toSideSets(played) {
+  return played.map((s) => (props.mySide === 0 ? [s.my, s.opponent] : [s.opponent, s.my]))
+}
+
+async function send(body) {
   submitting.value = true
   error.value = ''
   try {
-    const body = { sets: played.map((s) => ({ myScore: s.my, opponentScore: s.opponent })) }
     if (props.counter) await POST('/api/games/{id}/result/reject', { path: { id: Number(props.gameId) }, body })
     else await POST('/api/games/{id}/result', { path: { id: Number(props.gameId) }, body })
     emit('update:modelValue', false)
@@ -105,5 +150,31 @@ async function submit() {
   } finally {
     submitting.value = false
   }
+}
+
+function submitGroup() {
+  const ps = people.value
+  if (groupMode.value === 'place') {
+    if (ps.some((p) => !p.place)) return (error.value = '모든 사람의 등수를 골라 주세요')
+    return send({ places: Object.fromEntries(ps.map((p) => [p.id, p.place])) })
+  }
+  if (!ps.every((p) => Number.isInteger(p.score) && p.score >= 0 && p.score <= 999)) return (error.value = '모든 사람의 점수를 0~999 사이로 넣어 주세요')
+  return send({ sideSets: [ps.map((p) => p.score)] })
+}
+
+async function submit() {
+  if (isGroup.value) return submitGroup()
+  const valid = (n) => Number.isInteger(n) && n >= 0 && n <= 999
+  const empty = (n) => n === null || n === ''
+  // 두 칸 다 빈 세트는 안 한 세트로 본다 (칸은 넉넉히 두므로)
+  const played = sets.value.filter((s) => !(empty(s.my) && empty(s.opponent)))
+  if (!played.length || !played.every((s) => valid(s.my) && valid(s.opponent))) {
+    error.value = played.length ? '세트마다 두 사람 점수를 0~999 사이로 넣어주세요' : '한 세트 이상 점수를 넣어주세요'
+    return
+  }
+  // 팀 경기는 편 순서대로 (sideSets), 1:1은 [내 점수, 상대 점수] (sets)
+  await send(props.format === 'TEAMS'
+    ? { sideSets: toSideSets(played) }
+    : { sets: played.map((s) => ({ myScore: s.my, opponentScore: s.opponent })) })
 }
 </script>

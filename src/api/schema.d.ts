@@ -916,6 +916,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/plays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 대결 시작
+         * @description 상대를 기다리는 대결이 있으면 그 문제로 짝이 되고, 없으면 새 대결을 열어 다음 사람을 기다린다. 시간은 이때부터 서버가 잰다.
+         */
+        post: operations["start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/plays/{playId}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 답 내기
+         * @description 점수를 매기고, 상대도 냈으면 승패를 정해 레이팅에 반영한다.
+         */
+        post: operations["submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/rules/edit-requests/{id}/reject": {
         parameters: {
             query?: never;
@@ -2052,6 +2092,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 앱 게임 목록
+         * @description 게임마다 내 레이팅·전적·최고 기록을 함께 준다.
+         */
+        get: operations["list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/{key}/records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 기록 순위
+         * @description 사람마다 최고 기록 하나, 높은 순 50명과 내 순위. period=WEEK는 이번 주 월요일부터. problemKey를 주면 그 문제 안에서만.
+         */
+        get: operations["records"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/{key}/duels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 이 게임에서 내 최근 대결 */
+        get: operations["myDuels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/duels/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 내 대결 하나 */
+        get: operations["duel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/users": {
         parameters: {
             query?: never;
@@ -2103,7 +2217,7 @@ export interface paths {
          * 신고 목록 (관리자 전용)
          * @description 최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.
          */
-        get: operations["list"];
+        get: operations["list_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2282,6 +2396,7 @@ export interface components {
             /** Format: int64 */
             editRequestId?: number;
             rejectionReason?: string;
+            appGameKey?: string;
         };
         UserProfileDto: {
             /** Format: int64 */
@@ -2413,6 +2528,50 @@ export interface components {
         };
         CheckUsernameRequest: {
             username: string;
+        };
+        AppPlayResponse: {
+            /** Format: int64 */
+            playId: number;
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            problem: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            deadlineAt: string;
+            /** Format: int32 */
+            timeLimitSeconds: number;
+            matched: boolean;
+        };
+        SubmitPlayRequest: {
+            answer: string;
+        };
+        AppDuelResponse: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            /** @enum {string} */
+            result?: "WIN" | "LOSE" | "DRAW";
+            problem: string;
+            /** Format: double */
+            myScore?: number;
+            opponent?: components["schemas"]["AppPlayer"];
+            /** Format: double */
+            opponentScore?: number;
+            /** Format: int32 */
+            ratingAfter?: number;
+            /** Format: int32 */
+            ratingChange?: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AppPlayer: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
         };
         RejectEditRequestDto: {
             rejectionReason: string;
@@ -2637,7 +2796,7 @@ export interface components {
             /** Format: int64 */
             gameId?: number;
             /** @enum {string} */
-            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -2646,7 +2805,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -2674,7 +2833,7 @@ export interface components {
             opponentNickname?: string;
             opponentProfileUrl?: string;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
             /** Format: date-time */
             startedAt?: string;
             /** Format: int64 */
@@ -2731,7 +2890,7 @@ export interface components {
             limitSeconds: number;
             chatRoomId: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
         };
         ApplicantInfo: {
             /** Format: int64 */
@@ -2784,7 +2943,7 @@ export interface components {
             ownerNickname: string;
             ownerProfileUrl?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
             /** Format: double */
             mannerScore: number;
             /** Format: int64 */
@@ -2895,7 +3054,7 @@ export interface components {
             matchDate?: string;
             matchLocation?: string;
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
             /** Format: int64 */
             resultSubmittedById?: number;
             /** @enum {string} */
@@ -2932,7 +3091,7 @@ export interface components {
             /** Format: double */
             opponentRating?: number;
             /** @enum {string} */
-            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
             /** Format: date-time */
             startedAt?: string;
             /** Format: int64 */
@@ -2949,7 +3108,7 @@ export interface components {
             matchLocation?: string;
             applicants: components["schemas"]["ApplicantInfo"][];
             /** @enum {string} */
-            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED";
+            gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING";
             myProfileUrl?: string;
             /** Format: int64 */
             myId: number;
@@ -3077,6 +3236,46 @@ export interface components {
             username: string;
             nickname: string;
             isAdmin: boolean;
+        };
+        AppGameSummary: {
+            key: string;
+            title: string;
+            summary: string;
+            /** @enum {string} */
+            playMode: "OFFLINE" | "REALTIME" | "NON_REALTIME";
+            /** @enum {string} */
+            judge: "CONFIRM" | "APP" | "AI" | "VOTE";
+            recordable: boolean;
+            /** Format: int32 */
+            timeLimitSeconds: number;
+            scoreUnit: string;
+            /** Format: int64 */
+            ruleId: number;
+            /** Format: int32 */
+            myRating: number;
+            /** Format: int32 */
+            myWins: number;
+            /** Format: int32 */
+            myLosses: number;
+            /** Format: int32 */
+            myDraws: number;
+            /** Format: double */
+            myBest?: number;
+        };
+        AppRecordBoard: {
+            key: string;
+            /** @enum {string} */
+            period: "ALL" | "WEEK";
+            problemKey?: string;
+            entries: components["schemas"]["AppRecordEntry"][];
+            mine?: components["schemas"]["AppRecordEntry"];
+        };
+        AppRecordEntry: {
+            /** Format: int32 */
+            rank: number;
+            player: components["schemas"]["AppPlayer"];
+            /** Format: double */
+            score: number;
         };
         AdminUserResponse: {
             /** Format: int64 */
@@ -4376,6 +4575,54 @@ export interface operations {
                     "*/*": {
                         [key: string]: boolean;
                     };
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppPlayResponse"];
+                };
+            };
+        };
+    };
+    submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitPlayRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDuelResponse"];
                 };
             };
         };
@@ -5756,6 +6003,95 @@ export interface operations {
             };
         };
     };
+    list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppGameSummary"][];
+                };
+            };
+        };
+    };
+    records: {
+        parameters: {
+            query?: {
+                period?: "ALL" | "WEEK";
+                problemKey?: string;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppRecordBoard"];
+                };
+            };
+        };
+    };
+    myDuels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDuelResponse"][];
+                };
+            };
+        };
+    };
+    duel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDuelResponse"];
+                };
+            };
+        };
+    };
     getAllUsers: {
         parameters: {
             query?: never;
@@ -5816,7 +6152,7 @@ export interface operations {
             };
         };
     };
-    list: {
+    list_1: {
         parameters: {
             query?: never;
             header?: never;

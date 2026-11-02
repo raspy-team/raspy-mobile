@@ -25,13 +25,13 @@
           <template v-else>
             <span class="flex-1 min-w-0">
               <span class="block t-heading">아직 순위가 없어요</span>
-              <span class="block t-caption mt-0.5">이 규칙으로 한 판 하면 순위에 올라가요</span>
+              <span class="block t-caption mt-0.5">이 규칙으로 5판 하면 순위에 올라가요</span>
             </span>
             <UiButton size="sm" variant="tonal" :to="`/create-game?ruleId=${ruleId}`">경기 열기</UiButton>
           </template>
         </UiCard>
 
-        <UiEmptyState v-if="!rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 랭킹이 없어요" description="첫 경기의 승자가 1위가 돼요" />
+        <UiEmptyState v-if="!rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 랭킹이 없어요" description="5판 넘게 한 사람부터 순위에 올라요" />
 
         <UiList v-else class="mt-6">
           <UiListItem

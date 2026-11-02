@@ -24,6 +24,8 @@
       <UiButton size="sm" variant="ghost" to="/rules">규칙 둘러보기</UiButton>
     </div>
 
+    <AppGameStrip class="mt-6" />
+
     <UiSection title="열린 경기" class="mt-6">
       <template #action>
         <span v-if="games.length" class="t-micro">{{ games.length }}개</span>
@@ -136,6 +138,7 @@ import { getMyId } from '@/utils/me'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
+import AppGameStrip from '../../components/appgame/AppGameStrip.vue'
 import Comment from '../GameCommentView.vue'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,

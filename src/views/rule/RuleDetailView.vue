@@ -108,7 +108,8 @@
           <p class="t-heading truncate">{{ winSummary(rule) }}</p>
           <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : '첫 경기를 열어보세요' }}</p>
         </div>
-        <UiButton size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 열기</UiButton>
+        <UiButton v-if="rule.appGameKey" size="lg" :to="`/play/${rule.appGameKey}`">한 판 하기</UiButton>
+        <UiButton v-else size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 열기</UiButton>
       </div>
     </div>
 

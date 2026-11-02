@@ -1691,6 +1691,81 @@
         }
       }
     },
+    "/api/app-games/{key}/plays": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "대결 시작",
+        "description": "상대를 기다리는 대결이 있으면 그 문제로 짝이 되고, 없으면 새 대결을 열어 다음 사람을 기다린다. 시간은 이때부터 서버가 잰다.",
+        "operationId": "start",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppPlayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/plays/{playId}/submit": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "답 내기",
+        "description": "점수를 매기고, 상대도 냈으면 승패를 정해 레이팅에 반영한다.",
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitPlayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDuelResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/rules/edit-requests/{id}/reject": {
       "post": {
         "tags": [
@@ -3628,6 +3703,150 @@
         }
       }
     },
+    "/api/app-games": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "앱 게임 목록",
+        "description": "게임마다 내 레이팅·전적·최고 기록을 함께 준다.",
+        "operationId": "list",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppGameSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/{key}/records": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "기록 순위",
+        "description": "사람마다 최고 기록 하나, 높은 순 50명과 내 순위. period=WEEK는 이번 주 월요일부터. problemKey를 주면 그 문제 안에서만.",
+        "operationId": "records",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ALL",
+                "WEEK"
+              ],
+              "default": "ALL"
+            }
+          },
+          {
+            "name": "problemKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppRecordBoard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/{key}/duels": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "이 게임에서 내 최근 대결",
+        "operationId": "myDuels",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppDuelResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/duels/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "내 대결 하나",
+        "operationId": "duel",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDuelResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/users": {
       "get": {
         "tags": [
@@ -3727,7 +3946,7 @@
         ],
         "summary": "신고 목록 (관리자 전용)",
         "description": "최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.",
-        "operationId": "list",
+        "operationId": "list_1",
         "responses": {
           "200": {
             "description": "OK",
@@ -4121,6 +4340,9 @@
             "format": "int64"
           },
           "rejectionReason": {
+            "type": "string"
+          },
+          "appGameKey": {
             "type": "string"
           }
         }
@@ -4552,6 +4774,136 @@
         "type": "object",
         "properties": {
           "username": {
+            "type": "string"
+          }
+        }
+      },
+      "AppPlayResponse": {
+        "required": [
+          "deadlineAt",
+          "gameId",
+          "key",
+          "matched",
+          "playId",
+          "problem",
+          "startedAt",
+          "timeLimitSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeLimitSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matched": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SubmitPlayRequest": {
+        "required": [
+          "answer"
+        ],
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "AppDuelResponse": {
+        "required": [
+          "createdAt",
+          "gameId",
+          "key",
+          "problem",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "WIN",
+              "LOSE",
+              "DRAW"
+            ]
+          },
+          "problem": {
+            "type": "string"
+          },
+          "myScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "opponentScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "ratingAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ratingChange": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AppPlayer": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
             "type": "string"
           }
         }
@@ -5252,7 +5604,9 @@
               "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
-              "DELETED"
+              "DELETED",
+              "WAITING",
+              "PLAYING"
             ]
           }
         }
@@ -5304,7 +5658,8 @@
               "CREATOR_NEW_GAME",
               "PLAY_WITH_ME_TOO_REQUEST",
               "PLAY_WITH_ME_TOO_ACCEPT",
-              "PLAY_WITH_ME_TOO_REJECT"
+              "PLAY_WITH_ME_TOO_REJECT",
+              "APP_DUEL_RESULT"
             ]
           },
           "createdAt": {
@@ -5402,7 +5757,9 @@
               "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
-              "DELETED"
+              "DELETED",
+              "WAITING",
+              "PLAYING"
             ]
           },
           "startedAt": {
@@ -5571,7 +5928,9 @@
               "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
-              "DELETED"
+              "DELETED",
+              "WAITING",
+              "PLAYING"
             ]
           }
         }
@@ -5737,7 +6096,9 @@
               "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
-              "DELETED"
+              "DELETED",
+              "WAITING",
+              "PLAYING"
             ]
           },
           "mannerScore": {
@@ -6084,7 +6445,9 @@
               "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
-              "DELETED"
+              "DELETED",
+              "WAITING",
+              "PLAYING"
             ]
           },
           "resultSubmittedById": {
@@ -6196,7 +6559,9 @@
               "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
-              "DELETED"
+              "DELETED",
+              "WAITING",
+              "PLAYING"
             ]
           },
           "startedAt": {
@@ -6254,7 +6619,9 @@
               "RESULT_PENDING",
               "COMPLETED",
               "CANCELED",
-              "DELETED"
+              "DELETED",
+              "WAITING",
+              "PLAYING"
             ]
           },
           "myProfileUrl": {
@@ -6697,6 +7064,139 @@
           },
           "isAdmin": {
             "type": "boolean"
+          }
+        }
+      },
+      "AppGameSummary": {
+        "required": [
+          "judge",
+          "key",
+          "myDraws",
+          "myLosses",
+          "myRating",
+          "myWins",
+          "playMode",
+          "recordable",
+          "ruleId",
+          "scoreUnit",
+          "summary",
+          "timeLimitSeconds",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "playMode": {
+            "type": "string",
+            "enum": [
+              "OFFLINE",
+              "REALTIME",
+              "NON_REALTIME"
+            ]
+          },
+          "judge": {
+            "type": "string",
+            "enum": [
+              "CONFIRM",
+              "APP",
+              "AI",
+              "VOTE"
+            ]
+          },
+          "recordable": {
+            "type": "boolean"
+          },
+          "timeLimitSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scoreUnit": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "myRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myWins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myLosses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myDraws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myBest": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "AppRecordBoard": {
+        "required": [
+          "entries",
+          "key",
+          "period"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "WEEK"
+            ]
+          },
+          "problemKey": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppRecordEntry"
+            }
+          },
+          "mine": {
+            "$ref": "#/components/schemas/AppRecordEntry"
+          }
+        }
+      },
+      "AppRecordEntry": {
+        "required": [
+          "player",
+          "rank",
+          "score"
+        ],
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "player": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
           }
         }
       },

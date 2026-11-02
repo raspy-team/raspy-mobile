@@ -103,6 +103,7 @@ const routes = [
   { path: '/settings', component:  Setting},
   { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
+  { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/rules', component:  Rule},
   { path: '/rules/create', component: RuleCreate},
   { path: '/rules/my-rules', component: MyRules},

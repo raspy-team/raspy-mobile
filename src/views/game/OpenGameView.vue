@@ -37,7 +37,7 @@
           class="mt-6"
           :game-id="game.id"
           :players="game.players"
-          :closed="!['SCHEDULED', 'IN_PROGRESS'].includes(game.gameStatus)"
+          :closed="!['MATCHING', 'SCHEDULED'].includes(game.gameStatus)"
         />
         <UiButton v-if="game.ownerId === myId" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>
         <UiButton v-else block variant="ghost" class="mt-4" to="/">다른 열린 경기 보기</UiButton>

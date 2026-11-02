@@ -283,7 +283,7 @@ export interface paths {
         put?: never;
         /**
          * 응원하기
-         * @description 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번). 이기면 +50%를 더해 돌려받는다
+         * @description 시작 전인 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번, 만 19세 이상). 이기면 돌려받고 보너스(최대 50%, 유력한 쪽일수록 작고 아는 사이면 0)를 더한다
          */
         post: operations["cheerWithPoints"];
         delete?: never;
@@ -3734,6 +3734,8 @@ export interface components {
             /** Format: int32 */
             amount: number;
             settled: boolean;
+            /** Format: double */
+            bonusRate: number;
         };
         VerifyRequest: {
             /** Format: double */

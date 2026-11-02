@@ -3544,10 +3544,6 @@ export interface components {
             key: string;
             title: string;
             summary: string;
-            /** @enum {string} */
-            kind: "SPEED" | "ACCURACY" | "MEMORY" | "KNOWLEDGE" | "WORDS" | "CREATIVE" | "STRATEGY" | "DEXTERITY" | "MIND";
-            kindLabel: string;
-            ability: string;
             /** Format: int64 */
             playCount: number;
             /** @enum {string} */

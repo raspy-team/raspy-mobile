@@ -7781,12 +7781,9 @@
       },
       "AppGameSummary": {
         "required": [
-          "ability",
           "available",
           "judge",
           "key",
-          "kind",
-          "kindLabel",
           "myDraws",
           "myLosses",
           "myRating",
@@ -7809,26 +7806,6 @@
             "type": "string"
           },
           "summary": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "SPEED",
-              "ACCURACY",
-              "MEMORY",
-              "KNOWLEDGE",
-              "WORDS",
-              "CREATIVE",
-              "STRATEGY",
-              "DEXTERITY",
-              "MIND"
-            ]
-          },
-          "kindLabel": {
-            "type": "string"
-          },
-          "ability": {
             "type": "string"
           },
           "playCount": {

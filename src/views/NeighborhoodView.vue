@@ -39,12 +39,12 @@
             <div class="flex items-center justify-between border-t border-line px-4 h-11">
               <span class="t-micro">{{ n.expired ? '다시 인증해야 경기를 열고 신청할 수 있어요' : `${dateText(n.expiresAt)}까지 인증` }}</span>
               <span class="flex -mr-2">
-                <UiButton variant="ghost" size="sm" @click="openVerify">다시 인증</UiButton>
+                <UiButton variant="ghost" size="sm" @click="openVerify(n.code)">다시 인증</UiButton>
                 <UiButton variant="ghost" size="sm" @click="confirmRemove(n)">지우기</UiButton>
               </span>
             </div>
           </UiCard>
-          <UiButton v-if="list.length < maxCount" block variant="secondary" icon="plus" @click="openVerify">동네 추가하기</UiButton>
+          <UiButton v-if="list.length < maxCount" block variant="secondary" icon="plus" @click="openVerify('')">동네 추가하기</UiButton>
         </section>
 
         <!-- 범위: 지금 동네 기준 -->
@@ -75,8 +75,8 @@
       </template>
     </main>
 
-    <UiSheet v-model="verifyOpen" title="지금 위치로 인증">
-      <NeighborhoodVerify :current="list" :max-count="maxCount" @verified="onVerified" />
+    <UiSheet v-model="verifyOpen" :title="expectName ? `${expectName} 다시 인증` : '지금 위치로 인증'">
+      <NeighborhoodVerify :key="expectCode" :current="list" :max-count="maxCount" :expect-code="expectCode" @verified="onVerified" />
     </UiSheet>
   </div>
 </template>
@@ -115,7 +115,11 @@ function dateText(iso: string) {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-function openVerify() {
+// 다시 인증은 그 동네 안에서만 된다 (엉뚱한 동네가 인증되지 않게). 추가는 지금 위치 그대로
+const expectCode = ref('')
+const expectName = computed(() => list.value.find((n) => n.code === expectCode.value)?.name ?? '')
+function openVerify(code: string) {
+  expectCode.value = code
   verifyOpen.value = true
 }
 

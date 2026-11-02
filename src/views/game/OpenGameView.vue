@@ -22,6 +22,11 @@
           <template v-if="game.gameStatus !== 'MATCHING'">이미 상대가 정해진 경기예요.</template>
           <template v-else-if="game.ownerId === myId">신청이 오면 알려 드려요. 내 경기에서 승인해요.</template>
           <template v-else-if="game.isAppliedByMe">신청했어요. {{ game.ownerNickname }}님이 승인하면 알려 드려요.</template>
+          <!-- 공유 링크로 다른 동네 경기에 들어온 경우: 누르기 전에 이유를 보여 준다 -->
+          <template v-else-if="game.joinBlockedReason">
+            <span class="text-danger-fg">{{ game.joinBlockedReason }}</span>
+            <RouterLink to="/neighborhood" class="ml-1 underline underline-offset-2">내 동네 설정</RouterLink>
+          </template>
           <template v-else>신청하면 {{ game.ownerNickname }}님이 승인하고, 장소와 시간을 함께 정해요.</template>
         </p>
         <UiButton v-if="game.ownerId === myId" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>

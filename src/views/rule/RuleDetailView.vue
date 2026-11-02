@@ -45,7 +45,7 @@
         </div>
         <button type="button" class="py-3" @click="router.push(`/rules/${rule.id}/ranking`)">
           <p class="t-heading">{{ myRank ? `${myRank}위` : '–' }}</p>
-          <p class="t-micro mt-0.5">내 순위 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
+          <p class="t-micro mt-0.5">{{ rankingArea ? "동네 순위" : "내 순위" }} <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </button>
       </div>
 
@@ -81,7 +81,7 @@
 
       <!-- 랭킹 미리보기 -->
       <section v-if="top.length" class="mt-10 pt-8 border-t border-line">
-        <h2 class="t-heading mb-3">랭킹</h2>
+        <h2 class="t-heading mb-3">{{ rankingArea ? `${rankingArea} 랭킹` : '랭킹' }}</h2>
         <UiList>
           <UiListItem
             v-for="r in top"
@@ -184,6 +184,7 @@ const loading = ref(true)
 const myId = ref(null)
 const top = ref([])
 const myRank = ref(null)
+const rankingArea = ref('') // 동네 순위면 '합정동 근처'
 const menuOpen = ref(false)
 const reportOpen = ref(false)
 const reportReason = ref('')
@@ -267,6 +268,7 @@ onMounted(async () => {
   if (rankRes.status === 'fulfilled') {
     top.value = (rankRes.value.data.rankings || []).slice(0, 3)
     myRank.value = rankRes.value.data.currentUserRanking?.rank || null
+    rankingArea.value = rankRes.value.data.scope === 'dong' ? rankRes.value.data.areaName : ''
   }
   loading.value = false
 })

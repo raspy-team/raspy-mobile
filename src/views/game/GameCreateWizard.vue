@@ -44,14 +44,14 @@
             type="button"
             class="w-full flex items-center gap-4 p-4 rounded-xl bg-surface text-left active:bg-surface-2 disabled:opacity-50"
             :disabled="creating"
-            @click="opt.value === 'anyone' ? create(null) : (friendsOpen = true)"
+            @click="opt.value === 'anyone' ? createAnyone() : (friendsOpen = true)"
           >
             <span class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-fg-muted flex-shrink-0" aria-hidden="true">
               <UiIcon :name="opt.icon" />
             </span>
             <span class="flex-1 min-w-0">
               <span class="block t-heading">{{ opt.title }}</span>
-              <span class="block t-caption mt-0.5">{{ opt.description }}</span>
+              <span class="block t-caption mt-0.5">{{ opt.value === 'anyone' ? anyoneLine : opt.description }}</span>
             </span>
             <UiSpinner v-if="creating && opt.value === 'anyone' && !friend" size="sm" label="여는 중" />
             <UiIcon name="fas fa-chevron-right" class="text-fg-subtle" v-else  aria-hidden="true" />
@@ -145,6 +145,23 @@ const filteredFriends = computed(() => {
   return friends.value.filter((f) => f.nickname?.toLowerCase().includes(k) || f.username?.toLowerCase().includes(k))
 })
 
+// '아무나'는 내 동네 경기 목록에 올라간다. 동네가 없거나 인증이 지났으면 고르기 전에 알려 주고 인증으로 보낸다
+// ('친구와'는 아는 사람과 바로 잡는 경기라 동네와 상관없다)
+const dong = ref(null) // { name, expired } | null, 불러오기 전 undefined
+const anyoneLine = computed(() => {
+  if (dong.value === undefined) return OPTIONS[0].description
+  if (!dong.value) return '동네를 인증하면 내 동네 경기 목록에 올릴 수 있어요'
+  if (dong.value.expired) return `${dong.value.name} 인증이 지났어요. 다시 인증하면 열 수 있어요`
+  return `${dong.value.name} 근처 경기 목록에 올려서 신청을 받아요`
+})
+function createAnyone() {
+  if (dong.value === null || dong.value?.expired) {
+    router.push({ path: '/neighborhood', query: { back: route.fullPath, reason: anyoneLine.value } })
+    return
+  }
+  create(null)
+}
+
 async function create(target) {
   if (creating.value) return
   creating.value = true
@@ -183,6 +200,10 @@ onMounted(() => {
     return
   }
   api.get(`/api/rules/${ruleId}`).then(({ data }) => (rule.value = data)).catch(() => {})
+  dong.value = undefined
+  api.get('/api/neighborhoods/me')
+    .then(({ data }) => (dong.value = data.neighborhoods.find((n) => n.active) ?? null))
+    .catch(() => (dong.value = undefined))
   loadFriends()
 })
 </script>

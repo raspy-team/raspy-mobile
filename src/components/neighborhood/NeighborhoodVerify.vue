@@ -25,11 +25,13 @@
         </div>
       </div>
 
+      <p v-if="wrongPlace" class="t-caption text-danger-fg mt-4" role="alert">{{ expected!.name }}을 다시 인증하려면 {{ expected!.name }} 안에서 해 주세요</p>
       <p v-if="error" class="t-caption text-danger-fg mt-4" role="alert">{{ error }}</p>
       <div class="flex gap-2 mt-6">
         <UiButton variant="secondary" :disabled="saving" @click="reset">다시 찾기</UiButton>
-        <UiButton class="flex-1" :loading="saving" :disabled="needReplace && !replaceCode" @click="verify">{{ found.name }}으로 인증하기</UiButton>
+        <UiButton class="flex-1" :loading="saving" :disabled="wrongPlace || (needReplace && !replaceCode)" @click="verify">{{ found.name }}으로 인증하기</UiButton>
       </div>
+      <p class="t-micro mt-3">인증하면 위치를 동네 확인에만 쓰는 데 동의하는 거예요. 좌표는 저장하지 않고 동네 이름만 남겨요.</p>
     </div>
 
     <!-- 공공누리 제1유형 · CC BY 4.0 출처 표시 (raspy-api resources/neighborhood/README.md) -->
@@ -48,7 +50,8 @@ import { UiButton, UiChip } from '../ui'
 type Mine = components['schemas']['MyNeighborhoods']
 type Found = components['schemas']['DongView']
 
-const props = withDefaults(defineProps<{ current?: Mine['neighborhoods']; maxCount?: number }>(), { current: () => [], maxCount: 2 })
+// expectCode: 이 동네를 다시 인증한다 (지금 위치가 그 동네여야 한다)
+const props = withDefaults(defineProps<{ current?: Mine['neighborhoods']; maxCount?: number; expectCode?: string }>(), { current: () => [], maxCount: 2, expectCode: '' })
 const emit = defineEmits<{ verified: [Mine] }>()
 
 const locating = ref(false)
@@ -58,7 +61,9 @@ const found = ref<Found | null>(null)
 const pos = ref<Position | null>(null)
 const replaceCode = ref('')
 
-const needReplace = computed(() => !!found.value && props.current.length >= props.maxCount && !props.current.some((n) => n.code === found.value!.code))
+const needReplace = computed(() => !props.expectCode && !!found.value && props.current.length >= props.maxCount && !props.current.some((n) => n.code === found.value!.code))
+const expected = computed(() => props.current.find((n) => n.code === props.expectCode))
+const wrongPlace = computed(() => !!expected.value && !!found.value && found.value.code !== props.expectCode)
 
 function reset() {
   found.value = null
@@ -87,7 +92,7 @@ async function verify() {
   error.value = ''
   try {
     const { data } = await POST('/api/neighborhoods/verify', {
-      body: { lat: pos.value.lat, lon: pos.value.lon, accuracy: pos.value.accuracy, replaceCode: replaceCode.value || undefined },
+      body: { lat: pos.value.lat, lon: pos.value.lon, accuracy: pos.value.accuracy, replaceCode: replaceCode.value || undefined, expectCode: props.expectCode || undefined },
     })
     emit('verified', data)
     reset()

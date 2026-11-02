@@ -2983,6 +2983,7 @@ export interface components {
             /** Format: double */
             accuracy?: number;
             replaceCode?: string;
+            expectCode?: string;
         };
         MyNeighborhoods: {
             neighborhoods: components["schemas"]["NeighborhoodView"][];
@@ -3650,6 +3651,7 @@ export interface components {
             matchDate?: string;
             matchLocation?: string;
             dongName?: string;
+            joinBlockedReason?: string;
             rule: components["schemas"]["FullRuleResponse"];
             /** Format: date-time */
             createdAt: string;

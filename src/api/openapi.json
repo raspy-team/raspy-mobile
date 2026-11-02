@@ -5698,6 +5698,9 @@
           },
           "replaceCode": {
             "type": "string"
+          },
+          "expectCode": {
+            "type": "string"
           }
         }
       },
@@ -7883,6 +7886,9 @@
             "type": "string"
           },
           "dongName": {
+            "type": "string"
+          },
+          "joinBlockedReason": {
             "type": "string"
           },
           "rule": {

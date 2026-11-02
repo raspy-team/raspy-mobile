@@ -33,6 +33,8 @@
       <UiChip v-for="s in SITUATIONS" :key="s.label" class="flex-shrink-0 whitespace-nowrap" :icon="s.icon" @click="router.push({ path: '/rules', query: s.query })">{{ s.label }}</UiChip>
     </div>
 
+    <!-- 누가 지금 앱 게임에서 상대를 기다리면 홈에서 바로 붙는다 (없으면 안 보인다) -->
+    <WaitingNow class="mt-6" />
     <AppGameStrip class="mt-6" />
 
     <UiSection title="열린 경기" class="mt-6">
@@ -153,6 +155,7 @@ import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import AppGameStrip from '../../components/appgame/AppGameStrip.vue'
+import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import Comment from '../GameCommentView.vue'
 import {

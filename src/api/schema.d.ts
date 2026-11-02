@@ -24,6 +24,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/login/oauth2/apple/web/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["callback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login/oauth2/apple/notify": {
         parameters: {
             query?: never;
@@ -1647,6 +1663,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/login/oauth2/apple/web/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["start_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login/oauth2/apple/token": {
         parameters: {
             query?: never;
@@ -2631,6 +2663,26 @@ export interface paths {
             cookie?: never;
         };
         get: operations["requestWithdraw"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 쓸 수 있는 소셜 로그인
+         * @description 키가 들어 있는 것만 true. 로그인하지 않아도 부른다
+         */
+        get: operations["providers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4452,6 +4504,11 @@ export interface components {
             unreadCount: number;
         };
         BodyBuilder: Record<string, never>;
+        SocialProviders: {
+            google: boolean;
+            kakao: boolean;
+            apple: boolean;
+        };
         OnboardingStatus: {
             termsAgreed: boolean;
             onboarded: boolean;
@@ -4623,6 +4680,28 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    callback: {
+        parameters: {
+            query?: {
+                state?: string;
+                id_token?: string;
+                error?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -6792,6 +6871,24 @@ export interface operations {
             };
         };
     };
+    start_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     appleTokenLogin: {
         parameters: {
             query: {
@@ -7942,6 +8039,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BodyBuilder"];
+                };
+            };
+        };
+    };
+    providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SocialProviders"];
                 };
             };
         };

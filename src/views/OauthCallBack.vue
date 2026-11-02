@@ -18,7 +18,13 @@ const route = useRoute()
 const router = useRouter()
 
 onMounted(() => {
-  if (route.query.token) localStorage.setItem('raspy_access_token2', route.query.token)
+  // 토큰은 주소 뒤 #에 온다(방문 기록·서버 로그에 남지 않게). 예전 앱은 ?token=으로 보낸다
+  const hash = new URLSearchParams(window.location.hash.slice(1))
+  const fromUrl = hash.get('token') || route.query.token
+  if (fromUrl) {
+    localStorage.setItem('raspy_access_token2', fromUrl)
+    window.history.replaceState(null, '', window.location.pathname) // 주소창에서 토큰을 지운다
+  }
   const token = localStorage.getItem('raspy_access_token2')
   if (!token) return router.replace('/init')
   registerFcmToken(token)

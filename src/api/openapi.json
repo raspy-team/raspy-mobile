@@ -80,6 +80,45 @@
         }
       }
     },
+    "/login/oauth2/apple/web/callback": {
+      "post": {
+        "tags": [
+          "apple-web-login-controller"
+        ],
+        "operationId": "callback",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/login/oauth2/apple/notify": {
       "post": {
         "tags": [
@@ -3132,6 +3171,19 @@
         }
       }
     },
+    "/login/oauth2/apple/web/start": {
+      "get": {
+        "tags": [
+          "apple-web-login-controller"
+        ],
+        "operationId": "start_1",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/login/oauth2/apple/token": {
       "get": {
         "tags": [
@@ -4892,6 +4944,28 @@
         }
       }
     },
+    "/api/auth/providers": {
+      "get": {
+        "tags": [
+          "social-providers-controller"
+        ],
+        "summary": "쓸 수 있는 소셜 로그인",
+        "description": "키가 들어 있는 것만 true. 로그인하지 않아도 부른다",
+        "operationId": "providers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocialProviders"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/onboarding": {
       "get": {
         "tags": [
@@ -5018,11 +5092,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -10250,6 +10324,25 @@
       },
       "BodyBuilder": {
         "type": "object"
+      },
+      "SocialProviders": {
+        "required": [
+          "apple",
+          "google",
+          "kakao"
+        ],
+        "type": "object",
+        "properties": {
+          "google": {
+            "type": "boolean"
+          },
+          "kakao": {
+            "type": "boolean"
+          },
+          "apple": {
+            "type": "boolean"
+          }
+        }
       },
       "OnboardingStatus": {
         "required": [

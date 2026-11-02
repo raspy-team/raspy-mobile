@@ -65,6 +65,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * 회원 탈퇴
+         * @description 개인정보(이메일·닉네임·프로필·동네·친구·푸시 토큰)를 지우고 계정은 '탈퇴한 사용자'로 남긴다. 경기 기록은 상대 기록을 위해 익명으로 남는다. 되돌릴 수 없다
+         */
         post: operations["removeUser"];
         delete?: never;
         options?: never;
@@ -456,6 +460,26 @@ export interface paths {
          * @description 0 내 동네만 · 1 가까운 동네 · 2 조금 먼 동네 · 3 먼 동네
          */
         post: operations["range"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/match-cards/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 카드 고르기
+         * @description like=true면 '붙어 보고 싶어요'(하루 20번), false면 넘기기(상대에게 알리지 않는다). 둘 다 원하면 matched=true와 DM 방
+         */
+        post: operations["swipe"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2119,6 +2143,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/match-cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 맞붙기 카드
+         * @description 내 동네 범위 사람 카드 (최근에 들어온 사람 먼저). 동네가 없으면 428
+         */
+        get: operations["deck"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/match-cards/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 매치한 사람들 */
+        get: operations["matches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/invite/{gameId}": {
         parameters: {
             query?: never;
@@ -3336,6 +3397,18 @@ export interface components {
             /** Format: int32 */
             level: number;
         };
+        SwipeRequest: {
+            like: boolean;
+        };
+        SwipeResult: {
+            matched: boolean;
+            /** Format: int32 */
+            likesLeft: number;
+            roomId?: string;
+            /** Format: int64 */
+            partnerId?: number;
+            partnerNickname?: string;
+        };
         GameRegionRequest: {
             roadAddress: string;
             detailAddress?: string;
@@ -3770,6 +3843,25 @@ export interface components {
             /** Format: int32 */
             totalPlayers: number;
         };
+        TrustSummary: {
+            /** @enum {string} */
+            level: "NEW" | "NORMAL" | "TRUSTED" | "CAUTION";
+            label: string;
+            /** Format: double */
+            temperature: number;
+            /** Format: int32 */
+            offlineGames: number;
+            /** Format: double */
+            mannerAverage?: number;
+            /** Format: int32 */
+            mannerCount: number;
+            /** Format: int32 */
+            disputes: number;
+            dongVerified: boolean;
+            socialVerified: boolean;
+            /** Format: int32 */
+            daysSinceJoined: number;
+        };
         UserProfileResponse: {
             /** Format: int64 */
             id: number;
@@ -3786,6 +3878,7 @@ export interface components {
             affiliation?: string;
             /** Format: double */
             mannerScore: number;
+            trust?: components["schemas"]["TrustSummary"];
             /** Format: int32 */
             playTime: number;
             /** Format: int32 */
@@ -3988,6 +4081,31 @@ export interface components {
             shortName: string;
             fullName: string;
         };
+        MatchCard: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            avatar?: string;
+            bio?: string;
+            dongName?: string;
+            trust: components["schemas"]["TrustSummary"];
+            abilities: string[];
+            /** Format: date */
+            lastSeen?: string;
+        };
+        MatchDeck: {
+            cards: components["schemas"]["MatchCard"][];
+            /** Format: int32 */
+            likesLeft: number;
+            areaName?: string;
+        };
+        MatchedPerson: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            avatar?: string;
+            trust: components["schemas"]["TrustSummary"];
+        };
         InvitedGameResponse: {
             /** Format: int64 */
             id: number;
@@ -4084,6 +4202,9 @@ export interface components {
             approved: boolean;
             /** Format: int32 */
             team?: number;
+            /** Format: double */
+            temperature?: number;
+            trustLabel?: string;
         };
         GameResultResponse: {
             gameSummary: components["schemas"]["GameSummaryResponse"];
@@ -4146,6 +4267,9 @@ export interface components {
             gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** Format: double */
             mannerScore: number;
+            /** Format: double */
+            ownerTemperature?: number;
+            ownerTrustLabel?: string;
             /** Format: int64 */
             championId?: number;
             ruleStatisticsOfOwner?: components["schemas"]["UserGameStatisticsDTO"];
@@ -5227,6 +5351,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MyNeighborhoods"];
+                };
+            };
+        };
+    };
+    swipe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwipeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SwipeResult"];
                 };
             };
         };
@@ -7397,6 +7547,46 @@ export interface operations {
                 };
                 content: {
                     "*/*": string;
+                };
+            };
+        };
+    };
+    deck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MatchDeck"];
+                };
+            };
+        };
+    };
+    matches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MatchedPerson"][];
                 };
             };
         };

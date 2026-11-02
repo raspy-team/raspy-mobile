@@ -83,7 +83,12 @@ watch(() => props.game.isAppliedByMe, (now, before) => {
 const applicants = computed(() => props.game.challengers?.length || 0)
 // 올린 지 얼마나 됐는지는 경기 시간보다 덜 중요해서 위 줄이 아니라 여기에
 const ownerLine = computed(() =>
-  [ratingLine(props.game.ruleStatisticsOfOwner), props.game.createdAt && `${timeAgo(props.game.createdAt)} 올림`].filter(Boolean).join(' · '),
+  [
+    // 매치 온도 (만나도 되는 사람인지, 기능 검토 #1)
+    props.game.ownerTemperature != null && `${props.game.ownerTemperature.toFixed(1)}°`,
+    ratingLine(props.game.ruleStatisticsOfOwner),
+    props.game.createdAt && `${timeAgo(props.game.createdAt)} 올림`,
+  ].filter(Boolean).join(' · '),
 )
 </script>
 

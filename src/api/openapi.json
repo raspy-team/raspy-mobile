@@ -153,6 +153,8 @@
         "tags": [
           "user-controller"
         ],
+        "summary": "회원 탈퇴",
+        "description": "개인정보(이메일·닉네임·프로필·동네·친구·푸시 토큰)를 지우고 계정은 '탈퇴한 사용자'로 남긴다. 경기 기록은 상대 기록을 위해 익명으로 남는다. 되돌릴 수 없다",
         "operationId": "removeUser",
         "responses": {
           "200": {
@@ -798,6 +800,49 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/MyNeighborhoods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/match-cards/{userId}": {
+      "post": {
+        "tags": [
+          "match-card-controller"
+        ],
+        "summary": "카드 고르기",
+        "description": "like=true면 '붙어 보고 싶어요'(하루 20번), false면 넘기기(상대에게 알리지 않는다). 둘 다 원하면 matched=true와 DM 방",
+        "operationId": "swipe",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwipeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwipeResult"
                 }
               }
             }
@@ -4019,6 +4064,52 @@
         }
       }
     },
+    "/api/match-cards": {
+      "get": {
+        "tags": [
+          "match-card-controller"
+        ],
+        "summary": "맞붙기 카드",
+        "description": "내 동네 범위 사람 카드 (최근에 들어온 사람 먼저). 동네가 없으면 428",
+        "operationId": "deck",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchDeck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/match-cards/matches": {
+      "get": {
+        "tags": [
+          "match-card-controller"
+        ],
+        "summary": "매치한 사람들",
+        "operationId": "matches",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MatchedPerson"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/invite/{gameId}": {
       "get": {
         "tags": [
@@ -6441,6 +6532,43 @@
           }
         }
       },
+      "SwipeRequest": {
+        "required": [
+          "like"
+        ],
+        "type": "object",
+        "properties": {
+          "like": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SwipeResult": {
+        "required": [
+          "likesLeft",
+          "matched"
+        ],
+        "type": "object",
+        "properties": {
+          "matched": {
+            "type": "boolean"
+          },
+          "likesLeft": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roomId": {
+            "type": "string"
+          },
+          "partnerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partnerNickname": {
+            "type": "string"
+          }
+        }
+      },
       "GameRegionRequest": {
         "required": [
           "roadAddress"
@@ -7833,6 +7961,64 @@
           }
         }
       },
+      "TrustSummary": {
+        "required": [
+          "daysSinceJoined",
+          "disputes",
+          "dongVerified",
+          "label",
+          "level",
+          "mannerCount",
+          "offlineGames",
+          "socialVerified",
+          "temperature"
+        ],
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "NORMAL",
+              "TRUSTED",
+              "CAUTION"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "temperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "offlineGames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mannerAverage": {
+            "type": "number",
+            "format": "double"
+          },
+          "mannerCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "disputes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dongVerified": {
+            "type": "boolean"
+          },
+          "socialVerified": {
+            "type": "boolean"
+          },
+          "daysSinceJoined": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "UserProfileResponse": {
         "required": [
           "id",
@@ -7888,6 +8074,9 @@
           "mannerScore": {
             "type": "number",
             "format": "double"
+          },
+          "trust": {
+            "$ref": "#/components/schemas/TrustSummary"
           },
           "playTime": {
             "type": "integer",
@@ -8596,6 +8785,91 @@
           }
         }
       },
+      "MatchCard": {
+        "required": [
+          "abilities",
+          "nickname",
+          "trust",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "dongName": {
+            "type": "string"
+          },
+          "trust": {
+            "$ref": "#/components/schemas/TrustSummary"
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "MatchDeck": {
+        "required": [
+          "cards",
+          "likesLeft"
+        ],
+        "type": "object",
+        "properties": {
+          "cards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchCard"
+            }
+          },
+          "likesLeft": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "areaName": {
+            "type": "string"
+          }
+        }
+      },
+      "MatchedPerson": {
+        "required": [
+          "nickname",
+          "trust",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "trust": {
+            "$ref": "#/components/schemas/TrustSummary"
+          }
+        }
+      },
       "InvitedGameResponse": {
         "required": [
           "id",
@@ -8904,6 +9178,13 @@
           "team": {
             "type": "integer",
             "format": "int32"
+          },
+          "temperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "trustLabel": {
+            "type": "string"
           }
         }
       },
@@ -9108,6 +9389,13 @@
           "mannerScore": {
             "type": "number",
             "format": "double"
+          },
+          "ownerTemperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "ownerTrustLabel": {
+            "type": "string"
           },
           "championId": {
             "type": "integer",

@@ -67,6 +67,9 @@
         </button>
       </div>
 
+      <!-- 만나도 되는 사람인지 (매치 온도와 근거) -->
+      <TrustCard v-if="user.trust" :trust="user.trust" class="mt-4" />
+
       <!-- 주 행동 -->
       <div class="flex gap-2 mt-4">
         <template v-if="user.isMe">
@@ -210,6 +213,7 @@
 
 <script setup>
 import RuleThumb from '../../components/rule/RuleThumb.vue'
+import TrustCard from '../../components/profile/TrustCard.vue'
 // 프로필 (/profile/0 = 나, /profile/:id = 다른 사람)
 // 누구인지(동네) → 숫자 한 줄 → 주 행동(나: 편집 / 남: 친구·메시지) → 챔피언 → 많이 쓴 능력 → 많이 한 규칙 → 최근 경기
 // 신고·차단·친구 끊기는 더보기 안에. 빈 값(나이·성별·지역 없음)은 보여주지 않는다

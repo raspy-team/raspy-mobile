@@ -73,7 +73,7 @@
         v-for="a in applicantsGame.applicants"
         :key="a.userId"
         :title="a.applicantNickname"
-        :subtitle="(a.team != null ? TEAM_NAMES[a.team] + ' · ' : '') + (ratingLine(a.applicantGameStatisticsDTO) || '첫 경기를 앞두고 있어요')"
+        :subtitle="(a.team != null ? TEAM_NAMES[a.team] + ' · ' : '') + (a.temperature != null ? `${a.temperature.toFixed(1)}° ${a.trustLabel} · ` : '') + (ratingLine(a.applicantGameStatisticsDTO) || '첫 경기를 앞두고 있어요')"
         plain
       >
         <template #leading>
@@ -94,6 +94,7 @@
       <UiListItem icon="fas fa-book-open" title="규칙 보기" @click="openRule(menuGame)" />
       <UiListItem v-if="dmTarget(menuGame)" icon="far fa-paper-plane" :title="`${dmTarget(menuGame).name}에게 메시지`" @click="router.push('/chat/' + dmTarget(menuGame).id)" />
       <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
+      <UiListItem v-if="canTellFriend(menuGame)" icon="shield-halved" title="친구에게 일정 알리기" subtitle="누구와 언제 어디서 만나는지 보내 둬요" @click="tellFriend(menuGame)" />
       <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
     </UiList>
   </UiSheet>
@@ -211,7 +212,8 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { copyText } from '../../utils/clipboard'
-import { ratingLine } from '../../utils/format'
+import { matchTime, place, ratingLine } from '../../utils/format'
+import { venuePlace } from '../../utils/gameFormat'
 import { quickTimes } from '../../utils/when'
 
 const FIRST_STEPS = [
@@ -360,6 +362,24 @@ async function share(g) {
   } catch {
     showToast('링크를 만들지 못했어요')
   }
+}
+
+// 친구에게 일정 알리기 (기능 검토 #1, 처음 보는 사람을 만날 때): 누구와·언제·어디서를 한 문장으로 카톡 등에 보낸다
+const canTellFriend = (g) => !!dmTarget(g) && !!g.matchDate && !['COMPLETED', 'CANCELED', 'REJECTED', 'REQUESTED'].includes(g.status)
+async function tellFriend(g) {
+  menuGame.value = null
+  const who = dmTarget(g)
+  const where = venuePlace(g, place)
+  const text = `나 ${matchTime(g.matchDate)}에 ${where ? where + '에서 ' : ''}${who.name}님이랑 '${g.rule?.ruleTitle ?? '경기'}' 하기로 했어. 혹시 연락 안 되면 확인해 줘 (Match)`
+  if (navigator.share) {
+    try {
+      await navigator.share({ text })
+      return
+    } catch (e) {
+      if (e.name === 'AbortError') return
+    }
+  }
+  showToast((await copyText(text)) ? '일정을 복사했어요. 친구에게 붙여 넣어 보내세요' : '복사하지 못했어요')
 }
 
 async function removeGame(g) {

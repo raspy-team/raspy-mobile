@@ -25,6 +25,7 @@
     <div class="flex items-center gap-1">
       <UiButton size="sm" icon="plus" to="/create-game">경기 만들기</UiButton>
       <UiButton size="sm" variant="ghost" to="/rules">규칙 둘러보기</UiButton>
+      <UiButton size="sm" variant="ghost" to="/match">맞붙기 카드</UiButton>
     </div>
 
     <!-- 지금 상황으로 찾기 (docs/direction.md '찾기': 홈에는 자주 쓰는 조합을 줄로) -->

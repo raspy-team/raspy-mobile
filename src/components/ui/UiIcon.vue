@@ -49,7 +49,7 @@ import {
   Folder, FolderOpen, Gavel, Hand, Heading, Heart, Hourglass, House, Keyboard, Images, Inbox, Info, Instagram, Layers,
   LayoutGrid, List, ListOrdered, LogOut, Mail, MapPin, MessageCircle, Minus, Pencil, Play, Plus, RotateCcw, RotateCw,
   Search, Send, Settings, Share, Ship, ShieldHalf, Square, SquarePen, Star, Target, Timer, TriangleAlert, Trophy, Trash2,
-  Unplug, User, Swords, Activity, Globe, SunMoon, GalleryVerticalEnd, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper,
+  Unplug, User, Swords, Handshake, Scale, CircleCheck, Circle, Activity, Globe, SunMoon, GalleryVerticalEnd, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -62,6 +62,7 @@ const ICONS = {
   'arrow-down': ArrowDown, 'arrow-left': ArrowLeft, 'arrow-right': ArrowRight,
   'arrow-up-from-bracket': Share, share: Share, 'share-nodes': Share,
   at: AtSign, ban: Ban, bell: Bell, bolt: Zap, 'book-open': BookOpen, 'border-all': LayoutGrid,
+  handshake: Handshake, 'scale-unbalanced': Scale, 'circle-check': CircleCheck, circle: Circle,
   bullseye: Target, calendar: Calendar, 'calendar-check': CalendarCheck, camera: Camera,
   'chart-bar': ChartBar, 'chart-line': ChartLine, 'chart-simple': ChartNoAxesColumn,
   check: Check, 'chef-hat': ChefHat, 'chevron-down': ChevronDown, 'chevron-left': ChevronLeft, 'chevron-right': ChevronRight, 'chevron-up': ChevronUp,

@@ -29,6 +29,14 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <DialogPlay
+          v-else-if="key === 'debate'"
+          :play-id="play.playId"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
       </template>
 
@@ -58,7 +66,7 @@
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
-            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : 'AI 셰프가 채점하고 있어요' }}</p>
+            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : `${judgeName}가 채점하고 있어요` }}</p>
             <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 알림으로 알려 드릴게요</p>
           </template>
           <template v-else-if="result.status === 'VOTING'">
@@ -86,7 +94,7 @@
         <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <UiCard v-if="result.myFeedback" class="mt-3">
-          <p class="t-micro">{{ game?.judge === 'AI' ? 'AI 셰프 한마디' : '알림' }}</p>
+          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : '알림' }}</p>
           <p class="t-body mt-1">{{ result.myFeedback }}</p>
         </UiCard>
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
@@ -99,7 +107,19 @@
             <p class="t-body mt-1">{{ result.opponentAnswer }}</p>
           </UiCard>
         </template>
-        <template v-if="game?.judge === 'AI'">
+        <!-- 말싸움: 주고받은 말 -->
+        <template v-if="key === 'debate'">
+          <UiCard v-if="result.myAnswer" class="mt-3">
+            <p class="t-micro">내 말싸움</p>
+            <p class="t-caption mt-1 whitespace-pre-line">{{ result.myAnswer }}</p>
+          </UiCard>
+          <UiCard v-if="result.opponentAnswer" class="mt-3">
+            <p class="t-micro">{{ result.opponent?.nickname }}님의 말싸움 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line">{{ result.opponentAnswer }}</p>
+            <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
+          </UiCard>
+        </template>
+        <template v-else-if="game?.judge === 'AI'">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 요리</p>
             <p class="t-heading mt-1">{{ dish(result.myAnswer).name }}</p>
@@ -240,6 +260,7 @@ import BrandFace from '../../components/BrandFace.vue'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
+import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import { copyText } from '../../utils/clipboard'
@@ -385,6 +406,9 @@ async function shareVote(gameId: number) {
 }
 
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
+// AI가 채점하는 게임마다 심판 이름
+const judgeName = computed(() => (key.value === 'debate' ? 'AI 심판' : 'AI 셰프'))
+
 function dish(answer: string) {
   const [name, ...rest] = answer.split('\n')
   return { name, steps: rest.join('\n') }

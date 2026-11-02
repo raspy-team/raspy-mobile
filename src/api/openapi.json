@@ -2152,6 +2152,49 @@
         }
       }
     },
+    "/api/app-games/plays/{playId}/say": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "대화형 판에서 한 마디 하기",
+        "description": "AI가 받아친다(몇 초). 마지막 말에는 받아치지 않는다. 끝내려면 답 내기(빈 답)",
+        "operationId": "say",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DialogSayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDialogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/duels/{gameId}/challenge": {
       "post": {
         "tags": [
@@ -4399,6 +4442,39 @@
         }
       }
     },
+    "/api/app-games/plays/{playId}/dialog": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "대화형 판의 주고받은 말",
+        "description": "AI 첫마디부터. 남은 말할 횟수와 함께",
+        "operationId": "dialog",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDialogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/duels/{gameId}": {
       "get": {
         "tags": [
@@ -6076,6 +6152,65 @@
           "votingEndsAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "DialogSayRequest": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "AppDialogResponse": {
+        "required": [
+          "lines",
+          "maxChars",
+          "playId",
+          "submitted",
+          "turnsLeft"
+        ],
+        "type": "object",
+        "properties": {
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DialogLine"
+            }
+          },
+          "turnsLeft": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxChars": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "submitted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DialogLine": {
+        "required": [
+          "mine",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "mine": {
+            "type": "boolean"
+          },
+          "text": {
+            "type": "string"
           }
         }
       },

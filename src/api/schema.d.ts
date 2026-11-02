@@ -1137,6 +1137,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/plays/{playId}/say": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 대화형 판에서 한 마디 하기
+         * @description AI가 받아친다(몇 초). 마지막 말에는 받아치지 않는다. 끝내려면 답 내기(빈 답)
+         */
+        post: operations["say"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/duels/{gameId}/challenge": {
         parameters: {
             query?: never;
@@ -2447,6 +2467,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/plays/{playId}/dialog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 대화형 판의 주고받은 말
+         * @description AI 첫마디부터. 남은 말할 횟수와 함께
+         */
+        get: operations["dialog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/duels/{gameId}": {
         parameters: {
             query?: never;
@@ -3070,6 +3110,23 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             votingEndsAt?: string;
+        };
+        DialogSayRequest: {
+            text: string;
+        };
+        AppDialogResponse: {
+            /** Format: int64 */
+            playId: number;
+            lines: components["schemas"]["DialogLine"][];
+            /** Format: int32 */
+            turnsLeft: number;
+            /** Format: int32 */
+            maxChars: number;
+            submitted: boolean;
+        };
+        DialogLine: {
+            mine: boolean;
+            text: string;
         };
         AppChallenge: {
             /** Format: int64 */
@@ -5513,6 +5570,32 @@ export interface operations {
             };
         };
     };
+    say: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DialogSayRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDialogResponse"];
+                };
+            };
+        };
+    };
     openChallenge: {
         parameters: {
             query?: never;
@@ -7083,6 +7166,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    dialog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppDialogResponse"];
                 };
             };
         };

@@ -27,6 +27,8 @@
           </div>
           <UiButton variant="ghost" size="sm" @click="router.push('/rules?fromGameCreate=true')">바꾸기</UiButton>
         </UiCard>
+        <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
+        <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
 
         <!-- 언제쯤: 열린 경기를 보는 사람이 신청할지 정하는 데 가장 필요한 정보. 정확한 시간은 상대와 함께 -->
         <h1 class="t-title">언제쯤 할까요?</h1>
@@ -143,6 +145,7 @@ const venue = ref('IN_PERSON')
 const venueDetail = ref('')
 
 const formats = computed(() => allowedFormats(rule.value))
+const dangerous = computed(() => (rule.value?.category?.traits || []).some((t) => t.key === 'DANGER'))
 const format = ref('DUEL')
 const size = ref(2)
 const sizes = computed(() => (format.value === 'TEAMS' ? TEAM_SIZES : GROUP_SIZES))

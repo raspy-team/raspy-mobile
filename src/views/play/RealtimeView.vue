@@ -37,6 +37,23 @@
           <div class="h-full bg-fg transition-[width] duration-200" :style="{ width: `${(left / state.turnSeconds) * 100}%` }" />
         </div>
 
+        <!-- 알까기: 판 -->
+        <template v-if="state.stones">
+        <AlkkagiBoard
+          class="mt-4"
+          :stones="state.stones"
+          :flip="!state.meFirst"
+          :my-turn="myTurn"
+          :last-move="state.moves[state.moves.length - 1]?.word"
+          :move-count="state.moves.length"
+          :sending="sending"
+          @shoot="shoot"
+        />
+        <p v-if="moveError" class="t-caption text-danger mt-1">{{ moveError }}</p>
+        </template>
+
+        <!-- 끝말잇기: 이은 낱말과 입력칸 -->
+        <template v-else>
         <UiCard class="mt-4">
           <ol class="space-y-1.5">
             <li class="t-caption">시작: {{ state.startWord }}</li>
@@ -57,6 +74,7 @@
           <p v-if="moveError" class="t-caption text-danger mt-1">{{ moveError }}</p>
           <UiButton block size="lg" class="mt-3" :disabled="!myTurn || !word.trim()" :loading="sending" @click="send">내기</UiButton>
         </form>
+        </template>
         <UiButton block variant="ghost" class="mt-2" @click="leave">그만두기 (지게 돼요)</UiButton>
       </template>
 
@@ -66,11 +84,12 @@
           <template v-if="state.status === 'COMPLETED'">
             <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : '졌어요' }}</p>
-            <p class="t-caption mt-2">{{ state.opponent?.nickname }}님과 {{ state.moves.length }}번 이었어요</p>
+            <p v-if="state.stones" class="t-caption mt-2">{{ state.opponent?.nickname }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
+            <p v-else class="t-caption mt-2">{{ state.opponent?.nickname }}님과 {{ state.moves.length }}번 이었어요</p>
           </template>
           <p v-else class="t-title">대결이 끝났어요</p>
         </UiCard>
-        <UiCard v-if="state.moves.length" class="mt-3">
+        <UiCard v-if="state.moves.length && !state.stones" class="mt-3">
           <p class="t-caption">{{ [state.startWord, ...state.moves.map((m) => m.word)].join(' → ') }}</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" @click="again">한 판 더</UiButton>
@@ -91,6 +110,7 @@ import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
 import BrandFace from '../../components/BrandFace.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
+import AlkkagiBoard from '../../components/appgame/AlkkagiBoard.vue'
 import { UiButton, UiCard, UiEmptyState, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['RealtimeState']
@@ -98,7 +118,8 @@ type State = components['schemas']['RealtimeState']
 const route = useRoute()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const title = computed(() => (key.value === 'wordchain' ? '끝말잇기' : '실시간 대결'))
+const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기' }
+const title = computed(() => TITLES[key.value] ?? '실시간 대결')
 const state = ref<State | null>(null)
 const error = ref('')
 const word = ref('')
@@ -164,6 +185,25 @@ async function send() {
   } finally {
     sending.value = false
   }
+}
+
+/** 알까기: 튕긴 수를 낸다 */
+async function shoot(move: string) {
+  if (!state.value || !myTurn.value || sending.value) return
+  sending.value = true
+  moveError.value = ''
+  try {
+    apply((await POST('/api/app-games/realtime/{gameId}/move', { path: { gameId: state.value.gameId }, body: { word: move } })).data)
+  } catch (e) {
+    moveError.value = message(e, '내지 못했어요')
+  } finally {
+    sending.value = false
+  }
+}
+
+/** 알까기: 쳐낸 돌 수 (mine=true면 상대가 쳐낸 내 돌) */
+function knocked(mine: boolean) {
+  return (state.value?.stones ?? []).filter((s) => s.mine === mine && !s.alive).length
 }
 
 async function leave() {

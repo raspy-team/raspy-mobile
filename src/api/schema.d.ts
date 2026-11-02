@@ -2855,6 +2855,8 @@ export interface components {
             opponent?: components["schemas"]["AppPlayer"];
             startWord: string;
             moves: components["schemas"]["RealtimeMove"][];
+            stones?: components["schemas"]["RealtimeStone"][];
+            meFirst: boolean;
             /** Format: int64 */
             turnUserId?: number;
             /** Format: date-time */
@@ -2871,6 +2873,16 @@ export interface components {
             botAfterSeconds: number;
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
+        };
+        RealtimeStone: {
+            /** Format: int32 */
+            id: number;
+            mine: boolean;
+            /** Format: double */
+            x: number;
+            /** Format: double */
+            y: number;
+            alive: boolean;
         };
         AppPlayResponse: {
             /** Format: int64 */

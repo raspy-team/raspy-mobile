@@ -5426,6 +5426,7 @@
           "gameId",
           "key",
           "me",
+          "meFirst",
           "moves",
           "serverNow",
           "startWord",
@@ -5459,6 +5460,15 @@
             "items": {
               "$ref": "#/components/schemas/RealtimeMove"
             }
+          },
+          "stones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RealtimeStone"
+            }
+          },
+          "meFirst": {
+            "type": "boolean"
           },
           "turnUserId": {
             "type": "integer",
@@ -5495,6 +5505,36 @@
               "LOSE",
               "DRAW"
             ]
+          }
+        }
+      },
+      "RealtimeStone": {
+        "required": [
+          "alive",
+          "id",
+          "mine",
+          "x",
+          "y"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          },
+          "alive": {
+            "type": "boolean"
           }
         }
       },

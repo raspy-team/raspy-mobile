@@ -169,7 +169,7 @@ import {
 import { useToast } from '../../composable/useToast'
 import { copyText } from '../../utils/clipboard'
 import { timeAgo } from '../../utils/format'
-import { ratingText, winSummary } from '../../utils/rule'
+import { ratingText, ruleKind, winSummary } from '../../utils/rule'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import RuleCategory from '../../components/rule/RuleCategory.vue'
 
@@ -194,12 +194,7 @@ const suggestText = ref('')
 const suggesting = ref(false)
 
 const rating = computed(() => (rule.value ? ratingText(rule.value) : ''))
-// 이름 아래 한 줄: 분류한 규칙은 바탕 종목 · 능력, 아직이면 예전 종목 분류
-const subtitle = computed(() => {
-  const r = rule.value
-  const parts = r?.category ? [r.category.sport, ...r.category.abilities.map((a) => a.label)] : [r?.majorCategory, r?.minorCategory]
-  return parts.filter(Boolean).join(' · ')
-})
+const subtitle = computed(() => ruleKind(rule.value, true))
 const isMine = computed(() => rule.value?.createdBy?.id === myId.value)
 
 async function share() {

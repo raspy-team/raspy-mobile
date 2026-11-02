@@ -2935,6 +2935,100 @@
               "type": "string",
               "default": "recent"
             }
+          },
+          {
+            "name": "place",
+            "in": "query",
+            "description": "찾기: 어디서 (Place 이름)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PHONE",
+                "HOME",
+                "OUTSIDE",
+                "GATHERING",
+                "SPORTS"
+              ]
+            }
+          },
+          {
+            "name": "party",
+            "in": "query",
+            "description": "찾기: 몇 명 (Party 이름)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SOLO",
+                "DUO",
+                "GROUP",
+                "TEAM"
+              ]
+            }
+          },
+          {
+            "name": "length",
+            "in": "query",
+            "description": "찾기: 얼마나 (Length 이름)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MINUTE",
+                "TEN_MINUTES",
+                "HOUR",
+                "DAYS"
+              ]
+            }
+          },
+          {
+            "name": "gear",
+            "in": "query",
+            "description": "찾기: 준비물 (Gear 이름)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NONE",
+                "PHONE",
+                "ITEMS",
+                "FOOD"
+              ]
+            }
+          },
+          {
+            "name": "ability",
+            "in": "query",
+            "description": "잘하려면 (Ability 이름)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRENGTH",
+                "ENDURANCE",
+                "SPEED",
+                "PRECISION",
+                "BALANCE",
+                "FLEXIBILITY",
+                "RHYTHM",
+                "EXPRESSION",
+                "READING",
+                "SPATIAL",
+                "MEMORY",
+                "KNOWLEDGE",
+                "LANGUAGE",
+                "CALCULATION",
+                "SENSE",
+                "SOCIAL",
+                "PERSUASION",
+                "TEAMWORK",
+                "GRIT",
+                "CONSISTENCY",
+                "CREATIVITY",
+                "HUMOR"
+              ]
+            }
           }
         ],
         "responses": {

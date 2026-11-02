@@ -79,3 +79,10 @@ export function categoryKey(rule) {
   return exact || inTitle || '기타'
 }
 
+
+/** 이름 아래 한 줄의 종류: 분류한 규칙은 바탕 종목 · 능력, 아직이면 예전 종목 분류 (docs/direction.md '카테고리') */
+export function ruleKind(rule, withMajor = false) {
+  const c = rule?.category
+  const parts = c ? [c.sport, ...c.abilities.map((a) => a.label)] : [withMajor && rule?.majorCategory, rule?.minorCategory]
+  return parts.filter(Boolean).join(' · ')
+}

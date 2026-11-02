@@ -27,32 +27,36 @@
         </label>
       </div>
 
-      <!-- 종류: 아이콘 탭 (가로로 넘긴다) -->
-      <div class="max-w-2xl mx-auto flex gap-6 px-4 mt-1 overflow-x-auto no-scrollbar" role="tablist" aria-label="종류">
-        <button
-          v-for="m in ['', ...majors]"
-          :key="m || 'all'"
-          type="button"
-          role="tab"
-          :aria-selected="major === m"
-          class="flex flex-col items-center gap-1 pt-3 pb-2.5 border-b-2 flex-shrink-0 transition-colors"
-          :class="major === m ? 'border-fg text-fg' : 'border-transparent text-fg-subtle'"
-          @click="pickMajor(m)"
+      <!-- 찾기 상황 네 가지: 누르면 시트에서 고른다 (docs/direction.md '찾기') -->
+      <div class="max-w-2xl mx-auto flex gap-2 px-4 pt-3 overflow-x-auto no-scrollbar">
+        <UiChip
+          v-for="f in SITUATIONS"
+          :key="f.key"
+          class="flex-shrink-0 whitespace-nowrap"
+          :selected="!!route.query[f.key]"
+          @click="sheet = f.key"
         >
-          <CategoryIcon v-if="m" :name="m" />
-          <UiIcon v-else name="border-all" class="text-2xl" />
-          <span class="text-xs font-medium whitespace-nowrap">{{ m || '전체' }}</span>
-        </button>
+          {{ labelOf(f.key) || f.question }}
+          <UiIcon name="fas fa-chevron-down" class="text-[10px]" aria-hidden="true" />
+        </UiChip>
+      </div>
+
+      <!-- 잘하려면: 능력 칩 (가로로 넘긴다) -->
+      <div v-if="options" class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-2 pb-3 overflow-x-auto no-scrollbar" role="group" aria-label="잘하려면">
+        <span class="t-micro flex-shrink-0">잘하려면</span>
+        <UiChip
+          v-for="a in options.abilities"
+          :key="a.key"
+          class="flex-shrink-0 whitespace-nowrap !h-8 !px-3"
+          :selected="ability === a.key"
+          @click="setQuery({ ability: ability === a.key ? '' : a.key })"
+        >
+          {{ a.label }}
+        </UiChip>
       </div>
     </div>
 
     <main class="max-w-2xl mx-auto px-4 pb-16">
-      <!-- 세부 종목 -->
-      <div v-if="major && minors.length" class="flex gap-2 pt-4 overflow-x-auto no-scrollbar -mx-4 px-4">
-        <UiChip class="flex-shrink-0 whitespace-nowrap" :selected="!minor" @click="pickMinor('')">전체</UiChip>
-        <UiChip v-for="n in minors" :key="n" class="flex-shrink-0 whitespace-nowrap" :selected="minor === n" @click="pickMinor(n)">{{ n }}</UiChip>
-      </div>
-
       <!-- 개수 + 정렬 -->
       <div class="flex items-center justify-between pt-4">
         <p class="t-caption">{{ loading ? '찾는 중…' : `규칙 ${rules.length}개` }}</p>
@@ -89,10 +93,10 @@
         class="pt-16"
         icon="fas fa-magnifying-glass"
         title="맞는 규칙이 없어요"
-        :description="q || major ? '검색어나 종류를 바꿔보거나, 직접 만들어보세요' : '첫 규칙을 만들어보세요'"
+        :description="filtered ? '검색어나 조건을 바꿔보거나, 직접 만들어보세요' : '첫 규칙을 만들어보세요'"
       >
         <div class="flex gap-2">
-          <UiButton v-if="q || major" variant="secondary" @click="clearFilters">조건 지우기</UiButton>
+          <UiButton v-if="filtered" variant="secondary" @click="clearFilters">조건 지우기</UiButton>
           <UiButton to="/rules/create">규칙 만들기</UiButton>
         </div>
       </UiEmptyState>
@@ -101,52 +105,74 @@
         <RuleListCard v-for="rule in rules" :key="rule.id" :rule="rule" />
       </div>
     </main>
+
+    <!-- 상황 하나 고르기 -->
+    <UiSheet :model-value="!!sheet" :title="current?.question" @update:model-value="(v) => !v && (sheet = '')">
+      <div v-if="current" class="flex flex-wrap gap-2">
+        <UiChip :selected="!route.query[current.key]" @click="pick('')">상관없음</UiChip>
+        <UiChip v-for="o in choices(current.key)" :key="o.key" :selected="route.query[current.key] === o.key" @click="pick(o.key)">{{ o.label }}</UiChip>
+      </div>
+    </UiSheet>
   </div>
 </template>
 
 <script setup>
-// 규칙 둘러보기: 검색 + 종류 탭 + 목록. 고른 조건은 주소(?major=&minor=&q=&sort=)에 남겨
-// 상세에서 돌아와도, 링크로 공유해도 같은 목록이 나온다
+// 규칙 둘러보기: 검색 + 찾기 상황(어디서·몇 명·얼마나·준비물) + 능력 칩 + 목록 (docs/direction.md '카테고리').
+// 고른 조건은 주소(?place=&party=&length=&gear=&ability=&q=&sort=)에 남겨 상세에서 돌아와도, 링크로 공유해도 같은 목록이 나온다
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
+import { GET } from '@/api/client'
 import RuleListCard from '../components/rule/RuleListCard.vue'
-import CategoryIcon from '../components/rule/CategoryIcon.vue'
-import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSkeleton, UiTopBar } from '../components/ui'
+import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
 
 const SORTS = [
   { value: 'popular', label: '인기순' },
   { value: 'recent', label: '최신순' },
 ]
+// 주소 이름 → 질문, category-options의 목록 이름
+const SITUATIONS = [
+  { key: 'place', question: '어디서?', list: 'places' },
+  { key: 'party', question: '몇 명?', list: 'parties' },
+  { key: 'length', question: '얼마나?', list: 'lengths' },
+  { key: 'gear', question: '준비물?', list: 'gears' },
+]
+const FILTER_KEYS = [...SITUATIONS.map((f) => f.key), 'ability']
 
 const route = useRoute()
 const router = useRouter()
 const picking = computed(() => !!route.query.fromGameCreate)
 
-const majors = ref([])
-const minors = ref([])
+const options = ref(null)
 const rules = ref([])
 const loading = ref(true)
+const sheet = ref('')
 
-const major = computed(() => route.query.major || '')
-const minor = computed(() => route.query.minor || '')
+const ability = computed(() => route.query.ability || '')
 const sort = computed(() => route.query.sort || 'popular')
 const q = ref(route.query.q || '')
+const current = computed(() => SITUATIONS.find((f) => f.key === sheet.value))
+const filtered = computed(() => !!route.query.q || FILTER_KEYS.some((k) => route.query[k]))
 
+function choices(key) {
+  return options.value?.[SITUATIONS.find((f) => f.key === key).list] ?? []
+}
+function labelOf(key) {
+  const v = route.query[key]
+  return v ? choices(key).find((o) => o.key === v)?.label : ''
+}
 function setQuery(patch) {
   const next = { ...route.query, ...patch }
   Object.keys(next).forEach((k) => !next[k] && delete next[k])
   router.replace({ query: next })
 }
-function pickMajor(m) {
-  setQuery({ major: m, minor: '' })
-}
-function pickMinor(n) {
-  setQuery({ minor: n })
+function pick(v) {
+  setQuery({ [sheet.value]: v })
+  sheet.value = ''
 }
 function clearFilters() {
   q.value = ''
-  setQuery({ major: '', minor: '', q: '' })
+  setQuery(Object.fromEntries([...FILTER_KEYS, 'q'].map((k) => [k, ''])))
 }
 
 // 글자를 칠 때마다 부르지 않고 잠깐 멈췄을 때 찾는다
@@ -162,8 +188,7 @@ async function load() {
   loading.value = true
   try {
     const params = { sort: sort.value }
-    if (major.value) params.major = major.value
-    if (minor.value) params.minor = minor.value
+    FILTER_KEYS.forEach((k) => route.query[k] && (params[k] = route.query[k]))
     if (route.query.q) params.search = route.query.q
     const { data } = await api.get('/api/rules/list', { params })
     if (mine === seq) rules.value = data
@@ -174,13 +199,10 @@ async function load() {
   }
 }
 
-watch(major, async (m) => {
-  minors.value = m ? (await api.get(`/api/rules/categories/${m}`).catch(() => ({ data: [] }))).data : []
-}, { immediate: true })
-watch(() => [major.value, minor.value, sort.value, route.query.q], load)
+watch(() => [...FILTER_KEYS.map((k) => route.query[k]), sort.value, route.query.q], load)
 
 onMounted(async () => {
   load()
-  majors.value = (await api.get('/api/rules/categories').catch(() => ({ data: {} }))).data.majors || []
+  options.value = (await GET('/api/rules/category-options').catch(() => ({ data: null }))).data
 })
 </script>

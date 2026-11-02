@@ -5990,6 +5990,16 @@ export interface operations {
                 search?: string;
                 /** @description 정렬 기준(recent 또는 popular) */
                 sort?: string;
+                /** @description 찾기: 어디서 (Place 이름) */
+                place?: "PHONE" | "HOME" | "OUTSIDE" | "GATHERING" | "SPORTS";
+                /** @description 찾기: 몇 명 (Party 이름) */
+                party?: "SOLO" | "DUO" | "GROUP" | "TEAM";
+                /** @description 찾기: 얼마나 (Length 이름) */
+                length?: "MINUTE" | "TEN_MINUTES" | "HOUR" | "DAYS";
+                /** @description 찾기: 준비물 (Gear 이름) */
+                gear?: "NONE" | "PHONE" | "ITEMS" | "FOOD";
+                /** @description 잘하려면 (Ability 이름) */
+                ability?: "STRENGTH" | "ENDURANCE" | "SPEED" | "PRECISION" | "BALANCE" | "FLEXIBILITY" | "RHYTHM" | "EXPRESSION" | "READING" | "SPATIAL" | "MEMORY" | "KNOWLEDGE" | "LANGUAGE" | "CALCULATION" | "SENSE" | "SOCIAL" | "PERSUASION" | "TEAMWORK" | "GRIT" | "CONSISTENCY" | "CREATIVITY" | "HUMOR";
             };
             header?: never;
             path?: never;

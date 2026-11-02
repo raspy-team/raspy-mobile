@@ -96,9 +96,14 @@
         <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">랭킹 전체 보기</UiButton>
       </section>
 
-      <button type="button" class="mt-10 flex items-center gap-2 t-caption underline underline-offset-2" @click="openReport">
-        <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고하기
-      </button>
+      <div v-if="!isMine" class="mt-10 flex items-center gap-5">
+        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2" @click="openSuggest">
+          <UiIcon name="far fa-comment" aria-hidden="true" /> 수정 제안하기
+        </button>
+        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2" @click="openReport">
+          <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고하기
+        </button>
+      </div>
     </main>
 
     <!-- 아래 고정: 요약 + 경기 열기 -->
@@ -119,8 +124,18 @@
         <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share" />
         <UiListItem v-if="isMine" icon="fas fa-pen" title="수정 요청하기" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
         <UiListItem icon="fas fa-ranking-star" title="랭킹 보기" @click="goRanking" />
+        <UiListItem v-if="!isMine" icon="far fa-comment" title="수정 제안하기" subtitle="만든 사람에게 DM으로 보내요" @click="openSuggest" />
         <UiListItem v-if="!isMine" icon="far fa-flag" title="신고하기" danger @click="openReport" />
       </UiList>
+    </UiSheet>
+
+    <!-- 수정 제안: 만든 사람에게 DM으로 -->
+    <UiSheet v-model="suggestOpen" title="수정 제안하기">
+      <p class="t-caption mb-4">{{ rule?.createdBy?.nickname || '만든 사람' }}님에게 DM으로 보내요. 답이 오면 메시지에서 이어서 이야기할 수 있어요.</p>
+      <UiInput v-model="suggestText" multiline :rows="4" :maxlength="1000" placeholder="예: 3세트는 길어요. 2세트 선승으로 바꾸면 어때요?" />
+      <template #footer>
+        <UiButton block :disabled="suggestText.trim().length < 5" :loading="suggesting" @click="submitSuggest">보내기</UiButton>
+      </template>
     </UiSheet>
 
     <!-- 신고 -->
@@ -142,6 +157,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
+import { POST } from '@/api/client'
 import { getMyId } from '@/utils/me'
 import RuleBody from '../../components/rule/RuleBody.vue'
 import {
@@ -169,6 +185,9 @@ const reportOpen = ref(false)
 const reportReason = ref('')
 const reportDetail = ref('')
 const reporting = ref(false)
+const suggestOpen = ref(false)
+const suggestText = ref('')
+const suggesting = ref(false)
 
 const rating = computed(() => (rule.value ? ratingText(rule.value) : ''))
 const isMine = computed(() => rule.value?.createdBy?.id === myId.value)
@@ -193,6 +212,23 @@ function goEdit() {
 function goRanking() {
   menuOpen.value = false
   router.push(`/rules/${rule.value.id}/ranking`)
+}
+function openSuggest() {
+  menuOpen.value = false
+  suggestText.value = ''
+  suggestOpen.value = true
+}
+async function submitSuggest() {
+  suggesting.value = true
+  try {
+    const { data } = await POST('/api/rules/{ruleId}/suggestions', { path: { ruleId: rule.value.id }, body: { message: suggestText.value.trim() } })
+    suggestOpen.value = false
+    showToast(`${data.targetNickname}님에게 DM으로 보냈어요`)
+  } catch (e) {
+    showToast(e.response?.data?.message || '보내지 못했어요. 다시 시도해 주세요')
+  } finally {
+    suggesting.value = false
+  }
 }
 function openReport() {
   menuOpen.value = false

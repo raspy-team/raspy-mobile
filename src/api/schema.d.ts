@@ -96,6 +96,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rules/{ruleId}/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 규칙 수정 제안
+         * @description 규칙을 만든 사람에게 고쳤으면 하는 점을 DM으로 보냅니다. 두 사람의 DM 방에 메시지로 남습니다.
+         */
+        post: operations["suggest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules/{ruleId}/rating": {
         parameters: {
             query?: never;
@@ -2681,6 +2701,14 @@ export interface components {
             nickname: string;
             profile?: components["schemas"]["UserProfileDto"];
         };
+        RuleSuggestionRequest: {
+            message: string;
+        };
+        SuggestionResult: {
+            /** Format: int64 */
+            targetUserId: number;
+            targetNickname: string;
+        };
         CreateRuleRatingRequest: {
             /** Format: int64 */
             gameId: number;
@@ -3878,6 +3906,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FullRuleResponse"];
+                };
+            };
+        };
+    };
+    suggest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleSuggestionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SuggestionResult"];
                 };
             };
         };

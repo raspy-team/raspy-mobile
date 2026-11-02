@@ -196,6 +196,49 @@
         }
       }
     },
+    "/api/rules/{ruleId}/suggestions": {
+      "post": {
+        "tags": [
+          "rule-controller"
+        ],
+        "summary": "규칙 수정 제안",
+        "description": "규칙을 만든 사람에게 고쳤으면 하는 점을 DM으로 보냅니다. 두 사람의 DM 방에 메시지로 남습니다.",
+        "operationId": "suggest",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleSuggestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rules/{ruleId}/rating": {
       "post": {
         "tags": [
@@ -4896,6 +4939,33 @@
           },
           "profile": {
             "$ref": "#/components/schemas/UserProfileDto"
+          }
+        }
+      },
+      "RuleSuggestionRequest": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SuggestionResult": {
+        "required": [
+          "targetNickname",
+          "targetUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "targetNickname": {
+            "type": "string"
           }
         }
       },

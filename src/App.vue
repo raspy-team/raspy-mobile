@@ -168,11 +168,21 @@ const dismissedReviewIds = (() => {
     return []
   }
 })()
+// 그리고 24시간은 다른 경기도 묻지 않는다 (평가 안 한 경기가 여럿이면 닫자마자 다음 창이 연달아 떴다)
+const REVIEW_SNOOZE_MS = 24 * 60 * 60 * 1000
+const reviewSnoozed = () => {
+  try {
+    return Date.now() < Number(localStorage.getItem('reviewPromptSnoozeUntil') || 0)
+  } catch {
+    return false
+  }
+}
 const dismissPendingReview = () => {
   if (pendingReviewGameId.value) {
     dismissedReviewIds.push(pendingReviewGameId.value)
     try {
       localStorage.setItem('dismissedReviewIds', JSON.stringify(dismissedReviewIds.slice(-50)))
+      localStorage.setItem('reviewPromptSnoozeUntil', String(Date.now() + REVIEW_SNOOZE_MS))
     } catch {
       // 저장 못 해도 이번에는 닫힌다
     }
@@ -187,7 +197,7 @@ watch(
     if (newIds && newIds.length > 0) {
       // 결과 화면에 있거나 '나중에'를 누른 경기는 다시 띄우지 않는다
       const next = newIds.find((id) => !dismissedReviewIds.includes(id))
-      if (next && !route.fullPath.includes('/result')) {
+      if (next && !route.fullPath.includes('/result') && !reviewSnoozed()) {
         pendingReviewGameId.value = next
         showPendingReviewModal.value = true
       }

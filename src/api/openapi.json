@@ -5842,6 +5842,9 @@
           "currentChampion": {
             "$ref": "#/components/schemas/UserSummaryDto"
           },
+          "championAreaName": {
+            "type": "string"
+          },
           "rating": {
             "type": "number",
             "format": "double"

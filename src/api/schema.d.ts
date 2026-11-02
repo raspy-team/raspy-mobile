@@ -3123,6 +3123,7 @@ export interface components {
             /** Format: int64 */
             useCount: number;
             currentChampion?: components["schemas"]["UserSummaryDto"];
+            championAreaName?: string;
             /** Format: double */
             rating: number;
             /** Format: int64 */

@@ -44,7 +44,7 @@
 import { computed, defineProps } from 'vue'
 import {
   ArrowDown, ArrowLeft, ArrowRight, Award, Ban, Bell, BookOpen, Calendar, CalendarCheck, Camera, ChartBar,
-  ChartLine, ChartNoAxesColumn, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CircleAlert, CircleHelp,
+  ChartLine, ChartNoAxesColumn, Check, ChefHat, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CircleAlert, CircleHelp,
   CircleX, ClipboardCheck, Clock, Crown, Dices, Download, Ellipsis, Eye, EyeOff, FileText, Flag, FlagTriangleRight,
   Folder, FolderOpen, Gavel, Hand, Heading, Heart, Hourglass, House, Keyboard, Images, Inbox, Info, Instagram, Layers,
   LayoutGrid, List, ListOrdered, LogOut, Mail, MapPin, MessageCircle, Pencil, Play, Plus, RotateCcw, RotateCw,
@@ -64,7 +64,7 @@ const ICONS = {
   at: AtSign, ban: Ban, bell: Bell, bolt: Zap, 'book-open': BookOpen, 'border-all': LayoutGrid,
   bullseye: Target, calendar: Calendar, 'calendar-check': CalendarCheck, camera: Camera,
   'chart-bar': ChartBar, 'chart-line': ChartLine, 'chart-simple': ChartNoAxesColumn,
-  check: Check, 'chevron-down': ChevronDown, 'chevron-left': ChevronLeft, 'chevron-right': ChevronRight, 'chevron-up': ChevronUp,
+  check: Check, 'chef-hat': ChefHat, 'chevron-down': ChevronDown, 'chevron-left': ChevronLeft, 'chevron-right': ChevronRight, 'chevron-up': ChevronUp,
   'circle-question': CircleHelp, 'circle-xmark': CircleX, 'clipboard-check': ClipboardCheck, clock: Clock,
   comment: MessageCircle, crown: Crown, dice: Dices, download: Download, ellipsis: Ellipsis, envelope: Mail,
   'exclamation-circle': CircleAlert, eye: Eye, 'eye-slash': EyeOff, 'file-lines': FileText,

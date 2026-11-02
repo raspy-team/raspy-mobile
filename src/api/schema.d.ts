@@ -2557,9 +2557,13 @@ export interface components {
             problem: string;
             /** Format: double */
             myScore?: number;
+            myAnswer?: string;
+            myFeedback?: string;
             opponent?: components["schemas"]["AppPlayer"];
             /** Format: double */
             opponentScore?: number;
+            opponentAnswer?: string;
+            opponentFeedback?: string;
             /** Format: int32 */
             ratingAfter?: number;
             /** Format: int32 */
@@ -3261,6 +3265,9 @@ export interface components {
             myDraws: number;
             /** Format: double */
             myBest?: number;
+            available: boolean;
+            /** Format: int32 */
+            dailyLimit?: number;
         };
         AppRecordBoard: {
             key: string;

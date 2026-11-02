@@ -4868,12 +4868,24 @@
             "type": "number",
             "format": "double"
           },
+          "myAnswer": {
+            "type": "string"
+          },
+          "myFeedback": {
+            "type": "string"
+          },
           "opponent": {
             "$ref": "#/components/schemas/AppPlayer"
           },
           "opponentScore": {
             "type": "number",
             "format": "double"
+          },
+          "opponentAnswer": {
+            "type": "string"
+          },
+          "opponentFeedback": {
+            "type": "string"
           },
           "ratingAfter": {
             "type": "integer",
@@ -7069,6 +7081,7 @@
       },
       "AppGameSummary": {
         "required": [
+          "available",
           "judge",
           "key",
           "myDraws",
@@ -7144,6 +7157,13 @@
           "myBest": {
             "type": "number",
             "format": "double"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "dailyLimit": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

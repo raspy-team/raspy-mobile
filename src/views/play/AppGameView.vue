@@ -12,6 +12,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <RecipePlay
+          v-else-if="key === 'recipe'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
       </template>
 
@@ -41,10 +48,27 @@
             <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
             <p class="t-caption">{{ game?.scoreUnit }}</p>
             <p class="t-heading mt-6">상대를 찾고 있어요</p>
-            <p class="t-caption mt-1">같은 문장을 다른 사람이 치면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
+            <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
           </template>
         </UiCard>
-        <UiButton block size="lg" class="mt-4" :loading="starting" @click="start">한 판 더</UiButton>
+        <UiCard v-if="result.myFeedback" class="mt-3">
+          <p class="t-micro">{{ game?.judge === 'AI' ? 'AI 셰프 한마디' : '한마디' }}</p>
+          <p class="t-body mt-1">{{ result.myFeedback }}</p>
+        </UiCard>
+        <template v-if="game?.judge === 'AI'">
+          <UiCard v-if="result.myAnswer" class="mt-3">
+            <p class="t-micro">내 요리</p>
+            <p class="t-heading mt-1">{{ dish(result.myAnswer).name }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line">{{ dish(result.myAnswer).steps }}</p>
+          </UiCard>
+          <UiCard v-if="result.opponentAnswer" class="mt-3">
+            <p class="t-micro">{{ result.opponent?.nickname }}님의 요리 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-heading mt-1">{{ dish(result.opponentAnswer).name }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line">{{ dish(result.opponentAnswer).steps }}</p>
+            <p v-if="result.opponentFeedback" class="t-caption mt-2">AI 셰프: {{ result.opponentFeedback }}</p>
+          </UiCard>
+        </template>
+        <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
       </template>
 
@@ -66,14 +90,21 @@
                 <span class="block t-title tabular-nums">{{ game.myWins }}<span class="t-caption">승</span> {{ game.myLosses }}<span class="t-caption">패</span></span>
                 <span class="block t-micro">전적</span>
               </span>
-              <span>
+              <span v-if="game.recordable">
                 <span class="block t-title tabular-nums">{{ game.myBest ?? '-' }}</span>
                 <span class="block t-micro">최고 기록</span>
               </span>
+              <span v-else>
+                <span class="block t-title tabular-nums">{{ game.myDraws }}</span>
+                <span class="block t-micro">무승부</span>
+              </span>
             </div>
           </UiCard>
-          <UiButton block size="lg" class="mt-4" :loading="starting" @click="start">대결 시작</UiButton>
-          <p class="t-caption text-center mt-2">기다리는 사람이 있으면 바로 붙고, 없으면 다음 사람을 기다려요</p>
+          <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">대결 시작</UiButton>
+          <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
+          <p v-else class="t-caption text-center mt-2">
+            기다리는 사람이 있으면 바로 붙고, 없으면 다음 사람을 기다려요<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template>
+          </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
 
           <UiSection title="내 대결" class="mt-8">
@@ -130,6 +161,7 @@ import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import BrandFace from '../../components/BrandFace.vue'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
+import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiTabs, UiTopBar,
 } from '../../components/ui'
@@ -212,6 +244,12 @@ async function submit(answer: string) {
 function secondsLeft(p: Play) {
   const left = Math.floor((new Date(p.deadlineAt).getTime() - Date.now()) / 1000)
   return Math.max(1, Math.min(p.timeLimitSeconds, left))
+}
+
+/** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
+function dish(answer: string) {
+  const [name, ...rest] = answer.split('\n')
+  return { name, steps: rest.join('\n') }
 }
 
 function closeResult() {

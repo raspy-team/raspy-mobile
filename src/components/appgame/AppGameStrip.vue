@@ -9,7 +9,8 @@
           <span class="block t-heading">{{ g.title }}</span>
           <span class="block t-caption mt-0.5">{{ g.summary }}</span>
         </span>
-        <span class="text-right flex-shrink-0">
+        <UiBadge v-if="!g.available">준비 중</UiBadge>
+        <span v-else class="text-right flex-shrink-0">
           <span class="block t-mono">{{ g.myRating }}</span>
           <span class="block t-micro">레이팅</span>
         </span>
@@ -23,11 +24,11 @@
 import { ref, onMounted } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
-import { UiCard, UiIcon, UiSection } from '../ui'
+import { UiBadge, UiCard, UiIcon, UiSection } from '../ui'
 
 type AppGameSummary = components['schemas']['AppGameSummary']
 
-const ICON: Record<string, string> = { typing: 'keyboard' }
+const ICON: Record<string, string> = { typing: 'keyboard', recipe: 'chef-hat' }
 const games = ref<AppGameSummary[]>([])
 
 onMounted(async () => {

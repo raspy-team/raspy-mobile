@@ -2998,6 +2998,7 @@ export interface components {
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
             simultaneous: boolean;
+            race: boolean;
             /** Format: int32 */
             round: number;
             view?: components["schemas"]["TurnView"];
@@ -3032,6 +3033,8 @@ export interface components {
             boards: components["schemas"]["TurnBoard"][];
             choices: components["schemas"]["TurnChoice"][];
             note?: string;
+            prompt?: string;
+            input?: string;
         };
         AppPlayResponse: {
             /** Format: int64 */

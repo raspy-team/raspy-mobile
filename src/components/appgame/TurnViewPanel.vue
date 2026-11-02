@@ -2,6 +2,15 @@
   <div>
     <p v-if="view.note" class="t-heading text-center whitespace-pre-line tabular-nums">{{ view.note }}</p>
 
+    <!-- 문제 (퀴즈) -->
+    <p v-if="view.prompt" class="t-title text-center mt-6 break-keep">{{ view.prompt }}</p>
+
+    <!-- 글로 답하기 (퀴즈) -->
+    <form v-if="view.input" class="mt-4 flex gap-2" @submit.prevent="answer">
+      <UiInput ref="field" v-model="text" class="flex-1" :maxlength="30" :placeholder="myTurn ? view.input : '다음 문제를 기다려요'" :disabled="!myTurn" @enter="answer" />
+      <UiButton :disabled="!myTurn || !text.trim()" :loading="sending" @click="answer">내기</UiButton>
+    </form>
+
     <!-- 보드: 빈칸을 누르면 "행,열"을 낸다 (내 차례이고 누를 수 있는 보드일 때만) -->
     <section v-for="(b, i) in view.boards" :key="i" class="mt-4">
       <p v-if="b.title" class="t-label mb-2">{{ b.title }}</p>
@@ -39,9 +48,9 @@
 
 <script setup lang="ts">
 // 서버가 준 판(TurnView)을 게임마다 화면을 만들지 않고 그린다: 보드 격자와 고르는 버튼 (가위바위보·편지 오목·배틀십)
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, watch, nextTick, defineProps, defineEmits } from 'vue'
 import type { components } from '@/api/schema'
-import { UiButton, UiIcon } from '../ui'
+import { UiButton, UiIcon, UiInput } from '../ui'
 
 type TurnView = components['schemas']['TurnView']
 type TurnBoard = components['schemas']['TurnBoard']
@@ -53,6 +62,20 @@ const LABEL: Record<string, string> = { me: '내 돌', op: '상대 돌', ship: '
 const kind = (cell: string) => cell.split(' ')[0]
 const last = (cell: string) => cell.includes('last')
 const canPlay = (b: TurnBoard, cell: string) => b.playable && props.myTurn && !props.sending && kind(cell) === ''
+
+const text = ref('')
+const field = ref<{ focus: () => void } | null>(null)
+function answer() {
+  if (!props.myTurn || !text.value.trim()) return
+  emit('move', text.value.trim())
+  text.value = ''
+}
+// 새 문제가 나오면 바로 칠 수 있게
+watch(() => props.view.prompt, async () => {
+  text.value = ''
+  await nextTick()
+  if (props.myTurn) field.value?.focus()
+})
 
 const picked = ref('')
 function pick(value: string) {

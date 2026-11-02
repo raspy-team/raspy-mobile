@@ -132,7 +132,7 @@ type State = components['schemas']['RealtimeState']
 const route = useRoute()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십' }
+const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기' }
 const title = computed(() => TITLES[key.value] ?? '실시간 대결')
 const state = ref<State | null>(null)
 const error = ref('')
@@ -167,6 +167,7 @@ const leftText = computed(() => {
 const turnLine = computed(() => {
   const s = state.value
   if (!s) return ''
+  if (s.race) return myTurn.value ? '먼저 맞히세요' : '다음 문제를 기다려요'
   if (s.simultaneous) return myTurn.value ? `${(s.round ?? 0) + 1}판 · 골라 주세요` : `${s.opponent?.nickname}님이 고르는 중`
   return myTurn.value ? '내 차례' : `${s.opponent?.nickname}님 차례`
 })
@@ -266,8 +267,10 @@ const timer = setInterval(async () => {
     botCalled = true
     apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
   }
-  if (s.status === 'PLAYING' && left.value === 0 && timeoutSentFor !== s.moves.length) {
-    timeoutSentFor = s.moves.length
+  // 마감 시각마다 한 번 (레이스·같이 내기는 moves가 그대로여도 판이 바뀐다)
+  const due = s.turnEndsAt ? new Date(s.turnEndsAt).getTime() : -1
+  if (s.status === 'PLAYING' && left.value === 0 && timeoutSentFor !== due) {
+    timeoutSentFor = due
     // 서버는 1초 여유를 둔다
     setTimeout(async () => {
       if (state.value?.gameId === s.gameId) apply((await POST('/api/app-games/realtime/{gameId}/timeout', { path: { gameId: s.gameId } })).data)

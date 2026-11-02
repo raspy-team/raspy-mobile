@@ -86,6 +86,8 @@ const ownerLine = computed(() =>
   [
     // 매치 온도 (만나도 되는 사람인지, 기능 검토 #1)
     props.game.ownerTemperature != null && `${props.game.ownerTemperature.toFixed(1)}°`,
+    // 둘 다 이 규칙 레이팅이 있으면 이길 확률 (비슷한 실력인지 고르는 데 쓴다). 40~60%면 '해 볼 만'
+    props.game.myWinChance != null && `이길 확률 ${props.game.myWinChance}%${props.game.myWinChance >= 40 && props.game.myWinChance <= 60 ? ' 해 볼 만' : ''}`,
     ratingLine(props.game.ruleStatisticsOfOwner),
     props.game.createdAt && `${timeAgo(props.game.createdAt)} 올림`,
   ].filter(Boolean).join(' · '),

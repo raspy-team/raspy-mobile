@@ -4306,6 +4306,8 @@ export interface components {
             mannerScore: number;
             /** Format: double */
             ownerTemperature?: number;
+            /** Format: int32 */
+            myWinChance?: number;
             ownerTrustLabel?: string;
             /** Format: int64 */
             championId?: number;

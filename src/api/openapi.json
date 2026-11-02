@@ -5219,11 +5219,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -9483,6 +9483,10 @@
           "ownerTemperature": {
             "type": "number",
             "format": "double"
+          },
+          "myWinChance": {
+            "type": "integer",
+            "format": "int32"
           },
           "ownerTrustLabel": {
             "type": "string"

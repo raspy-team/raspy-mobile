@@ -10,7 +10,7 @@
         </span>
         <h1 class="t-title mt-5">경기가 열렸어요</h1>
         <p class="t-caption mt-2">
-          {{ friend ? `${friend.nickname}님에게 알렸어요. 장소와 시간은 내 경기에서 함께 정해요.` : '열린 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
+          {{ friend ? `${friend.nickname}님에게 알렸어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '열린 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
         <!-- 아무나로 열었으면, 기다리기만 하기보다 아는 사람을 먼저 부르게 -->
         <UiButton v-if="!friend && createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">{{ format === 'DUEL' ? '링크 보내서 상대 부르기' : '링크 보내서 같이 할 사람 부르기' }}</UiButton>
@@ -33,6 +33,15 @@
         <div class="flex flex-wrap gap-2 mt-3 mb-8">
           <UiChip v-for="w in WHEN" :key="w.label" :selected="when === w.label" @click="when = w.label">{{ w.label }}</UiChip>
         </div>
+
+        <!-- 어디서: 만나서 / 화상으로 / 다른 게임에서. 화상·다른 게임은 동네 없이 전국에 보인다 -->
+        <h1 class="t-title">어디서 할까요?</h1>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <UiChip v-for="v in VENUES" :key="v.value" :selected="venue === v.value" @click="venue = v.value">{{ v.label }}</UiChip>
+        </div>
+        <UiInput v-if="isRemote(venue)" v-model="venueDetail" class="mt-3" :placeholder="VENUES.find((v) => v.value === venue)?.placeholder" />
+        <p v-if="isRemote(venue)" class="t-caption mt-2">장소가 없어서 어느 동네에서든 보여요.</p>
+        <div class="mb-8"></div>
 
         <!-- 몇 명이서: 규칙이 팀·여럿을 받을 때만 보인다 -->
         <template v-if="formats.length > 1">
@@ -113,7 +122,7 @@ import { useToast } from '../../composable/useToast'
 import { haptic } from '../../utils/haptics'
 import { shareLink } from '../../utils/share'
 import { quickTimes } from '../../utils/when'
-import { allowedFormats, TEAM_SIZES, GROUP_SIZES } from '../../utils/gameFormat'
+import { allowedFormats, TEAM_SIZES, GROUP_SIZES, VENUES, isRemote } from '../../utils/gameFormat'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
 } from '../../components/ui'
@@ -129,6 +138,9 @@ const OPTIONS = [
 
 // 친구와 바로 잡는 경기는 1:1만 된다 (여럿은 열어서 신청을 받는다)
 const options = computed(() => (format.value === 'DUEL' ? OPTIONS : OPTIONS.filter((o) => o.value === 'anyone')))
+
+const venue = ref('IN_PERSON')
+const venueDetail = ref('')
 
 const formats = computed(() => allowedFormats(rule.value))
 const format = ref('DUEL')
@@ -181,7 +193,10 @@ async function create(target) {
   friend.value = target
   try {
     const matchDate = WHEN.find((w) => w.label === when.value)?.date() ?? null
-    const payload = { referencedRuleId: ruleId, friendId: target?.id ?? null, matchDate, format: format.value, maxPlayers: maxPlayers.value }
+    const payload = {
+      referencedRuleId: ruleId, friendId: target?.id ?? null, matchDate, format: format.value, maxPlayers: maxPlayers.value,
+      venue: venue.value, placeDetail: isRemote(venue.value) ? venueDetail.value.trim() || null : null,
+    }
     const { data } = await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
     createdId.value = data
     friendsOpen.value = false

@@ -6,7 +6,7 @@
         <RuleThumb :rule="game.rule" :size="36" bare />
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ game.rule?.ruleTitle }}</span>
-          <span class="block t-caption truncate mt-0.5">{{ place(game.matchLocation) }} · {{ matchTime(game.matchDate) }}</span>
+          <span class="block t-caption truncate mt-0.5">{{ venuePlace(game, place) }} · {{ matchTime(game.matchDate) }}</span>
           <!-- 여럿이 하는 경기: 형식과 모인 인원 -->
           <span v-if="multi" class="block t-micro mt-0.5">{{ formatLabel(game.format, game.maxPlayers) }} · {{ game.currentParticipantCounts }}/{{ game.maxPlayers }}명 모임</span>
         </span>
@@ -58,7 +58,7 @@ import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
 import { matchTime, place, ratingLine, timeAgo } from '../../utils/format'
-import { formatLabel, TEAM_NAMES } from '../../utils/gameFormat'
+import { formatLabel, TEAM_NAMES, venuePlace } from '../../utils/gameFormat'
 
 const props = defineProps({
   game: { type: Object, required: true },

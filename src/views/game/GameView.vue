@@ -99,7 +99,7 @@
   </UiSheet>
 
   <!-- 시간·장소 정하기 (시작 전 언제든). 보낸 칸만 바뀌고 상대에게 알림이 간다 -->
-  <UiSheet :model-value="!!scheduleGame" title="언제, 어디서 할까요?" @update:model-value="scheduleGame = null">
+  <UiSheet :model-value="!!scheduleGame" :title="isRemote(scheduleGame?.venue) ? '언제 할까요?' : '언제, 어디서 할까요?'" @update:model-value="scheduleGame = null">
     <div class="space-y-5">
       <div>
         <p class="t-label mb-2">시간</p>
@@ -108,7 +108,12 @@
         </div>
         <UiInput v-model="schedTime" type="datetime-local" />
       </div>
-      <div>
+      <!-- 화상·다른 게임은 주소 대신 어디서인지만 -->
+      <div v-if="isRemote(scheduleGame?.venue)">
+        <p class="t-label mb-2">어디서</p>
+        <UiInput v-model="schedPlace" :placeholder="VENUES.find((v) => v.value === scheduleGame?.venue)?.placeholder" />
+      </div>
+      <div v-else>
         <p class="t-label mb-2">장소</p>
         <div class="grid grid-cols-2 gap-2">
           <UiSelect v-model="schedRegion1" :options="region1Options" placeholder="시·도" />
@@ -118,7 +123,7 @@
       </div>
     </div>
     <template #footer>
-      <UiButton block :disabled="!schedTime && !(schedRegion1 && schedRegion2)" :loading="busy" @click="submitSchedule">정하기</UiButton>
+      <UiButton block :disabled="!schedTime && !(schedRegion1 && schedRegion2) && !(isRemote(scheduleGame?.venue) && schedPlace.trim())" :loading="busy" @click="submitSchedule">정하기</UiButton>
     </template>
   </UiSheet>
 
@@ -184,7 +189,7 @@
 
 <script setup>
 // 내 경기: 할 일(시작·승인·참여) / 기다리는 중 / 끝난 경기로 나눠 보여준다
-import { TEAM_NAMES } from '../../utils/gameFormat'
+import { TEAM_NAMES, VENUES, isRemote } from '../../utils/gameFormat'
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -403,17 +408,19 @@ function openSchedule(g) {
   const parsed = g.matchLocation ? parseRegion(g.matchLocation) : null
   schedRegion1.value = parsed?.region1 || ''
   nextTick(() => (schedRegion2.value = parsed?.region2 || ''))
-  schedPlace.value = ''
+  schedPlace.value = isRemote(g.venue) ? g.matchLocation || '' : ''
 }
 
 async function submitSchedule() {
   busy.value = true
   try {
-    const hasPlace = schedRegion1.value && schedRegion2.value
+    const remote = isRemote(scheduleGame.value.venue)
+    const hasPlace = !remote && schedRegion1.value && schedRegion2.value
     await api.post(`/api/games/${scheduleGame.value.id}/schedule`, {
       matchDate: schedTime.value ? (schedTime.value.length === 16 ? `${schedTime.value}:00` : schedTime.value) : null,
       roadAddress: hasPlace ? `${schedRegion1.value} ${schedRegion2.value}` : null,
-      detailAddress: hasPlace ? schedPlace.value.trim() || null : null,
+      // 화상·다른 게임은 어디서인지만 보낸다 (서버가 주소 없이 받는다)
+      detailAddress: remote ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || null : null,
     })
     scheduleGame.value = null
     showToast('정했어요. 상대에게 알렸어요')
@@ -442,6 +449,8 @@ const startMessage = computed(() => {
 
 function openStart(game) {
   startGame.value = game
+  // 화상·다른 게임은 장소를 묻지 않는다
+  if (isRemote(game.venue)) return goCamera()
   if (game.matchLocation && game.matchLocation.trim()) showPlaceConfirm.value = true
   else openPlaceForm()
 }

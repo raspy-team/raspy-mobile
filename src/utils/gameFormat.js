@@ -26,3 +26,18 @@ export function formatLabel(format, maxPlayers) {
 }
 
 export const TEAM_NAMES = ['A팀', 'B팀']
+
+// 앱 밖 경기를 어디서 하나 (서버 GameVenue). 화상·다른 게임은 동네가 없고 어디서인지(디스코드 등)만 적는다
+export const VENUES = [
+  { value: 'IN_PERSON', label: '만나서', placeholder: '' },
+  { value: 'VIDEO', label: '화상으로', placeholder: '예: 디스코드, 페이스타임' },
+  { value: 'ONLINE', label: '다른 게임에서', placeholder: '예: 롤 사용자 설정 게임, 체스닷컴' },
+]
+export const isRemote = (venue) => !!venue && venue !== 'IN_PERSON'
+
+// 카드에 보일 장소: 만나서는 장소, 화상·다른 게임은 "화상 · 디스코드"
+export function venuePlace(game, place) {
+  if (!isRemote(game?.venue)) return place(game?.matchLocation)
+  const label = VENUES.find((v) => v.value === game.venue)?.label
+  return game.matchLocation ? `${label} · ${game.matchLocation}` : label
+}

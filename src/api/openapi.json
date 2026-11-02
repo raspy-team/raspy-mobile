@@ -4303,11 +4303,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -5430,7 +5430,8 @@
       "CreateGameRequest": {
         "required": [
           "format",
-          "referencedRuleId"
+          "referencedRuleId",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -5463,6 +5464,14 @@
           "maxPlayers": {
             "type": "integer",
             "format": "int32"
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
+            ]
           }
         }
       },
@@ -7383,7 +7392,8 @@
           "maxPlayers",
           "ownerId",
           "ownerNickname",
-          "rule"
+          "rule",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -7464,6 +7474,14 @@
               "DUEL",
               "TEAMS",
               "FREE_FOR_ALL"
+            ]
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
             ]
           },
           "teamSeatsLeft": {
@@ -7855,7 +7873,8 @@
           "ownerStatistics",
           "players",
           "rule",
-          "status"
+          "status",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -7934,6 +7953,14 @@
             "type": "integer",
             "format": "int32"
           },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
+            ]
+          },
           "players": {
             "type": "array",
             "items": {
@@ -7958,7 +7985,8 @@
           "myStatistics",
           "players",
           "rule",
-          "status"
+          "status",
+          "venue"
         ],
         "type": "object",
         "properties": {
@@ -8051,6 +8079,14 @@
           "maxPlayers": {
             "type": "integer",
             "format": "int32"
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIDEO",
+              "ONLINE"
+            ]
           },
           "players": {
             "type": "array",

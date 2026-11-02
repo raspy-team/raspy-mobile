@@ -2882,6 +2882,8 @@ export interface components {
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             /** Format: int32 */
             maxPlayers?: number;
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
         };
         CancelGameRequest: {
             /** Format: int64 */
@@ -3487,6 +3489,8 @@ export interface components {
             isAppliedByMe: boolean;
             /** @enum {string} */
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
             teamSeatsLeft?: number[];
         };
         SideResult: {
@@ -3634,6 +3638,8 @@ export interface components {
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             /** Format: int32 */
             maxPlayers: number;
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
             players: components["schemas"]["GamePlayer"][];
             /** Format: int32 */
             myTeam?: number;
@@ -3672,6 +3678,8 @@ export interface components {
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             /** Format: int32 */
             maxPlayers: number;
+            /** @enum {string} */
+            venue: "IN_PERSON" | "VIDEO" | "ONLINE";
             players: components["schemas"]["GamePlayer"][];
         };
         GameApplicantsResponse: {

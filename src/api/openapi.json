@@ -864,6 +864,80 @@
         }
       }
     },
+    "/api/games/{id}/result/peer-vote": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "operationId": "peerVote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeerVoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{id}/result/peer-vote/open": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "참가자 투표로 결과 정하기",
+        "description": "셋 이상이 각자 겨룬 경기. 함께 한 사람들이 자기 말고 한 명을 뽑고, 모두 뽑거나 24시간이 지나면 표 순서로 등수가 정해진다",
+        "operationId": "openPeerVote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{id}/result/confirm": {
       "post": {
         "tags": [
@@ -4513,11 +4587,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -5658,6 +5732,18 @@
           "opponentScore": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "PeerVoteRequest": {
+        "required": [
+          "targetId"
+        ],
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -7879,6 +7965,8 @@
           "format",
           "gameSummary",
           "newChampionIdx",
+          "peerVotes",
+          "peerVoting",
           "placesEntered",
           "rejectsLeft",
           "setResults",
@@ -7977,6 +8065,17 @@
           },
           "placesEntered": {
             "type": "boolean"
+          },
+          "peerVoting": {
+            "type": "boolean"
+          },
+          "peerVotes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myPeerVoteTargetId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

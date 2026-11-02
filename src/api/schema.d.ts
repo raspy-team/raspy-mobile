@@ -472,6 +472,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{id}/result/peer-vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["peerVote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{id}/result/peer-vote/open": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 참가자 투표로 결과 정하기
+         * @description 셋 이상이 각자 겨룬 경기. 함께 한 사람들이 자기 말고 한 명을 뽑고, 모두 뽑거나 24시간이 지나면 표 순서로 등수가 정해진다
+         */
+        post: operations["openPeerVote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{id}/result/confirm": {
         parameters: {
             query?: never;
@@ -3006,6 +3042,10 @@ export interface components {
             /** Format: int32 */
             opponentScore: number;
         };
+        PeerVoteRequest: {
+            /** Format: int64 */
+            targetId: number;
+        };
         GameReviewRequest: {
             /** Format: int32 */
             manner: number;
@@ -3712,6 +3752,11 @@ export interface components {
             sides: components["schemas"]["SideResult"][];
             sideSetResults: components["schemas"]["SideSetResult"][];
             placesEntered: boolean;
+            peerVoting: boolean;
+            /** Format: int32 */
+            peerVotes: number;
+            /** Format: int64 */
+            myPeerVoteTargetId?: number;
         };
         GameSummaryResponse: {
             /** Format: int64 */
@@ -4817,6 +4862,54 @@ export interface operations {
                 "application/json": components["schemas"]["EnterResultRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    peerVote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PeerVoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    openPeerVote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {

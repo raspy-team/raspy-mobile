@@ -10,8 +10,10 @@
       <div class="flex gap-2 mb-4">
         <UiChip :selected="groupMode === 'place'" @click="groupMode = 'place'">등수로</UiChip>
         <UiChip :selected="groupMode === 'score'" @click="groupMode = 'score'">점수로</UiChip>
+        <UiChip v-if="!counter" :selected="groupMode === 'vote'" @click="groupMode = 'vote'">투표로</UiChip>
       </div>
-      <ol class="space-y-2">
+      <p v-if="groupMode === 'vote'" class="t-caption">점수 없이 함께 한 사람들이 '누가 제일 잘했나'를 뽑아요. 자기는 못 뽑고, 모두 뽑거나 24시간이 지나면 표가 많은 순서로 등수가 정해져요.</p>
+      <ol v-if="groupMode !== 'vote'" class="space-y-2">
         <li v-for="p in people" :key="p.id" class="grid grid-cols-[1fr_6rem] items-center gap-3">
           <span class="text-sm text-fg truncate">{{ p.nickname }}</span>
           <select v-if="groupMode === 'place'" v-model.number="p.place" class="ui-control h-12 text-center" :aria-label="`${p.nickname} 등수`">
@@ -30,7 +32,7 @@
           />
         </li>
       </ol>
-      <p class="t-caption mt-3">{{ groupMode === 'place' ? '같이 들어오면 같은 등수를 고르세요.' : '점수가 높은 순서로 등수가 매겨져요.' }}</p>
+      <p v-if="groupMode !== 'vote'" class="t-caption mt-3">{{ groupMode === 'place' ? '같이 들어오면 같은 등수를 고르세요.' : '점수가 높은 순서로 등수가 매겨져요.' }}</p>
     </template>
 
     <template v-else>
@@ -69,7 +71,7 @@
     <p v-if="error" class="text-sm text-danger-fg mt-3" role="alert">{{ error }}</p>
 
     <template #footer>
-      <UiButton block size="lg" :loading="submitting" @click="submit">{{ counter ? '이 점수로 돌려보내기' : '결과 내기' }}</UiButton>
+      <UiButton block size="lg" :loading="submitting" @click="submit">{{ counter ? '이 점수로 돌려보내기' : isGroup && groupMode === 'vote' ? '투표 열기' : '결과 내기' }}</UiButton>
     </template>
   </UiSheet>
 </template>
@@ -152,7 +154,22 @@ async function send(body) {
   }
 }
 
+async function openVote() {
+  submitting.value = true
+  error.value = ''
+  try {
+    await POST('/api/games/{id}/result/peer-vote/open', { path: { id: Number(props.gameId) } })
+    emit('update:modelValue', false)
+    emit('submitted')
+  } catch (e) {
+    error.value = e.response?.data?.message || '투표를 열지 못했어요'
+  } finally {
+    submitting.value = false
+  }
+}
+
 function submitGroup() {
+  if (groupMode.value === 'vote') return openVote()
   const ps = people.value
   if (groupMode.value === 'place') {
     if (ps.some((p) => !p.place)) return (error.value = '모든 사람의 등수를 골라 주세요')

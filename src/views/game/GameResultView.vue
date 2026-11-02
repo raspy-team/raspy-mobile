@@ -24,8 +24,22 @@
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<span v-if="playedOn" class="t-mono ml-2">{{ playedOn }}</span></p>
         <h1 class="t-display text-center mt-3" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
 
+        <!-- 참가자 투표 중: 자기 말고 한 명 뽑기 -->
+        <section v-if="peerVoting" class="mt-8">
+          <p class="t-heading text-center">누가 제일 잘했나요?</p>
+          <p class="t-caption text-center mt-1">{{ peerVotes }}/{{ resSides.length }}명이 뽑았어요. 모두 뽑거나 24시간이 지나면 표가 많은 순서로 등수가 정해져요.</p>
+          <ul class="mt-4 rounded-xl bg-surface divide-y divide-line">
+            <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3 px-4 h-14">
+              <UiAvatar :src="r.profileUrl" :name="r.nickname" size="sm" />
+              <span class="flex-1 text-sm truncate">{{ r.nickname }}<span v-if="r.id === currentUserId" class="text-fg-subtle"> (나)</span></span>
+              <UiBadge v-if="myPeerVote === r.id" tone="primary">뽑음</UiBadge>
+              <UiButton v-else-if="isParticipant && !myPeerVote && r.id !== currentUserId" size="sm" variant="tonal" :loading="voting === r.id" @click="peerVote(r.id)">뽑기</UiButton>
+            </li>
+          </ul>
+        </section>
+
         <!-- 셋 이상이 각자: 등수 표 -->
-        <ol v-if="format === 'FREE_FOR_ALL'" class="mt-10 rounded-xl bg-surface divide-y divide-line">
+        <ol v-else-if="format === 'FREE_FOR_ALL'" class="mt-10 rounded-xl bg-surface divide-y divide-line">
           <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3 px-4 h-14">
             <span class="t-mono w-8 text-fg" :class="r.place === 1 ? 'font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
             <button type="button" class="flex items-center gap-2.5 min-w-0 flex-1 text-left" @click="router.push('/profile/' + r.id)">
@@ -315,7 +329,7 @@ import { TEAM_NAMES } from '../../utils/gameFormat'
 import BrandFace from '../../components/BrandFace.vue'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import {
-  UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
+  UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'
@@ -439,6 +453,23 @@ const resultError = ref('')
 const format = ref('DUEL')
 const resSides = ref([])
 const placesEntered = ref(false)
+// 참가자 투표 중이면 뽑은 사람 수와 내가 뽑은 사람
+const peerVoting = ref(false)
+const peerVotes = ref(0)
+const myPeerVote = ref(null)
+const voting = ref(null)
+async function peerVote(targetId) {
+  voting.value = targetId
+  try {
+    await POST('/api/games/{id}/result/peer-vote', { path: { id: Number(gameId) }, body: { targetId } })
+    haptic('success')
+    await load()
+  } catch (e) {
+    showToast(e.response?.data?.message || '뽑지 못했어요')
+  } finally {
+    voting.value = null
+  }
+}
 const mySide = computed(() => resSides.value.findIndex((s) => s.members.some((m) => m.id === currentUserId.value)))
 const ranking = computed(() =>
   resSides.value.map((s) => ({ ...s.members[0], place: s.place, points: s.points })).sort((a, b) => a.place - b.place),
@@ -470,6 +501,7 @@ const playedOn = computed(() =>
 )
 const headline = computed(() => {
   if (disputed.value) return { text: '기록하지 않은 경기', tone: 'text-fg-muted' }
+  if (peerVoting.value) return { text: '투표하는 중', tone: 'text-fg' }
   if (format.value === 'FREE_FOR_ALL') {
     const first = ranking.value.filter((r) => r.place === 1)
     if (first.length === ranking.value.length) return { text: '모두 같은 등수', tone: 'text-fg' }
@@ -484,6 +516,8 @@ const headline = computed(() => {
 })
 const pending = computed(() => {
   if (confirmed.value || disputed.value) return { canAnswer: false }
+  // 참가자 투표는 위의 뽑기가 확인이다
+  if (peerVoting.value) return { canAnswer: false, title: '투표로 정하는 중이에요', description: '함께 한 사람들이 모두 뽑으면 바로 기록돼요' }
   const submitter = resSides.value.flatMap((s) => s.members).find((u) => u.id === resultSubmittedById.value)
     || [user1.value, user2.value].find((u) => u.id === resultSubmittedById.value)
   const until = autoConfirmAt.value ? `${matchTime(autoConfirmAt.value)}까지` : '24시간 안에'
@@ -549,6 +583,9 @@ async function load() {
     format.value = res.data.format || 'DUEL'
     resSides.value = res.data.sides || []
     placesEntered.value = !!res.data.placesEntered
+    peerVoting.value = !!res.data.peerVoting
+    peerVotes.value = res.data.peerVotes ?? 0
+    myPeerVote.value = res.data.myPeerVoteTargetId ?? null
     // 팀 경기: 두 팀을 두 사람처럼 보인다 (이름은 팀 이름과 팀원, 누르면 첫 사람 프로필)
     if (format.value === 'TEAMS' && resSides.value.length === 2) {
       const asUser = (side) => ({ ...side.members[0], nickname: `${TEAM_NAMES[side.key] || '팀'} · ${side.members.map((m) => m.nickname).join('·')}` })

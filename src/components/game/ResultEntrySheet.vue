@@ -1,6 +1,8 @@
 <template>
-  <UiSheet :model-value="modelValue" title="결과만 입력" @update:model-value="emit('update:modelValue', $event)">
-    <p class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워두세요. {{ opponentName }}님이 확인하면 기록돼요.</p>
+  <UiSheet :model-value="modelValue" :title="counter ? '내가 생각하는 점수' : '결과만 입력'" @update:model-value="emit('update:modelValue', $event)">
+    <p v-if="counter" class="t-caption mb-4">고친 점수가 새 결과가 되고, 이번엔 {{ opponentName }}님이 확인해요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
+    <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워두세요. {{ opponentName }}님이 확인하면 기록돼요.</p>
+    <p v-if="warning" class="text-sm text-danger-fg mb-4">{{ warning }}</p>
 
     <div class="grid grid-cols-[3rem_1fr_1fr_2.75rem] items-center gap-2 mb-1">
       <span></span>
@@ -36,13 +38,14 @@
     <p v-if="error" class="text-sm text-danger-fg mt-3" role="alert">{{ error }}</p>
 
     <template #footer>
-      <UiButton block size="lg" :loading="submitting" @click="submit">결과 내기</UiButton>
+      <UiButton block size="lg" :loading="submitting" @click="submit">{{ counter ? '이 점수로 돌려보내기' : '결과 내기' }}</UiButton>
     </template>
   </UiSheet>
 </template>
 
 <script setup>
 // 점수판 없이, 경기가 끝난 뒤 세트별 점수만 낸다. 상대가 확인하면 확정된다
+// counter: 상대가 낸 결과를 돌려보내며 내가 생각하는 점수를 낸다 (initial: 지금 결과를 [내 점수, 상대 점수]로)
 import { ref, watch, defineProps, defineEmits } from 'vue'
 import { POST } from '../../api/client'
 import { UiButton, UiIconButton, UiSheet } from '../ui'
@@ -52,6 +55,9 @@ const props = defineProps({
   gameId: { type: [Number, String], required: true },
   opponentName: { type: String, default: '상대' },
   setCount: { type: Number, default: 1 }, // 규칙의 총 세트 수. 처음 칸 수로만 쓴다
+  counter: { type: Boolean, default: false },
+  initial: { type: Array, default: () => [] },
+  warning: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue', 'submitted'])
 
@@ -67,7 +73,9 @@ watch(
   (open) => {
     if (!open) return
     const first = Math.max(1, Math.min(9, Math.floor(props.setCount / 2) + 1))
-    sets.value = Array.from({ length: first }, blank)
+    sets.value = props.initial.length
+      ? props.initial.map(([my, opponent]) => ({ key: nextKey++, my, opponent }))
+      : Array.from({ length: first }, blank)
     error.value = ''
   },
   { immediate: true },
@@ -87,10 +95,9 @@ async function submit() {
   submitting.value = true
   error.value = ''
   try {
-    await POST('/api/games/{id}/result', {
-      path: { id: Number(props.gameId) },
-      body: { sets: played.map((s) => ({ myScore: s.my, opponentScore: s.opponent })) },
-    })
+    const body = { sets: played.map((s) => ({ myScore: s.my, opponentScore: s.opponent })) }
+    if (props.counter) await POST('/api/games/{id}/result/reject', { path: { id: Number(props.gameId) }, body })
+    else await POST('/api/games/{id}/result', { path: { id: Number(props.gameId) }, body })
     emit('update:modelValue', false)
     emit('submitted')
   } catch (e) {

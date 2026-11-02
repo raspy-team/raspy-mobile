@@ -72,8 +72,19 @@
         <p v-else class="t-caption text-center mt-6">세트 점수 없이 승패만 기록한 경기예요</p>
       </section>
 
+      <!-- 끝내 맞지 않은 결과 -->
+      <UiCard v-if="disputed" class="flex items-start gap-3">
+        <span class="w-10 h-10 rounded-full bg-surface-2 text-fg-muted flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <UiIcon name="fas fa-triangle-exclamation" />
+        </span>
+        <div class="min-w-0">
+          <p class="t-heading">결과가 끝내 맞지 않았어요</p>
+          <p class="t-caption mt-0.5">세 번 돌려보내서 이 경기는 전적과 레이팅에 남기지 않아요. 관리자가 확인할게요.</p>
+        </div>
+      </UiCard>
+
       <!-- 상대 확인을 기다리는 결과 -->
-      <UiCard v-if="!confirmed" class="space-y-3">
+      <UiCard v-else-if="!confirmed" class="space-y-3">
         <div class="flex items-start gap-3">
           <span class="w-10 h-10 rounded-full bg-surface-2 text-fg-muted flex items-center justify-center flex-shrink-0" aria-hidden="true">
             <UiIcon name="fas fa-hourglass-half" />
@@ -83,7 +94,7 @@
             <p class="t-caption mt-0.5">{{ pending.description }}</p>
           </div>
         </div>
-        <UiButton v-if="pending.canAnswer" variant="ghost" block :loading="isAnswering === 'reject'" @click="rejectResult">점수가 달라요, 다시 맞출게요</UiButton>
+        <UiButton v-if="pending.canAnswer" variant="ghost" block @click="showCounter = true">점수가 달라요, 고쳐서 보낼게요</UiButton>
       </UiCard>
 
       <!-- 새 챔피언 -->
@@ -253,6 +264,17 @@
     </div>
   </div>
 
+  <!-- 돌려보내기: 내가 생각하는 점수를 낸다 -->
+  <ResultEntrySheet
+    v-model="showCounter"
+    counter
+    :game-id="gameId"
+    :opponent-name="opponent.nickname"
+    :initial="mySetScores"
+    :warning="rejectsLeft <= 1 ? '이번에 돌려보내면 결과가 끝내 맞지 않은 것으로 보고 이 경기는 기록하지 않아요' : ''"
+    @submitted="onCountered"
+  />
+
   <!-- 숨겨진 카메라·동영상 입력 -->
   <input ref="cameraInputRef" type="file" accept="image/*" capture="environment" class="hidden" @change="onCameraChange" />
   <input ref="videoInputRef" type="file" accept="video/*" capture="environment" class="hidden" @change="onVideoChange" />
@@ -272,6 +294,7 @@ import { POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { matchTime } from '../../utils/format'
 import BrandFace from '../../components/BrandFace.vue'
+import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import {
   UiAvatar, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'
@@ -372,6 +395,9 @@ const confirmed = ref(true)
 const resultSubmittedById = ref(null)
 const autoConfirmAt = ref(null)
 const isAnswering = ref('')
+const rejectsLeft = ref(3)
+const disputed = ref(false)
+const showCounter = ref(false)
 
 // 사진 관련 상태
 const allPictures = ref([])
@@ -408,13 +434,14 @@ const playedOn = computed(() =>
   startDate.value ? (() => { const d = new Date(startDate.value); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}` })() : '',
 )
 const headline = computed(() => {
+  if (disputed.value) return { text: '기록하지 않은 경기', tone: 'text-fg-muted' }
   if (winnerIdx.value === 0) return { text: '무승부', tone: 'text-fg' }
   const winner = winnerIdx.value === 1 ? user1.value : user2.value
   if (!isParticipant.value) return { text: `${winner.nickname}님 승리`, tone: 'text-fg', mark: true }
   return winner.id === currentUserId.value ? { text: '이겼어요', tone: 'text-fg', mark: true } : { text: '졌어요', tone: 'text-fg-muted' }
 })
 const pending = computed(() => {
-  if (confirmed.value) return { canAnswer: false }
+  if (confirmed.value || disputed.value) return { canAnswer: false }
   const submitter = [user1.value, user2.value].find((u) => u.id === resultSubmittedById.value)
   const until = autoConfirmAt.value ? `${matchTime(autoConfirmAt.value)}까지` : '24시간 안에'
   if (!isParticipant.value) return { canAnswer: false, title: '확인 중인 결과예요', description: '두 선수가 확인하면 기록돼요' }
@@ -423,8 +450,8 @@ const pending = computed(() => {
   }
   return {
     canAnswer: true,
-    title: `${submitter?.nickname || '상대'}님이 낸 결과예요. 맞나요?`,
-    description: `맞으면 전적과 레이팅에 반영돼요. ${until} 확인하지 않으면 그대로 확정돼요`,
+    title: `${submitter?.nickname || '상대'}님이 ${rejectsLeft.value < 3 ? '고쳐 보낸' : '낸'} 결과예요. 맞나요?`,
+    description: `맞으면 전적과 레이팅에 반영돼요. ${until} 확인하지 않으면 그대로 확정돼요` + (rejectsLeft.value <= 1 ? '. 한 번 더 돌려보내면 이 경기는 기록하지 않아요' : ''),
   }
 })
 
@@ -441,22 +468,13 @@ async function confirmResult() {
   }
 }
 
-async function rejectResult() {
-  const ok = await confirmDialog({
-    title: '결과를 돌려보낼까요?',
-    message: `경기가 다시 진행 중이 돼요. ${opponent.value.nickname}님과 점수를 맞춰 다시 내주세요.`,
-    confirmText: '돌려보내기',
-  })
-  if (!ok) return
-  isAnswering.value = 'reject'
-  try {
-    await POST('/api/games/{id}/result/reject', { path: { id: Number(gameId) } })
-    router.replace(`/games/${gameId}/play`)
-  } catch (e) {
-    showToast(e.response?.data?.message || '돌려보내지 못했어요. 다시 시도해 주세요')
-  } finally {
-    isAnswering.value = ''
-  }
+// 지금 결과를 내 쪽에서 본 세트 점수 [내 점수, 상대 점수]. 돌려보내기 칸의 처음 값
+const mySetScores = computed(() => setResults.value.map((s) => (sides.value[0].isMe ? [setLeft(s), setRight(s)] : [setRight(s), setLeft(s)])))
+
+async function onCountered() {
+  haptic('success')
+  await load()
+  showToast(disputed.value ? '결과가 맞지 않아 이 경기는 기록하지 않아요' : `고친 점수를 보냈어요. ${opponent.value.nickname}님이 확인해요`)
 }
 
 const reviewRows = computed(() => [
@@ -472,6 +490,8 @@ async function load() {
     confirmed.value = res.data.confirmed !== false
     resultSubmittedById.value = res.data.resultSubmittedById
     autoConfirmAt.value = res.data.autoConfirmAt
+    rejectsLeft.value = res.data.rejectsLeft ?? 3
+    disputed.value = !!res.data.disputed
     game.value = res.data.gameSummary
     startDate.value = res.data.startDate
     setResults.value = res.data.setResults

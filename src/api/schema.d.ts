@@ -442,8 +442,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * 결과 다시 확인 요청
-         * @description 상대가 낸 결과가 틀렸다고 돌려보냅니다. 경기는 다시 진행 중이 됩니다.
+         * 결과 돌려보내기
+         * @description 상대가 낸 결과가 틀렸다며 내가 생각하는 세트별 점수(내 점수, 상대 점수)를 냅니다. 이 점수가 새 결과가 되고 상대가 확인합니다. 두 사람 합쳐 3번째 돌려보내기면 이견으로 끝나 기록되지 않습니다.
          */
         post: operations["rejectResult"];
         delete?: never;
@@ -3167,7 +3167,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -3286,6 +3286,9 @@ export interface components {
             resultSubmittedById?: number;
             /** Format: date-time */
             autoConfirmAt?: string;
+            /** Format: int32 */
+            rejectsLeft: number;
+            disputed: boolean;
         };
         GameSummaryResponse: {
             /** Format: int64 */
@@ -4300,7 +4303,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnterResultRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {

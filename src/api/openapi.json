@@ -783,8 +783,8 @@
         "tags": [
           "game-play-controller"
         ],
-        "summary": "결과 다시 확인 요청",
-        "description": "상대가 낸 결과가 틀렸다고 돌려보냅니다. 경기는 다시 진행 중이 됩니다.",
+        "summary": "결과 돌려보내기",
+        "description": "상대가 낸 결과가 틀렸다며 내가 생각하는 세트별 점수(내 점수, 상대 점수)를 냅니다. 이 점수가 새 결과가 되고 상대가 확인합니다. 두 사람 합쳐 3번째 돌려보내기면 이견으로 끝나 기록되지 않습니다.",
         "operationId": "rejectResult",
         "parameters": [
           {
@@ -797,6 +797,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnterResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -6455,7 +6465,9 @@
               "APP_DUEL_RESULT",
               "APP_PLAY_JUDGED",
               "APP_VOTE_STARTED",
-              "GAME_SCHEDULED"
+              "GAME_SCHEDULED",
+              "GAME_REMINDER",
+              "GAME_RESULT_DISPUTED"
             ]
           },
           "createdAt": {
@@ -6763,9 +6775,11 @@
       "GameResultResponse": {
         "required": [
           "confirmed",
+          "disputed",
           "drawCount",
           "gameSummary",
           "newChampionIdx",
+          "rejectsLeft",
           "setResults",
           "startDate",
           "totalSetCount",
@@ -6830,6 +6844,13 @@
           "autoConfirmAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "rejectsLeft": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "disputed": {
+            "type": "boolean"
           }
         }
       },

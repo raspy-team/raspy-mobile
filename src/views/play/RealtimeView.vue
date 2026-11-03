@@ -12,17 +12,18 @@
       <template v-else-if="state?.status === 'WAITING'">
         <UiCard class="text-center py-10">
           <UiSpinner class="mx-auto" />
-          <p class="t-heading mt-4">상대를 찾고 있어요</p>
-          <p v-if="longLobby" class="t-caption mt-1">상대가 오면 알려 드려요. 이 화면을 닫아도 돼요</p>
+          <p class="t-heading mt-4">{{ state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
+          <p v-if="state.fixture" class="t-caption mt-1">상대에게 알렸어요. 상대가 들어오면 바로 시작해요</p>
+          <p v-else-if="longLobby" class="t-caption mt-1">상대가 오면 알려 드려요. 이 화면을 닫아도 돼요</p>
           <p v-else class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
           <!-- 처음 온 사람이 기다리다 나가지 않게: 곧 연습 상대가 온다고 말해 둔다 (세션 B 흐름 검토) -->
-          <p v-if="!longLobby && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 연습 상대(봇)와 붙어요</p>
+          <p v-if="!longLobby && !state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 연습 상대(봇)와 붙어요</p>
         </UiCard>
         <!-- 하루 기다리는 게임은 봇을 저절로 부르지 않는다: 원하면 바로 봇과 -->
-        <UiButton v-if="longLobby" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
+        <UiButton v-if="longLobby && !state.fixture" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
           {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 봇과 할 수 있어요` : '기다리지 않고 봇과 하기' }}
         </UiButton>
-        <UiButton v-if="!called" block variant="secondary" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
+        <UiButton v-if="!called && !state.fixture" block variant="secondary" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">그만 찾기</UiButton>
         <!-- 다른 게임에서 기다리는 사람이 있으면 그쪽으로 붙는 게 빠르다 -->
@@ -320,7 +321,7 @@ const timer = setInterval(async () => {
   now.value = Date.now()
   const s = state.value
   if (!s) return
-  if (s.status === 'WAITING' && !botCalled && !longLobby.value && waited.value >= s.botAfterSeconds) {
+  if (s.status === 'WAITING' && !s.fixture && !botCalled && !longLobby.value && waited.value >= s.botAfterSeconds) {
     botCalled = true
     apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
   }

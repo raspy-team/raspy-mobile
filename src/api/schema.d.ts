@@ -24,6 +24,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clubs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 동호회 보기
+         * @description 멤버·동호회 경기. 초대 코드는 멤버에게만
+         */
+        get: operations["detail_1"];
+        /**
+         * 동호회 꾸미기 (회장·운영진)
+         * @description 이름·소개·공지·단톡방 링크·가입 방식(OPEN·APPROVAL)·가입 질문·대표 종목. 보낸 것만 바꾸고, 빈 글자는 지운다
+         */
+        put: operations["update_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/matches/{matchId}/boards/{boardNo}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 판에 선수 내기 (회장·운영진)
+         * @description 1:1이면 한 명, 2:2면 두 명. 양쪽이 다 내면 그 판의 경기가 열린다
+         */
+        put: operations["setLineup"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login/oauth2/apple/web/callback": {
         parameters: {
             query?: never;
@@ -140,6 +184,187 @@ export interface paths {
          * @description 앱이 뜰 때 하루 한 번, 로그인 직후 한 번 부른다. 로그인 없이도 부를 수 있고, 토큰이 있으면 그 사람을 붙인다
          */
         post: operations["visit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 대회 목록
+         * @description scope=near(내 동네 범위의 모집·진행 중) · mine(내가 나가거나 연 대회) · club(clubId 동호회가 연 대회)
+         */
+        get: operations["list"];
+        put?: never;
+        /**
+         * 대회 열기
+         * @description 동네 인증한 사람(개인 주최), 동호회 회장·운영진(hostClubId, 멤버만 = 월례대회), 관리자(official = 매치 공식 대회). 앱 게임 규칙은 개인 참가만. 신청은 시작 때까지, 체크인은 시작 24시간 전부터
+         */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 신청 거두기
+         * @description 시작 전에만
+         */
+        post: operations["withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 지금 시작 (주최자)
+         * @description 체크인한 참가자로 대진을 만든다. 둘보다 적으면 대회가 취소된다
+         */
+        post: operations["start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/check-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 체크인
+         * @description 시작 24시간 전부터. 체크인한 참가자로만 대진을 만든다
+         */
+        post: operations["checkIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 대회 취소 (주최자)
+         * @description 시작 전에만
+         */
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 신청
+         * @description 동호회 대회면 clubId(내가 회장·운영진인 동호회)
+         */
+        post: operations["apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/fixtures/{fixtureId}/play": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 앱 게임 판 경기하기
+         * @description 앱 게임 대회의 내 판. 먼저 누른 사람이 대결(실시간이면 방)을 열고, 상대는 같은 대결에 들어간다. mode=PLAY·LIVE·BATTLE로 화면을 고른다
+         */
+        post: operations["play"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/fixtures/{fixtureId}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 마감 지난 판 정하기 (주최자)
+         * @description winner=HOME·AWAY 승, NONE 둘 다 패(리그만)
+         */
+        post: operations["decideFixture"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/entries/{entryId}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 신청 받기·거절 (주최자) */
+        post: operations["decide"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1371,7 +1596,84 @@ export interface paths {
          * 동호회 만들기
          * @description 만든 사람의 지금 동네로 만든다. 만든 사람이 첫 멤버
          */
-        post: operations["create"];
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/{id}/requests/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 가입 신청 받기·거절 (회장·운영진) */
+        post: operations["decideRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/{id}/members/{userId}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 역할 바꾸기 (회장만)
+         * @description STAFF 운영진 맡기기 · MEMBER 풀기 · OWNER 회장 넘기기(나는 운영진이 된다)
+         */
+        post: operations["setRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/{id}/members/{userId}/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 내보내기 (회장·운영진)
+         * @description 회장은 못 내보내고, 운영진은 회장만 내보낸다
+         */
+        post: operations["removeMember"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/{id}/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 교류전 신청 (회장·운영진)
+         * @description 다른 동호회에 규칙·판 수(1~9)·1:1(perBoard 1)/2:2(2)·때·곳으로. 상대 운영진에게 알린다
+         */
+        post: operations["proposeMatch"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1398,6 +1700,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clubs/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 일정 잡기 (회장·운영진)
+         * @description 정모·번개. 멤버에게 알리고, 만든 사람은 간다. 시작 3시간 전에 '갈게요'한 사람에게 알린다
+         */
+        post: operations["createEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/matches/{matchId}/respond": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 교류전 받기·거절 (받는 동호회 회장·운영진) */
+        post: operations["respondMatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/matches/{matchId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 교류전 취소 (두 동호회 회장·운영진)
+         * @description 아직 시작한 판이 없을 때만
+         */
+        post: operations["cancelMatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clubs/join": {
         parameters: {
             query?: never;
@@ -1409,9 +1768,49 @@ export interface paths {
         put?: never;
         /**
          * 동호회 들어가기
-         * @description 초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로
+         * @description 초대 코드(code)면 바로. 동네 목록의 동호회(clubId)는 가입 방식대로 바로 또는 가입 신청(answer: 가입 질문의 답). 이미 들었으면 그대로
          */
         post: operations["join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/events/{eventId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 일정 취소 (회장·운영진)
+         * @description '갈게요'한 사람에게 알린다
+         */
+        post: operations["cancelEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/events/{eventId}/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 일정 답하기
+         * @description going=true 갈게요 · false 못 가요. 정원이 차면 갈게요를 더 받지 않는다
+         */
+        post: operations["answerEvent"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1611,7 +2010,7 @@ export interface paths {
          * 대결 시작
          * @description 상대를 기다리는 대결이 있으면 그 문제로 짝이 되고, 없으면 새 대결을 열어 다음 사람을 기다린다. 시간은 이때부터 서버가 잰다.
          */
-        post: operations["start"];
+        post: operations["start_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2120,7 +2519,7 @@ export interface paths {
          * 노쇼 기록 취소 (관리자 전용)
          * @description 이의가 맞을 때. 처벌을 다시 계산한다
          */
-        post: operations["cancel"];
+        post: operations["cancel_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2246,7 +2645,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["start_1"];
+        get: operations["start_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2359,6 +2758,26 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getMyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 대회 보기
+         * @description 참가자, 라운드마다 판(대진표), 리그면 순위표, 내 참가·할 수 있는 일
+         */
+        get: operations["detail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3476,7 +3895,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/clubs/{id}": {
+    "/api/clubs/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -3484,10 +3903,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 동호회 보기
-         * @description 멤버·동호회 경기. 초대 코드는 멤버에게만
+         * 동호회 이름으로 찾기
+         * @description 교류전 상대를 고를 때. 두 글자부터
          */
-        get: operations["detail"];
+        get: operations["search_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3525,6 +3944,26 @@ export interface paths {
         };
         /** 내 동호회 */
         get: operations["mine_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clubs/matches/{matchId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 교류전 보기
+         * @description 판마다 양쪽 선수·경기·결과
+         */
+        get: operations["match"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4187,6 +4626,150 @@ export interface components {
         UpdateRequest: {
             enabled: boolean;
         };
+        ClubUpdateRequest: {
+            name?: string;
+            intro?: string;
+            notice?: string;
+            chatLink?: string;
+            /** @enum {string} */
+            joinMode?: "OPEN" | "APPROVAL";
+            joinQuestion?: string;
+            /** Format: int64 */
+            mainRuleId?: number;
+        };
+        ClubDetail: {
+            club: components["schemas"]["ClubSummary"];
+            members: components["schemas"]["ClubMember"][];
+            games: components["schemas"]["ClubGame"][];
+            inviteCode?: string;
+            myRole?: string;
+            joinQuestion?: string;
+            notice?: string;
+            chatLink?: string;
+            /** Format: int64 */
+            mainRuleId?: number;
+            ranking: components["schemas"]["ClubRankRow"][];
+            /** Format: int32 */
+            gamesThisMonth: number;
+            events: components["schemas"]["ClubEventView"][];
+            matches: components["schemas"]["ClubMatchView"][];
+            requested: boolean;
+            pendingRequests: components["schemas"]["ClubJoinRequestView"][];
+        };
+        ClubEventView: {
+            /** Format: int64 */
+            id: number;
+            title: string;
+            /** Format: date-time */
+            startsAt: string;
+            place?: string;
+            /** Format: int32 */
+            capacity?: number;
+            note?: string;
+            going: components["schemas"]["ClubMember"][];
+            /** Format: int32 */
+            notGoingCount: number;
+            myAnswer?: boolean;
+            full: boolean;
+        };
+        ClubGame: {
+            /** Format: int64 */
+            gameId: number;
+            title: string;
+            status: string;
+            /** Format: date-time */
+            matchDate?: string;
+            placeRoad?: string;
+            hostNickname: string;
+        };
+        ClubJoinRequestView: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
+            answer?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ClubMatchBoard: {
+            /** Format: int32 */
+            boardNo: number;
+            home: components["schemas"]["ClubMember"][];
+            away: components["schemas"]["ClubMember"][];
+            /** Format: int64 */
+            gameId?: number;
+            gameStatus?: string;
+            winner?: string;
+        };
+        ClubMatchSide: {
+            /** Format: int64 */
+            clubId: number;
+            name: string;
+            /** Format: int32 */
+            score: number;
+        };
+        ClubMatchView: {
+            /** Format: int64 */
+            id: number;
+            status: string;
+            /** Format: int64 */
+            ruleId: number;
+            ruleTitle: string;
+            /** Format: int32 */
+            boards: number;
+            /** Format: int32 */
+            perBoard: number;
+            /** Format: date-time */
+            matchDate?: string;
+            placeRoad?: string;
+            placeDetail?: string;
+            message?: string;
+            home: components["schemas"]["ClubMatchSide"];
+            away: components["schemas"]["ClubMatchSide"];
+            result?: string;
+            mySide?: string;
+            boardList: components["schemas"]["ClubMatchBoard"][];
+        };
+        ClubMember: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profilePicture?: string;
+            isOwner: boolean;
+            role: string;
+        };
+        ClubRankRow: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            /** Format: int32 */
+            rating: number;
+        };
+        ClubRecord: {
+            /** Format: int32 */
+            wins: number;
+            /** Format: int32 */
+            draws: number;
+            /** Format: int32 */
+            losses: number;
+        };
+        ClubSummary: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            intro?: string;
+            dongName?: string;
+            /** Format: int32 */
+            memberCount: number;
+            isMember: boolean;
+            isOwner: boolean;
+            mainRuleTitle?: string;
+            joinMode: string;
+            record?: components["schemas"]["ClubRecord"];
+        };
+        ClubLineupRequest: {
+            userIds: number[];
+        };
         Unit: Record<string, never>;
         WatchFollowState: {
             watching: boolean;
@@ -4210,6 +4793,179 @@ export interface components {
             referrer?: string;
             landingPath?: string;
             standalone: boolean;
+        };
+        TournamentCreateRequest: {
+            title: string;
+            description?: string;
+            /** Format: int64 */
+            ruleId: number;
+            /** @enum {string} */
+            format: "LEAGUE" | "KNOCKOUT";
+            /** @enum {string} */
+            entrantType: "USER" | "CLUB";
+            /** Format: int64 */
+            hostClubId?: number;
+            membersOnly: boolean;
+            joinMode: string;
+            /** Format: int32 */
+            maxEntrants: number;
+            /** Format: int32 */
+            minRating?: number;
+            /** Format: int32 */
+            maxRating?: number;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: int32 */
+            roundDays: number;
+            thirdPlace: boolean;
+            /** Format: int32 */
+            boards: number;
+            /** Format: int32 */
+            perBoard: number;
+            official: boolean;
+        };
+        TournamentClubChoice: {
+            /** Format: int64 */
+            clubId: number;
+            name: string;
+        };
+        TournamentEntryView: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int64 */
+            userId?: number;
+            /** Format: int64 */
+            clubId?: number;
+            status: string;
+            /** Format: int32 */
+            seed?: number;
+            /** Format: int32 */
+            rating: number;
+        };
+        TournamentFixtureView: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int32 */
+            orderNo: number;
+            home?: components["schemas"]["TournamentSide"];
+            away?: components["schemas"]["TournamentSide"];
+            status: string;
+            result?: string;
+            /** Format: int64 */
+            winnerEntryId?: number;
+            /** Format: int32 */
+            homeScore: number;
+            /** Format: int32 */
+            awayScore: number;
+            /** Format: int64 */
+            gameId?: number;
+            /** Format: int64 */
+            clubMatchId?: number;
+            needsHost: boolean;
+            mine: boolean;
+        };
+        TournamentMyEntry: {
+            /** Format: int64 */
+            entryId: number;
+            status: string;
+            /** Format: int64 */
+            clubId?: number;
+        };
+        TournamentRoundView: {
+            /** Format: int32 */
+            round: number;
+            name: string;
+            /** Format: date-time */
+            opensAt: string;
+            /** Format: date-time */
+            closesAt: string;
+            fixtures: components["schemas"]["TournamentFixtureView"][];
+        };
+        TournamentSide: {
+            /** Format: int64 */
+            entryId: number;
+            name: string;
+            /** Format: int64 */
+            userId?: number;
+            /** Format: int64 */
+            clubId?: number;
+        };
+        TournamentStandingView: {
+            /** Format: int64 */
+            entryId: number;
+            name: string;
+            /** Format: int32 */
+            played: number;
+            /** Format: int32 */
+            wins: number;
+            /** Format: int32 */
+            draws: number;
+            /** Format: int32 */
+            losses: number;
+            /** Format: int32 */
+            points: number;
+            /** Format: int32 */
+            diff: number;
+        };
+        TournamentSummary: {
+            /** Format: int64 */
+            id: number;
+            title: string;
+            /** Format: int64 */
+            ruleId: number;
+            ruleTitle: string;
+            format: string;
+            entrantType: string;
+            status: string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: int32 */
+            roundDays: number;
+            hostName: string;
+            /** Format: int64 */
+            hostClubId?: number;
+            /** Format: int32 */
+            entryCount: number;
+            /** Format: int32 */
+            maxEntrants: number;
+            dongName?: string;
+            winnerName?: string;
+            official: boolean;
+            appGameKey?: string;
+        };
+        TournamentView: {
+            summary: components["schemas"]["TournamentSummary"];
+            description?: string;
+            joinMode: string;
+            membersOnly: boolean;
+            /** Format: int32 */
+            minRating?: number;
+            /** Format: int32 */
+            maxRating?: number;
+            /** Format: date-time */
+            entryDeadline?: string;
+            thirdPlace: boolean;
+            /** Format: int32 */
+            boards: number;
+            /** Format: int32 */
+            perBoard: number;
+            isHost: boolean;
+            canHostOfficial: boolean;
+            my?: components["schemas"]["TournamentMyEntry"];
+            myStaffClubs: components["schemas"]["TournamentClubChoice"][];
+            canCheckIn: boolean;
+            entries: components["schemas"]["TournamentEntryView"][];
+            rounds: components["schemas"]["TournamentRoundView"][];
+            standings: components["schemas"]["TournamentStandingView"][];
+            runnerUpName?: string;
+        };
+        TournamentPlay: {
+            key: string;
+            mode: string;
+            /** Format: int64 */
+            gameId: number;
+            played: boolean;
         };
         CategoryInput: {
             face: string;
@@ -4677,45 +5433,38 @@ export interface components {
         CreateClubRequest: {
             name: string;
             intro?: string;
-        };
-        ClubDetail: {
-            club: components["schemas"]["ClubSummary"];
-            members: components["schemas"]["ClubMember"][];
-            games: components["schemas"]["ClubGame"][];
-            inviteCode?: string;
-        };
-        ClubGame: {
             /** Format: int64 */
-            gameId: number;
-            title: string;
-            status: string;
+            mainRuleId?: number;
+        };
+        ClubMatchProposeRequest: {
+            /** Format: int64 */
+            awayClubId: number;
+            /** Format: int64 */
+            ruleId: number;
+            /** Format: int32 */
+            boards: number;
+            /** Format: int32 */
+            perBoard: number;
             /** Format: date-time */
             matchDate?: string;
             placeRoad?: string;
-            hostNickname: string;
+            placeDetail?: string;
+            message?: string;
         };
-        ClubMember: {
-            /** Format: int64 */
-            userId: number;
-            nickname: string;
-            profilePicture?: string;
-            isOwner: boolean;
-        };
-        ClubSummary: {
-            /** Format: int64 */
-            id: number;
-            name: string;
-            intro?: string;
-            dongName?: string;
+        ClubEventCreateRequest: {
+            title: string;
+            /** Format: date-time */
+            startsAt: string;
+            place?: string;
             /** Format: int32 */
-            memberCount: number;
-            isMember: boolean;
-            isOwner: boolean;
+            capacity?: number;
+            note?: string;
         };
         JoinClubRequest: {
             /** Format: int64 */
             clubId?: number;
             code?: string;
+            answer?: string;
         };
         DmRoomDto: {
             /** Format: int64 */
@@ -4779,6 +5528,7 @@ export interface components {
             waitingSince: string;
             /** Format: int32 */
             botAfterSeconds: number;
+            fixture: boolean;
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
             simultaneous: boolean;
@@ -4875,6 +5625,7 @@ export interface components {
             waitingSince: string;
             /** Format: int32 */
             botAfterSeconds: number;
+            fixture: boolean;
             topic: string;
             /** Format: int64 */
             tickMillis: number;
@@ -6612,6 +7363,81 @@ export interface operations {
             };
         };
     };
+    detail_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClubUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    setLineup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                matchId: number;
+                boardNo: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClubLineupRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubMatchView"];
+                };
+            };
+        };
+    };
     callback: {
         parameters: {
             query?: {
@@ -6830,6 +7656,239 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: {
+                scope?: string;
+                clubId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentSummary"][];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TournamentCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    withdraw: {
+        parameters: {
+            query?: {
+                clubId?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    checkIn: {
+        parameters: {
+            query?: {
+                clubId?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    apply: {
+        parameters: {
+            query?: {
+                clubId?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    play: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fixtureId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentPlay"];
+                };
+            };
+        };
+    };
+    decideFixture: {
+        parameters: {
+            query: {
+                winner: string;
+            };
+            header?: never;
+            path: {
+                fixtureId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    decide: {
+        parameters: {
+            query: {
+                accept: boolean;
+            };
+            header?: never;
+            path: {
+                entryId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
                 };
             };
         };
@@ -8417,7 +9476,7 @@ export interface operations {
             };
         };
     };
-    create: {
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -8437,6 +9496,105 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    decideRequest: {
+        parameters: {
+            query: {
+                accept: boolean;
+            };
+            header?: never;
+            path: {
+                id: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    setRole: {
+        parameters: {
+            query: {
+                role: "OWNER" | "STAFF" | "MEMBER";
+            };
+            header?: never;
+            path: {
+                id: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    removeMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    proposeMatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClubMatchProposeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubMatchView"];
                 };
             };
         };
@@ -8463,6 +9621,78 @@ export interface operations {
             };
         };
     };
+    createEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClubEventCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubEventView"];
+                };
+            };
+        };
+    };
+    respondMatch: {
+        parameters: {
+            query: {
+                accept: boolean;
+            };
+            header?: never;
+            path: {
+                matchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubMatchView"];
+                };
+            };
+        };
+    };
+    cancelMatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                matchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubMatchView"];
+                };
+            };
+        };
+    };
     join: {
         parameters: {
             query?: never;
@@ -8483,6 +9713,52 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ClubDetail"];
+                };
+            };
+        };
+    };
+    cancelEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    answerEvent: {
+        parameters: {
+            query: {
+                going: boolean;
+            };
+            header?: never;
+            path: {
+                eventId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubEventView"];
                 };
             };
         };
@@ -8749,7 +10025,7 @@ export interface operations {
             };
         };
     };
-    start: {
+    start_1: {
         parameters: {
             query?: {
                 solo?: boolean;
@@ -9384,7 +10660,7 @@ export interface operations {
             };
         };
     };
-    cancel: {
+    cancel_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -9594,7 +10870,7 @@ export interface operations {
             };
         };
     };
-    start_1: {
+    start_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9736,6 +11012,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MyProfileResponse"];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
                 };
             };
         };
@@ -11013,13 +12311,13 @@ export interface operations {
             };
         };
     };
-    detail: {
+    search_1: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
+            query: {
+                q: string;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -11030,7 +12328,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ClubDetail"];
+                    "*/*": components["schemas"]["ClubSummary"][];
                 };
             };
         };
@@ -11071,6 +12369,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ClubSummary"][];
+                };
+            };
+        };
+    };
+    match: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                matchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClubMatchView"];
                 };
             };
         };

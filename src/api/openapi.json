@@ -2020,7 +2020,7 @@
           "live-media-controller"
         ],
         "summary": "관중 사진·영상 보기",
-        "description": "그 경기 관중이 올린 사진·영상. 중계를 볼 수 있는 사람만. 새로 오면 /topic/game-live/{gameId}에 MEDIA",
+        "description": "그 경기 관중이 올린 사진·영상. 중계를 볼 수 있는 사람만. 새로 오거나 내리면 /topic/game-media/{gameId}에 MEDIA",
         "operationId": "list",
         "parameters": [
           {

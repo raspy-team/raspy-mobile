@@ -57,7 +57,8 @@
 <script setup lang="ts">
 // 관중이 찍은 장면 (리뷰 6번 "점수만 있고 장면이 없다"). 중계 화면과 결과 화면에 한 줄로 붙는다.
 // 관중은 경기 중·끝나고 하루 안에 올리고, 선수는 보고 내린다. 볼 수 없는 경기(차단·구경 끔·앱 게임)면 통째로 숨는다
-// 새 사진은 /topic/game-live/{id}의 MEDIA 신호에만 다시 불러온다 (폴링하지 않는다)
+// 새 사진은 /topic/game-media/{id}의 MEDIA 신호에만 다시 불러온다 (폴링하지 않는다).
+// 중계 채널(/topic/game-live)은 구독이 곧 관중 수·증인 기록이라 여기서 듣지 않는다 (결과 화면만 연 사람이 관중이 되고, 익명 관중이 실명이 된다)
 import { ref, onMounted, onBeforeUnmount, defineProps } from 'vue'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -139,8 +140,7 @@ async function hide() {
 let off: (() => void) | undefined
 onMounted(() => {
   load()
-  // 같은 채널에 점수 신호(CHANGED)도 오지만, 사진은 MEDIA(올림·내림)에만 다시 불러온다
-  off = subscribeTopic(`/topic/game-live/${props.gameId}`, (e: { type: string }) => { if (e.type === 'MEDIA') load() })
+  off = subscribeTopic(`/topic/game-media/${props.gameId}`, (e: { type: string }) => { if (e.type === 'MEDIA') load() })
 })
 onBeforeUnmount(() => off?.())
 </script>

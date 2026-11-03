@@ -1323,7 +1323,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/Unit"
+                  "$ref": "#/components/schemas/ReviewSubmitResult"
                 }
               }
             }
@@ -5895,11 +5895,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -7507,6 +7507,20 @@
           "targetId": {
             "type": "integer",
             "format": "int64"
+          },
+          "meetAgain": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReviewSubmitResult": {
+        "required": [
+          "revealed"
+        ],
+        "type": "object",
+        "properties": {
+          "revealed": {
+            "type": "boolean"
           }
         }
       },
@@ -9100,6 +9114,7 @@
           "label",
           "level",
           "mannerCount",
+          "meetAgainCount",
           "offlineGames",
           "socialVerified",
           "temperature"
@@ -9146,6 +9161,10 @@
             "type": "boolean"
           },
           "daysSinceJoined": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "meetAgainCount": {
             "type": "integer",
             "format": "int32"
           }

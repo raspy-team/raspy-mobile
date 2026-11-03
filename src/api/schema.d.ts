@@ -3887,6 +3887,10 @@ export interface components {
             text: string;
             /** Format: int64 */
             targetId?: number;
+            meetAgain?: boolean;
+        };
+        ReviewSubmitResult: {
+            revealed: boolean;
         };
         PictureUploadResponse: {
             success: boolean;
@@ -4397,6 +4401,8 @@ export interface components {
             socialVerified: boolean;
             /** Format: int32 */
             daysSinceJoined: number;
+            /** Format: int32 */
+            meetAgainCount: number;
         };
         UserProfileResponse: {
             /** Format: int64 */
@@ -6330,7 +6336,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["Unit"];
+                    "*/*": components["schemas"]["ReviewSubmitResult"];
                 };
             };
         };

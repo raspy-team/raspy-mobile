@@ -248,6 +248,16 @@
               </div>
             </div>
             <UiInput v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
+            <!-- 또 만나고 싶나요? (만나서 한 경기만, 안전·신뢰 B). 상대에게 보이지 않고 매치 온도에만 -->
+            <div v-if="game?.venue === 'IN_PERSON'">
+              <p class="t-label mb-1">또 만나서 하고 싶나요?</p>
+              <div class="flex gap-2" role="radiogroup" aria-label="또 만나서 하고 싶나요?">
+                <UiChip :selected="review.meetAgain === true" @click="review.meetAgain = review.meetAgain === true ? null : true">네, 또 하고 싶어요</UiChip>
+                <UiChip :selected="review.meetAgain === false" @click="review.meetAgain = review.meetAgain === false ? null : false">아니요</UiChip>
+              </div>
+              <p class="t-micro mt-1.5">이 답은 상대에게 보이지 않아요</p>
+            </div>
+            <p class="t-micro">평가는 둘 다 남기거나 7일이 지나면 함께 공개돼요. 상대가 먼저 본 뒤 맞받아 쓰지 못하게요</p>
           </UiCard>
         </UiSection>
 
@@ -329,7 +339,7 @@ import { TEAM_NAMES } from '../../utils/gameFormat'
 import BrandFace from '../../components/BrandFace.vue'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import {
-  UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
+  UiAvatar, UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'
@@ -360,6 +370,7 @@ function setRuleRating(n) {
   ruleRating.value = n
 }
 
+let reviewRevealed = false
 function submitReviewAndGoHome() {
   // 리뷰 제출 전 유효성 검사
   if (review.value.manner === 0 || review.value.performance === 0) {
@@ -379,7 +390,8 @@ function submitReviewAndGoHome() {
       // 화면이 "○○님은 어땠나요?"라고 묻는 그 사람을 평가한다 (팀·각자 경기는 서버가 대상을 꼭 받는다)
       return api.post(`/api/games/${gameId}/review`, { ...review.value, targetId: opponent.value.id })
     })
-    .then(() => {
+    .then((res) => {
+      reviewRevealed = !!res?.data?.revealed
       // 규칙 평가 제출 (점수가 있을 때만)
       if (ruleRating.value > 0) {
         return api.post(`/api/rules/${game.value.rule.id}/rating`, {
@@ -391,7 +403,7 @@ function submitReviewAndGoHome() {
       return Promise.resolve()
     })
     .then(() => {
-      showToast('평가를 보냈어요')
+      showToast(reviewRevealed ? '평가를 보냈어요. 상대도 남겨서 함께 공개됐어요' : '평가를 보냈어요. 상대도 남기거나 7일이 지나면 공개돼요')
       setTimeout(() => {
         goHome()
       }, 500)
@@ -408,7 +420,7 @@ const router = useRouter()
 const gameId = route.params.gameId
 
 const isLoading = ref(true)
-const review = ref({ manner: 0, performance: 0, text: '' })
+const review = ref({ manner: 0, performance: 0, text: '', meetAgain: null })
 const ruleRating = ref(0) // 규칙 평가 점수 (0~5)
 const ruleReview = ref('') // 규칙 평가 의견
 const game = ref({})

@@ -19,11 +19,12 @@
         <template v-else>매너 평가 아직 없음</template>
       </li>
       <li class="flex items-center gap-1.5" :class="trust.disputes ? 'text-danger-fg' : ''"><UiIcon name="scale-unbalanced" class="w-4 text-center" aria-hidden="true" />결과 이견 <b class="tabular-nums">{{ trust.disputes ? `${trust.disputes}명` : '없음' }}</b></li>
+      <li v-if="trust.meetAgainCount" class="flex items-center gap-1.5"><UiIcon name="user-group" class="w-4 text-center" aria-hidden="true" />또 만나고 싶대요 <b class="text-fg tabular-nums">{{ trust.meetAgainCount }}명</b></li>
       <li class="flex items-center gap-1.5"><UiIcon name="calendar" class="w-4 text-center" aria-hidden="true" />가입 {{ joined }}</li>
       <li class="flex items-center gap-1.5" :class="trust.dongVerified ? '' : 'text-fg-subtle'"><UiIcon :name="trust.dongVerified ? 'circle-check' : 'circle'" class="w-4 text-center" aria-hidden="true" />동네 인증</li>
       <li class="flex items-center gap-1.5" :class="trust.socialVerified ? '' : 'text-fg-subtle'"><UiIcon :name="trust.socialVerified ? 'circle-check' : 'circle'" class="w-4 text-center" aria-hidden="true" />소셜 계정 확인</li>
     </ul>
-    <p v-if="!compact" class="t-micro mt-3">온도는 36.5도에서 시작해 매너 평가(평가한 사람마다 한 표), 만나서 겨룬 서로 다른 상대, 결과 이견으로만 오르내려요</p>
+    <p v-if="!compact" class="t-micro mt-3">온도는 36.5도에서 시작해 매너 평가(평가한 사람마다 한 표), 만나서 겨룬 서로 다른 상대, '또 만나고 싶은지', 결과 이견으로만 오르내려요. 평가는 둘 다 남기거나 7일이 지나야 반영돼요</p>
   </section>
 </template>
 

@@ -36,7 +36,6 @@
           v-if="canCheer"
           class="mt-6"
           :game-id="game.id"
-          :players="game.players"
           :closed="!['MATCHING', 'SCHEDULED'].includes(game.gameStatus)"
         />
         <UiButton v-if="game.ownerId === myId" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>
@@ -70,7 +69,7 @@ const myId = ref(null)
 const canCheer = computed(() => {
   const g = game.value
   return g && g.rule?.judge !== 'OUTCOME' && (g.players?.length || 0) >= 2 && !g.players.some((p) => p.id === myId.value)
-    && ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED'].includes(g.gameStatus)
+    && ['MATCHING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED'].includes(g.gameStatus)
 })
 
 async function load() {

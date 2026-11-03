@@ -25,6 +25,11 @@
         </ul>
       </template>
 
+      <!-- 응원 성적: 포인트 숫자보다 '보는 눈'이 자랑거리 (판타지 리그의 본질, docs/points-betting-review.md) -->
+      <p v-if="sources.cheerRecord.total" class="t-body mt-5">
+        응원 {{ sources.cheerRecord.total }}번 중 <b class="tabular-nums">{{ sources.cheerRecord.hits }}번</b> 맞혔어요<template v-if="sources.cheerRecord.upsets"> · 이변 {{ sources.cheerRecord.upsets }}번</template>
+      </p>
+
       <!-- 한 줄에 한 가지. 숫자는 예로 -->
       <h3 class="t-heading mt-7">이렇게 모여요</h3>
       <ul class="mt-2 space-y-2 t-body">
@@ -34,8 +39,9 @@
       </ul>
       <h3 class="t-heading mt-6">이렇게 써요</h3>
       <ul class="mt-2 space-y-2 t-body">
-        <li>시작 전인 남의 경기에 10~100P를 걸고 응원해요.</li>
-        <li>응원한 쪽이 이기면 더 받고, 지면 건 만큼 잃어요. 약한 쪽을 응원할수록 많이 받아요. 100P를 걸면 최대 150P예요.</li>
+        <li>선수가 다 모인 남의 경기에 시작 전까지 10~100P를 걸고 응원해요. 하루 300P까지예요.</li>
+        <li>편마다 배수가 보여요. 이길 것 같지 않은 쪽일수록 커요(최대 3배). 100P를 ×2.4에 걸고 이기면 240P, 지면 잃어요.</li>
+        <li>친구이거나 같이 한 판 한 선수의 경기는 포인트 없이 중계에서 응원해요.</li>
         <li>돈으로 사거나 바꿀 수 없고, 남에게 줄 수도 없어요.</li>
       </ul>
 

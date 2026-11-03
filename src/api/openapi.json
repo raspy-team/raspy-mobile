@@ -710,7 +710,7 @@
           "point-controller"
         ],
         "summary": "경기 응원 현황",
-        "description": "쪽마다 응원한 사람 수와 포인트, 내 응원",
+        "description": "편마다 배수·이길 확률·응원한 사람 수와 포인트, 내 응원, 내가 걸 수 있는지와 까닭",
         "operationId": "pointCheerState",
         "parameters": [
           {
@@ -741,7 +741,7 @@
           "point-controller"
         ],
         "summary": "응원하기",
-        "description": "시작 전인 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번). 이기면 돌려받고 보너스(최대 50%, 유력한 쪽일수록 작고 아는 사이면 0)를 더한다",
+        "description": "선수가 다 모인 시작 전 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번, 하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 걸 때 정해짐). 선수와 아는 사이는 못 건다",
         "operationId": "cheerWithPoints",
         "parameters": [
           {
@@ -4889,7 +4889,7 @@
           "point-controller"
         ],
         "summary": "그 사람의 포인트 출처",
-        "description": "프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서",
+        "description": "프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서, 응원 성적(맞힌 수·이변)",
         "operationId": "sources",
         "parameters": [
           {
@@ -8065,6 +8065,50 @@
           }
         }
       },
+      "BetSide": {
+        "required": [
+          "chance",
+          "cheerers",
+          "label",
+          "memberIds",
+          "multiplier",
+          "points",
+          "sideUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "sideUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "label": {
+            "type": "string"
+          },
+          "chance": {
+            "type": "number",
+            "format": "double"
+          },
+          "multiplier": {
+            "type": "number",
+            "format": "double"
+          },
+          "cheerers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "points": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "CheerSide": {
         "required": [
           "cheerers",
@@ -8089,7 +8133,11 @@
       },
       "CheerState": {
         "required": [
-          "sides"
+          "board",
+          "canBet",
+          "dailyStakeLimit",
+          "sides",
+          "stakedToday"
         ],
         "type": "object",
         "properties": {
@@ -8101,6 +8149,26 @@
           },
           "mine": {
             "$ref": "#/components/schemas/MyCheer"
+          },
+          "board": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BetSide"
+            }
+          },
+          "canBet": {
+            "type": "boolean"
+          },
+          "blockedReason": {
+            "type": "string"
+          },
+          "stakedToday": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dailyStakeLimit": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -11387,6 +11455,28 @@
           }
         }
       },
+      "BetRecord": {
+        "required": [
+          "hits",
+          "total",
+          "upsets"
+        ],
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hits": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "upsets": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "PointSourceLine": {
         "required": [
           "amount",
@@ -11410,6 +11500,7 @@
       "PointSources": {
         "required": [
           "balance",
+          "cheerRecord",
           "earned",
           "lines"
         ],
@@ -11428,6 +11519,9 @@
             "items": {
               "$ref": "#/components/schemas/PointSourceLine"
             }
+          },
+          "cheerRecord": {
+            "$ref": "#/components/schemas/BetRecord"
           }
         }
       },

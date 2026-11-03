@@ -327,13 +327,13 @@ export interface paths {
         };
         /**
          * 경기 응원 현황
-         * @description 쪽마다 응원한 사람 수와 포인트, 내 응원
+         * @description 편마다 배수·이길 확률·응원한 사람 수와 포인트, 내 응원, 내가 걸 수 있는지와 까닭
          */
         get: operations["pointCheerState"];
         put?: never;
         /**
          * 응원하기
-         * @description 시작 전인 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번). 이기면 돌려받고 보너스(최대 50%, 유력한 쪽일수록 작고 아는 사이면 0)를 더한다
+         * @description 선수가 다 모인 시작 전 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번, 하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 걸 때 정해짐). 선수와 아는 사이는 못 건다
          */
         post: operations["cheerWithPoints"];
         delete?: never;
@@ -2484,7 +2484,7 @@ export interface paths {
         };
         /**
          * 그 사람의 포인트 출처
-         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서
+         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서, 응원 성적(맞힌 수·이변)
          */
         get: operations["sources"];
         put?: never;
@@ -4191,6 +4191,20 @@ export interface components {
             /** Format: int32 */
             amount: number;
         };
+        BetSide: {
+            /** Format: int64 */
+            sideUserId: number;
+            memberIds: number[];
+            label: string;
+            /** Format: double */
+            chance: number;
+            /** Format: double */
+            multiplier: number;
+            /** Format: int32 */
+            cheerers: number;
+            /** Format: int32 */
+            points: number;
+        };
         CheerSide: {
             /** Format: int64 */
             userId: number;
@@ -4202,6 +4216,13 @@ export interface components {
         CheerState: {
             sides: components["schemas"]["CheerSide"][];
             mine?: components["schemas"]["MyCheer"];
+            board: components["schemas"]["BetSide"][];
+            canBet: boolean;
+            blockedReason?: string;
+            /** Format: int64 */
+            stakedToday: number;
+            /** Format: int64 */
+            dailyStakeLimit: number;
         };
         MyCheer: {
             /** Format: int64 */
@@ -5227,6 +5248,14 @@ export interface components {
             provisional: boolean;
             points: components["schemas"]["RatingPoint"][];
         };
+        BetRecord: {
+            /** Format: int32 */
+            total: number;
+            /** Format: int32 */
+            hits: number;
+            /** Format: int32 */
+            upsets: number;
+        };
         PointSourceLine: {
             key: string;
             label: string;
@@ -5239,6 +5268,7 @@ export interface components {
             /** Format: int64 */
             earned: number;
             lines: components["schemas"]["PointSourceLine"][];
+            cheerRecord: components["schemas"]["BetRecord"];
         };
         PointLine: {
             /** Format: int32 */

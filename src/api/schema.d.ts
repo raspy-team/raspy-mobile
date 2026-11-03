@@ -1250,7 +1250,7 @@ export interface paths {
          * 관중 사진·영상 보기
          * @description 그 경기 관중이 올린 사진·영상. 중계를 볼 수 있는 사람만. 새로 오거나 내리면 /topic/game-media/{gameId}에 MEDIA
          */
-        get: operations["list"];
+        get: operations["list_1"];
         put?: never;
         /**
          * 관중 사진·영상 올리기
@@ -4163,7 +4163,7 @@ export interface paths {
          * 앱 게임 목록
          * @description 게임마다 내 레이팅·전적·최고 기록을 함께 준다.
          */
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4477,7 +4477,7 @@ export interface paths {
          * 신고 목록 (관리자 전용)
          * @description 최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.
          */
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -9018,7 +9018,7 @@ export interface operations {
             };
         };
     };
-    list: {
+    list_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -12605,7 +12605,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -12990,7 +12990,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;

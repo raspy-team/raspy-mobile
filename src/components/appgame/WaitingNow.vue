@@ -1,5 +1,10 @@
 <template>
-  <div v-if="list && (list.tonight || list.lobbies.length || showEmpty)">
+  <div v-if="list && (anyButton || list.tonight || list.lobbies.length || showEmpty)">
+    <!-- 아무거나 바로 붙기: 어느 게임이든 기다리는 사람에게, 없으면 오늘 밤의 게임으로 (docs/lobby.md 5) -->
+    <template v-if="anyButton">
+      <UiButton block :disabled="joining" @click="joinAny">아무거나 바로 붙기</UiButton>
+      <p class="t-micro text-center mt-2 mb-4">{{ anyLine }}</p>
+    </template>
     <!-- 오늘 밤의 게임: 밤 9시대에 사람을 게임 하나에 모은다 (docs/lobby.md 4-C) -->
     <UiCard v-if="list.tonight" class="flex items-center gap-3 py-3 mb-3" :class="list.goldenHour ? 'bg-signal-soft' : ''">
       <UiIcon :name="gameIcon(list.tonight.key, list.tonight.icon)" class="text-fg-muted" />
@@ -37,7 +42,7 @@ import type { components } from '@/api/schema'
 import { onLobbyChange, openUserChannel } from '@/websocket/userChannel'
 import { UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
 
-const props = withDefaults(defineProps<{ title?: string; showEmpty?: boolean; excludeGameId?: number }>(), { title: '지금 기다리는 사람', showEmpty: false, excludeGameId: 0 })
+const props = withDefaults(defineProps<{ title?: string; showEmpty?: boolean; excludeGameId?: number; anyButton?: boolean }>(), { title: '지금 기다리는 사람', showEmpty: false, excludeGameId: 0, anyButton: false })
 const emit = defineEmits<{ join: [key: string] }>()
 const router = useRouter()
 const list = ref<components['schemas']['LobbyList'] | null>(null)
@@ -78,6 +83,25 @@ async function setAlarm(on: boolean) {
     show((await POST('/api/app-games/realtime/night-alarm', { body: { on } })).data)
   } finally {
     saving.value = false
+  }
+}
+
+const anyLine = computed(() => {
+  const n = list.value?.lobbies.length ?? 0
+  if (n) return `지금 ${n}명이 기다려요. 실력이 가까운 사람과 바로 붙어요`
+  return list.value?.tonight ? `기다리는 사람이 없으면 ${list.value.tonight.title}에서 상대를 기다려요` : '기다리는 사람이 없으면 상대를 기다려요'
+})
+
+// 붙을 게임은 서버가 정한다. 그 게임 화면으로 가면 들어가 있는 판을 이어서 보여 준다
+const joining = ref(false)
+async function joinAny() {
+  joining.value = true
+  try {
+    const state = (await POST('/api/app-games/realtime/any')).data
+    emit('join', state.key)
+    router.push(`/play/${state.key}/live`)
+  } finally {
+    joining.value = false
   }
 }
 

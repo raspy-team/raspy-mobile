@@ -35,6 +35,7 @@
         :until="startsAt"
         :offset="offset"
         :opponent="who(state.opponent)"
+        :hint="state.summary"
         @done="now = Date.now()"
       />
 

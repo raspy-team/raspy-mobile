@@ -1735,6 +1735,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/realtime/any": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 아무거나 바로 붙기
+         * @description 어느 실시간 게임에서든 지금 기다리는 사람에게 붙는다(실력이 가까운 사람부터). 없으면 오늘 밤의 게임에 방을 연다
+         */
+        post: operations["joinAny"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/plays/{playId}/submit": {
         parameters: {
             query?: never;
@@ -4552,6 +4572,7 @@ export interface components {
             me: components["schemas"]["AppPlayer"];
             opponent?: components["schemas"]["AppPlayer"];
             startWord: string;
+            summary: string;
             moves: components["schemas"]["RealtimeMove"][];
             stones?: components["schemas"]["RealtimeStone"][];
             meFirst: boolean;
@@ -8612,6 +8633,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LobbyList"];
+                };
+            };
+        };
+    };
+    joinAny: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
                 };
             };
         };

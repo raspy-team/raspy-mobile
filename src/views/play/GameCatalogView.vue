@@ -18,7 +18,7 @@
 
       <template v-else>
         <!-- 지금 기다리는 사람: 한 번에 붙기 (사람이 적을 때 흩어지지 않게) -->
-        <WaitingNow v-if="!query && !structure" class="mt-6" />
+        <WaitingNow v-if="!query && !structure" class="mt-6" any-button />
         <!-- 최근에 한 게임: 찾지 않고 바로 다시 -->
         <UiSection v-if="recent.length && !query && !structure" title="최근에 한 게임" class="mt-6">
           <!-- 이어 하기 줄: 옆으로 밀어 고른다 -->

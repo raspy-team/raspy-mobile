@@ -3419,6 +3419,28 @@
         }
       }
     },
+    "/api/app-games/realtime/any": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "아무거나 바로 붙기",
+        "description": "어느 실시간 게임에서든 지금 기다리는 사람에게 붙는다(실력이 가까운 사람부터). 없으면 오늘 밤의 게임에 방을 연다",
+        "operationId": "joinAny",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/plays/{playId}/submit": {
       "post": {
         "tags": [
@@ -9184,6 +9206,7 @@
           "simultaneous",
           "startWord",
           "status",
+          "summary",
           "turnSeconds",
           "waitingSince"
         ],
@@ -9206,6 +9229,9 @@
             "$ref": "#/components/schemas/AppPlayer"
           },
           "startWord": {
+            "type": "string"
+          },
+          "summary": {
             "type": "string"
           },
           "moves": {

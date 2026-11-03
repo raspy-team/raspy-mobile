@@ -2,7 +2,7 @@
   <div class="min-h-dvh bg-canvas">
     <UiTopBar title="동호회" back />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
-      <p class="t-caption">동호회 사람들에게 경기를 열어 한 번에 알려요. 이미 있는 동호회는 초대 링크를 단톡방에 올리면 다 같이 들어와요.</p>
+      <p class="t-caption">같이 붙고, 같이 기록이 쌓이는 팀이에요. 정모·번개를 잡고, 우리끼리 순위를 보고, 다른 동호회와 교류전을 해요. 이미 있는 동호회는 초대 링크를 단톡방에 올리면 다 같이 들어와요.</p>
       <UiButton block class="mt-4" icon="plus" @click="createOpen = true">동호회 만들기</UiButton>
 
       <UiSection title="내 동호회" class="mt-8">
@@ -17,7 +17,7 @@
         <UiListSkeleton v-if="!nearby" :rows="2" />
         <div v-else-if="nearby.length" class="space-y-2">
           <ClubRow v-for="c in nearby" :key="c.id" :club="c" @click="router.push(`/clubs/${c.id}`)">
-            <UiButton size="sm" variant="secondary" :loading="joining === c.id" @click.stop="join(c.id)">들어가기</UiButton>
+            <UiButton size="sm" variant="secondary" :loading="joining === c.id" @click.stop="join(c)">{{ c.joinMode === 'APPROVAL' ? '신청하기' : '들어가기' }}</UiButton>
           </ClubRow>
         </div>
         <p v-else class="t-caption">동네에 아직 동호회가 없어요. 처음으로 만들어 보세요</p>
@@ -62,7 +62,10 @@ async function load() {
   nearby.value = b.data
 }
 
-async function join(clubId: number) {
+// 승인 가입 동호회는 가입 질문에 답해야 해서 동호회 화면에서 신청한다
+async function join(club: Club) {
+  const clubId = club.id
+  if (club.joinMode === 'APPROVAL') return router.push(`/clubs/${clubId}`)
   joining.value = clubId
   try {
     await POST('/api/clubs/join', { body: { clubId } })

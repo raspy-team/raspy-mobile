@@ -104,6 +104,132 @@
         }
       }
     },
+    "/api/clubs/{id}": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 보기",
+        "description": "멤버·동호회 경기. 초대 코드는 멤버에게만",
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "동호회 꾸미기 (회장·운영진)",
+        "description": "이름·소개·공지·단톡방 링크·가입 방식(OPEN·APPROVAL)·가입 질문·대표 종목. 보낸 것만 바꾸고, 빈 글자는 지운다",
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClubUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/matches/{matchId}/boards/{boardNo}": {
+      "put": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "판에 선수 내기 (회장·운영진)",
+        "description": "1:1이면 한 명, 2:2면 두 명. 양쪽이 다 내면 그 판의 경기가 열린다",
+        "operationId": "setLineup",
+        "parameters": [
+          {
+            "name": "matchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "boardNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClubLineupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubMatchView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/login/oauth2/apple/web/callback": {
       "post": {
         "tags": [
@@ -2592,6 +2718,195 @@
         }
       }
     },
+    "/api/clubs/{id}/requests/{userId}": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "가입 신청 받기·거절 (회장·운영진)",
+        "operationId": "decideRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accept",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/{id}/members/{userId}/role": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "역할 바꾸기 (회장만)",
+        "description": "STAFF 운영진 맡기기 · MEMBER 풀기 · OWNER 회장 넘기기(나는 운영진이 된다)",
+        "operationId": "setRole",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OWNER",
+                "STAFF",
+                "MEMBER"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/{id}/members/{userId}/remove": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "내보내기 (회장·운영진)",
+        "description": "회장은 못 내보내고, 운영진은 회장만 내보낸다",
+        "operationId": "removeMember",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/{id}/matches": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "교류전 신청 (회장·운영진)",
+        "description": "다른 동호회에 규칙·판 수(1~9)·1:1(perBoard 1)/2:2(2)·때·곳으로. 상대 운영진에게 알린다",
+        "operationId": "proposeMatch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClubMatchProposeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubMatchView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/clubs/{id}/leave": {
       "post": {
         "tags": [
@@ -2625,13 +2940,129 @@
         }
       }
     },
+    "/api/clubs/{id}/events": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "일정 잡기 (회장·운영진)",
+        "description": "정모·번개. 멤버에게 알리고, 만든 사람은 간다. 시작 3시간 전에 '갈게요'한 사람에게 알린다",
+        "operationId": "createEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClubEventCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubEventView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/matches/{matchId}/respond": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "교류전 받기·거절 (받는 동호회 회장·운영진)",
+        "operationId": "respondMatch",
+        "parameters": [
+          {
+            "name": "matchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accept",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubMatchView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/matches/{matchId}/cancel": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "교류전 취소 (두 동호회 회장·운영진)",
+        "description": "아직 시작한 판이 없을 때만",
+        "operationId": "cancelMatch",
+        "parameters": [
+          {
+            "name": "matchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubMatchView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/clubs/join": {
       "post": {
         "tags": [
           "club-controller"
         ],
         "summary": "동호회 들어가기",
-        "description": "초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로",
+        "description": "초대 코드(code)면 바로. 동네 목록의 동호회(clubId)는 가입 방식대로 바로 또는 가입 신청(answer: 가입 질문의 답). 이미 들었으면 그대로",
         "operationId": "join",
         "requestBody": {
           "content": {
@@ -2650,6 +3081,80 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ClubDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/events/{eventId}/cancel": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "일정 취소 (회장·운영진)",
+        "description": "'갈게요'한 사람에게 알린다",
+        "operationId": "cancelEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/events/{eventId}/answer": {
+      "post": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "일정 답하기",
+        "description": "going=true 갈게요 · false 못 가요. 정원이 차면 갈게요를 더 받지 않는다",
+        "operationId": "answerEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "going",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubEventView"
                 }
               }
             }
@@ -6256,22 +6761,21 @@
         }
       }
     },
-    "/api/clubs/{id}": {
+    "/api/clubs/search": {
       "get": {
         "tags": [
           "club-controller"
         ],
-        "summary": "동호회 보기",
-        "description": "멤버·동호회 경기. 초대 코드는 멤버에게만",
-        "operationId": "detail",
+        "summary": "동호회 이름으로 찾기",
+        "description": "교류전 상대를 고를 때. 두 글자부터",
+        "operationId": "search_1",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "q",
+            "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -6281,7 +6785,10 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ClubDetail"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClubSummary"
+                  }
                 }
               }
             }
@@ -6331,6 +6838,39 @@
                   "items": {
                     "$ref": "#/components/schemas/ClubSummary"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clubs/matches/{matchId}": {
+      "get": {
+        "tags": [
+          "club-controller"
+        ],
+        "summary": "교류전 보기",
+        "description": "판마다 양쪽 선수·경기·결과",
+        "operationId": "match",
+        "parameters": [
+          {
+            "name": "matchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClubMatchView"
                 }
               }
             }
@@ -7410,6 +7950,482 @@
         "properties": {
           "enabled": {
             "type": "boolean"
+          }
+        }
+      },
+      "ClubUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "chatLink": {
+            "type": "string"
+          },
+          "joinMode": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "APPROVAL"
+            ]
+          },
+          "joinQuestion": {
+            "type": "string"
+          },
+          "mainRuleId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ClubDetail": {
+        "required": [
+          "club",
+          "events",
+          "games",
+          "gamesThisMonth",
+          "matches",
+          "members",
+          "pendingRequests",
+          "ranking",
+          "requested"
+        ],
+        "type": "object",
+        "properties": {
+          "club": {
+            "$ref": "#/components/schemas/ClubSummary"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMember"
+            }
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubGame"
+            }
+          },
+          "inviteCode": {
+            "type": "string"
+          },
+          "myRole": {
+            "type": "string"
+          },
+          "joinQuestion": {
+            "type": "string"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "chatLink": {
+            "type": "string"
+          },
+          "mainRuleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ranking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubRankRow"
+            }
+          },
+          "gamesThisMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubEventView"
+            }
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMatchView"
+            }
+          },
+          "requested": {
+            "type": "boolean"
+          },
+          "pendingRequests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubJoinRequestView"
+            }
+          }
+        }
+      },
+      "ClubEventView": {
+        "required": [
+          "full",
+          "going",
+          "id",
+          "notGoingCount",
+          "startsAt",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "place": {
+            "type": "string"
+          },
+          "capacity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "going": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMember"
+            }
+          },
+          "notGoingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myAnswer": {
+            "type": "boolean"
+          },
+          "full": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ClubGame": {
+        "required": [
+          "gameId",
+          "hostNickname",
+          "status",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "placeRoad": {
+            "type": "string"
+          },
+          "hostNickname": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubJoinRequestView": {
+        "required": [
+          "createdAt",
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ClubMatchBoard": {
+        "required": [
+          "away",
+          "boardNo",
+          "home"
+        ],
+        "type": "object",
+        "properties": {
+          "boardNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "home": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMember"
+            }
+          },
+          "away": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMember"
+            }
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gameStatus": {
+            "type": "string"
+          },
+          "winner": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubMatchSide": {
+        "required": [
+          "clubId",
+          "name",
+          "score"
+        ],
+        "type": "object",
+        "properties": {
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ClubMatchView": {
+        "required": [
+          "away",
+          "boardList",
+          "boards",
+          "home",
+          "id",
+          "perBoard",
+          "ruleId",
+          "ruleTitle",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "boards": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "perBoard": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "placeRoad": {
+            "type": "string"
+          },
+          "placeDetail": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "home": {
+            "$ref": "#/components/schemas/ClubMatchSide"
+          },
+          "away": {
+            "$ref": "#/components/schemas/ClubMatchSide"
+          },
+          "result": {
+            "type": "string"
+          },
+          "mySide": {
+            "type": "string"
+          },
+          "boardList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClubMatchBoard"
+            }
+          }
+        }
+      },
+      "ClubMember": {
+        "required": [
+          "isOwner",
+          "nickname",
+          "role",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "type": "string"
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "ClubRankRow": {
+        "required": [
+          "nickname",
+          "rating",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ClubRecord": {
+        "required": [
+          "draws",
+          "losses",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "draws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ClubSummary": {
+        "required": [
+          "id",
+          "isMember",
+          "isOwner",
+          "joinMode",
+          "memberCount",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "dongName": {
+            "type": "string"
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isMember": {
+            "type": "boolean"
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "mainRuleTitle": {
+            "type": "string"
+          },
+          "joinMode": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ClubRecord"
+          }
+        }
+      },
+      "ClubLineupRequest": {
+        "required": [
+          "userIds"
+        ],
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
           }
         }
       },
@@ -8873,55 +9889,37 @@
           },
           "intro": {
             "type": "string"
+          },
+          "mainRuleId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
-      "ClubDetail": {
+      "ClubMatchProposeRequest": {
         "required": [
-          "club",
-          "games",
-          "members"
+          "awayClubId",
+          "boards",
+          "perBoard",
+          "ruleId"
         ],
         "type": "object",
         "properties": {
-          "club": {
-            "$ref": "#/components/schemas/ClubSummary"
-          },
-          "members": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClubMember"
-            }
-          },
-          "games": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClubGame"
-            }
-          },
-          "inviteCode": {
-            "type": "string"
-          }
-        }
-      },
-      "ClubGame": {
-        "required": [
-          "gameId",
-          "hostNickname",
-          "status",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "gameId": {
+          "awayClubId": {
             "type": "integer",
             "format": "int64"
           },
-          "title": {
-            "type": "string"
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
           },
-          "status": {
-            "type": "string"
+          "boards": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "perBoard": {
+            "type": "integer",
+            "format": "int32"
           },
           "matchDate": {
             "type": "string",
@@ -8930,66 +9928,37 @@
           "placeRoad": {
             "type": "string"
           },
-          "hostNickname": {
+          "placeDetail": {
+            "type": "string"
+          },
+          "message": {
             "type": "string"
           }
         }
       },
-      "ClubMember": {
+      "ClubEventCreateRequest": {
         "required": [
-          "isOwner",
-          "nickname",
-          "userId"
+          "startsAt",
+          "title"
         ],
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
+          "title": {
             "type": "string"
           },
-          "profilePicture": {
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "place": {
             "type": "string"
           },
-          "isOwner": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ClubSummary": {
-        "required": [
-          "id",
-          "isMember",
-          "isOwner",
-          "memberCount",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "name": {
-            "type": "string"
-          },
-          "intro": {
-            "type": "string"
-          },
-          "dongName": {
-            "type": "string"
-          },
-          "memberCount": {
+          "capacity": {
             "type": "integer",
             "format": "int32"
           },
-          "isMember": {
-            "type": "boolean"
-          },
-          "isOwner": {
-            "type": "boolean"
+          "note": {
+            "type": "string"
           }
         }
       },
@@ -9001,6 +9970,9 @@
             "format": "int64"
           },
           "code": {
+            "type": "string"
+          },
+          "answer": {
             "type": "string"
           }
         }

@@ -107,7 +107,7 @@
 
   <!-- 신뢰 사다리: 처음 보는 사람과 1:1로 만나기 전에 앱 게임 한 판 (안전·신뢰 D) -->
   <UiSheet :model-value="!!ladderFor" title="먼저 앱 게임 한 판" @update:model-value="ladderFor = null">
-    <p class="t-caption mb-4">{{ ladderFor?.applicantNickname }}님과는 처음 만나요. 1분짜리 게임을 먼저 하면 승인할 수 있어요. 내가 먼저 풀고, 같은 문제로 도전장을 메시지로 보내요</p>
+    <p class="t-caption mb-4">{{ ladderFor?.applicantNickname }}님과는 처음 만나요. 앱 게임을 한 판 같이 하면 승인할 수 있어요. 내가 먼저 하면 같은 문제로 도전장이 메시지로 가고, 상대가 하면 끝나요</p>
     <UiList>
       <UiListItem v-for="g in LADDER_GAMES" :key="g.key" :icon="g.icon" :title="g.title" :subtitle="g.sub" chevron @click="startLadder(g.key)" />
     </UiList>
@@ -411,11 +411,10 @@ function dmTarget(g) {
 }
 // 만나기 전 안전 수칙: 만나서 하는 경기에 상대가 정해지면 한 번 저절로 (경기마다), 그 뒤엔 더보기에서
 const safetyGame = ref(null)
-// 신뢰 사다리 (안전·신뢰 D): 신청자에게 보낼 1분짜리 앱 게임
+// 신뢰 사다리 (안전·신뢰 D): 신청자에게 보낼 앱 게임. 도전장은 메시지로 가니 각자 편할 때 하는 게임만 된다.
+// 실시간 게임(암산·퀴즈·숫자 야구)은 대기실에서 아무나·봇과 붙어 도전장이 안 나가 무한 반복이었다 (11/4, 서버 TrustLadderTest)
 const LADDER_GAMES = [
-  { key: 'math-race', title: '암산 먼저', sub: '1분 · 계산', icon: 'chart-simple' },
-  { key: 'quiz-race', title: '퀴즈 먼저 맞히기', sub: '1분 · 상식', icon: 'circle-question' },
-  { key: 'number-baseball', title: '숫자 야구', sub: '1분 · 추리', icon: 'magnifying-glass' },
+  { key: 'typing', title: '타자 대결', sub: '2분 · 같은 글을 빨리 정확하게', icon: 'keyboard' },
 ]
 const ladderFor = ref(null)
 function startLadder(key) {

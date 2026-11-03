@@ -260,6 +260,16 @@ onMounted(async () => {
     steps.value = [needTerms.value && 'terms', ...(needProfile.value ? ['profile', 'neighborhood'] : [])].filter(Boolean)
     // 자동으로 붙은 아이디(u_...)는 비워 두고, 사람이 정한 것만 채운다
     username.value = data.username?.startsWith('u_') ? '' : data.username || ''
+    // 아이디로 막 가입했으면 그 아이디를 채워 둔다 (같은 걸 두 번 묻지 않게)
+    if (!username.value) {
+      let signupId = ''
+      try {
+        signupId = (sessionStorage.getItem('signup_id') || '').toLowerCase()
+      } catch {
+        // 저장소를 못 쓰면 빈칸으로 둔다
+      }
+      if (USERNAME_PATTERN.test(signupId)) username.value = signupId
+    }
   } catch {
     // 401이면 api.js가 시작 화면으로 보낸다
   } finally {

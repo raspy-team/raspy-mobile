@@ -96,6 +96,12 @@ async function submit() {
         else submitError.value = '가입하지 못했어요. 잠시 뒤 다시 시도해주세요'
         return
       }
+      // 첫 설정의 '아이디' 칸에 다시 묻지 않고 채워 둔다 (OnboardingView)
+      try {
+        sessionStorage.setItem('signup_id', id)
+      } catch {
+        // 저장소를 못 쓰면 첫 설정에서 다시 적으면 된다
+      }
     }
     let token
     let tooMany = false

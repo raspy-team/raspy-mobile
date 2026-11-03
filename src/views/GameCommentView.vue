@@ -150,6 +150,7 @@ import {
   defineProps,
   defineEmits,
 } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
 import CommentItem from '../components/CommentItem.vue'
 import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
@@ -314,9 +315,13 @@ watch(
 const closeModal = () => {
   showModal.value = false
 }
+const route = useRoute()
+const router = useRouter()
 const afterLeave = () => {
   modalVisible.value = false
   emit('close')
+  // 주소(/games/:id/comments)로 열었으면 닫을 때 빈 화면에 남지 않게 돌아간다
+  if (route.name === 'GameComments') window.history.state?.back ? router.back() : router.replace('/feed')
 }
 
 // 바텀시트 드래그

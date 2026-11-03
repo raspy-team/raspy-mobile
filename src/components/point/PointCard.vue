@@ -54,7 +54,8 @@ import { UiIcon, UiList, UiListItem, UiSheet } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 const props = defineProps<{ userId: number; isMe?: boolean }>()
-const TONE: Record<string, string> = { WIN: 'bg-signal', PLAY: 'bg-fg', CHEER: 'bg-fg-subtle', ATTEND: 'bg-signal-fg', WELCOME: 'bg-line-strong' }
+// 볼트는 승리 하나만. signal-fg는 어두운 화면에서 볼트와 같은 색이라 출석을 회색 단계로 둔다
+const TONE: Record<string, string> = { WIN: 'bg-signal', PLAY: 'bg-fg', ATTEND: 'bg-fg-muted', CHEER: 'bg-fg-subtle', WELCOME: 'bg-line-strong' }
 const sources = ref<components['schemas']['PointSources'] | null>(null)
 const data = ref<components['schemas']['PointSummary'] | null>(null)
 const open = ref(false)

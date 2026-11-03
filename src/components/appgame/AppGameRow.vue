@@ -10,9 +10,9 @@
     </span>
     <UiBadge v-if="!game.available">준비 중</UiBadge>
     <span v-else class="text-right flex-shrink-0">
-      <!-- 해 본 적 없는 게임의 1500은 뜻 없는 숫자라 '처음'으로 -->
+      <!-- 해 본 적 없는 게임의 1500은 뜻 없는 숫자라 '안 해 봄'으로 ('처음'만 쓰면 새 게임으로 읽힌다) -->
       <template v-if="(game.myWins || 0) + (game.myLosses || 0) + (game.myDraws || 0) > 0"><span class="block t-mono">{{ game.myRating }}</span><span class="block t-micro">레이팅</span></template>
-      <span v-else class="block t-micro">처음</span>
+      <span v-else class="block t-micro">안 해 봄</span>
     </span>
   </UiCard>
 </template>

@@ -153,7 +153,7 @@
       <p class="t-micro">정하면 상대에게 알려요. 정한 뒤에도 경기 시작 전까지 두 사람 모두 언제든 바꿀 수 있어요.</p>
     </div>
     <template #footer>
-      <UiButton block :disabled="!canSubmitSchedule" :loading="busy" @click="submitSchedule">{{ scheduleGame && scheduleGame.matchDate ? '바꾸기' : '정하기' }}</UiButton>
+      <UiButton block :disabled="!canSubmitSchedule" :loading="busy" @click="submitSchedule">{{ scheduleDecided(scheduleGame) ? '바꾸기' : '정하기' }}</UiButton>
     </template>
   </UiSheet>
 
@@ -193,25 +193,15 @@
     </template>
   </UiSheet>
 
-  <!-- 경기 시작 ③ 인증샷 (선택) -->
+  <!-- 경기 시작 ③ 인증샷 (선택). 사진을 고르거나 '사진 없이 시작'을 누르면 바로 시작한다 (한 번 더 묻지 않는다) -->
   <CameraCapture
     :is-visible="showCameraModal"
     title="경기 시작 인증샷"
-    subtitle="피드에 표시될 사진을 촬영해주세요"
+    :subtitle="`${startMessage} 사진은 피드에 보여요.`"
     allow-skip
     @capture="onPhotoCapture"
     @skip="onPhotoCapture(null)"
     @cancel="showCameraModal = false"
-  />
-
-  <!-- 경기 시작 ④ 마지막 확인 -->
-  <UiDialog
-    v-model="showStartConfirm"
-    title="경기를 시작할까요?"
-    :message="startMessage"
-    confirm-text="시작하기"
-    :loading="busy"
-    @confirm="confirmStart"
   />
 
   <MatchRuleModal v-if="ruleGame" :rule="ruleGame.rule" @close="ruleGame = null" />
@@ -231,7 +221,7 @@ import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import SafetyTipsSheet from '../../components/game/SafetyTipsSheet.vue'
 import { GET } from '@/api/client'
 import {
-  UiAvatar, UiButton, UiCard, UiChip, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
+  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
   UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton, UiTopBar
 } from '../../components/ui'
 import regionMap from '../../assets/regionMap.json'
@@ -468,7 +458,6 @@ const startGame = ref(null)
 const showPlaceConfirm = ref(false)
 const showPlaceForm = ref(false)
 const showCameraModal = ref(false)
-const showStartConfirm = ref(false)
 const capturedPhotoFile = ref(null)
 const searchQuery = ref('')
 const detailedPlace = ref('')
@@ -513,6 +502,9 @@ function openSchedule(g) {
   schedPlace.value = isRemote(g.venue) ? g.matchLocation || '' : ''
 }
 
+// 시간·장소가 둘 다 정해져 있었을 때만 '바꾸기'. 하나라도 미정이면 처음 정하는 것
+const scheduleDecided = (g) => !!g?.matchDate && !!g?.matchLocation
+
 async function submitSchedule() {
   busy.value = true
   try {
@@ -527,7 +519,7 @@ async function submitSchedule() {
       // 화상·다른 게임은 어디서인지만 보낸다 (서버가 주소 없이 받는다)
       detailAddress: remote ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || (mode === 'mine' ? myArea.value.shortName : null) : null,
     })
-    const changed = !!scheduleGame.value?.matchDate
+    const changed = scheduleDecided(scheduleGame.value)
     scheduleGame.value = null
     showToast(changed ? '바꿨어요. 상대에게 알렸어요' : '정했어요. 상대에게 알렸어요')
     await fetchGames()
@@ -621,17 +613,17 @@ function goCamera() {
 
 function onPhotoCapture(file) {
   capturedPhotoFile.value = file
-  showCameraModal.value = false
-  showStartConfirm.value = true
+  confirmStart()
 }
 
 async function confirmStart() {
+  if (busy.value) return
   busy.value = true
   try {
     const form = new FormData()
     if (capturedPhotoFile.value) form.append('photo', capturedPhotoFile.value)
     await api.post(`/api/games/${startGame.value.id}/start`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
-    showStartConfirm.value = false
+    showCameraModal.value = false
     router.push(`/games/${startGame.value.id}/play`)
   } catch (e) {
     showToast(e.response?.data?.message || '경기를 시작하지 못했어요')

@@ -541,6 +541,8 @@ async function confirmResult() {
   try {
     await POST('/api/games/{id}/result/confirm', { path: { id: Number(gameId) } })
     haptic('success')
+    // 확인 칸이 사라지기만 하면 눌렸는지 모른다 (웹은 진동도 없다)
+    showToast('확정했어요. 전적과 레이팅에 반영돼요')
     await load()
   } catch (e) {
     showToast(e.response?.data?.message || '확인하지 못했어요. 다시 시도해 주세요')

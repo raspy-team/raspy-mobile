@@ -2180,7 +2180,7 @@ export interface paths {
         };
         /**
          * 그 사람의 포인트 출처
-         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·처음 선물로 나눠서
+         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서
          */
         get: operations["sources"];
         put?: never;
@@ -5028,6 +5028,8 @@ export interface components {
         MyGameStatusResponse: {
             activeGame?: components["schemas"]["ActiveGameResponse"];
             pendingReviewGameIds: number[];
+            /** Format: int32 */
+            waitingOnMeCount: number;
         };
         FriendStatusDto: {
             sent: boolean;

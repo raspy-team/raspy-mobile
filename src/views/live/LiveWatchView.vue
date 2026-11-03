@@ -6,7 +6,7 @@
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-eye-slash" :title="error" />
       <template v-else-if="live">
         <p class="t-caption text-center">
-          <span v-if="live.status === 'IN_PROGRESS'" class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-danger animate-pulse"></span>LIVE · {{ live.setIndex ? `${live.setIndex}세트` : '곧 시작' }}</span>
+          <span v-if="live.status === 'IN_PROGRESS'" class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-signal-fg motion-safe:animate-pulse" aria-hidden="true"></span>LIVE · {{ live.setIndex ? `${live.setIndex}세트` : '곧 시작' }}</span>
           <span v-else>{{ STATUS[live.status] || '끝난 경기' }}</span>
         </p>
 

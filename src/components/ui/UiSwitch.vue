@@ -5,7 +5,7 @@
     :aria-checked="modelValue"
     :aria-label="label"
     :disabled="disabled"
-    class="relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:opacity-40"
+    class="relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:opacity-40 before:absolute before:-inset-2 before:content-['']"
     :class="modelValue ? 'bg-fg' : 'bg-line-strong'"
     @click="feel('select'); emit('update:modelValue', !modelValue)"
   >

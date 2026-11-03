@@ -92,10 +92,10 @@
       </section>
 
       <div v-if="!isMine" class="mt-10 flex items-center gap-5">
-        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2" @click="openSuggest">
+        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openSuggest">
           <UiIcon name="far fa-comment" aria-hidden="true" /> 수정 제안하기
         </button>
-        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2" @click="openReport">
+        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openReport">
           <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고하기
         </button>
       </div>

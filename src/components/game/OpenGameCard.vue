@@ -26,7 +26,7 @@
           <span class="block t-micro truncate">{{ ownerLine }}</span>
         </span>
       </button>
-      <button v-if="applicants" type="button" class="t-micro underline underline-offset-2 flex-shrink-0" @click="emit('challengers')">
+      <button v-if="applicants" type="button" class="t-micro underline underline-offset-2 flex-shrink-0 px-2 -mx-2 py-3 -my-3" @click="emit('challengers')">
         {{ applicants }}명 신청
       </button>
       <UiBadge v-if="isMine">내 경기</UiBadge>

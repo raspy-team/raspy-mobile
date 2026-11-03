@@ -109,6 +109,27 @@
         </p>
       </UiSection>
 
+      <!-- 안전: 만나서 한 경기가 안전했는지 (안전·신뢰 I). 비율은 몇 중 몇인지도 함께 보여 준다 -->
+      <UiSection title="안전">
+        <UiTabs v-model="safetyDays" :options="acqTabs" class="mb-3" />
+        <UiListSkeleton v-if="!safety" :rows="2" />
+        <UiCard v-else-if="!safety.meetings">
+          <UiEmptyState icon="fas fa-shield-halved" title="아직 만나서 한 경기가 없어요" description="경기 시간이 지난, 만나서 하는 경기부터 셉니다" />
+        </UiCard>
+        <template v-else>
+          <div class="grid grid-cols-2 gap-2">
+            <div v-for="t in safetyTiles" :key="t.label" class="rounded-xl bg-surface p-3">
+              <p class="t-title tabular-nums" :class="t.warn ? 'text-danger' : 'text-fg'">{{ t.value }}</p>
+              <p class="t-caption mt-0.5">{{ t.label }}</p>
+              <p class="t-micro tabular-nums">{{ t.detail }}</p>
+            </div>
+          </div>
+          <p class="t-micro mt-2">
+            만남 {{ safety.meetings }}번 기준 (경기 시간이 지난 만나서 하는 경기, 노쇼로 취소된 판 포함). 만남이 적으면 비율이 크게 흔들려요
+          </p>
+        </template>
+      </UiSection>
+
       <!-- 규칙 수정 요청 -->
       <UiSection title="규칙 수정 요청">
         <template #action>
@@ -196,7 +217,7 @@
 </template>
 
 <script setup>
-// 관리자: 신고 처리 → 유입 → 규칙 수정 요청 → 도구. 권한이 없으면 서버가 403을 주고 홈으로 보낸다
+// 관리자: 신고 처리 → 유입 → 안전 → 규칙 수정 요청 → 도구. 권한이 없으면 서버가 403을 주고 홈으로 보낸다
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -258,6 +279,34 @@ async function loadAcquisition() {
 }
 
 watch(acqDays, loadAcquisition)
+
+// 안전 숫자: 신고는 만남 100번당, 나머지는 몇 중 몇
+const safetyDays = ref(30)
+const safety = ref(null)
+const ratio = (r) => (r.total ? pct(r.count, r.total) : '-')
+const safetyTiles = computed(() => {
+  const s = safety.value
+  if (!s) return []
+  return [
+    { label: '신고 (만남 100번당)', value: ((s.reports / s.meetings) * 100).toFixed(1), detail: `신고 ${s.reports}건` },
+    { label: '노쇼', value: ratio(s.noShow), detail: `${s.noShow.count} / ${s.noShow.total} 만남`, warn: s.noShow.total >= 10 && s.noShow.count / s.noShow.total >= 0.1 },
+    { label: '도착 확인', value: ratio(s.arrived), detail: `${s.arrived.count} / ${s.arrived.total}명` },
+    { label: '위치 공유', value: ratio(s.shared), detail: `${s.shared.count} / ${s.shared.total} 만남` },
+    { label: '또 만나고 싶다', value: ratio(s.meetAgain), detail: `${s.meetAgain.count} / ${s.meetAgain.total} 답` },
+    { label: '같은 상대와 다시', value: ratio(s.rematch), detail: `${s.rematch.count} / ${s.rematch.total}쌍` },
+  ]
+})
+
+async function loadSafety() {
+  safety.value = null
+  try {
+    safety.value = (await GET('/api/admin/safety', { query: { days: safetyDays.value } })).data
+  } catch {
+    showToast('안전 숫자를 불러오지 못했어요')
+  }
+}
+
+watch(safetyDays, loadSafety)
 
 // 규칙 분류 (카테고리 개편 전 규칙)
 const classify = ref({ remaining: null, items: [], applied: false, stopped: false, busy: '' })
@@ -408,6 +457,7 @@ async function openUsers() {
 onMounted(() => {
   load()
   loadAcquisition()
+  loadSafety()
   loadClassifyRemaining()
 })
 </script>

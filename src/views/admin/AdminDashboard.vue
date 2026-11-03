@@ -295,6 +295,7 @@ const safetyTiles = computed(() => {
     { label: '위치 공유', value: ratio(s.shared), detail: `${s.shared.count} / ${s.shared.total} 만남` },
     { label: '또 만나고 싶다', value: ratio(s.meetAgain), detail: `${s.meetAgain.count} / ${s.meetAgain.total} 답` },
     { label: '같은 상대와 다시', value: ratio(s.rematch), detail: `${s.rematch.count} / ${s.rematch.total}쌍` },
+    { label: '첫 만남 공공장소', value: ratio(s.firstPublic), detail: `${s.firstPublic.count} / ${s.firstPublic.total} 첫 만남` },
   ]
 })
 

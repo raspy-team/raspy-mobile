@@ -147,11 +147,11 @@
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 문장</p>
-            <p class="t-body mt-1">{{ result.myAnswer }}</p>
+            <p class="t-body mt-1 whitespace-pre-line">{{ result.myAnswer }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
             <p class="t-micro">상대 문장</p>
-            <p class="t-body mt-1">{{ result.opponentAnswer }}</p>
+            <p class="t-body mt-1 whitespace-pre-line">{{ result.opponentAnswer }}</p>
           </UiCard>
         </template>
         <!-- 말싸움: 주고받은 말 -->
@@ -331,6 +331,7 @@ const WRITING: Record<string, { guide: string; placeholder: string }> = {
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
   trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
   'power-level': { guide: '주제에 맞는 싸움꾼을 한 줄로 (뻔한 최강은 약해요)', placeholder: '예) 고무장갑 낀 할머니와 효자손' },
+  acrostic: { guide: '글자마다 한 줄씩, 그 글자로 시작해요 (줄바꿈으로 나눠요)', placeholder: '고: 고백하려고\n양: 양말까지 새로 샀는데\n이: 이미 여친이 있었다' },
 }
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
 import SquatPlay from '../../components/appgame/SquatPlay.vue'

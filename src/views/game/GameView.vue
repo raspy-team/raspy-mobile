@@ -27,7 +27,7 @@
         <li v-for="(s, i) in FIRST_STEPS" :key="s.title" class="flex items-baseline gap-4 px-4 py-4">
           <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
           <span>
-            <span class="block text-[15px] font-semibold text-fg">{{ s.title }}</span>
+            <span class="block text-[0.9375rem] font-semibold text-fg">{{ s.title }}</span>
             <span class="block t-caption mt-0.5">{{ s.body }}</span>
           </span>
         </li>

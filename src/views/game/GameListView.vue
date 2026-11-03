@@ -27,7 +27,7 @@
       <UiIcon name="gamepad" class="text-xl text-fg-muted" />
       <span class="flex-1 min-w-0">
         <span class="block t-label text-fg">앱 게임</span>
-        <span class="block t-caption">만나지 않고 폰으로 바로 한 판</span>
+        <span class="block t-caption">만나지 않고 폰으로 바로 한&nbsp;판</span>
       </span>
       <UiIcon name="chevron-right" class="text-fg-subtle" />
     </RouterLink>

@@ -12,7 +12,7 @@
           :class="model.face === f.key ? 'border-fg bg-surface-2' : 'border-line bg-surface'"
           @click="model.face = f.key"
         >
-          <span class="block text-[15px] font-semibold text-fg">{{ FACE_HELP[f.key]?.title ?? f.label }}</span>
+          <span class="block text-[0.9375rem] font-semibold text-fg">{{ FACE_HELP[f.key]?.title ?? f.label }}</span>
           <span class="block t-caption mt-0.5">{{ FACE_HELP[f.key]?.example }}</span>
         </button>
       </div>

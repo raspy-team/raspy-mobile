@@ -13,7 +13,7 @@
           </div>
           <button
             type="button"
-            class="w-full h-14 border-t border-line text-[17px] font-semibold active:bg-surface-3 transition-colors disabled:opacity-50"
+            class="w-full h-14 border-t border-line text-[1.0625rem] font-semibold active:bg-surface-3 transition-colors disabled:opacity-50"
             :class="danger ? 'text-danger-fg' : 'text-fg'"
             :disabled="loading"
             @click="emit('confirm')"
@@ -22,7 +22,7 @@
           </button>
         </div>
         <!-- 취소는 따로 떨어뜨려, 엄지가 가장 쉽게 닿는 아래에 -->
-        <button v-if="cancelText" type="button" class="w-full h-14 rounded-2xl bg-surface-2 text-[17px] text-fg active:bg-surface-3 transition-colors" @click="close">
+        <button v-if="cancelText" type="button" class="w-full h-14 rounded-2xl bg-surface-2 text-[1.0625rem] text-fg active:bg-surface-3 transition-colors" @click="close">
           {{ cancelText }}
         </button>
       </div>

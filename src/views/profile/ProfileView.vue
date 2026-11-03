@@ -3,7 +3,8 @@
     <UiTopBar :title="isMeRoute ? '내 정보' : ''" :back="!isMeRoute">
       <template #right>
         <template v-if="isMeRoute">
-          <UiIconButton icon="fas fa-magnifying-glass" label="사람 찾기" @click="showSearch = true" />
+          <!-- 탭마다 위 오른쪽은 메시지·알림으로 같게, 내 정보만 설정을 더한다. 돋보기는 '찾기' 탭이 쓰므로 사람 찾기는 친구 시트로 (11/3) -->
+          <InboxButtons />
           <UiIconButton icon="fas fa-gear" label="설정" @click="router.push('/settings')" />
         </template>
         <UiIconButton v-else-if="user" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
@@ -62,21 +63,21 @@
         </template>
       </div>
 
-      <!-- 숫자 한 줄 -->
-      <div class="mt-4 grid grid-cols-4 bg-surface rounded-xl divide-x divide-line text-center">
-        <div class="py-3">
+      <!-- 숫자 한 줄: 상자 없이, 승률은 경기가 있을 때만 -->
+      <div class="mt-5 flex text-center">
+        <div class="flex-1">
           <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
           <p class="t-micro mt-0.5">경기</p>
         </div>
-        <div class="py-3">
-          <p class="t-heading tabular-nums">{{ stats.totalGames ? `${stats.winRate}%` : '–' }}</p>
+        <div v-if="stats.totalGames" class="flex-1">
+          <p class="t-heading tabular-nums">{{ stats.winRate }}%</p>
           <p class="t-micro mt-0.5">승률</p>
         </div>
-        <div class="py-3">
+        <div class="flex-1">
           <p class="t-heading tabular-nums">{{ (user.myChampions || []).length }}</p>
           <p class="t-micro mt-0.5">챔피언</p>
         </div>
-        <button type="button" class="py-3" @click="openFriends">
+        <button type="button" class="flex-1" @click="openFriends">
           <p class="t-heading tabular-nums">{{ stats.friends || 0 }}</p>
           <p class="t-micro mt-0.5">친구 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </button>
@@ -194,6 +195,7 @@
 
     <!-- 친구 목록 -->
     <UiSheet v-model="friendsOpen" :title="`친구 ${stats.friends || 0}명`">
+      <UiButton v-if="user?.isMe" block variant="secondary" icon="user-plus" class="mb-3" @click="friendsOpen = false; showSearch = true">사람 찾기</UiButton>
       <UiListSkeleton v-if="friendsLoading" :rows="4" />
       <UiList v-else-if="friends.length">
         <UiListItem
@@ -226,6 +228,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import api from '../../api/api'
 import UserSearchModal from '../../components/profile/UserSearchModal.vue'
+import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
   UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiListSkeleton,
   UiSheet, UiSkeleton, UiTopBar,

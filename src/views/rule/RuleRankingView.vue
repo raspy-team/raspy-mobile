@@ -36,7 +36,7 @@
           </template>
         </UiCard>
 
-        <UiEmptyState v-if="!rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 랭킹이 없어요" description="이 규칙으로 5판 넘게 한 사람부터 순위에 올라요">
+        <UiEmptyState v-if="!rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" description="5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요">
           <UiButton variant="secondary" :to="appGameKey ? `/play/${appGameKey}` : `/create-game?ruleId=${ruleId}`">
             {{ appGameKey ? '한 판 하기' : '경기 열기' }}
           </UiButton>

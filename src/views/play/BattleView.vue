@@ -62,9 +62,11 @@
       <template v-else-if="state">
         <UiCard class="text-center py-8">
           <template v-if="state.status === 'COMPLETED'">
-            <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
+            <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
+            <BrandFace :mood="state.result === 'WIN' ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
             <p class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
+            <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
         </UiCard>
@@ -88,6 +90,7 @@ import { WS_URL } from '@/config/server'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
 import BrandFace from '../../components/BrandFace.vue'
+import { NEXT_ROUND } from '@/utils/verdict'
 import { UiButton, UiCard, UiEmptyState, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['BattleStateResponse']

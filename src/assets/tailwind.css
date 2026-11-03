@@ -108,8 +108,8 @@
   .t-label { @apply text-[0.8125rem] font-medium text-fg-muted; }                                 /* 입력칸 이름 */
   .t-caption { @apply text-sm leading-[1.45] text-fg-muted; }                                /* 보조 설명 */
   .t-micro { @apply text-[0.8125rem] leading-[1.4] text-fg-muted; }                                                /* 시간, 개수 */
-  /* 기록·메타 정보 (Nous식 고정폭 라벨): 섹션 머리, 숫자 단위, 상태 */
-  .t-mono { @apply font-mono text-xs text-fg-subtle tracking-normal uppercase; }
+  /* 기록·메타 숫자 (순번, 단위, 상태). 고정폭 대신 표 숫자로 자리만 맞춘다 */
+  .t-mono { @apply font-mono text-[0.8125rem] text-fg-subtle tracking-normal tabular-nums; }
 }
 
 /* 매치의 서명: 볼트 형광펜. 승자 이름, 큰 제목의 핵심 낱말에만 (한 화면에 한두 곳)

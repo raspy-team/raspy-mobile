@@ -2,7 +2,7 @@
   <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
     <header class="flex items-center gap-3">
       <span class="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-        <UiIcon :name="duel.icon" />
+        <UiIcon :name="gameIcon(duel.key, duel.icon)" />
       </span>
       <button type="button" class="flex-1 min-w-0 text-left" @click="emit('play')">
         <span class="block text-sm font-semibold text-fg truncate">{{ duel.title }}</span>
@@ -17,19 +17,19 @@
     </div>
 
     <!-- 끝난 대결: 누가 몇 점(표·타)으로 이겼나 -->
-    <div v-else class="mt-3 rounded-xl bg-surface px-4 py-5">
+    <div v-else class="mt-4 mb-1">
       <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <button
           v-for="(side, i) in sides"
           :key="i"
           type="button"
-          class="min-w-0 truncate text-[0.9375rem]"
+          class="min-w-0 truncate text-[0.9375rem] py-2.5 -my-2.5"
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', side.id)"
         >
           <span :class="side.won ? 'hl' : ''">{{ side.name }}</span>
         </button>
-        <span class="order-2 font-mono text-[28px] leading-none tracking-[-0.05em] tabular-nums">
+        <span class="order-2 text-[1.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums">
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
         </span>
       </div>
@@ -52,20 +52,19 @@
           <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
         </button>
       </template>
-      <div class="flex-1"></div>
-      <UiButton size="sm" variant="tonal" @click="emit('play')">나도 한 판</UiButton>
     </footer>
   </article>
 </template>
 
 <script setup lang="ts">
+import { gameIcon } from '@/utils/appGameIcon'
 import { who } from '@/utils/format'
 // 피드의 앱 대결 한 장. 끝난 대결은 점수와 승자(+요리 이름·문장), 투표 중인 문장 대결은 그 자리에서 투표
 import { ref, computed, onMounted } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import VoteCard from '../appgame/VoteCard.vue'
-import { UiButton, UiIcon, UiSkeleton } from '../ui'
+import { UiIcon, UiSkeleton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 type Post = components['schemas']['FeedItemResponse']

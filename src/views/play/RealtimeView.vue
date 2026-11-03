@@ -102,11 +102,13 @@
       <template v-else-if="state">
         <UiCard class="text-center py-8">
           <template v-if="state.status === 'COMPLETED'">
-            <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
+            <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
+            <BrandFace :mood="state.result === 'WIN' ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
             <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.moves.length }}번 이었어요</p>
+            <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
         </UiCard>
@@ -132,6 +134,7 @@ import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
 import BrandFace from '../../components/BrandFace.vue'
+import { NEXT_ROUND } from '@/utils/verdict'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import AlkkagiBoard from '../../components/appgame/AlkkagiBoard.vue'
 import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'

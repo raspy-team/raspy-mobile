@@ -44,6 +44,8 @@ const VARIANTS = {
   ghost: 'bg-transparent text-fg-muted font-medium active:bg-surface-2',
   tonal: 'bg-transparent text-fg font-semibold border border-line-strong active:bg-surface-2',
   danger: 'bg-danger-soft text-danger-fg font-medium active:bg-danger/25',
+  // 볼트: '내 차례'에만 (결과 확인·신청 승인처럼 상대가 나를 기다릴 때). 한 화면에 하나 넘게 두지 않는다
+  signal: 'bg-signal text-signal-on font-semibold active:opacity-90',
 }
 // 높이는 손가락으로 누르기 쉬운 크기 이상 (sm도 36px)
 const SIZES = {

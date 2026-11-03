@@ -21,14 +21,15 @@
         <WaitingNow v-if="!query && !structure" class="mt-6" />
         <!-- 최근에 한 게임: 찾지 않고 바로 다시 -->
         <UiSection v-if="recent.length && !query && !structure" title="최근에 한 게임" class="mt-6">
-          <div class="space-y-2">
-            <AppGameRow v-for="g in recent" :key="g.key" :game="g" />
+          <!-- 이어 하기 줄: 옆으로 밀어 고른다 -->
+          <div class="flex gap-3 -mx-4 px-4 overflow-x-auto no-scrollbar">
+            <AppGameTile v-for="g in recent" :key="g.key" :game="g" compact />
           </div>
         </UiSection>
 
         <UiSection :title="query || structure ? `찾은 게임 ${filtered.length}` : '많이 하는 게임'" class="mt-6">
-          <div v-if="filtered.length" class="space-y-2">
-            <AppGameRow v-for="g in filtered" :key="g.key" :game="g" />
+          <div v-if="filtered.length" class="grid grid-cols-2 gap-3">
+            <AppGameTile v-for="g in filtered" :key="g.key" :game="g" />
           </div>
           <UiEmptyState v-else icon="search" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
         </UiSection>
@@ -43,7 +44,7 @@ import { ref, computed, onMounted } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import { STRUCTURES } from '@/utils/appGame'
-import AppGameRow from '../../components/appgame/AppGameRow.vue'
+import AppGameTile from '../../components/appgame/AppGameTile.vue'
 import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import { UiChip, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 

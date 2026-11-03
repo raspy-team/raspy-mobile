@@ -4790,6 +4790,7 @@ export interface components {
             before: number;
             /** Format: int32 */
             after: number;
+            provisional: boolean;
         };
         SideResult: {
             /** Format: int32 */

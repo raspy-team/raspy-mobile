@@ -3024,6 +3024,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/live/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 킥오프 카드
+         * @description 왜 이 경기인가: 맞대결 전적·라이벌, 편마다 최근 흐름, 이길 확률, 동네 챔피언이 걸렸는지. 중계와 같은 기준으로 볼 수 있는 사람만
+         */
+        get: operations["context"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/like/users": {
         parameters: {
             query?: never;
@@ -5776,6 +5796,37 @@ export interface components {
             displayOrder: number;
             /** Format: date-time */
             uploadedAt: string;
+        };
+        LiveChampionStake: {
+            area: string;
+            /** Format: int32 */
+            holderSide?: number;
+            holderName?: string;
+        };
+        LiveContext: {
+            /** Format: int64 */
+            gameId: number;
+            sides: components["schemas"]["LiveContextSide"][];
+            headToHead?: components["schemas"]["LiveHeadToHead"];
+            rival: boolean;
+            champion?: components["schemas"]["LiveChampionStake"];
+            lines: string[];
+        };
+        LiveContextSide: {
+            /** Format: int32 */
+            side: number;
+            label: string;
+            /** Format: int32 */
+            chance?: number;
+            recent: string[];
+        };
+        LiveHeadToHead: {
+            /** Format: int32 */
+            games: number;
+            wins: number[];
+            /** Format: int32 */
+            draws: number;
+            last: number[];
         };
         GameLikeStatusResponse: {
             isLiked: boolean;
@@ -10306,6 +10357,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LiveGame"];
+                };
+            };
+        };
+    };
+    context: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveContext"];
                 };
             };
         };

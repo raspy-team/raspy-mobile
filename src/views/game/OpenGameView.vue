@@ -26,7 +26,7 @@
           <template v-else-if="game.isAppliedByMe">신청했어요. {{ game.ownerNickname }}님이 승인하면 알려 드려요.</template>
           <!-- 공유 링크로 다른 동네 경기에 들어온 경우: 누르기 전에 이유를 보여 준다 -->
           <template v-else-if="game.joinBlockedReason">
-            <span class="text-danger-fg">{{ game.joinBlockedReason }}</span>
+            <span class="text-fg-muted">{{ game.joinBlockedReason }}</span>
             <!-- 인증하고 이 경기로 돌아온다 (11/4 밤샘: 링크로 온 동료가 인증 뒤 경기를 다시 찾아야 했다) -->
             <RouterLink :to="{ path: '/neighborhood', query: { back: route.fullPath } }" class="ml-1 underline underline-offset-2">동네 인증</RouterLink>
           </template>

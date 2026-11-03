@@ -4144,6 +4144,39 @@
         }
       }
     },
+    "/api/rankings/overview": {
+      "get": {
+        "tags": [
+          "ranking-controller"
+        ],
+        "summary": "레이팅 한눈에",
+        "description": "종합, 몸·머리·마음, 능력별(규칙별 레이팅을 1/RD²로 모은 것), 봇과 한 연습 레이팅",
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rankings/history": {
       "get": {
         "tags": [
@@ -9347,13 +9380,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "rating": {
-            "type": "number",
-            "format": "double"
-          },
           "totalGameCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
@@ -9508,6 +9541,102 @@
           "rulePercent": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "PracticeLine": {
+        "required": [
+          "games",
+          "margin",
+          "rating",
+          "ruleId",
+          "ruleTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "margin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "games": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RatingOverview": {
+        "required": [
+          "abilities",
+          "groups",
+          "practice"
+        ],
+        "type": "object",
+        "properties": {
+          "overall": {
+            "$ref": "#/components/schemas/ScopeRatingLine"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScopeRatingLine"
+            }
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScopeRatingLine"
+            }
+          },
+          "practice": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeLine"
+            }
+          }
+        }
+      },
+      "ScopeRatingLine": {
+        "required": [
+          "key",
+          "label",
+          "margin",
+          "provisional",
+          "rating",
+          "rules"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "margin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provisional": {
+            "type": "boolean"
+          },
+          "rules": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

@@ -73,6 +73,29 @@
         </div>
       </section>
 
+      <!-- 레이팅 한눈에: 종합 · 몸·머리·마음 · 능력 (규칙별 레이팅을 확실한 점수에 무게를 두어 모은 것) -->
+      <section v-if="overview?.overall">
+        <h2 class="t-heading mb-3">레이팅 한눈에</h2>
+        <div class="rounded-xl bg-surface p-4">
+          <div class="flex items-baseline gap-2">
+            <p class="t-caption">종합</p>
+            <p class="t-title tabular-nums ml-auto">{{ overview.overall.rating }}</p>
+            <p class="t-caption tabular-nums">±{{ overview.overall.margin }}</p>
+            <UiBadge v-if="overview.overall.provisional">잠정</UiBadge>
+          </div>
+          <div v-if="overview.groups.length" class="grid gap-2 mt-3" :style="{ gridTemplateColumns: `repeat(${overview.groups.length}, minmax(0, 1fr))` }">
+            <div v-for="g in overview.groups" :key="g.key" class="rounded-lg bg-surface-2 px-3 py-2">
+              <p class="t-micro">{{ g.label }}</p>
+              <p class="t-heading tabular-nums">{{ g.rating }}</p>
+            </div>
+          </div>
+          <div v-if="overview.abilities.length" class="flex flex-wrap gap-1.5 mt-3">
+            <UiBadge v-for="a in overview.abilities.slice(0, 6)" :key="a.key">{{ a.label }} {{ a.rating }}</UiBadge>
+          </div>
+          <p class="t-micro mt-3">규칙마다 따로 매긴 레이팅을, 확실한 점수일수록 무게를 두어 모았어요</p>
+        </div>
+      </section>
+
       <!-- 레이팅 흐름: 규칙마다 점수는 따로다. 많이 한 규칙부터 고른다 -->
       <section v-if="ratings.length">
         <div class="flex items-center justify-between mb-3">
@@ -94,6 +117,16 @@
           </svg>
           <p class="t-micro mt-2">±는 실제 실력이 있을 법한 범위예요 (95%). 오래 쉬면 다시 넓어져요</p>
         </div>
+      </section>
+
+      <!-- 봇과 한 판은 사람 레이팅·순위와 따로 -->
+      <section v-if="overview?.practice?.length">
+        <h2 class="t-heading mb-1">연습 레이팅 <span class="t-caption">봇과 한 판</span></h2>
+        <UiList>
+          <UiListItem v-for="p in overview.practice" :key="p.ruleId" :title="p.ruleTitle" :subtitle="`${p.games}판`" chevron @click="router.push(`/rules/${p.ruleId}`)">
+            <template #trailing><span class="t-heading tabular-nums">{{ p.rating }}</span></template>
+          </UiListItem>
+        </UiList>
       </section>
 
       <!-- 규칙별 -->
@@ -247,6 +280,8 @@ const rivals = computed(() => {
 
 // 규칙별 레이팅과 흐름 (/api/rankings/history): 점수 ± 범위, 잠정, 경기마다 바뀐 점수
 const ratings = ref([])
+// 종합·몸머리마음·능력·연습 (/api/rankings/overview)
+const overview = ref(null)
 const pickedId = ref(null)
 const picked = computed(() => ratings.value.find((r) => r.ruleId === pickedId.value) || ratings.value[0])
 const trend = computed(() => {
@@ -270,6 +305,7 @@ async function load() {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
     const { data } = await api.get(`/api/user-profile/${user.value.id}/games`)
     ratings.value = (await GET('/api/rankings/history', { query: { userId: user.value.id } }).catch(() => ({ data: [] }))).data
+    overview.value = (await GET('/api/rankings/overview', { query: { userId: user.value.id } }).catch(() => ({ data: null }))).data
     games.value = data.map((g) => ({ ...g, r: norm(g.result) })).sort((a, b) => new Date(a.date) - new Date(b.date))
   } catch (e) {
     error.value = e.response?.data?.message || '기록을 불러오지 못했어요'

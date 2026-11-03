@@ -2131,6 +2131,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rankings/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 레이팅 한눈에
+         * @description 종합, 몸·머리·마음, 능력별(규칙별 레이팅을 1/RD²로 모은 것), 봇과 한 연습 레이팅
+         */
+        get: operations["overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rankings/history": {
         parameters: {
             query?: never;
@@ -4414,10 +4434,10 @@ export interface components {
             draws: number;
             /** Format: int32 */
             ruleRating?: number;
-            /** Format: double */
-            rating: number;
             /** Format: int32 */
             totalGameCount: number;
+            /** Format: double */
+            rating: number;
         };
         UserRankingDto: {
             /** Format: int32 */
@@ -4457,6 +4477,34 @@ export interface components {
             ruleRank: number;
             /** Format: double */
             rulePercent: number;
+        };
+        PracticeLine: {
+            /** Format: int64 */
+            ruleId: number;
+            ruleTitle: string;
+            /** Format: int32 */
+            rating: number;
+            /** Format: int32 */
+            margin: number;
+            /** Format: int32 */
+            games: number;
+        };
+        RatingOverview: {
+            overall?: components["schemas"]["ScopeRatingLine"];
+            groups: components["schemas"]["ScopeRatingLine"][];
+            abilities: components["schemas"]["ScopeRatingLine"][];
+            practice: components["schemas"]["PracticeLine"][];
+        };
+        ScopeRatingLine: {
+            key: string;
+            label: string;
+            /** Format: int32 */
+            rating: number;
+            /** Format: int32 */
+            margin: number;
+            provisional: boolean;
+            /** Format: int32 */
+            rules: number;
         };
         RatingPoint: {
             /** Format: date-time */
@@ -8072,6 +8120,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RankingResponse"];
+                };
+            };
+        };
+    };
+    overview: {
+        parameters: {
+            query: {
+                userId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RatingOverview"];
                 };
             };
         };

@@ -310,6 +310,9 @@
 
       </template>
 
+      <!-- 관중이 찍은 장면: 선수·관중 모두 본다. 관중은 끝나고 하루 안까지 올린다 -->
+      <LiveMediaStrip v-if="game?.venue === 'IN_PERSON'" :game-id="Number(gameId)" />
+
       <!-- 친구 · 공유 (덜 급한 것은 맨 아래) -->
       <div class="flex gap-2">
         <UiButton v-if="isParticipant && format === 'DUEL'" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
@@ -372,6 +375,7 @@ import { TEAM_NAMES } from '../../utils/gameFormat'
 import BrandFace from '../../components/BrandFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
+import LiveMediaStrip from '../../components/live/LiveMediaStrip.vue'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'

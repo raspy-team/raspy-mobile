@@ -2090,6 +2090,130 @@
         }
       }
     },
+    "/api/games/{gameId}/live/media": {
+      "get": {
+        "tags": [
+          "live-media-controller"
+        ],
+        "summary": "관중 사진·영상 보기",
+        "description": "그 경기 관중이 올린 사진·영상. 중계를 볼 수 있는 사람만. 새로 오거나 내리면 /topic/game-media/{gameId}에 MEDIA",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveMediaList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "live-media-controller"
+        ],
+        "summary": "관중 사진·영상 올리기",
+        "description": "관중(선수 아님)이 경기 중이나 끝나고 하루 안에 한 개씩. 사진 JPG·PNG·WebP·GIF, 영상 MP4·MOV·WebM 등 10MB까지",
+        "operationId": "upload",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveMedia"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live/media/{mediaId}/hide": {
+      "post": {
+        "tags": [
+          "live-media-controller"
+        ],
+        "summary": "관중 사진·영상 내리기",
+        "description": "그 경기 선수나 올린 사람만",
+        "operationId": "hide",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "mediaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/live/cheer": {
       "post": {
         "tags": [
@@ -6765,7 +6889,7 @@
         ],
         "summary": "앱 게임 목록",
         "description": "게임마다 내 레이팅·전적·최고 기록을 함께 준다.",
-        "operationId": "list",
+        "operationId": "list_1",
         "responses": {
           "200": {
             "description": "OK",
@@ -7330,7 +7454,7 @@
         ],
         "summary": "신고 목록 (관리자 전용)",
         "description": "최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.",
-        "operationId": "list_1",
+        "operationId": "list_2",
         "responses": {
           "200": {
             "description": "OK",
@@ -8170,7 +8294,8 @@
               "COMMENT",
               "RULE",
               "USER",
-              "CHAT_MESSAGE"
+              "CHAT_MESSAGE",
+              "GAME_MEDIA"
             ]
           },
           "targetId": {
@@ -9008,6 +9133,42 @@
         "properties": {
           "emoji": {
             "type": "string"
+          }
+        }
+      },
+      "LiveMedia": {
+        "required": [
+          "canHide",
+          "id",
+          "mediaType",
+          "mine",
+          "uploadedAt",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/LivePlayer"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "canHide": {
+            "type": "boolean"
           }
         }
       },
@@ -13088,6 +13249,24 @@
           }
         }
       },
+      "LiveMediaList": {
+        "required": [
+          "canUpload",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveMedia"
+            }
+          },
+          "canUpload": {
+            "type": "boolean"
+          }
+        }
+      },
       "GameLikeStatusResponse": {
         "required": [
           "isLiked",
@@ -15021,7 +15200,8 @@
               "COMMENT",
               "RULE",
               "USER",
-              "CHAT_MESSAGE"
+              "CHAT_MESSAGE",
+              "GAME_MEDIA"
             ]
           },
           "targetId": {

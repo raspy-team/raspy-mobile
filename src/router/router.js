@@ -21,6 +21,7 @@ const RuleDetail = () => import('../views/rule/RuleDetailView.vue')
 const DmRoomList = () => import('../views/DmRoomList.vue')
 const OauthCallback = () => import('../views/OauthCallBack.vue')
 const Onboarding = () => import('../views/auth/OnboardingView.vue')
+import { useToast } from '../composable/useToast'
 import { installOnboardingGuard } from './onboardingGuard'
 
 const GroupUserLogin = () => import('../views/auth/LoginView.vue')
@@ -160,5 +161,24 @@ const router = createRouter({
 })
 
 installOnboardingGuard(router)
+
+// 화면 파일(나눠 받는 조각)을 못 받으면 누른 탭이 아무 반응 없이 멈췄다 (11/4 밤샘).
+// 끊겼으면 연결을 확인하라고 알리고, 연결돼 있는데 못 받으면 새로 배포돼 옛 조각이 사라진 것이라 그 화면으로 한 번 새로 연다
+const CHUNK_ERROR = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i
+router.onError((error, to) => {
+  if (!CHUNK_ERROR.test(String(error?.message || error))) return
+  if (!navigator.onLine) {
+    useToast().showToast('인터넷 연결을 확인해 주세요')
+    return
+  }
+  const key = `chunk_reload_${to.fullPath}`
+  try {
+    if (sessionStorage.getItem(key)) return // 한 번 새로 열었는데도 안 되면 되풀이하지 않는다
+    sessionStorage.setItem(key, '1')
+  } catch {
+    return
+  }
+  window.location.assign(to.fullPath)
+})
 
 export default router

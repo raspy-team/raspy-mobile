@@ -327,13 +327,13 @@ export interface paths {
         };
         /**
          * 경기 응원 현황
-         * @description 편마다 배수·이길 확률·응원한 사람 수와 포인트, 내 응원, 내가 걸 수 있는지와 까닭
+         * @description 편마다 배수·이길 확률·응원한 사람 수와 포인트·못 고르는 까닭, 내 응원
          */
         get: operations["pointCheerState"];
         put?: never;
         /**
          * 응원하기
-         * @description 선수가 다 모인 시작 전 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번, 하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 걸 때 정해짐). 선수와 아는 사이는 못 건다
+         * @description 선수가 다 모인 시작 전 남의 경기 한쪽을 고른다 (경기마다 한 번). amount 0은 예측만, 10~100은 포인트도 건다(하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 고를 때 정해짐). 아는 사람의 상대편은 못 고른다
          */
         post: operations["cheerWithPoints"];
         delete?: never;
@@ -2484,7 +2484,7 @@ export interface paths {
         };
         /**
          * 그 사람의 포인트 출처
-         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서, 응원 성적(맞힌 수·이변)
+         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서, 응원 성적(맞힌 수·이변·연속·유닛)
          */
         get: operations["sources"];
         put?: never;
@@ -2507,6 +2507,26 @@ export interface paths {
          * @description 잔액, 오늘 번 양과 하루 한도, 최근 30줄. 포인트는 사고팔거나 바꾸거나 넘길 수 없다
          */
         get: operations["myPoints"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/points/league": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 주간 응원 리그
+         * @description 이번 주(월요일부터) 친구 또는 내 동네에서 응원을 잘 맞힌 순위. sort=UNITS(유닛: 맞히면 +(배수−1), 틀리면 −1) 또는 POINTS(응원으로 늘린 포인트). 3번 이상 맞혀 본 사람만
+         */
+        get: operations["cheerLeague"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4204,6 +4224,8 @@ export interface components {
             cheerers: number;
             /** Format: int32 */
             points: number;
+            lockedReason?: string;
+            rated: boolean;
         };
         CheerSide: {
             /** Format: int64 */
@@ -4232,6 +4254,7 @@ export interface components {
             settled: boolean;
             /** Format: double */
             bonusRate: number;
+            outcome?: string;
         };
         VerifyRequest: {
             /** Format: double */
@@ -5255,6 +5278,10 @@ export interface components {
             hits: number;
             /** Format: int32 */
             upsets: number;
+            /** Format: int32 */
+            streak: number;
+            /** Format: double */
+            units: number;
         };
         PointSourceLine: {
             key: string;
@@ -5287,6 +5314,33 @@ export interface components {
             /** Format: int32 */
             dailyLimit: number;
             history: components["schemas"]["PointLine"][];
+        };
+        BetLeague: {
+            /** @enum {string} */
+            scope: "FRIENDS" | "NEIGHBORHOOD";
+            /** @enum {string} */
+            sort: "UNITS" | "POINTS";
+            /** Format: date */
+            weekStart: string;
+            /** Format: int32 */
+            minPicks: number;
+            rows: components["schemas"]["BetLeagueRow"][];
+            me?: components["schemas"]["BetLeagueRow"];
+        };
+        BetLeagueRow: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            /** Format: int32 */
+            picks: number;
+            /** Format: int32 */
+            hits: number;
+            /** Format: double */
+            units: number;
+            /** Format: int32 */
+            points: number;
+            /** Format: int32 */
+            rank: number;
         };
         PlayWithMeTooResponse: {
             /** Format: int64 */
@@ -9598,6 +9652,29 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PointSummary"];
+                };
+            };
+        };
+    };
+    cheerLeague: {
+        parameters: {
+            query?: {
+                scope?: "FRIENDS" | "NEIGHBORHOOD";
+                sort?: "UNITS" | "POINTS";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BetLeague"];
                 };
             };
         };

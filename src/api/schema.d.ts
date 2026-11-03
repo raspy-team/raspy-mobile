@@ -1849,7 +1849,7 @@ export interface paths {
         put?: never;
         /**
          * 이용 정지 (관리자 전용)
-         * @description days가 없으면 영구. 이 사람의 처리 전 신고도 모두 처리한 것으로 표시한다
+         * @description days가 없으면 영구. age=true면 만 14세 이상을 확인할 때까지(서류를 받으면 풀기). 이 사람의 처리 전 신고도 모두 처리한 것으로 표시한다
          */
         post: operations["suspend"];
         delete?: never;
@@ -4683,6 +4683,7 @@ export interface components {
             /** Format: int64 */
             days?: number;
             reason: string;
+            age: boolean;
         };
         RejectEditRequestDto: {
             rejectionReason: string;

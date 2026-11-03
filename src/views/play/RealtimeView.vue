@@ -55,6 +55,17 @@
           <div class="h-full bg-fg transition-[width] duration-200" :style="{ width: `${(left / state.turnSeconds) * 100}%` }" />
         </div>
 
+        <!-- 어떻게 하나요: 처음 하는 게임이면 펼쳐 둔다 ('아무거나'로 처음 보는 게임에 붙어도 알게) -->
+        <section v-if="state.howTo?.length" class="mt-3 rounded-xl bg-surface-2 px-4 py-3">
+          <button type="button" class="w-full flex items-center justify-between t-label" :aria-expanded="howToOpen" @click="toggleHowTo">
+            어떻게 하나요
+            <UiIcon :name="howToOpen ? 'chevron-up' : 'chevron-down'" />
+          </button>
+          <ul v-if="howToOpen" class="mt-2 space-y-1">
+            <li v-for="(line, i) in state.howTo" :key="i" class="t-caption text-fg-muted break-keep">· {{ line }}</li>
+          </ul>
+        </section>
+
         <!-- 서버가 준 판 (가위바위보·편지 오목·배틀십) -->
         <template v-if="state.view">
           <TurnViewPanel class="mt-4" :view="state.view" :my-turn="myTurn && !counting" :sending="sending" @move="shoot" />
@@ -149,7 +160,7 @@ import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'
 import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import { shareLink } from '../../utils/share'
 import { useToast } from '../../composable/useToast'
-import { UiButton, UiCard, UiEmptyState, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
+import { UiButton, UiCard, UiEmptyState, UiIcon, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['RealtimeState']
 
@@ -157,7 +168,7 @@ const route = useRoute()
 const { showToast } = useToast()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀', 'thirty-one': '서른하나', 'last-stone': '마지막 돌', 'card-duel': '숫자 카드 대결', auction: '칩 경매', 'drop-four': '사목 떨어뜨리기', flip: '뒤집기', 'number-baseball': '숫자 야구', 'number-bomb': '숫자 폭탄', 'math-race': '암산 먼저', chosung: '초성 먼저', 'energy-duel': '기 모으기', 'pitch-duel': '투타 수싸움', 'block-duel': '블록 맞대결', 'liar-dice': '거짓말 주사위', 'three-hills': '세 고지', majority: '다수파', 'hidden-word': '가나다 숨바꼭질', 'minus-one': '하나 빼기', boxes: '상자 먹기', 'fading-three': '사라지는 삼목', chicken: '눈치 버티기', 'mine-duel': '지뢰 피하기', 'two-truths': '두 진실 한 거짓', proverb: '속담 이어 말하기', 'chosung-endure': '초성 버티기', 'which-first': '어느 게 먼저' }
+const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀', 'thirty-one': '서른하나', 'last-stone': '마지막 돌', 'card-duel': '숫자 카드 대결', auction: '칩 경매', 'drop-four': '사목 떨어뜨리기', flip: '뒤집기', 'number-baseball': '숫자 야구', 'number-bomb': '숫자 폭탄', 'math-race': '암산 먼저', chosung: '초성 먼저', 'energy-duel': '기 모으기', 'pitch-duel': '투타 수싸움', 'block-duel': '블록 맞대결', 'liar-dice': '거짓말 주사위', 'three-hills': '세 고지', majority: '다수파', 'hidden-word': '가나다 숨바꼭질', 'minus-one': '하나 빼기', boxes: '상자 먹기', 'fading-three': '사라지는 삼목', chicken: '눈치 버티기', 'mine-duel': '지뢰 피하기', 'two-truths': '두 진실 한 거짓', proverb: '속담 이어 말하기', 'chosung-endure': '초성 버티기', 'which-first': '어느 게 먼저', 'greed-dice': '욕심 주사위' }
 const title = computed(() => TITLES[key.value] ?? '실시간 경기')
 const state = ref<State | null>(null)
 const error = ref('')
@@ -192,12 +203,27 @@ const leftText = computed(() => {
 const turnLine = computed(() => {
   const s = state.value
   if (!s) return ''
-  if (s.race) return myTurn.value ? '먼저 맞히세요' : '다음 문제를 기다려요'
+  if (s.race) return myTurn.value ? '먼저 맞혀요' : '다음 문제를 기다려요'
   // 서버가 판(view)을 주는 게임은 판 수를 게임이 따로 보여 준다 (수 번호를 '판'이라 부르면 세트와 헷갈린다)
   if (s.simultaneous) return myTurn.value ? `${s.view ? '' : `${(s.round ?? 0) + 1}판 · `}골라 주세요` : `${who(s.opponent)}님이 고르는 중`
   return myTurn.value ? '내 차례' : `${who(s.opponent)}님 차례`
 })
 const longLobby = computed(() => (state.value?.lobbySeconds ?? 30) > 120)
+
+// 어떻게 하나요: 이 기기에서 이 게임을 처음 보면 펼쳐 두고, 한 번 본 뒤로는 접어 둔다 (브라우저에만 남는 편의 기록)
+const HOWTO_SEEN = 'match_howto_seen'
+function seenHowTo(): string[] {
+  try { return JSON.parse(localStorage.getItem(HOWTO_SEEN) || '[]') } catch { return [] }
+}
+function markHowToSeen() {
+  try { localStorage.setItem(HOWTO_SEEN, JSON.stringify([...new Set([...seenHowTo(), key.value])])) } catch { /* 저장이 막혀도 화면은 그대로 */ }
+}
+// 이번에는 펼쳐 보여 주고, 다음부터 접히게 바로 적어 둔다
+const howToOpen = ref(!seenHowTo().includes(String(route.params.key)))
+markHowToSeen()
+function toggleHowTo() {
+  howToOpen.value = !howToOpen.value
+}
 
 async function shareWatch() {
   if (!state.value) return

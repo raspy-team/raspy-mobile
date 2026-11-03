@@ -11654,6 +11654,7 @@
           "botAfterSeconds",
           "fixture",
           "gameId",
+          "howTo",
           "key",
           "liveJudged",
           "lobbySeconds",
@@ -11693,6 +11694,12 @@
           },
           "summary": {
             "type": "string"
+          },
+          "howTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "moves": {
             "type": "array",

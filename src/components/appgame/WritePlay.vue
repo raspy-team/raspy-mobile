@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center justify-between">
       <span class="t-caption">{{ guide }}</span>
-      <span class="t-mono tabular-nums" :class="remaining <= 20 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
+      <span class="t-mono tabular-nums" :class="remaining <= 20 ? 'text-danger-fg' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 
     <p class="t-title mt-4 break-keep">{{ problem }}</p>

@@ -5551,6 +5551,7 @@ export interface components {
             opponent?: components["schemas"]["AppPlayer"];
             startWord: string;
             summary: string;
+            howTo: string[];
             moves: components["schemas"]["RealtimeMove"][];
             stones?: components["schemas"]["RealtimeStone"][];
             meFirst: boolean;

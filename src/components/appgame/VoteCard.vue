@@ -19,7 +19,7 @@
         @click="vote(o.playId)"
       >
         <span class="t-micro block" :class="card.myVote === o.playId ? 'text-canvas' : ''">{{ i === 0 ? 'A' : 'B' }}</span>
-        <span class="t-body block mt-0.5 whitespace-pre-line">{{ o.text }}</span>
+        <span class="t-body block mt-0.5 whitespace-pre-line break-keep">{{ o.text }}</span>
       </button>
     </div>
 

@@ -58,6 +58,27 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <LiteracyPlay
+          v-else-if="key === 'daily-literacy'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
+        <TimeSensePlay
+          v-else-if="key === 'time-sense'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
+        <NumberSpotsPlay
+          v-else-if="key === 'number-spots'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <WritePlay
           v-else-if="WRITING[key]"
           :problem="play.problem"
@@ -139,11 +160,11 @@
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
-          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : '알림' }}</p>
-          <p class="t-body mt-1">{{ result.myFeedback }}</p>
+          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '알림' }}</p>
+          <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
         </UiCard>
         <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
-        <UiButton v-if="key === 'daily-chosung' && result.myFeedback" block variant="secondary" icon="share" class="mt-3" @click="shareDaily(result.myFeedback)">오늘 결과 공유</UiButton>
+        <UiButton v-if="DAILY_SHARE.includes(key) && result.myFeedback" block variant="secondary" icon="share" class="mt-3" @click="shareDaily(result.myFeedback)">오늘 결과 공유</UiButton>
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 문장</p>
@@ -324,6 +345,9 @@ import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import { shareLink } from '@/utils/share'
 import WritePlay from '../../components/appgame/WritePlay.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
+import LiteracyPlay from '../../components/appgame/LiteracyPlay.vue'
+import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
+import NumberSpotsPlay from '../../components/appgame/NumberSpotsPlay.vue'
 
 // 글로 겨루는 게임: 같은 화면(WritePlay)에 안내만 다르게
 const WRITING: Record<string, { guide: string; placeholder: string }> = {
@@ -529,10 +553,13 @@ async function sendChallenge(gameId: number) {
 }
 
 /** 오늘의 초성 결과: "4/5 맞힘 · 38초" → 칸 그림과 함께. 같은 날이면 친구도 같은 문제를 푼다 */
+// 오늘의 낱말도 같은 꼴: 한마디 첫 줄이 "4/5 맞힘 · 38초", 다음 줄부터는 틀린 문제의 답이라 공유하지 않는다
+const DAILY_SHARE = ['daily-chosung', 'daily-literacy']
 async function shareDaily(feedback: string) {
-  const right = Number(feedback.match(/(\d)\/5/)?.[1] ?? 0)
+  const head = feedback.split('\n')[0]
+  const right = Number(head.match(/(\d)\/5/)?.[1] ?? 0)
   const boxes = '■'.repeat(right) + '□'.repeat(5 - right)
-  const msg = await shareLink(`${window.location.origin}/play/daily-chosung`, `오늘의 초성 ${feedback}\n${boxes}\n같은 문제로 붙어 봐요`)
+  const msg = await shareLink(`${window.location.origin}/play/${key.value}`, `${game.value?.title ?? '오늘의 퍼즐'} ${head}\n${boxes}\n같은 문제로 붙어 봐요`)
   if (msg) showToast(msg)
 }
 

@@ -7,6 +7,7 @@ const ICONS: Record<string, string> = {
   'number-baseball': 'hash', 'number-bomb': 'bomb', pong: 'activity', predict: 'goal', 'quiz-race': 'lightbulb',
   recipe: 'chef-hat', rps: 'hand', sentence: 'feather', shake: 'vibrate', squat: 'dumbbell',
   'thirty-one': 'list-ol', trial: 'gavel', typing: 'keyboard', 'word-battle': 'swords', wordchain: 'link',
+  'daily-literacy': 'book-open', 'time-sense': 'hourglass-half', 'number-spots': 'border-all',
 }
 
 export function gameIcon(key: string | undefined, fallback = 'dice'): string {

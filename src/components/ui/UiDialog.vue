@@ -17,7 +17,8 @@
 </template>
 
 <script setup>
-// 가운데 뜨는 확인 창. 짧은 질문 하나와 버튼 두 개만. 내용이 길면 UiSheet를 쓴다
+// 가운데 뜨는 알림 창. 예상 못 한 문제를 알릴 때만 (보낼 수 없어요 등).
+// 사용자가 시작한 일의 확인은 confirmDialog() (아래 액션 시트), 할 일·내용은 UiSheet (애플 HIG, 11/3)
 import { toRef, defineProps, defineEmits } from 'vue'
 import UiButton from './UiButton.vue'
 import { useOverlay } from '../../composables/useOverlay'

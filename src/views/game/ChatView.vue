@@ -200,7 +200,7 @@ function pressEnd() {
 }
 async function blockUser() {
   menuOpen.value = false
-  if (!(await confirmDialog({ title: `${targetUserNickname.value}님을 차단할까요?`, message: '서로 메시지·신청·대결을 할 수 없고 프로필도 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
+  if (!(await confirmDialog({ title: `${targetUserNickname.value}님을 차단할까요?`, message: '서로 메시지·신청·도전을 할 수 없고 프로필도 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
   try {
     await api.post(`/api/block/${targetUserId}`)
     showToast('차단했어요')
@@ -353,7 +353,7 @@ const handleAccept = async () => {
     await playWithMeTooAPI.acceptRequest(challengeStatus.value.fromUserId)
   } catch (error) {
     console.error('도전 요청 수락 중 오류:', error)
-    showToast(error.response?.data?.message || '수락하지 못했어요. 다시 시도해 주세요')
+    showToast(error.response?.data?.message || '수락하지 못했어요. 다시 해 주세요')
   }
 }
 
@@ -365,7 +365,7 @@ const handleReject = async () => {
     challengeStatus.value.status = 'REJECTED'
   } catch (error) {
     console.error('도전 요청 거절 중 오류:', error)
-    showToast(error.response?.data?.message || '거절하지 못했어요. 다시 시도해 주세요')
+    showToast(error.response?.data?.message || '거절하지 못했어요. 다시 해 주세요')
   }
 }
 
@@ -515,7 +515,7 @@ const closeErrorModal = () => {
     <UiSheet v-model="menuOpen">
       <UiList>
         <UiListItem icon="far fa-flag" title="신고하기" subtitle="운영진이 바로 확인하고 조치해요. 메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
-        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·대결을 할 수 없어요" danger @click="blockUser" />
+        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="blockUser" />
       </UiList>
     </UiSheet>
     <ReportSheet v-model="report.open" :title="report.title" :target-type="report.type" :target-id="report.id" :context="roomId ? String(roomId) : null" />

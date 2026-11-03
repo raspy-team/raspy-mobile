@@ -4,7 +4,7 @@
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!game && !error" class="h-36 w-full" />
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
-        <UiButton to="/">다른 열린 경기 보기</UiButton>
+        <UiButton to="/">다른 경기 찾기</UiButton>
       </UiEmptyState>
       <template v-else-if="game">
         <OpenGameCard
@@ -40,7 +40,7 @@
           :closed="!['MATCHING', 'SCHEDULED'].includes(game.gameStatus)"
         />
         <UiButton v-if="game.ownerId === myId" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>
-        <UiButton v-else block variant="ghost" class="mt-4" to="/">다른 열린 경기 보기</UiButton>
+        <UiButton v-else block variant="ghost" class="mt-4" to="/">다른 경기 찾기</UiButton>
       </template>
     </main>
   </div>

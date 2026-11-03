@@ -24,7 +24,7 @@
     </div>
 
     <p class="t-caption mt-3">
-      <template v-if="card.isMine">내 대결이라 투표할 수 없어요</template>
+      <template v-if="card.isMine">내 경기라 투표할 수 없어요</template>
       <template v-else-if="card.myVote">투표했어요. 결과는 마감 뒤에 나와요</template>
       <template v-else-if="card.closed">투표가 끝났어요</template>
       <template v-else>더 마음이 가는 글을 눌러 주세요. 한 번만 할 수 있어요</template>

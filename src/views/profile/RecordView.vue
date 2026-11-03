@@ -12,7 +12,7 @@
     </main>
 
     <main v-else-if="error" class="max-w-2xl mx-auto px-4 pt-16">
-      <UiEmptyState icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 시도해주세요">
+      <UiEmptyState icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
         <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
       </UiEmptyState>
     </main>
@@ -75,7 +75,7 @@
 
       <!-- 레이팅 한눈에: 종합 · 몸·머리·마음 · 능력 (규칙별 레이팅을 확실한 점수에 무게를 두어 모은 것) -->
       <section v-if="overview?.overall">
-        <h2 class="t-heading mb-3">레이팅 한눈에</h2>
+        <h2 class="t-heading mb-3">실력 점수 한눈에</h2>
         <div class="rounded-xl bg-surface p-4">
           <div class="flex items-baseline gap-2">
             <p class="t-caption">종합</p>
@@ -92,14 +92,14 @@
           <div v-if="overview.abilities.length" class="flex flex-wrap gap-1.5 mt-3">
             <UiBadge v-for="a in overview.abilities.slice(0, 6)" :key="a.key">{{ a.label }} {{ a.rating }}</UiBadge>
           </div>
-          <p class="t-micro mt-3">규칙마다 따로 매긴 레이팅을, 확실한 점수일수록 무게를 두어 모았어요</p>
+          <p class="t-micro mt-3">규칙마다 따로 매긴 실력 점수를, 확실한 점수일수록 무게를 두어 모았어요</p>
         </div>
       </section>
 
       <!-- 레이팅 흐름: 규칙마다 점수는 따로다. 많이 한 규칙부터 고른다 -->
       <section v-if="ratings.length">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="t-heading">레이팅</h2>
+          <h2 class="t-heading">실력 점수</h2>
           <span v-if="picked?.provisional" class="t-micro">판이 쌓이면 범위가 좁아져요</span>
         </div>
         <div v-if="ratings.length > 1" class="flex gap-2 -mx-4 px-4 mb-3 overflow-x-auto no-scrollbar" role="tablist" aria-label="규칙 고르기">
@@ -112,7 +112,7 @@
             <UiBadge v-if="picked.provisional" class="ml-auto">잠정</UiBadge>
             <p v-else-if="trend" class="t-caption tabular-nums ml-auto" :class="trend > 0 ? 'text-signal-fg' : ''">최근 {{ trend > 0 ? '+' : '' }}{{ trend }}</p>
           </div>
-          <svg v-if="spark" viewBox="0 0 300 64" class="w-full h-16 mt-3" role="img" :aria-label="`${picked.ruleTitle} 레이팅 흐름, 처음 ${picked.points[0].rating}점에서 지금 ${picked.rating}점`">
+          <svg v-if="spark" viewBox="0 0 300 64" class="w-full h-16 mt-3" role="img" :aria-label="`${picked.ruleTitle} 실력 점수 흐름, 처음 ${picked.points[0].rating}점에서 지금 ${picked.rating}점`">
             <polyline :points="spark" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="text-fg" />
           </svg>
           <p class="t-micro mt-2">±는 실제 실력이 있을 법한 범위예요 (95%). 오래 쉬면 다시 넓어져요</p>
@@ -121,7 +121,7 @@
 
       <!-- 봇과 한 판은 사람 레이팅·순위와 따로 -->
       <section v-if="overview?.practice?.length">
-        <h2 class="t-heading mb-1">연습 레이팅 <span class="t-caption">봇과 한 판</span></h2>
+        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">봇과 한 판</span></h2>
         <UiList>
           <UiListItem v-for="p in overview.practice" :key="p.ruleId" :title="p.ruleTitle" :subtitle="`${p.games}판`" chevron @click="router.push(`/rules/${p.ruleId}`)">
             <template #trailing><span class="t-heading tabular-nums">{{ p.rating }}</span></template>

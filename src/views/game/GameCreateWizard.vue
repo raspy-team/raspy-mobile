@@ -10,7 +10,7 @@
         </span>
         <h1 class="t-title mt-5">경기가 열렸어요</h1>
         <p class="t-caption mt-2">
-          {{ friend ? `${friend.nickname}님에게 알렸어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '열린 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
+          {{ friend ? `${friend.nickname}님에게 알렸어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
         <!-- 아무나로 열었으면, 기다리기만 하기보다 아는 사람을 먼저 부르게 -->
         <UiButton v-if="!friend && createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">{{ format === 'DUEL' ? '링크 보내서 상대 부르기' : '링크 보내서 같이 할 사람 부르기' }}</UiButton>
@@ -251,7 +251,7 @@ async function create(target) {
     haptic('success')
   } catch (e) {
     friend.value = null
-    showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 시도해 주세요')
+    showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 해 주세요')
   } finally {
     creating.value = false
   }

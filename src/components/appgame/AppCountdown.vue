@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col items-center justify-center py-20 text-center" role="timer" aria-live="assertive">
-    <p v-if="opponent" class="t-caption">{{ opponent }}님과 대결</p>
+    <p v-if="opponent" class="t-caption">{{ opponent }}님과 경기</p>
     <!-- key가 바뀔 때마다 숫자가 새로 튀어나온다 -->
     <span :key="count" class="countdown-pop block text-[96px] leading-none font-semibold tabular-nums tracking-[-0.05em] text-fg mt-4">{{ count }}</span>
     <p class="t-caption mt-6">곧 시작해요</p>

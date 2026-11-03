@@ -55,7 +55,7 @@ async function toggle(s, enabled) {
     await api.put(`/api/notification-settings/${s.category}`, { enabled })
   } catch {
     s.enabled = !enabled
-    showToast('바꾸지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('바꾸지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     savingKey.value = ''
   }

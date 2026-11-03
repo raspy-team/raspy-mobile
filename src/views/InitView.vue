@@ -12,7 +12,7 @@
           <li v-for="(f, i) in FEATURES" :key="f.title" class="flex items-baseline gap-4 py-4 border-b border-line">
             <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
             <span>
-              <span class="block text-[15px] font-semibold text-fg tracking-[-0.02em]">{{ f.title }}</span>
+              <span class="block text-[0.9375rem] font-semibold text-fg tracking-[-0.02em]">{{ f.title }}</span>
               <span class="block t-caption mt-0.5">{{ f.body }}</span>
             </span>
           </li>
@@ -28,20 +28,20 @@
         <button
           v-if="show.kakao"
           type="button"
-          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[15px] font-semibold disabled:opacity-60"
+          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[0.9375rem] font-semibold disabled:opacity-60"
           style="background:#FEE500;color:rgba(0,0,0,.85)"
           :disabled="!!pending"
           @click="loginWith('kakao')"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#000" d="M12 3C6.48 3 2 6.58 2 11c0 2.85 1.86 5.35 4.66 6.76-.2.74-.74 2.7-.85 3.12-.13.52.19.51.4.37.17-.11 2.6-1.77 3.66-2.49.7.1 1.41.15 2.13.15 5.52 0 10-3.58 10-8S17.52 3 12 3z"/></svg>
-          카카오로 1초 만에 시작
+          카카오로 계속하기
         </button>
 
         <!-- 구글: 흰 바탕 + 색 G (구글 버튼 규칙) -->
         <button
           v-if="show.google"
           type="button"
-          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[15px] font-semibold bg-white text-[#1f1f1f] border border-[#dadce0] disabled:opacity-60"
+          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[0.9375rem] font-semibold bg-white text-[#1f1f1f] border border-[#dadce0] disabled:opacity-60"
           :disabled="!!pending"
           @click="loginWith('google')"
         >
@@ -51,19 +51,20 @@
             <path fill="#FBBC05" d="M6.9 13.69a5.997 5.997 0 0 1 0-3.38V7.95H3.9a9.003 9.003 0 0 0 0 8.1l3-2.36z"/>
             <path fill="#EA4335" d="M12 6.58c1.32 0 2.5.45 3.43 1.33l2.57-2.57C16.46 3.83 14.42 3 12 3 8.45 3 5.39 5.03 3.9 7.95l3 2.36C7.62 8.18 9.63 6.58 12 6.58z"/>
           </svg>
-          Google로 1초 만에 시작
+          Google로 계속하기
         </button>
 
-        <!-- 애플: 검정 바탕 + 흰 사과 (애플 버튼 규칙). 웹은 애플 승인 뒤 키를 넣으면 보인다 -->
+        <!-- 애플 (Sign in with Apple HIG): 문구는 승인된 'Apple로 계속하기'만, 밝은 화면은 검정·어두운 화면은 흰 버튼
+             (잉크 토큰 fg/canvas가 정확히 뒤집힌다). 크기는 다른 버튼과 같게. 웹은 OAUTH2_APPLE_SERVICES_ID를 넣으면 보인다 -->
         <button
           v-if="show.apple"
           type="button"
-          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[15px] font-semibold bg-black text-white disabled:opacity-60"
+          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[0.9375rem] font-semibold bg-fg text-canvas disabled:opacity-60"
           :disabled="!!pending"
           @click="loginWith('apple')"
         >
           <UiIcon name="fab fa-apple" class="text-lg" aria-hidden="true" />
-          Apple로 1초 만에 시작
+          Apple로 계속하기
         </button>
 
         <UiButton block size="lg" :variant="anySocial ? 'ghost' : 'primary'" to="/group/login?mode=signup">
@@ -97,9 +98,10 @@ import { takeReturnTo } from '../utils/authRedirect'
 import { isAndroidApp, isIosApp } from '../utils/nativeBridge'
 
 const FEATURES = [
-  { icon: 'fas fa-user-group', title: '상대 찾기', body: '열린 경기에 신청하거나, 규칙을 골라 직접 열어요' },
-  { icon: 'fas fa-stopwatch', title: '점수는 앱으로', body: '둘이 같은 화면을 보며 세트·점수·시간을 기록해요' },
-  { icon: 'fas fa-crown', title: '기록이 쌓여요', body: '규칙마다 레이팅과 랭킹, 챔피언이 있어요' },
+  // 처음 온 사람의 짧은 안내. 한 줄에 한 가지, 실제로 하는 순서대로 (11/3)
+  { icon: 'fas fa-user-group', title: '동네에서 상대 찾기', body: '모집 중인 경기에 신청하거나 직접 열어요' },
+  { icon: 'fas fa-stopwatch', title: '만나서 한 판', body: '점수는 둘이 같은 화면에 함께 남겨요' },
+  { icon: 'fas fa-crown', title: '실력 점수가 쌓여요', body: '이기면 오르고, 동네 챔피언에 도전할 수 있어요' },
 ]
 
 const router = useRouter()

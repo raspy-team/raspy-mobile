@@ -6,6 +6,7 @@ import './utils/install'
 import { trackVisit } from './utils/visit'
 import App from './App.vue'
 import './assets/tailwind.css'
+import { followIosTextSize } from './utils/textSize'
 import router from './router/router.js'
 import  { setRouter } from './api/api'
 import autocomplete from './utils/autocomplete'
@@ -14,6 +15,7 @@ import DefaultAvatar from './assets/default.png'
 import { useToast } from './composable/useToast'
 
 setRouter(router) // api.js에 router 주입
+followIosTextSize() // 아이폰 글자 크기 설정을 따른다
 
 // 장소 자동완성(Google Places). 키가 있을 때만 불러온다. 쓰는 쪽은 window.google이 생겼는지 확인한다
 const placesKey = import.meta.env.VUE_APP_GOOGLE_PLACES_API_KEY

@@ -144,7 +144,7 @@ async function handle(id, action, reason) {
     selectedRequest.value = null
     loadRequests()
   } catch (e) {
-    showToast(e.response?.data?.message || '처리하지 못했어요. 다시 시도해 주세요')
+    showToast(e.response?.data?.message || '처리하지 못했어요. 다시 해 주세요')
   } finally {
     processing.value = false
   }

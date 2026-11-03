@@ -77,8 +77,8 @@ function toggleMode() {
 }
 
 function validate() {
-  emailError.value = email.value.trim() ? '' : '아이디를 적어주세요'
-  passwordError.value = password.value.length >= 8 && password.value.length <= 20 ? '' : '비밀번호는 8~20자로 적어주세요'
+  emailError.value = email.value.trim() ? '' : '아이디를 적어 주세요'
+  passwordError.value = password.value.length >= 8 && password.value.length <= 20 ? '' : '비밀번호는 8~20자로 적어 주세요'
   submitError.value = ''
   return !emailError.value && !passwordError.value
 }
@@ -92,9 +92,15 @@ async function submit() {
       try {
         await api.post('/api/auth/register', { email: id, password: password.value })
       } catch (err) {
-        if (err.response?.status === 409) emailError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어주세요'
-        else submitError.value = '가입하지 못했어요. 잠시 뒤 다시 시도해주세요'
+        if (err.response?.status === 409) emailError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어 주세요'
+        else submitError.value = '가입하지 못했어요. 잠시 뒤 다시 해 주세요'
         return
+      }
+      // 첫 설정의 '아이디' 칸에 다시 묻지 않고 채워 둔다 (OnboardingView)
+      try {
+        sessionStorage.setItem('signup_id', id)
+      } catch {
+        // 저장소를 못 쓰면 첫 설정에서 다시 적으면 된다
       }
     }
     let token

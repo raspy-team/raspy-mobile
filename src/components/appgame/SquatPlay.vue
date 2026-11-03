@@ -19,7 +19,7 @@
       <p v-if="cameraError" class="absolute inset-0 flex items-center justify-center p-6 text-center t-body">{{ cameraError }}</p>
     </div>
 
-    <UiButton v-if="!recording && !sent" block size="lg" class="mt-4" :disabled="!stream" :loading="submitting" @click="record">찍기 시작 (30초)</UiButton>
+    <UiButton v-if="!recording && !sent" block size="lg" class="mt-4" :disabled="!stream" :loading="submitting" @click="record">30초 찍기 시작</UiButton>
     <UiButton v-else-if="recording" block size="lg" variant="secondary" class="mt-4" @click="stop">지금 멈추고 내기</UiButton>
     <p class="t-caption text-center mt-2">처음에 인증 동작을 하고, 엉덩이가 무릎 높이까지 내려가야 하나로 세요. 영상은 AI가 센 뒤 바로 지우고 남기지 않아요</p>
   </div>

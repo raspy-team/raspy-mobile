@@ -47,8 +47,23 @@
       </div>
       <p v-if="user.intro" class="t-body text-fg-muted mt-4 whitespace-pre-line break-words">{{ user.intro }}</p>
 
+      <!-- 주 행동: 누구인지 바로 아래 (연락처 앱처럼) -->
+      <div class="flex gap-2 mt-5">
+        <template v-if="user.isMe">
+          <UiButton block variant="secondary" icon="fas fa-pen" to="/set-profile">프로필 편집</UiButton>
+        </template>
+        <template v-else>
+          <UiButton v-if="friend.received" class="flex-1" :loading="busy" @click="friendAction('accept')">친구 수락</UiButton>
+          <UiButton v-if="friend.received" class="flex-1" variant="secondary" :disabled="busy" @click="friendAction('reject')">거절</UiButton>
+          <UiButton v-else-if="friend.sent" class="flex-1" variant="secondary" :loading="busy" @click="friendAction('cancel')">친구 요청 취소</UiButton>
+          <UiButton v-else-if="!friend.isFriend" class="flex-1" icon="fas fa-user-plus" :loading="busy" @click="friendAction('request')">친구 추가</UiButton>
+          <UiButton v-else class="flex-1" variant="secondary" icon="fas fa-user-check" @click="menuOpen = true">친구</UiButton>
+          <UiButton class="flex-1" variant="secondary" icon="far fa-paper-plane" :to="`/chat/${user.id}`">메시지</UiButton>
+        </template>
+      </div>
+
       <!-- 숫자 한 줄 -->
-      <div class="mt-6 grid grid-cols-4 bg-surface rounded-xl divide-x divide-line text-center">
+      <div class="mt-4 grid grid-cols-4 bg-surface rounded-xl divide-x divide-line text-center">
         <div class="py-3">
           <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
           <p class="t-micro mt-0.5">경기</p>
@@ -67,25 +82,10 @@
         </button>
       </div>
 
-      <!-- 만나도 되는 사람인지 (매치 온도와 근거) -->
-      <TrustCard v-if="user.trust" :trust="user.trust" class="mt-4" />
-
-      <!-- 포인트와 출처 (누구나 본다). 내 것이면 눌러서 내역 -->
-      <PointCard :key="user.id" :user-id="user.id" :is-me="user.isMe" class="mt-3" />
-
-      <!-- 주 행동 -->
-      <div class="flex gap-2 mt-4">
-        <template v-if="user.isMe">
-          <UiButton block variant="secondary" icon="fas fa-pen" to="/set-profile">프로필 편집</UiButton>
-        </template>
-        <template v-else>
-          <UiButton v-if="friend.received" class="flex-1" :loading="busy" @click="friendAction('accept')">친구 수락</UiButton>
-          <UiButton v-if="friend.received" class="flex-1" variant="secondary" :disabled="busy" @click="friendAction('reject')">거절</UiButton>
-          <UiButton v-else-if="friend.sent" class="flex-1" variant="secondary" :loading="busy" @click="friendAction('cancel')">요청 보냄 · 취소</UiButton>
-          <UiButton v-else-if="!friend.isFriend" class="flex-1" icon="fas fa-user-plus" :loading="busy" @click="friendAction('request')">친구 추가</UiButton>
-          <UiButton v-else class="flex-1" variant="secondary" icon="fas fa-user-check" @click="menuOpen = true">친구</UiButton>
-          <UiButton class="flex-1" variant="secondary" icon="far fa-paper-plane" :to="`/chat/${user.id}`">메시지</UiButton>
-        </template>
+      <!-- 신뢰 온도·포인트는 타일 둘로. 근거·설명은 눌러서 연다 (점진적 공개) -->
+      <div class="mt-3 grid grid-cols-2 gap-3">
+        <TrustCard v-if="user.trust" :trust="user.trust" />
+        <PointCard :key="user.id" :user-id="user.id" :is-me="user.isMe" />
       </div>
 
       <!-- 챔피언 -->
@@ -135,7 +135,7 @@
           v-else
           icon="fas fa-trophy"
           :title="user.isMe ? '아직 한 경기가 없어요' : '아직 한 경기가 없어요'"
-          :description="user.isMe ? '열린 경기에 신청하거나 직접 열어보세요' : ''"
+          :description="user.isMe ? '모집 중인 경기에 신청하거나 직접 열어보세요' : ''"
         >
           <UiButton v-if="user.isMe" to="/">경기 찾기</UiButton>
         </UiEmptyState>
@@ -176,7 +176,7 @@
       <UiList>
         <UiListItem v-if="friend.isFriend" icon="fas fa-user-minus" title="친구 끊기" @click="unfriend" />
         <UiListItem icon="far fa-flag" title="신고하기" @click="openReport" />
-        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·대결을 할 수 없어요" danger @click="block" />
+        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="block" />
       </UiList>
     </UiSheet>
 
@@ -186,7 +186,7 @@
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
-      <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어주세요" />
+      <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
       <template #footer>
         <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고하기</UiButton>
       </template>
@@ -291,7 +291,7 @@ async function friendAction(kind) {
     showToast(FRIEND_ACTIONS[kind].done)
     await loadFriendStatus()
   } catch (e) {
-    showToast(e.response?.data?.message || '처리하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast(e.response?.data?.message || '처리하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     busy.value = false
   }
@@ -305,13 +305,13 @@ async function unfriend() {
     showToast('친구를 끊었어요')
     await loadFriendStatus()
   } catch {
-    showToast('처리하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('처리하지 못했어요. 잠시 뒤 다시 해 주세요')
   }
 }
 
 async function block() {
   menuOpen.value = false
-  if (!(await confirmDialog({ title: `${user.value.nickname}님을 차단할까요?`, message: '서로 메시지·신청·대결을 할 수 없고 프로필도 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
+  if (!(await confirmDialog({ title: `${user.value.nickname}님을 차단할까요?`, message: '서로 메시지·신청·도전을 할 수 없고 프로필도 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
   try {
     await api.post(`/api/block/${user.value.id}`)
     showToast('차단했어요')

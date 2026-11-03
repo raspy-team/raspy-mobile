@@ -170,7 +170,7 @@ async function readAll() {
   try {
     await markAllNotificationsRead()
   } catch {
-    showToast('처리하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('처리하지 못했어요. 잠시 뒤 다시 해 주세요')
   }
 }
 async function answer(r, kindName) {
@@ -184,7 +184,7 @@ async function answer(r, kindName) {
     inbox.friendRequests = inbox.friendRequests.filter((x) => x.id !== r.id)
     if (!inbox.friendRequests.length) requestsOpen.value = false
   } catch (e) {
-    showToast(e.response?.data?.message || '처리하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast(e.response?.data?.message || '처리하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     busyId.value = null
   }

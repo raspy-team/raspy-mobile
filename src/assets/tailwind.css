@@ -101,13 +101,13 @@
 /* 글자 역할. 화면에서는 크기·굵기를 직접 고르지 말고 역할 이름을 쓴다 */
 @layer components {
   /* 굵기는 semibold 하나로 위계를 만들고, 크기·자간·색 단계로 나눈다 */
-  .t-display { @apply text-[40px] leading-[1.05] font-semibold text-fg tracking-[-0.045em]; } /* 결과 점수, 큰 숫자 */
-  .t-title { @apply text-[26px] leading-[1.2] font-semibold text-fg tracking-[-0.035em]; }   /* 화면 제목 */
-  .t-heading { @apply text-[17px] leading-[1.35] font-semibold text-fg tracking-[-0.02em]; } /* 섹션·카드 제목 */
-  .t-body { @apply text-[15px] leading-[1.55] text-fg; }                                     /* 본문 */
-  .t-label { @apply text-[13px] font-medium text-fg-muted; }                                 /* 입력칸 이름 */
+  .t-display { @apply text-[2.5rem] leading-[1.05] font-semibold text-fg tracking-[-0.045em]; } /* 결과 점수, 큰 숫자 */
+  .t-title { @apply text-[1.625rem] leading-[1.2] font-semibold text-fg tracking-[-0.035em]; }   /* 화면 제목 */
+  .t-heading { @apply text-[1.0625rem] leading-[1.35] font-semibold text-fg tracking-[-0.02em]; } /* 섹션·카드 제목 */
+  .t-body { @apply text-[0.9375rem] leading-[1.55] text-fg; }                                     /* 본문 */
+  .t-label { @apply text-[0.8125rem] font-medium text-fg-muted; }                                 /* 입력칸 이름 */
   .t-caption { @apply text-sm leading-[1.45] text-fg-muted; }                                /* 보조 설명 */
-  .t-micro { @apply text-xs text-fg-subtle; }                                                /* 시간, 개수 */
+  .t-micro { @apply text-[0.8125rem] leading-[1.4] text-fg-muted; }                                                /* 시간, 개수 */
   /* 기록·메타 정보 (Nous식 고정폭 라벨): 섹션 머리, 숫자 단위, 상태 */
   .t-mono { @apply font-mono text-xs text-fg-subtle tracking-normal uppercase; }
 }

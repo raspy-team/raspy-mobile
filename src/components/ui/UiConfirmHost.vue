@@ -1,5 +1,5 @@
 <template>
-  <UiDialog
+  <UiActionSheet
     :model-value="confirmState.open"
     :title="confirmState.options.title || ''"
     :message="confirmState.options.message"
@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-// confirmDialog()가 띄우는 확인 창. App.vue에 하나만 둔다
-import UiDialog from './UiDialog.vue'
+// confirmDialog()가 띄우는 확인. 사용자가 시작한 일의 확인이라 아래에서 올라오는 액션 시트로 (HIG). App.vue에 하나만 둔다
+import UiActionSheet from './UiActionSheet.vue'
 import { confirmState, answerConfirm } from '../../composables/useConfirm'
 </script>

@@ -255,7 +255,7 @@
     >
       <div class="bg-surface rounded-2xl p-6 max-w-md w-full">
         <h3 class="text-xl font-bold text-fg mb-3">수정 요청 거절</h3>
-        <p class="text-fg-muted mb-4">거절 사유를 입력해주세요.</p>
+        <p class="text-fg-muted mb-4">거절 사유를 적어 주세요.</p>
         <textarea
           v-model="rejectionReason"
           class="w-full border border-line-strong rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-fg/30"

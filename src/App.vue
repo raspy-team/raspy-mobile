@@ -16,7 +16,7 @@
     <div v-if="serverDown" class="fixed inset-x-0 top-0 z-toast pt-safe" role="alert">
       <div class="mx-4 mt-2 rounded-xl bg-surface-2 border border-line-strong px-4 py-3 flex items-center gap-3 text-sm">
         <UiIcon name="fas fa-plug-circle-exclamation" class="text-fg-muted" aria-hidden="true" />
-        <span class="flex-1 text-fg">서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요</span>
+        <span class="flex-1 text-fg">서버에 연결하지 못했어요. 잠시 뒤 다시 해 주세요</span>
         <button type="button" class="text-primary font-bold flex-shrink-0 px-1 py-2" @click="reload">다시 시도</button>
       </div>
     </div>
@@ -28,17 +28,6 @@
     <CustomToast />
     <UiConfirmHost />
     <RouteProgress />
-
-    <!-- 끝난 경기 평가 요청. '나중에'를 누르면 그 경기는 다시 묻지 않는다 -->
-    <UiDialog
-      :model-value="showPendingReviewModal && !!pendingReviewGameId && !route.path.endsWith('/result')"
-      title="경기는 어땠나요?"
-      message="상대와 규칙을 평가해주세요. 다음 매칭과 규칙 순위에 반영돼요."
-      confirm-text="평가하기"
-      cancel-text="나중에"
-      @confirm="goToPendingReview"
-      @update:model-value="(v) => !v && dismissPendingReview()"
-    />
 
     <!-- 진행 중인 내 경기. 경기 화면에 있을 때는 숨긴다 -->
     <ActiveGameBanner
@@ -61,7 +50,6 @@ import UiConfirmHost from './components/ui/UiConfirmHost.vue'
 import RouteProgress from './components/RouteProgress.vue'
 import SuspendedBanner from './components/safety/SuspendedBanner.vue'
 import { startInbox } from './stores/inbox'
-import UiDialog from './components/ui/UiDialog.vue'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 import { serverDown } from './stores/server'
@@ -98,14 +86,9 @@ router.afterEach((to, from) => {
 // 진행 중인 게임 폴링 (명시적으로 초기화)
 const activeGamePolling = useActiveGamePolling()
 const activeGame = activeGamePolling.activeGame || ref(null)
-const pendingReviewGameIds = activeGamePolling.pendingReviewGameIds || ref([])
 const startPolling = activeGamePolling.startPolling
 const stopPolling = activeGamePolling.stopPolling
 const dismissActiveGame = activeGamePolling.dismissActiveGame
-
-// 펜딩 리뷰 모달 상태
-const showPendingReviewModal = ref(false)
-const pendingReviewGameId = ref(null)
 
 // 하루에 한 번만 daily-first API 호출
 const checkAndSendDailyFirst = async () => {
@@ -164,68 +147,11 @@ onMounted(() => {
   }
 })
 
-// '나중에 할게요': 이 경기는 다시 묻지 않는다 (평가는 결과 화면에서 언제든 할 수 있다)
-const dismissedReviewIds = (() => {
-  try {
-    return JSON.parse(localStorage.getItem('dismissedReviewIds') || '[]')
-  } catch {
-    return []
-  }
-})()
-// 그리고 24시간은 다른 경기도 묻지 않는다 (평가 안 한 경기가 여럿이면 닫자마자 다음 창이 연달아 떴다)
-const REVIEW_SNOOZE_MS = 24 * 60 * 60 * 1000
-const reviewSnoozed = () => {
-  try {
-    return Date.now() < Number(localStorage.getItem('reviewPromptSnoozeUntil') || 0)
-  } catch {
-    return false
-  }
-}
-const dismissPendingReview = () => {
-  if (pendingReviewGameId.value) {
-    dismissedReviewIds.push(pendingReviewGameId.value)
-    try {
-      localStorage.setItem('dismissedReviewIds', JSON.stringify(dismissedReviewIds.slice(-50)))
-      localStorage.setItem('reviewPromptSnoozeUntil', String(Date.now() + REVIEW_SNOOZE_MS))
-    } catch {
-      // 저장 못 해도 이번에는 닫힌다
-    }
-  }
-  showPendingReviewModal.value = false
-}
+// 끝난 경기 평가는 창을 띄워 묻지 않는다. 하던 일을 끊지 않게 '내 경기'의 할 일로 둔다 (애플 HIG, 11/3)
 
-// pendingReviewGameIds 변경 감지
-watch(
-  pendingReviewGameIds,
-  (newIds) => {
-    if (newIds && newIds.length > 0) {
-      // 결과 화면에 있거나 '나중에'를 누른 경기는 다시 띄우지 않는다
-      const next = newIds.find((id) => !dismissedReviewIds.includes(id))
-      if (next && !route.fullPath.includes('/result') && !reviewSnoozed()) {
-        pendingReviewGameId.value = next
-        showPendingReviewModal.value = true
-      }
-    } else {
-      showPendingReviewModal.value = false
-      pendingReviewGameId.value = null
-    }
-  },
-  { immediate: true },
-)
-
-// 펜딩 리뷰 페이지로 이동
-const goToPendingReview = () => {
-  if (pendingReviewGameId.value) {
-    showPendingReviewModal.value = false
-    router.push(`/games/${pendingReviewGameId.value}/result`)
-  }
-}
-
-// 진행 중 경기 띠: 경기·결과·내 경기 화면에 있거나 평가 창이 떠 있으면 숨긴다
+// 진행 중 경기 띠: 경기·결과·내 경기 화면에서는 숨긴다
 // 내 경기 화면은 카드에 이미 '경기로 돌아가기'가 있어서 띠를 띄우지 않는다
-const showActiveBanner = computed(
-  () => !showPendingReviewModal.value && route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path),
-)
+const showActiveBanner = computed(() => route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path))
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)
 }

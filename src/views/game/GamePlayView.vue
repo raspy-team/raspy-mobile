@@ -24,15 +24,11 @@
   </div>
 
   <div v-else-if="game && user1 && user2" class="h-dvh flex flex-col bg-canvas text-fg overflow-hidden pt-safe pb-safe">
-    <!-- 위: 뒤로 · 규칙 이름 · 규칙/로그 -->
+    <!-- 위: 뒤로 · 규칙 이름 · 더보기 하나. 이름 없는 아이콘을 늘어놓지 않고, 자주 안 쓰는 일은 이름을 단 목록으로 (11/3) -->
     <header class="flex items-center gap-1 px-2 h-14 flex-shrink-0">
       <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack" />
       <h1 class="flex-1 min-w-0 truncate t-body font-bold">{{ game.rule?.ruleTitle }}</h1>
-      <UiIconButton icon="fas fa-book-open" label="규칙 보기" @click="game.showRuleDetail = true" />
-      <!-- 중계: 구경 링크 보내기·구경 끄기 (응원 수도 여기서) -->
-      <UiIconButton icon="eye" label="중계" @click="router.push(`/live/${gameId}`)" />
-      <UiIconButton icon="fas fa-list" label="경기 기록" @click="showLogModal = true" />
-      <UiIconButton icon="fas fa-pen-to-square" label="결과만 입력" @click="showResultEntry = true" />
+      <UiIconButton icon="ellipsis" label="더보기" @click="showMenu = true" />
     </header>
 
     <!-- 규칙 요약 한 줄 + 시계 -->
@@ -59,6 +55,8 @@
           <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" :user-id="side.user.id" size="md" />
           <span class="text-sm text-fg-muted truncate max-w-full px-2">{{ side.user.nickname }}</span>
           <span class="font-bold tabular-nums leading-none text-fg" style="font-size: clamp(4rem, 14vh, 8rem)">{{ side.score }}</span>
+          <!-- 칸 전체가 버튼이라는 걸 첫 점수 전까지만 알린다 -->
+          <span v-if="!currentScore1 && !currentScore2" class="t-caption">눌러서 1점</span>
           <span class="flex gap-1" :aria-label="`세트 ${side.sets}개 승리`">
             <span v-for="n in setDots" :key="n" class="w-2 h-2 rounded-full" :class="n <= side.sets ? 'bg-primary' : 'bg-line-strong'"></span>
           </span>
@@ -76,33 +74,27 @@
       </div>
     </section>
 
-    <!-- 아래: 사진·영상 · 세트 끝내기 / 처음부터 · 경기 끝내기 -->
-    <footer class="flex-shrink-0 px-4 pb-4 space-y-2">
-      <div class="flex gap-2">
-        <UiIconButton icon="fas fa-camera" label="사진 찍기" class="bg-surface" :disabled="isCountingDown" @click="triggerPhotoCapture" />
-        <UiIconButton icon="fas fa-video" label="영상 찍기" class="bg-surface" :disabled="isCountingDown" @click="triggerVideoCapture" />
-        <UiButton
-          v-if="!isSetOver && !isGameOver && !isCountingDown"
-          variant="secondary"
-          class="flex-1"
-          icon="fas fa-flag-checkered"
-          @click="manualFinishSet"
-        >
-          세트 끝내기
-        </UiButton>
-      </div>
-      <div class="flex gap-2">
-        <UiButton v-if="nothingScored" variant="ghost" class="flex-1" icon="fas fa-xmark" @click="openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소')">
-          경기 취소
-        </UiButton>
-        <UiButton v-else variant="ghost" class="flex-1" icon="fas fa-rotate-left" @click="openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터')">
-          처음부터
-        </UiButton>
-        <UiButton variant="danger" class="flex-1" icon="fas fa-stop" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기')">
-          경기 끝내기
-        </UiButton>
-      </div>
+    <!-- 아래: 다음 단계 둘만. 되돌릴 수 없는 '취소·처음부터'는 손이 자주 가는 이 줄에 두지 않고 더보기로 -->
+    <footer class="flex-shrink-0 px-4 pb-4 flex gap-2">
+      <UiButton v-if="!isSetOver && !isGameOver && !isCountingDown" size="lg" variant="secondary" class="flex-1" @click="manualFinishSet">세트 끝내기</UiButton>
+      <UiButton size="lg" class="flex-1" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기', false)">
+        경기 끝내기
+      </UiButton>
     </footer>
+
+    <!-- 더보기: 아이콘마다 이름을 붙여 고른다 -->
+    <UiSheet v-model="showMenu">
+      <UiList>
+        <UiListItem icon="book-open" title="규칙 보기" @click="menu(() => (game.showRuleDetail = true))" />
+        <UiListItem icon="eye" title="중계" subtitle="구경 링크 보내기, 응원 보기" @click="menu(() => router.push(`/live/${gameId}`))" />
+        <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menu(() => (showLogModal = true))" />
+        <UiListItem icon="camera" title="사진 찍기" @click="menu(triggerPhotoCapture)" />
+        <UiListItem icon="video" title="영상 찍기" @click="menu(triggerVideoCapture)" />
+        <UiListItem icon="pen-to-square" title="점수만 입력하기" subtitle="점수판을 안 쓰고 끝난 점수를 적어요" @click="menu(() => (showResultEntry = true))" />
+        <UiListItem v-if="!nothingScored" icon="rotate-left" title="처음부터 다시" danger @click="menu(() => openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터'))" />
+        <UiListItem icon="xmark" title="경기 취소" danger @click="menu(() => openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소'))" />
+      </UiList>
+    </UiSheet>
 
     <!-- 세트 시작 전: 화면 전체에서 시작 버튼 하나만 -->
     <div
@@ -122,7 +114,7 @@
         </UiButton>
         <!-- 점수판은 원하는 사람만. 끝나고 점수만 넣어도 된다 -->
         <UiButton v-if="currentSet === 1 && !currentScore1 && !currentScore2" variant="ghost" class="mt-2" @click="showResultEntry = true">
-          점수판 없이 결과만 입력
+          점수만 입력하기
         </UiButton>
         <UiButton v-if="nothingScored" variant="ghost" class="mt-1 text-fg-muted" @click="openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소')">
           경기 취소
@@ -179,7 +171,7 @@ import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
 import MatchModal from '../../components/MatchModal.vue'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
-import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiSheet, UiSpinner } from '../../components/ui'
+import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiList, UiListItem, UiSheet, UiSpinner } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
 import {
@@ -234,8 +226,16 @@ const isCountingDown = ref(false)
 const timeOverNotified = ref(false)
 
 // 되돌리기 어려운 행동(처음부터, 경기 끝내기)은 한 번 더 묻는다
-async function openConfirm(title, cb, message = '', confirmText = '확인') {
-  if (await confirmDialog({ title, message, confirmText, danger: true })) cb()
+// 되돌릴 수 없는 일(취소·처음부터)은 빨간 글자로, 다음 단계(경기 끝내기)는 보통 글자로 묻는다
+async function openConfirm(title, cb, message = '', confirmText = '확인', danger = true) {
+  if (await confirmDialog({ title, message, confirmText, danger })) cb()
+}
+
+// 더보기에서 고르면 시트를 닫고 바로 한다 (사진·영상은 누른 그 순간에 열어야 폰이 막지 않는다)
+const showMenu = ref(false)
+function menu(cb) {
+  showMenu.value = false
+  cb()
 }
 
 // 점수판 두 칸 (왼쪽 user1, 오른쪽 user2)
@@ -819,7 +819,7 @@ async function onCameraChange(e) {
     } catch (error) {
       console.error('사진 저장 실패:', error)
       if (error.message === 'QUOTA_EXCEEDED') {
-        showToast('저장 공간이 부족합니다. 일부 사진을 삭제한 후 다시 시도해주세요.')
+        showToast('폰 저장 공간이 모자라요. 사진 몇 장을 지우고 다시 해 주세요')
       } else {
         showToast('사진을 저장하지 못했어요')
       }
@@ -855,7 +855,7 @@ async function onVideoChange(e) {
   } catch (error) {
     console.error('동영상 저장 실패:', error)
     if (error.message === 'QUOTA_EXCEEDED') {
-      showToast('저장 공간이 부족합니다. 일부 미디어를 삭제한 후 다시 시도해주세요.')
+      showToast('폰 저장 공간이 모자라요. 사진·영상 몇 개를 지우고 다시 해 주세요')
     } else {
       showToast('동영상을 저장하지 못했어요')
     }

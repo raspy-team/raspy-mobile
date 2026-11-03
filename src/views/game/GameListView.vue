@@ -1,24 +1,10 @@
 <template>
-  <UiTopBar title="경기">
+  <UiTopBar title="찾기">
     <template #right><InboxButtons /></template>
   </UiTopBar>
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
-
-    <!-- 첫 설정을 막 마친 사람에게 한 번 -->
-    <UiCard v-if="route.query.welcome" class="mb-4 flex items-start gap-3">
-      <span class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center flex-shrink-0" aria-hidden="true">
-        <UiIcon name="fas fa-hand" />
-      </span>
-      <div class="flex-1 min-w-0">
-        <p class="t-heading">준비됐어요!</p>
-        <!-- 처음 성공까지 가장 빠른 길(앱 게임, 15초 안에 상대)을 먼저 권한다 (세션 B 흐름 검토) -->
-        <p class="t-caption mt-0.5">폰만 있으면 지금 바로 한 판 할 수 있어요. 15초 안에 상대가 없으면 연습 상대와 붙어요.</p>
-        <UiButton size="sm" class="mt-3" icon="bolt" to="/games">앱 게임 한 판 하기</UiButton>
-      </div>
-      <UiIconButton icon="fas fa-xmark" label="닫기" class="-mt-2 -mr-2" @click="router.replace({ query: {} })" />
-    </UiCard>
 
     <!-- 지금 동네 (경기 목록이 이 동네 범위를 따른다) -->
     <NeighborhoodBar class="mb-3" @changed="fetchGames" />
@@ -32,15 +18,21 @@
     </div>
 
     <!-- 지금 상황으로 찾기 (docs/direction.md '찾기': 홈에는 자주 쓰는 조합을 줄로) -->
-    <div class="flex gap-2 mt-5 -mx-4 px-4 overflow-x-auto no-scrollbar" role="group" aria-label="상황으로 찾기">
-      <UiChip v-for="s in SITUATIONS" :key="s.label" class="flex-shrink-0 whitespace-nowrap" :icon="s.icon" @click="router.push({ path: '/rules', query: s.query })">{{ s.label }}</UiChip>
+    <div v-if="situations.length" class="flex gap-2 mt-5 -mx-4 px-4 overflow-x-auto no-scrollbar" role="group" aria-label="상황으로 찾기">
+      <UiChip v-for="s in situations" :key="s.label" class="flex-shrink-0 whitespace-nowrap" :icon="s.icon" @click="router.push({ path: '/rules', query: s.query })">{{ s.label }}</UiChip>
     </div>
 
-    <!-- 누가 지금 앱 게임에서 상대를 기다리면 홈에서 바로 붙는다 (없으면 안 보인다) -->
-    <WaitingNow class="mt-6" />
-    <AppGameStrip class="mt-6" />
+    <!-- 앱 게임은 이 화면의 주인공이 아니다 (사용자 11/3). 들어가는 문 한 줄만 두고, 목록·기다리는 사람은 /games에서 -->
+    <RouterLink to="/games" class="mt-5 flex items-center gap-3 rounded-xl bg-surface px-4 py-3 active:bg-surface-2 transition-colors">
+      <UiIcon name="gamepad" class="text-xl text-fg-muted" />
+      <span class="flex-1 min-w-0">
+        <span class="block t-label text-fg">앱 게임</span>
+        <span class="block t-caption">만나지 않고 폰으로 바로 한&nbsp;판</span>
+      </span>
+      <UiIcon name="chevron-right" class="text-fg-subtle" />
+    </RouterLink>
 
-    <UiSection title="열린 경기" class="mt-6">
+    <UiSection title="모집 중인 경기" class="mt-6">
       <template #action>
         <span v-if="games.length" class="t-micro">{{ games.length }}개</span>
       </template>
@@ -63,13 +55,13 @@
       </div>
 
       <UiCard v-else-if="loadFailed && !games.length">
-        <UiEmptyState icon="fas fa-rotate-right" title="경기를 불러오지 못했어요" description="연결이 돌아오면 다시 시도해 주세요">
+        <UiEmptyState icon="fas fa-rotate-right" title="경기를 불러오지 못했어요" description="연결이 돌아오면 다시 해 주세요">
           <UiButton variant="secondary" @click="retry">다시 시도</UiButton>
         </UiEmptyState>
       </UiCard>
 
       <UiCard v-else-if="!games.length">
-        <UiEmptyState icon="fas fa-trophy" title="아직 열린 경기가 없어요" description="첫 경기를 만들면 동네 사람들에게 보여요">
+        <UiEmptyState icon="fas fa-trophy" title="아직 모집 중인 경기가 없어요" description="첫 경기를 만들면 동네 사람들에게 보여요">
           <UiButton to="/create-game">경기 만들기</UiButton>
         </UiEmptyState>
       </UiCard>
@@ -129,7 +121,7 @@
     <div class="flex flex-wrap gap-2 mb-4">
       <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
     </div>
-    <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어주세요" />
+    <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
     <template #footer>
       <UiButton
         block
@@ -157,12 +149,10 @@ import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import PairApplySheet from '../../components/game/PairApplySheet.vue'
-import AppGameStrip from '../../components/appgame/AppGameStrip.vue'
-import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import Comment from '../GameCommentView.vue'
 import {
-  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
+  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem,
   UiPullIndicator, UiSection, UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
@@ -171,16 +161,12 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { ratingLine } from '../../utils/format'
 import { copyText } from '../../utils/clipboard'
 import { haptic } from '../../utils/haptics'
+import { SITUATIONS, availableSituations } from '@/utils/situations'
 
 const REPORT_REASONS = ['욕설·비방', '거짓 경기', '광고·스팸', '기타']
-// 홈의 상황 줄. 값은 규칙 둘러보기 주소(?place=&party=&length=)와 같다
-const SITUATIONS = [
-  { label: '지금 폰만 있으면', icon: 'bolt', query: { place: 'PHONE' } },
-  { label: '친구랑 둘이', icon: 'user-group', query: { party: 'DUO' } },
-  { label: '술자리·모임에서', icon: 'users', query: { place: 'GATHERING' } },
-  { label: '1분이면', icon: 'stopwatch', query: { length: 'MINUTE' } },
-  { label: '집에서', icon: 'home', query: { place: 'HOME' } },
-]
+// 걸리는 규칙이 없는 줄은 뺀다 (utils/situations). 받기 전에는 전부 보여 준다
+const situations = ref(SITUATIONS)
+availableSituations().then((list) => (situations.value = list))
 
 const route = useRoute()
 const router = useRouter()
@@ -228,7 +214,7 @@ async function apply(game, team) {
     haptic('success')
     showToast('신청했어요. 주최자가 승인하면 알려드려요')
   } catch (e) {
-    showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     busyId.value = null
   }

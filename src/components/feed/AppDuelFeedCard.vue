@@ -23,7 +23,7 @@
           v-for="(side, i) in sides"
           :key="i"
           type="button"
-          class="min-w-0 truncate text-[15px]"
+          class="min-w-0 truncate text-[0.9375rem]"
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', side.id)"
         >

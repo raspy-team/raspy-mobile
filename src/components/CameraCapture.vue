@@ -1,31 +1,28 @@
 <template>
-  <!-- 가운데 창 (UiDialog 모양) -->
-  <div v-if="isVisible" class="fixed inset-0 bg-black/70 z-dialog flex items-center justify-center p-6">
-    <div class="w-full max-w-sm bg-surface border border-line rounded-2xl overflow-hidden">
-      <div class="px-6 pt-6">
-        <h2 class="t-heading">{{ title || '경기 시작 사진' }}</h2>
-        <p class="t-caption mt-1">{{ subtitle || '피드 맨 앞에 보이고, 실제로 경기했다는 표시가 돼요' }}</p>
-      </div>
-
-      <div class="p-6">
-        <img v-if="capturedImage" :src="capturedImage" class="w-full aspect-square object-cover rounded-xl bg-surface-2" alt="찍은 사진" />
-        <div v-else class="w-full aspect-square rounded-xl border border-dashed border-line-strong flex flex-col items-center justify-center gap-3 text-fg-muted">
-          <UiIcon name="camera" class="text-[32px]" />
-          <span class="t-caption">두 사람이 함께 나오면 좋아요</span>
-        </div>
-      </div>
-
-      <div class="px-6 pb-6 space-y-2">
+  <!-- 할 일이라 아래에서 올라오는 시트 (가운데 창은 알림에만, 애플 HIG 11/3). 닫기는 시트의 X·바깥·뒤로가기 -->
+  <UiSheet :model-value="isVisible" :title="title || '경기 시작 사진'" @update:model-value="(v) => !v && $emit('cancel')">
+    <p class="t-caption">{{ subtitle || '소식 맨 앞에 보이고, 실제로 경기했다는 표시가 돼요' }}</p>
+    <img v-if="capturedImage" :src="capturedImage" class="mt-4 w-full aspect-[4/3] object-cover rounded-xl bg-surface-2" alt="찍은 사진" />
+    <button
+      v-else
+      type="button"
+      class="mt-4 w-full aspect-[4/3] rounded-xl border border-dashed border-line-strong flex flex-col items-center justify-center gap-3 text-fg-muted active:bg-surface-2 transition-colors"
+      @click.stop="triggerCamera"
+    >
+      <UiIcon name="camera" class="text-[32px]" />
+      <span class="t-caption">두 사람이 함께 나오면 좋아요</span>
+    </button>
+    <template #footer>
+      <div class="space-y-2">
         <UiButton v-if="!capturedImage" block size="lg" icon="camera" @click.stop="triggerCamera">사진 찍기</UiButton>
         <div v-else class="grid grid-cols-2 gap-2">
           <UiButton variant="secondary" icon="rotate-left" @click="retake">다시 찍기</UiButton>
-          <UiButton icon="check" @click="confirm">이 사진 쓰기</UiButton>
+          <UiButton icon="check" @click="confirm">{{ allowSkip ? '이 사진으로 시작' : '이 사진 쓰기' }}</UiButton>
         </div>
         <UiButton v-if="allowSkip && !capturedImage" block variant="ghost" @click="$emit('skip')">사진 없이 시작</UiButton>
-        <UiButton block variant="ghost" @click="$emit('cancel')">취소</UiButton>
       </div>
-    </div>
-  </div>
+    </template>
+  </UiSheet>
 
   <!-- 숨겨진 파일 입력 (모달 외부에 배치 - 안드로이드 웹뷰 호환성) -->
   <input
@@ -41,7 +38,7 @@
 <script setup>
 import { ref, watch, defineProps, defineEmits, onMounted, onUnmounted } from 'vue'
 import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
-import { UiButton } from './ui'
+import { UiButton, UiIcon, UiSheet } from './ui'
 
 const props = defineProps({
   // 인증샷 없이도 진행할 수 있으면 '사진 없이 시작'을 보여준다

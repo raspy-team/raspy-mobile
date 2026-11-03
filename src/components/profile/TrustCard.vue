@@ -1,45 +1,57 @@
 <template>
-  <section class="rounded-xl bg-surface p-4" aria-label="만나도 되는 사람인지">
-    <div class="flex items-center gap-3">
-      <div class="flex-1 min-w-0">
-        <p class="t-micro">매치 온도</p>
-        <p class="t-title tabular-nums" :class="trust.temperature >= 36.5 ? 'text-signal-fg' : ['CAUTION', 'SUSPENDED'].includes(trust.level) ? 'text-danger-fg' : ''">{{ trust.temperature.toFixed(1) }}°</p>
-      </div>
+  <!-- 프로필에는 숫자와 단계만. 근거와 계산은 눌러서 본다 (점진적 공개) -->
+  <button type="button" class="block w-full rounded-xl bg-surface p-4 text-left active:bg-surface-2 transition-colors" :aria-label="`신뢰 온도 ${temp}도, ${trust.label}. 자세히 보기`" @click="open = true">
+    <span class="flex items-center gap-1 t-label">신뢰 온도<UiIcon name="info-circle" class="text-fg-subtle" /></span>
+    <span class="block t-title tabular-nums mt-1" :class="tone">{{ temp }}°</span>
+    <span class="block t-caption mt-0.5">{{ trust.label }}</span>
+  </button>
+
+  <UiSheet v-model="open" title="신뢰 온도">
+    <div class="flex items-end justify-between">
+      <p class="t-display tabular-nums" :class="tone">{{ temp }}°</p>
       <UiBadge :tone="TONE[trust.level]" :icon="trust.level === 'TRUSTED' ? 'shield-halved' : ['CAUTION', 'SUSPENDED'].includes(trust.level) ? 'triangle-exclamation' : ''">{{ trust.label }}</UiBadge>
     </div>
     <!-- 36.5도에서 시작 (0~99.9). 막대는 30~45도를 보여 준다: 대부분 이 사이 -->
-    <div class="h-1.5 rounded-full bg-surface-3 mt-2 overflow-hidden" aria-hidden="true">
+    <div class="h-1.5 rounded-full bg-surface-3 mt-3 overflow-hidden" aria-hidden="true">
       <div class="h-full rounded-full" :class="['CAUTION', 'SUSPENDED'].includes(trust.level) ? 'bg-danger' : 'bg-signal'" :style="{ width: `${bar}%` }" />
     </div>
 
-    <ul v-if="!compact" class="mt-4 grid grid-cols-2 gap-y-2 gap-x-3 t-caption">
-      <li class="flex items-center gap-1.5"><UiIcon name="handshake" class="w-4 text-center" aria-hidden="true" />만나서 한 경기 <b class="text-fg tabular-nums">{{ trust.offlineGames }}번</b></li>
-      <li class="flex items-center gap-1.5"><UiIcon name="star" class="w-4 text-center" aria-hidden="true" />
-        <template v-if="trust.mannerCount">매너 <b class="text-fg tabular-nums">{{ trust.mannerAverage }}</b> ({{ trust.mannerCount }}명)</template>
-        <template v-else>매너 평가 아직 없음</template>
-      </li>
-      <li class="flex items-center gap-1.5" :class="trust.disputes ? 'text-danger-fg' : ''"><UiIcon name="scale-unbalanced" class="w-4 text-center" aria-hidden="true" />결과 이견 <b class="tabular-nums">{{ trust.disputes ? `${trust.disputes}명` : '없음' }}</b></li>
-      <li v-if="trust.noShows" class="flex items-center gap-1.5 text-danger-fg"><UiIcon name="triangle-exclamation" class="w-4 text-center" aria-hidden="true" />노쇼 <b class="tabular-nums">{{ trust.noShows }}번</b></li>
-      <li v-if="trust.meetAgainCount" class="flex items-center gap-1.5"><UiIcon name="user-group" class="w-4 text-center" aria-hidden="true" />또 만나고 싶대요 <b class="text-fg tabular-nums">{{ trust.meetAgainCount }}명</b></li>
-      <li class="flex items-center gap-1.5"><UiIcon name="calendar" class="w-4 text-center" aria-hidden="true" />가입 {{ joined }}</li>
-      <li class="flex items-center gap-1.5" :class="trust.dongVerified ? '' : 'text-fg-subtle'"><UiIcon :name="trust.dongVerified ? 'circle-check' : 'circle'" class="w-4 text-center" aria-hidden="true" />동네 인증</li>
-      <li class="flex items-center gap-1.5" :class="trust.socialVerified ? '' : 'text-fg-subtle'"><UiIcon :name="trust.socialVerified ? 'circle-check' : 'circle'" class="w-4 text-center" aria-hidden="true" />소셜 계정 확인</li>
-    </ul>
-    <p v-if="!compact" class="t-micro mt-3">온도는 36.5도에서 시작해 매너 평가(평가한 사람마다 한 표), 만나서 겨룬 서로 다른 상대, '또 만나고 싶은지', 결과 이견, 노쇼로만 오르내려요. 평가는 둘 다 남기거나 7일이 지나야 반영돼요</p>
-  </section>
+    <!-- 한 문장에 한 가지. 오르는 때와 내리는 때를 나눠 읽게 -->
+    <div class="mt-5 space-y-3 t-body">
+      <p>처음 만나도 괜찮은 사람인지 보여 주는 숫자예요. 누구나 36.5도에서 시작해요.</p>
+      <p><b>올라가요.</b> 상대가 매너를 좋게 평가하거나, 처음 보는 사람과 만나서 경기하면요.</p>
+      <p><b>내려가요.</b> 매너 평가가 나쁘거나, 경기 결과가 맞지 않아 다투거나, 약속에 나오지 않으면(노쇼)요.</p>
+      <p>평가는 둘 다 남기거나 7일이 지나야 반영돼요. '또 만나고 싶은지'도 남몰래 반영돼요.</p>
+    </div>
+
+    <UiList class="mt-5">
+      <UiListItem icon="handshake" title="만나서 한 경기" :subtitle="`${trust.offlineGames}번`" />
+      <UiListItem icon="star" title="매너 평가" :subtitle="trust.mannerCount ? `평균 ${trust.mannerAverage}점 (${trust.mannerCount}명)` : '아직 없어요'" />
+      <UiListItem icon="scale-unbalanced" title="결과 다툼" :subtitle="trust.disputes ? `${trust.disputes}명과 결과가 맞지 않았어요` : '없어요'" :danger="!!trust.disputes" />
+      <UiListItem v-if="trust.meetAgainCount" icon="user-group" title="또 만나고 싶대요" :subtitle="`${trust.meetAgainCount}명`" />
+      <UiListItem v-if="trust.noShows" icon="triangle-exclamation" title="노쇼" :subtitle="`${trust.noShows}번 약속에 나오지 않았어요`" danger />
+      <UiListItem icon="calendar" title="가입" :subtitle="joined" />
+      <UiListItem :icon="trust.dongVerified ? 'circle-check' : 'circle'" title="동네 인증" :subtitle="trust.dongVerified ? '했어요' : '안 했어요'" />
+      <UiListItem :icon="trust.socialVerified ? 'circle-check' : 'circle'" title="카카오·구글 계정 연결" :subtitle="trust.socialVerified ? '했어요' : '안 했어요'" />
+    </UiList>
+
+  </UiSheet>
 </template>
 
 <script setup lang="ts">
 // 만나도 되는 사람인가 (기능 검토 #1, 11/3): 서버 TrustService가 확인된 사실만 모아 준다.
-// 온도는 한눈에 보는 숫자, 아래 목록은 그 근거. compact면 온도와 단계만
-import { computed } from 'vue'
+// 프로필에는 온도·단계만 작게 두고, 근거와 오르내리는 이유는 눌러서 연다 (애플 HIG 점진적 공개, 11/3)
+import { computed, ref } from 'vue'
 import type { components } from '@/api/schema'
-import { UiBadge, UiIcon } from '../ui'
+import { UiBadge, UiIcon, UiList, UiListItem, UiSheet } from '../ui'
 
 type Trust = components['schemas']['TrustSummary']
-const props = defineProps<{ trust: Trust; compact?: boolean }>()
+const props = defineProps<{ trust: Trust }>()
 
+const open = ref(false)
 const TONE: Record<Trust['level'], string> = { NEW: 'neutral', NORMAL: 'neutral', TRUSTED: 'success', CAUTION: 'danger', SUSPENDED: 'danger' }
+const temp = computed(() => props.trust.temperature.toFixed(1))
+const tone = computed(() => (['CAUTION', 'SUSPENDED'].includes(props.trust.level) ? 'text-danger-fg' : props.trust.temperature >= 36.5 ? 'text-signal-fg' : ''))
 const bar = computed(() => Math.min(100, Math.max(4, ((props.trust.temperature - 30) / 15) * 100)))
 const joined = computed(() => {
   const d = props.trust.daysSinceJoined

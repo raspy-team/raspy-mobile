@@ -148,12 +148,12 @@ const loading = ref(!!props.editId)
 const done = ref(null)
 
 function validate() {
-  if (props.editId && !form.ruleTitle.trim()) return '규칙 이름을 적어주세요'
-  if (!form.ruleGoal.trim()) return '어떤 경기인지 적어주세요'
-  if (winMode.value === 'points' && !(points.value >= 1)) return '세트 승리 점수를 1 이상으로 적어주세요'
-  if (winMode.value === 'time' && !(minutes.value >= 1)) return '세트 시간을 1분 이상으로 적어주세요'
-  if (!(sets.value >= 1 && sets.value <= 9)) return '세트 수는 1~9로 적어주세요'
-  if (containsProfanity(Object.values(form).join(' '))) return '쓰면 안 되는 말이 들어 있어요. 고쳐서 다시 보내주세요'
+  if (props.editId && !form.ruleTitle.trim()) return '규칙 이름을 적어 주세요'
+  if (!form.ruleGoal.trim()) return '어떤 경기인지 적어 주세요'
+  if (winMode.value === 'points' && !(points.value >= 1)) return '세트 승리 점수를 1 이상으로 적어 주세요'
+  if (winMode.value === 'time' && !(minutes.value >= 1)) return '세트 시간을 1분 이상으로 적어 주세요'
+  if (!(sets.value >= 1 && sets.value <= 9)) return '세트 수는 1~9로 적어 주세요'
+  if (containsProfanity(Object.values(form).join(' '))) return '쓰면 안 되는 말이 들어 있어요. 고쳐서 다시 보내 주세요'
   return ''
 }
 
@@ -182,14 +182,14 @@ async function next() {
     step.value = 'confirm'
     window.scrollTo(0, 0)
   } catch (e) {
-    error.value = e.response?.data?.message || '잠시 뒤 다시 시도해주세요'
+    error.value = e.response?.data?.message || '잠시 뒤 다시 해 주세요'
   } finally {
     submitting.value = false
   }
 }
 
 async function submit() {
-  error.value = props.editId ? validate() : !form.ruleTitle.trim() ? '규칙 이름을 적어주세요' : missing(category.value)
+  error.value = props.editId ? validate() : !form.ruleTitle.trim() ? '규칙 이름을 적어 주세요' : missing(category.value)
   if (error.value) return
   submitting.value = true
   try {
@@ -201,7 +201,7 @@ async function submit() {
     }
     window.scrollTo(0, 0)
   } catch (e) {
-    error.value = e.response?.data?.message || '보내지 못했어요. 잠시 뒤 다시 시도해주세요'
+    error.value = e.response?.data?.message || '보내지 못했어요. 잠시 뒤 다시 해 주세요'
   } finally {
     submitting.value = false
   }

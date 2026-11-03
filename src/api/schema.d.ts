@@ -5118,6 +5118,7 @@ export interface components {
             peerVotes: number;
             /** Format: int64 */
             myPeerVoteTargetId?: number;
+            myRating?: components["schemas"]["MyRatingChange"];
         };
         GameSummaryResponse: {
             /** Format: int64 */
@@ -5158,6 +5159,12 @@ export interface components {
             /** @enum {string} */
             venue: "IN_PERSON" | "VIDEO" | "ONLINE";
             teamSeatsLeft?: number[];
+        };
+        MyRatingChange: {
+            /** Format: int32 */
+            before: number;
+            /** Format: int32 */
+            after: number;
         };
         SideResult: {
             /** Format: int32 */
@@ -5403,6 +5410,15 @@ export interface components {
         MyGameStatusResponse: {
             activeGame?: components["schemas"]["ActiveGameResponse"];
             pendingReviewGameIds: number[];
+            /** Format: int32 */
+            waitingOnMeCount: number;
+            pendingReviews: components["schemas"]["PendingReview"][];
+        };
+        PendingReview: {
+            /** Format: int64 */
+            gameId: number;
+            ruleTitle: string;
+            opponentNickname?: string;
         };
         FriendStatusDto: {
             sent: boolean;

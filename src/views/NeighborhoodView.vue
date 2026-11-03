@@ -17,7 +17,7 @@
       <!-- 아직 동네가 없으면 인증부터 -->
       <template v-else-if="!list.length">
         <h1 class="t-title mt-2">동네를 인증해 주세요</h1>
-        <p class="t-body text-fg-muted mt-2">내 동네와 가까운 동네의 경기만 보이고, 동네 순위에 올라가요. 앱 안 게임은 동네와 상관없이 전국에서 상대를 찾아요.</p>
+        <p class="t-body text-fg-muted mt-2">내 동네와 가까운 동네의 경기만 보이고, 동네 순위에 올라가요. 앱 게임은 동네와 상관없이 전국에서 상대를 찾아요.</p>
         <NeighborhoodVerify class="mt-4" :current="list" :max-count="maxCount" @verified="onVerified" />
       </template>
 

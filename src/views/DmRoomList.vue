@@ -10,7 +10,7 @@
       <UiPullIndicator :pull="pull" :refreshing="refreshing" />
       <UiListSkeleton v-if="loading" :rows="6" />
 
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" title="메시지를 불러오지 못했어요" description="잠시 뒤 다시 시도해주세요">
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" title="메시지를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
         <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
       </UiEmptyState>
 

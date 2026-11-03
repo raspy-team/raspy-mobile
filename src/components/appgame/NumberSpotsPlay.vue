@@ -72,7 +72,7 @@ const hidden = computed(() => tapped.value.length > 0 && missedAt.value === null
 const hint = computed(() => {
   if (over.value) return ''
   if (missedAt.value !== null) return '아깝다. 자리를 보고 새 판으로 다시'
-  if (!tapped.value.length) return '자리를 외우고 1부터 누르세요'
+  if (!tapped.value.length) return '자리를 외우고 1부터 눌러요'
   return ''
 })
 
@@ -84,7 +84,7 @@ function showNumber(cell: number) {
 function cellClass(cell: number) {
   if (missedAt.value === cell) return 'bg-danger text-white'
   if (tapped.value.includes(cell)) return 'bg-canvas'
-  if (board.value.includes(cell)) return hidden.value ? 'bg-fg text-canvas' : 'bg-surface-2 text-fg'
+  if (board.value.includes(cell)) return hidden.value ? 'bg-fg text-canvas' : 'bg-surface-3 text-fg'
   return 'bg-surface'
 }
 function label(cell: number) {

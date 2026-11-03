@@ -86,6 +86,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <RhythmCopyPlay
+          v-else-if="key === 'rhythm-copy'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <WritePlay
           v-else-if="WRITING[key]"
           :problem="play.problem"
@@ -219,7 +226,7 @@
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
-            <p v-if="!played" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요.</p>
+            <p v-if="!played" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요</p>
             <div v-else class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
@@ -240,7 +247,9 @@
             </div>
             <p v-if="played" class="t-micro mt-3 text-center">전적·실력 점수는 사람과 한 판만 세요. 봇과 한 판은 연습이에요</p>
           </UiCard>
-          <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
+          <!-- 하루 한 번 게임을 오늘 이미 냈으면 버튼 대신 한 줄 (누르면 '오늘은 다 했어요'만 떴다, 11/5 밤샘 C 검토) -->
+          <p v-if="dailyDone" class="t-body text-center mt-5">오늘 몫을 냈어요. 새 문제는 내일 0시에 나와요</p>
+          <UiButton v-else block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
@@ -283,7 +292,7 @@
                   <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
                 </UiListItem>
               </UiList>
-              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" description="5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요" />
+              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="game.dailyLimit === 1 ? '5일 풀면 첫 이름이 올라가요. 먼저 올라가 보세요' : '5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요'" />
               <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">순위 전체 보기</UiButton>
             </template>
             <template v-else>
@@ -356,6 +365,7 @@ import LiteracyPlay from '../../components/appgame/LiteracyPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
 import NumberSpotsPlay from '../../components/appgame/NumberSpotsPlay.vue'
 import DailyNumberPlay from '../../components/appgame/DailyNumberPlay.vue'
+import RhythmCopyPlay from '../../components/appgame/RhythmCopyPlay.vue'
 
 // 글로 겨루는 게임: 같은 화면(WritePlay)에 안내만 다르게
 const WRITING: Record<string, { guide: string; placeholder: string }> = {
@@ -430,6 +440,12 @@ const ranking = ref<Schemas['UserRankingDto'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))
 const finished = computed(() => duels.value.filter((d) => DONE.includes(d.status)))
+// 하루 한 번 게임: 오늘 마감인 내 판을 이미 냈나 (내 판의 마감 시각으로 날짜를 본다. 남의 어제 판에 붙었어도 내 판은 오늘이다)
+const dailyDone = computed(() => {
+  if (game.value?.dailyLimit !== 1) return false
+  const today = new Date().toDateString()
+  return duels.value.some((d) => new Date(d.deadlineAt ?? d.createdAt).toDateString() === today && (d.myScore != null || DONE.includes(d.status)))
+})
 // 투표 게임은 투표가 먼저 (남의 글에 표를 주는 게 이 게임의 절반)
 const tab = ref<'rank' | 'mine' | 'vote'>('rank')
 const tabs = computed(() => [

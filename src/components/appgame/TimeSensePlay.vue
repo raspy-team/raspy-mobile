@@ -9,8 +9,9 @@
     <p class="t-caption mt-8">{{ state === 'stopped' || state === 'done' ? '방금 목표' : '이번 목표' }}</p>
     <p class="t-display tabular-nums">{{ targets[shownRound].toFixed(1) }}<span class="t-title">초</span></p>
 
-    <!-- 초시계: 처음 1초만 보이고 사라진다. 그다음은 머릿속으로 센다 -->
-    <p class="t-display font-mono tabular-nums mt-6 h-16" aria-live="off">
+    <!-- 초시계: 처음 1초만 보이고 사라진다. 그다음은 머릿속으로 센다. 목표와 구분되게 작은 이름표 (C 검토) -->
+    <p class="t-caption mt-6">내 시간</p>
+    <p class="t-display font-mono tabular-nums h-16" aria-live="off">
       <template v-if="state === 'running'">{{ shown }}</template>
       <template v-else-if="state === 'stopped' && last">{{ (last.measured / 1000).toFixed(2) }}</template>
       <template v-else>0.00</template>
@@ -24,7 +25,7 @@
     <button
       type="button"
       class="mt-8 w-44 h-44 rounded-full t-title select-none touch-manipulation transition-transform motion-safe:active:scale-95"
-      :class="state === 'running' ? 'bg-primary text-primary-on' : 'bg-surface-2 text-fg'"
+      :class="state === 'running' ? 'bg-fg text-canvas' : 'bg-primary text-primary-on'"
       :disabled="submitting || state === 'done'"
       @pointerdown.prevent="press"
     >

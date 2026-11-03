@@ -23,7 +23,7 @@
         :key="i"
         type="button"
         class="h-14 rounded-xl t-title tabular-nums transition-colors"
-        :class="used.has(i) ? 'bg-canvas text-fg-subtle' : 'bg-surface-2 text-fg active:bg-surface-3'"
+        :class="used.has(i) ? 'bg-surface-2 text-fg-subtle opacity-35' : 'bg-surface-2 text-fg active:bg-surface-3 disabled:opacity-35'"
         :disabled="used.has(i) || lastIsNumber || lastIsClose"
         @click="push({ kind: 'num', i })"
       >
@@ -35,7 +35,7 @@
         v-for="op in OPS"
         :key="op.v"
         type="button"
-        class="h-12 rounded-xl t-title bg-surface active:bg-surface-2 disabled:opacity-35"
+        class="h-12 rounded-xl t-title bg-surface-2 active:bg-surface-3 disabled:opacity-35"
         :aria-label="op.label"
         :disabled="!canOp(op.v)"
         @click="push({ kind: 'op', v: op.v })"
@@ -47,7 +47,7 @@
       <UiButton variant="secondary" icon="rotate-left" :disabled="!tokens.length" @click="tokens.pop()">지우기</UiButton>
       <UiButton class="flex-1" size="lg" :loading="submitting" :disabled="value === null" @click="finish">이 식으로 내기</UiButton>
     </div>
-    <p class="t-caption text-center mt-3">딱 맞히면 1000점에 빠를수록 더, 10 차이까지는 가까운 만큼. 오늘은 한 번만</p>
+    <p class="t-caption text-center mt-3">딱 맞히면 1000점, 빠를수록 더 높아요. 10 차이까지는 가까운 만큼 받아요. 오늘은 한 번만 해요</p>
   </div>
 </template>
 

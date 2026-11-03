@@ -14,6 +14,10 @@
       "description": "관리자 전용 신고 처리 API"
     },
     {
+      "name": "안전 숫자",
+      "description": "만남 안전을 운영진이 숫자로 본다 (안전·신뢰 I)"
+    },
+    {
       "name": "Report",
       "description": "신고 관련 API"
     },
@@ -6741,6 +6745,40 @@
         }
       }
     },
+    "/api/admin/safety": {
+      "get": {
+        "tags": [
+          "안전 숫자"
+        ],
+        "summary": "안전 숫자 (관리자)",
+        "description": "최근 days일의 만나서 한 경기 기준: 신고·노쇼·도착 확인·위치 공유·또 만나고 싶다·같은 상대와 다시 경기. 비율은 count/total",
+        "operationId": "safety",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/rules/edit-requests": {
       "get": {
         "tags": [
@@ -13116,6 +13154,65 @@
           },
           "intro": {
             "type": "string"
+          }
+        }
+      },
+      "SafetyRatio": {
+        "required": [
+          "count",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SafetyStats": {
+        "required": [
+          "arrived",
+          "meetAgain",
+          "meetings",
+          "noShow",
+          "rematch",
+          "reports",
+          "shared",
+          "since"
+        ],
+        "type": "object",
+        "properties": {
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "meetings": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reports": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noShow": {
+            "$ref": "#/components/schemas/SafetyRatio"
+          },
+          "arrived": {
+            "$ref": "#/components/schemas/SafetyRatio"
+          },
+          "shared": {
+            "$ref": "#/components/schemas/SafetyRatio"
+          },
+          "meetAgain": {
+            "$ref": "#/components/schemas/SafetyRatio"
+          },
+          "rematch": {
+            "$ref": "#/components/schemas/SafetyRatio"
           }
         }
       },

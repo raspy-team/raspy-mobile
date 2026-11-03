@@ -3648,6 +3648,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/safety": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 안전 숫자 (관리자)
+         * @description 최근 days일의 만나서 한 경기 기준: 신고·노쇼·도착 확인·위치 공유·또 만나고 싶다·같은 상대와 다시 경기. 비율은 count/total
+         */
+        get: operations["safety"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/rules/edit-requests": {
         parameters: {
             query?: never;
@@ -5673,6 +5693,25 @@ export interface components {
             nickname: string;
             avatar?: string;
             intro?: string;
+        };
+        SafetyRatio: {
+            /** Format: int32 */
+            count: number;
+            /** Format: int32 */
+            total: number;
+        };
+        SafetyStats: {
+            /** Format: date-time */
+            since: string;
+            /** Format: int32 */
+            meetings: number;
+            /** Format: int32 */
+            reports: number;
+            noShow: components["schemas"]["SafetyRatio"];
+            arrived: components["schemas"]["SafetyRatio"];
+            shared: components["schemas"]["SafetyRatio"];
+            meetAgain: components["schemas"]["SafetyRatio"];
+            rematch: components["schemas"]["SafetyRatio"];
         };
         EditRequestDetailResponse: {
             /** Format: int64 */
@@ -10376,6 +10415,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminUserResponse"][];
+                };
+            };
+        };
+    };
+    safety: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SafetyStats"];
                 };
             };
         };

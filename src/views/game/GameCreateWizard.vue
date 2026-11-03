@@ -88,7 +88,7 @@
 
         <!-- 동호회 경기: 고르면 그 동호회 멤버 모두에게 알린다 (든 동호회가 있을 때만) -->
         <template v-if="clubs.length">
-          <h1 class="t-title">동호회에 알릴까요?</h1>
+          <h2 class="t-heading">동호회에 알릴까요?</h2>
           <div class="flex flex-wrap gap-2 mt-3 mb-8">
             <UiChip :selected="!clubId" @click="clubId = null">알리지 않기</UiChip>
             <UiChip v-for="c in clubs" :key="c.id" :selected="clubId === c.id" @click="clubId = c.id">{{ c.name }}</UiChip>

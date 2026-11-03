@@ -14,7 +14,8 @@
         <LiveKickoffCard class="mt-4" :game-id="gameId" />
 
         <!-- 같이 보는 사람: 수와 얼굴 (익명은 수에만) -->
-        <div class="flex items-center justify-center gap-2 mt-2">
+        <!-- 끝난 경기에 '아직 관중이 없어요'는 어색하다: 지금 보는 사람이 없으면 줄을 숨긴다 (끝을 본 사람은 아래 증인 줄) -->
+        <div v-if="live.viewers || live.status === 'IN_PROGRESS' || live.status === 'SCHEDULED'" class="flex items-center justify-center gap-2 mt-2">
           <div v-if="live.viewerFaces.length" class="flex -space-x-2">
             <UiAvatar v-for="p in live.viewerFaces.slice(0, 6)" :key="p.userId" :src="p.profilePicture || undefined" :name="p.nickname" :user-id="p.userId" size="xs" />
           </div>

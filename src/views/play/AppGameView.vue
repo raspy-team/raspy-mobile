@@ -111,7 +111,7 @@
           <template v-else-if="result.status === 'VOTING'">
             <p class="t-title">투표 중이에요</p>
             <p class="t-caption mt-1">{{ until(result.votingEndsAt) }}까지 사람들이 투표해요. 끝나면 알려 드릴게요</p>
-            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 복사</UiButton>
+            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 보내기</UiButton>
           </template>
           <template v-else-if="result.status === 'CANCELED'">
             <p class="t-title">취소된 경기예요</p>
@@ -145,6 +145,8 @@
         <!-- 하루 한 판 게임(오늘의 초성)은 '한 판 더'를 눌러도 할 수 없어 빼고, 공유가 다음 행동이 된다 -->
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
+        <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
+        <UiButton v-if="result.status === 'COMPLETED' && key !== 'daily-chosung'" block variant="secondary" icon="share" class="mt-3" :loading="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : '알림' }}</p>
           <p class="t-body mt-1">{{ result.myFeedback }}</p>
@@ -307,6 +309,7 @@
         </template>
       </template>
     </main>
+    <ShareSheet :post="sharePost" :my-id="myId" @close="sharePost = null" />
   </div>
 </template>
 
@@ -329,6 +332,8 @@ import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import { shareLink } from '@/utils/share'
+import ShareSheet from '../../components/feed/story/ShareSheet.vue'
+import { getMyId } from '@/utils/me'
 import WritePlay from '../../components/appgame/WritePlay.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 
@@ -542,6 +547,22 @@ async function shareDaily(feedback: string) {
   const boxes = '■'.repeat(right) + '□'.repeat(5 - right)
   const msg = await shareLink(`${window.location.origin}/play/daily-chosung`, `오늘의 초성 ${feedback}\n${boxes}\n같은 문제로 붙어 봐요`)
   if (msg) showToast(msg)
+}
+
+/** 끝난 판 보내기: 소식 카드를 받아 ShareSheet(링크 미리보기·스토리 그림)로 */
+const sharePost = ref<unknown>(null)
+const sharingResult = ref(false)
+const myId = ref<number | null>(null)
+getMyId().then((id) => (myId.value = id))
+async function openShare(gameId: number) {
+  sharingResult.value = true
+  try {
+    sharePost.value = (await GET('/api/feed/game/{gameId}', { path: { gameId } })).data
+  } catch {
+    showToast('결과를 불러오지 못했어요')
+  } finally {
+    sharingResult.value = false
+  }
 }
 
 /** 투표 공유 링크: 친구에게 보내 표를 받는다 */

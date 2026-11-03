@@ -22,9 +22,11 @@ const parts = computed<Part[]>(() => {
   let last = 0
   for (const m of props.text.matchAll(URL_RE)) {
     const start = m.index ?? 0
+    // 주소 뒤에 붙은 문장 부호는 주소가 아니다 ("…/games/3." "(…/clubs/2)")
+    const url = m[0].replace(/[.,)!?'"]+$/, '')
     if (start > last) out.push({ text: props.text.slice(last, start) })
-    out.push(toPart(m[0]))
-    last = start + m[0].length
+    out.push(toPart(url))
+    last = start + url.length
   }
   if (last < props.text.length) out.push({ text: props.text.slice(last) })
   return out

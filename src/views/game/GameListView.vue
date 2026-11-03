@@ -207,7 +207,7 @@ async function apply(game, team) {
     await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
     game.isAppliedByMe = true
     feel('success')
-    showToast('신청했어요. 주최자가 승인하면 알려드려요')
+    showToast('신청했어요. 주최자가 승인하면 알려 드려요')
   } catch (e) {
     showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {

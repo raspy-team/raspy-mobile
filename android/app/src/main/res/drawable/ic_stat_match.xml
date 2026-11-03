@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 알림 표시줄의 작은 아이콘 (한 가지 색). public/favicon.svg의 얼굴을 옮겼다 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="64" android:viewportHeight="64">
+    <group android:translateX="6.4" android:translateY="6.4" android:scaleX="0.8" android:scaleY="0.8">
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="3.8" android:strokeLineCap="round" android:strokeLineJoin="round"
+            android:pathData="M28.6,16.6L22.5,4.5M32,16.5V3.5M35.4,16.6l6.1,-12.1M25.4,10.5h13.2M10,39a22,22 0,1 0,44 0a22,22 0,1 0,-44 0M14.5,27c4.6,5 4.6,19 0,24M49.5,27c-4.6,5 -4.6,19 0,24" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M24.5,31.5l3,2.2 -1.2,3.5h-3.6l-1.2,-3.5zM39.5,31.5l3,2.2 -1.2,3.5h-3.6l-1.2,-3.5zM24,45h16a8,7.5 0,0 1,-16 0z" />
+    </group>
+</vector>

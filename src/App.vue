@@ -53,6 +53,7 @@ import { startInbox } from './stores/inbox'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 import { serverDown } from './stores/server'
+import { registerFcmToken } from './utils/nativeBridge'
 
 const route = useRoute()
 const reload = () => window.location.reload()
@@ -128,20 +129,8 @@ onMounted(() => {
       checkAndSendDailyFirst()
     }
 
-    setTimeout(() => {
-      if (window.AndroidApp && window.AndroidApp.registerFcmToken) {
-        window.AndroidApp.registerFcmToken(token)
-      } else if (
-        window.webkit &&
-        window.webkit.messageHandlers &&
-        window.webkit.messageHandlers.iosBridge
-      ) {
-        window.webkit.messageHandlers.iosBridge.postMessage({
-          action: 'registerFcmToken',
-          jwt: token,
-        })
-      }
-    }, 5000)
+    // 앱이면 푸시 토큰을 (다시) 등록한다. 토큰은 바뀔 수 있어 켤 때마다 (Capacitor 앱·옛 앱 모두 nativeBridge가 고른다)
+    if (token) setTimeout(() => registerFcmToken(token), 5000)
   } catch {
     // 웹에서는 앱 브리지가 없다
   }

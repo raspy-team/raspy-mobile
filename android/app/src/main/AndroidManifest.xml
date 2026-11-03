@@ -7,6 +7,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- 푸시 알림의 작은 아이콘 (흰 한 가지 색이어야 네모로 안 보인다) -->
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_match" />
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
@@ -32,4 +34,6 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 안드로이드 13부터 알림을 띄우려면 묻는 권한 (PushNotifications.requestPermissions) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

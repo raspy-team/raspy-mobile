@@ -67,7 +67,8 @@ const subline = computed(() => {
 const padClass = computed(() => {
   if (state.value === 'listen') return lit.value ? 'bg-primary text-primary-on scale-105' : 'bg-surface-2 text-fg'
   if (state.value === 'tap') return 'bg-fg text-canvas motion-safe:active:scale-95'
-  return 'bg-surface-2 text-fg'
+  // '들어 보기'·'다음 판'은 화면의 주 행동이라 채운 색 (C 검토: 감 잡기와 같게)
+  return 'bg-primary text-primary-on'
 })
 
 // 소리: 첫 누름(사용자 동작) 때 만든다. iOS는 그 전에는 소리를 낼 수 없다

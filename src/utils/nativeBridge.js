@@ -11,8 +11,41 @@ export const isCapacitorApp = Capacitor.isNativePlatform()
 
 // 로그인 뒤 푸시 알림 토큰을 서버에 등록하도록 앱에 알린다
 export function registerFcmToken(jwt) {
-  if (window.AndroidApp?.registerFcmToken) window.AndroidApp.registerFcmToken(jwt)
+  if (isCapacitorApp) registerCapacitorPush()
+  else if (window.AndroidApp?.registerFcmToken) window.AndroidApp.registerFcmToken(jwt)
   else window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'registerFcmToken', jwt })
+}
+
+// Capacitor 앱의 푸시 (11/5): 권한을 묻고 FCM 토큰을 받아 서버(/api/push/register)에 등록한다.
+// 알림을 누르면 서버가 data.url에 넣은 화면으로 간다. 앱은 운영 웹을 띄우니 같은 사이트 주소만 따른다
+let pushReady = false
+async function registerCapacitorPush() {
+  try {
+    const { PushNotifications } = await import('@capacitor/push-notifications')
+    let perm = await PushNotifications.checkPermissions()
+    if (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale') perm = await PushNotifications.requestPermissions()
+    if (perm.receive !== 'granted') return
+    if (!pushReady) {
+      pushReady = true
+      const { POST } = await import('../api/client')
+      await PushNotifications.addListener('registration', ({ value }) => {
+        POST('/api/push/register', { body: { token: value } }).catch(() => {})
+      })
+      await PushNotifications.addListener('pushNotificationActionPerformed', ({ notification }) => {
+        const url = notification?.data?.url
+        if (!url) return
+        try {
+          const u = new URL(url, window.location.origin)
+          if (u.host === window.location.host || u.hostname === 'matchapp.me') window.location.assign(window.location.origin + u.pathname + u.search)
+        } catch {
+          // 주소가 아니면 그대로 둔다
+        }
+      })
+    }
+    await PushNotifications.register()
+  } catch {
+    // 푸시를 못 켜도 앱은 그대로 쓴다 (앱 안 알림 목록은 남는다)
+  }
 }
 
 // 구글은 앱 안 웹 화면 로그인을 막는다. 앱이 직접 구글 계정을 고르게 하고, 받은 토큰을 서버에 넘긴다.

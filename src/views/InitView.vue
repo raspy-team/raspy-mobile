@@ -95,7 +95,7 @@ import { API_BASE_URL } from '@/config/server'
 import { TERMS } from '../content/legal'
 import { UiButton, UiSheet } from '../components/ui'
 import { takeReturnTo } from '../utils/authRedirect'
-import { isAndroidApp, isIosApp } from '../utils/nativeBridge'
+import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin } from '../utils/nativeBridge'
 
 const FEATURES = [
   // 처음 온 사람의 짧은 안내. 한 줄에 한 가지, 실제로 하는 순서대로 (11/3)
@@ -126,7 +126,8 @@ const LOGIN_ERRORS = {
   email: '확인된 이메일이 있어야 시작할 수 있어요. 계정의 이메일을 확인해 주세요',
   failed: '로그인하지 못했어요. 다시 해 주세요',
 }
-const loginError = computed(() => LOGIN_ERRORS[route.query.loginError] || (route.query.loginError ? LOGIN_ERRORS.failed : ''))
+const nativeError = ref('')
+const loginError = computed(() => nativeError.value || LOGIN_ERRORS[route.query.loginError] || (route.query.loginError ? LOGIN_ERRORS.failed : ''))
 
 if (localStorage.getItem('raspy_access_token2')) router.replace('/')
 
@@ -144,6 +145,14 @@ function loginWith(provider) {
     window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'appleLogin' })
   } else if (provider === 'apple') {
     window.location.href = `${API_BASE_URL}/login/oauth2/apple/web/start`
+  } else if (provider === 'google' && isCapacitorApp) {
+    nativeError.value = ''
+    nativeGoogleLogin().catch((e) => {
+      pending.value = ''
+      // 계정 고르기를 닫은 건 오류가 아니다
+      if (!/cancel/i.test(String(e?.message || e))) nativeError.value = LOGIN_ERRORS.failed
+    })
+    return
   } else if (provider === 'google' && window.AndroidApp?.loginWithGoogle) {
     window.AndroidApp.loginWithGoogle()
   } else {

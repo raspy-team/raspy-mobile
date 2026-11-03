@@ -111,6 +111,9 @@ const routes = [
   { path: '/clubs/matches/:matchId', component: () => import('../views/club/ClubMatchView.vue') },
   { path: '/clubs/:id', component: () => import('../views/club/ClubView.vue') },
   { path: '/club/join/:code', component: () => import('../views/club/ClubJoinView.vue') },
+  // 대회 (tournament/): 리그·토너먼트
+  { path: '/tournaments', component: () => import('../views/tournament/TournamentListView.vue') },
+  { path: '/tournaments/:id', component: () => import('../views/tournament/TournamentView.vue') },
   // 만나서 하는 경기 중계 (live/): 점수·응원·반응. 앱 게임 관전은 /watch
   { path: '/live/:gameId', component: () => import('../views/live/LiveWatchView.vue') },
   // 위치 공유 링크 (안전·신뢰 C): 받은 친구가 로그인 없이 본다

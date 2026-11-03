@@ -35,7 +35,7 @@ export interface paths {
          * 동호회 보기
          * @description 멤버·동호회 경기. 초대 코드는 멤버에게만
          */
-        get: operations["detail"];
+        get: operations["detail_1"];
         /**
          * 동호회 꾸미기 (회장·운영진)
          * @description 이름·소개·공지·단톡방 링크·가입 방식(OPEN·APPROVAL)·가입 질문·대표 종목. 보낸 것만 바꾸고, 빈 글자는 지운다
@@ -184,6 +184,167 @@ export interface paths {
          * @description 앱이 뜰 때 하루 한 번, 로그인 직후 한 번 부른다. 로그인 없이도 부를 수 있고, 토큰이 있으면 그 사람을 붙인다
          */
         post: operations["visit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 대회 목록
+         * @description scope=near(내 동네 범위의 모집·진행 중) · mine(내가 나가거나 연 대회) · club(clubId 동호회가 연 대회)
+         */
+        get: operations["list"];
+        put?: never;
+        /**
+         * 대회 열기
+         * @description 동네 인증한 사람(개인 주최) 또는 동호회 회장·운영진(hostClubId, 멤버만 = 월례대회). 신청은 시작 때까지, 체크인은 시작 24시간 전부터
+         */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 신청 거두기
+         * @description 시작 전에만
+         */
+        post: operations["withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 지금 시작 (주최자)
+         * @description 체크인한 참가자로 대진을 만든다. 둘보다 적으면 대회가 취소된다
+         */
+        post: operations["start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/check-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 체크인
+         * @description 시작 24시간 전부터. 체크인한 참가자로만 대진을 만든다
+         */
+        post: operations["checkIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 대회 취소 (주최자)
+         * @description 시작 전에만
+         */
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 신청
+         * @description 동호회 대회면 clubId(내가 회장·운영진인 동호회)
+         */
+        post: operations["apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/fixtures/{fixtureId}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 마감 지난 판 정하기 (주최자)
+         * @description winner=HOME·AWAY 승, NONE 둘 다 패(리그만)
+         */
+        post: operations["decideFixture"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/entries/{entryId}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 신청 받기·거절 (주최자) */
+        post: operations["decide"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1331,7 +1492,7 @@ export interface paths {
          * 동호회 만들기
          * @description 만든 사람의 지금 동네로 만든다. 만든 사람이 첫 멤버
          */
-        post: operations["create"];
+        post: operations["create_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1745,7 +1906,7 @@ export interface paths {
          * 대결 시작
          * @description 상대를 기다리는 대결이 있으면 그 문제로 짝이 되고, 없으면 새 대결을 열어 다음 사람을 기다린다. 시간은 이때부터 서버가 잰다.
          */
-        post: operations["start"];
+        post: operations["start_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2214,7 +2375,7 @@ export interface paths {
          * 노쇼 기록 취소 (관리자 전용)
          * @description 이의가 맞을 때. 처벌을 다시 계산한다
          */
-        post: operations["cancel"];
+        post: operations["cancel_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2340,7 +2501,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["start_1"];
+        get: operations["start_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2433,6 +2594,26 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getMyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 대회 보기
+         * @description 참가자, 라운드마다 판(대진표), 리그면 순위표, 내 참가·할 수 있는 일
+         */
+        get: operations["detail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3778,7 +3959,7 @@ export interface paths {
          * 앱 게임 목록
          * @description 게임마다 내 레이팅·전적·최고 기록을 함께 준다.
          */
-        get: operations["list"];
+        get: operations["list_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4092,7 +4273,7 @@ export interface paths {
          * 신고 목록 (관리자 전용)
          * @description 최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.
          */
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4408,6 +4589,168 @@ export interface components {
             referrer?: string;
             landingPath?: string;
             standalone: boolean;
+        };
+        TournamentCreateRequest: {
+            title: string;
+            description?: string;
+            /** Format: int64 */
+            ruleId: number;
+            /** @enum {string} */
+            format: "LEAGUE" | "KNOCKOUT";
+            /** @enum {string} */
+            entrantType: "USER" | "CLUB";
+            /** Format: int64 */
+            hostClubId?: number;
+            membersOnly: boolean;
+            joinMode: string;
+            /** Format: int32 */
+            maxEntrants: number;
+            /** Format: int32 */
+            minRating?: number;
+            /** Format: int32 */
+            maxRating?: number;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: int32 */
+            roundDays: number;
+            thirdPlace: boolean;
+            /** Format: int32 */
+            boards: number;
+            /** Format: int32 */
+            perBoard: number;
+        };
+        TournamentClubChoice: {
+            /** Format: int64 */
+            clubId: number;
+            name: string;
+        };
+        TournamentEntryView: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int64 */
+            userId?: number;
+            /** Format: int64 */
+            clubId?: number;
+            status: string;
+            /** Format: int32 */
+            seed?: number;
+            /** Format: int32 */
+            rating: number;
+        };
+        TournamentFixtureView: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int32 */
+            orderNo: number;
+            home?: components["schemas"]["TournamentSide"];
+            away?: components["schemas"]["TournamentSide"];
+            status: string;
+            result?: string;
+            /** Format: int64 */
+            winnerEntryId?: number;
+            /** Format: int32 */
+            homeScore: number;
+            /** Format: int32 */
+            awayScore: number;
+            /** Format: int64 */
+            gameId?: number;
+            /** Format: int64 */
+            clubMatchId?: number;
+            needsHost: boolean;
+            mine: boolean;
+        };
+        TournamentMyEntry: {
+            /** Format: int64 */
+            entryId: number;
+            status: string;
+            /** Format: int64 */
+            clubId?: number;
+        };
+        TournamentRoundView: {
+            /** Format: int32 */
+            round: number;
+            name: string;
+            /** Format: date-time */
+            opensAt: string;
+            /** Format: date-time */
+            closesAt: string;
+            fixtures: components["schemas"]["TournamentFixtureView"][];
+        };
+        TournamentSide: {
+            /** Format: int64 */
+            entryId: number;
+            name: string;
+            /** Format: int64 */
+            userId?: number;
+            /** Format: int64 */
+            clubId?: number;
+        };
+        TournamentStandingView: {
+            /** Format: int64 */
+            entryId: number;
+            name: string;
+            /** Format: int32 */
+            played: number;
+            /** Format: int32 */
+            wins: number;
+            /** Format: int32 */
+            draws: number;
+            /** Format: int32 */
+            losses: number;
+            /** Format: int32 */
+            points: number;
+            /** Format: int32 */
+            diff: number;
+        };
+        TournamentSummary: {
+            /** Format: int64 */
+            id: number;
+            title: string;
+            /** Format: int64 */
+            ruleId: number;
+            ruleTitle: string;
+            format: string;
+            entrantType: string;
+            status: string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: int32 */
+            roundDays: number;
+            hostName: string;
+            /** Format: int64 */
+            hostClubId?: number;
+            /** Format: int32 */
+            entryCount: number;
+            /** Format: int32 */
+            maxEntrants: number;
+            dongName?: string;
+            winnerName?: string;
+        };
+        TournamentView: {
+            summary: components["schemas"]["TournamentSummary"];
+            description?: string;
+            joinMode: string;
+            membersOnly: boolean;
+            /** Format: int32 */
+            minRating?: number;
+            /** Format: int32 */
+            maxRating?: number;
+            /** Format: date-time */
+            entryDeadline?: string;
+            thirdPlace: boolean;
+            /** Format: int32 */
+            boards: number;
+            /** Format: int32 */
+            perBoard: number;
+            isHost: boolean;
+            my?: components["schemas"]["TournamentMyEntry"];
+            myStaffClubs: components["schemas"]["TournamentClubChoice"][];
+            canCheckIn: boolean;
+            entries: components["schemas"]["TournamentEntryView"][];
+            rounds: components["schemas"]["TournamentRoundView"][];
+            standings: components["schemas"]["TournamentStandingView"][];
+            runnerUpName?: string;
         };
         CategoryInput: {
             face: string;
@@ -5509,10 +5852,10 @@ export interface components {
             draws: number;
             /** Format: int32 */
             ruleRating?: number;
-            /** Format: int32 */
-            totalGameCount: number;
             /** Format: double */
             rating: number;
+            /** Format: int32 */
+            totalGameCount: number;
         };
         UserRankingDto: {
             /** Format: int32 */
@@ -6662,7 +7005,7 @@ export interface operations {
             };
         };
     };
-    detail: {
+    detail_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6955,6 +7298,217 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: {
+                scope?: string;
+                clubId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentSummary"][];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TournamentCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    withdraw: {
+        parameters: {
+            query?: {
+                clubId?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    checkIn: {
+        parameters: {
+            query?: {
+                clubId?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    apply: {
+        parameters: {
+            query?: {
+                clubId?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    decideFixture: {
+        parameters: {
+            query: {
+                winner: string;
+            };
+            header?: never;
+            path: {
+                fixtureId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    decide: {
+        parameters: {
+            query: {
+                accept: boolean;
+            };
+            header?: never;
+            path: {
+                entryId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
                 };
             };
         };
@@ -8420,7 +8974,7 @@ export interface operations {
             };
         };
     };
-    create: {
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -8969,7 +9523,7 @@ export interface operations {
             };
         };
     };
-    start: {
+    start_1: {
         parameters: {
             query?: {
                 solo?: boolean;
@@ -9560,7 +10114,7 @@ export interface operations {
             };
         };
     };
-    cancel: {
+    cancel_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -9770,7 +10324,7 @@ export interface operations {
             };
         };
     };
-    start_1: {
+    start_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9890,6 +10444,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MyProfileResponse"];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentView"];
                 };
             };
         };
@@ -11416,7 +11992,7 @@ export interface operations {
             };
         };
     };
-    list: {
+    list_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -11801,7 +12377,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: never;
             header?: never;

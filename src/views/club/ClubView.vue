@@ -104,6 +104,15 @@
           <p v-else class="t-caption">아직 교류전이 없어요{{ isStaff ? '. 다른 동호회에 신청해 보세요' : '' }}</p>
         </UiSection>
 
+        <!-- 대회: 이 동호회가 연 대회 (월례대회 등) -->
+        <UiSection title="대회" class="mt-8">
+          <template v-if="isStaff" #action><UiButton variant="ghost" size="sm" icon="trophy" @click="router.push(`/tournaments?create=1&clubId=${id}`)">대회 열기</UiButton></template>
+          <div v-if="tournaments.length" class="space-y-2">
+            <TournamentRow v-for="t in tournaments" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
+          </div>
+          <p v-else class="t-caption">{{ isStaff ? '월례대회를 열면 멤버에게 알림이 가고, 대진·순위가 저절로 나와요' : '아직 연 대회가 없어요' }}</p>
+        </UiSection>
+
         <!-- 우리끼리 순위: 대표 종목 실력 점수 -->
         <UiSection v-if="detail.club.mainRuleTitle" :title="`우리끼리 순위 · ${detail.club.mainRuleTitle}`" class="mt-8">
           <UiList v-if="detail.ranking.length">
@@ -237,6 +246,7 @@ import { shareLink } from '@/utils/share'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useToast } from '@/composable/useToast'
 import ClubRulePicker from '../../components/club/ClubRulePicker.vue'
+import TournamentRow from '../../components/tournament/TournamentRow.vue'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIcon, UiIconButton, UiInput, UiList, UiListItem, UiSection, UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
@@ -272,9 +282,11 @@ const when = (iso: string) => {
 }
 const message = (e: unknown, fallback: string) => (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 
+const tournaments = ref<Schemas['TournamentSummary'][]>([])
 async function load() {
   try {
     detail.value = (await GET('/api/clubs/{id}', { path: { id } })).data
+    tournaments.value = (await GET('/api/tournaments', { query: { scope: 'club', clubId: id } })).data.slice(0, 5)
   } catch {
     error.value = '동호회를 찾지 못했어요'
   }

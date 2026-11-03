@@ -54,6 +54,10 @@
       "description": "장소 검색과 지도"
     },
     {
+      "name": "대회",
+      "description": "리그·토너먼트 (개인·동호회). 판 하나는 보통 경기 또는 교류전"
+    },
+    {
       "name": "Block",
       "description": "유저 차단 기능 API"
     }
@@ -111,7 +115,7 @@
         ],
         "summary": "동호회 보기",
         "description": "멤버·동호회 경기. 초대 코드는 멤버에게만",
-        "operationId": "detail",
+        "operationId": "detail_1",
         "parameters": [
           {
             "name": "id",
@@ -536,6 +540,354 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments": {
+      "get": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "대회 목록",
+        "description": "scope=near(내 동네 범위의 모집·진행 중) · mine(내가 나가거나 연 대회) · club(clubId 동호회가 연 대회)",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "near"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TournamentSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "대회 열기",
+        "description": "동네 인증한 사람(개인 주최) 또는 동호회 회장·운영진(hostClubId, 멤버만 = 월례대회). 신청은 시작 때까지, 체크인은 시작 24시간 전부터",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TournamentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "신청 거두기",
+        "description": "시작 전에만",
+        "operationId": "withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/{id}/start": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "지금 시작 (주최자)",
+        "description": "체크인한 참가자로 대진을 만든다. 둘보다 적으면 대회가 취소된다",
+        "operationId": "start",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/{id}/check-in": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "체크인",
+        "description": "시작 24시간 전부터. 체크인한 참가자로만 대진을 만든다",
+        "operationId": "checkIn",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/{id}/cancel": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "대회 취소 (주최자)",
+        "description": "시작 전에만",
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/{id}/apply": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "신청",
+        "description": "동호회 대회면 clubId(내가 회장·운영진인 동호회)",
+        "operationId": "apply",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "clubId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/fixtures/{fixtureId}/decide": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "마감 지난 판 정하기 (주최자)",
+        "description": "winner=HOME·AWAY 승, NONE 둘 다 패(리그만)",
+        "operationId": "decideFixture",
+        "parameters": [
+          {
+            "name": "fixtureId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "winner",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/entries/{entryId}/decide": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "신청 받기·거절 (주최자)",
+        "operationId": "decide",
+        "parameters": [
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accept",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
                 }
               }
             }
@@ -2693,7 +3045,7 @@
         ],
         "summary": "동호회 만들기",
         "description": "만든 사람의 지금 동네로 만든다. 만든 사람이 첫 멤버",
-        "operationId": "create",
+        "operationId": "create_1",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3504,7 +3856,7 @@
         ],
         "summary": "대결 시작",
         "description": "상대를 기다리는 대결이 있으면 그 문제로 짝이 되고, 없으면 새 대결을 열어 다음 사람을 기다린다. 시간은 이때부터 서버가 잰다.",
-        "operationId": "start",
+        "operationId": "start_1",
         "parameters": [
           {
             "name": "key",
@@ -4436,7 +4788,7 @@
         ],
         "summary": "노쇼 기록 취소 (관리자 전용)",
         "description": "이의가 맞을 때. 처벌을 다시 계산한다",
-        "operationId": "cancel",
+        "operationId": "cancel_1",
         "parameters": [
           {
             "name": "reportId",
@@ -4686,7 +5038,7 @@
         "tags": [
           "apple-web-login-controller"
         ],
-        "operationId": "start_1",
+        "operationId": "start_2",
         "responses": {
           "200": {
             "description": "OK"
@@ -4831,6 +5183,39 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/MyProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/{id}": {
+      "get": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "대회 보기",
+        "description": "참가자, 라운드마다 판(대진표), 리그면 순위표, 내 참가·할 수 있는 일",
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentView"
                 }
               }
             }
@@ -7146,7 +7531,7 @@
         ],
         "summary": "앱 게임 목록",
         "description": "게임마다 내 레이팅·전적·최고 기록을 함께 준다.",
-        "operationId": "list",
+        "operationId": "list_1",
         "responses": {
           "200": {
             "description": "OK",
@@ -7711,7 +8096,7 @@
         ],
         "summary": "신고 목록 (관리자 전용)",
         "description": "최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.",
-        "operationId": "list_1",
+        "operationId": "list_2",
         "responses": {
           "200": {
             "description": "OK",
@@ -8504,6 +8889,487 @@
           },
           "standalone": {
             "type": "boolean"
+          }
+        }
+      },
+      "TournamentCreateRequest": {
+        "required": [
+          "boards",
+          "entrantType",
+          "format",
+          "joinMode",
+          "maxEntrants",
+          "membersOnly",
+          "perBoard",
+          "roundDays",
+          "ruleId",
+          "startsAt",
+          "thirdPlace",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "LEAGUE",
+              "KNOCKOUT"
+            ]
+          },
+          "entrantType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "CLUB"
+            ]
+          },
+          "hostClubId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "membersOnly": {
+            "type": "boolean"
+          },
+          "joinMode": {
+            "type": "string"
+          },
+          "maxEntrants": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "roundDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "thirdPlace": {
+            "type": "boolean"
+          },
+          "boards": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "perBoard": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TournamentClubChoice": {
+        "required": [
+          "clubId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "TournamentEntryView": {
+        "required": [
+          "id",
+          "name",
+          "rating",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TournamentFixtureView": {
+        "required": [
+          "awayScore",
+          "homeScore",
+          "id",
+          "mine",
+          "needsHost",
+          "orderNo",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "orderNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "home": {
+            "$ref": "#/components/schemas/TournamentSide"
+          },
+          "away": {
+            "$ref": "#/components/schemas/TournamentSide"
+          },
+          "status": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "winnerEntryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "homeScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "awayScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "clubMatchId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "needsHost": {
+            "type": "boolean"
+          },
+          "mine": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TournamentMyEntry": {
+        "required": [
+          "entryId",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TournamentRoundView": {
+        "required": [
+          "closesAt",
+          "fixtures",
+          "name",
+          "opensAt",
+          "round"
+        ],
+        "type": "object",
+        "properties": {
+          "round": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "opensAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closesAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fixtures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TournamentFixtureView"
+            }
+          }
+        }
+      },
+      "TournamentSide": {
+        "required": [
+          "entryId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "clubId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TournamentStandingView": {
+        "required": [
+          "diff",
+          "draws",
+          "entryId",
+          "losses",
+          "name",
+          "played",
+          "points",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "played": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "draws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "points": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diff": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TournamentSummary": {
+        "required": [
+          "entrantType",
+          "entryCount",
+          "format",
+          "hostName",
+          "id",
+          "maxEntrants",
+          "roundDays",
+          "ruleId",
+          "ruleTitle",
+          "startsAt",
+          "status",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "entrantType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "roundDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hostName": {
+            "type": "string"
+          },
+          "hostClubId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxEntrants": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dongName": {
+            "type": "string"
+          },
+          "winnerName": {
+            "type": "string"
+          }
+        }
+      },
+      "TournamentView": {
+        "required": [
+          "boards",
+          "canCheckIn",
+          "entries",
+          "isHost",
+          "joinMode",
+          "membersOnly",
+          "myStaffClubs",
+          "perBoard",
+          "rounds",
+          "standings",
+          "summary",
+          "thirdPlace"
+        ],
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/TournamentSummary"
+          },
+          "description": {
+            "type": "string"
+          },
+          "joinMode": {
+            "type": "string"
+          },
+          "membersOnly": {
+            "type": "boolean"
+          },
+          "minRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entryDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "thirdPlace": {
+            "type": "boolean"
+          },
+          "boards": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "perBoard": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isHost": {
+            "type": "boolean"
+          },
+          "my": {
+            "$ref": "#/components/schemas/TournamentMyEntry"
+          },
+          "myStaffClubs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TournamentClubChoice"
+            }
+          },
+          "canCheckIn": {
+            "type": "boolean"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TournamentEntryView"
+            }
+          },
+          "rounds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TournamentRoundView"
+            }
+          },
+          "standings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TournamentStandingView"
+            }
+          },
+          "runnerUpName": {
+            "type": "string"
           }
         }
       },
@@ -12037,13 +12903,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "totalGameCount": {
-            "type": "integer",
-            "format": "int32"
-          },
           "rating": {
             "type": "number",
             "format": "double"
+          },
+          "totalGameCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

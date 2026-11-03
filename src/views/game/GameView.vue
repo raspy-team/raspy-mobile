@@ -502,7 +502,7 @@ async function removeGame(g) {
   menuGame.value = null
   const ok = await confirmDialog({
     title: '경기를 삭제할까요?',
-    message: '신청한 사람들에게서도 사라져요.',
+    message: '함께하기로 한 사람과 신청한 사람에게 취소됐다고 알려요.',
     confirmText: '삭제',
     danger: true,
   })

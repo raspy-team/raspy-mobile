@@ -70,19 +70,22 @@
           <div
             class="flex items-center flex-1 min-w-0 bg-surface-2 rounded-full px-3 py-2 focus-within:bg-surface focus-within:border-line transition border"
           >
-            <span
+            <button
               v-if="replyingToId"
-              class="inline-block px-2 py-0.5 mr-2 bg-surface-3 text-fg font-medium rounded-full text-sm whitespace-nowrap cursor-pointer select-none"
+              type="button"
+              :aria-label="`${replyNickname}님에게 답글 그만 쓰기`"
+              class="inline-flex items-center px-2 py-0.5 mr-2 bg-surface-3 text-fg font-medium rounded-full text-sm whitespace-nowrap select-none"
               @click="resetInput"
             >
               {{ replyNickname }}
-              <UiIcon name="fas fa-times" class="ml-1 text-xs" />
-            </span>
+              <UiIcon name="fas fa-times" class="ml-1 text-xs" aria-hidden="true" />
+            </button>
             <input
               v-model="inputContent"
               ref="commentInputRef"
               type="text"
               placeholder="댓글 달기"
+              aria-label="댓글"
               class="flex-1 text-base bg-transparent border-0 focus:ring-0 p-0 m-0 outline-none"
               :disabled="isLoading"
               maxlength="1000"
@@ -120,7 +123,7 @@
           v-if="inputImagePreview"
           class="flex items-center gap-2 px-4 pt-1 pb-2 bg-surface border-t border-line"
         >
-          <img :src="inputImagePreview" class="w-14 h-14 rounded-lg object-cover border" />
+          <img :src="inputImagePreview" alt="올릴 사진" class="w-14 h-14 rounded-lg object-cover" />
           <button @click="removeInputImage" type="button" aria-label="사진 빼기" class="w-11 h-11 flex items-center justify-center text-fg-muted hover:text-danger">
             <UiIcon name="fas fa-times" class="text-lg" />
           </button>
@@ -131,7 +134,7 @@
           class="fixed inset-0 z-dialog flex items-center justify-center bg-black/80"
           @click="previewImg = null"
         >
-          <img :src="previewImg" class="max-h-[80vh] max-w-full rounded-xl shadow-lg" />
+          <img :src="previewImg" alt="댓글 사진" class="max-h-[80vh] max-w-full rounded-xl shadow-lg" />
         </div>
       </div>
     </transition>

@@ -38,11 +38,9 @@
         <span v-html="autoLink(comment.content)" />
       </div>
       <div v-if="comment.imageUrl" class="mt-1">
-        <img
-          :src="comment.imageUrl"
-          class="max-w-[140px] max-h-[140px] rounded-xl cursor-pointer hover:brightness-95 transition"
-          @click="emitImgClick(comment.imageUrl)"
-        />
+        <button type="button" class="block rounded-xl" aria-label="댓글 사진 크게 보기" @click="emitImgClick(comment.imageUrl)">
+          <img :src="comment.imageUrl" alt="" loading="lazy" class="max-w-[140px] max-h-[140px] rounded-xl hover:brightness-95 transition" />
+        </button>
       </div>
       <div class="flex items-center gap-2 mt-1.5 t-micro">
         <button

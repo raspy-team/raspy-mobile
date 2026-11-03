@@ -55,7 +55,7 @@
         <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
 
         <!-- 언제쯤: 열린 경기를 보는 사람이 신청할지 정하는 데 가장 필요한 정보. 정확한 시간은 상대와 함께 -->
-        <h1 class="t-title">언제쯤 할까요?</h1>
+        <h2 class="t-heading">언제쯤 할까요?</h2>
         <div class="flex flex-wrap gap-2 mt-3" :class="when === EXACT ? 'mb-3' : 'mb-8'">
           <UiChip v-for="w in WHEN" :key="w.label" :selected="when === w.label" @click="when = w.label">{{ w.label }}</UiChip>
         </div>
@@ -63,7 +63,7 @@
         <UiInput v-if="when === EXACT" v-model="exactTime" type="datetime-local" :min="nowLocal" class="mb-8" />
 
         <!-- 어디서: 만나서 / 화상으로 / 다른 게임에서. 화상·다른 게임은 동네 없이 전국에 보인다 -->
-        <h1 class="t-title">어디서 할까요?</h1>
+        <h2 class="t-heading">어디서 할까요?</h2>
         <div class="flex flex-wrap gap-2 mt-3">
           <UiChip v-for="v in VENUES" :key="v.value" :selected="venue === v.value" @click="venue = v.value">{{ v.label }}</UiChip>
         </div>
@@ -73,7 +73,7 @@
 
         <!-- 몇 명이서: 규칙이 팀·여럿을 받을 때만 보인다 -->
         <template v-if="formats.length > 1">
-          <h1 class="t-title">몇 명이서 할까요?</h1>
+          <h2 class="t-heading">몇 명이서 할까요?</h2>
           <div class="flex flex-wrap gap-2 mt-3">
             <UiChip v-for="f in formats" :key="f.value" :selected="format === f.value" @click="pickFormat(f.value)">{{ f.label }}</UiChip>
           </div>
@@ -95,7 +95,7 @@
           </div>
         </template>
 
-        <h1 class="t-title">{{ format === 'DUEL' ? '누구와 겨룰까요?' : '어떻게 모을까요?' }}</h1>
+        <h2 class="t-heading">{{ format === 'DUEL' ? '누구와 겨룰까요?' : '어떻게 모을까요?' }}</h2>
         <p class="t-caption mt-1 mb-5">시간·장소는 나중에 내 경기에서 언제든 정하거나 바꿀 수 있어요.</p>
 
         <div class="space-y-2">

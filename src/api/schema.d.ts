@@ -1997,6 +1997,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/realtime/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 실시간 초대 방 열기
+         * @description 정한 한 사람만 들어오는 방을 열고 메시지로 도전장을 보낸다. 대기실 목록·봇에서 빠지고 10분 기다린다
+         */
+        post: operations["inviteRealtime"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/{key}/plays": {
         parameters: {
             query?: never;
@@ -2192,6 +2212,26 @@ export interface paths {
          * @description 방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.
          */
         post: operations["callBot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/realtime/{gameId}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 실시간 초대 받기
+         * @description 초대받은 사람만. 들어오면 바로 3·2·1
+         */
+        post: operations["acceptInvite"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5529,6 +5569,9 @@ export interface components {
             /** Format: int32 */
             botAfterSeconds: number;
             fixture: boolean;
+            invitee?: components["schemas"]["AppPlayer"];
+            /** Format: date-time */
+            inviteUntil?: string;
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
             simultaneous: boolean;
@@ -5783,6 +5826,8 @@ export interface components {
             open: boolean;
             /** Format: date-time */
             challengeUntil?: string;
+            live: boolean;
+            forMe: boolean;
         };
         SuspendRequest: {
             /** Format: int64 */
@@ -10025,6 +10070,31 @@ export interface operations {
             };
         };
     };
+    inviteRealtime: {
+        parameters: {
+            query: {
+                to: number;
+                from?: string;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
     start_1: {
         parameters: {
             query?: {
@@ -10260,6 +10330,28 @@ export interface operations {
         };
     };
     callBot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    acceptInvite: {
         parameters: {
             query?: never;
             header?: never;

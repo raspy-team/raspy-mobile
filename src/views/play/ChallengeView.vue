@@ -9,12 +9,11 @@
           <UiAvatar :src="info.challenger.profilePicture" :name="info.challenger.nickname" :user-id="info.challenger.userId" size="lg" class="mx-auto" />
           <p class="t-title mt-4">{{ info.challenger.nickname }}님의 도전장</p>
           <p class="t-heading mt-1">{{ info.title }}</p>
-          <p class="t-caption mt-2">{{ info.summary }}. 같은 문제로 겨뤄요</p>
+          <p class="t-caption mt-2">{{ info.summary }}. {{ info.live ? '지금 기다리고 있어요. 들어가면 바로 시작해요' : '같은 문제로 겨뤄요' }}</p>
         </UiCard>
-        <UiButton v-if="info.open && !info.mine" block size="lg" class="mt-4" :to="`/play/${info.key}?challenge=${info.gameId}`">도전 받기</UiButton>
-        <p v-else class="t-caption text-center mt-4">
-          {{ info.mine ? '내가 보낸 도전장이에요. 친구가 받으면 알림이 가요' : '이미 누가 받았거나 끝난 도전이에요' }}
-        </p>
+        <!-- 실시간 게임은 그 사람만 들어오는 방으로 (RealtimeView ?invite=) -->
+        <UiButton v-if="info.open && !info.mine" block size="lg" class="mt-4" :to="info.live ? `/play/${info.key}/live?invite=${info.gameId}` : `/play/${info.key}?challenge=${info.gameId}`">도전 받기</UiButton>
+        <p v-else class="t-caption text-center mt-4">{{ closedLine }}</p>
         <UiButton block variant="ghost" class="mt-2" :to="`/play/${info.key}`">이 게임 둘러보기</UiButton>
       </template>
     </main>
@@ -23,7 +22,7 @@
 
 <script setup lang="ts">
 // 도전 링크 (/challenge/:gameId). 받으면 같은 문제로 바로 플레이한다 (AppGameView ?challenge=)
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -32,6 +31,13 @@ import { UiAvatar, UiButton, UiCard, UiEmptyState, UiSkeleton, UiTopBar } from '
 const route = useRoute()
 const info = ref<components['schemas']['AppChallenge'] | null>(null)
 const error = ref('')
+const closedLine = computed(() => {
+  const i = info.value
+  if (!i) return ''
+  if (i.mine) return '내가 보낸 도전장이에요. 받으면 알림이 가요'
+  if (!i.forMe) return '다른 사람에게 보낸 도전장이에요'
+  return i.live ? '도전한 사람이 나갔거나 시간이 지났어요' : '이미 누가 받았거나 끝난 도전이에요'
+})
 
 onMounted(async () => {
   try {

@@ -216,7 +216,8 @@
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
-            <template v-if="ladderTo && fromFeed">{{ ladderName }}님에게 도전해요. 먼저 한 판 하면 같은 문제로 도전장을 메시지로 보내요</template>
+            <template v-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님만 들어오는 방을 열고 메시지로 도전장을 보내요. 들어오면 바로 시작해요</template>
+            <template v-else-if="ladderTo && fromFeed">{{ ladderName }}님에게 도전해요. 먼저 한 판 하면 같은 문제로 도전장을 메시지로 보내요</template>
             <template v-else-if="ladderTo">만나기 전에 {{ ladderName }}님과 한 판 해요. 끝나면 같은 문제로 도전장을 메시지로 보내요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번 풀 수 있어요. 오늘 같은 문제를 푼 사람들과 견줘요</template>
             <template v-else>기다리는 사람이 있으면 바로 시작하고, 없으면 다음 사람을 기다려요<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template></template>
@@ -443,7 +444,12 @@ function begin(p: Play) {
 }
 
 async function start() {
-  // 실시간 게임은 대기실 화면으로
+  // 실시간 게임은 대기실 화면으로. 정한 사람에게 도전하면 그 사람만 들어오는 방(턴제만. 함께 쓰는 판·실시간 대전은 아직 없다)
+  if (ladderTo && (game.value?.shared || game.value?.battle)) {
+    startError.value = '이 게임은 아직 도전장을 보낼 수 없어요'
+    return
+  }
+  if (ladderTo && game.value?.playMode === 'REALTIME') return router.push({ path: `/play/${key.value}/live`, query: { to: ladderTo, toName: ladderName } })
   if (game.value?.shared) return router.push(`/play/${key.value}/board`)
   if (game.value?.playMode === 'REALTIME') return router.push(game.value.battle ? `/play/${key.value}/battle` : liveRoute(key.value))
   starting.value = true

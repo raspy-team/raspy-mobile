@@ -4082,6 +4082,55 @@
         }
       }
     },
+    "/api/app-games/{key}/realtime/invite": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "실시간 초대 방 열기",
+        "description": "정한 한 사람만 들어오는 방을 열고 메시지로 도전장을 보낸다. 대기실 목록·봇에서 빠지고 10분 기다린다",
+        "operationId": "inviteRealtime",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/{key}/plays": {
       "post": {
         "tags": [
@@ -4452,6 +4501,39 @@
         "summary": "봇 부르기",
         "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.",
         "operationId": "callBot",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/accept": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "실시간 초대 받기",
+        "description": "초대받은 사람만. 들어오면 바로 3·2·1",
+        "operationId": "acceptInvite",
         "parameters": [
           {
             "name": "gameId",
@@ -11658,6 +11740,13 @@
           "fixture": {
             "type": "boolean"
           },
+          "invitee": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "inviteUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
           "result": {
             "type": "string",
             "enum": [
@@ -12433,8 +12522,10 @@
       "AppChallenge": {
         "required": [
           "challenger",
+          "forMe",
           "gameId",
           "key",
+          "live",
           "mine",
           "open",
           "summary",
@@ -12467,6 +12558,12 @@
           "challengeUntil": {
             "type": "string",
             "format": "date-time"
+          },
+          "live": {
+            "type": "boolean"
+          },
+          "forMe": {
+            "type": "boolean"
           }
         }
       },

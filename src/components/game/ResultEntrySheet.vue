@@ -7,7 +7,7 @@
 
     <!-- 셋 이상이 각자: 등수로 또는 점수로 -->
     <template v-if="isGroup">
-      <div class="flex gap-2 mb-4">
+      <div class="flex flex-wrap gap-2 mb-4">
         <UiChip :selected="groupMode === 'place'" @click="groupMode = 'place'">등수로</UiChip>
         <UiChip :selected="groupMode === 'score'" @click="groupMode = 'score'">점수로</UiChip>
         <UiChip v-if="!counter" :selected="groupMode === 'vote'" @click="groupMode = 'vote'">투표로</UiChip>

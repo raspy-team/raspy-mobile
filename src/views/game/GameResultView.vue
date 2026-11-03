@@ -195,7 +195,7 @@
             <!-- 또 만나고 싶나요? (만나서 한 경기만, 안전·신뢰 B). 상대에게 보이지 않고 신뢰 온도에만 -->
             <div v-if="game?.venue === 'IN_PERSON'">
               <p class="t-label mb-1">또 만나서 하고 싶나요?</p>
-              <div class="flex gap-2" role="radiogroup" aria-label="또 만나서 하고 싶나요?">
+              <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="또 만나서 하고 싶나요?">
                 <UiChip :selected="review.meetAgain === true" @click="review.meetAgain = review.meetAgain === true ? null : true">네, 또 하고 싶어요</UiChip>
                 <UiChip :selected="review.meetAgain === false" @click="review.meetAgain = review.meetAgain === false ? null : false">아니요</UiChip>
               </div>

@@ -51,7 +51,7 @@
 
       <!-- 만든 사람 -->
       <button type="button" class="w-full flex items-center gap-3 py-5 mt-2 border-b border-line text-left" @click="router.push('/profile/' + rule.createdBy.id)">
-        <UiAvatar :src="rule.createdBy.profile?.profilePicture" :name="rule.createdBy.nickname" size="md" />
+        <UiAvatar :src="rule.createdBy.profile?.profilePicture" :name="rule.createdBy.nickname" :user-id="rule.createdBy.id" size="md" />
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ rule.createdBy.nickname }}님이 만들었어요</span>
           <span v-if="rule.lastPlayedAt" class="block t-caption mt-0.5">마지막 경기 {{ timeAgo(rule.lastPlayedAt) }}</span>
@@ -93,7 +93,7 @@
           >
             <template #leading>
               <span class="w-6 text-center t-heading tabular-nums">{{ r.rank }}</span>
-              <UiAvatar :src="r.userAvatar" :name="r.userName" size="sm" />
+              <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
             </template>
           </UiListItem>
         </UiList>

@@ -21,7 +21,7 @@
           @click="requestsOpen = true"
         >
           <span class="relative flex -space-x-3">
-            <UiAvatar v-for="r in inbox.friendRequests.slice(0, 2)" :key="r.id" :src="r.avatar" :name="r.nickname" size="md" class="ring-2 ring-canvas" />
+            <UiAvatar v-for="r in inbox.friendRequests.slice(0, 2)" :key="r.id" :src="r.avatar" :name="r.nickname" :user-id="r.id" size="md" class="ring-2 ring-canvas" />
           </span>
           <span class="flex-1 min-w-0">
             <span class="block t-heading">친구 요청 {{ inbox.friendRequests.length }}개</span>
@@ -74,7 +74,7 @@
       <UiList v-if="inbox.friendRequests.length">
         <UiListItem v-for="r in inbox.friendRequests" :key="r.id" plain :title="r.nickname" :subtitle="r.intro || (r.username ? `@${r.username}` : '')">
           <template #leading>
-            <button type="button" :aria-label="`${r.nickname} 프로필`" @click="goProfile(r.id)"><UiAvatar :src="r.avatar" :name="r.nickname" size="sm" /></button>
+            <button type="button" :aria-label="`${r.nickname} 프로필`" @click="goProfile(r.id)"><UiAvatar :src="r.avatar" :name="r.nickname" :user-id="r.id" size="sm" /></button>
           </template>
           <template #trailing>
             <span class="flex gap-1.5">

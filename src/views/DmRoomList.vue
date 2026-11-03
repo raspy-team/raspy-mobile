@@ -21,7 +21,7 @@
       <ul v-else class="ui-appear">
         <li v-for="dm in rooms" :key="dm.targetUserId">
           <button type="button" class="w-full flex items-center gap-3 py-3 text-left rounded-lg -mx-2 px-2 active:bg-surface-2 transition-colors" @click="router.push(`/chat/${dm.targetUserId}`)">
-            <UiAvatar :src="dm.targetUserProfileUrl" :name="dm.targetUserNickname" size="md" />
+            <UiAvatar :src="dm.targetUserProfileUrl" :name="dm.targetUserNickname" :user-id="dm.targetUserId" size="md" />
             <span class="flex-1 min-w-0">
               <span class="flex items-baseline gap-2">
                 <span class="flex-1 truncate" :class="dm.unreadCount ? 't-heading' : 't-body'">{{ dm.targetUserNickname }}</span>
@@ -44,7 +44,7 @@
       <UiListSkeleton v-if="friendsLoading" :rows="4" />
       <UiList v-else-if="friends.length">
         <UiListItem v-for="f in friends" :key="f.id" :title="f.nickname" :subtitle="`@${f.username}`" chevron @click="startChat(f.id)">
-          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" size="sm" /></template>
+          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
       <UiEmptyState v-else icon="fas fa-user-group" title="아직 친구가 없어요" description="경기를 함께한 사람의 프로필에서 메시지를 보낼 수 있어요" />

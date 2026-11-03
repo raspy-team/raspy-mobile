@@ -154,7 +154,7 @@
           :to="`/profile/${u.id}`"
           chevron
         >
-          <template #leading><UiAvatar :src="u.avatar" :name="u.nickname" size="sm" /></template>
+          <template #leading><UiAvatar :src="u.avatar" :name="u.nickname" :user-id="u.id" size="sm" /></template>
         </UiListItem>
       </UiList>
     </UiSheet>

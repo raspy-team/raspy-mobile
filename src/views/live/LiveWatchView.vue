@@ -14,7 +14,7 @@
         <div class="grid gap-3 mt-4" :style="{ gridTemplateColumns: `repeat(${live.sides.length}, minmax(0, 1fr))` }">
           <UiCard v-for="s in live.sides" :key="s.side" class="text-center py-5" :class="{ 'ring-2 ring-signal': live.myCheer === s.side }">
             <div class="flex justify-center -space-x-2">
-              <UiAvatar v-for="p in s.players" :key="p.userId" :src="p.profilePicture || undefined" :name="p.nickname" size="sm" />
+              <UiAvatar v-for="p in s.players" :key="p.userId" :src="p.profilePicture || undefined" :name="p.nickname" :user-id="p.userId" size="sm" />
             </div>
             <p class="t-label mt-2 truncate">{{ s.players.map((p) => p.nickname).join(' · ') }}</p>
             <UiRollNumber class="t-display tabular-nums mt-2 block" :value="s.score" />

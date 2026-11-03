@@ -3,7 +3,7 @@
     <!-- 무엇을 · 어디서 · 언제 (이름은 아래 결과에 한 번만) -->
     <header class="flex items-center gap-3">
       <span class="flex -space-x-2 flex-shrink-0">
-        <UiAvatar v-for="pl in players" :key="pl.id" :src="pl.avatar" :name="pl.name" size="sm" class="ring-2 ring-canvas" />
+        <UiAvatar v-for="pl in players" :key="pl.id" :src="pl.avatar" :name="pl.name" :user-id="pl.id" size="sm" class="ring-2 ring-canvas" />
       </span>
       <button type="button" class="flex-1 min-w-0 text-left" @click="emit('rule')">
         <span class="flex items-center gap-1.5 text-sm font-semibold text-fg truncate">

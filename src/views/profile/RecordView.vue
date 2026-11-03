@@ -133,7 +133,7 @@
             chevron
             @click="router.push('/profile/' + o.id)"
           >
-            <template #leading><UiAvatar :src="o.avatar" :name="o.nickname" size="sm" /></template>
+            <template #leading><UiAvatar :src="o.avatar" :name="o.nickname" :user-id="o.id" size="sm" /></template>
             <template #trailing>
               <UiBadge :tone="o.win > o.lose ? 'success' : o.win < o.lose ? 'danger' : 'neutral'">
                 {{ o.win > o.lose ? '우세' : o.win < o.lose ? '열세' : '팽팽' }}

@@ -107,7 +107,7 @@
         chevron
         @click="router.push('/profile/' + c.userId)"
       >
-        <template #leading><UiAvatar :src="c.applicantProfileUrl" :name="c.applicantNickname" size="sm" /></template>
+        <template #leading><UiAvatar :src="c.applicantProfileUrl" :name="c.applicantNickname" :user-id="c.userId" size="sm" /></template>
       </UiListItem>
     </UiList>
     <UiEmptyState v-else icon="fas fa-user-group" title="아직 신청한 사람이 없어요" />

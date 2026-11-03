@@ -30,7 +30,7 @@
           <p class="t-caption text-center mt-1">{{ peerVotes }}/{{ resSides.length }}명이 뽑았어요. 모두 뽑거나 24시간이 지나면 표가 많은 순서로 등수가 정해져요.</p>
           <ul class="mt-4 rounded-xl bg-surface divide-y divide-line">
             <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3 px-4 h-14">
-              <UiAvatar :src="r.profileUrl" :name="r.nickname" size="sm" />
+              <UiAvatar :src="r.profileUrl" :name="r.nickname" :user-id="r.id" size="sm" />
               <span class="flex-1 text-sm truncate">{{ r.nickname }}<span v-if="r.id === currentUserId" class="text-fg-subtle"> (나)</span></span>
               <UiBadge v-if="myPeerVote === r.id" tone="primary">뽑음</UiBadge>
               <UiButton v-else-if="isParticipant && !myPeerVote && r.id !== currentUserId" size="sm" variant="tonal" :loading="voting === r.id" @click="peerVote(r.id)">뽑기</UiButton>
@@ -43,7 +43,7 @@
           <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3 px-4 h-14">
             <span class="t-mono w-8 text-fg" :class="r.place === 1 ? 'font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
             <button type="button" class="flex items-center gap-2.5 min-w-0 flex-1 text-left" @click="router.push('/profile/' + r.id)">
-              <UiAvatar :src="r.profileUrl" :name="r.nickname" size="sm" />
+              <UiAvatar :src="r.profileUrl" :name="r.nickname" :user-id="r.id" size="sm" />
               <span class="text-sm truncate" :class="r.place === 1 ? 'text-fg font-medium' : 'text-fg-muted'">{{ r.nickname }}<span v-if="r.id === currentUserId" class="text-fg-subtle"> (나)</span></span>
             </button>
             <span v-if="!placesEntered" class="font-mono tabular-nums text-fg-muted">{{ r.points }}</span>
@@ -61,7 +61,7 @@
             @click="router.push('/profile/' + side.user.id)"
           >
             <span class="relative">
-              <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" size="lg" />
+              <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" :user-id="side.user.id" size="lg" />
               <span
                 v-if="side.champion"
                 class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-signal text-signal-on flex items-center justify-center text-sm"

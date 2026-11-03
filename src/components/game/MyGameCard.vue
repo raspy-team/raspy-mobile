@@ -20,7 +20,7 @@
         <span v-if="row.name" class="t-micro w-9 flex-shrink-0">{{ row.name }}</span>
         <div class="flex items-center gap-1.5 flex-wrap min-w-0">
           <button v-for="p in row.players" :key="p.id" type="button" :aria-label="p.nickname" @click="emit('profile', p.id)">
-            <UiAvatar :src="p.profileUrl" :name="p.nickname" size="sm" />
+            <UiAvatar :src="p.profileUrl" :name="p.nickname" :user-id="p.id" size="sm" />
           </button>
           <span v-for="n in row.empty" :key="'e' + n" class="w-8 h-8 rounded-full border border-dashed border-line-strong" aria-hidden="true"></span>
         </div>
@@ -30,7 +30,7 @@
     <!-- 나 vs 상대 -->
     <div v-else class="flex items-center gap-3 px-4 pb-4">
       <button type="button" class="flex items-center gap-2 min-w-0 flex-1" @click="emit('profile', me.id)">
-        <UiAvatar :src="me.avatar" :name="me.name" size="sm" />
+        <UiAvatar :src="me.avatar" :name="me.name" :user-id="me.id" size="sm" />
         <span class="text-sm text-fg truncate">{{ me.name }}</span>
       </button>
       <span class="t-micro">vs</span>
@@ -41,7 +41,7 @@
         @click="emit('profile', opponent.id)"
       >
         <span class="text-sm text-fg truncate">{{ opponent.name }}</span>
-        <UiAvatar :src="opponent.avatar" :name="opponent.name" size="sm" />
+        <UiAvatar :src="opponent.avatar" :name="opponent.name" :user-id="opponent.id" size="sm" />
       </button>
       <span v-else class="flex-1 flex items-center justify-end gap-2 min-w-0">
         <span class="t-caption truncate">상대 구하는 중</span>

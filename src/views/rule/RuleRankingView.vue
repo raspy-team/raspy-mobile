@@ -49,7 +49,7 @@
           >
             <template #leading>
               <span class="w-7 text-center tabular-nums" :class="r.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ r.rank }}</span>
-              <UiAvatar :src="r.userAvatar" :name="r.userName" size="sm" />
+              <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
             </template>
             <template #trailing>
               <span class="t-heading tabular-nums">{{ r.rating }}</span>

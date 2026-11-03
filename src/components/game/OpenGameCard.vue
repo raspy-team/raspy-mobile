@@ -19,7 +19,7 @@
     <!-- 누구와 · 신청 -->
     <div class="flex items-center gap-3 px-4 pb-4">
       <button type="button" class="flex-1 min-w-0 flex items-center gap-2.5 text-left" @click="emit('profile')">
-        <UiAvatar :src="game.ownerProfileUrl" :name="game.ownerNickname" size="sm" />
+        <UiAvatar :src="game.ownerProfileUrl" :name="game.ownerNickname" :user-id="game.ownerId" size="sm" />
         <span class="min-w-0">
           <span class="block text-sm text-fg truncate">{{ game.ownerNickname }}</span>
           <!-- 아직 안 해 본 사람의 '1500점 · 첫 경기 전'은 정보가 아니라 소음이라 뺀다 -->

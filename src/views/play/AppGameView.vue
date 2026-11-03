@@ -239,7 +239,7 @@
                 >
                   <template #leading>
                     <span class="w-6 t-mono text-center">{{ r.rank }}</span>
-                    <UiAvatar :src="r.userAvatar" :name="r.userName" size="sm" />
+                    <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
                   </template>
                   <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
                 </UiListItem>
@@ -257,7 +257,7 @@
                 >
                   <template #leading>
                     <span class="w-6 t-mono text-center">{{ e.rank }}</span>
-                    <UiAvatar :src="e.player.profilePicture" :name="e.player.nickname" size="sm" />
+                    <UiAvatar :src="e.player.profilePicture" :name="e.player.nickname" :user-id="e.player.userId" size="sm" />
                   </template>
                   <template #trailing><span class="t-mono">{{ e.score }}{{ game.scoreUnit }}</span></template>
                 </UiListItem>

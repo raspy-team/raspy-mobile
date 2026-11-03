@@ -16,7 +16,7 @@
           chevron
           @click="goToUser(user.id)"
         >
-          <template #leading><UiAvatar :src="user.avatar" :name="user.nickname" size="md" /></template>
+          <template #leading><UiAvatar :src="user.avatar" :name="user.nickname" :user-id="user.id" size="md" /></template>
         </UiListItem>
       </UiList>
 

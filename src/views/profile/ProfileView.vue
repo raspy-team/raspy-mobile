@@ -204,7 +204,7 @@
           chevron
           @click="goFriend(f.id)"
         >
-          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" size="sm" /></template>
+          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
       <UiEmptyState v-else icon="fas fa-user-group" title="아직 친구가 없어요" :description="user?.isMe ? '경기를 함께한 사람에게 친구를 걸어보세요' : ''" />

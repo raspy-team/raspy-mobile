@@ -6,7 +6,7 @@
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
       <template v-else-if="info">
         <UiCard class="text-center py-8">
-          <UiAvatar :src="info.challenger.profilePicture" :name="info.challenger.nickname" size="lg" class="mx-auto" />
+          <UiAvatar :src="info.challenger.profilePicture" :name="info.challenger.nickname" :user-id="info.challenger.userId" size="lg" class="mx-auto" />
           <p class="t-title mt-4">{{ info.challenger.nickname }}님의 도전장</p>
           <p class="t-heading mt-1">{{ info.title }}</p>
           <p class="t-caption mt-2">{{ info.summary }}. 같은 문제로 겨뤄요</p>

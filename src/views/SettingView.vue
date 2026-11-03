@@ -5,7 +5,7 @@
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-32 space-y-8">
       <!-- 나 -->
       <button type="button" class="w-full flex items-center gap-3 py-3 text-left" @click="router.push('/set-profile')">
-        <UiAvatar :src="me.avatar" :name="me.nickname || '나'" size="md" />
+        <UiAvatar :src="me.avatar" :name="me.nickname || '나'" user-id="0" size="md" />
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ me.nickname || ' ' }}</span>
           <span class="block t-caption truncate">{{ me.username ? `@${me.username}` : '' }}</span>
@@ -70,7 +70,7 @@
       <UiListSkeleton v-if="blockedLoading" :rows="3" />
       <UiList v-else-if="blocked.length">
         <UiListItem v-for="u in blocked" :key="u.id" plain :title="u.nickname">
-          <template #leading><UiAvatar :src="u.profile?.profilePicture" :name="u.nickname" size="sm" /></template>
+          <template #leading><UiAvatar :src="u.profile?.profilePicture" :name="u.nickname" :user-id="u.id" size="sm" /></template>
           <template #trailing>
             <UiButton size="sm" variant="secondary" :loading="unblockingId === u.id" @click="unblock(u)">차단 풀기</UiButton>
           </template>

@@ -117,7 +117,7 @@
           :disabled="creating"
           @click="create(f)"
         >
-          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" size="sm" /></template>
+          <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
     </UiSheet>

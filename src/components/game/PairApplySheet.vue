@@ -5,7 +5,7 @@
     <UiEmptyState v-else-if="!friends.length" icon="user-group" title="아직 친구가 없어요" description="친구를 맺으면 둘이 신청할 수 있어요" />
     <UiList v-else>
       <UiListItem v-for="f in friends" :key="f.id" :title="f.nickname" :subtitle="'@' + f.username" @click="pick(f)">
-        <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" size="sm" /></template>
+        <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
       </UiListItem>
     </UiList>
   </UiSheet>

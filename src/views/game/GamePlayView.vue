@@ -10,7 +10,7 @@
       <p class="t-caption">{{ game.sides?.length }}명이 각자 · 시작한 지 {{ elapsedTimeStr }}</p>
       <ul class="mt-4 bg-surface rounded-xl divide-y divide-line">
         <li v-for="s in game.sides" :key="s.key" class="flex items-center gap-3 px-4 py-3">
-          <UiAvatar :src="s.members[0].profileUrl" :name="s.members[0].nickname" size="sm" />
+          <UiAvatar :src="s.members[0].profileUrl" :name="s.members[0].nickname" :user-id="s.members[0].id" size="sm" />
           <span class="text-sm text-fg truncate">{{ s.members[0].nickname }}</span>
         </li>
       </ul>
@@ -56,7 +56,7 @@
           :aria-label="`${side.user.nickname} 1점 올리기`"
           @click="socket_sendScore(side.idx, 1)"
         >
-          <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" size="md" />
+          <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" :user-id="side.user.id" size="md" />
           <span class="text-sm text-fg-muted truncate max-w-full px-2">{{ side.user.nickname }}</span>
           <span class="font-bold tabular-nums leading-none text-fg" style="font-size: clamp(4rem, 14vh, 8rem)">{{ side.score }}</span>
           <span class="flex gap-1" :aria-label="`세트 ${side.sets}개 승리`">

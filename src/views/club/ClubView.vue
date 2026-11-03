@@ -33,7 +33,7 @@
         <UiSection :title="`멤버 ${detail.members.length}`" class="mt-8">
           <UiList>
             <UiListItem v-for="m in detail.members" :key="m.userId" :title="m.nickname" :subtitle="m.isOwner ? '만든 사람' : undefined" :to="`/profile/${m.userId}`">
-              <template #leading><UiAvatar :src="m.profilePicture || undefined" :name="m.nickname" size="sm" /></template>
+              <template #leading><UiAvatar :src="m.profilePicture || undefined" :name="m.nickname" :user-id="m.userId" size="sm" /></template>
             </UiListItem>
           </UiList>
         </UiSection>

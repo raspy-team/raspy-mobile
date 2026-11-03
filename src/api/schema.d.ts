@@ -2167,7 +2167,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/user-profile/{userId}/games": {
+    "/api/user-profile/{userId}/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -2175,10 +2175,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 유저 경기 기록 조회
-         * @description 특정 유저가 플레이한 경기 리스트(요약)를 반환한다.
+         * 유저 기록 (기록 화면)
+         * @description 사람과 한 판의 승패(기간별), 활동 달력·연속 주(연습 포함), 최근 경기, 규칙별 전적·점수·순위, 자주 만난 상대, 개인 최고 기록, 받은 한마디·별점. userId 0은 나
          */
-        get: operations["getUserGames"];
+        get: operations["getUserStats"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4837,6 +4837,11 @@ export interface components {
             startPhotoUrl?: string;
             /** Format: date-time */
             playedAt?: string;
+            /** Format: int32 */
+            place: number;
+            /** Format: int32 */
+            players: number;
+            teams: boolean;
         };
         Top3RuleStatsDto: {
             /** Format: int64 */
@@ -4897,8 +4902,6 @@ export interface components {
             mannerScore: number;
             trust?: components["schemas"]["TrustSummary"];
             /** Format: int32 */
-            playTime: number;
-            /** Format: int32 */
             totalPlayers: number;
             stats: components["schemas"]["UserStatsDto"];
             playedRules: components["schemas"]["FullRuleResponse"][];
@@ -4923,45 +4926,147 @@ export interface components {
             performance?: number;
             performanceHistory?: number[];
         };
-        FullGameSummaryResponse: {
-            /** Format: int64 */
-            id: number;
-            /** Format: date-time */
+        BestLine: {
+            key: string;
+            title: string;
+            icon: string;
+            scoreUnit: string;
+            /** Format: double */
+            score: number;
+            /** Format: int32 */
+            rank: number;
+            /** Format: int32 */
+            players: number;
+            setThisWeek: boolean;
+        };
+        DayCount: {
+            /** Format: date */
             date: string;
-            location?: string;
-            rule: components["schemas"]["FullRuleResponse"];
+            /** Format: int32 */
+            games: number;
+        };
+        MatchLine: {
+            /** Format: int64 */
+            gameId: number;
+            /** Format: int64 */
+            ruleId: number;
+            ruleTitle: string;
+            minorCategory?: string;
+            appGameKey?: string;
+            /** Format: date-time */
+            playedAt: string;
             result: string;
             /** Format: int32 */
-            myScore: number;
+            place: number;
             /** Format: int32 */
-            opponentScore: number;
+            players: number;
+            teams: boolean;
+            opponent?: components["schemas"]["StatsPlayer"];
             /** Format: int32 */
-            setCount: number;
-            setResults: components["schemas"]["SetResult"][];
-            opponent: components["schemas"]["PlayerDto"];
-            me: components["schemas"]["PlayerDto"];
-            review?: string;
-            /** Format: double */
-            mannerScore?: number;
-            /** Format: double */
-            performanceScore?: number;
+            opponentCount: number;
         };
-        PlayerDto: {
+        PeriodStats: {
+            key: string;
+            tally: components["schemas"]["StatsTally"];
+            /** Format: int32 */
+            practiceGames: number;
+            /** Format: int32 */
+            opponents: number;
+            /** Format: int32 */
+            activeDays: number;
+            /** Format: int32 */
+            previousGames?: number;
+        };
+        ResultStreak: {
+            kind: string;
+            /** Format: int32 */
+            count: number;
+        };
+        ReviewLine: {
+            /** Format: int64 */
+            gameId: number;
+            text: string;
+            from: components["schemas"]["StatsPlayer"];
+            ruleTitle: string;
+            /** Format: date-time */
+            at: string;
+        };
+        RivalLine: {
+            player: components["schemas"]["StatsPlayer"];
+            tally: components["schemas"]["StatsTally"];
+            /** Format: date-time */
+            lastPlayedAt: string;
+        };
+        RuleStatsLine: {
+            /** Format: int64 */
+            ruleId: number;
+            ruleTitle: string;
+            minorCategory?: string;
+            appGameKey?: string;
+            tally: components["schemas"]["StatsTally"];
+            /** Format: date-time */
+            lastPlayedAt: string;
+            /** Format: int32 */
+            rating?: number;
+            /** Format: int32 */
+            margin?: number;
+            provisional: boolean;
+            /** Format: int32 */
+            rank?: number;
+            /** Format: int32 */
+            rankedPlayers: number;
+            /** Format: int32 */
+            needGames: number;
+            /** Format: int32 */
+            needOpponents: number;
+        };
+        StarAverage: {
+            /** Format: double */
+            average: number;
+            /** Format: int32 */
+            count: number;
+        };
+        StatsPlayer: {
             /** Format: int64 */
             id: number;
             nickname: string;
-            location?: string;
             avatar?: string;
         };
-        SetResult: {
+        StatsTally: {
             /** Format: int32 */
-            setIdx: number;
+            games: number;
             /** Format: int32 */
-            user1Score: number;
+            wins: number;
             /** Format: int32 */
-            user2Score: number;
+            draws: number;
             /** Format: int32 */
-            winnerIdx: number;
+            losses: number;
+            /** Format: int32 */
+            winRate: number;
+        };
+        UserStatsResponse: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            isMe: boolean;
+            total: components["schemas"]["StatsTally"];
+            /** Format: int32 */
+            practiceGames: number;
+            periods: components["schemas"]["PeriodStats"][];
+            /** Format: date */
+            activitySince: string;
+            activity: components["schemas"]["DayCount"][];
+            /** Format: int32 */
+            weekStreak: number;
+            activeThisWeek: boolean;
+            streak?: components["schemas"]["ResultStreak"];
+            matches: components["schemas"]["MatchLine"][];
+            rules: components["schemas"]["RuleStatsLine"][];
+            rivals: components["schemas"]["RivalLine"][];
+            bests: components["schemas"]["BestLine"][];
+            reviews: components["schemas"]["ReviewLine"][];
+            manner?: components["schemas"]["StarAverage"];
+            skill?: components["schemas"]["StarAverage"];
         };
         UserSearchResultDto: {
             /** Format: int64 */
@@ -5100,6 +5205,10 @@ export interface components {
             provisional: boolean;
             /** Format: int32 */
             rules: number;
+            /** Format: int32 */
+            rank?: number;
+            /** Format: int32 */
+            people?: number;
         };
         RatingPoint: {
             /** Format: date-time */
@@ -5439,6 +5548,16 @@ export interface components {
             /** Format: int32 */
             after: number;
             provisional: boolean;
+        };
+        SetResult: {
+            /** Format: int32 */
+            setIdx: number;
+            /** Format: int32 */
+            user1Score: number;
+            /** Format: int32 */
+            user2Score: number;
+            /** Format: int32 */
+            winnerIdx: number;
         };
         SideResult: {
             /** Format: int32 */
@@ -5827,6 +5946,13 @@ export interface components {
         PhotoDto: {
             url: string;
             mediaType: string;
+        };
+        PlayerDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            avatar?: string;
+            isBot: boolean;
         };
         Quote: {
             /** Format: int64 */
@@ -9037,7 +9163,7 @@ export interface operations {
             };
         };
     };
-    getUserGames: {
+    getUserStats: {
         parameters: {
             query?: never;
             header?: never;
@@ -9054,7 +9180,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["FullGameSummaryResponse"][];
+                    "*/*": components["schemas"]["UserStatsResponse"];
                 };
             };
         };

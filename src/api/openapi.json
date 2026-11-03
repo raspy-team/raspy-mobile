@@ -4245,14 +4245,14 @@
         }
       }
     },
-    "/api/user-profile/{userId}/games": {
+    "/api/user-profile/{userId}/stats": {
       "get": {
         "tags": [
           "user-profile-controller"
         ],
-        "summary": "유저 경기 기록 조회",
-        "description": "특정 유저가 플레이한 경기 리스트(요약)를 반환한다.",
-        "operationId": "getUserGames",
+        "summary": "유저 기록 (기록 화면)",
+        "description": "사람과 한 판의 승패(기간별), 활동 달력·연속 주(연습 포함), 최근 경기, 규칙별 전적·점수·순위, 자주 만난 상대, 개인 최고 기록, 받은 한마디·별점. userId 0은 나",
+        "operationId": "getUserStats",
         "parameters": [
           {
             "name": "userId",
@@ -4270,10 +4270,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullGameSummaryResponse"
-                  }
+                  "$ref": "#/components/schemas/UserStatsResponse"
                 }
               }
             }
@@ -10111,8 +10108,11 @@
           "myScore",
           "opponentNickname",
           "opponentScore",
+          "place",
+          "players",
           "result",
-          "ruleTitle"
+          "ruleTitle",
+          "teams"
         ],
         "type": "object",
         "properties": {
@@ -10143,6 +10143,17 @@
           "playedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "place": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "players": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "teams": {
+            "type": "boolean"
           }
         }
       },
@@ -10274,7 +10285,6 @@
           "mannerScore",
           "myChampions",
           "nickname",
-          "playTime",
           "playedRules",
           "recentGames",
           "stats",
@@ -10325,10 +10335,6 @@
           },
           "trust": {
             "$ref": "#/components/schemas/TrustSummary"
-          },
-          "playTime": {
-            "type": "integer",
-            "format": "int32"
           },
           "totalPlayers": {
             "type": "integer",
@@ -10411,76 +10417,302 @@
           }
         }
       },
-      "FullGameSummaryResponse": {
+      "BestLine": {
         "required": [
-          "date",
-          "id",
-          "me",
-          "myScore",
-          "opponent",
-          "opponentScore",
-          "result",
-          "rule",
-          "setCount",
-          "setResults"
+          "icon",
+          "key",
+          "players",
+          "rank",
+          "score",
+          "scoreUnit",
+          "setThisWeek",
+          "title"
         ],
         "type": "object",
         "properties": {
-          "id": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "scoreUnit": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "players": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "setThisWeek": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DayCount": {
+        "required": [
+          "date",
+          "games"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "games": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MatchLine": {
+        "required": [
+          "gameId",
+          "opponentCount",
+          "place",
+          "playedAt",
+          "players",
+          "result",
+          "ruleId",
+          "ruleTitle",
+          "teams"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
             "type": "integer",
             "format": "int64"
           },
-          "date": {
-            "type": "string",
-            "format": "date-time"
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
           },
-          "location": {
+          "ruleTitle": {
             "type": "string"
           },
-          "rule": {
-            "$ref": "#/components/schemas/FullRuleResponse"
+          "minorCategory": {
+            "type": "string"
+          },
+          "appGameKey": {
+            "type": "string"
+          },
+          "playedAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "result": {
             "type": "string"
           },
-          "myScore": {
+          "place": {
             "type": "integer",
             "format": "int32"
           },
-          "opponentScore": {
+          "players": {
             "type": "integer",
             "format": "int32"
           },
-          "setCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "setResults": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SetResult"
-            }
+          "teams": {
+            "type": "boolean"
           },
           "opponent": {
-            "$ref": "#/components/schemas/PlayerDto"
+            "$ref": "#/components/schemas/StatsPlayer"
           },
-          "me": {
-            "$ref": "#/components/schemas/PlayerDto"
-          },
-          "review": {
-            "type": "string"
-          },
-          "mannerScore": {
-            "type": "number",
-            "format": "double"
-          },
-          "performanceScore": {
-            "type": "number",
-            "format": "double"
+          "opponentCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
-      "PlayerDto": {
+      "PeriodStats": {
+        "required": [
+          "activeDays",
+          "key",
+          "opponents",
+          "practiceGames",
+          "tally"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "tally": {
+            "$ref": "#/components/schemas/StatsTally"
+          },
+          "practiceGames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "opponents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "previousGames": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ResultStreak": {
+        "required": [
+          "count",
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReviewLine": {
+        "required": [
+          "at",
+          "from",
+          "gameId",
+          "ruleTitle",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "text": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/components/schemas/StatsPlayer"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RivalLine": {
+        "required": [
+          "lastPlayedAt",
+          "player",
+          "tally"
+        ],
+        "type": "object",
+        "properties": {
+          "player": {
+            "$ref": "#/components/schemas/StatsPlayer"
+          },
+          "tally": {
+            "$ref": "#/components/schemas/StatsTally"
+          },
+          "lastPlayedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RuleStatsLine": {
+        "required": [
+          "lastPlayedAt",
+          "needGames",
+          "needOpponents",
+          "provisional",
+          "rankedPlayers",
+          "ruleId",
+          "ruleTitle",
+          "tally"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "minorCategory": {
+            "type": "string"
+          },
+          "appGameKey": {
+            "type": "string"
+          },
+          "tally": {
+            "$ref": "#/components/schemas/StatsTally"
+          },
+          "lastPlayedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "margin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provisional": {
+            "type": "boolean"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankedPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "needGames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "needOpponents": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StarAverage": {
+        "required": [
+          "average",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "average": {
+            "type": "number",
+            "format": "double"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StatsPlayer": {
         "required": [
           "id",
           "nickname"
@@ -10494,38 +10726,141 @@
           "nickname": {
             "type": "string"
           },
-          "location": {
-            "type": "string"
-          },
           "avatar": {
             "type": "string"
           }
         }
       },
-      "SetResult": {
+      "StatsTally": {
         "required": [
-          "setIdx",
-          "user1Score",
-          "user2Score",
-          "winnerIdx"
+          "draws",
+          "games",
+          "losses",
+          "winRate",
+          "wins"
         ],
         "type": "object",
         "properties": {
-          "setIdx": {
+          "games": {
             "type": "integer",
             "format": "int32"
           },
-          "user1Score": {
+          "wins": {
             "type": "integer",
             "format": "int32"
           },
-          "user2Score": {
+          "draws": {
             "type": "integer",
             "format": "int32"
           },
-          "winnerIdx": {
+          "losses": {
             "type": "integer",
             "format": "int32"
+          },
+          "winRate": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UserStatsResponse": {
+        "required": [
+          "activeThisWeek",
+          "activity",
+          "activitySince",
+          "bests",
+          "isMe",
+          "matches",
+          "nickname",
+          "periods",
+          "practiceGames",
+          "reviews",
+          "rivals",
+          "rules",
+          "total",
+          "userId",
+          "weekStreak"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "isMe": {
+            "type": "boolean"
+          },
+          "total": {
+            "$ref": "#/components/schemas/StatsTally"
+          },
+          "practiceGames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PeriodStats"
+            }
+          },
+          "activitySince": {
+            "type": "string",
+            "format": "date"
+          },
+          "activity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayCount"
+            }
+          },
+          "weekStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeThisWeek": {
+            "type": "boolean"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/ResultStreak"
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchLine"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleStatsLine"
+            }
+          },
+          "rivals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RivalLine"
+            }
+          },
+          "bests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BestLine"
+            }
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewLine"
+            }
+          },
+          "manner": {
+            "$ref": "#/components/schemas/StarAverage"
+          },
+          "skill": {
+            "$ref": "#/components/schemas/StarAverage"
           }
         }
       },
@@ -10985,6 +11320,14 @@
             "type": "boolean"
           },
           "rules": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "people": {
             "type": "integer",
             "format": "int32"
           }
@@ -12126,6 +12469,33 @@
           },
           "provisional": {
             "type": "boolean"
+          }
+        }
+      },
+      "SetResult": {
+        "required": [
+          "setIdx",
+          "user1Score",
+          "user2Score",
+          "winnerIdx"
+        ],
+        "type": "object",
+        "properties": {
+          "setIdx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user1Score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user2Score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winnerIdx": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -13443,6 +13813,29 @@
           },
           "mediaType": {
             "type": "string"
+          }
+        }
+      },
+      "PlayerDto": {
+        "required": [
+          "id",
+          "isBot",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },

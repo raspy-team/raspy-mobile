@@ -29,7 +29,7 @@
             <div v-if="v.summary.entrantType === 'CLUB'" class="mt-4">
               <p v-if="!v.myStaffClubs.length" class="t-caption">동호회 회장·운영진이 신청해요</p>
               <div v-else class="flex gap-2 flex-wrap">
-                <UiButton v-for="c in v.myStaffClubs" :key="c.clubId" :loading="busy" @click="apply(c.clubId)">{{ c.name }}(으)로 신청</UiButton>
+                <UiButton v-for="c in v.myStaffClubs" :key="c.clubId" :loading="busy" @click="apply(c.clubId)">{{ withRo(c.name) }} 신청</UiButton>
               </div>
             </div>
             <UiButton v-else block size="lg" class="mt-4" :loading="busy" :disabled="full" @click="apply()">{{ full ? '자리가 다 찼어요' : '신청하기' }}</UiButton>
@@ -138,6 +138,7 @@ import type { components } from '@/api/schema'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useToast } from '@/composable/useToast'
 import { refreshOnChange } from '@/websocket/userChannel'
+import { withRo } from '@/utils/format'
 import { UiButton, UiCard, UiEmptyState, UiIcon, UiList, UiListItem, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type Schemas = components['schemas']

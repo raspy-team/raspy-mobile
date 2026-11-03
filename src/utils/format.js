@@ -59,3 +59,16 @@ export function who(p, fallback = '상대') {
   const name = p.nickname ?? p.name ?? fallback
   return p.isBot ? `${name} (봇)` : name
 }
+
+// 받침에 따라 '으로/로' ('(으)로'처럼 괄호로 쓰지 않게, 11/5 밤샘 C). ㄹ 받침은 '로' (서울로)
+export function withRo(word) {
+  const s = String(word ?? '')
+  const c = s.charCodeAt(s.length - 1) - 0xac00
+  if (!(c >= 0 && c <= 11171)) {
+    // 숫자는 읽는 소리로 (영·삼·육 → 으로, 일·칠·팔은 ㄹ이라 로), 영문 등은 로
+    const d = s.slice(-1)
+    return s + ('036'.includes(d) && d !== '' ? '으로' : '로')
+  }
+  const jong = c % 28
+  return s + (jong === 0 || jong === 8 ? '로' : '으로')
+}

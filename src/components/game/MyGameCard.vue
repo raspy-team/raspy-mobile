@@ -52,7 +52,7 @@
 
     <!-- 지금 이 경기에서 할 일 하나 + 더보기 -->
     <div class="flex items-center gap-2 px-4 pb-4">
-      <UiButton v-if="state.action" block :variant="state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
+      <UiButton v-if="state.action" block :variant="quiet && state.actionVariant === 'signal' ? 'primary' : state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
       <p v-else class="flex-1 t-caption">{{ state.hint }}</p>
       <UiIconButton icon="fas fa-ellipsis" label="더보기" class="flex-shrink-0" @click="emit('more')" />
     </div>
@@ -70,6 +70,8 @@ import { TEAM_NAMES, venuePlace, isRemote } from '../../utils/gameFormat'
 const props = defineProps({
   game: { type: Object, required: true },
   me: { type: Object, default: () => ({ name: '나' }) }, // { id, name, avatar }
+  /** 볼트(내 차례) 버튼을 보통 채운 버튼으로. 한 화면에 볼트는 하나라 목록의 둘째부터 */
+  quiet: { type: Boolean, default: false },
 })
 const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule'])
 

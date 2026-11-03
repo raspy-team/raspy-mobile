@@ -56,11 +56,13 @@
           />
         </UiList>
       </UiSection>
-      <UiSection v-for="g in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
+      <UiSection v-for="(g, gi) in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
         <div class="space-y-3">
-          <div v-for="game in g.items" :key="game.type + game.id" class="space-y-2">
+          <div v-for="(game, i) in g.items" :key="game.type + game.id" class="space-y-2">
+            <!-- 볼트 버튼은 한 화면에 하나: 맨 위(가장 급한) 카드만 (11/5 밤샘 C) -->
             <MyGameCard
               :game="game"
+              :quiet="gi > 0 || i > 0"
               :me="me"
               @profile="(id) => id && router.push('/profile/' + id)"
               @play="router.push(`/games/${game.id}/play`)"

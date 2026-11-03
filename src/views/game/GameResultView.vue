@@ -4,7 +4,7 @@
 
   <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
   <main v-if="!isLoading && resultError" class="px-4 pt-4 max-w-xl mx-auto">
-    <UiEmptyState icon="fas fa-flag-checkered" :title="resultError" description="경기가 끝나면 여기서 결과를 볼 수 있어요">
+    <UiEmptyState icon="fas fa-flag-checkered" :title="resultError" :description="resultMissing ? '주소가 바뀌었거나 지워진 경기예요' : '경기가 끝나면 여기서 결과를 볼 수 있어요'">
       <UiButton to="/game">내 경기로</UiButton>
     </UiEmptyState>
   </main>
@@ -520,6 +520,8 @@ const unselectedPictures = computed(() => {
 })
 
 const resultError = ref('')
+// 없는 경기(404)에 '끝나면 여기서 볼 수 있어요'는 맞지 않는다 (11/5 밤샘 C)
+const resultMissing = ref(false)
 
 // 화면 계산: user1이 나(참가자면), winnerIdx 1·2도 user1·user2 기준으로 맞춰져 있다
 // 팀·각자 경기: 서버의 편(sides) 순서, 등수만 낸 결과인지
@@ -690,6 +692,7 @@ async function load() {
     allPictures.value = await getGamePictures(gameId)
   } catch (err) {
     resultError.value = err.response?.data?.message || '결과를 불러오지 못했어요'
+    resultMissing.value = err.response?.status === 404
   } finally {
     isLoading.value = false
   }

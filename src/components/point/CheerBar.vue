@@ -2,7 +2,7 @@
   <section class="rounded-xl bg-surface p-4" aria-label="응원">
     <div class="flex items-center justify-between">
       <h2 class="t-heading">응원</h2>
-      <span class="t-micro">시작 전에만 · 이기면 돌려받고 보너스</span>
+      <span class="t-micro">시작 전에만 · 이기면 +50%</span>
     </div>
     <!-- 쪽마다 응원 수. 막대는 포인트 비율 -->
     <div class="mt-3 grid gap-2" :style="{ gridTemplateColumns: `repeat(${players.length}, minmax(0, 1fr))` }">
@@ -23,7 +23,7 @@
 
     <p v-if="state?.mine" class="t-caption mt-3">
       {{ nameOf(state.mine.sideUserId) }}님에게 {{ state.mine.amount }}P 응원했어요{{ state.mine.settled ? ' · 정산됨' : '' }}
-      <span class="block t-micro mt-0.5">{{ state.mine.bonusRate > 0 ? `이기면 돌려받고 +${Math.round(state.mine.bonusRate * 100)}% (유력한 쪽일수록 작아요)` : '선수와 아는 사이라 이겨도 돌려만 받아요' }}</span>
+      <span class="block t-micro mt-0.5">{{ state.mine.bonusRate > 0 ? `이기면 ${Math.round(state.mine.amount * (1 + state.mine.bonusRate))}P로 돌려받아요` : '선수와 아는 사이라 이겨도 돌려만 받아요' }}</span>
     </p>
     <template v-else-if="!closed">
       <div class="flex gap-2 mt-3" role="radiogroup" aria-label="걸 포인트">
@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 // 경기 응원 (기능 검토 #5): 시작 전인 남의 경기 한쪽에 포인트를 건다. 경기마다 한 번, 10~100P.
-// 이기면 돌려받고 시스템이 보너스를 더한다(최대 50%, 유력한 쪽일수록 작고, 선수와 아는 사이면 0). 비기거나 취소되면 돌려준다.
+// 이기면 시스템이 50%를 더해 돌려준다(100P → 150P, 선수와 아는 사이면 돌려만). 비기거나 취소되면 돌려준다.
 // 경기 중 응원(포인트 없음)은 중계 화면(/live)에서 한다
 import { ref, onMounted } from 'vue'
 import { GET, POST } from '@/api/client'

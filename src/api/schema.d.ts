@@ -2151,6 +2151,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/points/users/{userId}/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 그 사람의 포인트 출처
+         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·처음 선물로 나눠서
+         */
+        get: operations["sources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/points/me": {
         parameters: {
             query?: never;
@@ -4394,10 +4414,10 @@ export interface components {
             draws: number;
             /** Format: int32 */
             ruleRating?: number;
-            /** Format: int32 */
-            totalGameCount: number;
             /** Format: double */
             rating: number;
+            /** Format: int32 */
+            totalGameCount: number;
         };
         UserRankingDto: {
             /** Format: int32 */
@@ -4454,6 +4474,19 @@ export interface components {
             margin: number;
             provisional: boolean;
             points: components["schemas"]["RatingPoint"][];
+        };
+        PointSourceLine: {
+            key: string;
+            label: string;
+            /** Format: int64 */
+            amount: number;
+        };
+        PointSources: {
+            /** Format: int64 */
+            balance: number;
+            /** Format: int64 */
+            earned: number;
+            lines: components["schemas"]["PointSourceLine"][];
         };
         PointLine: {
             /** Format: int32 */
@@ -8061,6 +8094,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RuleRatingHistory"][];
+                };
+            };
+        };
+    };
+    sources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PointSources"];
                 };
             };
         };

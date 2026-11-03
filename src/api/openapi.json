@@ -4180,6 +4180,39 @@
         }
       }
     },
+    "/api/points/users/{userId}/sources": {
+      "get": {
+        "tags": [
+          "point-controller"
+        ],
+        "summary": "그 사람의 포인트 출처",
+        "description": "프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·처음 선물로 나눠서",
+        "operationId": "sources",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointSources"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/points/me": {
       "get": {
         "tags": [
@@ -9314,13 +9347,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "totalGameCount": {
-            "type": "integer",
-            "format": "int32"
-          },
           "rating": {
             "type": "number",
             "format": "double"
+          },
+          "totalGameCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -9528,6 +9561,50 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RatingPoint"
+            }
+          }
+        }
+      },
+      "PointSourceLine": {
+        "required": [
+          "amount",
+          "key",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PointSources": {
+        "required": [
+          "balance",
+          "earned",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earned": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PointSourceLine"
             }
           }
         }

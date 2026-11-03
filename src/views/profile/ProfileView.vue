@@ -70,8 +70,8 @@
       <!-- 만나도 되는 사람인지 (매치 온도와 근거) -->
       <TrustCard v-if="user.trust" :trust="user.trust" class="mt-4" />
 
-      <!-- 내 포인트 (나만 본다) -->
-      <PointCard v-if="user.isMe" class="mt-3" />
+      <!-- 포인트와 출처 (누구나 본다). 내 것이면 눌러서 내역 -->
+      <PointCard :key="user.id" :user-id="user.id" :is-me="user.isMe" class="mt-3" />
 
       <!-- 주 행동 -->
       <div class="flex gap-2 mt-4">

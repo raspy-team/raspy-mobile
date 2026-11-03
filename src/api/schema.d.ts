@@ -954,6 +954,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/live/thanks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 관중에게 고마워요
+         * @description 선수만, 세트마다 한 번. 보는 사람 모두에게 뜬다
+         */
+        post: operations["thanks"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live/shout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 응원 글 보내기
+         * @description 정해진 응원 글 하나(번호). 흘려보내고 세트 사이 한 장에 모은다 (한 사람 3초에 한 번). 선수는 못 한다
+         */
+        post: operations["shout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/live/react": {
         parameters: {
             query?: never;
@@ -985,7 +1025,7 @@ export interface paths {
         put?: never;
         /**
          * 응원하기
-         * @description 어느 편인지 한 번. 다른 편을 누르면 바뀐다. 선수는 못 한다
+         * @description 어느 편인지 한 번. 한 번 고른 편은 바꿀 수 없다. 선수는 못 한다
          */
         post: operations["cheer"];
         delete?: never;
@@ -2139,6 +2179,26 @@ export interface paths {
             cookie?: never;
         };
         get: operations["appleTokenLogin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{userId}/live-record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 관중 기록
+         * @description 그 사람이 본 경기 수, 증인이 된 경기 수(결과를 낸 순간 보고 있었다). 익명으로 본 건 세지 않는다
+         */
+        get: operations["liveRecord"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4426,6 +4486,12 @@ export interface components {
             myCheer?: number;
             isPlayer: boolean;
             watchOff: boolean;
+            /** Format: int32 */
+            viewers: number;
+            viewerFaces: components["schemas"]["LivePlayer"][];
+            /** Format: int32 */
+            witnesses: number;
+            shouts: string[];
         };
         LivePlayer: {
             /** Format: int64 */
@@ -4443,6 +4509,10 @@ export interface components {
             setsWon: number;
             /** Format: int32 */
             cheers: number;
+        };
+        LiveShoutRequest: {
+            /** Format: int32 */
+            index: number;
         };
         ReactRequest: {
             emoji: string;
@@ -4858,6 +4928,12 @@ export interface components {
         UpdateCommentRequest: {
             content: string;
             imageUrl?: string;
+        };
+        LiveWatchRecord: {
+            /** Format: int64 */
+            watched: number;
+            /** Format: int64 */
+            witnessed: number;
         };
         ChampionTitleDto: {
             region: string;
@@ -7644,6 +7720,54 @@ export interface operations {
             };
         };
     };
+    thanks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    shout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LiveShoutRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
     react: {
         parameters: {
             query?: never;
@@ -9222,6 +9346,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    liveRecord: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveWatchRecord"];
+                };
             };
         };
     };

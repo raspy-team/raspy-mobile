@@ -1971,6 +1971,82 @@
         }
       }
     },
+    "/api/games/{gameId}/live/thanks": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "관중에게 고마워요",
+        "description": "선수만, 세트마다 한 번. 보는 사람 모두에게 뜬다",
+        "operationId": "thanks",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live/shout": {
+      "post": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "응원 글 보내기",
+        "description": "정해진 응원 글 하나(번호). 흘려보내고 세트 사이 한 장에 모은다 (한 사람 3초에 한 번). 선수는 못 한다",
+        "operationId": "shout",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveShoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/live/react": {
       "post": {
         "tags": [
@@ -2020,7 +2096,7 @@
           "live-watch-controller"
         ],
         "summary": "응원하기",
-        "description": "어느 편인지 한 번. 다른 편을 누르면 바뀐다. 선수는 못 한다",
+        "description": "어느 편인지 한 번. 한 번 고른 편은 바꿀 수 없다. 선수는 못 한다",
         "operationId": "cheer",
         "parameters": [
           {
@@ -4212,6 +4288,39 @@
         }
       }
     },
+    "/api/users/{userId}/live-record": {
+      "get": {
+        "tags": [
+          "live-record-controller"
+        ],
+        "summary": "관중 기록",
+        "description": "그 사람이 본 경기 수, 증인이 된 경기 수(결과를 낸 순간 보고 있었다). 익명으로 본 건 세지 않는다",
+        "operationId": "liveRecord",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveWatchRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user-profile/{userId}": {
       "get": {
         "tags": [
@@ -4953,11 +5062,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           },
           {
@@ -4966,11 +5075,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ],
-              "default": "UNITS"
+              ]
             }
           }
         ],
@@ -6732,11 +6841,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -8763,10 +8872,14 @@
           "gameId",
           "isPlayer",
           "setIndex",
+          "shouts",
           "sides",
           "status",
           "title",
-          "watchOff"
+          "viewerFaces",
+          "viewers",
+          "watchOff",
+          "witnesses"
         ],
         "type": "object",
         "properties": {
@@ -8799,6 +8912,26 @@
           },
           "watchOff": {
             "type": "boolean"
+          },
+          "viewers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "viewerFaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LivePlayer"
+            }
+          },
+          "witnesses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shouts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -8850,6 +8983,18 @@
             "format": "int32"
           },
           "cheers": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LiveShoutRequest": {
+        "required": [
+          "index"
+        ],
+        "type": "object",
+        "properties": {
+          "index": {
             "type": "integer",
             "format": "int32"
           }
@@ -10193,6 +10338,23 @@
             "maxLength": 1024,
             "minLength": 0,
             "type": "string"
+          }
+        }
+      },
+      "LiveWatchRecord": {
+        "required": [
+          "watched",
+          "witnessed"
+        ],
+        "type": "object",
+        "properties": {
+          "watched": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "witnessed": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

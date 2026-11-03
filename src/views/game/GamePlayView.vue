@@ -30,6 +30,10 @@
       <h1 class="flex-1 min-w-0 truncate t-body font-bold">{{ game.rule?.ruleTitle }}</h1>
       <UiIconButton icon="ellipsis" label="더보기" @click="showMenu = true" />
     </header>
+    <!-- 관중: 지금 보는 사람 수 (누르면 중계). 응원은 소리로, 세트가 끝나면 한 장으로 (docs/live-spectator-review.md A·B) -->
+    <button v-if="viewers" type="button" class="flex-shrink-0 mx-auto -mt-2 mb-1 t-micro tabular-nums inline-flex items-center gap-1" @click="router.push(`/live/${gameId}`)">
+      <span class="w-1.5 h-1.5 rounded-full bg-danger" aria-hidden="true"></span>관중 {{ viewers }}명이 보고 있어요
+    </button>
 
     <!-- 규칙 요약 한 줄 + 시계 -->
     <section class="flex-shrink-0 text-center px-4">
@@ -88,6 +92,7 @@
       <UiList>
         <UiListItem icon="book-open" title="규칙 보기" @click="menu(() => (game.showRuleDetail = true))" />
         <UiListItem icon="eye" title="중계" subtitle="구경 링크 보내기, 응원 보기" @click="menu(() => router.push(`/live/${gameId}`))" />
+        <UiListItem icon="volume" :title="soundOn ? '관중 소리 끄기' : '관중 소리 켜기'" subtitle="관중이 응원하면 이 휴대폰에서 박수 소리가 나요" @click="menu(toggleSound)" />
         <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menu(() => (showLogModal = true))" />
         <UiListItem icon="camera" title="사진 찍기" @click="menu(triggerPhotoCapture)" />
         <UiListItem icon="video" title="영상 찍기" @click="menu(triggerVideoCapture)" />
@@ -95,6 +100,11 @@
         <UiListItem v-if="!nothingScored" icon="rotate-left" title="처음부터 다시" danger @click="menu(() => openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터'))" />
         <UiListItem icon="xmark" title="경기 취소" danger @click="menu(() => openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소'))" />
       </UiList>
+    </UiSheet>
+
+    <!-- 세트 사이 라커룸: 그 세트 동안 관중이 보낸 응원 한 장 -->
+    <UiSheet :model-value="!!lastBreak" title="관중석에서" @update:model-value="(v) => { if (!v) lastBreak = null }">
+      <LiveBreakCard v-if="lastBreak" :data="lastBreak" :game-id="Number(gameId)" player />
     </UiSheet>
 
     <!-- 세트 시작 전: 화면 전체에서 시작 버튼 하나만 -->
@@ -170,6 +180,10 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
+import { subscribeTopic } from '../../websocket/userChannel'
+import { GET } from '@/api/client'
+import { clap, crowdSoundOn, setCrowdSound } from '../../utils/crowdSound'
+import LiveBreakCard from '../../components/live/LiveBreakCard.vue'
 import MatchModal from '../../components/MatchModal.vue'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiList, UiListItem, UiSheet, UiSpinner } from '../../components/ui'
@@ -186,6 +200,29 @@ const route = useRoute()
 const router = useRouter()
 const { showToast } = useToast()
 const gameId = route.params.gameId
+
+// 관중 (docs/live-spectator-review.md A·B): 중계 채널을 함께 듣는다. 응원은 박수 소리, 세트가 끝나면 한 장
+const viewers = ref(0)
+const lastBreak = ref(null)
+const soundOn = ref(crowdSoundOn())
+let offLive
+async function loadViewers() {
+  viewers.value = (await GET('/api/games/{gameId}/live', { path: { gameId: Number(gameId) } }).catch(() => ({ data: null }))).data?.viewers ?? 0
+}
+function toggleSound() {
+  soundOn.value = !soundOn.value
+  setCrowdSound(soundOn.value)
+  if (soundOn.value) clap(2)
+}
+function listenCrowd() {
+  offLive = subscribeTopic(`/topic/game-live/${gameId}`, (e) => {
+    if (e.type === 'REACT') clap(1)
+    else if (e.type === 'SHOUT') clap(3)
+    else if (e.type === 'BREAK') lastBreak.value = e
+    else if (e.type === 'VIEWERS') loadViewers()
+  })
+  loadViewers()
+}
 
 // 소켓 연결 상태
 const socketStatus = ref('connected') // 'connected', 'connecting', 'disconnected'
@@ -468,6 +505,7 @@ function addLog(log) {
 }
 
 onMounted(async () => {
+  listenCrowd()
   // 안드로이드 네이티브 카메라 콜백 등록
   if (typeof window !== 'undefined') {
     // 사진 촬영 콜백 핸들러
@@ -880,6 +918,7 @@ onUnmounted(() => {
     window.onGameVideoCameraResult = null
   }
 
+  offLive?.()
   // 소켓 핸들러 정리
   socket.onConnecting(null)
   socket.onConnected(null)

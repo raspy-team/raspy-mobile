@@ -29,6 +29,8 @@
         <span v-else-if="headline.line && isParticipant" class="block w-fit mx-auto mb-4 text-fg"><BrandFace :size="48" mood="neutral" /></span>
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<template v-if="playedOn"> · {{ playedOn }}</template></p>
         <h1 class="t-display text-center mt-3 feel-rise" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
+        <!-- 증인: 결과를 낸 순간 중계를 보던 관중 (docs/live-spectator-review.md C) -->
+        <p v-if="witnesses" class="t-caption text-center mt-1">관중 {{ witnesses }}명이 지켜본 경기</p>
         <!-- 이 경기로 바뀐 내 실력 점수: 이긴 사람이 가장 먼저 궁금한 숫자라 결과 바로 밑에 -->
         <p v-if="myRating && confirmed" class="mt-3 flex items-baseline justify-center gap-2 feel-rise feel-rise-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
           <span class="t-caption">실력 점수</span>
@@ -362,7 +364,7 @@ import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
-import { POST } from '../../api/client'
+import { GET, POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
 import { matchTime } from '../../utils/format'
@@ -702,9 +704,16 @@ function feelResult() {
   feel(headline.value.mark ? 'win' : headline.value.line ? 'lose' : 'success')
 }
 
+// 증인 수 (만나서 한 경기만. 앱 게임·볼 수 없는 경기는 조용히 0)
+const witnesses = ref(0)
+async function loadWitnesses() {
+  witnesses.value = (await GET('/api/games/{gameId}/live', { path: { gameId: Number(gameId) } }).catch(() => ({ data: null }))).data?.witnesses ?? 0
+}
+
 let stopWatching = null
 onMounted(() => {
   load()
+  loadWitnesses()
   loadBeats()
   // 확인을 기다리는 동안 상대가 확인하거나 돌려보내면 다시 불러온다
   stopWatching = refreshOnChange(() => {

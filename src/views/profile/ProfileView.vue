@@ -88,6 +88,7 @@
         <TrustCard v-if="user.trust" :trust="user.trust" :user-id="user.id" :is-me="user.isMe" />
         <PointCard :key="user.id" :user-id="user.id" :is-me="user.isMe" />
       </div>
+      <LiveRecordLine :key="`lr${user.id}`" class="mt-2" :user-id="user.id" />
 
       <!-- 챔피언 -->
       <section v-if="user.myChampions?.length" class="mt-10">
@@ -220,6 +221,7 @@
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import TrustCard from '../../components/profile/TrustCard.vue'
 import PointCard from '../../components/point/PointCard.vue'
+import LiveRecordLine from '../../components/live/LiveRecordLine.vue'
 // 프로필 (/profile/0 = 나, /profile/:id = 다른 사람)
 // 누구인지(동네) → 숫자 한 줄 → 주 행동(나: 편집 / 남: 친구·메시지) → 챔피언 → 많이 쓴 능력 → 많이 한 규칙 → 최근 경기
 // 신고·차단·친구 끊기는 더보기 안에. 빈 값(나이·성별·지역 없음)은 보여주지 않는다

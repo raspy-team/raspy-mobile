@@ -8,7 +8,7 @@ let client = null
 const listeners = new Set()
 const lobbyListeners = new Set()
 // 화면이 잠깐 듣는 공개 채널 (예: 경기 중계 /topic/game-live/{id}). 연결이 다시 붙으면 다시 구독한다
-const topics = new Map() // destination → { cb, sub }
+const topics = new Map() // destination → { cb, sub, headers }
 
 export async function openUserChannel() {
   if (client) return
@@ -31,7 +31,7 @@ export async function openUserChannel() {
       })
       // 지금 기다리는 사람 목록이 바뀌었다 (모두에게 같은 신호). 목록을 보는 화면만 다시 불러온다
       client.subscribe('/topic/lobbies', () => lobbyListeners.forEach((cb) => cb()))
-      topics.forEach((t, destination) => { t.sub = client.subscribe(destination, ({ body }) => t.cb(JSON.parse(body))) })
+      topics.forEach((t, destination) => { t.sub = client.subscribe(destination, ({ body }) => t.cb(JSON.parse(body)), t.headers) })
       // 끊겨 있던 사이 놓친 신호가 있을 수 있으니 다시 붙으면 한 번 새로고침하게 알린다
       listeners.forEach((cb) => cb({ type: 'RECONNECTED' }))
     },
@@ -70,11 +70,11 @@ export function onLobbyChange(cb) {
   return () => lobbyListeners.delete(cb)
 }
 
-/** 공개 채널 하나를 듣는다. 돌려받은 함수로 그만 듣는다 */
-export function subscribeTopic(destination, cb) {
-  const t = { cb, sub: null }
+/** 공개 채널 하나를 듣는다. headers는 구독 머리글(예: 중계를 익명으로 볼 때 { anon: 'true' }). 돌려받은 함수로 그만 듣는다 */
+export function subscribeTopic(destination, cb, headers = {}) {
+  const t = { cb, sub: null, headers }
   topics.set(destination, t)
-  if (client?.connected) t.sub = client.subscribe(destination, ({ body }) => cb(JSON.parse(body)))
+  if (client?.connected) t.sub = client.subscribe(destination, ({ body }) => cb(JSON.parse(body)), headers)
   openUserChannel()
   return () => {
     t.sub?.unsubscribe()

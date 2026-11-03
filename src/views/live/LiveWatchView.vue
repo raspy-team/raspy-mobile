@@ -10,6 +10,9 @@
           <span v-else>{{ STATUS[live.status] || '끝난 경기' }}</span>
         </p>
 
+        <!-- 킥오프 카드: 왜 이 경기인가 (match-28, 전적·흐름·이길 확률·라이벌·챔피언). 내용이 없으면 안 보인다 -->
+        <LiveKickoffCard class="mt-4" :game-id="gameId" />
+
         <!-- 같이 보는 사람: 수와 얼굴 (익명은 수에만) -->
         <div class="flex items-center justify-center gap-2 mt-2">
           <div v-if="live.viewerFaces.length" class="flex -space-x-2">
@@ -97,6 +100,7 @@ import { useToast } from '@/composable/useToast'
 import { UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiRollNumber, UiSkeleton, UiTopBar } from '../../components/ui'
 import LiveBreakCard, { type LiveBreak } from '../../components/live/LiveBreakCard.vue'
 import LiveMediaStrip from '../../components/live/LiveMediaStrip.vue'
+import LiveKickoffCard from '../../components/live/LiveKickoffCard.vue'
 
 const REACTIONS = ['👏', '🔥', '😮', '😂', '💪']
 const STATUS: Record<string, string> = { SCHEDULED: '곧 시작해요', RESULT_PENDING: '경기 끝 · 결과 확인 중', COMPLETED: '끝난 경기', CANCELED: '취소된 경기' }

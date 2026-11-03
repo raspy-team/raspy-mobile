@@ -5947,6 +5947,39 @@
         }
       }
     },
+    "/api/games/{gameId}/live/context": {
+      "get": {
+        "tags": [
+          "live-context-controller"
+        ],
+        "summary": "킥오프 카드",
+        "description": "왜 이 경기인가: 맞대결 전적·라이벌, 편마다 최근 흐름, 이길 확률, 동네 챔피언이 걸렸는지. 중계와 같은 기준으로 볼 수 있는 사람만",
+        "operationId": "context",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveContext"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/like/users": {
       "get": {
         "tags": [
@@ -13264,6 +13297,120 @@
           },
           "canUpload": {
             "type": "boolean"
+          }
+        }
+      },
+      "LiveChampionStake": {
+        "required": [
+          "area"
+        ],
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "holderSide": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "holderName": {
+            "type": "string"
+          }
+        }
+      },
+      "LiveContext": {
+        "required": [
+          "gameId",
+          "lines",
+          "rival",
+          "sides"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveContextSide"
+            }
+          },
+          "headToHead": {
+            "$ref": "#/components/schemas/LiveHeadToHead"
+          },
+          "rival": {
+            "type": "boolean"
+          },
+          "champion": {
+            "$ref": "#/components/schemas/LiveChampionStake"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LiveContextSide": {
+        "required": [
+          "label",
+          "recent",
+          "side"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string"
+          },
+          "chance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recent": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LiveHeadToHead": {
+        "required": [
+          "draws",
+          "games",
+          "last",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "games": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wins": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "draws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "last": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         }
       },

@@ -123,6 +123,7 @@
       <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
       <UiListItem v-if="canTellFriend(menuGame)" icon="shield-halved" title="친구에게 일정 알리기" subtitle="누구와 언제 어디서 만나는지 보내 둬요" @click="tellFriend(menuGame)" />
       <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
+      <UiListItem v-if="canLeave(menuGame)" icon="fas fa-right-from-bracket" title="이 경기에서 빠지기" subtitle="연 사람과 남은 사람에게 알려요" danger @click="leaveGame(menuGame)" />
     </UiList>
   </UiSheet>
 
@@ -513,6 +514,25 @@ async function removeGame(g) {
     showToast('경기를 삭제했어요')
   } catch (e) {
     showToast(e.response?.data?.message || '삭제하지 못했어요')
+  }
+}
+
+// 승인된 뒤 시작 전이면 빠질 수 있다 (내가 연 경기는 삭제). 전에는 빠지는 길이 없어 노쇼가 되거나 주최자에게 부탁했다 (11/4 밤샘)
+const BEFORE_START = ['MATCHING', 'SCHEDULED']
+const canLeave = (g) => !!g && (g.type === 'sent'
+  ? g.status === 'APPROVED' && BEFORE_START.includes(g.gameStatus)
+  : g.type === 'my-game' && g.isOwner === false && BEFORE_START.includes(g.status))
+async function leaveGame(g) {
+  menuGame.value = null
+  const ok = await confirmDialog({ title: '이 경기에서 빠질까요?', message: '연 사람과 남은 사람에게 빠졌다고 알려요. 경기는 다시 모집 중이 돼요.', confirmText: '빠지기', danger: true })
+  if (!ok) return
+  try {
+    await api.delete(`/api/games/${g.id}/leave`)
+    sentGames.value = sentGames.value.filter((x) => x.id !== g.id)
+    myGames.value = myGames.value.filter((x) => x.id !== g.id)
+    showToast('경기에서 빠졌어요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '빠지지 못했어요')
   }
 }
 

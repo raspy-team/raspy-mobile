@@ -3387,6 +3387,38 @@
         }
       }
     },
+    "/api/app-games/realtime/night-alarm": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "오늘 밤의 게임 알림",
+        "description": "켜면 매일 밤 8시 55분에 오늘 밤의 게임을 푸시로 알린다",
+        "operationId": "nightAlarm",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LobbyNightAlarmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LobbyList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/plays/{playId}/submit": {
       "post": {
         "tags": [
@@ -9712,6 +9744,114 @@
           }
         }
       },
+      "LobbyNightAlarmRequest": {
+        "required": [
+          "on"
+        ],
+        "type": "object",
+        "properties": {
+          "on": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LobbyCard": {
+        "required": [
+          "gameId",
+          "icon",
+          "key",
+          "nickname",
+          "title",
+          "userId",
+          "waitedSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "waitedSeconds": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LobbyList": {
+        "required": [
+          "goldenHour",
+          "goldenHourStart",
+          "lobbies",
+          "nightAlarm",
+          "serverNow"
+        ],
+        "type": "object",
+        "properties": {
+          "lobbies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LobbyCard"
+            }
+          },
+          "goldenHour": {
+            "type": "boolean"
+          },
+          "goldenHourStart": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tonight": {
+            "$ref": "#/components/schemas/LobbyTonight"
+          },
+          "nightAlarm": {
+            "type": "boolean"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LobbyTonight": {
+        "required": [
+          "icon",
+          "key",
+          "startsAt",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "SubmitPlayRequest": {
         "required": [
           "answer"
@@ -14302,67 +14442,6 @@
           "score": {
             "type": "number",
             "format": "double"
-          }
-        }
-      },
-      "LobbyCard": {
-        "required": [
-          "gameId",
-          "icon",
-          "key",
-          "nickname",
-          "title",
-          "userId",
-          "waitedSeconds"
-        ],
-        "type": "object",
-        "properties": {
-          "gameId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "key": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "icon": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "waitedSeconds": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "LobbyList": {
-        "required": [
-          "goldenHour",
-          "goldenHourStart",
-          "lobbies"
-        ],
-        "type": "object",
-        "properties": {
-          "lobbies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LobbyCard"
-            }
-          },
-          "goldenHour": {
-            "type": "boolean"
-          },
-          "goldenHourStart": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },

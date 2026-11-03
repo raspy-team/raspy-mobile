@@ -100,6 +100,8 @@ import { isAndroidApp, isIosApp } from '../utils/nativeBridge'
 const FEATURES = [
   // 처음 온 사람의 짧은 안내. 한 줄에 한 가지, 실제로 하는 순서대로 (11/3)
   { icon: 'fas fa-user-group', title: '동네에서 상대 찾기', body: '모집 중인 경기에 신청하거나 직접 열어요' },
+  // 안전·신뢰 J: 처음 보는 사람과 만나는 앱이라 가장 큰 걱정을 첫 화면에서 푼다 (있는 기능만: 신뢰 온도·보증·위치 공유)
+  { icon: 'fas fa-shield-halved', title: '처음 보는 사람과도 안심하고', body: '신뢰 온도와 만나 본 사람의 보증을 보고, 경기 동안 친구에게 위치를 알려요' },
   { icon: 'fas fa-stopwatch', title: '만나서 한 판', body: '점수는 둘이 같은 화면에 함께 남겨요' },
   { icon: 'fas fa-crown', title: '실력 점수가 쌓여요', body: '이기면 오르고, 동네 챔피언에 도전할 수 있어요' },
 ]

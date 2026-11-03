@@ -34,7 +34,7 @@
         v-else-if="state?.status === 'PLAYING' && counting"
         :until="startsAt"
         :offset="offset"
-        :opponent="state.opponent?.nickname"
+        :opponent="who(state.opponent)"
         @done="now = Date.now()"
       />
 
@@ -81,7 +81,7 @@
               :class="i === state.moves.length - 1 ? 't-heading' : 't-body text-fg-muted'"
             >
               <span>{{ m.word }}</span>
-              <span class="t-micro">{{ m.userId === state.me.userId ? '나' : state.opponent?.nickname }}</span>
+              <span class="t-micro">{{ m.userId === state.me.userId ? '나' : who(state.opponent) }}</span>
             </li>
           </ol>
         </UiCard>
@@ -103,9 +103,9 @@
           <template v-if="state.status === 'COMPLETED'">
             <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
-            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ state.opponent?.nickname }}님과 · {{ state.view.note }}</p>
-            <p v-else-if="state.stones" class="t-caption mt-2">{{ state.opponent?.nickname }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
-            <p v-else class="t-caption mt-2">{{ state.opponent?.nickname }}님과 {{ state.moves.length }}번 이었어요</p>
+            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
+            <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
+            <p v-else class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.moves.length }}번 이었어요</p>
           </template>
           <p v-else class="t-title">대결이 끝났어요</p>
         </UiCard>
@@ -121,6 +121,7 @@
 </template>
 
 <script setup lang="ts">
+import { who } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
@@ -180,8 +181,8 @@ const turnLine = computed(() => {
   const s = state.value
   if (!s) return ''
   if (s.race) return myTurn.value ? '먼저 맞히세요' : '다음 문제를 기다려요'
-  if (s.simultaneous) return myTurn.value ? `${(s.round ?? 0) + 1}판 · 골라 주세요` : `${s.opponent?.nickname}님이 고르는 중`
-  return myTurn.value ? '내 차례' : `${s.opponent?.nickname}님 차례`
+  if (s.simultaneous) return myTurn.value ? `${(s.round ?? 0) + 1}판 · 골라 주세요` : `${who(s.opponent)}님이 고르는 중`
+  return myTurn.value ? '내 차례' : `${who(s.opponent)}님 차례`
 })
 const longLobby = computed(() => (state.value?.lobbySeconds ?? 30) > 120)
 

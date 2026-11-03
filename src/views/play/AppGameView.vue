@@ -77,7 +77,7 @@
             <BrandFace v-if="result.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ VERDICT[result.result || 'DRAW'] }}</p>
             <p class="t-caption mt-2">
-              <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ result.opponent.nickname }}</router-link>님과 대결
+              <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 대결
             </p>
             <div class="flex items-center justify-center gap-6 mt-6">
               <span>
@@ -104,7 +104,7 @@
             <p class="t-title">경기 결과를 기다려요</p>
             <p class="t-caption mt-1">{{ kickoffLabel(fixtureOf(result.problem).kickoff) }} 경기가 끝나면 채점하고 알려 드릴게요</p>
             <p class="t-body mt-5">내 예상 <b class="tabular-nums">{{ predictionLine(result.problem, result.myAnswer) }}</b></p>
-            <p v-if="result.opponentAnswer" class="t-caption mt-1">{{ result.opponent?.nickname }}님 예상 {{ predictionLine(result.problem, result.opponentAnswer) }}</p>
+            <p v-if="result.opponentAnswer" class="t-caption mt-1">{{ who(result.opponent) }}님 예상 {{ predictionLine(result.problem, result.opponentAnswer) }}</p>
           </template>
           <template v-else-if="result.status === 'VOTING'">
             <p class="t-title">투표 중이에요</p>
@@ -158,7 +158,7 @@
             <p class="t-caption mt-1 whitespace-pre-line">{{ result.myAnswer }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
-            <p class="t-micro">{{ result.opponent?.nickname }}님의 말싸움 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-micro">{{ who(result.opponent) }}님의 말싸움 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
             <p class="t-caption mt-1 whitespace-pre-line">{{ result.opponentAnswer }}</p>
             <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
           </UiCard>
@@ -170,7 +170,7 @@
             <p class="t-caption mt-1 whitespace-pre-line">{{ dish(result.myAnswer).steps }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
-            <p class="t-micro">{{ result.opponent?.nickname }}님의 요리 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-micro">{{ who(result.opponent) }}님의 요리 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
             <p class="t-heading mt-1">{{ dish(result.opponentAnswer).name }}</p>
             <p class="t-caption mt-1 whitespace-pre-line">{{ dish(result.opponentAnswer).steps }}</p>
             <p v-if="result.opponentFeedback" class="t-caption mt-2">AI 셰프: {{ result.opponentFeedback }}</p>
@@ -293,6 +293,7 @@
 </template>
 
 <script setup lang="ts">
+import { who } from '@/utils/format'
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
 import { liveRoute } from '@/utils/battle'
@@ -515,7 +516,7 @@ function closeResult() {
 }
 
 function duelTitle(d: Duel) {
-  if (d.opponent) return `${d.opponent.nickname}님과`
+  if (d.opponent) return `${who(d.opponent)}님과`
   return d.status === 'CANCELED' ? '상대 없이 끝난 대결' : '상대를 찾는 중'
 }
 function duelSubtitle(d: Duel) {

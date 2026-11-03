@@ -52,3 +52,10 @@ export function record(stats) {
   if (!w && !d && !l) return '첫 경기 전'
   return [`${w}승`, d ? `${d}무` : '', `${l}패`].filter(Boolean).join(' ')
 }
+
+// 사람 이름. 봇이면 '(봇)'을 붙인다 (사용자 11/3: 봇은 봇이라고 표시)
+export function who(p, fallback = '상대') {
+  if (!p) return fallback
+  const name = p.nickname ?? p.name ?? fallback
+  return p.isBot ? `${name} (봇)` : name
+}

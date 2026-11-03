@@ -25,7 +25,7 @@
         <div class="text-center pt-6">
           <p class="t-caption">{{ counting ? '곧 시작해요' : `${shakeLeft}초 남음` }}</p>
           <p class="t-display tabular-nums mt-4">{{ score[0] }}</p>
-          <p class="t-caption">나 · {{ state.opponent?.nickname }} {{ score[1] }}</p>
+          <p class="t-caption">나 · {{ who(state.opponent) }} {{ score[1] }}</p>
           <p v-if="counting" class="t-display tabular-nums mt-8">{{ countdown }}</p>
           <p v-else class="t-title mt-8">폰을 흔드세요!</p>
           <!-- 아이폰은 센서를 쓰려면 한 번 눌러 허락을 받아야 한다 -->
@@ -38,7 +38,7 @@
       <!-- 판: 내 라켓이 늘 아래. 판 위 어디든 손가락을 대고 좌우로 움직인다 -->
       <template v-else-if="state?.status === 'PLAYING'">
         <div class="flex items-center justify-between">
-          <span class="t-heading tabular-nums">나 {{ score[0] }} : {{ score[1] }} {{ state.opponent?.nickname }}</span>
+          <span class="t-heading tabular-nums">나 {{ score[0] }} : {{ score[1] }} {{ who(state.opponent) }}</span>
           <span class="t-micro">{{ counting ? '곧 시작해요' : serving ? '서브' : '5점 먼저' }}</span>
         </div>
         <div
@@ -64,7 +64,7 @@
           <template v-if="state.status === 'COMPLETED'">
             <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
-            <p class="t-caption mt-2">{{ state.opponent?.nickname }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
+            <p class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
           </template>
           <p v-else class="t-title">대결이 끝났어요</p>
         </UiCard>
@@ -76,6 +76,7 @@
 </template>
 
 <script setup lang="ts">
+import { who } from '@/utils/format'
 // 실시간 대전 (/play/:key/battle, 퐁). 서버가 1초에 20번 판을 계산해 웹소켓으로 보내고, 화면은 그대로 그린다.
 // 손가락 위치만 보낸다 (라켓을 두고 싶은 x). 라켓이 얼마나 빨리 가는지는 서버가 정한다. 내 쪽(0번이 아니면 판을 뒤집어)이 늘 아래
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'

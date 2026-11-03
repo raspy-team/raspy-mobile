@@ -59,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+import { who } from '@/utils/format'
 // 피드의 앱 대결 한 장. 끝난 대결은 점수와 승자(+요리 이름·문장), 투표 중인 문장 대결은 그 자리에서 투표
 import { ref, computed, onMounted } from 'vue'
 import { GET } from '@/api/client'
@@ -81,7 +82,7 @@ const sides = computed(() =>
     const p = (props.post.players as unknown as { id: number; name: string }[] | undefined)?.[i]
     return {
       id: p?.id,
-      name: p?.name ?? '',
+      name: p ? who(p) : '',
       score: Math.round(duel.value.scores?.[i] ?? 0),
       text: duel.value.texts?.[i] ?? '',
       won: p != null && p.id === duel.value.winnerId,

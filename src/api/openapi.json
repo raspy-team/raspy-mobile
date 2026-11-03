@@ -7797,6 +7797,7 @@
       },
       "AppPlayer": {
         "required": [
+          "isBot",
           "nickname",
           "userId"
         ],
@@ -7811,6 +7812,9 @@
           },
           "profilePicture": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },

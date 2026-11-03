@@ -3920,6 +3920,7 @@ export interface components {
             userId: number;
             nickname: string;
             profilePicture?: string;
+            isBot: boolean;
         };
         RealtimeMove: {
             /** Format: int64 */

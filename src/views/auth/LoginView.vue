@@ -38,6 +38,16 @@
         <UiButton type="submit" block size="lg" :loading="busy">{{ isSignup ? '가입하기' : '로그인' }}</UiButton>
       </form>
 
+      <!-- 아이디 계정은 비밀번호를 되찾을 이메일이 없다. 막다른 길 대신 어떻게 하면 되는지 (11/4 밤샘, 일주일 만에 온 45세) -->
+      <div v-if="!isSignup" class="mt-4 text-center">
+        <button v-if="!forgotOpen" type="button" class="t-caption underline underline-offset-2" @click="forgotOpen = true">비밀번호를 잊었나요?</button>
+        <p v-else class="t-caption text-left rounded-xl bg-surface px-4 py-3">
+          아이디로 가입한 계정은 비밀번호를 되찾을 이메일이 없어요. 아이디와 가입한 때를 적어
+          <a class="underline underline-offset-2 text-fg" :href="forgotMail">yeonkoh@protonmail.com</a>으로 보내 주시면 확인하고 도와 드려요.
+          카카오·구글로 시작했다면 그 버튼으로 다시 들어오면 돼요.
+        </p>
+      </div>
+
       <p class="mt-6 text-center t-caption">
         {{ isSignup ? '이미 계정이 있나요?' : '처음이신가요?' }}
         <UiButton variant="ghost" size="sm" @click="toggleMode">{{ isSignup ? '로그인' : '가입하기' }}</UiButton>
@@ -65,6 +75,8 @@ const showPassword = ref(false)
 const emailError = ref('')
 const passwordError = ref('')
 const submitError = ref('')
+const forgotOpen = ref(false)
+const forgotMail = 'mailto:yeonkoh@protonmail.com?subject=' + encodeURIComponent('[Match] 비밀번호를 잊었어요')
 const busy = ref(false)
 const isSignup = ref(route.query.mode === 'signup')
 

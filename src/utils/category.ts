@@ -49,5 +49,5 @@ export function missing(c: CategoryInput, maxAbilities = 3) {
     !c.parties.length && '몇 명이',
     !c.gears.length && '준비물',
   ].filter(Boolean)
-  return left.length ? `아직 고르지 않았어요: ${left.join(' · ')}` : ''
+  return left.length ? `골라 주세요: ${left.join(' · ')}` : ''
 }

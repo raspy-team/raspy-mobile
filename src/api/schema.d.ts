@@ -5613,6 +5613,8 @@ export interface components {
             note?: string;
             prompt?: string;
             input?: string;
+            /** Format: int32 */
+            inputMax?: number;
         };
         AppPlayResponse: {
             /** Format: int64 */

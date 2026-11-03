@@ -205,7 +205,7 @@ export interface paths {
         put?: never;
         /**
          * 대회 열기
-         * @description 동네 인증한 사람(개인 주최) 또는 동호회 회장·운영진(hostClubId, 멤버만 = 월례대회). 신청은 시작 때까지, 체크인은 시작 24시간 전부터
+         * @description 동네 인증한 사람(개인 주최), 동호회 회장·운영진(hostClubId, 멤버만 = 월례대회), 관리자(official = 매치 공식 대회). 앱 게임 규칙은 개인 참가만. 신청은 시작 때까지, 체크인은 시작 24시간 전부터
          */
         post: operations["create"];
         delete?: never;
@@ -308,6 +308,26 @@ export interface paths {
          * @description 동호회 대회면 clubId(내가 회장·운영진인 동호회)
          */
         post: operations["apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/fixtures/{fixtureId}/play": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 앱 게임 판 경기하기
+         * @description 앱 게임 대회의 내 판. 먼저 누른 사람이 대결(실시간이면 방)을 열고, 상대는 같은 대결에 들어간다. mode=PLAY·LIVE·BATTLE로 화면을 고른다
+         */
+        post: operations["play"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4618,6 +4638,7 @@ export interface components {
             boards: number;
             /** Format: int32 */
             perBoard: number;
+            official: boolean;
         };
         TournamentClubChoice: {
             /** Format: int64 */
@@ -4726,6 +4747,8 @@ export interface components {
             maxEntrants: number;
             dongName?: string;
             winnerName?: string;
+            official: boolean;
+            appGameKey?: string;
         };
         TournamentView: {
             summary: components["schemas"]["TournamentSummary"];
@@ -4744,6 +4767,7 @@ export interface components {
             /** Format: int32 */
             perBoard: number;
             isHost: boolean;
+            canHostOfficial: boolean;
             my?: components["schemas"]["TournamentMyEntry"];
             myStaffClubs: components["schemas"]["TournamentClubChoice"][];
             canCheckIn: boolean;
@@ -4751,6 +4775,13 @@ export interface components {
             rounds: components["schemas"]["TournamentRoundView"][];
             standings: components["schemas"]["TournamentStandingView"][];
             runnerUpName?: string;
+        };
+        TournamentPlay: {
+            key: string;
+            mode: string;
+            /** Format: int64 */
+            gameId: number;
+            played: boolean;
         };
         CategoryInput: {
             face: string;
@@ -5267,6 +5298,7 @@ export interface components {
             waitingSince: string;
             /** Format: int32 */
             botAfterSeconds: number;
+            fixture: boolean;
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
             simultaneous: boolean;
@@ -5363,6 +5395,7 @@ export interface components {
             waitingSince: string;
             /** Format: int32 */
             botAfterSeconds: number;
+            fixture: boolean;
             topic: string;
             /** Format: int64 */
             tickMillis: number;
@@ -5852,10 +5885,10 @@ export interface components {
             draws: number;
             /** Format: int32 */
             ruleRating?: number;
-            /** Format: double */
-            rating: number;
             /** Format: int32 */
             totalGameCount: number;
+            /** Format: double */
+            rating: number;
         };
         UserRankingDto: {
             /** Format: int32 */
@@ -7461,6 +7494,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TournamentView"];
+                };
+            };
+        };
+    };
+    play: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fixtureId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TournamentPlay"];
                 };
             };
         };

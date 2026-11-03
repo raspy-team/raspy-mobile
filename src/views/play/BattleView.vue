@@ -12,7 +12,7 @@
       <template v-else-if="state?.status === 'WAITING'">
         <UiCard class="text-center py-10">
           <UiSpinner class="mx-auto" />
-          <p class="t-heading mt-4">상대를 찾고 있어요</p>
+          <p class="t-heading mt-4">{{ state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
           <p class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
         </UiCard>
         <!-- 흔들기는 판이 시작되기 전에 센서를 켜 둔다 (시작한 뒤에 누르면 그만큼 손해) -->
@@ -266,7 +266,7 @@ let botCalled = false
 const timer = setInterval(async () => {
   now.value = Date.now()
   const s = state.value
-  if (s?.status === 'WAITING' && !botCalled && waited.value >= s.botAfterSeconds) {
+  if (s?.status === 'WAITING' && !s.fixture && !botCalled && waited.value >= s.botAfterSeconds) {
     botCalled = true
     apply((await POST('/api/app-games/battle/{gameId}/bot', { path: { gameId: s.gameId } })).data)
   }

@@ -22,7 +22,7 @@ const STATUS: Record<string, string> = { RECRUITING: '모집 중', RUNNING: '진
 const line = computed(() => {
   const t = props.t
   const d = new Date(t.startsAt)
-  return [t.ruleTitle, t.format === 'LEAGUE' ? '리그' : '토너먼트', t.entrantType === 'CLUB' ? '동호회 대항' : '', t.hostName,
+  return [t.official ? '매치 공식' : '', t.ruleTitle, t.format === 'LEAGUE' ? '리그' : '토너먼트', t.entrantType === 'CLUB' ? '동호회 대항' : '', t.hostName,
     t.status === 'COMPLETED' && t.winnerName ? `우승 ${t.winnerName}` : `${t.entryCount}/${t.maxEntrants} · ${d.getMonth() + 1}월 ${d.getDate()}일 시작`]
     .filter(Boolean).join(' · ')
 })

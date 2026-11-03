@@ -596,7 +596,7 @@
           "대회"
         ],
         "summary": "대회 열기",
-        "description": "동네 인증한 사람(개인 주최) 또는 동호회 회장·운영진(hostClubId, 멤버만 = 월례대회). 신청은 시작 때까지, 체크인은 시작 24시간 전부터",
+        "description": "동네 인증한 사람(개인 주최), 동호회 회장·운영진(hostClubId, 멤버만 = 월례대회), 관리자(official = 매치 공식 대회). 앱 게임 규칙은 개인 참가만. 신청은 시작 때까지, 체크인은 시작 24시간 전부터",
         "operationId": "create",
         "requestBody": {
           "content": {
@@ -807,6 +807,39 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/TournamentView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tournaments/fixtures/{fixtureId}/play": {
+      "post": {
+        "tags": [
+          "대회"
+        ],
+        "summary": "앱 게임 판 경기하기",
+        "description": "앱 게임 대회의 내 판. 먼저 누른 사람이 대결(실시간이면 방)을 열고, 상대는 같은 대결에 들어간다. mode=PLAY·LIVE·BATTLE로 화면을 고른다",
+        "operationId": "play",
+        "parameters": [
+          {
+            "name": "fixtureId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TournamentPlay"
                 }
               }
             }
@@ -8900,6 +8933,7 @@
           "joinMode",
           "maxEntrants",
           "membersOnly",
+          "official",
           "perBoard",
           "roundDays",
           "ruleId",
@@ -8973,6 +9007,9 @@
           "perBoard": {
             "type": "integer",
             "format": "int32"
+          },
+          "official": {
+            "type": "boolean"
           }
         }
       },
@@ -9220,6 +9257,7 @@
           "hostName",
           "id",
           "maxEntrants",
+          "official",
           "roundDays",
           "ruleId",
           "ruleTitle",
@@ -9280,6 +9318,12 @@
           },
           "winnerName": {
             "type": "string"
+          },
+          "official": {
+            "type": "boolean"
+          },
+          "appGameKey": {
+            "type": "string"
           }
         }
       },
@@ -9287,6 +9331,7 @@
         "required": [
           "boards",
           "canCheckIn",
+          "canHostOfficial",
           "entries",
           "isHost",
           "joinMode",
@@ -9338,6 +9383,9 @@
           "isHost": {
             "type": "boolean"
           },
+          "canHostOfficial": {
+            "type": "boolean"
+          },
           "my": {
             "$ref": "#/components/schemas/TournamentMyEntry"
           },
@@ -9370,6 +9418,30 @@
           },
           "runnerUpName": {
             "type": "string"
+          }
+        }
+      },
+      "TournamentPlay": {
+        "required": [
+          "gameId",
+          "key",
+          "mode",
+          "played"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "played": {
+            "type": "boolean"
           }
         }
       },
@@ -10977,6 +11049,7 @@
       "RealtimeState": {
         "required": [
           "botAfterSeconds",
+          "fixture",
           "gameId",
           "key",
           "liveJudged",
@@ -11056,6 +11129,9 @@
           "botAfterSeconds": {
             "type": "integer",
             "format": "int32"
+          },
+          "fixture": {
+            "type": "boolean"
           },
           "result": {
             "type": "string",
@@ -11308,6 +11384,7 @@
       "BattleStateResponse": {
         "required": [
           "botAfterSeconds",
+          "fixture",
           "gameId",
           "key",
           "me",
@@ -11355,6 +11432,9 @@
           "botAfterSeconds": {
             "type": "integer",
             "format": "int32"
+          },
+          "fixture": {
+            "type": "boolean"
           },
           "topic": {
             "type": "string"
@@ -12903,13 +12983,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "rating": {
-            "type": "number",
-            "format": "double"
-          },
           "totalGameCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
           }
         }
       },

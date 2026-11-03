@@ -6,7 +6,8 @@
       <div>
         <p class="t-heading">종목</p>
         <p class="t-caption mt-0.5">{{ ruleTitle ? `고른 규칙: ${ruleTitle}` : '규칙을 골라 주세요' }}</p>
-        <ClubRulePicker class="mt-2" @pick="(r) => { f.ruleId = r.id; ruleTitle = r.title }" />
+        <ClubRulePicker class="mt-2" with-app @pick="pickRule" />
+        <p v-if="appGame" class="t-caption mt-1">앱 게임 대회예요. 판마다 두 사람이 기간 안에 '경기하기'를 눌러 앱에서 겨뤄요</p>
       </div>
 
       <div>
@@ -24,7 +25,7 @@
         <p class="t-heading">누가 나가나</p>
         <div class="flex gap-2 mt-2">
           <UiChip :selected="f.entrantType === 'USER'" @click="f.entrantType = 'USER'">개인</UiChip>
-          <UiChip :selected="f.entrantType === 'CLUB'" @click="f.entrantType = 'CLUB'">동호회끼리</UiChip>
+          <UiChip v-if="!appGame" :selected="f.entrantType === 'CLUB'" @click="f.entrantType = 'CLUB'">동호회끼리</UiChip>
         </div>
         <template v-if="f.entrantType === 'CLUB'">
           <p class="t-caption mt-2">한 판이 교류전이에요. 판마다 운영진이 선수를 내요</p>
@@ -36,12 +37,14 @@
         </template>
       </div>
 
-      <div v-if="hostClubs.length">
+      <div v-if="hostClubs.length || isAdmin">
         <p class="t-heading">주최</p>
         <div class="flex gap-2 mt-2 flex-wrap">
-          <UiChip :selected="!f.hostClubId" @click="f.hostClubId = null; f.membersOnly = false">나</UiChip>
-          <UiChip v-for="c in hostClubs" :key="c.id" :selected="f.hostClubId === c.id" @click="f.hostClubId = c.id">{{ c.name }}</UiChip>
+          <UiChip :selected="!f.hostClubId && !f.official" @click="f.hostClubId = null; f.membersOnly = false; f.official = false">나</UiChip>
+          <UiChip v-for="c in hostClubs" :key="c.id" :selected="f.hostClubId === c.id" @click="f.hostClubId = c.id; f.official = false">{{ c.name }}</UiChip>
+          <UiChip v-if="isAdmin" :selected="f.official" @click="f.official = true; f.hostClubId = null; f.membersOnly = false">매치 공식 대회</UiChip>
         </div>
+        <p v-if="f.official" class="t-caption mt-2">동네와 상관없이 모두의 대회 목록에 보여요</p>
         <label v-if="f.hostClubId && f.entrantType === 'USER'" class="flex items-center justify-between mt-3">
           <span class="t-body">멤버만 (월례대회)</span><UiSwitch v-model="f.membersOnly" />
         </label>
@@ -77,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-// 대회 열기: 이름·종목·방식·참가(개인/동호회)·주최(나/내가 운영진인 동호회)·정원·시작·라운드 기간·실력 범위
+// 대회 열기: 이름·종목(앱 게임 포함)·방식·참가(개인/동호회)·주최(나/내가 운영진인 동호회/관리자는 매치 공식)·정원·시작·라운드 기간·실력 범위
 import { ref, reactive, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -93,15 +96,18 @@ const busy = ref(false)
 const ruleTitle = ref('')
 const approval = ref(false)
 const hostClubs = ref<{ id: number; name: string }[]>([])
+const isAdmin = ref(false)
+const appGame = ref(false)
 const f = reactive({
   title: '', ruleId: 0, format: 'KNOCKOUT' as 'LEAGUE' | 'KNOCKOUT', entrantType: 'USER' as 'USER' | 'CLUB', hostClubId: null as number | null,
-  membersOnly: false, maxEntrants: '8', startsAt: '', roundDays: 7, thirdPlace: false, minRating: '', maxRating: '', description: '', boards: 3, perBoard: 1,
+  membersOnly: false, official: false, maxEntrants: '8', startsAt: '', roundDays: 7, thirdPlace: false, minRating: '', maxRating: '', description: '', boards: 3, perBoard: 1,
 })
 const canCreate = computed(() => f.title.trim().length >= 2 && f.ruleId > 0 && !!f.startsAt && Number(f.maxEntrants) >= 2)
 
 // 내가 회장·운영진인 동호회를 주최로 고를 수 있다
 watch(() => props.modelValue, async (open) => {
   if (!open) return
+  GET('/api/auth/onboarding').then(({ data }) => (isAdmin.value = !!data.isAdmin)).catch(() => {})
   const mine = (await GET('/api/clubs/mine')).data
   const details = await Promise.all(mine.map((c) => GET('/api/clubs/{id}', { path: { id: c.id } }).then((r) => r.data).catch(() => null)))
   hostClubs.value = details.filter((d) => d && (d.myRole === 'OWNER' || d.myRole === 'STAFF')).map((d) => ({ id: d!.club.id, name: d!.club.name }))
@@ -113,6 +119,14 @@ watch(() => props.modelValue, async (open) => {
   }
 })
 
+// 앱 게임은 1:1이라 개인 참가만
+function pickRule(r: { id: number; title: string; appGameKey: string | null }) {
+  f.ruleId = r.id
+  ruleTitle.value = r.title
+  appGame.value = !!r.appGameKey
+  if (appGame.value) f.entrantType = 'USER'
+}
+
 async function create() {
   busy.value = true
   try {
@@ -122,7 +136,7 @@ async function create() {
         membersOnly: f.membersOnly && f.entrantType === 'USER', joinMode: approval.value ? 'APPROVAL' : 'OPEN', maxEntrants: Number(f.maxEntrants),
         minRating: f.minRating ? Number(f.minRating) : undefined, maxRating: f.maxRating ? Number(f.maxRating) : undefined,
         startsAt: f.startsAt, roundDays: f.roundDays, thirdPlace: f.format === 'KNOCKOUT' && f.thirdPlace,
-        boards: f.boards, perBoard: f.perBoard, description: f.description.trim() || undefined,
+        boards: f.boards, perBoard: f.perBoard, description: f.description.trim() || undefined, official: f.official,
       },
     })
     emit('update:modelValue', false)

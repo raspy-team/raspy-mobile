@@ -88,7 +88,11 @@
                     <span class="flex-1 min-w-0 truncate text-right" :class="sideClass(f, f.away)"><span :class="won(f, f.away) ? 'hl' : ''">{{ f.away?.name || (f.status === 'DONE' ? '부전승' : '앞 판 승자') }}</span></span>
                   </div>
                   <p v-if="f.result && f.result !== 'WIN'" class="t-micro text-center">{{ RESULT[f.result] }}</p>
-                  <div v-if="f.gameId || f.clubMatchId" class="flex">
+                  <!-- 앱 게임 판: 기간 안에 각자 '경기하기' -->
+                  <div v-if="v.summary.appGameKey && f.mine && f.status === 'OPEN' && !f.needsHost" class="flex">
+                    <UiButton size="sm" variant="signal" class="flex-1" :loading="busy" @click="playFixture(f)">경기하기</UiButton>
+                  </div>
+                  <div v-else-if="f.gameId || f.clubMatchId" class="flex">
                     <UiButton size="sm" variant="secondary" class="flex-1" @click="goFixture(f)">{{ f.mine && f.status === 'OPEN' ? '내 경기 · 시간·장소 잡기' : f.status === 'DONE' ? '결과 보기' : '경기 보기' }}</UiButton>
                   </div>
                   <!-- 주최자: 마감이 지난 판 -->
@@ -126,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-// 대회 한 곳 (/tournaments/:id): 신청·체크인 → (시작) 대진표·일정·순위 → 우승. 판 하나는 보통 경기 또는 교류전
+// 대회 한 곳 (/tournaments/:id): 신청·체크인 → (시작) 대진표·일정·순위 → 우승. 판 하나는 보통 경기, 교류전 또는 앱 대결
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -161,7 +165,7 @@ const infoLine = computed(() => {
   const s = new Date(x.summary.startsAt)
   return [x.summary.ruleTitle, x.summary.format === 'LEAGUE' ? '리그' : x.thirdPlace ? '토너먼트 · 3·4위전' : '토너먼트',
     x.summary.entrantType === 'CLUB' ? `동호회 대항 · ${x.boards}판 ${x.perBoard === 2 ? '2:2' : '1:1'}` : '',
-    `주최 ${x.summary.hostName}`, x.membersOnly ? '멤버만' : '', `${s.getMonth() + 1}월 ${s.getDate()}일 ${s.getHours()}시 시작`, `라운드 ${x.summary.roundDays}일`,
+    x.summary.appGameKey ? '앱 게임' : '', `주최 ${x.summary.hostName}`, x.membersOnly ? '멤버만' : '', `${s.getMonth() + 1}월 ${s.getDate()}일 ${s.getHours()}시 시작`, `라운드 ${x.summary.roundDays}일`,
     x.minRating || x.maxRating ? `실력 점수 ${x.minRating ?? ''}~${x.maxRating ?? ''}` : '', STATUS[x.summary.status]].filter(Boolean).join(' · ')
 })
 const myHint = computed(() => {
@@ -221,8 +225,24 @@ async function decide(fixtureId: number, winner: 'HOME' | 'AWAY' | 'NONE') {
   await act(() => POST('/api/tournaments/fixtures/{fixtureId}/decide', { path: { fixtureId }, query: { winner } }), '정하지 못했어요')
 }
 function goFixture(f: Fixture) {
+  const key = v.value?.summary.appGameKey
   if (f.clubMatchId) router.push(`/clubs/matches/${f.clubMatchId}`)
+  else if (key && f.gameId) router.push(`/play/${key}?duel=${f.gameId}`)
   else if (f.gameId) router.push(f.status === 'DONE' ? `/games/${f.gameId}/result` : `/game?id=${f.gameId}`)
+}
+// 앱 게임 판: 먼저 누른 사람이 대결(실시간이면 방)을 열고, 상대는 같은 대결에 들어간다. 실시간 화면은 내 진행 중 대결을 이어서 연다
+async function playFixture(f: Fixture) {
+  busy.value = true
+  try {
+    const p = (await POST('/api/tournaments/fixtures/{fixtureId}/play', { path: { fixtureId: f.id } })).data
+    if (p.mode === 'LIVE') router.push(`/play/${p.key}/live`)
+    else if (p.mode === 'BATTLE') router.push(`/play/${p.key}/battle`)
+    else router.push(p.played ? `/play/${p.key}?duel=${p.gameId}` : `/play/${p.key}?resume=1`)
+  } catch (e) {
+    showToast(message(e, '들어가지 못했어요'))
+  } finally {
+    busy.value = false
+  }
 }
 
 // 판이 끝나면 대진이 나아간다 (선수에게 오는 변경 신호, 화면에 돌아올 때)

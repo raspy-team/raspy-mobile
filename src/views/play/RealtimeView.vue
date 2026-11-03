@@ -24,6 +24,13 @@
           <!-- 처음 온 사람이 기다리다 나가지 않게: 곧 연습 상대가 온다고 말해 둔다 (세션 B 흐름 검토) -->
           <p v-if="!longLobby && !state.fixture && !state.invitee && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 연습 상대(봇)와 붙어요</p>
         </UiCard>
+        <!-- 기다리는 동안이 규칙을 읽기 가장 좋은 때다: 펼쳐 둔다 (B 사용자 흐름) -->
+        <section v-if="state.howTo?.length" class="mt-3 rounded-xl bg-surface-2 px-4 py-3">
+          <p class="t-label">어떻게 하나요</p>
+          <ul class="mt-2 space-y-1">
+            <li v-for="(line, i) in state.howTo" :key="i" class="t-caption text-fg-muted break-keep">· {{ line }}</li>
+          </ul>
+        </section>
         <!-- 하루 기다리는 게임은 봇을 저절로 부르지 않는다: 원하면 바로 봇과 -->
         <UiButton v-if="longLobby && !state.fixture && !state.invitee" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
           {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 봇과 할 수 있어요` : '기다리지 않고 봇과 하기' }}
@@ -224,6 +231,10 @@ markHowToSeen()
 function toggleHowTo() {
   howToOpen.value = !howToOpen.value
 }
+// 기다리는 동안 5초 넘게 읽었으면 판이 시작될 때 접어 둔다 (판을 가리지 않게)
+watch(() => state.value?.status, (now, before) => {
+  if (before === 'WAITING' && now === 'PLAYING' && waited.value >= 5) howToOpen.value = false
+})
 
 async function shareWatch() {
   if (!state.value) return

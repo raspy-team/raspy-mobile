@@ -974,6 +974,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/live/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 관중 사진·영상 보기
+         * @description 그 경기 관중이 올린 사진·영상. 중계를 볼 수 있는 사람만. 새로 오면 /topic/game-live/{gameId}에 MEDIA
+         */
+        get: operations["list"];
+        put?: never;
+        /**
+         * 관중 사진·영상 올리기
+         * @description 관중(선수 아님)이 경기 중이나 끝나고 하루 안에 한 개씩. 사진 JPG·PNG·WebP·GIF, 영상 MP4·MOV·WebM 등 10MB까지
+         */
+        post: operations["upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live/media/{mediaId}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 관중 사진·영상 내리기
+         * @description 그 경기 선수나 올린 사람만
+         */
+        post: operations["hide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/live/cheer": {
         parameters: {
             query?: never;
@@ -3560,7 +3604,7 @@ export interface paths {
          * 앱 게임 목록
          * @description 게임마다 내 레이팅·전적·최고 기록을 함께 준다.
          */
-        get: operations["list"];
+        get: operations["list_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3874,7 +3918,7 @@ export interface paths {
          * 신고 목록 (관리자 전용)
          * @description 최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.
          */
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4193,7 +4237,7 @@ export interface components {
         };
         ReportRequest: {
             /** @enum {string} */
-            targetType: "GAME" | "COMMENT" | "RULE" | "USER" | "CHAT_MESSAGE";
+            targetType: "GAME" | "COMMENT" | "RULE" | "USER" | "CHAT_MESSAGE" | "GAME_MEDIA";
             /** Format: int64 */
             targetId: number;
             reason: string;
@@ -4446,6 +4490,17 @@ export interface components {
         };
         ReactRequest: {
             emoji: string;
+        };
+        LiveMedia: {
+            /** Format: int64 */
+            id: number;
+            url: string;
+            mediaType: string;
+            uploader?: components["schemas"]["LivePlayer"];
+            /** Format: date-time */
+            uploadedAt: string;
+            mine: boolean;
+            canHide: boolean;
         };
         CheerRequest: {
             /** Format: int32 */
@@ -5701,6 +5756,10 @@ export interface components {
             /** Format: date-time */
             uploadedAt: string;
         };
+        LiveMediaList: {
+            items: components["schemas"]["LiveMedia"][];
+            canUpload: boolean;
+        };
         GameLikeStatusResponse: {
             isLiked: boolean;
             /** Format: int64 */
@@ -6269,7 +6328,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             /** @enum {string} */
-            targetType: "GAME" | "COMMENT" | "RULE" | "USER" | "CHAT_MESSAGE";
+            targetType: "GAME" | "COMMENT" | "RULE" | "USER" | "CHAT_MESSAGE" | "GAME_MEDIA";
             /** Format: int64 */
             targetId: number;
             targetLabel?: string;
@@ -7658,6 +7717,80 @@ export interface operations {
                 "application/json": components["schemas"]["ReactRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveMediaList"];
+                };
+            };
+        };
+    };
+    upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveMedia"];
+                };
+            };
+        };
+    };
+    hide: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+                mediaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -10834,7 +10967,7 @@ export interface operations {
             };
         };
     };
-    list: {
+    list_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -11219,7 +11352,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: never;
             header?: never;

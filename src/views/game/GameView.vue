@@ -92,6 +92,8 @@
   <UiSheet :model-value="!!menuGame" @update:model-value="menuGame = null">
     <UiList v-if="menuGame">
       <UiListItem icon="fas fa-book-open" title="규칙 보기" @click="openRule(menuGame)" />
+      <UiListItem v-if="needsSafety(menuGame)" icon="shield-halved" title="만나기 전 안전 수칙" @click="openSafety(menuGame)" />
+      <UiListItem v-if="canReschedule(menuGame)" icon="pen" title="시간·장소 바꾸기" subtitle="바꾸면 상대에게 알려요" @click="openScheduleFromMenu(menuGame)" />
       <UiListItem v-if="dmTarget(menuGame)" icon="far fa-paper-plane" :title="`${dmTarget(menuGame).name}에게 메시지`" @click="router.push('/chat/' + dmTarget(menuGame).id)" />
       <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
       <UiListItem v-if="canTellFriend(menuGame)" icon="shield-halved" title="친구에게 일정 알리기" subtitle="누구와 언제 어디서 만나는지 보내 둬요" @click="tellFriend(menuGame)" />
@@ -99,9 +101,22 @@
     </UiList>
   </UiSheet>
 
-  <!-- 시간·장소 정하기 (시작 전 언제든). 보낸 칸만 바뀌고 상대에게 알림이 간다 -->
+  <SafetyTipsSheet
+    :model-value="!!safetyGame"
+    :opponent="safetyGame ? dmTarget(safetyGame)?.name || '' : ''"
+    :can-tell-friend="!!safetyGame && canTellFriend(safetyGame)"
+    @update:model-value="(v) => !v && closeSafety()"
+    @tell-friend="tellFriend(safetyGame)"
+  />
+
+  <!-- 시간·장소 정하기 (시작 전 언제든, 두 선수 모두). 보낸 칸만 바뀌고 상대에게 알림이 간다 -->
   <UiSheet :model-value="!!scheduleGame" :title="isRemote(scheduleGame?.venue) ? '언제 할까요?' : '언제, 어디서 할까요?'" @update:model-value="scheduleGame = null">
     <div class="space-y-5">
+      <!-- 정하기 전에 상대와 이야기할 수 있게 (예전엔 시트를 닫고 채팅을 따로 찾아가야 했다) -->
+      <div v-if="scheduleGame && dmTarget(scheduleGame)" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3">
+        <p class="flex-1 t-caption">{{ dmTarget(scheduleGame).name }}님과 먼저 맞춰 보세요</p>
+        <UiButton size="sm" variant="secondary" icon="far fa-paper-plane" @click="router.push('/chat/' + dmTarget(scheduleGame).id)">메시지</UiButton>
+      </div>
       <div>
         <p class="t-label mb-2">시간</p>
         <div class="flex flex-wrap gap-2 mb-2">
@@ -116,15 +131,29 @@
       </div>
       <div v-else>
         <p class="t-label mb-2">장소</p>
-        <div class="grid grid-cols-2 gap-2">
-          <UiSelect v-model="schedRegion1" :options="region1Options" placeholder="시·도" />
-          <UiSelect v-model="schedRegion2" :options="schedRegion2Options" placeholder="구·시·군" :disabled="!schedRegion1" />
-        </div>
-        <UiInput v-model="schedPlace" class="mt-2" placeholder="장소 이름 (예: 관악구민체육센터 3층)" />
+        <!-- 이미 정한 곳이면 그대로 두고(시간만 바꿀 때 장소가 바뀌지 않게), 처음이면 내 동네(시·군·구 + 동, 도는 뺀다), 다른 곳이면 직접 -->
+        <button v-if="placeMode === 'keep'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = myArea ? 'mine' : 'other'">
+          <UiIcon name="location-dot" aria-hidden="true" />
+          <span class="flex-1 t-body truncate">{{ scheduleGame?.matchLocation }}</span>
+          <span class="t-micro underline underline-offset-2 flex-shrink-0">장소 바꾸기</span>
+        </button>
+        <template v-else>
+          <button v-if="placeMode === 'mine'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = 'other'">
+            <UiIcon name="location-dot" aria-hidden="true" />
+            <span class="flex-1 t-body">{{ myArea.shortName }}</span>
+            <span class="t-micro underline underline-offset-2">다른 곳</span>
+          </button>
+          <div v-else class="grid grid-cols-2 gap-2">
+            <UiSelect v-model="schedRegion1" :options="region1Options" placeholder="시·도" />
+            <UiSelect v-model="schedRegion2" :options="schedRegion2Options" placeholder="구·시·군" :disabled="!schedRegion1" />
+          </div>
+          <UiInput v-model="schedPlace" class="mt-2" :placeholder="`장소 이름 (예: ${myArea?.name || '동네'} 주민센터 체육관)`" />
+        </template>
       </div>
+      <p class="t-micro">정하면 상대에게 알려요. 정한 뒤에도 경기 시작 전까지 두 사람 모두 언제든 바꿀 수 있어요.</p>
     </div>
     <template #footer>
-      <UiButton block :disabled="!schedTime && !(schedRegion1 && schedRegion2) && !(isRemote(scheduleGame?.venue) && schedPlace.trim())" :loading="busy" @click="submitSchedule">정하기</UiButton>
+      <UiButton block :disabled="!canSubmitSchedule" :loading="busy" @click="submitSchedule">{{ scheduleGame && scheduleGame.matchDate ? '바꾸기' : '정하기' }}</UiButton>
     </template>
   </UiSheet>
 
@@ -199,6 +228,7 @@ import MatchRuleModal from '../../components/MatchModal.vue'
 import CameraCapture from '../../components/CameraCapture.vue'
 import MyGameCard from '../../components/game/MyGameCard.vue'
 import AppDuelList from '../../components/appgame/AppDuelList.vue'
+import SafetyTipsSheet from '../../components/game/SafetyTipsSheet.vue'
 import { GET } from '@/api/client'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
@@ -347,6 +377,36 @@ function dmTarget(g) {
   if (g.opponentId) return { id: g.opponentId, name: g.opponentNickname }
   return null
 }
+// 만나기 전 안전 수칙: 만나서 하는 경기에 상대가 정해지면 한 번 저절로 (경기마다), 그 뒤엔 더보기에서
+const safetyGame = ref(null)
+const needsSafety = (g) => !!g && !isRemote(g.venue) && !!dmTarget(g) && canReschedule(g)
+const safetySeen = (() => {
+  try { return JSON.parse(localStorage.getItem('safetyTipsSeen') || '[]') } catch { return [] }
+})()
+function openSafety(g) {
+  menuGame.value = null
+  safetyGame.value = g
+}
+function closeSafety() {
+  const g = safetyGame.value
+  if (g && !safetySeen.includes(g.id)) {
+    safetySeen.push(g.id)
+    try { localStorage.setItem('safetyTipsSeen', JSON.stringify(safetySeen.slice(-100))) } catch { /* 이번만 닫힌다 */ }
+  }
+  safetyGame.value = null
+}
+watch(allGames, (list) => {
+  if (safetyGame.value || scheduleGame.value) return
+  const g = list.find((x) => needsSafety(x) && !safetySeen.includes(x.id))
+  if (g) safetyGame.value = g
+})
+
+// 시작 전이면 두 선수 모두 바꿀 수 있다 (MyGameCard의 canSchedule과 같은 기준)
+const canReschedule = (g) => g.type === 'my-game' ? ['MATCHING', 'SCHEDULED'].includes(g.status) : g.status === 'APPROVED' && ['MATCHING', 'SCHEDULED'].includes(g.gameStatus)
+function openScheduleFromMenu(g) {
+  menuGame.value = null
+  openSchedule(g)
+}
 const canDelete = (g) => g.type === 'my-game' && g.isOwner !== false && ['MATCHING', 'SCHEDULED'].includes(g.status)
 
 function openRule(g) {
@@ -422,7 +482,26 @@ const schedPlace = ref('')
 const schedRegion2Options = computed(() => (regionMap[schedRegion1.value] || []).filter((r) => r !== '전체'))
 watch(schedRegion1, () => (schedRegion2.value = ''))
 
-function openSchedule(g) {
+// 장소 기본값: 내 지금 동네 (시·군·구 + 동). 한 번만 불러 둔다
+const myArea = ref(null)
+// keep: 이미 정한 장소 그대로 / mine: 내 동네 / other: 시·도와 구를 직접
+const placeMode = ref('mine')
+async function loadMyArea() {
+  if (myArea.value) return
+  const mine = await api.get('/api/neighborhoods/me').then((r) => r.data).catch(() => null)
+  myArea.value = mine?.neighborhoods?.find((n) => n.active) || null
+}
+const canSubmitSchedule = computed(() => {
+  const g = scheduleGame.value
+  if (!g) return false
+  if (isRemote(g.venue)) return !!schedTime.value || !!schedPlace.value.trim()
+  if (placeMode.value === 'keep') return !!schedTime.value
+  return !!schedTime.value || (placeMode.value === 'mine' && !!myArea.value) || (schedRegion1.value && schedRegion2.value)
+})
+
+async function openSchedule(g) {
+  await loadMyArea()
+  placeMode.value = g.matchLocation && !isRemote(g.venue) ? 'keep' : myArea.value ? 'mine' : 'other'
   scheduleGame.value = g
   schedTime.value = g.matchDate ? String(g.matchDate).slice(0, 16) : ''
   const parsed = g.matchLocation ? parseRegion(g.matchLocation) : null
@@ -435,15 +514,19 @@ async function submitSchedule() {
   busy.value = true
   try {
     const remote = isRemote(scheduleGame.value.venue)
-    const hasPlace = !remote && schedRegion1.value && schedRegion2.value
+    // 내 동네를 쓰면 주소는 '서울특별시 동대문구 회기동'(서버 지역 판정용), 화면에는 장소 이름이 먼저 보인다
+    const mode = placeMode.value
+    const area = remote || mode === 'keep' ? null : mode === 'mine' ? myArea.value.fullName : schedRegion1.value && schedRegion2.value ? `${schedRegion1.value} ${schedRegion2.value}` : null
+    const hasPlace = !!area
     await api.post(`/api/games/${scheduleGame.value.id}/schedule`, {
       matchDate: schedTime.value ? (schedTime.value.length === 16 ? `${schedTime.value}:00` : schedTime.value) : null,
-      roadAddress: hasPlace ? `${schedRegion1.value} ${schedRegion2.value}` : null,
+      roadAddress: area,
       // 화상·다른 게임은 어디서인지만 보낸다 (서버가 주소 없이 받는다)
-      detailAddress: remote ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || null : null,
+      detailAddress: remote ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || (mode === 'mine' ? myArea.value.shortName : null) : null,
     })
+    const changed = !!scheduleGame.value?.matchDate
     scheduleGame.value = null
-    showToast('정했어요. 상대에게 알렸어요')
+    showToast(changed ? '바꿨어요. 상대에게 알렸어요' : '정했어요. 상대에게 알렸어요')
     await fetchGames()
   } catch (e) {
     showToast(e.response?.data?.message || '정하지 못했어요')

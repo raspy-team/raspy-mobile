@@ -28,7 +28,6 @@
     <div class="flex items-center gap-1 -mx-4 px-4 overflow-x-auto no-scrollbar [&>*]:flex-shrink-0 [&>*]:whitespace-nowrap">
       <UiButton size="sm" icon="plus" to="/create-game">경기 만들기</UiButton>
       <UiButton size="sm" variant="ghost" to="/rules">규칙</UiButton>
-      <UiButton size="sm" variant="ghost" to="/match">맞붙기 카드</UiButton>
       <UiButton size="sm" variant="ghost" to="/clubs">동호회</UiButton>
     </div>
 

@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 // 만나도 되는 사람인가 (기능 검토 #1, 11/3): 서버 TrustService가 확인된 사실만 모아 준다.
-// 온도는 한눈에 보는 숫자, 아래 목록은 그 근거. compact면 온도와 단계만 (맞붙기 카드)
+// 온도는 한눈에 보는 숫자, 아래 목록은 그 근거. compact면 온도와 단계만
 import { computed } from 'vue'
 import type { components } from '@/api/schema'
 import { UiBadge, UiIcon } from '../ui'

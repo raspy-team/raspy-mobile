@@ -37,9 +37,9 @@
           <UiIcon name="chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
         </RouterLink>
       </UiField>
-      <!-- 나이: 처음 보는 사람과 만나는 기능(맞붙기 카드·응원 포인트·다칠 수 있는 규칙)은 만 19세 이상이라 확인한다 -->
+      <!-- 나이: 다칠 수 있는 규칙은 만 19세 이상이라 확인한다 -->
       <div id="age">
-        <UiInput v-model="form.age" label="나이 (만)" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="맞붙기 카드·응원 포인트·다칠 수 있는 규칙은 만 19세 이상만 쓸 수 있어요. 다른 사람에게는 보이지 않아요" :error="errors.age" />
+        <UiInput v-model="form.age" label="나이 (만)" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세 이상만 할 수 있어요. 다른 사람에게는 보이지 않아요" :error="errors.age" />
       </div>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
       <UiInput v-model="form.affiliation" label="소속" optional :maxlength="100" placeholder="예: 성수 러닝크루" />
@@ -187,7 +187,7 @@ async function load() {
   }
 }
 
-// #age로 오면(맞붙기 카드 등 '나이를 먼저 넣어 주세요') 나이 칸으로 바로
+// #age로 오면('나이를 먼저 넣어 주세요') 나이 칸으로 바로
 onMounted(async () => {
   await load()
   if (route.hash === '#age') {

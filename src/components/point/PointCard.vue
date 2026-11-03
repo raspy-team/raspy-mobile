@@ -15,8 +15,8 @@
       <button type="button" class="t-micro underline underline-offset-2 mt-1" :aria-expanded="more" @click="more = !more">{{ more ? '접기' : '자세히' }}</button>
       <ul v-if="more" class="mt-3 space-y-1.5 t-caption">
         <li>· 경기를 마치면 20P, 이기면 10P 더 (앱 게임은 5P·3P)</li>
-        <li>· 시작 전인 남의 경기에 10~100P를 걸어 응원할 수 있어요 (만 19세 이상). 응원한 쪽이 이기면 돌려받고 <b class="text-fg">보너스</b>(최대 50%, 유력한 쪽일수록 작고 선수와 아는 사이면 없음)</li>
-        <li>· 같은 상대와 일주일에 4번째 판부터는 쌓이지 않고, 응원 보너스까지 하루 100P까지예요</li>
+        <li>· 시작 전인 남의 경기에 10~100P를 걸어 응원할 수 있어요. 응원한 쪽이 이기면 돌려받고 <b class="text-fg">보너스</b>(최대 50%, 유력한 쪽일수록 작고 선수와 아는 사이면 없음)</li>
+        <li>· 같은 상대와 일주일에 4번째 판부터는 쌓이지 않고, 응원 보너스까지 하루 200P까지예요</li>
         <li>· 포인트는 돈으로 사거나 돈·경품으로 바꾸거나 남에게 줄 수 없어요</li>
       </ul>
 

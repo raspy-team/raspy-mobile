@@ -103,8 +103,6 @@ const routes = [
   { path: '/settings', component:  Setting},
   // 동네 인증·범위 (docs/direction.md '동네')
   { path: '/neighborhood', component: () => import('../views/NeighborhoodView.vue') },
-  // 맞붙기 카드: 동네 사람과 서로 원하면 연결 (MatchCardView 주석)
-  { path: '/match', component: () => import('../views/MatchCardView.vue') },
   { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },

@@ -6,7 +6,8 @@
         <p class="t-heading truncate">{{ game.rule?.ruleTitle }}</p>
         <button v-if="canSchedule" type="button" class="flex items-center gap-1.5 max-w-full text-left mt-0.5" @click="emit('schedule')">
           <span class="t-caption truncate">{{ venuePlace(game, place) }} · {{ matchTime(game.matchDate) }}</span>
-          <span class="t-micro underline underline-offset-2 flex-shrink-0">{{ needsSchedule ? '정하기' : '바꾸기' }}</span>
+          <!-- 정한 뒤에도 두 선수 모두 바꿀 수 있다는 게 보이게 (예전 밑줄 글씨는 너무 작아 못 바꾸는 줄 알았다) -->
+          <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-surface-3 text-fg text-xs font-medium flex-shrink-0"><UiIcon name="pen" class="text-[10px]" aria-hidden="true" />{{ needsSchedule ? '정하기' : '바꾸기' }}</span>
         </button>
         <p v-else class="t-caption truncate mt-0.5">{{ venuePlace(game, place) }} · {{ matchTime(game.matchDate) }}</p>
       </div>

@@ -45,21 +45,23 @@
       </UiSection>
       <UiSection v-for="g in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
         <div class="space-y-3">
-          <MyGameCard
-            v-for="game in g.items"
-            :key="game.type + game.id"
-            :game="game"
-            :me="me"
-            @profile="(id) => id && router.push('/profile/' + id)"
-            @play="router.push(`/games/${game.id}/play`)"
-            @result="router.push(`/games/${game.id}/result`)"
-            @start="openStart(game)"
-            @applicants="applicantsGame = game"
-            @share="share(game)"
-            @cancel-request="cancelRequest(game)"
-            @more="menuGame = game"
-            @schedule="openSchedule(game)"
-          />
+          <div v-for="game in g.items" :key="game.type + game.id" class="space-y-2">
+            <MyGameCard
+              :game="game"
+              :me="me"
+              @profile="(id) => id && router.push('/profile/' + id)"
+              @play="router.push(`/games/${game.id}/play`)"
+              @result="router.push(`/games/${game.id}/result`)"
+              @start="openStart(game)"
+              @applicants="applicantsGame = game"
+              @share="share(game)"
+              @cancel-request="cancelRequest(game)"
+              @more="menuGame = game"
+              @schedule="openSchedule(game)"
+            />
+            <!-- 만나서 하는 경기: 도착·끝 확인, 노쇼, 위치 공유 (안전·신뢰 C) -->
+            <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" />
+          </div>
         </div>
       </UiSection>
     </template>
@@ -229,6 +231,7 @@ import CameraCapture from '../../components/CameraCapture.vue'
 import MyGameCard from '../../components/game/MyGameCard.vue'
 import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import SafetyTipsSheet from '../../components/game/SafetyTipsSheet.vue'
+import MeetSafetyCard from '../../components/safety/MeetSafetyCard.vue'
 import { GET } from '@/api/client'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiDialog, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
@@ -380,6 +383,8 @@ function dmTarget(g) {
 }
 // 만나기 전 안전 수칙: 만나서 하는 경기에 상대가 정해지면 한 번 저절로 (경기마다), 그 뒤엔 더보기에서
 const safetyGame = ref(null)
+// 경기 시간이 잡힌 만나서 하는 경기 (앞뒤 하루). 카드 안에서 서버가 지금 할 일이 있는지 정한다
+const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && Math.abs(Date.now() - new Date(g.matchDate).getTime()) < 86_400_000 && !['REQUESTED', 'REJECTED'].includes(g.status)
 const needsSafety = (g) => !!g && !isRemote(g.venue) && !!dmTarget(g) && canReschedule(g)
 const safetySeen = (() => {
   try { return JSON.parse(localStorage.getItem('safetyTipsSeen') || '[]') } catch { return [] }

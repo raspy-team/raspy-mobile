@@ -490,6 +490,140 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/meet/{gameId}/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 위치 공유 시작
+         * @description 링크를 친구에게 보낸다. friendId를 주면 그 매치 친구에게도 알리고, 끝 확인이 늦으면 그 친구에게 알린다
+         */
+        post: operations["share"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meet/{gameId}/no-show/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 노쇼 알리기
+         * @description 내가 도착을 눌렀고 상대는 누르지 않았을 때, 경기 시간 15분 뒤부터
+         */
+        post: operations["noShow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meet/{gameId}/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 잘 끝났어요
+         * @description 끝 확인. 켜 둔 위치 공유도 닫는다
+         */
+        post: operations["finish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meet/{gameId}/arrive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 도착했어요
+         * @description 경기 1시간 전 ~ 3시간 뒤. 위치를 함께 보내 두 사람이 실제로 만났는지 본다
+         */
+        post: operations["arrive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meet/share/{token}/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 위치 공유 그만 */
+        post: operations["stop"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meet/share/{token}/location": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 위치 갱신 */
+        post: operations["location"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meet/no-show/{reportId}/appeal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 노쇼 이의
+         * @description 노쇼로 기록된 사람이 낸다. 운영진이 확인한다
+         */
+        post: operations["appeal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/invite": {
         parameters: {
             query?: never;
@@ -1779,6 +1913,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/no-show/{reportId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 노쇼 기록 취소 (관리자 전용)
+         * @description 이의가 맞을 때. 처벌을 다시 계산한다
+         */
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/access/daily-first": {
         parameters: {
             query?: never;
@@ -1991,6 +2145,26 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getMyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/share/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 공유받은 위치 보기 (로그인 없이)
+         * @description 링크를 받은 친구가 본다. 끝나고 하루가 지나면 404
+         */
+        get: operations["view"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2423,6 +2597,26 @@ export interface paths {
          * @description 인증 전에 '여기는 합정동이에요'를 보여 준다. 저장하지 않는다. 못 찾으면 null
          */
         get: operations["locate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meet/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 만남 상태
+         * @description 도착·끝 확인, 상대 도착, 노쇼를 알릴 수 있는지, 켜 둔 위치 공유
+         */
+        get: operations["state"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3486,6 +3680,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/no-show/appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 노쇼 이의 목록 (관리자 전용) */
+        get: operations["appeals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/chat/{roomId}": {
         parameters: {
             query?: never;
@@ -3851,6 +4062,48 @@ export interface components {
             code: string;
             /** Format: int32 */
             level: number;
+        };
+        ShareRequest: {
+            /** Format: int64 */
+            friendId?: number;
+        };
+        ShareStarted: {
+            token: string;
+            url: string;
+            text: string;
+        };
+        MeetState: {
+            inPerson: boolean;
+            canArrive: boolean;
+            /** Format: date-time */
+            arrivedAt?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            others: components["schemas"]["Other"][];
+            /** Format: int64 */
+            noShowReportId?: number;
+            noShowAppealed: boolean;
+            canShare: boolean;
+            shareUrl?: string;
+            shareFriendNickname?: string;
+        };
+        Other: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            /** Format: date-time */
+            arrivedAt?: string;
+            near?: boolean;
+            canReportNoShow: boolean;
+        };
+        Point: {
+            /** Format: double */
+            lat: number;
+            /** Format: double */
+            lon: number;
+        };
+        AppealRequest: {
+            text: string;
         };
         GameRegionRequest: {
             roadAddress: string;
@@ -4403,6 +4656,8 @@ export interface components {
             daysSinceJoined: number;
             /** Format: int32 */
             meetAgainCount: number;
+            /** Format: int32 */
+            noShows: number;
         };
         UserProfileResponse: {
             /** Format: int64 */
@@ -4507,10 +4762,30 @@ export interface components {
             profilePicture?: string;
             affiliation?: string;
         };
+        ShareView: {
+            nickname: string;
+            ruleTitle: string;
+            /** Format: date-time */
+            matchDate?: string;
+            place?: string;
+            opponents: string[];
+            /** Format: double */
+            lastLat?: number;
+            /** Format: double */
+            lastLon?: number;
+            /** Format: date-time */
+            lastAt?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            /** @enum {string} */
+            status: "LIVE" | "OVERDUE" | "FINISHED" | "STOPPED" | "EXPIRED";
+        };
         MySafety: {
             /** Format: date-time */
             suspendedUntil?: string;
             suspendedMessage?: string;
+            /** Format: date-time */
+            offlineBannedUntil?: string;
         };
         RuleRankingResponse: {
             /** Format: int64 */
@@ -4686,7 +4961,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -5411,6 +5686,22 @@ export interface components {
             accusedSuspendedUntil?: string;
             context?: string;
         };
+        NoShowAppeal: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            gameId: number;
+            ruleTitle: string;
+            /** Format: date-time */
+            matchDate?: string;
+            reporterNickname: string;
+            /** Format: int64 */
+            accusedId: number;
+            accusedNickname: string;
+            appeal?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
         AdminChatLine: {
             /** Format: int64 */
             senderId?: number;
@@ -6063,6 +6354,171 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["MyNeighborhoods"];
                 };
+            };
+        };
+    };
+    share: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShareRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ShareStarted"];
+                };
+            };
+        };
+    };
+    noShow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MeetState"];
+                };
+            };
+        };
+    };
+    finish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MeetState"];
+                };
+            };
+        };
+    };
+    arrive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Point"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MeetState"];
+                };
+            };
+        };
+    };
+    stop: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    location: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Point"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    appeal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppealRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -7755,6 +8211,26 @@ export interface operations {
             };
         };
     };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     recordDailyFirstAccess: {
         parameters: {
             query?: never;
@@ -8065,6 +8541,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MyProfileResponse"];
+                };
+            };
+        };
+    };
+    view: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ShareView"];
                 };
             };
         };
@@ -8555,6 +9053,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DongView"];
+                };
+            };
+        };
+    };
+    state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MeetState"];
                 };
             };
         };
@@ -9794,6 +10314,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminReportResponse"][];
+                };
+            };
+        };
+    };
+    appeals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NoShowAppeal"][];
                 };
             };
         };

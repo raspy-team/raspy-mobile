@@ -26,6 +26,10 @@
       "description": "유저의 일일 첫 접속을 추적하고 알림을 전송하는 API"
     },
     {
+      "name": "Meet",
+      "description": "만나서 하는 경기의 안전: 도착·끝 확인, 노쇼, 위치 공유"
+    },
+    {
       "name": "Notification",
       "description": "인앱 알림 API"
     },
@@ -888,6 +892,261 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/meet/{gameId}/share": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "위치 공유 시작",
+        "description": "링크를 친구에게 보낸다. friendId를 주면 그 매치 친구에게도 알리고, 끝 확인이 늦으면 그 친구에게 알린다",
+        "operationId": "share",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareStarted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meet/{gameId}/no-show/{userId}": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "노쇼 알리기",
+        "description": "내가 도착을 눌렀고 상대는 누르지 않았을 때, 경기 시간 15분 뒤부터",
+        "operationId": "noShow",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meet/{gameId}/finish": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "잘 끝났어요",
+        "description": "끝 확인. 켜 둔 위치 공유도 닫는다",
+        "operationId": "finish",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meet/{gameId}/arrive": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "도착했어요",
+        "description": "경기 1시간 전 ~ 3시간 뒤. 위치를 함께 보내 두 사람이 실제로 만났는지 본다",
+        "operationId": "arrive",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Point"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meet/share/{token}/stop": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "위치 공유 그만",
+        "operationId": "stop",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/meet/share/{token}/location": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "위치 갱신",
+        "operationId": "location",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Point"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/meet/no-show/{reportId}/appeal": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "노쇼 이의",
+        "description": "노쇼로 기록된 사람이 낸다. 운영진이 확인한다",
+        "operationId": "appeal",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -3404,6 +3663,32 @@
         }
       }
     },
+    "/api/admin/no-show/{reportId}/cancel": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "노쇼 기록 취소 (관리자 전용)",
+        "description": "이의가 맞을 때. 처벌을 다시 계산한다",
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/access/daily-first": {
       "post": {
         "tags": [
@@ -3783,6 +4068,38 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/MyProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/share/{token}": {
+      "get": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "공유받은 위치 보기 (로그인 없이)",
+        "description": "링크를 받은 친구가 본다. 끝나고 하루가 지나면 404",
+        "operationId": "view",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareView"
                 }
               }
             }
@@ -4586,6 +4903,39 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/DongView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meet/{gameId}": {
+      "get": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "만남 상태",
+        "description": "도착·끝 확인, 상대 도착, 노쇼를 알릴 수 있는지, 켜 둔 위치 공유",
+        "operationId": "state",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetState"
                 }
               }
             }
@@ -5895,11 +6245,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -6360,6 +6710,30 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/AdminReportResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/no-show/appeals": {
+      "get": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "노쇼 이의 목록 (관리자 전용)",
+        "operationId": "appeals",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NoShowAppeal"
                   }
                 }
               }
@@ -7396,6 +7770,137 @@
           "level": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ShareRequest": {
+        "type": "object",
+        "properties": {
+          "friendId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ShareStarted": {
+        "required": [
+          "text",
+          "token",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "MeetState": {
+        "required": [
+          "canArrive",
+          "canShare",
+          "inPerson",
+          "noShowAppealed",
+          "others"
+        ],
+        "type": "object",
+        "properties": {
+          "inPerson": {
+            "type": "boolean"
+          },
+          "canArrive": {
+            "type": "boolean"
+          },
+          "arrivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "others": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Other"
+            }
+          },
+          "noShowReportId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noShowAppealed": {
+            "type": "boolean"
+          },
+          "canShare": {
+            "type": "boolean"
+          },
+          "shareUrl": {
+            "type": "string"
+          },
+          "shareFriendNickname": {
+            "type": "string"
+          }
+        }
+      },
+      "Other": {
+        "required": [
+          "canReportNoShow",
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "arrivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "near": {
+            "type": "boolean"
+          },
+          "canReportNoShow": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Point": {
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "AppealRequest": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
           }
         }
       },
@@ -9115,6 +9620,7 @@
           "level",
           "mannerCount",
           "meetAgainCount",
+          "noShows",
           "offlineGames",
           "socialVerified",
           "temperature"
@@ -9165,6 +9671,10 @@
             "format": "int32"
           },
           "meetAgainCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noShows": {
             "type": "integer",
             "format": "int32"
           }
@@ -9492,6 +10002,62 @@
           }
         }
       },
+      "ShareView": {
+        "required": [
+          "nickname",
+          "opponents",
+          "ruleTitle",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "place": {
+            "type": "string"
+          },
+          "opponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastLon": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "LIVE",
+              "OVERDUE",
+              "FINISHED",
+              "STOPPED",
+              "EXPIRED"
+            ]
+          }
+        }
+      },
       "MySafety": {
         "type": "object",
         "properties": {
@@ -9501,6 +10067,10 @@
           },
           "suspendedMessage": {
             "type": "string"
+          },
+          "offlineBannedUntil": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -10129,7 +10699,8 @@
               "APP_VOTE_STARTED",
               "GAME_SCHEDULED",
               "GAME_REMINDER",
-              "GAME_RESULT_DISPUTED"
+              "GAME_RESULT_DISPUTED",
+              "SAFETY"
             ]
           },
           "createdAt": {
@@ -12548,6 +13119,52 @@
           },
           "context": {
             "type": "string"
+          }
+        }
+      },
+      "NoShowAppeal": {
+        "required": [
+          "accusedId",
+          "accusedNickname",
+          "createdAt",
+          "gameId",
+          "id",
+          "reporterNickname",
+          "ruleTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reporterNickname": {
+            "type": "string"
+          },
+          "accusedId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accusedNickname": {
+            "type": "string"
+          },
+          "appeal": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

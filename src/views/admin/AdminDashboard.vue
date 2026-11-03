@@ -56,6 +56,20 @@
         </ul>
       </UiSection>
 
+      <!-- 노쇼 이의 (안전·신뢰 C): 맞으면 기록을 지우고 처벌을 다시 센다 -->
+      <UiSection v-if="appeals.length" :title="`노쇼 이의 ${appeals.length}`">
+        <ul class="space-y-2">
+          <li v-for="a in appeals" :key="a.id">
+            <UiCard class="space-y-2">
+              <p class="t-body text-fg">{{ a.accusedNickname }}님 · {{ a.ruleTitle }}</p>
+              <p class="t-caption">보고: {{ a.reporterNickname }}님 · {{ timeAgo(a.createdAt) }}</p>
+              <p class="t-caption break-words">"{{ a.appeal }}"</p>
+              <UiButton size="sm" variant="secondary" :loading="sanctioningId === 'n' + a.id" @click="cancelNoShow(a)">노쇼 기록 지우기</UiButton>
+            </UiCard>
+          </li>
+        </ul>
+      </UiSection>
+
       <UiSheet v-model="chatOpen" title="신고된 대화">
         <UiListSkeleton v-if="!chatLines" :rows="4" />
         <ul v-else class="space-y-2 max-h-[60vh] overflow-auto">
@@ -291,6 +305,7 @@ async function load() {
       ...ruleStats.value.map((s) => api.get('/api/admin/rules/edit-requests', { params: { status: s.status } })),
     ])
     reports.value = reportRes.data
+    loadAppeals()
     ruleRes.forEach((res, i) => (ruleStats.value[i].count = Array.isArray(res.data) ? res.data.length : 0))
     recentRequests.value = (Array.isArray(ruleRes[0].data) ? ruleRes[0].data : []).slice(0, 5)
   } catch (e) {
@@ -303,6 +318,23 @@ async function load() {
 
 // 제재 (안전·신뢰 A)
 const sanctioningId = ref(null)
+const appeals = ref([])
+async function loadAppeals() {
+  appeals.value = (await GET('/api/admin/no-show/appeals').catch(() => ({ data: [] }))).data || []
+}
+async function cancelNoShow(a) {
+  if (!(await confirmDialog({ title: `${a.accusedNickname}님의 노쇼 기록을 지울까요?`, message: '처벌을 다시 계산해요', confirmText: '지우기' }))) return
+  sanctioningId.value = 'n' + a.id
+  try {
+    await POST('/api/admin/no-show/{reportId}/cancel', { path: { reportId: a.id } })
+    await loadAppeals()
+    showToast('노쇼 기록을 지웠어요')
+  } catch {
+    showToast('처리하지 못했어요')
+  } finally {
+    sanctioningId.value = null
+  }
+}
 const chatOpen = ref(false)
 const chatLines = ref(null)
 const isRoom = (c) => /^[0-9a-f-]{36}$/i.test(c || '')

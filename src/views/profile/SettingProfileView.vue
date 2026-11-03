@@ -9,7 +9,7 @@
 
     <!-- 지금 값을 못 불러오면 저장하지 않는다 (빈 칸으로 덮어쓰지 않게) -->
     <main v-else-if="loadError" class="max-w-md mx-auto px-4 pt-16">
-      <UiEmptyState icon="fas fa-triangle-exclamation" title="프로필을 불러오지 못했어요" description="잠시 뒤 다시 시도해주세요">
+      <UiEmptyState icon="fas fa-triangle-exclamation" title="프로필을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
         <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
       </UiEmptyState>
     </main>
@@ -105,14 +105,14 @@ async function onPhoto(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
   if (!file) return
-  if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라주세요')
+  if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라 주세요')
   const dataUrl = await new Promise((resolve) => {
     const r = new FileReader()
     r.onload = () => resolve(r.result)
     r.onerror = () => resolve(null)
     r.readAsDataURL(file)
   })
-  if (!dataUrl) return showToast('사진을 읽지 못했어요. 다른 사진을 골라주세요')
+  if (!dataUrl) return showToast('사진을 읽지 못했어요. 다른 사진을 골라 주세요')
   preview.value = await compressImage(dataUrl)
   photo.value = dataUrlToFile(preview.value, file.name)
   photoState.value = 'updated'
@@ -126,8 +126,8 @@ function removePhoto() {
 async function save() {
   const nick = form.nickname.trim()
   const name = form.username.trim()
-  if (!nick || nick.length > NICKNAME_MAX) return (errors.nickname = `닉네임을 1~${NICKNAME_MAX}자로 적어주세요`)
-  if (!USERNAME_PATTERN.test(name)) return (errors.username = '영문 소문자·숫자·밑줄(_)로 12자까지 적어주세요')
+  if (!nick || nick.length > NICKNAME_MAX) return (errors.nickname = `닉네임을 1~${NICKNAME_MAX}자로 적어 주세요`)
+  if (!USERNAME_PATTERN.test(name)) return (errors.username = '영문 소문자·숫자·밑줄(_)로 12자까지 적어 주세요')
   if (containsProfanity([nick, name, form.bio, form.affiliation].join(' '))) return showToast('쓰면 안 되는 말이 들어 있어요')
   const ageText = String(form.age ?? '').trim()
   if (ageText && !(Number.isInteger(Number(ageText)) && Number(ageText) >= 4 && Number(ageText) <= 120)) return (errors.age = '만 나이를 숫자로 적어 주세요')
@@ -139,8 +139,8 @@ async function save() {
       try {
         await api.post('/api/auth/complete', { username: name, nickname: nick })
       } catch (e) {
-        if (e.response?.status === 409) errors.username = '이미 누가 쓰는 아이디예요. 다른 걸 적어주세요'
-        else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 시도해주세요')
+        if (e.response?.status === 409) errors.username = '이미 누가 쓰는 아이디예요. 다른 걸 적어 주세요'
+        else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 해 주세요')
         return
       }
     }
@@ -158,7 +158,7 @@ async function save() {
     showToast('저장했어요')
     router.replace('/profile/0')
   } catch (e) {
-    showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     saving.value = false
   }

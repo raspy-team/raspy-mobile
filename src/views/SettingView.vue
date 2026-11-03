@@ -152,7 +152,7 @@ async function deleteAccount() {
     await api.post('/api/user/remove')
     leave()
   } catch {
-    showToast('삭제하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('삭제하지 못했어요. 잠시 뒤 다시 해 주세요')
   }
 }
 
@@ -175,7 +175,7 @@ async function unblock(u) {
     blocked.value = blocked.value.filter((x) => x.id !== u.id)
     showToast(`${u.nickname}님 차단을 풀었어요`)
   } catch {
-    showToast('풀지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('풀지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     unblockingId.value = null
   }

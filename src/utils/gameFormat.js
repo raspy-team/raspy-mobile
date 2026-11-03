@@ -1,7 +1,7 @@
 // 누가 겨루나: 1:1(DUEL), 팀 대 팀(TEAMS), 셋 이상이 각자(FREE_FOR_ALL). 서버 GameFormat과 같은 값
 export const FORMATS = [
   { value: 'DUEL', label: '1:1', description: '한 사람과 겨뤄요' },
-  { value: 'TEAMS', label: '팀 대 팀', description: '두 팀으로 나눠 겨뤄요. 팀원 모두 레이팅이 바뀌어요' },
+  { value: 'TEAMS', label: '팀 대 팀', description: '두 팀으로 나눠 겨뤄요. 팀원 모두 실력 점수가 바뀌어요' },
   { value: 'FREE_FOR_ALL', label: '여럿이 각자', description: '셋 이상이 각자 겨뤄 등수를 매겨요' },
 ]
 

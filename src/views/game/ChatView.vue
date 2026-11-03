@@ -315,7 +315,7 @@ const handleAccept = async () => {
     await playWithMeTooAPI.acceptRequest(challengeStatus.value.fromUserId)
   } catch (error) {
     console.error('도전 요청 수락 중 오류:', error)
-    showToast(error.response?.data?.message || '수락하지 못했어요. 다시 시도해 주세요')
+    showToast(error.response?.data?.message || '수락하지 못했어요. 다시 해 주세요')
   }
 }
 
@@ -327,7 +327,7 @@ const handleReject = async () => {
     challengeStatus.value.status = 'REJECTED'
   } catch (error) {
     console.error('도전 요청 거절 중 오류:', error)
-    showToast(error.response?.data?.message || '거절하지 못했어요. 다시 시도해 주세요')
+    showToast(error.response?.data?.message || '거절하지 못했어요. 다시 해 주세요')
   }
 }
 

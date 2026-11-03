@@ -144,11 +144,11 @@
 
     <!-- 신고 -->
     <UiSheet v-model="reportOpen" title="이 규칙을 신고할까요?">
-      <p class="t-caption mb-4">어떤 문제인지 알려주시면 확인 후 조치할게요.</p>
+      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 확인하고 처리할게요.</p>
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
-      <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어주세요" />
+      <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
       <template #footer>
         <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고하기</UiButton>
       </template>
@@ -233,7 +233,7 @@ async function submitSuggest() {
     suggestOpen.value = false
     showToast(`${data.targetNickname}님에게 DM으로 보냈어요`)
   } catch (e) {
-    showToast(e.response?.data?.message || '보내지 못했어요. 다시 시도해 주세요')
+    showToast(e.response?.data?.message || '보내지 못했어요. 다시 해 주세요')
   } finally {
     suggesting.value = false
   }
@@ -249,7 +249,7 @@ async function submitReport() {
   try {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     await api.post('/api/reports', { targetType: 'RULE', targetId: rule.value.id, reason })
-    showToast('신고를 접수했어요. 확인 후 조치할게요')
+    showToast('신고를 접수했어요. 확인하고 처리할게요')
   } catch (e) {
     showToast(e.response?.data?.message || '이미 신고한 규칙이에요')
   } finally {

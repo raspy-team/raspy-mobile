@@ -114,7 +114,7 @@
             class="border rounded p-2 w-full mb-3 text-base"
             rows="3"
             maxlength="100"
-            placeholder="신고 사유를 입력해주세요"
+            placeholder="신고 사유를 적어 주세요"
             autofocus
             @keydown.enter.exact.prevent="submitReport"
             @click.stop
@@ -219,7 +219,7 @@ async function submitReport() {
     reportSuccess.value = '신고했어요. 운영진이 확인할게요'
     setTimeout(closeReportModal, 1300)
   } catch (e) {
-    const msg = e?.response?.data?.message || '신고하지 못했어요. 다시 시도해 주세요'
+    const msg = e?.response?.data?.message || '신고하지 못했어요. 다시 해 주세요'
     reportError.value = msg
   }
   reportLoading.value = false

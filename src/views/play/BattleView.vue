@@ -32,7 +32,7 @@
           <UiButton v-if="sensor === 'ask'" block size="lg" class="mt-6" @click="askSensor">센서 켜기</UiButton>
           <UiButton v-else-if="sensor === 'none'" block size="lg" class="mt-6" :disabled="counting" @click="sendShake">흔들 수 없으면 눌러서</UiButton>
         </div>
-        <UiButton block variant="ghost" class="mt-6" @click="leave">그만두기 (지게 돼요)</UiButton>
+        <UiButton block variant="ghost" class="mt-6" @click="leave">그만두기</UiButton>
       </template>
 
       <!-- 판: 내 라켓이 늘 아래. 판 위 어디든 손가락을 대고 좌우로 움직인다 -->
@@ -55,7 +55,7 @@
           <p v-if="counting" class="absolute inset-0 flex items-center justify-center t-display tabular-nums">{{ countdown }}</p>
         </div>
         <p v-if="!connected" class="t-caption text-danger mt-2 text-center">연결하는 중이에요</p>
-        <UiButton block variant="ghost" class="mt-3" @click="leave">그만두기 (지게 돼요)</UiButton>
+        <UiButton block variant="ghost" class="mt-3" @click="leave">그만두기</UiButton>
       </template>
 
       <!-- 결과 -->
@@ -66,7 +66,7 @@
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
             <p class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
           </template>
-          <p v-else class="t-title">대결이 끝났어요</p>
+          <p v-else class="t-title">경기가 끝났어요</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" @click="again">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" :to="`/play/${key}`">돌아가기</UiButton>

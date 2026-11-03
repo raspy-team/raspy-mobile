@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-dvh bg-canvas">
     <UiTopBar v-if="userId" :title="userName ? `${userName}님의 경기` : '경기 기록'" back />
-    <UiTopBar v-else title="피드">
+    <UiTopBar v-else title="소식">
       <template #right><InboxButtons /></template>
     </UiTopBar>
 
@@ -11,7 +11,7 @@
       <UiTabs v-if="!userId" v-model="tab" :options="TABS" class="mt-3" />
 
       <!-- 처음 불러오는 중: 카드 모양 그대로 -->
-      <div v-if="loading && !posts.length" role="status" aria-label="피드 불러오는 중">
+      <div v-if="loading && !posts.length" role="status" aria-label="소식 불러오는 중">
         <div v-for="n in 3" :key="n" class="py-5 border-b border-line">
           <div class="flex items-center gap-3">
             <UiSkeleton class="w-8 h-8 rounded-full" />
@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <UiEmptyState v-else-if="error && !posts.length" class="pt-16" icon="fas fa-triangle-exclamation" title="피드를 불러오지 못했어요" description="잠시 뒤 다시 시도해주세요">
+      <UiEmptyState v-else-if="error && !posts.length" class="pt-16" icon="fas fa-triangle-exclamation" title="소식을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
         <UiButton variant="secondary" @click="reload">다시 불러오기</UiButton>
       </UiEmptyState>
 
@@ -40,7 +40,7 @@
       </UiEmptyState>
 
       <UiEmptyState v-else-if="!visible.length" class="pt-16" icon="fas fa-flag-checkered" title="아직 끝난 경기가 없어요" description="경기를 마치면 결과가 여기 올라와요">
-        <UiButton to="/">열린 경기 보기</UiButton>
+        <UiButton to="/">경기 찾기</UiButton>
       </UiEmptyState>
 
       <div v-else class="ui-appear">
@@ -100,11 +100,11 @@
 
     <!-- 신고 -->
     <UiSheet :model-value="!!reportPost" title="이 경기를 신고할까요?" @update:model-value="reportPost = null">
-      <p class="t-caption mb-4">어떤 문제인지 알려주시면 확인 후 조치할게요.</p>
+      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 확인하고 처리할게요.</p>
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
-      <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어주세요" />
+      <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
       <template #footer>
         <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고하기</UiButton>
       </template>
@@ -274,7 +274,7 @@ async function toggleLike(p) {
   } catch {
     p.isLiked = was
     p.likeCount = (p.likeCount || 0) + (was ? 1 : -1)
-    showToast('반영하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('반영하지 못했어요. 잠시 뒤 다시 해 주세요')
   }
 }
 
@@ -322,7 +322,7 @@ async function submitReport() {
   try {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     await api.post('/api/reports', { targetType: 'GAME', targetId: Number(reportPost.value.id), reason })
-    showToast('신고를 접수했어요. 확인 후 조치할게요')
+    showToast('신고를 접수했어요. 확인하고 처리할게요')
   } catch (e) {
     showToast(e.response?.data?.message || '이미 신고한 경기예요')
   } finally {

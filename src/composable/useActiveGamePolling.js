@@ -12,6 +12,8 @@ import { openUserChannel, refreshOnChange } from '../websocket/userChannel'
 // 전역 상태 (모든 컴포넌트가 공유)
 const activeGame = ref(null)
 const pendingReviewGameIds = ref([])
+// 평가할 경기 { gameId, ruleTitle, opponentNickname } ('내 경기'의 할 일 줄)
+const pendingReviews = ref([])
 // 상대가 나를 기다리는 경기 수 (결과 확인·신청 승인). 하단 '내 경기' 탭에 숫자로
 const waitingOnMeCount = ref(0)
 const isPolling = ref(false)
@@ -32,6 +34,7 @@ export function useActiveGamePolling() {
       }
 
       waitingOnMeCount.value = data.waitingOnMeCount || 0
+      pendingReviews.value = data.pendingReviews || []
 
       const game = data.activeGame
 
@@ -98,6 +101,7 @@ export function useActiveGamePolling() {
     activeGame,
     pendingReviewGameIds,
     waitingOnMeCount,
+    pendingReviews,
     isPolling,
     startPolling,
     stopPolling,

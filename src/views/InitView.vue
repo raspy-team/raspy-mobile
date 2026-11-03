@@ -97,9 +97,10 @@ import { takeReturnTo } from '../utils/authRedirect'
 import { isAndroidApp, isIosApp } from '../utils/nativeBridge'
 
 const FEATURES = [
-  { icon: 'fas fa-user-group', title: '상대 찾기', body: '열린 경기에 신청하거나, 규칙을 골라 직접 열어요' },
-  { icon: 'fas fa-stopwatch', title: '점수는 앱으로', body: '둘이 같은 화면을 보며 세트·점수·시간을 기록해요' },
-  { icon: 'fas fa-crown', title: '기록이 쌓여요', body: '규칙마다 레이팅과 랭킹, 챔피언이 있어요' },
+  // 처음 온 사람의 짧은 안내. 한 줄에 한 가지, 실제로 하는 순서대로 (11/3)
+  { icon: 'fas fa-user-group', title: '동네에서 상대 찾기', body: '모집 중인 경기에 신청하거나 직접 열어요' },
+  { icon: 'fas fa-stopwatch', title: '만나서 한 판', body: '점수는 둘이 같은 화면에 함께 남겨요' },
+  { icon: 'fas fa-crown', title: '실력 점수가 쌓여요', body: '이기면 오르고, 동네 챔피언에 도전할 수 있어요' },
 ]
 
 const router = useRouter()

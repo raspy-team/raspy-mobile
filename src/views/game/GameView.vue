@@ -20,7 +20,7 @@
     </div>
 
     <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
-    <section v-else-if="!allGames.length && !appDuels.length" class="pt-6">
+    <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length" class="pt-6">
       <h2 class="t-title">첫 경기를 잡아볼까요</h2>
       <p class="t-caption mt-2">잡힌 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
       <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
@@ -33,15 +33,28 @@
         </li>
       </ol>
       <div class="flex gap-2 mt-6">
-        <UiButton class="flex-1" to="/">열린 경기 보기</UiButton>
+        <UiButton class="flex-1" to="/">경기 찾기</UiButton>
         <UiButton class="flex-1" variant="secondary" to="/create-game">경기 만들기</UiButton>
       </div>
     </section>
 
     <template v-else>
       <!-- 앱 게임에서 아직 안 끝난 대결: 게임마다 흩어지지 않게 여기 모은다 -->
-      <UiSection v-if="appDuels.length" :title="`앱 대결 ${appDuels.length}`">
+      <UiSection v-if="appDuels.length" :title="`앱 게임 ${appDuels.length}`">
         <AppDuelList :duels="appDuels" />
+      </UiSection>
+      <UiSection v-if="pendingReviews.length" :title="`평가 남기기 ${pendingReviews.length}`">
+        <UiList>
+          <UiListItem
+            v-for="r in pendingReviews"
+            :key="r.gameId"
+            icon="star"
+            :title="r.ruleTitle"
+            :subtitle="r.opponentNickname ? `${r.opponentNickname}님과 규칙을 평가해 주세요` : '상대와 규칙을 평가해 주세요'"
+            chevron
+            @click="router.push(`/games/${r.gameId}/result`)"
+          />
+        </UiList>
       </UiSection>
       <UiSection v-for="g in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
         <div class="space-y-3">
@@ -197,7 +210,7 @@
   <CameraCapture
     :is-visible="showCameraModal"
     title="경기 시작 인증샷"
-    :subtitle="`${startMessage} 사진은 피드에 보여요.`"
+    :subtitle="`${startMessage} 사진은 소식에 보여요.`"
     allow-skip
     @capture="onPhotoCapture"
     @skip="onPhotoCapture(null)"
@@ -229,6 +242,7 @@ import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { confirmDialog } from '../../composables/useConfirm'
 import { refreshOnChange } from '../../websocket/userChannel'
+import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
 import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { copyText } from '../../utils/clipboard'
@@ -237,9 +251,9 @@ import { venuePlace } from '../../utils/gameFormat'
 import { quickTimes } from '../../utils/when'
 
 const FIRST_STEPS = [
-  { title: '열린 경기에 신청하거나 직접 열기', body: '규칙을 고르면 누구나 신청할 수 있게 올라가요' },
+  { title: '모집 중인 경기에 신청하거나 직접 열기', body: '규칙을 고르면 누구나 신청할 수 있게 올라가요' },
   { title: '상대가 정해지면 장소·시간 맞추기', body: '채팅으로 정하고, 그날 경기 화면에서 시작해요' },
-  { title: '끝나면 결과 남기기', body: '상대가 확인하면 레이팅과 챔피언에 반영돼요' },
+  { title: '끝나면 결과 남기기', body: '상대가 확인하면 실력 점수와 챔피언에 반영돼요' },
 ]
 
 const router = useRouter()
@@ -259,8 +273,10 @@ const ruleGame = ref(null)
 
 // ---------- 목록 ----------
 
+// 평가를 아직 안 남긴 끝난 경기 (앱 전체가 변경 신호마다 받아 두는 값). 창으로 묻지 않고 여기 할 일로 둔다
+const { pendingReviews } = useActiveGamePolling()
 const allGames = computed(() => [
-  ...myGames.value.map((g) => ({ ...g, type: 'my-game', applicants: applicantsMap.value[g.id] || [] })),
+  ...myGames.value.map((g) => ({ ...g, type: 'my-game', applicants: applicantsMap.value[g.id] || []})),
   ...sentGames.value.map((g) => ({ ...g, type: 'sent' })),
 ])
 
@@ -575,7 +591,7 @@ function initGoogleAutocomplete() {
   ac.addListener('place_changed', () => {
     const p = ac.getPlace()
     const parsed = p.formatted_address && parseRegion(p.formatted_address)
-    if (!parsed) return showToast('지역을 알 수 없는 주소예요. 지역을 직접 골라주세요')
+    if (!parsed) return showToast('지역을 알 수 없는 주소예요. 지역을 직접 골라 주세요')
     selectedPlace.value = { name: p.name || '', address: parsed.fullAddress }
   })
 }

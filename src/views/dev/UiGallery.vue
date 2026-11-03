@@ -101,7 +101,7 @@
 
     <UiSection title="빈 상태 · 불러오는 중">
       <UiCard>
-        <UiEmptyState icon="fas fa-calendar" title="아직 잡힌 경기가 없어요" description="열린 경기에 신청하거나 직접 만들어보세요">
+        <UiEmptyState icon="fas fa-calendar" title="아직 잡힌 경기가 없어요" description="모집 중인 경기에 신청하거나 직접 만들어보세요">
           <UiButton>경기 찾기</UiButton>
         </UiEmptyState>
       </UiCard>

@@ -93,8 +93,9 @@
         </form>
         </template>
         <!-- 실시간 심사: 보는 사람들이 응원해 승패가 정해진다 -->
-        <UiButton v-if="state.liveJudged" block variant="secondary" icon="share" class="mt-4" @click="shareWatch">관전 링크 보내기 (응원으로 승패가 정해져요)</UiButton>
-        <UiButton block variant="ghost" class="mt-2" @click="leave">그만두기 (지게 돼요)</UiButton>
+        <UiButton v-if="state.liveJudged" block variant="secondary" icon="share" class="mt-4" @click="shareWatch">구경 링크 보내기</UiButton>
+        <p v-if="state.liveJudged" class="t-caption text-center mt-1">보는 사람들의 응원으로 승패가 정해져요</p>
+        <UiButton block variant="ghost" class="mt-2" @click="leave">그만두기</UiButton>
       </template>
 
       <!-- 결과 -->
@@ -107,7 +108,7 @@
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.moves.length }}번 이었어요</p>
           </template>
-          <p v-else class="t-title">대결이 끝났어요</p>
+          <p v-else class="t-title">경기가 끝났어요</p>
         </UiCard>
         <TurnViewPanel v-if="state.view?.boards?.length" class="mt-3" :view="{ ...state.view, note: undefined, choices: [] }" :my-turn="false" :sending="false" />
         <UiCard v-if="state.moves.length && !state.stones && !state.view" class="mt-3">
@@ -146,7 +147,7 @@ const { showToast } = useToast()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
 const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀', 'thirty-one': '서른하나', 'last-stone': '마지막 돌', 'card-duel': '숫자 카드 대결', auction: '칩 경매', 'drop-four': '사목 떨어뜨리기', flip: '뒤집기', 'number-baseball': '숫자 야구', 'number-bomb': '숫자 폭탄', 'math-race': '암산 먼저', chosung: '초성 먼저' }
-const title = computed(() => TITLES[key.value] ?? '실시간 대결')
+const title = computed(() => TITLES[key.value] ?? '실시간 경기')
 const state = ref<State | null>(null)
 const error = ref('')
 const word = ref('')

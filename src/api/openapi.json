@@ -10445,6 +10445,9 @@
           "myPeerVoteTargetId": {
             "type": "integer",
             "format": "int64"
+          },
+          "myRating": {
+            "$ref": "#/components/schemas/MyRatingChange"
           }
         }
       },
@@ -10583,6 +10586,23 @@
               "type": "integer",
               "format": "int32"
             }
+          }
+        }
+      },
+      "MyRatingChange": {
+        "required": [
+          "after",
+          "before"
+        ],
+        "type": "object",
+        "properties": {
+          "before": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "after": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -11382,6 +11402,7 @@
       "MyGameStatusResponse": {
         "required": [
           "pendingReviewGameIds",
+          "pendingReviews",
           "waitingOnMeCount"
         ],
         "type": "object",
@@ -11399,6 +11420,31 @@
           "waitingOnMeCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "pendingReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingReview"
+            }
+          }
+        }
+      },
+      "PendingReview": {
+        "required": [
+          "gameId",
+          "ruleTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "opponentNickname": {
+            "type": "string"
           }
         }
       },

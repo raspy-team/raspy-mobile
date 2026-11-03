@@ -39,23 +39,32 @@
       <!-- 상대가 다 정해졌거나 시작한 경기는 신청할 수 없다 (공유 링크로 들어온 경기 화면) -->
       <UiBadge v-else-if="game.gameStatus && game.gameStatus !== 'MATCHING'">{{ STATUS_LABEL[game.gameStatus] || '모집 끝' }}</UiBadge>
       <!-- 다른 동네 경기(공유 링크)는 신청 버튼 대신 경기 화면이 이유를 보여 준다 -->
-      <!-- 팀 경기는 들어갈 팀을 골라 신청한다 (자리가 남은 팀만) -->
-      <span v-else-if="game.format === 'TEAMS' && !game.joinBlockedReason" class="flex gap-1.5 flex-shrink-0">
-        <UiButton
-          v-for="(left, team) in game.teamSeatsLeft || []"
-          :key="team"
-          size="sm"
-          variant="tonal"
-          :disabled="left <= 0"
-          :loading="busy"
-          @click="emit('apply', team)"
-        >{{ TEAM_NAMES[team] }} {{ left > 0 ? `${left}자리` : '꽉 참' }}</UiButton>
-        <!-- 친구와 둘이: 두 자리가 남은 팀이 있을 때 -->
-        <UiButton v-if="(game.teamSeatsLeft || []).some((n) => n >= 2)" size="sm" variant="ghost" icon="user-group" :loading="busy" @click="emit('pair')">둘이</UiButton>
-      </span>
-      <UiButton v-else-if="!game.joinBlockedReason" size="sm" variant="tonal" :loading="busy" @click="emit('apply')">신청</UiButton>
+      <!-- 팀 경기도 카드에는 신청 버튼 하나. 팀 고르기는 시트에서 (카드에 버튼이 늘면 주최자 이름이 잘렸다) -->
+      <UiButton v-else-if="!game.joinBlockedReason" size="sm" variant="tonal" :loading="busy" @click="game.format === 'TEAMS' ? (teamPick = true) : emit('apply')">신청</UiButton>
     </div>
   </UiCard>
+
+  <!-- 팀 고르기: 자리가 남은 팀, 친구와 둘이 -->
+  <UiSheet v-model="teamPick" title="어느 팀으로 갈까요?">
+    <UiList>
+      <UiListItem
+        v-for="(left, team) in game.teamSeatsLeft || []"
+        :key="team"
+        :title="TEAM_NAMES[team]"
+        :subtitle="left > 0 ? `${left}자리 남았어요` : '자리가 없어요'"
+        :chevron="left > 0"
+        @click="left > 0 && pick(() => emit('apply', team))"
+      />
+      <UiListItem
+        v-if="(game.teamSeatsLeft || []).some((n) => n >= 2)"
+        icon="user-group"
+        title="친구와 둘이 신청"
+        subtitle="두 자리가 남은 팀에 같이 들어가요"
+        chevron
+        @click="pick(() => emit('pair'))"
+      />
+    </UiList>
+  </UiSheet>
 </template>
 
 <script setup>
@@ -63,7 +72,7 @@
 const STATUS_LABEL = { SCHEDULED: '상대 정해짐', IN_PROGRESS: '경기 중', RESULT_PENDING: '결과 확인 중', COMPLETED: '끝남', CANCELED: '취소됨' }
 import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
-import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
+import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton, UiList, UiListItem, UiSheet } from '../ui'
 import { matchTime, place, ratingLine, timeAgo } from '../../utils/format'
 import { formatLabel, TEAM_NAMES, venuePlace } from '../../utils/gameFormat'
 
@@ -84,6 +93,12 @@ watch(() => props.game.isAppliedByMe, (now, before) => {
     setTimeout(() => (justApplied.value = false), 1200)
   }
 })
+
+const teamPick = ref(false)
+function pick(cb) {
+  teamPick.value = false
+  cb()
+}
 
 const applicants = computed(() => props.game.challengers?.length || 0)
 // 올린 지 얼마나 됐는지는 경기 시간보다 덜 중요해서 위 줄이 아니라 여기에

@@ -38,6 +38,6 @@ const TIPS = [
   { icon: 'shield-halved', title: '친구에게 일정을 알려 두세요', body: '누구와, 언제, 어디서 만나는지 한 번 보내 두면 마음이 놓여요' },
   { icon: 'comment', title: '이야기는 앱 메시지로', body: '만나기 전까지는 전화번호나 다른 메신저를 주지 않아도 돼요' },
   { icon: 'triangle-exclamation', title: '불편하면 바로 그만두기', body: '경기 중이라도 언제든 멈춰도 돼요. 이상한 요구를 하면 프로필의 신고·차단을 눌러 주세요' },
-  { icon: 'star', title: '상대의 매치 온도를 확인해요', body: '만나서 한 경기, 매너 평가, 결과 이견이 프로필에 있어요' },
+  { icon: 'star', title: '상대의 신뢰 온도를 확인해요', body: '만나서 한 경기, 매너 평가, 결과 다툼이 프로필에 있어요' },
 ]
 </script>

@@ -9,7 +9,7 @@
     </UiEmptyState>
   </main>
 
-  <main v-else class="px-4 pt-4 max-w-xl mx-auto space-y-8" :class="isParticipant && (confirmed || pending.canAnswer) ? 'pb-32' : 'pb-12'">
+  <main v-else class="px-4 pt-4 max-w-xl mx-auto space-y-8" :class="isParticipant && (confirmed || pending.canAnswer) ? 'pb-40' : 'pb-12'">
     <!-- 불러오는 중 -->
     <div v-if="isLoading" class="space-y-4 pt-6">
       <UiSkeleton class="h-8 w-1/2 mx-auto" />
@@ -21,8 +21,14 @@
       <section>
         <!-- 이긴 순간: 매치 얼굴이 통통 튀어 오른다 -->
         <span v-if="headline.mark && isParticipant" class="block w-fit mx-auto mb-4 text-fg win-bounce"><BrandFace :size="48" /></span>
-        <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<span v-if="playedOn" class="t-mono ml-2">{{ playedOn }}</span></p>
+        <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<template v-if="playedOn"> · {{ playedOn }}</template></p>
         <h1 class="t-display text-center mt-3" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
+        <!-- 이 경기로 바뀐 내 실력 점수: 이긴 사람이 가장 먼저 궁금한 숫자라 결과 바로 밑에 -->
+        <p v-if="myRating && confirmed" class="mt-3 flex items-baseline justify-center gap-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
+          <span class="t-caption">실력 점수</span>
+          <span class="t-heading tabular-nums">{{ myRating.before }} → {{ myRating.after }}</span>
+          <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta }}</span>
+        </p>
 
         <!-- 참가자 투표 중: 자기 말고 한 명 뽑기 -->
         <section v-if="peerVoting" class="mt-8">
@@ -107,7 +113,7 @@
         </span>
         <div class="min-w-0">
           <p class="t-heading">결과가 끝내 맞지 않았어요</p>
-          <p class="t-caption mt-0.5">세 번 돌려보내서 이 경기는 전적과 레이팅에 남기지 않아요. 관리자가 확인할게요.</p>
+          <p class="t-caption mt-0.5">세 번 돌려보내서 이 경기는 전적과 실력 점수에 남기지 않아요. 관리자가 확인할게요.</p>
         </div>
       </UiCard>
 
@@ -122,7 +128,7 @@
             <p class="t-caption mt-0.5">{{ pending.description }}</p>
           </div>
         </div>
-        <UiButton v-if="pending.canAnswer" variant="ghost" block @click="showCounter = true">점수가 달라요, 고쳐서 보낼게요</UiButton>
+        <UiButton v-if="pending.canAnswer" variant="ghost" block @click="showCounter = true">점수 고쳐 보내기</UiButton>
       </UiCard>
 
       <!-- 새 챔피언 -->
@@ -136,25 +142,67 @@
         </div>
       </UiCard>
 
-      <!-- 친구 · 공유 -->
-      <div class="flex gap-2">
-        <UiButton v-if="isParticipant && format === 'DUEL'" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
-        <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유하기</UiButton>
-      </div>
+      <!-- 할 일(평가)이 먼저, 사진은 고를 사람만. 이미 평가한 경기는 묻지 않는다 -->
+      <template v-if="canReview">
+        <!-- 상대 평가 -->
+        <UiSection :title="`${opponent.nickname || '상대'}님은 어땠나요?`">
+          <UiCard class="space-y-5">
+            <div v-for="row in reviewRows" :key="row.key">
+              <p class="t-label mb-1">{{ row.label }}</p>
+              <div class="flex items-center -ml-2" role="radiogroup" :aria-label="row.label">
+                <button
+                  v-for="n in 5"
+                  :key="n"
+                  type="button"
+                  role="radio"
+                  :aria-checked="row.value === n"
+                  :aria-label="`${n}점`"
+                  class="w-11 h-11 flex items-center justify-center text-2xl"
+                  :class="n <= row.value ? 'text-primary' : 'text-line-strong'"
+                  @click="row.set(n)"
+                >
+                  <UiIcon :name="n <= row.value ? 'fas fa-star' : 'far fa-star'" aria-hidden="true" />
+                </button>
+                <span v-if="row.value" class="t-caption ml-1">{{ row.value }}/5</span>
+              </div>
+            </div>
+            <UiInput v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
+          </UiCard>
+        </UiSection>
 
-      <template v-if="isParticipant && confirmed && format === 'DUEL'">
+        <!-- 규칙 평가 -->
+        <UiSection title="이 규칙은 어땠나요?">
+          <UiCard class="space-y-4">
+            <p class="t-caption">재미있고, 알기 쉽고, 공평했나요? 다음 사람이 규칙을 고를 때 참고해요.</p>
+            <div class="flex items-center -ml-2" role="radiogroup" aria-label="규칙 평가">
+              <button
+                v-for="n in 5"
+                :key="n"
+                type="button"
+                role="radio"
+                :aria-checked="ruleRating === n"
+                :aria-label="`${n}점`"
+                class="w-11 h-11 flex items-center justify-center text-2xl"
+                :class="n <= ruleRating ? 'text-primary' : 'text-line-strong'"
+                @click="setRuleRating(n)"
+              >
+                <UiIcon :name="n <= ruleRating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true" />
+              </button>
+              <span class="t-caption ml-1">{{ ruleRating ? `${ruleRating}/5` : '선택' }}</span>
+            </div>
+            <UiInput v-if="ruleRating" v-model="ruleReview" multiline :rows="2" label="규칙 의견" optional placeholder="고치면 좋을 점이 있나요?" />
+          </UiCard>
+        </UiSection>
+
         <!-- 사진·동영상 -->
-        <UiSection title="경기 사진·동영상">
+        <UiSection title="사진·영상 (선택)">
           <template #action><span class="t-micro">{{ allPictures.length }}/5</span></template>
 
-          <UiCard v-if="allPictures.length === 0">
-            <UiEmptyState icon="fas fa-images" title="남길 사진이 없어요" description="경기 장면을 찍어 피드에 함께 올려보세요">
-              <div class="flex gap-2">
-                <UiButton variant="secondary" icon="fas fa-camera" @click="openCamera">사진</UiButton>
-                <UiButton variant="secondary" icon="fas fa-video" @click="openVideoRecorder">동영상</UiButton>
-              </div>
-            </UiEmptyState>
-          </UiCard>
+          <!-- 없을 때는 큰 빈 상자 대신 한 줄: 평가보다 앞서지 않게 -->
+          <div v-if="allPictures.length === 0" class="flex gap-2">
+            <UiButton variant="secondary" icon="fas fa-camera" class="flex-1" @click="openCamera">사진 추가</UiButton>
+            <UiButton variant="secondary" icon="fas fa-video" class="flex-1" @click="openVideoRecorder">영상 추가</UiButton>
+          </div>
 
           <div v-else class="space-y-4">
             <!-- 올릴 것 (끌어서 순서 바꾸기) -->
@@ -225,56 +273,14 @@
           </div>
         </UiSection>
 
-        <!-- 상대 평가 -->
-        <UiSection :title="`${opponent.nickname || '상대'}님은 어땠나요?`">
-          <UiCard class="space-y-5">
-            <div v-for="row in reviewRows" :key="row.key">
-              <p class="t-label mb-1">{{ row.label }}</p>
-              <div class="flex items-center -ml-2" role="radiogroup" :aria-label="row.label">
-                <button
-                  v-for="n in 5"
-                  :key="n"
-                  type="button"
-                  role="radio"
-                  :aria-checked="row.value === n"
-                  :aria-label="`${n}점`"
-                  class="w-11 h-11 flex items-center justify-center text-2xl"
-                  :class="n <= row.value ? 'text-primary' : 'text-line-strong'"
-                  @click="row.set(n)"
-                >
-                  <UiIcon :name="n <= row.value ? 'fas fa-star' : 'far fa-star'" aria-hidden="true" />
-                </button>
-                <span v-if="row.value" class="t-caption ml-1">{{ row.value }}/5</span>
-              </div>
-            </div>
-            <UiInput v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
-          </UiCard>
-        </UiSection>
-
-        <!-- 규칙 평가 -->
-        <UiSection title="이 규칙은 어땠나요?">
-          <UiCard class="space-y-4">
-            <p class="t-caption">재미·명확함·균형을 생각해 별을 눌러주세요. 다음 사람이 규칙을 고를 때 참고해요.</p>
-            <div class="flex items-center -ml-2" role="radiogroup" aria-label="규칙 평가">
-              <button
-                v-for="n in 5"
-                :key="n"
-                type="button"
-                role="radio"
-                :aria-checked="ruleRating === n"
-                :aria-label="`${n}점`"
-                class="w-11 h-11 flex items-center justify-center text-2xl"
-                :class="n <= ruleRating ? 'text-primary' : 'text-line-strong'"
-                @click="setRuleRating(n)"
-              >
-                <UiIcon :name="n <= ruleRating ? 'fas fa-star' : 'far fa-star'" aria-hidden="true" />
-              </button>
-              <span class="t-caption ml-1">{{ ruleRating ? `${ruleRating}/5` : '선택' }}</span>
-            </div>
-            <UiInput v-if="ruleRating" v-model="ruleReview" multiline :rows="2" label="규칙 의견" optional placeholder="고치면 좋을 점이 있나요?" />
-          </UiCard>
-        </UiSection>
       </template>
+
+      <!-- 친구 · 공유 (덜 급한 것은 맨 아래) -->
+      <div class="flex gap-2">
+        <UiButton v-if="isParticipant && format === 'DUEL'" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
+        <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유하기</UiButton>
+      </div>
+
     </template>
   </main>
 
@@ -284,11 +290,11 @@
       <UiButton block size="lg" :loading="isAnswering === 'confirm'" @click="confirmResult">결과가 맞아요</UiButton>
     </div>
   </div>
-  <div v-else-if="isParticipant && confirmed && !isLoading && !resultError && format === 'DUEL'" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+  <div v-else-if="canReview && !isLoading && !resultError" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
     <div class="max-w-xl mx-auto px-4 py-3">
-      <UiButton block size="lg" :loading="isSubmitting" :disabled="!review.manner || !review.performance" @click="submitReviewAndGoHome">
-        {{ review.manner && review.performance ? '평가 보내기' : '매너와 실력에 별을 눌러주세요' }}
-      </UiButton>
+      <!-- 버튼 글자는 늘 할 일. 왜 못 누르는지는 버튼 위 글로 (꺼진 버튼을 안내문으로 쓰지 않는다) -->
+      <p v-if="!review.manner || !review.performance" class="t-caption text-center mb-2">매너와 실력에 별을 눌러 주세요</p>
+      <UiButton block size="lg" :loading="isSubmitting" :disabled="!review.manner || !review.performance" @click="submitReviewAndGoHome">평가 보내기</UiButton>
     </div>
   </div>
 
@@ -324,6 +330,7 @@ import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
+import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
 import { matchTime } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import BrandFace from '../../components/BrandFace.vue'
@@ -363,11 +370,11 @@ function setRuleRating(n) {
 function submitReviewAndGoHome() {
   // 리뷰 제출 전 유효성 검사
   if (review.value.manner === 0 || review.value.performance === 0) {
-    showToast('매너와 실력에 별을 눌러주세요')
+    showToast('매너와 실력에 별을 눌러 주세요')
     return
   }
   if (containsProfanity(review.value.text) || containsProfanity(ruleReview.value)) {
-    showToast('쓰면 안 되는 말이 들어 있어요. 고쳐서 다시 보내주세요')
+    showToast('쓰면 안 되는 말이 들어 있어요. 고쳐서 다시 보내 주세요')
     return
   }
 
@@ -399,7 +406,7 @@ function submitReviewAndGoHome() {
     .catch((error) => {
       isSubmitting.value = false
       console.error('제출 실패:', error)
-      showToast(error.response?.data?.message || '보내지 못했어요. 잠시 뒤 다시 시도해주세요')
+      showToast(error.response?.data?.message || '보내지 못했어요. 잠시 뒤 다시 해 주세요')
     })
 }
 
@@ -432,6 +439,12 @@ const isAnswering = ref('')
 const rejectsLeft = ref(3)
 const disputed = ref(false)
 const showCounter = ref(false)
+// 이 경기로 바뀐 내 실력 점수 { before, after } (확정 뒤 선수만)
+const myRating = ref(null)
+const ratingDelta = computed(() => (myRating.value ? myRating.value.after - myRating.value.before : 0))
+// 평가는 아직 안 남긴 1:1 경기에서만 묻는다 (이미 낸 사람에게 다시 묻지 않게)
+const { pendingReviewGameIds } = useActiveGamePolling()
+const canReview = computed(() => isParticipant.value && confirmed.value && format.value === 'DUEL' && pendingReviewGameIds.value.includes(Number(gameId)))
 
 // 사진 관련 상태
 const allPictures = ref([])
@@ -497,8 +510,8 @@ const sides = computed(() => [
 const setLeft = (s) => (idxCorrect.value ? s.user1Score : s.user2Score)
 const setRight = (s) => (idxCorrect.value ? s.user2Score : s.user1Score)
 const playedOn = computed(() =>
-  // 고정폭에는 숫자만: 2026.10.31
-  startDate.value ? (() => { const d = new Date(startDate.value); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}` })() : '',
+  // 한국어로 읽히게: 11월 3일 (올해가 아니면 연도도). 고정폭 숫자를 제목에 붙이지 않는다
+  startDate.value ? (() => { const d = new Date(startDate.value); const y = d.getFullYear() !== new Date().getFullYear() ? `${d.getFullYear()}년 ` : ''; return `${y}${d.getMonth() + 1}월 ${d.getDate()}일` })() : '',
 )
 const headline = computed(() => {
   if (disputed.value) return { text: '기록하지 않은 경기', tone: 'text-fg-muted' }
@@ -527,12 +540,12 @@ const pending = computed(() => {
   const waitingFor = format.value === 'TEAMS' ? '상대 팀' : format.value === 'FREE_FOR_ALL' ? '다른 사람' : `${opponent.value.nickname}님`
   const sameTeam = format.value === 'TEAMS' && mySide.value === submitterSide.value
   if (resultSubmittedById.value === currentUserId.value || sameTeam) {
-    return { canAnswer: false, title: `${waitingFor}의 확인을 기다려요`, description: `확인하면 전적과 레이팅에 반영돼요. ${until} 답이 없으면 그대로 확정돼요` }
+    return { canAnswer: false, title: `${waitingFor}의 확인을 기다려요`, description: `확인하면 전적과 실력 점수에 반영돼요. ${until} 답이 없으면 그대로 확정돼요` }
   }
   return {
     canAnswer: true,
     title: `${submitter?.nickname || '상대'}님이 ${rejectsLeft.value < 3 ? '고쳐 보낸' : '낸'} 결과예요. 맞나요?`,
-    description: `맞으면 전적과 레이팅에 반영돼요. ${until} 확인하지 않으면 그대로 확정돼요` + (rejectsLeft.value <= 1 ? '. 한 번 더 돌려보내면 이 경기는 기록하지 않아요' : ''),
+    description: `맞으면 전적과 실력 점수에 반영돼요. ${until} 확인하지 않으면 그대로 확정돼요` + (rejectsLeft.value <= 1 ? '. 한 번 더 돌려보내면 이 경기는 기록하지 않아요' : ''),
   }
 })
 
@@ -542,10 +555,10 @@ async function confirmResult() {
     await POST('/api/games/{id}/result/confirm', { path: { id: Number(gameId) } })
     haptic('success')
     // 확인 칸이 사라지기만 하면 눌렸는지 모른다 (웹은 진동도 없다)
-    showToast('확정했어요. 전적과 레이팅에 반영돼요')
+    showToast('확정했어요. 전적과 실력 점수에 반영돼요')
     await load()
   } catch (e) {
-    showToast(e.response?.data?.message || '확인하지 못했어요. 다시 시도해 주세요')
+    showToast(e.response?.data?.message || '확인하지 못했어요. 다시 해 주세요')
   } finally {
     isAnswering.value = ''
   }
@@ -576,6 +589,7 @@ async function load() {
     autoConfirmAt.value = res.data.autoConfirmAt
     rejectsLeft.value = res.data.rejectsLeft ?? 3
     disputed.value = !!res.data.disputed
+    myRating.value = res.data.myRating ?? null
     game.value = res.data.gameSummary
     startDate.value = res.data.startDate
     setResults.value = res.data.setResults
@@ -678,7 +692,7 @@ const onCameraChange = async (e) => {
     } catch (error) {
       console.error('사진 저장 실패:', error)
       if (error.message === 'QUOTA_EXCEEDED') {
-        showToast('저장 공간이 부족합니다. 일부 사진을 삭제한 후 다시 시도해주세요.')
+        showToast('폰 저장 공간이 모자라요. 사진 몇 장을 지우고 다시 해 주세요')
       } else {
         showToast('사진을 저장하지 못했어요')
       }
@@ -723,7 +737,7 @@ const onVideoChange = async (e) => {
   } catch (error) {
     console.error('동영상 저장 실패:', error)
     if (error.message === 'QUOTA_EXCEEDED') {
-      showToast('저장 공간이 부족합니다. 일부 미디어를 삭제한 후 다시 시도해주세요.')
+      showToast('폰 저장 공간이 모자라요. 사진·영상 몇 개를 지우고 다시 해 주세요')
     } else {
       showToast('동영상을 저장하지 못했어요')
     }

@@ -64,7 +64,7 @@ async function load() {
   try {
     rules.value = (await api.get('/api/rules/my-rules')).data
   } catch {
-    showToast('규칙을 불러오지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('규칙을 불러오지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     loading.value = false
   }

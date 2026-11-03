@@ -77,7 +77,7 @@
             <BrandFace v-if="result.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ VERDICT[result.result || 'DRAW'] }}</p>
             <p class="t-caption mt-2">
-              <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 대결
+              <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
             </p>
             <div class="flex items-center justify-center gap-6 mt-6">
               <span>
@@ -91,7 +91,7 @@
               </span>
             </div>
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
-              레이팅 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
+              실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
           </template>
           <template v-else-if="result.myJudging">
@@ -112,7 +112,7 @@
             <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 복사</UiButton>
           </template>
           <template v-else-if="result.status === 'CANCELED'">
-            <p class="t-title">취소된 대결이에요</p>
+            <p class="t-title">취소된 경기예요</p>
           </template>
           <template v-else-if="key === 'predict' && result.status === 'WAITING'">
             <p class="t-heading">내 예상 {{ predictionLine(result.problem, result.myAnswer) }}</p>
@@ -191,7 +191,7 @@
             <div class="grid grid-cols-3 gap-2 mt-4 text-center">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
-                <span class="block t-micro">레이팅</span>
+                <span class="block t-micro">실력 점수</span>
               </span>
               <span>
                 <span class="block t-title tabular-nums">{{ game.myWins }}<span class="t-caption">승</span> {{ game.myLosses }}<span class="t-caption">패</span></span>
@@ -207,10 +207,12 @@
               </span>
             </div>
           </UiCard>
-          <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">대결 시작</UiButton>
+          <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
-            기다리는 사람이 있으면 바로 붙고, 없으면 다음 사람을 기다려요<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template>
+            <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
+            <template v-if="game.dailyLimit === 1">하루 한 번 풀 수 있어요. 오늘 같은 문제를 푼 사람들과 견줘요</template>
+            <template v-else>기다리는 사람이 있으면 바로 시작하고, 없으면 다음 사람을 기다려요<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template></template>
           </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
 
@@ -246,7 +248,7 @@
                 </UiListItem>
               </UiList>
               <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 없어요" description="5판 넘게 한 사람부터 순위에 올라요" />
-              <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">레이팅 순위 전체 보기</UiButton>
+              <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">순위 전체 보기</UiButton>
             </template>
             <template v-else>
               <UiList v-if="board?.entries.length">
@@ -278,14 +280,14 @@
                 </template>
               </UiListItem>
             </UiList>
-            <UiEmptyState v-else icon="fas fa-trophy" title="아직 끝난 대결이 없어요" description="첫 판을 해 보세요" />
+            <UiEmptyState v-else icon="fas fa-trophy" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
           </section>
 
           <section v-else class="mt-4">
             <div v-if="votes.length" class="space-y-3">
               <VoteCard v-for="(c, i) in votes" :key="c.gameId" :card="c" @voted="votes[i] = $event" />
             </div>
-            <UiEmptyState v-else icon="fas fa-check" title="지금 투표할 대결이 없어요" description="다른 사람들의 문장이 모이면 여기에 올라와요" />
+            <UiEmptyState v-else icon="fas fa-check" title="지금 투표할 경기가 없어요" description="다른 사람들의 문장이 모이면 여기에 올라와요" />
           </section>
         </template>
       </template>
@@ -336,7 +338,7 @@ type Play = Schemas['AppPlayResponse']
 
 const VERDICT = { WIN: '이겼어요', LOSE: '졌어요', DRAW: '비겼어요' } as const
 const BOARDS = [
-  { value: 'RATING', label: '레이팅' },
+  { value: 'RATING', label: '실력 점수' },
   { value: 'WEEK', label: '이번 주 기록' },
   { value: 'ALL', label: '전체 기록' },
 ]
@@ -363,7 +365,7 @@ const tab = ref<'rank' | 'mine' | 'vote'>('rank')
 const tabs = computed(() => [
   ...(isVote.value ? [{ value: 'vote', label: '투표', count: votes.value.length || undefined }] : []),
   { value: 'rank', label: '순위' },
-  { value: 'mine', label: '내 대결', count: finished.value.length || undefined },
+  { value: 'mine', label: '내 경기', count: finished.value.length || undefined },
 ])
 const { showToast } = useToast()
 const starting = ref(false)
@@ -518,7 +520,7 @@ function closeResult() {
 
 function duelTitle(d: Duel) {
   if (d.opponent) return `${who(d.opponent)}님과`
-  return d.status === 'CANCELED' ? '상대 없이 끝난 대결' : '상대를 찾는 중'
+  return d.status === 'CANCELED' ? '상대 없이 끝난 경기' : '상대를 찾는 중'
 }
 function duelSubtitle(d: Duel) {
   const unit = game.value?.scoreUnit ?? ''

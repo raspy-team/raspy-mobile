@@ -49,7 +49,7 @@ import {
   Folder, FolderOpen, Gavel, Hand, Heading, Heart, Hourglass, House, Keyboard, Images, Inbox, Info, Instagram, Layers,
   LayoutGrid, List, ListOrdered, LogOut, Mail, MapPin, MessageCircle, Minus, Pencil, Play, Plus, RotateCcw, RotateCw,
   Search, Send, Settings, Share, Ship, ShieldHalf, Square, SquarePen, Star, Target, Timer, TriangleAlert, Trophy, Trash2,
-  Unplug, User, Swords, Handshake, Scale, CircleCheck, Circle, Activity, Globe, SunMoon, GalleryVerticalEnd, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper,
+  Unplug, User, Swords, Handshake, Scale, CircleCheck, Circle, Activity, Globe, SunMoon, GalleryVerticalEnd, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper, Gamepad2,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -73,7 +73,7 @@ const ICONS = {
   gavel: Gavel, gear: Settings, hand: Hand, heading: Heading, heart: Heart, 'hourglass-half': Hourglass,
   home: House, images: Images, keyboard: Keyboard, inbox: Inbox, 'info-circle': Info, instagram: Instagram,
   'layer-group': Layers, list: List, 'list-ol': ListOrdered, 'location-dot': MapPin,
-  minus: Minus, 'magnifying-glass': Search, search: Search, newspaper: Newspaper, 'paper-plane': Send,
+  gamepad: Gamepad2, minus: Minus, 'magnifying-glass': Search, search: Search, newspaper: Newspaper, 'paper-plane': Send,
   pen: Pencil, 'pen-to-square': SquarePen, play: Play, 'plug-circle-exclamation': Unplug, plus: Plus,
   'ranking-star': Award, redo: RotateCw, 'right-from-bracket': LogOut, 'rotate-left': RotateCcw, 'rotate-right': RotateCw,
   'shield-halved': ShieldHalf, ship: Ship, star: Star, stop: Square, stopwatch: Timer, times: X, xmark: X,

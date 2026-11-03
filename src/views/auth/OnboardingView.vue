@@ -17,9 +17,9 @@
 
     <!-- 1. 약관 -->
     <main v-else-if="step === 'terms'" class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
-      <h1 class="t-title">{{ needProfile ? '반가워요!' : '약관을 확인해주세요' }}</h1>
+      <h1 class="t-title">{{ needProfile ? '반가워요!' : '약관을 확인해 주세요' }}</h1>
       <p class="t-body text-fg-muted mt-2">
-        {{ needProfile ? '시작하기 전에 약관에 동의해주세요.' : '그동안 동의를 기록하지 못했어요. 한 번만 확인해주세요.' }}
+        {{ needProfile ? '시작하기 전에 약관에 동의해 주세요.' : '그동안 동의를 기록하지 못했어요. 한 번만 확인해 주세요.' }}
       </p>
 
       <UiCard :pad="false" class="mt-8">
@@ -50,7 +50,7 @@
     <!-- 3. 동네 (건너뛸 수 있다) -->
     <main v-else-if="step === 'neighborhood'" class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
       <h1 class="t-title">어느 동네에서 겨룰까요?</h1>
-      <p class="t-body text-fg-muted mt-2">만나서 하는 경기는 내 동네 근처 사람들과 해요. 앱 안 게임은 동네와 상관없이 바로 할 수 있어요.</p>
+      <p class="t-body text-fg-muted mt-2">만나서 하는 경기는 내 동네 근처 사람들과 해요. 앱 게임은 동네와 상관없이 바로 할 수 있어요.</p>
       <NeighborhoodVerify class="mt-4" @verified="onNeighborhood" />
     </main>
 
@@ -81,7 +81,13 @@
           :error="nicknameError"
           autocomplete="nickname"
         />
+        <!-- 가입 때 적은 아이디를 그대로 쓰면 한 줄로 접는다: 아이디를 두 번 정하는 것처럼 느끼지 않게 (11/3) -->
+        <p v-if="fromSignup && !editingUsername" class="t-caption">
+          친구가 찾는 아이디 <b class="text-fg">@{{ username }}</b>
+          <button type="button" class="underline underline-offset-2 ml-1" @click="editingUsername = true">바꾸기</button>
+        </p>
         <UiInput
+          v-else
           v-model="username"
           label="아이디"
           icon="fas fa-at"
@@ -162,6 +168,10 @@ const nickname = ref('')
 const username = ref('')
 const nicknameError = ref('')
 const usernameError = ref('')
+// 가입 아이디를 채워 넣었으면 칸을 접어 둔다. 이미 쓰는 아이디라 막히면 다시 편다
+const fromSignup = ref(false)
+const editingUsername = ref(false)
+watch(usernameError, (e) => e && (editingUsername.value = true))
 
 const fileInput = ref(null)
 const photo = ref(null)
@@ -179,14 +189,14 @@ async function onPhoto(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
   if (!file) return
-  if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라주세요')
+  if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라 주세요')
   const dataUrl = await new Promise((resolve, reject) => {
     const r = new FileReader()
     r.onload = () => resolve(r.result)
     r.onerror = reject
     r.readAsDataURL(file)
   }).catch(() => null)
-  if (!dataUrl) return showToast('사진을 읽지 못했어요. 다른 사진을 골라주세요')
+  if (!dataUrl) return showToast('사진을 읽지 못했어요. 다른 사진을 골라 주세요')
   preview.value = await compressImage(dataUrl)
   photo.value = dataUrlToFile(preview.value, file.name)
 }
@@ -203,7 +213,7 @@ async function submitTerms() {
     if (needProfile.value) step.value = 'profile'
     else finish()
   } catch {
-    showToast('저장하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    showToast('저장하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     saving.value = false
   }
@@ -213,15 +223,15 @@ async function submitProfile() {
   const nick = nickname.value.trim()
   const name = username.value.trim()
   if (containsProfanity(nick)) return (nicknameError.value = '쓰면 안 되는 말이 들어 있어요')
-  if (!USERNAME_PATTERN.test(name)) return (usernameError.value = '영문 소문자·숫자·밑줄(_)로 12자까지 적어주세요')
+  if (!USERNAME_PATTERN.test(name)) return (usernameError.value = '영문 소문자·숫자·밑줄(_)로 12자까지 적어 주세요')
 
   saving.value = true
   try {
     await api.post('/api/auth/complete', { username: name, nickname: nick })
   } catch (e) {
     saving.value = false
-    if (e.response?.status === 409) usernameError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어주세요'
-    else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 시도해주세요')
+    if (e.response?.status === 409) usernameError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어 주세요'
+    else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 해 주세요')
     return
   }
   // 사진은 프로필 저장 API로. 실패해도 설정은 끝난 것으로 두고 알려만 준다
@@ -231,7 +241,7 @@ async function submitProfile() {
       fd.append('profile_picture', photo.value)
       await api.patch('/api/user-profile/save', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
     } catch {
-      showToast('사진은 저장하지 못했어요. 내 정보에서 다시 넣어주세요')
+      showToast('사진은 저장하지 못했어요. 내 정보에서 다시 넣어 주세요')
     }
   }
   saving.value = false
@@ -247,7 +257,7 @@ function onNeighborhood(data) {
 function finish() {
   markOnboarded()
   const back = takeReturnTo()
-  router.replace(back || { path: '/', query: { welcome: '1' } })
+  router.replace(back || '/')
 }
 
 onMounted(async () => {
@@ -268,7 +278,10 @@ onMounted(async () => {
       } catch {
         // 저장소를 못 쓰면 빈칸으로 둔다
       }
-      if (USERNAME_PATTERN.test(signupId)) username.value = signupId
+      if (USERNAME_PATTERN.test(signupId)) {
+        username.value = signupId
+        fromSignup.value = true
+      }
     }
   } catch {
     // 401이면 api.js가 시작 화면으로 보낸다

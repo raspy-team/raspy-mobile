@@ -74,7 +74,7 @@
 
     <!-- 내 경기에 사진이 없으면 한 번 누르는 자리 (미디어 딜레마: 찍기 귀찮다 → 결과가 이미 그림이고, 사진은 선택. 올리면 피드 위로) -->
     <button v-if="post.isMyGame && post.isCompleted && !post.photos?.length" type="button" class="mt-3 w-full h-11 rounded-xl border border-dashed border-line-strong t-caption flex items-center justify-center gap-1.5" @click="emit('photo')">
-      <UiIcon name="camera" aria-hidden="true" />사진 한 장 남기기 <span class="text-fg-subtle">· 피드에서 더 잘 보여요</span>
+      <UiIcon name="camera" aria-hidden="true" />사진 한 장 남기기 <span class="text-fg-subtle">· 소식에서 더 잘 보여요</span>
     </button>
 
     <p v-if="post.caption && post.caption.trim()" class="t-body mt-3 whitespace-pre-line break-words">{{ post.caption }}</p>

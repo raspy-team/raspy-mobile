@@ -148,7 +148,7 @@ async function send(body) {
     emit('update:modelValue', false)
     emit('submitted')
   } catch (e) {
-    error.value = e.response?.data?.message || '결과를 내지 못했어요. 다시 시도해 주세요'
+    error.value = e.response?.data?.message || '결과를 내지 못했어요. 다시 해 주세요'
   } finally {
     submitting.value = false
   }
@@ -186,7 +186,7 @@ async function submit() {
   // 두 칸 다 빈 세트는 안 한 세트로 본다 (칸은 넉넉히 두므로)
   const played = sets.value.filter((s) => !(empty(s.my) && empty(s.opponent)))
   if (!played.length || !played.every((s) => valid(s.my) && valid(s.opponent))) {
-    error.value = played.length ? '세트마다 두 사람 점수를 0~999 사이로 넣어주세요' : '한 세트 이상 점수를 넣어주세요'
+    error.value = played.length ? '세트마다 두 사람 점수를 0~999 사이로 넣어 주세요' : '한 세트 이상 점수를 넣어 주세요'
     return
   }
   // 팀 경기는 편 순서대로 (sideSets), 1:1은 [내 점수, 상대 점수] (sets)

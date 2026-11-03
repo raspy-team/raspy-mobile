@@ -132,6 +132,7 @@ import {
 import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { copyText } from '../../utils/clipboard'
+import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import Comment from '../GameCommentView.vue'
 
 // 동네(기본): 내 동네 범위 먼저, 동네 글이 적으면 서버가 다른 동네 글을 아래에 채운다 (elsewhere). 친구: 친구·내 경기. 전국: 전부
@@ -241,12 +242,20 @@ async function uploadPhoto(e) {
   e.target.value = ''
   const p = photoPost.value
   if (!file || !p) return
-  const form = new FormData()
-  form.append('pictures', file)
   try {
+    // 폰 사진은 10MB를 넘기 쉽다 (서버 한 파일 10MB). 피드에 충분한 크기로 줄여 올린다
+    const raw = await new Promise((resolve, reject) => {
+      const r = new FileReader()
+      r.onload = () => resolve(r.result)
+      r.onerror = reject
+      r.readAsDataURL(file)
+    })
+    const small = await compressImage(raw, 1280, 0.75)
+    const form = new FormData()
+    form.append('pictures', dataUrlToFile(small, `game_${p.id}.jpg`))
     const { data } = await api.post(`/api/games/${p.id}/pictures`, form)
     if (data?.success === false) throw new Error(data.message)
-    p.photos = [{ url: URL.createObjectURL(file), mediaType: 'IMAGE' }]
+    p.photos = [{ url: small, mediaType: 'IMAGE' }]
     showToast('사진을 올렸어요')
   } catch (err) {
     showToast(err?.response?.data?.message || err?.message || '사진을 올리지 못했어요')

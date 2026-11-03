@@ -216,7 +216,7 @@ async function submitReport() {
       targetType: 'COMMENT',
       reason: reportReason.value.trim(),
     })
-    reportSuccess.value = '신고했어요. 운영진이 확인할게요'
+    reportSuccess.value = '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요'
     setTimeout(closeReportModal, 1300)
   } catch (e) {
     const msg = e?.response?.data?.message || '신고하지 못했어요. 다시 시도해 주세요'

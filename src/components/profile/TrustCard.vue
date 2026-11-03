@@ -3,13 +3,13 @@
     <div class="flex items-center gap-3">
       <div class="flex-1 min-w-0">
         <p class="t-micro">매치 온도</p>
-        <p class="t-title tabular-nums" :class="trust.temperature >= 36.5 ? 'text-signal-fg' : trust.level === 'CAUTION' ? 'text-danger-fg' : ''">{{ trust.temperature.toFixed(1) }}°</p>
+        <p class="t-title tabular-nums" :class="trust.temperature >= 36.5 ? 'text-signal-fg' : ['CAUTION', 'SUSPENDED'].includes(trust.level) ? 'text-danger-fg' : ''">{{ trust.temperature.toFixed(1) }}°</p>
       </div>
-      <UiBadge :tone="TONE[trust.level]" :icon="trust.level === 'TRUSTED' ? 'shield-halved' : trust.level === 'CAUTION' ? 'triangle-exclamation' : ''">{{ trust.label }}</UiBadge>
+      <UiBadge :tone="TONE[trust.level]" :icon="trust.level === 'TRUSTED' ? 'shield-halved' : ['CAUTION', 'SUSPENDED'].includes(trust.level) ? 'triangle-exclamation' : ''">{{ trust.label }}</UiBadge>
     </div>
     <!-- 36.5도에서 시작 (0~99.9). 막대는 30~45도를 보여 준다: 대부분 이 사이 -->
     <div class="h-1.5 rounded-full bg-surface-3 mt-2 overflow-hidden" aria-hidden="true">
-      <div class="h-full rounded-full" :class="trust.level === 'CAUTION' ? 'bg-danger' : 'bg-signal'" :style="{ width: `${bar}%` }" />
+      <div class="h-full rounded-full" :class="['CAUTION', 'SUSPENDED'].includes(trust.level) ? 'bg-danger' : 'bg-signal'" :style="{ width: `${bar}%` }" />
     </div>
 
     <ul v-if="!compact" class="mt-4 grid grid-cols-2 gap-y-2 gap-x-3 t-caption">
@@ -37,7 +37,7 @@ import { UiBadge, UiIcon } from '../ui'
 type Trust = components['schemas']['TrustSummary']
 const props = defineProps<{ trust: Trust; compact?: boolean }>()
 
-const TONE: Record<Trust['level'], string> = { NEW: 'neutral', NORMAL: 'neutral', TRUSTED: 'success', CAUTION: 'danger' }
+const TONE: Record<Trust['level'], string> = { NEW: 'neutral', NORMAL: 'neutral', TRUSTED: 'success', CAUTION: 'danger', SUSPENDED: 'danger' }
 const bar = computed(() => Math.min(100, Math.max(4, ((props.trust.temperature - 30) / 15) * 100)))
 const joined = computed(() => {
   const d = props.trust.daysSinceJoined

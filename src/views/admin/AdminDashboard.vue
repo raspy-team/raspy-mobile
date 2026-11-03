@@ -25,6 +25,17 @@
               <div class="min-w-0">
                 <p class="t-body text-fg break-words">{{ r.targetLabel || '지워진 대상이에요' }}</p>
                 <p class="t-caption mt-1 break-words">"{{ r.reason }}" · {{ r.reporterNickname }}님</p>
+                <p v-if="r.accusedNickname" class="t-caption mt-1">
+                  신고당한 사람: <strong class="text-fg">{{ r.accusedNickname }}</strong>
+                  <UiBadge v-if="r.accusedSuspendedUntil" tone="danger" class="ml-1">{{ untilText(r.accusedSuspendedUntil) }} 정지</UiBadge>
+                </p>
+              </div>
+              <!-- 제재 (안전·신뢰 A): 신고가 부당하면 풀고, 맞으면 늘리거나 영구 정지. 처리 전 신고도 함께 처리된다 -->
+              <div v-if="r.accusedId" class="flex gap-2 flex-wrap">
+                <UiButton v-if="isRoom(r.context)" variant="secondary" size="sm" icon="far fa-comment" @click="openChat(r.context)">대화 보기</UiButton>
+                <UiButton variant="secondary" size="sm" :loading="sanctioningId === r.id" @click="sanction(r, 7)">7일 정지</UiButton>
+                <UiButton variant="danger" size="sm" :loading="sanctioningId === r.id" @click="sanction(r, null)">영구 정지</UiButton>
+                <UiButton v-if="r.accusedSuspendedUntil" variant="secondary" size="sm" :loading="sanctioningId === r.id" @click="lift(r)">정지 풀기</UiButton>
               </div>
               <div class="flex gap-2">
                 <UiButton v-if="r.targetPath" variant="secondary" size="sm" class="flex-1" :to="r.targetPath">보러 가기</UiButton>
@@ -44,6 +55,15 @@
           </li>
         </ul>
       </UiSection>
+
+      <UiSheet v-model="chatOpen" title="신고된 대화">
+        <UiListSkeleton v-if="!chatLines" :rows="4" />
+        <ul v-else class="space-y-2 max-h-[60vh] overflow-auto">
+          <li v-for="(l, i) in chatLines" :key="i" class="t-caption">
+            <strong class="text-fg">{{ l.sender }}</strong> · {{ timeAgo(l.sentAt) }}<br />{{ l.message }}
+          </li>
+        </ul>
+      </UiSheet>
 
       <!-- 유입: 홍보 채널별로 와서 → 가입 → 경기 → 다시 왔는지. 로봇·봇 계정·기존 사용자는 뺀다 -->
       <UiSection title="유입">
@@ -169,6 +189,7 @@ import api from '../../api/api'
 import { GET, POST } from '../../api/client'
 import { timeAgo } from '../../utils/format'
 import { useToast } from '../../composable/useToast'
+import { confirmDialog } from '../../composables/useConfirm'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton,
   UiSection, UiSheet, UiTabs, UiTopBar,
@@ -177,7 +198,7 @@ import {
 const router = useRouter()
 const { showToast } = useToast()
 
-const TYPE_LABEL = { USER: '사람', GAME: '경기', RULE: '규칙', COMMENT: '댓글' }
+const TYPE_LABEL = { USER: '사람', GAME: '경기', RULE: '규칙', COMMENT: '댓글', CHAT_MESSAGE: '메시지' }
 
 const loading = ref(true)
 const reports = ref([])
@@ -277,6 +298,52 @@ async function load() {
     router.replace('/')
   } finally {
     loading.value = false
+  }
+}
+
+// 제재 (안전·신뢰 A)
+const sanctioningId = ref(null)
+const chatOpen = ref(false)
+const chatLines = ref(null)
+const isRoom = (c) => /^[0-9a-f-]{36}$/i.test(c || '')
+function untilText(t) {
+  const d = new Date(t)
+  return d.getFullYear() >= 9999 ? '영구' : `${d.getMonth() + 1}/${d.getDate()}까지`
+}
+async function openChat(roomId) {
+  chatOpen.value = true
+  chatLines.value = null
+  try {
+    chatLines.value = (await GET('/api/admin/chat/{roomId}', { path: { roomId } })).data
+  } catch {
+    chatLines.value = []
+    showToast('대화를 불러오지 못했어요')
+  }
+}
+async function sanction(report, days) {
+  const what = days ? `${days}일 정지` : '영구 정지'
+  if (!(await confirmDialog({ title: `${report.accusedNickname}님을 ${what}할까요?`, message: `사유: ${report.reason}. 이 사람의 처리 전 신고도 함께 처리돼요`, confirmText: what, danger: true }))) return
+  sanctioningId.value = report.id
+  try {
+    await POST('/api/admin/users/{userId}/suspend', { path: { userId: report.accusedId }, body: { days, reason: report.reason } })
+    reports.value = (await GET('/api/admin/reports')).data
+    showToast(`${what}했어요`)
+  } catch (e) {
+    showToast(e.response?.data?.message || '처리하지 못했어요')
+  } finally {
+    sanctioningId.value = null
+  }
+}
+async function lift(report) {
+  sanctioningId.value = report.id
+  try {
+    await POST('/api/admin/users/{userId}/unsuspend', { path: { userId: report.accusedId } })
+    reports.value = (await GET('/api/admin/reports')).data
+    showToast('정지를 풀었어요')
+  } catch {
+    showToast('처리하지 못했어요')
+  } finally {
+    sanctioningId.value = null
   }
 }
 

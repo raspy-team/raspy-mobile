@@ -176,13 +176,13 @@
       <UiList>
         <UiListItem v-if="friend.isFriend" icon="fas fa-user-minus" title="친구 끊기" @click="unfriend" />
         <UiListItem icon="far fa-flag" title="신고하기" @click="openReport" />
-        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로의 경기·글이 보이지 않아요" danger @click="block" />
+        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·대결을 할 수 없어요" danger @click="block" />
       </UiList>
     </UiSheet>
 
     <!-- 신고 -->
     <UiSheet v-model="reportOpen" :title="`${user?.nickname || ''}님을 신고할까요?`">
-      <p class="t-caption mb-4">어떤 문제인지 알려주시면 확인 후 조치할게요.</p>
+      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 조치해요.</strong></p>
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
@@ -311,7 +311,7 @@ async function unfriend() {
 
 async function block() {
   menuOpen.value = false
-  if (!(await confirmDialog({ title: `${user.value.nickname}님을 차단할까요?`, message: '서로의 경기·글이 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
+  if (!(await confirmDialog({ title: `${user.value.nickname}님을 차단할까요?`, message: '서로 메시지·신청·대결을 할 수 없고 프로필도 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
   try {
     await api.post(`/api/block/${user.value.id}`)
     showToast('차단했어요')
@@ -331,8 +331,8 @@ async function submitReport() {
   reporting.value = true
   try {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
-    await api.post('/api/reports', { targetType: 'USER', targetId: user.value.id, reason })
-    showToast('신고를 접수했어요. 확인 후 조치할게요')
+    const { data: done } = await api.post('/api/reports', { targetType: 'USER', targetId: user.value.id, reason })
+    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요')
   } catch (e) {
     showToast(e.response?.data?.message || '이미 신고했어요')
   } finally {

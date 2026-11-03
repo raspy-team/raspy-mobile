@@ -226,8 +226,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * 컨텐츠 신고
-         * @description 게임/댓글/룰을 신고합니다.
+         * 신고
+         * @description 사람·경기·댓글·규칙·메시지를 신고합니다. 서로 다른 3명이 30일 안에 신고하면 운영진이 확인하는 동안 7일 정지합니다.
          */
         post: operations["report"];
         delete?: never;
@@ -1659,6 +1659,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/users/{userId}/unsuspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 정지 풀기 (관리자 전용)
+         * @description 신고가 부당했을 때. 이 사람의 처리 전 신고도 처리한 것으로 표시하고, 자동 정지는 이 뒤 신고만 센다
+         */
+        post: operations["unsuspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{userId}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 이용 정지 (관리자 전용)
+         * @description days가 없으면 영구. 이 사람의 처리 전 신고도 모두 처리한 것으로 표시한다
+         */
+        post: operations["suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/rules/edit-requests/{id}/reject": {
         parameters: {
             query?: never;
@@ -1959,6 +1999,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/safety/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 이용 상태
+         * @description 정지 중인지. 앱은 정지 중이면 화면 맨 위에 안내를 띄운다
+         */
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules/{ruleId}/rankings": {
         parameters: {
             query?: never;
@@ -2180,7 +2240,7 @@ export interface paths {
         };
         /**
          * 그 사람의 포인트 출처
-         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·처음 선물로 나눠서
+         * @description 프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서
          */
         get: operations["sources"];
         put?: never;
@@ -3426,6 +3486,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/chat/{roomId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 신고된 대화 보기 (관리자 전용)
+         * @description 메시지 신고를 확인할 때 앞뒤 대화를 본다. 최근 200개
+         */
+        get: operations["chat"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/acquisition": {
         parameters: {
             query?: never;
@@ -3685,10 +3765,14 @@ export interface components {
         };
         ReportRequest: {
             /** @enum {string} */
-            targetType: "GAME" | "COMMENT" | "RULE" | "USER";
+            targetType: "GAME" | "COMMENT" | "RULE" | "USER" | "CHAT_MESSAGE";
             /** Format: int64 */
             targetId: number;
             reason: string;
+            context?: string;
+        };
+        ReportResult: {
+            message: string;
         };
         RegisterTokenRequest: {
             token: string;
@@ -4214,6 +4298,11 @@ export interface components {
             /** Format: date-time */
             challengeUntil?: string;
         };
+        SuspendRequest: {
+            /** Format: int64 */
+            days?: number;
+            reason: string;
+        };
         RejectEditRequestDto: {
             rejectionReason: string;
         };
@@ -4292,7 +4381,7 @@ export interface components {
         };
         TrustSummary: {
             /** @enum {string} */
-            level: "NEW" | "NORMAL" | "TRUSTED" | "CAUTION";
+            level: "NEW" | "NORMAL" | "TRUSTED" | "CAUTION" | "SUSPENDED";
             label: string;
             /** Format: double */
             temperature: number;
@@ -4411,6 +4500,11 @@ export interface components {
             bio?: string;
             profilePicture?: string;
             affiliation?: string;
+        };
+        MySafety: {
+            /** Format: date-time */
+            suspendedUntil?: string;
+            suspendedMessage?: string;
         };
         RuleRankingResponse: {
             /** Format: int64 */
@@ -5142,6 +5236,8 @@ export interface components {
             timestamp: string;
             /** @enum {string} */
             messageType: "ENTER" | "TALK" | "LEAVE" | "SCORE" | "SET" | "RESET" | "FINISH" | "PLAY_WITH_ME_TOO";
+            /** Format: int64 */
+            id?: number;
         };
         DmRoomPreviewDto: {
             /** Format: int64 */
@@ -5287,7 +5383,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             /** @enum {string} */
-            targetType: "GAME" | "COMMENT" | "RULE" | "USER";
+            targetType: "GAME" | "COMMENT" | "RULE" | "USER" | "CHAT_MESSAGE";
             /** Format: int64 */
             targetId: number;
             targetLabel?: string;
@@ -5302,6 +5398,20 @@ export interface components {
             handledAt?: string;
             /** Format: int32 */
             sameTargetCount: number;
+            /** Format: int64 */
+            accusedId?: number;
+            accusedNickname?: string;
+            /** Format: date-time */
+            accusedSuspendedUntil?: string;
+            context?: string;
+        };
+        AdminChatLine: {
+            /** Format: int64 */
+            senderId?: number;
+            sender: string;
+            message?: string;
+            /** Format: date-time */
+            sentAt: string;
         };
         ChannelRow: {
             channel: string;
@@ -5615,7 +5725,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "*/*": components["schemas"]["ReportResult"];
+                };
             };
         };
     };
@@ -7500,6 +7612,50 @@ export interface operations {
             };
         };
     };
+    unsuspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    suspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuspendRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     rejectEditRequest: {
         parameters: {
             query?: never;
@@ -7903,6 +8059,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MyProfileResponse"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MySafety"];
                 };
             };
         };
@@ -9612,6 +9788,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminReportResponse"][];
+                };
+            };
+        };
+    };
+    chat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminChatLine"][];
                 };
             };
         };

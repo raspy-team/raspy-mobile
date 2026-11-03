@@ -21,6 +21,9 @@
       </div>
     </div>
 
+    <!-- 이용 정지 중이면 왜 막혔는지 (안전·신뢰 A) -->
+    <SuspendedBanner v-if="!serverDown" />
+
     <!-- 앱 전체 알림 한 줄 (window.alert도 여기로 온다) -->
     <CustomToast />
     <UiConfirmHost />
@@ -56,6 +59,7 @@ import FooterNav from './components/FooterNav.vue'
 import CustomToast from './components/CustomToast.vue'
 import UiConfirmHost from './components/ui/UiConfirmHost.vue'
 import RouteProgress from './components/RouteProgress.vue'
+import SuspendedBanner from './components/safety/SuspendedBanner.vue'
 import { startInbox } from './stores/inbox'
 import UiDialog from './components/ui/UiDialog.vue'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'

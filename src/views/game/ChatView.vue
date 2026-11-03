@@ -1,6 +1,8 @@
 <script setup>
 import RuleThumb from '../../components/rule/RuleThumb.vue'
-import { UiAvatar, UiBadge, UiButton, UiChip, UiDialog, UiEmptyState, UiIconButton, UiSkeleton } from '../../components/ui'
+import { UiAvatar, UiBadge, UiButton, UiChip, UiDialog, UiEmptyState, UiIconButton, UiList, UiListItem, UiSheet, UiSkeleton } from '../../components/ui'
+import ReportSheet from '../../components/safety/ReportSheet.vue'
+import { confirmDialog } from '../../composables/useConfirm'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { refreshInbox } from '../../stores/inbox'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
@@ -136,6 +138,10 @@ onMounted(async () => {
     if (e.response?.data?.message?.includes('자기 자신과의 DM')) {
       errorMessage.value = '나에게는 메시지를 보낼 수 없어요'
       showErrorModal.value = true
+    } else if (e.response?.status === 400 || e.response?.status === 403) {
+      // 차단한 사이거나 내가 정지 중일 때
+      errorMessage.value = e.response.data?.message || '메시지를 보낼 수 없어요'
+      showErrorModal.value = true
     } else {
       showToast('메시지를 불러오지 못했어요')
     }
@@ -170,6 +176,38 @@ function keepFocus() {
 const router = useRouter()
 function goToProfile() {
   router.push(`/profile/${targetUserId}`)
+}
+
+// 신고·차단을 대화 안에서 (안전·신뢰 A, 11/3). 괴롭힘은 대부분 1:1 메시지에서 일어나는데 예전엔 프로필로 가야 했다.
+// 사람 신고는 이 대화방을 맥락으로 붙여 운영진이 앞뒤를 본다. 메시지 하나는 길게 눌러 신고한다
+const menuOpen = ref(false)
+const report = ref({ open: false, type: 'USER', id: null, title: '' })
+function reportUser() {
+  menuOpen.value = false
+  report.value = { open: true, type: 'USER', id: targetUserId, title: `${targetUserNickname.value}님을 신고할까요?` }
+}
+function reportMessage(msg) {
+  if (!msg.id || msg.senderId === currentUserId.value) return
+  report.value = { open: true, type: 'CHAT_MESSAGE', id: msg.id, title: '이 메시지를 신고할까요?' }
+}
+let pressTimer = null
+function pressStart(msg) {
+  clearTimeout(pressTimer)
+  pressTimer = setTimeout(() => reportMessage(msg), 550)
+}
+function pressEnd() {
+  clearTimeout(pressTimer)
+}
+async function blockUser() {
+  menuOpen.value = false
+  if (!(await confirmDialog({ title: `${targetUserNickname.value}님을 차단할까요?`, message: '서로 메시지·신청·대결을 할 수 없고 프로필도 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
+  try {
+    await api.post(`/api/block/${targetUserId}`)
+    showToast('차단했어요')
+    router.replace('/dm')
+  } catch (e) {
+    showToast(e.response?.data?.message || '차단하지 못했어요')
+  }
 }
 function goBack() {
   router.go(-1)
@@ -360,6 +398,7 @@ const closeErrorModal = () => {
           <UiAvatar :src="targetUserProfileUrl" :name="targetUserNickname" size="sm" />
           <span class="t-heading truncate">{{ targetUserNickname }}</span>
         </button>
+        <UiIconButton class="ml-auto" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
       </header>
 
       <!-- 도전 상태 -->
@@ -437,7 +476,10 @@ const closeErrorModal = () => {
               <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words">{{ msg.content }}</p>
             </div>
             <div v-else class="flex justify-start items-end gap-1.5 pr-12">
-              <p class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words">{{ msg.content }}</p>
+              <p
+                class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words select-none"
+                @touchstart.passive="pressStart(msg)" @touchend="pressEnd" @touchmove.passive="pressEnd" @contextmenu.prevent="reportMessage(msg)"
+              >{{ msg.content }}</p>
               <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>
             </div>
           </template>
@@ -469,6 +511,14 @@ const closeErrorModal = () => {
         </button>
       </form>
     </div>
+
+    <UiSheet v-model="menuOpen">
+      <UiList>
+        <UiListItem icon="far fa-flag" title="신고하기" subtitle="운영진이 바로 확인하고 조치해요. 메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
+        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·대결을 할 수 없어요" danger @click="blockUser" />
+      </UiList>
+    </UiSheet>
+    <ReportSheet v-model="report.open" :title="report.title" :target-type="report.type" :target-id="report.id" :context="roomId ? String(roomId) : null" />
 
     <UiDialog
       :model-value="showErrorModal"

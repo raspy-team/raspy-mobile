@@ -6,6 +6,10 @@
   },
   "tags": [
     {
+      "name": "Safety",
+      "description": "안전·신뢰: 내 이용 상태, 운영진 제재"
+    },
+    {
       "name": "Admin Report",
       "description": "관리자 전용 신고 처리 API"
     },
@@ -429,8 +433,8 @@
         "tags": [
           "Report"
         ],
-        "summary": "컨텐츠 신고",
-        "description": "게임/댓글/룰을 신고합니다.",
+        "summary": "신고",
+        "description": "사람·경기·댓글·규칙·메시지를 신고합니다. 서로 다른 3명이 30일 안에 신고하면 운영진이 확인하는 동안 7일 정지합니다.",
         "operationId": "report",
         "requestBody": {
           "content": {
@@ -444,7 +448,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResult"
+                }
+              }
+            }
           }
         }
       }
@@ -3179,6 +3190,68 @@
         }
       }
     },
+    "/api/admin/users/{userId}/unsuspend": {
+      "post": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "정지 풀기 (관리자 전용)",
+        "description": "신고가 부당했을 때. 이 사람의 처리 전 신고도 처리한 것으로 표시하고, 자동 정지는 이 뒤 신고만 센다",
+        "operationId": "unsuspend",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/users/{userId}/suspend": {
+      "post": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "이용 정지 (관리자 전용)",
+        "description": "days가 없으면 영구. 이 사람의 처리 전 신고도 모두 처리한 것으로 표시한다",
+        "operationId": "suspend",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/rules/edit-requests/{id}/reject": {
       "post": {
         "tags": [
@@ -3717,6 +3790,28 @@
         }
       }
     },
+    "/api/safety/me": {
+      "get": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "내 이용 상태",
+        "description": "정지 중인지. 앱은 정지 중이면 화면 맨 위에 안내를 띄운다",
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MySafety"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rules/{ruleId}/rankings": {
       "get": {
         "tags": [
@@ -4219,7 +4314,7 @@
           "point-controller"
         ],
         "summary": "그 사람의 포인트 출처",
-        "description": "프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·처음 선물로 나눠서",
+        "description": "프로필용. 잔액과 들어온 포인트를 승리·경기·응원 보너스·출석·처음 선물로 나눠서",
         "operationId": "sources",
         "parameters": [
           {
@@ -6273,6 +6368,42 @@
         }
       }
     },
+    "/api/admin/chat/{roomId}": {
+      "get": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "신고된 대화 보기 (관리자 전용)",
+        "description": "메시지 신고를 확인할 때 앞뒤 대화를 본다. 최근 200개",
+        "operationId": "chat",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminChatLine"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/acquisition": {
       "get": {
         "tags": [
@@ -6989,7 +7120,8 @@
               "GAME",
               "COMMENT",
               "RULE",
-              "USER"
+              "USER",
+              "CHAT_MESSAGE"
             ]
           },
           "targetId": {
@@ -6997,6 +7129,20 @@
             "format": "int64"
           },
           "reason": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          }
+        }
+      },
+      "ReportResult": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
             "type": "string"
           }
         }
@@ -8683,6 +8829,21 @@
           }
         }
       },
+      "SuspendRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "RejectEditRequestDto": {
         "required": [
           "rejectionReason"
@@ -8951,7 +9112,8 @@
               "NEW",
               "NORMAL",
               "TRUSTED",
-              "CAUTION"
+              "CAUTION",
+              "SUSPENDED"
             ]
           },
           "label": {
@@ -9307,6 +9469,18 @@
             "type": "string"
           },
           "affiliation": {
+            "type": "string"
+          }
+        }
+      },
+      "MySafety": {
+        "type": "object",
+        "properties": {
+          "suspendedUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "suspendedMessage": {
             "type": "string"
           }
         }
@@ -11814,6 +11988,10 @@
               "FINISH",
               "PLAY_WITH_ME_TOO"
             ]
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -12302,7 +12480,8 @@
               "GAME",
               "COMMENT",
               "RULE",
-              "USER"
+              "USER",
+              "CHAT_MESSAGE"
             ]
           },
           "targetId": {
@@ -12336,6 +12515,43 @@
           "sameTargetCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "accusedId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accusedNickname": {
+            "type": "string"
+          },
+          "accusedSuspendedUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "context": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminChatLine": {
+        "required": [
+          "sender",
+          "sentAt"
+        ],
+        "type": "object",
+        "properties": {
+          "senderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sender": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

@@ -144,7 +144,7 @@
 
     <!-- 신고 -->
     <UiSheet v-model="reportOpen" title="이 규칙을 신고할까요?">
-      <p class="t-caption mb-4">어떤 문제인지 알려주시면 확인 후 조치할게요.</p>
+      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 조치해요.</strong></p>
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
@@ -248,8 +248,8 @@ async function submitReport() {
   reporting.value = true
   try {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
-    await api.post('/api/reports', { targetType: 'RULE', targetId: rule.value.id, reason })
-    showToast('신고를 접수했어요. 확인 후 조치할게요')
+    const { data: done } = await api.post('/api/reports', { targetType: 'RULE', targetId: rule.value.id, reason })
+    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요')
   } catch (e) {
     showToast(e.response?.data?.message || '이미 신고한 규칙이에요')
   } finally {

@@ -151,7 +151,7 @@
 <script setup>
 // 경기 만들기: 규칙은 /rules에서 고르고 돌아온다. 여기서는 상대(아무나 / 친구)만 정하면 경기가 열린다.
 // 장소·시간은 상대가 정해진 뒤 내 경기에서 함께 정한다
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { GET } from '@/api/client'
 import { categoryKey, winSummary } from '../../utils/rule'
@@ -226,6 +226,15 @@ async function shareGame() {
   }
 }
 const rule = ref(null)
+// 규칙이 팀으로만(또는 여럿이만) 하는 것이면 그 방식으로 시작한다. 1:1로 두면 '세 명씩 편을 나눠' 규칙도 1:1로 열렸다 (11/4 밤샘)
+// 사람이 이미 고른 방식(돌아올 주소의 format)이 있으면 그대로
+watch(rule, (r) => {
+  if (!r || route.query.format) return
+  const parties = (r.category?.parties || []).map((p) => p.key)
+  const only = (k) => parties.includes(k) && !parties.includes('SOLO') && !parties.includes('DUO')
+  if (only('TEAM') && format.value !== 'TEAMS') pickFormat('TEAMS')
+  else if (only('GROUP') && !parties.includes('TEAM') && format.value !== 'FREE_FOR_ALL') pickFormat('FREE_FOR_ALL')
+})
 
 // 종목 고르기: 규칙을 많이 쓴 순으로 받아 종목마다 맨 위 규칙을 고른다. 종목 이름은 분류(category.sport) → 제목·분류에서 찾은 종목
 const sports = ref(null)

@@ -86,7 +86,8 @@
                 "RULE",
                 "COMMENT",
                 "LIKE",
-                "DM"
+                "DM",
+                "DAILY"
               ]
             }
           }
@@ -14459,7 +14460,8 @@
               "GAME_SCHEDULED",
               "GAME_REMINDER",
               "GAME_RESULT_DISPUTED",
-              "SAFETY"
+              "SAFETY",
+              "DAILY_PUZZLE"
             ]
           },
           "createdAt": {
@@ -14490,7 +14492,8 @@
               "RULE",
               "COMMENT",
               "LIKE",
-              "DM"
+              "DM",
+              "DAILY"
             ]
           },
           "label": {

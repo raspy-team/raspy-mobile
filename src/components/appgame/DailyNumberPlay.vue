@@ -10,7 +10,7 @@
 
     <!-- 지금 식과 그 값. 값은 서버와 같은 규칙(나누어떨어질 때만 ÷)으로 화면이 미리 계산한다 -->
     <div class="mt-5 rounded-xl bg-surface px-4 py-3 min-h-[4.5rem]">
-      <p class="t-title t-mono tabular-nums break-all">{{ shown || ' ' }}</p>
+      <p class="t-title font-mono tabular-nums break-all">{{ shown || ' ' }}</p>
       <p class="t-caption mt-1 tabular-nums">
         <template v-if="value === null">{{ tokens.length ? '식을 이어 가세요' : '숫자를 눌러 시작해요' }}</template>
         <template v-else>= {{ value }} · {{ value === target ? '딱 맞아요!' : `${Math.abs(value - target)} 차이` }}</template>

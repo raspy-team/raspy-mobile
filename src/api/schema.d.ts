@@ -6408,14 +6408,14 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
         };
         SettingDto: {
             /** @enum {string} */
-            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM";
+            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
             label: string;
             description: string;
             enabled: boolean;
@@ -7389,7 +7389,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM";
+                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
             };
             cookie?: never;
         };

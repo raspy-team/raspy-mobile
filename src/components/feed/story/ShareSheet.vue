@@ -13,7 +13,8 @@
 <script setup lang="ts">
 // 공유 주소는 matchapp.me/m/{경기}. Vercel이 서버로 넘겨 경기마다 미리보기 그림을 낸다 (raspy-api share/)
 // ?s= 는 어디로 보냈는지. 받은 사람이 '나도 한 판'을 누르면 유입 꼬리표(utm_source)가 되어 관리자 > 유입에 잡힌다
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { GET } from '@/api/client'
 import { UiList, UiListItem, UiSheet } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
 import { useToast } from '../../../composable/useToast'
@@ -28,7 +29,24 @@ const emit = defineEmits(['close'])
 const { showToast } = useToast()
 const saving = ref(false)
 
-const link = (s: string) => `${location.origin}/m/${props.post?.id}?s=${s}`
+// 서명(k)이 붙은 주소는 서버가 준다 (번호만으로는 열리지 않는다). 시트가 열릴 때 한 번 받는다
+const shared = ref<{ url: string; storyImage: string } | null>(null)
+watch(
+  () => props.post?.id,
+  async (id) => {
+    shared.value = null
+    if (!id) return
+    const { data } = await GET('/api/games/{gameId}/share-link', { path: { gameId: Number(id) } })
+    if (data && props.post?.id === id) shared.value = data
+  },
+  { immediate: true },
+)
+// 서버 주소의 앞(matchapp.me)을 지금 연 곳으로 바꾼다 (미리보기·로컬에서도 같은 곳으로 돌아오게)
+const link = (s: string) => {
+  if (!shared.value) return ''
+  const u = new URL(shared.value.url)
+  return `${location.origin}${u.pathname}${u.search}&s=${s}`
+}
 const close = () => emit('close')
 
 // 워들처럼: 칸 하나가 세트 하나, 볼트 칸은 보내는 사람(선수가 아니면 이긴 사람)이 이긴 세트
@@ -62,12 +80,13 @@ const grid = computed(() => {
   // 이야기 줄은 이름이 들어가지 않은 사실 줄만 (beats 중 첫 줄)
   const beat = story?.beats?.map((b: any) => (typeof b === 'string' ? b : b?.text)).find((b: string) => b && !(p.players || []).some((x: any) => x.name && b.includes(x.name)))
   if (beat) lines.push(`⚡ ${beat}`)
-  lines.push(link('x').replace(/^https?:\/\//, ''))
+  if (shared.value) lines.push(link('x').replace(/^https?:\/\//, ''))
   return lines.join('\n')
 })
 
 async function sendLink() {
   const url = link('link')
+  if (!url) return showToast('링크를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요')
   if (navigator.share) {
     try {
       await navigator.share({ url })
@@ -82,10 +101,10 @@ async function sendLink() {
 
 async function saveStory() {
   const id = props.post?.id
-  if (!id || saving.value) return
+  if (!id || saving.value || !shared.value) return
   saving.value = true
   try {
-    const res = await fetch(`/m/${id}/story.png`)
+    const res = await fetch(shared.value.storyImage)
     if (!res.ok) throw new Error()
     const file = new File([await res.blob()], `match-${id}.png`, { type: 'image/png' })
     // 폰은 공유 시트로 넘겨 바로 인스타 스토리에 올리게 한다. 안 되면 내려받기
@@ -112,6 +131,7 @@ async function saveStory() {
 }
 
 async function copyGrid() {
+  if (!shared.value) return showToast('링크를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요')
   showToast((await copyText(grid.value)) ? '복사했어요. 붙여 넣으세요' : '복사하지 못했어요')
   close()
 }

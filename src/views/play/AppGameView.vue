@@ -215,7 +215,8 @@
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
-            <template v-if="ladderTo">만나기 전에 {{ ladderName }}님과 한 판 해요. 끝나면 같은 문제로 도전장을 메시지로 보내요</template>
+            <template v-if="ladderTo && fromFeed">{{ ladderName }}님에게 도전해요. 먼저 한 판 하면 같은 문제로 도전장을 메시지로 보내요</template>
+            <template v-else-if="ladderTo">만나기 전에 {{ ladderName }}님과 한 판 해요. 끝나면 같은 문제로 도전장을 메시지로 보내요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번 풀 수 있어요. 오늘 같은 문제를 푼 사람들과 견줘요</template>
             <template v-else>기다리는 사람이 있으면 바로 시작하고, 없으면 다음 사람을 기다려요<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template></template>
           </p>
@@ -366,12 +367,14 @@ const result = ref<Duel | null>(null)
 // 신뢰 사다리 (안전·신뢰 D): 경기 신청자와 만나기 전에 한 판. ?to=사람&toName=이름으로 오면 새 판을 열고, 끝나면 그 사람에게 도전장을 메시지로 보낸다
 const ladderTo = Number(route.query.to) || null
 const ladderName = String(route.query.toName || '상대')
+// 소식 카드의 '도전해요'로 왔다 (같은 길, 문구만 다르다)
+const fromFeed = route.query.from === 'feed'
 let ladderSent = false
 watch(() => result.value?.gameId, async (gameId) => {
   if (!ladderTo || ladderSent || !gameId || result.value?.status !== 'WAITING') return
   ladderSent = true
   try {
-    await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId }, query: { to: ladderTo } })
+    await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId }, query: { to: ladderTo, from: fromFeed ? 'feed' : undefined } })
     showToast(`${ladderName}님에게 도전장을 메시지로 보냈어요. 받으면 같은 문제로 붙어요`)
   } catch (e) {
     ladderSent = false

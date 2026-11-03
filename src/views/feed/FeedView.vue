@@ -66,6 +66,9 @@
           @like="toggleLike(p)"
           @comment="commentId = Number(p.id)"
           @play="router.push(`/play/${p.appDuel.key}`)"
+          :my-id="myId"
+          @watch="(t) => pick(p, 'watch', t)"
+          @challenge="(t) => pick(p, 'challenge', t)"
         />
         <FeedCard
           v-else
@@ -76,7 +79,9 @@
           @rule="router.push(`/rules/${p.rule.id}`)"
           @like="toggleLike(p)"
           @comment="commentId = Number(p.id)"
-          @play="router.push(`/create-game?ruleId=${p.rule.id}`)"
+          :my-id="myId"
+          @watch="(t) => pick(p, 'watch', t)"
+          @challenge="(t) => pick(p, 'challenge', t)"
           @more="menuPost = p"
           @photo="pickPhoto(p)"
         />
@@ -96,6 +101,20 @@
         <UiListItem v-if="menuPost?.rule?.id" icon="rotate-right" title="이 규칙으로 한 판" subtitle="같은 규칙으로 경기를 열어요" chevron @click="go(`/create-game?ruleId=${menuPost.rule.id}`)" />
         <UiListItem icon="fas fa-arrow-up-from-bracket" title="결과 보내기" subtitle="링크 · 스토리 그림 · 글자" @click="share(menuPost)" />
         <UiListItem v-if="!menuPost?.isMyGame" icon="far fa-flag" title="신고하기" danger @click="openReport(menuPost)" />
+      </UiList>
+    </UiSheet>
+
+    <!-- 또 보고 싶어요 · 도전해요: 대상이 여럿이면 고른다 -->
+    <UiSheet :model-value="!!picking" :title="picking?.kind === 'watch' ? '누구 경기를 또 보고 싶어요?' : '누구에게 도전할까요?'" @update:model-value="picking = null">
+      <UiList>
+        <UiListItem
+          v-for="t in picking?.targets || []"
+          :key="t.id"
+          :title="t.name"
+          :subtitle="picking?.kind === 'watch' && picking.post.watching?.includes(t.id) ? '보는 중 · 누르면 그만 봐요' : ''"
+          chevron
+          @click="act(picking.post, picking.kind, t)"
+        />
       </UiList>
     </UiSheet>
 
@@ -129,7 +148,6 @@ import api from '../../api/api'
 import FeedCard from '../../components/feed/FeedCard.vue'
 import AppDuelFeedCard from '../../components/feed/AppDuelFeedCard.vue'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
-import { getMyId } from '@/utils/me'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
   UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
@@ -139,6 +157,9 @@ import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { copyText } from '../../utils/clipboard'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import Comment from '../GameCommentView.vue'
+import { DELETE, POST } from '@/api/client'
+import { playWithMeTooAPI } from '../../api/api'
+import { getMyId } from '@/utils/me'
 
 // 동네(기본): 내 동네 범위 먼저, 동네 글이 적으면 서버가 다른 동네 글을 아래에 채운다 (elsewhere). 친구: 친구·내 경기. 전국: 전부
 const TABS = [
@@ -264,6 +285,47 @@ async function uploadPhoto(e) {
     showToast('사진을 올렸어요')
   } catch (err) {
     showToast(err?.response?.data?.message || err?.message || '사진을 올리지 못했어요')
+  }
+}
+
+// 또 보고 싶어요 · 도전해요 (카드의 선수 중 나·봇을 뺀 사람에게)
+const picking = ref(null)
+function pick(post, kind, targets) {
+  if (targets.length === 1) act(post, kind, targets[0])
+  else picking.value = { post, kind, targets }
+}
+async function act(post, kind, target) {
+  picking.value = null
+  if (kind === 'watch') return toggleWatch(post, target)
+  // 앱 게임: 같은 게임을 먼저 하고 그 사람에게 도전장을 보낸다 (신뢰 사다리와 같은 길)
+  if (post.appDuel) return router.push({ path: `/play/${post.appDuel.key}`, query: { to: target.id, toName: target.name, from: 'feed' } })
+  // 만나서·화상 경기: 같은 규칙으로 '나랑도해' (메시지로 이어진다. 만남 안전 검사는 서버가 한다)
+  try {
+    await playWithMeTooAPI.sendRequest(target.id, post.rule.id)
+    feel('tap')
+    showToast(`${target.name}님에게 도전했어요. 받으면 메시지로 이어져요`)
+  } catch (e) {
+    showToast(e.response?.data?.message || '도전을 보내지 못했어요')
+  }
+}
+async function toggleWatch(post, target) {
+  const on = !(post.watching || []).includes(target.id)
+  post.watching = on ? [...(post.watching || []), target.id] : (post.watching || []).filter((id) => id !== target.id)
+  try {
+    if (on) await POST('/api/watch/{userId}', { path: { userId: target.id } })
+    else await DELETE('/api/watch/{userId}', { path: { userId: target.id } })
+    // 같은 사람이 나오는 다른 카드도 맞춘다
+    posts.value.forEach((p) => {
+      if (p === post || !(p.players || []).some((x) => x.id === target.id)) return
+      p.watching = on ? [...new Set([...(p.watching || []), target.id])] : (p.watching || []).filter((id) => id !== target.id)
+    })
+    if (on) {
+      feel('tap')
+      showToast(`${target.name}님 경기가 시작되면 알려 드릴게요`)
+    }
+  } catch (e) {
+    post.watching = !on ? [...(post.watching || []), target.id] : (post.watching || []).filter((id) => id !== target.id)
+    showToast(e.response?.data?.message || '반영하지 못했어요')
   }
 }
 

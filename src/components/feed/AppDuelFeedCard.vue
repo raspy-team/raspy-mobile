@@ -1,5 +1,6 @@
 <template>
   <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
+    <FeedStoryLine v-if="!voting" :story="post.story" />
     <header class="flex items-center gap-3">
       <span class="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
         <UiIcon :name="gameIcon(duel.key, duel.icon)" />
@@ -49,18 +50,11 @@
       </div>
     </div>
 
-    <footer class="flex items-center mt-2 -ml-3">
-      <template v-if="!voting">
-        <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm" :class="post.isLiked ? 'text-danger' : 'text-fg-muted'" :aria-pressed="post.isLiked" aria-label="좋아요" @click="emit('like')">
-          <UiIcon :name="post.isLiked ? 'fas fa-heart' : 'far fa-heart'" class="text-lg" aria-hidden="true" />
-          <span v-if="post.likeCount" class="tabular-nums">{{ post.likeCount }}</span>
-        </button>
-        <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm text-fg-muted" aria-label="댓글" @click="emit('comment')">
-          <UiIcon name="far fa-comment" class="text-lg" aria-hidden="true" />
-          <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
-        </button>
-      </template>
-    </footer>
+    <!-- 투표 중에는 이름을 가린 동안이라 사람에게 잇는 행동(또 보고 싶어요·도전해요)을 두지 않는다 -->
+    <template v-if="!voting">
+      <FeedVoice :post="post" />
+      <FeedActions :post="post" :my-id="myId ?? undefined" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
+    </template>
   </article>
 </template>
 
@@ -73,12 +67,16 @@ import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import VoteCard from '../appgame/VoteCard.vue'
 import AppVisualFigure from './story/AppVisualFigure.vue'
+import FeedStoryLine from './FeedStoryLine.vue'
+import FeedVoice from './FeedVoice.vue'
+import FeedActions from './FeedActions.vue'
 import { UiIcon, UiSkeleton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 type Post = components['schemas']['FeedItemResponse']
-const props = defineProps<{ post: Post; highlight?: boolean }>()
-const emit = defineEmits<{ profile: [id?: number]; like: []; comment: []; play: [] }>()
+const props = defineProps<{ post: Post; highlight?: boolean; myId?: number | null }>()
+type Player = { id: number; name: string; isBot?: boolean }
+const emit = defineEmits<{ profile: [id?: number]; like: []; comment: []; play: []; watch: [targets: Player[]]; challenge: [targets: Player[]] }>()
 
 const duel = computed(() => props.post.appDuel!)
 const voting = computed(() => props.post.type === 'app_vote')

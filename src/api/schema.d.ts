@@ -67,15 +67,15 @@ export interface paths {
          * 또 보고 싶어요 상태
          * @description 내가 따라가는지, 따라가는 사람 수
          */
-        get: operations["state"];
+        get: operations["followState"];
         put?: never;
         /**
          * 또 보고 싶어요
          * @description 선수에게 한 번 알리고, 그 선수의 만나서 하는 경기가 시작되면 나에게 알린다
          */
-        post: operations["watch"];
+        post: operations["followPlayer"];
         /** 또 보고 싶어요 취소 */
-        delete: operations["unwatch"];
+        delete: operations["unfollowPlayer"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2723,7 +2723,7 @@ export interface paths {
          * 만남 상태
          * @description 도착·끝 확인, 상대 도착, 노쇼를 알릴 수 있는지, 켜 둔 위치 공유
          */
-        get: operations["state_1"];
+        get: operations["state"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2840,6 +2840,22 @@ export interface paths {
          * @description 특정 게임 ID에 대한 상세 정보를 조회합니다.
          */
         get: operations["getDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/share-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["link"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3618,7 +3634,7 @@ export interface paths {
          * 관전하기
          * @description 말 배틀처럼 보는 사람이 응원해 승패를 정하는 실시간 게임. 선수가 아니어도 본다
          */
-        get: operations["watch_1"];
+        get: operations["watch"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3988,7 +4004,7 @@ export interface components {
             enabled: boolean;
         };
         Unit: Record<string, never>;
-        WatchState: {
+        WatchFollowState: {
             watching: boolean;
             /** Format: int64 */
             fans: number;
@@ -4664,6 +4680,28 @@ export interface components {
         MoveRequest: {
             word: string;
         };
+        WatchState: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            status: string;
+            subject: string;
+            players: components["schemas"]["AppPlayer"][];
+            moves: components["schemas"]["RealtimeMove"][];
+            votes: number[];
+            /** Format: int32 */
+            myVote?: number;
+            player: boolean;
+            /** Format: int64 */
+            turnUserId?: number;
+            /** Format: date-time */
+            turnEndsAt?: string;
+            /** Format: date-time */
+            serverNow: string;
+            /** Format: int64 */
+            winnerId?: number;
+            topic: string;
+        };
         CallResult: {
             /** Format: int32 */
             called: number;
@@ -5290,6 +5328,10 @@ export interface components {
             score: number;
             /** Format: int32 */
             sets: number;
+        };
+        ShareLinkResponse: {
+            url: string;
+            storyImage: string;
         };
         ApplicantInfo: {
             /** Format: int64 */
@@ -6165,7 +6207,7 @@ export interface operations {
             };
         };
     };
-    state: {
+    followState: {
         parameters: {
             query?: never;
             header?: never;
@@ -6182,12 +6224,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["WatchState"];
+                    "*/*": components["schemas"]["WatchFollowState"];
                 };
             };
         };
     };
-    watch: {
+    followPlayer: {
         parameters: {
             query?: never;
             header?: never;
@@ -6204,12 +6246,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["WatchState"];
+                    "*/*": components["schemas"]["WatchFollowState"];
                 };
             };
         };
     };
-    unwatch: {
+    unfollowPlayer: {
         parameters: {
             query?: never;
             header?: never;
@@ -6226,7 +6268,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["WatchState"];
+                    "*/*": components["schemas"]["WatchFollowState"];
                 };
             };
         };
@@ -8475,6 +8517,7 @@ export interface operations {
         parameters: {
             query?: {
                 to?: number;
+                from?: string;
             };
             header?: never;
             path: {
@@ -9614,7 +9657,7 @@ export interface operations {
             };
         };
     };
-    state_1: {
+    state: {
         parameters: {
             query?: never;
             header?: never;
@@ -9764,6 +9807,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GameDetailResponse"];
+                };
+            };
+        };
+    };
+    link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ShareLinkResponse"];
                 };
             };
         };
@@ -10647,7 +10712,7 @@ export interface operations {
             };
         };
     };
-    watch_1: {
+    watch: {
         parameters: {
             query?: never;
             header?: never;

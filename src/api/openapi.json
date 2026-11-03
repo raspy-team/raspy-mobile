@@ -13606,6 +13606,7 @@
       "SafetyStats": {
         "required": [
           "arrived",
+          "firstPublic",
           "meetAgain",
           "meetings",
           "noShow",
@@ -13641,6 +13642,9 @@
             "$ref": "#/components/schemas/SafetyRatio"
           },
           "rematch": {
+            "$ref": "#/components/schemas/SafetyRatio"
+          },
+          "firstPublic": {
             "$ref": "#/components/schemas/SafetyRatio"
           }
         }

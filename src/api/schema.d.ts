@@ -5892,6 +5892,7 @@ export interface components {
             shared: components["schemas"]["SafetyRatio"];
             meetAgain: components["schemas"]["SafetyRatio"];
             rematch: components["schemas"]["SafetyRatio"];
+            firstPublic: components["schemas"]["SafetyRatio"];
         };
         EditRequestDetailResponse: {
             /** Format: int64 */

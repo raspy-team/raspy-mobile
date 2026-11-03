@@ -32,9 +32,11 @@
 
         <!-- 언제쯤: 열린 경기를 보는 사람이 신청할지 정하는 데 가장 필요한 정보. 정확한 시간은 상대와 함께 -->
         <h1 class="t-title">언제쯤 할까요?</h1>
-        <div class="flex flex-wrap gap-2 mt-3 mb-8">
+        <div class="flex flex-wrap gap-2 mt-3" :class="when === EXACT ? 'mb-3' : 'mb-8'">
           <UiChip v-for="w in WHEN" :key="w.label" :selected="when === w.label" @click="when = w.label">{{ w.label }}</UiChip>
         </div>
+        <!-- 이미 정해 둔 때가 있으면 날짜·시간을 바로 (빠른 고르기 셋만으로는 '토요일 3시'를 못 적었다) -->
+        <UiInput v-if="when === EXACT" v-model="exactTime" type="datetime-local" :min="nowLocal" class="mb-8" />
 
         <!-- 어디서: 만나서 / 화상으로 / 다른 게임에서. 화상·다른 게임은 동네 없이 전국에 보인다 -->
         <h1 class="t-title">어디서 할까요?</h1>
@@ -132,7 +134,7 @@ import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
 import { haptic } from '../../utils/haptics'
 import { shareLink } from '../../utils/share'
-import { quickTimes } from '../../utils/when'
+import { localIso, quickTimes } from '../../utils/when'
 import { allowedFormats, TEAM_SIZES, GROUP_SIZES, VENUES, isRemote } from '../../utils/gameFormat'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
@@ -165,7 +167,10 @@ function pickFormat(value) {
 // 서버에 보내는 인원: 팀은 두 팀 합
 const maxPlayers = computed(() => (format.value === 'TEAMS' ? size.value * 2 : format.value === 'FREE_FOR_ALL' ? size.value : 2))
 
-const WHEN = [...quickTimes(), { label: '나중에 정하기', date: () => null }]
+const EXACT = '날짜·시간 고르기'
+const exactTime = ref('')
+const nowLocal = localIso(new Date()).slice(0, 16)
+const WHEN = [...quickTimes(), { label: EXACT, date: () => (exactTime.value ? `${exactTime.value.slice(0, 16)}:00` : null) }, { label: '나중에 정하기', date: () => null }]
 const when = ref('나중에 정하기')
 
 const ruleId = Number(route.query.ruleId)

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">match</string>
+    <string name="title_activity_main">match</string>
+    <string name="package_name">com.songostudio.match</string>
+    <string name="custom_url_scheme">com.songostudio.match</string>
+</resources>

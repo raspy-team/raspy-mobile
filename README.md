@@ -28,6 +28,33 @@ npm run api:sync             # 로컬 백엔드에서 API 문서·타입을 다�
 - 화면 부품 모음: http://localhost:8081/dev/ui (개발 서버에서만)
 - 로컬 테스트 계정: `12341234` / `12341234`
 
+## 앱 (Capacitor)
+
+> 앱은 운영 웹 **https://matchapp.me** 를 그대로 띄운다 (`capacitor.config.ts`의 `server.url`). 화면을 고치면 앱도 스토어 심사 없이 바로 바뀐다. 앱을 다시 올려야 하는 건 앱 쪽(플러그인·아이콘·권한)을 바꿀 때뿐이다
+
+| 항목 | 값 |
+|---|---|
+| 패키지 | `com.songostudio.match` (Android·iOS 같음) |
+| 앱인지 알아보기 | User-Agent에 `raspy-android` / `raspy-ios` (`src/utils/nativeBridge.js`) |
+| 서명 키 | 리포 밖 `~/.config/match/android-upload.properties`와 `match-upload.jks`. **잃으면 구글에 키 재설정을 요청해야 하니 따로 백업한다** |
+| 아이콘·시작 화면 | `assets/`의 원본에서 만든다 (원본은 `public/favicon.svg`) |
+
+```bash
+# 처음 한 번 (맥): Java 21, 안드로이드 SDK
+brew install openjdk@21 && brew install --cask android-commandlinetools
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+
+npx cap sync                                  # 플러그인·설정을 android/ios에 반영
+cd android && ./gradlew assembleDebug         # 시험용 APK: app/build/outputs/apk/debug/
+cd android && ./gradlew bundleRelease         # 스토어용 AAB(서명됨): app/build/outputs/bundle/release/
+npx capacitor-assets generate --android --ios # 아이콘·시작 화면 다시 만들기 (assets/를 바꿨을 때)
+```
+
+- 스토어에 올릴 때마다 `android/app/build.gradle`의 `versionCode`를 1씩 올린다
+- iOS는 Xcode가 있어야 빌드된다 (`npx cap open ios`)
+
 ## 폴더
 
 | 경로 | 내용 |

@@ -135,6 +135,7 @@ import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
 import BrandFace from '../../components/BrandFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
+import { feel } from '@/utils/feel'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import AlkkagiBoard from '../../components/appgame/AlkkagiBoard.vue'
 import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'
@@ -236,6 +237,12 @@ const waited = computed(() => {
 function message(e: unknown, fallback: string) {
   return (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 }
+
+// 끝나는 순간 한 번: 이기면 화음, 지면 부드럽게 내려가는 소리와 진동
+watch(
+  () => (state.value?.status === 'COMPLETED' ? state.value.result : null),
+  (r, before) => r && !before && feel(r === 'WIN' ? 'win' : r === 'DRAW' ? 'success' : 'lose'),
+)
 
 function apply(s: State) {
   offset.value = new Date(s.serverNow).getTime() - Date.now()

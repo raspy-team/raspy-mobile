@@ -1,6 +1,6 @@
 <template>
   <!-- 프로필에는 숫자와 단계만. 근거와 계산은 눌러서 본다 (점진적 공개) -->
-  <button type="button" class="block w-full rounded-xl bg-surface p-4 text-left active:bg-surface-2 transition-colors" :aria-label="`신뢰 온도 ${temp}도, ${trust.label}. 자세히 보기`" @click="open = true">
+  <button type="button" class="block w-full rounded-xl bg-surface p-4 text-left active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]" :aria-label="`신뢰 온도 ${temp}도, ${trust.label}. 자세히 보기`" @click="open = true">
     <span class="flex items-center gap-1 t-label">신뢰 온도<UiIcon name="info-circle" class="text-fg-subtle" /></span>
     <span class="block t-title tabular-nums mt-1" :class="tone">{{ temp }}°</span>
     <span class="block t-caption mt-0.5">{{ trust.label }}</span>

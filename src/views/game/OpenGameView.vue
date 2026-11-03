@@ -52,7 +52,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { useToast } from '../../composable/useToast'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import CheerBar from '../../components/point/CheerBar.vue'
@@ -85,7 +85,7 @@ async function apply(team) {
   busy.value = true
   try {
     await api.post(`/api/games/${game.value.id}/apply`, null, { params: team === undefined ? {} : { team } })
-    haptic('success')
+    feel('success')
     await load()
   } catch (e) {
     showToast(e.response?.data?.message || '신청하지 못했어요')

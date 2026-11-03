@@ -10,7 +10,7 @@
 <script setup lang="ts">
 // 판 시작 전 3·2·1. 시작 시각은 서버가 정한다(until: 서버 시각 ms, offset: 서버 시각 - 기기 시각). 끝나면 done
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 
 const props = defineProps<{ until: number; offset: number; opponent?: string }>()
 const emit = defineEmits<{ done: [] }>()
@@ -20,19 +20,19 @@ const count = ref(Math.max(1, Math.ceil(left() / 1000)))
 let timer: ReturnType<typeof setInterval> | undefined
 
 onMounted(() => {
-  haptic('tap')
+  feel('tap')
   timer = setInterval(() => {
     const ms = left()
     if (ms <= 0) {
       clearInterval(timer)
-      haptic('success')
+      feel('success')
       emit('done')
       return
     }
     const next = Math.ceil(ms / 1000)
     if (next !== count.value) {
       count.value = next
-      haptic('tap')
+      feel('tap')
     }
   }, 50)
 })

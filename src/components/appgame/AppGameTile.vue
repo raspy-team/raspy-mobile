@@ -1,6 +1,6 @@
 <template>
   <!-- 놀이방의 게임 한 칸: 게임마다 다른 그림을 크게, 이름, 두 줄 소개. 모서리에 내 점수나 '안 해 봄' -->
-  <RouterLink :to="`/play/${game.key}`" class="flex flex-col rounded-2xl bg-surface p-4 active:bg-surface-2 transition-colors" :class="compact ? 'w-36 flex-shrink-0' : ''">
+  <RouterLink :to="`/play/${game.key}`" class="flex flex-col rounded-2xl bg-surface p-4 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]" :class="compact ? 'w-36 flex-shrink-0' : ''">
     <span class="flex items-start justify-between">
       <span class="w-12 h-12 rounded-2xl bg-surface-2 flex items-center justify-center text-[26px] text-fg" aria-hidden="true">
         <UiIcon :name="gameIcon(game.key, game.icon)" />

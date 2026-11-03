@@ -1,5 +1,6 @@
 // 목록 맨 위에서 아래로 당기면 새로고침 (터치)
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { feel } from '../utils/feel'
 
 const THRESHOLD = 70
 
@@ -21,6 +22,7 @@ export function usePullToRefresh(onRefresh) {
     if (startY === null) return
     startY = null
     if (pull.value >= THRESHOLD) {
+      feel('tap') // 당겨서 새로고침이 걸린 순간
       refreshing.value = true
       pull.value = 48
       try {

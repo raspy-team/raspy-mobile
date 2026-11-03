@@ -121,7 +121,7 @@
 // - 동네(기본) / 친구 / 전국. 서버가 범위·순서를 정한다 (FeedService.getFeed). 동네 글이 적으면 아래에 '다른 동네' 줄
 // - ?gameId= 링크·알림으로 온 경기는 맨 위에 강조, ?userId= 는 그 사람의 경기만
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import FeedCard from '../../components/feed/FeedCard.vue'
@@ -267,7 +267,7 @@ async function toggleLike(p) {
   const was = p.isLiked
   p.isLiked = !was
   p.likeCount = (p.likeCount || 0) + (was ? -1 : 1)
-  if (!was) haptic('tap')
+  if (!was) feel('tap')
   try {
     const { data } = await api.post(`/api/games/${p.id}/like`)
     p.isLiked = data.isLiked

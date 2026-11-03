@@ -20,13 +20,17 @@
       <!-- 결과 한 줄 + 점수판: 이 앱에서 감정이 가장 실리는 순간이라 글자와 숫자로 크게 -->
       <section>
         <!-- 이긴 순간: 매치 얼굴이 통통 튀어 오른다 -->
-        <span v-if="headline.mark && isParticipant" class="block w-fit mx-auto mb-4 text-fg win-bounce"><BrandFace :size="48" /></span>
+        <span v-if="headline.mark && isParticipant" class="relative block w-fit mx-auto mb-4 text-fg win-bounce">
+          <BrandFace :size="48" />
+          <!-- 이긴 순간 얼굴 둘레로 볼트 불꽃 -->
+          <span v-for="n in 10" :key="n" class="win-spark" :style="{ '--a': n * 36 + 'deg' }" aria-hidden="true"></span>
+        </span>
         <!-- 진 순간에도 같은 얼굴이 곁에 있다. 표정만 담담하게 (11/3, essence: 진 판도 기록, 다음 판) -->
         <span v-else-if="headline.line && isParticipant" class="block w-fit mx-auto mb-4 text-fg"><BrandFace :size="48" mood="neutral" /></span>
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<template v-if="playedOn"> · {{ playedOn }}</template></p>
-        <h1 class="t-display text-center mt-3" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
+        <h1 class="t-display text-center mt-3 feel-rise" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
         <!-- 이 경기로 바뀐 내 실력 점수: 이긴 사람이 가장 먼저 궁금한 숫자라 결과 바로 밑에 -->
-        <p v-if="myRating && confirmed" class="mt-3 flex items-baseline justify-center gap-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
+        <p v-if="myRating && confirmed" class="mt-3 flex items-baseline justify-center gap-2 feel-rise feel-rise-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
           <span class="t-caption">실력 점수</span>
           <span class="t-heading tabular-nums">{{ myRating.before }} → {{ myRating.after }}</span>
           <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta }}</span>
@@ -68,7 +72,7 @@
         </ol>
 
         <template v-else>
-        <div class="mt-10 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div class="mt-10 grid grid-cols-[1fr_auto_1fr] items-center gap-3 feel-rise feel-rise-3">
           <button
             v-for="(side, i) in sides"
             :key="side.user.id || i"
@@ -337,7 +341,7 @@
 // 경기 결과: 누가 이겼나 → 사진 고르기 → 상대·규칙 평가 → 보내기. 평가는 경기에 뛴 사람에게만 보인다
 
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
@@ -372,12 +376,15 @@ const videoInputRef = ref(null)
 
 // 자동 제출 함수들
 function setManner(n) {
+  feel('select')
   review.value.manner = n
 }
 function setPerformance(n) {
+  feel('select')
   review.value.performance = n
 }
 function setRuleRating(n) {
+  feel('select')
   ruleRating.value = n
 }
 
@@ -490,7 +497,7 @@ async function peerVote(targetId) {
   voting.value = targetId
   try {
     await POST('/api/games/{id}/result/peer-vote', { path: { id: Number(gameId) }, body: { targetId } })
-    haptic('success')
+    feel('success')
     await load()
   } catch (e) {
     showToast(e.response?.data?.message || '뽑지 못했어요')
@@ -568,7 +575,7 @@ async function confirmResult() {
   isAnswering.value = 'confirm'
   try {
     await POST('/api/games/{id}/result/confirm', { path: { id: Number(gameId) } })
-    haptic('success')
+    feel('success')
     // 확인 칸이 사라지기만 하면 눌렸는지 모른다 (웹은 진동도 없다)
     showToast('확정했어요. 전적과 실력 점수에 반영돼요')
     await load()
@@ -583,7 +590,7 @@ async function confirmResult() {
 const mySetScores = computed(() => setResults.value.map((s) => (sides.value[0].isMe ? [setLeft(s), setRight(s)] : [setRight(s), setLeft(s)])))
 
 async function onCountered() {
-  haptic('success')
+  feel('success')
   await load()
   const who = format.value === 'TEAMS' ? '상대 팀이' : format.value === 'FREE_FOR_ALL' ? '다른 사람이' : `${opponent.value.nickname}님이`
   showToast(disputed.value ? '결과가 맞지 않아 이 경기는 기록하지 않아요' : `고친 결과를 보냈어요. ${who} 확인해요`)
@@ -640,6 +647,7 @@ async function load() {
       winnerIdx.value = res.data.winnerIdx === 2 ? 1 : res.data.winnerIdx === 1 ? 2 : 0
     }
 
+    feelResult()
     // 저장된 사진 불러오기
     allPictures.value = await getGamePictures(gameId)
   } catch (err) {
@@ -647,6 +655,19 @@ async function load() {
   } finally {
     isLoading.value = false
   }
+}
+
+// 결과가 확정된 걸 처음 보는 순간 한 번만: 이기면 짧은 화음, 지면 부드럽게 내려가는 소리 (같은 화면을 다시 열면 조용히)
+function feelResult() {
+  if (!isParticipant.value || !confirmed.value || disputed.value || peerVoting.value) return
+  const key = `felt_result_${gameId}`
+  try {
+    if (sessionStorage.getItem(key)) return
+    sessionStorage.setItem(key, '1')
+  } catch {
+    // 저장소를 못 쓰면 매번 난다
+  }
+  feel(headline.value.mark ? 'win' : headline.value.line ? 'lose' : 'success')
 }
 
 let stopWatching = null

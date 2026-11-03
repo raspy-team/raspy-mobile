@@ -17,7 +17,7 @@
     <!-- 위쪽 버튼은 두 가지만: 채운 주 행동 하나 + 같은 모양의 갈 곳 셋 (11/3) -->
     <UiButton block size="lg" icon="plus" to="/create-game">경기 만들기</UiButton>
     <nav class="mt-3 grid grid-cols-3 gap-2" aria-label="둘러보기">
-      <RouterLink v-for="d in DESTINATIONS" :key="d.to" :to="d.to" class="flex flex-col items-center gap-1.5 rounded-xl bg-surface py-3.5 active:bg-surface-2 transition-colors">
+      <RouterLink v-for="d in DESTINATIONS" :key="d.to" :to="d.to" class="flex flex-col items-center gap-1.5 rounded-xl bg-surface py-3.5 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]">
         <UiIcon :name="d.icon" class="text-xl text-fg-muted" />
         <span class="t-label text-fg">{{ d.label }}</span>
       </RouterLink>
@@ -151,7 +151,7 @@ import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { ratingLine } from '../../utils/format'
 import { copyText } from '../../utils/clipboard'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { todayBrandLine } from '@/utils/brandLines'
 
 const REPORT_REASONS = ['욕설·비방', '거짓 경기', '광고·스팸', '기타']
@@ -206,7 +206,7 @@ async function apply(game, team) {
   try {
     await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
     game.isAppliedByMe = true
-    haptic('success')
+    feel('success')
     showToast('신청했어요. 주최자가 승인하면 알려드려요')
   } catch (e) {
     showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')

@@ -312,6 +312,7 @@ import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import BrandFace from '../../components/BrandFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
+import { feel } from '@/utils/feel'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
@@ -361,6 +362,15 @@ const play = ref<Play | null>(null)
 const counting = ref(false)
 let offset = 0 // 서버 시각 - 기기 시각
 const result = ref<Duel | null>(null)
+// 결과가 '끝남'으로 바뀌는 순간 한 번 (지난 경기를 다시 열어 볼 때는 조용히)
+watch(result, (now, before) => {
+  if (now?.status !== 'COMPLETED' || !now.result) return
+  if (before?.gameId === now.gameId ? before.status === 'COMPLETED' : !justSubmitted) return
+  justSubmitted = false
+  const r = now.result
+  feel(r === 'WIN' ? 'win' : r === 'DRAW' ? 'success' : 'lose')
+})
+let justSubmitted = false
 const votes = ref<Schemas['AppVoteCard'][]>([])
 const ranking = ref<Schemas['UserRankingDto'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
@@ -432,6 +442,7 @@ async function submit(answer: string) {
   if (!play.value) return
   submitting.value = true
   try {
+    justSubmitted = true
     result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { answer } })).data
     play.value = null
     load()
@@ -451,6 +462,7 @@ async function submitVideo(video: Blob) {
   try {
     const fd = new FormData()
     fd.append('video', video, video.type.includes('mp4') ? 'proof.mp4' : 'proof.webm')
+    justSubmitted = true
     result.value = (await api.post(`/api/app-games/plays/${play.value.playId}/proof`, fd, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 })).data
     play.value = null
     load()

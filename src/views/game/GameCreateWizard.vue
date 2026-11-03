@@ -29,7 +29,7 @@
             v-for="s in sports"
             :key="s.name"
             type="button"
-            class="flex flex-col items-center gap-2 rounded-xl bg-surface py-4 active:bg-surface-2 transition-colors"
+            class="flex flex-col items-center gap-2 rounded-xl bg-surface py-4 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]"
             @click="pickSport(s)"
           >
             <RuleThumb :minor="s.name" :size="36" bare />
@@ -158,7 +158,7 @@ import { categoryKey, winSummary } from '../../utils/rule'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { shareLink } from '../../utils/share'
 import { localIso, quickTimes } from '../../utils/when'
 import { allowedFormats, TEAM_SIZES, GROUP_SIZES, VENUES, isRemote } from '../../utils/gameFormat'
@@ -249,7 +249,7 @@ function pickSport(s) {
   rule.value = s.top
   autoPicked.value = true
   pickedSport.value = s.name
-  haptic()
+  feel('select')
 }
 const friend = ref(null)
 const creating = ref(false)
@@ -300,7 +300,7 @@ async function create(target) {
     friendsOpen.value = false
     created.value = true
     sessionStorage.removeItem(CLUB_KEY)
-    haptic('success')
+    feel('success')
   } catch (e) {
     friend.value = null
     showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 해 주세요')

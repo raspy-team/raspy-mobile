@@ -5,7 +5,7 @@
     :type="to ? undefined : type"
     :disabled="to ? undefined : disabled || loading"
     :aria-busy="loading || undefined"
-    class="relative inline-flex items-center justify-center gap-2 rounded-xl select-none transition-[background-color,color,transform] active:scale-[0.98] disabled:pointer-events-none"
+    class="relative inline-flex items-center justify-center gap-2 rounded-xl select-none transition-[background-color,color,transform] motion-safe:active:scale-[0.97] disabled:pointer-events-none"
     :class="[VARIANTS[variant], SIZES[size], block ? 'w-full' : '', disabled && !loading ? 'opacity-40' : '']"
   >
     <!-- 기다리는 동안 글자 자리는 그대로 두고 그 위에 스피너 (버튼 폭이 흔들리지 않게) -->

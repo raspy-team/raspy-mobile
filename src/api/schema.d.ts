@@ -56,6 +56,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/watch/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 또 보고 싶어요 상태
+         * @description 내가 따라가는지, 따라가는 사람 수
+         */
+        get: operations["followState"];
+        put?: never;
+        /**
+         * 또 보고 싶어요
+         * @description 선수에게 한 번 알리고, 그 선수의 만나서 하는 경기가 시작되면 나에게 알린다
+         */
+        post: operations["followPlayer"];
+        /** 또 보고 싶어요 취소 */
+        delete: operations["unfollowPlayer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vouch/{userId}": {
         parameters: {
             query?: never;
@@ -3963,6 +3988,11 @@ export interface components {
             enabled: boolean;
         };
         Unit: Record<string, never>;
+        WatchFollowState: {
+            watching: boolean;
+            /** Format: int64 */
+            fans: number;
+        };
         VouchState: {
             /** Format: int32 */
             count: number;
@@ -5679,6 +5709,15 @@ export interface components {
             texts: string[];
             votingEndsAt?: string;
         };
+        AppVisual: {
+            kind: string;
+        };
+        ChampionStory: {
+            area: string;
+            fromName?: string;
+            /** Format: int32 */
+            heldDays?: number;
+        };
         FeedItemResponse: {
             id: string;
             date: string;
@@ -5704,6 +5743,8 @@ export interface components {
             dongCode?: string;
             elsewhere: boolean;
             live: boolean;
+            story?: components["schemas"]["FeedStory"];
+            watching: number[];
         };
         FeedResponse: {
             items: components["schemas"]["FeedItemResponse"][];
@@ -5718,6 +5759,38 @@ export interface components {
             pageSize: number;
             asOf?: string;
         };
+        FeedStory: {
+            picked?: string;
+            beats: components["schemas"]["StoryBeat"][];
+            /** Format: double */
+            winProb?: number;
+            flow?: components["schemas"]["FlowPoint"][];
+            /** Format: int32 */
+            lowIdx?: number;
+            champion?: components["schemas"]["ChampionStory"];
+            h2h?: components["schemas"]["HeadToHead"];
+            gains: components["schemas"]["RatingGain"][];
+            quotes: components["schemas"]["Quote"][];
+            aiSummary?: string;
+            appVisual?: components["schemas"]["AppVisual"];
+        };
+        FlowPoint: {
+            /** Format: int32 */
+            set: number;
+            /** Format: int32 */
+            a: number;
+            /** Format: int32 */
+            b: number;
+        };
+        HeadToHead: {
+            /** Format: int32 */
+            games: number;
+            /** Format: int32 */
+            winsA: number;
+            /** Format: int32 */
+            winsB: number;
+            seq: string[];
+        };
         MetaDto: {
             place: string;
             time: string;
@@ -5726,12 +5799,26 @@ export interface components {
             url: string;
             mediaType: string;
         };
+        Quote: {
+            /** Format: int64 */
+            userId: number;
+            name: string;
+            text: string;
+        };
         RankDto: {
             /** Format: int64 */
             id: number;
             name: string;
             /** Format: int32 */
             place: number;
+        };
+        RatingGain: {
+            /** Format: int64 */
+            userId: number;
+            /** Format: int32 */
+            ratingAfter: number;
+            /** Format: int32 */
+            gain: number;
         };
         ResultDto: {
             /** Format: int32 */
@@ -5762,6 +5849,10 @@ export interface components {
             scoreA: number;
             /** Format: int32 */
             scoreB: number;
+        };
+        StoryBeat: {
+            kind: string;
+            text: string;
         };
         ChatMessage: {
             /** Format: int64 */
@@ -6083,6 +6174,72 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    followState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchFollowState"];
+                };
+            };
+        };
+    };
+    followPlayer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchFollowState"];
+                };
+            };
+        };
+    };
+    unfollowPlayer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchFollowState"];
                 };
             };
         };
@@ -8331,6 +8488,7 @@ export interface operations {
         parameters: {
             query?: {
                 to?: number;
+                from?: string;
             };
             header?: never;
             path: {

@@ -1,5 +1,6 @@
 <template>
   <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
+    <FeedStoryLine :story="post.story" />
     <!-- 무엇을 · 어디서 · 언제 (이름은 아래 결과에 한 번만) -->
     <header class="flex items-center gap-3">
       <span class="flex -space-x-2 flex-shrink-0">
@@ -74,38 +75,30 @@
 
     <p v-if="post.caption && post.caption.trim()" class="t-body mt-3 whitespace-pre-line break-words">{{ post.caption }}</p>
 
-    <!-- 반응 + 이어지는 행동 -->
-    <footer class="flex items-center mt-2 -ml-3">
-      <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm" :class="post.isLiked ? 'text-danger' : 'text-fg-muted'" :aria-pressed="post.isLiked" aria-label="좋아요" @click="emit('like')">
-        <UiIcon :name="post.isLiked ? 'fas fa-heart' : 'far fa-heart'" class="text-lg" aria-hidden="true" />
-        <span v-if="post.likeCount" class="tabular-nums">{{ post.likeCount }}</span>
-      </button>
-      <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm text-fg-muted" aria-label="댓글" @click="emit('comment')">
-        <UiIcon name="far fa-comment" class="text-lg" aria-hidden="true" />
-        <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
-      </button>
-      <div class="flex-1"></div>
-      <!-- 카드마다 같은 '이 규칙으로 한 판'을 두지 않는다(더보기에). 내 경기에 사진이 없을 때만 조용히 한 줄 -->
-      <button v-if="post.isMyGame && post.isCompleted && !post.photos?.length" type="button" class="h-11 px-1 flex items-center gap-1.5 t-caption" @click="emit('photo')">
-        <UiIcon name="camera" aria-hidden="true" />사진 남기기
-      </button>
-    </footer>
+    <FeedVoice :post="post" />
+
+    <!-- 반응 + 사람에게 잇는 행동 ('이 규칙으로 한 판'은 더보기에) -->
+    <FeedActions :post="post" :my-id="myId" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
   </article>
 </template>
 
 <script setup>
-// 소식의 경기 한 장: 누구 vs 누구 → 결과(점수·승자·규칙) → 사진(있으면) → 좋아요·댓글. '이 규칙으로 한 판'은 더보기에
+// 소식의 경기 한 장: 이야기 줄 → 누구 vs 누구 → 결과(점수·승자·규칙) → 사진(있으면) → 오른 점수·한마디(없으면 AI 기자) → 좋아요·댓글·또 보고 싶어요·도전해요. '이 규칙으로 한 판'은 더보기에
 // 사진이 없어도 결과가 주인공이라 카드가 비지 않는다
 import { computed, defineProps, defineEmits } from 'vue'
 import RuleThumb from '../rule/RuleThumb.vue'
+import FeedStoryLine from './FeedStoryLine.vue'
+import FeedVoice from './FeedVoice.vue'
+import FeedActions from './FeedActions.vue'
 import { UiAvatar, UiIconButton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 const props = defineProps({
   post: { type: Object, required: true },
   highlight: { type: Boolean, default: false },
+  myId: { type: Number, default: null },
 })
-const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'play', 'more', 'photo'])
+const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'watch', 'challenge', 'more', 'photo'])
 
 const players = computed(() => props.post.players || [])
 const ranking = computed(() => props.post.result?.ranking || [])

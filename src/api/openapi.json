@@ -6,6 +6,22 @@
   },
   "tags": [
     {
+      "name": "Report",
+      "description": "신고 관련 API"
+    },
+    {
+      "name": "Meet",
+      "description": "만나서 하는 경기의 안전: 도착·끝 확인, 노쇼, 위치 공유"
+    },
+    {
+      "name": "Notification",
+      "description": "인앱 알림 API"
+    },
+    {
+      "name": "Admin User Management",
+      "description": "관리자 전용 유저 관리 API"
+    },
+    {
       "name": "Safety",
       "description": "안전·신뢰: 내 이용 상태, 운영진 제재"
     },
@@ -18,10 +34,6 @@
       "description": "만남 안전을 운영진이 숫자로 본다 (안전·신뢰 I)"
     },
     {
-      "name": "Report",
-      "description": "신고 관련 API"
-    },
-    {
       "name": "유입 측정",
       "description": "채널별 유입 → 가입 → 첫 경기 → 재방문"
     },
@@ -30,8 +42,8 @@
       "description": "유저의 일일 첫 접속을 추적하고 알림을 전송하는 API"
     },
     {
-      "name": "Meet",
-      "description": "만나서 하는 경기의 안전: 도착·끝 확인, 노쇼, 위치 공유"
+      "name": "또 보고 싶어요",
+      "description": "소식에서 선수를 따라간다. 그 선수 경기가 시작되면 알림"
     },
     {
       "name": "Identity",
@@ -42,16 +54,8 @@
       "description": "장소 검색과 지도"
     },
     {
-      "name": "Notification",
-      "description": "인앱 알림 API"
-    },
-    {
       "name": "Block",
       "description": "유저 차단 기능 API"
-    },
-    {
-      "name": "Admin User Management",
-      "description": "관리자 전용 유저 관리 API"
     }
   ],
   "paths": {
@@ -161,6 +165,100 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/watch/{userId}": {
+      "get": {
+        "tags": [
+          "또 보고 싶어요"
+        ],
+        "summary": "또 보고 싶어요 상태",
+        "description": "내가 따라가는지, 따라가는 사람 수",
+        "operationId": "followState",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchFollowState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "또 보고 싶어요"
+        ],
+        "summary": "또 보고 싶어요",
+        "description": "선수에게 한 번 알리고, 그 선수의 만나서 하는 경기가 시작되면 나에게 알린다",
+        "operationId": "followPlayer",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchFollowState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "또 보고 싶어요"
+        ],
+        "summary": "또 보고 싶어요 취소",
+        "operationId": "unfollowPlayer",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchFollowState"
                 }
               }
             }
@@ -3452,6 +3550,14 @@
               "type": "integer",
               "format": "int64"
             }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6548,11 +6654,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -7281,6 +7387,22 @@
       },
       "Unit": {
         "type": "object"
+      },
+      "WatchFollowState": {
+        "required": [
+          "fans",
+          "watching"
+        ],
+        "type": "object",
+        "properties": {
+          "watching": {
+            "type": "boolean"
+          },
+          "fans": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
       },
       "VouchState": {
         "required": [
@@ -12916,6 +13038,35 @@
           }
         }
       },
+      "AppVisual": {
+        "required": [
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          }
+        }
+      },
+      "ChampionStory": {
+        "required": [
+          "area"
+        ],
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "fromName": {
+            "type": "string"
+          },
+          "heldDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "FeedItemResponse": {
         "required": [
           "caption",
@@ -12935,7 +13086,8 @@
           "rule",
           "ruleStatisticsList",
           "tags",
-          "type"
+          "type",
+          "watching"
         ],
         "type": "object",
         "properties": {
@@ -13021,6 +13173,16 @@
           },
           "live": {
             "type": "boolean"
+          },
+          "story": {
+            "$ref": "#/components/schemas/FeedStory"
+          },
+          "watching": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
           }
         }
       },
@@ -13064,6 +13226,114 @@
           }
         }
       },
+      "FeedStory": {
+        "required": [
+          "beats",
+          "gains",
+          "quotes"
+        ],
+        "type": "object",
+        "properties": {
+          "picked": {
+            "type": "string"
+          },
+          "beats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StoryBeat"
+            }
+          },
+          "winProb": {
+            "type": "number",
+            "format": "double"
+          },
+          "flow": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowPoint"
+            }
+          },
+          "lowIdx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "champion": {
+            "$ref": "#/components/schemas/ChampionStory"
+          },
+          "h2h": {
+            "$ref": "#/components/schemas/HeadToHead"
+          },
+          "gains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RatingGain"
+            }
+          },
+          "quotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Quote"
+            }
+          },
+          "aiSummary": {
+            "type": "string"
+          },
+          "appVisual": {
+            "$ref": "#/components/schemas/AppVisual"
+          }
+        }
+      },
+      "FlowPoint": {
+        "required": [
+          "a",
+          "b",
+          "set"
+        ],
+        "type": "object",
+        "properties": {
+          "set": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "a": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "b": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HeadToHead": {
+        "required": [
+          "games",
+          "seq",
+          "winsA",
+          "winsB"
+        ],
+        "type": "object",
+        "properties": {
+          "games": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winsA": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winsB": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seq": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "MetaDto": {
         "required": [
           "place",
@@ -13094,6 +13364,26 @@
           }
         }
       },
+      "Quote": {
+        "required": [
+          "name",
+          "text",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
       "RankDto": {
         "required": [
           "id",
@@ -13110,6 +13400,28 @@
             "type": "string"
           },
           "place": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RatingGain": {
+        "required": [
+          "gain",
+          "ratingAfter",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ratingAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gain": {
             "type": "integer",
             "format": "int32"
           }
@@ -13215,6 +13527,21 @@
           "scoreB": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "StoryBeat": {
+        "required": [
+          "kind",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
           }
         }
       },

@@ -162,7 +162,15 @@
           <span class="flex-1 t-body truncate">{{ scheduleGame?.matchLocation }}</span>
           <span class="t-micro underline underline-offset-2 flex-shrink-0">장소 바꾸기</span>
         </button>
+        <!-- 검색으로 고른 공공장소 (안전·신뢰 G) -->
+        <button v-else-if="placeMode === 'picked'" type="button" class="w-full flex items-center gap-3 min-h-12 py-2 px-4 rounded-xl bg-surface border border-line text-left" @click="pickerOpen = true">
+          <UiIcon name="location-dot" aria-hidden="true" />
+          <span class="flex-1 min-w-0"><span class="block t-body truncate">{{ pickedPlace.name }}</span><span class="block t-micro truncate">{{ pickedPlace.roadAddress || pickedPlace.address }}</span></span>
+          <span class="t-micro underline underline-offset-2 flex-shrink-0">다시 찾기</span>
+        </button>
         <template v-else>
+          <UiButton v-if="placeSearchOn" block variant="secondary" icon="magnifying-glass" class="mb-2" @click="pickerOpen = true">공공장소 찾기</UiButton>
+          <p v-if="placeSearchOn" class="t-micro mb-2">처음 만나는 상대와는 찾아서 고른 공공장소에서만 정할 수 있어요</p>
           <button v-if="placeMode === 'mine'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = 'other'">
             <UiIcon name="location-dot" aria-hidden="true" />
             <span class="flex-1 t-body">{{ myArea.shortName }}</span>
@@ -175,6 +183,7 @@
           <UiInput v-model="schedPlace" class="mt-2" :placeholder="`장소 이름 (예: ${myArea?.name || '동네'} 주민센터 체육관)`" />
         </template>
       </div>
+      <PlacePickerSheet v-model="pickerOpen" :near="myArea?.lat ? { lat: myArea.lat, lon: myArea.lon } : null" @picked="(p) => { pickedPlace = p; placeMode = 'picked' }" />
       <p class="t-micro">정하면 상대에게 알려요. 정한 뒤에도 경기 시작 전까지 두 사람 모두 언제든 바꿀 수 있어요.</p>
     </div>
     <template #footer>
@@ -245,6 +254,7 @@ import MyGameCard from '../../components/game/MyGameCard.vue'
 import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import SafetyTipsSheet from '../../components/game/SafetyTipsSheet.vue'
 import MeetSafetyCard from '../../components/safety/MeetSafetyCard.vue'
+import PlacePickerSheet from '../../components/map/PlacePickerSheet.vue'
 import { GET } from '@/api/client'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
@@ -527,9 +537,15 @@ async function loadMyArea() {
   const mine = await api.get('/api/neighborhoods/me').then((r) => r.data).catch(() => null)
   myArea.value = mine?.neighborhoods?.find((n) => n.active) || null
 }
+// 공공장소 찾기 (안전·신뢰 G): 서버에 장소 검색이 켜져 있을 때만 버튼을 보인다
+const pickerOpen = ref(false)
+const pickedPlace = ref(null)
+const placeSearchOn = ref(false)
+GET('/api/places/available').then((r) => (placeSearchOn.value = !!r.data)).catch(() => {})
 const canSubmitSchedule = computed(() => {
   const g = scheduleGame.value
   if (!g) return false
+  if (placeMode.value === 'picked') return !!pickedPlace.value
   if (isRemote(g.venue)) return !!schedTime.value || !!schedPlace.value.trim()
   if (placeMode.value === 'keep') return !!schedTime.value
   return !!schedTime.value || (placeMode.value === 'mine' && !!myArea.value) || (schedRegion1.value && schedRegion2.value)
@@ -538,6 +554,7 @@ const canSubmitSchedule = computed(() => {
 function openSchedule(g) {
   // 시트를 먼저 연다 (동네를 불러오는 사이 다른 시트가 끼어들지 않게). 동네가 오면 기본 장소를 채운다
   scheduleGame.value = g
+  pickedPlace.value = null
   placeMode.value = g.matchLocation && !isRemote(g.venue) ? 'keep' : myArea.value ? 'mine' : 'other'
   if (!myArea.value) loadMyArea().then(() => { if (scheduleGame.value?.id === g.id && placeMode.value === 'other' && myArea.value) placeMode.value = 'mine' })
   schedTime.value = g.matchDate ? String(g.matchDate).slice(0, 16) : ''
@@ -556,13 +573,14 @@ async function submitSchedule() {
     const remote = isRemote(scheduleGame.value.venue)
     // 내 동네를 쓰면 주소는 '서울특별시 동대문구 회기동'(서버 지역 판정용), 화면에는 장소 이름이 먼저 보인다
     const mode = placeMode.value
-    const area = remote || mode === 'keep' ? null : mode === 'mine' ? myArea.value.fullName : schedRegion1.value && schedRegion2.value ? `${schedRegion1.value} ${schedRegion2.value}` : null
+    const area = remote || mode === 'keep' || mode === 'picked' ? null : mode === 'mine' ? myArea.value.fullName : schedRegion1.value && schedRegion2.value ? `${schedRegion1.value} ${schedRegion2.value}` : null
     const hasPlace = !!area
     await api.post(`/api/games/${scheduleGame.value.id}/schedule`, {
       matchDate: schedTime.value ? (schedTime.value.length === 16 ? `${schedTime.value}:00` : schedTime.value) : null,
       roadAddress: area,
       // 화상·다른 게임은 어디서인지만 보낸다 (서버가 주소 없이 받는다)
       detailAddress: remote ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || (mode === 'mine' ? myArea.value.shortName : null) : null,
+      place: mode === 'picked' ? { kakaoId: pickedPlace.value.kakaoId, name: pickedPlace.value.name, lat: pickedPlace.value.lat, lon: pickedPlace.value.lon } : null,
     })
     const changed = scheduleDecided(scheduleGame.value)
     scheduleGame.value = null

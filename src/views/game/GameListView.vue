@@ -1,6 +1,6 @@
 <template>
   <UiTopBar title="찾기">
-    <template #right><InboxButtons /></template>
+    <template #right><UiIconButton icon="location-dot" label="지도" @click="router.push('/map')" /><InboxButtons /></template>
   </UiTopBar>
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
@@ -153,7 +153,7 @@ import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import Comment from '../GameCommentView.vue'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem,
-  UiPullIndicator, UiSection, UiSheet, UiSkeleton, UiTopBar,
+  UiIconButton, UiPullIndicator, UiSection, UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'

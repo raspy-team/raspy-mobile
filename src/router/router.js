@@ -114,6 +114,8 @@ const routes = [
   { path: '/live/:gameId', component: () => import('../views/live/LiveWatchView.vue') },
   // 위치 공유 링크 (안전·신뢰 C): 받은 친구가 로그인 없이 본다
   { path: '/s/:token', component: () => import('../views/safety/ShareView.vue') },
+  // 지도 (안전·신뢰 G): 모집 중인 경기와 끝난 경기의 장소
+  { path: '/map', component: () => import('../views/safety/MapView.vue') },
   { path: '/games/:gameId(\\d+)', component: () => import('../views/game/OpenGameView.vue') },
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },

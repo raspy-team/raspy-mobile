@@ -34,6 +34,10 @@
       "description": "만나서 하는 경기의 안전: 도착·끝 확인, 노쇼, 위치 공유"
     },
     {
+      "name": "Map",
+      "description": "장소 검색과 지도"
+    },
+    {
       "name": "Notification",
       "description": "인앱 알림 API"
     },
@@ -4911,6 +4915,80 @@
         }
       }
     },
+    "/api/places/search": {
+      "get": {
+        "tags": [
+          "Map"
+        ],
+        "summary": "장소 검색",
+        "description": "카카오 장소 검색. public이 true면 처음 만나기 좋은 공공장소. 가까운 순(lat·lon을 주면)",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Place"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/places/available": {
+      "get": {
+        "tags": [
+          "Map"
+        ],
+        "summary": "장소 검색이 켜져 있나",
+        "operationId": "available",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/notifications": {
       "get": {
         "tags": [
@@ -5082,6 +5160,58 @@
                 "schema": {
                   "type": "string",
                   "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/map/games": {
+      "get": {
+        "tags": [
+          "Map"
+        ],
+        "summary": "지도의 경기",
+        "description": "중심(lat·lon)에서 radiusKm(최대 20) 안: 모집 중인 경기(장소를 검색으로 고른 것)와 최근 90일 끝난 경기의 장소별 횟수",
+        "operationId": "games",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "radiusKm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapGames"
                 }
               }
             }
@@ -7905,6 +8035,14 @@
           },
           "expired": {
             "type": "boolean"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
@@ -8108,6 +8246,34 @@
           },
           "detailAddress": {
             "type": "string"
+          },
+          "place": {
+            "$ref": "#/components/schemas/PickedPlace"
+          }
+        }
+      },
+      "PickedPlace": {
+        "required": [
+          "kakaoId",
+          "lat",
+          "lon",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "kakaoId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
@@ -10830,6 +10996,50 @@
           }
         }
       },
+      "Place": {
+        "required": [
+          "address",
+          "category",
+          "kakaoId",
+          "lat",
+          "lon",
+          "name",
+          "public"
+        ],
+        "type": "object",
+        "properties": {
+          "kakaoId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "roadAddress": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
+          },
+          "distanceM": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
       "NotificationResponse": {
         "required": [
           "createdAt",
@@ -10952,6 +11162,75 @@
           },
           "fullName": {
             "type": "string"
+          }
+        }
+      },
+      "MapGames": {
+        "required": [
+          "finished",
+          "recruiting"
+        ],
+        "type": "object",
+        "properties": {
+          "recruiting": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapPin"
+            }
+          },
+          "finished": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapPin"
+            }
+          }
+        }
+      },
+      "MapPin": {
+        "required": [
+          "count",
+          "lat",
+          "lon",
+          "placeName",
+          "public"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "placeName": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hostNickname": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "public": {
+            "type": "boolean"
           }
         }
       },
@@ -11442,6 +11721,17 @@
           },
           "matchLocation": {
             "type": "string"
+          },
+          "placePublic": {
+            "type": "boolean"
+          },
+          "placeLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "placeLon": {
+            "type": "number",
+            "format": "double"
           },
           "dongName": {
             "type": "string"
@@ -11976,6 +12266,17 @@
           "matchLocation": {
             "type": "string"
           },
+          "placePublic": {
+            "type": "boolean"
+          },
+          "placeLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "placeLon": {
+            "type": "number",
+            "format": "double"
+          },
           "gameStatus": {
             "type": "string",
             "enum": [
@@ -12081,6 +12382,17 @@
           },
           "matchLocation": {
             "type": "string"
+          },
+          "placePublic": {
+            "type": "boolean"
+          },
+          "placeLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "placeLon": {
+            "type": "number",
+            "format": "double"
           },
           "matchDate": {
             "type": "string",
@@ -12207,6 +12519,17 @@
           },
           "matchLocation": {
             "type": "string"
+          },
+          "placePublic": {
+            "type": "boolean"
+          },
+          "placeLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "placeLon": {
+            "type": "number",
+            "format": "double"
           },
           "applicants": {
             "type": "array",

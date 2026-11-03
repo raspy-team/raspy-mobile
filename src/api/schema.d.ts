@@ -2550,6 +2550,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/places/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 장소 검색
+         * @description 카카오 장소 검색. public이 true면 처음 만나기 좋은 공공장소. 가까운 순(lat·lon을 주면)
+         */
+        get: operations["search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/places/available": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 장소 검색이 켜져 있나 */
+        get: operations["available"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notifications": {
         parameters: {
             query?: never;
@@ -2658,6 +2695,26 @@ export interface paths {
             cookie?: never;
         };
         get: operations["get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/map/games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 지도의 경기
+         * @description 중심(lat·lon)에서 radiusKm(최대 20) 안: 모집 중인 경기(장소를 검색으로 고른 것)와 최근 90일 끝난 경기의 장소별 횟수
+         */
+        get: operations["games"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4103,6 +4160,10 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
             expired: boolean;
+            /** Format: double */
+            lat?: number;
+            /** Format: double */
+            lon?: number;
         };
         RangeOption: {
             /** Format: int32 */
@@ -4168,6 +4229,15 @@ export interface components {
             matchDate?: string;
             roadAddress?: string;
             detailAddress?: string;
+            place?: components["schemas"]["PickedPlace"];
+        };
+        PickedPlace: {
+            kakaoId: string;
+            name: string;
+            /** Format: double */
+            lat: number;
+            /** Format: double */
+            lon: number;
         };
         EnterResultRequest: {
             sets?: components["schemas"]["SetScoreInput"][];
@@ -5011,6 +5081,20 @@ export interface components {
             /** @enum {string} */
             gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
         };
+        Place: {
+            kakaoId: string;
+            name: string;
+            category: string;
+            address: string;
+            roadAddress?: string;
+            /** Format: double */
+            lat: number;
+            /** Format: double */
+            lon: number;
+            /** Format: int32 */
+            distanceM?: number;
+            public: boolean;
+        };
         NotificationResponse: {
             /** Format: int64 */
             id: number;
@@ -5035,6 +5119,28 @@ export interface components {
             name: string;
             shortName: string;
             fullName: string;
+        };
+        MapGames: {
+            recruiting: components["schemas"]["MapPin"][];
+            finished: components["schemas"]["MapPin"][];
+        };
+        MapPin: {
+            /** Format: int64 */
+            gameId?: number;
+            placeName: string;
+            /** Format: double */
+            lat: number;
+            /** Format: double */
+            lon: number;
+            ruleTitle?: string;
+            /** Format: date-time */
+            matchDate?: string;
+            hostNickname?: string;
+            /** Format: int32 */
+            count: number;
+            /** Format: date-time */
+            lastAt?: string;
+            public: boolean;
         };
         InvitedGameResponse: {
             /** Format: int64 */
@@ -5188,6 +5294,11 @@ export interface components {
             /** Format: date-time */
             matchDate?: string;
             matchLocation?: string;
+            placePublic?: boolean;
+            /** Format: double */
+            placeLat?: number;
+            /** Format: double */
+            placeLon?: number;
             dongName?: string;
             joinBlockedReason?: string;
             rule: components["schemas"]["FullRuleResponse"];
@@ -5356,6 +5467,11 @@ export interface components {
             /** Format: date-time */
             matchDate?: string;
             matchLocation?: string;
+            placePublic?: boolean;
+            /** Format: double */
+            placeLat?: number;
+            /** Format: double */
+            placeLon?: number;
             /** @enum {string} */
             gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** Format: int64 */
@@ -5384,6 +5500,11 @@ export interface components {
             /** Format: int64 */
             id: number;
             matchLocation?: string;
+            placePublic?: boolean;
+            /** Format: double */
+            placeLat?: number;
+            /** Format: double */
+            placeLon?: number;
             /** Format: date-time */
             matchDate?: string;
             rule: components["schemas"]["FullRuleResponse"];
@@ -5425,6 +5546,11 @@ export interface components {
             /** Format: date-time */
             matchDate?: string;
             matchLocation?: string;
+            placePublic?: boolean;
+            /** Format: double */
+            placeLat?: number;
+            /** Format: double */
+            placeLon?: number;
             applicants: components["schemas"]["ApplicantInfo"][];
             /** @enum {string} */
             gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
@@ -9137,6 +9263,50 @@ export interface operations {
             };
         };
     };
+    search: {
+        parameters: {
+            query: {
+                q: string;
+                lat?: number;
+                lon?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Place"][];
+                };
+            };
+        };
+    };
+    available: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": boolean;
+                };
+            };
+        };
+    };
     getNotifications: {
         parameters: {
             query?: never;
@@ -9260,6 +9430,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": string;
+                };
+            };
+        };
+    };
+    games: {
+        parameters: {
+            query: {
+                lat: number;
+                lon: number;
+                radiusKm?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MapGames"];
                 };
             };
         };

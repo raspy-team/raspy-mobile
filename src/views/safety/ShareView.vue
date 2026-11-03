@@ -24,6 +24,7 @@
 
       <section v-if="v.lastLat != null" class="mt-6">
         <p class="t-caption mb-2">마지막 위치 · {{ ago(v.lastAt) }}</p>
+        <KakaoMap v-if="kakaoMapKey" class="mb-2" :center="{ lat: v.lastLat, lon: v.lastLon }" :pins="[{ id: 'me', lat: v.lastLat, lon: v.lastLon, label: v.nickname }]" :level="4" height="220px" />
         <UiButton block variant="secondary" icon="location-dot" @click="openMap">지도에서 보기</UiButton>
       </section>
       <p v-else-if="v.status === 'LIVE'" class="t-caption mt-6">아직 위치가 오지 않았어요. {{ v.nickname }}님이 앱을 열면 보내져요</p>
@@ -42,6 +43,8 @@ import { GET } from '../../api/client'
 import { matchTime } from '../../utils/format'
 import { UiButton, UiEmptyState, UiListSkeleton } from '../../components/ui'
 import BrandMark from '../../components/BrandMark.vue'
+import KakaoMap from '../../components/map/KakaoMap.vue'
+import { kakaoMapKey, kakaoMapLink } from '../../utils/kakaoMap'
 
 const route = useRoute()
 const v = ref(null)
@@ -63,7 +66,7 @@ const SUB = {
 }
 const TONE = { LIVE: 'bg-surface', OVERDUE: 'bg-surface-2 border border-danger', FINISHED: 'bg-surface', STOPPED: 'bg-surface', EXPIRED: 'bg-surface' }
 
-const mapUrl = computed(() => v.value && `https://map.kakao.com/link/map/${encodeURIComponent(v.value.nickname)},${v.value.lastLat},${v.value.lastLon}`)
+const mapUrl = computed(() => v.value && kakaoMapLink(v.value.nickname, v.value.lastLat, v.value.lastLon))
 function openMap(e) {
   e?.preventDefault?.()
   window.open(mapUrl.value, '_blank', 'noopener')

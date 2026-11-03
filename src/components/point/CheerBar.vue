@@ -51,7 +51,7 @@
 <script setup lang="ts">
 // 경기 응원 (포인트 걸기 고도화, 11/3 세션 2. docs/points-betting-review.md): 선수가 다 모인 시작 전 남의 경기에서 이길 쪽을 고른다.
 // 기본은 예측만(0P), 포인트(10~100P, 하루 300P)는 원할 때만. 배수 = 1 ÷ 이길 확률 (×1.05~×3.0), 고를 때 정해진다.
-// 아는 사람의 상대편은 못 고른다 (편마다 까닭을 서버가 준다). 경기 중 응원(포인트 없음)은 중계 화면(/live)에서
+// 편마다 못 고르는 까닭이 있으면 서버가 준다 (지금은 없다: 아는 사이도 다 연다, 고병연 11/3). 경기 중 응원(포인트 없음)은 중계 화면(/live)에서
 import { ref, computed, onMounted } from 'vue'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'

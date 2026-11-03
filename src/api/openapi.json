@@ -741,7 +741,7 @@
           "point-controller"
         ],
         "summary": "응원하기",
-        "description": "선수가 다 모인 시작 전 남의 경기 한쪽을 고른다 (경기마다 한 번). amount 0은 예측만, 10~100은 포인트도 건다(하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 고를 때 정해짐). 아는 사람의 상대편은 못 고른다",
+        "description": "선수가 다 모인 시작 전 남의 경기 한쪽을 고른다 (경기마다 한 번). amount 0은 예측만, 10~100은 포인트도 건다(하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 고를 때 정해짐)",
         "operationId": "cheerWithPoints",
         "parameters": [
           {
@@ -4953,11 +4953,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ]
+              ],
+              "default": "FRIENDS"
             }
           },
           {
@@ -4966,11 +4966,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ]
+              ],
+              "default": "UNITS"
             }
           }
         ],
@@ -6732,11 +6732,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {

@@ -21,7 +21,7 @@
 
     <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
     <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length" class="pt-6">
-      <h2 class="t-title">첫 경기를 잡아볼까요</h2>
+      <h2 class="t-title">첫 경기를 잡아 볼까요</h2>
       <p class="t-caption mt-2">잡힌 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
       <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
         <li v-for="(s, i) in FIRST_STEPS" :key="s.title" class="flex items-baseline gap-4 px-4 py-4">

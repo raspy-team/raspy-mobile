@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="ruleName ? `${ruleName} 랭킹` : '랭킹'" back />
+    <UiTopBar :title="ruleName ? `${ruleName} 순위` : '순위'" back />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
       <div v-if="loading && !rankings.length" class="space-y-3">
@@ -101,7 +101,7 @@ async function load() {
     rankings.value = data.rankings || []
     me.value = data.currentUserRanking || null
   } catch (e) {
-    error.value = e.response?.data?.message || '랭킹을 불러오지 못했어요'
+    error.value = e.response?.data?.message || '순위를 불러오지 못했어요'
   } finally {
     loading.value = false
   }

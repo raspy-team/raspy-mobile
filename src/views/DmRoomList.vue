@@ -14,7 +14,7 @@
         <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
       </UiEmptyState>
 
-      <UiEmptyState v-else-if="!rooms.length" class="pt-16" icon="far fa-paper-plane" title="아직 주고받은 메시지가 없어요" description="경기 약속을 잡거나 친구에게 먼저 말을 걸어보세요">
+      <UiEmptyState v-else-if="!rooms.length" class="pt-16" icon="far fa-paper-plane" title="아직 주고받은 메시지가 없어요" description="경기 약속을 잡거나 친구에게 먼저 말을 걸어 보세요">
         <UiButton @click="openFriends">친구에게 메시지 보내기</UiButton>
       </UiEmptyState>
 
@@ -28,7 +28,7 @@
                 <span class="t-micro flex-shrink-0">{{ dm.lastMessageTimestamp ? timeAgo(dm.lastMessageTimestamp) : '' }}</span>
               </span>
               <span class="flex items-center gap-2 mt-0.5">
-                <span class="flex-1 truncate text-sm" :class="dm.unreadCount ? 'text-fg' : 'text-fg-muted'">{{ dm.lastMessageContent || '대화를 시작해보세요' }}</span>
+                <span class="flex-1 truncate text-sm" :class="dm.unreadCount ? 'text-fg' : 'text-fg-muted'">{{ dm.lastMessageContent || '대화를 시작해 보세요' }}</span>
                 <span v-if="dm.unreadCount" class="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-on text-xs font-bold leading-5 text-center flex-shrink-0" :aria-label="`안 읽은 메시지 ${dm.unreadCount}개`">
                   {{ dm.unreadCount > 99 ? '99+' : dm.unreadCount }}
                 </span>

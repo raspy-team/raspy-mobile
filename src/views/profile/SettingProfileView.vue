@@ -28,7 +28,7 @@
       </div>
 
       <UiInput v-model="form.nickname" label="닉네임" :maxlength="NICKNAME_MAX" :hint="`다른 사람에게 보이는 이름. ${NICKNAME_MAX}자까지`" :error="errors.nickname" />
-      <UiInput v-model="form.username" label="친구 찾기 아이디 (@)" icon="fas fa-at" :maxlength="12" hint="영문 소문자·숫자·밑줄(_). 친구가 나를 찾을 때 써요 (로그인 아이디와 달라도 돼요)" :error="errors.username" />
+      <UiInput v-model="form.username" label="친구 찾기 아이디" icon="fas fa-at" :maxlength="12" hint="친구가 나를 찾을 때 써요. 영문 소문자·숫자·밑줄(_)로 적어요. 로그인 아이디와 달라도 돼요" :error="errors.username" />
       <!-- 활동 지역은 고르지 않고 동네 인증으로 정한다 (GPS) -->
       <UiField label="동네" :hint="form.region ? '누르면 동네를 바꾸거나 다시 인증해요' : '지금 있는 곳으로 인증해요. 내 동네 근처 경기가 보여요'">
         <RouterLink to="/neighborhood" class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
@@ -39,14 +39,14 @@
       </UiField>
       <!-- 나이: 다칠 수 있는 규칙은 만 19세 이상이라 확인한다 -->
       <div id="age">
-        <UiInput v-model="form.age" label="나이 (만)" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세 이상만 할 수 있어요. 다른 사람에게는 보이지 않아요" :error="errors.age" />
+        <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세 이상만 할 수 있어요. 다른 사람에게는 보이지 않아요" :error="errors.age" />
       </div>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
       <UiInput v-model="form.affiliation" label="소속" optional :maxlength="100" placeholder="예: 성수 러닝크루" />
 
       <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
         <div class="max-w-md mx-auto px-4 py-3">
-          <UiButton type="submit" block size="lg" :disabled="!dirty" :loading="saving">{{ dirty ? '저장' : '바뀐 내용이 없어요' }}</UiButton>
+          <UiButton type="submit" block size="lg" :disabled="!dirty" :loading="saving">저장</UiButton>
         </div>
       </div>
     </form>

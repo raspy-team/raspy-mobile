@@ -8,7 +8,7 @@
   >
     <!-- 신고 버튼 (우측 상단) -->
     <button
-      class="absolute text-red-500 text-xs right-0 top-2 z-10 text-fg-muted hover:text-primary p-1"
+      class="absolute text-xs right-0 top-2 z-10 text-fg-muted hover:text-primary p-1"
       @click.stop="openReportModal"
       title="댓글 신고"
     >
@@ -36,7 +36,7 @@
           {{ timeAgo(comment.createdAt) }}
         </span>
         <span v-if="comment.editedAt" class="text-xs text-fg-muted ml-1">(수정됨)</span>
-        <span v-if="comment.deleted" class="text-xs text-red-400 ml-1">[삭제됨]</span>
+        <span v-if="comment.deleted" class="t-caption ml-1">지운 댓글</span>
       </div>
       <div class="whitespace-pre-wrap break-all text-base mt-1 leading-snug">
         <span
@@ -56,8 +56,9 @@
       </div>
       <div class="flex items-center gap-2 mt-2 text-fg-subtle text-sm">
         <button
-          class="focus:outline-none transition flex items-center justify-center"
-          style="height: 26px; width: 26px"
+          class="-m-2.5 w-11 h-11 transition flex items-center justify-center"
+          :aria-label="comment.myLikeType === 'LIKE' ? '좋아요 취소' : '좋아요'"
+          :aria-pressed="comment.myLikeType === 'LIKE'"
           @click="emitLike(comment.id)"
         >
           <UiIcon
@@ -93,56 +94,14 @@
       </div>
     </div>
 
-    <!-- 신고 모달 -->
-    <transition name="fade">
-      <div
-        v-if="reportModal"
-        class="fixed inset-0 z-[10000] bg-black/30 flex items-center justify-center"
-        @click.self="closeReportModal"
-        @click.stop
-      >
-        <div
-          class="bg-gray-900 rounded-2xl shadow-lg px-6 py-6 w-full max-w-xs flex flex-col items-stretch"
-          @click.stop
-        >
-          <div class="font-bold text-lg mb-2 text-fg">댓글 신고하기</div>
-          <div class="text-fg-subtle text-sm mb-3 leading-snug">
-            신고는 <b>24시간 내에 처리</b>되며, 신고해주셔서 감사합니다.
-          </div>
-          <textarea
-            v-model="reportReason"
-            class="border rounded p-2 w-full mb-3 text-base"
-            rows="3"
-            maxlength="100"
-            placeholder="신고 사유를 적어 주세요"
-            autofocus
-            @keydown.enter.exact.prevent="submitReport"
-            @click.stop
-          />
-          <button
-            @click.stop="submitReport"
-            :disabled="!reportReason.trim() || reportLoading"
-           class="w-full bg-danger text-white py-2 rounded-xl font-bold mt-1 disabled:opacity-40"
-          >
-            {{ reportLoading ? '신고 중...' : '신고하기' }}
-          </button>
-          <button @click.stop="closeReportModal" class="w-full mt-2 text-fg-muted text-sm">
-            취소
-          </button>
-          <p v-if="reportError" class="text-red-500 mt-2 text-sm text-center">{{ reportError }}</p>
-          <p v-if="reportSuccess" class="text-green-600 mt-2 text-sm text-center">
-            {{ reportSuccess }}
-          </p>
-        </div>
-      </div>
-    </transition>
+    <ReportSheet v-model="reportModal" title="댓글을 신고할까요?" target-type="COMMENT" :target-id="comment.id" />
   </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue'
 import CommentItem from './CommentItem.vue'
-import api from '../api/api'
+import ReportSheet from './safety/ReportSheet.vue'
 
 const props = defineProps({
   comment: { type: Object, required: true },
@@ -186,53 +145,8 @@ function emitImgClick(imageUrl) {
   emit('img-click', imageUrl)
 }
 
-// ----- 신고 모달 관련 -----
 const reportModal = ref(false)
-const reportReason = ref('')
-const reportLoading = ref(false)
-const reportError = ref('')
-const reportSuccess = ref('')
-
 function openReportModal() {
   reportModal.value = true
-  reportReason.value = ''
-  reportError.value = ''
-  reportSuccess.value = ''
-}
-function closeReportModal() {
-  reportModal.value = false
-  reportReason.value = ''
-  reportError.value = ''
-  reportSuccess.value = ''
-}
-async function submitReport() {
-  if (!reportReason.value.trim()) return
-  reportLoading.value = true
-  reportError.value = ''
-  reportSuccess.value = ''
-  try {
-    await api.post('/api/reports', {
-      targetId: props.comment.id,
-      targetType: 'COMMENT',
-      reason: reportReason.value.trim(),
-    })
-    reportSuccess.value = '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요'
-    setTimeout(closeReportModal, 1300)
-  } catch (e) {
-    const msg = e?.response?.data?.message || '신고하지 못했어요. 다시 해 주세요'
-    reportError.value = msg
-  }
-  reportLoading.value = false
 }
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

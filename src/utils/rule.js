@@ -86,5 +86,6 @@ export function categoryKey(rule) {
 export function ruleKind(rule, withMajor = false) {
   const c = rule?.category
   const parts = c ? [c.sport, ...c.abilities.map((a) => a.label)] : [withMajor && rule?.majorCategory, rule?.minorCategory]
-  return parts.filter(Boolean).join(' · ')
+  // '기타 · 기타'처럼 같은 말이 두 번 나오지 않게
+  return [...new Set(parts.filter(Boolean))].join(' · ')
 }

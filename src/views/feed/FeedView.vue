@@ -31,7 +31,7 @@
         class="pt-16"
         icon="fas fa-user-group"
         title="친구의 경기가 아직 없어요"
-        description="함께 겨룬 사람에게 친구를 걸거나, 친구를 초대해보세요"
+        description="함께 겨룬 사람에게 친구를 걸거나, 친구를 초대해 보세요"
       >
         <div class="flex gap-2">
           <UiButton variant="secondary" @click="tab = 'near'">동네 보기</UiButton>

@@ -121,7 +121,7 @@
           class="flex items-center gap-2 px-4 pt-1 pb-2 bg-surface border-t border-line"
         >
           <img :src="inputImagePreview" class="w-14 h-14 rounded-lg object-cover border" />
-          <button @click="removeInputImage" type="button" class="text-fg-muted hover:text-red-400">
+          <button @click="removeInputImage" type="button" aria-label="사진 빼기" class="w-11 h-11 flex items-center justify-center text-fg-muted hover:text-danger">
             <UiIcon name="fas fa-times" class="text-lg" />
           </button>
         </div>

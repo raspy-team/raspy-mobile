@@ -7,6 +7,7 @@ const ICONS: Record<string, string> = {
   'number-baseball': 'hash', 'number-bomb': 'bomb', pong: 'activity', predict: 'goal', 'quiz-race': 'lightbulb',
   recipe: 'chef-hat', rps: 'hand', sentence: 'feather', shake: 'vibrate', squat: 'dumbbell',
   'thirty-one': 'list-ol', trial: 'gavel', typing: 'keyboard', 'word-battle': 'swords', wordchain: 'link',
+  'energy-duel': 'flame', 'pitch-duel': 'crosshair', 'block-duel': 'blocks', 'liar-dice': 'dice', 'three-hills': 'mountain', 'power-level': 'biceps', majority: 'percent', 'hidden-word': 'search', 'minus-one': 'grab', boxes: 'square-dashed',
 }
 
 export function gameIcon(key: string | undefined, fallback = 'dice'): string {

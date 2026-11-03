@@ -330,6 +330,7 @@ const WRITING: Record<string, { guide: string; placeholder: string }> = {
   excuse: { guide: '이 상황에서 빠져나갈 한 줄 변명', placeholder: '그럴듯하고 웃긴 변명' },
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
   trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
+  'power-level': { guide: '주제에 맞는 싸움꾼을 한 줄로 (뻔한 최강은 약해요)', placeholder: '예) 고무장갑 낀 할머니와 효자손' },
 }
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
 import SquatPlay from '../../components/appgame/SquatPlay.vue'

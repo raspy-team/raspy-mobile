@@ -18,20 +18,20 @@
       <div class="flex items-center gap-2">
         <router-link
           :to="`/profile/${comment.author.id}`"
-         class="font-medium text-base hover:underline focus:underline focus:outline-none"
+         class="text-[0.9375rem] font-semibold text-fg hover:underline focus:underline focus:outline-none"
         >
           {{ comment.author.nickname }}
         </router-link>
-        <span class="text-fg-muted text-xs select-none">
+        <span class="t-micro select-none">
           {{ timeAgo(comment.createdAt) }}
         </span>
-        <span v-if="comment.editedAt" class="text-xs text-fg-muted ml-1">(수정됨)</span>
-        <span v-if="comment.deleted" class="t-caption ml-1">지운 댓글</span>
+        <span v-if="comment.editedAt" class="t-micro">수정됨</span>
+        <span v-if="comment.deleted" class="t-micro">지운 댓글</span>
       </div>
-      <div class="whitespace-pre-wrap break-all text-base mt-1 leading-snug">
+      <div class="t-body whitespace-pre-wrap break-words mt-0.5">
         <span
           v-if="comment.mentionUserNickname"
-          class="inline-block px-2 py-0.5 bg-surface-3 text-fg font-medium rounded-full mr-1 text-sm align-middle"
+          class="inline-block px-2 py-0.5 bg-surface-3 text-fg font-medium rounded-full mr-1 t-micro align-middle"
         >
           {{ comment.mentionUserNickname }}
         </span>
@@ -40,11 +40,11 @@
       <div v-if="comment.imageUrl" class="mt-1">
         <img
           :src="comment.imageUrl"
-          class="max-w-[140px] max-h-[140px] rounded-xl border cursor-pointer hover:brightness-95 transition"
+          class="max-w-[140px] max-h-[140px] rounded-xl cursor-pointer hover:brightness-95 transition"
           @click="emitImgClick(comment.imageUrl)"
         />
       </div>
-      <div class="flex items-center gap-2 mt-2 text-fg-subtle text-sm">
+      <div class="flex items-center gap-2 mt-1.5 t-micro">
         <button
           class="-m-2.5 w-11 h-11 transition flex items-center justify-center"
           :aria-label="comment.myLikeType === 'LIKE' ? '좋아요 취소' : '좋아요'"
@@ -58,12 +58,12 @@
             :class="comment.myLikeType === 'LIKE' ? 'text-danger-fg' : 'text-fg-muted'"
           />
         </button>
-        <span v-if="comment.likeCount > 0" class="min-w-[16px] text-sm select-none">{{
+        <span v-if="comment.likeCount > 0" class="min-w-[16px] tabular-nums select-none">{{
           comment.likeCount
         }}</span>
         <button
           v-if="!isReply"
-          class="text-sm hover:underline focus:underline ml-1 px-1"
+          class="hover:underline focus:underline ml-1 px-1 py-2.5 -my-2.5"
           @click="emitReply(comment.id, comment.author.nickname)"
         >
           답글

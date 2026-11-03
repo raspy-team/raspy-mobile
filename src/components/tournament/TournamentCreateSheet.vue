@@ -50,9 +50,10 @@
         </label>
       </div>
 
-      <div class="grid grid-cols-2 gap-2">
-        <UiInput v-model="f.maxEntrants" type="number" inputmode="numeric" placeholder="정원" />
-        <UiInput v-model="f.startsAt" type="datetime-local" />
+      <!-- 이름표가 없으면 '8'이 무엇인지, 날짜가 무엇의 날짜인지 몰랐다 (11/4 밤샘, 52세 탁구 대회 주최자) -->
+      <div class="grid grid-cols-[2fr_3fr] gap-2">
+        <UiInput v-model="f.maxEntrants" label="최대 인원" type="number" inputmode="numeric" placeholder="8" />
+        <UiInput v-model="f.startsAt" label="시작" type="datetime-local" />
       </div>
       <div>
         <p class="t-heading">라운드 기간</p>

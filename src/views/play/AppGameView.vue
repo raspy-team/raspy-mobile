@@ -129,9 +129,16 @@
           <template v-else>
             <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
             <p class="t-caption">{{ game?.scoreUnit }}</p>
-            <p class="t-heading mt-6">상대를 찾고 있어요</p>
-            <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
-            <UiButton v-if="(result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+            <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
+            <template v-if="ladderTo">
+              <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
+              <p class="t-caption mt-1">도전장을 메시지로 보냈어요. {{ ladderName }}님이 같은 문제를 풀면 승패가 나요</p>
+            </template>
+            <template v-else>
+              <p class="t-heading mt-6">상대를 찾고 있어요</p>
+              <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
+            </template>
+            <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
         </UiCard>
         <!-- 다음 행동은 결과 바로 밑에. 긴 답·한마디는 그 아래 -->
@@ -336,7 +343,6 @@ import SquatPlay from '../../components/appgame/SquatPlay.vue'
 import { fixtureOf, kickoffLabel, predictionLine } from '@/utils/predict'
 import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
-import { copyText } from '../../utils/clipboard'
 import { useToast } from '../../composable/useToast'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
@@ -520,7 +526,9 @@ async function sendChallenge(gameId: number) {
   challenging.value = true
   try {
     await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
-    showToast((await copyText(`${window.location.origin}/challenge/${gameId}`)) ? '도전장 링크를 복사했어요. 하루 동안 친구만 받을 수 있어요' : '복사하지 못했어요')
+    // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
+    const msg = await shareLink(`${window.location.origin}/challenge/${gameId}`, `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
+    if (msg) showToast(`${msg}. 하루 동안 이 링크로만 받을 수 있어요`)
   } catch (e) {
     showToast(errorMessage(e, '도전장을 만들지 못했어요'))
   } finally {
@@ -538,7 +546,8 @@ async function shareDaily(feedback: string) {
 
 /** 투표 공유 링크: 친구에게 보내 표를 받는다 */
 async function shareVote(gameId: number) {
-  showToast((await copyText(`${window.location.origin}/vote/${gameId}`)) ? '투표 링크를 복사했어요' : '복사하지 못했어요')
+  const msg = await shareLink(`${window.location.origin}/vote/${gameId}`, `${game.value?.title ?? '대결'} 투표 좀 해 줘요. 어느 쪽이 나아요?`)
+  if (msg) showToast(msg)
 }
 
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */

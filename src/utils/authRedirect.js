@@ -12,6 +12,15 @@ export function rememberReturnTo(fullPath) {
   }
 }
 
+/** 지우지 않고 보기만 (시작 화면이 "무엇에 불려 왔는지"를 보여 줄 때) */
+export function peekReturnTo() {
+  try {
+    return localStorage.getItem(KEY)
+  } catch {
+    return null
+  }
+}
+
 export function takeReturnTo() {
   try {
     const path = localStorage.getItem(KEY)

@@ -3391,6 +3391,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/landing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 링크로 들어온 사람의 시작 화면 한 줄 (로그인 전)
+         * @description path: 로그인 뒤 돌아갈 앱 주소. 알 수 없는 주소면 204
+         */
+        get: operations["landing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/invite/{gameId}": {
         parameters: {
             query?: never;
@@ -6447,6 +6467,10 @@ export interface components {
             /** Format: date-time */
             lastAt?: string;
             public: boolean;
+        };
+        LandingResponse: {
+            title: string;
+            line: string;
         };
         InvitedGameResponse: {
             /** Format: int64 */
@@ -11773,6 +11797,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MapGames"];
+                };
+            };
+        };
+    };
+    landing: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LandingResponse"];
                 };
             };
         };

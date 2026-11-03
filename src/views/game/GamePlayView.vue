@@ -549,9 +549,11 @@ onMounted(async () => {
 
   const currentUserId = await getMyId()
 
-  const res = await api.get(`/api/games/${gameId}/detail`)
-  if (res.data.gameStatus != 'IN_PROGRESS') {
-    router.push(`/games/${gameId}/result`)
+  // 시작 전 경기(신청만 있거나 승인 전)는 점수판이 없다: 경기 화면으로. 끝난 경기는 결과로 (11/4 밤샘)
+  const res = await api.get(`/api/games/${gameId}/detail`).catch(() => null)
+  if (!res || res.data.gameStatus != 'IN_PROGRESS') {
+    router.replace(res?.data.gameStatus === 'COMPLETED' ? `/games/${gameId}/result` : `/games/${gameId}`)
+    return
   }
 
   // reactive에 직접 대입 (전체 덮어쓰기)

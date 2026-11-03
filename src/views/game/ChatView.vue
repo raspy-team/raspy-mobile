@@ -2,6 +2,7 @@
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { UiAvatar, UiBadge, UiButton, UiChip, UiDialog, UiEmptyState, UiIconButton, UiList, UiListItem, UiSheet, UiSkeleton } from '../../components/ui'
 import ReportSheet from '../../components/safety/ReportSheet.vue'
+import ChatText from '../../components/chat/ChatText.vue'
 import { confirmDialog } from '../../composables/useConfirm'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { refreshInbox } from '../../stores/inbox'
@@ -473,13 +474,13 @@ const closeErrorModal = () => {
           <template v-if="msg.messageType === 'TALK'">
             <div v-if="msg.senderId === currentUserId" class="flex justify-end items-end gap-1.5 pl-12">
               <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>
-              <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words">{{ msg.content }}</p>
+              <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words"><ChatText :text="msg.content" /></p>
             </div>
             <div v-else class="flex justify-start items-end gap-1.5 pr-12">
               <p
                 class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words select-none"
                 @touchstart.passive="pressStart(msg)" @touchend="pressEnd" @touchmove.passive="pressEnd" @contextmenu.prevent="reportMessage(msg)"
-              >{{ msg.content }}</p>
+              ><ChatText :text="msg.content" /></p>
               <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>
             </div>
           </template>

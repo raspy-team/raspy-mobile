@@ -178,13 +178,13 @@ const OPTIONS = [
 // 친구와 바로 잡는 경기는 1:1만 된다 (여럿은 열어서 신청을 받는다)
 const options = computed(() => (format.value === 'DUEL' ? OPTIONS : OPTIONS.filter((o) => o.value === 'anyone')))
 
-const venue = ref('IN_PERSON')
+const venue = ref(route.query.venue ? String(route.query.venue) : 'IN_PERSON')
 const venueDetail = ref('')
 
 const formats = computed(() => allowedFormats(rule.value))
 const dangerous = computed(() => (rule.value?.category?.traits || []).some((t) => t.key === 'DANGER'))
-const format = ref('DUEL')
-const size = ref(2)
+const format = ref(route.query.format ? String(route.query.format) : 'DUEL')
+const size = ref(Number(route.query.size) || 2)
 const sizes = computed(() => (format.value === 'TEAMS' ? TEAM_SIZES : GROUP_SIZES))
 function pickFormat(value) {
   format.value = value
@@ -197,7 +197,8 @@ const EXACT = '날짜·시간 고르기'
 const exactTime = ref('')
 const nowLocal = localIso(new Date()).slice(0, 16)
 const WHEN = [...quickTimes(), { label: EXACT, date: () => (exactTime.value ? `${exactTime.value.slice(0, 16)}:00` : null) }, { label: '나중에 정하기', date: () => null }]
-const when = ref('나중에 정하기')
+const when = ref(WHEN.some((w) => w.label === route.query.when) ? String(route.query.when) : '나중에 정하기')
+if (route.query.exact) exactTime.value = String(route.query.exact)
 
 const ruleId = ref(Number(route.query.ruleId) || 0)
 
@@ -278,7 +279,10 @@ const anyoneLine = computed(() => {
 })
 function createAnyone() {
   if (!isRemote(venue.value) && (dong.value === null || dong.value?.expired)) {
-    router.push({ path: '/neighborhood', query: { back: route.fullPath, reason: anyoneLine.value } })
+    // 고른 것(규칙·언제·어디서·몇 명)을 돌아올 주소에 담는다. 전에는 인증하고 오면 처음부터 다시 골라야 했다 (11/4 밤샘)
+    const picks = { ruleId: ruleId.value || undefined, when: when.value, exact: exactTime.value || undefined, venue: venue.value, format: format.value, size: size.value }
+    const back = router.resolve({ path: route.path, query: { ...route.query, ...picks } }).fullPath
+    router.push({ path: '/neighborhood', query: { back, reason: anyoneLine.value } })
     return
   }
   create(null)

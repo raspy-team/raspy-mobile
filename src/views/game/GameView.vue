@@ -270,6 +270,7 @@ import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
 import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { copyText } from '../../utils/clipboard'
+import { shareLink } from '../../utils/share'
 import { matchTime, place, ratingLine } from '../../utils/format'
 import { venuePlace } from '../../utils/gameFormat'
 import { quickTimes } from '../../utils/when'
@@ -363,9 +364,13 @@ function canApprove(game, a) {
   return true
 }
 function applicantsHint(game) {
-  if (!isMulti(game)) return '한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.'
+  // 승인 버튼 대신 '앱 게임 한 판'만 보이면 왜 승인이 안 되는지 먼저 말한다 (11/4 밤샘: 처음 연 경기에서 승인 버튼을 못 찾았다)
+  const ladder = (game?.applicants || []).some((a) => a.needsAppGameFirst && !a.approved)
+    ? ' 처음 만나는 사람은 앱 게임을 한 판 같이 한 뒤에 승인할 수 있어요.'
+    : ''
+  if (!isMulti(game)) return '한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.' + ladder
   const n = (game.players || []).length
-  return `${game.maxPlayers}명이 모이면 경기가 확정돼요. 지금 ${n}명이에요.`
+  return `${game.maxPlayers}명이 모이면 경기가 확정돼요. 지금 ${n}명이에요.` + ladder
 }
 
 async function approve(game, a) {
@@ -425,7 +430,9 @@ function startLadder(key) {
 }
 
 // 경기 시간이 잡힌 만나서 하는 경기 (앞뒤 하루). 카드 안에서 서버가 지금 할 일이 있는지 정한다
-const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && Math.abs(Date.now() - new Date(g.matchDate).getTime()) < 86_400_000 && !['REQUESTED', 'REJECTED'].includes(g.status)
+// 결과를 낸 뒤(확인 기다림·끝·취소)에는 '도착했어요'·노쇼 안내를 거둔다 (11/4 밤샘: 결과 확인 카드 밑에 도착 칸이 남았다)
+const OVER = ['REQUESTED', 'REJECTED', 'RESULT_PENDING', 'COMPLETED', 'CANCELED']
+const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && Math.abs(Date.now() - new Date(g.matchDate).getTime()) < 86_400_000 && !OVER.includes(g.status) && !OVER.includes(g.gameStatus)
 const needsSafety = (g) => !!g && !isRemote(g.venue) && !!dmTarget(g) && canReschedule(g)
 const safetySeen = (() => {
   try { return JSON.parse(localStorage.getItem('safetyTipsSeen') || '[]') } catch { return [] }
@@ -466,7 +473,8 @@ async function share(g) {
   menuGame.value = null
   try {
     const { data } = await api.post('/api/invite', null, { params: { gameId: g.id } })
-    showToast((await copyText(data.url)) ? '링크를 복사했어요. 같이 할 사람에게 보내보세요' : '복사하지 못했어요')
+    const msg = await shareLink(data.url, `'${g.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`)
+    if (msg) showToast(msg === '링크를 복사했어요' ? '링크를 복사했어요. 같이 할 사람에게 보내 보세요' : msg)
   } catch {
     showToast('링크를 만들지 못했어요')
   }

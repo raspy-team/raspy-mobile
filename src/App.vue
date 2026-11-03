@@ -184,9 +184,9 @@ watch(
     if (chatUrl) return
     if (gameUrl) {
       const gameId = await gameUrl[1]
-      const res = await api.get(`/api/games/${gameId}/detail`)
-
-      roomId = res.data.chatRoomId
+      // 시작 전 경기면 서버가 거절한다 (점수판이 경기 화면으로 돌려보낸다)
+      const res = await api.get(`/api/games/${gameId}/detail`).catch(() => null)
+      roomId = res?.data.chatRoomId
     }
 
     // 채팅·경기 방에 들어오면 그 방에 연결하고, 나가면 끊는다

@@ -150,7 +150,7 @@ import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { ratingLine } from '../../utils/format'
-import { copyText } from '../../utils/clipboard'
+import { shareLink } from '../../utils/share'
 import { feel } from '../../utils/feel'
 import { todayBrandLine } from '@/utils/brandLines'
 
@@ -232,7 +232,8 @@ async function share(game) {
   menuGame.value = null
   try {
     const { data } = await api.post('/api/invite', null, { params: { gameId: game.id } })
-    showToast((await copyText(data.url)) ? '링크를 복사했어요' : '복사하지 못했어요')
+    const msg = await shareLink(data.url, `'${game.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`)
+    if (msg) showToast(msg)
   } catch {
     showToast('링크를 만들지 못했어요')
   }

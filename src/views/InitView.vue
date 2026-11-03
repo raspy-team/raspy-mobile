@@ -4,11 +4,19 @@
       <!-- 무슨 앱인지 -->
       <div class="flex-1 flex flex-col justify-center py-10">
         <BrandMark size="22px" />
+        <!-- 링크로 들어온 사람: 무엇에 불려 왔는지 먼저 (인스타 게임 링크, 친구의 도전장). 가입하면 그 화면으로 돌아간다 -->
+        <UiCard v-if="landing" class="mt-8">
+          <p class="t-caption">받은 링크</p>
+          <p class="t-title mt-1">{{ landing.title }}</p>
+          <p class="t-caption mt-1">{{ landing.line }}</p>
+          <p class="t-caption text-fg mt-3">시작하면 바로 이어서 해요</p>
+        </UiCard>
         <h1 class="t-display text-[44px] mt-10">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
         <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
 
         <!-- 아이콘 상자 대신 번호와 글자로 (장식보다 내용) -->
-        <ol class="mt-12 border-t border-line">
+        <!-- 링크로 온 사람은 하려던 것이 있으니 소개를 접어 시작 버튼이 한 화면에 들어오게 -->
+        <ol v-if="!landing" class="mt-12 border-t border-line">
           <li v-for="(f, i) in FEATURES" :key="f.title" class="flex items-baseline gap-4 py-4 border-b border-line">
             <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
             <span>
@@ -93,8 +101,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import { API_BASE_URL } from '@/config/server'
 import { TERMS } from '../content/legal'
-import { UiButton, UiSheet } from '../components/ui'
-import { takeReturnTo } from '../utils/authRedirect'
+import { UiButton, UiCard, UiSheet } from '../components/ui'
+import { peekReturnTo, takeReturnTo } from '../utils/authRedirect'
 import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin } from '../utils/nativeBridge'
 
 const FEATURES = [
@@ -131,7 +139,16 @@ const loginError = computed(() => nativeError.value || LOGIN_ERRORS[route.query.
 
 if (localStorage.getItem('raspy_access_token2')) router.replace('/')
 
+// 링크로 왔으면 그 링크가 무엇인지 (/api/landing, 로그인 전). 모르는 주소면 비어 있다
+const landing = ref(null)
+
 onMounted(async () => {
+  const returnTo = peekReturnTo()
+  if (returnTo) {
+    GET('/api/landing', { query: { path: returnTo } })
+      .then(({ data }) => (landing.value = data?.title ? data : null))
+      .catch(() => {})
+  }
   try {
     enabled.value = (await GET('/api/auth/providers')).data
   } catch {

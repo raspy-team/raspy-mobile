@@ -79,6 +79,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <DailyNumberPlay
+          v-else-if="key === 'daily-number'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <WritePlay
           v-else-if="WRITING[key]"
           :problem="play.problem"
@@ -348,6 +355,7 @@ import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 import LiteracyPlay from '../../components/appgame/LiteracyPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
 import NumberSpotsPlay from '../../components/appgame/NumberSpotsPlay.vue'
+import DailyNumberPlay from '../../components/appgame/DailyNumberPlay.vue'
 
 // 글로 겨루는 게임: 같은 화면(WritePlay)에 안내만 다르게
 const WRITING: Record<string, { guide: string; placeholder: string }> = {
@@ -553,13 +561,13 @@ async function sendChallenge(gameId: number) {
 }
 
 /** 오늘의 초성 결과: "4/5 맞힘 · 38초" → 칸 그림과 함께. 같은 날이면 친구도 같은 문제를 푼다 */
-// 오늘의 낱말도 같은 꼴: 한마디 첫 줄이 "4/5 맞힘 · 38초", 다음 줄부터는 틀린 문제의 답이라 공유하지 않는다
-const DAILY_SHARE = ['daily-chosung', 'daily-literacy']
+// 오늘의 낱말·셈도 같은 꼴: 한마디 첫 줄만 공유한다 (다음 줄은 답이라 가린다). 다섯 문제 게임은 칸 그림을 붙인다
+const DAILY_SHARE = ['daily-chosung', 'daily-literacy', 'daily-number']
 async function shareDaily(feedback: string) {
   const head = feedback.split('\n')[0]
-  const right = Number(head.match(/(\d)\/5/)?.[1] ?? 0)
-  const boxes = '■'.repeat(right) + '□'.repeat(5 - right)
-  const msg = await shareLink(`${window.location.origin}/play/${key.value}`, `${game.value?.title ?? '오늘의 퍼즐'} ${head}\n${boxes}\n같은 문제로 붙어 봐요`)
+  const right = head.match(/(\d)\/5/)?.[1]
+  const boxes = right == null ? '' : '■'.repeat(Number(right)) + '□'.repeat(5 - Number(right)) + '\n'
+  const msg = await shareLink(`${window.location.origin}/play/${key.value}`, `${game.value?.title ?? '오늘의 퍼즐'} ${head}\n${boxes}같은 문제로 붙어 봐요`)
   if (msg) showToast(msg)
 }
 

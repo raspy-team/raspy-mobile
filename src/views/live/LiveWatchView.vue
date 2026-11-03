@@ -49,6 +49,9 @@
         <!-- 끝난 경기: 증인 -->
         <p v-if="live.witnesses" class="t-caption text-center mt-5">관중 {{ live.witnesses }}명이 이 경기의 끝을 지켜봤어요</p>
 
+        <!-- 관중 사진·영상 (match-34, 비판 6: 장면이 없다). 사진 신호는 /topic/game-media로 따로 듣는다 -->
+        <LiveMediaStrip class="mt-5" :game-id="gameId" />
+
         <!-- 선수: 구경 링크 보내기, 구경 끄기 -->
         <template v-if="live.isPlayer">
           <UiButton block variant="secondary" icon="share" class="mt-5" @click="share">구경 링크 보내기</UiButton>
@@ -93,6 +96,7 @@ import { shareLink } from '@/utils/share'
 import { useToast } from '@/composable/useToast'
 import { UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiRollNumber, UiSkeleton, UiTopBar } from '../../components/ui'
 import LiveBreakCard, { type LiveBreak } from '../../components/live/LiveBreakCard.vue'
+import LiveMediaStrip from '../../components/live/LiveMediaStrip.vue'
 
 const REACTIONS = ['👏', '🔥', '😮', '😂', '💪']
 const STATUS: Record<string, string> = { SCHEDULED: '곧 시작해요', RESULT_PENDING: '경기 끝 · 결과 확인 중', COMPLETED: '끝난 경기', CANCELED: '취소된 경기' }

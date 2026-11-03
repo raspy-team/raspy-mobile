@@ -4,7 +4,7 @@
     :to="to"
     :type="interactive && !to ? 'button' : undefined"
     class="block w-full text-left bg-surface rounded-xl"
-    :class="[pad ? 'p-4' : '', interactive || to ? 'active:bg-surface-2 transition-colors' : '']"
+    :class="[pad ? 'p-4' : '', interactive || to ? 'active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]' : '']"
   >
     <slot />
   </component>

@@ -33,7 +33,8 @@ module.exports = {
     fontFamily: {
       // 라틴·숫자는 Geist, 한글은 Pretendard가 받는다
       sans: ['Geist', '"Pretendard Variable"', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-      mono: ['"Geist Mono"', '"Pretendard Variable"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      // 예전 'mono'(Geist Mono)는 빗금 0·고정폭이라 개발 도구처럼 보였다 (11/3 디자인 리뷰). 숫자는 Geist 그대로, 표 숫자(tabular-nums)로 자리만 맞춘다
+      mono: ['Geist', '"Pretendard Variable"', 'Pretendard', '-apple-system', 'system-ui', 'sans-serif'],
     },
     // 굵기는 아껴 쓴다. 예전 화면의 font-bold(700)가 많아 한 단계 가볍게(620) 받아준다
     fontWeight: {

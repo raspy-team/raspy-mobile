@@ -39,7 +39,7 @@
         </div>
       </UiEmptyState>
 
-      <UiEmptyState v-else-if="!visible.length" class="pt-16" icon="fas fa-flag-checkered" title="아직 끝난 경기가 없어요" description="경기를 마치면 결과가 여기 올라와요">
+      <UiEmptyState v-else-if="!visible.length" class="pt-16" icon="fas fa-flag-checkered" title="아직 끝난 판이 없어요" description="이기든 지든 끝난 경기는 여기 남아요">
         <UiButton to="/">경기 찾기</UiButton>
       </UiEmptyState>
 
@@ -93,6 +93,7 @@
     <UiSheet :model-value="!!menuPost" @update:model-value="menuPost = null">
       <UiList>
         <UiListItem icon="fas fa-flag-checkered" title="경기 결과 보기" chevron @click="go(`/games/${menuPost.id}/result`)" />
+        <UiListItem v-if="menuPost?.rule?.id" icon="rotate-right" title="이 규칙으로 한 판" subtitle="같은 규칙으로 경기를 열어요" chevron @click="go(`/create-game?ruleId=${menuPost.rule.id}`)" />
         <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share(menuPost)" />
         <UiListItem v-if="!menuPost?.isMyGame" icon="far fa-flag" title="신고하기" danger @click="openReport(menuPost)" />
       </UiList>
@@ -120,7 +121,7 @@
 // - 동네(기본) / 친구 / 전국. 서버가 범위·순서를 정한다 (FeedService.getFeed). 동네 글이 적으면 아래에 '다른 동네' 줄
 // - ?gameId= 링크·알림으로 온 경기는 맨 위에 강조, ?userId= 는 그 사람의 경기만
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import FeedCard from '../../components/feed/FeedCard.vue'
@@ -266,7 +267,7 @@ async function toggleLike(p) {
   const was = p.isLiked
   p.isLiked = !was
   p.likeCount = (p.likeCount || 0) + (was ? -1 : 1)
-  if (!was) haptic('tap')
+  if (!was) feel('tap')
   try {
     const { data } = await api.post(`/api/games/${p.id}/like`)
     p.isLiked = data.isLiked

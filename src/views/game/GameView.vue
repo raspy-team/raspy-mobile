@@ -265,6 +265,7 @@ import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { confirmDialog } from '../../composables/useConfirm'
 import { refreshOnChange } from '../../websocket/userChannel'
+import { feel } from '../../utils/feel'
 import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
 import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
@@ -372,6 +373,7 @@ async function approve(game, a) {
   try {
     await api.post('/api/games/approve', { gameId: game.id, userId: a.userId })
     const full = !isMulti(game) || (game.players || []).length + 1 >= game.maxPlayers
+    feel('success')
     showToast(full ? `${a.applicantNickname}님과 경기가 확정됐어요` : `${a.applicantNickname}님을 승인했어요`)
     applicantsGame.value = null
     await fetchGames()
@@ -584,6 +586,7 @@ async function submitSchedule() {
     })
     const changed = scheduleDecided(scheduleGame.value)
     scheduleGame.value = null
+    feel('success')
     showToast(changed ? '바꿨어요. 상대에게 알렸어요' : '정했어요. 상대에게 알렸어요')
     await fetchGames()
   } catch (e) {
@@ -687,6 +690,7 @@ async function confirmStart() {
     if (capturedPhotoFile.value) form.append('photo', capturedPhotoFile.value)
     await api.post(`/api/games/${startGame.value.id}/start`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
     showCameraModal.value = false
+    feel('success')
     router.push(`/games/${startGame.value.id}/play`)
   } catch (e) {
     showToast(e.response?.data?.message || '경기를 시작하지 못했어요')

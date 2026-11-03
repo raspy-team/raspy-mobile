@@ -48,7 +48,7 @@ import { Client } from '@stomp/stompjs'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { WS_URL } from '@/config/server'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { UiAvatar, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['WatchState']
@@ -71,7 +71,7 @@ async function cheer(side: number) {
   busy.value = true
   try {
     state.value = (await POST('/api/app-games/realtime/{gameId}/cheer', { path: { gameId }, body: { side } })).data
-    haptic('light')
+    feel('tap')
   } catch {
     await load()
   } finally {

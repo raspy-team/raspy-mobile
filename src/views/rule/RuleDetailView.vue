@@ -30,24 +30,15 @@
         </div>
       </div>
 
-      <!-- 숫자 세 칸. 아직 아무도 안 해 본 규칙이면 '– 0 –'만 남아 빼고, 아래 챔피언 줄이 첫 경기를 안내한다 -->
-      <div v-if="rule.playCount || rating" class="mt-6 grid grid-cols-3 bg-surface rounded-xl divide-x divide-line text-center">
-        <div class="py-3">
-          <p class="t-heading">
-            <template v-if="rating"><UiIcon name="fas fa-star" class="text-sm" aria-hidden="true" /> {{ rating }}</template>
-            <template v-else>–</template>
-          </p>
-          <p class="t-micro mt-0.5">{{ rule.ratingCount ? `평가 ${rule.ratingCount}개` : '평가 없음' }}</p>
-        </div>
-        <div class="py-3">
-          <p class="t-heading">{{ rule.playCount || 0 }}</p>
-          <p class="t-micro mt-0.5">경기</p>
-        </div>
-        <button type="button" class="py-3" @click="router.push(`/rules/${rule.id}/ranking`)">
-          <p class="t-heading">{{ myRank ? `${myRank}위` : '–' }}</p>
-          <p class="t-micro mt-0.5">{{ rankingArea ? "동네 순위" : "내 순위" }} <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
+      <!-- 숫자는 상자 없이 한 줄, 있는 것만 (빈 값을 '–'로 보이지 않는다, 11/3) -->
+      <p v-if="rule.playCount || rating || myRank" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 t-body text-fg-muted">
+        <span v-if="rating" class="inline-flex items-center gap-1 text-fg"><UiIcon name="fas fa-star" class="text-sm" aria-hidden="true" />{{ rating }}<span class="text-fg-muted">({{ rule.ratingCount }})</span></span>
+        <span v-if="rule.playCount">경기 <b class="text-fg tabular-nums">{{ rule.playCount }}</b>번</span>
+        <button v-if="myRank" type="button" class="inline-flex items-center gap-1 py-2.5 -my-2.5" @click="router.push(`/rules/${rule.id}/ranking`)">
+          {{ rankingArea ? '동네' : '내' }} 순위 <b class="text-fg tabular-nums">{{ myRank }}위</b><UiIcon name="chevron-right" class="text-xs" aria-hidden="true" />
         </button>
-      </div>
+        <button v-else-if="rule.playCount" type="button" class="inline-flex items-center gap-1 underline underline-offset-2 py-2.5 -my-2.5" @click="router.push(`/rules/${rule.id}/ranking`)">순위 보기</button>
+      </p>
 
       <!-- 만든 사람 -->
       <button type="button" class="w-full flex items-center gap-3 py-5 mt-2 border-b border-line text-left" @click="router.push('/profile/' + rule.createdBy.id)">

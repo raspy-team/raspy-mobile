@@ -11943,7 +11943,8 @@
       "MyRatingChange": {
         "required": [
           "after",
-          "before"
+          "before",
+          "provisional"
         ],
         "type": "object",
         "properties": {
@@ -11954,6 +11955,9 @@
           "after": {
             "type": "integer",
             "format": "int32"
+          },
+          "provisional": {
+            "type": "boolean"
           }
         }
       },

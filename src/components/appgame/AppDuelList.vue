@@ -3,7 +3,7 @@
     <UiListItem v-for="d in duels" :key="d.gameId" :title="d.title" :subtitle="view(d).line" @click="router.push(view(d).to)">
       <template #leading>
         <span class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-          <UiIcon :name="d.icon" />
+          <UiIcon :name="gameIcon(d.key, d.icon)" />
         </span>
       </template>
       <template #trailing>
@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { gameIcon } from '@/utils/appGameIcon'
 import { who } from '@/utils/format'
 // 아직 안 끝난 앱 대결 목록 (내 경기 화면). 내가 할 일이 남은 판(이어서 하기·하는 중)은 배지를 칠한다
 import { fixtureOf, kickoffLabel } from '@/utils/predict'

@@ -4,7 +4,7 @@
     <UiSection :title="title">
       <div v-if="list.lobbies.length" class="space-y-2">
         <UiCard v-for="l in list.lobbies" :key="l.gameId" class="flex items-center gap-3 py-3">
-          <UiIcon :name="l.icon" class="text-fg-muted" />
+          <UiIcon :name="gameIcon(l.key, l.icon)" class="text-fg-muted" />
           <div class="flex-1 min-w-0">
             <p class="t-label truncate">{{ l.nickname }}님 · {{ l.title }}</p>
             <p class="t-micro tabular-nums">{{ l.waitedSeconds + since }}초째 기다리는 중</p>
@@ -18,6 +18,7 @@
 </template>
 
 <script setup lang="ts">
+import { gameIcon } from '@/utils/appGameIcon'
 // 지금 기다리는 사람: 사람이 적을 때 게임마다 흩어지면 서로 못 만난다. 누가 어디서 기다리는지 보여 주고 한 번에 붙게 한다
 // 목록은 /topic/lobbies 신호가 올 때만 다시 불러온다 (폴링하지 않는다)
 import { ref, onMounted, onBeforeUnmount } from 'vue'

@@ -62,9 +62,11 @@
       <template v-else-if="state">
         <UiCard class="text-center py-8">
           <template v-if="state.status === 'COMPLETED'">
-            <BrandFace v-if="state.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
+            <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
+            <BrandFace :mood="state.result === 'WIN' ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
             <p class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
+            <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
         </UiCard>
@@ -79,7 +81,7 @@
 import { who } from '@/utils/format'
 // 실시간 대전 (/play/:key/battle, 퐁). 서버가 1초에 20번 판을 계산해 웹소켓으로 보내고, 화면은 그대로 그린다.
 // 손가락 위치만 보낸다 (라켓을 두고 싶은 x). 라켓이 얼마나 빨리 가는지는 서버가 정한다. 내 쪽(0번이 아니면 판을 뒤집어)이 늘 아래
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Client } from '@stomp/stompjs'
 import { GET, POST } from '@/api/client'
@@ -88,6 +90,8 @@ import { WS_URL } from '@/config/server'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
 import BrandFace from '../../components/BrandFace.vue'
+import { NEXT_ROUND } from '@/utils/verdict'
+import { feel } from '@/utils/feel'
 import { UiButton, UiCard, UiEmptyState, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['BattleStateResponse']
@@ -215,6 +219,12 @@ async function askSensor() {
 }
 
 // ---------- 대기실·결과 ----------
+// 끝나는 순간 한 번: 이기면 화음, 지면 부드럽게 내려가는 소리와 진동
+watch(
+  () => (state.value?.status === 'COMPLETED' ? state.value.result : null),
+  (r, before) => r && !before && feel(r === 'WIN' ? 'win' : r === 'DRAW' ? 'success' : 'lose'),
+)
+
 function apply(s: State) {
   offset.value = new Date(s.serverNow).getTime() - Date.now()
   state.value = s

@@ -17,15 +17,39 @@
         <UiButton block size="lg" :variant="!friend && createdId ? 'ghost' : 'primary'" :class="!friend && createdId ? 'mt-2' : 'mt-10'" to="/game">내 경기 보기</UiButton>
       </section>
 
+      <!-- 종목부터: 사람들은 규칙이 아니라 '토요일에 배드민턴'을 하고 싶다. 고르면 그 종목에서 가장 많이 쓰는 규칙으로 (11/3) -->
+      <section v-else-if="!ruleId">
+        <h1 class="t-title">무슨 종목으로 할까요?</h1>
+        <p class="t-caption mt-2">고르면 가장 많이 쓰는 규칙으로 시작해요. 다음 화면에서 바꿀 수 있어요.</p>
+        <div v-if="!sports" class="grid grid-cols-3 gap-2 mt-6">
+          <UiSkeleton v-for="n in 9" :key="n" class="h-24 rounded-xl" />
+        </div>
+        <div v-else class="grid grid-cols-3 gap-2 mt-6">
+          <button
+            v-for="s in sports"
+            :key="s.name"
+            type="button"
+            class="flex flex-col items-center gap-2 rounded-xl bg-surface py-4 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]"
+            @click="pickSport(s)"
+          >
+            <RuleThumb :minor="s.name" :size="36" bare />
+            <span class="t-label text-fg">{{ s.name }}</span>
+          </button>
+        </div>
+        <UiButton block variant="ghost" class="mt-6" @click="router.push('/rules?fromGameCreate=true')">규칙을 직접 고를래요</UiButton>
+      </section>
+
       <!-- 누구와 -->
       <template v-else>
         <UiCard v-if="rule" class="flex items-center gap-3 mb-8">
           <RuleThumb :rule="rule" :size="36" bare />
           <div class="flex-1 min-w-0">
-            <p class="t-micro">규칙</p>
+            <p class="t-micro">{{ autoPicked ? '자동으로 골랐어요 · 가장 많이 쓰는 규칙' : '규칙' }}</p>
             <p class="t-heading truncate">{{ rule.ruleTitle }}</p>
+            <p v-if="winSummary(rule)" class="t-caption">{{ winSummary(rule) }}</p>
           </div>
-          <UiButton variant="ghost" size="sm" @click="router.push('/rules?fromGameCreate=true')">바꾸기</UiButton>
+          <!-- 종목은 점점 늘어나고 예외도 있으니, 골라 준 규칙은 늘 바꿀 수 있게 (같은 종목 규칙부터 보여 준다) -->
+          <UiButton variant="ghost" size="sm" @click="router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked && pickedSport ? { q: pickedSport } : {}) } })">바꾸기</UiButton>
         </UiCard>
         <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
         <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
@@ -129,15 +153,17 @@
 // 장소·시간은 상대가 정해진 뒤 내 경기에서 함께 정한다
 import { ref, computed, onMounted } from 'vue'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
+import { GET } from '@/api/client'
+import { categoryKey, winSummary } from '../../utils/rule'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composable/useToast'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { shareLink } from '../../utils/share'
 import { localIso, quickTimes } from '../../utils/when'
 import { allowedFormats, TEAM_SIZES, GROUP_SIZES, VENUES, isRemote } from '../../utils/gameFormat'
 import {
-  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSpinner, UiTopBar,
+  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSkeleton, UiSpinner, UiTopBar,
 } from '../../components/ui'
 
 const route = useRoute()
@@ -173,7 +199,7 @@ const nowLocal = localIso(new Date()).slice(0, 16)
 const WHEN = [...quickTimes(), { label: EXACT, date: () => (exactTime.value ? `${exactTime.value.slice(0, 16)}:00` : null) }, { label: '나중에 정하기', date: () => null }]
 const when = ref('나중에 정하기')
 
-const ruleId = Number(route.query.ruleId)
+const ruleId = ref(Number(route.query.ruleId) || 0)
 
 // 동호회 화면에서 '동호회 경기 열기'로 왔으면 그 동호회를 미리 고른다 (규칙을 고르러 다녀오는 동안 sessionStorage에 둔다)
 const CLUB_KEY = 'match_club_for_game'
@@ -199,6 +225,32 @@ async function shareGame() {
   }
 }
 const rule = ref(null)
+
+// 종목 고르기: 규칙을 많이 쓴 순으로 받아 종목마다 맨 위 규칙을 고른다. 종목 이름은 분류(category.sport) → 제목·분류에서 찾은 종목
+const sports = ref(null)
+const autoPicked = ref(false)
+const pickedSport = ref('')
+async function loadSports() {
+  try {
+    const { data } = await GET('/api/rules/list', { query: { sort: 'popular' } })
+    const bySport = new Map()
+    for (const r of data || []) {
+      const name = r.category?.sport || categoryKey(r)
+      if (name === '기타' || bySport.has(name)) continue
+      bySport.set(name, { name, top: r })
+    }
+    sports.value = [...bySport.values()]
+  } catch {
+    sports.value = []
+  }
+}
+function pickSport(s) {
+  ruleId.value = s.top.id
+  rule.value = s.top
+  autoPicked.value = true
+  pickedSport.value = s.name
+  feel('select')
+}
 const friend = ref(null)
 const creating = ref(false)
 const created = ref(false)
@@ -239,7 +291,7 @@ async function create(target) {
   try {
     const matchDate = WHEN.find((w) => w.label === when.value)?.date() ?? null
     const payload = {
-      referencedRuleId: ruleId, friendId: target?.id ?? null, matchDate, format: format.value, maxPlayers: maxPlayers.value,
+      referencedRuleId: ruleId.value, friendId: target?.id ?? null, matchDate, format: format.value, maxPlayers: maxPlayers.value,
       venue: venue.value, placeDetail: isRemote(venue.value) ? venueDetail.value.trim() || null : null,
       clubId: target ? null : clubId.value,
     }
@@ -248,7 +300,7 @@ async function create(target) {
     friendsOpen.value = false
     created.value = true
     sessionStorage.removeItem(CLUB_KEY)
-    haptic('success')
+    feel('success')
   } catch (e) {
     friend.value = null
     showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 해 주세요')
@@ -269,12 +321,9 @@ async function loadFriends() {
 }
 
 onMounted(() => {
-  // 규칙 없이 들어오면 규칙부터 고른다
-  if (!ruleId) {
-    router.replace('/rules?fromGameCreate=true')
-    return
-  }
-  api.get(`/api/rules/${ruleId}`).then(({ data }) => (rule.value = data)).catch(() => {})
+  // 규칙 없이 들어오면 종목부터 고른다 (규칙 목록으로 보내지 않는다)
+  if (!ruleId.value) loadSports()
+  else api.get(`/api/rules/${ruleId.value}`).then(({ data }) => (rule.value = data)).catch(() => {})
   dong.value = undefined
   api.get('/api/neighborhoods/me')
     .then(({ data }) => (dong.value = data.neighborhoods.find((n) => n.active) ?? null))

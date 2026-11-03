@@ -74,11 +74,13 @@
       <template v-else-if="result">
         <UiCard class="text-center py-8">
           <template v-if="result.status === 'COMPLETED'">
-            <BrandFace v-if="result.result === 'WIN'" mood="wow" :size="64" class="mx-auto mb-3" />
+            <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
+            <BrandFace :mood="result.result === 'WIN' ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ VERDICT[result.result || 'DRAW'] }}</p>
             <p class="t-caption mt-2">
               <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
             </p>
+            <p v-if="NEXT_ROUND[result.result || '']" class="t-body mt-3">{{ NEXT_ROUND[result.result || ''] }}</p>
             <div class="flex items-center justify-center gap-6 mt-6">
               <span>
                 <UiRollNumber class="t-title tabular-nums" :value="result.myScore ?? 0" />
@@ -188,7 +190,9 @@
         <template v-else>
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
-            <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+            <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
+            <p v-if="!played" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요.</p>
+            <div v-else class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
                 <span class="block t-micro">실력 점수</span>
@@ -197,11 +201,11 @@
                 <span class="block t-title tabular-nums">{{ game.myWins }}<span class="t-caption">승</span> {{ game.myLosses }}<span class="t-caption">패</span></span>
                 <span class="block t-micro">전적</span>
               </span>
-              <span v-if="game.recordable">
-                <span class="block t-title tabular-nums">{{ game.myBest ?? '-' }}</span>
+              <span v-if="game.recordable && game.myBest != null">
+                <span class="block t-title tabular-nums">{{ game.myBest }}</span>
                 <span class="block t-micro">최고 기록</span>
               </span>
-              <span v-else>
+              <span v-else-if="!game.recordable">
                 <span class="block t-title tabular-nums">{{ game.myDraws }}</span>
                 <span class="block t-micro">무승부</span>
               </span>
@@ -248,7 +252,7 @@
                   <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
                 </UiListItem>
               </UiList>
-              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 없어요" description="5판 넘게 한 사람부터 순위에 올라요" />
+              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" description="5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요" />
               <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">순위 전체 보기</UiButton>
             </template>
             <template v-else>
@@ -308,6 +312,8 @@ import api from '../../api/api'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import BrandFace from '../../components/BrandFace.vue'
+import { NEXT_ROUND } from '@/utils/verdict'
+import { feel } from '@/utils/feel'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
@@ -349,6 +355,7 @@ const route = useRoute()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
 const game = ref<Schemas['AppGameSummary'] | null>(null)
+const played = computed(() => !!game.value && (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0)
 const duels = ref<Duel[]>([])
 const board = ref<Schemas['AppRecordBoard'] | null>(null)
 const boardKind = ref<'RATING' | 'WEEK' | 'ALL'>('RATING')
@@ -371,6 +378,15 @@ watch(() => result.value?.gameId, async (gameId) => {
     showToast(errorMessage(e, '도전장을 보내지 못했어요'))
   }
 })
+// 결과가 '끝남'으로 바뀌는 순간 한 번 (지난 경기를 다시 열어 볼 때는 조용히)
+watch(result, (now, before) => {
+  if (now?.status !== 'COMPLETED' || !now.result) return
+  if (before?.gameId === now.gameId ? before.status === 'COMPLETED' : !justSubmitted) return
+  justSubmitted = false
+  const r = now.result
+  feel(r === 'WIN' ? 'win' : r === 'DRAW' ? 'success' : 'lose')
+})
+let justSubmitted = false
 const votes = ref<Schemas['AppVoteCard'][]>([])
 const ranking = ref<Schemas['UserRankingDto'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
@@ -442,6 +458,7 @@ async function submit(answer: string) {
   if (!play.value) return
   submitting.value = true
   try {
+    justSubmitted = true
     result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { answer } })).data
     play.value = null
     load()
@@ -461,6 +478,7 @@ async function submitVideo(video: Blob) {
   try {
     const fd = new FormData()
     fd.append('video', video, video.type.includes('mp4') ? 'proof.mp4' : 'proof.webm')
+    justSubmitted = true
     result.value = (await api.post(`/api/app-games/plays/${play.value.playId}/proof`, fd, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 })).data
     play.value = null
     load()

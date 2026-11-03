@@ -121,7 +121,7 @@ const canConfirm = computed(() => {
 const gathered = computed(() => `${players.value.length}/${props.game.maxPlayers}명`)
 
 // 상태 → 배지 + 할 일 (한 곳에서 정한다)
-// 주황(primary)은 진행 중인 경기로 돌아가기만. 나머지 할 일은 tonal로 옅게 (카드마다 주황이 반복되지 않게)
+// 채운 버튼은 진행 중인 경기로 돌아가기, 볼트(signal)는 상대가 나를 기다리는 일(결과 확인·신청 승인)만. 나머지 할 일은 tonal
 const state = computed(() => {
   const g = props.game
   const live = g.status === 'IN_PROGRESS' || g.gameStatus === 'IN_PROGRESS'
@@ -129,7 +129,7 @@ const state = computed(() => {
   if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
     return !canConfirm.value
       ? { label: '확인 대기', tone: 'neutral', hint: multi.value ? '상대 쪽에서 확인하면 기록돼요' : '상대가 확인하면 기록돼요', action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }
-      : { label: '결과 확인', tone: 'primary', action: 'result', actionLabel: '결과 확인하기', actionVariant: 'tonal' }
+      : { label: '결과 확인', tone: 'primary', action: 'result', actionLabel: '결과 확인하기', actionVariant: 'signal' }
   }
   if (isMine.value) {
     const n = (g.applicants || []).filter((a) => !a.approved || !multi.value).length
@@ -141,7 +141,7 @@ const state = computed(() => {
         ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려드려요' }
         : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
     }
-    if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청자 보고 승인하기', actionVariant: 'tonal' }
+    if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청자 보고 승인하기', actionVariant: 'signal' }
     if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 보내서 더 부르기', actionVariant: 'secondary' }
     return { label: '상대 구하는 중', tone: 'neutral', action: 'share', actionLabel: '링크 공유하기', actionVariant: 'secondary' }
   }

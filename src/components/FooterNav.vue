@@ -28,10 +28,12 @@ const tabs = [
         :class="tab === t.key ? 'text-fg' : 'text-fg-subtle'"
       >
         <span class="relative">
-          <UiIcon :name="t.icon" class="text-2xl" :strong="tab === t.key" />
+          <!-- 고른 탭 아이콘이 한 번 톡 튄다 -->
+          <span :key="tab === t.key ? 'on' : 'off'" class="block" :class="tab === t.key ? 'feel-pop' : ''"><UiIcon :name="t.icon" class="text-2xl" :strong="tab === t.key" /></span>
           <span
             v-if="t.key === 'game' && waitingOnMeCount"
-            class="absolute -top-1 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-signal text-signal-on text-[11px] font-semibold leading-[18px] text-center tabular-nums"
+            :key="waitingOnMeCount"
+            class="feel-pop absolute -top-1 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-signal text-signal-on text-[11px] font-semibold leading-[18px] text-center tabular-nums"
             aria-hidden="true"
           >{{ waitingOnMeCount > 9 ? '9+' : waitingOnMeCount }}</span>
         </span>

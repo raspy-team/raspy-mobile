@@ -108,8 +108,8 @@
   .t-label { @apply text-[0.8125rem] font-medium text-fg-muted; }                                 /* 입력칸 이름 */
   .t-caption { @apply text-sm leading-[1.45] text-fg-muted; }                                /* 보조 설명 */
   .t-micro { @apply text-[0.8125rem] leading-[1.4] text-fg-muted; }                                                /* 시간, 개수 */
-  /* 기록·메타 정보 (Nous식 고정폭 라벨): 섹션 머리, 숫자 단위, 상태 */
-  .t-mono { @apply font-mono text-xs text-fg-subtle tracking-normal uppercase; }
+  /* 기록·메타 숫자 (순번, 단위, 상태). 고정폭 대신 표 숫자로 자리만 맞춘다 */
+  .t-mono { @apply font-mono text-[0.8125rem] text-fg-subtle tracking-normal tabular-nums; }
 }
 
 /* 매치의 서명: 볼트 형광펜. 승자 이름, 큰 제목의 핵심 낱말에만 (한 화면에 한두 곳)
@@ -177,6 +177,37 @@
 @media (prefers-reduced-motion: reduce) {
   .ui-skeleton::after { animation: none; }
   .ui-appear { animation: none; }
+}
+
+/* 손맛 움직임 (11/3, utils/feel과 짝). 짧고 한 번만. 움직임 줄이기면 모두 멈춘다
+   - feel-pop: 바뀐 숫자·고른 아이콘이 톡 튄다 (점수 +1, 탭, 숫자 배지)
+   - feel-rise: 결과처럼 '나온 순간'이 중요한 것이 차례로 올라온다 (feel-rise-2·3으로 늦춘다)
+   - win-spark: 이긴 얼굴 둘레로 볼트 불꽃이 튄다 (--a 각도) */
+@keyframes feel-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.feel-pop { animation: feel-pop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes feel-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.feel-rise { animation: feel-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.feel-rise-2 { animation-delay: 0.12s; }
+.feel-rise-3 { animation-delay: 0.24s; }
+@keyframes win-spark {
+  0% { opacity: 1; transform: rotate(var(--a)) translateX(0) scale(1); }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(54px) scale(0.4); }
+}
+.win-spark {
+  position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 9999px;
+  background: rgb(var(--c-signal)); pointer-events: none;
+  animation: win-spark 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .feel-pop, .feel-rise { animation: none; }
+  .win-spark { display: none; }
 }
 
 /* 화면 전환 (App.vue). 나갈 때는 바로, 들어올 때만 짧게 움직여 기다림이 늘지 않게 한다.

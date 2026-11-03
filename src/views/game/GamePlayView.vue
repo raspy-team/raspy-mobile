@@ -54,7 +54,8 @@
         >
           <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" :user-id="side.user.id" size="md" />
           <span class="text-sm text-fg-muted truncate max-w-full px-2">{{ side.user.nickname }}</span>
-          <span class="font-bold tabular-nums leading-none text-fg" style="font-size: clamp(4rem, 14vh, 8rem)">{{ side.score }}</span>
+          <!-- 점수가 바뀌면 숫자가 톡 튄다 (key가 바뀌어 다시 그려진다) -->
+          <span :key="side.score" class="font-bold tabular-nums leading-none text-fg feel-pop" style="font-size: clamp(4rem, 14vh, 8rem)">{{ side.score }}</span>
           <!-- 칸 전체가 버튼이라는 걸 첫 점수 전까지만 알린다 -->
           <span v-if="!currentScore1 && !currentScore2" class="t-caption">눌러서 1점</span>
           <span class="flex gap-1" :aria-label="`세트 ${side.sets}개 승리`">
@@ -164,7 +165,7 @@
 <script setup>
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
@@ -339,7 +340,7 @@ function manualFinishSet() {
 }
 
 function finishSet(who) {
-  haptic('success')
+  feel('success')
   isSetOver.value = true
   clearInterval(timerRef.value)
   if (who === 1) {
@@ -399,7 +400,7 @@ function updateElapsed() {
   ) {
     timeOverNotified.value = true
     // 진동
-    haptic('alert')
+    feel('alert')
     // 소리는 넣지 않는다. 있던 /notification.mp3 파일이 없어 매번 오류만 났다 (진동으로 알린다)
   }
 }
@@ -667,8 +668,8 @@ function socket_sendScore(userIndex, scoreDelta) {
     setIndex: currentSet.value,
     scoreDelta: scoreDelta,
   })
-  if (sent) return haptic('tap')
-  haptic('error')
+  if (sent) return feel(scoreDelta > 0 ? 'score' : 'tap')
+  feel('error')
   showToast('연결이 끊겨 점수가 올라가지 않았어요. 연결되면 다시 눌러 주세요')
 }
 

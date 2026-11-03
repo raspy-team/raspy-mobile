@@ -7,13 +7,14 @@
     :disabled="disabled"
     class="relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:opacity-40"
     :class="modelValue ? 'bg-fg' : 'bg-line-strong'"
-    @click="emit('update:modelValue', !modelValue)"
+    @click="feel('select'); emit('update:modelValue', !modelValue)"
   >
     <span class="absolute top-0.5 left-0.5 w-6 h-6 rounded-full transition-transform" :class="modelValue ? 'translate-x-5 bg-canvas' : 'bg-fg'"></span>
   </button>
 </template>
 
 <script setup>
+import { feel } from '../../utils/feel'
 // 켜기·끄기. 바로 적용되는 설정에 쓴다 (저장 버튼 없이)
 import { defineProps, defineEmits } from 'vue'
 defineProps({

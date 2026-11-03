@@ -14,13 +14,13 @@
       <UiIconButton icon="fas fa-ellipsis" label="더보기" class="-mr-3 flex-shrink-0" @click="emit('more')" />
     </header>
 
-    <!-- 결과: 이 카드의 주인공. 승자 이름에 형광펜 -->
-    <div class="mt-3 rounded-xl bg-surface px-4 py-5">
+    <!-- 결과: 이 카드의 주인공. 승자 이름에 형광펜. 카드 안에 상자를 또 두지 않는다 (11/3) -->
+    <div class="mt-4 mb-1">
       <!-- 셋 이상이 각자: 등수 줄 -->
       <ol v-if="ranking.length" class="space-y-1.5">
         <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3">
           <span class="t-mono w-8" :class="r.place === 1 ? 'text-fg font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
-          <button type="button" class="min-w-0 truncate text-[0.9375rem] text-left" :class="r.place === 1 ? 'text-fg font-semibold' : 'text-fg-muted'" @click="emit('profile', r.id)">
+          <button type="button" class="min-w-0 truncate text-[0.9375rem] text-left py-2.5 -my-2.5" :class="r.place === 1 ? 'text-fg font-semibold' : 'text-fg-muted'" @click="emit('profile', r.id)">
             <span :class="r.place === 1 ? 'hl' : ''">{{ r.name }}</span>
           </button>
         </li>
@@ -30,7 +30,7 @@
           v-for="(side, i) in sides"
           :key="i"
           type="button"
-          class="min-w-0 truncate text-[0.9375rem]"
+          class="min-w-0 truncate text-[0.9375rem] py-2.5 -my-2.5"
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', sideFirst(i)?.id)"
         >
@@ -38,7 +38,7 @@
         </button>
         <!-- 세트 점수 없이 승패만 남긴 경기는 0:0 대신 vs -->
         <span v-if="!hasScore" class="order-2 t-mono">vs</span>
-        <span v-else class="order-2 font-mono text-[34px] leading-none tracking-[-0.05em] tabular-nums">
+        <span v-else class="order-2 text-[2.125rem] font-semibold leading-none tracking-[-0.04em] tabular-nums">
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
         </span>
       </div>
@@ -72,11 +72,6 @@
       </template>
     </div>
 
-    <!-- 내 경기에 사진이 없으면 한 번 누르는 자리 (미디어 딜레마: 찍기 귀찮다 → 결과가 이미 그림이고, 사진은 선택. 올리면 피드 위로) -->
-    <button v-if="post.isMyGame && post.isCompleted && !post.photos?.length" type="button" class="mt-3 w-full h-11 rounded-xl border border-dashed border-line-strong t-caption flex items-center justify-center gap-1.5" @click="emit('photo')">
-      <UiIcon name="camera" aria-hidden="true" />사진 한 장 남기기 <span class="text-fg-subtle">· 소식에서 더 잘 보여요</span>
-    </button>
-
     <p v-if="post.caption && post.caption.trim()" class="t-body mt-3 whitespace-pre-line break-words">{{ post.caption }}</p>
 
     <!-- 반응 + 이어지는 행동 -->
@@ -90,17 +85,20 @@
         <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
       </button>
       <div class="flex-1"></div>
-      <UiButton size="sm" variant="tonal" @click="emit('play')">이 규칙으로 한 판</UiButton>
+      <!-- 카드마다 같은 '이 규칙으로 한 판'을 두지 않는다(더보기에). 내 경기에 사진이 없을 때만 조용히 한 줄 -->
+      <button v-if="post.isMyGame && post.isCompleted && !post.photos?.length" type="button" class="h-11 px-1 flex items-center gap-1.5 t-caption" @click="emit('photo')">
+        <UiIcon name="camera" aria-hidden="true" />사진 남기기
+      </button>
     </footer>
   </article>
 </template>
 
 <script setup>
-// 피드의 경기 한 장: 누구 vs 누구 → 결과(점수·승자·규칙) → 사진(있으면) → 좋아요·댓글 → 이 규칙으로 한 판
+// 소식의 경기 한 장: 누구 vs 누구 → 결과(점수·승자·규칙) → 사진(있으면) → 좋아요·댓글. '이 규칙으로 한 판'은 더보기에
 // 사진이 없어도 결과가 주인공이라 카드가 비지 않는다
 import { computed, defineProps, defineEmits } from 'vue'
 import RuleThumb from '../rule/RuleThumb.vue'
-import { UiAvatar, UiButton, UiIconButton } from '../ui'
+import { UiAvatar, UiIconButton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 const props = defineProps({

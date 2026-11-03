@@ -50,6 +50,8 @@ import {
   LayoutGrid, List, ListOrdered, LogOut, Mail, MapPin, MessageCircle, Minus, Pencil, Play, Plus, RotateCcw, RotateCw,
   Search, Send, Settings, Share, Ship, ShieldHalf, Square, SquarePen, Star, Target, Timer, TriangleAlert, Trophy, Trash2,
   Unplug, User, Swords, Handshake, Scale, CircleCheck, Circle, Activity, Globe, SunMoon, GalleryVerticalEnd, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper, Gamepad2,
+  CircleDot, Spade, Type, CalendarDays, MessagesSquare, Grid2x2, MessageCircleQuestion, RefreshCw, Map, Gem, Calculator, Hash, Bomb,
+  Goal, Lightbulb, Feather, Vibrate, Dumbbell, Link, Volume2,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -73,7 +75,11 @@ const ICONS = {
   gavel: Gavel, gear: Settings, hand: Hand, heading: Heading, heart: Heart, 'hourglass-half': Hourglass,
   home: House, images: Images, keyboard: Keyboard, inbox: Inbox, 'info-circle': Info, instagram: Instagram,
   'layer-group': Layers, list: List, 'list-ol': ListOrdered, 'location-dot': MapPin,
-  gamepad: Gamepad2, minus: Minus, 'magnifying-glass': Search, search: Search, newspaper: Newspaper, 'paper-plane': Send,
+  gamepad: Gamepad2, minus: Minus,
+  // 앱 게임마다의 그림 (utils/appGameIcon)
+  'circle-dot': CircleDot, spade: Spade, type: Type, 'calendar-days': CalendarDays, messages: MessagesSquare, 'grid-2x2': Grid2x2,
+  'message-question': MessageCircleQuestion, refresh: RefreshCw, map: Map, gem: Gem, calculator: Calculator, hash: Hash, bomb: Bomb,
+  goal: Goal, lightbulb: Lightbulb, feather: Feather, vibrate: Vibrate, dumbbell: Dumbbell, link: Link, volume: Volume2, 'magnifying-glass': Search, search: Search, newspaper: Newspaper, 'paper-plane': Send,
   pen: Pencil, 'pen-to-square': SquarePen, play: Play, 'plug-circle-exclamation': Unplug, plus: Plus,
   'ranking-star': Award, redo: RotateCw, 'right-from-bracket': LogOut, 'rotate-left': RotateCcw, 'rotate-right': RotateCw,
   'shield-halved': ShieldHalf, ship: Ship, star: Star, stop: Square, stopwatch: Timer, times: X, xmark: X,

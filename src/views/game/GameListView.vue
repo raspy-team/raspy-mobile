@@ -6,33 +6,24 @@
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
+    <!-- 브랜드 한 줄 (docs/essence.md: 줄 말고 판). 하루에 하나, 핵심 낱말에 형광펜. 입구에만 있던 목소리를 안으로 (11/3) -->
+    <p class="text-[1.375rem] leading-[1.35] font-semibold tracking-[-0.03em] text-fg">
+      {{ brandLine.before }}<span class="hl">{{ brandLine.mark }}</span>{{ brandLine.after }}
+    </p>
+
     <!-- 지금 동네 (경기 목록이 이 동네 범위를 따른다) -->
-    <NeighborhoodBar class="mb-3" @changed="fetchGames" />
+    <NeighborhoodBar class="mt-5 mb-3" @changed="fetchGames" />
 
-    <!-- 주 행동은 경기 만들기 하나. 화면에서 가장 밝은 덩어리가 내용보다 앞서지 않게 작게 -->
-    <!-- 버튼이 늘어 한 줄에 다 안 들어가면 옆으로 민다 (줄바꿈하면 '동호/회'처럼 깨진다) -->
-    <div class="flex items-center gap-1 -mx-4 px-4 overflow-x-auto no-scrollbar [&>*]:flex-shrink-0 [&>*]:whitespace-nowrap">
-      <UiButton size="sm" icon="plus" to="/create-game">경기 만들기</UiButton>
-      <UiButton size="sm" variant="ghost" to="/rules">규칙</UiButton>
-      <UiButton size="sm" variant="ghost" to="/clubs">동호회</UiButton>
-    </div>
+    <!-- 위쪽 버튼은 두 가지만: 채운 주 행동 하나 + 같은 모양의 갈 곳 셋 (11/3) -->
+    <UiButton block size="lg" icon="plus" to="/create-game">경기 만들기</UiButton>
+    <nav class="mt-3 grid grid-cols-3 gap-2" aria-label="둘러보기">
+      <RouterLink v-for="d in DESTINATIONS" :key="d.to" :to="d.to" class="flex flex-col items-center gap-1.5 rounded-xl bg-surface py-3.5 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]">
+        <UiIcon :name="d.icon" class="text-xl text-fg-muted" />
+        <span class="t-label text-fg">{{ d.label }}</span>
+      </RouterLink>
+    </nav>
 
-    <!-- 지금 상황으로 찾기 (docs/direction.md '찾기': 홈에는 자주 쓰는 조합을 줄로) -->
-    <div v-if="situations.length" class="flex gap-2 mt-5 -mx-4 px-4 overflow-x-auto no-scrollbar" role="group" aria-label="상황으로 찾기">
-      <UiChip v-for="s in situations" :key="s.label" class="flex-shrink-0 whitespace-nowrap" :icon="s.icon" @click="router.push({ path: '/rules', query: s.query })">{{ s.label }}</UiChip>
-    </div>
-
-    <!-- 앱 게임은 이 화면의 주인공이 아니다 (사용자 11/3). 들어가는 문 한 줄만 두고, 목록·기다리는 사람은 /games에서 -->
-    <RouterLink to="/games" class="mt-5 flex items-center gap-3 rounded-xl bg-surface px-4 py-3 active:bg-surface-2 transition-colors">
-      <UiIcon name="gamepad" class="text-xl text-fg-muted" />
-      <span class="flex-1 min-w-0">
-        <span class="block t-label text-fg">앱 게임</span>
-        <span class="block t-caption">만나지 않고 폰으로 바로 한&nbsp;판</span>
-      </span>
-      <UiIcon name="chevron-right" class="text-fg-subtle" />
-    </RouterLink>
-
-    <UiSection title="모집 중인 경기" class="mt-6">
+    <UiSection title="모집 중인 경기" class="mt-8">
       <template #action>
         <span v-if="games.length" class="t-micro">{{ games.length }}개</span>
       </template>
@@ -61,7 +52,7 @@
       </UiCard>
 
       <UiCard v-else-if="!games.length">
-        <UiEmptyState icon="fas fa-trophy" title="아직 모집 중인 경기가 없어요" description="첫 경기를 만들면 동네 사람들에게 보여요">
+        <UiEmptyState icon="fas fa-trophy" title="아직 판이 없어요" description="처음 여는 사람이 판을 깔아요. 만들면 동네 사람들에게 바로 보여요">
           <UiButton to="/create-game">경기 만들기</UiButton>
         </UiEmptyState>
       </UiCard>
@@ -160,13 +151,17 @@ import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { ratingLine } from '../../utils/format'
 import { copyText } from '../../utils/clipboard'
-import { haptic } from '../../utils/haptics'
-import { SITUATIONS, availableSituations } from '@/utils/situations'
+import { feel } from '../../utils/feel'
+import { todayBrandLine } from '@/utils/brandLines'
 
 const REPORT_REASONS = ['욕설·비방', '거짓 경기', '광고·스팸', '기타']
-// 걸리는 규칙이 없는 줄은 뺀다 (utils/situations). 받기 전에는 전부 보여 준다
-const situations = ref(SITUATIONS)
-availableSituations().then((list) => (situations.value = list))
+// 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나 (사용자 11/3)
+const DESTINATIONS = [
+  { to: '/games', icon: 'gamepad', label: '앱 게임' },
+  { to: '/rules', icon: 'book-open', label: '규칙' },
+  { to: '/clubs', icon: 'users', label: '동호회' },
+]
+const brandLine = todayBrandLine()
 
 const route = useRoute()
 const router = useRouter()
@@ -211,7 +206,7 @@ async function apply(game, team) {
   try {
     await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
     game.isAppliedByMe = true
-    haptic('success')
+    feel('success')
     showToast('신청했어요. 주최자가 승인하면 알려드려요')
   } catch (e) {
     showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')

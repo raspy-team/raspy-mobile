@@ -522,7 +522,7 @@
           "point-controller"
         ],
         "summary": "응원하기",
-        "description": "시작 전인 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번, 만 19세 이상). 이기면 돌려받고 보너스(최대 50%, 유력한 쪽일수록 작고 아는 사이면 0)를 더한다",
+        "description": "시작 전인 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번). 이기면 돌려받고 보너스(최대 50%, 유력한 쪽일수록 작고 아는 사이면 0)를 더한다",
         "operationId": "cheerWithPoints",
         "parameters": [
           {
@@ -874,81 +874,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/MyNeighborhoods"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/match-cards/{userId}": {
-      "post": {
-        "tags": [
-          "match-card-controller"
-        ],
-        "summary": "카드 고르기",
-        "description": "like=true면 '붙어 보고 싶어요'(하루 20번), false면 넘기기(상대에게 알리지 않는다). 둘 다 원하면 matched=true와 DM 방",
-        "operationId": "swipe",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SwipeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SwipeResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/match-cards/join": {
-      "post": {
-        "tags": [
-          "match-card-controller"
-        ],
-        "summary": "내 카드 켜기·끄기",
-        "description": "켠 사람(만 19세 이상)만 덱을 보고 남의 덱에 나온다",
-        "operationId": "join",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JoinRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/MatchDeckStatus"
                 }
               }
             }
@@ -2201,7 +2126,7 @@
         ],
         "summary": "동호회 들어가기",
         "description": "초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로",
-        "operationId": "join_1",
+        "operationId": "join",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4538,52 +4463,6 @@
         }
       }
     },
-    "/api/match-cards": {
-      "get": {
-        "tags": [
-          "match-card-controller"
-        ],
-        "summary": "맞붙기 카드",
-        "description": "내 동네 범위 사람 카드 (최근에 들어온 사람 먼저). 동네가 없으면 428",
-        "operationId": "deck",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/MatchDeck"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/match-cards/matches": {
-      "get": {
-        "tags": [
-          "match-card-controller"
-        ],
-        "summary": "매치한 사람들",
-        "operationId": "matches",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MatchedPerson"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/invite/{gameId}": {
       "get": {
         "tags": [
@@ -5071,6 +4950,39 @@
                   "items": {
                     "$ref": "#/components/schemas/GameSummaryResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/between/{userId}": {
+      "get": {
+        "tags": [
+          "game-between-controller"
+        ],
+        "summary": "이 사람과 함께 있는 경기",
+        "description": "채팅 위에 보여 준다. 진행 중·결과 확인·예정·신청 중인 경기 중 가장 급한 하나와 지금 할 일. 없으면 빈 응답",
+        "operationId": "between",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameBetween"
                 }
               }
             }
@@ -7272,65 +7184,6 @@
           "level": {
             "type": "integer",
             "format": "int32"
-          }
-        }
-      },
-      "SwipeRequest": {
-        "required": [
-          "like"
-        ],
-        "type": "object",
-        "properties": {
-          "like": {
-            "type": "boolean"
-          }
-        }
-      },
-      "SwipeResult": {
-        "required": [
-          "likesLeft",
-          "matched"
-        ],
-        "type": "object",
-        "properties": {
-          "matched": {
-            "type": "boolean"
-          },
-          "likesLeft": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "roomId": {
-            "type": "string"
-          },
-          "partnerId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "partnerNickname": {
-            "type": "string"
-          }
-        }
-      },
-      "JoinRequest": {
-        "required": [
-          "joined"
-        ],
-        "type": "object",
-        "properties": {
-          "joined": {
-            "type": "boolean"
-          }
-        }
-      },
-      "MatchDeckStatus": {
-        "required": [
-          "joined"
-        ],
-        "type": "object",
-        "properties": {
-          "joined": {
-            "type": "boolean"
           }
         }
       },
@@ -9941,95 +9794,6 @@
           }
         }
       },
-      "MatchCard": {
-        "required": [
-          "abilities",
-          "nickname",
-          "trust",
-          "userId"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "avatar": {
-            "type": "string"
-          },
-          "bio": {
-            "type": "string"
-          },
-          "dongName": {
-            "type": "string"
-          },
-          "trust": {
-            "$ref": "#/components/schemas/TrustSummary"
-          },
-          "abilities": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "lastSeen": {
-            "type": "string",
-            "format": "date"
-          }
-        }
-      },
-      "MatchDeck": {
-        "required": [
-          "cards",
-          "joined",
-          "likesLeft"
-        ],
-        "type": "object",
-        "properties": {
-          "cards": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MatchCard"
-            }
-          },
-          "likesLeft": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "areaName": {
-            "type": "string"
-          },
-          "joined": {
-            "type": "boolean"
-          }
-        }
-      },
-      "MatchedPerson": {
-        "required": [
-          "nickname",
-          "trust",
-          "userId"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "avatar": {
-            "type": "string"
-          },
-          "trust": {
-            "$ref": "#/components/schemas/TrustSummary"
-          }
-        }
-      },
       "InvitedGameResponse": {
         "required": [
           "id",
@@ -11297,6 +11061,66 @@
           "championId": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "GameBetween": {
+        "required": [
+          "canReschedule",
+          "gameId",
+          "minorCategory",
+          "needsSchedule",
+          "remote",
+          "ruleTitle",
+          "status",
+          "todo"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "minorCategory": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "MATCHING",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "RESULT_PENDING",
+              "COMPLETED",
+              "CANCELED",
+              "DELETED",
+              "WAITING",
+              "PLAYING",
+              "VOTING",
+              "AWAITING_RESULT"
+            ]
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "place": {
+            "type": "string"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "todo": {
+            "type": "string"
+          },
+          "needsSchedule": {
+            "type": "boolean"
+          },
+          "canReschedule": {
+            "type": "boolean"
           }
         }
       },

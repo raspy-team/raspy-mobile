@@ -221,7 +221,7 @@
 // 내 경기: 할 일(시작·승인·참여) / 기다리는 중 / 끝난 경기로 나눠 보여준다
 import { TEAM_NAMES, VENUES, isRemote } from '../../utils/gameFormat'
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
@@ -253,6 +253,7 @@ const FIRST_STEPS = [
 ]
 
 const router = useRouter()
+const route = useRoute()
 const { showToast } = useToast()
 
 const loading = ref(true)
@@ -396,7 +397,8 @@ function closeSafety() {
   safetyGame.value = null
 }
 watch(allGames, (list) => {
-  if (safetyGame.value || scheduleGame.value) return
+  // 시간·장소를 정하러 왔으면(채팅 위 경기 칸) 그 시트가 먼저. 수칙은 다음에 볼 때
+  if (safetyGame.value || scheduleGame.value || Number(route.query.schedule)) return
   const g = list.find((x) => needsSafety(x) && !safetySeen.includes(x.id))
   if (g) safetyGame.value = g
 })
@@ -499,10 +501,11 @@ const canSubmitSchedule = computed(() => {
   return !!schedTime.value || (placeMode.value === 'mine' && !!myArea.value) || (schedRegion1.value && schedRegion2.value)
 })
 
-async function openSchedule(g) {
-  await loadMyArea()
-  placeMode.value = g.matchLocation && !isRemote(g.venue) ? 'keep' : myArea.value ? 'mine' : 'other'
+function openSchedule(g) {
+  // 시트를 먼저 연다 (동네를 불러오는 사이 다른 시트가 끼어들지 않게). 동네가 오면 기본 장소를 채운다
   scheduleGame.value = g
+  placeMode.value = g.matchLocation && !isRemote(g.venue) ? 'keep' : myArea.value ? 'mine' : 'other'
+  if (!myArea.value) loadMyArea().then(() => { if (scheduleGame.value?.id === g.id && placeMode.value === 'other' && myArea.value) placeMode.value = 'mine' })
   schedTime.value = g.matchDate ? String(g.matchDate).slice(0, 16) : ''
   const parsed = g.matchLocation ? parseRegion(g.matchLocation) : null
   schedRegion1.value = parsed?.region1 || ''
@@ -654,6 +657,14 @@ onMounted(async () => {
   window.onGameViewCameraResult = handleNativeCamera
   api.get('/api/user-profile/0').then(({ data }) => (me.value = { id: data.id, name: data.nickname, avatar: data.avatar })).catch(() => {})
   await fetchGames()
+  // 채팅 위 경기 칸에서 '시간·장소 정하기'로 왔으면 그 경기의 시트를 바로 연다
+  const want = Number(route.query.schedule)
+  if (want) {
+    const g = allGames.value.find((x) => x.id === want && x.type !== 'app-duel')
+    // 주소에서 ?schedule만 조용히 뺀다. router.replace를 쓰면 화면이 주소 전체를 열쇠로 다시 만들어져 시트가 사라진다
+    history.replaceState(history.state, '', route.path)
+    if (g) openSchedule(g)
+  }
   // 신청·승인·시작·종료 신호가 오거나 앱으로 돌아왔을 때 다시 불러온다
   stopWatching = refreshOnChange(fetchGames)
 })

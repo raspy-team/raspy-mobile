@@ -283,7 +283,7 @@ export interface paths {
         put?: never;
         /**
          * 응원하기
-         * @description 시작 전인 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번, 만 19세 이상). 이기면 돌려받고 보너스(최대 50%, 유력한 쪽일수록 작고 아는 사이면 0)를 더한다
+         * @description 시작 전인 남의 경기 한쪽에 포인트를 건다 (10~100, 경기마다 한 번). 이기면 돌려받고 보너스(최대 50%, 유력한 쪽일수록 작고 아는 사이면 0)를 더한다
          */
         post: operations["cheerWithPoints"];
         delete?: never;
@@ -484,46 +484,6 @@ export interface paths {
          * @description 0 내 동네만 · 1 가까운 동네 · 2 조금 먼 동네 · 3 먼 동네
          */
         post: operations["range"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/match-cards/{userId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 카드 고르기
-         * @description like=true면 '붙어 보고 싶어요'(하루 20번), false면 넘기기(상대에게 알리지 않는다). 둘 다 원하면 matched=true와 DM 방
-         */
-        post: operations["swipe"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/match-cards/join": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 내 카드 켜기·끄기
-         * @description 켠 사람(만 19세 이상)만 덱을 보고 남의 덱에 나온다
-         */
-        post: operations["join"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1163,7 +1123,7 @@ export interface paths {
          * 동호회 들어가기
          * @description 초대 코드(code) 또는 동네 목록의 동호회(clubId). 이미 들었으면 그대로
          */
-        post: operations["join_1"];
+        post: operations["join"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2387,43 +2347,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/match-cards": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * 맞붙기 카드
-         * @description 내 동네 범위 사람 카드 (최근에 들어온 사람 먼저). 동네가 없으면 428
-         */
-        get: operations["deck"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/match-cards/matches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 매치한 사람들 */
-        get: operations["matches"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/invite/{gameId}": {
         parameters: {
             query?: never;
@@ -2712,6 +2635,26 @@ export interface paths {
          * @description 선택한 지역 및 정렬 기준에 따라 현재 참여 가능한 게임 방의 요약 정보를 반환합니다.
          */
         get: operations["listGames"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/between/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 이 사람과 함께 있는 경기
+         * @description 채팅 위에 보여 준다. 진행 중·결과 확인·예정·신청 중인 경기 중 가장 급한 하나와 지금 할 일. 없으면 빈 응답
+         */
+        get: operations["between"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3785,24 +3728,6 @@ export interface components {
             /** Format: int32 */
             level: number;
         };
-        SwipeRequest: {
-            like: boolean;
-        };
-        SwipeResult: {
-            matched: boolean;
-            /** Format: int32 */
-            likesLeft: number;
-            roomId?: string;
-            /** Format: int64 */
-            partnerId?: number;
-            partnerNickname?: string;
-        };
-        JoinRequest: {
-            joined: boolean;
-        };
-        MatchDeckStatus: {
-            joined: boolean;
-        };
         GameRegionRequest: {
             roadAddress: string;
             detailAddress?: string;
@@ -4597,32 +4522,6 @@ export interface components {
             shortName: string;
             fullName: string;
         };
-        MatchCard: {
-            /** Format: int64 */
-            userId: number;
-            nickname: string;
-            avatar?: string;
-            bio?: string;
-            dongName?: string;
-            trust: components["schemas"]["TrustSummary"];
-            abilities: string[];
-            /** Format: date */
-            lastSeen?: string;
-        };
-        MatchDeck: {
-            cards: components["schemas"]["MatchCard"][];
-            /** Format: int32 */
-            likesLeft: number;
-            areaName?: string;
-            joined: boolean;
-        };
-        MatchedPerson: {
-            /** Format: int64 */
-            userId: number;
-            nickname: string;
-            avatar?: string;
-            trust: components["schemas"]["TrustSummary"];
-        };
         InvitedGameResponse: {
             /** Format: int64 */
             id: number;
@@ -5014,6 +4913,21 @@ export interface components {
             myGameStatisticsDTO: components["schemas"]["UserGameStatisticsDTO"];
             /** Format: int64 */
             championId?: number;
+        };
+        GameBetween: {
+            /** Format: int64 */
+            gameId: number;
+            ruleTitle: string;
+            minorCategory: string;
+            /** @enum {string} */
+            status: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
+            /** Format: date-time */
+            matchDate?: string;
+            place?: string;
+            remote: boolean;
+            todo: string;
+            needsSchedule: boolean;
+            canReschedule: boolean;
         };
         ActiveGameResponse: {
             /** Format: int64 */
@@ -5952,56 +5866,6 @@ export interface operations {
             };
         };
     };
-    swipe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SwipeRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["SwipeResult"];
-                };
-            };
-        };
-    };
-    join: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JoinRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MatchDeckStatus"];
-                };
-            };
-        };
-    };
     createInvite: {
         parameters: {
             query: {
@@ -6819,7 +6683,7 @@ export interface operations {
             };
         };
     };
-    join_1: {
+    join: {
         parameters: {
             query?: never;
             header?: never;
@@ -8409,46 +8273,6 @@ export interface operations {
             };
         };
     };
-    deck: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MatchDeck"];
-                };
-            };
-        };
-    };
-    matches: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MatchedPerson"][];
-                };
-            };
-        };
-    };
     getInviteById: {
         parameters: {
             query?: never;
@@ -8778,6 +8602,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GameSummaryResponse"][];
+                };
+            };
+        };
+    };
+    between: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GameBetween"];
                 };
             };
         };

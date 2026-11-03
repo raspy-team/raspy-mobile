@@ -5,6 +5,7 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { refreshInbox } from '../../stores/inbox'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { matchTime } from '../../utils/format'
 import api, { playWithMeTooAPI } from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
@@ -27,6 +28,11 @@ const bottomHeight = ref(64)
 const STATUS_TONE = { green: 'success', orange: 'primary', red: 'danger', gray: 'neutral', blue: 'neutral' }
 let sizeObserver = null
 
+// 이 사람과 함께 있는 경기 하나와 지금 할 일 (/api/games/between)
+const between = ref(null)
+async function fetchBetween() {
+  between.value = (await api.get(`/api/games/between/${targetUserId}`).catch(() => ({ data: null }))).data || null
+}
 const targetUserNickname = ref('')
 const targetUserProfileUrl = ref('')
 // 도전 요청 데이터 (모든 상태 포함)
@@ -116,7 +122,8 @@ onMounted(async () => {
     await fetchChallengeStatus()
 
     // 그 밖의 변경(내 채널 신호)이나 앱으로 돌아왔을 때도 다시 불러온다 (예전엔 5초마다)
-    stopWatchingStatus = refreshOnChange(fetchChallengeStatus)
+    fetchBetween()
+    stopWatchingStatus = refreshOnChange(() => { fetchChallengeStatus(); fetchBetween() })
 
     const res = await api.get(`/api/chat-room/${roomId.value}/chat-messages`)
     messages.value = res.data
@@ -376,6 +383,22 @@ const closeErrorModal = () => {
           <UiButton v-else-if="headerInfo.actionType === 'go_to_game'" size="sm" block icon="fas fa-play" @click="handleGoToGame">경기로 가기</UiButton>
           <UiButton v-else-if="headerInfo.actionType === 'view_result'" variant="secondary" size="sm" block icon="fas fa-trophy" @click="handleViewResult">결과 보기</UiButton>
         </div>
+      </div>
+      <!-- 지금 이 사람과 무슨 경기 이야기인지 (당근 채팅의 물건 칸처럼). 도전 카드가 없을 때 -->
+      <div v-if="!headerInfo.show && between" class="px-3 py-2 border-b border-line">
+        <div class="flex items-start gap-3">
+          <RuleThumb :rule="{ minorCategory: between.minorCategory, ruleTitle: between.ruleTitle }" :size="44" class="!rounded-lg" />
+          <button type="button" class="flex-1 min-w-0 text-left" @click="router.push('/game')">
+            <span class="flex items-center gap-2">
+              <span class="t-body font-medium text-fg truncate">{{ between.ruleTitle }}</span>
+              <UiBadge :tone="between.needsSchedule ? 'primary' : 'neutral'">{{ between.todo }}</UiBadge>
+            </span>
+            <span class="block t-caption mt-0.5 truncate">{{ [between.matchDate ? matchTime(between.matchDate) : '시간 미정', between.remote ? between.place : between.place || '장소 미정'].filter(Boolean).join(' · ') }}</span>
+          </button>
+        </div>
+        <UiButton v-if="between.canReschedule" size="sm" :variant="between.needsSchedule ? 'primary' : 'secondary'" block class="mt-2" icon="pen" @click="router.push({ path: '/game', query: { schedule: between.gameId } })">
+          {{ between.needsSchedule ? (between.remote ? '시간 정하기' : '시간·장소 정하기') : '시간·장소 바꾸기' }}
+        </UiButton>
       </div>
     </div>
 

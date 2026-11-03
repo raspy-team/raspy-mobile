@@ -42,8 +42,8 @@
       <div v-if="!isSignup" class="mt-4 text-center">
         <button v-if="!forgotOpen" type="button" class="t-caption underline underline-offset-2" @click="forgotOpen = true">비밀번호를 잊었나요?</button>
         <p v-else class="t-caption text-left rounded-xl bg-surface px-4 py-3">
-          아이디로 가입한 계정은 비밀번호를 되찾을 이메일이 없어요. 아이디와 가입한 때를 적어
-          <a class="underline underline-offset-2 text-fg" :href="forgotMail">yeonkoh@protonmail.com</a>으로 보내 주시면 확인하고 도와 드려요.
+          아이디로 가입한 계정은 비밀번호를 되찾을 이메일이 없어요. 아이디를 적어
+          <a class="underline underline-offset-2 text-fg" :href="forgotMail">yeonkoh@protonmail.com</a>으로 보내 주시면 본인인지 확인한 뒤 도와 드려요.
           카카오·구글로 시작했다면 그 버튼으로 다시 들어오면 돼요.
         </p>
       </div>

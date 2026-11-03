@@ -94,7 +94,7 @@
         </UiCard>
 
         <form class="mt-4" @submit.prevent="send">
-          <UiInput ref="input" v-model="word" :maxlength="6" :placeholder="myTurn ? `'${lastChar}'(으)로 시작하는 낱말` : '상대가 생각하는 중'" @enter="send" />
+          <UiInput ref="input" v-model="word" :maxlength="6" :placeholder="myTurn ? `'${lastChar}'${withRo(lastChar).slice(String(lastChar).length)} 시작하는 낱말` : '상대가 생각하는 중'" @enter="send" />
           <p v-if="moveError" class="t-caption text-danger mt-1">{{ moveError }}</p>
           <UiButton block size="lg" class="mt-3" :disabled="!myTurn || !word.trim()" :loading="sending" @click="send">내기</UiButton>
         </form>
@@ -131,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { who } from '@/utils/format'
+import { who, withRo } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'

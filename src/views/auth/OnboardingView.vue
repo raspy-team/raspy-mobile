@@ -36,12 +36,12 @@
           <span class="t-heading">모두 동의</span>
         </button>
         <div class="border-t border-line">
-          <div v-for="t in TERMS" :key="t.id" class="flex items-center pl-4 pr-1 h-12">
+          <div v-for="t in CHECKS" :key="t.id" class="flex items-center pl-4 pr-1 h-12">
             <button type="button" role="checkbox" :aria-checked="agreed[t.id]" class="flex-1 flex items-center gap-3 h-full text-left" @click="agreed[t.id] = !agreed[t.id]">
               <UiIcon name="fas fa-check" class="w-6 text-center" :class="agreed[t.id] ? 'text-primary' : 'text-line-strong'" aria-hidden="true" />
               <span class="text-sm text-fg">{{ t.title }} <span class="text-fg-subtle">(필수)</span></span>
             </button>
-            <UiButton variant="ghost" size="sm" @click="openTerm = t">보기</UiButton>
+            <UiButton v-if="t.body" variant="ghost" size="sm" @click="openTerm = t">보기</UiButton>
           </div>
         </div>
       </UiCard>
@@ -150,13 +150,14 @@ const needProfile = ref(true)
 const step = ref('terms')
 const steps = ref([]) // 처음에 보여 줄 단계들 (단계 표시용)
 
-// 약관
-const agreed = reactive(Object.fromEntries(TERMS.map((t) => [t.id, false])))
-const allAgreed = computed(() => TERMS.every((t) => agreed[t.id]))
+// 약관 + 만 14세 이상 (당근처럼 가입 때 필수로 체크만 받는다. 본인인증은 만나서 하는 경기에서)
+const CHECKS = [...TERMS, { id: 'age14', title: '만 14세 이상이에요' }]
+const agreed = reactive(Object.fromEntries(CHECKS.map((t) => [t.id, false])))
+const allAgreed = computed(() => CHECKS.every((t) => agreed[t.id]))
 const openTerm = ref(null)
 function toggleAll() {
   const next = !allAgreed.value
-  TERMS.forEach((t) => (agreed[t.id] = next))
+  CHECKS.forEach((t) => (agreed[t.id] = next))
 }
 function agreeOne(id) {
   agreed[id] = true

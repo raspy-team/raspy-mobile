@@ -35,6 +35,7 @@
                 <UiButton v-if="isRoom(r.context)" variant="secondary" size="sm" icon="far fa-comment" @click="openChat(r.context)">대화 보기</UiButton>
                 <UiButton variant="secondary" size="sm" :loading="sanctioningId === r.id" @click="sanction(r, 7)">7일 정지</UiButton>
                 <UiButton variant="danger" size="sm" :loading="sanctioningId === r.id" @click="sanction(r, null)">영구 정지</UiButton>
+                <UiButton v-if="r.reason === AGE_REPORT" variant="danger" size="sm" :loading="sanctioningId === r.id" @click="sanctionAge(r)">나이 확인까지 멈추기</UiButton>
                 <UiButton v-if="r.accusedSuspendedUntil" variant="secondary" size="sm" :loading="sanctioningId === r.id" @click="lift(r)">정지 풀기</UiButton>
               </div>
               <div class="flex gap-2">
@@ -409,6 +410,21 @@ async function sanction(report, days) {
     await POST('/api/admin/users/{userId}/suspend', { path: { userId: report.accusedId }, body: { days, reason: report.reason } })
     reports.value = (await GET('/api/admin/reports')).data
     showToast(`${what}했어요`)
+  } catch (e) {
+    showToast(e.response?.data?.message || '처리하지 못했어요')
+  } finally {
+    sanctioningId.value = null
+  }
+}
+// 만 14세 미만 신고 (안전·신뢰 F, 당근과 같이): 기한 없이 멈추고, 이동통신사 가입확인서를 받으면 '정지 풀기'
+const AGE_REPORT = '만 14세 미만 같아요'
+async function sanctionAge(report) {
+  if (!(await confirmDialog({ title: `${report.accusedNickname}님을 나이 확인까지 멈출까요?`, message: '만 14세 이상임을 보여 주는 서류(이동통신사 가입확인서 등)를 메일로 받으면 풀어 주세요. 당사자에게는 서류를 보낼 곳이 안내돼요', confirmText: '멈추기', danger: true }))) return
+  sanctioningId.value = report.id
+  try {
+    await POST('/api/admin/users/{userId}/suspend', { path: { userId: report.accusedId }, body: { age: true } })
+    reports.value = (await GET('/api/admin/reports')).data
+    showToast('나이 확인까지 멈췄어요')
   } catch (e) {
     showToast(e.response?.data?.message || '처리하지 못했어요')
   } finally {

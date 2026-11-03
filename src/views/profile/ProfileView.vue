@@ -234,7 +234,7 @@ import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
 import { matchTime } from '../../utils/format'
 
-const REPORT_REASONS = ['욕설·비방', '노쇼·비매너', '사칭', '기타']
+const REPORT_REASONS = ['욕설·비방', '노쇼·비매너', '사칭', '만 14세 미만 같아요', '기타']
 const RESULT = {
   win: { label: '승', class: 'bg-fg text-canvas' },
   lose: { label: '패', class: 'border border-line-strong text-fg-subtle' },

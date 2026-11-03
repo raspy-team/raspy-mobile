@@ -2,7 +2,10 @@
   <div v-if="message || offlineBan" class="fixed inset-x-0 top-0 z-toast pt-safe pointer-events-none" role="alert">
     <div class="mx-4 mt-2 rounded-xl bg-surface-2 border border-line-strong px-4 py-3 flex items-start gap-3 text-sm pointer-events-auto">
       <UiIcon name="fas fa-ban" class="text-danger mt-0.5" aria-hidden="true" />
-      <span v-if="message" class="flex-1 text-fg">{{ message }}. 보기는 되지만 신청·메시지·경기 열기는 할 수 없어요</span>
+      <span v-if="message" class="flex-1 text-fg">{{ message }}. 보기는 되지만 신청·메시지·경기 열기는 할 수 없어요
+        <!-- 나이 확인 정지는 휴대폰 본인인증으로 바로 풀 수 있다 (안전·신뢰 H) -->
+        <RouterLink v-if="message.includes('만 14세')" to="/verify" class="block mt-1 font-semibold underline underline-offset-2">휴대폰 본인인증으로 풀기</RouterLink>
+      </span>
       <span v-else class="flex-1 text-fg">노쇼가 거듭 기록돼 {{ offlineBan }}까지 만나서 하는 경기를 열거나 신청할 수 없어요. 앱 게임은 그대로 돼요</span>
     </div>
   </div>

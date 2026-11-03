@@ -59,6 +59,12 @@ api.interceptors.response.use(
     }
   }
 
+  // 만나서 하는 경기에 본인인증이 필요하다 (안전·신뢰 H, 서버 IdentityService.REQUIRED_MESSAGE). 인증 화면으로 보내고 끝나면 돌아온다
+  if (error.response?.status === 400 && String(error.response.data?.message || '').includes('휴대폰 본인인증') && routerInstance) {
+    const here = routerInstance.currentRoute.value
+    if (here.path !== '/verify') routerInstance.push({ path: '/verify', query: { back: here.fullPath } })
+  }
+
   // 401 처리
   if (error.response && error.response.status === 401) {
     // 요청 URL 추출

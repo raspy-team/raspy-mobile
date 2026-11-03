@@ -34,6 +34,10 @@
       "description": "만나서 하는 경기의 안전: 도착·끝 확인, 노쇼, 위치 공유"
     },
     {
+      "name": "Identity",
+      "description": "휴대폰 본인인증 (만나서 하는 경기 전)"
+    },
+    {
       "name": "Map",
       "description": "장소 검색과 지도"
     },
@@ -1282,6 +1286,38 @@
                   "additionalProperties": {
                     "type": "string"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/identity/verify": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "본인인증 확인",
+        "description": "포트원 창이 끝나면 그 번호를 보낸다. 서버가 포트원에서 결과를 직접 확인한다",
+        "operationId": "verify_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityResult"
                 }
               }
             }
@@ -5252,6 +5288,28 @@
         }
       }
     },
+    "/api/identity": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "본인인증 준비",
+        "description": "켜져 있는지, 포트원 창을 여는 값, 내가 이미 했는지, 이번에 쓸 인증 번호",
+        "operationId": "config",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{id}/game-logs": {
       "get": {
         "tags": [
@@ -6490,11 +6548,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -8216,6 +8274,25 @@
         "type": "object",
         "properties": {
           "text": {
+            "type": "string"
+          }
+        }
+      },
+      "IdentityResult": {
+        "required": [
+          "age",
+          "verified"
+        ],
+        "type": "object",
+        "properties": {
+          "verified": {
+            "type": "boolean"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
             "type": "string"
           }
         }
@@ -11305,6 +11382,31 @@
           "championId": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "IdentityConfig": {
+        "required": [
+          "available",
+          "verificationId",
+          "verified"
+        ],
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "channelKey": {
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "verificationId": {
+            "type": "string"
           }
         }
       },

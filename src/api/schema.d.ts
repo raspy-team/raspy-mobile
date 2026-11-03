@@ -669,6 +669,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/identity/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 본인인증 확인
+         * @description 포트원 창이 끝나면 그 번호를 보낸다. 서버가 포트원에서 결과를 직접 확인한다
+         */
+        post: operations["verify_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{id}/start": {
         parameters: {
             query?: never;
@@ -2743,6 +2763,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/identity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 본인인증 준비
+         * @description 켜져 있는지, 포트원 창을 여는 값, 내가 이미 했는지, 이번에 쓸 인증 번호
+         */
+        get: operations["config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{id}/game-logs": {
         parameters: {
             query?: never;
@@ -4220,6 +4260,12 @@ export interface components {
         AppealRequest: {
             text: string;
         };
+        IdentityResult: {
+            verified: boolean;
+            /** Format: int32 */
+            age: number;
+            message?: string;
+        };
         GameRegionRequest: {
             roadAddress: string;
             detailAddress?: string;
@@ -5164,6 +5210,13 @@ export interface components {
             startedAt?: string;
             /** Format: int64 */
             championId?: number;
+        };
+        IdentityConfig: {
+            available: boolean;
+            storeId?: string;
+            channelKey?: string;
+            verified: boolean;
+            verificationId: string;
         };
         LogMessage: {
             /** Format: date-time */
@@ -6828,6 +6881,30 @@ export interface operations {
                     "*/*": {
                         [key: string]: string;
                     };
+                };
+            };
+        };
+    };
+    verify_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IdentityResult"];
                 };
             };
         };
@@ -9477,6 +9554,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["InvitedGameResponse"];
+                };
+            };
+        };
+    };
+    config: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IdentityConfig"];
                 };
             };
         };

@@ -154,7 +154,7 @@
             :key="g.gameId"
             :ref="(el) => setGameRef(el, g.gameId)"
             :title="g.ruleTitle"
-            :subtitle="`vs ${g.opponentNickname} · ${matchTime(g.playedAt)}`"
+            :subtitle="`${g.players > 2 && !g.teams ? `${g.players}명 중 ${g.place}등` : `vs ${g.opponentNickname}`} · ${matchTime(g.playedAt)}`"
             :class="{ 'bg-surface-2': highlightId === g.gameId }"
             chevron
             @click="router.push(`/feed?gameId=${g.gameId}`)"

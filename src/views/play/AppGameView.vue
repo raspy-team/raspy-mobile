@@ -210,6 +210,7 @@
                 <span class="block t-micro">무승부</span>
               </span>
             </div>
+            <p v-if="played" class="t-micro mt-3 text-center">전적·실력 점수는 사람과 한 판만 세요. 봇과 한 판은 연습이에요</p>
           </UiCard>
           <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
@@ -355,7 +356,8 @@ const route = useRoute()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
 const game = ref<Schemas['AppGameSummary'] | null>(null)
-const played = computed(() => !!game.value && (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0)
+// 봇과만 한 판은 전적(사람과 한 판)에 안 들어가니, 해 봤는지는 마지막으로 한 때로도 본다 (11/3 통계 개편)
+const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
 const board = ref<Schemas['AppRecordBoard'] | null>(null)
 const boardKind = ref<'RATING' | 'WEEK' | 'ALL'>('RATING')

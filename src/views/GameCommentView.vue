@@ -53,7 +53,7 @@
           </template>
           <div v-else class="text-center mt-16 px-6">
             <p class="t-heading">아직 댓글이 없어요</p>
-            <p class="t-caption mt-1">첫 댓글로 응원이나 한마디를 남겨보세요</p>
+            <p class="t-caption mt-1">첫 댓글로 응원이나 한마디를 남겨 보세요</p>
           </div>
         </div>
 
@@ -82,7 +82,7 @@
               v-model="inputContent"
               ref="commentInputRef"
               type="text"
-              placeholder="댓글 달기..."
+              placeholder="댓글 달기"
               class="flex-1 text-base bg-transparent border-0 focus:ring-0 p-0 m-0 outline-none"
               :disabled="isLoading"
               maxlength="1000"

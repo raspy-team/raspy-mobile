@@ -458,7 +458,7 @@ const closeErrorModal = () => {
       </div>
 
       <div v-else-if="!visibleMessages.length" class="h-full flex flex-col items-center justify-center">
-        <UiEmptyState icon="far fa-comment" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="첫마디가 어려우면 하나 골라 보내보세요" />
+        <UiEmptyState icon="far fa-comment" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="첫마디가 어려우면 하나 골라 보내 보세요" />
         <!-- 빠른 첫마디: 누르면 바로 보낸다 -->
         <div class="flex flex-wrap justify-center gap-2 px-6 -mt-6">
           <UiChip v-for="q in QUICK_REPLIES" :key="q" @click="sendQuick(q)">{{ q }}</UiChip>

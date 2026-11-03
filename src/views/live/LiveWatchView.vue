@@ -58,8 +58,9 @@
         <!-- 선수: 구경 링크 보내기, 구경 끄기 -->
         <template v-if="live.isPlayer">
           <UiButton block variant="secondary" icon="share" class="mt-5" @click="share">구경 링크 보내기</UiButton>
-          <UiButton block variant="ghost" class="mt-2" :loading="toggling" @click="toggleWatch">{{ live.watchOff ? '구경 다시 켜기' : '구경 끄기 (선수만 봐요)' }}</UiButton>
-          <p v-if="live.watchOff" class="t-caption text-center mt-1">지금은 선수 말고는 이 경기를 볼 수 없어요</p>
+          <UiButton block variant="ghost" class="mt-2" :loading="toggling" @click="toggleWatch">{{ live.watchOff ? '구경 다시 켜기' : '구경 끄기' }}</UiButton>
+          <!-- 버튼에 괄호 설명을 넣지 않고 아래 한 줄로 (ui/README 문구) -->
+          <p class="t-caption text-center mt-1">{{ live.watchOff ? '지금은 선수 말고는 이 경기를 볼 수 없어요' : '끄면 선수 말고는 이 경기를 볼 수 없어요' }}</p>
         </template>
         <!-- 관중: 익명으로 보기 (수에는 들지만 얼굴·기록은 남지 않는다) -->
         <label v-else class="flex items-center justify-center gap-2 t-caption mt-6">

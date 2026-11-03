@@ -6,22 +6,12 @@
       { 'pl-4': isReply, 'pl-0': !isReply }, // 대댓글은 16px(4)만 들여쓰기
     ]"
   >
-    <!-- 신고 버튼 (우측 상단) -->
-    <button
-      class="absolute text-xs right-0 top-2 z-10 text-fg-muted hover:text-primary p-1"
-      @click.stop="openReportModal"
-      title="댓글 신고"
-    >
-      신고하기
-    </button>
+    <!-- 신고는 오른쪽 위 더보기로 (댓글마다 '신고하기' 글자가 떠 있으면 시끄럽다, 11/5 밤샘 C) -->
+    <button type="button" aria-label="댓글 신고" class="absolute -right-3 -top-1 w-11 h-11 flex items-center justify-center text-fg-subtle" @click.stop="openReportModal"><UiIcon name="fas fa-ellipsis" aria-hidden="true" /></button>
 
     <!-- 프로필 링크 -->
-    <router-link :to="`/profile/${comment.author.id}`" class="w-9 h-9 flex-shrink-0" tabindex="-1">
-      <img
-        :src="comment.author.profileImageUrl || defaultProfile"
-        class="w-9 h-9 rounded-full object-cover bg-surface-2 border"
-        alt="profile"
-      />
+    <router-link :to="`/profile/${comment.author.id}`" class="flex-shrink-0" tabindex="-1">
+      <UiAvatar :src="comment.author.profileImageUrl" :name="comment.author.nickname" :user-id="comment.author.id" size="sm" />
     </router-link>
 
     <div class="flex-1 min-w-0">
@@ -94,7 +84,7 @@
       </div>
     </div>
 
-    <ReportSheet v-model="reportModal" title="댓글을 신고할까요?" target-type="COMMENT" :target-id="comment.id" />
+    <ReportSheet v-model="reportModal" title="댓글을 신고할까요?" target-type="COMMENT" :reasons="COMMENT_REASONS" :target-id="comment.id" />
   </div>
 </template>
 
@@ -102,6 +92,7 @@
 import { defineProps, defineEmits, ref } from 'vue'
 import CommentItem from './CommentItem.vue'
 import ReportSheet from './safety/ReportSheet.vue'
+import { UiAvatar } from './ui'
 
 const props = defineProps({
   comment: { type: Object, required: true },
@@ -110,8 +101,6 @@ const props = defineProps({
   isReply: { type: Boolean, default: false },
 })
 const emit = defineEmits(['reply', 'like', 'img-click'])
-
-const defaultProfile = '/default-profile.svg'
 
 function timeAgo(isoString) {
   if (!isoString) return ''
@@ -145,6 +134,8 @@ function emitImgClick(imageUrl) {
   emit('img-click', imageUrl)
 }
 
+// 댓글에는 노쇼·사칭 대신 댓글에서 생기는 일 (11/5 리뷰 D)
+const COMMENT_REASONS = ['욕설·비방', '성희롱·불쾌한 말', '광고·도배', '기타']
 const reportModal = ref(false)
 function openReportModal() {
   reportModal.value = true

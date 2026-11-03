@@ -95,6 +95,8 @@
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
               실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
+            <!-- 첫 판에 +162처럼 크게 움직이면 고장으로 보였다. 만나서 한 경기 결과 화면과 같은 말 (11/4 밤샘, 실력 점수파 31세) -->
+            <p v-if="result.ratingChange != null && fewGames" class="t-caption mt-1">처음 몇 판은 크게 움직여요. 더 하면 자리를 잡아요</p>
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
@@ -370,6 +372,8 @@ const router = useRouter()
 const key = computed(() => String(route.params.key))
 const game = ref<Schemas['AppGameSummary'] | null>(null)
 // 봇과만 한 판은 전적(사람과 한 판)에 안 들어가니, 해 봤는지는 마지막으로 한 때로도 본다 (11/3 통계 개편)
+// 이 게임을 몇 판 안 했으면 실력 점수가 크게 움직인다 (서버는 RD가 크면 잠정으로 본다)
+const fewGames = computed(() => ((game.value?.myWins || 0) + (game.value?.myLosses || 0) + (game.value?.myDraws || 0)) < 5)
 const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
 const board = ref<Schemas['AppRecordBoard'] | null>(null)

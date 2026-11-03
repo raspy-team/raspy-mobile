@@ -56,6 +56,9 @@ async function join() {
   try {
     const done = (await POST('/api/clubs/join', { body: { code } })).data
     router.replace(`/clubs/${done.club.id}`)
+  } catch (e) {
+    // 가입 뒤 바로 들어가기(자동)에서도 왜 안 됐는지 보이게
+    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '들어가지 못했어요. 다시 해 주세요'
   } finally {
     joining.value = false
   }

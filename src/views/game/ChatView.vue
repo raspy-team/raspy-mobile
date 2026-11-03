@@ -514,7 +514,7 @@ const closeErrorModal = () => {
 
     <UiSheet v-model="menuOpen">
       <UiList>
-        <UiListItem icon="far fa-flag" title="신고하기" subtitle="운영진이 바로 확인하고 조치해요. 메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
+        <UiListItem icon="far fa-flag" title="신고하기" subtitle="운영진이 바로 확인하고 처리해요. 메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
         <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="blockUser" />
       </UiList>
     </UiSheet>

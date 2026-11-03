@@ -6245,11 +6245,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ]
+              ],
+              "default": "FRIENDS"
             }
           },
           {
@@ -6258,11 +6258,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ]
+              ],
+              "default": "UNITS"
             }
           }
         ],
@@ -8092,11 +8092,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -11811,8 +11811,10 @@
         "required": [
           "cells",
           "cols",
+          "lattice",
           "playable",
           "rows",
+          "small",
           "title"
         ],
         "type": "object",
@@ -11836,11 +11838,18 @@
           },
           "playable": {
             "type": "boolean"
+          },
+          "small": {
+            "type": "boolean"
+          },
+          "lattice": {
+            "type": "boolean"
           }
         }
       },
       "TurnChoice": {
         "required": [
+          "disabled",
           "label",
           "value"
         ],
@@ -11854,6 +11863,9 @@
           },
           "icon": {
             "type": "string"
+          },
+          "disabled": {
+            "type": "boolean"
           }
         }
       },
@@ -11888,6 +11900,9 @@
           "inputMax": {
             "type": "integer",
             "format": "int32"
+          },
+          "hint": {
+            "type": "string"
           }
         }
       },

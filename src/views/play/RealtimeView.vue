@@ -193,7 +193,8 @@ const turnLine = computed(() => {
   const s = state.value
   if (!s) return ''
   if (s.race) return myTurn.value ? '먼저 맞히세요' : '다음 문제를 기다려요'
-  if (s.simultaneous) return myTurn.value ? `${(s.round ?? 0) + 1}판 · 골라 주세요` : `${who(s.opponent)}님이 고르는 중`
+  // 서버가 판(view)을 주는 게임은 판 수를 게임이 따로 보여 준다 (수 번호를 '판'이라 부르면 세트와 헷갈린다)
+  if (s.simultaneous) return myTurn.value ? `${s.view ? '' : `${(s.round ?? 0) + 1}판 · `}골라 주세요` : `${who(s.opponent)}님이 고르는 중`
   return myTurn.value ? '내 차례' : `${who(s.opponent)}님 차례`
 })
 const longLobby = computed(() => (state.value?.lobbySeconds ?? 30) > 120)

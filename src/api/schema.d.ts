@@ -5601,11 +5601,14 @@ export interface components {
             cols: number;
             cells: string[];
             playable: boolean;
+            small: boolean;
+            lattice: boolean;
         };
         TurnChoice: {
             value: string;
             label: string;
             icon?: string;
+            disabled: boolean;
         };
         TurnView: {
             boards: components["schemas"]["TurnBoard"][];
@@ -5615,6 +5618,7 @@ export interface components {
             input?: string;
             /** Format: int32 */
             inputMax?: number;
+            hint?: string;
         };
         AppPlayResponse: {
             /** Format: int64 */

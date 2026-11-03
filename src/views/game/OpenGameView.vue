@@ -27,7 +27,8 @@
           <!-- 공유 링크로 다른 동네 경기에 들어온 경우: 누르기 전에 이유를 보여 준다 -->
           <template v-else-if="game.joinBlockedReason">
             <span class="text-danger-fg">{{ game.joinBlockedReason }}</span>
-            <RouterLink to="/neighborhood" class="ml-1 underline underline-offset-2">내 동네 설정</RouterLink>
+            <!-- 인증하고 이 경기로 돌아온다 (11/4 밤샘: 링크로 온 동료가 인증 뒤 경기를 다시 찾아야 했다) -->
+            <RouterLink :to="{ path: '/neighborhood', query: { back: route.fullPath } }" class="ml-1 underline underline-offset-2">동네 인증</RouterLink>
           </template>
           <template v-else>신청하면 {{ game.ownerNickname }}님이 승인하고, 장소와 시간을 함께 정해요.</template>
         </p>

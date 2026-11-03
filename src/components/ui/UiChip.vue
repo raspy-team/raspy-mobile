@@ -3,7 +3,7 @@
     type="button"
     :aria-pressed="selected"
     @click="feel('select')"
-    class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-sm transition-[background-color,color,transform] motion-safe:active:scale-95 disabled:opacity-35"
+    class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-sm whitespace-nowrap flex-shrink-0 transition-[background-color,color,transform] motion-safe:active:scale-95 disabled:opacity-35"
     :class="selected ? 'bg-fg text-canvas font-medium' : 'bg-transparent text-fg-muted border border-line-strong active:bg-surface-2'"
   >
     <UiIcon v-if="icon" :name="icon" class="text-xs" aria-hidden="true" />

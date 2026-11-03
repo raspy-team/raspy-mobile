@@ -34,6 +34,14 @@
         </span>
       </div>
       <p class="text-center t-micro mt-2">{{ isDraw ? '무승부' : duel.scoreUnit }}</p>
+      <!-- 수 기록으로 그린 그림 (낱말 사슬·마지막 판·막대) -->
+      <AppVisualFigure
+        :visual="story?.appVisual"
+        :players="feedPlayers"
+        :scores="duel.scores"
+        :winner-id="duel.winnerId"
+        :unit="duel.scoreUnit"
+      />
       <div v-if="sides.some((s) => s.text)" class="mt-4 space-y-2">
         <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body">
           <span class="t-micro block">{{ side.name }}</span>{{ side.text }}
@@ -64,6 +72,7 @@ import { ref, computed, onMounted } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import VoteCard from '../appgame/VoteCard.vue'
+import AppVisualFigure from './story/AppVisualFigure.vue'
 import { UiIcon, UiSkeleton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
@@ -89,6 +98,9 @@ const sides = computed(() =>
   }),
 )
 const when = computed(() => (props.post.date ? timeAgo(props.post.date) : ''))
+// 서버 feed_story가 붙인 이야기 (앱 대결은 수 기록 그림만 쓴다)
+const story = computed(() => (props.post as { story?: { appVisual?: any } | null }).story)
+const feedPlayers = computed(() => (props.post.players as unknown as { id: number; name: string }[] | undefined) || [])
 
 onMounted(async () => {
   if (!voting.value) return

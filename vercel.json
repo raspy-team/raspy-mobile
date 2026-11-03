@@ -4,6 +4,14 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/m/:id(\\d+)",
+      "destination": "https://raspy-api.fly.dev/m/:id"
+    },
+    {
+      "source": "/m/:id(\\d+)/:file(og.png|story.png)",
+      "destination": "https://raspy-api.fly.dev/m/:id/:file"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index"
     }

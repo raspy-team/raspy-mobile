@@ -183,6 +183,13 @@
               </div>
             </div>
             <UiInput v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
+            <!-- 기록에서 뽑은 사실 한 줄 (소식 이야기 줄). 누르면 한마디에 넣는다. 고르지 않아도 된다 -->
+            <div v-if="beatChoices.length" class="-mt-2">
+              <p class="t-micro mb-1.5">기록에서 한 줄 고르기</p>
+              <div class="flex flex-wrap gap-2">
+                <UiChip v-for="b in beatChoices" :key="b" :selected="review.text === b" @click="review.text = review.text === b ? '' : b">{{ b }}</UiChip>
+              </div>
+            </div>
             <!-- 또 만나고 싶나요? (만나서 한 경기만, 안전·신뢰 B). 상대에게 보이지 않고 신뢰 온도에만 -->
             <div v-if="game?.venue === 'IN_PERSON'">
               <p class="t-label mb-1">또 만나서 하고 싶나요?</p>
@@ -449,6 +456,19 @@ const gameId = route.params.gameId
 
 const isLoading = ref(true)
 const review = ref({ manner: 0, performance: 0, text: '', meetAgain: null })
+// 소식 카드의 이야기 줄(feed_story beats) 중 셋. 남의 연승을 끊었다 같은 줄은 한마디로 쓰기 어색해 뺀다
+const beatChoices = ref([])
+async function loadBeats() {
+  try {
+    const { data } = await api.get(`/api/feed/game/${gameId}`)
+    beatChoices.value = (data?.story?.beats || [])
+      .filter((b) => b?.text && b.kind !== 'STREAK_STOP')
+      .map((b) => b.text)
+      .slice(0, 3)
+  } catch {
+    beatChoices.value = []
+  }
+}
 const ruleRating = ref(0) // 규칙 평가 점수 (0~5)
 const ruleReview = ref('') // 규칙 평가 의견
 const game = ref({})
@@ -685,6 +705,7 @@ function feelResult() {
 let stopWatching = null
 onMounted(() => {
   load()
+  loadBeats()
   // 확인을 기다리는 동안 상대가 확인하거나 돌려보내면 다시 불러온다
   stopWatching = refreshOnChange(() => {
     if (!confirmed.value) load()

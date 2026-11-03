@@ -56,6 +56,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/watch/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 또 보고 싶어요 상태
+         * @description 내가 따라가는지, 따라가는 사람 수
+         */
+        get: operations["state"];
+        put?: never;
+        /**
+         * 또 보고 싶어요
+         * @description 선수에게 한 번 알리고, 그 선수의 만나서 하는 경기가 시작되면 나에게 알린다
+         */
+        post: operations["watch"];
+        /** 또 보고 싶어요 취소 */
+        delete: operations["unwatch"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vouch/{userId}": {
         parameters: {
             query?: never;
@@ -2698,7 +2723,7 @@ export interface paths {
          * 만남 상태
          * @description 도착·끝 확인, 상대 도착, 노쇼를 알릴 수 있는지, 켜 둔 위치 공유
          */
-        get: operations["state"];
+        get: operations["state_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3593,7 +3618,7 @@ export interface paths {
          * 관전하기
          * @description 말 배틀처럼 보는 사람이 응원해 승패를 정하는 실시간 게임. 선수가 아니어도 본다
          */
-        get: operations["watch"];
+        get: operations["watch_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3963,6 +3988,11 @@ export interface components {
             enabled: boolean;
         };
         Unit: Record<string, never>;
+        WatchState: {
+            watching: boolean;
+            /** Format: int64 */
+            fans: number;
+        };
         VouchState: {
             /** Format: int32 */
             count: number;
@@ -4633,28 +4663,6 @@ export interface components {
         };
         MoveRequest: {
             word: string;
-        };
-        WatchState: {
-            /** Format: int64 */
-            gameId: number;
-            key: string;
-            status: string;
-            subject: string;
-            players: components["schemas"]["AppPlayer"][];
-            moves: components["schemas"]["RealtimeMove"][];
-            votes: number[];
-            /** Format: int32 */
-            myVote?: number;
-            player: boolean;
-            /** Format: int64 */
-            turnUserId?: number;
-            /** Format: date-time */
-            turnEndsAt?: string;
-            /** Format: date-time */
-            serverNow: string;
-            /** Format: int64 */
-            winnerId?: number;
-            topic: string;
         };
         CallResult: {
             /** Format: int32 */
@@ -5679,6 +5687,24 @@ export interface components {
             texts: string[];
             votingEndsAt?: string;
         };
+        AppVisual: {
+            kind: string;
+            /** Format: int64 */
+            firstUserId?: number;
+            words: string[];
+            /** Format: int32 */
+            rows: number;
+            /** Format: int32 */
+            cols: number;
+            cells: string[];
+            bests: number[];
+        };
+        ChampionStory: {
+            area: string;
+            fromName?: string;
+            /** Format: int32 */
+            heldDays?: number;
+        };
         FeedItemResponse: {
             id: string;
             date: string;
@@ -5704,6 +5730,8 @@ export interface components {
             dongCode?: string;
             elsewhere: boolean;
             live: boolean;
+            story?: components["schemas"]["FeedStory"];
+            watching: number[];
         };
         FeedResponse: {
             items: components["schemas"]["FeedItemResponse"][];
@@ -5718,6 +5746,38 @@ export interface components {
             pageSize: number;
             asOf?: string;
         };
+        FeedStory: {
+            picked?: string;
+            beats: components["schemas"]["StoryBeat"][];
+            /** Format: double */
+            winProb?: number;
+            flow?: components["schemas"]["FlowPoint"][];
+            /** Format: int32 */
+            lowIdx?: number;
+            champion?: components["schemas"]["ChampionStory"];
+            h2h?: components["schemas"]["HeadToHead"];
+            gains: components["schemas"]["RatingGain"][];
+            quotes: components["schemas"]["Quote"][];
+            aiSummary?: string;
+            appVisual?: components["schemas"]["AppVisual"];
+        };
+        FlowPoint: {
+            /** Format: int32 */
+            set: number;
+            /** Format: int32 */
+            a: number;
+            /** Format: int32 */
+            b: number;
+        };
+        HeadToHead: {
+            /** Format: int32 */
+            games: number;
+            /** Format: int32 */
+            winsA: number;
+            /** Format: int32 */
+            winsB: number;
+            seq: string[];
+        };
         MetaDto: {
             place: string;
             time: string;
@@ -5726,12 +5786,26 @@ export interface components {
             url: string;
             mediaType: string;
         };
+        Quote: {
+            /** Format: int64 */
+            userId: number;
+            name: string;
+            text: string;
+        };
         RankDto: {
             /** Format: int64 */
             id: number;
             name: string;
             /** Format: int32 */
             place: number;
+        };
+        RatingGain: {
+            /** Format: int64 */
+            userId: number;
+            /** Format: int32 */
+            ratingAfter: number;
+            /** Format: int32 */
+            gain: number;
         };
         ResultDto: {
             /** Format: int32 */
@@ -5762,6 +5836,10 @@ export interface components {
             scoreA: number;
             /** Format: int32 */
             scoreB: number;
+        };
+        StoryBeat: {
+            kind: string;
+            text: string;
         };
         ChatMessage: {
             /** Format: int64 */
@@ -6083,6 +6161,72 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    watch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    unwatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchState"];
                 };
             };
         };
@@ -9470,7 +9614,7 @@ export interface operations {
             };
         };
     };
-    state: {
+    state_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -10503,7 +10647,7 @@ export interface operations {
             };
         };
     };
-    watch: {
+    watch_1: {
         parameters: {
             query?: never;
             header?: never;

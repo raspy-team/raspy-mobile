@@ -94,7 +94,7 @@
       <UiList>
         <UiListItem icon="fas fa-flag-checkered" title="경기 결과 보기" chevron @click="go(`/games/${menuPost.id}/result`)" />
         <UiListItem v-if="menuPost?.rule?.id" icon="rotate-right" title="이 규칙으로 한 판" subtitle="같은 규칙으로 경기를 열어요" chevron @click="go(`/create-game?ruleId=${menuPost.rule.id}`)" />
-        <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share(menuPost)" />
+        <UiListItem icon="fas fa-arrow-up-from-bracket" title="결과 보내기" subtitle="링크 · 스토리 그림 · 글자" @click="share(menuPost)" />
         <UiListItem v-if="!menuPost?.isMyGame" icon="far fa-flag" title="신고하기" danger @click="openReport(menuPost)" />
       </UiList>
     </UiSheet>
@@ -111,6 +111,8 @@
       </template>
     </UiSheet>
 
+    <ShareSheet :post="sharePost" :my-id="myId" @close="sharePost = null" />
+
     <input ref="photoInput" type="file" accept="image/*" capture="environment" class="hidden" @change="uploadPhoto" />
     <Comment v-if="commentId" :id="commentId" @close="commentId = 0" />
   </div>
@@ -126,6 +128,8 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import FeedCard from '../../components/feed/FeedCard.vue'
 import AppDuelFeedCard from '../../components/feed/AppDuelFeedCard.vue'
+import ShareSheet from '../../components/feed/story/ShareSheet.vue'
+import { getMyId } from '@/utils/me'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
   UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
@@ -283,22 +287,13 @@ function go(path) {
   menuPost.value = null
   router.push(path)
 }
-async function share(p) {
+// 결과 보내기: 링크(경기마다 미리보기 그림) · 스토리 그림 · 글자 격자 (components/feed/story/ShareSheet)
+const sharePost = ref(null)
+const myId = ref(null)
+getMyId().then((id) => (myId.value = id)).catch(() => {})
+function share(p) {
   menuPost.value = null
-  try {
-    const { data } = await api.post('/api/invite', null, { params: { gameId: p.id } })
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Match', text: `${p.rule?.ruleTitle} 경기 결과`, url: data.url })
-        return
-      } catch (e) {
-        if (e?.name === 'AbortError') return
-      }
-    }
-    showToast((await copyText(data.url)) ? '링크를 복사했어요' : '복사하지 못했어요')
-  } catch {
-    showToast('링크를 만들지 못했어요')
-  }
+  sharePost.value = p
 }
 async function inviteFriends() {
   const url = window.location.origin

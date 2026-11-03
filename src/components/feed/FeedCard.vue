@@ -42,8 +42,16 @@
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
         </span>
       </div>
-      <p v-if="setLine && !ranking.length" class="text-center t-mono normal-case mt-3">{{ setLine }}</p>
-      <p v-else-if="isDraw && !ranking.length" class="text-center t-micro mt-3">무승부</p>
+      <!-- 기록으로 그린 그림 하나 (흐름·이변·왕관·전적·세트 칸). 그림이 세트 점수를 보여 주니 세트 줄은 그림이 없을 때만 -->
+      <FeedStoryFigure
+        v-if="!ranking.length && post.story"
+        :story="post.story"
+        :names="sides.map((s) => s.name)"
+        :winner="winnerIndex"
+        :set-scores="post.result?.setScores"
+      />
+      <p v-else-if="setLine && !ranking.length" class="text-center t-mono normal-case mt-3">{{ setLine }}</p>
+      <p v-if="isDraw && !ranking.length" class="text-center t-micro mt-3">무승부</p>
     </div>
 
     <!-- 사진·영상 (있을 때만) -->
@@ -98,6 +106,7 @@
 // 사진이 없어도 결과가 주인공이라 카드가 비지 않는다
 import { computed, defineProps, defineEmits } from 'vue'
 import RuleThumb from '../rule/RuleThumb.vue'
+import FeedStoryFigure from './story/FeedStoryFigure.vue'
 import { UiAvatar, UiIconButton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
@@ -123,6 +132,7 @@ const sides = computed(() => {
     { name: b?.name || '', score: single ? single.scoreB : r.scoreB ?? 0, won: !!r.winner && r.winner === b?.name },
   ]
 })
+const winnerIndex = computed(() => (sides.value[0].won ? 0 : sides.value[1].won ? 1 : null))
 // 세트 점수: "1세트 11:7 · 2세트 9:11"
 const hasScore = computed(() => (props.post.result?.sets || 0) > 0)
 const setLine = computed(() => {

@@ -114,7 +114,7 @@
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
             <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
-            <p v-else class="t-caption mt-2">{{ who(state.opponent) }}님과 · {{ resultCount }}</p>
+            <p v-else class="t-caption mt-2">{{ resultCount }}</p>
             <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
@@ -193,7 +193,7 @@ const resultCount = computed(() => {
   const s = state.value
   const n = s?.moves?.length ?? 0
   if (!s || !n) return '첫 수 전에 끝났어요'
-  return s.simultaneous ? `${s.round ?? Math.ceil(n / 2)}판 겨뤘어요` : `${n}번 주고받았어요`
+  return `${who(s.opponent)}님과 ` + (s.simultaneous ? `${s.round ?? Math.ceil(n / 2)}판 겨뤘어요` : `${n}번 주고받았어요`)
 })
 
 // 같이 내는 게임(가위바위보)은 '골라 주세요' / '상대가 고르는 중'

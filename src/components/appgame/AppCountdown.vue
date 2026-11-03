@@ -3,7 +3,7 @@
     <p v-if="opponent" class="t-caption">{{ opponent }}님과 경기</p>
     <!-- key가 바뀔 때마다 숫자가 새로 튀어나온다 -->
     <span :key="count" class="countdown-pop block text-[96px] leading-none font-semibold tabular-nums tracking-[-0.05em] text-fg mt-4">{{ count }}</span>
-    <p class="t-caption mt-6">곧 시작해요</p>
+    <p class="t-caption mt-6 max-w-xs">{{ hint || '곧 시작해요' }}</p>
   </div>
 </template>
 
@@ -12,7 +12,8 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { feel } from '../../utils/feel'
 
-const props = defineProps<{ until: number; offset: number; opponent?: string }>()
+// hint: 게임 한 줄 설명 ('아무거나'로 처음 하는 게임이 걸려도 시작 전에 알게)
+const props = defineProps<{ until: number; offset: number; opponent?: string; hint?: string }>()
 const emit = defineEmits<{ done: [] }>()
 
 const left = () => props.until - (Date.now() + props.offset)

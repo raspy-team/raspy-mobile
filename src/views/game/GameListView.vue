@@ -6,9 +6,9 @@
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
-    <!-- 브랜드 한 줄 (docs/essence.md: 줄 말고 판). 하루에 하나, 핵심 낱말에 형광펜. 입구에만 있던 목소리를 안으로 (11/3) -->
-    <p class="text-[1.375rem] leading-[1.35] font-semibold tracking-[-0.03em] text-fg">
-      {{ brandLine.before }}<span class="hl">{{ brandLine.mark }}</span>{{ brandLine.after }}
+    <!-- 브랜드 한 줄 (docs/essence.md: 줄 말고 판). 하루에 하나. 제목처럼 외치지 않고 본문 크기로 조용히, 핵심 낱말만 진하게 볼트 밑줄 (11/3) -->
+    <p class="t-body text-fg-muted">
+      {{ brandLine.before }}<span class="font-semibold text-fg underline decoration-signal decoration-[0.14em] underline-offset-[0.22em]">{{ brandLine.mark }}</span>{{ brandLine.after }}
     </p>
 
     <!-- 지금 동네 (경기 목록이 이 동네 범위를 따른다) -->

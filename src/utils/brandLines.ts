@@ -3,13 +3,13 @@
 export type BrandLine = { before: string; mark: string; after: string }
 
 const LINES: BrandLine[] = [
-  { before: '할 말 없어도 돼요. ', mark: '한 판', after: ' 하면 되니까' },
-  { before: '보는 거 말고, ', mark: '하는 거', after: '' },
-  { before: '계급장 떼고 ', mark: '한 판', after: '' },
-  { before: '줄 말고 ', mark: '판', after: '. 오늘은 어디서 붙어 볼까요?' },
-  { before: '육각형 말고, 뾰족한 ', mark: '꼭짓점 하나', after: '' },
-  { before: '누구나 어딘가의 ', mark: '1등', after: '이에요' },
-  { before: '매치에서 ', mark: '1등', after: '은 혼자 될 수 없어요' },
+  { before: '할 말 없어도 괜찮아요. ', mark: '한 판', after: '이면 충분하니까요' },
+  { before: '오늘은 보는 거 말고, ', mark: '하는 거', after: '' },
+  { before: '나이도 직함도 떼고, ', mark: '한 판', after: '' },
+  { before: '오늘은 어디서 ', mark: '한 판', after: ' 붙어 볼까요?' },
+  { before: '다 잘할 필요 없어요. ', mark: '하나', after: '만 잘하면 돼요' },
+  { before: '어딘가엔 내가 ', mark: '1등', after: '인 게임이 있어요' },
+  { before: '이기려면 ', mark: '상대', after: '가 있어야 해요' },
 ]
 
 /** 오늘의 한 줄 (날짜로 고른다: 하루 동안 같은 말) */

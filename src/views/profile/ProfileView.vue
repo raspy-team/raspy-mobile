@@ -65,14 +65,15 @@
 
       <!-- 숫자 한 줄: 상자 없이, 승률은 경기가 있을 때만 -->
       <div class="mt-5 flex text-center">
-        <div class="flex-1">
+        <!-- 경기·승률은 누르면 기록 화면 -->
+        <RouterLink :to="`/profile/${user.id}/stats`" class="flex-1">
           <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
-          <p class="t-micro mt-0.5">경기</p>
-        </div>
-        <div v-if="stats.totalGames" class="flex-1">
+          <p class="t-micro mt-0.5">경기 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
+        </RouterLink>
+        <RouterLink v-if="stats.totalGames" :to="`/profile/${user.id}/stats`" class="flex-1">
           <p class="t-heading tabular-nums">{{ stats.winRate }}%</p>
-          <p class="t-micro mt-0.5">승률</p>
-        </div>
+          <p class="t-micro mt-0.5">승률 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
+        </RouterLink>
         <div class="flex-1">
           <p class="t-heading tabular-nums">{{ (user.myChampions || []).length }}</p>
           <p class="t-micro mt-0.5">챔피언</p>
@@ -114,7 +115,7 @@
       <section class="mt-10">
         <div class="flex items-center justify-between mb-1">
           <h2 class="t-heading">많이 한 규칙</h2>
-          <UiButton v-if="stats.totalGames" size="sm" variant="ghost" class="-mr-2" :to="`/profile/${user.id}/stats`">기록 자세히</UiButton>
+          <UiButton v-if="stats.totalGames" size="sm" variant="secondary" icon="fas fa-chart-simple" :to="`/profile/${user.id}/stats`">기록 보기</UiButton>
         </div>
         <UiList v-if="user.top3Rules?.length">
           <UiListItem

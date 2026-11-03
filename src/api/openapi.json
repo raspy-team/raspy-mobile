@@ -156,6 +156,100 @@
         }
       }
     },
+    "/api/vouch/{userId}": {
+      "get": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "보증 상태",
+        "description": "이 사람을 보증한 사람 수·점수·배지, 내가 보증했는지, 보증할 수 있는지(만나서 한 경기가 있어야)",
+        "operationId": "vouchState",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VouchState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "보증해요",
+        "description": "만나서 경기해 본 사람만. 보증받은 사람의 보증이 더 무겁다 (안전·신뢰 E)",
+        "operationId": "vouch",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VouchState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "보증 거두기",
+        "operationId": "unvouch",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VouchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/remove": {
       "post": {
         "tags": [
@@ -2772,6 +2866,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "solo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -3293,6 +3395,15 @@
             "name": "gameId",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -6945,6 +7056,35 @@
       "Unit": {
         "type": "object"
       },
+      "VouchState": {
+        "required": [
+          "canVouch",
+          "count",
+          "mine",
+          "score",
+          "vouched"
+        ],
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "vouched": {
+            "type": "boolean"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "canVouch": {
+            "type": "boolean"
+          }
+        }
+      },
       "VisitInput": {
         "required": [
           "standalone",
@@ -9623,7 +9763,9 @@
           "noShows",
           "offlineGames",
           "socialVerified",
-          "temperature"
+          "temperature",
+          "vouched",
+          "vouches"
         ],
         "type": "object",
         "properties": {
@@ -9677,6 +9819,13 @@
           "noShows": {
             "type": "integer",
             "format": "int32"
+          },
+          "vouches": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vouched": {
+            "type": "boolean"
           }
         }
       },
@@ -11053,6 +11202,7 @@
           "applicantGameStatisticsDTO",
           "applicantNickname",
           "approved",
+          "needsAppGameFirst",
           "userId"
         ],
         "type": "object",
@@ -11087,6 +11237,9 @@
           "partnerId": {
             "type": "integer",
             "format": "int64"
+          },
+          "needsAppGameFirst": {
+            "type": "boolean"
           }
         }
       },

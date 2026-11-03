@@ -96,11 +96,21 @@
         </template>
         <template #trailing>
           <UiButton v-if="a.approved" size="sm" variant="secondary" :loading="busy" @click.stop="cancelApproval(applicantsGame, a)">승인 취소</UiButton>
+          <!-- 처음 보는 사람과 만나서 하는 1:1은 앱 게임 한 판이 먼저 (안전·신뢰 D) -->
+          <UiButton v-else-if="a.needsAppGameFirst" size="sm" variant="secondary" icon="paper-plane" @click.stop="ladderFor = a">앱 게임 한 판</UiButton>
           <UiButton v-else size="sm" :disabled="!canApprove(applicantsGame, a)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
         </template>
       </UiListItem>
     </UiList>
     <UiEmptyState v-else icon="fas fa-user-group" title="아직 신청한 사람이 없어요" description="링크를 공유하면 더 빨리 모여요" />
+  </UiSheet>
+
+  <!-- 신뢰 사다리: 처음 보는 사람과 1:1로 만나기 전에 앱 게임 한 판 (안전·신뢰 D) -->
+  <UiSheet :model-value="!!ladderFor" title="먼저 앱 게임 한 판" @update:model-value="ladderFor = null">
+    <p class="t-caption mb-4">{{ ladderFor?.applicantNickname }}님과는 처음 만나요. 1분짜리 게임을 먼저 하면 승인할 수 있어요. 내가 먼저 풀고, 같은 문제로 도전장을 메시지로 보내요</p>
+    <UiList>
+      <UiListItem v-for="g in LADDER_GAMES" :key="g.key" :icon="g.icon" :title="g.title" :subtitle="g.sub" chevron @click="startLadder(g.key)" />
+    </UiList>
   </UiSheet>
 
   <!-- 더보기 -->
@@ -389,6 +399,20 @@ function dmTarget(g) {
 }
 // 만나기 전 안전 수칙: 만나서 하는 경기에 상대가 정해지면 한 번 저절로 (경기마다), 그 뒤엔 더보기에서
 const safetyGame = ref(null)
+// 신뢰 사다리 (안전·신뢰 D): 신청자에게 보낼 1분짜리 앱 게임
+const LADDER_GAMES = [
+  { key: 'math-race', title: '암산 먼저', sub: '1분 · 계산', icon: 'chart-simple' },
+  { key: 'quiz-race', title: '퀴즈 먼저 맞히기', sub: '1분 · 상식', icon: 'circle-question' },
+  { key: 'number-baseball', title: '숫자 야구', sub: '1분 · 추리', icon: 'magnifying-glass' },
+]
+const ladderFor = ref(null)
+function startLadder(key) {
+  const a = ladderFor.value
+  ladderFor.value = null
+  applicantsGame.value = null
+  router.push({ path: `/play/${key}`, query: { to: a.userId, toName: a.applicantNickname } })
+}
+
 // 경기 시간이 잡힌 만나서 하는 경기 (앞뒤 하루). 카드 안에서 서버가 지금 할 일이 있는지 정한다
 const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && Math.abs(Date.now() - new Date(g.matchDate).getTime()) < 86_400_000 && !['REQUESTED', 'REJECTED'].includes(g.status)
 const needsSafety = (g) => !!g && !isRemote(g.venue) && !!dmTarget(g) && canReschedule(g)

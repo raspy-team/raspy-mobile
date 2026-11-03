@@ -56,6 +56,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/vouch/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 보증 상태
+         * @description 이 사람을 보증한 사람 수·점수·배지, 내가 보증했는지, 보증할 수 있는지(만나서 한 경기가 있어야)
+         */
+        get: operations["vouchState"];
+        put?: never;
+        /**
+         * 보증해요
+         * @description 만나서 경기해 본 사람만. 보증받은 사람의 보증이 더 무겁다 (안전·신뢰 E)
+         */
+        post: operations["vouch"];
+        /** 보증 거두기 */
+        delete: operations["unvouch"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/remove": {
         parameters: {
             query?: never;
@@ -3821,6 +3846,15 @@ export interface components {
             enabled: boolean;
         };
         Unit: Record<string, never>;
+        VouchState: {
+            /** Format: int32 */
+            count: number;
+            /** Format: double */
+            score: number;
+            vouched: boolean;
+            mine: boolean;
+            canVouch: boolean;
+        };
         VisitInput: {
             visitorId: string;
             source?: string;
@@ -4658,6 +4692,9 @@ export interface components {
             meetAgainCount: number;
             /** Format: int32 */
             noShows: number;
+            /** Format: int32 */
+            vouches: number;
+            vouched: boolean;
         };
         UserProfileResponse: {
             /** Format: int64 */
@@ -5080,6 +5117,7 @@ export interface components {
             trustLabel?: string;
             /** Format: int64 */
             partnerId?: number;
+            needsAppGameFirst: boolean;
         };
         GameResultResponse: {
             gameSummary: components["schemas"]["GameSummaryResponse"];
@@ -5824,6 +5862,72 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    vouchState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VouchState"];
+                };
+            };
+        };
+    };
+    vouch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VouchState"];
+                };
+            };
+        };
+    };
+    unvouch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VouchState"];
                 };
             };
         };
@@ -7643,7 +7747,9 @@ export interface operations {
     };
     start: {
         parameters: {
-            query?: never;
+            query?: {
+                solo?: boolean;
+            };
             header?: never;
             path: {
                 key: string;
@@ -7978,7 +8084,9 @@ export interface operations {
     };
     openChallenge: {
         parameters: {
-            query?: never;
+            query?: {
+                to?: number;
+            };
             header?: never;
             path: {
                 gameId: number;

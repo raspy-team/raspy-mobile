@@ -84,7 +84,7 @@
 
       <!-- 신뢰 온도·포인트는 타일 둘로. 근거·설명은 눌러서 연다 (점진적 공개) -->
       <div class="mt-3 grid grid-cols-2 gap-3">
-        <TrustCard v-if="user.trust" :trust="user.trust" />
+        <TrustCard v-if="user.trust" :trust="user.trust" :user-id="user.id" :is-me="user.isMe" />
         <PointCard :key="user.id" :user-id="user.id" :is-me="user.isMe" />
       </div>
 

@@ -169,6 +169,7 @@ import Comment from '../GameCommentView.vue'
 import { DELETE, POST } from '@/api/client'
 import { playWithMeTooAPI } from '../../api/api'
 import { getMyId } from '@/utils/me'
+import { track } from '@/utils/trackLog'
 
 // 동네(기본): 내 동네 범위 먼저, 동네 글이 적으면 서버가 다른 동네 글을 아래에 채운다 (elsewhere). 친구: 친구·내 경기. 전국: 전부
 const TABS = [
@@ -229,6 +230,9 @@ async function loadMore() {
       const { data } = await api.get('/api/feed', { params: { page: page.value, size: PAGE, scope: tab.value, asOf: asOf.value || undefined } })
       if (page.value === 0) asOf.value = data.asOf || ''
       addPosts(data.items || [])
+      // AI 주민 카드가 채운 장은 원본 기록에 ai=true로 (docs/ai-residents.md '숫자는 따로': AI가 채운 곳에서 사람이 무엇을 했나)
+      const aiCards = (data.items || []).filter((p) => p.players?.length && p.players.every((x) => x.isBot)).length
+      if (aiCards) track('feed_ai_shown', { step: page.value, value: `ai=true:${tab.value}:${aiCards}/${(data.items || []).length}` })
       page.value++
       done.value = data.nextCursor == null || !(data.items || []).length
     }

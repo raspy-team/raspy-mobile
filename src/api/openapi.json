@@ -18905,6 +18905,7 @@
           "mannerScore",
           "maxPlayers",
           "ownerId",
+          "ownerIsBot",
           "ownerNickname",
           "rule",
           "venue"
@@ -18963,6 +18964,9 @@
           },
           "ownerProfileUrl": {
             "type": "string"
+          },
+          "ownerIsBot": {
+            "type": "boolean"
           },
           "gameStatus": {
             "type": "string",
@@ -21260,6 +21264,7 @@
       "AdminUserResponse": {
         "required": [
           "id",
+          "isBot",
           "nickname",
           "username"
         ],
@@ -21280,6 +21285,9 @@
           },
           "intro": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },

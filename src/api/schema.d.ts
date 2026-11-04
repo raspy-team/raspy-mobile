@@ -8212,6 +8212,7 @@ export interface components {
             ownerId: number;
             ownerNickname: string;
             ownerProfileUrl?: string;
+            ownerIsBot: boolean;
             /** @enum {string} */
             gameStatus: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
             /** Format: double */
@@ -8894,6 +8895,7 @@ export interface components {
             nickname: string;
             avatar?: string;
             intro?: string;
+            isBot: boolean;
         };
         SafetyRatio: {
             /** Format: int32 */

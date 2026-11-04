@@ -44,9 +44,9 @@
         <div class="flex-1 min-w-0">
           <h1 class="t-title flex items-center min-w-0"><span class="truncate">{{ user.nickname }}</span><UiAiBadge v-if="user.isBot" /></h1>
           <p class="t-caption truncate mt-0.5">@{{ user.username }}</p>
-          <!-- 동네 (당근의 '합정동 · 동네 인증'). 인증이 지났으면 표시를 뺀다 -->
+          <!-- 동네 (당근의 '합정동 · 동네 인증'). 인증이 지났으면 표시를 뺀다. AI 주민은 사람이 인증한 동네가 아니라 '동네 인증'을 달지 않는다 -->
           <p v-if="user.dong" class="t-caption truncate mt-0.5 flex items-center gap-1">
-            <UiIcon name="location-dot" class="text-xs" aria-hidden="true" />{{ user.dong.name }}<span v-if="user.dong.verified" class="text-fg-subtle">· 동네 인증</span>
+            <UiIcon name="location-dot" class="text-xs" aria-hidden="true" />{{ user.dong.name }}<span v-if="user.dong.verified && !user.isBot" class="text-fg-subtle">· 동네 인증</span>
           </p>
           <p v-if="subline" class="t-caption truncate mt-0.5">{{ subline }}</p>
           <!-- 예전에 직접 적은 소속 (인증 소속 ✓과 다르다): 흐리게 -->
@@ -93,7 +93,8 @@
           <p class="t-heading tabular-nums">{{ seatLines.length }}</p>
           <p class="t-micro mt-0.5">자리</p>
         </div>
-        <button type="button" class="flex-1" @click="openFriends">
+        <!-- AI 주민은 친구가 없다 (docs/ai-residents.md '채우지 않는 곳': 친구) -->
+        <button v-if="!user.isBot" type="button" class="flex-1" @click="openFriends">
           <p class="t-heading tabular-nums">{{ stats.friends || 0 }}</p>
           <p class="t-micro mt-0.5">친구 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </button>

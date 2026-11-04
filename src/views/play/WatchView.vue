@@ -23,7 +23,7 @@
             @click="cheer(side)"
           >
             <UiAvatar :src="p.profilePicture" :name="p.nickname" :user-id="p.userId" size="md" class="mx-auto" />
-            <p class="t-heading mt-2 truncate">{{ p.nickname }}</p>
+            <p class="t-heading mt-2 truncate">{{ p.nickname }}<UiAiBadge v-if="p.isBot" /></p>
             <p class="t-display tabular-nums mt-1">{{ state.votes[side] ?? 0 }}</p>
             <p class="t-micro">{{ state.winnerId === p.userId ? '승리' : state.myVote === side ? '내가 응원 중' : canCheer ? '눌러서 응원' : '응원' }}</p>
           </button>
@@ -51,7 +51,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { WS_URL } from '@/config/server'
 import { feel } from '../../utils/feel'
-import { UiAvatar, UiButton, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiAiBadge, UiAvatar, UiButton, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['WatchState']
 

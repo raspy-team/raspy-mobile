@@ -98,7 +98,7 @@ const sides = computed(() =>
 const when = computed(() => (props.post.date ? timeAgo(props.post.date) : ''))
 // 서버 feed_story가 붙인 이야기 (앱 대결은 수 기록 그림만 쓴다)
 const story = computed(() => (props.post as { story?: { appVisual?: any } | null }).story)
-const feedPlayers = computed(() => (props.post.players as unknown as { id: number; name: string }[] | undefined) || [])
+const feedPlayers = computed(() => (props.post.players as unknown as { id: number; name: string; isBot?: boolean }[] | undefined) || [])
 
 onMounted(async () => {
   if (!voting.value) return

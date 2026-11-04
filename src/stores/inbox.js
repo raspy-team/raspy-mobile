@@ -13,14 +13,18 @@ const state = reactive({
 })
 
 let inflight = null
+// 계정이 바뀌면(로그아웃·탈퇴) 늘어난다: 앞 계정으로 보낸 요청이 늦게 돌아와도 담지 않는다
+let generation = 0
 export function refreshInbox() {
   if (!localStorage.getItem('raspy_access_token2')) return Promise.resolve()
   if (inflight) return inflight
+  const mine = generation
   inflight = Promise.allSettled([
     api.get('/api/notifications'),
     api.get('/api/friends/my/received'),
     api.get('/api/chat-room/unread-count'),
   ]).then(([n, f, d]) => {
+    if (mine !== generation) return
     if (n.status === 'fulfilled') state.notifications = n.value.data
     if (f.status === 'fulfilled') state.friendRequests = f.value.data
     if (d.status === 'fulfilled') state.dmUnread = d.value.data.count || 0
@@ -39,6 +43,13 @@ export function startInbox() {
 export function stopInbox() {
   stop?.()
   stop = null
+  // 앞 계정의 알림·친구 요청·배지를 비운다. 같은 기기에서 다른 계정으로 들어오면 앞사람 것이 보였다 (SPA라 화면을 새로 띄우지 않는다)
+  generation++
+  inflight = null
+  state.notifications = []
+  state.friendRequests = []
+  state.dmUnread = 0
+  state.loaded = false
 }
 
 export async function markNotificationRead(n) {

@@ -7,8 +7,8 @@
           <InboxButtons />
           <UiIconButton icon="fas fa-gear" label="설정" @click="router.push('/settings')" />
         </template>
-        <!-- AI 주민은 친구·신고·차단이 없다 (docs/ai-residents.md) -->
-        <UiIconButton v-else-if="user && !user.isBot" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
+        <!-- AI 주민은 친구·신고·차단이 없다 (docs/ai-residents.md). 순위의 '(나)' 줄처럼 내 id로 들어와도 나를 신고·차단하는 메뉴는 두지 않는다 -->
+        <UiIconButton v-else-if="user && !user.isBot && !user.isMe" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
       </template>
     </UiTopBar>
 
@@ -28,8 +28,10 @@
     </main>
 
     <main v-else-if="loadError" class="max-w-2xl mx-auto px-4 pt-16">
-      <UiEmptyState icon="fas fa-user-slash" :title="loadError" description="차단했거나 없는 사용자예요">
-        <UiButton variant="secondary" @click="router.back()">돌아가기</UiButton>
+      <!-- 서버가 이유를 말했으면(차단·없음·탈퇴) 그 말만, 연결 오류면 다시 불러오기 -->
+      <UiEmptyState icon="fas fa-user-slash" :title="loadError" :description="loadFailed ? '잠시 뒤 다시 해 주세요' : ''">
+        <UiButton v-if="loadFailed" variant="secondary" @click="reload">다시 불러오기</UiButton>
+        <UiButton v-else variant="secondary" @click="router.back()">돌아가기</UiButton>
       </UiEmptyState>
     </main>
 
@@ -288,6 +290,9 @@ const isMeRoute = route.params.id === '0'
 const user = ref(null)
 const loading = ref(true)
 const loadError = ref('')
+const loadFailed = ref(false) // 서버가 이유를 말하지 않은 실패 (연결·서버 오류)
+// 화면은 주소마다 새로 그려지니(App.vue의 key) 다시 불러오기는 새로고침으로
+const reload = () => window.location.reload()
 const friend = ref({ sent: false, isFriend: false, received: false })
 const busy = ref(false)
 const menuOpen = ref(false)
@@ -427,6 +432,7 @@ onMounted(async () => {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
   } catch (e) {
+    loadFailed.value = !e.response?.data?.message
     loadError.value = e.response?.data?.message || '프로필을 불러오지 못했어요'
   } finally {
     loading.value = false

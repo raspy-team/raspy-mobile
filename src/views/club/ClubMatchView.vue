@@ -106,12 +106,16 @@ async function load() {
   }
 }
 
-async function act(task: () => Promise<{ data: Schemas['ClubMatchView'] }>, fallback: string) {
+/** 됐으면 true */
+async function act(task: () => Promise<{ data: Schemas['ClubMatchView'] }>, fallback: string): Promise<boolean> {
+  if (busy.value) return false
   busy.value = true
   try {
     m.value = (await task()).data
+    return true
   } catch (e) {
     showToast(message(e, fallback))
+    return false
   } finally {
     busy.value = false
   }
@@ -148,8 +152,8 @@ function toggle(userId: number) {
 }
 async function saveLineup() {
   const boardNo = lineupBoard.value
-  await act(() => PUT('/api/clubs/matches/{matchId}/boards/{boardNo}', { path: { matchId, boardNo }, body: { userIds: picked.value } }), '정하지 못했어요')
-  lineupBoard.value = 0
+  // 못 정했으면 고른 사람을 그대로 두고 시트도 닫지 않는다
+  if (await act(() => PUT('/api/clubs/matches/{matchId}/boards/{boardNo}', { path: { matchId, boardNo }, body: { userIds: picked.value } }), '정하지 못했어요')) lineupBoard.value = 0
 }
 
 // 판이 끝나면 점수가 바뀐다 (선수에게 오는 변경 신호, 화면에 돌아올 때)

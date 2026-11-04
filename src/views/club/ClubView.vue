@@ -61,8 +61,8 @@
               </div>
               <p v-if="r.answer" class="t-body break-words">“{{ r.answer }}”</p>
               <div class="flex gap-2">
-                <UiButton size="sm" class="flex-1" @click="decide(r.userId, true)">받기</UiButton>
-                <UiButton size="sm" variant="secondary" class="flex-1" @click="decide(r.userId, false)">거절</UiButton>
+                <UiButton size="sm" class="flex-1" :disabled="busy" @click="decide(r.userId, true)">받기</UiButton>
+                <UiButton size="sm" variant="secondary" class="flex-1" :disabled="busy" @click="decide(r.userId, false)">거절</UiButton>
               </div>
             </UiCard>
           </div>
@@ -299,6 +299,8 @@ async function load() {
 }
 
 async function run<T>(task: () => Promise<T>, fallback: string): Promise<T | undefined> {
+  // 두 번 눌러도 한 번만 (가입 받기를 두 번 누르면 두 번째가 '가입 신청이 없어요'로 실패해 오류가 떴다)
+  if (busy.value) return undefined
   busy.value = true
   try {
     return await task()
@@ -380,12 +382,16 @@ function openPropose() {
   // 처음엔 우리 동네 동호회를 후보로
   if (!opResults.value.length) GET('/api/clubs/nearby').then((r) => (opResults.value = r.data)).catch(() => {})
 }
+let searchSeq = 0
 function searchClubs() {
   clearTimeout(searchTimer)
   searchTimer = setTimeout(async () => {
     const q = opQuery.value.trim()
-    if (q.length < 2) return
-    opResults.value = (await GET('/api/clubs/search', { query: { q } })).data.filter((c) => c.id !== id)
+    const seq = ++searchSeq
+    // 두 글자보다 짧으면 처음처럼 우리 동네 동호회 (예전엔 지난 검색 결과가 그대로 남았다). 늦게 온 앞 검색은 버린다
+    const r = await (q.length < 2 ? GET('/api/clubs/nearby') : GET('/api/clubs/search', { query: { q } })).catch(() => null)
+    if (seq !== searchSeq) return
+    opResults.value = (r?.data ?? []).filter((c) => c.id !== id)
   }, 250)
 }
 async function propose() {

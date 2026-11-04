@@ -137,6 +137,8 @@ async function save() {
   if (!USERNAME_PATTERN.test(name)) return (errors.username = '영문 소문자·숫자·밑줄(_)로 12자까지 적어 주세요')
   if (containsProfanity([nick, name, form.bio, form.affiliation].join(' '))) return showToast('쓰면 안 되는 말이 들어 있어요')
   const ageText = String(form.age ?? '').trim()
+  // 한 번 넣은 나이는 지우지 않는다 (만 19세 확인에 쓴다). 예전엔 비우고 저장하면 '저장했어요'라고 하고 그대로 두었다
+  if (!ageText && original.age != null) return (errors.age = '한 번 넣은 나이는 지울 수 없어요. 숨기려면 설정 > 내 정보 공개에서 정해요')
   if (ageText && !(Number.isInteger(Number(ageText)) && Number(ageText) >= 4 && Number(ageText) <= 120)) return (errors.age = '만 나이를 숫자로 적어 주세요')
 
   saving.value = true

@@ -62,8 +62,9 @@
         </div>
 
         <UiCard class="mt-4">
-          <p class="t-title">점수 저장하고 상대와 붙기</p>
-          <p class="t-caption mt-1">시작하면 이 점수가 내 기록에 남고, 같은 문제로 다른 사람과 승패를 내요</p>
+          <!-- 가입하며 옮긴 판은 기록(최고 기록·기록 순위)에만 남고 승패는 없다(0승 0패). 지키지 못하는 말을 하지 않는다 (first10 검토) -->
+          <p class="t-title">점수 저장하고 사람과 붙기</p>
+          <p class="t-caption mt-1">시작하면 이 점수가 내 기록에 남아 기록 순위에 올라가요. 다음 판부터는 사람과 승패를 내요</p>
           <UiButton block size="lg" class="mt-4" @click="join('result_join')">1초 만에 시작하기</UiButton>
         </UiCard>
         <UiButton v-if="key !== 'daily-chosung'" block variant="ghost" class="mt-2" :loading="starting" @click="again">한 판 더</UiButton>

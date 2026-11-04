@@ -11503,7 +11503,8 @@
           "perBoard",
           "ruleId",
           "ruleTitle",
-          "status"
+          "status",
+          "tournament"
         ],
         "type": "object",
         "properties": {
@@ -11559,6 +11560,9 @@
             "items": {
               "$ref": "#/components/schemas/ClubMatchBoard"
             }
+          },
+          "tournament": {
+            "type": "boolean"
           }
         }
       },

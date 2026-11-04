@@ -5948,6 +5948,7 @@ export interface components {
             result?: string;
             mySide?: string;
             boardList: components["schemas"]["ClubMatchBoard"][];
+            tournament: boolean;
         };
         ClubMember: {
             /** Format: int64 */

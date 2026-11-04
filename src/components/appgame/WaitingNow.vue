@@ -10,7 +10,9 @@
       <UiIcon :name="gameIcon(list.tonight.key, list.tonight.icon)" class="text-fg-muted" />
       <div class="flex-1 min-w-0">
         <p class="t-label truncate">{{ list.goldenHour ? `지금은 ${list.tonight.title} 시간` : `오늘 밤 ${nightHour}시 · ${list.tonight.title}` }}</p>
-        <p class="t-micro tabular-nums">{{ list.goldenHour ? `${nightHour}시대에는 이 게임에 사람이 모여요` : `${left} 남음 · ${list.nightAlarm ? '' : '켜면 '}${nightHour - 1}시 55분에 알려 드려요` }}</p>
+        <!-- 좁은 화면에서 '8시 / 55분'처럼 시각이 갈라지지 않게 덩어리마다 줄을 바꾼다 (11/5 c6 320 검토) -->
+        <p v-if="list.goldenHour" class="t-micro tabular-nums">{{ nightHour }}시대에는 이 게임에 사람이 모여요</p>
+        <p v-else class="t-micro tabular-nums"><span class="whitespace-nowrap">{{ left }} 남음</span> · <span class="whitespace-nowrap">{{ list.nightAlarm ? '' : '켜면 ' }}{{ nightHour - 1 }}시 55분에</span> 알려 드려요</p>
       </div>
       <UiButton v-if="list.goldenHour" size="sm" @click="join(list.tonight.key)">바로 하기</UiButton>
       <UiSwitch v-else :model-value="list.nightAlarm" :disabled="saving" label="8시 55분에 알려 주기" @update:model-value="setAlarm" />

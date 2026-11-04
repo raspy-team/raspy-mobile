@@ -55,6 +55,7 @@ import type { components } from '@/api/schema'
 import { onLobbyChange, openUserChannel } from '@/websocket/userChannel'
 import { UiAiBadge, UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
 import { liveRoute } from '@/utils/battle'
+import { waitText } from '@/utils/format'
 import { useToast } from '../../composable/useToast'
 
 const { showToast } = useToast()
@@ -119,7 +120,9 @@ async function setAlarm(on: boolean) {
 const anyLine = computed(() => {
   const n = list.value?.lobbies.length ?? 0
   if (n) return `지금 ${n}명이 기다려요. 실력이 가까운 사람과 바로 붙어요`
-  return list.value?.tonight ? `기다리는 사람이 없으면 ${list.value.tonight.title}에서 상대를 기다려요` : '기다리는 사람이 없으면 상대를 기다려요'
+  // 아무도 없으면 서버가 오늘 밤의 게임에 방을 연다. 그 방도 botAfterSeconds 뒤 AI 주민이 상대가 된다 (밤 9시대는 길게, 9e)
+  const ai = `${waitText(list.value?.botAfterSeconds ?? 15)} 안에 아무도 안 오면 AI 주민이 상대가 돼요`
+  return list.value?.tonight ? `기다리는 사람이 없으면 ${list.value.tonight.title}에서 기다려요. ${ai}` : `기다리는 사람이 없으면 방을 열어요. ${ai}`
 })
 
 // 붙을 게임은 서버가 정한다. 그 게임 화면으로 가면 들어가 있는 판을 이어서 보여 준다

@@ -15073,6 +15073,9 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/AppPlayer"
           }
         }
       },
@@ -15435,6 +15438,7 @@
       },
       "LobbyList": {
         "required": [
+          "botAfterSeconds",
           "goldenHour",
           "goldenHourStart",
           "lobbies",
@@ -15472,6 +15476,10 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          },
+          "botAfterSeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -21217,6 +21225,10 @@
           },
           "shared": {
             "type": "boolean"
+          },
+          "botAfterSeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

@@ -4,10 +4,12 @@
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <!-- 시작 전 3·2·1: 끝날 때까지 문제를 가린다 -->
-      <AppCountdown v-if="play && counting" :until="new Date(play.startedAt).getTime()" :offset="offset" @done="counting = false" />
+      <AppCountdown v-if="play && counting" :until="new Date(play.startedAt).getTime()" :offset="offset" :opponent="play.opponent ? who(play.opponent) : undefined" @done="counting = false" />
 
       <!-- 플레이 중: 게임마다 다른 판 -->
       <template v-else-if="play">
+        <!-- 기다리던 사람과 짝이 지어졌으면 누구와 겨루는지 (AI 주민이면 이름 뒤에 AI, 9e) -->
+        <p v-if="play.opponent" class="t-caption flex items-center min-w-0 mb-3"><span class="shrink-0">상대&nbsp;·&nbsp;</span><OpponentName :player="play.opponent" /><span class="shrink-0">&nbsp;· 먼저 풀었어요</span></p>
         <TypingPlay
           v-if="key === 'typing'"
           :problem="play.problem"
@@ -131,7 +133,7 @@
               <span class="t-caption">:</span>
               <span>
                 <span class="block t-title tabular-nums text-fg-muted">{{ result.opponentScore ?? 0 }}</span>
-                <span class="block t-micro">상대{{ isVote ? ' (표)' : '' }}</span>
+                <span class="flex items-center justify-center t-micro max-w-[8rem]"><OpponentName :player="result.opponent" /><span v-if="isVote" class="shrink-0">&nbsp;(표)</span></span>
               </span>
             </div>
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
@@ -180,7 +182,7 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
+              <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민이 풀어요.` : '' }} 결과가 나오면 알려 드릴게요</p>
             </template>
             <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
@@ -282,7 +284,7 @@
             <template v-else-if="ladderTo && fromFeed">{{ ladderName }}님에게 도전해요. 먼저 한 판 하면 같은 문제로 도전장을 메시지로 보내요</template>
             <template v-else-if="ladderTo">만나기 전에 {{ ladderName }}님과 한 판 해요. 끝나면 같은 문제로 도전장을 메시지로 보내요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번 풀 수 있어요. 오늘 같은 문제를 푼 사람들과 견줘요</template>
-            <template v-else>기다리는 사람이 있으면 바로 시작하고, 없으면 다음 사람을 기다려요<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template></template>
+            <template v-else>{{ waitLine }}<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template></template>
           </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
 
@@ -374,7 +376,8 @@
 </template>
 
 <script setup lang="ts">
-import { who } from '@/utils/format'
+import { waitText, who } from '@/utils/format'
+import OpponentName from '../../components/appgame/OpponentName.vue'
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
 import { liveRoute } from '@/utils/battle'
@@ -455,6 +458,21 @@ const result = ref<Duel | null>(null)
 // 신뢰 사다리 (안전·신뢰 D): 경기 신청자와 만나기 전에 한 판. ?to=사람&toName=이름으로 오면 새 판을 열고, 끝나면 그 사람에게 도전장을 메시지로 보낸다
 const ladderTo = Number(route.query.to) || null
 const ladderName = String(route.query.toName || '상대')
+
+// 시작 버튼 밑 한 줄: 사람이 안 오면 어떻게 되나. 초는 서버가 실제로 기다리는 시간 (밤 9시대 오늘 밤의 게임은 길다, 9e)
+const waitLine = computed(() => {
+  const g = game.value
+  if (!g) return ''
+  const after = g.botAfterSeconds
+  if (g.shared) return '열린 판에 들어가 여럿이 함께 겨뤄요'
+  if (g.playMode === 'REALTIME') {
+    // 하루 기다리는 게임(편지 오목): AI 주민이 저절로 오지 않고, 원하면 부른다
+    if (!after) return '기다리는 사람이 있으면 바로 시작해요. 없으면 상대가 올 때 알려 드려요. 기다리기 싫으면 AI 주민과 해도 돼요'
+    return `기다리는 사람이 있으면 바로 시작하고, ${waitText(after)} 안에 아무도 안 오면 AI 주민이 상대가 돼요`
+  }
+  if (!after) return '같은 문제를 푼 사람과 견줘요'
+  return `기다리는 사람이 있으면 같은 문제로 바로 겨뤄요. ${waitText(after)} 안에 아무도 안 풀면 AI 주민이 풀어요`
+})
 // 소식 카드의 '도전해요'로 왔다 (같은 길, 문구만 다르다)
 const fromFeed = route.query.from === 'feed'
 let ladderSent = false

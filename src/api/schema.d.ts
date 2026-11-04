@@ -7034,6 +7034,7 @@ export interface components {
             matched: boolean;
             /** Format: date-time */
             serverNow: string;
+            opponent?: components["schemas"]["AppPlayer"];
         };
         SharedBoardState: {
             /** Format: int64 */
@@ -7159,6 +7160,8 @@ export interface components {
             nightAlarm: boolean;
             /** Format: date-time */
             serverNow: string;
+            /** Format: int32 */
+            botAfterSeconds: number;
         };
         LobbyResident: {
             /** Format: int64 */
@@ -8875,6 +8878,8 @@ export interface components {
             dailyLimit?: number;
             battle: boolean;
             shared: boolean;
+            /** Format: int32 */
+            botAfterSeconds?: number;
         };
         AppRecordBoard: {
             key: string;

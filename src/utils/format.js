@@ -74,3 +74,10 @@ export function withRo(word) {
   const jong = c % 28
   return s + (jong === 0 || jong === 8 ? '로' : '으로')
 }
+
+// AI 주민이 상대가 되기까지 기다리는 시간 (서버의 botAfterSeconds): '15초', '1분', '1시간'
+export function waitText(seconds) {
+  if (seconds < 60) return `${seconds}초`
+  if (seconds < 3600) return `${Math.round(seconds / 60)}분`
+  return `${Math.round(seconds / 3600)}시간`
+}

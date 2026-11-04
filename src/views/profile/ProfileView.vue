@@ -340,11 +340,17 @@ const FRIEND_ACTIONS = {
   accept: { call: (id) => api.post(`/api/friends/accept/${id}`), done: '이제 친구예요' },
   reject: { call: (id) => api.post(`/api/friends/reject/${id}`), done: '요청을 거절했어요' },
 }
+function bumpFriends(d) {
+  if (user.value?.stats && typeof user.value.stats.friends === 'number') user.value.stats.friends = Math.max(0, user.value.stats.friends + d)
+}
+
 async function friendAction(kind) {
   busy.value = true
   try {
     await FRIEND_ACTIONS[kind].call(user.value.id)
     showToast(FRIEND_ACTIONS[kind].done)
+    // 친구 수가 바뀌는 건 수락뿐: 숫자 줄도 맞춘다 (예전엔 '이제 친구예요'인데 친구 0이 그대로였다)
+    if (kind === 'accept') bumpFriends(1)
     await loadFriendStatus()
   } catch (e) {
     showToast(e.response?.data?.message || '처리하지 못했어요. 잠시 뒤 다시 해 주세요')
@@ -359,6 +365,7 @@ async function unfriend() {
   try {
     await api.delete(`/api/friends/${user.value.id}`)
     showToast('친구를 끊었어요')
+    bumpFriends(-1)
     await loadFriendStatus()
   } catch {
     showToast('처리하지 못했어요. 잠시 뒤 다시 해 주세요')

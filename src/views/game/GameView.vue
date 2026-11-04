@@ -73,6 +73,7 @@
               @cancel-request="cancelRequest(game)"
               @more="menuGame = game"
               @schedule="openSchedule(game)"
+              @chat="router.push(`/games/${game.id}/chat`)"
             />
             <!-- 만나서 하는 경기: 도착·끝 확인, 노쇼, 위치 공유 (안전·신뢰 C) -->
             <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" />

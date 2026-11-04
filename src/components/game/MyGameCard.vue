@@ -54,6 +54,8 @@
     <div class="flex items-center gap-2 px-4 pb-4">
       <UiButton v-if="state.action" block :variant="quiet && state.actionVariant === 'signal' ? 'primary' : state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
       <p v-else class="flex-1 t-caption">{{ state.hint }}</p>
+      <!-- 팀 경기 단톡방: 승인된 둘 이상이면 (11/5 C) -->
+      <UiIconButton v-if="chatOpen" icon="far fa-comment" label="단톡방" class="flex-shrink-0" @click="emit('chat')" />
       <UiIconButton icon="fas fa-ellipsis" label="더보기" class="flex-shrink-0" @click="emit('more')" />
     </div>
   </UiCard>
@@ -65,7 +67,7 @@ import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
 import { matchTime, place } from '../../utils/format'
-import { TEAM_NAMES, venuePlace, isRemote } from '../../utils/gameFormat'
+import { TEAM_NAMES, venuePlace, isRemote, teamChatOpen } from '../../utils/gameFormat'
 
 const props = defineProps({
   game: { type: Object, required: true },
@@ -73,7 +75,8 @@ const props = defineProps({
   /** 볼트(내 차례) 버튼을 보통 채운 버튼으로. 한 화면에 볼트는 하나라 목록의 둘째부터 */
   quiet: { type: Boolean, default: false },
 })
-const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule'])
+const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule', 'chat'])
+const chatOpen = computed(() => teamChatOpen(props.game, props.game.myId ?? props.me?.id))
 
 // 시작 전이면 선수(주최자·확정된 상대)가 시간·장소를 정하고 바꾼다
 const canSchedule = computed(() => {

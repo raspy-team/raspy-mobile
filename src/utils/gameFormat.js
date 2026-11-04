@@ -41,3 +41,13 @@ export function venuePlace(game, place) {
   const label = VENUES.find((v) => v.value === game.venue)?.label
   return game.matchLocation ? `${label} · ${game.matchLocation}` : label
 }
+
+/**
+ * 팀 경기 단톡방이 열렸는지 (서버 TeamChatService.isOpen과 같은 기준): 1:1이 아니고, 승인된 사람이 둘 이상이고, 내가 그중 하나.
+ * players는 승인된 사람 목록 (내 경기는 id, 경기 하나는 userId)
+ */
+export function teamChatOpen(game, myId) {
+  if (!game || !game.format || game.format === 'DUEL' || game.gameStatus === 'DELETED') return false
+  const ids = (game.players || []).map((p) => p.id ?? p.userId)
+  return ids.length >= 2 && myId != null && ids.includes(myId)
+}

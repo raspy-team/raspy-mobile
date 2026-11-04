@@ -6895,6 +6895,39 @@
         }
       }
     },
+    "/api/games/{gameId}/team-chat": {
+      "get": {
+        "tags": [
+          "team-chat-controller"
+        ],
+        "summary": "팀 경기 단톡방 열기",
+        "description": "승인된 사람이 둘 이상인 팀 대 팀·여럿이 각자 경기의 단체 대화방. 처음이면 만든다. 메시지는 /api/chat-room/{roomId}/chat-messages, 보내기는 웹소켓 /app/chat/{roomId}",
+        "operationId": "open",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamChatInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/share-link": {
       "get": {
         "tags": [
@@ -14595,6 +14628,7 @@
               "INBOX",
               "MY_GAME",
               "DM",
+              "TEAM_CHAT",
               "GAME_JOIN_APPROVED",
               "APP_TURN",
               "REALTIME_CALL",
@@ -15072,6 +15106,68 @@
           "sets": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "Member": {
+        "required": [
+          "isHost",
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileUrl": {
+            "type": "string"
+          },
+          "isHost": {
+            "type": "boolean"
+          },
+          "team": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TeamChatInfo": {
+        "required": [
+          "members",
+          "roomId",
+          "ruleTitle",
+          "writable"
+        ],
+        "type": "object",
+        "properties": {
+          "roomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "writable": {
+            "type": "boolean"
+          },
+          "closesAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            }
           }
         }
       },

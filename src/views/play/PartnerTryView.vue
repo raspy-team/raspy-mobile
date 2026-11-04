@@ -13,7 +13,13 @@
             {{ done.waiting > 0 ? `이 동네에서 ${done.waiting}명이 먼저 기다리고 있어요` : '이 동네 첫 등록이에요' }}
           </p>
         </UiCard>
-        <UiCard class="mt-4">
+        <!-- 이미 로그인한 사람에게 '시작해 주세요'는 맞지 않는다: 등록을 바로 내 계정에 붙이고 홈으로 -->
+        <UiCard v-if="loggedIn" class="mt-4">
+          <p class="t-title">상대가 생기면 알려 드릴게요</p>
+          <p class="t-caption mt-1">내 계정에 등록했어요</p>
+          <UiButton block size="lg" class="mt-4" to="/">홈으로</UiButton>
+        </UiCard>
+        <UiCard v-else class="mt-4">
           <p class="t-title">상대가 생기면 알려 드릴게요</p>
           <p class="t-caption mt-1">알림을 받으려면 시작해 주세요. 등록한 내용은 그대로 이어져요</p>
           <UiButton block size="lg" class="mt-4" @click="join">1초 만에 시작하기</UiButton>
@@ -100,7 +106,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import BrandFace from '../../components/BrandFace.vue'
 import { UiButton, UiCard, UiInput, UiSection, UiTopBar } from '../../components/ui'
-import { getVisitorId, markPartnerRegistered } from '@/utils/visit'
+import { claimGuestPlays, getVisitorId, markPartnerRegistered } from '@/utils/visit'
 import { track, flush } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
 
@@ -108,7 +114,8 @@ type Schemas = components['schemas']
 type DongOption = Schemas['DongOption']
 
 const router = useRouter()
-if (localStorage.getItem('raspy_access_token2')) track('partner_open_loggedin')
+const loggedIn = !!localStorage.getItem('raspy_access_token2')
+if (loggedIn) track('partner_open_loggedin')
 
 const options = ref<Schemas['Options'] | null>(null)
 const sport = ref('')
@@ -240,6 +247,7 @@ async function register() {
       })
     ).data
     markPartnerRegistered()
+    if (loggedIn) claimGuestPlays()
     track('partner_done', { step: 4, value: `waiting=${done.value.waiting}` })
   } catch (e) {
     error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '등록하지 못했어요'

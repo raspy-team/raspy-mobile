@@ -16,6 +16,11 @@
         <UiSkeleton v-for="n in 4" :key="n" class="h-20 w-full" />
       </div>
 
+      <!-- 목록을 못 받으면 '찾는 게임이 없어요'(검색 결과처럼) 대신 다시 불러오기 -->
+      <UiEmptyState v-else-if="loadFailed" class="pt-12" icon="fas fa-triangle-exclamation" title="게임 목록을 불러오지 못했어요" description="연결을 확인하고 다시 해 주세요">
+        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+      </UiEmptyState>
+
       <template v-else>
         <!-- 지금 기다리는 사람: 한 번에 붙기 (사람이 적을 때 흩어지지 않게) -->
         <WaitingNow v-if="!query && !structure" class="mt-6" any-button />
@@ -46,7 +51,7 @@ import type { components } from '@/api/schema'
 import { STRUCTURES } from '@/utils/appGame'
 import AppGameTile from '../../components/appgame/AppGameTile.vue'
 import WaitingNow from '../../components/appgame/WaitingNow.vue'
-import { UiChip, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiButton, UiChip, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type AppGameSummary = components['schemas']['AppGameSummary']
 const games = ref<AppGameSummary[]>([])
@@ -68,11 +73,17 @@ const filtered = computed(() => {
     .sort((a, b) => Number(b.available) - Number(a.available) || b.playCount - a.playCount)
 })
 
-onMounted(async () => {
+const loadFailed = ref(false)
+async function load() {
+  loading.value = true
+  loadFailed.value = false
   try {
     games.value = (await GET('/api/app-games')).data
+  } catch {
+    loadFailed.value = true
   } finally {
     loading.value = false
   }
-})
+}
+onMounted(load)
 </script>

@@ -16,6 +16,7 @@
         class="w-full text-left rounded-xl px-4 py-3 transition-colors"
         :class="card.myVote === o.playId ? 'bg-fg text-canvas' : 'bg-surface-2 active:bg-surface-3'"
         :disabled="!canVote || voting"
+        :aria-pressed="card.myVote === o.playId"
         @click="vote(o.playId)"
       >
         <span class="t-micro block" :class="card.myVote === o.playId ? 'text-canvas' : ''">{{ i === 0 ? 'A' : 'B' }}</span>

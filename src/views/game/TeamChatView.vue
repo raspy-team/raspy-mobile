@@ -72,6 +72,7 @@ import type { components } from '@/api/schema'
 import { socket } from '@/websocket'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { getMyId } from '@/utils/me'
+import { useToast } from '@/composable/useToast'
 import { matchTime } from '@/utils/format'
 import { TEAM_NAMES } from '@/utils/gameFormat'
 import { UiAvatar, UiButton, UiChip, UiEmptyState, UiIcon, UiListSkeleton, UiTopBar } from '@/components/ui'
@@ -124,7 +125,11 @@ async function load() {
 function send(text?: string) {
   const content = (text ?? draft.value).trim()
   if (!content || !info.value?.writable) return
-  socket.sendChat(info.value.roomId, content)
+  // 연결이 끊겨 못 보냈으면 쓴 글을 남기고 알린다 (예전엔 글이 조용히 사라졌다, ChatView와 같이)
+  if (!socket.sendChat(info.value.roomId, content)) {
+    showToast('연결이 잠시 끊겼어요. 잠시 뒤 다시 보내 주세요')
+    return
+  }
   if (!text) draft.value = ''
 }
 
@@ -135,6 +140,7 @@ function onEnter(e: KeyboardEvent) {
   send()
 }
 
+const { showToast } = useToast()
 let stop: (() => void) | null = null
 onMounted(async () => {
   me.value = await getMyId()
@@ -149,5 +155,10 @@ onMounted(async () => {
   }
   stop = refreshOnChange(load)
 })
-onBeforeUnmount(() => { stop?.(); socket.disconnect() })
+// 나갈 때 콜백과 방 번호까지 지운다: 남겨 두면 끊긴 소켓이 다시 붙어 이 방의 새 글을 '읽음'으로 보냈다 (ChatView와 같은 문제)
+onBeforeUnmount(() => {
+  stop?.()
+  socket.onMessage(null)
+  socket.disconnect({ clearRoomId: true })
+})
 </script>

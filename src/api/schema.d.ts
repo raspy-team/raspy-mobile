@@ -190,6 +190,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/track/log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 원본 기록 묶음
+         * @description 로그인 없이. {visitorId, items:[{name, gameKey, step, value, path}]} 40개까지. 일어난 그대로 쌓는다(하루 한 번 아님)
+         */
+        post: operations["log"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/track/event": {
         parameters: {
             query?: never;
@@ -651,6 +671,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/partner-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 상대 구하기 등록
+         * @description 로그인 없이. 기기 번호·종목·행정동·편한 때만 남긴다
+         */
+        post: operations["register_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partner-requests/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 가입 전 등록을 내 계정으로
+         * @description 로그인한 뒤 부른다. 여러 번 불러도 한 번만
+         */
+        post: operations["claim"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/nunchi/tastes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 내 취향 내기
+         * @description 로그인 없이. 많아야 셋. 질문마다 기기당 한 표(처음 것). 나와 같은 쪽을 고른 사람 비율을 돌려준다
+         */
+        post: operations["tastes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notifications/{id}/read": {
         parameters: {
             query?: never;
@@ -1012,7 +1092,7 @@ export interface paths {
          * 가입 전 판을 내 기록으로
          * @description 로그인한 뒤 부른다. 이 기기의 가입 전 판을 내 기록으로 옮긴다. 여러 번 불러도 한 번만
          */
-        post: operations["claim"];
+        post: operations["claim_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1994,7 +2074,7 @@ export interface paths {
          * 어드민에 의한 그룹 등록
          * @description 계정이름, 비밀번호를 받아 신규 유저를 생성합니다.
          */
-        post: operations["register_1"];
+        post: operations["register_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3355,6 +3435,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/partner-requests/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 고를 수 있는 종목·때
+         * @description 로그인 없이
+         */
+        get: operations["options"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partner-requests/locate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 좌표의 동네
+         * @description 로그인 없이. 저장하지 않는다. 못 찾으면 비어 있다
+         */
+        get: operations["locate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/partner-requests/dongs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 동네 이름 찾기
+         * @description 로그인 없이. '합정' → 마포구 합정동, 10개까지
+         */
+        get: operations["search_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/nunchi/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 질문 글
+         * @description 로그인 없이. 판의 문제(질문 id 열 개)로 질문과 두 선택을 받는다. 정답은 주지 않는다
+         */
+        get: operations["questions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/nunchi/plays/{playId}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 판 돌아보기
+         * @description 로그인한 사람의 낸 판
+         */
+        get: operations["myReview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/nunchi/guest-plays/{playId}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 가입 전 판 돌아보기
+         * @description 로그인 없이. 낸 판만, 그 기기만. 질문마다 정답·몇 명 기준·내 선택·내가 낸 취향, 친구 도전이면 친구 점수
+         */
+        get: operations["guestReview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notifications": {
         parameters: {
             query?: never;
@@ -3426,7 +3626,7 @@ export interface paths {
          * 좌표의 동네 보기
          * @description 인증 전에 '여기는 합정동이에요'를 보여 준다. 저장하지 않는다. 못 찾으면 null
          */
-        get: operations["locate"];
+        get: operations["locate_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4086,7 +4286,7 @@ export interface paths {
          * 동호회 이름으로 찾기
          * @description 교류전 상대를 고를 때. 두 글자부터
          */
-        get: operations["search_1"];
+        get: operations["search_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4609,6 +4809,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/track-log.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 원본 기록 내려받기 (관리자)
+         * @description 최근 days일. 분석은 이 파일로 한다
+         */
+        get: operations["csv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/safety": {
         parameters: {
             query?: never;
@@ -4678,6 +4898,26 @@ export interface paths {
          * @description 최근 신고부터. 처리 전 것만 보려면 화면에서 handledAt으로 거른다.
          */
         get: operations["list_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/partner-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 상대 구하기 등록 집계 (관리자)
+         * @description 최근 days일, 동네·종목별 등록 수와 가입으로 이어진 수
+         */
+        get: operations["summary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5385,6 +5625,43 @@ export interface components {
             bonusRate: number;
             outcome?: string;
         };
+        RegisterRequest: {
+            visitorId: string;
+            sport: string;
+            dongCode: string;
+            times: string[];
+            dongSource?: string;
+        };
+        RegisterResponse: {
+            /** Format: int64 */
+            id: number;
+            dongName: string;
+            /** Format: int64 */
+            waiting: number;
+        };
+        ClaimRequest: {
+            visitorId: string;
+        };
+        ClaimResponse: {
+            /** Format: int32 */
+            claimed: number;
+        };
+        TastePick: {
+            id: string;
+            choice: string;
+        };
+        TasteRequest: {
+            visitorId: string;
+            picks: components["schemas"]["TastePick"][];
+        };
+        TasteResult: {
+            id: string;
+            choice: string;
+            /** Format: int32 */
+            sameRate: number;
+            /** Format: int32 */
+            people: number;
+        };
         VerifyRequest: {
             /** Format: double */
             lat: number;
@@ -5488,6 +5765,9 @@ export interface components {
         StartRequest: {
             visitorId: string;
             key: string;
+            first?: string;
+            /** Format: int64 */
+            from?: number;
         };
         GuestPlayResponse: {
             /** Format: int64 */
@@ -5519,13 +5799,6 @@ export interface components {
             rank?: number;
             /** Format: int32 */
             rankOf?: number;
-        };
-        ClaimRequest: {
-            visitorId: string;
-        };
-        ClaimResponse: {
-            /** Format: int32 */
-            claimed: number;
         };
         GameRegionRequest: {
             roadAddress: string;
@@ -5725,10 +5998,6 @@ export interface components {
             myNickname: string;
             /** Format: uuid */
             roomId: string;
-        };
-        RegisterRequest: {
-            email: string;
-            password: string;
         };
         ResetRequest: {
             loginId: string;
@@ -6623,6 +6892,46 @@ export interface components {
             /** Format: int32 */
             distanceM?: number;
             public: boolean;
+        };
+        Option: {
+            value: string;
+            label: string;
+        };
+        Options: {
+            sports: components["schemas"]["Option"][];
+            times: components["schemas"]["Option"][];
+        };
+        DongOption: {
+            code: string;
+            name: string;
+        };
+        QuestionView: {
+            id: string;
+            q: string;
+            a: string;
+            b: string;
+        };
+        Review: {
+            /** Format: double */
+            score?: number;
+            items: components["schemas"]["ReviewItem"][];
+            /** Format: double */
+            challengerScore?: number;
+        };
+        ReviewItem: {
+            id: string;
+            q: string;
+            a: string;
+            b: string;
+            answer: string;
+            /** Format: int32 */
+            people: number;
+            byFirst: boolean;
+            /** Format: int32 */
+            percentA?: number;
+            mine?: string;
+            correct: boolean;
+            myTaste?: string;
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -7581,6 +7890,28 @@ export interface components {
             accusedSuspendedUntil?: string;
             context?: string;
         };
+        Summary: {
+            /** Format: date */
+            since: string;
+            /** Format: int32 */
+            total: number;
+            rows: components["schemas"]["SummaryRow"][];
+            bySport: {
+                [key: string]: number;
+            };
+            byTime: {
+                [key: string]: number;
+            };
+        };
+        SummaryRow: {
+            dongCode: string;
+            dongName: string;
+            sport: string;
+            /** Format: int32 */
+            count: number;
+            /** Format: int32 */
+            claimed: number;
+        };
         NoShowAppeal: {
             /** Format: int64 */
             id: number;
@@ -7953,6 +8284,32 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["VisitInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    log: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "*/*": string;
             };
         };
         responses: {
@@ -8579,6 +8936,82 @@ export interface operations {
             };
         };
     };
+    register_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RegisterResponse"];
+                };
+            };
+        };
+    };
+    claim: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClaimResponse"];
+                };
+            };
+        };
+    };
+    tastes: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TasteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TasteResult"][];
+                };
+            };
+        };
+    };
     markAsRead: {
         parameters: {
             query?: never;
@@ -8998,7 +9431,7 @@ export interface operations {
             };
         };
     };
-    claim: {
+    claim_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -10280,7 +10713,7 @@ export interface operations {
             };
         };
     };
-    register_1: {
+    register_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -12018,6 +12451,141 @@ export interface operations {
             };
         };
     };
+    options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Options"];
+                };
+            };
+        };
+    };
+    locate: {
+        parameters: {
+            query: {
+                lat: number;
+                lon: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DongOption"];
+                };
+            };
+        };
+    };
+    search_1: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DongOption"][];
+                };
+            };
+        };
+    };
+    questions: {
+        parameters: {
+            query: {
+                ids: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuestionView"][];
+                };
+            };
+        };
+    };
+    myReview: {
+        parameters: {
+            query?: {
+                visitorId?: string;
+            };
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Review"];
+                };
+            };
+        };
+    };
+    guestReview: {
+        parameters: {
+            query: {
+                visitorId: string;
+            };
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Review"];
+                };
+            };
+        };
+    };
     getNotifications: {
         parameters: {
             query?: never;
@@ -12078,7 +12646,7 @@ export interface operations {
             };
         };
     };
-    locate: {
+    locate_1: {
         parameters: {
             query: {
                 lat: number;
@@ -12839,7 +13407,7 @@ export interface operations {
             };
         };
     };
-    search_1: {
+    search_2: {
         parameters: {
             query: {
                 q: string;
@@ -13474,6 +14042,28 @@ export interface operations {
             };
         };
     };
+    csv: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     safety: {
         parameters: {
             query?: {
@@ -13554,6 +14144,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminReportResponse"][];
+                };
+            };
+        };
+    };
+    summary: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Summary"];
                 };
             };
         };

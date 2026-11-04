@@ -65,6 +65,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <NunchiPlay
+          v-else-if="key === 'nunchi'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <TimeSensePlay
           v-else-if="key === 'time-sense'"
           :problem="play.problem"
@@ -377,6 +384,7 @@ import WritePlay from '../../components/appgame/WritePlay.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 import LiteracyPlay from '../../components/appgame/LiteracyPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
+import NunchiPlay from '../../components/appgame/NunchiPlay.vue'
 import NumberSpotsPlay from '../../components/appgame/NumberSpotsPlay.vue'
 import DailyNumberPlay from '../../components/appgame/DailyNumberPlay.vue'
 import RhythmCopyPlay from '../../components/appgame/RhythmCopyPlay.vue'

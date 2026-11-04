@@ -126,6 +126,29 @@
           </table>
         </UiCard>
         <p v-if="acq?.events?.length" class="t-micro mt-2">기기 수. 가입 전 한 판을 시작·끝낸 기기, 시작 화면과 한 판 끝 화면에서 로그인 버튼(카카오·구글·애플·아이디)을 누른 기기</p>
+        <!-- 상대 구하기 등록 (H2): 동네·종목별 등록 수, 그중 가입으로 이어진 수 -->
+        <UiCard v-if="partner?.rows?.length" class="!p-0 overflow-x-auto mt-3">
+          <table class="w-full text-sm tabular-nums">
+            <thead>
+              <tr class="t-micro text-left">
+                <th class="font-normal py-2.5 pl-4 pr-2">상대 구하기 · 동네</th>
+                <th class="font-normal py-2.5 px-2">종목</th>
+                <th class="font-normal py-2.5 px-2 text-right">등록</th>
+                <th class="font-normal py-2.5 px-2 text-right pr-4">가입</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="r in partner.rows" :key="`${r.dongCode}|${r.sport}`" class="border-t border-line">
+                <td class="py-2.5 pl-4 pr-2 max-w-[9rem] truncate">{{ r.dongName }}</td>
+                <td class="py-2.5 px-2">{{ SPORT_LABEL[r.sport] || r.sport }}</td>
+                <td class="py-2.5 px-2 text-right">{{ r.count }}</td>
+                <td class="py-2.5 px-2 text-right pr-4">{{ r.claimed }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </UiCard>
+        <p v-if="partner?.total" class="t-micro mt-2">상대 구하기 등록 {{ partner.total }}건 · 때: {{ Object.entries(partner.byTime).map(([k, v]) => `${k} ${v}`).join(', ') }}</p>
+        <UiButton size="sm" variant="secondary" class="mt-3" icon="download" :loading="downloading" @click="downloadTrackLog">원본 기록 내려받기 (CSV)</UiButton>
       </UiSection>
 
       <!-- 안전: 만나서 한 경기가 안전했는지 (안전·신뢰 I). 비율은 몇 중 몇인지도 함께 보여 준다 -->
@@ -283,10 +306,46 @@ const ACQ_COLS = [
 const EVENT_COLS = [
   { key: 'guest_start', label: '한 판 시작' },
   { key: 'guest_finish', label: '끝까지' },
+  { key: 'guest_start@nunchi', label: '눈치 시작' },
+  { key: 'guest_finish@nunchi', label: '눈치 끝' },
+  { key: 'taste@nunchi', label: '취향' },
+  { key: 'challenge@nunchi', label: '도전' },
   { key: 'tap@guest', label: '끝나고 누름' },
+  { key: 'partner', label: '상대 등록' },
+  { key: 'tap@partner', label: '등록 뒤 누름' },
   { key: 'tap@init', label: '첫 화면 누름' },
   { key: 'tap_kakao@init', label: '카카오' },
 ]
+
+// 상대 구하기 등록 (H2): 동네·종목별
+const partner = ref(null)
+const SPORT_LABEL = { badminton: '배드민턴', tabletennis: '탁구', tennis: '테니스', futsal: '풋살', basketball: '농구', bowling: '볼링', billiards: '당구', running: '러닝', climbing: '클라이밍', golf: '골프', boardgame: '보드게임', etc: '기타' }
+async function loadPartner() {
+  try {
+    partner.value = (await GET('/api/admin/partner-requests', { query: { days: acqDays.value } })).data
+  } catch {
+    partner.value = null
+  }
+}
+
+// 수요 조사 원본 기록 내려받기 (문제마다 답·시간, 그만둔 곳, 버튼, 단계). 분석은 이 파일로
+const downloading = ref(false)
+async function downloadTrackLog() {
+  downloading.value = true
+  try {
+    const { data } = await api.get('/api/admin/track-log.csv', { params: { days: acqDays.value }, responseType: 'blob' })
+    const url = URL.createObjectURL(data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `track-log-${new Date().toLocaleDateString('sv')}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch {
+    showToast('내려받지 못했어요')
+  } finally {
+    downloading.value = false
+  }
+}
 const acqTabs = [
   { value: 7, label: '7일' },
   { value: 30, label: '30일' },
@@ -303,6 +362,7 @@ async function loadAcquisition() {
   } catch {
     showToast('유입을 불러오지 못했어요')
   }
+  loadPartner()
 }
 
 watch(acqDays, loadAcquisition)

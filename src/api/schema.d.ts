@@ -2839,6 +2839,30 @@ export interface paths {
         patch: operations["saveUserProfile"];
         trace?: never;
     };
+    "/api/privacy/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 정보 공개 설정
+         * @description 나이·성별·동네(직접 적은 지역 포함)·경기 기록을 남에게 보일지. EVERYONE(모두) 또는 ONLY_ME(나만)
+         */
+        get: operations["mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * 내 정보 공개 바꾸기
+         * @description 보낸 항목만 바꾼다. '나만'인 항목은 남에게 가는 응답(프로필·기록·순위·소식·공유 그림)에서 서버가 뺀다
+         */
+        patch: operations["update_2"];
+        trace?: never;
+    };
     "/api/comments/{commentId}": {
         parameters: {
             query?: never;
@@ -3523,7 +3547,7 @@ export interface paths {
          * 내 소속
          * @description 인증한 소속(공개 범위 포함), 기다리는 신청, 가장 최근 결과
          */
-        get: operations["mine"];
+        get: operations["mine_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3583,7 +3607,7 @@ export interface paths {
          * 내 동네
          * @description 인증한 동네(최대 2개), 범위 선택지, 인증 유효 기간
          */
-        get: operations["mine_1"];
+        get: operations["mine_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4300,7 +4324,7 @@ export interface paths {
             cookie?: never;
         };
         /** 내 동호회 */
-        get: operations["mine_2"];
+        get: operations["mine_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5140,7 +5164,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        VisibilityRequest: {
+        OrgVisibilityRequest: {
             /** @enum {string} */
             visibility: "ALL" | "SAME_ORG" | "HIDDEN";
         };
@@ -5292,7 +5316,7 @@ export interface components {
         ClubLineupRequest: {
             userIds: number[];
         };
-        RenameRequest: {
+        OrgRenameRequest: {
             name: string;
             /** @enum {string} */
             type?: "UNIVERSITY" | "COMPANY" | "OTHER";
@@ -5711,7 +5735,7 @@ export interface components {
             bonusRate: number;
             outcome?: string;
         };
-        RequestView: {
+        OrgRequestView: {
             /** Format: int64 */
             id: number;
             name: string;
@@ -6416,8 +6440,15 @@ export interface components {
             applied: boolean;
             stoppedByLimit: boolean;
         };
-        RejectRequest: {
+        OrgRejectRequest: {
             reason: string;
+        };
+        OrgApproveRequest: {
+            /** Format: int64 */
+            orgId?: number;
+            name?: string;
+            /** @enum {string} */
+            type?: "UNIVERSITY" | "COMPANY" | "OTHER";
         };
         DailyAccessResponse: {
             isFirstAccess: boolean;
@@ -6434,6 +6465,26 @@ export interface components {
             region?: string;
             bio?: string;
             affiliation?: string;
+        };
+        PrivacySettingsRequest: {
+            /** @enum {string} */
+            age?: "EVERYONE" | "ONLY_ME";
+            /** @enum {string} */
+            gender?: "EVERYONE" | "ONLY_ME";
+            /** @enum {string} */
+            region?: "EVERYONE" | "ONLY_ME";
+            /** @enum {string} */
+            records?: "EVERYONE" | "ONLY_ME";
+        };
+        PrivacySettings: {
+            /** @enum {string} */
+            age: "EVERYONE" | "ONLY_ME";
+            /** @enum {string} */
+            gender: "EVERYONE" | "ONLY_ME";
+            /** @enum {string} */
+            region: "EVERYONE" | "ONLY_ME";
+            /** @enum {string} */
+            records: "EVERYONE" | "ONLY_ME";
         };
         UpdateCommentRequest: {
             content: string;
@@ -6538,6 +6589,7 @@ export interface components {
             myChampions: components["schemas"]["ChampionTitleDto"][];
             top3Rules: components["schemas"]["Top3RuleStatsDto"][];
             recentGames: components["schemas"]["RecentGameSummaryDto"][];
+            recordsHidden: boolean;
         };
         UserStatsDto: {
             /** Format: int32 */
@@ -7007,7 +7059,7 @@ export interface components {
             /** @enum {string} */
             type: "UNIVERSITY" | "COMPANY" | "OTHER";
         };
-        Membership: {
+        OrgMembership: {
             /** Format: int64 */
             orgId: number;
             name: string;
@@ -7018,10 +7070,10 @@ export interface components {
             /** Format: date-time */
             verifiedAt: string;
         };
-        MyOrganizations: {
-            memberships: components["schemas"]["Membership"][];
-            pending?: components["schemas"]["RequestView"];
-            lastDecided?: components["schemas"]["RequestView"];
+        OrgMine: {
+            memberships: components["schemas"]["OrgMembership"][];
+            pending?: components["schemas"]["OrgRequestView"];
+            lastDecided?: components["schemas"]["OrgRequestView"];
             /** Format: int32 */
             maxOrgs: number;
             canRequest: boolean;
@@ -8028,7 +8080,7 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
-        AdminRequest: {
+        AdminOrgRequest: {
             /** Format: int64 */
             id: number;
             /** Format: int64 */
@@ -8130,7 +8182,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["VisibilityRequest"];
+                "application/json": components["schemas"]["OrgVisibilityRequest"];
             };
         };
         responses: {
@@ -8255,7 +8307,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RenameRequest"];
+                "application/json": components["schemas"]["OrgRenameRequest"];
             };
         };
         responses: {
@@ -9131,7 +9183,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["RequestView"];
+                    "*/*": components["schemas"]["OrgRequestView"];
                 };
             };
         };
@@ -11735,7 +11787,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RejectRequest"];
+                "application/json": components["schemas"]["OrgRejectRequest"];
             };
         };
         responses: {
@@ -11761,7 +11813,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ApproveRequest"];
+                "application/json": components["schemas"]["OrgApproveRequest"];
             };
         };
         responses: {
@@ -11898,6 +11950,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": string;
+                };
+            };
+        };
+    };
+    mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PrivacySettings"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrivacySettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PrivacySettings"];
                 };
             };
         };
@@ -12696,7 +12792,7 @@ export interface operations {
             };
         };
     };
-    mine: {
+    mine_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -12711,7 +12807,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["MyOrganizations"];
+                    "*/*": components["schemas"]["OrgMine"];
                 };
             };
         };
@@ -12756,7 +12852,7 @@ export interface operations {
             };
         };
     };
-    mine_1: {
+    mine_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -13579,7 +13675,7 @@ export interface operations {
             };
         };
     };
-    mine_2: {
+    mine_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -14339,7 +14435,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AdminRequest"][];
+                    "*/*": components["schemas"]["AdminOrgRequest"][];
                 };
             };
         };

@@ -39,10 +39,17 @@
       </UiField>
       <!-- 나이: 다칠 수 있는 규칙은 만 19세 이상이라 확인한다 -->
       <div id="age">
-        <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세 이상만 할 수 있어요. 다른 사람에게는 보이지 않아요" :error="errors.age" />
+        <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세 이상만 할 수 있어요. 남에게 보일지는 설정 > 내 정보 공개에서 정해요" :error="errors.age" />
       </div>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
-      <UiInput v-model="form.affiliation" label="소속" optional :maxlength="100" placeholder="예: 성수 러닝크루" />
+      <!-- 예전에 직접 적은 소속: 새로 적을 수 없고 지우기만 된다. 학교·회사는 설정 > 소속에서 인증한다 (docs/organizations.md 2) -->
+      <UiField v-if="original?.affiliation" label="예전에 적은 소속" :hint="form.affiliation ? '이제 소속은 증명서로 인증해요. 예전 글은 지울 수만 있어요' : '저장하면 지워져요'">
+        <div class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
+          <span class="flex-1 t-body text-fg-subtle truncate" :class="{ 'line-through': !form.affiliation }">{{ original?.affiliation }}</span>
+          <UiButton v-if="form.affiliation" variant="ghost" size="sm" class="-mr-2" @click="form.affiliation = ''">지우기</UiButton>
+          <UiButton v-else variant="ghost" size="sm" class="-mr-2" @click="form.affiliation = original?.affiliation || ''">되돌리기</UiButton>
+        </div>
+      </UiField>
 
       <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
         <div class="max-w-md mx-auto px-4 py-3">
@@ -54,7 +61,7 @@
 </template>
 
 <script setup>
-// 프로필 편집: 사진·닉네임·아이디·동네·나이(만 19세 확인용, 남에게 안 보임)·소개·소속. 성별은 받지 않는다 (예전 값은 그대로 둔다)
+// 프로필 편집: 사진·닉네임·아이디·동네·나이(만 19세 확인용, 공개는 설정 > 내 정보 공개)·소개·예전 소속(지우기만). 성별은 받지 않는다 (예전 값은 그대로 둔다)
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'

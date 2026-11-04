@@ -10,6 +10,10 @@
       <UiListSkeleton :rows="3" shape="tile" class="mt-8" />
     </main>
 
+    <!-- 경기 기록을 '나만'으로 둔 사람 (서버 403, 내 정보 공개). 다시 불러와도 같으니 버튼을 두지 않는다 -->
+    <main v-else-if="hidden" class="max-w-2xl mx-auto px-4 pt-16">
+      <UiEmptyState icon="eye-slash" title="기록을 공개하지 않았어요" description="이 사람이 경기 기록을 나만 보도록 해 두었어요" />
+    </main>
     <main v-else-if="error" class="max-w-2xl mx-auto px-4 pt-16">
       <UiEmptyState icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
         <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
@@ -325,6 +329,7 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const error = ref('')
+const hidden = ref(false)
 const s = ref(null)
 const nickname = ref('')
 const isMe = ref(route.params.id === '0')
@@ -440,6 +445,7 @@ const chart = computed(() => {
 async function load() {
   loading.value = true
   error.value = ''
+  hidden.value = false
   try {
     const { data } = await GET('/api/user-profile/{userId}/stats', { path: { userId: Number(route.params.id) } })
     const [history, ov, seatsRes] = await Promise.all([
@@ -456,7 +462,8 @@ async function load() {
     periodKey.value = (data.periods.find((p) => p.tally.games + p.practiceGames > 0) || data.periods[data.periods.length - 1]).key
     s.value = data
   } catch (e) {
-    error.value = e.response?.data?.message || '기록을 불러오지 못했어요'
+    if (e.response?.status === 403) hidden.value = true
+    else error.value = e.response?.data?.message || '기록을 불러오지 못했어요'
   } finally {
     loading.value = false
   }

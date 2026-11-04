@@ -102,7 +102,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/VisibilityRequest"
+                "$ref": "#/components/schemas/OrgVisibilityRequest"
               }
             }
           },
@@ -316,7 +316,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RenameRequest"
+                "$ref": "#/components/schemas/OrgRenameRequest"
               }
             }
           },
@@ -1655,7 +1655,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestView"
+                  "$ref": "#/components/schemas/OrgRequestView"
                 }
               }
             }
@@ -5599,7 +5599,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RejectRequest"
+                "$ref": "#/components/schemas/OrgRejectRequest"
               }
             }
           },
@@ -5642,7 +5642,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApproveRequest"
+                "$ref": "#/components/schemas/OrgApproveRequest"
               }
             }
           },
@@ -5801,6 +5801,58 @@
               "*/*": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/privacy/me": {
+      "get": {
+        "tags": [
+          "privacy-controller"
+        ],
+        "summary": "내 정보 공개 설정",
+        "description": "나이·성별·동네(직접 적은 지역 포함)·경기 기록을 남에게 보일지. EVERYONE(모두) 또는 ONLY_ME(나만)",
+        "operationId": "mine",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacySettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "privacy-controller"
+        ],
+        "summary": "내 정보 공개 바꾸기",
+        "description": "보낸 항목만 바꾼다. '나만'인 항목은 남에게 가는 응답(프로필·기록·순위·소식·공유 그림)에서 서버가 뺀다",
+        "operationId": "update_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrivacySettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacySettings"
                 }
               }
             }
@@ -7078,14 +7130,14 @@
         ],
         "summary": "내 소속",
         "description": "인증한 소속(공개 범위 포함), 기다리는 신청, 가장 최근 결과",
-        "operationId": "mine",
+        "operationId": "mine_1",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/MyOrganizations"
+                  "$ref": "#/components/schemas/OrgMine"
                 }
               }
             }
@@ -7150,7 +7202,7 @@
         ],
         "summary": "내 동네",
         "description": "인증한 동네(최대 2개), 범위 선택지, 인증 유효 기간",
-        "operationId": "mine_1",
+        "operationId": "mine_2",
         "responses": {
           "200": {
             "description": "OK",
@@ -8385,7 +8437,7 @@
           "club-controller"
         ],
         "summary": "내 동호회",
-        "operationId": "mine_2",
+        "operationId": "mine_3",
         "responses": {
           "200": {
             "description": "OK",
@@ -9446,7 +9498,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/AdminRequest"
+                    "$ref": "#/components/schemas/AdminOrgRequest"
                   }
                 }
               }
@@ -9777,7 +9829,7 @@
   },
   "components": {
     "schemas": {
-      "VisibilityRequest": {
+      "OrgVisibilityRequest": {
         "required": [
           "visibility"
         ],
@@ -10283,7 +10335,7 @@
           }
         }
       },
-      "RenameRequest": {
+      "OrgRenameRequest": {
         "required": [
           "name"
         ],
@@ -11644,7 +11696,7 @@
           }
         }
       },
-      "RequestView": {
+      "OrgRequestView": {
         "required": [
           "createdAt",
           "id",
@@ -13904,7 +13956,7 @@
           }
         }
       },
-      "RejectRequest": {
+      "OrgRejectRequest": {
         "required": [
           "reason"
         ],
@@ -13912,6 +13964,26 @@
         "properties": {
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "OrgApproveRequest": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
           }
         }
       },
@@ -13961,6 +14033,78 @@
           },
           "affiliation": {
             "type": "string"
+          }
+        }
+      },
+      "PrivacySettingsRequest": {
+        "type": "object",
+        "properties": {
+          "age": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
+          },
+          "region": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
+          },
+          "records": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
+          }
+        }
+      },
+      "PrivacySettings": {
+        "required": [
+          "age",
+          "gender",
+          "records",
+          "region"
+        ],
+        "type": "object",
+        "properties": {
+          "age": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
+          },
+          "region": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
+          },
+          "records": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "ONLY_ME"
+            ]
           }
         }
       },
@@ -14218,6 +14362,7 @@
           "nickname",
           "playedRules",
           "recentGames",
+          "recordsHidden",
           "stats",
           "top3Rules",
           "totalPlayers",
@@ -14297,6 +14442,9 @@
             "items": {
               "$ref": "#/components/schemas/RecentGameSummaryDto"
             }
+          },
+          "recordsHidden": {
+            "type": "boolean"
           }
         }
       },
@@ -15821,7 +15969,7 @@
           }
         }
       },
-      "Membership": {
+      "OrgMembership": {
         "required": [
           "name",
           "orgId",
@@ -15860,7 +16008,7 @@
           }
         }
       },
-      "MyOrganizations": {
+      "OrgMine": {
         "required": [
           "canRequest",
           "maxOrgs",
@@ -15871,14 +16019,14 @@
           "memberships": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Membership"
+              "$ref": "#/components/schemas/OrgMembership"
             }
           },
           "pending": {
-            "$ref": "#/components/schemas/RequestView"
+            "$ref": "#/components/schemas/OrgRequestView"
           },
           "lastDecided": {
-            "$ref": "#/components/schemas/RequestView"
+            "$ref": "#/components/schemas/OrgRequestView"
           },
           "maxOrgs": {
             "type": "integer",
@@ -19268,7 +19416,7 @@
           }
         }
       },
-      "AdminRequest": {
+      "AdminOrgRequest": {
         "required": [
           "createdAt",
           "hasFile",

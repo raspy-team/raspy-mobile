@@ -112,7 +112,7 @@ async function apply(team) {
     feel('success')
     await load()
   } catch (e) {
-    showToast(e.response?.data?.message || '신청하지 못했어요')
+    if (e.response?.status !== 428) showToast(e.response?.data?.message || '신청하지 못했어요') // 428은 내 동네 화면이 말한다
   } finally {
     busy.value = false
   }

@@ -123,8 +123,9 @@
                   <span><span class="sr-only">{{ it.correct ? '맞힘: ' : '틀림: ' }}</span>{{ it.q }}</span>
                 </p>
                 <p class="t-caption mt-1">
+                  <!-- 비율은 정답 쪽 것만: '정답 집 · 노래방 35%'처럼 다른 보기의 비율이 붙으면 무엇이 몇 %인지 헷갈렸다 (first10 검토) -->
                   정답 <b class="text-fg">{{ answerLabel(it) }}</b>
-                  <template v-if="it.percentA != null"> · {{ it.a }} {{ it.percentA }}%</template>
+                  <template v-if="it.percentA != null && it.answer !== 'tie'"> {{ it.answer === 'a' ? it.percentA : 100 - it.percentA }}%</template>
                   · {{ it.byFirst ? `AI 추정 · 사람 ${it.minVotes}명 모이면 바뀌어요` : `${it.people}명 기준` }}
                 </p>
                 <p class="t-micro mt-0.5">내 답: {{ it.mine === 'a' ? it.a : it.mine === 'b' ? it.b : '시간 안에 못 골랐어요' }}</p>

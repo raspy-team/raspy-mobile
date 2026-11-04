@@ -15,7 +15,8 @@
       <template v-else-if="data">
         <SeatChips class="mb-4" :seats="data.seats" :model-value="data.seat" :no-org="data.noOrg" @update:model-value="load" />
 
-        <UiCard class="flex items-center gap-4">
+        <!-- 순위가 통째로 비었으면 내 칸('아직 순위가 없어요')과 빈 화면이 같은 말을 두 번 한다: 빈 화면 하나만 (first10 검토) -->
+        <UiCard v-if="data.me || data.rankings.length" class="flex items-center gap-4">
           <template v-if="data.me">
             <span class="t-display tabular-nums">{{ data.me.rank }}<span class="t-heading">위</span></span>
             <span class="flex-1 min-w-0">
@@ -29,7 +30,9 @@
           </span>
         </UiCard>
 
-        <UiEmptyState v-if="!data.rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" description="사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요" />
+        <UiEmptyState v-if="!data.rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="`${data.label}에 드는 게임을 사람과 5판 하면 첫 이름이 올라가요`">
+          <UiButton to="/games">한 판 하러 가기</UiButton>
+        </UiEmptyState>
 
         <UiList v-else class="mt-6">
           <UiListItem

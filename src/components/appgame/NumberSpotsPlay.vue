@@ -17,6 +17,8 @@
         :disabled="over || pausing || tapped.includes(cell - 1)"
         :aria-label="label(cell - 1)"
         @pointerdown.prevent="tap(cell - 1)"
+        @keydown.enter.prevent="!$event.repeat && tap(cell - 1)"
+        @keydown.space.prevent="!$event.repeat && tap(cell - 1)"
       >
         {{ showNumber(cell - 1) }}
       </button>

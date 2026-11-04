@@ -28,6 +28,8 @@
       :class="state === 'running' ? 'bg-fg text-canvas' : 'bg-primary text-primary-on'"
       :disabled="submitting || state === 'done'"
       @pointerdown.prevent="press"
+      @keydown.enter.prevent="!$event.repeat && press($event)"
+      @keydown.space.prevent="!$event.repeat && press($event)"
     >
       {{ state === 'running' ? '멈춤' : state === 'stopped' ? '다음' : '시작' }}
     </button>
@@ -72,7 +74,7 @@ function tick() {
   raf = requestAnimationFrame(tick)
 }
 
-function press(e: PointerEvent) {
+function press(e: Event) {
   if (state.value === 'running') {
     const measured = Math.round(e.timeStamp - startStamp)
     // 0.5초 안의 누름은 두 번 닿은 손가락이다. 서버는 0.5초 아래를 받지 않아 판 전체가 날아가니 무시한다 (TimeSenseGame.MIN_MS)

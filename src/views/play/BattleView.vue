@@ -14,6 +14,8 @@
           <UiSpinner class="mx-auto" />
           <p class="t-heading mt-4">{{ state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
           <p class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
+          <!-- 실시간 게임 대기실과 같은 말: 곧 연습 상대가 온다 -->
+          <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 연습 상대(봇)와 붙어요</p>
         </UiCard>
         <!-- 흔들기는 판이 시작되기 전에 센서를 켜 둔다 (시작한 뒤에 누르면 그만큼 손해) -->
         <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">센서 미리 켜기</UiButton>
@@ -94,6 +96,7 @@ import BrandFace from '../../components/BrandFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import { UiButton, UiCard, UiEmptyState, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
+import { useToast } from '../../composable/useToast'
 
 type State = components['schemas']['BattleStateResponse']
 // 퐁: b 공, p 라켓, s 점수. 흔들기: c 횟수, left 남은 초
@@ -107,6 +110,7 @@ const BALL_R = 0.02
 
 const route = useRoute()
 const router = useRouter()
+const { showToast } = useToast()
 const key = computed(() => String(route.params.key))
 const title = computed(() => ({ pong: '퐁', shake: '흔들기 대결' } as Record<string, string>)[key.value] ?? '실시간 대전')
 const state = ref<State | null>(null)
@@ -233,7 +237,10 @@ function apply(s: State) {
   else disconnect()
 }
 function message(e: unknown, fallback: string) {
-  return (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
+  const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
+  // 없는 번호는 서버가 '대결 없음: 123'처럼 개발용 문구를 준다. 사람에게는 풀어서 (도전장 화면과 같은 말)
+  if (r?.status === 404) return '없거나 이미 끝난 경기예요'
+  return r?.data?.message || fallback
 }
 // AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다. 한 번만
 let aiId = Number(route.query.ai) || null
@@ -263,7 +270,12 @@ async function reload() {
 async function leave() {
   if (!state.value) return
   if (state.value.status === 'PLAYING' && !(await confirmDialog({ title: '그만둘까요?', message: '지금 나가면 이 판은 지게 돼요', confirmText: '그만두기' }))) return
-  apply((await POST('/api/app-games/battle/{gameId}/leave', { path: { gameId: state.value.gameId } })).data)
+  try {
+    apply((await POST('/api/app-games/battle/{gameId}/leave', { path: { gameId: state.value.gameId } })).data)
+  } catch (e) {
+    showToast(message(e, '나가지 못했어요. 연결을 확인하고 다시 해 주세요'))
+    return
+  }
   if (state.value?.status === 'CANCELED') router.replace(`/play/${key.value}`)
 }
 async function again() {
@@ -273,12 +285,15 @@ async function again() {
 }
 
 let botCalled = false
-const timer = setInterval(async () => {
+const timer = setInterval(() => {
   now.value = Date.now()
   const s = state.value
   if (s?.status === 'WAITING' && !s.fixture && !botCalled && waited.value >= s.botAfterSeconds) {
     botCalled = true
-    apply((await POST('/api/app-games/battle/{gameId}/bot', { path: { gameId: s.gameId } })).data)
+    // 못 부르면 5초 뒤 다시
+    POST('/api/app-games/battle/{gameId}/bot', { path: { gameId: s.gameId } })
+      .then(({ data }) => apply(data))
+      .catch(() => setTimeout(() => (botCalled = false), 5000))
   }
 }, 250)
 

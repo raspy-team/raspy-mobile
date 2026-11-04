@@ -143,6 +143,8 @@ async function main() {
   // 친구
   await call(demo, 'POST', `/api/friends/request/${minjun.userId}`); await call(minjun, 'POST', `/api/friends/accept/${demo.userId}`)
   await call(jiho, 'POST', `/api/friends/request/${demo.userId}`); await call(demo, 'POST', `/api/friends/accept/${jiho.userId}`)
+  // 처음 만나는 1:1은 앱 게임 한 판이 먼저다(신뢰 사다리, TrustLadder). 시연 경기를 바로 잡으려고 서연과도 친구로 둔다
+  await call(seoyeon, 'POST', `/api/friends/request/${demo.userId}`); await call(demo, 'POST', `/api/friends/accept/${seoyeon.userId}`)
   await call(hayun, 'POST', `/api/friends/request/${demo.userId}`) // 받은 친구 요청 (알림)
 
   // 끝난 경기 8판 (시연 계정 5승 3패)

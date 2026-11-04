@@ -7,7 +7,7 @@
     <p class="t-caption mt-1 h-5">{{ hint }}</p>
 
     <!-- 5×8 판. 1을 누르면 나머지 숫자가 가려진다 -->
-    <div class="grid grid-cols-5 gap-1.5 mt-3 select-none touch-manipulation" role="grid" aria-label="숫자 판">
+    <div class="grid grid-cols-5 gap-1.5 mt-3 select-none touch-manipulation" role="group" aria-label="숫자 판">
       <button
         v-for="cell in CELLS"
         :key="`${round}-${cell}`"
@@ -17,6 +17,8 @@
         :disabled="over || pausing || tapped.includes(cell - 1)"
         :aria-label="label(cell - 1)"
         @pointerdown.prevent="tap(cell - 1)"
+        @keydown.enter.prevent="!$event.repeat && tap(cell - 1)"
+        @keydown.space.prevent="!$event.repeat && tap(cell - 1)"
       >
         {{ showNumber(cell - 1) }}
       </button>

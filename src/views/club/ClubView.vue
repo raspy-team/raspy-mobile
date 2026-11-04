@@ -61,8 +61,8 @@
               </div>
               <p v-if="r.answer" class="t-body break-words">“{{ r.answer }}”</p>
               <div class="flex gap-2">
-                <UiButton size="sm" class="flex-1" @click="decide(r.userId, true)">받기</UiButton>
-                <UiButton size="sm" variant="secondary" class="flex-1" @click="decide(r.userId, false)">거절</UiButton>
+                <UiButton size="sm" class="flex-1" :disabled="busy" @click="decide(r.userId, true)">받기</UiButton>
+                <UiButton size="sm" variant="secondary" class="flex-1" :disabled="busy" @click="decide(r.userId, false)">거절</UiButton>
               </div>
             </UiCard>
           </div>
@@ -244,6 +244,7 @@
 // 동호회 한 곳 (/clubs/:id): 같이 붙고, 같이 기록이 쌓이는 팀 (docs/clubs.md).
 // 공지·단톡방 → 가입 신청(운영진) → 일정·참석 → 교류전 → 우리끼리 순위 → 친선전 → 멤버(운영진 관리)
 import { ref, computed, reactive, onMounted } from 'vue'
+import { matchTime } from '@/utils/format'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -281,10 +282,8 @@ const faceLine = computed(() => {
   return [d.club.dongName, d.club.mainRuleTitle, `멤버 ${d.club.memberCount}명`, d.gamesThisMonth ? `이번 달 ${d.gamesThisMonth}판` : '',
     played ? `교류전 ${r!.wins}승 ${r!.draws ? `${r!.draws}무 ` : ''}${r!.losses}패` : ''].filter(Boolean).join(' · ')
 })
-const when = (iso: string) => {
-  const d = new Date(iso)
-  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${d.getHours()}시${d.getMinutes() ? ` ${d.getMinutes()}분` : ''}`
-}
+// 오전·오후까지 (예전엔 '11월 7일 4시 16분'으로 새벽인지 오후인지 몰랐다). 다른 화면과 같은 꼴
+const when = (iso: string) => matchTime(iso)
 const message = (e: unknown, fallback: string) => (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 
 const tournaments = ref<Schemas['TournamentSummary'][]>([])
@@ -299,6 +298,8 @@ async function load() {
 }
 
 async function run<T>(task: () => Promise<T>, fallback: string): Promise<T | undefined> {
+  // 두 번 눌러도 한 번만 (가입 받기를 두 번 누르면 두 번째가 '가입 신청이 없어요'로 실패해 오류가 떴다)
+  if (busy.value) return undefined
   busy.value = true
   try {
     return await task()
@@ -380,12 +381,16 @@ function openPropose() {
   // 처음엔 우리 동네 동호회를 후보로
   if (!opResults.value.length) GET('/api/clubs/nearby').then((r) => (opResults.value = r.data)).catch(() => {})
 }
+let searchSeq = 0
 function searchClubs() {
   clearTimeout(searchTimer)
   searchTimer = setTimeout(async () => {
     const q = opQuery.value.trim()
-    if (q.length < 2) return
-    opResults.value = (await GET('/api/clubs/search', { query: { q } })).data.filter((c) => c.id !== id)
+    const seq = ++searchSeq
+    // 두 글자보다 짧으면 처음처럼 우리 동네 동호회 (예전엔 지난 검색 결과가 그대로 남았다). 늦게 온 앞 검색은 버린다
+    const r = await (q.length < 2 ? GET('/api/clubs/nearby') : GET('/api/clubs/search', { query: { q } })).catch(() => null)
+    if (seq !== searchSeq) return
+    opResults.value = (r?.data ?? []).filter((c) => c.id !== id)
   }, 250)
 }
 async function propose() {

@@ -20,7 +20,8 @@
           <UiButton class="flex-1" variant="secondary" :loading="busy" @click="respond(false)">거절</UiButton>
         </div>
         <p v-else-if="m.status === 'PROPOSED'" class="t-caption text-center mt-5">{{ m.away.name }} 운영진이 답하기를 기다려요</p>
-        <p v-if="m.status === 'ACCEPTED' && m.mySide" class="t-caption text-center mt-5">판마다 우리 선수를 정해 주세요. 양쪽이 다 정하면 그 판의 경기가 열려요</p>
+        <!-- 판이 다 열렸으면 선수를 정하라는 말 대신 다음 할 일 -->
+        <p v-if="m.status === 'ACCEPTED' && m.mySide" class="t-caption text-center mt-5">{{ m.boardList.every((b) => b.gameId) ? '판마다 경기가 열렸어요. 경기에서 결과를 내면 점수가 올라가요' : '판마다 우리 선수를 정해 주세요. 양쪽이 다 정하면 그 판의 경기가 열려요' }}</p>
 
         <UiSection title="판" class="mt-8">
           <div class="space-y-2">
@@ -70,6 +71,7 @@
 <script setup lang="ts">
 // 교류전 한 판 (/clubs/matches/:matchId): 동호회 대 동호회. 판마다 양쪽 선수 → 판이 보통 경기로 열린다 → 이긴 판이 많은 동호회가 이긴다
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { matchTime } from '@/utils/format'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -92,10 +94,8 @@ const error = ref('')
 const busy = ref(false)
 
 const names = (ps: Schemas['ClubMember'][]) => ps.map((p) => p.nickname).join('·')
-const when = (iso: string) => {
-  const d = new Date(iso)
-  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${d.getHours()}시`
-}
+// 분과 오전·오후까지 (예전엔 '11월 8일 19시'로 분을 버렸다). 다른 화면과 같은 꼴: '내일 오후 7:30'
+const when = (iso: string) => matchTime(iso)
 const message = (e: unknown, fallback: string) => (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 
 async function load() {
@@ -106,12 +106,16 @@ async function load() {
   }
 }
 
-async function act(task: () => Promise<{ data: Schemas['ClubMatchView'] }>, fallback: string) {
+/** 됐으면 true */
+async function act(task: () => Promise<{ data: Schemas['ClubMatchView'] }>, fallback: string): Promise<boolean> {
+  if (busy.value) return false
   busy.value = true
   try {
     m.value = (await task()).data
+    return true
   } catch (e) {
     showToast(message(e, fallback))
+    return false
   } finally {
     busy.value = false
   }
@@ -148,8 +152,8 @@ function toggle(userId: number) {
 }
 async function saveLineup() {
   const boardNo = lineupBoard.value
-  await act(() => PUT('/api/clubs/matches/{matchId}/boards/{boardNo}', { path: { matchId, boardNo }, body: { userIds: picked.value } }), '정하지 못했어요')
-  lineupBoard.value = 0
+  // 못 정했으면 고른 사람을 그대로 두고 시트도 닫지 않는다
+  if (await act(() => PUT('/api/clubs/matches/{matchId}/boards/{boardNo}', { path: { matchId, boardNo }, body: { userIds: picked.value } }), '정하지 못했어요')) lineupBoard.value = 0
 }
 
 // 판이 끝나면 점수가 바뀐다 (선수에게 오는 변경 신호, 화면에 돌아올 때)

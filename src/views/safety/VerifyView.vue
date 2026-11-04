@@ -5,14 +5,18 @@
     <template v-else>
       <h1 class="t-title">{{ cfg.verified ? '본인인증을 했어요' : '만나서 하기 전에 한 번만' }}</h1>
       <div class="mt-4 space-y-2 t-body">
-        <p>만나서 하는 경기는 휴대폰 본인인증을 한 사람끼리 해요. 처음 보는 사람과도 안심하고 만나게요.</p>
+        <!-- 준비 중일 때는 '인증한 사람끼리 해요'와 '인증 없이 할 수 있어요'가 한 화면에 함께 나와 어긋났다 -->
+        <p v-if="cfg.available || cfg.verified">만나서 하는 경기는 휴대폰 본인인증을 한 사람끼리 해요. 처음 보는 사람과도 안심하고 만나게요.</p>
         <p class="t-caption">이름과 전화번호는 매치에 남지 않아요. 한 사람이 한 계정만 쓰는지 확인하는 값과 생년월일만 남아요. 앱 게임은 인증 없이 할 수 있어요.</p>
       </div>
       <p v-if="message" class="t-caption text-danger-fg mt-4">{{ message }}</p>
 
       <UiButton v-if="cfg.verified" block size="lg" class="mt-8" @click="router.replace(back)">돌아가기</UiButton>
       <UiButton v-else-if="cfg.available" block size="lg" class="mt-8" icon="shield-halved" :loading="busy" @click="start">휴대폰으로 본인인증</UiButton>
-      <p v-else class="t-caption mt-8 rounded-xl bg-surface px-4 py-3">본인인증은 아직 준비 중이에요. 지금은 인증 없이 만나서 하는 경기를 할 수 있어요</p>
+      <template v-else>
+        <p class="t-caption mt-8 rounded-xl bg-surface px-4 py-3">본인인증은 아직 준비 중이에요. 지금은 인증 없이 만나서 하는 경기를 할 수 있어요</p>
+        <UiButton block variant="secondary" class="mt-4" @click="router.replace(back)">돌아가기</UiButton>
+      </template>
     </template>
   </main>
 </template>
@@ -27,7 +31,9 @@ import { UiButton, UiListSkeleton, UiTopBar } from '../../components/ui'
 
 const route = useRoute()
 const router = useRouter()
-const back = String(route.query.back || '/')
+// 돌아갈 곳은 앱 안 주소만 ('//다른곳'·'https://' 같은 값은 첫 화면으로)
+const rawBack = String(route.query.back || '/')
+const back = rawBack.startsWith('/') && !rawBack.startsWith('//') ? rawBack : '/'
 const cfg = ref(null)
 const busy = ref(false)
 const message = ref('')

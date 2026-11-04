@@ -17,7 +17,7 @@
           </span>
           <span class="block t-caption mt-0.5 break-keep">{{ s.seatName }} AI 보스 · {{ bossHint(s) }}</span>
         </button>
-        <UiButton size="sm" variant="tonal" :disabled="s.bossTriesLeft === 0" @click="challengeBoss">도전하기</UiButton>
+        <UiButton variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI 보스 ${s.champion.nickname}에게 도전`" @click="challengeBoss">도전하기</UiButton>
       </template>
       <template v-else>
         <button
@@ -33,7 +33,7 @@
             {{ s.mine ? '지면 자리를 내줘요. 30일 쉬어도 넘어가요' : s.champion ? '챔피언을 이기면 자리를 가져와요' : emptyHint(s.seat) }}
           </span>
         </button>
-        <UiButton v-if="s.champion && !s.mine" size="sm" variant="tonal" @click="challenge(s.champion)">도전</UiButton>
+        <UiButton v-if="s.champion && !s.mine" variant="tonal" :aria-label="`${s.champion.nickname}님에게 도전`" @click="challenge(s.champion)">도전</UiButton>
       </template>
     </div>
   </div>

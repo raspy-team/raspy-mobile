@@ -3,7 +3,7 @@
     <UiTopBar title="알림 설정" back />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
-      <p class="t-caption py-3">끈 알림은 휴대폰으로 오지 않아요. 앱 안 알림 목록에는 그대로 남아요.</p>
+      <p class="t-caption py-3">끈 알림은 휴대폰으로 오지 않아요. 앱 안 알림 목록에는 그대로 남아요. 메시지·하루 퍼즐은 휴대폰 알림만 있어서 끄면 따로 알려 드리지 않아요.</p>
 
       <UiListSkeleton v-if="loading" :rows="8" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="설정을 불러오지 못했어요">

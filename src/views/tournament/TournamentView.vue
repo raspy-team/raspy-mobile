@@ -17,6 +17,12 @@
           <p v-if="v.runnerUpName" class="t-caption mt-1">준우승 {{ v.runnerUpName }}</p>
         </UiCard>
 
+        <!-- 시작한 뒤: 신청했지만 체크인하지 않아 대진에 없는 사람에게 그 사실을 (예전엔 아무 말 없이 참가 목록에만 남았다) -->
+        <UiCard v-if="leftOut" class="mt-4">
+          <p class="t-heading">이번 대진에 들어가지 못했어요</p>
+          <p class="t-caption mt-1">시작 때 체크인한 참가자로만 대진이 나와요. 다음 대회에서는 시작 하루 전부터 체크인해 주세요</p>
+        </UiCard>
+
         <!-- 내가 할 일 -->
         <template v-if="v.summary.status === 'RECRUITING'">
           <UiCard v-if="v.my" class="mt-4">
@@ -114,9 +120,9 @@
         </UiSection>
 
         <!-- 참가자 -->
-        <UiSection :title="`참가 ${acceptedCount}/${v.summary.maxEntrants}`" class="mt-8">
-          <UiList v-if="v.entries.length">
-            <UiListItem v-for="e in v.entries" :key="e.id" :title="(e.seed ? `${e.seed}. ` : '') + e.name" :subtitle="entrySub(e)" :to="e.userId ? `/profile/${e.userId}` : e.clubId ? `/clubs/${e.clubId}` : undefined">
+        <UiSection :title="started ? `참가 ${shownEntries.length}` : `참가 ${acceptedCount}/${v.summary.maxEntrants}`" class="mt-8">
+          <UiList v-if="shownEntries.length">
+            <UiListItem v-for="e in shownEntries" :key="e.id" :title="(e.seed ? `${e.seed}. ` : '') + e.name" :subtitle="entrySub(e)" :to="e.userId ? `/profile/${e.userId}` : e.clubId ? `/clubs/${e.clubId}` : undefined">
               <template v-if="v.isHost && e.status === 'APPLIED'" #trailing>
                 <span class="flex gap-1">
                   <UiButton size="sm" @click.prevent.stop="decideEntry(e.id, true)">받기</UiButton>
@@ -141,7 +147,7 @@ import type { components } from '@/api/schema'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useToast } from '@/composable/useToast'
 import { refreshOnChange } from '@/websocket/userChannel'
-import { withRo } from '@/utils/format'
+import { matchTime, withRo } from '@/utils/format'
 import { UiButton, UiCard, UiEmptyState, UiIcon, UiList, UiListItem, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type Schemas = components['schemas']
@@ -162,18 +168,25 @@ const day = (iso: string) => {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 const acceptedCount = computed(() => v.value?.summary.entryCount ?? 0)
+// 시작한 뒤에는 대진에 든 참가자(시드가 있는 사람)만. 체크인하지 않은 신청자는 대진에 없다
+const started = computed(() => !!v.value && v.value.summary.status !== 'RECRUITING' && v.value.summary.status !== 'CANCELED')
+const shownEntries = computed(() => (v.value?.entries ?? []).filter((e) => !started.value || e.seed != null))
+const leftOut = computed(() => {
+  const my = v.value?.my
+  if (!started.value || !my || my.status === 'REJECTED' || my.status === 'WITHDRAWN') return false
+  return v.value?.entries.find((e) => e.id === my.entryId)?.seed == null
+})
 // '지금 시작'은 체크인한 사람으로만 대진을 짠다. 신청만 받은 수로 켜면 눌러도 시작할 수 없다 (서버가 막는다)
 const checkedInCount = computed(() => v.value?.entries.filter((e) => e.status === 'CHECKED_IN').length ?? 0)
 const full = computed(() => !!v.value && v.value.summary.entryCount >= v.value.summary.maxEntrants)
 const infoLine = computed(() => {
   const x = v.value
   if (!x) return ['', '']
-  const s = new Date(x.summary.startsAt)
   const what = [x.summary.ruleTitle, x.summary.format === 'LEAGUE' ? '리그' : x.thirdPlace ? '토너먼트 · 3·4위전' : '토너먼트',
     x.summary.entrantType === 'CLUB' ? `동호회 대항 · ${x.boards}판 ${x.perBoard === 2 ? '2:2' : '1:1'}` : '',
     x.summary.appGameKey ? '앱 게임' : '', x.membersOnly ? '멤버만' : '',
     x.minRating || x.maxRating ? `실력 점수 ${x.minRating ?? ''}~${x.maxRating ?? ''}` : '']
-  const when = [STATUS[x.summary.status], `${s.getMonth() + 1}월 ${s.getDate()}일 ${s.getHours()}시 시작`, `라운드마다 ${x.summary.roundDays}일`, `주최 ${x.summary.hostName}`]
+  const when = [STATUS[x.summary.status], `${matchTime(x.summary.startsAt)} 시작`, `라운드마다 ${x.summary.roundDays}일`, `주최 ${x.summary.hostName}`]
   return [what.filter(Boolean).join(' · '), when.filter(Boolean).join(' · ')]
 })
 const myHint = computed(() => {

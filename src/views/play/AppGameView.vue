@@ -250,8 +250,9 @@
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
-            <p v-if="!played" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요</p>
-            <div v-else class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
+            <!-- 준비 중인 게임에는 첫 판을 권하지 않는다 (바로 밑의 '준비 중인 게임이에요'와 어긋났다) -->
+            <p v-if="!played && game.available" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요</p>
+            <div v-else-if="played" class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
                 <span class="block t-micro">실력 점수</span>
@@ -377,6 +378,7 @@ import { who } from '@/utils/format'
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
 import { liveRoute } from '@/utils/battle'
+import { canResumeDuel } from '@/utils/appGame'
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -573,11 +575,13 @@ async function submit(answer: string) {
     justSubmitted = true
     result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { answer } })).data
     play.value = null
-    load()
+    startError.value = ''
+    load().catch(() => {})
   } catch (e) {
-    submitError.value = errorMessage(e, '내지 못했어요')
+    // 판이 닫히면 첫 화면으로 돌아가니 오류는 시작 버튼 밑 칸에 남긴다 (판 아래 칸은 판과 함께 사라져 아무 말 없이 돌아갔다)
+    submitError.value = startError.value = errorMessage(e, '내지 못했어요. 시간이 남았으면 다시 열어 이어서 낼 수 있어요')
     play.value = null
-    load()
+    load().catch(() => {})
   } finally {
     submitting.value = false
   }
@@ -593,11 +597,12 @@ async function submitVideo(video: Blob) {
     justSubmitted = true
     result.value = (await api.post(`/api/app-games/plays/${play.value.playId}/proof`, fd, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 })).data
     play.value = null
-    load()
+    startError.value = ''
+    load().catch(() => {})
   } catch (e) {
-    submitError.value = errorMessage(e, '영상을 올리지 못했어요')
+    submitError.value = startError.value = errorMessage(e, '영상을 올리지 못했어요. 시간이 남았으면 다시 열어 이어서 낼 수 있어요')
     play.value = null
-    load()
+    load().catch(() => {})
   } finally {
     submitting.value = false
   }
@@ -700,7 +705,7 @@ function duelSubtitle(d: Duel) {
   if (isVote.value) return d.myAnswer ?? ''
   // 실시간 판은 '내기'가 없다: 하는 중인 판으로 돌아가게 (11/5 9e)
   if (d.playMode === 'REALTIME') return d.opponent ? '하는 중이에요 · 눌러서 돌아가기' : '상대를 기다리는 중이에요'
-  return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : '아직 내지 않았어요'
+  return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : canResume(d) ? '안 냈어요 · 눌러서 이어 하기' : '아직 내지 않았어요'
 }
 function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']
@@ -712,8 +717,14 @@ function duelBadge(d: Duel) {
   return d.opponent ? '상대 차례' : '기다리는 중'
 }
 // 끝나지 않은 실시간 판은 결과 카드 대신 그 판으로 (대기실·대전 화면)
+// 새로고침·뒤로 가기로 판을 놓쳤으면 내지 않은 판을 이어서 한다 (서버가 같은 판을 돌려준다).
+// 예전에는 빈 결과 카드('상대를 찾고 있어요', 0점)가 떠서 낸 것처럼 보였다
+function canResume(d: Duel) {
+  return canResumeDuel(d, Date.now() + offset)
+}
 function openUnfinished(d: Duel) {
   if (d.playMode === 'REALTIME') router.push(liveRoute(d.key))
+  else if (canResume(d)) start()
   else result.value = d
 }
 
@@ -744,12 +755,17 @@ onMounted(async () => {
   }
   const duelId = Number(route.query.duel)
   if (duelId) {
-    result.value = duels.value.find((d) => d.gameId === duelId)
-      ?? (await GET('/api/app-games/duels/{gameId}', { path: { gameId: duelId } })).data
+    try {
+      result.value = duels.value.find((d) => d.gameId === duelId)
+        ?? (await GET('/api/app-games/duels/{gameId}', { path: { gameId: duelId } })).data
+    } catch {
+      // 지워졌거나 내 경기가 아닌 알림이면 게임 첫 화면을 그대로 보인다 (예전에는 여기서 멈춰 실시간 갱신도 걸리지 않았다)
+      showToast('그 경기를 찾지 못했어요')
+    }
   }
   // 상대가 플레이해서 결과가 나오면 서버가 신호를 보낸다
   stop = refreshOnChange(() => {
-    if (!play.value) load()
+    if (!play.value) load().catch(() => {})
   })
 })
 onBeforeUnmount(() => stop?.())

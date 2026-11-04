@@ -7,8 +7,8 @@
           <InboxButtons />
           <UiIconButton icon="fas fa-gear" label="설정" @click="router.push('/settings')" />
         </template>
-        <!-- AI 주민은 친구·신고·차단이 없다 (docs/ai-residents.md) -->
-        <UiIconButton v-else-if="user && !user.isBot" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
+        <!-- AI 주민은 친구·신고·차단이 없다 (docs/ai-residents.md). 순위의 '(나)' 줄처럼 내 id로 들어와도 나를 신고·차단하는 메뉴는 두지 않는다 -->
+        <UiIconButton v-else-if="user && !user.isBot && !user.isMe" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
       </template>
     </UiTopBar>
 
@@ -28,8 +28,10 @@
     </main>
 
     <main v-else-if="loadError" class="max-w-2xl mx-auto px-4 pt-16">
-      <UiEmptyState icon="fas fa-user-slash" :title="loadError" description="차단했거나 없는 사용자예요">
-        <UiButton variant="secondary" @click="router.back()">돌아가기</UiButton>
+      <!-- 서버가 이유를 말했으면(차단·없음·탈퇴) 그 말만, 연결 오류면 다시 불러오기 -->
+      <UiEmptyState icon="fas fa-user-slash" :title="loadError" :description="loadFailed ? '잠시 뒤 다시 해 주세요' : ''">
+        <UiButton v-if="loadFailed" variant="secondary" @click="reload">다시 불러오기</UiButton>
+        <UiButton v-else variant="secondary" @click="router.back()">돌아가기</UiButton>
       </UiEmptyState>
     </main>
 
@@ -127,6 +129,16 @@
         <div class="flex flex-wrap gap-2">
           <UiChip v-for="a in abilities" :key="a.key" @click="router.push({ path: '/rules', query: { ability: a.key } })">
             {{ a.label }}<span class="text-fg-subtle">{{ a.games }}판</span>
+          </UiChip>
+        </div>
+      </section>
+
+      <!-- 인기 게임 티어 (롤·브롤 공식 정보). 아이디는 안 보이고, 기록을 '나만'으로 둔 사람은 서버가 비워 보낸다 (9번) -->
+      <section v-if="gameTiers.length" class="mt-10">
+        <h2 class="t-heading mb-3">게임 티어</h2>
+        <div class="flex flex-wrap gap-2">
+          <UiChip v-for="t in gameTiers" :key="t.game" @click="router.push({ path: '/rules', query: { kind: 'POPULAR', q: t.label } })">
+            {{ t.label }}<span class="text-fg-subtle">{{ t.tier }}</span>
           </UiChip>
         </div>
       </section>
@@ -279,6 +291,9 @@ const isMeRoute = route.params.id === '0'
 const user = ref(null)
 const loading = ref(true)
 const loadError = ref('')
+const loadFailed = ref(false) // 서버가 이유를 말하지 않은 실패 (연결·서버 오류)
+// 화면은 주소마다 새로 그려지니(App.vue의 key) 다시 불러오기는 새로고침으로
+const reload = () => window.location.reload()
 const friend = ref({ sent: false, isFriend: false, received: false })
 const busy = ref(false)
 const menuOpen = ref(false)
@@ -326,11 +341,17 @@ const FRIEND_ACTIONS = {
   accept: { call: (id) => api.post(`/api/friends/accept/${id}`), done: '이제 친구예요' },
   reject: { call: (id) => api.post(`/api/friends/reject/${id}`), done: '요청을 거절했어요' },
 }
+function bumpFriends(d) {
+  if (user.value?.stats && typeof user.value.stats.friends === 'number') user.value.stats.friends = Math.max(0, user.value.stats.friends + d)
+}
+
 async function friendAction(kind) {
   busy.value = true
   try {
     await FRIEND_ACTIONS[kind].call(user.value.id)
     showToast(FRIEND_ACTIONS[kind].done)
+    // 친구 수가 바뀌는 건 수락뿐: 숫자 줄도 맞춘다 (예전엔 '이제 친구예요'인데 친구 0이 그대로였다)
+    if (kind === 'accept') bumpFriends(1)
     await loadFriendStatus()
   } catch (e) {
     showToast(e.response?.data?.message || '처리하지 못했어요. 잠시 뒤 다시 해 주세요')
@@ -345,6 +366,7 @@ async function unfriend() {
   try {
     await api.delete(`/api/friends/${user.value.id}`)
     showToast('친구를 끊었어요')
+    bumpFriends(-1)
     await loadFriendStatus()
   } catch {
     showToast('처리하지 못했어요. 잠시 뒤 다시 해 주세요')
@@ -401,6 +423,7 @@ function goFriend(id) {
 }
 
 const abilities = ref([])
+const gameTiers = ref([])
 
 // 가진 자리 (벨트 먼저, 그다음 1위). 벨트는 그 게임으로, 능력·종합 1위는 그 순위로 간다
 const seats = ref({ belts: [], crowns: [] })
@@ -417,6 +440,7 @@ onMounted(async () => {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
   } catch (e) {
+    loadFailed.value = !e.response?.data?.message
     loadError.value = e.response?.data?.message || '프로필을 불러오지 못했어요'
   } finally {
     loading.value = false
@@ -428,6 +452,7 @@ onMounted(async () => {
   // 많이 쓴 능력 (없어도 화면은 그대로)
   if (user.value) {
     abilities.value = (await GET('/api/rules/top-played-abilities/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data
+    gameTiers.value = (await GET('/api/users/{userId}/game-tiers', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data || []
   }
   // 경기 결과를 보내고 넘어온 경우(?id=경기) 그 경기를 보여준다
   if (highlightId.value) {

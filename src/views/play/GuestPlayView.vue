@@ -93,8 +93,8 @@
                   <UiButton
                     v-for="side in (['a', 'b'] as const)"
                     :key="side"
-                    size="sm"
                     :variant="tastes[it.id] === side ? 'primary' : 'secondary'"
+                    :aria-pressed="tastes[it.id] === side"
                     :disabled="!tastes[it.id] && pickedCount >= 3"
                     @click="toggleTaste(it.id, side)"
                   >
@@ -117,7 +117,11 @@
           <ul class="space-y-2">
             <li v-for="it in review.items" :key="it.id">
               <UiCard>
-                <p class="t-body text-fg break-keep">{{ it.correct ? '⭕' : '❌' }} {{ it.q }}</p>
+                <!-- 맞음·틀림은 그림 글자 대신 아이콘 + 읽어 주는 말. 틀림을 빨강으로 칠하지 않는다 (ui/README: 패배는 흐린 글자) -->
+                <p class="t-body text-fg break-keep flex items-start gap-1.5">
+                  <UiIcon :name="it.correct ? 'check' : 'xmark'" class="mt-1 flex-shrink-0" :class="it.correct ? 'text-signal-fg' : 'text-fg-subtle'" aria-hidden="true" />
+                  <span><span class="sr-only">{{ it.correct ? '맞힘: ' : '틀림: ' }}</span>{{ it.q }}</span>
+                </p>
                 <p class="t-caption mt-1">
                   정답 <b class="text-fg">{{ answerLabel(it) }}</b>
                   <template v-if="it.percentA != null"> · {{ it.a }} {{ it.percentA }}%</template>

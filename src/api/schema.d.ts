@@ -3253,6 +3253,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/{userId}/game-tiers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 프로필의 인기 게임 티어
+         * @description 티어를 가져온 게임만, 아이디는 빼고. 경기 기록을 '나만'으로 둔 사람은 빈 목록
+         */
+        get: operations["gameTiers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user-profile/{userId}": {
         parameters: {
             query?: never;
@@ -6924,6 +6944,7 @@ export interface components {
             me: components["schemas"]["AppPlayer"];
             opponent?: components["schemas"]["AppPlayer"];
             startWord: string;
+            title: string;
             summary: string;
             howTo: string[];
             moves: components["schemas"]["RealtimeMove"][];
@@ -7299,6 +7320,11 @@ export interface components {
             watched: number;
             /** Format: int64 */
             witnessed: number;
+        };
+        PublicTier: {
+            game: string;
+            label: string;
+            tier: string;
         };
         ChampionTitleDto: {
             region: string;
@@ -13424,6 +13450,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["LiveWatchRecord"];
+                };
+            };
+        };
+    };
+    gameTiers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PublicTier"][];
                 };
             };
         };

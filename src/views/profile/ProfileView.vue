@@ -44,6 +44,8 @@
             <UiIcon name="location-dot" class="text-xs" aria-hidden="true" />{{ user.dong.name }}<span v-if="user.dong.verified" class="text-fg-subtle">· 동네 인증</span>
           </p>
           <p v-if="subline" class="t-caption truncate mt-0.5">{{ subline }}</p>
+          <!-- 예전에 직접 적은 소속 (인증 소속 ✓과 다르다): 흐리게 -->
+          <p v-if="user.affiliation?.trim()" class="t-caption text-fg-subtle truncate mt-0.5">{{ user.affiliation }}</p>
         </div>
       </div>
       <p v-if="user.intro" class="t-body text-fg-muted mt-4 whitespace-pre-line break-words">{{ user.intro }}</p>
@@ -65,8 +67,12 @@
 
       <!-- 숫자 한 줄: 상자 없이, 승률은 경기가 있을 때만 -->
       <div class="mt-5 flex text-center">
-        <!-- 경기·승률은 누르면 기록 화면 -->
-        <RouterLink :to="`/profile/${user.id}/stats`" class="flex-1">
+        <!-- 경기·승률은 누르면 기록 화면. 기록을 '나만'으로 둔 사람은 서버가 숫자를 비워 보낸다 -->
+        <div v-if="user.recordsHidden" class="flex-1">
+          <p class="t-heading text-fg-subtle">–</p>
+          <p class="t-micro mt-0.5">경기</p>
+        </div>
+        <RouterLink v-else :to="`/profile/${user.id}/stats`" class="flex-1">
           <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
           <p class="t-micro mt-0.5">경기 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
@@ -134,6 +140,7 @@
             </template>
           </UiListItem>
         </UiList>
+        <UiEmptyState v-else-if="user.recordsHidden" icon="eye-slash" title="기록을 공개하지 않았어요" />
         <UiEmptyState
           v-else
           icon="fas fa-trophy"
@@ -274,7 +281,14 @@ const gameRefs = {}
 const stats = computed(() => user.value?.stats || {})
 // 지역·소속 중 있는 것만 한 줄로
 // 동네가 있으면 예전 활동 지역(시·구)은 겹치니 뺀다
-const subline = computed(() => [user.value?.dong ? '' : user.value?.location, user.value?.affiliation].filter((v) => v && v.trim()).join(' · '))
+// 나이·성별은 본인이 '모두'로 열었을 때만 서버가 보낸다 (설정 > 내 정보 공개)
+const subline = computed(() => {
+  const u = user.value
+  if (!u) return ''
+  const age = u.age != null ? `만 ${u.age}세` : ''
+  const gender = u.gender && u.gender !== '비공개' ? u.gender : ''
+  return [gender, age, u.dong ? '' : u.location].filter((v) => v && v.trim()).join(' · ')
+})
 
 function setGameRef(el, id) {
   if (el) gameRefs[id] = el.$el || el

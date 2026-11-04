@@ -17,6 +17,7 @@
       <UiSection title="알림과 사람">
         <UiList>
           <UiListItem icon="location-dot" title="내 동네" subtitle="동네 인증 · 보는 범위" chevron @click="router.push('/neighborhood')" />
+          <UiListItem icon="eye-slash" title="내 정보 공개" subtitle="나이·성별·동네·경기 기록을 누가 볼지" chevron @click="router.push('/settings/privacy')" />
           <UiListItem icon="far fa-bell" title="알림 설정" subtitle="경기·도전·친구·댓글·좋아요·메시지" chevron @click="router.push('/settings/notifications')" />
           <UiListItem icon="fas fa-ban" title="차단한 사람" chevron @click="openBlocked" />
           <UiListItem v-if="!installed" icon="download" title="홈 화면에 추가" subtitle="앱처럼 아이콘을 눌러 바로 열어요" chevron @click="addToHome" />

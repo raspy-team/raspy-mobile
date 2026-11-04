@@ -22,7 +22,7 @@
         <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3">
           <span class="t-mono w-8" :class="r.place === 1 ? 'text-fg font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
           <button type="button" class="min-w-0 truncate text-[0.9375rem] text-left py-2.5 -my-2.5" :class="r.place === 1 ? 'text-fg font-semibold' : 'text-fg-muted'" @click="emit('profile', r.id)">
-            <span :class="r.place === 1 ? 'hl' : ''">{{ r.name }}</span>
+            <span :class="r.place === 1 ? 'hl' : ''">{{ r.name }}</span><UiAiBadge v-if="isBot(r.id)" />
           </button>
         </li>
       </ol>
@@ -35,7 +35,7 @@
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', sideFirst(i)?.id)"
         >
-          <span :class="side.won ? 'hl' : ''">{{ side.name }}</span>
+          <span :class="side.won ? 'hl' : ''">{{ side.name }}</span><UiAiBadge v-if="side.isBot" />
         </button>
         <!-- 세트 점수 없이 승패만 남긴 경기는 0:0 대신 vs -->
         <span v-if="!hasScore" class="order-2 t-mono">vs</span>
@@ -99,7 +99,7 @@ import FeedStoryFigure from './story/FeedStoryFigure.vue'
 import FeedStoryLine from './FeedStoryLine.vue'
 import FeedVoice from './FeedVoice.vue'
 import FeedActions from './FeedActions.vue'
-import { UiAvatar, UiIconButton } from '../ui'
+import { UiAiBadge, UiAvatar, UiIconButton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 const props = defineProps({
@@ -111,6 +111,8 @@ const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'watch', 'challe
 
 const players = computed(() => props.post.players || [])
 const ranking = computed(() => props.post.result?.ranking || [])
+// AI 주민 표시 (docs/ai-residents.md): 선수 이름 옆에 AI
+const isBot = (id) => players.value.some((p) => p.id === id && p.isBot)
 // 칸의 첫 사람. 팀 경기의 선수 목록은 [앞 팀..., 뒤 팀...] 순서다
 const sideFirst = (i) => (props.post.result?.sideNames?.length === 2 && i === 1 ? players.value[players.value.length / 2] : players.value[i])
 const isDraw = computed(() => !props.post.result?.winner)
@@ -121,8 +123,8 @@ const sides = computed(() => {
   // 단판이면 세트 수(1:0) 대신 그 판의 점수(21:15)를 크게
   const single = r.setScores?.length === 1 ? r.setScores[0] : null
   return [
-    { name: a?.name || '', score: single ? single.scoreA : r.scoreA ?? 0, won: !!r.winner && r.winner === a?.name },
-    { name: b?.name || '', score: single ? single.scoreB : r.scoreB ?? 0, won: !!r.winner && r.winner === b?.name },
+    { name: a?.name || '', isBot: !!a?.isBot, score: single ? single.scoreA : r.scoreA ?? 0, won: !!r.winner && r.winner === a?.name },
+    { name: b?.name || '', isBot: !!b?.isBot, score: single ? single.scoreB : r.scoreB ?? 0, won: !!r.winner && r.winner === b?.name },
   ]
 })
 const winnerIndex = computed(() => (sides.value[0].won ? 0 : sides.value[1].won ? 1 : null))

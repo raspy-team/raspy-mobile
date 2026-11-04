@@ -269,7 +269,7 @@
                 <span class="block t-micro">무승부</span>
               </span>
             </div>
-            <p v-if="played" class="t-micro mt-3 text-center">전적·실력 점수는 사람과 한 판만 세요. 봇과 한 판은 연습이에요</p>
+            <p v-if="played" class="t-micro mt-3 text-center">전적·실력 점수는 사람과 한 판만 세요. AI 주민과 한 판은 연습이에요</p>
           </UiCard>
           <!-- 하루 한 번 게임을 오늘 이미 냈으면 버튼 대신 한 줄 (누르면 '오늘은 다 했어요'만 떴다, 11/5 밤샘 C 검토) -->
           <p v-if="dailyDone" class="t-body text-center mt-5">오늘 몫을 냈어요. 새 문제는 내일 0시에 나와요</p>

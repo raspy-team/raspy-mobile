@@ -22,7 +22,7 @@
           <p v-else-if="longLobby" class="t-caption mt-1">상대가 오면 알려 드려요. 이 화면을 닫아도 돼요</p>
           <p v-else class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
           <!-- 처음 온 사람이 기다리다 나가지 않게: 곧 연습 상대가 온다고 말해 둔다 (세션 B 흐름 검토) -->
-          <p v-if="!longLobby && !state.fixture && !state.invitee && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 연습 상대(봇)와 붙어요</p>
+          <p v-if="!longLobby && !state.fixture && !state.invitee && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 AI 주민과 붙어요</p>
         </UiCard>
         <!-- 기다리는 동안이 규칙을 읽기 가장 좋은 때다: 펼쳐 둔다 (B 사용자 흐름) -->
         <section v-if="state.howTo?.length" class="mt-3 rounded-xl bg-surface-2 px-4 py-3">
@@ -33,7 +33,7 @@
         </section>
         <!-- 하루 기다리는 게임은 봇을 저절로 부르지 않는다: 원하면 바로 봇과 -->
         <UiButton v-if="longLobby && !state.fixture && !state.invitee" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
-          {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 봇과 할 수 있어요` : '기다리지 않고 봇과 하기' }}
+          {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 AI 주민과 할 수 있어요` : '기다리지 않고 AI 주민과 하기' }}
         </UiButton>
         <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="secondary" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
@@ -307,7 +307,9 @@ function apply(s: State) {
 // 정한 사람과 한 판 (11/4): ?to=사람 이면 그 사람만 들어오는 방을 열고, ?invite=경기 면 받은 초대로 들어간다. 한 번만 쓴다 (다시 한 판은 보통 대기실)
 let inviteTo = Number(route.query.to) || null
 let inviteId = Number(route.query.invite) || null
-if (inviteTo || inviteId) router.replace({ query: {} })
+// AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다 (docs/ai-residents.md 1). 한 번만
+let aiId = Number(route.query.ai) || null
+if (inviteTo || inviteId || aiId) router.replace({ query: {} })
 
 const inviteLeft = computed(() => {
   const until = state.value?.inviteUntil ? new Date(state.value.inviteUntil).getTime() : 0
@@ -323,6 +325,12 @@ async function join() {
     if (invite) return apply((await POST('/api/app-games/realtime/{gameId}/accept', { path: { gameId: invite } })).data)
     if (to) return apply((await POST('/api/app-games/{key}/realtime/invite', { path: { key: key.value }, query: { to } })).data)
     apply((await POST('/api/app-games/{key}/realtime', { path: { key: key.value } })).data)
+    const ai = aiId
+    aiId = null
+    if (ai && state.value?.status === 'WAITING') {
+      botCalled = true
+      apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: state.value.gameId }, query: { botId: ai } })).data)
+    }
   } catch (e) {
     // 다시 들어가기가 아무나 붙는 대기실로 가지 않게
     inviteTo = to

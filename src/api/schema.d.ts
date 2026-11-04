@@ -2446,7 +2446,7 @@ export interface paths {
         put?: never;
         /**
          * 봇 부르기
-         * @description 방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.
+         * @description 방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다. botId(AI 주민)를 주면 기다리지 않고 그 주민이 들어온다.
          */
         post: operations["callBot"];
         delete?: never;
@@ -6859,6 +6859,8 @@ export interface components {
             top3Rules: components["schemas"]["Top3RuleStatsDto"][];
             recentGames: components["schemas"]["RecentGameSummaryDto"][];
             recordsHidden: boolean;
+            isBot: boolean;
+            aiAppGames: string[];
         };
         UserStatsDto: {
             /** Format: int32 */
@@ -7026,6 +7028,7 @@ export interface components {
             nickname: string;
             avatar?: string;
             intro?: string;
+            isBot: boolean;
         };
         MyProfileResponse: {
             nickname: string;
@@ -7487,6 +7490,7 @@ export interface components {
             id: number;
             nickname: string;
             profileUrl?: string;
+            isBot: boolean;
         };
         GameDetailResponse: {
             /** Format: int64 */
@@ -7795,6 +7799,7 @@ export interface components {
             id: number;
             nickname: string;
             profileImageUrl?: string;
+            isBot: boolean;
         };
         CommentResponse: {
             /** Format: int64 */
@@ -11765,7 +11770,9 @@ export interface operations {
     };
     callBot: {
         parameters: {
-            query?: never;
+            query?: {
+                botId?: number;
+            };
             header?: never;
             path: {
                 gameId: number;
@@ -12029,7 +12036,9 @@ export interface operations {
     };
     battleBot: {
         parameters: {
-            query?: never;
+            query?: {
+                botId?: number;
+            };
             header?: never;
             path: {
                 gameId: number;

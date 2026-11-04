@@ -5052,13 +5052,22 @@
           "app-game-controller"
         ],
         "summary": "봇 부르기",
-        "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.",
+        "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다. botId(AI 주민)를 주면 기다리지 않고 그 주민이 들어온다.",
         "operationId": "callBot",
         "parameters": [
           {
             "name": "gameId",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -5469,6 +5478,15 @@
             "name": "gameId",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -7032,11 +7050,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           },
           {
@@ -7045,11 +7063,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ],
-              "default": "UNITS"
+              ]
             }
           }
         ],
@@ -9308,11 +9326,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -9933,13 +9951,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ],
-              "default": "PENDING"
+              ]
             }
           }
         ],
@@ -14904,7 +14922,9 @@
       },
       "UserProfileResponse": {
         "required": [
+          "aiAppGames",
           "id",
+          "isBot",
           "isMe",
           "mannerScore",
           "myChampions",
@@ -14994,6 +15014,15 @@
           },
           "recordsHidden": {
             "type": "boolean"
+          },
+          "isBot": {
+            "type": "boolean"
+          },
+          "aiAppGames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -15495,6 +15524,7 @@
       "UserSearchResultDto": {
         "required": [
           "id",
+          "isBot",
           "nickname",
           "username"
         ],
@@ -15515,6 +15545,9 @@
           },
           "intro": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -17091,6 +17124,7 @@
       "UserSummary": {
         "required": [
           "id",
+          "isBot",
           "nickname"
         ],
         "type": "object",
@@ -17104,6 +17138,9 @@
           },
           "profileUrl": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -18094,6 +18131,7 @@
       "AuthorSummary": {
         "required": [
           "id",
+          "isBot",
           "nickname"
         ],
         "type": "object",
@@ -18107,6 +18145,9 @@
           },
           "profileImageUrl": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },

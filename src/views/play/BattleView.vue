@@ -235,10 +235,19 @@ function apply(s: State) {
 function message(e: unknown, fallback: string) {
   return (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 }
+// AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다. 한 번만
+let aiId = Number(route.query.ai) || null
+if (aiId) router.replace({ query: {} })
 async function join() {
   error.value = ''
   try {
     apply((await POST('/api/app-games/{key}/battle', { path: { key: key.value } })).data)
+    const ai = aiId
+    aiId = null
+    if (ai && state.value?.status === 'WAITING') {
+      botCalled = true
+      apply((await POST('/api/app-games/battle/{gameId}/bot', { path: { gameId: state.value.gameId }, query: { botId: ai } })).data)
+    }
   } catch (e) {
     error.value = message(e, '들어가지 못했어요')
   }

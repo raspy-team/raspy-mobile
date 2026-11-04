@@ -7,7 +7,8 @@
           <InboxButtons />
           <UiIconButton icon="fas fa-gear" label="설정" @click="router.push('/settings')" />
         </template>
-        <UiIconButton v-else-if="user" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
+        <!-- AI 주민은 친구·신고·차단이 없다 (docs/ai-residents.md) -->
+        <UiIconButton v-else-if="user && !user.isBot" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
       </template>
     </UiTopBar>
 
@@ -33,11 +34,13 @@
     </main>
 
     <main v-else class="max-w-2xl mx-auto px-4 pt-6 pb-32 ui-appear">
+      <!-- AI 주민: 맨 위에 한 줄 (docs/ai-residents.md 'AI 표시') -->
+      <p v-if="user.isBot" class="t-caption mb-4 flex items-center gap-1.5"><UiAiBadge class="!ml-0" />AI 주민 · 매치가 만든 연습 상대예요</p>
       <!-- 누구인지 -->
       <div class="flex items-center gap-4">
         <UiAvatar :src="user.avatar" :name="user.nickname" size="xl" class="!w-20 !h-20" />
         <div class="flex-1 min-w-0">
-          <h1 class="t-title truncate">{{ user.nickname }}</h1>
+          <h1 class="t-title flex items-center min-w-0"><span class="truncate">{{ user.nickname }}</span><UiAiBadge v-if="user.isBot" /></h1>
           <p class="t-caption truncate mt-0.5">@{{ user.username }}</p>
           <!-- 동네 (당근의 '합정동 · 동네 인증'). 인증이 지났으면 표시를 뺀다 -->
           <p v-if="user.dong" class="t-caption truncate mt-0.5 flex items-center gap-1">
@@ -54,6 +57,10 @@
       <div class="flex gap-2 mt-5">
         <template v-if="user.isMe">
           <UiButton block variant="secondary" icon="fas fa-pen" to="/set-profile">프로필 편집</UiButton>
+        </template>
+        <!-- AI 주민: 친구·메시지 대신 주 앱 게임으로 바로 한 판 -->
+        <template v-else-if="user.isBot">
+          <UiButton v-if="aiGame" block icon="fas fa-gamepad" :to="aiGame">앱 게임 한 판</UiButton>
         </template>
         <template v-else>
           <UiButton v-if="friend.received" class="flex-1" :loading="busy" @click="friendAction('accept')">친구 수락</UiButton>
@@ -92,8 +99,8 @@
 
       <!-- 신뢰 온도·포인트는 타일 둘로. 근거·설명은 눌러서 연다 (점진적 공개) -->
       <div class="mt-3 grid grid-cols-2 gap-3">
-        <TrustCard v-if="user.trust" :trust="user.trust" :user-id="user.id" :is-me="user.isMe" />
-        <PointCard :key="user.id" :user-id="user.id" :is-me="user.isMe" />
+        <TrustCard v-if="user.trust && !user.isBot" :trust="user.trust" :user-id="user.id" :is-me="user.isMe" />
+        <PointCard v-if="!user.isBot" :key="user.id" :user-id="user.id" :is-me="user.isMe" />
       </div>
       <LiveRecordLine :key="`lr${user.id}`" class="mt-2" :user-id="user.id" />
 
@@ -246,12 +253,13 @@ import api from '../../api/api'
 import UserSearchModal from '../../components/profile/UserSearchModal.vue'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
-  UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiListSkeleton,
+  UiAiBadge, UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiListSkeleton,
   UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
 import { matchTime } from '../../utils/format'
+import { liveRoute } from '@/utils/battle'
 
 // 사람 신고: 처음 보는 사람을 만나는 앱이라 성희롱·불쾌한 요구가 맨 위 가까이에 있어야 한다 (11/4 밤샘, ReportSheet 기본 목록과 맞춤)
 const REPORT_REASONS = ['욕설·비방', '성희롱·불쾌한 요구', '노쇼·비매너', '사칭·사기', '만 14세 미만 같아요', '기타']
@@ -300,8 +308,14 @@ function setGameRef(el, id) {
   if (el) gameRefs[id] = el.$el || el
 }
 
+// AI 주민의 '앱 게임 한 판': 주 앱 게임(첫째)의 실시간 화면으로, ?ai=로 그 주민을 바로 부른다
+const aiGame = computed(() => {
+  const key = user.value?.isBot && user.value.aiAppGames?.[0]
+  return key ? `${liveRoute(key)}?ai=${user.value.id}` : ''
+})
+
 async function loadFriendStatus() {
-  if (!user.value || user.value.isMe) return
+  if (!user.value || user.value.isMe || user.value.isBot) return
   friend.value = (await api.get(`/api/friends/status/${user.value.id}`).catch(() => ({ data: friend.value }))).data
 }
 

@@ -744,8 +744,14 @@ onMounted(async () => {
   }
   const duelId = Number(route.query.duel)
   if (duelId) {
-    result.value = duels.value.find((d) => d.gameId === duelId)
-      ?? (await GET('/api/app-games/duels/{gameId}', { path: { gameId: duelId } })).data
+    // 알림의 대결이 없어졌거나 내 것이 아니면 알리고 게임 화면에 둔다 (예전엔 잡히지 않은 오류로 아래 등록까지 멈췄다)
+    try {
+      result.value = duels.value.find((d) => d.gameId === duelId)
+        ?? (await GET('/api/app-games/duels/{gameId}', { path: { gameId: duelId } })).data
+    } catch (e) {
+      showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '그 대결을 찾지 못했어요')
+      router.replace({ query: {} })
+    }
   }
   // 상대가 플레이해서 결과가 나오면 서버가 신호를 보낸다
   stop = refreshOnChange(() => {

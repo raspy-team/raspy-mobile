@@ -317,9 +317,14 @@ let inviteId = Number(route.query.invite) || null
 let bossChallenge = route.query.boss === '1'
 // AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다 (docs/ai-residents.md 1). 한 번만
 let aiId = Number(route.query.ai) || null
+// 알림('내 차례'·결과)은 ?game=판 으로 온다: 그 판을 연다. 예전엔 무시하고 보통 대기실로 들어가, 끝난 판의 알림을 누르면 새 상대를 찾기 시작했다
+let gameParam = Number(route.query.game) || null
 // 주소의 ?to·?invite·?boss·?ai는 들어간 뒤에 지운다. 화면은 주소마다 새로 그려져(App.vue의 key) 먼저 지우면
 // 새 화면이 보통 대기실로 한 번 더 들어가 따로 방을 열었다 (보스 판 대신 빈 대기실이 보였다). 들어간 뒤 지우면 새 화면은 그 판을 이어 받는다
-const clearQuery = () => { if (route.query.to || route.query.invite || route.query.boss || route.query.ai) router.replace({ query: {} }) }
+const clearQuery = () => { if (route.query.to || route.query.invite || route.query.boss || route.query.ai) router.replace({ query: {} })
+  // ?game은 화면을 다시 그리지 않고 조용히 뺀다: router.replace면 새 화면이 보통 대기실로 들어가 끝난 판 대신 새 상대를 찾았다
+  else if (route.query.game) history.replaceState(history.state, '', route.path)
+}
 
 const inviteLeft = computed(() => {
   const until = state.value?.inviteUntil ? new Date(state.value.inviteUntil).getTime() : 0
@@ -329,11 +334,12 @@ const inviteLeft = computed(() => {
 
 async function join() {
   error.value = ''
-  const to = inviteTo, invite = inviteId, boss = bossChallenge
+  const to = inviteTo, invite = inviteId, boss = bossChallenge, game = gameParam
   try {
-    inviteTo = inviteId = null
+    inviteTo = inviteId = gameParam = null
     bossChallenge = false
-    if (boss) apply((await POST('/api/app-games/{key}/realtime/boss', { path: { key: key.value } })).data)
+    if (game) apply((await GET('/api/app-games/realtime/{gameId}', { path: { gameId: game } })).data)
+    else if (boss) apply((await POST('/api/app-games/{key}/realtime/boss', { path: { key: key.value } })).data)
     else if (invite) apply((await POST('/api/app-games/realtime/{gameId}/accept', { path: { gameId: invite } })).data)
     else if (to) apply((await POST('/api/app-games/{key}/realtime/invite', { path: { key: key.value }, query: { to } })).data)
     else {
@@ -351,6 +357,7 @@ async function join() {
     inviteTo = to
     inviteId = invite
     bossChallenge = boss
+    gameParam = game
     error.value = message(e, '들어가지 못했어요')
   }
 }

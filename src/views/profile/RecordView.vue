@@ -15,8 +15,10 @@
       <UiEmptyState icon="eye-slash" title="기록을 공개하지 않았어요" description="이 사람이 경기 기록을 나만 보도록 해 두었어요" />
     </main>
     <main v-else-if="error" class="max-w-2xl mx-auto px-4 pt-16">
-      <UiEmptyState icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+      <!-- 서버가 이유를 말했으면(없는 사람·차단) 그 말만, 연결 오류면 다시 불러오기 -->
+      <UiEmptyState icon="fas fa-triangle-exclamation" :title="error" :description="told ? '' : '잠시 뒤 다시 해 주세요'">
+        <UiButton v-if="told" variant="secondary" @click="router.back()">돌아가기</UiButton>
+        <UiButton v-else variant="secondary" @click="load">다시 불러오기</UiButton>
       </UiEmptyState>
     </main>
 
@@ -442,6 +444,7 @@ const chart = computed(() => {
   }
 })
 
+const told = ref(false) // 서버가 이유를 말한 실패 (다시 불러와도 같다)
 async function load() {
   loading.value = true
   error.value = ''
@@ -463,7 +466,10 @@ async function load() {
     s.value = data
   } catch (e) {
     if (e.response?.status === 403) hidden.value = true
-    else error.value = e.response?.data?.message || '기록을 불러오지 못했어요'
+    else {
+      told.value = !!e.response?.data?.message
+      error.value = e.response?.data?.message || '기록을 불러오지 못했어요'
+    }
   } finally {
     loading.value = false
   }

@@ -27,7 +27,8 @@
           <p v-else-if="longLobby" class="t-caption mt-1">상대가 오면 알려 드려요. 이 화면을 닫아도 돼요</p>
           <p v-else class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
           <!-- 처음 온 사람이 기다리다 나가지 않게: 곧 연습 상대가 온다고 말해 둔다 (세션 B 흐름 검토) -->
-          <p v-if="!longLobby && !state.fixture && !state.invitee && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 AI 주민과 붙어요</p>
+          <!-- 초는 서버가 정한다: 밤 9시대 오늘 밤의 게임은 사람끼리 만날 틈을 주려고 길게 기다린다 (AppRealtimeService.botAfterFor) -->
+          <p v-if="!longLobby && !state.fixture && !state.invitee && state.botAfterSeconds" class="t-micro mt-2">{{ waitText(state.botAfterSeconds) }} 안에 사람이 안 오면 AI 주민이 상대가 돼요</p>
         </UiCard>
         <!-- 기다리는 동안이 규칙을 읽기 가장 좋은 때다: 펼쳐 둔다 (B 사용자 흐름) -->
         <section v-if="state.howTo?.length" class="mt-3 rounded-xl bg-surface-2 px-4 py-3">
@@ -59,6 +60,8 @@
 
       <!-- 판 -->
       <template v-else-if="state?.status === 'PLAYING'">
+        <!-- 누구와 하는지: 이름과 AI 주민 표시 (처음 온 사람이 '상대'만 보고 사람인지 몰랐다, 9e) -->
+        <p class="t-caption flex items-center min-w-0 mb-1"><span class="shrink-0">상대&nbsp;·&nbsp;</span><OpponentName :player="state.opponent" /></p>
         <div class="flex items-center justify-between">
           <span class="t-heading">{{ turnLine }}</span>
           <span class="t-mono tabular-nums" :class="left <= 5 ? 'text-danger' : 'text-fg-muted'">{{ leftText }}</span>
@@ -155,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { who, withRo } from '@/utils/format'
+import { waitText, who, withRo } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
@@ -171,6 +174,7 @@ import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import AlkkagiBoard from '../../components/appgame/AlkkagiBoard.vue'
 import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'
 import WaitingNow from '../../components/appgame/WaitingNow.vue'
+import OpponentName from '../../components/appgame/OpponentName.vue'
 import { shareLink } from '../../utils/share'
 import { useToast } from '../../composable/useToast'
 import { UiButton, UiCard, UiEmptyState, UiIcon, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'

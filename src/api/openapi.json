@@ -15073,6 +15073,9 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/AppPlayer"
           }
         }
       },
@@ -15435,6 +15438,7 @@
       },
       "LobbyList": {
         "required": [
+          "botAfterSeconds",
           "goldenHour",
           "goldenHourStart",
           "lobbies",
@@ -15472,6 +15476,10 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          },
+          "botAfterSeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -20969,6 +20977,8 @@
       "SeatChampionView": {
         "required": [
           "boss",
+          "bossReclaimed",
+          "masked",
           "mine",
           "seat",
           "seatName",
@@ -21001,6 +21011,12 @@
           "bossTriesLeft": {
             "type": "integer",
             "format": "int32"
+          },
+          "bossReclaimed": {
+            "type": "boolean"
+          },
+          "masked": {
+            "type": "boolean"
           }
         }
       },
@@ -21209,6 +21225,10 @@
           },
           "shared": {
             "type": "boolean"
+          },
+          "botAfterSeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

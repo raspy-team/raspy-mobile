@@ -14,8 +14,8 @@
           <UiSpinner class="mx-auto" />
           <p class="t-heading mt-4">{{ state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
           <p class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
-          <!-- 실시간 게임 대기실과 같은 말: 곧 연습 상대가 온다 -->
-          <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 연습 상대(봇)와 붙어요</p>
+          <!-- 실시간 게임 대기실과 같은 말: 곧 AI 주민이 온다 -->
+          <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ waitText(state.botAfterSeconds) }} 안에 사람이 안 오면 AI 주민이 상대가 돼요</p>
         </UiCard>
         <!-- 흔들기는 판이 시작되기 전에 센서를 켜 둔다 (시작한 뒤에 누르면 그만큼 손해) -->
         <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">센서 미리 켜기</UiButton>
@@ -27,7 +27,7 @@
         <div class="text-center pt-6">
           <p class="t-caption">{{ counting ? '곧 시작해요' : `${shakeLeft}초 남음` }}</p>
           <p class="t-display tabular-nums mt-4">{{ score[0] }}</p>
-          <p class="t-caption">나 · {{ who(state.opponent) }} {{ score[1] }}</p>
+          <p class="t-caption flex items-center justify-center min-w-0"><span class="shrink-0">나 ·&nbsp;</span><OpponentName :player="state.opponent" /><span class="shrink-0 tabular-nums">&nbsp;{{ score[1] }}</span></p>
           <p v-if="counting" class="t-display tabular-nums mt-8">{{ countdown }}</p>
           <p v-else class="t-title mt-8">폰을 흔드세요!</p>
           <!-- 아이폰은 센서를 쓰려면 한 번 눌러 허락을 받아야 한다 -->
@@ -40,8 +40,9 @@
       <!-- 판: 내 라켓이 늘 아래. 판 위 어디든 손가락을 대고 좌우로 움직인다 -->
       <template v-else-if="state?.status === 'PLAYING'">
         <div class="flex items-center justify-between">
-          <span class="t-heading tabular-nums">나 {{ score[0] }} : {{ score[1] }} {{ who(state.opponent) }}</span>
-          <span class="t-micro">{{ counting ? '곧 시작해요' : serving ? '서브' : '5점 먼저' }}</span>
+          <!-- 점수판: 상대 이름은 좁은 화면(320)에서 줄인다. AI 주민이면 이름 뒤에 AI -->
+          <span class="t-heading tabular-nums flex items-center min-w-0"><span class="shrink-0">나 {{ score[0] }} : {{ score[1] }}&nbsp;</span><OpponentName :player="state.opponent" /></span>
+          <span class="t-micro shrink-0 ml-2">{{ counting ? '곧 시작해요' : serving ? '서브' : '5점 먼저' }}</span>
         </div>
         <div
           ref="field"
@@ -81,7 +82,8 @@
 </template>
 
 <script setup lang="ts">
-import { who } from '@/utils/format'
+import { waitText, who } from '@/utils/format'
+import OpponentName from '../../components/appgame/OpponentName.vue'
 // 실시간 대전 (/play/:key/battle, 퐁). 서버가 1초에 20번 판을 계산해 웹소켓으로 보내고, 화면은 그대로 그린다.
 // 손가락 위치만 보낸다 (라켓을 두고 싶은 x). 라켓이 얼마나 빨리 가는지는 서버가 정한다. 내 쪽(0번이 아니면 판을 뒤집어)이 늘 아래
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'

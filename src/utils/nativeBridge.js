@@ -90,3 +90,13 @@ export async function nativeGoogleLogin() {
   if (!result.idToken) throw new Error('no id token')
   window.location.href = `${API_BASE_URL}/login/oauth2/google/token?id_token=${encodeURIComponent(result.idToken)}`
 }
+
+// 아이폰 앱의 Apple 로그인 (11/5): 앱이 Apple 창을 띄워 받은 identity token을 서버에 넘긴다.
+// 서버(AppleMobileAuthController /login/oauth2/apple/token)가 Apple 공개키로 확인하고(aud = 번들 ID) /oauth/callback으로 돌려보낸다
+export async function nativeAppleLogin() {
+  const { SocialLogin } = await import('@capgo/capacitor-social-login')
+  await SocialLogin.initialize({ apple: {} })
+  const { result } = await SocialLogin.login({ provider: 'apple', options: { scopes: ['email', 'name'] } })
+  if (!result.idToken) throw new Error('no id token')
+  window.location.href = `${API_BASE_URL}/login/oauth2/apple/token?id_token=${encodeURIComponent(result.idToken)}`
+}

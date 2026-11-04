@@ -87,6 +87,7 @@ export const TERMS = [
 - 탈퇴는 앱의 설정 > 계정 삭제에서 할 수 있습니다. 앱 없이 요청하는 방법은 https://matchapp.me/account-deletion 에 있습니다
 - 탈퇴하면 바로 지우는 것: 이메일, 소셜 로그인 식별값, 비밀번호, 닉네임, 친구 찾기 아이디, 프로필(사진 파일·나이·성별·지역·소개·소속), 휴대폰 본인인증 정보(연계정보 해시·생년월일·인증 일시), 인증한 동네, 위치 좌표(도착 확인·위치 공유), 친구, 내가 한 차단, 알림 설정, 알림 토큰
 - 탈퇴해도 남기는 것: 다른 회원과 함께 한 경기 기록, 게시물(사진·영상 포함), 채팅, 댓글, 신고·노쇼·이용 제한 기록. 상대의 기록과 다른 회원의 안전을 위해 남기되, 작성자를 "탈퇴한 사용자"로 바꿔 누구인지 알 수 없게 합니다. 방문 통계는 회원과 연결을 끊은 숫자로만 남습니다
+- 이용 정지나 만나서 하는 경기 금지(노쇼)를 받은 기록이 있는 회원이 탈퇴하면, 같은 사람이 탈퇴 뒤 바로 다시 가입해 제한을 피하지 못하도록 휴대폰 본인인증의 연계정보 해시를 한 번 더 암호화한 값(되돌려 누구인지 알 수 없는 값)만 '재가입 제한 목록'에 남깁니다. 기간은 제한이 끝나는 날부터 1년(이미 끝났으면 탈퇴한 날부터 1년), 영구 정지는 탈퇴한 날부터 3년이며, 기간이 지나면 지웁니다. 이 목록은 휴대폰 본인인증을 할 때 같은 사람인지 확인하는 데만 씁니다. 운영진이 풀어 준 정지와 나이 확인을 위한 정지는 남기지 않습니다
 - 단, 관련법령(전자상거래 등 소비자 보호법 등)에 따라 일정 기간 보관 필요 시 그에 따름
 
 5. 개인정보의 제3자 제공
@@ -130,7 +131,7 @@ export const TERMS = [
 - 2026년 11월 2일: 4항에 회원 탈퇴 방법과 지우는 항목 추가
 - 2026년 11월 3일: 2항에 만 14세 미만 아동 항목 추가 (수집·이용하지 않음, 가입 때 확인)
 - 2026년 11월 3일: 6항 Gemini에 경기 요약(소식의 AI 기자 한 줄) 추가
-- 2026년 11월 5일: 2항에 휴대폰 본인인증, 안전 기능의 위치, 사진·영상, 작성하는 것, 장소 검색어, 알림 토큰, 오류 정보 추가. 만 14세 미만(법정대리인 동의 절차 없음, 확인 방법)과 만 19세 미만 제한을 사실대로. 4항에 탈퇴 때 지우는 것과 남기는 것을 나눠 적고, 앱 없이 삭제를 요청하는 주소 추가. 6항에 코리아포트원(본인인증)·카카오(장소 검색·지도) 추가
+- 2026년 11월 5일: 2항에 휴대폰 본인인증, 안전 기능의 위치, 사진·영상, 작성하는 것, 장소 검색어, 알림 토큰, 오류 정보 추가. 만 14세 미만(법정대리인 동의 절차 없음, 확인 방법)과 만 19세 미만 제한을 사실대로. 4항에 탈퇴 때 지우는 것과 남기는 것을 나눠 적고(이용 제한 기록이 있으면 재가입 제한 목록), 앱 없이 삭제를 요청하는 주소 추가. 6항에 코리아포트원(본인인증)·카카오(장소 검색·지도) 추가
     `,
   },
   {
@@ -177,7 +178,7 @@ Match (matchapp.me) uses Google Sign-In, Kakao Login and Sign in with Apple only
 - Sharing: we do not sell, rent or share this data, and we do not use it for advertising. It is stored with our processors listed in section 6 only to run the service.
 - Other data the service collects (details in the Korean policy, sections 2 and 6): profile details you enter; location when you verify your neighborhood (not stored, only the district), when you check in at a match and while you choose to share your location with a friend; for in-person matches, mobile identity verification through PortOne (we store only a hash of the connecting information and your date of birth, not your name or phone number); photos and videos you upload; messages, chats and comments; place search terms (Kakao); a push notification token; and error reports (Sentry).
 - Age: you must be 14 or older. We do not offer sign-up with parental consent. Users under 19 cannot join matches with rules that may cause injury.
-- Retention and deletion: kept until you delete your account in the app (Settings > Delete account) or request it at https://matchapp.me/account-deletion. Your email, sign-in identifier, password, nickname, profile and profile photo file, identity verification data, neighborhood, location coordinates, friends, blocks, notification settings and push tokens are erased immediately. Match records, posts, chats, comments and safety reports shared with other players stay, shown as a deleted user. You can also ask at yeonkoh@protonmail.com.
+- Retention and deletion: kept until you delete your account in the app (Settings > Delete account) or request it at https://matchapp.me/account-deletion. Your email, sign-in identifier, password, nickname, profile and profile photo file, identity verification data, neighborhood, location coordinates, friends, blocks, notification settings and push tokens are erased immediately. Match records, posts, chats, comments and safety reports shared with other players stay, shown as a deleted user. If you were suspended or banned from in-person matches, we keep only an irreversibly encrypted form of your identity-verification value so the same person cannot rejoin to avoid the restriction: until one year after the restriction ends (three years after deletion for permanent suspensions), then it is erased. You can also ask at yeonkoh@protonmail.com.
 - Match's use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.
 `
 
@@ -208,6 +209,7 @@ Match 계정과 그 정보를 지우는 방법입니다.
 4. 남기는 것
 - 다른 회원과 함께 한 경기 기록, 게시물(사진·영상 포함), 채팅, 댓글, 신고·노쇼·이용 제한 기록은 상대의 기록과 다른 회원의 안전을 위해 남깁니다. 작성자는 "탈퇴한 사용자"로 바뀌어 누구인지 알 수 없습니다.
 - 방문 통계는 회원과 연결을 끊은 숫자로만 남습니다.
+- 이용 정지나 노쇼로 만나서 하는 경기 금지를 받은 기록이 있으면, 탈퇴 뒤 다시 가입해 제한을 피하지 못하도록 휴대폰 본인인증 정보를 되돌릴 수 없게 바꾼 값만 남깁니다. 제한이 끝난 뒤 1년(영구 정지는 탈퇴 뒤 3년)이 지나면 지웁니다.
 - 법령이 보관을 요구하는 정보가 있으면 그 기간 동안만 보관합니다.
 
 자세한 내용은 개인정보 처리방침(https://matchapp.me/privacy) 4항에 있습니다.

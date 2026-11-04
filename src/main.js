@@ -3,7 +3,7 @@ import UiIcon from './components/ui/UiIcon.vue'
 // 설치 창 신호(beforeinstallprompt)는 앱이 뜨자마자 오므로 처음부터 듣는다
 import './utils/install'
 // 유입 측정: 첫 화면 주소(utm 꼬리표)를 라우터가 바꾸기 전에 잡는다
-import { trackVisit } from './utils/visit'
+import { trackVisit, claimGuestPlays } from './utils/visit'
 import App from './App.vue'
 import './assets/tailwind.css'
 import { followIosTextSize } from './utils/textSize'
@@ -68,3 +68,4 @@ app
   .mount('#app')
 
 trackVisit()
+claimGuestPlays() // 가입 전 한 판을 하고 앱 로그인(새로 열림)으로 들어온 사람

@@ -14,6 +14,10 @@
       "description": "만나서 하는 경기의 안전: 도착·끝 확인, 노쇼, 위치 공유"
     },
     {
+      "name": "가입 전 한 판",
+      "description": "링크로 온 사람이 로그인 없이 허용된 게임을 한 판 한다. 가입하면 기록으로 옮긴다"
+    },
+    {
       "name": "Notification",
       "description": "인앱 알림 API"
     },
@@ -533,6 +537,48 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/VisitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/track/event": {
+      "post": {
+        "tags": [
+          "유입 측정"
+        ],
+        "summary": "방문 뒤 행동 기록",
+        "description": "로그인 없이. 가입 전 게임 시작·끝(guest_start·guest_finish), 로그인 버튼 누름(tap_kakao·tap_google·tap_apple·tap_id, place=init|guest). 기기·행동·곳마다 하루 한 번만 센다",
+        "operationId": "event",
+        "parameters": [
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventInput"
               }
             }
           },
@@ -1941,6 +1987,131 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/IdentityResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/plays": {
+      "post": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "가입 전 한 판 시작",
+        "description": "로그인 없이. 허용된 게임만(GuestPlayService.GUEST_KEYS). 내지 않은 판이 있으면 그 판을 준다",
+        "operationId": "start_1",
+        "parameters": [
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestPlayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/plays/{playId}/submit": {
+      "post": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "가입 전 한 판 답 내기",
+        "description": "로그인 없이. 서버가 채점하고, 가입한 사람들 사이 순위를 함께 준다",
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestResultResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/plays/claim": {
+      "post": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "가입 전 판을 내 기록으로",
+        "description": "로그인한 뒤 부른다. 이 기기의 가입 전 판을 내 기록으로 옮긴다. 여러 번 불러도 한 번만",
+        "operationId": "claim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimResponse"
                 }
               }
             }
@@ -4177,7 +4348,7 @@
         ],
         "summary": "대결 시작",
         "description": "상대를 기다리는 대결이 있으면 그 문제로 짝이 되고, 없으면 새 대결을 열어 다음 사람을 기다린다. 시간은 이때부터 서버가 잰다.",
-        "operationId": "start_1",
+        "operationId": "start_2",
         "parameters": [
           {
             "name": "key",
@@ -4659,7 +4830,7 @@
         ],
         "summary": "답 내기",
         "description": "점수를 매기고, 상대도 냈으면 승패를 정해 레이팅에 반영한다.",
-        "operationId": "submit",
+        "operationId": "submit_1",
         "parameters": [
           {
             "name": "playId",
@@ -5446,7 +5617,7 @@
         "tags": [
           "apple-web-login-controller"
         ],
-        "operationId": "start_2",
+        "operationId": "start_3",
         "responses": {
           "200": {
             "description": "OK"
@@ -9512,6 +9683,27 @@
           }
         }
       },
+      "EventInput": {
+        "required": [
+          "event",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "place": {
+            "type": "string"
+          },
+          "gameKey": {
+            "type": "string"
+          }
+        }
+      },
       "TournamentCreateRequest": {
         "required": [
           "boards",
@@ -11072,6 +11264,138 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "StartRequest": {
+        "required": [
+          "key",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "GuestPlayResponse": {
+        "required": [
+          "deadlineAt",
+          "key",
+          "playId",
+          "problem",
+          "serverNow",
+          "startedAt",
+          "timeLimitSeconds",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeLimitSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SubmitRequest": {
+        "required": [
+          "answer",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "GuestResultResponse": {
+        "required": [
+          "key",
+          "score",
+          "scoreUnit",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "scoreUnit": {
+            "type": "string"
+          },
+          "feedback": {
+            "type": "string"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rankOf": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ClaimRequest": {
+        "required": [
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          }
+        }
+      },
+      "ClaimResponse": {
+        "required": [
+          "claimed"
+        ],
+        "type": "object",
+        "properties": {
+          "claimed": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -17915,9 +18239,33 @@
           }
         }
       },
+      "EventRow": {
+        "required": [
+          "channel",
+          "counts"
+        ],
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "campaign": {
+            "type": "string"
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
       "Report": {
         "required": [
           "botVisits",
+          "eventTotal",
+          "events",
           "existingUsers",
           "rows",
           "since",
@@ -17945,6 +18293,15 @@
           "botVisits": {
             "type": "integer",
             "format": "int32"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventRow"
+            }
+          },
+          "eventTotal": {
+            "$ref": "#/components/schemas/EventRow"
           }
         }
       }

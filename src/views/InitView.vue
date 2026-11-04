@@ -75,10 +75,10 @@
           Apple로 계속하기
         </button>
 
-        <UiButton block size="lg" :variant="anySocial ? 'ghost' : 'primary'" to="/group/login?mode=signup">
+        <UiButton block size="lg" :variant="anySocial ? 'ghost' : 'primary'" to="/group/login?mode=signup" @click="tapId">
           {{ anySocial ? '아이디로 시작하기' : '시작하기' }}
         </UiButton>
-        <UiButton block variant="ghost" to="/group/login">이미 계정이 있어요</UiButton>
+        <UiButton block variant="ghost" to="/group/login" @click="tapId">이미 계정이 있어요</UiButton>
         <p class="pt-2 text-center t-micro">
           <button type="button" class="underline underline-offset-2 px-1 py-2" @click="openTerm = TERMS[0]">{{ TERMS[0].title }}</button>
           ·
@@ -104,6 +104,7 @@ import { TERMS } from '../content/legal'
 import { UiButton, UiCard, UiSheet } from '../components/ui'
 import { peekReturnTo, takeReturnTo } from '../utils/authRedirect'
 import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin } from '../utils/nativeBridge'
+import { trackEvent } from '../utils/visit'
 
 const FEATURES = [
   // 처음 온 사람의 짧은 안내. 한 줄에 한 가지, 실제로 하는 순서대로 (11/3)
@@ -156,8 +157,15 @@ onMounted(async () => {
   }
 })
 
+// 버튼 누름을 센다 (3단계 수요 조사 B): 가입 전 한 판 끝에서 왔으면 guest, 아니면 init
+const tapPlace = route.query.from === 'guest' ? 'guest' : 'init'
+function tapId() {
+  trackEvent('tap_id', tapPlace)
+}
+
 function loginWith(provider) {
   pending.value = provider
+  trackEvent(`tap_${provider}`, tapPlace)
   if (provider === 'apple' && isIosApp) {
     window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'appleLogin' })
   } else if (provider === 'apple') {

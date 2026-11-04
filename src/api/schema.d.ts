@@ -190,6 +190,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/track/event": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 방문 뒤 행동 기록
+         * @description 로그인 없이. 가입 전 게임 시작·끝(guest_start·guest_finish), 로그인 버튼 누름(tap_kakao·tap_google·tap_apple·tap_id, place=init|guest). 기기·행동·곳마다 하루 한 번만 센다
+         */
+        post: operations["event"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tournaments": {
         parameters: {
             query?: never;
@@ -933,6 +953,66 @@ export interface paths {
          * @description 포트원 창이 끝나면 그 번호를 보낸다. 서버가 포트원에서 결과를 직접 확인한다
          */
         post: operations["verify_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/plays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 가입 전 한 판 시작
+         * @description 로그인 없이. 허용된 게임만(GuestPlayService.GUEST_KEYS). 내지 않은 판이 있으면 그 판을 준다
+         */
+        post: operations["start_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/plays/{playId}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 가입 전 한 판 답 내기
+         * @description 로그인 없이. 서버가 채점하고, 가입한 사람들 사이 순위를 함께 준다
+         */
+        post: operations["submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/plays/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 가입 전 판을 내 기록으로
+         * @description 로그인한 뒤 부른다. 이 기기의 가입 전 판을 내 기록으로 옮긴다. 여러 번 불러도 한 번만
+         */
+        post: operations["claim"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2050,7 +2130,7 @@ export interface paths {
          * 대결 시작
          * @description 상대를 기다리는 대결이 있으면 그 문제로 짝이 되고, 없으면 새 대결을 열어 다음 사람을 기다린다. 시간은 이때부터 서버가 잰다.
          */
-        post: operations["start_1"];
+        post: operations["start_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2311,7 +2391,7 @@ export interface paths {
          * 답 내기
          * @description 점수를 매기고, 상대도 냈으면 승패를 정해 레이팅에 반영한다.
          */
-        post: operations["submit"];
+        post: operations["submit_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2705,7 +2785,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["start_2"];
+        get: operations["start_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4914,6 +4994,12 @@ export interface components {
             landingPath?: string;
             standalone: boolean;
         };
+        EventInput: {
+            visitorId: string;
+            event: string;
+            place?: string;
+            gameKey?: string;
+        };
         TournamentCreateRequest: {
             title: string;
             description?: string;
@@ -5398,6 +5484,48 @@ export interface components {
             /** Format: int32 */
             age: number;
             message?: string;
+        };
+        StartRequest: {
+            visitorId: string;
+            key: string;
+        };
+        GuestPlayResponse: {
+            /** Format: int64 */
+            playId: number;
+            key: string;
+            title: string;
+            problem: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            deadlineAt: string;
+            /** Format: int32 */
+            timeLimitSeconds: number;
+            /** Format: date-time */
+            serverNow: string;
+        };
+        SubmitRequest: {
+            visitorId: string;
+            answer: string;
+        };
+        GuestResultResponse: {
+            key: string;
+            title: string;
+            /** Format: double */
+            score: number;
+            scoreUnit: string;
+            feedback?: string;
+            /** Format: int32 */
+            rank?: number;
+            /** Format: int32 */
+            rankOf?: number;
+        };
+        ClaimRequest: {
+            visitorId: string;
+        };
+        ClaimResponse: {
+            /** Format: int32 */
+            claimed: number;
         };
         GameRegionRequest: {
             roadAddress: string;
@@ -7490,6 +7618,13 @@ export interface components {
             /** Format: int32 */
             homescreen: number;
         };
+        EventRow: {
+            channel: string;
+            campaign?: string;
+            counts: {
+                [key: string]: number;
+            };
+        };
         Report: {
             /** Format: date */
             since: string;
@@ -7499,6 +7634,8 @@ export interface components {
             existingUsers: number;
             /** Format: int32 */
             botVisits: number;
+            events: components["schemas"]["EventRow"][];
+            eventTotal: components["schemas"]["EventRow"];
         };
     };
     responses: never;
@@ -7816,6 +7953,32 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["VisitInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    event: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventInput"];
             };
         };
         responses: {
@@ -8777,6 +8940,84 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["IdentityResult"];
+                };
+            };
+        };
+    };
+    start_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GuestPlayResponse"];
+                };
+            };
+        };
+    };
+    submit: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GuestResultResponse"];
+                };
+            };
+        };
+    };
+    claim: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClaimResponse"];
                 };
             };
         };
@@ -10246,7 +10487,7 @@ export interface operations {
             };
         };
     };
-    start_1: {
+    start_2: {
         parameters: {
             query?: {
                 solo?: boolean;
@@ -10568,7 +10809,7 @@ export interface operations {
             };
         };
     };
-    submit: {
+    submit_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -11113,7 +11354,7 @@ export interface operations {
             };
         };
     };
-    start_2: {
+    start_3: {
         parameters: {
             query?: never;
             header?: never;

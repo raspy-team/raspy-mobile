@@ -2,8 +2,9 @@
 // (중간에 앱을 닫았거나, 앱의 소셜 로그인으로 설정을 건너뛴 경우)
 import api from '../api/api'
 import { rememberReturnTo } from '../utils/authRedirect'
+import { GUEST_GAMES } from '../utils/guestGames'
 
-const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/invite', '/invite-fall-back', '/dev', '/club/join', '/s/']
+const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/invite', '/invite-fall-back', '/dev', '/club/join', '/s/', '/try/']
 let done = false
 
 export function markOnboarded() {
@@ -15,6 +16,9 @@ export function installOnboardingGuard(router) {
     if (done || OPEN.some((p) => to.path.startsWith(p))) return true
     // 로그인 전이면 화면을 그리기 전에 시작 화면으로 (보던 주소는 기억)
     if (!localStorage.getItem('raspy_access_token2')) {
+      // 조사의 도착 게임은 가입 없이 한 판부터 (3단계 '로그인을 미룰까' C). 끝나면 가입을 권한다
+      const key = to.path.match(/^\/play\/([^/]+)$/)?.[1]
+      if (key && GUEST_GAMES[key]) return { path: `/try/${key}`, query: to.query }
       rememberReturnTo(to.fullPath)
       return '/init'
     }

@@ -52,3 +52,41 @@ export async function trackVisit() {
     // 측정이 실패해도 앱 사용은 막지 않는다. 다음에 열 때 다시 보낸다
   }
 }
+
+// ── 가입 전 한 판·로그인 버튼 누름 (3단계 수요 조사 '로그인을 미룰까' C + B, 11/5) ──
+// 개인정보 없이 위의 무작위 기기 번호만 쓴다. 측정이 실패해도 화면은 막지 않는다
+
+/** 이 기기의 무작위 번호 (가입 전 한 판도 이 번호로 남는다). 저장소를 못 쓰면 null */
+export function getVisitorId() {
+  return visitorId()
+}
+
+/** 로그인 버튼 누름 등 행동 하나. place: init(시작 화면), guest(가입 전 한 판 끝 화면) */
+export function trackEvent(event: 'tap_kakao' | 'tap_google' | 'tap_apple' | 'tap_id', place: 'init' | 'guest') {
+  const id = visitorId()
+  if (!id) return
+  POST('/api/track/event', { body: { visitorId: id, event, place } }).catch(() => {})
+}
+
+const GUEST_KEY = 'guest_played' // 가입 전에 한 판 했다 (로그인하면 기록으로 옮긴다)
+
+export function markGuestPlayed() {
+  try {
+    localStorage.setItem(GUEST_KEY, '1')
+  } catch {
+    // 못 남기면 옮기지 못할 뿐이다
+  }
+}
+
+/** 로그인한 뒤: 이 기기의 가입 전 판을 내 기록으로 옮긴다. 옮긴 수를 돌려준다 (할 게 없으면 0) */
+export async function claimGuestPlays(): Promise<number> {
+  const id = visitorId()
+  if (!id || !localStorage.getItem(GUEST_KEY) || !localStorage.getItem('raspy_access_token2')) return 0
+  try {
+    const { data } = await POST('/api/guest/plays/claim', { body: { visitorId: id } })
+    localStorage.removeItem(GUEST_KEY)
+    return data.claimed
+  } catch {
+    return 0 // 다음에 열 때 다시
+  }
+}

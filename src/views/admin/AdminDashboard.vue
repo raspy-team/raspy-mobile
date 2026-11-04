@@ -108,6 +108,24 @@
         <p v-if="acq" class="t-micro mt-2">
           {{ acq.since }}부터 처음 온 사람 · 기존 사용자 {{ acq.existingUsers }}명, 로봇 방문 {{ acq.botVisits }}번은 뺐어요
         </p>
+        <!-- 가입 전 한 판·로그인 버튼 (3단계 수요 조사 C + B): 해 봤다 → 끝까지 했다 → 시작 버튼을 눌렀다. 그 기기가 처음 온 채널·캠페인으로 묶는다 -->
+        <UiCard v-if="acq?.events?.length" class="!p-0 overflow-x-auto mt-3">
+          <table class="w-full text-sm tabular-nums">
+            <thead>
+              <tr class="t-micro text-left">
+                <th class="font-normal py-2.5 pl-4 pr-2">채널 · 캠페인</th>
+                <th v-for="c in EVENT_COLS" :key="c.key" class="font-normal py-2.5 px-2 text-right last:pr-4">{{ c.label }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in [...acq.events, acq.eventTotal]" :key="`${row.channel}|${row.campaign}`" class="border-t border-line" :class="row === acq.eventTotal ? 'font-semibold' : ''">
+                <td class="py-2.5 pl-4 pr-2 max-w-[9rem] truncate">{{ row.channel }}<span v-if="row.campaign" class="t-micro ml-1">{{ row.campaign }}</span></td>
+                <td v-for="c in EVENT_COLS" :key="c.key" class="py-2.5 px-2 text-right last:pr-4">{{ row.counts[c.key] ?? 0 }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </UiCard>
+        <p v-if="acq?.events?.length" class="t-micro mt-2">기기 수. 가입 전 한 판을 시작·끝낸 기기, 시작 화면과 한 판 끝 화면에서 로그인 버튼(카카오·구글·애플·아이디)을 누른 기기</p>
       </UiSection>
 
       <!-- 안전: 만나서 한 경기가 안전했는지 (안전·신뢰 I). 비율은 몇 중 몇인지도 함께 보여 준다 -->
@@ -260,6 +278,14 @@ const ACQ_COLS = [
   { key: 'played', label: '경기' },
   { key: 'returned', label: '재방문' },
   { key: 'homescreen', label: '홈 화면' },
+]
+// 가입 전 한 판 표의 열 (서버 AcquisitionService.EventRow.counts의 키)
+const EVENT_COLS = [
+  { key: 'guest_start', label: '한 판 시작' },
+  { key: 'guest_finish', label: '끝까지' },
+  { key: 'tap@guest', label: '끝나고 누름' },
+  { key: 'tap@init', label: '첫 화면 누름' },
+  { key: 'tap_kakao@init', label: '카카오' },
 ]
 const acqTabs = [
   { value: 7, label: '7일' },

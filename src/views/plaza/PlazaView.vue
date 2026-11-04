@@ -39,7 +39,8 @@
         <UiButton variant="secondary" @click="router.push('/games')">게임 목록으로 보기</UiButton>
       </div>
       <!-- 들어오면 매치가 한 줄 안내 (docs/mascots.md: 광장 입구의 매치) -->
-      <div v-if="phase === 'plaza' && hint" class="absolute top-[calc(env(safe-area-inset-top)+58px)] inset-x-0 flex justify-center pointer-events-none">
+      <!-- 아래 말하기 칸 바로 위에 (위에 두면 노점 이름을 가렸다, 11/6) -->
+      <div v-if="phase === 'plaza' && hint" class="absolute bottom-[calc(env(safe-area-inset-bottom)+84px)] inset-x-0 z-10 flex justify-center pointer-events-none">
         <div class="flex items-center gap-2 rounded-full bg-canvas/85 backdrop-blur pl-1.5 pr-4 py-1.5 max-w-[92%]">
           <MatchMascot who="match" :size="30" class="text-fg shrink-0" />
           <span class="t-caption text-fg">{{ hint }}</span>

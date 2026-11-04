@@ -96,7 +96,8 @@ export class PlazaScene extends Phaser.Scene {
     cam.setZoom(this.zoomFor())
     cam.roundPixels = true
     const me = this.walkers.get(this.meId)
-    if (me) cam.startFollow(me.sprite, true, 0.15, 0.15)
+    // 화면 위는 광장 고르기 막대가 가린다: 나보다 조금 위를 비춰 노점 이름이 막대 아래로 오게
+    if (me) cam.startFollow(me.sprite, true, 0.15, 0.15, 0, 36)
     this.scale.on('resize', () => cam.setZoom(this.zoomFor()))
 
     // 빈 땅을 누르면 거기까지 걷는다 (사람·물건을 누른 것은 그쪽에서 처리하고 여기로 오지 않게)
@@ -297,7 +298,40 @@ export class PlazaScene extends Phaser.Scene {
     w.bubble?.setPosition(Math.round(w.x), Math.round(w.y) - FRAME_H - 7)
   }
 
+  private nextDeclutter = 0
+
+  /**
+   * 이름표 정리 (11/6, 320px에서 이름표가 서로 겹쳤다): 내 이름은 늘, 남은 나와 가까운 순으로 보이되
+   * 이미 보인 이름표와 겹치거나 너무 멀면(화면 반쯤 밖) 숨긴다. 말풍선이 떠 있는 사람은 이름도 보인다
+   */
+  private declutter() {
+    const me = this.walkers.get(this.meId)
+    if (!me) return
+    const cam = this.cameras.main
+    const far = (cam.width / cam.zoom) * 0.6
+    const placed: Phaser.Geom.Rectangle[] = []
+    const list = [...this.walkers.values()].sort((a, b) => {
+      if (a.p.id === this.meId) return -1
+      if (b.p.id === this.meId) return 1
+      return Math.hypot(a.x - me.x, a.y - me.y) - Math.hypot(b.x - me.x, b.y - me.y)
+    })
+    for (const w of list) {
+      const mine = w.p.id === this.meId
+      const r = w.name.getBounds()
+      const near = mine || !!w.bubble || Math.hypot(w.x - me.x, w.y - me.y) < far
+      const free = mine || !placed.some((q) => Phaser.Geom.Intersects.RectangleToRectangle(q, r))
+      const show = near && free
+      w.name.setVisible(show)
+      w.badge?.setVisible(show)
+      if (show) placed.push(r)
+    }
+  }
+
   update(_t: number, dtMs: number) {
+    if (_t > this.nextDeclutter) {
+      this.nextDeclutter = _t + 250
+      this.declutter()
+    }
     const dt = Math.min(dtMs, 100) / 1000
     for (const w of this.walkers.values()) {
       const key = `a:${w.p.sheet}`
@@ -344,7 +378,7 @@ export class PlazaScene extends Phaser.Scene {
     if (goal === Math.floor(ty / cell) * cols + Math.floor(tx / cell)) pts[pts.length - 1] = { x: Math.round(tx), y: Math.round(ty) }
     const smooth = this.smooth({ x: me.x, y: me.y }, pts)
     me.path = smooth
-    this.cameras.main.startFollow(me.sprite, true, 0.15, 0.15)
+    this.cameras.main.startFollow(me.sprite, true, 0.15, 0.15, 0, 36)
     this.cb.onMove(smooth.map((p) => [Math.round(p.x), Math.round(p.y)]))
   }
 

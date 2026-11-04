@@ -107,7 +107,7 @@
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
             <BrandFace :mood="state.result === 'WIN' ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
-            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
+            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ resultNote }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.moves.length }}번 이었어요</p>
             <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
@@ -192,6 +192,16 @@ const turnLine = computed(() => {
   return myTurn.value ? '내 차례' : `${who(s.opponent)}님 차례`
 })
 const longLobby = computed(() => (state.value?.lobbySeconds ?? 30) > 120)
+// 암산 결과의 앞 숫자는 서버가 보낸 진행 수가 아니라 양쪽 정답 수의 합이어야 한다.
+// 예: "6/7 문제 · 나 4 : 상대 1" → "5/7 문제 · 나 4 : 상대 1"
+const resultNote = computed(() => {
+  const note = state.value?.view?.note ?? ''
+  if (key.value !== 'math-race') return note
+  return note.replace(
+    /(\d+)\/(\d+)(\s*문제\s*·\s*나\s*)(\d+)(\s*:\s*상대\s*)(\d+)/,
+    (_, _shown, total, beforeMe, me, between, opponent) => `${Number(me) + Number(opponent)}/${total}${beforeMe}${me}${between}${opponent}`,
+  )
+})
 
 async function shareWatch() {
   if (!state.value) return

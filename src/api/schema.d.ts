@@ -8809,6 +8809,8 @@ export interface components {
             boss: boolean;
             /** Format: int32 */
             bossTriesLeft?: number;
+            bossReclaimed: boolean;
+            masked: boolean;
         };
         ChampionHistoryLine: {
             /** Format: int64 */

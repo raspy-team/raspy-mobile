@@ -20969,6 +20969,8 @@
       "SeatChampionView": {
         "required": [
           "boss",
+          "bossReclaimed",
+          "masked",
           "mine",
           "seat",
           "seatName",
@@ -21001,6 +21003,12 @@
           "bossTriesLeft": {
             "type": "integer",
             "format": "int32"
+          },
+          "bossReclaimed": {
+            "type": "boolean"
+          },
+          "masked": {
+            "type": "boolean"
           }
         }
       },

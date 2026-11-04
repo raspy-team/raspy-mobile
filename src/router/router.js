@@ -139,6 +139,7 @@ const routes = [
   { path: '/rules/:ruleId(\\d+)', component: RuleDetail },
   { path: '/rules/:ruleId/ranking', component: RuleRanking, props: true},
   { path: '/group/register', component:  GroupUserRegister},
+  { path: '/password-reset', component: () => import('../views/auth/PasswordResetView.vue') },
   { path: '/group/login', component: GroupUserLogin},
   {path:'/invite-fall-back/:encodedUrl', component : InviteDeep},
   { path: '/feed', component: Feed},

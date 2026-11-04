@@ -127,6 +127,17 @@
     </UiList>
   </UiSheet>
 
+  <!-- 경기 3시간 안에 빠지기: 이유를 고르면 상대에게 보이고, 이유 없이 빠지면 노쇼로 기록된다 (11/5 사용자 결정) -->
+  <UiSheet :model-value="!!lateLeave" title="왜 빠지나요?" @update:model-value="lateLeave = null">
+    <p class="t-caption mb-4">경기가 곧이라 상대가 이미 움직이고 있을 수 있어요. 이유를 고르면 상대에게 함께 알려요. 이유 없이 빠지면 노쇼로 기록돼요.</p>
+    <div class="flex flex-wrap gap-2">
+      <UiChip v-for="r in LATE_REASONS" :key="r" :selected="leaveReason === r" @click="leaveReason = r">{{ r }}</UiChip>
+    </div>
+    <UiInput v-if="leaveReason === '기타'" v-model="leaveOther" class="mt-3" :maxlength="100" placeholder="이유를 짧게 적어 주세요" />
+    <UiButton block size="lg" class="mt-5" :disabled="!lateReasonText" @click="confirmLateLeave(lateReasonText)">이유를 알리고 빠지기</UiButton>
+    <UiButton block variant="ghost" class="mt-2 text-danger" @click="confirmLateLeave('')">이유 없이 빠지기</UiButton>
+  </UiSheet>
+
   <SafetyTipsSheet
     :model-value="!!safetyGame"
     :opponent="safetyGame ? dmTarget(safetyGame)?.name || '' : ''"
@@ -522,12 +533,35 @@ const BEFORE_START = ['MATCHING', 'SCHEDULED']
 const canLeave = (g) => !!g && (g.type === 'sent'
   ? g.status === 'APPROVED' && BEFORE_START.includes(g.gameStatus)
   : g.type === 'my-game' && g.isOwner === false && BEFORE_START.includes(g.status))
+// 만나서 하는 경기 3시간 안 (서버 MeetService.LATE_LEAVE와 같게)
+const LATE_LEAVE_MS = 3 * 3600_000
+const LATE_REASONS = ['아파요', '급한 일이 생겼어요', '날씨가 안 좋아요', '기타']
+const lateLeave = ref(null)
+const leaveReason = ref('')
+const leaveOther = ref('')
+const lateReasonText = computed(() => (leaveReason.value === '기타' ? leaveOther.value.trim() : leaveReason.value))
+const isLate = (g) => !isRemote(g.venue) && !!g.matchDate && new Date(g.matchDate).getTime() - Date.now() < LATE_LEAVE_MS
+
 async function leaveGame(g) {
   menuGame.value = null
+  if (isLate(g)) {
+    leaveReason.value = ''
+    leaveOther.value = ''
+    lateLeave.value = g
+    return
+  }
   const ok = await confirmDialog({ title: '이 경기에서 빠질까요?', message: '연 사람과 남은 사람에게 빠졌다고 알려요. 경기는 다시 모집 중이 돼요.', confirmText: '빠지기', danger: true })
   if (!ok) return
+  await doLeave(g, '')
+}
+async function confirmLateLeave(reason) {
+  const g = lateLeave.value
+  lateLeave.value = null
+  if (g) await doLeave(g, reason)
+}
+async function doLeave(g, reason) {
   try {
-    await api.delete(`/api/games/${g.id}/leave`)
+    await api.delete(`/api/games/${g.id}/leave`, { params: reason ? { reason } : {} })
     sentGames.value = sentGames.value.filter((x) => x.id !== g.id)
     myGames.value = myGames.value.filter((x) => x.id !== g.id)
     showToast('경기에서 빠졌어요')

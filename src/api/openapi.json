@@ -22,6 +22,10 @@
       "description": "관리자 전용 유저 관리 API"
     },
     {
+      "name": "Auth",
+      "description": "비밀번호 찾기 (아이디 계정)"
+    },
+    {
       "name": "Safety",
       "description": "안전·신뢰: 내 이용 상태, 운영진 제재"
     },
@@ -3931,6 +3935,31 @@
         }
       }
     },
+    "/api/auth/password-reset": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "비밀번호 새로 정하기 (로그인 전)",
+        "description": "아이디 + 방금 끝낸 휴대폰 본인인증. 그 계정에 저장된 본인인증과 같은 사람일 때만",
+        "operationId": "reset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/auth/login": {
       "post": {
         "tags": [
@@ -6245,11 +6274,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ]
+              ],
+              "default": "FRIENDS"
             }
           },
           {
@@ -6258,11 +6287,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ]
+              ],
+              "default": "UNITS"
             }
           }
         ],
@@ -7998,6 +8027,28 @@
         }
       }
     },
+    "/api/auth/password-reset/config": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "비밀번호 찾기 준비 (로그인 전)",
+        "description": "본인인증이 켜져 있는지, 포트원 창을 여는 값, 이번에 쓸 인증 번호",
+        "operationId": "config_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/onboarding": {
       "get": {
         "tags": [
@@ -8124,11 +8175,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -8741,6 +8792,15 @@
             "schema": {
               "type": "integer",
               "format": "int64"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "description": "만나서 하는 경기 3시간 안에 빠질 때의 이유. 없으면 노쇼로 센다",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -11591,6 +11651,27 @@
             "type": "string"
           },
           "password": {
+            "maxLength": 20,
+            "minLength": 8,
+            "type": "string"
+          }
+        }
+      },
+      "ResetRequest": {
+        "required": [
+          "identityVerificationId",
+          "loginId",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "loginId": {
+            "type": "string"
+          },
+          "identityVerificationId": {
+            "type": "string"
+          },
+          "newPassword": {
             "maxLength": 20,
             "minLength": 8,
             "type": "string"
@@ -17076,6 +17157,27 @@
           },
           "apple": {
             "type": "boolean"
+          }
+        }
+      },
+      "Config": {
+        "required": [
+          "available",
+          "verificationId"
+        ],
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "channelKey": {
+            "type": "string"
+          },
+          "verificationId": {
+            "type": "string"
           }
         }
       },

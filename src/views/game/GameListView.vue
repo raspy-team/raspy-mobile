@@ -52,7 +52,7 @@
       </UiCard>
 
       <UiCard v-else-if="!games.length">
-        <UiEmptyState icon="fas fa-trophy" title="아직 판이 없어요" description="처음 여는 사람이 판을 깔아요. 앱 게임은 전국 누구와도 바로 할 수 있어요">
+        <UiEmptyState icon="fas fa-trophy" title="아직 모집 중인 경기가 없어요" description="처음 여는 사람이 판을 깔아요. 앱 게임은 전국 누구와도 바로 할 수 있어요">
           <UiButton to="/create-game">경기 만들기</UiButton>
           <!-- 동네에 아직 사람이 없을 때 바로 할 수 있는 것: 범위 넓히기(동네 경기 화면이라 먼저), 전국 앱 게임 (11/4 밤샘, 제주에서 온 사람. 문구·모양 C) -->
           <div class="flex flex-wrap justify-center gap-2 mt-2">
@@ -162,7 +162,8 @@ async function apply(game, team) {
     feel('success')
     showToast('신청했어요. 주최자가 승인하면 알려 드려요')
   } catch (e) {
-    showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
+    // 428(동네 인증 필요)은 api.js가 내 동네 화면으로 보내며 같은 말을 맨 위에 보인다. 토스트로 두 번 말하지 않는다 (first10 검토)
+    if (e.response?.status !== 428) showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     busyId.value = null
   }

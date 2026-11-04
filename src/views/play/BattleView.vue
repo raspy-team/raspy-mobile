@@ -15,7 +15,7 @@
           <p class="t-heading mt-4">{{ state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
           <p class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
           <!-- 실시간 게임 대기실과 같은 말: 곧 연습 상대가 온다 -->
-          <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 연습 상대(봇)와 붙어요</p>
+          <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ state.botAfterSeconds }}초 안에 사람이 없으면 AI 주민과 붙어요</p>
         </UiCard>
         <!-- 흔들기는 판이 시작되기 전에 센서를 켜 둔다 (시작한 뒤에 누르면 그만큼 손해) -->
         <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">센서 미리 켜기</UiButton>

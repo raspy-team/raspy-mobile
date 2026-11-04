@@ -14,7 +14,8 @@
         <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
       </button>
 
-      <UiSection title="알림과 사람">
+      <!-- 제목이 담긴 것과 맞게 둘로: 계정에 남는 것 / 이 기기에만 남는 것 (first10 검토: '알림과 사람' 아래 화면·효과음이 있었다) -->
+      <UiSection title="내 정보와 알림">
         <UiList>
           <UiListItem icon="location-dot" title="내 동네" subtitle="동네 인증 · 보는 범위" chevron @click="router.push('/neighborhood')" />
           <UiListItem icon="building" title="소속" subtitle="학교·회사 인증 · 누가 볼지" chevron @click="router.push('/settings/organizations')" />
@@ -22,6 +23,11 @@
           <UiListItem icon="gamepad" title="게임 계정" subtitle="롤·피파·브롤 아이디와 티어" chevron @click="router.push('/settings/game-accounts')" />
           <UiListItem icon="far fa-bell" title="알림 설정" subtitle="경기·도전·친구·댓글·좋아요·메시지" chevron @click="router.push('/settings/notifications')" />
           <UiListItem icon="fas fa-ban" title="차단한 사람" chevron @click="openBlocked" />
+        </UiList>
+      </UiSection>
+
+      <UiSection title="이 기기">
+        <UiList>
           <UiListItem v-if="!installed" icon="download" title="홈 화면에 추가" subtitle="앱처럼 아이콘을 눌러 바로 열어요" chevron @click="addToHome" />
           <UiListItem icon="sun-moon" title="화면" :subtitle="THEME_OPTIONS.find((o) => o.value === theme).label" chevron @click="themeOpen = true" />
           <!-- 손맛 (utils/feel): 이 기기에만 저장. 켜면 바로 한 번 들려주고 울린다 -->

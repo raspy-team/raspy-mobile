@@ -281,7 +281,7 @@ const headerInfo = computed(() => {
         show: true,
         type: 'challenge_received',
         title: '도전 요청을 받았어요',
-        description: `${targetUserNickname.value}님이 함께 경기하기를 원합니다`,
+        description: `${targetUserNickname.value}님이 함께 경기하고 싶어 해요`,
         showActions: true,
         actionType: 'accept_reject',
         statusColor: 'orange',

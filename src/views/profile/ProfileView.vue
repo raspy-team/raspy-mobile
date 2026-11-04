@@ -91,7 +91,7 @@
         </RouterLink>
         <div class="flex-1">
           <p class="t-heading tabular-nums">{{ seatLines.length }}</p>
-          <p class="t-micro mt-0.5">자리</p>
+          <p class="t-micro mt-0.5">챔피언 자리</p>
         </div>
         <!-- AI 주민은 친구가 없다 (docs/ai-residents.md '채우지 않는 곳': 친구) -->
         <button v-if="!user.isBot" type="button" class="flex-1" @click="openFriends">

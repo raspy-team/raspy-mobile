@@ -9,7 +9,8 @@
           <p class="t-caption">받은 링크</p>
           <p class="t-title mt-1">{{ landing.title }}</p>
           <p class="t-caption mt-1">{{ landing.line }}</p>
-          <p class="t-caption text-fg mt-3">시작하면 바로 이어서 해요</p>
+          <!-- 가입 전에 한 판 하고 '점수 저장하고 상대와 붙기'로 온 사람: 그 점수가 어디 가는지 (first10 검토) -->
+          <p class="t-caption text-fg mt-3">{{ guestPlayed ? '시작하면 방금 한 판 점수가 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
         </UiCard>
         <h1 class="t-display text-[44px] mt-10">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
         <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
@@ -144,6 +145,7 @@ if (localStorage.getItem('raspy_access_token2')) router.replace('/')
 
 // 링크로 왔으면 그 링크가 무엇인지 (/api/landing, 로그인 전). 모르는 주소면 비어 있다
 const landing = ref(null)
+const guestPlayed = (() => { try { return !!localStorage.getItem('guest_played') } catch { return false } })()
 
 onMounted(async () => {
   const returnTo = peekReturnTo()

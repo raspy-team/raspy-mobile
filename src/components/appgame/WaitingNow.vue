@@ -37,7 +37,8 @@
           <UiButton size="sm" variant="secondary" :disabled="joining" @click="playAi(r)">한 판</UiButton>
         </UiCard>
       </div>
-      <p v-if="!list.lobbies.length" class="t-caption" :class="residents.length ? 'mt-3' : ''">지금 기다리는 사람이 없어요. 매일 밤 {{ nightHour }}시대{{ list.tonight ? `, ${list.tonight.title}에` : '에' }} 가장 많이 모여요</p>
+      <!-- AI 주민만 기다릴 때 '기다리는 사람이 없어요'라고 하면 바로 위 목록과 어긋난다 (first10 검토) -->
+      <p v-if="!list.lobbies.length" class="t-caption" :class="residents.length ? 'mt-3' : ''">{{ residents.length ? '지금은 AI 주민만 기다려요' : '지금 기다리는 사람이 없어요' }}. 매일 밤 {{ nightHour }}시대{{ list.tonight ? `, ${list.tonight.title}에` : '에' }} 가장 많이 모여요</p>
     </UiSection>
   </div>
 </template>

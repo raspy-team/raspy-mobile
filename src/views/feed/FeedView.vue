@@ -39,7 +39,7 @@
         </div>
       </UiEmptyState>
 
-      <UiEmptyState v-else-if="!visible.length" class="pt-16" icon="fas fa-flag-checkered" title="아직 끝난 판이 없어요" description="이기든 지든 끝난 경기는 여기 남아요">
+      <UiEmptyState v-else-if="!visible.length" class="pt-16" icon="fas fa-flag-checkered" title="아직 끝난 경기가 없어요" description="이기든 지든 끝난 경기는 여기 남아요">
         <UiButton to="/">경기 찾기</UiButton>
       </UiEmptyState>
 

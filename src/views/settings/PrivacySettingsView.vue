@@ -3,7 +3,7 @@
     <UiTopBar title="내 정보 공개" back="/settings" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
-      <p class="t-caption py-3">끄면 나만 봐요. 다른 사람의 화면에는 서버가 빼고 보내요. 짝짓기·나이 제한·동네 경기에는 그대로 써요.</p>
+      <p class="t-caption py-3">끄면 나만 봐요. 다른 사람에게는 보이지 않아요. 상대 찾기·나이 제한·동네 경기에는 그대로 써요.</p>
 
       <UiListSkeleton v-if="loading" :rows="4" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="설정을 불러오지 못했어요">

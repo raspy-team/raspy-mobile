@@ -334,7 +334,7 @@ async function create(target) {
     feel('success')
   } catch (e) {
     friend.value = null
-    showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 해 주세요')
+    if (e.response?.status !== 428) showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 해 주세요') // 428은 내 동네 화면이 말한다
   } finally {
     creating.value = false
   }

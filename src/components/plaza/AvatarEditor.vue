@@ -6,7 +6,7 @@
         <div v-if="previewKey" class="avatar-walk" :style="{ backgroundImage: `url(${sheetUrl(previewKey)})` }" role="img" :aria-label="'내 캐릭터 미리보기'" />
       </div>
       <p v-if="state" class="t-caption mt-2">
-        포인트 <strong class="text-fg">{{ state.balance.toLocaleString() }}</strong>
+        포인트 <strong class="text-fg">{{ state.balance.toLocaleString() }}P</strong>
         <span v-if="mode === 'start'"> · 처음엔 기본 옷 중에서 골라요. 더 꾸미는 건 포인트로</span>
       </p>
     </div>

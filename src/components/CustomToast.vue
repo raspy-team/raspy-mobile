@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="toastMsg"
-    class="fixed bottom-24 left-1/2 -translate-x-1/2 z-toast w-[calc(100%-32px)] max-w-sm bg-fg text-canvas font-medium px-4 py-3 rounded-xl text-sm text-center animate-toast-in"
+    class="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-toast w-[calc(100%-32px)] max-w-sm bg-fg text-canvas font-medium px-4 py-3 rounded-xl text-sm text-center animate-toast-in"
     role="status"
   >
     <div>{{ toastMsg }}</div>

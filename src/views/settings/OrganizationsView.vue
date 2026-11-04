@@ -72,7 +72,7 @@
             </template>
           </UiListItem>
         </UiList>
-        <UiButton block variant="ghost" class="text-danger mt-4" :loading="leaving" @click="leave(openMember)">소속 떼기</UiButton>
+        <UiButton block variant="danger" class="mt-4" :loading="leaving" @click="leave(openMember)">소속 떼기</UiButton>
       </template>
     </UiSheet>
 

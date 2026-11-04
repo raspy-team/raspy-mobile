@@ -159,7 +159,7 @@ import { who, withRo } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
@@ -184,6 +184,9 @@ const key = computed(() => String(route.params.key))
 // 이름은 서버가 준다 (화면에 따로 둔 이름표는 새 게임이 늘 때마다 빠져 '실시간 경기'로 보였다)
 const title = computed(() => state.value?.title || '실시간 경기')
 const state = ref<State | null>(null)
+// 게임 중에 뒤로 가기(안드로이드 하드웨어 버튼 포함)로 나가면 한 번 묻는다 (11/6 b2 앱 껍데기 점검).
+// 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다
+onBeforeRouteLeave(() => state.value?.status !== 'PLAYING' || window.confirm('게임이 진행 중이에요. 나가도 판은 계속되고, 차례 시간이 지나면 질 수 있어요. 나갈까요?'))
 const error = ref('')
 const word = ref('')
 const moveError = ref('')

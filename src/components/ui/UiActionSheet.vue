@@ -4,7 +4,7 @@
       <div v-if="modelValue" class="fixed inset-0 z-dialog bg-black/60" aria-hidden="true" @click="close"></div>
     </Transition>
     <Transition name="ui-sheet">
-      <div v-if="modelValue" role="alertdialog" aria-modal="true" :aria-label="title" class="fixed inset-x-0 bottom-0 z-dialog max-w-xl mx-auto px-3 pb-3 pb-safe space-y-2">
+      <div v-if="modelValue" role="alertdialog" aria-modal="true" :aria-label="title" class="fixed inset-x-0 bottom-0 z-dialog max-w-xl mx-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] space-y-2">
         <!-- 묻는 말과 할 일 한 묶음 -->
         <div class="rounded-2xl bg-surface-2 overflow-hidden">
           <div class="px-5 pt-4 pb-3 text-center">

@@ -8221,6 +8221,7 @@ export interface components {
             myWinChance?: number;
             players?: components["schemas"]["SummaryPlayer"][];
             ownerTrustLabel?: string;
+            ownerExtTier?: string;
             /** Format: int64 */
             championId?: number;
             ruleStatisticsOfOwner?: components["schemas"]["UserGameStatisticsDTO"];

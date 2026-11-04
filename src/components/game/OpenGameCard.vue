@@ -108,6 +108,8 @@ const ownerLine = computed(() =>
     props.game.ownerTemperature != null && `${props.game.ownerTemperature.toFixed(1)}°`,
     // 둘 다 이 규칙 레이팅이 있으면 이길 확률 (비슷한 실력인지 고르는 데 쓴다). 40~60%면 '해 볼 만'
     props.game.myWinChance != null && `이길 확률 ${props.game.myWinChance}%${props.game.myWinChance >= 40 && props.game.myWinChance <= 60 ? ' 해 볼 만' : ''}`,
+    // 롤·피파처럼 다른 게임에서 하는 경기면 주최자의 그 게임 티어 (9번)
+    props.game.ownerExtTier,
     ratingLine(props.game.ruleStatisticsOfOwner),
     props.game.createdAt && `${timeAgo(props.game.createdAt)} 올림`,
   ].filter(Boolean).join(' · '),

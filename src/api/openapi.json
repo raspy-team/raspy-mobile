@@ -18997,6 +18997,9 @@
           "ownerTrustLabel": {
             "type": "string"
           },
+          "ownerExtTier": {
+            "type": "string"
+          },
           "championId": {
             "type": "integer",
             "format": "int64"

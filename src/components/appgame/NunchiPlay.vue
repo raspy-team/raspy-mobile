@@ -1,7 +1,11 @@
 <template>
   <div>
     <UiSkeleton v-if="!list.length && !loadError" class="h-64 rounded-2xl" />
-    <p v-else-if="loadError" class="t-caption text-danger text-center py-10">{{ loadError }}</p>
+    <!-- 못 불러오면 빠져나갈 길: 다시 불러오기 (누르는 동안 문구는 그대로, 다시 실패해도 그대로) -->
+    <div v-else-if="loadError" class="py-10 text-center">
+      <p class="t-caption text-danger">{{ loadError }}</p>
+      <UiButton variant="secondary" class="mt-4" :loading="loading" @click="load">다시 불러오기</UiButton>
+    </div>
 
     <template v-else-if="current">
       <div class="flex items-center justify-between t-micro tabular-nums">
@@ -45,7 +49,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
-import { UiCard, UiSkeleton, UiSpinner } from '../ui'
+import { UiButton, UiCard, UiSkeleton, UiSpinner } from '../ui'
 import { track, flush } from '@/utils/trackLog'
 import { feel } from '@/utils/feel'
 
@@ -95,15 +99,24 @@ function record(choice: 'a' | 'b' | '-', ms: number) {
   }
 }
 
-onMounted(async () => {
+const loading = ref(false)
+async function load() {
+  if (loading.value) return
+  loading.value = true
   try {
     const ids = props.problem.split(',')
-    list.value = (await GET('/api/nunchi/questions', { query: { ids: ids.join(',') } })).data
+    const data = (await GET('/api/nunchi/questions', { query: { ids: ids.join(',') } })).data
+    loadError.value = ''
+    list.value = data
     show()
   } catch {
     loadError.value = '질문을 불러오지 못했어요. 다시 해 주세요'
+  } finally {
+    loading.value = false
   }
-})
+}
+
+onMounted(load)
 
 // 끝내지 않고 떠났다: 몇 번째 문제에서 그만뒀는지 (다른 화면으로 가거나 창을 닫거나)
 let quitSent = false

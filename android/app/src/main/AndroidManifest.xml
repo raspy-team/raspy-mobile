@@ -10,6 +10,7 @@
         <!-- 푸시 알림의 작은 아이콘 (흰 한 가지 색이어야 네모로 안 보인다) -->
         <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_match" />
         <activity
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
             android:label="@string/title_activity_main"

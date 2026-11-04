@@ -288,14 +288,15 @@
           <!-- 아직 안 끝난 내 대결은 시작 버튼 바로 밑에 -->
           <UiSection v-if="unfinished.length" title="진행 중" class="mt-8">
             <UiList>
-              <UiListItem v-for="d in unfinished" :key="d.gameId" :title="duelTitle(d)" :subtitle="duelSubtitle(d)" @click="result = d">
+              <UiListItem v-for="d in unfinished" :key="d.gameId" :title="duelTitle(d)" :subtitle="duelSubtitle(d)" @click="openUnfinished(d)">
                 <template #trailing><UiBadge>{{ duelBadge(d) }}</UiBadge></template>
               </UiListItem>
             </UiList>
           </UiSection>
 
           <!-- 챔피언: 내가 속한 자리(소속·동네·전국). 하루 퍼즐은 맞붙는 판이 없어 벨트가 없다 -->
-          <ChampionSeatsCard v-if="game.dailyLimit !== 1" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
+          <!-- 준비 중(AI 키 없음 등)인 게임은 이길 수 없으니 챔피언 자리를 보이지 않는다 (11/5 9e) -->
+          <ChampionSeatsCard v-if="game.dailyLimit !== 1 && game.available" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
 
           <!-- 나머지는 탭 하나로: 순위 · 내 대결 · 투표 -->
           <UiTabs v-model="tab" :options="tabs" class="mt-8" />
@@ -683,6 +684,8 @@ function duelSubtitle(d: Duel) {
   if (d.status === 'AWAITING_RESULT' || (key.value === 'predict' && d.myAnswer)) return `내 예상 ${predictionLine(d.problem, d.myAnswer)}`
   if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : `${judgeName.value}가 채점하고 있어요`
   if (isVote.value) return d.myAnswer ?? ''
+  // 실시간 판은 '내기'가 없다: 하는 중인 판으로 돌아가게 (11/5 9e)
+  if (d.playMode === 'REALTIME') return d.opponent ? '하는 중이에요 · 눌러서 돌아가기' : '상대를 기다리는 중이에요'
   return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : '아직 내지 않았어요'
 }
 function duelBadge(d: Duel) {
@@ -691,7 +694,13 @@ function duelBadge(d: Duel) {
   if (d.status === 'VOTING') return '투표 중'
   if (d.status === 'AWAITING_RESULT') return '결과 기다림'
   if (d.myJudging) return isVote.value ? '확인 중' : '채점 중'
+  if (d.playMode === 'REALTIME') return d.opponent ? '하는 중' : '기다리는 중'
   return d.opponent ? '상대 차례' : '기다리는 중'
+}
+// 끝나지 않은 실시간 판은 결과 카드 대신 그 판으로 (대기실·대전 화면)
+function openUnfinished(d: Duel) {
+  if (d.playMode === 'REALTIME') router.push(liveRoute(d.key))
+  else result.value = d
 }
 
 watch(boardKind, loadBoard)

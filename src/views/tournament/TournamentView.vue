@@ -102,7 +102,7 @@
                     <UiButton size="sm" variant="signal" class="flex-1" :loading="busy" @click="playFixture(f)">경기하기</UiButton>
                   </div>
                   <div v-else-if="f.gameId || f.clubMatchId" class="flex">
-                    <UiButton size="sm" variant="secondary" class="flex-1" @click="goFixture(f)">{{ f.mine && f.status === 'OPEN' ? '내 경기 · 시간·장소 잡기' : f.status === 'DONE' ? '결과 보기' : '경기 보기' }}</UiButton>
+                    <UiButton size="sm" variant="secondary" class="flex-1" @click="goFixture(f)">{{ f.mine && f.status === 'OPEN' ? (f.clubMatchId ? '우리 선수 정하기' : '내 경기 · 시간·장소 잡기') : f.status === 'DONE' ? '결과 보기' : '경기 보기' }}</UiButton>
                   </div>
                   <!-- 주최자: 마감이 지난 판 -->
                   <div v-if="v.isHost && f.needsHost" class="space-y-1">

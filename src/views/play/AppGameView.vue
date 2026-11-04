@@ -250,8 +250,9 @@
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
-            <p v-if="!played" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요</p>
-            <div v-else class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
+            <!-- 준비 중인 게임에는 첫 판을 권하지 않는다 (바로 밑의 '준비 중인 게임이에요'와 어긋났다) -->
+            <p v-if="!played && game.available" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요</p>
+            <div v-else-if="played" class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
                 <span class="block t-micro">실력 점수</span>
@@ -690,7 +691,7 @@ function duelSubtitle(d: Duel) {
   if (isVote.value) return d.myAnswer ?? ''
   // 실시간 판은 '내기'가 없다: 하는 중인 판으로 돌아가게 (11/5 9e)
   if (d.playMode === 'REALTIME') return d.opponent ? '하는 중이에요 · 눌러서 돌아가기' : '상대를 기다리는 중이에요'
-  return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : canResume(d) ? '아직 내지 않았어요 · 눌러서 이어 하기' : '아직 내지 않았어요'
+  return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : canResume(d) ? '안 냈어요 · 눌러서 이어 하기' : '아직 내지 않았어요'
 }
 function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']

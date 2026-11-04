@@ -22,6 +22,7 @@
         >
           {{ comment.author.nickname }}
         </router-link>
+        <UiAiBadge v-if="comment.author.isBot" class="!ml-0" />
         <span class="t-micro select-none">
           {{ timeAgo(comment.createdAt) }}
         </span>
@@ -90,7 +91,7 @@
 import { defineProps, defineEmits, ref } from 'vue'
 import CommentItem from './CommentItem.vue'
 import ReportSheet from './safety/ReportSheet.vue'
-import { UiAvatar } from './ui'
+import { UiAiBadge, UiAvatar } from './ui'
 
 const props = defineProps({
   comment: { type: Object, required: true },

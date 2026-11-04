@@ -113,6 +113,8 @@ const FEATURES = [
   { icon: 'fas fa-shield-halved', title: '처음 보는 사람과도 안심하고', body: '신뢰 온도와 만나 본 사람의 보증을 보고, 경기 동안 친구에게 위치를 알려요' },
   { icon: 'fas fa-stopwatch', title: '만나서 한 판', body: '점수는 둘이 같은 화면에 함께 남겨요' },
   { icon: 'fas fa-crown', title: '실력 점수가 쌓여요', body: '이기면 오르고, 동네 챔피언에 도전할 수 있어요' },
+  // AI 주민을 숨기지 않는다 (docs/ai-residents.md 'AI 표시': 약관·소개에 한 단락)
+  { icon: 'fas fa-robot', title: 'AI 주민도 있어요', body: '연습 상대가 되고 빈 곳을 채워요. 이름 옆에 AI가 붙어요' },
 ]
 
 const router = useRouter()

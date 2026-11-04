@@ -53,11 +53,12 @@ export function record(stats) {
   return [`${w}승`, d ? `${d}무` : '', `${l}패`].filter(Boolean).join(' ')
 }
 
-// 사람 이름. 봇이면 '(봇)'을 붙인다 (사용자 11/3: 봇은 봇이라고 표시)
+// 문장·토스트에 넣는 이름. AI 주민이면 'AI 주민 ○○' (docs/ai-residents.md 'AI 표시': 알림은 문장에 넣는다).
+// 이름만 따로 보이는 칸은 이름 뒤에 <UiAiBadge v-if="p.isBot" />를 쓴다
 export function who(p, fallback = '상대') {
   if (!p) return fallback
   const name = p.nickname ?? p.name ?? fallback
-  return p.isBot ? `${name} (봇)` : name
+  return p.isBot ? `AI 주민 ${name}` : name
 }
 
 // 받침에 따라 '으로/로' ('(으)로'처럼 괄호로 쓰지 않게, 11/5 밤샘 C). ㄹ 받침은 '로' (서울로)

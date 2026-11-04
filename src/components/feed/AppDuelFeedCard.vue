@@ -28,7 +28,7 @@
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', side.id)"
         >
-          <span :class="side.won ? 'hl' : ''">{{ side.name }}</span>
+          <span :class="side.won ? 'hl' : ''">{{ side.name }}</span><UiAiBadge v-if="side.isBot" />
         </button>
         <span class="order-2 text-[1.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums">
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
@@ -45,7 +45,7 @@
       />
       <div v-if="sides.some((s) => s.text)" class="mt-4 space-y-2">
         <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body">
-          <span class="t-micro block">{{ side.name }}</span>{{ side.text }}
+          <span class="t-micro block">{{ side.name }}<UiAiBadge v-if="side.isBot" /></span>{{ side.text }}
         </p>
       </div>
     </div>
@@ -60,7 +60,6 @@
 
 <script setup lang="ts">
 import { gameIcon } from '@/utils/appGameIcon'
-import { who } from '@/utils/format'
 // 피드의 앱 대결 한 장. 끝난 대결은 점수와 승자(+요리 이름·문장), 투표 중인 문장 대결은 그 자리에서 투표
 import { ref, computed, onMounted } from 'vue'
 import { GET } from '@/api/client'
@@ -70,7 +69,7 @@ import AppVisualFigure from './story/AppVisualFigure.vue'
 import FeedStoryLine from './FeedStoryLine.vue'
 import FeedVoice from './FeedVoice.vue'
 import FeedActions from './FeedActions.vue'
-import { UiIcon, UiSkeleton } from '../ui'
+import { UiAiBadge, UiIcon, UiSkeleton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 type Post = components['schemas']['FeedItemResponse']
@@ -85,10 +84,11 @@ const isDraw = computed(() => duel.value.winnerId == null)
 const sides = computed(() =>
   [0, 1].map((i) => {
     // OpenAPI 문서에 이름이 같은 PlayerDto가 둘이라 타입이 다른 쪽으로 잡힌다. 피드의 선수는 { id, name, avatar }
-    const p = (props.post.players as unknown as { id: number; name: string }[] | undefined)?.[i]
+    const p = (props.post.players as unknown as Player[] | undefined)?.[i]
     return {
       id: p?.id,
-      name: p ? who(p) : '',
+      name: p?.name ?? '',
+      isBot: !!p?.isBot,
       score: Math.round(duel.value.scores?.[i] ?? 0),
       text: duel.value.texts?.[i] ?? '',
       won: p != null && p.id === duel.value.winnerId,

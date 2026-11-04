@@ -52,7 +52,7 @@
             <p class="t-micro mt-0.5">{{ c.label }}</p>
           </div>
         </div>
-        <p v-if="!s.total.games" class="t-micro mt-3">봇과 한 판은 연습이라 승률에 넣지 않아요. 사람과 한 판부터 쌓여요</p>
+        <p v-if="!s.total.games" class="t-micro mt-3">AI 주민과 한 판은 연습이라 승률에 넣지 않아요. 사람과 한 판부터 쌓여요</p>
       </section>
 
       <!-- 활동: 한 판 이상 한 주가 몇 주 이어졌나 + 26주 달력 (연습 포함) -->
@@ -229,7 +229,7 @@
 
       <!-- 봇과 한 판은 사람 레이팅·순위와 따로 -->
       <section v-if="overview?.practice?.length">
-        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">봇과 한 판 · 순위에 안 들어가요</span></h2>
+        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">AI 주민과 한 판 · 순위에 안 들어가요</span></h2>
         <UiList>
           <UiListItem v-for="p in overview.practice" :key="p.ruleId" :title="p.ruleTitle" :subtitle="`${p.games}판`" chevron @click="router.push(`/rules/${p.ruleId}`)">
             <template #trailing><span class="t-heading tabular-nums">{{ p.rating }}</span></template>
@@ -290,7 +290,7 @@
         <li>이기면 오르고 지면 내려가요. <strong>나보다 점수가 높은 사람을 이기면</strong> 더 많이 올라요.</li>
         <li><strong>200점 차이</strong>면 높은 쪽이 4판 중 3판쯤 이겨요. 400점 차이면 10판 중 9판이에요.</li>
         <li><strong>±</strong>는 아직 확실하지 않은 정도예요. 판이 쌓이면 좁아지고, 오래 쉬면 다시 넓어져요. <strong>잠정</strong>은 아직 판이 적다는 뜻이에요.</li>
-        <li><strong>순위</strong>는 그 게임을 사람과 5판, 서로 다른 상대 3명 이상과 하면 붙어요. 봇과 한 판은 연습이라 따로 세요.</li>
+        <li><strong>순위</strong>는 그 게임을 사람과 5판, 서로 다른 상대 3명 이상과 하면 붙어요. AI 주민과 한 판은 연습이라 따로 세요.</li>
         <li><strong>종합</strong>은 게임별 점수를 모은 거예요. 판을 많이 해서 확실한 점수일수록 크게 쳐요.</li>
       </ul>
       <p class="t-micro mt-4">체스 사이트 lichess와 같은 Glicko-2 방식이에요.</p>
@@ -365,7 +365,7 @@ const compare = computed(() => {
 const periodCards = computed(() => [
   { label: '만난 사람', value: `${period.value.opponents}명` },
   { label: '활동한 날', value: `${period.value.activeDays}일` },
-  { label: '연습 (봇)', value: `${period.value.practiceGames}판` },
+  { label: '연습 (AI)', value: `${period.value.practiceGames}판` },
 ])
 
 // 26주 × 7일 (월요일부터, 왼쪽이 오래된 주). 오늘 뒤의 칸은 비운다

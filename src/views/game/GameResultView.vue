@@ -94,7 +94,7 @@
               </span>
             </span>
             <span class="text-sm truncate max-w-full" :class="side.won || !winnerIdx ? 'text-fg font-medium' : 'text-fg-muted'">
-              {{ side.user.nickname }}<span v-if="side.isMe" class="text-fg-subtle"> (나)</span>
+              {{ side.user.nickname }}<UiAiBadge v-if="side.user.isBot" /><span v-if="side.isMe" class="text-fg-subtle"> (나)</span>
             </span>
           </button>
           <!-- 세트 점수 없이 결과만 남긴 경기는 숫자 대신 vs -->
@@ -379,7 +379,7 @@ import { NEXT_ROUND } from '@/utils/verdict'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import LiveMediaStrip from '../../components/live/LiveMediaStrip.vue'
 import {
-  UiAvatar, UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
+  UiAiBadge, UiAvatar, UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'

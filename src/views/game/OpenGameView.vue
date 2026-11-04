@@ -19,6 +19,8 @@
           @challengers="challengersGame = game"
           @more="menuGame = game"
         />
+        <!-- 롤·피파처럼 다른 게임 안에서 하는 경기: 선수들의 그 게임 아이디 (선수·신청자·연 사람만, 9번) -->
+        <ExtGamePlayers v-if="game.rule?.extGame && (game.ownerId === myId || game.isAppliedByMe || game.players?.some((p) => p.id === myId))" :game-id="game.id" class="mt-2 border-b border-line" />
         <!-- 더보기·신청자: 홈 목록과 같은 시트 (예전엔 눌러도 아무 일이 없었다) -->
         <GameMenuSheets v-model:menu="menuGame" v-model:challengers="challengersGame" :my-id="myId" @comments="(id) => (commentId = id)" />
         <Comment v-if="commentId" :id="commentId" @close="commentId = 0" />
@@ -54,6 +56,7 @@
 <script setup>
 // 공유 링크로 들어온 열린 경기 하나 (/games/:gameId). 피드는 끝난 경기만 보여 줘서 예전엔 링크를 받아도 신청할 곳이 없었다
 import { ref, computed, onMounted } from 'vue'
+import ExtGamePlayers from '../../components/external/ExtGamePlayers.vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'

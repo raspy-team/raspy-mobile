@@ -109,6 +109,8 @@ const routes = [
   { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
   { path: '/settings/organizations', component: () => import('../views/settings/OrganizationsView.vue') },
   { path: '/settings/privacy', component: () => import('../views/settings/PrivacySettingsView.vue') },
+  // 인기 게임 아이디·티어 (9번, 11/6)
+  { path: '/settings/game-accounts', component: () => import('../views/settings/GameAccountsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },
   // 동호회 (club/): 목록·만들기, 한 곳, 초대 링크

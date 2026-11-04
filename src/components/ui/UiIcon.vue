@@ -52,7 +52,7 @@ import {
   Unplug, User, Swords, Handshake, Scale, CircleCheck, Circle, Activity, Globe, SunMoon, GalleryVerticalEnd, UserCheck, UserMinus, UserPlus, Users, UserX, Video, X, Zap, AtSign, Newspaper, Gamepad2,
   CircleDot, Spade, Type, CalendarDays, MessagesSquare, Grid2x2, MessageCircleQuestion, RefreshCw, Map, Gem, Calculator, Hash, Bomb,
   Goal, Lightbulb, Feather, Vibrate, Dumbbell, Link, Volume2,
-  Flame, Crosshair, Blocks, Mountain, Percent, BicepsFlexed, Brain, Grab, SquareDashed, Radar, PiggyBank, Building2,
+  Flame, Crosshair, Blocks, Mountain, Percent, BicepsFlexed, Brain, Grab, SquareDashed, Radar, PiggyBank, Building2, Shield,
   Shirt, Smile, Lock,
 } from 'lucide-vue-next'
 
@@ -77,7 +77,7 @@ const ICONS = {
   gavel: Gavel, gear: Settings, hand: Hand, heading: Heading, heart: Heart, 'hourglass-half': Hourglass,
   home: House, images: Images, keyboard: Keyboard, inbox: Inbox, 'info-circle': Info, instagram: Instagram,
   'layer-group': Layers, list: List, 'list-ol': ListOrdered, 'location-dot': MapPin,
-  gamepad: Gamepad2, minus: Minus,
+  gamepad: Gamepad2, minus: Minus, shield: Shield,
   // 앱 게임마다의 그림 (utils/appGameIcon)
   'circle-dot': CircleDot, spade: Spade, type: Type, 'calendar-days': CalendarDays, messages: MessagesSquare, 'grid-2x2': Grid2x2,
   'message-question': MessageCircleQuestion, refresh: RefreshCw, map: Map, gem: Gem, calculator: Calculator, hash: Hash, bomb: Bomb,

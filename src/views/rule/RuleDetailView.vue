@@ -50,6 +50,9 @@
         <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
       </button>
 
+      <!-- 롤·피파 같은 다른 게임 안에서 하는 규칙이면 어느 게임인지와 내 아이디 (9번) -->
+      <ExtGameCard v-if="rule.extGame" :game="rule.extGame" :label="rule.extGameLabel" class="border-b border-line" />
+
       <!-- 챔피언: 내가 속한 자리(동네·소속·전국)마다 한 줄 -->
       <ChampionSeatsCard :rule-id="rule.id" :app-game-key="rule.appGameKey" class="border-b border-line" />
 
@@ -167,6 +170,7 @@ import RuleThumb from '../../components/rule/RuleThumb.vue'
 import RuleCategory from '../../components/rule/RuleCategory.vue'
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
 import BaselineRow from '../../components/champion/BaselineRow.vue'
+import ExtGameCard from '../../components/external/ExtGameCard.vue'
 
 const REPORT_REASONS = ['욕설·비방', '위험한 규칙', '광고·스팸', '기타']
 

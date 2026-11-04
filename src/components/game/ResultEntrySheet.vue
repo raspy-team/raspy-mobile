@@ -68,6 +68,15 @@
     </ol>
     <UiButton v-if="sets.length < 9" variant="ghost" icon="fas fa-plus" class="mt-2" @click="addSet">세트 추가</UiButton>
     </template>
+    <!-- 다른 게임 안에서 한 경기: 결과 화면 스크린샷 (상대가 확인할 때 본다, 9번) -->
+    <div v-if="proof && !counter" class="mt-5">
+      <label class="flex items-center gap-3 min-h-12 px-4 rounded-xl bg-surface-2 cursor-pointer">
+        <UiIcon name="images" aria-hidden="true" />
+        <span class="flex-1 min-w-0 text-sm truncate">{{ proofFile ? proofFile.name : '결과 화면 스크린샷 붙이기 (선택)' }}</span>
+        <input type="file" accept="image/*" class="sr-only" @change="onProof" />
+      </label>
+      <p class="t-caption mt-1.5">붙이면 상대가 결과를 확인할 때 같이 봐요.</p>
+    </div>
     <p v-if="error" class="text-sm text-danger-fg mt-3" role="alert">{{ error }}</p>
 
     <template #footer>
@@ -81,7 +90,8 @@
 // counter: 상대가 낸 결과를 돌려보내며 내가 생각하는 점수를 낸다 (initial: 지금 결과를 [내 점수, 상대 점수]로)
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { POST } from '../../api/client'
-import { UiButton, UiChip, UiIconButton, UiSheet } from '../ui'
+import api from '../../api/api'
+import { UiButton, UiChip, UiIcon, UiIconButton, UiSheet } from '../ui'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -96,6 +106,8 @@ const props = defineProps({
   sides: { type: Array, default: () => [] },
   mySide: { type: Number, default: 0 },
   myName: { type: String, default: '나' },
+  // 결과 스크린샷 칸을 보일까 (다른 게임 안에서 하는 규칙, 9번)
+  proof: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue', 'submitted'])
 
@@ -139,10 +151,32 @@ function toSideSets(played) {
   return played.map((s) => (props.mySide === 0 ? [s.my, s.opponent] : [s.opponent, s.my]))
 }
 
+const proofFile = ref(null)
+function onProof(e) {
+  const f = e.target.files?.[0]
+  if (f && f.size > 10 * 1024 * 1024) {
+    error.value = '스크린샷은 10MB까지 올릴 수 있어요'
+    return
+  }
+  proofFile.value = f || null
+}
+
 async function send(body) {
   submitting.value = true
   error.value = ''
   try {
+    // 스크린샷을 먼저 올린다 (결과를 내면 경기가 '확인 기다림'으로 바뀌어도 올릴 수 있지만, 상대가 볼 때 이미 있게)
+    if (props.proof && !props.counter && proofFile.value) {
+      const form = new FormData()
+      form.append('file', proofFile.value)
+      try {
+        await api.post(`/api/games/${props.gameId}/result/proof`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      } catch (e) {
+        error.value = e.response?.data?.message || '스크린샷을 올리지 못했어요. 빼고 내거나 다시 해 주세요'
+        proofFile.value = null
+        return
+      }
+    }
     if (props.counter) await POST('/api/games/{id}/result/reject', { path: { id: Number(props.gameId) }, body })
     else await POST('/api/games/{id}/result', { path: { id: Number(props.gameId) }, body })
     emit('update:modelValue', false)

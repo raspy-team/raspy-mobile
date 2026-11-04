@@ -57,13 +57,14 @@
     </div>
 
     <main class="max-w-2xl mx-auto px-4 pb-16">
-      <!-- 종류: 모두 · 오프라인 · 앱 게임 (경기 열 규칙을 고를 때는 오프라인만이라 숨긴다) -->
-      <div v-if="!picking" class="flex gap-2 pt-4" role="radiogroup" aria-label="종류">
+      <!-- 종류: 모두 · 오프라인 · 앱 게임 · 인기 게임 (경기 열 규칙을 고를 때는 만나서 하는 것과 인기 게임만) -->
+      <div class="flex gap-2 pt-4 overflow-x-auto no-scrollbar -mx-4 px-4" role="radiogroup" aria-label="종류">
         <UiChip
-          v-for="k in KINDS"
+          v-for="k in kinds"
           :key="k.value"
           role="radio"
           :aria-checked="kind === k.value"
+          class="flex-shrink-0 whitespace-nowrap"
           :selected="kind === k.value"
           @click="setQuery({ kind: k.value === 'ALL' ? '' : k.value })"
         >
@@ -151,6 +152,13 @@ const KINDS = [
   { value: 'ALL', label: '전체' },
   { value: 'OFFLINE', label: '오프라인' },
   { value: 'APP', label: '앱 게임' },
+  // 롤·피파·브롤 같은 게임 안에서 붙는 규칙 (9번)
+  { value: 'POPULAR', label: '인기 게임' },
+]
+// 경기 열 규칙 고르기: 앱 게임은 뺀다
+const PICK_KINDS = [
+  { value: 'ALL', label: '모두' },
+  { value: 'POPULAR', label: '인기 게임' },
 ]
 // 주소 이름 → 질문, category-options의 목록 이름
 const SITUATIONS = [
@@ -174,6 +182,7 @@ const ability = computed(() => route.query.ability || '')
 // 예전 주소의 popular는 경기순
 const sort = computed(() => (route.query.sort === 'popular' ? 'plays' : route.query.sort) || 'rank')
 const kind = computed(() => route.query.kind || 'ALL')
+const kinds = computed(() => (picking.value ? PICK_KINDS : KINDS))
 const q = ref(route.query.q || '')
 const current = computed(() => SITUATIONS.find((f) => f.key === sheet.value))
 const filtered = computed(() => !!route.query.q || FILTER_KEYS.some((k) => route.query[k]))

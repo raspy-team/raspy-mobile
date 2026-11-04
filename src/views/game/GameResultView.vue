@@ -150,6 +150,12 @@
         <UiButton v-if="pending.canAnswer" variant="ghost" block @click="showCounter = true">점수 고쳐 보내기</UiButton>
       </UiCard>
 
+      <!-- 결과 화면 스크린샷 (다른 게임 안에서 한 경기, 9번). 누르면 크게 -->
+      <a v-if="proofUrl" :href="proofUrl" target="_blank" rel="noopener" class="block">
+        <p class="t-caption mb-2">결과 화면 스크린샷</p>
+        <img :src="proofUrl" alt="결과 화면 스크린샷" class="w-full max-h-80 object-contain rounded-xl bg-surface-2" loading="lazy" />
+      </a>
+
       <!-- 새 챔피언 -->
       <UiCard v-if="championUser" class="flex items-center gap-3">
         <span class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
@@ -498,6 +504,7 @@ const resultSubmittedById = ref(null)
 const autoConfirmAt = ref(null)
 const isAnswering = ref('')
 const rejectsLeft = ref(3)
+const proofUrl = ref(null) // 결과 스크린샷 (9번)
 const disputed = ref(false)
 const showCounter = ref(false)
 // 이 경기로 바뀐 내 실력 점수 { before, after } (확정 뒤 선수만)
@@ -654,6 +661,7 @@ async function load() {
     confirmed.value = res.data.confirmed !== false
     resultSubmittedById.value = res.data.resultSubmittedById
     autoConfirmAt.value = res.data.autoConfirmAt
+    proofUrl.value = res.data.resultProofUrl || null
     rejectsLeft.value = res.data.rejectsLeft ?? 3
     disputed.value = !!res.data.disputed
     myRating.value = res.data.myRating ?? null

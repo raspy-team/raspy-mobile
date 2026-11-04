@@ -230,6 +230,11 @@ const rule = ref(null)
 // 규칙이 팀으로만(또는 여럿이만) 하는 것이면 그 방식으로 시작한다. 1:1로 두면 '세 명씩 편을 나눠' 규칙도 1:1로 열렸다 (11/4 밤샘)
 // 사람이 이미 고른 방식(돌아올 주소의 format)이 있으면 그대로
 watch(rule, (r) => {
+  // 롤·피파처럼 다른 게임 안에서 하는 규칙이면 장소는 '다른 게임에서', 칸에는 그 게임 이름 (9번)
+  if (r?.extGame && !route.query.venue && venue.value === 'IN_PERSON') {
+    venue.value = 'ONLINE'
+    if (!venueDetail.value) venueDetail.value = r.extGameLabel || ''
+  }
   if (!r || route.query.format) return
   const parties = (r.category?.parties || []).map((p) => p.key)
   const only = (k) => parties.includes(k) && !parties.includes('SOLO') && !parties.includes('DUO')

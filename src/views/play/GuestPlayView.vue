@@ -67,6 +67,8 @@
           <UiButton block size="lg" class="mt-4" @click="join('result_join')">1초 만에 시작하기</UiButton>
         </UiCard>
         <UiButton v-if="key !== 'daily-chosung'" block variant="ghost" class="mt-2" :loading="starting" @click="again">한 판 더</UiButton>
+        <!-- 하루 판 수를 넘기면 '한 판 더'가 아무 말 없이 멈추지 않게 이유를 보인다 -->
+        <p v-if="startError" class="t-caption text-danger mt-2 text-center">{{ startError }}</p>
 
         <!-- 눈치 한 판: 내 취향이 다음 사람의 정답이 된다 (건너뛸 수 있다) -->
         <UiCard v-if="key === 'nunchi' && review && tasteState !== 'skipped' && (tasteCandidates.length || tasteState === 'done')" class="mt-4">
@@ -261,8 +263,10 @@ async function submit(answer: string) {
     play.value = null
     if (key.value === 'nunchi') loadReview()
   } catch (e) {
-    submitError.value = errorMessage(e, '내지 못했어요')
+    submitError.value = errorMessage(e, '답을 내지 못했어요. 다시 해 주세요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
+    // 판이 닫히면 시작 화면으로 돌아가니, 판 아래에 둔 오류 대신 시작 화면 오류 칸에 남긴다 (안 그러면 아무 말 없이 처음으로 돌아간다)
+    startError.value = submitError.value
     play.value = null
   } finally {
     submitting.value = false

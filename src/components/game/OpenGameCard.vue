@@ -7,7 +7,7 @@
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ game.rule?.ruleTitle }}</span>
           <!-- 만나서 하는 경기는 동네 이름부터 (화상·다른 게임은 동네가 없다) -->
-          <span class="block t-caption truncate mt-0.5">{{ [game.dongName, venuePlace(game, place), matchTime(game.matchDate)].filter(Boolean).join(' · ') }}</span>
+          <span class="block t-caption truncate mt-0.5">{{ [game.dongName, matchTime(game.matchDate), venuePlace(game, place)].filter(Boolean).join(' · ') }}</span>
           <!-- 여럿이 하는 경기: 형식과 모인 인원 -->
           <span v-if="multi" class="block t-micro mt-0.5">{{ formatLabel(game.format, game.maxPlayers) }} · {{ game.currentParticipantCounts }}/{{ game.maxPlayers }}명 모임</span>
         </span>
@@ -26,7 +26,7 @@
           <span class="block t-micro truncate">{{ ownerLine }}</span>
         </span>
       </button>
-      <button v-if="applicants" type="button" class="t-micro underline underline-offset-2 flex-shrink-0" @click="emit('challengers')">
+      <button v-if="applicants" type="button" class="t-micro underline underline-offset-2 flex-shrink-0 px-2 -mx-2 py-3 -my-3" @click="emit('challengers')">
         {{ applicants }}명 신청
       </button>
       <UiBadge v-if="isMine">내 경기</UiBadge>

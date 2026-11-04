@@ -6,7 +6,7 @@
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-eye-slash" :title="error" />
       <template v-else-if="live">
         <p class="t-caption text-center">
-          <span v-if="live.status === 'IN_PROGRESS'" class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-danger animate-pulse"></span>LIVE · {{ live.setIndex ? `${live.setIndex}세트` : '곧 시작' }}</span>
+          <span v-if="live.status === 'IN_PROGRESS'" class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-signal-fg motion-safe:animate-pulse" aria-hidden="true"></span>LIVE · {{ live.setIndex ? `${live.setIndex}세트` : '곧 시작' }}</span>
           <span v-else>{{ STATUS[live.status] || '끝난 경기' }}</span>
         </p>
 
@@ -14,7 +14,8 @@
         <LiveKickoffCard class="mt-4" :game-id="gameId" />
 
         <!-- 같이 보는 사람: 수와 얼굴 (익명은 수에만) -->
-        <div class="flex items-center justify-center gap-2 mt-2">
+        <!-- 끝난 경기에 '아직 관중이 없어요'는 어색하다: 지금 보는 사람이 없으면 줄을 숨긴다 (끝을 본 사람은 아래 증인 줄) -->
+        <div v-if="live.viewers || live.status === 'IN_PROGRESS' || live.status === 'SCHEDULED'" class="flex items-center justify-center gap-2 mt-2">
           <div v-if="live.viewerFaces.length" class="flex -space-x-2">
             <UiAvatar v-for="p in live.viewerFaces.slice(0, 6)" :key="p.userId" :src="p.profilePicture || undefined" :name="p.nickname" :user-id="p.userId" size="xs" />
           </div>
@@ -58,8 +59,9 @@
         <!-- 선수: 구경 링크 보내기, 구경 끄기 -->
         <template v-if="live.isPlayer">
           <UiButton block variant="secondary" icon="share" class="mt-5" @click="share">구경 링크 보내기</UiButton>
-          <UiButton block variant="ghost" class="mt-2" :loading="toggling" @click="toggleWatch">{{ live.watchOff ? '구경 다시 켜기' : '구경 끄기 (선수만 봐요)' }}</UiButton>
-          <p v-if="live.watchOff" class="t-caption text-center mt-1">지금은 선수 말고는 이 경기를 볼 수 없어요</p>
+          <UiButton block variant="ghost" class="mt-2" :loading="toggling" @click="toggleWatch">{{ live.watchOff ? '구경 다시 켜기' : '구경 끄기' }}</UiButton>
+          <!-- 버튼에 괄호 설명을 넣지 않고 아래 한 줄로 (ui/README 문구) -->
+          <p class="t-caption text-center mt-1">{{ live.watchOff ? '지금은 선수 말고는 이 경기를 볼 수 없어요' : '끄면 선수 말고는 이 경기를 볼 수 없어요' }}</p>
         </template>
         <!-- 관중: 익명으로 보기 (수에는 들지만 얼굴·기록은 남지 않는다) -->
         <label v-else class="flex items-center justify-center gap-2 t-caption mt-6">

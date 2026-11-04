@@ -21,7 +21,7 @@
 
     <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
     <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length" class="pt-6">
-      <h2 class="t-title">첫 경기를 잡아볼까요</h2>
+      <h2 class="t-title">첫 경기를 잡아 볼까요</h2>
       <p class="t-caption mt-2">잡힌 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
       <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
         <li v-for="(s, i) in FIRST_STEPS" :key="s.title" class="flex items-baseline gap-4 px-4 py-4">
@@ -56,11 +56,13 @@
           />
         </UiList>
       </UiSection>
-      <UiSection v-for="g in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
+      <UiSection v-for="(g, gi) in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
         <div class="space-y-3">
-          <div v-for="game in g.items" :key="game.type + game.id" class="space-y-2">
+          <div v-for="(game, i) in g.items" :key="game.type + game.id" class="space-y-2">
+            <!-- 볼트 버튼은 한 화면에 하나: 맨 위(가장 급한) 카드만 (11/5 밤샘 C) -->
             <MyGameCard
               :game="game"
+              :quiet="gi > 0 || i > 0"
               :me="me"
               @profile="(id) => id && router.push('/profile/' + id)"
               @play="router.push(`/games/${game.id}/play`)"

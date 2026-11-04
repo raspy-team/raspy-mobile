@@ -4,7 +4,7 @@
 
   <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
   <main v-if="!isLoading && resultError" class="px-4 pt-4 max-w-xl mx-auto">
-    <UiEmptyState icon="fas fa-flag-checkered" :title="resultError" description="경기가 끝나면 여기서 결과를 볼 수 있어요">
+    <UiEmptyState icon="fas fa-flag-checkered" :title="resultError" :description="resultMissing ? '주소가 바뀌었거나 지워진 경기예요' : '경기가 끝나면 여기서 결과를 볼 수 있어요'">
       <UiButton to="/game">내 경기로</UiButton>
     </UiEmptyState>
   </main>
@@ -195,7 +195,7 @@
             <!-- 또 만나고 싶나요? (만나서 한 경기만, 안전·신뢰 B). 상대에게 보이지 않고 신뢰 온도에만 -->
             <div v-if="game?.venue === 'IN_PERSON'">
               <p class="t-label mb-1">또 만나서 하고 싶나요?</p>
-              <div class="flex gap-2" role="radiogroup" aria-label="또 만나서 하고 싶나요?">
+              <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="또 만나서 하고 싶나요?">
                 <UiChip :selected="review.meetAgain === true" @click="review.meetAgain = review.meetAgain === true ? null : true">네, 또 하고 싶어요</UiChip>
                 <UiChip :selected="review.meetAgain === false" @click="review.meetAgain = review.meetAgain === false ? null : false">아니요</UiChip>
               </div>
@@ -520,6 +520,8 @@ const unselectedPictures = computed(() => {
 })
 
 const resultError = ref('')
+// 없는 경기(404)에 '끝나면 여기서 볼 수 있어요'는 맞지 않는다 (11/5 밤샘 C)
+const resultMissing = ref(false)
 
 // 화면 계산: user1이 나(참가자면), winnerIdx 1·2도 user1·user2 기준으로 맞춰져 있다
 // 팀·각자 경기: 서버의 편(sides) 순서, 등수만 낸 결과인지
@@ -690,6 +692,7 @@ async function load() {
     allPictures.value = await getGamePictures(gameId)
   } catch (err) {
     resultError.value = err.response?.data?.message || '결과를 불러오지 못했어요'
+    resultMissing.value = err.response?.status === 404
   } finally {
     isLoading.value = false
   }

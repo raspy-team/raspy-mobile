@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center h-screen bg-gray-800">
+  <div class="flex flex-col items-center justify-center h-screen bg-canvas">
     <div class="flex flex-col items-center gap-4">
       <UiSpinner size="lg" class="text-fg-muted" label="이동하는 중" />
     </div>

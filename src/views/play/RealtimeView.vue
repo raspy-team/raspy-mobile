@@ -112,7 +112,7 @@
         </UiCard>
 
         <form class="mt-4" @submit.prevent="send">
-          <UiInput ref="input" v-model="word" :maxlength="6" :placeholder="myTurn ? `'${lastChar}'(으)로 시작하는 낱말` : '상대가 생각하는 중'" @enter="send" />
+          <UiInput ref="input" v-model="word" :maxlength="6" :placeholder="myTurn ? `'${lastChar}'${withRo(lastChar).slice(String(lastChar).length)} 시작하는 낱말` : '상대가 생각하는 중'" @enter="send" />
           <p v-if="moveError" class="t-caption text-danger mt-1">{{ moveError }}</p>
           <UiButton block size="lg" class="mt-3" :disabled="!myTurn || !word.trim()" :loading="sending" @click="send">내기</UiButton>
         </form>
@@ -132,7 +132,7 @@
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
             <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
-            <p v-else class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.moves.length }}번 이었어요</p>
+            <p v-else class="t-caption mt-2">{{ resultCount }}</p>
             <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
@@ -149,7 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import { who } from '@/utils/format'
+import { who, withRo } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
@@ -206,6 +206,14 @@ const leftText = computed(() => {
   const m = Math.floor((l % 3600) / 60)
   return h ? `${h}시간 ${m}분` : `${m}분`
 })
+// 결과 한 줄. 같이 내기는 한 판에 두 수가 쌓여 판 수로 센다. 0이면 '0번'이 어색해 따로 (11/5 밤샘 C)
+const resultCount = computed(() => {
+  const s = state.value
+  const n = s?.moves?.length ?? 0
+  if (!s || !n) return '첫 수 전에 끝났어요'
+  return `${who(s.opponent)}님과 ` + (s.simultaneous ? `${s.round ?? Math.ceil(n / 2)}판 겨뤘어요` : `${n}번 주고받았어요`)
+})
+
 // 같이 내는 게임(가위바위보)은 '골라 주세요' / '상대가 고르는 중'
 const turnLine = computed(() => {
   const s = state.value

@@ -5,7 +5,9 @@
       <UiSkeleton v-if="!v && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
       <template v-else-if="v">
-        <p class="t-caption">{{ infoLine }}</p>
+        <!-- 일곱 가지를 한 줄에 잇지 않고 '무엇'과 '언제·누가' 두 줄로 (11/5 밤샘 C) -->
+        <p class="t-caption">{{ infoLine[0] }}</p>
+        <p class="t-caption">{{ infoLine[1] }}</p>
         <p v-if="v.description" class="t-body mt-2 break-words">{{ v.description }}</p>
 
         <!-- 끝난 대회: 우승·준우승 -->
@@ -29,7 +31,7 @@
             <div v-if="v.summary.entrantType === 'CLUB'" class="mt-4">
               <p v-if="!v.myStaffClubs.length" class="t-caption">동호회 회장·운영진이 신청해요</p>
               <div v-else class="flex gap-2 flex-wrap">
-                <UiButton v-for="c in v.myStaffClubs" :key="c.clubId" :loading="busy" @click="apply(c.clubId)">{{ c.name }}(으)로 신청</UiButton>
+                <UiButton v-for="c in v.myStaffClubs" :key="c.clubId" :loading="busy" @click="apply(c.clubId)">{{ withRo(c.name) }} 신청</UiButton>
               </div>
             </div>
             <UiButton v-else block size="lg" class="mt-4" :loading="busy" :disabled="full" @click="apply()">{{ full ? '자리가 다 찼어요' : '신청하기' }}</UiButton>
@@ -41,7 +43,8 @@
           <p class="t-heading">주최자</p>
           <p class="t-caption">시작 시각에 체크인한 참가자로 대진이 저절로 나와요. 다 모였으면 지금 시작해도 돼요</p>
           <div class="flex gap-2">
-            <UiButton class="flex-1" :loading="busy" @click="start">지금 시작</UiButton>
+            <!-- 한 화면의 채운 버튼은 '신청하기' 하나. 둘이 안 모였으면 시작할 수 없다 -->
+            <UiButton class="flex-1" variant="secondary" :loading="busy" :disabled="acceptedCount < 2" @click="start">지금 시작</UiButton>
             <UiButton class="flex-1" variant="secondary" :loading="busy" @click="cancelTournament">대회 취소</UiButton>
           </div>
         </UiCard>
@@ -138,6 +141,7 @@ import type { components } from '@/api/schema'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useToast } from '@/composable/useToast'
 import { refreshOnChange } from '@/websocket/userChannel'
+import { withRo } from '@/utils/format'
 import { UiButton, UiCard, UiEmptyState, UiIcon, UiList, UiListItem, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type Schemas = components['schemas']
@@ -161,12 +165,14 @@ const acceptedCount = computed(() => v.value?.summary.entryCount ?? 0)
 const full = computed(() => !!v.value && v.value.summary.entryCount >= v.value.summary.maxEntrants)
 const infoLine = computed(() => {
   const x = v.value
-  if (!x) return ''
+  if (!x) return ['', '']
   const s = new Date(x.summary.startsAt)
-  return [x.summary.ruleTitle, x.summary.format === 'LEAGUE' ? '리그' : x.thirdPlace ? '토너먼트 · 3·4위전' : '토너먼트',
+  const what = [x.summary.ruleTitle, x.summary.format === 'LEAGUE' ? '리그' : x.thirdPlace ? '토너먼트 · 3·4위전' : '토너먼트',
     x.summary.entrantType === 'CLUB' ? `동호회 대항 · ${x.boards}판 ${x.perBoard === 2 ? '2:2' : '1:1'}` : '',
-    x.summary.appGameKey ? '앱 게임' : '', `주최 ${x.summary.hostName}`, x.membersOnly ? '멤버만' : '', `${s.getMonth() + 1}월 ${s.getDate()}일 ${s.getHours()}시 시작`, `라운드 ${x.summary.roundDays}일`,
-    x.minRating || x.maxRating ? `실력 점수 ${x.minRating ?? ''}~${x.maxRating ?? ''}` : '', STATUS[x.summary.status]].filter(Boolean).join(' · ')
+    x.summary.appGameKey ? '앱 게임' : '', x.membersOnly ? '멤버만' : '',
+    x.minRating || x.maxRating ? `실력 점수 ${x.minRating ?? ''}~${x.maxRating ?? ''}` : '']
+  const when = [STATUS[x.summary.status], `${s.getMonth() + 1}월 ${s.getDate()}일 ${s.getHours()}시 시작`, `라운드마다 ${x.summary.roundDays}일`, `주최 ${x.summary.hostName}`]
+  return [what.filter(Boolean).join(' · '), when.filter(Boolean).join(' · ')]
 })
 const myHint = computed(() => {
   const x = v.value

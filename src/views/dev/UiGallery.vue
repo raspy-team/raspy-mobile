@@ -64,7 +64,7 @@
         <UiBadge>매칭 중</UiBadge>
         <UiBadge tone="primary">신청 2명</UiBadge>
         <UiBadge tone="success" icon="fas fa-check">확정</UiBadge>
-        <UiBadge tone="danger">패배</UiBadge>
+        <UiBadge tone="danger">신고됨</UiBadge>
       </div>
       <div class="mt-4">
         <UiTabs v-model="tab" :options="[{ value: 'all', label: '전체' }, { value: 'mine', label: '내가 연', count: 2 }, { value: 'sent', label: '신청한' }]" />
@@ -101,7 +101,7 @@
 
     <UiSection title="빈 상태 · 불러오는 중">
       <UiCard>
-        <UiEmptyState icon="fas fa-calendar" title="아직 잡힌 경기가 없어요" description="모집 중인 경기에 신청하거나 직접 만들어보세요">
+        <UiEmptyState icon="fas fa-calendar" title="아직 잡힌 경기가 없어요" description="모집 중인 경기에 신청하거나 직접 만들어 보세요">
           <UiButton>경기 찾기</UiButton>
         </UiEmptyState>
       </UiCard>

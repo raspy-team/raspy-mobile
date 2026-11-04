@@ -17,7 +17,7 @@
 
       <div>
         <p class="t-heading">방식</p>
-        <div class="flex gap-2 mt-2">
+        <div class="flex flex-wrap gap-2 mt-2">
           <UiChip :selected="f.format === 'LEAGUE'" @click="f.format = 'LEAGUE'">리그 · 모두와 한 번씩</UiChip>
           <UiChip :selected="f.format === 'KNOCKOUT'" @click="f.format = 'KNOCKOUT'">토너먼트 · 지면 끝</UiChip>
         </div>
@@ -28,13 +28,13 @@
 
       <div>
         <p class="t-heading">누가 나가나</p>
-        <div class="flex gap-2 mt-2">
+        <div class="flex flex-wrap gap-2 mt-2">
           <UiChip :selected="f.entrantType === 'USER'" @click="f.entrantType = 'USER'">개인</UiChip>
           <UiChip v-if="!appGame" :selected="f.entrantType === 'CLUB'" @click="f.entrantType = 'CLUB'">동호회끼리</UiChip>
         </div>
         <template v-if="f.entrantType === 'CLUB'">
           <p class="t-caption mt-2">한 판이 교류전이에요. 판마다 운영진이 선수를 내요</p>
-          <div class="flex gap-2 mt-2">
+          <div class="flex flex-wrap gap-2 mt-2">
             <UiChip v-for="n in [1, 3, 5]" :key="n" :selected="f.boards === n" @click="f.boards = n">{{ n }}판</UiChip>
             <UiChip :selected="f.perBoard === 1" @click="f.perBoard = 1">1:1</UiChip>
             <UiChip :selected="f.perBoard === 2" @click="f.perBoard = 2">2:2</UiChip>
@@ -63,7 +63,7 @@
       <div>
         <p class="t-heading">라운드 기간</p>
         <p class="t-caption mt-0.5">기간 안에 두 쪽이 시간·장소를 잡아 경기해요</p>
-        <div class="flex gap-2 mt-2">
+        <div class="flex flex-wrap gap-2 mt-2">
           <UiChip v-for="d in [1, 3, 7, 14]" :key="d" :selected="f.roundDays === d" @click="f.roundDays = d">{{ d === 1 ? '하루' : `${d}일` }}</UiChip>
         </div>
       </div>

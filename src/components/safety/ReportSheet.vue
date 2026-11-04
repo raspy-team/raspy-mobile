@@ -1,6 +1,6 @@
 <template>
   <UiSheet :model-value="modelValue" :title="title" @update:model-value="(v) => emit('update:modelValue', v)">
-    <p class="t-caption mb-4">신고하면 <strong class="text-fg">운영진이 바로 확인하고 조치해요.</strong> 상대에게는 누가 신고했는지 알리지 않아요</p>
+    <p class="t-caption mb-4">신고하면 <strong class="text-fg">운영진이 바로 확인하고 처리해요.</strong> 상대에게는 누가 신고했는지 알리지 않아요</p>
     <div class="flex flex-wrap gap-2 mb-4">
       <UiChip v-for="r in reasons" :key="r" :selected="reason === r" @click="reason = r">{{ r }}</UiChip>
     </div>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-// 신고 한 곳 (안전·신뢰 A, 11/3). 서버가 돌려주는 한 줄("운영진이 바로 확인하고 조치해요")을 그대로 보여 준다.
+// 신고 한 곳 (안전·신뢰 A, 11/3). 서버가 돌려주는 한 줄("운영진이 바로 확인하고 처리해요")을 그대로 보여 준다.
 // 서로 다른 3명이 30일 안에 신고하면 운영진이 확인하는 동안 7일 정지된다 (서버 SanctionService)
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiButton, UiChip, UiInput, UiSheet } from '../ui'
@@ -42,7 +42,7 @@ async function submit() {
   try {
     const text = reason.value === '기타' ? detail.value.trim() : reason.value
     const { data } = await POST('/api/reports', { body: { targetType: props.targetType, targetId: props.targetId, reason: text, context: props.context } })
-    showToast(data?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요')
+    showToast(data?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
     emit('done')
   } catch (e) {
     showToast(e?.response?.data?.message || '신고하지 못했어요. 잠시 뒤 다시 해 주세요')

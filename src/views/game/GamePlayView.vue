@@ -38,9 +38,12 @@
     <!-- 규칙 요약 한 줄 + 시계 -->
     <section class="flex-shrink-0 text-center px-4">
       <p class="t-caption">
-        {{ game.rule?.setsToWin }}세트 중 {{ currentSet }}세트 ·
-        {{ game.rule?.pointsToWin == -1 ? '점수 제한 없음' : `${game.rule?.pointsToWin}점 선취` }} ·
-        {{ limitTimeStr ? `세트당 ${limitTimeStr}` : '시간 제한 없음' }}
+        <!-- '11점 선취 · 세트당 제한 없음'은 낱말이 어렵고 무엇이 없는지 몰랐다. 지금 몇 세트째 · 몇 점 먼저 · (있을 때만) 세트마다 시간 (11/5 밤샘 C) -->
+        {{ [
+          game.rule?.setsToWin > 1 ? `${currentSet}/${game.rule.setsToWin}세트` : null,
+          game.rule?.pointsToWin == -1 ? null : `${game.rule?.pointsToWin}점 먼저`,
+          game.limitSeconds != null && game.limitSeconds !== -1 && limitTimeStr ? `세트마다 ${limitTimeStr}` : null,
+        ].filter(Boolean).join(' · ') }}
       </p>
       <p class="mt-2 text-4xl font-bold tabular-nums" :class="isOvertime ? 'text-danger-fg' : 'text-fg'">{{ elapsedTimeStr }}</p>
       <p v-if="isOvertime" class="text-sm text-danger-fg mt-1">시간이 지났어요 · 추가 시간</p>
@@ -82,7 +85,8 @@
     <!-- 아래: 다음 단계 둘만. 되돌릴 수 없는 '취소·처음부터'는 손이 자주 가는 이 줄에 두지 않고 더보기로 -->
     <footer class="flex-shrink-0 px-4 pb-4 flex gap-2">
       <UiButton v-if="!isSetOver && !isGameOver && !isCountingDown" size="lg" variant="secondary" class="flex-1" @click="manualFinishSet">세트 끝내기</UiButton>
-      <UiButton size="lg" class="flex-1" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기', false)">
+      <!-- 점수를 내는 동안 주 행동은 점수 칸이다. 경기 끝내기는 승부가 난 뒤에만 채운 버튼으로 (0:0에도 가장 눈에 띄어 잘못 누르기 쉬웠다, 11/5 밤샘 C) -->
+      <UiButton size="lg" :variant="isSetOver || isGameOver ? 'primary' : 'secondary'" class="flex-1" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기', false)">
         경기 끝내기
       </UiButton>
     </footer>

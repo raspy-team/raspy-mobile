@@ -4,12 +4,13 @@
       <RuleThumb :rule="game.rule" :size="36" bare />
       <div class="flex-1 min-w-0">
         <p class="t-heading truncate">{{ game.rule?.ruleTitle }}</p>
-        <button v-if="canSchedule" type="button" class="flex items-center gap-1.5 max-w-full text-left mt-0.5" @click="emit('schedule')">
-          <span class="t-caption truncate">{{ venuePlace(game, place) }} · {{ matchTime(game.matchDate) }}</span>
+        <!-- 줄이 모자라면 장소가 잘리게 때를 앞에 ('11월 …'로 날짜가 잘렸다, 11/5 밤샘 C) -->
+        <button v-if="canSchedule" type="button" class="flex items-center gap-1.5 max-w-full text-left mt-0.5 py-2.5 -my-2.5" @click="emit('schedule')">
+          <span class="t-caption truncate">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</span>
           <!-- 정한 뒤에도 두 선수 모두 바꿀 수 있다는 게 보이게 (예전 밑줄 글씨는 너무 작아 못 바꾸는 줄 알았다) -->
           <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-surface-3 text-fg text-xs font-medium flex-shrink-0"><UiIcon name="pen" class="text-[10px]" aria-hidden="true" />{{ needsSchedule ? '정하기' : '바꾸기' }}</span>
         </button>
-        <p v-else class="t-caption truncate mt-0.5">{{ venuePlace(game, place) }} · {{ matchTime(game.matchDate) }}</p>
+        <p v-else class="t-caption truncate mt-0.5">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</p>
       </div>
       <UiBadge :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
     </div>
@@ -51,7 +52,7 @@
 
     <!-- 지금 이 경기에서 할 일 하나 + 더보기 -->
     <div class="flex items-center gap-2 px-4 pb-4">
-      <UiButton v-if="state.action" block :variant="state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
+      <UiButton v-if="state.action" block :variant="quiet && state.actionVariant === 'signal' ? 'primary' : state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
       <p v-else class="flex-1 t-caption">{{ state.hint }}</p>
       <UiIconButton icon="fas fa-ellipsis" label="더보기" class="flex-shrink-0" @click="emit('more')" />
     </div>
@@ -69,6 +70,8 @@ import { TEAM_NAMES, venuePlace, isRemote } from '../../utils/gameFormat'
 const props = defineProps({
   game: { type: Object, required: true },
   me: { type: Object, default: () => ({ name: '나' }) }, // { id, name, avatar }
+  /** 볼트(내 차례) 버튼을 보통 채운 버튼으로. 한 화면에 볼트는 하나라 목록의 둘째부터 */
+  quiet: { type: Boolean, default: false },
 })
 const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule'])
 
@@ -138,7 +141,7 @@ const state = computed(() => {
     if (g.status === 'SCHEDULED') {
       if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
       return g.isOwner === false
-        ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려드려요' }
+        ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
         : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
     }
     if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청자 보고 승인하기', actionVariant: 'signal' }
@@ -153,7 +156,7 @@ const state = computed(() => {
   if (g.status === 'APPROVED') {
     return needsSchedule.value
       ? { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
-      : { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려드려요' }
+      : { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
   }
   if (g.status === 'REJECTED') return { label: '거절됨', tone: 'danger', hint: '다른 경기를 찾아보세요' }
   return { label: '대기', tone: 'neutral', hint: '' }

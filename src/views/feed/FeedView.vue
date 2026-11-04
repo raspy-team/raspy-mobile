@@ -31,7 +31,7 @@
         class="pt-16"
         icon="fas fa-user-group"
         title="친구의 경기가 아직 없어요"
-        description="함께 겨룬 사람에게 친구를 걸거나, 친구를 초대해보세요"
+        description="함께 겨룬 사람에게 친구를 걸거나, 친구를 초대해 보세요"
       >
         <div class="flex gap-2">
           <UiButton variant="secondary" @click="tab = 'near'">동네 보기</UiButton>
@@ -50,7 +50,7 @@
         </p>
         <!-- 지금 하는 경기: 중계로 -->
         <RouterLink v-if="p.live" :to="`/live/${p.id}`" class="flex items-center gap-3 py-4 border-b border-line" :data-game="p.id">
-          <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-danger text-white text-xs font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse" aria-hidden="true"></span>LIVE</span>
+          <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-signal text-signal-on text-xs font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-signal-on motion-safe:animate-pulse" aria-hidden="true"></span>LIVE</span>
           <span class="flex-1 min-w-0">
             <span class="block t-heading truncate">{{ p.players.map((x) => x.name).join(' vs ') }}</span>
             <span class="block t-caption truncate">{{ p.rule?.ruleTitle }}{{ p.meta?.place ? ` · ${p.meta.place}` : '' }}</span>
@@ -120,7 +120,7 @@
 
     <!-- 신고 -->
     <UiSheet :model-value="!!reportPost" title="이 경기를 신고할까요?" @update:model-value="reportPost = null">
-      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 조치해요.</strong></p>
+      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 처리해요.</strong></p>
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
@@ -380,7 +380,7 @@ async function submitReport() {
   try {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     const { data: done } = await api.post('/api/reports', { targetType: 'GAME', targetId: Number(reportPost.value.id), reason })
-    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요')
+    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
   } catch (e) {
     showToast(e.response?.data?.message || '이미 신고한 경기예요')
   } finally {

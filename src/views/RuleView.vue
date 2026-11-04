@@ -93,7 +93,7 @@
         class="pt-16"
         icon="fas fa-magnifying-glass"
         title="맞는 규칙이 없어요"
-        :description="filtered ? '검색어나 조건을 바꿔보거나, 직접 만들어보세요' : '첫 규칙을 만들어보세요'"
+        :description="filtered ? '검색어나 조건을 바꿔 보거나, 직접 만들어 보세요' : '첫 규칙을 만들어 보세요'"
       >
         <div class="flex gap-2">
           <UiButton v-if="filtered" variant="secondary" @click="clearFilters">조건 지우기</UiButton>

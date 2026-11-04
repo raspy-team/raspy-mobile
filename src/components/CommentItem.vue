@@ -6,58 +6,47 @@
       { 'pl-4': isReply, 'pl-0': !isReply }, // 대댓글은 16px(4)만 들여쓰기
     ]"
   >
-    <!-- 신고 버튼 (우측 상단) -->
-    <button
-      class="absolute text-red-500 text-xs right-0 top-2 z-10 text-fg-muted hover:text-primary p-1"
-      @click.stop="openReportModal"
-      title="댓글 신고"
-    >
-      신고하기
-    </button>
+    <!-- 신고는 오른쪽 위 더보기로 (댓글마다 '신고하기' 글자가 떠 있으면 시끄럽다, 11/5 밤샘 C) -->
+    <button type="button" aria-label="댓글 신고" class="absolute -right-3 -top-1 w-11 h-11 flex items-center justify-center text-fg-subtle" @click.stop="openReportModal"><UiIcon name="fas fa-ellipsis" aria-hidden="true" /></button>
 
     <!-- 프로필 링크 -->
-    <router-link :to="`/profile/${comment.author.id}`" class="w-9 h-9 flex-shrink-0" tabindex="-1">
-      <img
-        :src="comment.author.profileImageUrl || defaultProfile"
-        class="w-9 h-9 rounded-full object-cover bg-surface-2 border"
-        alt="profile"
-      />
+    <router-link :to="`/profile/${comment.author.id}`" class="flex-shrink-0" tabindex="-1">
+      <UiAvatar :src="comment.author.profileImageUrl" :name="comment.author.nickname" :user-id="comment.author.id" size="sm" />
     </router-link>
 
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2">
         <router-link
           :to="`/profile/${comment.author.id}`"
-         class="font-medium text-base hover:underline focus:underline focus:outline-none"
+         class="text-[0.9375rem] font-semibold text-fg hover:underline focus:underline focus:outline-none"
         >
           {{ comment.author.nickname }}
         </router-link>
-        <span class="text-fg-muted text-xs select-none">
+        <span class="t-micro select-none">
           {{ timeAgo(comment.createdAt) }}
         </span>
-        <span v-if="comment.editedAt" class="text-xs text-fg-muted ml-1">(수정됨)</span>
-        <span v-if="comment.deleted" class="text-xs text-red-400 ml-1">[삭제됨]</span>
+        <span v-if="comment.editedAt" class="t-micro">수정됨</span>
+        <span v-if="comment.deleted" class="t-micro">지운 댓글</span>
       </div>
-      <div class="whitespace-pre-wrap break-all text-base mt-1 leading-snug">
+      <div class="t-body whitespace-pre-wrap break-words mt-0.5">
         <span
           v-if="comment.mentionUserNickname"
-          class="inline-block px-2 py-0.5 bg-surface-3 text-fg font-medium rounded-full mr-1 text-sm align-middle"
+          class="inline-block px-2 py-0.5 bg-surface-3 text-fg font-medium rounded-full mr-1 t-micro align-middle"
         >
           {{ comment.mentionUserNickname }}
         </span>
         <span v-html="autoLink(comment.content)" />
       </div>
       <div v-if="comment.imageUrl" class="mt-1">
-        <img
-          :src="comment.imageUrl"
-          class="max-w-[140px] max-h-[140px] rounded-xl border cursor-pointer hover:brightness-95 transition"
-          @click="emitImgClick(comment.imageUrl)"
-        />
+        <button type="button" class="block rounded-xl" aria-label="댓글 사진 크게 보기" @click="emitImgClick(comment.imageUrl)">
+          <img :src="comment.imageUrl" alt="" loading="lazy" class="max-w-[140px] max-h-[140px] rounded-xl hover:brightness-95 transition" />
+        </button>
       </div>
-      <div class="flex items-center gap-2 mt-2 text-fg-subtle text-sm">
+      <div class="flex items-center gap-2 mt-1.5 t-micro">
         <button
-          class="focus:outline-none transition flex items-center justify-center"
-          style="height: 26px; width: 26px"
+          class="-m-2.5 w-11 h-11 transition flex items-center justify-center"
+          :aria-label="comment.myLikeType === 'LIKE' ? '좋아요 취소' : '좋아요'"
+          :aria-pressed="comment.myLikeType === 'LIKE'"
           @click="emitLike(comment.id)"
         >
           <UiIcon
@@ -67,12 +56,12 @@
             :class="comment.myLikeType === 'LIKE' ? 'text-danger-fg' : 'text-fg-muted'"
           />
         </button>
-        <span v-if="comment.likeCount > 0" class="min-w-[16px] text-sm select-none">{{
+        <span v-if="comment.likeCount > 0" class="min-w-[16px] tabular-nums select-none">{{
           comment.likeCount
         }}</span>
         <button
           v-if="!isReply"
-          class="text-sm hover:underline focus:underline ml-1 px-1"
+          class="hover:underline focus:underline ml-1 px-1 py-2.5 -my-2.5"
           @click="emitReply(comment.id, comment.author.nickname)"
         >
           답글
@@ -93,56 +82,15 @@
       </div>
     </div>
 
-    <!-- 신고 모달 -->
-    <transition name="fade">
-      <div
-        v-if="reportModal"
-        class="fixed inset-0 z-[10000] bg-black/30 flex items-center justify-center"
-        @click.self="closeReportModal"
-        @click.stop
-      >
-        <div
-          class="bg-gray-900 rounded-2xl shadow-lg px-6 py-6 w-full max-w-xs flex flex-col items-stretch"
-          @click.stop
-        >
-          <div class="font-bold text-lg mb-2 text-fg">댓글 신고하기</div>
-          <div class="text-fg-subtle text-sm mb-3 leading-snug">
-            신고는 <b>24시간 내에 처리</b>되며, 신고해주셔서 감사합니다.
-          </div>
-          <textarea
-            v-model="reportReason"
-            class="border rounded p-2 w-full mb-3 text-base"
-            rows="3"
-            maxlength="100"
-            placeholder="신고 사유를 적어 주세요"
-            autofocus
-            @keydown.enter.exact.prevent="submitReport"
-            @click.stop
-          />
-          <button
-            @click.stop="submitReport"
-            :disabled="!reportReason.trim() || reportLoading"
-           class="w-full bg-danger text-white py-2 rounded-xl font-bold mt-1 disabled:opacity-40"
-          >
-            {{ reportLoading ? '신고 중...' : '신고하기' }}
-          </button>
-          <button @click.stop="closeReportModal" class="w-full mt-2 text-fg-muted text-sm">
-            취소
-          </button>
-          <p v-if="reportError" class="text-red-500 mt-2 text-sm text-center">{{ reportError }}</p>
-          <p v-if="reportSuccess" class="text-green-600 mt-2 text-sm text-center">
-            {{ reportSuccess }}
-          </p>
-        </div>
-      </div>
-    </transition>
+    <ReportSheet v-model="reportModal" title="댓글을 신고할까요?" target-type="COMMENT" :reasons="COMMENT_REASONS" :target-id="comment.id" />
   </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue'
 import CommentItem from './CommentItem.vue'
-import api from '../api/api'
+import ReportSheet from './safety/ReportSheet.vue'
+import { UiAvatar } from './ui'
 
 const props = defineProps({
   comment: { type: Object, required: true },
@@ -151,8 +99,6 @@ const props = defineProps({
   isReply: { type: Boolean, default: false },
 })
 const emit = defineEmits(['reply', 'like', 'img-click'])
-
-const defaultProfile = '/default-profile.svg'
 
 function timeAgo(isoString) {
   if (!isoString) return ''
@@ -186,53 +132,10 @@ function emitImgClick(imageUrl) {
   emit('img-click', imageUrl)
 }
 
-// ----- 신고 모달 관련 -----
+// 댓글에는 노쇼·사칭 대신 댓글에서 생기는 일 (11/5 리뷰 D)
+const COMMENT_REASONS = ['욕설·비방', '성희롱·불쾌한 말', '광고·도배', '기타']
 const reportModal = ref(false)
-const reportReason = ref('')
-const reportLoading = ref(false)
-const reportError = ref('')
-const reportSuccess = ref('')
-
 function openReportModal() {
   reportModal.value = true
-  reportReason.value = ''
-  reportError.value = ''
-  reportSuccess.value = ''
-}
-function closeReportModal() {
-  reportModal.value = false
-  reportReason.value = ''
-  reportError.value = ''
-  reportSuccess.value = ''
-}
-async function submitReport() {
-  if (!reportReason.value.trim()) return
-  reportLoading.value = true
-  reportError.value = ''
-  reportSuccess.value = ''
-  try {
-    await api.post('/api/reports', {
-      targetId: props.comment.id,
-      targetType: 'COMMENT',
-      reason: reportReason.value.trim(),
-    })
-    reportSuccess.value = '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요'
-    setTimeout(closeReportModal, 1300)
-  } catch (e) {
-    const msg = e?.response?.data?.message || '신고하지 못했어요. 다시 해 주세요'
-    reportError.value = msg
-  }
-  reportLoading.value = false
 }
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

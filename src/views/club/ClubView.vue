@@ -198,10 +198,10 @@
             <span class="t-heading flex-1 truncate">{{ opponent.name }}</span>
             <UiButton size="sm" variant="ghost" @click="opponent = null">바꾸기</UiButton>
           </UiCard>
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-2">
             <UiChip v-for="n in [1, 3, 5, 7]" :key="n" :selected="pr.boards === n" @click="pr.boards = n">{{ n }}판</UiChip>
           </div>
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-2">
             <UiChip :selected="pr.perBoard === 1" @click="pr.perBoard = 1">1:1</UiChip>
             <UiChip :selected="pr.perBoard === 2" @click="pr.perBoard = 2">2:2</UiChip>
           </div>
@@ -227,7 +227,7 @@
         </div>
         <div>
           <p class="t-heading">가입 방식</p>
-          <div class="flex gap-2 mt-2">
+          <div class="flex flex-wrap gap-2 mt-2">
             <UiChip :selected="st.joinMode === 'OPEN'" @click="st.joinMode = 'OPEN'">바로 들어오기</UiChip>
             <UiChip :selected="st.joinMode === 'APPROVAL'" @click="st.joinMode = 'APPROVAL'">운영진 승인</UiChip>
           </div>

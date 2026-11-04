@@ -459,7 +459,7 @@ const closeErrorModal = () => {
       </div>
 
       <div v-else-if="!visibleMessages.length" class="h-full flex flex-col items-center justify-center">
-        <UiEmptyState icon="far fa-comment" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="첫마디가 어려우면 하나 골라 보내보세요" />
+        <UiEmptyState icon="far fa-comment" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="첫마디가 어려우면 하나 골라 보내 보세요" />
         <!-- 빠른 첫마디: 누르면 바로 보낸다 -->
         <div class="flex flex-wrap justify-center gap-2 px-6 -mt-6">
           <UiChip v-for="q in QUICK_REPLIES" :key="q" @click="sendQuick(q)">{{ q }}</UiChip>
@@ -515,7 +515,7 @@ const closeErrorModal = () => {
 
     <UiSheet v-model="menuOpen">
       <UiList>
-        <UiListItem icon="far fa-flag" title="신고하기" subtitle="운영진이 바로 확인하고 조치해요. 메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
+        <UiListItem icon="far fa-flag" title="신고하기" subtitle="운영진이 바로 확인하고 처리해요. 메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
         <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="blockUser" />
       </UiList>
     </UiSheet>

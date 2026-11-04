@@ -73,7 +73,7 @@
 
       <!-- 랭킹 미리보기 -->
       <section v-if="top.length" class="mt-10 pt-8 border-t border-line">
-        <h2 class="t-heading mb-3">{{ rankingArea ? `${rankingArea} 랭킹` : '랭킹' }}</h2>
+        <h2 class="t-heading mb-3">{{ rankingArea ? `${rankingArea} 순위` : '순위' }}</h2>
         <UiList>
           <UiListItem
             v-for="r in top"
@@ -88,14 +88,14 @@
             </template>
           </UiListItem>
         </UiList>
-        <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">랭킹 전체 보기</UiButton>
+        <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">순위 전체 보기</UiButton>
       </section>
 
       <div v-if="!isMine" class="mt-10 flex items-center gap-5">
-        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2" @click="openSuggest">
+        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openSuggest">
           <UiIcon name="far fa-comment" aria-hidden="true" /> 수정 제안하기
         </button>
-        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2" @click="openReport">
+        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openReport">
           <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고하기
         </button>
       </div>
@@ -106,7 +106,7 @@
       <div class="max-w-2xl mx-auto px-4 py-3 flex items-center gap-4">
         <div class="flex-1 min-w-0">
           <p class="t-heading truncate">{{ winSummary(rule) }}</p>
-          <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : '첫 경기를 열어보세요' }}</p>
+          <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : '첫 경기를 열어 보세요' }}</p>
         </div>
         <UiButton v-if="rule.appGameKey" size="lg" :to="`/play/${rule.appGameKey}`">한 판 하기</UiButton>
         <UiButton v-else size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 열기</UiButton>
@@ -118,7 +118,7 @@
       <UiList>
         <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share" />
         <UiListItem v-if="isMine" icon="fas fa-pen" title="수정 요청하기" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
-        <UiListItem icon="fas fa-ranking-star" title="랭킹 보기" @click="goRanking" />
+        <UiListItem icon="fas fa-ranking-star" title="순위 보기" @click="goRanking" />
         <UiListItem v-if="!isMine" icon="far fa-comment" title="수정 제안하기" subtitle="만든 사람에게 DM으로 보내요" @click="openSuggest" />
         <UiListItem v-if="!isMine" icon="far fa-flag" title="신고하기" danger @click="openReport" />
       </UiList>
@@ -135,7 +135,7 @@
 
     <!-- 신고 -->
     <UiSheet v-model="reportOpen" title="이 규칙을 신고할까요?">
-      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 조치해요.</strong></p>
+      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 처리해요.</strong></p>
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
@@ -240,7 +240,7 @@ async function submitReport() {
   try {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     const { data: done } = await api.post('/api/reports', { targetType: 'RULE', targetId: rule.value.id, reason })
-    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요')
+    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
   } catch (e) {
     showToast(e.response?.data?.message || '이미 신고한 규칙이에요')
   } finally {

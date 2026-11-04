@@ -138,7 +138,7 @@
           v-else
           icon="fas fa-trophy"
           :title="user.isMe ? '아직 한 경기가 없어요' : '아직 한 경기가 없어요'"
-          :description="user.isMe ? '모집 중인 경기에 신청하거나 직접 열어보세요' : ''"
+          :description="user.isMe ? '모집 중인 경기에 신청하거나 직접 열어 보세요' : ''"
         >
           <UiButton v-if="user.isMe" to="/">경기 찾기</UiButton>
         </UiEmptyState>
@@ -185,7 +185,7 @@
 
     <!-- 신고 -->
     <UiSheet v-model="reportOpen" :title="`${user?.nickname || ''}님을 신고할까요?`">
-      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 조치해요.</strong></p>
+      <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 처리해요.</strong></p>
       <div class="flex flex-wrap gap-2 mb-4">
         <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
       </div>
@@ -211,7 +211,7 @@
           <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
-      <UiEmptyState v-else icon="fas fa-user-group" title="아직 친구가 없어요" :description="user?.isMe ? '경기를 함께한 사람에게 친구를 걸어보세요' : ''" />
+      <UiEmptyState v-else icon="fas fa-user-group" title="아직 친구가 없어요" :description="user?.isMe ? '경기를 함께한 사람에게 친구를 걸어 보세요' : ''" />
     </UiSheet>
 
     <UserSearchModal v-if="showSearch" @close="showSearch = false" />
@@ -339,7 +339,7 @@ async function submitReport() {
   try {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     const { data: done } = await api.post('/api/reports', { targetType: 'USER', targetId: user.value.id, reason })
-    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 조치해요')
+    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
   } catch (e) {
     showToast(e.response?.data?.message || '이미 신고했어요')
   } finally {

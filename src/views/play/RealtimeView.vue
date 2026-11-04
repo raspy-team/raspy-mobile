@@ -3,6 +3,11 @@
     <UiTopBar :title="title" back />
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
+      <!-- AI 보스 도전 판 (docs/ai-residents.md 3): 보통 판과 같은 화면, 위에 띠 하나 -->
+      <p v-if="state?.bossChallenge" class="mb-3 flex items-center gap-2 rounded-lg bg-signal-soft text-signal-fg px-3 py-2 t-label">
+        <UiIcon name="fas fa-crown" aria-hidden="true" />
+        <span class="min-w-0">챔피언 도전 · {{ state.status === 'COMPLETED' ? '보스와 한 판' : '이기면 전국 챔피언' }}</span>
+      </p>
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
         <UiButton variant="secondary" @click="join">다시 들어가기</UiButton>
@@ -133,7 +138,8 @@
             <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ resultCount }}</p>
-            <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
+            <p v-if="state.bossChallenge" class="t-body mt-4">{{ state.result === 'WIN' ? 'AI 보스를 꺾고 전국 챔피언이 됐어요' : '보스 도전은 하루 3번까지예요' }}</p>
+            <p v-else-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
         </UiCard>
@@ -307,7 +313,11 @@ function apply(s: State) {
 // 정한 사람과 한 판 (11/4): ?to=사람 이면 그 사람만 들어오는 방을 열고, ?invite=경기 면 받은 초대로 들어간다. 한 번만 쓴다 (다시 한 판은 보통 대기실)
 let inviteTo = Number(route.query.to) || null
 let inviteId = Number(route.query.invite) || null
-if (inviteTo || inviteId) router.replace({ query: {} })
+// AI 보스 도전 (?boss=1, 챔피언 카드의 '도전하기'): 보스와 바로 붙는다. 한 번만 쓴다 (docs/ai-residents.md 3)
+let bossChallenge = route.query.boss === '1'
+// 주소의 ?to·?invite·?boss는 들어간 뒤에 지운다. 화면은 주소마다 새로 그려져(App.vue의 key) 먼저 지우면
+// 새 화면이 보통 대기실로 한 번 더 들어가 따로 방을 열었다 (보스 판 대신 빈 대기실이 보였다). 들어간 뒤 지우면 새 화면은 그 판을 이어 받는다
+const clearQuery = () => { if (route.query.to || route.query.invite || route.query.boss) router.replace({ query: {} }) }
 
 const inviteLeft = computed(() => {
   const until = state.value?.inviteUntil ? new Date(state.value.inviteUntil).getTime() : 0
@@ -317,16 +327,20 @@ const inviteLeft = computed(() => {
 
 async function join() {
   error.value = ''
-  const to = inviteTo, invite = inviteId
+  const to = inviteTo, invite = inviteId, boss = bossChallenge
   try {
     inviteTo = inviteId = null
-    if (invite) return apply((await POST('/api/app-games/realtime/{gameId}/accept', { path: { gameId: invite } })).data)
-    if (to) return apply((await POST('/api/app-games/{key}/realtime/invite', { path: { key: key.value }, query: { to } })).data)
-    apply((await POST('/api/app-games/{key}/realtime', { path: { key: key.value } })).data)
+    bossChallenge = false
+    if (boss) apply((await POST('/api/app-games/{key}/realtime/boss', { path: { key: key.value } })).data)
+    else if (invite) apply((await POST('/api/app-games/realtime/{gameId}/accept', { path: { gameId: invite } })).data)
+    else if (to) apply((await POST('/api/app-games/{key}/realtime/invite', { path: { key: key.value }, query: { to } })).data)
+    else apply((await POST('/api/app-games/{key}/realtime', { path: { key: key.value } })).data)
+    clearQuery()
   } catch (e) {
     // 다시 들어가기가 아무나 붙는 대기실로 가지 않게
     inviteTo = to
     inviteId = invite
+    bossChallenge = boss
     error.value = message(e, '들어가지 못했어요')
   }
 }

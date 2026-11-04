@@ -82,6 +82,16 @@
         <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">순위 전체 보기</UiButton>
       </section>
 
+      <!-- 사람 순위가 아직 없는 앱 게임: AI 주민과 둔 판 수와 기준선으로 채운다 (docs/ai-residents.md 6). 오프라인 규칙은 그대로 -->
+      <section v-else-if="rule.appGameKey && (baselines.length || aiGames)" class="mt-10 pt-8 border-t border-line">
+        <h2 class="t-heading">순위</h2>
+        <p class="t-caption mt-1 mb-3">아직 사람 순위는 없어요{{ aiGames ? ` · AI 주민과 ${aiGames}판 했어요` : '' }}</p>
+        <UiList v-if="baselines.length">
+          <BaselineRow v-for="b in baselines" :key="b.label" :line="b" />
+        </UiList>
+        <UiButton block variant="secondary" class="mt-4" :to="`/play/${rule.appGameKey}`">한 판 하기</UiButton>
+      </section>
+
       <div v-if="!isMine" class="mt-10 flex items-center gap-5">
         <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openSuggest">
           <UiIcon name="far fa-comment" aria-hidden="true" /> 수정 제안하기
@@ -97,7 +107,7 @@
       <div class="max-w-2xl mx-auto px-4 py-3 flex items-center gap-4">
         <div class="flex-1 min-w-0">
           <p class="t-heading truncate">{{ winSummary(rule) }}</p>
-          <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : '첫 경기를 열어 보세요' }}</p>
+          <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : aiGames ? `AI 주민과 ${aiGames}판 했어요` : '첫 경기를 열어 보세요' }}</p>
         </div>
         <UiButton v-if="rule.appGameKey" size="lg" :to="`/play/${rule.appGameKey}`">한 판 하기</UiButton>
         <UiButton v-else size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 열기</UiButton>
@@ -156,6 +166,7 @@ import { ratingText, ruleKind, winSummary } from '../../utils/rule'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import RuleCategory from '../../components/rule/RuleCategory.vue'
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
+import BaselineRow from '../../components/champion/BaselineRow.vue'
 
 const REPORT_REASONS = ['욕설·비방', '위험한 규칙', '광고·스팸', '기타']
 
@@ -169,6 +180,8 @@ const myId = ref(null)
 const top = ref([])
 const myRank = ref(null)
 const rankingArea = ref('') // 동네 순위면 '합정동 근처'
+const baselines = ref([]) // AI 기준선 (앱 게임)
+const aiGames = ref(0) // AI 주민과 둔 판 수 (앱 게임)
 const menuOpen = ref(false)
 const reportOpen = ref(false)
 const reportReason = ref('')
@@ -253,6 +266,8 @@ onMounted(async () => {
     top.value = (rankRes.value.data.rankings || []).slice(0, 3)
     myRank.value = rankRes.value.data.currentUserRanking?.rank || null
     rankingArea.value = rankRes.value.data.scope === 'dong' ? rankRes.value.data.areaName : ''
+    baselines.value = rankRes.value.data.baselines || []
+    aiGames.value = rankRes.value.data.aiGames || 0
   }
   loading.value = false
 })

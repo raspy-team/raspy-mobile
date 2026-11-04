@@ -2254,7 +2254,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/app-games/{key}/realtime/ai": {
+    "/api/app-games/{key}/realtime/boss": {
         parameters: {
             query?: never;
             header?: never;
@@ -2264,10 +2264,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * AI 주민과 바로 한 판
-         * @description 대기실의 'AI 주민 기다리는 중'을 눌렀을 때. 기다리는 사람에게 붙지 않고 그 AI(botId)와 바로 시작한다. 하던 판이 있으면 그 판
+         * AI 보스에게 도전
+         * @description 앱 게임 전국 자리를 든 AI 보스(고수 세기)와 바로 한 판. 하루 3번. 이기면 전국 챔피언 (docs/ai-residents.md 3)
          */
-        post: operations["playAi"];
+        post: operations["challengeBoss"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4701,6 +4701,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/champions/rules/{ruleId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 역대 챔피언
+         * @description 앱 게임 전국 자리의 챔피언을 오래된 것부터. AI 보스는 ai=true (docs/ai-residents.md 3). 기록을 '나만'으로 둔 사람은 이름을 가린다
+         */
+        get: operations["history_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/block": {
         parameters: {
             query?: never;
@@ -6045,9 +6065,6 @@ export interface components {
             sameRate: number;
             /** Format: int32 */
             people: number;
-            byAi: boolean;
-            /** Format: int32 */
-            minVotes: number;
         };
         VerifyRequest: {
             /** Format: double */
@@ -6455,6 +6472,7 @@ export interface components {
             view?: components["schemas"]["TurnView"];
             /** Format: int32 */
             lobbySeconds: number;
+            bossChallenge: boolean;
         };
         RealtimeStone: {
             /** Format: int32 */
@@ -6626,7 +6644,6 @@ export interface components {
         };
         LobbyList: {
             lobbies: components["schemas"]["LobbyCard"][];
-            residents: components["schemas"]["LobbyResident"][];
             goldenHour: boolean;
             /** Format: int32 */
             goldenHourStart: number;
@@ -6634,14 +6651,6 @@ export interface components {
             nightAlarm: boolean;
             /** Format: date-time */
             serverNow: string;
-        };
-        LobbyResident: {
-            /** Format: int64 */
-            userId: number;
-            nickname: string;
-            key: string;
-            title: string;
-            icon: string;
         };
         LobbyTonight: {
             key: string;
@@ -7095,6 +7104,11 @@ export interface components {
             /** Format: date-time */
             offlineBannedUntil?: string;
         };
+        RankingBaseline: {
+            label: string;
+            /** Format: int32 */
+            rating: number;
+        };
         RankingSeat: {
             key: string;
             label: string;
@@ -7111,6 +7125,9 @@ export interface components {
             areaName?: string;
             seats: components["schemas"]["RankingSeat"][];
             noOrg: boolean;
+            baselines: components["schemas"]["RankingBaseline"][];
+            /** Format: int64 */
+            aiGames: number;
         };
         UserGameStatisticsDTO: {
             /** Format: int64 */
@@ -7418,8 +7435,6 @@ export interface components {
             mine?: string;
             correct: boolean;
             myTaste?: string;
-            /** Format: int32 */
-            minVotes: number;
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -7428,14 +7443,14 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT" | "PARTNER_NEARBY";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
         };
         SettingDto: {
             /** @enum {string} */
-            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
+            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
             label: string;
             description: string;
             enabled: boolean;
@@ -8248,6 +8263,19 @@ export interface components {
             /** Format: date-time */
             since?: string;
             mine: boolean;
+            boss: boolean;
+            /** Format: int32 */
+            bossTriesLeft?: number;
+        };
+        ChampionHistoryLine: {
+            /** Format: int64 */
+            userId?: number;
+            nickname: string;
+            ai: boolean;
+            /** Format: date-time */
+            since: string;
+            /** Format: date-time */
+            until?: string;
         };
         BodyBuilder: Record<string, never>;
         SocialProviders: {
@@ -8567,7 +8595,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
+                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
             };
             cookie?: never;
         };
@@ -11563,11 +11591,9 @@ export interface operations {
             };
         };
     };
-    playAi: {
+    challengeBoss: {
         parameters: {
-            query?: {
-                botId?: number;
-            };
+            query?: never;
             header?: never;
             path: {
                 key: string;
@@ -14493,6 +14519,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SeatChampionView"][];
+                };
+            };
+        };
+    };
+    history_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChampionHistoryLine"][];
                 };
             };
         };

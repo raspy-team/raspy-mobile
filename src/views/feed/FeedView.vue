@@ -57,6 +57,15 @@
           </span>
           <span class="t-caption flex items-center gap-1 flex-shrink-0">보러 가기<UiIcon name="chevron-right" aria-hidden="true" /></span>
         </RouterLink>
+        <!-- AI 보스가 앱 게임 전국 자리를 되찾았다 (docs/ai-residents.md 3). 누르면 그 게임 (챔피언 카드에서 다시 도전) -->
+        <RouterLink v-else-if="p.type === 'boss_back'" :to="p.rule?.appGameKey ? `/play/${p.rule.appGameKey}` : `/rules/${p.rule?.id}`" class="flex items-center gap-3 py-4 border-b border-line" :data-game="p.id">
+          <span class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true"><UiIcon name="crown" /></span>
+          <span class="flex-1 min-w-0">
+            <span class="flex items-center t-heading min-w-0"><span class="truncate">{{ p.players[0]?.name }}</span><UiAiBadge /></span>
+            <span class="block t-caption mt-0.5 break-keep">{{ p.caption }}</span>
+          </span>
+          <span class="t-caption flex items-center gap-1 flex-shrink-0">도전<UiIcon name="chevron-right" aria-hidden="true" /></span>
+        </RouterLink>
         <AppDuelFeedCard
           v-else-if="p.appDuel"
           :post="p"
@@ -150,7 +159,7 @@ import AppDuelFeedCard from '../../components/feed/AppDuelFeedCard.vue'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
-  UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
+  UiAiBadge, UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
@@ -196,7 +205,7 @@ const reporting = ref(false)
 // 끝난 경기만 (열린 경기는 홈에서 본다)
 // 끝난 오프라인 경기 + 앱 대결(끝난 것·투표 중인 것). 열린(예정) 경기는 홈에서 본다
 // 지금 하는 경기(LIVE)는 끝나지 않았어도 보여 준다 → 중계(/live)로
-const finished = (list) => list.filter((p) => p.live || (p.type === 'game' && p.isCompleted) || p.type === 'app_duel' || p.type === 'app_vote')
+const finished = (list) => list.filter((p) => p.live || (p.type === 'game' && p.isCompleted) || p.type === 'app_duel' || p.type === 'app_vote' || p.type === 'boss_back')
 const visible = computed(() => posts.value)
 // 다른 동네 글이 시작되는 곳에 줄을 긋는다
 const firstElsewhere = computed(() => posts.value.find((p) => p.elsewhere)?.id)

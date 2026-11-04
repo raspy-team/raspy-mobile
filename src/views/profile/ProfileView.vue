@@ -130,6 +130,16 @@
         </div>
       </section>
 
+      <!-- 인기 게임 티어 (롤·브롤 공식 정보). 아이디는 안 보이고, 기록을 '나만'으로 둔 사람은 서버가 비워 보낸다 (9번) -->
+      <section v-if="gameTiers.length" class="mt-10">
+        <h2 class="t-heading mb-3">게임 티어</h2>
+        <div class="flex flex-wrap gap-2">
+          <UiChip v-for="t in gameTiers" :key="t.game" @click="router.push({ path: '/rules', query: { kind: 'POPULAR', q: t.label } })">
+            {{ t.label }}<span class="text-fg-subtle">{{ t.tier }}</span>
+          </UiChip>
+        </div>
+      </section>
+
       <!-- 많이 한 규칙 -->
       <section class="mt-10">
         <div class="flex items-center justify-between mb-1">
@@ -400,6 +410,7 @@ function goFriend(id) {
 }
 
 const abilities = ref([])
+const gameTiers = ref([])
 
 // 가진 자리 (벨트 먼저, 그다음 1위). 벨트는 그 게임으로, 능력·종합 1위는 그 순위로 간다
 const seats = ref({ belts: [], crowns: [] })
@@ -427,6 +438,7 @@ onMounted(async () => {
   // 많이 쓴 능력 (없어도 화면은 그대로)
   if (user.value) {
     abilities.value = (await GET('/api/rules/top-played-abilities/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data
+    gameTiers.value = (await GET('/api/users/{userId}/game-tiers', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data || []
   }
   // 경기 결과를 보내고 넘어온 경우(?id=경기) 그 경기를 보여준다
   if (highlightId.value) {

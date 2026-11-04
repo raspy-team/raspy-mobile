@@ -23,5 +23,6 @@ const props = defineProps({
   bare: { type: Boolean, default: false },
 })
 const appIcons = props.rule?.appGameKey ? useAppGameIcons() : null
-const appIcon = computed(() => (props.rule?.appGameKey && appIcons?.value[props.rule.appGameKey]) || '')
+// 롤·피파처럼 다른 게임 안에서 하는 규칙은 게임패드 (종목 그림이 없어 도형으로 나왔다, 9번)
+const appIcon = computed(() => (props.rule?.appGameKey && appIcons?.value[props.rule.appGameKey]) || (props.rule?.extGame ? 'gamepad' : ''))
 </script>

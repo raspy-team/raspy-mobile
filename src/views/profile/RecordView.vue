@@ -121,23 +121,28 @@
         </div>
 
         <div v-if="overview?.overall" class="rounded-xl bg-surface p-4">
-          <div class="flex items-baseline gap-2">
+          <button type="button" class="w-full flex items-baseline gap-2 text-left" @click="router.push('/rankings/OVERALL/ALL')">
             <p class="t-caption">종합</p>
+            <!-- 가진 1위 (자리마다, 새벽 4시에 정한다) -->
+            <span v-if="crownText('OVERALL', 'ALL')" class="t-micro text-signal-fg"><UiIcon name="fas fa-crown" /> {{ crownText('OVERALL', 'ALL') }}</span>
             <p class="t-title tabular-nums ml-auto">{{ overview.overall.rating }}</p>
             <p class="t-caption tabular-nums">±{{ overview.overall.margin }}</p>
-          </div>
+          </button>
           <p class="t-label mt-1 text-right" :class="overview.overall.provisional ? 'text-fg-muted' : ''">
             {{ overview.overall.provisional ? '잠정 · 판이 쌓이면 정해져요' : standing(overview.overall.rank, overview.overall.people) }}
           </p>
           <div v-if="overview.groups.length" class="grid gap-2 mt-3" :style="{ gridTemplateColumns: `repeat(${overview.groups.length}, minmax(0, 1fr))` }">
-            <div v-for="g in overview.groups" :key="g.key" class="rounded-lg bg-surface-2 px-3 py-2">
+            <button v-for="g in overview.groups" :key="g.key" type="button" class="rounded-lg bg-surface-2 px-3 py-2 text-left" @click="router.push(`/rankings/GROUP/${g.key}`)">
               <p class="t-micro">{{ g.label }}</p>
               <p class="t-heading tabular-nums">{{ g.rating }}</p>
               <p v-if="!g.provisional && g.rank" class="t-micro tabular-nums">{{ standing(g.rank, g.people) }}</p>
-            </div>
+              <p v-if="crownText('GROUP', g.key)" class="t-micro text-signal-fg truncate"><UiIcon name="fas fa-crown" /> {{ crownText('GROUP', g.key) }}</p>
+            </button>
           </div>
           <div v-if="overview.abilities.length" class="flex flex-wrap gap-1.5 mt-3">
-            <UiBadge v-for="a in overview.abilities.slice(0, 6)" :key="a.key">{{ a.label }} {{ a.rating }}</UiBadge>
+            <UiChip v-for="a in overview.abilities.slice(0, 6)" :key="a.key" :icon="crownText('ABILITY', a.key) ? 'fas fa-crown' : ''" @click="router.push(`/rankings/ABILITY/${a.key}`)">
+              {{ a.label }} {{ a.rating }}<template v-if="crownText('ABILITY', a.key)"> · {{ crownText('ABILITY', a.key) }}</template>
+            </UiChip>
           </div>
         </div>
 
@@ -325,6 +330,13 @@ const nickname = ref('')
 const isMe = ref(route.params.id === '0')
 const ratings = ref([])
 const overview = ref(null)
+// 가진 능력·종합 1위 (docs/organizations.md 3-3)
+const crowns = ref([])
+/** '전국·합정동 1위'. 없으면 '' */
+function crownText(kind, key) {
+  const seats = crowns.value.filter((c) => c.kind === kind && c.key === key).map((c) => c.seatLabel)
+  return seats.length ? `${seats.join('·')} 1위` : ''
+}
 const periodKey = ref('WEEK')
 const pickedId = ref(null)
 const allRules = ref(false)
@@ -430,10 +442,12 @@ async function load() {
   error.value = ''
   try {
     const { data } = await GET('/api/user-profile/{userId}/stats', { path: { userId: Number(route.params.id) } })
-    const [history, ov] = await Promise.all([
+    const [history, ov, seatsRes] = await Promise.all([
       GET('/api/rankings/history', { query: { userId: data.userId } }).catch(() => ({ data: [] })),
       GET('/api/rankings/overview', { query: { userId: data.userId } }).catch(() => ({ data: null })),
+      GET('/api/champions/users/{userId}', { path: { userId: data.userId } }).catch(() => ({ data: null })),
     ])
+    crowns.value = seatsRes.data?.crowns ?? []
     nickname.value = data.nickname
     isMe.value = data.isMe
     ratings.value = history.data || []

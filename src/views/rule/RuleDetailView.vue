@@ -50,17 +50,8 @@
         <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
       </button>
 
-      <!-- 챔피언 (동네) -->
-      <div class="flex items-center gap-3 py-5 border-b border-line">
-        <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" :class="rule.currentChampion ? 'bg-signal-soft text-signal-fg' : 'bg-surface-2 text-fg-subtle'" aria-hidden="true">
-          <UiIcon name="fas fa-crown" />
-        </span>
-        <span class="flex-1 min-w-0">
-          <!-- 챔피언 자리는 동네마다 (보는 사람의 지금 동네) -->
-          <span class="block t-heading truncate">{{ rule.currentChampion ? `${area}챔피언 ${rule.currentChampion.nickname}` : `${area || '이 규칙에 '}아직 챔피언이 없어요` }}</span>
-          <span class="block t-caption mt-0.5">{{ rule.currentChampion ? '챔피언을 이기면 자리를 가져와요' : rule.championAreaName ? `${rule.championAreaName}에서 이 규칙으로 처음 경기를 열면 챔피언이 돼요` : '동네를 인증하면 내 동네 챔피언 자리가 보여요' }}</span>
-        </span>
-      </div>
+      <!-- 챔피언: 내가 속한 자리(동네·소속·전국)마다 한 줄 -->
+      <ChampionSeatsCard :rule-id="rule.id" :app-game-key="rule.appGameKey" class="border-b border-line" />
 
       <!-- 카테고리 (분류한 규칙만) -->
       <RuleCategory v-if="rule.category" :category="rule.category" />
@@ -164,6 +155,7 @@ import { timeAgo } from '../../utils/format'
 import { ratingText, ruleKind, winSummary } from '../../utils/rule'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import RuleCategory from '../../components/rule/RuleCategory.vue'
+import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
 
 const REPORT_REASONS = ['욕설·비방', '위험한 규칙', '광고·스팸', '기타']
 
@@ -177,7 +169,6 @@ const myId = ref(null)
 const top = ref([])
 const myRank = ref(null)
 const rankingArea = ref('') // 동네 순위면 '합정동 근처'
-const area = computed(() => (rule.value?.championAreaName ? `${rule.value.championAreaName} ` : ''))
 const menuOpen = ref(false)
 const reportOpen = ref(false)
 const reportReason = ref('')

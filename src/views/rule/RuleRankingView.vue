@@ -13,8 +13,8 @@
       </UiEmptyState>
 
       <template v-else>
-        <!-- 동네 / 전국 (동네가 있을 때만) -->
-        <UiTabs v-if="areaName" class="mb-4" :model-value="scope" :options="[{ value: 'dong', label: areaName }, { value: 'all', label: '전국' }]" @update:model-value="setScope" />
+        <!-- 자리: [소속] [동네] [전국] -->
+        <SeatChips class="mb-4" :seats="seats" :model-value="scope" :no-org="noOrg" @update:model-value="setScope" />
 
         <!-- 내 자리. 아무도 순위에 없으면 아래 빈 화면 하나로 알린다 -->
         <UiCard v-if="me || rankings.length" class="flex items-center gap-4">
@@ -66,11 +66,12 @@
 </template>
 
 <script setup>
-// 규칙 랭킹: 동네/전국 → 내 자리 → 순위. 처음에는 서버가 정한 범위(앱 밖 경기는 동네, 앱 게임은 전국)
+// 규칙 랭킹: 자리 칩(소속·동네·전국) → 내 자리 → 순위. 처음에는 서버가 정한 자리(앱 게임은 첫 소속, 앱 밖 경기는 동네, 없으면 전국)
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import { UiAvatar, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiSkeleton, UiTabs, UiTopBar } from '../../components/ui'
+import { UiAvatar, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiSkeleton, UiTopBar } from '../../components/ui'
+import SeatChips from '../../components/champion/SeatChips.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -82,7 +83,8 @@ const me = ref(null)
 const loading = ref(true)
 const error = ref('')
 const scope = ref('')
-const areaName = ref('')
+const seats = ref([])
+const noOrg = ref(false)
 
 function setScope(v) {
   scope.value = v
@@ -95,7 +97,8 @@ async function load() {
   try {
     const { data } = await api.get(`/api/rules/${ruleId}/rankings`, { params: scope.value ? { scope: scope.value } : {} })
     scope.value = data.scope
-    areaName.value = data.areaName || ''
+    seats.value = data.seats || []
+    noOrg.value = !!data.noOrg
     ruleName.value = data.ruleName || ''
     appGameKey.value = data.appGameKey || ''
     rankings.value = data.rankings || []

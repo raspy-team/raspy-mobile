@@ -281,6 +281,9 @@
             </UiList>
           </UiSection>
 
+          <!-- 챔피언: 내가 속한 자리(소속·동네·전국). 하루 퍼즐은 맞붙는 판이 없어 벨트가 없다 -->
+          <ChampionSeatsCard v-if="game.dailyLimit !== 1" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
+
           <!-- 나머지는 탭 하나로: 순위 · 내 대결 · 투표 -->
           <UiTabs v-model="tab" :options="tabs" class="mt-8" />
 
@@ -364,6 +367,7 @@ import api from '../../api/api'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import BrandFace from '../../components/BrandFace.vue'
+import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'

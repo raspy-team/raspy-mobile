@@ -227,8 +227,10 @@ const turnLine = computed(() => {
   if (s.race) return myTurn.value ? '먼저 맞혀요' : '다음 문제를 기다려요'
   // 서버가 판(view)을 주는 게임은 판 수를 게임이 따로 보여 준다 (수 번호를 '판'이라 부르면 세트와 헷갈린다)
   // 고를 것 없이 글을 쓰는 판(두 진실 한 거짓의 문장 쓰기)은 '써 주세요'
+  // 짧은 칸(칩 걸기·숫자)은 '적어 주세요': 숫자를 '써 주세요'라 하면 글을 쓰라는 말로 읽힌다 (first10 검토, 칩 경매)
   const writing = !!s.view?.input && !s.view.choices?.length
-  if (s.simultaneous) return myTurn.value ? `${s.view ? '' : `${(s.round ?? 0) + 1}판 · `}${writing ? '써 주세요' : '골라 주세요'}` : `${who(s.opponent)}님이 ${writing ? '쓰는' : '고르는'} 중`
+  const long = (s.view?.inputMax ?? 30) > 60
+  if (s.simultaneous) return myTurn.value ? `${s.view ? '' : `${(s.round ?? 0) + 1}판 · `}${writing ? (long ? '써 주세요' : '적어 주세요') : '골라 주세요'}` : `${who(s.opponent)}님이 ${writing ? (long ? '쓰는' : '적는') : '고르는'} 중`
   return myTurn.value ? '내 차례' : `${who(s.opponent)}님 차례`
 })
 const longLobby = computed(() => (state.value?.lobbySeconds ?? 30) > 120)
@@ -290,7 +292,7 @@ async function callBot() {
   try {
     apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
   } catch (e) {
-    showToast(message(e, '봇을 부르지 못했어요. 잠시 뒤 다시 해 주세요'))
+    showToast(message(e, 'AI 주민을 부르지 못했어요. 잠시 뒤 다시 해 주세요'))
   }
 }
 

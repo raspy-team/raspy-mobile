@@ -53,6 +53,7 @@ import {
   CircleDot, Spade, Type, CalendarDays, MessagesSquare, Grid2x2, MessageCircleQuestion, RefreshCw, Map, Gem, Calculator, Hash, Bomb,
   Goal, Lightbulb, Feather, Vibrate, Dumbbell, Link, Volume2,
   Flame, Crosshair, Blocks, Mountain, Percent, BicepsFlexed, Brain, Grab, SquareDashed, Radar, PiggyBank, Building2,
+  Shirt, Smile, Lock,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -87,6 +88,7 @@ const ICONS = {
   'shield-halved': ShieldHalf, ship: Ship, star: Star, stop: Square, stopwatch: Timer, times: X, xmark: X,
   trash: Trash2, 'triangle-exclamation': TriangleAlert, trophy: Trophy,
   building: Building2, // 소속 (학교·회사)
+  shirt: Shirt, smile: Smile, lock: Lock, // 광장 (꾸미기·빠른 말·잠긴 것)
   user: User, 'user-check': UserCheck, 'user-group': Users, users: Users, 'user-minus': UserMinus,
   'user-plus': UserPlus, 'user-slash': UserX, video: Video, swords: Swords, activity: Activity, globe: Globe, 'sun-moon': SunMoon, feed: GalleryVerticalEnd,
 }

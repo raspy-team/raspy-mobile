@@ -114,7 +114,7 @@ import { todayBrandLine } from '@/utils/brandLines'
 
 // 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나 (사용자 11/3)
 const DESTINATIONS = [
-  { to: '/games', icon: 'gamepad', label: '앱 게임' },
+  { to: '/plaza', icon: 'gamepad', label: '앱 게임' },
   { to: '/rules', icon: 'book-open', label: '규칙' },
   { to: '/clubs', icon: 'users', label: '동호회' },
 ]

@@ -31,7 +31,7 @@
           <div v-if="filtered.length" class="grid grid-cols-2 gap-3">
             <AppGameTile v-for="g in filtered" :key="g.key" :game="g" />
           </div>
-          <UiEmptyState v-else icon="search" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
+          <UiEmptyState v-else mascot="dol" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
         </UiSection>
       </template>
     </main>

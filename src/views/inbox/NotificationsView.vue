@@ -33,7 +33,7 @@
 
         <!-- 비었을 때: 무엇이 오는지 보여주고 설정으로 -->
         <section v-if="!groups.length && !inbox.friendRequests.length" class="pt-10">
-          <UiEmptyState icon="far fa-bell" title="새 알림이 없어요" description="이럴 때 알려 드려요" class="!pb-6" />
+          <UiEmptyState mascot="kok" title="새 알림이 없어요" description="이럴 때 알려 드려요" class="!pb-6" />
           <UiList>
             <UiListItem plain icon="user-plus" title="누가 내 경기에 신청했을 때" />
             <UiListItem plain icon="clipboard-check" title="상대가 결과를 확인해 달라고 할 때" />

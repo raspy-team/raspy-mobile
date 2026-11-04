@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+    "/api/plaza/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 캐릭터와 꾸미기 상점
+         * @description exists=false면 아직 기본 꾸미기를 하지 않았다 (처음 광장에 들어올 때 꾸미기부터)
+         */
+        get: operations["avatar"];
+        /**
+         * 캐릭터 저장
+         * @description 무료 부품, 산 부품, (챔피언이면) 챔피언 부품만 입는다
+         */
+        put: operations["save"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/organizations/{orgId}/visibility": {
         parameters: {
             query?: never;
@@ -638,6 +662,63 @@ export interface paths {
          * @description 선수가 다 모인 시작 전 남의 경기 한쪽을 고른다 (경기마다 한 번). amount 0은 예측만, 10~100은 포인트도 건다(하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 고를 때 정해짐)
          */
         post: operations["cheerWithPoints"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/rooms/{room}/enter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 광장에 들어가기
+         * @description 지도·지금 있는 사람·쉬는 중인 사람을 준다. 그다음 /topic/plaza/{instance}를 구독하고 /app/plaza/{instance}/move·say·emote·ping을 보낸다
+         */
+        post: operations["enter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 광장에서 나가기 */
+        post: operations["leave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/avatar/items/{itemId}/buy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 부품 사기
+         * @description 포인트로 정해진 값에 산다. 한정 부품은 그 주 상점에 나온 주에만
+         */
+        post: operations["buy"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1910,7 +1991,7 @@ export interface paths {
          * 동호회 나가기
          * @description 만든 사람이 나가면 가장 오래된 멤버가 이어받는다. 혼자였으면 동호회가 없어진다
          */
-        post: operations["leave"];
+        post: operations["leave_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2388,7 +2469,7 @@ export interface paths {
          * 나가기
          * @description 대기 중이면 방을 닫고, 하는 중이면 진다.
          */
-        post: operations["leave_1"];
+        post: operations["leave_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3471,6 +3552,82 @@ export interface paths {
          * @description 이번 주(월요일부터) 친구 또는 내 동네에서 응원을 잘 맞힌 순위. sort=UNITS(유닛: 맞히면 +(배수−1), 틀리면 −1) 또는 POINTS(응원으로 늘린 포인트). 3번 이상 맞혀 본 사람만
          */
         get: operations["cheerLeague"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 들어갈 수 있는 광장
+         * @description 전국 광장, 내 도시 광장, 내 동네 광장(이웃이 모이면 열림)
+         */
+        get: operations["rooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/art/part/{itemId}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 부품 작은 그림
+         * @description 앞을 본 한 칸(16×32). 로그인 없이
+         */
+        get: operations["part"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/art/map/{name}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sprite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/art/avatar/{key}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 캐릭터 그림
+         * @description 부품을 겹친 896×96 그림 (16×32 칸, 서 있기·숨쉬기·걷기). 로그인 없이
+         */
+        get: operations["sheet"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5298,7 +5455,7 @@ export interface paths {
          * 소속 떼기
          * @description 다시 붙이려면 다시 인증한다
          */
-        delete: operations["leave_2"];
+        delete: operations["leave_3"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5404,6 +5561,38 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Parts: {
+            body: string;
+            eyes: string;
+            outfit: string;
+            hair: string;
+            acc?: string;
+        };
+        AvatarState: {
+            exists: boolean;
+            parts: components["schemas"]["Parts"];
+            sheet: string;
+            /** Format: int64 */
+            balance: number;
+            champion: boolean;
+            items: components["schemas"]["ShopItem"][];
+        };
+        ShopItem: {
+            id: string;
+            layer: string;
+            label: string;
+            /** Format: int32 */
+            variant?: number;
+            /** Format: int32 */
+            price: number;
+            owned: boolean;
+            wearable: boolean;
+            buyable: boolean;
+            limited: boolean;
+            champion: boolean;
+            onSale: boolean;
+            tier: string;
+        };
         OrgVisibilityRequest: {
             /** @enum {string} */
             visibility: "ALL" | "SAME_ORG" | "HIDDEN";
@@ -5974,6 +6163,108 @@ export interface components {
             /** Format: double */
             bonusRate: number;
             outcome?: string;
+        };
+        Area: {
+            kind: string;
+            /** Format: int32 */
+            x: number;
+            /** Format: int32 */
+            y: number;
+            /** Format: int32 */
+            w: number;
+            /** Format: int32 */
+            h: number;
+        };
+        EnterResponse: {
+            instance: string;
+            room: components["schemas"]["RoomInfo"];
+            map: components["schemas"]["MapSpec"];
+            me: components["schemas"]["PersonView"];
+            people: components["schemas"]["PersonView"][];
+            resting: components["schemas"]["PersonView"][];
+            hidden: number[];
+            statue?: components["schemas"]["Statue"];
+            presets: string[];
+            emotes: string[];
+        };
+        MapSpec: {
+            room: string;
+            name: string;
+            /** Format: int32 */
+            w: number;
+            /** Format: int32 */
+            h: number;
+            /** Format: int32 */
+            tile: number;
+            ground: components["schemas"]["Area"][];
+            objects: components["schemas"]["Obj"][];
+            /** Format: int32 */
+            cell: number;
+            walk: string;
+            spawn: number[];
+            wander: components["schemas"]["Rect"];
+            terrain: {
+                [key: string]: Record<string, never>;
+            };
+            /** Format: int32 */
+            rows: number;
+            /** Format: int32 */
+            cols: number;
+        };
+        Obj: {
+            s: string;
+            /** Format: int32 */
+            x: number;
+            /** Format: int32 */
+            y: number;
+            label?: string;
+            action?: string;
+        };
+        PersonView: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            sheet: string;
+            /** Format: int32 */
+            x: number;
+            /** Format: int32 */
+            y: number;
+            bot: boolean;
+            area?: string;
+            champion?: string;
+            /** Format: int64 */
+            restingMinutes?: number;
+        };
+        Rect: {
+            /** Format: int32 */
+            x: number;
+            /** Format: int32 */
+            y: number;
+            /** Format: int32 */
+            w: number;
+            /** Format: int32 */
+            h: number;
+        };
+        RoomInfo: {
+            id: string;
+            name: string;
+            kind: string;
+            open: boolean;
+            /** Format: int32 */
+            online: number;
+            /** Format: int32 */
+            residents?: number;
+            /** Format: int32 */
+            need?: number;
+            reason?: string;
+        };
+        Statue: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            sheet: string;
+            /** Format: int32 */
+            belts: number;
         };
         RegisterRequest: {
             visitorId: string;
@@ -8502,6 +8793,50 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    avatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AvatarState"];
+                };
+            };
+        };
+    };
+    save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Parts"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AvatarState"];
+                };
+            };
+        };
+    };
     visibility: {
         parameters: {
             query?: never;
@@ -9420,6 +9755,68 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CheerState"];
+                };
+            };
+        };
+    };
+    enter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                room: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EnterResponse"];
+                };
+            };
+        };
+    };
+    leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    buy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AvatarState"];
                 };
             };
         };
@@ -11056,7 +11453,7 @@ export interface operations {
             };
         };
     };
-    leave: {
+    leave_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -11693,7 +12090,7 @@ export interface operations {
             };
         };
     };
-    leave_1: {
+    leave_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -13071,6 +13468,92 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BetLeague"];
+                };
+            };
+        };
+    };
+    rooms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RoomInfo"][];
+                };
+            };
+        };
+    };
+    part: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+        };
+    };
+    sprite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+        };
+    };
+    sheet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
                 };
             };
         };
@@ -15138,7 +15621,7 @@ export interface operations {
             };
         };
     };
-    leave_2: {
+    leave_3: {
         parameters: {
             query?: never;
             header?: never;

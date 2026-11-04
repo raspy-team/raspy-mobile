@@ -6,6 +6,15 @@
   </UiTopBar>
 
   <main class="px-4 pb-32 pt-4 space-y-10">
+    <!-- 공식 캐릭터 (docs/mascots.md): 위는 앱 안 선, 아래는 인스타·스티커용 색 -->
+    <section id="mascots">
+      <h2 class="t-heading mb-3">캐릭터</h2>
+      <div v-for="v in ['line', 'color']" :key="v" class="grid grid-cols-5 gap-2 mb-3">
+        <div v-for="w in ['match', 'kok', 'tong', 'dol', 'bibi']" :key="w" class="flex flex-col items-center gap-1">
+          <MatchMascot v-for="m in ['smile', 'wow', 'sad', 'cheer']" :key="m" :who="w" :mood="m" :variant="v" :size="56" class="text-fg" />
+        </div>
+      </div>
+    </section>
     <UiSection title="종목 아이콘">
       <div class="grid grid-cols-4 gap-2">
         <div v-for="n in sportNames" :key="n" class="rounded-xl bg-surface flex flex-col items-center gap-2 py-3">
@@ -141,6 +150,7 @@
 // 개발할 때만 열리는 부품 모음 (/dev/ui). 새 부품을 만들면 여기에도 하나 놓는다
 import { ref } from 'vue'
 import CategoryIcon from '../../components/rule/CategoryIcon.vue'
+import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { SPORT_NAMES } from '../../components/rule/sportIcons'
 const sportNames = [...SPORT_NAMES]
 import {

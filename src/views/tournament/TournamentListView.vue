@@ -13,7 +13,7 @@
       <div v-else-if="list.length" class="space-y-2 mt-3">
         <TournamentRow v-for="t in list" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
       </div>
-      <UiEmptyState v-else class="pt-10" icon="trophy" :title="tab === 'mine' ? '나간 대회가 없어요' : '동네에 열린 대회가 없어요'" description="처음으로 열어 보세요. 동호회 월례대회도 여기서 열어요" />
+      <UiEmptyState v-else class="pt-10" mascot="tong" :title="tab === 'mine' ? '나간 대회가 없어요' : '동네에 열린 대회가 없어요'" description="처음으로 열어 보세요. 동호회 월례대회도 여기서 열어요" />
     </main>
 
     <TournamentCreateSheet v-model="createOpen" :club-id="clubId" />

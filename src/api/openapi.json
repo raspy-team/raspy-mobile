@@ -1186,6 +1186,15 @@
           "push-controller"
         ],
         "operationId": "removeCurrentDeviceToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveTokenRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -10441,6 +10450,14 @@
         "type": "object",
         "properties": {
           "message": {
+            "type": "string"
+          }
+        }
+      },
+      "RemoveTokenRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
             "type": "string"
           }
         }

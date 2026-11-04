@@ -53,7 +53,7 @@ import { startInbox } from './stores/inbox'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
 import { useActiveGamePolling } from './composable/useActiveGamePolling'
 import { serverDown } from './stores/server'
-import { registerFcmToken } from './utils/nativeBridge'
+import { registerFcmToken, setupPushListeners } from './utils/nativeBridge'
 
 const route = useRoute()
 const reload = () => window.location.reload()
@@ -129,6 +129,8 @@ onMounted(() => {
       checkAndSendDailyFirst()
     }
 
+    // 알림을 눌러 켜졌으면 바로 그 화면으로 (로그인과 상관없이 먼저 붙인다)
+    setupPushListeners()
     // 앱이면 푸시 토큰을 (다시) 등록한다. 토큰은 바뀔 수 있어 켤 때마다 (Capacitor 앱·옛 앱 모두 nativeBridge가 고른다)
     if (token) setTimeout(() => registerFcmToken(token), 5000)
   } catch {

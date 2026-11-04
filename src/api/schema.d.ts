@@ -5162,6 +5162,9 @@ export interface components {
         ReportResult: {
             message: string;
         };
+        RemoveTokenRequest: {
+            token?: string;
+        };
         RegisterTokenRequest: {
             token: string;
         };
@@ -8117,7 +8120,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RemoveTokenRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {

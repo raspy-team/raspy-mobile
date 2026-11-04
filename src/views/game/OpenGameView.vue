@@ -32,11 +32,18 @@
           <!-- 공유 링크로 다른 동네 경기에 들어온 경우: 누르기 전에 이유를 보여 준다 -->
           <template v-else-if="game.joinBlockedReason">
             <span class="text-fg-muted">{{ game.joinBlockedReason }}</span>
-            <!-- 인증하고 이 경기로 돌아온다 (11/4 밤샘: 링크로 온 동료가 인증 뒤 경기를 다시 찾아야 했다) -->
-            <RouterLink :to="{ path: '/neighborhood', query: { back: route.fullPath } }" class="ml-1 underline underline-offset-2">동네 인증</RouterLink>
           </template>
           <template v-else>신청하면 {{ game.ownerNickname }}님이 승인하고, 장소와 시간을 함께 정해요.</template>
         </p>
+        <!-- 인증하고 이 경기로 돌아온다 (11/4 밤샘: 링크로 온 동료가 인증 뒤 경기를 다시 찾아야 했다).
+             예전엔 글 끝의 작은 밑줄 글씨(51×18)라 누르기 어려웠다 (11/5 c6 320 검토) -->
+        <UiButton
+          v-if="game.gameStatus === 'MATCHING' && game.ownerId !== myId && !game.isAppliedByMe && game.joinBlockedReason"
+          block
+          icon="location-dot"
+          class="mt-3"
+          :to="{ path: '/neighborhood', query: { back: route.fullPath } }"
+        >동네 인증하기</UiButton>
         <!-- 상대가 정해진 남의 경기: 한쪽을 응원 (포인트) -->
         <CheerBar
           v-if="canCheer"

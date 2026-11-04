@@ -13,7 +13,7 @@
         <p class="t-micro tabular-nums">{{ list.goldenHour ? `${nightHour}시대에는 이 게임에 사람이 모여요` : `${left} 남음 · ${list.nightAlarm ? '' : '켜면 '}${nightHour - 1}시 55분에 알려 드려요` }}</p>
       </div>
       <UiButton v-if="list.goldenHour" size="sm" @click="join(list.tonight.key)">바로 하기</UiButton>
-      <UiSwitch v-else :model-value="list.nightAlarm" :disabled="saving" label="8시 55분에 알려 주기" @update:model-value="setAlarm" />
+      <UiSwitch v-else :model-value="list.nightAlarm" :disabled="saving" :label="`${nightHour - 1}시 55분에 알려 주기`" @update:model-value="setAlarm" />
     </UiCard>
     <UiSection v-if="list.lobbies.length || showEmpty" :title="title">
       <div v-if="list.lobbies.length" class="space-y-2">
@@ -41,6 +41,10 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { onLobbyChange, openUserChannel } from '@/websocket/userChannel'
 import { UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
+import { liveRoute } from '@/utils/battle'
+import { useToast } from '../../composable/useToast'
+
+const { showToast } = useToast()
 
 const props = withDefaults(defineProps<{ title?: string; showEmpty?: boolean; excludeGameId?: number; anyButton?: boolean }>(), { title: '지금 기다리는 사람', showEmpty: false, excludeGameId: 0, anyButton: false })
 const emit = defineEmits<{ join: [key: string] }>()
@@ -81,6 +85,9 @@ async function setAlarm(on: boolean) {
   saving.value = true
   try {
     show((await POST('/api/app-games/realtime/night-alarm', { body: { on } })).data)
+  } catch {
+    // 스위치는 서버 값(list)을 따르니 그대로 돌아간다. 아무 말 없이 안 바뀐 것처럼 보이지 않게 알린다
+    showToast('알림을 바꾸지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     saving.value = false
   }
@@ -99,7 +106,9 @@ async function joinAny() {
   try {
     const state = (await POST('/api/app-games/realtime/any')).data
     emit('join', state.key)
-    router.push(`/play/${state.key}/live`)
+    router.push(liveRoute(state.key))
+  } catch (e) {
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '붙지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     joining.value = false
   }
@@ -107,7 +116,7 @@ async function joinAny() {
 
 function join(key: string) {
   emit('join', key)
-  router.push(`/play/${key}/live`)
+  router.push(liveRoute(key))
 }
 
 let off: (() => void) | undefined

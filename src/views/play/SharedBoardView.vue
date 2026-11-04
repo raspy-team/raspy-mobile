@@ -67,7 +67,10 @@ function until(at: string) {
   return h >= 24 ? `${Math.floor(h / 24)}일 ${h % 24}시간 뒤` : `${h}시간 뒤`
 }
 function message(e: unknown, fallback: string) {
-  return (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
+  const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
+  // 없는 번호는 서버가 '대결 없음: 123'처럼 개발용 문구를 준다. 사람에게는 풀어서 (도전장 화면과 같은 말)
+  if (r?.status === 404) return '없거나 이미 끝난 경기예요'
+  return r?.data?.message || fallback
 }
 function apply(s: State) {
   offset.value = new Date(s.serverNow).getTime() - Date.now()

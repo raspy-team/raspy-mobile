@@ -13498,6 +13498,7 @@
           "startWord",
           "status",
           "summary",
+          "title",
           "turnSeconds",
           "waitingSince"
         ],
@@ -13520,6 +13521,9 @@
             "$ref": "#/components/schemas/AppPlayer"
           },
           "startWord": {
+            "type": "string"
+          },
+          "title": {
             "type": "string"
           },
           "summary": {

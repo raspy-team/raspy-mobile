@@ -175,8 +175,8 @@ const route = useRoute()
 const { showToast } = useToast()
 const router = useRouter()
 const key = computed(() => String(route.params.key))
-const TITLES: Record<string, string> = { wordchain: '끝말잇기', alkkagi: '알까기', rps: '가위바위보', 'letter-gomoku': '편지 오목', battleship: '배틀십', 'quiz-race': '퀴즈 먼저 맞히기', 'word-battle': '말 배틀', 'thirty-one': '서른하나', 'last-stone': '마지막 돌', 'card-duel': '숫자 카드 대결', auction: '칩 경매', 'drop-four': '사목 떨어뜨리기', flip: '뒤집기', 'number-baseball': '숫자 야구', 'number-bomb': '숫자 폭탄', 'math-race': '암산 먼저', chosung: '초성 먼저', 'energy-duel': '기 모으기', 'pitch-duel': '투타 수싸움', 'block-duel': '블록 맞대결', 'liar-dice': '거짓말 주사위', 'three-hills': '세 고지', majority: '다수파', 'hidden-word': '가나다 숨바꼭질', 'minus-one': '하나 빼기', boxes: '상자 먹기', 'fading-three': '사라지는 삼목', chicken: '눈치 버티기', 'mine-duel': '지뢰 피하기', 'two-truths': '두 진실 한 거짓', proverb: '속담 이어 말하기', 'chosung-endure': '초성 버티기', 'which-first': '어느 게 먼저', 'greed-dice': '욕심 주사위' }
-const title = computed(() => TITLES[key.value] ?? '실시간 경기')
+// 이름은 서버가 준다 (화면에 따로 둔 이름표는 새 게임이 늘 때마다 빠져 '실시간 경기'로 보였다)
+const title = computed(() => state.value?.title || '실시간 경기')
 const state = ref<State | null>(null)
 const error = ref('')
 const word = ref('')
@@ -281,7 +281,11 @@ watch(key, async (_, before) => {
 async function callBot() {
   const s = state.value
   if (!s) return
-  apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
+  try {
+    apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
+  } catch (e) {
+    showToast(message(e, '봇을 부르지 못했어요. 잠시 뒤 다시 해 주세요'))
+  }
 }
 
 const waited = computed(() => {
@@ -290,7 +294,10 @@ const waited = computed(() => {
 })
 
 function message(e: unknown, fallback: string) {
-  return (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
+  const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
+  // 없는 번호는 서버가 '대결 없음: 123'처럼 개발용 문구를 준다. 사람에게는 풀어서 (도전장 화면과 같은 말)
+  if (r?.status === 404) return '없거나 이미 끝난 경기예요'
+  return r?.data?.message || fallback
 }
 
 // 끝나는 순간 한 번: 이기면 화음, 지면 부드럽게 내려가는 소리와 진동
@@ -377,7 +384,13 @@ function knocked(mine: boolean) {
 async function leave() {
   if (!state.value) return
   if (state.value.status === 'PLAYING' && !(await confirmDialog({ title: '그만둘까요?', message: '지금 나가면 이 판은 지게 돼요', confirmText: '그만두기' }))) return
-  apply((await POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: state.value.gameId } })).data)
+  try {
+    apply((await POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: state.value.gameId } })).data)
+  } catch (e) {
+    // 끊겼을 때 버튼이 아무 반응 없이 멈추지 않게
+    showToast(message(e, '나가지 못했어요. 연결을 확인하고 다시 해 주세요'))
+    return
+  }
   if (state.value?.status === 'CANCELED') router.replace(`/play/${key.value}`)
 }
 
@@ -395,7 +408,10 @@ const timer = setInterval(async () => {
   if (!s) return
   if (s.status === 'WAITING' && !s.fixture && !s.invitee && !botCalled && !longLobby.value && waited.value >= s.botAfterSeconds) {
     botCalled = true
-    apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
+    // 못 부르면 5초 뒤 다시 (끊긴 사이 봇이 영영 안 오지 않게, 그렇다고 0.25초마다 두드리지 않게)
+    POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })
+      .then(({ data }) => apply(data))
+      .catch(() => setTimeout(() => (botCalled = false), 5000))
   }
   // 마감 시각마다 한 번 (레이스·같이 내기는 moves가 그대로여도 판이 바뀐다)
   const due = s.turnEndsAt ? new Date(s.turnEndsAt).getTime() : -1
@@ -403,7 +419,13 @@ const timer = setInterval(async () => {
     timeoutSentFor = due
     // 서버는 1초 여유를 둔다
     setTimeout(async () => {
-      if (state.value?.gameId === s.gameId) apply((await POST('/api/app-games/realtime/{gameId}/timeout', { path: { gameId: s.gameId } })).data)
+      if (state.value?.gameId !== s.gameId) return
+      try {
+        apply((await POST('/api/app-games/realtime/{gameId}/timeout', { path: { gameId: s.gameId } })).data)
+      } catch {
+        // 상대가 그사이 냈거나 끊겼다: 바뀜 신호나 다시 불러오기로 맞춘다
+        reload()
+      }
     }, 1500)
   }
 }, 250)

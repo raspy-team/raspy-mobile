@@ -5104,7 +5104,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        VisibilityRequest: {
+        OrgVisibilityRequest: {
             /** @enum {string} */
             visibility: "ALL" | "SAME_ORG" | "HIDDEN";
         };
@@ -5256,7 +5256,7 @@ export interface components {
         ClubLineupRequest: {
             userIds: number[];
         };
-        RenameRequest: {
+        OrgRenameRequest: {
             name: string;
             /** @enum {string} */
             type?: "UNIVERSITY" | "COMPANY" | "OTHER";
@@ -5675,7 +5675,7 @@ export interface components {
             bonusRate: number;
             outcome?: string;
         };
-        RequestView: {
+        OrgRequestView: {
             /** Format: int64 */
             id: number;
             name: string;
@@ -6380,8 +6380,15 @@ export interface components {
             applied: boolean;
             stoppedByLimit: boolean;
         };
-        RejectRequest: {
+        OrgRejectRequest: {
             reason: string;
+        };
+        OrgApproveRequest: {
+            /** Format: int64 */
+            orgId?: number;
+            name?: string;
+            /** @enum {string} */
+            type?: "UNIVERSITY" | "COMPANY" | "OTHER";
         };
         DailyAccessResponse: {
             isFirstAccess: boolean;
@@ -6959,7 +6966,7 @@ export interface components {
             /** @enum {string} */
             type: "UNIVERSITY" | "COMPANY" | "OTHER";
         };
-        Membership: {
+        OrgMembership: {
             /** Format: int64 */
             orgId: number;
             name: string;
@@ -6970,10 +6977,10 @@ export interface components {
             /** Format: date-time */
             verifiedAt: string;
         };
-        MyOrganizations: {
-            memberships: components["schemas"]["Membership"][];
-            pending?: components["schemas"]["RequestView"];
-            lastDecided?: components["schemas"]["RequestView"];
+        OrgMine: {
+            memberships: components["schemas"]["OrgMembership"][];
+            pending?: components["schemas"]["OrgRequestView"];
+            lastDecided?: components["schemas"]["OrgRequestView"];
             /** Format: int32 */
             maxOrgs: number;
             canRequest: boolean;
@@ -7946,7 +7953,7 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
-        AdminRequest: {
+        AdminOrgRequest: {
             /** Format: int64 */
             id: number;
             /** Format: int64 */
@@ -8048,7 +8055,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["VisibilityRequest"];
+                "application/json": components["schemas"]["OrgVisibilityRequest"];
             };
         };
         responses: {
@@ -8173,7 +8180,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RenameRequest"];
+                "application/json": components["schemas"]["OrgRenameRequest"];
             };
         };
         responses: {
@@ -9049,7 +9056,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["RequestView"];
+                    "*/*": components["schemas"]["OrgRequestView"];
                 };
             };
         };
@@ -11653,7 +11660,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RejectRequest"];
+                "application/json": components["schemas"]["OrgRejectRequest"];
             };
         };
         responses: {
@@ -11679,7 +11686,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ApproveRequest"];
+                "application/json": components["schemas"]["OrgApproveRequest"];
             };
         };
         responses: {
@@ -12649,7 +12656,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["MyOrganizations"];
+                    "*/*": components["schemas"]["OrgMine"];
                 };
             };
         };
@@ -14233,7 +14240,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AdminRequest"][];
+                    "*/*": components["schemas"]["AdminOrgRequest"][];
                 };
             };
         };

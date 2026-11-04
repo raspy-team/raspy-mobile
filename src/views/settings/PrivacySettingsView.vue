@@ -28,7 +28,7 @@
 
       <!-- 소속(조직마다 모두·같은 조직만·숨김)은 설정 > 소속에서 (org-verify) -->
       <UiList v-if="!loading && !error && hasOrgPage" class="mt-6">
-        <UiListItem icon="user-group" title="소속" subtitle="인증한 학교·회사를 누가 볼지는 소속에서 정해요" chevron @click="router.push(ORG_PATH)" />
+        <UiListItem icon="building" title="소속" subtitle="인증한 학교·회사를 누가 볼지는 소속에서 정해요" chevron @click="router.push(ORG_PATH)" />
       </UiList>
     </main>
   </div>

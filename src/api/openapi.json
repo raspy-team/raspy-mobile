@@ -102,7 +102,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/VisibilityRequest"
+                "$ref": "#/components/schemas/OrgVisibilityRequest"
               }
             }
           },
@@ -316,7 +316,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RenameRequest"
+                "$ref": "#/components/schemas/OrgRenameRequest"
               }
             }
           },
@@ -1655,7 +1655,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestView"
+                  "$ref": "#/components/schemas/OrgRequestView"
                 }
               }
             }
@@ -5599,7 +5599,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RejectRequest"
+                "$ref": "#/components/schemas/OrgRejectRequest"
               }
             }
           },
@@ -5642,7 +5642,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApproveRequest"
+                "$ref": "#/components/schemas/OrgApproveRequest"
               }
             }
           },
@@ -7083,7 +7083,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/MyOrganizations"
+                  "$ref": "#/components/schemas/OrgMine"
                 }
               }
             }
@@ -9375,7 +9375,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/AdminRequest"
+                    "$ref": "#/components/schemas/AdminOrgRequest"
                   }
                 }
               }
@@ -9706,7 +9706,7 @@
   },
   "components": {
     "schemas": {
-      "VisibilityRequest": {
+      "OrgVisibilityRequest": {
         "required": [
           "visibility"
         ],
@@ -10212,7 +10212,7 @@
           }
         }
       },
-      "RenameRequest": {
+      "OrgRenameRequest": {
         "required": [
           "name"
         ],
@@ -11573,7 +11573,7 @@
           }
         }
       },
-      "RequestView": {
+      "OrgRequestView": {
         "required": [
           "createdAt",
           "id",
@@ -13833,7 +13833,7 @@
           }
         }
       },
-      "RejectRequest": {
+      "OrgRejectRequest": {
         "required": [
           "reason"
         ],
@@ -13841,6 +13841,26 @@
         "properties": {
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "OrgApproveRequest": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
           }
         }
       },
@@ -15698,7 +15718,7 @@
           }
         }
       },
-      "Membership": {
+      "OrgMembership": {
         "required": [
           "name",
           "orgId",
@@ -15737,7 +15757,7 @@
           }
         }
       },
-      "MyOrganizations": {
+      "OrgMine": {
         "required": [
           "canRequest",
           "maxOrgs",
@@ -15748,14 +15768,14 @@
           "memberships": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Membership"
+              "$ref": "#/components/schemas/OrgMembership"
             }
           },
           "pending": {
-            "$ref": "#/components/schemas/RequestView"
+            "$ref": "#/components/schemas/OrgRequestView"
           },
           "lastDecided": {
-            "$ref": "#/components/schemas/RequestView"
+            "$ref": "#/components/schemas/OrgRequestView"
           },
           "maxOrgs": {
             "type": "integer",
@@ -19020,7 +19040,7 @@
           }
         }
       },
-      "AdminRequest": {
+      "AdminOrgRequest": {
         "required": [
           "createdAt",
           "hasFile",

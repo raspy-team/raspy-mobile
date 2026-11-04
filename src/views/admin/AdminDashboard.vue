@@ -149,6 +149,17 @@
         </template>
       </UiSection>
 
+      <!-- 소속 인증: 대기 중인 신청 수. 서류는 결정하면 바로 지워진다 -->
+      <UiSection title="소속 인증">
+        <template #action>
+          <UiButton variant="ghost" size="sm" to="/admin/organizations">열기</UiButton>
+        </template>
+        <RouterLink to="/admin/organizations" class="block rounded-xl bg-surface p-3 active:bg-surface-2">
+          <p class="t-title tabular-nums" :class="orgPending ? 'text-primary' : 'text-fg'">{{ orgPending ?? '-' }}</p>
+          <p class="t-caption mt-0.5">확인을 기다리는 신청</p>
+        </RouterLink>
+      </UiSection>
+
       <!-- 규칙 수정 요청 -->
       <UiSection title="규칙 수정 요청">
         <template #action>
@@ -375,6 +386,12 @@ const filteredUsers = computed(() => {
   return users.value.filter((u) => u.nickname?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q))
 })
 
+// 소속 인증 대기 수
+const orgPending = ref(null)
+async function loadOrgPending() {
+  orgPending.value = ((await GET('/api/admin/organizations/requests', { query: { status: 'PENDING' } }).catch(() => ({ data: null }))).data)?.length ?? null
+}
+
 async function load() {
   try {
     const [reportRes, ...ruleRes] = await Promise.all([
@@ -502,5 +519,6 @@ onMounted(() => {
   loadAcquisition()
   loadSafety()
   loadClassifyRemaining()
+  loadOrgPending()
 })
 </script>

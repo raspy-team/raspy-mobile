@@ -36,7 +36,7 @@
                 </span>
               </div>
               <div class="flex gap-2">
-                <UiButton v-if="b.gameId" size="sm" variant="secondary" class="flex-1" @click="router.push(`/game?id=${b.gameId}`)">{{ GAME_STATUS[b.gameStatus || ''] || '경기 보기' }}</UiButton>
+                <UiButton v-if="b.gameId" size="sm" variant="secondary" class="flex-1" @click="router.push(`/games/${b.gameId}`)">{{ GAME_STATUS[b.gameStatus || ''] || '경기 보기' }}</UiButton>
                 <UiButton v-else-if="m.status === 'ACCEPTED' && m.mySide" size="sm" variant="secondary" class="flex-1" @click="openLineup(b.boardNo)">
                   {{ (m.mySide === 'HOME' ? b.home : b.away).length ? '우리 선수 바꾸기' : '우리 선수 정하기' }}
                 </UiButton>
@@ -133,7 +133,13 @@ async function openLineup(boardNo: number) {
   picked.value = (m.value.mySide === 'HOME' ? b.home : b.away).map((p) => p.userId)
   const clubId = m.value.mySide === 'HOME' ? m.value.home.clubId : m.value.away.clubId
   members.value = null
-  members.value = (await GET('/api/clubs/{id}', { path: { id: clubId } })).data.members
+  try {
+    members.value = (await GET('/api/clubs/{id}', { path: { id: clubId } })).data.members
+  } catch (e) {
+    // 못 불러오면 빈 뼈대가 남지 않게 닫는다
+    lineupBoard.value = 0
+    showToast(message(e, '멤버를 불러오지 못했어요'))
+  }
 }
 function toggle(userId: number) {
   const max = m.value?.perBoard || 1

@@ -158,6 +158,9 @@ function onEnter(e) {
 
 onBeforeUnmount(() => {
   sizeObserver?.disconnect()
+  // 나간 뒤에도 이 방 메시지를 받아 '읽음'으로 보내던 것을 끊는다 (방 번호까지 지워야 끊긴 뒤 다시 붙지 않는다)
+  socket.onMessage(null)
+  socket.disconnect({ clearRoomId: true })
   refreshInbox() // 나가면 메시지 배지를 다시 센다
   stopWatchingStatus?.()
   stopWatchingStatus = null
@@ -222,7 +225,8 @@ function sendQuick(text) {
 
 function sendMsg() {
   if (!newMsg.value.trim()) return
-  socket.sendChat(roomId.value, newMsg.value)
+  // 연결이 끊겨 못 보냈으면 쓴 글을 남겨 다시 보낼 수 있게
+  if (!socket.sendChat(roomId.value, newMsg.value)) return showToast('연결이 끊겼어요. 잠시 뒤 다시 보내 주세요')
   newMsg.value = ''
 }
 function scrollToBottom() {
@@ -378,7 +382,7 @@ const handleGoToGame = () => {
 
 const handleViewResult = () => {
   if (headerInfo.value.gameId) {
-    router.push(`/game?id=${headerInfo.value.gameId}`)
+    router.push(`/games/${headerInfo.value.gameId}/result`)
   }
 }
 

@@ -6,7 +6,10 @@
       <UiButton block class="mt-4" icon="plus" @click="openCreate()">대회 열기</UiButton>
 
       <UiTabs v-model="tab" :options="TABS" class="mt-6" />
-      <UiListSkeleton v-if="!list" :rows="3" class="mt-3" />
+      <UiEmptyState v-if="error" class="pt-10" icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
+        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+      </UiEmptyState>
+      <UiListSkeleton v-else-if="!list" :rows="3" class="mt-3" />
       <div v-else-if="list.length" class="space-y-2 mt-3">
         <TournamentRow v-for="t in list" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
       </div>
@@ -36,11 +39,17 @@ const router = useRouter()
 const tab = ref<'near' | 'mine'>('near')
 const list = ref<components['schemas']['TournamentSummary'][] | null>(null)
 const createOpen = ref(false)
+const error = ref('')
 const clubId = ref<number | null>(route.query.clubId ? Number(route.query.clubId) : null)
 
 async function load() {
   list.value = null
-  list.value = (await GET('/api/tournaments', { query: { scope: tab.value } })).data
+  error.value = ''
+  try {
+    list.value = (await GET('/api/tournaments', { query: { scope: tab.value } })).data
+  } catch {
+    error.value = '대회를 불러오지 못했어요'
+  }
 }
 function openCreate() {
   createOpen.value = true

@@ -361,7 +361,8 @@ async function submitReport() {
     const { data: done } = await api.post('/api/reports', { targetType: 'USER', targetId: user.value.id, reason })
     showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
   } catch (e) {
-    showToast(e.response?.data?.message || '이미 신고했어요')
+    // 서버가 이유를 주면 그대로 (이미 신고했으면 서버가 그렇게 알려 준다). 연결 오류를 '이미 신고했어요'로 보이지 않게
+    showToast(e.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
   } finally {
     reporting.value = false
     reportOpen.value = false

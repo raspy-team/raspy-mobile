@@ -21,7 +21,7 @@
     <form v-else class="space-y-4" @submit.prevent="submit">
       <h1 class="t-title">새 비밀번호를 정해요</h1>
       <UiInput v-model="loginId" label="아이디" autocomplete="username" placeholder="로그인할 때 쓰던 아이디" />
-      <UiInput v-model="newPassword" label="새 비밀번호" type="password" autocomplete="new-password" hint="8~20자" />
+      <UiInput v-model="newPassword" label="새 비밀번호" type="password" autocomplete="new-password" hint="8~20자" :maxlength="20" />
       <p v-if="message" class="t-caption text-danger-fg" role="alert">{{ message }}</p>
       <UiButton type="submit" block size="lg" :loading="busy" :disabled="!loginId.trim() || newPassword.length < 8">바꾸기</UiButton>
     </form>
@@ -31,11 +31,12 @@
 <script setup lang="ts">
 // 아이디 계정 비밀번호 찾기 (11/5). 서버는 방금 한 본인인증이 그 계정에 전에 저장된 본인인증과 같은 사람일 때만 바꾼다 (PasswordResetService)
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import { UiButton, UiInput, UiListSkeleton, UiTopBar } from '../../components/ui'
 
 const route = useRoute()
+const router = useRouter()
 const cfg = ref<{ available: boolean; storeId?: string | null; channelKey?: string | null; verificationId: string } | null>(null)
 const verifiedId = ref('')
 const loginId = ref('')
@@ -86,8 +87,12 @@ async function submit() {
     done.value = true
   } catch (e) {
     message.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '바꾸지 못했어요. 다시 해 주세요'
-    // 인증이 오래됐으면 처음부터
-    if (/오래됐어요|인증 번호/.test(message.value)) verifiedId.value = ''
+    // 서버는 인증 한 번에 시도 한 번만 받는다 (비밀번호 길이만 먼저 본다). 그 밖의 실패는 인증부터 다시: 전에는 아이디를 고쳐 다시 눌러도
+    // '이미 쓴 인증'만 나오고 인증 버튼으로 돌아갈 길이 없었다. 주소의 인증 번호도 지워 새로고침해도 다시 붙지 않게 (11/5 ux-7a)
+    if (!/비밀번호는/.test(message.value)) {
+      verifiedId.value = ''
+      router.replace({ query: {} })
+    }''
   } finally {
     busy.value = false
   }

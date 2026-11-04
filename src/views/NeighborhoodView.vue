@@ -14,6 +14,11 @@
         <UiSkeleton class="h-24 w-full" />
       </div>
 
+      <!-- 못 불러왔을 때 '동네가 없다'로 보이지 않게 -->
+      <UiEmptyState v-else-if="loadError" class="pt-16" icon="fas fa-triangle-exclamation" title="동네를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+      </UiEmptyState>
+
       <!-- 아직 동네가 없으면 인증부터 -->
       <template v-else-if="!list.length">
         <h1 class="t-title mt-2">동네를 인증해 주세요</h1>
@@ -89,7 +94,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import NeighborhoodVerify from '../components/neighborhood/NeighborhoodVerify.vue'
-import { UiBadge, UiButton, UiCard, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
+import { UiBadge, UiButton, UiCard, UiEmptyState, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
 import { useToast } from '../composable/useToast'
 import { confirmDialog } from '../composables/useConfirm'
 
@@ -133,8 +138,12 @@ function onVerified(next: Mine) {
 
 async function select(n: Mine['neighborhoods'][number]) {
   if (n.active) return
-  data.value = (await POST('/api/neighborhoods/select', { body: { code: n.code } })).data
-  showToast(`지금 동네를 ${n.name}으로 바꿨어요`)
+  try {
+    data.value = (await POST('/api/neighborhoods/select', { body: { code: n.code } })).data
+    showToast(`지금 동네를 ${n.name}으로 바꿨어요`)
+  } catch (e) {
+    showToast(errMessage(e, '바꾸지 못했어요. 다시 해 주세요'))
+  }
 }
 
 async function setRange(level: number) {
@@ -142,6 +151,8 @@ async function setRange(level: number) {
   savingRange.value = true
   try {
     data.value = (await POST('/api/neighborhoods/range', { body: { code: active.value.code, level } })).data
+  } catch (e) {
+    showToast(errMessage(e, '범위를 바꾸지 못했어요. 다시 해 주세요'))
   } finally {
     savingRange.value = false
   }
@@ -151,19 +162,30 @@ async function confirmRemove(n: Mine['neighborhoods'][number]) {
   const last = list.value.length === 1
   const ok = await confirmDialog({
     title: `${n.name}을 지울까요?`,
-    message: last ? '동네가 없으면 경기를 열거나 신청할 수 없어요' : '남은 동네가 지금 동네가 돼요',
+    message: last ? '동네가 없으면 경기를 열거나 신청할 수 없어요' : n.active ? '남은 동네가 지금 동네가 돼요' : '다시 쓰려면 그 동네에서 인증해야 해요',
     confirmText: '지우기',
     danger: true,
   })
   if (!ok) return
-  data.value = (await POST('/api/neighborhoods/remove', { body: { code: n.code } })).data
+  try {
+    data.value = (await POST('/api/neighborhoods/remove', { body: { code: n.code } })).data
+  } catch (e) {
+    showToast(errMessage(e, '지우지 못했어요. 다시 해 주세요'))
+  }
 }
 
-onMounted(async () => {
+const loadError = ref(false)
+const errMessage = (e: unknown, fallback: string) => (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
+async function load() {
+  loading.value = true
+  loadError.value = false
   try {
     data.value = (await GET('/api/neighborhoods/me')).data
+  } catch {
+    loadError.value = true
   } finally {
     loading.value = false
   }
-})
+}
+onMounted(load)
 </script>

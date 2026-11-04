@@ -9,7 +9,10 @@
       </div>
 
       <UiSection title="내 동호회" class="mt-8">
-        <UiListSkeleton v-if="!mine" :rows="2" />
+        <UiEmptyState v-if="loadError" icon="fas fa-triangle-exclamation" title="동호회를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+          <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        </UiEmptyState>
+        <UiListSkeleton v-else-if="!mine" :rows="2" />
         <div v-else-if="mine.length" class="space-y-2">
           <ClubRow v-for="c in mine" :key="c.id" :club="c" @click="router.push(`/clubs/${c.id}`)" />
         </div>
@@ -17,7 +20,8 @@
       </UiSection>
 
       <UiSection title="우리 동네 동호회" class="mt-8">
-        <UiListSkeleton v-if="!nearby" :rows="2" />
+        <p v-if="loadError" class="t-caption">위에서 다시 불러와 주세요</p>
+        <UiListSkeleton v-else-if="!nearby" :rows="2" />
         <div v-else-if="nearby.length" class="space-y-2">
           <ClubRow v-for="c in nearby" :key="c.id" :club="c" @click="router.push(`/clubs/${c.id}`)">
             <UiButton size="sm" variant="secondary" :loading="joining === c.id" @click.stop="join(c)">{{ c.joinMode === 'APPROVAL' ? '신청하기' : '들어가기' }}</UiButton>
@@ -46,10 +50,12 @@ import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import ClubRow from '../../components/club/ClubRow.vue'
-import { UiButton, UiInput, UiListSkeleton, UiSection, UiSheet, UiTopBar } from '../../components/ui'
+import { UiButton, UiEmptyState, UiInput, UiListSkeleton, UiSection, UiSheet, UiTopBar } from '../../components/ui'
+import { useToast } from '@/composable/useToast'
 
 type Club = components['schemas']['ClubSummary']
 const router = useRouter()
+const { showToast } = useToast()
 const mine = ref<Club[] | null>(null)
 const nearby = ref<Club[] | null>(null)
 const joining = ref(0)
@@ -59,10 +65,16 @@ const intro = ref('')
 const creating = ref(false)
 const error = ref('')
 
+const loadError = ref(false)
 async function load() {
-  const [a, b] = await Promise.all([GET('/api/clubs/mine'), GET('/api/clubs/nearby')])
-  mine.value = a.data
-  nearby.value = b.data
+  loadError.value = false
+  try {
+    const [a, b] = await Promise.all([GET('/api/clubs/mine'), GET('/api/clubs/nearby')])
+    mine.value = a.data
+    nearby.value = b.data
+  } catch {
+    loadError.value = true
+  }
 }
 
 // 승인 가입 동호회는 가입 질문에 답해야 해서 동호회 화면에서 신청한다
@@ -73,6 +85,9 @@ async function join(club: Club) {
   try {
     await POST('/api/clubs/join', { body: { clubId } })
     router.push(`/clubs/${clubId}`)
+  } catch (e) {
+    // 동호회 수 제한 같은 이유가 보이게 (전에는 눌러도 아무 일이 없었다)
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '들어가지 못했어요. 다시 해 주세요')
   } finally {
     joining.value = 0
   }

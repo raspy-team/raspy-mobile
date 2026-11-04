@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="알림 설정" back="/settings" />
+    <UiTopBar title="알림 설정" back />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
       <p class="t-caption py-3">끈 알림은 휴대폰으로 오지 않아요. 앱 안 알림 목록에는 그대로 남아요.</p>

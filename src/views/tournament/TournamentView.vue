@@ -24,7 +24,7 @@
             <p class="t-caption mt-1">{{ myHint }}</p>
             <div class="flex gap-2 mt-3">
               <UiButton v-if="v.canCheckIn && v.my.status !== 'CHECKED_IN'" class="flex-1" variant="signal" :loading="busy" @click="checkIn">체크인</UiButton>
-              <UiButton size="sm" variant="ghost" :loading="busy" @click="withdraw">신청 거두기</UiButton>
+              <UiButton v-if="v.my.status !== 'REJECTED'" size="sm" variant="ghost" :loading="busy" @click="withdraw">신청 거두기</UiButton>
             </div>
           </UiCard>
           <template v-else>
@@ -44,7 +44,7 @@
           <p class="t-caption">시작 시각에 체크인한 참가자로 대진이 저절로 나와요. 다 모였으면 지금 시작해도 돼요</p>
           <div class="flex gap-2">
             <!-- 한 화면의 채운 버튼은 '신청하기' 하나. 둘이 안 모였으면 시작할 수 없다 -->
-            <UiButton class="flex-1" variant="secondary" :loading="busy" :disabled="acceptedCount < 2" @click="start">지금 시작</UiButton>
+            <UiButton class="flex-1" variant="secondary" :loading="busy" :disabled="checkedInCount < 2" @click="start">지금 시작</UiButton>
             <UiButton class="flex-1" variant="secondary" :loading="busy" @click="cancelTournament">대회 취소</UiButton>
           </div>
         </UiCard>
@@ -162,6 +162,8 @@ const day = (iso: string) => {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 const acceptedCount = computed(() => v.value?.summary.entryCount ?? 0)
+// '지금 시작'은 체크인한 사람으로만 대진을 짠다. 신청만 받은 수로 켜면 눌러도 시작할 수 없다 (서버가 막는다)
+const checkedInCount = computed(() => v.value?.entries.filter((e) => e.status === 'CHECKED_IN').length ?? 0)
 const full = computed(() => !!v.value && v.value.summary.entryCount >= v.value.summary.maxEntrants)
 const infoLine = computed(() => {
   const x = v.value
@@ -234,7 +236,7 @@ function goFixture(f: Fixture) {
   const key = v.value?.summary.appGameKey
   if (f.clubMatchId) router.push(`/clubs/matches/${f.clubMatchId}`)
   else if (key && f.gameId) router.push(`/play/${key}?duel=${f.gameId}`)
-  else if (f.gameId) router.push(f.status === 'DONE' ? `/games/${f.gameId}/result` : `/game?id=${f.gameId}`)
+  else if (f.gameId) router.push(f.status === 'DONE' ? `/games/${f.gameId}/result` : `/games/${f.gameId}`)
 }
 // 앱 게임 판: 먼저 누른 사람이 대결(실시간이면 방)을 열고, 상대는 같은 대결에 들어간다. 실시간 화면은 내 진행 중 대결을 이어서 연다
 async function playFixture(f: Fixture) {

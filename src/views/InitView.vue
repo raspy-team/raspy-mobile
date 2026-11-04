@@ -103,7 +103,7 @@ import { API_BASE_URL } from '@/config/server'
 import { TERMS } from '../content/legal'
 import { UiButton, UiCard, UiSheet } from '../components/ui'
 import { peekReturnTo, takeReturnTo } from '../utils/authRedirect'
-import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin } from '../utils/nativeBridge'
+import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin } from '../utils/nativeBridge'
 
 const FEATURES = [
   // 처음 온 사람의 짧은 안내. 한 줄에 한 가지, 실제로 하는 순서대로 (11/3)
@@ -158,7 +158,16 @@ onMounted(async () => {
 
 function loginWith(provider) {
   pending.value = provider
-  if (provider === 'apple' && isIosApp) {
+  if (provider === 'apple' && isIosApp && isCapacitorApp) {
+    // 아이폰 앱: 앱이 직접 Apple 로그인 창을 띄운다 (옛 앱의 iosBridge는 이제 없다, 11/5)
+    nativeError.value = ''
+    nativeAppleLogin().catch((e) => {
+      pending.value = ''
+      // 창을 닫은 건 오류가 아니다 (ASAuthorizationError 1001 canceled)
+      if (!/cancel|1001/i.test(String(e?.message || e))) nativeError.value = LOGIN_ERRORS.failed
+    })
+    return
+  } else if (provider === 'apple' && isIosApp) {
     window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'appleLogin' })
   } else if (provider === 'apple') {
     window.location.href = `${API_BASE_URL}/login/oauth2/apple/web/start`

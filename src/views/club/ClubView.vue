@@ -244,6 +244,7 @@
 // 동호회 한 곳 (/clubs/:id): 같이 붙고, 같이 기록이 쌓이는 팀 (docs/clubs.md).
 // 공지·단톡방 → 가입 신청(운영진) → 일정·참석 → 교류전 → 우리끼리 순위 → 친선전 → 멤버(운영진 관리)
 import { ref, computed, reactive, onMounted } from 'vue'
+import { matchTime } from '@/utils/format'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -281,10 +282,8 @@ const faceLine = computed(() => {
   return [d.club.dongName, d.club.mainRuleTitle, `멤버 ${d.club.memberCount}명`, d.gamesThisMonth ? `이번 달 ${d.gamesThisMonth}판` : '',
     played ? `교류전 ${r!.wins}승 ${r!.draws ? `${r!.draws}무 ` : ''}${r!.losses}패` : ''].filter(Boolean).join(' · ')
 })
-const when = (iso: string) => {
-  const d = new Date(iso)
-  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${d.getHours()}시${d.getMinutes() ? ` ${d.getMinutes()}분` : ''}`
-}
+// 오전·오후까지 (예전엔 '11월 7일 4시 16분'으로 새벽인지 오후인지 몰랐다). 다른 화면과 같은 꼴
+const when = (iso: string) => matchTime(iso)
 const message = (e: unknown, fallback: string) => (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 
 const tournaments = ref<Schemas['TournamentSummary'][]>([])

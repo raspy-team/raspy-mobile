@@ -147,22 +147,22 @@
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 문장</p>
-            <p class="t-body mt-1">{{ result.myAnswer }}</p>
+            <p class="t-body mt-1 whitespace-pre-line break-keep">{{ result.myAnswer }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
             <p class="t-micro">상대 문장</p>
-            <p class="t-body mt-1">{{ result.opponentAnswer }}</p>
+            <p class="t-body mt-1 whitespace-pre-line break-keep">{{ result.opponentAnswer }}</p>
           </UiCard>
         </template>
         <!-- 말싸움: 주고받은 말 -->
         <template v-if="key === 'debate'">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 말싸움</p>
-            <p class="t-caption mt-1 whitespace-pre-line">{{ result.myAnswer }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ result.myAnswer }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
             <p class="t-micro">{{ who(result.opponent) }}님의 말싸움 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
-            <p class="t-caption mt-1 whitespace-pre-line">{{ result.opponentAnswer }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ result.opponentAnswer }}</p>
             <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
@@ -170,12 +170,12 @@
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 요리</p>
             <p class="t-heading mt-1">{{ dish(result.myAnswer).name }}</p>
-            <p class="t-caption mt-1 whitespace-pre-line">{{ dish(result.myAnswer).steps }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ dish(result.myAnswer).steps }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
             <p class="t-micro">{{ who(result.opponent) }}님의 요리 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
             <p class="t-heading mt-1">{{ dish(result.opponentAnswer).name }}</p>
-            <p class="t-caption mt-1 whitespace-pre-line">{{ dish(result.opponentAnswer).steps }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ dish(result.opponentAnswer).steps }}</p>
             <p v-if="result.opponentFeedback" class="t-caption mt-2">AI 셰프: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
@@ -330,6 +330,8 @@ const WRITING: Record<string, { guide: string; placeholder: string }> = {
   excuse: { guide: '이 상황에서 빠져나갈 한 줄 변명', placeholder: '그럴듯하고 웃긴 변명' },
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
   trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
+  'power-level': { guide: '주제에 맞는 싸움꾼을 한 줄로 (뻔한 최강은 약해요)', placeholder: '예) 고무장갑 낀 할머니와 효자손' },
+  acrostic: { guide: '글자마다 한 줄씩, 그 글자로 시작해요. 줄을 바꿔 나눠요', placeholder: '고백하려고\n양말까지 새로 샀는데\n이미 여친이 있었다' },
 }
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
 import SquatPlay from '../../components/appgame/SquatPlay.vue'

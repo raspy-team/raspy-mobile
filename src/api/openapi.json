@@ -11654,6 +11654,7 @@
           "botAfterSeconds",
           "fixture",
           "gameId",
+          "howTo",
           "key",
           "liveJudged",
           "lobbySeconds",
@@ -11693,6 +11694,12 @@
           },
           "summary": {
             "type": "string"
+          },
+          "howTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "moves": {
             "type": "array",
@@ -11811,8 +11818,10 @@
         "required": [
           "cells",
           "cols",
+          "lattice",
           "playable",
           "rows",
+          "small",
           "title"
         ],
         "type": "object",
@@ -11836,11 +11845,18 @@
           },
           "playable": {
             "type": "boolean"
+          },
+          "small": {
+            "type": "boolean"
+          },
+          "lattice": {
+            "type": "boolean"
           }
         }
       },
       "TurnChoice": {
         "required": [
+          "disabled",
           "label",
           "value"
         ],
@@ -11854,6 +11870,9 @@
           },
           "icon": {
             "type": "string"
+          },
+          "disabled": {
+            "type": "boolean"
           }
         }
       },
@@ -11883,6 +11902,13 @@
             "type": "string"
           },
           "input": {
+            "type": "string"
+          },
+          "inputMax": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hint": {
             "type": "string"
           }
         }

@@ -5551,6 +5551,7 @@ export interface components {
             opponent?: components["schemas"]["AppPlayer"];
             startWord: string;
             summary: string;
+            howTo: string[];
             moves: components["schemas"]["RealtimeMove"][];
             stones?: components["schemas"]["RealtimeStone"][];
             meFirst: boolean;
@@ -5601,11 +5602,14 @@ export interface components {
             cols: number;
             cells: string[];
             playable: boolean;
+            small: boolean;
+            lattice: boolean;
         };
         TurnChoice: {
             value: string;
             label: string;
             icon?: string;
+            disabled: boolean;
         };
         TurnView: {
             boards: components["schemas"]["TurnBoard"][];
@@ -5613,6 +5617,9 @@ export interface components {
             note?: string;
             prompt?: string;
             input?: string;
+            /** Format: int32 */
+            inputMax?: number;
+            hint?: string;
         };
         AppPlayResponse: {
             /** Format: int64 */

@@ -1921,6 +1921,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/password-reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 비밀번호 새로 정하기 (로그인 전)
+         * @description 아이디 + 방금 끝낸 휴대폰 본인인증. 그 계정에 저장된 본인인증과 같은 사람일 때만
+         */
+        post: operations["reset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -3391,6 +3411,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/landing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 링크로 들어온 사람의 시작 화면 한 줄 (로그인 전)
+         * @description path: 로그인 뒤 돌아갈 앱 주소. 알 수 없는 주소면 204
+         */
+        get: operations["landing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/invite/{gameId}": {
         parameters: {
             query?: never;
@@ -4148,6 +4188,26 @@ export interface paths {
          * @description 키가 들어 있는 것만 true. 로그인하지 않아도 부른다
          */
         get: operations["providers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password-reset/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 비밀번호 찾기 준비 (로그인 전)
+         * @description 본인인증이 켜져 있는지, 포트원 창을 여는 값, 이번에 쓸 인증 번호
+         */
+        get: operations["config_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5519,6 +5579,11 @@ export interface components {
             email: string;
             password: string;
         };
+        ResetRequest: {
+            loginId: string;
+            identityVerificationId: string;
+            newPassword: string;
+        };
         LoginRequest: {
             email: string;
             password: string;
@@ -6455,6 +6520,10 @@ export interface components {
             lastAt?: string;
             public: boolean;
         };
+        LandingResponse: {
+            title: string;
+            line: string;
+        };
         InvitedGameResponse: {
             /** Format: int64 */
             id: number;
@@ -7183,6 +7252,12 @@ export interface components {
             google: boolean;
             kakao: boolean;
             apple: boolean;
+        };
+        Config: {
+            available: boolean;
+            storeId?: string;
+            channelKey?: string;
+            verificationId: string;
         };
         OnboardingStatus: {
             termsAgreed: boolean;
@@ -9959,6 +10034,28 @@ export interface operations {
             };
         };
     };
+    reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     login: {
         parameters: {
             query?: never;
@@ -11784,6 +11881,28 @@ export interface operations {
             };
         };
     };
+    landing: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LandingResponse"];
+                };
+            };
+        };
+    };
     getInviteById: {
         parameters: {
             query?: never;
@@ -12664,6 +12783,26 @@ export interface operations {
             };
         };
     };
+    config_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Config"];
+                };
+            };
+        };
+    };
     onboarding: {
         parameters: {
             query?: never;
@@ -13175,7 +13314,10 @@ export interface operations {
     };
     leaveGame: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 만나서 하는 경기 3시간 안에 빠질 때의 이유. 없으면 노쇼로 센다 */
+                reason?: string;
+            };
             header?: never;
             path: {
                 gameId: number;

@@ -151,7 +151,7 @@
 <script setup>
 // 경기 만들기: 규칙은 /rules에서 고르고 돌아온다. 여기서는 상대(아무나 / 친구)만 정하면 경기가 열린다.
 // 장소·시간은 상대가 정해진 뒤 내 경기에서 함께 정한다
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { GET } from '@/api/client'
 import { categoryKey, winSummary } from '../../utils/rule'
@@ -178,13 +178,13 @@ const OPTIONS = [
 // 친구와 바로 잡는 경기는 1:1만 된다 (여럿은 열어서 신청을 받는다)
 const options = computed(() => (format.value === 'DUEL' ? OPTIONS : OPTIONS.filter((o) => o.value === 'anyone')))
 
-const venue = ref('IN_PERSON')
+const venue = ref(route.query.venue ? String(route.query.venue) : 'IN_PERSON')
 const venueDetail = ref('')
 
 const formats = computed(() => allowedFormats(rule.value))
 const dangerous = computed(() => (rule.value?.category?.traits || []).some((t) => t.key === 'DANGER'))
-const format = ref('DUEL')
-const size = ref(2)
+const format = ref(route.query.format ? String(route.query.format) : 'DUEL')
+const size = ref(Number(route.query.size) || 2)
 const sizes = computed(() => (format.value === 'TEAMS' ? TEAM_SIZES : GROUP_SIZES))
 function pickFormat(value) {
   format.value = value
@@ -197,7 +197,8 @@ const EXACT = '날짜·시간 고르기'
 const exactTime = ref('')
 const nowLocal = localIso(new Date()).slice(0, 16)
 const WHEN = [...quickTimes(), { label: EXACT, date: () => (exactTime.value ? `${exactTime.value.slice(0, 16)}:00` : null) }, { label: '나중에 정하기', date: () => null }]
-const when = ref('나중에 정하기')
+const when = ref(WHEN.some((w) => w.label === route.query.when) ? String(route.query.when) : '나중에 정하기')
+if (route.query.exact) exactTime.value = String(route.query.exact)
 
 const ruleId = ref(Number(route.query.ruleId) || 0)
 
@@ -225,6 +226,15 @@ async function shareGame() {
   }
 }
 const rule = ref(null)
+// 규칙이 팀으로만(또는 여럿이만) 하는 것이면 그 방식으로 시작한다. 1:1로 두면 '세 명씩 편을 나눠' 규칙도 1:1로 열렸다 (11/4 밤샘)
+// 사람이 이미 고른 방식(돌아올 주소의 format)이 있으면 그대로
+watch(rule, (r) => {
+  if (!r || route.query.format) return
+  const parties = (r.category?.parties || []).map((p) => p.key)
+  const only = (k) => parties.includes(k) && !parties.includes('SOLO') && !parties.includes('DUO')
+  if (only('TEAM') && format.value !== 'TEAMS') pickFormat('TEAMS')
+  else if (only('GROUP') && !parties.includes('TEAM') && format.value !== 'FREE_FOR_ALL') pickFormat('FREE_FOR_ALL')
+})
 
 // 종목 고르기: 규칙을 많이 쓴 순으로 받아 종목마다 맨 위 규칙을 고른다. 종목 이름은 분류(category.sport) → 제목·분류에서 찾은 종목
 const sports = ref(null)
@@ -278,7 +288,10 @@ const anyoneLine = computed(() => {
 })
 function createAnyone() {
   if (!isRemote(venue.value) && (dong.value === null || dong.value?.expired)) {
-    router.push({ path: '/neighborhood', query: { back: route.fullPath, reason: anyoneLine.value } })
+    // 고른 것(규칙·언제·어디서·몇 명)을 돌아올 주소에 담는다. 전에는 인증하고 오면 처음부터 다시 골라야 했다 (11/4 밤샘)
+    const picks = { ruleId: ruleId.value || undefined, when: when.value, exact: exactTime.value || undefined, venue: venue.value, format: format.value, size: size.value }
+    const back = router.resolve({ path: route.path, query: { ...route.query, ...picks } }).fullPath
+    router.push({ path: '/neighborhood', query: { back, reason: anyoneLine.value } })
     return
   }
   create(null)

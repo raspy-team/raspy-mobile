@@ -22,6 +22,11 @@
         <UiCard v-if="route.query.made && detail.inviteCode" class="mt-4">
           <p class="t-heading">동호회를 만들었어요</p>
           <p class="t-caption mt-1">초대 링크를 동호회 단톡방에 올리면 누르기만 해도 들어와요. 대표 종목을 정하면 우리끼리 순위가 생겨요</p>
+          <!-- 정하는 곳이 위의 연필 아이콘뿐이라 안내만 보고는 못 찾았다 (11/4 밤샘, 동호회 총무) -->
+          <div class="flex gap-2 mt-3">
+            <UiButton size="sm" icon="share" @click="share">초대 링크 보내기</UiButton>
+            <UiButton v-if="isStaff && !detail.club.mainRuleTitle" size="sm" variant="secondary" @click="openSettings">대표 종목 정하기</UiButton>
+          </div>
         </UiCard>
 
         <template v-if="isMember">
@@ -436,7 +441,14 @@ async function share() {
 }
 
 async function leave() {
-  if (!(await confirmDialog({ title: '동호회를 나갈까요?', message: '동호회 일정·경기 알림이 더는 오지 않아요', confirmText: '나가기', danger: true }))) return
+  // 회장이 나가면 운영진(없으면 먼저 든 멤버)에게 넘어가고, 혼자면 동호회가 없어진다 (서버 ClubService.leave). 그걸 미리 말한다
+  const d = detail.value
+  const message = d?.myRole !== 'OWNER'
+    ? '동호회 일정·경기 알림이 더는 오지 않아요'
+    : (d.club.memberCount ?? 1) <= 1
+      ? '혼자 남은 동호회라 나가면 동호회가 없어져요'
+      : '회장은 운영진이나 먼저 든 멤버에게 넘어가요. 정해서 넘기려면 멤버 이름을 눌러 회장 넘기기를 해 주세요'
+  if (!(await confirmDialog({ title: '동호회를 나갈까요?', message, confirmText: '나가기', danger: true }))) return
   await POST('/api/clubs/{id}/leave', { path: { id } })
   router.replace('/clubs')
 }

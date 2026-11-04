@@ -123,7 +123,19 @@
       <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
       <UiListItem v-if="canTellFriend(menuGame)" icon="shield-halved" title="친구에게 일정 알리기" subtitle="누구와 언제 어디서 만나는지 보내 둬요" @click="tellFriend(menuGame)" />
       <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
+      <UiListItem v-if="canLeave(menuGame)" icon="fas fa-right-from-bracket" title="이 경기에서 빠지기" subtitle="연 사람과 남은 사람에게 알려요" danger @click="leaveGame(menuGame)" />
     </UiList>
+  </UiSheet>
+
+  <!-- 경기 3시간 안에 빠지기: 이유를 고르면 상대에게 보이고, 이유 없이 빠지면 노쇼로 기록된다 (11/5 사용자 결정) -->
+  <UiSheet :model-value="!!lateLeave" title="왜 빠지나요?" @update:model-value="lateLeave = null">
+    <p class="t-caption mb-4">경기가 곧이라 상대가 이미 움직이고 있을 수 있어요. 이유를 고르면 상대에게 함께 알려요. 이유 없이 빠지면 노쇼로 기록돼요.</p>
+    <div class="flex flex-wrap gap-2">
+      <UiChip v-for="r in LATE_REASONS" :key="r" :selected="leaveReason === r" @click="leaveReason = r">{{ r }}</UiChip>
+    </div>
+    <UiInput v-if="leaveReason === '기타'" v-model="leaveOther" class="mt-3" :maxlength="100" placeholder="이유를 짧게 적어 주세요" />
+    <UiButton block size="lg" class="mt-5" :disabled="!lateReasonText" @click="confirmLateLeave(lateReasonText)">이유를 알리고 빠지기</UiButton>
+    <UiButton block variant="ghost" class="mt-2 text-danger" @click="confirmLateLeave('')">이유 없이 빠지기</UiButton>
   </UiSheet>
 
   <SafetyTipsSheet
@@ -270,6 +282,7 @@ import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
 import { parseRegion } from '../../utils/regionParser'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { copyText } from '../../utils/clipboard'
+import { shareLink } from '../../utils/share'
 import { matchTime, place, ratingLine } from '../../utils/format'
 import { venuePlace } from '../../utils/gameFormat'
 import { quickTimes } from '../../utils/when'
@@ -363,9 +376,13 @@ function canApprove(game, a) {
   return true
 }
 function applicantsHint(game) {
-  if (!isMulti(game)) return '한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.'
+  // 승인 버튼 대신 '앱 게임 한 판'만 보이면 왜 승인이 안 되는지 먼저 말한다 (11/4 밤샘: 처음 연 경기에서 승인 버튼을 못 찾았다)
+  const ladder = (game?.applicants || []).some((a) => a.needsAppGameFirst && !a.approved)
+    ? ' 처음 만나는 사람은 앱 게임을 한 판 같이 한 뒤에 승인할 수 있어요.'
+    : ''
+  if (!isMulti(game)) return '한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.' + ladder
   const n = (game.players || []).length
-  return `${game.maxPlayers}명이 모이면 경기가 확정돼요. 지금 ${n}명이에요.`
+  return `${game.maxPlayers}명이 모이면 경기가 확정돼요. 지금 ${n}명이에요.` + ladder
 }
 
 async function approve(game, a) {
@@ -425,7 +442,9 @@ function startLadder(key) {
 }
 
 // 경기 시간이 잡힌 만나서 하는 경기 (앞뒤 하루). 카드 안에서 서버가 지금 할 일이 있는지 정한다
-const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && Math.abs(Date.now() - new Date(g.matchDate).getTime()) < 86_400_000 && !['REQUESTED', 'REJECTED'].includes(g.status)
+// 결과를 낸 뒤(확인 기다림·끝·취소)에는 '도착했어요'·노쇼 안내를 거둔다 (11/4 밤샘: 결과 확인 카드 밑에 도착 칸이 남았다)
+const OVER = ['REQUESTED', 'REJECTED', 'RESULT_PENDING', 'COMPLETED', 'CANCELED']
+const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && Math.abs(Date.now() - new Date(g.matchDate).getTime()) < 86_400_000 && !OVER.includes(g.status) && !OVER.includes(g.gameStatus)
 const needsSafety = (g) => !!g && !isRemote(g.venue) && !!dmTarget(g) && canReschedule(g)
 const safetySeen = (() => {
   try { return JSON.parse(localStorage.getItem('safetyTipsSeen') || '[]') } catch { return [] }
@@ -466,7 +485,8 @@ async function share(g) {
   menuGame.value = null
   try {
     const { data } = await api.post('/api/invite', null, { params: { gameId: g.id } })
-    showToast((await copyText(data.url)) ? '링크를 복사했어요. 같이 할 사람에게 보내보세요' : '복사하지 못했어요')
+    const msg = await shareLink(data.url, `'${g.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`)
+    if (msg) showToast(msg === '링크를 복사했어요' ? '링크를 복사했어요. 같이 할 사람에게 보내 보세요' : msg)
   } catch {
     showToast('링크를 만들지 못했어요')
   }
@@ -494,7 +514,7 @@ async function removeGame(g) {
   menuGame.value = null
   const ok = await confirmDialog({
     title: '경기를 삭제할까요?',
-    message: '신청한 사람들에게서도 사라져요.',
+    message: '함께하기로 한 사람과 신청한 사람에게 취소됐다고 알려요.',
     confirmText: '삭제',
     danger: true,
   })
@@ -505,6 +525,48 @@ async function removeGame(g) {
     showToast('경기를 삭제했어요')
   } catch (e) {
     showToast(e.response?.data?.message || '삭제하지 못했어요')
+  }
+}
+
+// 승인된 뒤 시작 전이면 빠질 수 있다 (내가 연 경기는 삭제). 전에는 빠지는 길이 없어 노쇼가 되거나 주최자에게 부탁했다 (11/4 밤샘)
+const BEFORE_START = ['MATCHING', 'SCHEDULED']
+const canLeave = (g) => !!g && (g.type === 'sent'
+  ? g.status === 'APPROVED' && BEFORE_START.includes(g.gameStatus)
+  : g.type === 'my-game' && g.isOwner === false && BEFORE_START.includes(g.status))
+// 만나서 하는 경기 3시간 안 (서버 MeetService.LATE_LEAVE와 같게)
+const LATE_LEAVE_MS = 3 * 3600_000
+const LATE_REASONS = ['아파요', '급한 일이 생겼어요', '날씨가 안 좋아요', '기타']
+const lateLeave = ref(null)
+const leaveReason = ref('')
+const leaveOther = ref('')
+const lateReasonText = computed(() => (leaveReason.value === '기타' ? leaveOther.value.trim() : leaveReason.value))
+const isLate = (g) => !isRemote(g.venue) && !!g.matchDate && new Date(g.matchDate).getTime() - Date.now() < LATE_LEAVE_MS
+
+async function leaveGame(g) {
+  menuGame.value = null
+  if (isLate(g)) {
+    leaveReason.value = ''
+    leaveOther.value = ''
+    lateLeave.value = g
+    return
+  }
+  const ok = await confirmDialog({ title: '이 경기에서 빠질까요?', message: '연 사람과 남은 사람에게 빠졌다고 알려요. 경기는 다시 모집 중이 돼요.', confirmText: '빠지기', danger: true })
+  if (!ok) return
+  await doLeave(g, '')
+}
+async function confirmLateLeave(reason) {
+  const g = lateLeave.value
+  lateLeave.value = null
+  if (g) await doLeave(g, reason)
+}
+async function doLeave(g, reason) {
+  try {
+    await api.delete(`/api/games/${g.id}/leave`, { params: reason ? { reason } : {} })
+    sentGames.value = sentGames.value.filter((x) => x.id !== g.id)
+    myGames.value = myGames.value.filter((x) => x.id !== g.id)
+    showToast('경기에서 빠졌어요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '빠지지 못했어요')
   }
 }
 

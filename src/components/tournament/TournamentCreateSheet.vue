@@ -1,6 +1,11 @@
 <template>
   <UiSheet :model-value="modelValue" title="대회 열기" @update:model-value="(v) => emit('update:modelValue', v)">
     <div class="space-y-4">
+      <!-- 개인 대회는 동네 대회라 인증이 먼저다. 다 채운 뒤 '열기'에서야 알게 하지 않는다 (11/4 밤샘, 52세 대회 주최자) -->
+      <div v-if="needsDong" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3">
+        <p class="flex-1 t-caption">개인이 여는 대회는 동네 대회예요. 동네를 먼저 인증해 주세요</p>
+        <UiButton size="sm" variant="secondary" @click="verifyDong">동네 인증</UiButton>
+      </div>
       <UiInput v-model="f.title" :maxlength="40" placeholder="대회 이름 (예: 11월 망원 탁구 월례대회)" />
 
       <div>
@@ -50,9 +55,10 @@
         </label>
       </div>
 
-      <div class="grid grid-cols-2 gap-2">
-        <UiInput v-model="f.maxEntrants" type="number" inputmode="numeric" placeholder="정원" />
-        <UiInput v-model="f.startsAt" type="datetime-local" />
+      <!-- 이름표가 없으면 '8'이 무엇인지, 날짜가 무엇의 날짜인지 몰랐다 (11/4 밤샘, 52세 탁구 대회 주최자) -->
+      <div class="grid grid-cols-[2fr_3fr] gap-2">
+        <UiInput v-model="f.maxEntrants" label="최대 인원" type="number" inputmode="numeric" placeholder="8" />
+        <UiInput v-model="f.startsAt" label="시작" type="datetime-local" />
       </div>
       <div>
         <p class="t-heading">라운드 기간</p>
@@ -104,9 +110,18 @@ const f = reactive({
 })
 const canCreate = computed(() => f.title.trim().length >= 2 && f.ruleId > 0 && !!f.startsAt && Number(f.maxEntrants) >= 2)
 
+// 동네 인증 여부 (불러오기 전 undefined). 동호회·공식 대회는 동네가 없어도 된다 (서버 TournamentService.create)
+const hasDong = ref<boolean | undefined>(undefined)
+const needsDong = computed(() => hasDong.value === false && !f.hostClubId && !f.official)
+function verifyDong() {
+  emit('update:modelValue', false)
+  router.push({ path: '/neighborhood', query: { back: '/tournaments?create=1', reason: '동네를 인증하면 대회를 열 수 있어요' } })
+}
+
 // 내가 회장·운영진인 동호회를 주최로 고를 수 있다
 watch(() => props.modelValue, async (open) => {
   if (!open) return
+  GET('/api/neighborhoods/me').then(({ data }) => (hasDong.value = data.neighborhoods.some((n) => n.active && !n.expired))).catch(() => {})
   GET('/api/auth/onboarding').then(({ data }) => (isAdmin.value = !!data.isAdmin)).catch(() => {})
   const mine = (await GET('/api/clubs/mine')).data
   const details = await Promise.all(mine.map((c) => GET('/api/clubs/{id}', { path: { id: c.id } }).then((r) => r.data).catch(() => null)))

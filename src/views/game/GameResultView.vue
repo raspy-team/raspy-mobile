@@ -716,12 +716,13 @@ async function loadWitnesses() {
 
 let stopWatching = null
 onMounted(() => {
-  load()
+  // 소식 카드(이야기 줄)는 확정된 경기에만 있다. 확인 전에 부르면 404가 났다
+  const withBeats = () => load().then(() => confirmed.value && loadBeats())
+  withBeats()
   loadWitnesses()
-  loadBeats()
   // 확인을 기다리는 동안 상대가 확인하거나 돌려보내면 다시 불러온다
   stopWatching = refreshOnChange(() => {
-    if (!confirmed.value) load()
+    if (!confirmed.value) withBeats()
   })
 })
 onUnmounted(() => stopWatching?.())

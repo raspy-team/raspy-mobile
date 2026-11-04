@@ -240,7 +240,8 @@ import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
 import { matchTime } from '../../utils/format'
 
-const REPORT_REASONS = ['욕설·비방', '노쇼·비매너', '사칭', '만 14세 미만 같아요', '기타']
+// 사람 신고: 처음 보는 사람을 만나는 앱이라 성희롱·불쾌한 요구가 맨 위 가까이에 있어야 한다 (11/4 밤샘, ReportSheet 기본 목록과 맞춤)
+const REPORT_REASONS = ['욕설·비방', '성희롱·불쾌한 요구', '노쇼·비매너', '사칭·사기', '만 14세 미만 같아요', '기타']
 const RESULT = {
   win: { label: '승', class: 'bg-fg text-canvas' },
   lose: { label: '패', class: 'border border-line-strong text-fg-subtle' },

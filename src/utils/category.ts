@@ -36,13 +36,18 @@ export function toInput(v: CategoryView): CategoryInput {
   }
 }
 
-/** 빠진 칸이 있으면 무엇을 고르라는 말, 다 채웠으면 '' */
+/**
+ * 빠진 칸이 있으면 무엇을 고르라는 말, 다 채웠으면 ''.
+ * 빠진 것을 한 번에 다 말한다 (11/4 밤샘: 하나씩 알려 줘서 '규칙 만들기'를 다섯 번 눌러야 다 알았다)
+ */
 export function missing(c: CategoryInput, maxAbilities = 3) {
-  if (!c.face) return '상대와 어떻게 하는지 골라 주세요'
-  if (!c.abilities.length) return '무엇이 어려운지 하나 이상 골라 주세요'
   if (c.abilities.length > maxAbilities) return `어려운 것은 ${maxAbilities}개까지 골라 주세요`
-  if (!c.places.length) return '어디서 하는지 골라 주세요'
-  if (!c.parties.length) return '몇 명이 함께하는지 골라 주세요'
-  if (!c.gears.length) return '준비물을 골라 주세요'
-  return ''
+  const left = [
+    !c.face && '상대와 어떻게',
+    !c.abilities.length && '무엇이 어려운지',
+    !c.places.length && '어디서',
+    !c.parties.length && '몇 명이',
+    !c.gears.length && '준비물',
+  ].filter(Boolean)
+  return left.length ? `골라 주세요: ${left.join(' · ')}` : ''
 }

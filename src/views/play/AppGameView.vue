@@ -95,6 +95,8 @@
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
               실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
+            <!-- 첫 판에 +162처럼 크게 움직이면 고장으로 보였다. 만나서 한 경기 결과 화면과 같은 말 (11/4 밤샘, 실력 점수파 31세) -->
+            <p v-if="result.ratingChange != null && fewGames" class="t-caption mt-1">처음 몇 판은 크게 움직여요. 더 하면 자리를 잡아요</p>
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
@@ -111,7 +113,7 @@
           <template v-else-if="result.status === 'VOTING'">
             <p class="t-title">투표 중이에요</p>
             <p class="t-caption mt-1">{{ until(result.votingEndsAt) }}까지 사람들이 투표해요. 끝나면 알려 드릴게요</p>
-            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 복사</UiButton>
+            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 보내기</UiButton>
           </template>
           <template v-else-if="result.status === 'CANCELED'">
             <p class="t-title">취소된 경기예요</p>
@@ -129,15 +131,24 @@
           <template v-else>
             <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
             <p class="t-caption">{{ game?.scoreUnit }}</p>
-            <p class="t-heading mt-6">상대를 찾고 있어요</p>
-            <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
-            <UiButton v-if="(result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+            <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
+            <template v-if="ladderTo">
+              <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
+              <p class="t-caption mt-1">도전장을 메시지로 보냈어요. {{ ladderName }}님이 같은 문제를 풀면 승패가 나요</p>
+            </template>
+            <template v-else>
+              <p class="t-heading mt-6">상대를 찾고 있어요</p>
+              <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요. 결과가 나오면 알려 드릴게요</p>
+            </template>
+            <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
         </UiCard>
         <!-- 다음 행동은 결과 바로 밑에. 긴 답·한마디는 그 아래 -->
         <!-- 하루 한 판 게임(오늘의 초성)은 '한 판 더'를 눌러도 할 수 없어 빼고, 공유가 다음 행동이 된다 -->
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
+        <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
+        <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" block variant="secondary" icon="share" class="mt-3" :loading="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : '알림' }}</p>
           <p class="t-body mt-1">{{ result.myFeedback }}</p>
@@ -300,6 +311,7 @@
         </template>
       </template>
     </main>
+    <ShareSheet :post="sharePost" :my-id="myId" @close="sharePost = null" />
   </div>
 </template>
 
@@ -322,6 +334,8 @@ import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import { shareLink } from '@/utils/share'
+import ShareSheet from '../../components/feed/story/ShareSheet.vue'
+import { getMyId } from '@/utils/me'
 import WritePlay from '../../components/appgame/WritePlay.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 
@@ -338,7 +352,6 @@ import SquatPlay from '../../components/appgame/SquatPlay.vue'
 import { fixtureOf, kickoffLabel, predictionLine } from '@/utils/predict'
 import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
-import { copyText } from '../../utils/clipboard'
 import { useToast } from '../../composable/useToast'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
@@ -361,6 +374,8 @@ const router = useRouter()
 const key = computed(() => String(route.params.key))
 const game = ref<Schemas['AppGameSummary'] | null>(null)
 // 봇과만 한 판은 전적(사람과 한 판)에 안 들어가니, 해 봤는지는 마지막으로 한 때로도 본다 (11/3 통계 개편)
+// 이 게임을 몇 판 안 했으면 실력 점수가 크게 움직인다 (서버는 RD가 크면 잠정으로 본다)
+const fewGames = computed(() => ((game.value?.myWins || 0) + (game.value?.myLosses || 0) + (game.value?.myDraws || 0)) < 5)
 const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
 const board = ref<Schemas['AppRecordBoard'] | null>(null)
@@ -522,7 +537,9 @@ async function sendChallenge(gameId: number) {
   challenging.value = true
   try {
     await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
-    showToast((await copyText(`${window.location.origin}/challenge/${gameId}`)) ? '도전장 링크를 복사했어요. 하루 동안 친구만 받을 수 있어요' : '복사하지 못했어요')
+    // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
+    const msg = await shareLink(`${window.location.origin}/challenge/${gameId}`, `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
+    if (msg) showToast(`${msg}. 하루 동안 이 링크로만 받을 수 있어요`)
   } catch (e) {
     showToast(errorMessage(e, '도전장을 만들지 못했어요'))
   } finally {
@@ -538,9 +555,26 @@ async function shareDaily(feedback: string) {
   if (msg) showToast(msg)
 }
 
+/** 끝난 판 보내기: 소식 카드를 받아 ShareSheet(링크 미리보기·스토리 그림)로 */
+const sharePost = ref<unknown>(null)
+const sharingResult = ref(false)
+const myId = ref<number | null>(null)
+getMyId().then((id) => (myId.value = id))
+async function openShare(gameId: number) {
+  sharingResult.value = true
+  try {
+    sharePost.value = (await GET('/api/feed/game/{gameId}', { path: { gameId } })).data
+  } catch {
+    showToast('결과를 불러오지 못했어요')
+  } finally {
+    sharingResult.value = false
+  }
+}
+
 /** 투표 공유 링크: 친구에게 보내 표를 받는다 */
 async function shareVote(gameId: number) {
-  showToast((await copyText(`${window.location.origin}/vote/${gameId}`)) ? '투표 링크를 복사했어요' : '복사하지 못했어요')
+  const msg = await shareLink(`${window.location.origin}/vote/${gameId}`, `${game.value?.title ?? '대결'} 투표 좀 해 줘요. 어느 쪽이 나아요?`)
+  if (msg) showToast(msg)
 }
 
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */

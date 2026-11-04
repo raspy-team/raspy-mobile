@@ -37,7 +37,10 @@ onMounted(async () => {
     club.value = (await GET('/api/clubs/invite/{code}', { path: { code } })).data
   } catch {
     error.value = '초대 링크가 맞지 않아요'
+    return
   }
+  // '시작하고 들어가기'로 가입하고 돌아왔으면 한 번 더 누르게 하지 않고 바로 들어간다 (11/4 밤샘)
+  if (signedIn && route.query.join) join()
 })
 
 // 가입 전이면 시작 화면으로. 가입·로그인이 끝나면 이 주소로 돌아와 들어간다
@@ -45,7 +48,7 @@ const signedIn = !!localStorage.getItem('raspy_access_token2')
 async function join() {
   if (!club.value) return
   if (!signedIn) {
-    rememberReturnTo(route.fullPath)
+    rememberReturnTo(`${route.path}?join=1`)
     router.push('/init')
     return
   }
@@ -53,6 +56,9 @@ async function join() {
   try {
     const done = (await POST('/api/clubs/join', { body: { code } })).data
     router.replace(`/clubs/${done.club.id}`)
+  } catch (e) {
+    // 가입 뒤 바로 들어가기(자동)에서도 왜 안 됐는지 보이게
+    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '들어가지 못했어요. 다시 해 주세요'
   } finally {
     joining.value = false
   }

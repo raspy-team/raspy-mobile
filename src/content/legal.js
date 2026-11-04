@@ -67,16 +67,26 @@ export const TERMS = [
 - 소셜 로그인(Google·카카오·Apple) 시: 해당 계정의 이메일 주소와 계정 식별값만 받습니다. 연락처, 사진, 다른 Google 데이터에는 접근하지 않습니다. 받은 정보는 회원 가입·로그인과 계정 식별에만 쓰고, 광고에 쓰거나 다른 곳에 팔거나 넘기지 않습니다
 - 프로필 설정 시: 나이, 성별, 지역, 자기소개, 프로필사진 등
 - 동네 인증 시: 현재 위치(GPS 좌표). 어느 행정동인지 확인하는 데만 쓰고 저장하지 않습니다. 저장하는 것은 인증한 행정동과 인증 일시입니다
+- 휴대폰 본인인증 시(만나서 하는 경기를 열거나 신청할 때): 본인인증 업체가 이름·생년월일·휴대폰 번호로 본인을 확인합니다. 회사는 이름과 휴대폰 번호를 저장하지 않고, 한 사람이 한 계정만 쓰도록 연계정보(CI)를 바꾼 값(해시)과 나이 확인을 위한 생년월일, 인증 일시만 저장합니다
+- 만나서 하는 경기의 안전 기능을 쓸 때: 도착을 확인한 때의 위치(좌표), 친구에게 위치를 공유하는 동안의 최근 위치(좌표)와 그 시각. 위치 공유는 본인이 켤 때만 하고, 정한 시간이 지나거나 끄면 멈춥니다
+- 사진·영상을 올릴 때: 프로필 사진, 경기 사진·영상, 경기를 보던 사람이 올린 사진·영상
+- 서비스 이용 중 작성하는 것: 1:1 메시지, 경기 채팅, 댓글, 만든 규칙, 앱 게임에 낸 글·답, 신고 내용
+- 장소를 찾을 때: 입력한 검색어
+- 앱 알림을 허용할 때: 기기 알림 토큰
+- 오류가 날 때: 오류 내용, 기기·브라우저 종류(6항 Sentry)
 - 서비스 이용 시 자동 수집: 기기마다 무작위로 만든 방문자 식별값, 방문 경로(유입 링크의 꼬리표, 이전 사이트 주소), 방문 일자, 브라우저 정보. 어느 홍보 채널로 들어와 서비스를 이용하는지 세는 데만 씁니다
 
-- 만 14세 미만 아동: 회사는 만 14세 미만 아동의 개인정보를 수집·이용하지 않습니다. 가입할 때 만 14세 이상인지 확인하고, 만 14세 미만으로 확인되면 이용을 제한합니다
+- 만 14세 미만 아동: 회사는 만 14세 미만 아동의 개인정보를 수집·이용하지 않으며, 법정대리인 동의를 받아 가입하는 절차를 두지 않습니다. 가입할 때 만 14세 이상임을 확인받고, 휴대폰 본인인증에서 만 14세 미만으로 확인되거나 만 14세 미만으로 신고되면 만 14세 이상임을 확인할 때까지 이용을 멈춥니다
+- 만 19세 미만 회원: 다칠 수 있는 규칙의 경기는 열거나 신청할 수 없습니다
 
 3. 개인정보의 수집 및 이용 목적
 - 회원 가입, 본인확인, 서비스 제공 및 유지, 고객지원, 서비스 품질개선, 신규 서비스 개발, 부정이용 방지 등
 
 4. 개인정보의 보유 및 이용 기간
 - 회원 탈퇴 또는 개인정보 수집 및 이용 목적 달성 시까지 보유 및 이용
-- 탈퇴는 앱의 설정 > 계정 삭제에서 할 수 있습니다. 탈퇴하면 이메일, 소셜 로그인 식별값, 닉네임, 프로필(사진·나이·성별·지역·소개), 인증한 동네, 친구, 알림 토큰을 바로 지웁니다. 다른 회원과 함께 한 경기 기록, 게시물, 채팅은 상대의 기록을 위해 남기되 작성자를 "탈퇴한 사용자"로 바꿔 누구인지 알 수 없게 합니다
+- 탈퇴는 앱의 설정 > 계정 삭제에서 할 수 있습니다. 앱 없이 요청하는 방법은 https://matchapp.me/account-deletion 에 있습니다
+- 탈퇴하면 바로 지우는 것: 이메일, 소셜 로그인 식별값, 비밀번호, 닉네임, 친구 찾기 아이디, 프로필(사진 파일·나이·성별·지역·소개·소속), 휴대폰 본인인증 정보(연계정보 해시·생년월일·인증 일시), 인증한 동네, 위치 좌표(도착 확인·위치 공유), 친구, 내가 한 차단, 알림 설정, 알림 토큰
+- 탈퇴해도 남기는 것: 다른 회원과 함께 한 경기 기록, 게시물(사진·영상 포함), 채팅, 댓글, 신고·노쇼·이용 제한 기록. 상대의 기록과 다른 회원의 안전을 위해 남기되, 작성자를 "탈퇴한 사용자"로 바꿔 누구인지 알 수 없게 합니다. 방문 통계는 회원과 연결을 끊은 숫자로만 남습니다
 - 단, 관련법령(전자상거래 등 소비자 보호법 등)에 따라 일정 기간 보관 필요 시 그에 따름
 
 5. 개인정보의 제3자 제공
@@ -93,6 +103,8 @@ export const TERMS = [
 - Cloudflare, Inc. (미국): 사진 저장(R2) / 처리 위치 아시아·태평양 / 프로필·경기 사진
 - Google LLC (Firebase Cloud Messaging, 미국): 앱 푸시 알림 / 처리 위치 미국 / 기기 알림 토큰
 - Google LLC (Gemini API, 미국): AI 채점·규칙 분류·경기 요약 / 처리 위치 미국 / 규칙 설명, 게임에 낸 답(요리·문장·대화), 기록 인증 영상, 끝난 경기의 기록(닉네임·점수·결과). 기록 인증 영상은 채점에만 쓰고 회사가 저장하지 않습니다.
+- 코리아포트원 주식회사(PortOne, 대한민국): 휴대폰 본인인증 연결 / 처리 위치 대한민국 / 이름·생년월일·휴대폰 번호·연계정보(본인인증 기관이 확인하고, 회사는 2항대로 연계정보 해시와 생년월일만 저장합니다)
+- 주식회사 카카오(대한민국): 장소 검색과 지도 표시 / 처리 위치 대한민국 / 장소 검색어, 지도를 볼 때의 접속 정보(IP 주소 등)
 - 국외 이전을 원하지 않으면 회원 탈퇴로 거부할 수 있습니다. 다만 위 업체 없이는 서비스를 제공할 수 없습니다.
 
 7. 개인정보의 파기절차 및 방법
@@ -106,7 +118,7 @@ export const TERMS = [
 - 기타 문의는 서비스 내 고객센터를 통해 문의하실 수 있습니다.
 
 [부칙]
-본 방침은 2026년 11월 2일부터 시행합니다.
+본 방침은 2026년 11월 5일부터 시행합니다.
 
 [변경 이력]
 - 2025년 7월 25일: 최초 시행
@@ -118,6 +130,7 @@ export const TERMS = [
 - 2026년 11월 2일: 4항에 회원 탈퇴 방법과 지우는 항목 추가
 - 2026년 11월 3일: 2항에 만 14세 미만 아동 항목 추가 (수집·이용하지 않음, 가입 때 확인)
 - 2026년 11월 3일: 6항 Gemini에 경기 요약(소식의 AI 기자 한 줄) 추가
+- 2026년 11월 5일: 2항에 휴대폰 본인인증, 안전 기능의 위치, 사진·영상, 작성하는 것, 장소 검색어, 알림 토큰, 오류 정보 추가. 만 14세 미만(법정대리인 동의 절차 없음, 확인 방법)과 만 19세 미만 제한을 사실대로. 4항에 탈퇴 때 지우는 것과 남기는 것을 나눠 적고, 앱 없이 삭제를 요청하는 주소 추가. 6항에 코리아포트원(본인인증)·카카오(장소 검색·지도) 추가
     `,
   },
   {
@@ -162,9 +175,41 @@ Match (matchapp.me) uses Google Sign-In, Kakao Login and Sign in with Apple only
 - Data we receive: your email address and an account identifier. We do not access your contacts, photos, files or any other Google user data.
 - Use: account creation, sign-in and identifying your account in the service. Nothing else.
 - Sharing: we do not sell, rent or share this data, and we do not use it for advertising. It is stored with our processors listed in section 6 only to run the service.
-- Retention and deletion: kept until you delete your account in the app (Settings > Delete account). Your email, sign-in identifier, nickname and profile are erased immediately; match records shared with other players stay, shown as a deleted user. You can also ask at yeonkoh@protonmail.com.
+- Other data the service collects (details in the Korean policy, sections 2 and 6): profile details you enter; location when you verify your neighborhood (not stored, only the district), when you check in at a match and while you choose to share your location with a friend; for in-person matches, mobile identity verification through PortOne (we store only a hash of the connecting information and your date of birth, not your name or phone number); photos and videos you upload; messages, chats and comments; place search terms (Kakao); a push notification token; and error reports (Sentry).
+- Age: you must be 14 or older. We do not offer sign-up with parental consent. Users under 19 cannot join matches with rules that may cause injury.
+- Retention and deletion: kept until you delete your account in the app (Settings > Delete account) or request it at https://matchapp.me/account-deletion. Your email, sign-in identifier, password, nickname, profile and profile photo file, identity verification data, neighborhood, location coordinates, friends, blocks, notification settings and push tokens are erased immediately. Match records, posts, chats, comments and safety reports shared with other players stay, shown as a deleted user. You can also ask at yeonkoh@protonmail.com.
 - Match's use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.
 `
 
 // 가입 때 동의받는 것 (법적 고지사항은 읽기만)
 export const AGREEMENTS = TERMS.filter((t) => t.id !== 'notice')
+
+// 앱 없이 계정 삭제를 요청하는 쪽 (/account-deletion, 빌드 때 scripts/build-legal.mjs가 만든다).
+// Play Console 데이터 보안이 '앱을 깔지 않고도 삭제를 요청할 수 있는 웹 주소'를 요구한다 (11/5). 지우는 것·남기는 것은 개인정보 처리방침 4항과 같게
+export const ACCOUNT_DELETION = {
+  title: 'Match 계정 삭제',
+  body: `
+Match 계정과 그 정보를 지우는 방법입니다.
+
+1. 앱에서 지우기 (바로 지워집니다)
+- 앱을 열고 내 정보 > 설정 > 맨 아래 '계정 삭제'를 누릅니다.
+
+2. 앱 없이 요청하기
+- yeonkoh@protonmail.com 으로 메일을 보냅니다. 제목에 "계정 삭제"라고 적고, 닉네임과 가입한 방법(카카오·구글·애플 이메일, 또는 아이디)을 적어 주세요.
+- 가입한 이메일로 보내면 그 계정인지 확인하고 지웁니다. 아이디로 가입했다면 본인인지 확인하기 위해 몇 가지를 여쭤볼 수 있습니다. 지운 뒤 메일로 알려 드립니다.
+
+3. 지우는 것
+- 이메일, 소셜 로그인 식별값, 비밀번호, 닉네임, 친구 찾기 아이디
+- 프로필(사진 파일·나이·성별·지역·소개·소속)
+- 휴대폰 본인인증 정보(연계정보 해시·생년월일·인증 일시)
+- 인증한 동네, 위치 좌표(도착 확인·위치 공유)
+- 친구, 내가 한 차단, 알림 설정, 알림 토큰
+
+4. 남기는 것
+- 다른 회원과 함께 한 경기 기록, 게시물(사진·영상 포함), 채팅, 댓글, 신고·노쇼·이용 제한 기록은 상대의 기록과 다른 회원의 안전을 위해 남깁니다. 작성자는 "탈퇴한 사용자"로 바뀌어 누구인지 알 수 없습니다.
+- 방문 통계는 회원과 연결을 끊은 숫자로만 남습니다.
+- 법령이 보관을 요구하는 정보가 있으면 그 기간 동안만 보관합니다.
+
+자세한 내용은 개인정보 처리방침(https://matchapp.me/privacy) 4항에 있습니다.
+`,
+}

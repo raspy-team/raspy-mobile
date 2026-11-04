@@ -158,7 +158,7 @@ onMounted(async () => {
 })
 
 // 버튼 누름을 센다 (3단계 수요 조사 B): 가입 전 한 판 끝에서 왔으면 guest, 아니면 init
-const tapPlace = route.query.from === 'guest' ? 'guest' : 'init'
+const tapPlace = route.query.from === 'guest' ? 'guest' : route.query.from === 'partner' ? 'partner' : 'init'
 function tapId() {
   trackEvent('tap_id', tapPlace)
 }

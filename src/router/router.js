@@ -131,6 +131,8 @@ const routes = [
   // 팀 경기 단톡방 (11/5 C)
   { path: '/games/:gameId(\\d+)/chat', component: () => import('../views/game/TeamChatView.vue') },
   // 가입 없이 한 판 (로그인 전, 허용된 게임만: utils/guestGames)
+  // 상대 구하기 등록 (H2, 가입 전). /try/:key보다 먼저
+  { path: '/try/partner', component: () => import('../views/play/PartnerTryView.vue') },
   { path: '/try/:key', component: () => import('../views/play/GuestPlayView.vue') },
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },

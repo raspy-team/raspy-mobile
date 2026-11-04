@@ -47,6 +47,7 @@ import { gameIcon } from '@/utils/appGameIcon'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
+import { track } from '@/utils/trackLog'
 import type { components } from '@/api/schema'
 import { onLobbyChange, openUserChannel } from '@/websocket/userChannel'
 import { UiAiBadge, UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
@@ -57,12 +58,18 @@ const emit = defineEmits<{ join: [key: string] }>()
 const router = useRouter()
 const list = ref<components['schemas']['LobbyList'] | null>(null)
 // 불러온 뒤 흐른 초 (화면 시계로만 센다. 서버에 다시 묻지 않는다)
+let aiShown = false
 const since = ref(0)
 let loadedAt = Date.now()
 const tick = setInterval(() => { since.value = Math.floor((Date.now() - loadedAt) / 1000) }, 1000)
 
 function show(data: components['schemas']['LobbyList']) {
   list.value = { ...data, lobbies: data.lobbies.filter((l) => l.gameId !== props.excludeGameId) }
+  // 대기실에 AI 주민을 보인 때는 원본 기록에 ai=true로 (docs/ai-residents.md '숫자는 따로'). 같은 화면에서 다시 불러와도 한 번
+  if (props.ai && data.residents?.length && !aiShown) {
+    aiShown = true
+    track('lobby_ai_shown', { step: data.residents.length, value: 'ai=true' })
+  }
   loadedAt = Date.now()
   since.value = 0
 }
@@ -121,6 +128,7 @@ async function joinAny() {
 // AI 주민과 바로 한 판: 기다리는 사람에게 붙지 않고 그 AI가 바로 들어온 판으로 간다
 async function playAi(r: Resident) {
   joining.value = true
+  track('lobby_ai_play', { gameKey: r.key, value: 'ai=true' })
   try {
     await POST('/api/app-games/{key}/realtime/ai', { path: { key: r.key }, query: { botId: r.userId } })
     emit('join', r.key)

@@ -67,7 +67,7 @@
             <span class="t-mono w-8 text-fg" :class="r.place === 1 ? 'font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
             <button type="button" class="flex items-center gap-2.5 min-w-0 flex-1 text-left" @click="router.push('/profile/' + r.id)">
               <UiAvatar :src="r.profileUrl" :name="r.nickname" :user-id="r.id" size="sm" />
-              <span class="text-sm truncate" :class="r.place === 1 ? 'text-fg font-medium' : 'text-fg-muted'">{{ r.nickname }}<span v-if="r.id === currentUserId" class="text-fg-subtle"> (나)</span></span>
+              <span class="text-sm truncate" :class="r.place === 1 ? 'text-fg font-medium' : 'text-fg-muted'">{{ r.nickname }}<UiAiBadge v-if="r.isBot" /><span v-if="r.id === currentUserId" class="text-fg-subtle"> (나)</span></span>
             </button>
             <span v-if="!placesEntered" class="font-mono tabular-nums text-fg-muted">{{ r.points }}</span>
           </li>
@@ -110,9 +110,9 @@
         <div v-if="setResults.length" class="mt-10 border-y border-line divide-y divide-line">
           <div class="grid grid-cols-[3rem_1fr_auto_1fr] items-center px-1 h-10 t-micro">
             <span>세트</span>
-            <span class="text-right truncate">{{ sides[0].user.nickname }}</span>
+            <span class="text-right truncate">{{ sides[0].user.nickname }}<UiAiBadge v-if="sides[0].user.isBot" /></span>
             <span class="w-6"></span>
-            <span class="truncate">{{ sides[1].user.nickname }}</span>
+            <span class="truncate">{{ sides[1].user.nickname }}<UiAiBadge v-if="sides[1].user.isBot" /></span>
           </div>
           <div v-for="s in setResults" :key="s.setIdx" class="grid grid-cols-[3rem_1fr_auto_1fr] items-center px-1 h-12 tabular-nums">
             <span class="text-fg-subtle text-sm">{{ s.setIdx }}</span>
@@ -318,7 +318,8 @@
       </template>
 
       <!-- 관중이 찍은 장면: 선수·관중 모두 본다. 관중은 끝나고 하루 안까지 올린다 -->
-      <LiveMediaStrip v-if="game?.venue === 'IN_PERSON'" :game-id="Number(gameId)" />
+      <!-- AI 주민의 경기에는 현장이 없다: 관중 사진을 받지 않는다 (docs/ai-residents.md 6, 사람이 찾아가지 않게) -->
+      <LiveMediaStrip v-if="game?.venue === 'IN_PERSON' && !aiGame" :game-id="Number(gameId)" />
 
       <!-- 친구 · 공유 (덜 급한 것은 맨 아래) -->
       <div class="flex gap-2">
@@ -378,7 +379,7 @@ import { getMyId } from '@/utils/me'
 import { GET, POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
-import { matchTime } from '../../utils/format'
+import { matchTime, who } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import BrandFace from '../../components/BrandFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
@@ -560,6 +561,8 @@ const ranking = computed(() =>
 )
 const submitterSide = computed(() => resSides.value.findIndex((s) => s.members.some((m) => m.id === resultSubmittedById.value)))
 
+// AI 주민끼리 남긴 경기 (결과 생성기)
+const aiGame = computed(() => [user1.value, user2.value].some((u) => u?.isBot) || resSides.value.some((s) => s.members.some((m) => m.isBot)))
 const isParticipant = computed(() => !!currentUserId.value && (format.value === 'DUEL'
   ? user1.value.id === currentUserId.value || user2.value.id === currentUserId.value
   : mySide.value >= 0))
@@ -592,13 +595,13 @@ const headline = computed(() => {
   if (format.value === 'FREE_FOR_ALL') {
     const first = ranking.value.filter((r) => r.place === 1)
     if (first.length === ranking.value.length) return { text: '모두 같은 등수', tone: 'text-fg' }
-    if (!isParticipant.value) return { text: `${first.map((r) => r.nickname).join('·')}님 1등`, tone: 'text-fg', mark: true }
+    if (!isParticipant.value) return { text: `${first.map((r) => who(r)).join('·')}님 1등`, tone: 'text-fg', mark: true }
     const me = ranking.value.find((r) => r.id === currentUserId.value)
     return me?.place === 1 ? { text: '1등이에요', tone: 'text-fg', mark: true } : { text: `${me?.place}등`, tone: 'text-fg', line: '1등은 다음 판에서 가려요' }
   }
   if (winnerIdx.value === 0) return { text: '비겼어요', tone: 'text-fg', line: NEXT_ROUND.DRAW }
   const winner = winnerIdx.value === 1 ? user1.value : user2.value
-  if (!isParticipant.value) return { text: `${winner.nickname}${format.value === 'TEAMS' ? '' : '님'} 승리`, tone: 'text-fg', mark: true }
+  if (!isParticipant.value) return { text: `${format.value === 'TEAMS' ? winner.nickname : who(winner)}${format.value === 'TEAMS' ? '' : '님'} 승리`, tone: 'text-fg', mark: true }
   // 진 쪽도 회색으로 깎지 않는다. 같은 크기의 말로 다음 판을 권한다 (essence: 지면 낙오가 아니라 다음 판)
   return isMine(winner) ? { text: '이겼어요', tone: 'text-fg', mark: true } : { text: '졌어요', tone: 'text-fg', line: NEXT_ROUND.LOSE }
 })
@@ -644,8 +647,8 @@ const mySetScores = computed(() => setResults.value.map((s) => (sides.value[0].i
 async function onCountered() {
   feel('success')
   await load()
-  const who = format.value === 'TEAMS' ? '상대 팀이' : format.value === 'FREE_FOR_ALL' ? '다른 사람이' : `${opponent.value.nickname}님이`
-  showToast(disputed.value ? '결과가 맞지 않아 이 경기는 기록하지 않아요' : `고친 결과를 보냈어요. ${who} 확인해요`)
+  const by = format.value === 'TEAMS' ? '상대 팀이' : format.value === 'FREE_FOR_ALL' ? '다른 사람이' : `${opponent.value.nickname}님이`
+  showToast(disputed.value ? '결과가 맞지 않아 이 경기는 기록하지 않아요' : `고친 결과를 보냈어요. ${by} 확인해요`)
 }
 
 const reviewRows = computed(() => [
@@ -1016,8 +1019,7 @@ async function onShare() {
   try {
     const res = await api.post('/api/invite', null, { params: { gameId: `${gameId}` } })
     const url = res.data.url
-    const opponentName =
-      user1.value.id === currentUserId.value ? user2.value.nickname : user1.value.nickname
+    const opponentName = who(user1.value.id === currentUserId.value ? user2.value : user1.value)
     const text = `${opponentName}님과의 경기 결과 – Match`
 
     if (navigator.share) {

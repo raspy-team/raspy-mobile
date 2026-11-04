@@ -63,13 +63,14 @@ type Visual = { kind: 'CHAIN' | 'BOARD' | 'BARS'; firstUserId?: number | null; w
 const props = defineProps<{
   visual?: Visual | null
   /** 카드의 두 사람 (점수 순서와 같다) */
-  players: { id: number; name: string }[]
+  players: { id: number; name: string; isBot?: boolean }[]
   scores?: (number | null)[]
   winnerId?: number | null
   unit?: string
 }>()
 
-const firstName = computed(() => props.players.find((p) => p.id === props.visual?.firstUserId)?.name || '')
+// 이름만 따로 쓰는 줄이라 AI 주민이면 'AI 주민 ○○' (docs/ai-residents.md 'AI 표시')
+const firstName = computed(() => { const p = props.players.find((x) => x.id === props.visual?.firstUserId); return p ? (p.isBot ? `AI 주민 ${p.name}` : p.name) : '' })
 
 // 사슬은 길면 앞 셋 … 뒤 다섯만 (끝낸 낱말이 이야기)
 const shownWords = computed(() => {

@@ -241,7 +241,7 @@
       <!-- 사람 · 도구 -->
       <UiSection title="도구">
         <UiList>
-          <UiListItem icon="fas fa-users" title="사용자 찾기" :subtitle="users.length ? `${users.length}명` : ''" chevron @click="openUsers" />
+          <UiListItem icon="fas fa-users" title="사용자 찾기" :subtitle="users.length ? userCount : ''" chevron @click="openUsers" />
           <UiListItem icon="fas fa-user-plus" title="그룹 계정 만들기" to="/group/register" chevron />
           <UiListItem icon="fas fa-book-open" title="규칙 둘러보기" to="/rules" chevron />
         </UiList>
@@ -258,7 +258,7 @@
           v-for="u in filteredUsers"
           :key="u.id"
           :title="u.nickname"
-          :subtitle="'@' + u.username"
+          :subtitle="(u.isBot ? 'AI 주민 · ' : '') + '@' + u.username"
           :to="`/profile/${u.id}`"
           chevron
         >
@@ -439,6 +439,11 @@ function classifyLine(c) {
 const showUsers = ref(false)
 const loadingUsers = ref(false)
 const users = ref([])
+// 관리자 숫자는 사람만 센다. AI 주민은 따로 (docs/ai-residents.md '숫자는 따로')
+const userCount = computed(() => {
+  const ai = users.value.filter((u) => u.isBot).length
+  return `사람 ${users.value.length - ai}명${ai ? ` · AI 주민 ${ai}명` : ''}`
+})
 const userSearch = ref('')
 const filteredUsers = computed(() => {
   const q = userSearch.value.trim().toLowerCase()

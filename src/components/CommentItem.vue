@@ -63,7 +63,7 @@
         <button
           v-if="!isReply"
           class="hover:underline focus:underline ml-1 px-1 py-2.5 -my-2.5"
-          @click="emitReply(comment.id, comment.author.nickname)"
+          @click="emitReply(comment.id, who(comment.author, comment.author.nickname))"
         >
           답글
         </button>
@@ -92,6 +92,7 @@ import { defineProps, defineEmits, ref } from 'vue'
 import CommentItem from './CommentItem.vue'
 import ReportSheet from './safety/ReportSheet.vue'
 import { UiAiBadge, UiAvatar } from './ui'
+import { who } from '../utils/format'
 
 const props = defineProps({
   comment: { type: Object, required: true },

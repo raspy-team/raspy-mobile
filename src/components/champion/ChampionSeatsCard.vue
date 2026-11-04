@@ -44,6 +44,7 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET } from '@/api/client'
+import { track } from '@/utils/trackLog'
 import { UiAiBadge, UiButton } from '../ui'
 
 const props = defineProps<{ ruleId: number | null | undefined; appGameKey?: string | null }>()
@@ -71,6 +72,8 @@ function bossHint(s: Seat) {
 
 // 보스 도전: 실시간 화면이 ?boss=1을 보고 보스와 바로 붙는다
 function challengeBoss() {
+  // 보스 도전은 원본 기록에 ai=true로 (docs/ai-residents.md '숫자는 따로')
+  if (props.appGameKey) track('boss_challenge', { gameKey: props.appGameKey, value: 'ai=true' })
   if (props.appGameKey) router.push({ path: `/play/${props.appGameKey}/live`, query: { boss: 1 } })
 }
 

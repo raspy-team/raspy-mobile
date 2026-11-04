@@ -89,7 +89,10 @@ const canCheer = computed(() => {
 
 async function load() {
   try {
-    game.value = (await api.get('/api/games/summary', { params: { gameId: route.params.gameId } })).data
+    const g = (await api.get('/api/games/summary', { params: { gameId: route.params.gameId } })).data
+    // AI 주민의 경기는 끝난 결과만 보인다 (docs/ai-residents.md 6). 연 사람 카드(온도)·응원 칸 대신 결과로
+    if (g.ownerIsBot) return router.replace(`/games/${g.id}/result`)
+    game.value = g
   } catch {
     error.value = '경기를 찾지 못했어요'
   }

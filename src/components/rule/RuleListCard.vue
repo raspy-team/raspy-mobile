@@ -13,6 +13,10 @@
       <span class="block t-caption mt-0.5 truncate">{{ [ruleKind(rule), winSummary(rule)].filter(Boolean).join(' · ') }}</span>
       <span v-if="rule.ruleGoal" class="block t-caption mt-1 line-clamp-2">{{ rule.ruleGoal }}</span>
       <span class="flex items-center gap-1.5 mt-2 t-micro">
+        <template v-if="rule.rank">
+          <span class="flex-shrink-0 font-bold text-fg">{{ rule.rank }}위</span>
+          <span aria-hidden="true">·</span>
+        </template>
         <template v-if="rule.currentChampion">
           <UiIcon name="crown" class="text-signal-fg" />
           <span class="truncate">챔피언 {{ rule.currentChampion.nickname }}</span>
@@ -25,7 +29,7 @@
 </template>
 
 <script setup>
-// 규칙 목록의 한 줄: 그림 → 이름·평점 → 종류(종목·능력)·승리 조건 → 한 줄 설명 → 챔피언·경기 수. 누르면 상세
+// 규칙 목록의 한 줄: 그림 → 이름·평점 → 종류(종목·능력)·승리 조건 → 한 줄 설명 → 순위·챔피언·경기 수. 누르면 상세
 import { computed, defineProps } from 'vue'
 import { ratingText, ruleKind, winSummary } from '../../utils/rule'
 import RuleThumb from './RuleThumb.vue'

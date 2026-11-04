@@ -57,9 +57,23 @@
     </div>
 
     <main class="max-w-2xl mx-auto px-4 pb-16">
+      <!-- 종류: 모두 · 오프라인 · 앱 게임 (경기 열 규칙을 고를 때는 오프라인만이라 숨긴다) -->
+      <div v-if="!picking" class="flex gap-2 pt-4" role="radiogroup" aria-label="종류">
+        <UiChip
+          v-for="k in KINDS"
+          :key="k.value"
+          role="radio"
+          :aria-checked="kind === k.value"
+          :selected="kind === k.value"
+          @click="setQuery({ kind: k.value === 'ALL' ? '' : k.value })"
+        >
+          {{ k.label }}
+        </UiChip>
+      </div>
+
       <!-- 개수 + 정렬 -->
-      <div class="flex items-center justify-between pt-4">
-        <p class="t-caption">{{ loading ? '찾는 중…' : `규칙 ${rules.length}개` }}</p>
+      <div class="flex items-center justify-between gap-2 pt-4">
+        <p class="t-caption flex-shrink-0">{{ loading ? '찾는 중…' : `규칙 ${rules.length}개` }}</p>
         <div class="flex -mr-2" role="radiogroup" aria-label="정렬">
           <button
             v-for="o in SORTS"
@@ -67,7 +81,7 @@
             type="button"
             role="radio"
             :aria-checked="sort === o.value"
-            class="px-2 h-9 text-sm"
+            class="px-1.5 h-9 text-sm whitespace-nowrap"
             :class="sort === o.value ? 'text-fg font-bold' : 'text-fg-subtle'"
             @click="setQuery({ sort: o.value })"
           >
@@ -118,7 +132,7 @@
 
 <script setup>
 // 규칙 둘러보기: 검색 + 찾기 상황(어디서·몇 명·얼마나·준비물) + 능력 칩 + 목록 (docs/direction.md '카테고리').
-// 고른 조건은 주소(?place=&party=&length=&gear=&ability=&q=&sort=)에 남겨 상세에서 돌아와도, 링크로 공유해도 같은 목록이 나온다
+// 고른 조건은 주소(?place=&party=&length=&gear=&ability=&q=&sort=&kind=)에 남겨 상세에서 돌아와도, 링크로 공유해도 같은 목록이 나온다
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
@@ -126,9 +140,17 @@ import { GET } from '@/api/client'
 import RuleListCard from '../components/rule/RuleListCard.vue'
 import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
 
+// 순위는 별점(평가가 적으면 전체 평균 쪽으로 당김)과 경기 수를 합친 것. 서버 RuleRanking
 const SORTS = [
-  { value: 'popular', label: '인기순' },
+  { value: 'rank', label: '순위순' },
+  { value: 'plays', label: '경기순' },
+  { value: 'rating', label: '별점순' },
   { value: 'recent', label: '최신순' },
+]
+const KINDS = [
+  { value: 'ALL', label: '전체' },
+  { value: 'OFFLINE', label: '오프라인' },
+  { value: 'APP', label: '앱 게임' },
 ]
 // 주소 이름 → 질문, category-options의 목록 이름
 const SITUATIONS = [
@@ -149,7 +171,9 @@ const loading = ref(true)
 const sheet = ref('')
 
 const ability = computed(() => route.query.ability || '')
-const sort = computed(() => route.query.sort || 'popular')
+// 예전 주소의 popular는 경기순
+const sort = computed(() => (route.query.sort === 'popular' ? 'plays' : route.query.sort) || 'rank')
+const kind = computed(() => route.query.kind || 'ALL')
 const q = ref(route.query.q || '')
 const current = computed(() => SITUATIONS.find((f) => f.key === sheet.value))
 const filtered = computed(() => !!route.query.q || FILTER_KEYS.some((k) => route.query[k]))
@@ -188,7 +212,7 @@ async function load() {
   loading.value = true
   try {
     // 둘러보기는 앱 게임도 보여 준다. 경기를 열 규칙을 고를 때만 뺀다
-    const params = { sort: sort.value, withApp: !picking.value }
+    const params = { sort: sort.value, withApp: !picking.value, kind: kind.value }
     FILTER_KEYS.forEach((k) => route.query[k] && (params[k] = route.query[k]))
     if (route.query.q) params.search = route.query.q
     const { data } = await api.get('/api/rules/list', { params })
@@ -200,7 +224,7 @@ async function load() {
   }
 }
 
-watch(() => [...FILTER_KEYS.map((k) => route.query[k]), sort.value, route.query.q], load)
+watch(() => [...FILTER_KEYS.map((k) => route.query[k]), sort.value, kind.value, route.query.q], load)
 
 onMounted(async () => {
   load()

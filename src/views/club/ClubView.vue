@@ -87,7 +87,7 @@
               <div class="flex gap-2">
                 <UiButton size="sm" class="flex-1" :variant="e.myAnswer === true ? 'primary' : 'secondary'" :disabled="e.full && e.myAnswer !== true" @click="answerEvent(e.id, true)">{{ e.full && e.myAnswer !== true ? '정원이 찼어요' : '갈게요' }}</UiButton>
                 <UiButton size="sm" class="flex-1" :variant="e.myAnswer === false ? 'primary' : 'secondary'" @click="answerEvent(e.id, false)">못 가요</UiButton>
-                <UiIconButton v-if="isStaff" icon="ellipsis" label="일정 더보기" @click="cancelEvent(e.id)" />
+                <UiIconButton v-if="isStaff" icon="xmark" label="일정 취소" @click="cancelEvent(e.id)" />
               </div>
             </UiCard>
           </div>
@@ -131,7 +131,7 @@
 
         <UiSection title="친선전" class="mt-8">
           <div v-if="detail.games.length" class="space-y-2">
-            <UiCard v-for="g in detail.games" :key="g.gameId" class="py-3 cursor-pointer active:bg-surface-2" role="button" @click="router.push(`/game?id=${g.gameId}`)">
+            <UiCard v-for="g in detail.games" :key="g.gameId" class="py-3 cursor-pointer active:bg-surface-2" role="button" @click="router.push(`/games/${g.gameId}`)">
               <p class="t-heading">{{ g.title }}</p>
               <p class="t-caption mt-0.5">{{ g.hostNickname }}님이 열었어요 · {{ STATUS[g.status] || g.status }}</p>
             </UiCard>
@@ -291,7 +291,8 @@ const tournaments = ref<Schemas['TournamentSummary'][]>([])
 async function load() {
   try {
     detail.value = (await GET('/api/clubs/{id}', { path: { id } })).data
-    tournaments.value = (await GET('/api/tournaments', { query: { scope: 'club', clubId: id } })).data.slice(0, 5)
+    // 대회 목록만 못 불러오면 동호회는 그대로 보여 준다 (전에는 '동호회를 찾지 못했어요'가 떴다)
+    tournaments.value = await GET('/api/tournaments', { query: { scope: 'club', clubId: id } }).then((r) => r.data.slice(0, 5), () => [])
   } catch {
     error.value = '동호회를 찾지 못했어요'
   }
@@ -320,8 +321,7 @@ async function join() {
   }
 }
 async function cancelRequest() {
-  await POST('/api/clubs/{id}/leave', { path: { id } })
-  await load()
+  if (await run(() => POST('/api/clubs/{id}/leave', { path: { id } }), '취소하지 못했어요')) await load()
 }
 async function decide(userId: number, accept: boolean) {
   const d = await run(() => POST('/api/clubs/{id}/requests/{userId}', { path: { id, userId }, query: { accept } }), '처리하지 못했어요')
@@ -449,8 +449,7 @@ async function leave() {
       ? '혼자 남은 동호회라 나가면 동호회가 없어져요'
       : '회장은 운영진이나 먼저 든 멤버에게 넘어가요. 정해서 넘기려면 멤버 이름을 눌러 회장 넘기기를 해 주세요'
   if (!(await confirmDialog({ title: '동호회를 나갈까요?', message, confirmText: '나가기', danger: true }))) return
-  await POST('/api/clubs/{id}/leave', { path: { id } })
-  router.replace('/clubs')
+  if (await run(() => POST('/api/clubs/{id}/leave', { path: { id } }), '나가지 못했어요. 다시 해 주세요')) router.replace('/clubs')
 }
 
 onMounted(load)

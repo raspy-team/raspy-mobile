@@ -41,7 +41,7 @@
         />
         <!-- 팀 경기 단톡방: 승인된 둘 이상이면 (11/5 C) -->
         <UiButton v-if="teamChatOpen(game, myId)" block variant="secondary" icon="far fa-comment" class="mt-4" :to="`/games/${game.id}/chat`">단톡방</UiButton>
-        <UiButton v-if="game.ownerId === myId" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>
+        <UiButton v-if="game.ownerId === myId || game.players?.some((p) => p.id === myId)" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>
         <UiButton v-else block variant="ghost" class="mt-4" to="/">다른 경기 찾기</UiButton>
       </template>
     </main>

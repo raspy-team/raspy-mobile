@@ -119,13 +119,16 @@ export const socket = {
     if (_onDisconnected) _onDisconnected()
   },
 
+  /** 보냈으면 true. 연결이 끊겨 있으면 false (예전엔 조용히 버려 입력만 지워졌다) */
   sendChat(roomId, content) {
     if (stompClient && stompClient.connected) {
       stompClient.publish({
         destination: `/app/chat/${roomId}`,
         body: JSON.stringify({ content }),
       })
+      return true
     }
+    return false
   },
   /** 보냈으면 true. 연결이 끊겨 있으면 보내지 못하고 false (예전엔 조용히 버렸다) */
   sendGameEvent(roomId, payload) {

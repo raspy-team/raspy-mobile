@@ -16,9 +16,12 @@
           @apply="apply"
           @pair="pairOpen = true"
           @cancel="cancel"
-          @challengers="() => {}"
-          @more="() => {}"
+          @challengers="challengersGame = game"
+          @more="menuGame = game"
         />
+        <!-- 더보기·신청자: 홈 목록과 같은 시트 (예전엔 눌러도 아무 일이 없었다) -->
+        <GameMenuSheets v-model:menu="menuGame" v-model:challengers="challengersGame" :my-id="myId" @comments="(id) => (commentId = id)" />
+        <Comment v-if="commentId" :id="commentId" @close="commentId = 0" />
         <PairApplySheet :game="pairOpen ? game : null" @close="pairOpen = false" @done="() => { game.isAppliedByMe = true; pairOpen = false }" />
         <p class="t-caption mt-4">
           <template v-if="game.gameStatus !== 'MATCHING'">{{ game.format && game.format !== 'DUEL' ? '이미 사람이 다 모인 경기예요.' : '이미 상대가 정해진 경기예요.' }}</template>
@@ -59,6 +62,8 @@ import { useToast } from '../../composable/useToast'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import CheerBar from '../../components/point/CheerBar.vue'
 import PairApplySheet from '../../components/game/PairApplySheet.vue'
+import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
+import Comment from '../GameCommentView.vue'
 import { UiButton, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
 import { teamChatOpen } from '../../utils/gameFormat'
 
@@ -69,6 +74,9 @@ const game = ref(null)
 const error = ref('')
 const busy = ref(false)
 const pairOpen = ref(false)
+const menuGame = ref(null)
+const challengersGame = ref(null)
+const commentId = ref(0)
 const myId = ref(null)
 const canCheer = computed(() => {
   const g = game.value

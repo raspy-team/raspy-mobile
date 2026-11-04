@@ -84,52 +84,7 @@
   <!-- 친구와 둘이 신청 (팀 경기) -->
   <PairApplySheet :game="pairGame" @close="pairGame = null" @done="(g) => { g.isAppliedByMe = true; pairGame = null }" />
 
-  <!-- 신청자 -->
-  <UiSheet :model-value="!!challengersGame" :title="`신청자 ${challengersGame?.challengers?.length || 0}명`" @update:model-value="challengersGame = null">
-    <UiList v-if="challengersGame?.challengers?.length">
-      <UiListItem
-        v-for="c in challengersGame.challengers"
-        :key="c.userId"
-        :title="c.applicantNickname"
-        :subtitle="ratingLine(c.applicantGameStatisticsDTO) || '첫 경기를 앞두고 있어요'"
-        chevron
-        @click="router.push('/profile/' + c.userId)"
-      >
-        <template #leading><UiAvatar :src="c.applicantProfileUrl" :name="c.applicantNickname" :user-id="c.userId" size="sm" /></template>
-      </UiListItem>
-    </UiList>
-    <UiEmptyState v-else icon="fas fa-user-group" title="아직 신청한 사람이 없어요" />
-  </UiSheet>
-
-  <!-- 더보기 -->
-  <UiSheet :model-value="!!menuGame" @update:model-value="menuGame = null">
-    <UiList>
-      <UiListItem icon="far fa-comment" title="댓글" @click="openComments(menuGame)" />
-      <UiListItem v-if="menuGame?.ownerId !== myId" icon="far fa-paper-plane" title="주최자에게 메시지" @click="router.push('/chat/' + menuGame.ownerId)" />
-      <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share(menuGame)" />
-      <UiListItem v-if="menuGame?.ownerId !== myId" icon="far fa-flag" title="신고하기" danger @click="openReport(menuGame)" />
-    </UiList>
-  </UiSheet>
-
-  <!-- 신고 -->
-  <UiSheet :model-value="!!reportGame" title="이 경기를 신고할까요?" @update:model-value="reportGame = null">
-    <p class="t-caption mb-4">어떤 문제인지 알려 주시면 <strong class="text-fg">운영진이 바로 확인하고 처리해요.</strong></p>
-    <div class="flex flex-wrap gap-2 mb-4">
-      <UiChip v-for="r in REPORT_REASONS" :key="r" :selected="reportReason === r" @click="reportReason = r">{{ r }}</UiChip>
-    </div>
-    <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
-    <template #footer>
-      <UiButton
-        block
-        variant="danger"
-        :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())"
-        :loading="reporting"
-        @click="submitReport"
-      >
-        신고하기
-      </UiButton>
-    </template>
-  </UiSheet>
+  <GameMenuSheets v-model:menu="menuGame" v-model:challengers="challengersGame" :my-id="myId" @comments="(id) => (commentId = id)" />
 
   <Comment v-if="commentId != 0" :id="commentId" @close="commentId = 0" />
   <MatchRuleModal v-if="ruleGame" :rule="ruleGame.rule" @close="ruleGame = null" />
@@ -145,21 +100,18 @@ import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import PairApplySheet from '../../components/game/PairApplySheet.vue'
+import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import Comment from '../GameCommentView.vue'
 import {
-  UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem,
-  UiIconButton, UiPullIndicator, UiSection, UiSheet, UiSkeleton, UiTopBar,
+  UiButton, UiCard, UiEmptyState, UiIconButton, UiPullIndicator, UiSection, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
-import { ratingLine } from '../../utils/format'
-import { shareLink } from '../../utils/share'
 import { feel } from '../../utils/feel'
 import { todayBrandLine } from '@/utils/brandLines'
 
-const REPORT_REASONS = ['욕설·비방', '거짓 경기', '광고·스팸', '기타']
 // 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나 (사용자 11/3)
 const DESTINATIONS = [
   { to: '/games', icon: 'gamepad', label: '앱 게임' },
@@ -181,10 +133,6 @@ const commentId = ref(0)
 const ruleGame = ref(null)
 const challengersGame = ref(null)
 const menuGame = ref(null)
-const reportGame = ref(null)
-const reportReason = ref('')
-const reportDetail = ref('')
-const reporting = ref(false)
 
 // 못 불러온 것과 비어 있는 것을 구분한다 (서버가 꺼졌는데 '열린 경기가 없어요'로 보이지 않게)
 const loadFailed = ref(false)
@@ -231,43 +179,6 @@ async function cancelApply(game) {
   } finally {
     busyId.value = null
   }
-}
-
-async function share(game) {
-  menuGame.value = null
-  try {
-    const { data } = await api.post('/api/invite', null, { params: { gameId: game.id } })
-    const msg = await shareLink(data.url, `'${game.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`)
-    if (msg) showToast(msg)
-  } catch {
-    showToast('링크를 만들지 못했어요')
-  }
-}
-
-function openReport(game) {
-  menuGame.value = null
-  reportReason.value = ''
-  reportDetail.value = ''
-  reportGame.value = game
-}
-
-async function submitReport() {
-  reporting.value = true
-  try {
-    const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
-    const { data: done } = await api.post('/api/reports', { targetType: 'GAME', targetId: reportGame.value.id, reason })
-    showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
-  } catch (e) {
-    showToast(e.response?.data?.message || '이미 신고한 경기예요')
-  } finally {
-    reporting.value = false
-    reportGame.value = null
-  }
-}
-
-function openComments(game) {
-  menuGame.value = null
-  commentId.value = game.id
 }
 
 let stopWatching = null

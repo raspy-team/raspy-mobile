@@ -1,8 +1,8 @@
 <template>
-  <UiSheet :model-value="modelValue" :title="counter ? '내가 생각하는 점수' : '결과만 입력'" @update:model-value="emit('update:modelValue', $event)">
+  <UiSheet :model-value="modelValue" :title="counter ? '내가 생각하는 점수' : '점수만 입력'" @update:model-value="emit('update:modelValue', $event)">
     <p v-if="counter" class="t-caption mb-4">고친 결과가 새 결과가 되고, 이번엔 {{ isGroup ? '다른 사람' : opponentName + (format === 'TEAMS' ? '' : '님') }}이 확인해요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
     <p v-else-if="isGroup" class="t-caption mb-4">다른 사람 한 명이 확인하면 기록돼요.</p>
-    <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워두세요. {{ opponentName }}{{ format === 'TEAMS' ? '' : '님' }}이 확인하면 기록돼요.</p>
+    <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워 두세요. {{ opponentName }}{{ format === 'TEAMS' ? '' : '님' }}이 확인하면 기록돼요.</p>
     <p v-if="warning" class="text-sm text-danger-fg mb-4">{{ warning }}</p>
 
     <!-- 셋 이상이 각자: 등수로 또는 점수로 -->

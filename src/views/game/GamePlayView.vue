@@ -521,7 +521,7 @@ onMounted(async () => {
       } catch (error) {
         console.error('Failed to process camera image:', error)
         if (error.message === 'QUOTA_EXCEEDED') {
-          showToast('저장 공간이 부족합니다.')
+          showToast('폰 저장 공간이 모자라요. 사진·영상 몇 개를 지우고 다시 해 주세요')
         } else {
           showToast('사진을 저장하지 못했어요')
         }
@@ -537,7 +537,7 @@ onMounted(async () => {
       } catch (error) {
         console.error('Failed to process video:', error)
         if (error.message === 'QUOTA_EXCEEDED') {
-          showToast('저장 공간이 부족합니다.')
+          showToast('폰 저장 공간이 모자라요. 사진·영상 몇 개를 지우고 다시 해 주세요')
         } else {
           showToast('동영상을 저장하지 못했어요')
         }

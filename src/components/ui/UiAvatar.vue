@@ -9,11 +9,11 @@
     :aria-label="userId && name ? `${name} 프로필` : undefined"
     @click="go"
     @keydown.enter="go"
-    :style="{ width: px + 'px', height: px + 'px', fontSize: Math.round(px * 0.38) + 'px', background: (src && !failed) ? 'rgb(var(--c-surface-2))' : tint }"
+    :style="{ width: px + 'px', height: px + 'px', fontSize: Math.round(px * 0.38) + 'px', background: (photo && !failed) ? 'rgb(var(--c-surface-2))' : tint }"
   >
     <img
-      v-if="src && !failed"
-      :src="src"
+      v-if="photo && !failed"
+      :src="photo"
       :alt="name ? `${name}의 프로필 사진` : ''"
       data-fallback="1"
       loading="lazy"
@@ -49,6 +49,8 @@ function go(e) {
 const px = computed(() => SIZE[props.size] || 40)
 const initial = computed(() => (props.name || '?').trim().charAt(0).toUpperCase())
 const failed = ref(false)
+// 서버의 기본 사진(흰 사람 모양)은 사진이 없는 것으로 본다. 다크에서 흰 원만 튀었다 (11/5 c6 검토). 대신 이름 첫 글자
+const photo = computed(() => (props.src && !props.src.includes('/service/default-profile') ? props.src : ''))
 
 function hash(s) {
   let h = 0

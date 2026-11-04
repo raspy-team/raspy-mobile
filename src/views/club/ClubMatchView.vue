@@ -20,7 +20,8 @@
           <UiButton class="flex-1" variant="secondary" :loading="busy" @click="respond(false)">거절</UiButton>
         </div>
         <p v-else-if="m.status === 'PROPOSED'" class="t-caption text-center mt-5">{{ m.away.name }} 운영진이 답하기를 기다려요</p>
-        <p v-if="m.status === 'ACCEPTED' && m.mySide" class="t-caption text-center mt-5">판마다 우리 선수를 정해 주세요. 양쪽이 다 정하면 그 판의 경기가 열려요</p>
+        <!-- 판이 다 열렸으면 선수를 정하라는 말 대신 다음 할 일 -->
+        <p v-if="m.status === 'ACCEPTED' && m.mySide" class="t-caption text-center mt-5">{{ m.boardList.every((b) => b.gameId) ? '판마다 경기가 열렸어요. 경기에서 결과를 내면 점수가 올라가요' : '판마다 우리 선수를 정해 주세요. 양쪽이 다 정하면 그 판의 경기가 열려요' }}</p>
 
         <UiSection title="판" class="mt-8">
           <div class="space-y-2">

@@ -326,7 +326,14 @@ let bossChallenge = route.query.boss === '1'
 let aiId = Number(route.query.ai) || null
 // 주소의 ?to·?invite·?boss·?ai는 들어간 뒤에 지운다. 화면은 주소마다 새로 그려져(App.vue의 key) 먼저 지우면
 // 새 화면이 보통 대기실로 한 번 더 들어가 따로 방을 열었다 (보스 판 대신 빈 대기실이 보였다). 들어간 뒤 지우면 새 화면은 그 판을 이어 받는다
-const clearQuery = () => { if (route.query.to || route.query.invite || route.query.boss || route.query.ai) router.replace({ query: {} }) }
+// 주소를 지우면 화면이 다시 그려지는데, 그때 나가기(leave)를 하면 막 연 초대 방이 바로 취소됐다 (11/6 ff: 광장·프로필의 '한 판 하자고 하기'가 늘 취소됨).
+// 주소만 지우는 것이면 방을 그대로 두고, 새로 그려진 화면이 그 방을 이어 받는다
+let keepRoom = false
+const clearQuery = () => {
+  if (!(route.query.to || route.query.invite || route.query.boss || route.query.ai)) return
+  keepRoom = true
+  router.replace({ query: {} })
+}
 
 const inviteLeft = computed(() => {
   const until = state.value?.inviteUntil ? new Date(state.value.inviteUntil).getTime() : 0
@@ -473,6 +480,6 @@ onBeforeUnmount(() => {
   stop?.()
   // 대기실에 둔 채 나가면 방을 닫는다 (하는 중이면 돌아와서 이어 할 수 있게 그대로 둔다)
   // 하루 기다리는 게임(편지 오목)은 닫지 않는다: 상대가 오면 알림이 간다
-  if (state.value?.status === 'WAITING' && !longLobby.value) POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: state.value.gameId } }).catch(() => {})
+  if (state.value?.status === 'WAITING' && !longLobby.value && !keepRoom) POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: state.value.gameId } }).catch(() => {})
 })
 </script>

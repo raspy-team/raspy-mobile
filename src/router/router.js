@@ -123,6 +123,8 @@ const routes = [
   // 휴대폰 본인인증 (안전·신뢰 H): 만나서 하는 경기 전에 한 번
   { path: '/verify', component: () => import('../views/safety/VerifyView.vue') },
   { path: '/games/:gameId(\\d+)', component: () => import('../views/game/OpenGameView.vue') },
+  // 팀 경기 단톡방 (11/5 C)
+  { path: '/games/:gameId(\\d+)/chat', component: () => import('../views/game/TeamChatView.vue') },
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   { path: '/play/:key/live', component: () => import('../views/play/RealtimeView.vue') },
   { path: '/play/:key/battle', component: () => import('../views/play/BattleView.vue') },

@@ -3471,6 +3471,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/team-chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 팀 경기 단톡방 열기
+         * @description 승인된 사람이 둘 이상인 팀 대 팀·여럿이 각자 경기의 단체 대화방. 처음이면 만든다. 메시지는 /api/chat-room/{roomId}/chat-messages, 보내기는 웹소켓 /app/chat/{roomId}
+         */
+        get: operations["open"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/share-link": {
         parameters: {
             query?: never;
@@ -6408,7 +6428,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -6541,6 +6561,26 @@ export interface components {
             score: number;
             /** Format: int32 */
             sets: number;
+        };
+        Member: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            profileUrl?: string;
+            isHost: boolean;
+            /** Format: int32 */
+            team?: number;
+        };
+        TeamChatInfo: {
+            /** Format: uuid */
+            roomId: string;
+            ruleTitle: string;
+            /** Format: date-time */
+            matchDate?: string;
+            writable: boolean;
+            /** Format: date-time */
+            closesAt?: string;
+            members: components["schemas"]["Member"][];
         };
         ShareLinkResponse: {
             url: string;
@@ -11859,6 +11899,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GameDetailResponse"];
+                };
+            };
+        };
+    };
+    open: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TeamChatInfo"];
                 };
             };
         };

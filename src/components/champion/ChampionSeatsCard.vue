@@ -22,7 +22,7 @@
           {{ s.mine ? '지면 자리를 내줘요. 30일 쉬어도 넘어가요' : s.champion ? '챔피언을 이기면 자리를 가져와요' : emptyHint(s.seat) }}
         </span>
       </button>
-      <UiButton v-if="s.champion && !s.mine" size="sm" variant="tonal" @click="challenge(s.champion)">도전</UiButton>
+      <UiButton v-if="s.champion && !s.mine" variant="tonal" :aria-label="`${s.champion.nickname}님에게 도전`" @click="challenge(s.champion)">도전</UiButton>
     </div>
   </div>
 </template>

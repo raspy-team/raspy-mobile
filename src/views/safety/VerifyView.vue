@@ -27,7 +27,9 @@ import { UiButton, UiListSkeleton, UiTopBar } from '../../components/ui'
 
 const route = useRoute()
 const router = useRouter()
-const back = String(route.query.back || '/')
+// 돌아갈 곳은 앱 안 주소만 ('//다른곳'·'https://' 같은 값은 첫 화면으로)
+const rawBack = String(route.query.back || '/')
+const back = rawBack.startsWith('/') && !rawBack.startsWith('//') ? rawBack : '/'
 const cfg = ref(null)
 const busy = ref(false)
 const message = ref('')

@@ -5893,7 +5893,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "정렬 기준(recent 또는 popular)",
+            "description": "정렬: rank(순위, 별점과 판 수를 합침) · plays(판 수, 예전 이름 popular) · rating(별점, 평가가 적으면 전체 평균 쪽으로 당김) · recent(최신)",
             "required": false,
             "schema": {
               "type": "string",
@@ -6002,6 +6002,21 @@
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "종류: ALL(모두) · OFFLINE(만나서 하는 경기) · APP(앱 게임). withApp=false면 늘 OFFLINE",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ALL",
+              "enum": [
+                "ALL",
+                "OFFLINE",
+                "APP"
+              ]
             }
           }
         ],
@@ -6284,11 +6299,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           },
           {
@@ -6297,11 +6312,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ],
-              "default": "UNITS"
+              ]
             }
           }
         ],
@@ -8218,11 +8233,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -10299,6 +10314,10 @@
           },
           "category": {
             "$ref": "#/components/schemas/GameCategoryView"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

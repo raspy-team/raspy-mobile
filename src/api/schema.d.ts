@@ -5164,6 +5164,8 @@ export interface components {
             rejectionReason?: string;
             appGameKey?: string;
             category?: components["schemas"]["GameCategoryView"];
+            /** Format: int32 */
+            rank?: number;
         };
         GameCategoryView: {
             face: components["schemas"]["CategoryValue"];
@@ -11421,7 +11423,7 @@ export interface operations {
                 minor?: string;
                 /** @description 검색어 */
                 search?: string;
-                /** @description 정렬 기준(recent 또는 popular) */
+                /** @description 정렬: rank(순위, 별점과 판 수를 합침) · plays(판 수, 예전 이름 popular) · rating(별점, 평가가 적으면 전체 평균 쪽으로 당김) · recent(최신) */
                 sort?: string;
                 /** @description 찾기: 어디서 (Place 이름) */
                 place?: "PHONE" | "HOME" | "OUTSIDE" | "GATHERING" | "SPORTS";
@@ -11435,6 +11437,8 @@ export interface operations {
                 ability?: "STRENGTH" | "ENDURANCE" | "SPEED" | "PRECISION" | "BALANCE" | "FLEXIBILITY" | "RHYTHM" | "EXPRESSION" | "READING" | "SPATIAL" | "MEMORY" | "KNOWLEDGE" | "LANGUAGE" | "CALCULATION" | "SENSE" | "SOCIAL" | "PERSUASION" | "TEAMWORK" | "GRIT" | "CONSISTENCY" | "CREATIVITY" | "HUMOR";
                 /** @description 앱 게임도 넣기 (둘러보기). 경기를 열 규칙을 고를 때는 false */
                 withApp?: boolean;
+                /** @description 종류: ALL(모두) · OFFLINE(만나서 하는 경기) · APP(앱 게임). withApp=false면 늘 OFFLINE */
+                kind?: "ALL" | "OFFLINE" | "APP";
             };
             header?: never;
             path?: never;

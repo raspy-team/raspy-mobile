@@ -99,6 +99,8 @@ const routes = [
     component: InviteView,
   },
   { path: '/profile/:id/stats', component: () => import('../views/profile/RecordView.vue') },
+  // 능력·종합 순위 (kind: OVERALL·GROUP·ABILITY, key: ALL·BODY·능력 이름)
+  { path: '/rankings/:kind/:key', component: () => import('../views/profile/ScopeRankingView.vue') },
   { path: '/profile/:id', component: Profile },
 
   { path: '/settings', component:  Setting},

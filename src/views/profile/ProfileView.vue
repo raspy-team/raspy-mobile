@@ -81,8 +81,8 @@
           <p class="t-micro mt-0.5">승률 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
         <div class="flex-1">
-          <p class="t-heading tabular-nums">{{ (user.myChampions || []).length }}</p>
-          <p class="t-micro mt-0.5">챔피언</p>
+          <p class="t-heading tabular-nums">{{ seatLines.length }}</p>
+          <p class="t-micro mt-0.5">자리</p>
         </div>
         <button type="button" class="flex-1" @click="openFriends">
           <p class="t-heading tabular-nums">{{ stats.friends || 0 }}</p>
@@ -97,13 +97,19 @@
       </div>
       <LiveRecordLine :key="`lr${user.id}`" class="mt-2" :user-id="user.id" />
 
-      <!-- 챔피언 -->
-      <section v-if="user.myChampions?.length" class="mt-10">
-        <h2 class="t-heading mb-3">챔피언</h2>
+      <!-- 가진 자리: 규칙 챔피언(벨트)과 능력·종합·기록 1위. 동네·소속을 가린 사람은 '동네'·'소속'으로 온다 (docs/organizations.md 3-4) -->
+      <section v-if="seatLines.length" class="mt-10">
+        <h2 class="t-heading mb-3">가진 자리</h2>
         <div class="flex flex-wrap gap-2">
-          <span v-for="(c, i) in user.myChampions" :key="i" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-line-strong text-fg text-sm">
-            <UiIcon name="crown" class="text-signal-fg" />{{ [c.region, c.ruleTitle].filter(Boolean).join(' ') }}
-          </span>
+          <component
+            :is="l.to ? 'RouterLink' : 'span'"
+            v-for="l in seatLines"
+            :key="l.key"
+            :to="l.to"
+            class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-line-strong text-fg text-sm"
+          >
+            <UiIcon name="crown" class="text-signal-fg" />{{ l.title }}
+          </component>
         </div>
       </section>
 
@@ -380,6 +386,17 @@ function goFriend(id) {
 
 const abilities = ref([])
 
+// 가진 자리 (벨트 먼저, 그다음 1위). 벨트는 그 게임으로, 능력·종합 1위는 그 순위로 간다
+const seats = ref({ belts: [], crowns: [] })
+const seatLines = computed(() => [
+  ...seats.value.belts.map((b) => ({ key: `b${b.ruleId}${b.seatLabel}`, title: b.title, to: b.appGameKey ? `/play/${b.appGameKey}` : `/rules/${b.ruleId}` })),
+  ...seats.value.crowns.map((c) => ({
+    key: `c${c.kind}${c.key}${c.seat}`,
+    title: c.title,
+    to: c.kind === 'RECORD' ? `/play/${c.key}` : `/rankings/${c.kind}/${c.key}`,
+  })),
+])
+
 onMounted(async () => {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
@@ -389,6 +406,9 @@ onMounted(async () => {
     loading.value = false
   }
   await loadFriendStatus()
+  if (user.value) {
+    seats.value = (await GET('/api/champions/users/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: null }))).data ?? { belts: [], crowns: [] }
+  }
   // 많이 쓴 능력 (없어도 화면은 그대로)
   if (user.value) {
     abilities.value = (await GET('/api/rules/top-played-abilities/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data

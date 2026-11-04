@@ -70,6 +70,7 @@
 <script setup lang="ts">
 // 교류전 한 판 (/clubs/matches/:matchId): 동호회 대 동호회. 판마다 양쪽 선수 → 판이 보통 경기로 열린다 → 이긴 판이 많은 동호회가 이긴다
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { matchTime } from '@/utils/format'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -92,10 +93,8 @@ const error = ref('')
 const busy = ref(false)
 
 const names = (ps: Schemas['ClubMember'][]) => ps.map((p) => p.nickname).join('·')
-const when = (iso: string) => {
-  const d = new Date(iso)
-  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${d.getHours()}시`
-}
+// 분과 오전·오후까지 (예전엔 '11월 8일 19시'로 분을 버렸다). 다른 화면과 같은 꼴: '내일 오후 7:30'
+const when = (iso: string) => matchTime(iso)
 const message = (e: unknown, fallback: string) => (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 
 async function load() {

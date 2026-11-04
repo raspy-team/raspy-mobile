@@ -141,7 +141,7 @@ import type { components } from '@/api/schema'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useToast } from '@/composable/useToast'
 import { refreshOnChange } from '@/websocket/userChannel'
-import { withRo } from '@/utils/format'
+import { matchTime, withRo } from '@/utils/format'
 import { UiButton, UiCard, UiEmptyState, UiIcon, UiList, UiListItem, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type Schemas = components['schemas']
@@ -168,12 +168,11 @@ const full = computed(() => !!v.value && v.value.summary.entryCount >= v.value.s
 const infoLine = computed(() => {
   const x = v.value
   if (!x) return ['', '']
-  const s = new Date(x.summary.startsAt)
   const what = [x.summary.ruleTitle, x.summary.format === 'LEAGUE' ? '리그' : x.thirdPlace ? '토너먼트 · 3·4위전' : '토너먼트',
     x.summary.entrantType === 'CLUB' ? `동호회 대항 · ${x.boards}판 ${x.perBoard === 2 ? '2:2' : '1:1'}` : '',
     x.summary.appGameKey ? '앱 게임' : '', x.membersOnly ? '멤버만' : '',
     x.minRating || x.maxRating ? `실력 점수 ${x.minRating ?? ''}~${x.maxRating ?? ''}` : '']
-  const when = [STATUS[x.summary.status], `${s.getMonth() + 1}월 ${s.getDate()}일 ${s.getHours()}시 시작`, `라운드마다 ${x.summary.roundDays}일`, `주최 ${x.summary.hostName}`]
+  const when = [STATUS[x.summary.status], `${matchTime(x.summary.startsAt)} 시작`, `라운드마다 ${x.summary.roundDays}일`, `주최 ${x.summary.hostName}`]
   return [what.filter(Boolean).join(' · '), when.filter(Boolean).join(' · ')]
 })
 const myHint = computed(() => {

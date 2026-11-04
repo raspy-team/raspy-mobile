@@ -91,6 +91,58 @@
     }
   ],
   "paths": {
+    "/api/plaza/avatar": {
+      "get": {
+        "tags": [
+          "avatar-controller"
+        ],
+        "summary": "내 캐릭터와 꾸미기 상점",
+        "description": "exists=false면 아직 기본 꾸미기를 하지 않았다 (처음 광장에 들어올 때 꾸미기부터)",
+        "operationId": "avatar",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "avatar-controller"
+        ],
+        "summary": "캐릭터 저장",
+        "description": "무료 부품, 산 부품, (챔피언이면) 챔피언 부품만 입는다",
+        "operationId": "save",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Parts"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/organizations/{orgId}/visibility": {
       "put": {
         "tags": [
@@ -158,7 +210,8 @@
                 "COMMENT",
                 "LIKE",
                 "DM",
-                "DAILY"
+                "DAILY",
+                "NEIGHBOR"
               ]
             }
           }
@@ -187,7 +240,7 @@
         ],
         "summary": "게임 계정 적기·바꾸기",
         "description": "티어 연결이 되는 게임이면 바로 가져온다. 실패해도 아이디는 저장하고 tierError로 알린다",
-        "operationId": "save",
+        "operationId": "save_1",
         "parameters": [
           {
             "name": "game",
@@ -1560,6 +1613,117 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CheerState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plaza/rooms/{room}/enter": {
+      "post": {
+        "tags": [
+          "plaza-controller"
+        ],
+        "summary": "광장에 들어가기",
+        "description": "지도·지금 있는 사람·쉬는 중인 사람을 준다. 그다음 /topic/plaza/{instance}를 구독하고 /app/plaza/{instance}/move·say·emote·ping을 보낸다",
+        "operationId": "enter",
+        "parameters": [
+          {
+            "name": "room",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plaza/leave": {
+      "post": {
+        "tags": [
+          "plaza-controller"
+        ],
+        "summary": "광장에서 나가기",
+        "operationId": "leave",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/plaza/hide/{targetId}": {
+      "post": {
+        "tags": [
+          "plaza-controller"
+        ],
+        "summary": "광장에서 차단한 뒤",
+        "description": "차단한 상대 화면에서도 나를 지운다 (서로 보이지 않게). 차단이 있어야 한다",
+        "operationId": "hide",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plaza/avatar/items/{itemId}/buy": {
+      "post": {
+        "tags": [
+          "avatar-controller"
+        ],
+        "summary": "부품 사기",
+        "description": "포인트로 정해진 값에 산다. 한정 부품은 그 주 상점에 나온 주에만",
+        "operationId": "buy",
+        "parameters": [
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarState"
                 }
               }
             }
@@ -3344,7 +3508,7 @@
         ],
         "summary": "관중 사진·영상 내리기",
         "description": "그 경기 선수나 올린 사람만",
-        "operationId": "hide",
+        "operationId": "hide_1",
         "parameters": [
           {
             "name": "gameId",
@@ -4185,7 +4349,7 @@
         ],
         "summary": "동호회 나가기",
         "description": "만든 사람이 나가면 가장 오래된 멤버가 이어받는다. 혼자였으면 동호회가 없어진다",
-        "operationId": "leave",
+        "operationId": "leave_1",
         "parameters": [
           {
             "name": "id",
@@ -4842,6 +5006,79 @@
         }
       }
     },
+    "/api/app-games/{key}/realtime/boss": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "AI 보스에게 도전",
+        "description": "앱 게임 전국 자리를 든 AI 보스(고수 세기)와 바로 한 판. 하루 3번. 이기면 전국 챔피언 (docs/ai-residents.md 3)",
+        "operationId": "challengeBoss",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/{key}/realtime/ai": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "AI 주민과 바로 한 판",
+        "description": "대기실의 'AI 주민 기다리는 중'을 눌렀을 때. 기다리는 사람에게 붙지 않고 그 AI(botId)와 바로 시작한다. 하던 판이 있으면 그 판",
+        "operationId": "playAi",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/{key}/plays": {
       "post": {
         "tags": [
@@ -5102,7 +5339,7 @@
         ],
         "summary": "나가기",
         "description": "대기 중이면 방을 닫고, 하는 중이면 진다.",
-        "operationId": "leave_1",
+        "operationId": "leave_2",
         "parameters": [
           {
             "name": "gameId",
@@ -5210,13 +5447,22 @@
           "app-game-controller"
         ],
         "summary": "봇 부르기",
-        "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.",
+        "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다. botId(AI 주민)를 주면 기다리지 않고 그 주민이 들어온다.",
         "operationId": "callBot",
         "parameters": [
           {
             "name": "gameId",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -5627,6 +5873,15 @@
             "name": "gameId",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -6355,6 +6610,42 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/LiveWatchRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/game-tiers": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "프로필의 인기 게임 티어",
+        "description": "티어를 가져온 게임만, 아이디는 빼고. 경기 기록을 '나만'으로 둔 사람은 빈 목록",
+        "operationId": "gameTiers",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicTier"
+                  }
                 }
               }
             }
@@ -7234,6 +7525,128 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/BetLeague"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plaza/rooms": {
+      "get": {
+        "tags": [
+          "plaza-controller"
+        ],
+        "summary": "들어갈 수 있는 광장",
+        "description": "전국 광장, 내 도시 광장, 내 동네 광장(이웃이 모이면 열림)",
+        "operationId": "rooms",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoomInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plaza/art/part/{itemId}.png": {
+      "get": {
+        "tags": [
+          "avatar-controller"
+        ],
+        "summary": "부품 작은 그림",
+        "description": "앞을 본 한 칸(16×32). 로그인 없이",
+        "operationId": "part",
+        "parameters": [
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plaza/art/map/{name}.png": {
+      "get": {
+        "tags": [
+          "plaza-art-controller"
+        ],
+        "operationId": "sprite",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plaza/art/avatar/{key}.png": {
+      "get": {
+        "tags": [
+          "avatar-controller"
+        ],
+        "summary": "캐릭터 그림",
+        "description": "부품을 겹친 896×96 그림 (16×32 칸, 서 있기·숨쉬기·걷기). 로그인 없이",
+        "operationId": "sheet",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
                 }
               }
             }
@@ -9349,6 +9762,42 @@
         }
       }
     },
+    "/api/champions/rules/{ruleId}/history": {
+      "get": {
+        "tags": [
+          "champion-controller"
+        ],
+        "summary": "역대 챔피언",
+        "description": "앱 게임 전국 자리의 챔피언을 오래된 것부터. AI 보스는 ai=true (docs/ai-residents.md 3). 기록을 '나만'으로 둔 사람은 이름을 가린다",
+        "operationId": "history_1",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChampionHistoryLine"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/block": {
       "get": {
         "tags": [
@@ -10352,7 +10801,7 @@
         ],
         "summary": "소속 떼기",
         "description": "다시 붙이려면 다시 인증한다",
-        "operationId": "leave_2",
+        "operationId": "leave_3",
         "parameters": [
           {
             "name": "orgId",
@@ -10539,6 +10988,123 @@
   },
   "components": {
     "schemas": {
+      "Parts": {
+        "required": [
+          "body",
+          "eyes",
+          "hair",
+          "outfit"
+        ],
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "eyes": {
+            "type": "string"
+          },
+          "outfit": {
+            "type": "string"
+          },
+          "hair": {
+            "type": "string"
+          },
+          "acc": {
+            "type": "string"
+          }
+        }
+      },
+      "AvatarState": {
+        "required": [
+          "balance",
+          "champion",
+          "exists",
+          "items",
+          "parts",
+          "sheet"
+        ],
+        "type": "object",
+        "properties": {
+          "exists": {
+            "type": "boolean"
+          },
+          "parts": {
+            "$ref": "#/components/schemas/Parts"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "champion": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShopItem"
+            }
+          }
+        }
+      },
+      "ShopItem": {
+        "required": [
+          "buyable",
+          "champion",
+          "id",
+          "label",
+          "layer",
+          "limited",
+          "onSale",
+          "owned",
+          "price",
+          "tier",
+          "wearable"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "layer": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "owned": {
+            "type": "boolean"
+          },
+          "wearable": {
+            "type": "boolean"
+          },
+          "buyable": {
+            "type": "boolean"
+          },
+          "limited": {
+            "type": "boolean"
+          },
+          "champion": {
+            "type": "boolean"
+          },
+          "onSale": {
+            "type": "boolean"
+          },
+          "tier": {
+            "type": "string"
+          }
+        }
+      },
       "OrgVisibilityRequest": {
         "required": [
           "visibility"
@@ -12497,6 +13063,344 @@
           }
         }
       },
+      "Area": {
+        "required": [
+          "h",
+          "kind",
+          "w",
+          "x",
+          "y"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "w": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "h": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "EnterResponse": {
+        "required": [
+          "emotes",
+          "hidden",
+          "instance",
+          "map",
+          "me",
+          "people",
+          "presets",
+          "resting",
+          "room"
+        ],
+        "type": "object",
+        "properties": {
+          "instance": {
+            "type": "string"
+          },
+          "room": {
+            "$ref": "#/components/schemas/RoomInfo"
+          },
+          "map": {
+            "$ref": "#/components/schemas/MapSpec"
+          },
+          "me": {
+            "$ref": "#/components/schemas/PersonView"
+          },
+          "people": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonView"
+            }
+          },
+          "resting": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonView"
+            }
+          },
+          "hidden": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "statue": {
+            "$ref": "#/components/schemas/Statue"
+          },
+          "presets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "emotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MapSpec": {
+        "required": [
+          "cell",
+          "cols",
+          "ground",
+          "h",
+          "name",
+          "objects",
+          "room",
+          "rows",
+          "spawn",
+          "terrain",
+          "tile",
+          "w",
+          "walk",
+          "wander"
+        ],
+        "type": "object",
+        "properties": {
+          "room": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "w": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "h": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tile": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ground": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Area"
+            }
+          },
+          "objects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Obj"
+            }
+          },
+          "cell": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "walk": {
+            "type": "string"
+          },
+          "spawn": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "wander": {
+            "$ref": "#/components/schemas/Rect"
+          },
+          "terrain": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "rows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cols": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Obj": {
+        "required": [
+          "s",
+          "x",
+          "y"
+        ],
+        "type": "object",
+        "properties": {
+          "s": {
+            "type": "string"
+          },
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          }
+        }
+      },
+      "PersonView": {
+        "required": [
+          "bot",
+          "id",
+          "name",
+          "sheet",
+          "x",
+          "y"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bot": {
+            "type": "boolean"
+          },
+          "area": {
+            "type": "string"
+          },
+          "champion": {
+            "type": "string"
+          },
+          "restingMinutes": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Rect": {
+        "required": [
+          "h",
+          "w",
+          "x",
+          "y"
+        ],
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "w": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "h": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RoomInfo": {
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "online",
+          "open"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "open": {
+            "type": "boolean"
+          },
+          "online": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "residents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "need": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "Statue": {
+        "required": [
+          "belts",
+          "id",
+          "name",
+          "sheet"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string"
+          },
+          "belts": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RegisterRequest": {
         "required": [
           "dongCode",
@@ -12652,8 +13556,10 @@
       },
       "TasteResult": {
         "required": [
+          "byAi",
           "choice",
           "id",
+          "minVotes",
           "people",
           "sameRate"
         ],
@@ -12670,6 +13576,13 @@
             "format": "int32"
           },
           "people": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "byAi": {
+            "type": "boolean"
+          },
+          "minVotes": {
             "type": "integer",
             "format": "int32"
           }
@@ -13840,6 +14753,7 @@
       },
       "RealtimeState": {
         "required": [
+          "bossChallenge",
           "botAfterSeconds",
           "fixture",
           "gameId",
@@ -13970,6 +14884,9 @@
           "lobbySeconds": {
             "type": "integer",
             "format": "int32"
+          },
+          "bossChallenge": {
+            "type": "boolean"
           }
         }
       },
@@ -14514,6 +15431,7 @@
           "goldenHourStart",
           "lobbies",
           "nightAlarm",
+          "residents",
           "serverNow"
         ],
         "type": "object",
@@ -14522,6 +15440,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/LobbyCard"
+            }
+          },
+          "residents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LobbyResident"
             }
           },
           "goldenHour": {
@@ -14540,6 +15464,34 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "LobbyResident": {
+        "required": [
+          "icon",
+          "key",
+          "nickname",
+          "title",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
           }
         }
       },
@@ -15051,6 +16003,25 @@
           }
         }
       },
+      "PublicTier": {
+        "required": [
+          "game",
+          "label",
+          "tier"
+        ],
+        "type": "object",
+        "properties": {
+          "game": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          }
+        }
+      },
       "ChampionTitleDto": {
         "required": [
           "region",
@@ -15263,7 +16234,9 @@
       },
       "UserProfileResponse": {
         "required": [
+          "aiAppGames",
           "id",
+          "isBot",
           "isMe",
           "mannerScore",
           "myChampions",
@@ -15353,6 +16326,15 @@
           },
           "recordsHidden": {
             "type": "boolean"
+          },
+          "isBot": {
+            "type": "boolean"
+          },
+          "aiAppGames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -15854,6 +16836,7 @@
       "UserSearchResultDto": {
         "required": [
           "id",
+          "isBot",
           "nickname",
           "username"
         ],
@@ -15874,6 +16857,9 @@
           },
           "intro": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -15983,6 +16969,22 @@
           }
         }
       },
+      "RankingBaseline": {
+        "required": [
+          "label",
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RankingSeat": {
         "required": [
           "key",
@@ -16000,6 +17002,8 @@
       },
       "RuleRankingResponse": {
         "required": [
+          "aiGames",
+          "baselines",
           "noOrg",
           "rankings",
           "ruleId",
@@ -16045,6 +17049,16 @@
           },
           "noOrg": {
             "type": "boolean"
+          },
+          "baselines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankingBaseline"
+            }
+          },
+          "aiGames": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -17049,6 +18063,7 @@
           "byFirst",
           "correct",
           "id",
+          "minVotes",
           "people",
           "q"
         ],
@@ -17088,6 +18103,10 @@
           },
           "myTaste": {
             "type": "string"
+          },
+          "minVotes": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -17152,7 +18171,8 @@
               "SAFETY",
               "DAILY_PUZZLE",
               "ORG_VERIFY",
-              "CHAMPION_SEAT"
+              "CHAMPION_SEAT",
+              "PARTNER_NEARBY"
             ]
           },
           "createdAt": {
@@ -17184,7 +18204,8 @@
               "COMMENT",
               "LIKE",
               "DM",
-              "DAILY"
+              "DAILY",
+              "NEIGHBOR"
             ]
           },
           "label": {
@@ -17450,6 +18471,7 @@
       "UserSummary": {
         "required": [
           "id",
+          "isBot",
           "nickname"
         ],
         "type": "object",
@@ -17463,6 +18485,9 @@
           },
           "profileUrl": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -18499,6 +19524,7 @@
       "AuthorSummary": {
         "required": [
           "id",
+          "isBot",
           "nickname"
         ],
         "type": "object",
@@ -18512,6 +19538,9 @@
           },
           "profileImageUrl": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -19924,6 +20953,7 @@
       },
       "SeatChampionView": {
         "required": [
+          "boss",
           "mine",
           "seat",
           "seatName",
@@ -19949,6 +20979,41 @@
           },
           "mine": {
             "type": "boolean"
+          },
+          "boss": {
+            "type": "boolean"
+          },
+          "bossTriesLeft": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChampionHistoryLine": {
+        "required": [
+          "ai",
+          "nickname",
+          "since"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "ai": {
+            "type": "boolean"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

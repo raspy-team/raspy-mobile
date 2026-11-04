@@ -6617,6 +6617,42 @@
         }
       }
     },
+    "/api/users/{userId}/game-tiers": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "프로필의 인기 게임 티어",
+        "description": "티어를 가져온 게임만, 아이디는 빼고. 경기 기록을 '나만'으로 둔 사람은 빈 목록",
+        "operationId": "gameTiers",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicTier"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user-profile/{userId}": {
       "get": {
         "tags": [
@@ -15964,6 +16000,25 @@
           "witnessed": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "PublicTier": {
+        "required": [
+          "game",
+          "label",
+          "tier"
+        ],
+        "type": "object",
+        "properties": {
+          "game": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
           }
         }
       },

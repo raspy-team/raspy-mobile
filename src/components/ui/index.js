@@ -1,5 +1,6 @@
 // 공통 UI 부품. 화면은 이 부품으로 만든다 (버튼·입력칸·모달을 화면에서 직접 그리지 않는다)
 // 쓰는 법과 규칙은 같은 폴더의 README.md
+export { default as UiAiBadge } from './UiAiBadge.vue'
 export { default as UiAvatar } from './UiAvatar.vue'
 export { default as UiBadge } from './UiBadge.vue'
 export { default as UiButton } from './UiButton.vue'

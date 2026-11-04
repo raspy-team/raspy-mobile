@@ -58,7 +58,13 @@
       </UiSection>
       <UiSection v-for="(g, gi) in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
         <div class="space-y-3">
-          <div v-for="(game, i) in g.items" :key="game.type + game.id" class="space-y-2">
+          <div
+            v-for="(game, i) in g.items"
+            :key="game.type + game.id"
+            class="space-y-2 rounded-xl transition-shadow duration-700"
+            :class="{ 'ring-2 ring-signal': focusId === game.id && game.type !== 'app-duel' }"
+            :data-game="game.type === 'app-duel' ? undefined : game.id"
+          >
             <!-- 볼트 버튼은 한 화면에 하나: 맨 위(가장 급한) 카드만 (11/5 밤샘 C) -->
             <MyGameCard
               :game="game"
@@ -775,6 +781,7 @@ async function handleNativeCamera(base64Image) {
 // ---------- 시작·정리 ----------
 
 let stopWatching = null
+const focusId = ref(null) // 알림으로 온 경기 (잠깐 테두리)
 onMounted(async () => {
   window.onCameraResult = handleNativeCamera
   window.onGameViewCameraResult = handleNativeCamera
@@ -787,6 +794,15 @@ onMounted(async () => {
     // 주소에서 ?schedule만 조용히 뺀다. router.replace를 쓰면 화면이 주소 전체를 열쇠로 다시 만들어져 시트가 사라진다
     history.replaceState(history.state, '', route.path)
     if (g) openSchedule(g)
+  }
+  // 알림(승인·확정·1시간 전·'잘 끝났나요?')은 /game?id=경기로 온다: 그 카드로 내려 잠깐 표시한다 (예전엔 id를 읽지 않아 목록 맨 위에 머물렀다)
+  const focus = Number(route.query.id)
+  if (focus) {
+    history.replaceState(history.state, '', route.path)
+    focusId.value = focus
+    await nextTick()
+    document.querySelector(`[data-game="${focus}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    setTimeout(() => (focusId.value = null), 2500)
   }
   // 신청·승인·시작·종료 신호가 오거나 앱으로 돌아왔을 때 다시 불러온다
   stopWatching = refreshOnChange(fetchGames)

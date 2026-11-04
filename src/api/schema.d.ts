@@ -44,6 +44,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/game-accounts/{game}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 게임 계정 적기·바꾸기
+         * @description 티어 연결이 되는 게임이면 바로 가져온다. 실패해도 아이디는 저장하고 tierError로 알린다
+         */
+        put: operations["save"];
+        post?: never;
+        /** 게임 계정 지우기 */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clubs/{id}": {
         parameters: {
             query?: never;
@@ -1352,6 +1373,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/result/proof": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 결과 스크린샷 올리기
+         * @description 선수만, 진행 중이거나 결과 확인을 기다릴 때. 다시 올리면 바뀐다
+         */
+        post: operations["proof"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/pictures": {
         parameters: {
             query?: never;
@@ -1694,6 +1735,26 @@ export interface paths {
          * @description 특정 게임에 지원한 사용자의 참가 신청을 승인합니다.
          */
         post: operations["approveApplicant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/game-accounts/{game}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 티어 다시 가져오기
+         * @description 10분에 한 번
+         */
+        post: operations["refresh"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4144,6 +4205,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/game-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 경기 선수들의 게임 아이디
+         * @description 다른 게임 안에서 하는 규칙의 경기일 때만. 선수·신청자·연 사람만 본다. 아니면 204
+         */
+        get: operations["forGame"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/comments/tree": {
         parameters: {
             query?: never;
@@ -4344,6 +4425,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/game-accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 게임 계정
+         * @description 게임마다 하나. 적지 않은 게임은 handle이 null
+         */
+        get: operations["mine_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/friends/status/{targetId}": {
         parameters: {
             query?: never;
@@ -4476,6 +4577,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/external-games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 인기 게임 목록
+         * @description 규칙을 할 수 있는 다른 게임들. 아이디 이름·티어 연결 여부
+         */
+        get: operations["catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clubs/search": {
         parameters: {
             query?: never;
@@ -4524,7 +4645,7 @@ export interface paths {
             cookie?: never;
         };
         /** 내 동호회 */
-        get: operations["mine_3"];
+        get: operations["mine_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5412,6 +5533,29 @@ export interface components {
         UpdateRequest: {
             enabled: boolean;
         };
+        SaveAccountRequest: {
+            handle: string;
+        };
+        AccountView: {
+            game: components["schemas"]["ExternalGameView"];
+            handle?: string;
+            tier?: string;
+            /** Format: date-time */
+            tierCheckedAt?: string;
+        };
+        ExternalGameView: {
+            key: string;
+            label: string;
+            short: string;
+            handleLabel: string;
+            handleHint: string;
+            platform: string;
+            tierAvailable: boolean;
+        };
+        SaveResult: {
+            account: components["schemas"]["AccountView"];
+            tierError?: string;
+        };
         ClubUpdateRequest: {
             name?: string;
             intro?: string;
@@ -5840,6 +5984,10 @@ export interface components {
             rejectionReason?: string;
             appGameKey?: string;
             category?: components["schemas"]["GameCategoryView"];
+            /** Format: int32 */
+            rank?: number;
+            extGame?: string;
+            extGameLabel?: string;
         };
         GameCategoryView: {
             face: components["schemas"]["CategoryValue"];
@@ -6212,6 +6360,9 @@ export interface components {
         };
         ReviewSubmitResult: {
             revealed: boolean;
+        };
+        ProofResponse: {
+            url: string;
         };
         PictureUploadResponse: {
             success: boolean;
@@ -7522,6 +7673,7 @@ export interface components {
             /** @enum {string} */
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             sides: components["schemas"]["SideScore"][];
+            resultProofUrl?: string;
         };
         SideScore: {
             /** Format: int32 */
@@ -7591,6 +7743,7 @@ export interface components {
             startDate: string;
             /** Format: int32 */
             newChampionIdx: number;
+            resultProofUrl?: string;
             confirmed: boolean;
             /** Format: int64 */
             resultSubmittedById?: number;
@@ -7789,6 +7942,17 @@ export interface components {
             /** Format: int64 */
             totalCount: number;
             likers: components["schemas"]["GameLikerInfo"][];
+        };
+        GameAccounts: {
+            game: components["schemas"]["ExternalGameView"];
+            players: components["schemas"]["PlayerAccount"][];
+        };
+        PlayerAccount: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            handle?: string;
+            tier?: string;
         };
         AuthorSummary: {
             /** Format: int64 */
@@ -8549,6 +8713,54 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                game: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SaveResult"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                game: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
             };
         };
     };
@@ -10315,6 +10527,35 @@ export interface operations {
             };
         };
     };
+    proof: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProofResponse"];
+                };
+            };
+        };
+    };
     getGamePictures: {
         parameters: {
             query?: never;
@@ -10830,6 +11071,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                game: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SaveResult"];
+                };
             };
         };
     };
@@ -12823,7 +13086,7 @@ export interface operations {
                 minor?: string;
                 /** @description 검색어 */
                 search?: string;
-                /** @description 정렬 기준(recent 또는 popular) */
+                /** @description 정렬: rank(순위, 별점과 판 수를 합침) · plays(판 수, 예전 이름 popular) · rating(별점, 평가가 적으면 전체 평균 쪽으로 당김) · recent(최신) */
                 sort?: string;
                 /** @description 찾기: 어디서 (Place 이름) */
                 place?: "PHONE" | "HOME" | "OUTSIDE" | "GATHERING" | "SPORTS";
@@ -12837,6 +13100,8 @@ export interface operations {
                 ability?: "STRENGTH" | "ENDURANCE" | "SPEED" | "PRECISION" | "BALANCE" | "FLEXIBILITY" | "RHYTHM" | "EXPRESSION" | "READING" | "SPATIAL" | "MEMORY" | "KNOWLEDGE" | "LANGUAGE" | "CALCULATION" | "SENSE" | "SOCIAL" | "PERSUASION" | "TEAMWORK" | "GRIT" | "CONSISTENCY" | "CREATIVITY" | "HUMOR";
                 /** @description 앱 게임도 넣기 (둘러보기). 경기를 열 규칙을 고를 때는 false */
                 withApp?: boolean;
+                /** @description 종류: ALL(모두) · OFFLINE(만나서 하는 경기) · APP(앱 게임). withApp=false면 늘 OFFLINE */
+                kind?: "ALL" | "OFFLINE" | "APP" | "POPULAR";
             };
             header?: never;
             path?: never;
@@ -13825,6 +14090,28 @@ export interface operations {
             };
         };
     };
+    forGame: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GameAccounts"];
+                };
+            };
+        };
+    };
     getCommentsTree: {
         parameters: {
             query?: never;
@@ -14036,6 +14323,26 @@ export interface operations {
             };
         };
     };
+    mine_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountView"][];
+                };
+            };
+        };
+    };
     getFriendStatus: {
         parameters: {
             query?: never;
@@ -14201,6 +14508,26 @@ export interface operations {
             };
         };
     };
+    catalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExternalGameView"][];
+                };
+            };
+        };
+    };
     search_3: {
         parameters: {
             query: {
@@ -14243,7 +14570,7 @@ export interface operations {
             };
         };
     };
-    mine_3: {
+    mine_4: {
         parameters: {
             query?: never;
             header?: never;

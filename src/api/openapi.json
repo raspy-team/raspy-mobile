@@ -26,6 +26,10 @@
       "description": "인앱 알림 API"
     },
     {
+      "name": "External Game",
+      "description": "인기 게임 연결: 내 게임 계정·티어, 경기 상대 아이디, 결과 스크린샷"
+    },
+    {
       "name": "Admin User Management",
       "description": "관리자 전용 유저 관리 API"
     },
@@ -172,6 +176,77 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/game-accounts/{game}": {
+      "put": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "게임 계정 적기·바꾸기",
+        "description": "티어 연결이 되는 게임이면 바로 가져온다. 실패해도 아이디는 저장하고 tierError로 알린다",
+        "operationId": "save",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "게임 계정 지우기",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
           }
         }
       }
@@ -2865,6 +2940,57 @@
         }
       }
     },
+    "/api/games/{gameId}/result/proof": {
+      "post": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "결과 스크린샷 올리기",
+        "description": "선수만, 진행 중이거나 결과 확인을 기다릴 때. 다시 올리면 바뀐다",
+        "operationId": "proof",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProofResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/pictures": {
       "get": {
         "tags": [
@@ -3665,6 +3791,38 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/game-accounts/{game}/refresh": {
+      "post": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "티어 다시 가져오기",
+        "description": "10분에 한 번",
+        "operationId": "refresh",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveResult"
+                }
+              }
+            }
           }
         }
       }
@@ -6587,7 +6745,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "정렬 기준(recent 또는 popular)",
+            "description": "정렬: rank(순위, 별점과 판 수를 합침) · plays(판 수, 예전 이름 popular) · rating(별점, 평가가 적으면 전체 평균 쪽으로 당김) · recent(최신)",
             "required": false,
             "schema": {
               "type": "string",
@@ -6696,6 +6854,22 @@
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "종류: ALL(모두) · OFFLINE(만나서 하는 경기) · APP(앱 게임). withApp=false면 늘 OFFLINE",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ALL",
+                "OFFLINE",
+                "APP",
+                "POPULAR"
+              ],
+              "default": "ALL"
             }
           }
         ],
@@ -8195,6 +8369,39 @@
         }
       }
     },
+    "/api/games/{gameId}/game-accounts": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "경기 선수들의 게임 아이디",
+        "description": "다른 게임 안에서 하는 규칙의 경기일 때만. 선수·신청자·연 사람만 본다. 아니면 204",
+        "operationId": "forGame",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameAccounts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/comments/tree": {
       "get": {
         "tags": [
@@ -8493,6 +8700,31 @@
         }
       }
     },
+    "/api/game-accounts/me": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "내 게임 계정",
+        "description": "게임마다 하나. 적지 않은 게임은 handle이 null",
+        "operationId": "mine_3",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/friends/status/{targetId}": {
       "get": {
         "tags": [
@@ -8756,6 +8988,31 @@
         }
       }
     },
+    "/api/external-games": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "인기 게임 목록",
+        "description": "규칙을 할 수 있는 다른 게임들. 아이디 이름·티어 연결 여부",
+        "operationId": "catalog",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalGameView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/clubs/search": {
       "get": {
         "tags": [
@@ -8822,7 +9079,7 @@
           "club-controller"
         ],
         "summary": "내 동호회",
-        "operationId": "mine_3",
+        "operationId": "mine_4",
         "responses": {
           "200": {
             "description": "OK",
@@ -10312,6 +10569,87 @@
           }
         }
       },
+      "SaveAccountRequest": {
+        "required": [
+          "handle"
+        ],
+        "type": "object",
+        "properties": {
+          "handle": {
+            "type": "string"
+          }
+        }
+      },
+      "AccountView": {
+        "required": [
+          "game"
+        ],
+        "type": "object",
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/ExternalGameView"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          },
+          "tierCheckedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExternalGameView": {
+        "required": [
+          "handleHint",
+          "handleLabel",
+          "key",
+          "label",
+          "platform",
+          "short",
+          "tierAvailable"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "handleLabel": {
+            "type": "string"
+          },
+          "handleHint": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "tierAvailable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SaveResult": {
+        "required": [
+          "account"
+        ],
+        "type": "object",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/AccountView"
+          },
+          "tierError": {
+            "type": "string"
+          }
+        }
+      },
       "ClubUpdateRequest": {
         "type": "object",
         "properties": {
@@ -11690,6 +12028,16 @@
           },
           "category": {
             "$ref": "#/components/schemas/GameCategoryView"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "extGame": {
+            "type": "string"
+          },
+          "extGameLabel": {
+            "type": "string"
           }
         }
       },
@@ -12910,6 +13258,17 @@
         "properties": {
           "revealed": {
             "type": "boolean"
+          }
+        }
+      },
+      "ProofResponse": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
           }
         }
       },
@@ -17219,6 +17578,9 @@
             "items": {
               "$ref": "#/components/schemas/SideScore"
             }
+          },
+          "resultProofUrl": {
+            "type": "string"
           }
         }
       },
@@ -17441,6 +17803,9 @@
           "newChampionIdx": {
             "type": "integer",
             "format": "int32"
+          },
+          "resultProofUrl": {
+            "type": "string"
           },
           "confirmed": {
             "type": "boolean"
@@ -18088,6 +18453,46 @@
             "items": {
               "$ref": "#/components/schemas/GameLikerInfo"
             }
+          }
+        }
+      },
+      "GameAccounts": {
+        "required": [
+          "game",
+          "players"
+        ],
+        "type": "object",
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/ExternalGameView"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerAccount"
+            }
+          }
+        }
+      },
+      "PlayerAccount": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
           }
         }
       },

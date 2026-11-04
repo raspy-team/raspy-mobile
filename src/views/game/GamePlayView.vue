@@ -47,6 +47,8 @@
       </p>
       <p class="mt-2 text-4xl font-bold tabular-nums" :class="isOvertime ? 'text-danger-fg' : 'text-fg'">{{ elapsedTimeStr }}</p>
       <p v-if="isOvertime" class="text-sm text-danger-fg mt-1">시간이 지났어요 · 추가 시간</p>
+      <!-- 다른 게임 안에서 하는 경기: 그 게임 아이디를 시트로 (9번) -->
+      <UiButton v-if="game.rule?.extGame" variant="ghost" size="sm" icon="gamepad" class="mt-1" @click="showExtIds = true">{{ game.rule.extGameLabel || '게임' }} 아이디</UiButton>
     </section>
 
     <!-- 점수판: 선수 칸 전체가 +1 버튼 (경기 중에 대충 눌러도 되게 크게) -->
@@ -152,6 +154,10 @@
   <input ref="cameraInputRef" type="file" accept="image/*" capture="environment" class="hidden" @change="onCameraChange" />
   <input ref="videoInputRef" type="file" accept="video/mp4,video/quicktime,video/*" class="hidden" @change="onVideoChange" />
 
+  <UiSheet v-model="showExtIds" :title="game?.rule?.extGameLabel ? `${game.rule.extGameLabel} 아이디` : '게임 아이디'">
+    <ExtGamePlayers v-if="showExtIds" :game-id="gameId" />
+  </UiSheet>
+
   <ResultEntrySheet
     v-model="showResultEntry"
     :game-id="gameId"
@@ -161,6 +167,7 @@
     :my-name="game?.format === 'TEAMS' ? '우리 팀' : '나'"
     :opponent-name="user2?.nickname"
     :set-count="game?.rule?.setsToWin || 1"
+    :proof="!!game?.rule?.extGame"
     @submitted="goToResult"
   />
 
@@ -190,6 +197,7 @@ import { clap, crowdSoundOn, setCrowdSound } from '../../utils/crowdSound'
 import LiveBreakCard from '../../components/live/LiveBreakCard.vue'
 import MatchModal from '../../components/MatchModal.vue'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
+import ExtGamePlayers from '../../components/external/ExtGamePlayers.vue'
 import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiList, UiListItem, UiSheet, UiSpinner } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composable/useToast'
@@ -262,6 +270,7 @@ const mySideIndex = ref(0)
 const gameWinner = ref('')
 const showLogModal = ref(false)
 const showResultEntry = ref(false)
+const showExtIds = ref(false)
 const showStartButton = ref(false)
 const countdown = ref(0)
 const isCountingDown = ref(false)

@@ -110,6 +110,7 @@ import { useToast } from '../composable/useToast'
 import { stopInbox } from '../stores/inbox'
 import { closeUserChannel } from '../websocket/userChannel'
 import pkg from '../../package.json'
+import { pushToken } from '../utils/nativeBridge'
 
 defineOptions({ name: 'SettingsView' })
 
@@ -144,7 +145,9 @@ async function logout() {
   if (!(await confirmDialog({ title: '로그아웃할까요?', confirmText: '로그아웃' }))) return
   loggingOut.value = true
   // 이 기기로 푸시가 더 오지 않게 (실패해도 로그아웃은 한다)
-  await api.post('/api/push/remove-device').catch(() => {})
+  // 이 기기 토큰만 지운다. 토큰을 모르면(옛 앱) 서버가 내 토큰을 모두 지운다
+  const token = pushToken()
+  await api.post('/api/push/remove-device', token ? { token } : undefined).catch(() => {})
   leave()
 }
 

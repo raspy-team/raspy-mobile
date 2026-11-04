@@ -90,7 +90,8 @@
                 "RULE",
                 "COMMENT",
                 "LIKE",
-                "DM"
+                "DM",
+                "DAILY"
               ]
             }
           }
@@ -1189,6 +1190,15 @@
           "push-controller"
         ],
         "operationId": "removeCurrentDeviceToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveTokenRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -10536,6 +10546,14 @@
           }
         }
       },
+      "RemoveTokenRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
       "RegisterTokenRequest": {
         "required": [
           "token"
@@ -14598,7 +14616,8 @@
               "GAME_SCHEDULED",
               "GAME_REMINDER",
               "GAME_RESULT_DISPUTED",
-              "SAFETY"
+              "SAFETY",
+              "DAILY_PUZZLE"
             ]
           },
           "createdAt": {
@@ -14629,7 +14648,8 @@
               "RULE",
               "COMMENT",
               "LIKE",
-              "DM"
+              "DM",
+              "DAILY"
             ]
           },
           "label": {

@@ -58,6 +58,41 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <LiteracyPlay
+          v-else-if="key === 'daily-literacy'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
+        <TimeSensePlay
+          v-else-if="key === 'time-sense'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
+        <NumberSpotsPlay
+          v-else-if="key === 'number-spots'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
+        <DailyNumberPlay
+          v-else-if="key === 'daily-number'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
+        <RhythmCopyPlay
+          v-else-if="key === 'rhythm-copy'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <WritePlay
           v-else-if="WRITING[key]"
           :problem="play.problem"
@@ -150,11 +185,11 @@
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
         <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" block variant="secondary" icon="share" class="mt-3" :loading="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
-          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : '알림' }}</p>
-          <p class="t-body mt-1">{{ result.myFeedback }}</p>
+          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '알림' }}</p>
+          <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
         </UiCard>
         <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
-        <UiButton v-if="key === 'daily-chosung' && result.myFeedback" block variant="secondary" icon="share" class="mt-3" @click="shareDaily(result.myFeedback)">오늘 결과 공유</UiButton>
+        <UiButton v-if="DAILY_SHARE.includes(key) && result.myFeedback" block variant="secondary" icon="share" class="mt-3" @click="shareDaily(result.myFeedback)">오늘 결과 공유</UiButton>
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 문장</p>
@@ -202,7 +237,7 @@
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
-            <p v-if="!played" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요.</p>
+            <p v-if="!played" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요</p>
             <div v-else class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
@@ -223,7 +258,9 @@
             </div>
             <p v-if="played" class="t-micro mt-3 text-center">전적·실력 점수는 사람과 한 판만 세요. 봇과 한 판은 연습이에요</p>
           </UiCard>
-          <UiButton block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
+          <!-- 하루 한 번 게임을 오늘 이미 냈으면 버튼 대신 한 줄 (누르면 '오늘은 다 했어요'만 떴다, 11/5 밤샘 C 검토) -->
+          <p v-if="dailyDone" class="t-body text-center mt-5">오늘 몫을 냈어요. 새 문제는 내일 0시에 나와요</p>
+          <UiButton v-else block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
@@ -266,7 +303,7 @@
                   <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
                 </UiListItem>
               </UiList>
-              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" description="5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요" />
+              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="game.dailyLimit === 1 ? '5일 풀면 첫 이름이 올라가요. 먼저 올라가 보세요' : '5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요'" />
               <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">순위 전체 보기</UiButton>
             </template>
             <template v-else>
@@ -338,6 +375,11 @@ import ShareSheet from '../../components/feed/story/ShareSheet.vue'
 import { getMyId } from '@/utils/me'
 import WritePlay from '../../components/appgame/WritePlay.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
+import LiteracyPlay from '../../components/appgame/LiteracyPlay.vue'
+import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
+import NumberSpotsPlay from '../../components/appgame/NumberSpotsPlay.vue'
+import DailyNumberPlay from '../../components/appgame/DailyNumberPlay.vue'
+import RhythmCopyPlay from '../../components/appgame/RhythmCopyPlay.vue'
 
 // 글로 겨루는 게임: 같은 화면(WritePlay)에 안내만 다르게
 const WRITING: Record<string, { guide: string; placeholder: string }> = {
@@ -415,6 +457,12 @@ const ranking = ref<Schemas['UserRankingDto'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))
 const finished = computed(() => duels.value.filter((d) => DONE.includes(d.status)))
+// 하루 한 번 게임: 오늘 마감인 내 판을 이미 냈나 (내 판의 마감 시각으로 날짜를 본다. 남의 어제 판에 붙었어도 내 판은 오늘이다)
+const dailyDone = computed(() => {
+  if (game.value?.dailyLimit !== 1) return false
+  const today = new Date().toDateString()
+  return duels.value.some((d) => new Date(d.deadlineAt ?? d.createdAt).toDateString() === today && (d.myScore != null || DONE.includes(d.status)))
+})
 // 투표 게임은 투표가 먼저 (남의 글에 표를 주는 게 이 게임의 절반)
 const tab = ref<'rank' | 'mine' | 'vote'>('rank')
 const tabs = computed(() => [
@@ -548,10 +596,13 @@ async function sendChallenge(gameId: number) {
 }
 
 /** 오늘의 초성 결과: "4/5 맞힘 · 38초" → 칸 그림과 함께. 같은 날이면 친구도 같은 문제를 푼다 */
+// 오늘의 낱말·셈도 같은 꼴: 한마디 첫 줄만 공유한다 (다음 줄은 답이라 가린다). 다섯 문제 게임은 칸 그림을 붙인다
+const DAILY_SHARE = ['daily-chosung', 'daily-literacy', 'daily-number']
 async function shareDaily(feedback: string) {
-  const right = Number(feedback.match(/(\d)\/5/)?.[1] ?? 0)
-  const boxes = '■'.repeat(right) + '□'.repeat(5 - right)
-  const msg = await shareLink(`${window.location.origin}/play/daily-chosung`, `오늘의 초성 ${feedback}\n${boxes}\n같은 문제로 붙어 봐요`)
+  const head = feedback.split('\n')[0]
+  const right = head.match(/(\d)\/5/)?.[1]
+  const boxes = right == null ? '' : '■'.repeat(Number(right)) + '□'.repeat(5 - Number(right)) + '\n'
+  const msg = await shareLink(`${window.location.origin}/play/${key.value}`, `${game.value?.title ?? '오늘의 퍼즐'} ${head}\n${boxes}같은 문제로 붙어 봐요`)
   if (msg) showToast(msg)
 }
 

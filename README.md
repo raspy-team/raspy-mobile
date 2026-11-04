@@ -54,7 +54,7 @@ npx capacitor-assets generate --android --ios # 아이콘·시작 화면 다시 
 
 - 스토어에 올릴 때마다 `android/app/build.gradle`의 `versionCode`를 1씩 올린다
 - **빌드 전에 꼭 `npx cap sync`**: 페이스북 SDK를 빼는 설정(`capacitor.config.ts`의 `SocialLogin.providers`)은 sync 때 `node_modules` 안 플러그인에 적힌다. `npm install` 뒤 sync 없이 빌드하면 페이스북 SDK와 광고 ID 권한(AD_ID)이 다시 들어간다. 푸시에는 `~/.config/match/google-services.json`을 `android/app/`에 복사해 둔다
-- iOS는 Xcode가 있어야 빌드된다 (`npx cap open ios`)
+- iOS는 Xcode가 있어야 빌드된다 (`npx cap open ios`). 푸시는 `~/.config/match/GoogleService-Info.plist`가 있어야 등록된다(빌드 때 자동 복사). 사용자 할 일은 워크스페이스 `docs/store/ios.md`
 
 ## 폴더
 

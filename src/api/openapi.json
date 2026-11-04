@@ -16792,7 +16792,8 @@
               "GAME_RESULT_DISPUTED",
               "SAFETY",
               "DAILY_PUZZLE",
-              "ORG_VERIFY"
+              "ORG_VERIFY",
+              "CHAMPION_SEAT"
             ]
           },
           "createdAt": {

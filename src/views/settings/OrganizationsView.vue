@@ -106,6 +106,8 @@
             재학·재직·합격·졸업 증명서(3개월 안에 뗀 것), 학생증·사원증 사진. PDF·JPG·PNG, 10MB까지.
             학번·주민번호 뒷자리는 가려도 돼요. 확인이 끝나면 바로 지워요.
           </p>
+          <!-- 아이폰 사진(HEIC)은 받지 않는다 (org-all 결정 7) -->
+          <p class="t-caption mb-2">아이폰 사진이 안 올라가면 스크린샷으로 올려 주세요</p>
           <input ref="fileInput" type="file" accept="application/pdf,image/jpeg,image/png" class="hidden" @change="onFile" />
           <UiButton variant="secondary" block icon="file-lines" @click="fileInput?.click()">
             {{ file ? `${file.name} (${sizeText(file.size)})` : '파일 고르기' }}
@@ -278,7 +280,7 @@ function onFile(e: Event) {
   fileError.value = ''
   if (!f) return
   if (f.size > MAX_BYTES) { file.value = null; fileError.value = '10MB까지 올릴 수 있어요'; return }
-  if (!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)) { file.value = null; fileError.value = 'PDF·JPG·PNG 파일만 올릴 수 있어요'; return }
+  if (!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)) { file.value = null; fileError.value = 'PDF·JPG·PNG 파일만 올릴 수 있어요. 아이폰 사진이면 스크린샷으로 올려 주세요'; return }
   file.value = f
 }
 

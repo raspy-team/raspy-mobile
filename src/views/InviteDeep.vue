@@ -73,7 +73,7 @@ function goToStore() {
     window.location.href = 'https://apps.apple.com/kr/app/match/id6748941318'
     // 위의 idYOUR_IOS_APP_ID 부분을 실제 App Store 앱 ID로 todo
   } else {
-    alert('앱 설치는 모바일에서 가능합니다.')
+    alert('앱 설치는 휴대폰에서 할 수 있어요')
   }
 }
 </script>

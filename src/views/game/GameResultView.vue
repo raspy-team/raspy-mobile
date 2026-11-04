@@ -35,7 +35,7 @@
         <p v-if="myRating && confirmed" class="mt-3 flex items-baseline justify-center gap-2 feel-rise feel-rise-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
           <span class="t-caption">실력 점수</span>
           <span class="t-heading tabular-nums">{{ myRating.before }} → {{ myRating.after }}</span>
-          <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta }}</span>
+          <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta === 0 ? "±0" : ratingDelta }}</span>
         </p>
         <!-- 첫 몇 판은 점수가 크게 움직인다. 숫자만 보여 주면 이긴 쪽은 착각하고 진 쪽은 상처받는다 -->
         <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-1">처음 몇 판은 크게 움직여요. 더 하면 자리를 잡아요</p>
@@ -98,8 +98,9 @@
             </span>
           </button>
           <!-- 세트 점수 없이 결과만 남긴 경기는 숫자 대신 vs -->
-          <p v-if="setResults.length" class="order-2 text-[4rem] font-semibold leading-none tracking-[-0.05em] tabular-nums" :aria-label="`세트 ${sides[0].sets} 대 ${sides[1].sets}`">
-            <UiRollNumber :value="sides[0].sets" :class="sides[0].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'" /><span class="text-fg-subtle mx-1.5">:</span><UiRollNumber :value="sides[1].sets" :delay="140" :class="sides[1].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'" />
+          <!-- 한 세트뿐이면 세트 수(1:0, 비기면 0:0) 대신 그 세트 점수 -->
+          <p v-if="setResults.length" class="order-2 text-[4rem] font-semibold leading-none tracking-[-0.05em] tabular-nums" :aria-label="`${bigScore.label} ${bigScore.left} 대 ${bigScore.right}`">
+            <UiRollNumber :value="bigScore.left" :class="sides[0].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'" /><span class="text-fg-subtle mx-1.5">:</span><UiRollNumber :value="bigScore.right" :delay="140" :class="sides[1].won || !winnerIdx ? 'text-fg' : 'text-fg-subtle'" />
           </p>
           <p v-else class="order-2 t-mono">vs</p>
         </div>
@@ -315,7 +316,8 @@
 
       <!-- 친구 · 공유 (덜 급한 것은 맨 아래) -->
       <div class="flex gap-2">
-        <UiButton v-if="isParticipant && format === 'DUEL'" variant="secondary" icon="fas fa-user-plus" class="flex-1" @click="sendFriendRequest">친구 요청</UiButton>
+        <!-- 이미 친구면 숨기고, 보냈으면 '요청 보냄' (예전엔 친구 사이에도 늘 '친구 요청'이 보였다) -->
+        <UiButton v-if="isParticipant && format === 'DUEL' && friendState && !friendState.isFriend" variant="secondary" icon="fas fa-user-plus" class="flex-1" :disabled="friendState.sent" @click="sendFriendRequest">{{ friendState.sent ? '요청 보냄' : friendState.received ? '친구 받기' : '친구 요청' }}</UiButton>
         <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유하기</UiButton>
       </div>
 
@@ -570,6 +572,9 @@ const sides = computed(() => [
 ])
 const setLeft = (s) => (idxCorrect.value ? s.user1Score : s.user2Score)
 const setRight = (s) => (idxCorrect.value ? s.user2Score : s.user1Score)
+const bigScore = computed(() => setResults.value.length === 1
+  ? { label: '점수', left: setLeft(setResults.value[0]), right: setRight(setResults.value[0]) }
+  : { label: '세트', left: sides.value[0].sets, right: sides.value[1].sets })
 const playedOn = computed(() =>
   // 한국어로 읽히게: 11월 3일 (올해가 아니면 연도도). 고정폭 숫자를 제목에 붙이지 않는다
   startDate.value ? (() => { const d = new Date(startDate.value); const y = d.getFullYear() !== new Date().getFullYear() ? `${d.getFullYear()}년 ` : ''; return `${y}${d.getMonth() + 1}월 ${d.getDate()}일` })() : '',
@@ -688,6 +693,7 @@ async function load() {
     }
 
     feelResult()
+    if (isParticipant.value) loadFriendState()
     // 저장된 사진 불러오기
     allPictures.value = await getGamePictures(gameId)
   } catch (err) {
@@ -979,14 +985,21 @@ const dataUrlToFile = (dataUrl, filename) => {
 const goHome = () => router.push(`/profile/0?id=${gameId}`)
 
 // 친구 요청
+const friendState = ref(null)
+const opponentId = () => (user1.value?.id === currentUserId.value ? user2.value?.id : user1.value?.id)
+async function loadFriendState() {
+  if (format.value !== 'DUEL' || !opponentId()) return
+  friendState.value = (await api.get(`/api/friends/status/${opponentId()}`).catch(() => null))?.data ?? null
+}
 async function sendFriendRequest() {
+  const received = friendState.value?.received
   try {
-    const opponentId = user1.value.id === currentUserId.value ? user2.value.id : user1.value.id
-    await api.post(`/api/friends/request/${opponentId}`)
-    showToast('친구 요청을 보냈어요')
+    // 상대가 먼저 보냈으면 받는다
+    await api.post(received ? `/api/friends/accept/${opponentId()}` : `/api/friends/request/${opponentId()}`)
+    showToast(received ? '친구가 됐어요' : '친구 요청을 보냈어요')
+    friendState.value = { ...friendState.value, sent: !received, isFriend: !!received }
   } catch (e) {
-    if (e?.response?.data?.message) showToast(e.response.data.message)
-    else showToast('이미 요청했거나 친구 상태입니다.')
+    showToast(e?.response?.data?.message || '친구 요청을 보내지 못했어요')
   }
 }
 

@@ -64,9 +64,9 @@
 
         <!-- 어떻게 하나요: 처음 하는 게임이면 펼쳐 둔다 ('아무거나'로 처음 보는 게임에 붙어도 알게) -->
         <section v-if="state.howTo?.length" class="mt-3 rounded-xl bg-surface-2 px-4 py-3">
-          <button type="button" class="w-full flex items-center justify-between t-label" :aria-expanded="howToOpen" @click="toggleHowTo">
+          <button type="button" class="w-full min-h-[44px] -my-2.5 flex items-center justify-between t-label" :aria-expanded="howToOpen" @click="toggleHowTo">
             어떻게 하나요
-            <UiIcon :name="howToOpen ? 'chevron-up' : 'chevron-down'" />
+            <UiIcon :name="howToOpen ? 'chevron-up' : 'chevron-down'" aria-hidden="true" />
           </button>
           <ul v-if="howToOpen" class="mt-2 space-y-1">
             <li v-for="(line, i) in state.howTo" :key="i" class="t-caption text-fg-muted break-keep">· {{ line }}</li>

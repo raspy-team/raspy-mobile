@@ -81,3 +81,15 @@ export function subscribeTopic(destination, cb, headers = {}) {
     topics.delete(destination)
   }
 }
+
+/** 서버로 보낸다 (광장 걷기·말). 연결이 아직 없으면 false (화면이 잠깐 뒤 다시 보낸다) */
+export function publish(destination, body = {}) {
+  if (!client?.connected) return false
+  client.publish({ destination, body: JSON.stringify(body) })
+  return true
+}
+
+/** 연결이 붙었는지 (광장 화면이 연결을 기다릴 때) */
+export function isChannelOpen() {
+  return !!client?.connected
+}

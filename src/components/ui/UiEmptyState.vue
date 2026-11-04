@@ -4,6 +4,7 @@
     <span v-if="isError" class="w-14 h-14 mb-5 rounded-2xl bg-surface-2 flex items-center justify-center text-fg-muted" aria-hidden="true">
       <UiIcon :name="icon" class="text-[26px]" />
     </span>
+    <span v-else-if="mascot" class="mb-5 text-fg" aria-hidden="true"><MatchMascot :who="mascot" :size="64" :mood="$slots.default ? 'smile' : 'sad'" /></span>
     <span v-else class="mb-5 text-fg" aria-hidden="true"><BrandFace :size="56" :mood="$slots.default ? 'smile' : 'neutral'" /></span>
     <p class="t-heading">{{ title }}</p>
     <p v-if="description" class="t-caption mt-1.5 max-w-[30ch]">{{ description }}</p>
@@ -16,11 +17,14 @@
 // icon은 오류 표시(못 불러옴·연결 끊김·없는 사람)일 때만 그린다. 예전 face prop은 이제 기본이라 받기만 한다
 import { computed, defineProps } from 'vue'
 import BrandFace from '../BrandFace.vue'
+import MatchMascot from '../mascot/MatchMascot.vue'
 const props = defineProps({
   icon: { type: String, default: '' },
   face: { type: Boolean, default: false },
   title: { type: String, required: true },
   description: { type: String, default: '' },
+  /** 그 화면이 속한 곳의 캐릭터 (docs/mascots.md): dol 앱 게임, tong 응원·소식·모임, kok 처음·안내, bibi AI. 없으면 매치 얼굴 */
+  mascot: { type: String, default: '' },
 })
 const ERROR_ICONS = ['triangle-exclamation', 'rotate-right', 'plug-circle-exclamation', 'user-slash', 'circle-xmark']
 const isError = computed(() => ERROR_ICONS.some((e) => props.icon.includes(e)))

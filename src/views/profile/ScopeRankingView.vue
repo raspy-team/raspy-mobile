@@ -29,7 +29,7 @@
           </span>
         </UiCard>
 
-        <UiEmptyState v-if="!data.rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" description="5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요" />
+        <UiEmptyState v-if="!data.rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" description="사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요" />
 
         <UiList v-else class="mt-6">
           <UiListItem

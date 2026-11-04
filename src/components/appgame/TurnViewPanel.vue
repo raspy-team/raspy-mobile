@@ -10,8 +10,9 @@
     <p v-if="view.prompt" class="text-center mt-6 break-keep whitespace-pre-line" :class="shortPrompt ? 't-display' : 't-title'">{{ view.prompt }}</p>
 
     <!-- 글로 답하기 (퀴즈) -->
-    <form v-if="view.input" class="mt-4 flex gap-2" @submit.prevent="answer">
-      <UiInput ref="field" v-model="text" class="flex-1" :maxlength="view.inputMax ?? 30" :placeholder="myTurn ? view.input : '다음 문제를 기다려요'" :disabled="!myTurn" @enter="answer" />
+    <!-- 긴 글(두 진실 한 거짓의 문장 셋)은 여러 줄 칸으로. 한 줄 칸이면 320px에서 앞 문장이 가려졌다. 줄을 바꿔 쓰면 ' / '로 나눠 보낸다 -->
+    <form v-if="view.input" class="mt-4 flex gap-2" :class="longInput ? 'flex-col' : ''" @submit.prevent="answer">
+      <UiInput ref="field" v-model="text" class="flex-1" :multiline="longInput" :rows="3" :maxlength="view.inputMax ?? 30" :placeholder="myTurn ? view.input : '다음 문제를 기다려요'" :disabled="!myTurn" @enter="answer" />
       <UiButton :disabled="!myTurn || !text.trim()" :loading="sending" @click="answer">내기</UiButton>
     </form>
 
@@ -90,9 +91,11 @@ function boardStyle(b: TurnBoard) {
 
 const text = ref('')
 const field = ref<{ focus: () => void } | null>(null)
+const longInput = computed(() => (props.view.inputMax ?? 30) > 60)
 function answer() {
   if (!props.myTurn || !text.value.trim()) return
-  emit('move', text.value.trim())
+  const t = longInput.value ? text.value.split('\n').map((l) => l.trim()).filter(Boolean).join(' / ') : text.value
+  emit('move', t.trim())
   text.value = ''
 }
 // 새 문제가 나오면 바로 칠 수 있게

@@ -42,6 +42,10 @@
       "description": "관리자 전용 신고 처리 API"
     },
     {
+      "name": "상대 구하기 등록",
+      "description": "가입 없이 종목·동네·편한 때를 남긴다 (3단계 수요 조사 H2)"
+    },
+    {
       "name": "안전 숫자",
       "description": "만남 안전을 운영진이 숫자로 본다 (안전·신뢰 I)"
     },
@@ -60,6 +64,10 @@
     {
       "name": "또 보고 싶어요",
       "description": "소식에서 선수를 따라간다. 그 선수 경기가 시작되면 알림"
+    },
+    {
+      "name": "눈치 한 판",
+      "description": "남들이 무엇을 골랐을지 맞히는 게임. 정답은 끝낸 사람들의 '내 취향' 다수"
     },
     {
       "name": "Identity",
@@ -630,6 +638,48 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/VisitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/track/log": {
+      "post": {
+        "tags": [
+          "유입 측정"
+        ],
+        "summary": "원본 기록 묶음",
+        "description": "로그인 없이. {visitorId, items:[{name, gameKey, step, value, path}]} 40개까지. 일어난 그대로 쌓는다(하루 한 번 아님)",
+        "operationId": "log",
+        "parameters": [
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "string"
               }
             }
           },
@@ -1582,6 +1632,80 @@
         }
       }
     },
+    "/api/partner-requests": {
+      "post": {
+        "tags": [
+          "상대 구하기 등록"
+        ],
+        "summary": "상대 구하기 등록",
+        "description": "로그인 없이. 기기 번호·종목·행정동·편한 때만 남긴다",
+        "operationId": "register_1",
+        "parameters": [
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/partner-requests/claim": {
+      "post": {
+        "tags": [
+          "상대 구하기 등록"
+        ],
+        "summary": "가입 전 등록을 내 계정으로",
+        "description": "로그인한 뒤 부른다. 여러 번 불러도 한 번만",
+        "operationId": "claim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/organizations/requests": {
       "post": {
         "tags": [
@@ -1656,6 +1780,51 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrgRequestView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/nunchi/tastes": {
+      "post": {
+        "tags": [
+          "눈치 한 판"
+        ],
+        "summary": "내 취향 내기",
+        "description": "로그인 없이. 많아야 셋. 질문마다 기기당 한 표(처음 것). 나와 같은 쪽을 고른 사람 비율을 돌려준다",
+        "operationId": "tastes",
+        "parameters": [
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TasteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TasteResult"
+                  }
                 }
               }
             }
@@ -2268,7 +2437,7 @@
         ],
         "summary": "가입 전 판을 내 기록으로",
         "description": "로그인한 뒤 부른다. 이 기기의 가입 전 판을 내 기록으로 옮긴다. 여러 번 불러도 한 번만",
-        "operationId": "claim",
+        "operationId": "claim_1",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4245,7 +4414,7 @@
         ],
         "summary": "어드민에 의한 그룹 등록",
         "description": "계정이름, 비밀번호를 받아 신규 유저를 생성합니다.",
-        "operationId": "register_1",
+        "operationId": "register_2",
         "requestBody": {
           "content": {
             "application/json": {
@@ -6264,7 +6433,7 @@
           {
             "name": "scope",
             "in": "query",
-            "description": "dong(내 동네 범위) 또는 all(전국). 비우면 앱 밖 경기는 동네, 앱 게임은 전국",
+            "description": "ORG:{조직 id}(내 소속) · dong(내 동네 범위) · all(전국). 비우면 앱 게임은 첫 소속(없으면 전국), 앱 밖 경기는 동네(없으면 전국)",
             "required": false,
             "schema": {
               "type": "string"
@@ -6670,6 +6839,60 @@
         }
       }
     },
+    "/api/rankings/scope": {
+      "get": {
+        "tags": [
+          "ranking-controller"
+        ],
+        "summary": "능력·종합 순위",
+        "description": "kind: OVERALL(key ALL) · GROUP(BODY·MIND·HEART) · ABILITY(능력 이름). seat: ORG:{조직 id} · 행정동 코드 · NATIONAL. 비우면 첫 소속, 없으면 전국. 5판 이상, 연습 제외",
+        "operationId": "scopeRanking",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OVERALL",
+                "GROUP",
+                "ABILITY",
+                "RECORD"
+              ]
+            }
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "seat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeRankingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rankings/overview": {
       "get": {
         "tags": [
@@ -7034,6 +7257,105 @@
         }
       }
     },
+    "/api/partner-requests/options": {
+      "get": {
+        "tags": [
+          "상대 구하기 등록"
+        ],
+        "summary": "고를 수 있는 종목·때",
+        "description": "로그인 없이",
+        "operationId": "options",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Options"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/partner-requests/locate": {
+      "get": {
+        "tags": [
+          "상대 구하기 등록"
+        ],
+        "summary": "좌표의 동네",
+        "description": "로그인 없이. 저장하지 않는다. 못 찾으면 비어 있다",
+        "operationId": "locate",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DongOption"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/partner-requests/dongs": {
+      "get": {
+        "tags": [
+          "상대 구하기 등록"
+        ],
+        "summary": "동네 이름 찾기",
+        "description": "로그인 없이. '합정' → 마포구 합정동, 10개까지",
+        "operationId": "search_1",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DongOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/organizations/search": {
       "get": {
         "tags": [
@@ -7041,7 +7363,7 @@
         ],
         "summary": "조직 이름 찾기",
         "description": "인증하기에서 조직을 고를 때. 이름에 q가 들어간 조직 최대 20개 (회원 수는 주지 않는다)",
-        "operationId": "search_1",
+        "operationId": "search_2",
         "parameters": [
           {
             "name": "q",
@@ -7084,6 +7406,123 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrgMine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/nunchi/questions": {
+      "get": {
+        "tags": [
+          "눈치 한 판"
+        ],
+        "summary": "질문 글",
+        "description": "로그인 없이. 판의 문제(질문 id 열 개)로 질문과 두 선택을 받는다. 정답은 주지 않는다",
+        "operationId": "questions",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuestionView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/nunchi/plays/{playId}/review": {
+      "get": {
+        "tags": [
+          "눈치 한 판"
+        ],
+        "summary": "내 판 돌아보기",
+        "description": "로그인한 사람의 낸 판",
+        "operationId": "myReview",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "visitorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/nunchi/guest-plays/{playId}/review": {
+      "get": {
+        "tags": [
+          "눈치 한 판"
+        ],
+        "summary": "가입 전 판 돌아보기",
+        "description": "로그인 없이. 낸 판만, 그 기기만. 질문마다 정답·몇 명 기준·내 선택·내가 낸 취향, 친구 도전이면 친구 점수",
+        "operationId": "guestReview",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "visitorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
                 }
               }
             }
@@ -7170,7 +7609,7 @@
         ],
         "summary": "좌표의 동네 보기",
         "description": "인증 전에 '여기는 합정동이에요'를 보여 준다. 저장하지 않는다. 못 찾으면 null",
-        "operationId": "locate",
+        "operationId": "locate_1",
         "parameters": [
           {
             "name": "lat",
@@ -8324,7 +8763,7 @@
         ],
         "summary": "동호회 이름으로 찾기",
         "description": "교류전 상대를 고를 때. 두 글자부터",
-        "operationId": "search_2",
+        "operationId": "search_3",
         "parameters": [
           {
             "name": "q",
@@ -8576,6 +9015,75 @@
                   "additionalProperties": {
                     "type": "string",
                     "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/champions/users/{userId}": {
+      "get": {
+        "tags": [
+          "champion-controller"
+        ],
+        "summary": "가진 자리",
+        "description": "벨트(규칙 챔피언)와 1위(능력·종합·기록 게임). 동네를 숨긴 사람은 '동네', 소속을 같은 조직만 보이게 한 사람은 조직 밖에 '소속'으로 보인다",
+        "operationId": "userSeats",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSeatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/champions/rules/{ruleId}/seats": {
+      "get": {
+        "tags": [
+          "champion-controller"
+        ],
+        "summary": "게임 화면의 챔피언 카드",
+        "description": "내가 속한 자리(소속·동네·전국)의 챔피언, 기본 자리부터 최대 3개. 빈자리는 champion이 null",
+        "operationId": "ruleSeats",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeatChampionView"
                   }
                 }
               }
@@ -9185,6 +9693,40 @@
         }
       }
     },
+    "/api/admin/track-log.csv": {
+      "get": {
+        "tags": [
+          "유입 측정"
+        ],
+        "summary": "원본 기록 내려받기 (관리자)",
+        "description": "최근 days일. 분석은 이 파일로 한다",
+        "operationId": "csv",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/safety": {
       "get": {
         "tags": [
@@ -9300,6 +9842,40 @@
                   "items": {
                     "$ref": "#/components/schemas/AdminReportResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/partner-requests": {
+      "get": {
+        "tags": [
+          "상대 구하기 등록"
+        ],
+        "summary": "상대 구하기 등록 집계 (관리자)",
+        "description": "최근 days일, 동네·종목별 등록 수와 가입으로 이어진 수",
+        "operationId": "summary",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Summary"
                 }
               }
             }
@@ -11573,6 +12149,79 @@
           }
         }
       },
+      "RegisterRequest": {
+        "required": [
+          "dongCode",
+          "sport",
+          "times",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          },
+          "sport": {
+            "type": "string"
+          },
+          "dongCode": {
+            "type": "string"
+          },
+          "times": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dongSource": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "required": [
+          "dongName",
+          "id",
+          "waiting"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dongName": {
+            "type": "string"
+          },
+          "waiting": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ClaimRequest": {
+        "required": [
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          }
+        }
+      },
+      "ClaimResponse": {
+        "required": [
+          "claimed"
+        ],
+        "type": "object",
+        "properties": {
+          "claimed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "OrgRequestView": {
         "required": [
           "createdAt",
@@ -11617,6 +12266,64 @@
           "decidedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "TastePick": {
+        "required": [
+          "choice",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "choice": {
+            "type": "string"
+          }
+        }
+      },
+      "TasteRequest": {
+        "required": [
+          "picks",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          },
+          "picks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TastePick"
+            }
+          }
+        }
+      },
+      "TasteResult": {
+        "required": [
+          "choice",
+          "id",
+          "people",
+          "sameRate"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "choice": {
+            "type": "string"
+          },
+          "sameRate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "people": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -11949,6 +12656,13 @@
           },
           "key": {
             "type": "string"
+          },
+          "first": {
+            "type": "string"
+          },
+          "from": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -12041,29 +12755,6 @@
             "format": "int32"
           },
           "rankOf": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ClaimRequest": {
-        "required": [
-          "visitorId"
-        ],
-        "type": "object",
-        "properties": {
-          "visitorId": {
-            "type": "string"
-          }
-        }
-      },
-      "ClaimResponse": {
-        "required": [
-          "claimed"
-        ],
-        "type": "object",
-        "properties": {
-          "claimed": {
             "type": "integer",
             "format": "int32"
           }
@@ -12680,25 +13371,6 @@
           "roomId": {
             "type": "string",
             "format": "uuid"
-          }
-        }
-      },
-      "RegisterRequest": {
-        "required": [
-          "email",
-          "password"
-        ],
-        "type": "object",
-        "properties": {
-          "email": {
-            "maxLength": 50,
-            "minLength": 0,
-            "type": "string"
-          },
-          "password": {
-            "maxLength": 20,
-            "minLength": 8,
-            "type": "string"
           }
         }
       },
@@ -14952,12 +15624,29 @@
           }
         }
       },
+      "RankingSeat": {
+        "required": [
+          "key",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
       "RuleRankingResponse": {
         "required": [
+          "noOrg",
           "rankings",
           "ruleId",
           "ruleName",
-          "scope"
+          "scope",
+          "seats"
         ],
         "type": "object",
         "properties": {
@@ -14988,6 +15677,15 @@
           },
           "areaName": {
             "type": "string"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankingSeat"
+            }
+          },
+          "noOrg": {
+            "type": "boolean"
           }
         }
       },
@@ -15182,6 +15880,108 @@
           "rulePercent": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "RankingSeatChip": {
+        "required": [
+          "key",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ScopeRankEntry": {
+        "required": [
+          "crown",
+          "isCurrentUser",
+          "rank",
+          "rating",
+          "userId",
+          "userName"
+        ],
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "userAvatar": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "crown": {
+            "type": "boolean"
+          },
+          "isCurrentUser": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ScopeRankingResponse": {
+        "required": [
+          "key",
+          "kind",
+          "label",
+          "noOrg",
+          "rankings",
+          "seat",
+          "seats"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "OVERALL",
+              "GROUP",
+              "ABILITY",
+              "RECORD"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "seat": {
+            "type": "string"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankingSeatChip"
+            }
+          },
+          "rankings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScopeRankEntry"
+            }
+          },
+          "me": {
+            "$ref": "#/components/schemas/ScopeRankEntry"
+          },
+          "noOrg": {
+            "type": "boolean"
           }
         }
       },
@@ -15693,6 +16493,57 @@
           }
         }
       },
+      "Option": {
+        "required": [
+          "label",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "Options": {
+        "required": [
+          "sports",
+          "times"
+        ],
+        "type": "object",
+        "properties": {
+          "sports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "times": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          }
+        }
+      },
+      "DongOption": {
+        "required": [
+          "code",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "OrgSummary": {
         "required": [
           "id",
@@ -15783,6 +16634,101 @@
           },
           "canRequest": {
             "type": "boolean"
+          }
+        }
+      },
+      "QuestionView": {
+        "required": [
+          "a",
+          "b",
+          "id",
+          "q"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          },
+          "b": {
+            "type": "string"
+          }
+        }
+      },
+      "Review": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewItem"
+            }
+          },
+          "challengerScore": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ReviewItem": {
+        "required": [
+          "a",
+          "answer",
+          "b",
+          "byFirst",
+          "correct",
+          "id",
+          "people",
+          "q"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          },
+          "b": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "people": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "byFirst": {
+            "type": "boolean"
+          },
+          "percentA": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mine": {
+            "type": "string"
+          },
+          "correct": {
+            "type": "boolean"
+          },
+          "myTaste": {
+            "type": "string"
           }
         }
       },
@@ -18475,6 +19421,131 @@
           }
         }
       },
+      "BeltView": {
+        "required": [
+          "ruleId",
+          "ruleTitle",
+          "seatLabel",
+          "since",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "appGameKey": {
+            "type": "string"
+          },
+          "seatLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CrownView": {
+        "required": [
+          "itemLabel",
+          "key",
+          "kind",
+          "seat",
+          "seatLabel",
+          "since",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "OVERALL",
+              "GROUP",
+              "ABILITY",
+              "RECORD"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "itemLabel": {
+            "type": "string"
+          },
+          "seat": {
+            "type": "string"
+          },
+          "seatLabel": {
+            "type": "string"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "UserSeatsResponse": {
+        "required": [
+          "belts",
+          "crowns"
+        ],
+        "type": "object",
+        "properties": {
+          "belts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BeltView"
+            }
+          },
+          "crowns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrownView"
+            }
+          }
+        }
+      },
+      "SeatChampionView": {
+        "required": [
+          "mine",
+          "seat",
+          "seatName",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "seat": {
+            "type": "string"
+          },
+          "seatName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "champion": {
+            "$ref": "#/components/schemas/UserSummaryDto"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mine": {
+            "type": "boolean"
+          }
+        }
+      },
       "BodyBuilder": {
         "type": "object"
       },
@@ -19002,6 +20073,75 @@
           },
           "context": {
             "type": "string"
+          }
+        }
+      },
+      "Summary": {
+        "required": [
+          "bySport",
+          "byTime",
+          "rows",
+          "since",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "since": {
+            "type": "string",
+            "format": "date"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SummaryRow"
+            }
+          },
+          "bySport": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "byTime": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "SummaryRow": {
+        "required": [
+          "claimed",
+          "count",
+          "dongCode",
+          "dongName",
+          "sport"
+        ],
+        "type": "object",
+        "properties": {
+          "dongCode": {
+            "type": "string"
+          },
+          "dongName": {
+            "type": "string"
+          },
+          "sport": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "claimed": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

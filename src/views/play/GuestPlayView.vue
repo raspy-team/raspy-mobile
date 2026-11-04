@@ -77,7 +77,9 @@
             <ul class="mt-3 space-y-2">
               <li v-for="t in tasteResults" :key="t.id" class="t-body">
                 <span class="text-fg-muted">{{ itemOf(t.id)?.q }}</span> · {{ choiceLabel(t.id, t.choice) }}
-                <span class="block t-caption">당신과 같은 답을 고른 사람 <b class="text-fg">{{ t.sameRate }}%</b> ({{ t.people }}명 중)</span>
+                <!-- 표가 적으면 '100%(1명 중)' 대신 AI 추정 비율이라고 밝힌다 (docs/ai-residents.md 6) -->
+                <span v-if="t.byAi" class="block t-caption">같은 답 <b class="text-fg">{{ t.sameRate }}%</b> · AI 추정 · 사람 {{ t.minVotes }}명 모이면 바뀌어요</span>
+                <span v-else class="block t-caption">당신과 같은 답을 고른 사람 <b class="text-fg">{{ t.sameRate }}%</b> ({{ t.people }}명 중)</span>
               </li>
             </ul>
           </template>
@@ -118,8 +120,8 @@
                 <p class="t-body text-fg break-keep">{{ it.correct ? '⭕' : '❌' }} {{ it.q }}</p>
                 <p class="t-caption mt-1">
                   정답 <b class="text-fg">{{ answerLabel(it) }}</b>
-                  · {{ it.byFirst ? '처음 정답 (아직 사람이 적어요)' : `${it.people}명 기준` }}
                   <template v-if="it.percentA != null"> · {{ it.a }} {{ it.percentA }}%</template>
+                  · {{ it.byFirst ? `AI 추정 · 사람 ${it.minVotes}명 모이면 바뀌어요` : `${it.people}명 기준` }}
                 </p>
                 <p class="t-micro mt-0.5">내 답: {{ it.mine === 'a' ? it.a : it.mine === 'b' ? it.b : '시간 안에 못 골랐어요' }}</p>
               </UiCard>

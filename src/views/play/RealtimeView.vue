@@ -39,7 +39,7 @@
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">{{ state.invitee ? '도전 취소' : '그만 찾기' }}</UiButton>
         <!-- 다른 게임에서 기다리는 사람이 있으면 그쪽으로 붙는 게 빠르다 -->
-        <WaitingNow v-if="!state.invitee" class="mt-6" title="다른 게임에서 기다리는 사람" :exclude-game-id="state.gameId" />
+        <WaitingNow v-if="!state.invitee" class="mt-6" title="다른 게임에서 기다리는 사람" :exclude-game-id="state.gameId" :ai="false" />
       </template>
 
       <!-- 짝이 지어지면 3·2·1 (첫 차례 시간은 그 뒤부터) -->

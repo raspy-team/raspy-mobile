@@ -118,6 +118,8 @@ const KINDS = {
   FRIEND: { icon: 'fas fa-user-group', bg: 'bg-surface-2 text-fg' },
   COMMENT: { icon: 'far fa-comment', bg: 'bg-surface-2 text-fg' },
   LIKE: { icon: 'fas fa-heart', bg: 'bg-danger-soft text-danger-fg' },
+  // 이웃 알림: 상대 구하기로 등록한 동네·종목 (docs/ai-residents.md 4)
+  NEIGHBOR: { icon: 'fas fa-location-dot', bg: 'bg-primary-soft text-primary' },
   OTHER: { icon: 'far fa-bell', bg: 'bg-surface-2 text-fg' },
 }
 function kind(type = '') {
@@ -125,6 +127,7 @@ function kind(type = '') {
   if (type.startsWith('FRIEND')) return KINDS.FRIEND
   if (type.includes('COMMENT')) return KINDS.COMMENT
   if (type === 'GAME_LIKE') return KINDS.LIKE
+  if (type === 'PARTNER_NEARBY') return KINDS.NEIGHBOR
   if (type.startsWith('GAME') || ['INBOX', 'MY_GAME', 'CREATOR_NEW_GAME'].includes(type)) return KINDS.GAME
   return KINDS.OTHER
 }

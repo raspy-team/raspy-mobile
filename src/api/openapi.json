@@ -154,7 +154,8 @@
                 "COMMENT",
                 "LIKE",
                 "DM",
-                "DAILY"
+                "DAILY",
+                "NEIGHBOR"
               ]
             }
           }
@@ -4667,6 +4668,47 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/{key}/realtime/ai": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "AI 주민과 바로 한 판",
+        "description": "대기실의 'AI 주민 기다리는 중'을 눌렀을 때. 기다리는 사람에게 붙지 않고 그 AI(botId)와 바로 시작한다. 하던 판이 있으면 그 판",
+        "operationId": "playAi",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
@@ -12304,8 +12346,10 @@
       },
       "TasteResult": {
         "required": [
+          "byAi",
           "choice",
           "id",
+          "minVotes",
           "people",
           "sameRate"
         ],
@@ -12322,6 +12366,13 @@
             "format": "int32"
           },
           "people": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "byAi": {
+            "type": "boolean"
+          },
+          "minVotes": {
             "type": "integer",
             "format": "int32"
           }
@@ -14155,6 +14206,7 @@
           "goldenHourStart",
           "lobbies",
           "nightAlarm",
+          "residents",
           "serverNow"
         ],
         "type": "object",
@@ -14163,6 +14215,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/LobbyCard"
+            }
+          },
+          "residents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LobbyResident"
             }
           },
           "goldenHour": {
@@ -14181,6 +14239,34 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "LobbyResident": {
+        "required": [
+          "icon",
+          "key",
+          "nickname",
+          "title",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
           }
         }
       },
@@ -16690,6 +16776,7 @@
           "byFirst",
           "correct",
           "id",
+          "minVotes",
           "people",
           "q"
         ],
@@ -16729,6 +16816,10 @@
           },
           "myTaste": {
             "type": "string"
+          },
+          "minVotes": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -16793,7 +16884,8 @@
               "SAFETY",
               "DAILY_PUZZLE",
               "ORG_VERIFY",
-              "CHAMPION_SEAT"
+              "CHAMPION_SEAT",
+              "PARTNER_NEARBY"
             ]
           },
           "createdAt": {
@@ -16825,7 +16917,8 @@
               "COMMENT",
               "LIKE",
               "DM",
-              "DAILY"
+              "DAILY",
+              "NEIGHBOR"
             ]
           },
           "label": {

@@ -21,6 +21,7 @@
       <section v-else-if="!ruleId">
         <h1 class="t-title">무슨 종목으로 할까요?</h1>
         <p class="t-caption mt-2">고르면 가장 많이 쓰는 규칙으로 시작해요. 다음 화면에서 바꿀 수 있어요.</p>
+        <p v-if="sportMissing" class="t-caption mt-2">아직 {{ wantSport }} 규칙이 없어요. 비슷한 종목을 고르거나 규칙을 직접 골라 주세요.</p>
         <div v-if="!sports" class="grid grid-cols-3 gap-2 mt-6">
           <UiSkeleton v-for="n in 9" :key="n" class="h-24 rounded-xl" />
         </div>
@@ -240,6 +241,8 @@ watch(rule, (r) => {
 const sports = ref(null)
 const autoPicked = ref(false)
 const pickedSport = ref('')
+const wantSport = typeof route.query.sport === 'string' ? route.query.sport.trim().slice(0, 20) : ''
+const sportMissing = ref(false)
 async function loadSports() {
   try {
     const { data } = await GET('/api/rules/list', { query: { sort: 'popular' } })
@@ -250,6 +253,16 @@ async function loadSports() {
       bySport.set(name, { name, top: r })
     }
     sports.value = [...bySport.values()]
+    // 이웃 알림의 '먼저 경기를 열어 보세요'(?sport=배드민턴)로 왔으면 그 종목을 골라 둔다 (docs/ai-residents.md 4)
+    if (wantSport && !ruleId.value) {
+      const hit = sports.value.find((s) => s.name === wantSport) || sports.value.find((s) => s.name.includes(wantSport) || wantSport.includes(s.name))
+      if (hit) {
+        ruleId.value = hit.top.id
+        rule.value = hit.top
+        autoPicked.value = true
+        pickedSport.value = hit.name
+      } else sportMissing.value = true
+    }
   } catch {
     sports.value = []
   }

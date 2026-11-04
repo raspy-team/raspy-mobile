@@ -2254,6 +2254,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/realtime/ai": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 주민과 바로 한 판
+         * @description 대기실의 'AI 주민 기다리는 중'을 눌렀을 때. 기다리는 사람에게 붙지 않고 그 AI(botId)와 바로 시작한다. 하던 판이 있으면 그 판
+         */
+        post: operations["playAi"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/{key}/plays": {
         parameters: {
             query?: never;
@@ -6025,6 +6045,9 @@ export interface components {
             sameRate: number;
             /** Format: int32 */
             people: number;
+            byAi: boolean;
+            /** Format: int32 */
+            minVotes: number;
         };
         VerifyRequest: {
             /** Format: double */
@@ -6603,6 +6626,7 @@ export interface components {
         };
         LobbyList: {
             lobbies: components["schemas"]["LobbyCard"][];
+            residents: components["schemas"]["LobbyResident"][];
             goldenHour: boolean;
             /** Format: int32 */
             goldenHourStart: number;
@@ -6610,6 +6634,14 @@ export interface components {
             nightAlarm: boolean;
             /** Format: date-time */
             serverNow: string;
+        };
+        LobbyResident: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            key: string;
+            title: string;
+            icon: string;
         };
         LobbyTonight: {
             key: string;
@@ -7386,6 +7418,8 @@ export interface components {
             mine?: string;
             correct: boolean;
             myTaste?: string;
+            /** Format: int32 */
+            minVotes: number;
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -7394,14 +7428,14 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT" | "PARTNER_NEARBY";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
         };
         SettingDto: {
             /** @enum {string} */
-            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
+            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
             label: string;
             description: string;
             enabled: boolean;
@@ -8533,7 +8567,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
+                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
             };
             cookie?: never;
         };
@@ -11509,6 +11543,30 @@ export interface operations {
             query: {
                 to: number;
                 from?: string;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    playAi: {
+        parameters: {
+            query?: {
+                botId?: number;
             };
             header?: never;
             path: {

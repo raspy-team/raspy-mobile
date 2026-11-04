@@ -94,7 +94,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import BrandFace from '../../components/BrandFace.vue'
 import { UiButton, UiCard, UiInput, UiSection, UiTopBar } from '../../components/ui'
-import { getVisitorId, markPartnerRegistered } from '@/utils/visit'
+import { claimGuestPlays, getVisitorId, markPartnerRegistered } from '@/utils/visit'
 import { track, flush } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
 
@@ -217,6 +217,8 @@ async function register() {
       })
     ).data
     markPartnerRegistered()
+    // 이미 로그인했으면 바로 내 계정에 붙인다: 같은 동네·종목에 사람이 모였는지 그때 알린다 (이웃 알림, 로그인 전이면 아무 일 없다)
+    claimGuestPlays()
     track('partner_done', { step: 4, value: `waiting=${done.value.waiting}` })
   } catch (e) {
     error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '등록하지 못했어요'

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="list && (anyButton || list.tonight || list.lobbies.length || showEmpty)">
+  <div v-if="list && (anyButton || list.tonight || list.lobbies.length || residents.length || showEmpty)">
     <!-- 아무거나 바로 붙기: 어느 게임이든 기다리는 사람에게, 없으면 오늘 밤의 게임으로 (docs/lobby.md 5) -->
     <template v-if="anyButton">
       <UiButton block :disabled="joining" @click="joinAny">아무거나 바로 붙기</UiButton>
@@ -15,8 +15,8 @@
       <UiButton v-if="list.goldenHour" size="sm" @click="join(list.tonight.key)">바로 하기</UiButton>
       <UiSwitch v-else :model-value="list.nightAlarm" :disabled="saving" label="8시 55분에 알려 주기" @update:model-value="setAlarm" />
     </UiCard>
-    <UiSection v-if="list.lobbies.length || showEmpty" :title="title">
-      <div v-if="list.lobbies.length" class="space-y-2">
+    <UiSection v-if="list.lobbies.length || residents.length || showEmpty" :title="title">
+      <div v-if="list.lobbies.length || residents.length" class="space-y-2">
         <UiCard v-for="l in list.lobbies" :key="l.gameId" class="flex items-center gap-3 py-3">
           <UiIcon :name="gameIcon(l.key, l.icon)" class="text-fg-muted" />
           <div class="flex-1 min-w-0">
@@ -25,8 +25,17 @@
           </div>
           <UiButton size="sm" @click="join(l.key)">붙기</UiButton>
         </UiCard>
+        <!-- 사람이 2명보다 적으면 AI 주민이 기다린다 (docs/ai-residents.md 6). 누르면 그 AI와 바로 한 판. 사람이 늘면 서버가 빼 준다 -->
+        <UiCard v-for="r in residents" :key="`ai-${r.userId}`" class="flex items-center gap-3 py-3">
+          <UiIcon :name="gameIcon(r.key, r.icon)" class="text-fg-muted" />
+          <div class="flex-1 min-w-0">
+            <p class="t-label flex items-center min-w-0"><span class="truncate">{{ r.nickname }}</span><UiAiBadge /><span class="truncate">&nbsp;· {{ r.title }}</span></p>
+            <p class="t-micro">기다리는 중 · 바로 시작해요</p>
+          </div>
+          <UiButton size="sm" variant="secondary" :disabled="joining" @click="playAi(r)">한 판</UiButton>
+        </UiCard>
       </div>
-      <p v-else class="t-caption">지금 기다리는 사람이 없어요. 매일 밤 {{ nightHour }}시대{{ list.tonight ? `, ${list.tonight.title}에` : '에' }} 가장 많이 모여요</p>
+      <p v-if="!list.lobbies.length" class="t-caption" :class="residents.length ? 'mt-3' : ''">지금 기다리는 사람이 없어요. 매일 밤 {{ nightHour }}시대{{ list.tonight ? `, ${list.tonight.title}에` : '에' }} 가장 많이 모여요</p>
     </UiSection>
   </div>
 </template>
@@ -40,9 +49,10 @@ import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { onLobbyChange, openUserChannel } from '@/websocket/userChannel'
-import { UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
+import { UiAiBadge, UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
 
-const props = withDefaults(defineProps<{ title?: string; showEmpty?: boolean; excludeGameId?: number; anyButton?: boolean }>(), { title: '지금 기다리는 사람', showEmpty: false, excludeGameId: 0, anyButton: false })
+// ai: 기다리는 AI 주민을 보일까. 내 대기실 안(RealtimeView)에서는 끈다: 거기서 AI와 붙으면 기다리던 내 방이 남는다
+const props = withDefaults(defineProps<{ title?: string; showEmpty?: boolean; excludeGameId?: number; anyButton?: boolean; ai?: boolean }>(), { title: '지금 기다리는 사람', showEmpty: false, excludeGameId: 0, anyButton: false, ai: true })
 const emit = defineEmits<{ join: [key: string] }>()
 const router = useRouter()
 const list = ref<components['schemas']['LobbyList'] | null>(null)
@@ -64,6 +74,9 @@ async function load() {
     // 목록은 덤이라 실패해도 화면은 그대로
   }
 }
+
+type Resident = components['schemas']['LobbyResident']
+const residents = computed<Resident[]>(() => (props.ai ? list.value?.residents ?? [] : []))
 
 // 서버는 24시간제(21)로 준다. 화면은 '밤 9시'
 const nightHour = computed(() => (list.value ? list.value.goldenHourStart % 12 || 12 : 9))
@@ -100,6 +113,18 @@ async function joinAny() {
     const state = (await POST('/api/app-games/realtime/any')).data
     emit('join', state.key)
     router.push(`/play/${state.key}/live`)
+  } finally {
+    joining.value = false
+  }
+}
+
+// AI 주민과 바로 한 판: 기다리는 사람에게 붙지 않고 그 AI가 바로 들어온 판으로 간다
+async function playAi(r: Resident) {
+  joining.value = true
+  try {
+    await POST('/api/app-games/{key}/realtime/ai', { path: { key: r.key }, query: { botId: r.userId } })
+    emit('join', r.key)
+    router.push(`/play/${r.key}/live`)
   } finally {
     joining.value = false
   }

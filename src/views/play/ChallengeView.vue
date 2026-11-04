@@ -3,7 +3,9 @@
     <UiTopBar title="도전장" back />
     <main class="max-w-xl mx-auto px-4 pt-6 pb-16">
       <UiSkeleton v-if="!info && !error" class="h-48 w-full" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
+        <UiButton class="mt-4" to="/games">다른 게임 둘러보기</UiButton>
+      </UiEmptyState>
       <template v-else-if="info">
         <UiCard class="text-center py-8">
           <UiAvatar :src="info.challenger.profilePicture" :name="info.challenger.nickname" :user-id="info.challenger.userId" size="lg" class="mx-auto" />
@@ -43,7 +45,9 @@ onMounted(async () => {
   try {
     info.value = (await GET('/api/app-games/challenges/{gameId}', { path: { gameId: Number(route.params.gameId) } })).data
   } catch (e) {
-    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '도전장을 불러오지 못했어요'
+    // 없는 번호는 서버가 '도전 없음: 123'처럼 개발용 문구를 준다. 사람에게는 풀어서 (11/5 UX)
+    const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
+    error.value = r?.status === 404 ? '없거나 지워진 도전장이에요' : r?.data?.message || '도전장을 불러오지 못했어요'
   }
 })
 </script>

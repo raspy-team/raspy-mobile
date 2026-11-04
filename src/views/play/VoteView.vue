@@ -1,9 +1,11 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="TITLES[card?.key || 'sentence'] || '어느 쪽이 더 좋은가요?'" back />
+    <UiTopBar :title="card ? TITLES[card.key] || '어느 쪽이 더 좋은가요?' : '투표'" back />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!card && !error" class="h-48 w-full" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
+        <UiButton class="mt-4" to="/games">게임 둘러보기</UiButton>
+      </UiEmptyState>
       <template v-else-if="card">
         <VoteCard :card="card" @voted="card = $event" />
         <UiButton block variant="secondary" class="mt-4" :to="`/play/${card.key}`">나도 한 판 쓰기</UiButton>
@@ -30,7 +32,8 @@ onMounted(async () => {
   try {
     card.value = (await GET('/api/app-games/votes/{gameId}', { path: { gameId: Number(route.params.gameId) } })).data
   } catch (e) {
-    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '투표를 불러오지 못했어요'
+    const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
+    error.value = r?.status === 404 ? '없거나 지워진 투표예요' : r?.data?.message || '투표를 불러오지 못했어요'
   }
 })
 </script>

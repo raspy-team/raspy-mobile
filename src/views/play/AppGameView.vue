@@ -236,7 +236,13 @@
 
       <!-- 게임 첫 화면 -->
       <template v-else>
-        <div v-if="!game" class="space-y-3">
+        <UiEmptyState v-if="missing" class="pt-16" icon="fas fa-circle-xmark" title="없는 게임이에요" description="주소가 바뀌었거나 사라진 게임이에요">
+          <UiButton class="mt-4" to="/games">게임 목록 보기</UiButton>
+        </UiEmptyState>
+        <UiEmptyState v-else-if="loadFailed" class="pt-16" icon="fas fa-triangle-exclamation" title="게임을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+          <UiButton class="mt-4" @click="retry">다시 불러오기</UiButton>
+        </UiEmptyState>
+        <div v-else-if="!game" class="space-y-3">
           <UiSkeleton class="h-28 w-full" />
           <UiSkeleton class="h-14 w-full" />
         </div>
@@ -488,13 +494,16 @@ const submitting = ref(false)
 const startError = ref('')
 const submitError = ref('')
 
+// 없는 게임 주소이거나 불러오지 못했으면 뼈대만 계속 보이지 않게 (11/5 UX)
+const missing = ref(false)
+const loadFailed = ref(false)
 async function load() {
-  const [games, mine] = await Promise.all([
-    GET('/api/app-games'),
-    GET('/api/app-games/{key}/duels', { path: { key: key.value } }),
-  ])
+  const games = await GET('/api/app-games')
   const first = !game.value
   game.value = games.data.find((g) => g.key === key.value) ?? null
+  missing.value = !game.value
+  if (!game.value) return
+  const mine = await GET('/api/app-games/{key}/duels', { path: { key: key.value } })
   if (first && game.value?.judge === 'VOTE') tab.value = 'vote'
   duels.value = mine.data
   // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
@@ -689,7 +698,12 @@ watch(boardKind, loadBoard)
 
 let stop: (() => void) | undefined
 onMounted(async () => {
-  await load()
+  try {
+    await load()
+  } catch {
+    loadFailed.value = true
+    return
+  }
   // 도전 링크로 왔으면 그 문제로 바로 시작
   const challengeId = Number(route.query.challenge)
   if (challengeId) {
@@ -716,4 +730,8 @@ onMounted(async () => {
   })
 })
 onBeforeUnmount(() => stop?.())
+async function retry() {
+  loadFailed.value = false
+  try { await load() } catch { loadFailed.value = true }
+}
 </script>

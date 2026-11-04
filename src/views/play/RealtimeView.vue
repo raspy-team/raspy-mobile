@@ -85,7 +85,7 @@
           class="mt-4"
           :stones="state.stones"
           :flip="!state.meFirst"
-          :my-turn="myTurn"
+          :my-turn="myTurn && !counting"
           :last-move="state.moves[state.moves.length - 1]?.word"
           :move-count="state.moves.length"
           :sending="sending"
@@ -354,7 +354,8 @@ async function send() {
 
 /** 알까기: 튕긴 수를 낸다 */
 async function shoot(move: string) {
-  if (!state.value || !myTurn.value || sending.value) return
+  // 3·2·1 사이에 낸 수는 서버가 '아직 시작 전'으로 거절한다 (알까기는 판이 먼저 보여 당길 수 있었다, 11/5 리뷰)
+  if (!state.value || !myTurn.value || counting.value || sending.value) return
   sending.value = true
   moveError.value = ''
   try {

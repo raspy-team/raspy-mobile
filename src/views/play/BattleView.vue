@@ -51,7 +51,8 @@
           <div class="absolute inset-x-0 top-1/2 border-t border-dashed border-line-strong"></div>
           <div class="absolute rounded-full bg-fg" :style="paddleStyle(0)"></div>
           <div class="absolute rounded-full bg-fg-muted" :style="paddleStyle(1)"></div>
-          <div class="absolute rounded-full bg-signal" :style="ballStyle"></div>
+          <!-- 연두 공은 밝은 판(흰색)에서 잘 안 보여 테두리를 둔다 (11/5 UX) -->
+          <div class="absolute rounded-full bg-signal ring-1 ring-fg" :style="ballStyle"></div>
           <p v-if="counting" class="absolute inset-0 flex items-center justify-center t-display tabular-nums">{{ countdown }}</p>
         </div>
         <p v-if="!connected" class="t-caption text-danger mt-2 text-center">연결하는 중이에요</p>

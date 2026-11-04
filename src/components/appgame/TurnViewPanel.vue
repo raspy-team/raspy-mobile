@@ -36,6 +36,7 @@
           <span v-else-if="kind(cell) === 'op'" class="w-[78%] h-[78%] rounded-full bg-canvas border-2 border-fg" :class="{ 'ring-2 ring-signal': last(cell) }"></span>
           <span v-else-if="kind(cell) === 'ship'" class="w-full h-full bg-surface-3"></span>
           <span v-else-if="kind(cell) === 'hit'" class="w-full h-full flex items-center justify-center bg-danger-soft text-danger-fg" :class="{ 'ring-2 ring-inset ring-signal': last(cell) }"><UiIcon name="xmark" /></span>
+          <span v-else-if="kind(cell) === 'mine'" class="w-full h-full flex items-center justify-center bg-surface-3 text-fg-muted"><UiIcon name="bomb" /></span>
           <span v-else-if="kind(cell) === 'miss'" class="w-2 h-2 rounded-full bg-fg-subtle" :class="{ 'ring-2 ring-signal': last(cell) }"></span>
           <span v-else-if="kind(cell) === 'hint'" class="rounded-full border-2 border-fg-subtle" :class="b.lattice ? 'w-2 h-2' : 'w-[30%] h-[30%]'" aria-hidden="true"></span>
           <span v-else-if="kind(cell) === 'closed'" class="w-full h-full bg-surface-3" aria-hidden="true"></span>
@@ -70,7 +71,7 @@ type TurnBoard = components['schemas']['TurnBoard']
 const props = defineProps<{ view: TurnView; myTurn: boolean; sending: boolean }>()
 const emit = defineEmits<{ (e: 'move', move: string): void }>()
 
-const LABEL: Record<string, string> = { me: '내 돌', op: '상대 돌', ship: '내 배', hit: '맞힘', miss: '빗나감', hint: '둘 수 있는 곳', open: '열린 칸', line: '그은 선', closed: '안 연 칸', fill: '찬 칸' }
+const LABEL: Record<string, string> = { me: '내 돌', op: '상대 돌', ship: '내 배', hit: '맞힘', miss: '빗나감', mine: '지뢰', hint: '둘 수 있는 곳', open: '열린 칸', line: '그은 선', closed: '안 연 칸', fill: '찬 칸' }
 const kind = (cell: string) => cell.split(' ')[0]
 const last = (cell: string) => cell.includes('last')
 // 빈칸과 '둘 수 있는 곳'(뒤집기)만 누를 수 있다
@@ -93,8 +94,9 @@ const field = ref<{ focus: () => void } | null>(null)
 function answer() {
   if (!props.myTurn || !text.value.trim()) return
   emit('move', text.value.trim())
-  text.value = ''
 }
+// 낸 말은 받아들여져 차례가 넘어가거나 새 문제가 나올 때 지운다. 거절되면 그대로 두어 고쳐 낼 수 있게 (11/5 UX)
+watch(() => props.myTurn, (mine) => { if (!mine) text.value = '' })
 // 새 문제가 나오면 바로 칠 수 있게
 watch(() => props.view.prompt, async () => {
   text.value = ''

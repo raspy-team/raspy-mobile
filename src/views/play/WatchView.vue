@@ -3,7 +3,9 @@
     <UiTopBar title="구경하기" back="/" />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
-      <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
+      <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
+        <UiButton class="mt-4" to="/games">게임 둘러보기</UiButton>
+      </UiEmptyState>
 
       <template v-else-if="state">
         <p class="t-title">주제: {{ state.subject }}</p>
@@ -49,7 +51,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { WS_URL } from '@/config/server'
 import { feel } from '../../utils/feel'
-import { UiAvatar, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiAvatar, UiButton, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['WatchState']
 
@@ -64,7 +66,8 @@ async function load() {
   try {
     state.value = (await GET('/api/app-games/realtime/{gameId}/watch', { path: { gameId } })).data
   } catch (e) {
-    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '볼 수 없는 판이에요'
+    const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
+    error.value = r?.status === 404 ? '없거나 지워진 판이에요' : r?.data?.message || '볼 수 없는 판이에요'
   }
 }
 async function cheer(side: number) {

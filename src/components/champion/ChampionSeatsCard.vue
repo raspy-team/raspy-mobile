@@ -9,7 +9,7 @@
       >
         <UiIcon name="fas fa-crown" />
       </span>
-      <!-- AI 보스 (docs/ai-residents.md 3): 앱 게임 전국 빈자리를 든 AI. 이기면 첫 사람 챔피언 -->
+      <!-- AI 보스 (docs/ai-residents.md 3): 앱 게임 전국 빈자리를 든 AI. 이기면 첫 사람 챔피언 (사람이 쉬어서 되찾은 자리면 그냥 챔피언) -->
       <template v-if="s.boss && s.champion">
         <button type="button" class="flex-1 min-w-0 text-left" @click="router.push(`/profile/${s.champion.id}`)">
           <span class="flex items-center t-heading min-w-0">
@@ -23,8 +23,8 @@
         <button
           type="button"
           class="flex-1 min-w-0 text-left"
-          :disabled="!s.champion"
-          @click="s.champion && router.push(`/profile/${s.champion.id}`)"
+          :disabled="!s.champion?.id"
+          @click="s.champion?.id && router.push(`/profile/${s.champion.id}`)"
         >
           <span class="block t-heading truncate">
             {{ s.champion ? (s.mine ? `내가 ${s.seatName} 챔피언이에요` : `${s.seatName} 챔피언 ${s.champion.nickname}`) : `${s.seatName} 자리가 비어 있어요` }}
@@ -54,10 +54,14 @@ type Seat = {
   seat: string
   seatName: string
   title: string
-  champion?: { id?: number; nickname: string } | null
+  champion?: { id?: number | null; nickname: string } | null
   mine: boolean
   boss?: boolean
   bossTriesLeft?: number | null
+  /** AI 보스가 30일 쉰 사람 챔피언에게서 되찾은 자리 (이기면 '첫 사람'이 아니라 그냥 챔피언) */
+  bossReclaimed?: boolean
+  /** 챔피언이 경기 기록을 '나만'으로 뒀다: 이름만 '기록을 숨긴 사람', id 없음 */
+  masked?: boolean
 }
 const seats = ref<Seat[]>([])
 
@@ -67,7 +71,8 @@ function emptyHint(seat: string) {
 
 function bossHint(s: Seat) {
   if (s.bossTriesLeft === 0) return '오늘 도전을 다 썼어요. 내일 다시 도전해 주세요'
-  return s.bossTriesLeft != null ? `이기면 첫 사람 챔피언이 돼요 · 오늘 ${s.bossTriesLeft}번 남았어요` : '이기면 첫 사람 챔피언이 돼요 · 하루 3번'
+  const win = s.bossReclaimed ? 'AI 보스가 되찾은 자리예요 · 이기면 챔피언' : '이기면 첫 사람 챔피언이 돼요'
+  return s.bossTriesLeft != null ? `${win} · 오늘 ${s.bossTriesLeft}번 남았어요` : `${win} · 하루 3번`
 }
 
 // 보스 도전: 실시간 화면이 ?boss=1을 보고 보스와 바로 붙는다
@@ -77,8 +82,9 @@ function challengeBoss() {
   if (props.appGameKey) router.push({ path: `/play/${props.appGameKey}/live`, query: { boss: 1 } })
 }
 
-function challenge(c: { id?: number; nickname: string }) {
-  if (props.appGameKey) router.push({ path: `/play/${props.appGameKey}`, query: { to: c.id, toName: c.nickname } })
+function challenge(c: { id?: number | null; nickname: string }) {
+  // 기록을 숨긴 챔피언(id 없음)은 지목하지 않고 그 게임 짝짓기로
+  if (props.appGameKey) router.push(c.id ? { path: `/play/${props.appGameKey}`, query: { to: c.id, toName: c.nickname } } : `/play/${props.appGameKey}`)
   else router.push(`/create-game?ruleId=${props.ruleId}`)
 }
 

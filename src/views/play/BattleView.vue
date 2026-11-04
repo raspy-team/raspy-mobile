@@ -87,7 +87,7 @@ import OpponentName from '../../components/appgame/OpponentName.vue'
 // 실시간 대전 (/play/:key/battle, 퐁). 서버가 1초에 20번 판을 계산해 웹소켓으로 보내고, 화면은 그대로 그린다.
 // 손가락 위치만 보낸다 (라켓을 두고 싶은 x). 라켓이 얼마나 빨리 가는지는 서버가 정한다. 내 쪽(0번이 아니면 판을 뒤집어)이 늘 아래
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { Client } from '@stomp/stompjs'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -116,6 +116,9 @@ const { showToast } = useToast()
 const key = computed(() => String(route.params.key))
 const title = computed(() => ({ pong: '퐁', shake: '흔들기 대결' } as Record<string, string>)[key.value] ?? '실시간 대전')
 const state = ref<State | null>(null)
+// 게임 중에 뒤로 가기(안드로이드 하드웨어 버튼 포함)로 나가면 한 번 묻는다 (11/6 b2 앱 껍데기 점검).
+// 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다
+onBeforeRouteLeave(() => state.value?.status !== 'PLAYING' || window.confirm('게임이 진행 중이에요. 나가면 이 판은 진 것으로 남을 수 있어요. 나갈까요?'))
 const error = ref('')
 const snap = ref<Snapshot | null>(null)
 const connected = ref(false)

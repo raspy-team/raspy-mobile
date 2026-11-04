@@ -162,7 +162,7 @@ import { waitText, who, withRo } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
@@ -188,6 +188,9 @@ const key = computed(() => String(route.params.key))
 // 이름은 서버가 준다 (화면에 따로 둔 이름표는 새 게임이 늘 때마다 빠져 '실시간 경기'로 보였다)
 const title = computed(() => state.value?.title || '실시간 경기')
 const state = ref<State | null>(null)
+// 게임 중에 뒤로 가기(안드로이드 하드웨어 버튼 포함)로 나가면 한 번 묻는다 (11/6 b2 앱 껍데기 점검).
+// 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다
+onBeforeRouteLeave(() => state.value?.status !== 'PLAYING' || window.confirm('게임이 진행 중이에요. 나가도 판은 계속되고, 차례 시간이 지나면 질 수 있어요. 나갈까요?'))
 const error = ref('')
 const word = ref('')
 const moveError = ref('')
@@ -328,15 +331,20 @@ let inviteId = Number(route.query.invite) || null
 let bossChallenge = route.query.boss === '1'
 // AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다 (docs/ai-residents.md 1). 한 번만
 let aiId = Number(route.query.ai) || null
+// 알림('내 차례'·결과)은 ?game=판 으로 온다: 그 판을 연다. 예전엔 무시하고 보통 대기실로 들어가, 끝난 판의 알림을 누르면 새 상대를 찾기 시작했다
+let gameParam = Number(route.query.game) || null
 // 주소의 ?to·?invite·?boss·?ai는 들어간 뒤에 지운다. 화면은 주소마다 새로 그려져(App.vue의 key) 먼저 지우면
 // 새 화면이 보통 대기실로 한 번 더 들어가 따로 방을 열었다 (보스 판 대신 빈 대기실이 보였다). 들어간 뒤 지우면 새 화면은 그 판을 이어 받는다
 // 주소를 지우면 화면이 다시 그려지는데, 그때 나가기(leave)를 하면 막 연 초대 방이 바로 취소됐다 (11/6 ff: 광장·프로필의 '한 판 하자고 하기'가 늘 취소됨).
 // 주소만 지우는 것이면 방을 그대로 두고, 새로 그려진 화면이 그 방을 이어 받는다
 let keepRoom = false
 const clearQuery = () => {
-  if (!(route.query.to || route.query.invite || route.query.boss || route.query.ai)) return
-  keepRoom = true
-  router.replace({ query: {} })
+  if (route.query.to || route.query.invite || route.query.boss || route.query.ai) {
+    keepRoom = true
+    router.replace({ query: {} })
+  }
+  // ?game은 화면을 다시 그리지 않고 조용히 뺀다: router.replace면 새 화면이 보통 대기실로 들어가 끝난 판 대신 새 상대를 찾았다 (7a)
+  else if (route.query.game) history.replaceState(history.state, '', route.path)
 }
 
 const inviteLeft = computed(() => {
@@ -347,11 +355,12 @@ const inviteLeft = computed(() => {
 
 async function join() {
   error.value = ''
-  const to = inviteTo, invite = inviteId, boss = bossChallenge
+  const to = inviteTo, invite = inviteId, boss = bossChallenge, game = gameParam
   try {
-    inviteTo = inviteId = null
+    inviteTo = inviteId = gameParam = null
     bossChallenge = false
-    if (boss) apply((await POST('/api/app-games/{key}/realtime/boss', { path: { key: key.value } })).data)
+    if (game) apply((await GET('/api/app-games/realtime/{gameId}', { path: { gameId: game } })).data)
+    else if (boss) apply((await POST('/api/app-games/{key}/realtime/boss', { path: { key: key.value } })).data)
     else if (invite) apply((await POST('/api/app-games/realtime/{gameId}/accept', { path: { gameId: invite } })).data)
     else if (to) apply((await POST('/api/app-games/{key}/realtime/invite', { path: { key: key.value }, query: { to } })).data)
     else {
@@ -369,6 +378,7 @@ async function join() {
     inviteTo = to
     inviteId = invite
     bossChallenge = boss
+    gameParam = game
     error.value = message(e, '들어가지 못했어요')
   }
 }

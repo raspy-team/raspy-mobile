@@ -120,6 +120,11 @@ const KINDS = {
   LIKE: { icon: 'fas fa-heart', bg: 'bg-danger-soft text-danger-fg' },
   // 이웃 알림: 상대 구하기로 등록한 동네·종목 (docs/ai-residents.md 4)
   NEIGHBOR: { icon: 'fas fa-location-dot', bg: 'bg-primary-soft text-primary' },
+  // 앱 게임(대결 결과·내 차례·채점·투표), 안전, 소속 인증, 챔피언 자리: 예전엔 모두 종 모양(기타)으로 보였다
+  APP: { icon: 'gamepad', bg: 'bg-primary-soft text-primary' },
+  SAFETY: { icon: 'shield-halved', bg: 'bg-surface-2 text-fg' },
+  ORG: { icon: 'building', bg: 'bg-surface-2 text-fg' },
+  CHAMPION: { icon: 'crown', bg: 'bg-signal-soft text-signal-fg' },
   OTHER: { icon: 'far fa-bell', bg: 'bg-surface-2 text-fg' },
 }
 function kind(type = '') {
@@ -128,6 +133,10 @@ function kind(type = '') {
   if (type.includes('COMMENT')) return KINDS.COMMENT
   if (type === 'GAME_LIKE') return KINDS.LIKE
   if (type === 'PARTNER_NEARBY') return KINDS.NEIGHBOR
+  if (type.startsWith('APP_')) return KINDS.APP
+  if (type === 'SAFETY') return KINDS.SAFETY
+  if (type === 'ORG_VERIFY') return KINDS.ORG
+  if (type === 'CHAMPION_SEAT') return KINDS.CHAMPION
   if (type.startsWith('GAME') || ['INBOX', 'MY_GAME', 'CREATOR_NEW_GAME'].includes(type)) return KINDS.GAME
   return KINDS.OTHER
 }
@@ -137,7 +146,8 @@ function dayLabel(iso) {
   const today = new Date()
   const start = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
   const diff = Math.round((start(today) - start(d)) / 86400000)
-  return diff <= 0 ? '오늘' : diff === 1 ? '어제' : '이번 주'
+  // 이레가 지난 것을 '이번 주'라 하지 않는다
+  return diff <= 0 ? '오늘' : diff === 1 ? '어제' : diff < 7 ? '이번 주' : '지난 알림'
 }
 
 // 같은 날, 같은 종류, 같은 이동 주소(같은 경기)는 하나로 묶는다 ("비슷한 알림 N개 더")

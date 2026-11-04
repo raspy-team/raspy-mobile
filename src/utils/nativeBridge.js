@@ -51,7 +51,7 @@ export async function setupPushListeners() {
       if (!url) return
       try {
         const u = new URL(url, window.location.origin)
-        if (u.host === window.location.host || u.hostname === 'matchapp.me') window.location.assign(window.location.origin + u.pathname + u.search)
+        if (u.host === window.location.host || u.hostname === 'matchapp.me') openInApp(u.pathname + u.search)
       } catch {
         // 주소가 아니면 그대로 둔다
       }
@@ -63,6 +63,23 @@ export async function setupPushListeners() {
     })
   } catch {
     listening = false
+  }
+}
+
+/**
+ * 알림을 눌러 연 화면으로 (11/6 b2). 앱이 꺼진 채 알림으로 켜지면 라우터가 첫 화면을 다 열기 전에 신호가 온다:
+ * 라우터가 준비될 때까지 기다렸다가(router.isReady가 한 칸 버퍼) 앱 안에서 옮긴다. 예전엔 페이지를 통째로 다시 열었다.
+ * 늦게 붙은 리스너도 신호를 받는 근거: 안드로이드 PushNotificationsPlugin.handleOnNewIntent와 iOS PushNotificationsHandler가
+ * notifyListeners(..., retainUntilConsumed = true)로 보내 Capacitor Plugin이 리스너가 붙을 때까지 쥐고 있다.
+ * 꺼진 상태에서 켜질 때도 BridgeActivity.onCreate가 onNewIntent(getIntent())를 불러 같은 길로 온다 (@capacitor/android 8)
+ */
+async function openInApp(path) {
+  try {
+    const { default: router } = await import('../router/router.js')
+    await router.isReady()
+    await router.push(path)
+  } catch {
+    window.location.assign(window.location.origin + path)
   }
 }
 

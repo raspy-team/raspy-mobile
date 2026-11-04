@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   appId: 'com.songostudio.match',
   appName: 'match',
   webDir: 'dist',
-  backgroundColor: '#0a0a0b',
+  backgroundColor: '#121214',
   server: {
     url: 'https://matchapp.me',
     // 이 주소 밖은 시스템 브라우저로 연다. 카카오 로그인은 앱 안에서 끝나야 해서 넣는다

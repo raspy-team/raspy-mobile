@@ -24,13 +24,13 @@
   <!-- 홈 화면에 추가(PWA): 앱스토어 전까지 웹으로 들어온 사람이 앱처럼 다시 연다 -->
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="apple-mobile-web-app-title" content="match">
-  <meta name="theme-color" content="#f7f7f5" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
+  <!-- 기본은 다크. 라이트를 고른 사람은 아래 스크립트가 바꾼다 (src/utils/theme.js와 같은 값) -->
+  <meta name="theme-color" content="#121214">
   <title>match</title>
 
   <script>
     // 화면 모드(설정 > 화면). 첫 화면을 그리기 전에 적용해 깜빡이지 않게
-    try { const t = localStorage.getItem('match_theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t } catch (e) {}
+    try { if (localStorage.getItem('match_theme') === 'light') { document.documentElement.dataset.theme = 'light'; document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f7f5') } } catch (e) {}
     // 터치 기반 확대(핀치줌, 더블탭) 완전 차단
     document.addEventListener('gesturestart', function (e) {
       e.preventDefault();
@@ -84,7 +84,7 @@ a {
       overscroll-behavior: none;
       /* 최신 브라우저용 */
       margin: 0;
-      /* 앱 전체가 검은 바탕. 글자 기본색도 맞춘다 */
+      /* 앱 전체 바탕(--c-canvas). 글자 기본색도 맞춘다 */
       background-color: rgb(var(--c-canvas));
       color: rgb(var(--c-fg));
       height: 100%;

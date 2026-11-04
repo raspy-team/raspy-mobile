@@ -27,6 +27,11 @@
             <UiButton size="sm" variant="secondary" :loading="joining === c.id" @click.stop="join(c)">{{ c.joinMode === 'APPROVAL' ? '신청하기' : '들어가기' }}</UiButton>
           </ClubRow>
         </div>
+        <!-- 동네를 인증하지 않았으면 '동네에 없어요'가 아니라 인증부터 -->
+        <div v-else-if="hasDong === false" class="flex items-center gap-3">
+          <p class="t-caption flex-1 min-w-0">동네를 인증하면 우리 동네 동호회가 보여요</p>
+          <UiButton size="sm" variant="secondary" to="/neighborhood">동네 인증</UiButton>
+        </div>
         <!-- 우리 동네 목록은 내가 든 동호회를 뺀다: 내 동호회가 있으면 '아직 없어요'가 틀린 말이 된다 -->
         <p v-else class="t-caption">{{ mine?.length ? '내 동호회 말고는 동네에 아직 동호회가 없어요' : '동네에 아직 동호회가 없어요. 처음으로 만들어 보세요' }}</p>
       </UiSection>
@@ -67,8 +72,10 @@ const creating = ref(false)
 const error = ref('')
 
 const loadError = ref(false)
+const hasDong = ref<boolean | null>(null) // 모르면 null (못 불러와도 목록은 보인다)
 async function load() {
   loadError.value = false
+  GET('/api/neighborhoods/me').then((r) => { hasDong.value = r.data.neighborhoods.length > 0 }, () => {})
   try {
     const [a, b] = await Promise.all([GET('/api/clubs/mine'), GET('/api/clubs/nearby')])
     mine.value = a.data

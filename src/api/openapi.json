@@ -6,6 +6,10 @@
   },
   "tags": [
     {
+      "name": "Organization",
+      "description": "소속 인증 (학교·회사·기타)"
+    },
+    {
       "name": "Report",
       "description": "신고 관련 API"
     },
@@ -46,6 +50,10 @@
       "description": "채널별 유입 → 가입 → 첫 경기 → 재방문"
     },
     {
+      "name": "Admin Organization",
+      "description": "관리자 전용 소속 인증 처리 API"
+    },
+    {
       "name": "일일 접속 추적",
       "description": "유저의 일일 첫 접속을 추적하고 알림을 전송하는 API"
     },
@@ -71,6 +79,49 @@
     }
   ],
   "paths": {
+    "/api/organizations/{orgId}/visibility": {
+      "put": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "소속 공개 범위",
+        "description": "ALL 모두 / SAME_ORG 같은 조직만 / HIDDEN 숨김(순위·소속 자리에서도 빠진다)",
+        "operationId": "visibility",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgVisibilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/notification-settings/{category}": {
       "put": {
         "tags": [
@@ -236,6 +287,48 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ClubMatchView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/organizations/{orgId}": {
+      "put": {
+        "tags": [
+          "Admin Organization"
+        ],
+        "summary": "조직 이름·종류 고치기 (관리자 전용)",
+        "operationId": "rename",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgRenameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
                 }
               }
             }
@@ -1482,6 +1575,87 @@
                 "schema": {
                   "type": "integer",
                   "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/requests": {
+      "post": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "소속 인증 신청",
+        "description": "기존 조직이면 orgId, 없으면 name·type. 증명서 한 장(PDF·JPG·PNG, 10MB). 동의(agree=true)가 있어야 한다",
+        "operationId": "request",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNIVERSITY",
+                "COMPANY",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "agree",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgRequestView"
                 }
               }
             }
@@ -5360,6 +5534,134 @@
         }
       }
     },
+    "/api/admin/organizations/{orgId}/merge-into/{intoId}": {
+      "post": {
+        "tags": [
+          "Admin Organization"
+        ],
+        "summary": "조직 합치기 (관리자 전용)",
+        "description": "orgId의 회원을 intoId로 옮기고 orgId를 지운다 ('서울대' → '서울대학교')",
+        "operationId": "merge",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "intoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/organizations/requests/{id}/reject": {
+      "post": {
+        "tags": [
+          "Admin Organization"
+        ],
+        "summary": "거절 (관리자 전용)",
+        "description": "사유는 본인에게 알림으로 간다. 파일은 바로 지운다",
+        "operationId": "reject",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgRejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/organizations/requests/{id}/approve": {
+      "post": {
+        "tags": [
+          "Admin Organization"
+        ],
+        "summary": "승인 (관리자 전용)",
+        "description": "orgId로 기존 조직에 붙이거나, 없으면 name·type(비우면 신청한 이름·종류)으로 조직을 만든다. 파일은 바로 지운다",
+        "operationId": "approve",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/no-show/{reportId}/cancel": {
       "post": {
         "tags": [
@@ -6680,6 +6982,63 @@
         }
       }
     },
+    "/api/organizations/search": {
+      "get": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "조직 이름 찾기",
+        "description": "인증하기에서 조직을 고를 때. 이름에 q가 들어간 조직 최대 20개 (회원 수는 주지 않는다)",
+        "operationId": "search_1",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrgSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/me": {
+      "get": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "내 소속",
+        "description": "인증한 소속(공개 범위 포함), 기다리는 신청, 가장 최근 결과",
+        "operationId": "mine",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgMine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/notifications": {
       "get": {
         "tags": [
@@ -6737,7 +7096,7 @@
         ],
         "summary": "내 동네",
         "description": "인증한 동네(최대 2개), 범위 선택지, 인증 유효 기간",
-        "operationId": "mine",
+        "operationId": "mine_1",
         "responses": {
           "200": {
             "description": "OK",
@@ -7913,7 +8272,7 @@
         ],
         "summary": "동호회 이름으로 찾기",
         "description": "교류전 상대를 고를 때. 두 글자부터",
-        "operationId": "search_1",
+        "operationId": "search_2",
         "parameters": [
           {
             "name": "q",
@@ -7972,7 +8331,7 @@
           "club-controller"
         ],
         "summary": "내 동호회",
-        "operationId": "mine_1",
+        "operationId": "mine_2",
         "responses": {
           "200": {
             "description": "OK",
@@ -8896,6 +9255,117 @@
         }
       }
     },
+    "/api/admin/organizations": {
+      "get": {
+        "tags": [
+          "Admin Organization"
+        ],
+        "summary": "조직 목록 (관리자 전용)",
+        "description": "q가 있으면 이름으로 찾는다. 회원 수 포함",
+        "operationId": "organizations",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminOrg"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/organizations/requests": {
+      "get": {
+        "tags": [
+          "Admin Organization"
+        ],
+        "summary": "소속 인증 신청 목록 (관리자 전용)",
+        "description": "status=PENDING(기본)이면 오래된 것부터, 그 밖이면 최근 결과 50개",
+        "operationId": "list_4",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED",
+                "CANCELED"
+              ],
+              "default": "PENDING"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminOrgRequest"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/organizations/requests/{id}/file": {
+      "get": {
+        "tags": [
+          "Admin Organization"
+        ],
+        "summary": "증명서 파일 보기 (관리자 전용)",
+        "description": "대기 중인 신청의 파일. 결정하면 지워져 404",
+        "operationId": "file",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/no-show/appeals": {
       "get": {
         "tags": [
@@ -8983,6 +9453,72 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/{orgId}/membership": {
+      "delete": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "소속 떼기",
+        "description": "다시 붙이려면 다시 인증한다",
+        "operationId": "leave_2",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/requests/{id}": {
+      "delete": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "기다리는 신청 취소",
+        "description": "올린 파일도 바로 지운다",
+        "operationId": "cancel_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
                 }
               }
             }
@@ -9118,6 +9654,25 @@
   },
   "components": {
     "schemas": {
+      "OrgVisibilityRequest": {
+        "required": [
+          "visibility"
+        ],
+        "type": "object",
+        "properties": {
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "SAME_ORG",
+              "HIDDEN"
+            ]
+          }
+        }
+      },
+      "Unit": {
+        "type": "object"
+      },
       "UpdateRequest": {
         "required": [
           "enabled"
@@ -9605,8 +10160,24 @@
           }
         }
       },
-      "Unit": {
-        "type": "object"
+      "OrgRenameRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
+          }
+        }
       },
       "WatchFollowState": {
         "required": [
@@ -10947,6 +11518,53 @@
           },
           "outcome": {
             "type": "string"
+          }
+        }
+      },
+      "OrgRequestView": {
+        "required": [
+          "createdAt",
+          "id",
+          "name",
+          "status",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "CANCELED"
+            ]
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -13163,6 +13781,37 @@
           }
         }
       },
+      "OrgRejectRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OrgApproveRequest": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
+          }
+        }
+      },
       "DailyAccessResponse": {
         "required": [
           "accessOrder",
@@ -14916,6 +15565,99 @@
           }
         }
       },
+      "OrgSummary": {
+        "required": [
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
+          }
+        }
+      },
+      "OrgMembership": {
+        "required": [
+          "name",
+          "orgId",
+          "type",
+          "verifiedAt",
+          "visibility"
+        ],
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "SAME_ORG",
+              "HIDDEN"
+            ]
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrgMine": {
+        "required": [
+          "canRequest",
+          "maxOrgs",
+          "memberships"
+        ],
+        "type": "object",
+        "properties": {
+          "memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgMembership"
+            }
+          },
+          "pending": {
+            "$ref": "#/components/schemas/OrgRequestView"
+          },
+          "lastDecided": {
+            "$ref": "#/components/schemas/OrgRequestView"
+          },
+          "maxOrgs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "canRequest": {
+            "type": "boolean"
+          }
+        }
+      },
       "NotificationResponse": {
         "required": [
           "createdAt",
@@ -14975,7 +15717,8 @@
               "GAME_REMINDER",
               "GAME_RESULT_DISPUTED",
               "SAFETY",
-              "DAILY_PUZZLE"
+              "DAILY_PUZZLE",
+              "ORG_VERIFY"
             ]
           },
           "createdAt": {
@@ -18131,6 +18874,121 @@
           },
           "context": {
             "type": "string"
+          }
+        }
+      },
+      "AdminOrg": {
+        "required": [
+          "createdAt",
+          "id",
+          "members",
+          "name",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
+          },
+          "members": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdminOrgRequest": {
+        "required": [
+          "createdAt",
+          "hasFile",
+          "id",
+          "memberships",
+          "name",
+          "nickname",
+          "status",
+          "type",
+          "userId",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "COMPANY",
+              "OTHER"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "CANCELED"
+            ]
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasFile": {
+            "type": "boolean"
+          },
+          "fileType": {
+            "type": "string"
+          },
+          "fileBytes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "memberships": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

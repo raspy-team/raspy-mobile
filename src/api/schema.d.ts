@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/organizations/{orgId}/visibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 소속 공개 범위
+         * @description ALL 모두 / SAME_ORG 같은 조직만 / HIDDEN 숨김(순위·소속 자리에서도 빠진다)
+         */
+        put: operations["visibility"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notification-settings/{category}": {
         parameters: {
             query?: never;
@@ -61,6 +81,23 @@ export interface paths {
          * @description 1:1이면 한 명, 2:2면 두 명. 양쪽이 다 내면 그 판의 경기가 열린다
          */
         put: operations["setLineup"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organizations/{orgId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 조직 이름·종류 고치기 (관리자 전용) */
+        put: operations["rename"];
         post?: never;
         delete?: never;
         options?: never;
@@ -645,6 +682,26 @@ export interface paths {
          * @description 특정 유저로부터 받은 도전 요청을 수락하고 게임을 생성합니다.
          */
         post: operations["acceptPlayWithMeTooRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizations/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 소속 인증 신청
+         * @description 기존 조직이면 orgId, 없으면 name·type. 증명서 한 장(PDF·JPG·PNG, 10MB). 동의(agree=true)가 있어야 한다
+         */
+        post: operations["request"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2646,6 +2703,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/organizations/{orgId}/merge-into/{intoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 조직 합치기 (관리자 전용)
+         * @description orgId의 회원을 intoId로 옮기고 orgId를 지운다 ('서울대' → '서울대학교')
+         */
+        post: operations["merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organizations/requests/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 거절 (관리자 전용)
+         * @description 사유는 본인에게 알림으로 간다. 파일은 바로 지운다
+         */
+        post: operations["reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organizations/requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 승인 (관리자 전용)
+         * @description orgId로 기존 조직에 붙이거나, 없으면 name·type(비우면 신청한 이름·종류)으로 조직을 만든다. 파일은 바로 지운다
+         */
+        post: operations["approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/no-show/{reportId}/cancel": {
         parameters: {
             query?: never;
@@ -3355,6 +3472,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/organizations/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 조직 이름 찾기
+         * @description 인증하기에서 조직을 고를 때. 이름에 q가 들어간 조직 최대 20개 (회원 수는 주지 않는다)
+         */
+        get: operations["search_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizations/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 소속
+         * @description 인증한 소속(공개 범위 포함), 기다리는 신청, 가장 최근 결과
+         */
+        get: operations["mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/notifications": {
         parameters: {
             query?: never;
@@ -3406,7 +3563,7 @@ export interface paths {
          * 내 동네
          * @description 인증한 동네(최대 2개), 범위 선택지, 인증 유효 기간
          */
-        get: operations["mine"];
+        get: operations["mine_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4086,7 +4243,7 @@ export interface paths {
          * 동호회 이름으로 찾기
          * @description 교류전 상대를 고를 때. 두 글자부터
          */
-        get: operations["search_1"];
+        get: operations["search_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4123,7 +4280,7 @@ export interface paths {
             cookie?: never;
         };
         /** 내 동호회 */
-        get: operations["mine_1"];
+        get: operations["mine_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4686,6 +4843,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 조직 목록 (관리자 전용)
+         * @description q가 있으면 이름으로 찾는다. 회원 수 포함
+         */
+        get: operations["organizations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organizations/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 소속 인증 신청 목록 (관리자 전용)
+         * @description status=PENDING(기본)이면 오래된 것부터, 그 밖이면 최근 결과 50개
+         */
+        get: operations["list_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organizations/requests/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 증명서 파일 보기 (관리자 전용)
+         * @description 대기 중인 신청의 파일. 결정하면 지워져 404
+         */
+        get: operations["file"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/no-show/appeals": {
         parameters: {
             query?: never;
@@ -4738,6 +4955,46 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizations/{orgId}/membership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * 소속 떼기
+         * @description 다시 붙이려면 다시 인증한다
+         */
+        delete: operations["leave_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizations/requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * 기다리는 신청 취소
+         * @description 올린 파일도 바로 지운다
+         */
+        delete: operations["cancel_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4823,6 +5080,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        OrgVisibilityRequest: {
+            /** @enum {string} */
+            visibility: "ALL" | "SAME_ORG" | "HIDDEN";
+        };
+        Unit: Record<string, never>;
         UpdateRequest: {
             enabled: boolean;
         };
@@ -4970,7 +5232,11 @@ export interface components {
         ClubLineupRequest: {
             userIds: number[];
         };
-        Unit: Record<string, never>;
+        OrgRenameRequest: {
+            name: string;
+            /** @enum {string} */
+            type?: "UNIVERSITY" | "COMPANY" | "OTHER";
+        };
         WatchFollowState: {
             watching: boolean;
             /** Format: int64 */
@@ -5384,6 +5650,20 @@ export interface components {
             /** Format: double */
             bonusRate: number;
             outcome?: string;
+        };
+        OrgRequestView: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** @enum {string} */
+            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED";
+            rejectReason?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            decidedAt?: string;
         };
         VerifyRequest: {
             /** Format: double */
@@ -6076,6 +6356,16 @@ export interface components {
             applied: boolean;
             stoppedByLimit: boolean;
         };
+        OrgRejectRequest: {
+            reason: string;
+        };
+        OrgApproveRequest: {
+            /** Format: int64 */
+            orgId?: number;
+            name?: string;
+            /** @enum {string} */
+            type?: "UNIVERSITY" | "COMPANY" | "OTHER";
+        };
         DailyAccessResponse: {
             isFirstAccess: boolean;
             /** Format: int32 */
@@ -6624,6 +6914,32 @@ export interface components {
             distanceM?: number;
             public: boolean;
         };
+        OrgSummary: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** @enum {string} */
+            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+        };
+        OrgMembership: {
+            /** Format: int64 */
+            orgId: number;
+            name: string;
+            /** @enum {string} */
+            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            /** @enum {string} */
+            visibility: "ALL" | "SAME_ORG" | "HIDDEN";
+            /** Format: date-time */
+            verifiedAt: string;
+        };
+        OrgMine: {
+            memberships: components["schemas"]["OrgMembership"][];
+            pending?: components["schemas"]["OrgRequestView"];
+            lastDecided?: components["schemas"]["OrgRequestView"];
+            /** Format: int32 */
+            maxOrgs: number;
+            canRequest: boolean;
+        };
         NotificationResponse: {
             /** Format: int64 */
             id: number;
@@ -6631,7 +6947,7 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
@@ -7581,6 +7897,43 @@ export interface components {
             accusedSuspendedUntil?: string;
             context?: string;
         };
+        AdminOrg: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** @enum {string} */
+            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            /** Format: int64 */
+            members: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AdminOrgRequest: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            username: string;
+            /** Format: int64 */
+            orgId?: number;
+            name: string;
+            /** @enum {string} */
+            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED";
+            rejectReason?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            decidedAt?: string;
+            hasFile: boolean;
+            fileType?: string;
+            /** Format: int32 */
+            fileBytes?: number;
+            /** Format: int32 */
+            memberships: number;
+        };
         NoShowAppeal: {
             /** Format: int64 */
             id: number;
@@ -7646,6 +7999,32 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    visibility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgVisibilityRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
     update: {
         parameters: {
             query?: never;
@@ -7741,6 +8120,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ClubMatchView"];
+                };
+            };
+        };
+    };
+    rename: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgRenameRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
                 };
             };
         };
@@ -8575,6 +8980,38 @@ export interface operations {
                 };
                 content: {
                     "*/*": number;
+                };
+            };
+        };
+    };
+    request: {
+        parameters: {
+            query?: {
+                orgId?: number;
+                name?: string;
+                type?: "UNIVERSITY" | "COMPANY" | "OTHER";
+                agree?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrgRequestView"];
                 };
             };
         };
@@ -11144,6 +11581,81 @@ export interface operations {
             };
         };
     };
+    merge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+                intoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgRejectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgApproveRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
     cancel_1: {
         parameters: {
             query?: never;
@@ -12018,6 +12530,48 @@ export interface operations {
             };
         };
     };
+    search_1: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrgSummary"][];
+                };
+            };
+        };
+    };
+    mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrgMine"];
+                };
+            };
+        };
+    };
     getNotifications: {
         parameters: {
             query?: never;
@@ -12058,7 +12612,7 @@ export interface operations {
             };
         };
     };
-    mine: {
+    mine_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -12839,7 +13393,7 @@ export interface operations {
             };
         };
     };
-    search_1: {
+    search_2: {
         parameters: {
             query: {
                 q: string;
@@ -12881,7 +13435,7 @@ export interface operations {
             };
         };
     };
-    mine_1: {
+    mine_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -13558,6 +14112,72 @@ export interface operations {
             };
         };
     };
+    organizations: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminOrg"][];
+                };
+            };
+        };
+    };
+    list_4: {
+        parameters: {
+            query?: {
+                status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminOrgRequest"][];
+                };
+            };
+        };
+    };
+    file: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     appeals: {
         parameters: {
             query?: never;
@@ -13618,6 +14238,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Report"];
+                };
+            };
+        };
+    };
+    leave_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    cancel_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
                 };
             };
         };

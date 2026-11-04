@@ -68,6 +68,7 @@ export const TERMS = [
 - 프로필 설정 시: 나이, 성별, 지역, 자기소개, 프로필사진 등
 - 동네 인증 시: 현재 위치(GPS 좌표). 어느 행정동인지 확인하는 데만 쓰고 저장하지 않습니다. 저장하는 것은 인증한 행정동과 인증 일시입니다
 - 휴대폰 본인인증 시(만나서 하는 경기를 열거나 신청할 때): 본인인증 업체가 이름·생년월일·휴대폰 번호로 본인을 확인합니다. 회사는 이름과 휴대폰 번호를 저장하지 않고, 한 사람이 한 계정만 쓰도록 연계정보(CI)를 바꾼 값(해시)과 나이 확인을 위한 생년월일, 인증 일시만 저장합니다
+- 소속(학교·회사 등)을 인증할 때: 조직 이름과 종류, 소속 확인 서류(재학·재직·합격·졸업 증명서, 학생증·사원증 사진 등 한 장). 서류는 운영진이 소속을 확인하는 데만 쓰고, 승인·거절하거나 신청을 취소하면 바로 지웁니다. 남기는 것은 인증한 조직, 인증 일시, 확인한 운영진, 이용자가 고른 공개 범위입니다
 - 만나서 하는 경기의 안전 기능을 쓸 때: 도착을 확인한 때의 위치(좌표), 친구에게 위치를 공유하는 동안의 최근 위치(좌표)와 그 시각. 위치 공유는 본인이 켤 때만 하고, 정한 시간이 지나거나 끄면 멈춥니다
 - 사진·영상을 올릴 때: 프로필 사진, 경기 사진·영상, 경기를 보던 사람이 올린 사진·영상
 - 서비스 이용 중 작성하는 것: 1:1 메시지, 경기 채팅, 댓글, 만든 규칙, 앱 게임에 낸 글·답, 신고 내용
@@ -85,7 +86,7 @@ export const TERMS = [
 4. 개인정보의 보유 및 이용 기간
 - 회원 탈퇴 또는 개인정보 수집 및 이용 목적 달성 시까지 보유 및 이용
 - 탈퇴는 앱의 설정 > 계정 삭제에서 할 수 있습니다. 앱 없이 요청하는 방법은 https://matchapp.me/account-deletion 에 있습니다
-- 탈퇴하면 바로 지우는 것: 이메일, 소셜 로그인 식별값, 비밀번호, 닉네임, 친구 찾기 아이디, 프로필(사진 파일·나이·성별·지역·소개·소속), 휴대폰 본인인증 정보(연계정보 해시·생년월일·인증 일시), 인증한 동네, 위치 좌표(도착 확인·위치 공유), 친구, 내가 한 차단, 알림 설정, 알림 토큰
+- 탈퇴하면 바로 지우는 것: 이메일, 소셜 로그인 식별값, 비밀번호, 닉네임, 친구 찾기 아이디, 프로필(사진 파일·나이·성별·지역·소개·소속), 휴대폰 본인인증 정보(연계정보 해시·생년월일·인증 일시), 인증한 동네, 인증한 소속과 소속 인증 신청(확인 서류 포함), 위치 좌표(도착 확인·위치 공유), 친구, 내가 한 차단, 알림 설정, 알림 토큰
 - 탈퇴해도 남기는 것: 다른 회원과 함께 한 경기 기록, 게시물(사진·영상 포함), 채팅, 댓글, 신고·노쇼·이용 제한 기록. 상대의 기록과 다른 회원의 안전을 위해 남기되, 작성자를 "탈퇴한 사용자"로 바꿔 누구인지 알 수 없게 합니다. 방문 통계는 회원과 연결을 끊은 숫자로만 남습니다
 - 이용 정지나 만나서 하는 경기 금지(노쇼)를 받은 기록이 있는 회원이 탈퇴하면, 같은 사람이 탈퇴 뒤 바로 다시 가입해 제한을 피하지 못하도록 휴대폰 본인인증의 연계정보 해시를 한 번 더 암호화한 값(되돌려 누구인지 알 수 없는 값)만 '재가입 제한 목록'에 남깁니다. 기간은 제한이 끝나는 날부터 1년(이미 끝났으면 탈퇴한 날부터 1년), 영구 정지는 탈퇴한 날부터 3년이며, 기간이 지나면 지웁니다. 이 목록은 휴대폰 본인인증을 할 때 같은 사람인지 확인하는 데만 씁니다. 운영진이 풀어 준 정지와 나이 확인을 위한 정지는 남기지 않습니다
 - 단, 관련법령(전자상거래 등 소비자 보호법 등)에 따라 일정 기간 보관 필요 시 그에 따름
@@ -98,7 +99,7 @@ export const TERMS = [
 6. 개인정보 처리 위탁 및 국외 이전
 회사는 서비스 운영을 위해 아래 업체에 개인정보 처리를 맡깁니다. 이에 따라 개인정보가 대한민국 밖에서 저장·처리됩니다. 정보는 서비스를 이용하는 동안 네트워크로 수시로 전송되고, 회원 탈퇴 또는 위탁 계약이 끝날 때까지 보관됩니다.
 - Fly.io, Inc. (미국): 서버 운영 / 처리 위치 싱가포르 / 이메일, 프로필 정보, 경기·게시물·채팅 등 서비스 이용 기록, 접속 기록(IP 주소 등)
-- Aiven Oy (핀란드): 데이터베이스 보관 / 처리 위치 싱가포르 / 위와 같은 항목(프로필·게시물 사진 포함)
+- Aiven Oy (핀란드): 데이터베이스 보관 / 처리 위치 싱가포르 / 위와 같은 항목(프로필·게시물 사진 포함), 소속 확인 서류(확인이 끝날 때까지)
 - Vercel Inc. (미국): 앱 화면(웹) 제공 / 처리 위치 미국 및 전 세계 전송망 / 접속 기록(IP 주소 등)
 - Functional Software, Inc. (Sentry, 미국): 오류 추적 / 처리 위치 미국 / 오류 내용, 기기·브라우저 종류, 오류가 난 요청 정보. 오류 내용에 이용자를 알아볼 수 있는 정보가 섞일 수 있습니다.
 - Cloudflare, Inc. (미국): 사진 저장(R2) / 처리 위치 아시아·태평양 / 프로필·경기 사진
@@ -131,6 +132,7 @@ export const TERMS = [
 - 2026년 11월 2일: 4항에 회원 탈퇴 방법과 지우는 항목 추가
 - 2026년 11월 3일: 2항에 만 14세 미만 아동 항목 추가 (수집·이용하지 않음, 가입 때 확인)
 - 2026년 11월 3일: 6항 Gemini에 경기 요약(소식의 AI 기자 한 줄) 추가
+- 2026년 11월 5일: 2항에 소속 인증(조직 이름·종류, 확인 서류는 확인이 끝나면 바로 지움) 추가. 4항 탈퇴 때 지우는 것에 소속 인증 정보, 6항 Aiven에 소속 확인 서류 추가
 - 2026년 11월 5일: 2항에 휴대폰 본인인증, 안전 기능의 위치, 사진·영상, 작성하는 것, 장소 검색어, 알림 토큰, 오류 정보 추가. 만 14세 미만(법정대리인 동의 절차 없음, 확인 방법)과 만 19세 미만 제한을 사실대로. 4항에 탈퇴 때 지우는 것과 남기는 것을 나눠 적고(이용 제한 기록이 있으면 재가입 제한 목록), 앱 없이 삭제를 요청하는 주소 추가. 6항에 코리아포트원(본인인증)·카카오(장소 검색·지도) 추가
     `,
   },
@@ -176,9 +178,9 @@ Match (matchapp.me) uses Google Sign-In, Kakao Login and Sign in with Apple only
 - Data we receive: your email address and an account identifier. We do not access your contacts, photos, files or any other Google user data.
 - Use: account creation, sign-in and identifying your account in the service. Nothing else.
 - Sharing: we do not sell, rent or share this data, and we do not use it for advertising. It is stored with our processors listed in section 6 only to run the service.
-- Other data the service collects (details in the Korean policy, sections 2 and 6): profile details you enter; location when you verify your neighborhood (not stored, only the district), when you check in at a match and while you choose to share your location with a friend; for in-person matches, mobile identity verification through PortOne (we store only a hash of the connecting information and your date of birth, not your name or phone number); photos and videos you upload; messages, chats and comments; place search terms (Kakao); a push notification token; and error reports (Sentry).
+- Other data the service collects (details in the Korean policy, sections 2 and 6): profile details you enter; location when you verify your neighborhood (not stored, only the district), when you check in at a match and while you choose to share your location with a friend; for in-person matches, mobile identity verification through PortOne (we store only a hash of the connecting information and your date of birth, not your name or phone number); for school or workplace verification, the organization name and type and one proof document, which staff use only to confirm membership and which is erased as soon as the request is approved, rejected or canceled; photos and videos you upload; messages, chats and comments; place search terms (Kakao); a push notification token; and error reports (Sentry).
 - Age: you must be 14 or older. We do not offer sign-up with parental consent. Users under 19 cannot join matches with rules that may cause injury.
-- Retention and deletion: kept until you delete your account in the app (Settings > Delete account) or request it at https://matchapp.me/account-deletion. Your email, sign-in identifier, password, nickname, profile and profile photo file, identity verification data, neighborhood, location coordinates, friends, blocks, notification settings and push tokens are erased immediately. Match records, posts, chats, comments and safety reports shared with other players stay, shown as a deleted user. If you were suspended or banned from in-person matches, we keep only an irreversibly encrypted form of your identity-verification value so the same person cannot rejoin to avoid the restriction: until one year after the restriction ends (three years after deletion for permanent suspensions), then it is erased. You can also ask at yeonkoh@protonmail.com.
+- Retention and deletion: kept until you delete your account in the app (Settings > Delete account) or request it at https://matchapp.me/account-deletion. Your email, sign-in identifier, password, nickname, profile and profile photo file, identity verification data, neighborhood, verified organizations and pending verification requests, location coordinates, friends, blocks, notification settings and push tokens are erased immediately. Match records, posts, chats, comments and safety reports shared with other players stay, shown as a deleted user. If you were suspended or banned from in-person matches, we keep only an irreversibly encrypted form of your identity-verification value so the same person cannot rejoin to avoid the restriction: until one year after the restriction ends (three years after deletion for permanent suspensions), then it is erased. You can also ask at yeonkoh@protonmail.com.
 - Match's use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.
 `
 
@@ -203,7 +205,7 @@ Match 계정과 그 정보를 지우는 방법입니다.
 - 이메일, 소셜 로그인 식별값, 비밀번호, 닉네임, 친구 찾기 아이디
 - 프로필(사진 파일·나이·성별·지역·소개·소속)
 - 휴대폰 본인인증 정보(연계정보 해시·생년월일·인증 일시)
-- 인증한 동네, 위치 좌표(도착 확인·위치 공유)
+- 인증한 동네, 인증한 소속과 소속 인증 신청(확인 서류 포함), 위치 좌표(도착 확인·위치 공유)
 - 친구, 내가 한 차단, 알림 설정, 알림 토큰
 
 4. 남기는 것

@@ -105,6 +105,7 @@ const routes = [
   // 동네 인증·범위 (docs/direction.md '동네')
   { path: '/neighborhood', component: () => import('../views/NeighborhoodView.vue') },
   { path: '/settings/notifications', component: () => import('../views/settings/NotificationSettingsView.vue') },
+  { path: '/settings/organizations', component: () => import('../views/settings/OrganizationsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },
   // 동호회 (club/): 목록·만들기, 한 곳, 초대 링크
@@ -151,6 +152,7 @@ const routes = [
   // Admin routes
   { path: '/admin', component: AdminDashboard},
   { path: '/admin/rule-edit-requests', component: AdminRuleEditRequests},
+  { path: '/admin/organizations', component: () => import('../views/admin/AdminOrganizationsView.vue') },
 
 
   /**

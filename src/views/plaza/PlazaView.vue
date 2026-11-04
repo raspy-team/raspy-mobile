@@ -205,10 +205,11 @@ function afterAvatar() {
 }
 
 async function go(r: S['RoomInfo']) {
+  // 들어가기가 거절되면 지금 광장을 그대로 두도록, 먼저 들어가고 나서 지금 장면을 닫는다 (11/6 리뷰)
+  const data = (await POST('/api/plaza/rooms/{room}/enter', { path: { room: r.id } })).data
   teardown(false)
   phase.value = 'loading'
   room.value = r
-  const data = (await POST('/api/plaza/rooms/{room}/enter', { path: { room: r.id } })).data
   enter.value = data
   rooms.value = rooms.value.map((x) => (x.id === data.room.id ? data.room : x))
   phase.value = 'plaza'
@@ -301,13 +302,13 @@ function tapObject(o: MapObj) {
   }
 }
 
-/** 한 판: 사람이면 그 사람만 들어오는 방을 열고(받는 사람 화면에 '받기'가 뜬다), AI면 그 게임 대기실로 (AI가 바로 붙는다) */
+/** 한 판: 사람이면 그 사람만 들어오는 방을 열고(받는 사람 화면에 '받기'가 뜬다), AI면 그 AI 주민을 바로 부른다 */
 function challenge(key: string) {
   const p = card.value
   if (!p) return
   pickerOpen.value = false
   cardOpen.value = false
-  if (p.bot) router.push(`/play/${key}/live`)
+  if (p.bot) router.push({ path: `/play/${key}/live`, query: { ai: String(p.id) } }) // 그 AI 주민이 바로 들어온다 (ai-a)
   else router.push({ path: `/play/${key}/live`, query: { to: String(p.id) } })
 }
 
@@ -317,6 +318,7 @@ async function block(id: number) {
   } catch {
     return showToast('차단하지 못했어요')
   }
+  POST('/api/plaza/hide/{targetId}', { path: { targetId: id } }).catch(() => {})
   scene()?.hide(id)
   cardOpen.value = false
   showToast('차단했어요. 서로 광장에서 보이지 않아요')
@@ -371,6 +373,10 @@ onMounted(() => {
   openUserChannel()
   offUser = onUserEvent((e: { type: string; gameId?: number }) => {
     if (e.type === 'REALTIME_INVITE' && e.gameId) onInvite(e.gameId)
+    // 나를 차단한 사람은 내 화면에서도 지운다 (gameId 자리에 그 사람 번호)
+    else if (e.type === 'PLAZA_HIDE' && e.gameId) scene()?.hide(e.gameId)
+    // 연결이 끊겼다 다시 붙으면 서버는 나를 내보냈을 수 있다: 같은 광장에 다시 들어간다
+    else if (e.type === 'RECONNECTED' && phase.value === 'plaza' && room.value) go(room.value).catch(() => {})
   })
   start()
 })

@@ -68,6 +68,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/game-accounts/{game}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 게임 계정 적기·바꾸기
+         * @description 티어 연결이 되는 게임이면 바로 가져온다. 실패해도 아이디는 저장하고 tierError로 알린다
+         */
+        put: operations["save_1"];
+        post?: never;
+        /** 게임 계정 지우기 */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clubs/{id}": {
         parameters: {
             query?: never;
@@ -699,6 +720,26 @@ export interface paths {
         put?: never;
         /** 광장에서 나가기 */
         post: operations["leave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plaza/hide/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 광장에서 차단한 뒤
+         * @description 차단한 상대 화면에서도 나를 지운다 (서로 보이지 않게). 차단이 있어야 한다
+         */
+        post: operations["hide"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1433,6 +1474,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/result/proof": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 결과 스크린샷 올리기
+         * @description 선수만, 진행 중이거나 결과 확인을 기다릴 때. 다시 올리면 바뀐다
+         */
+        post: operations["proof"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/pictures": {
         parameters: {
             query?: never;
@@ -1574,7 +1635,7 @@ export interface paths {
          * 관중 사진·영상 내리기
          * @description 그 경기 선수나 올린 사람만
          */
-        post: operations["hide"];
+        post: operations["hide_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1775,6 +1836,26 @@ export interface paths {
          * @description 특정 게임에 지원한 사용자의 참가 신청을 승인합니다.
          */
         post: operations["approveApplicant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/game-accounts/{game}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 티어 다시 가져오기
+         * @description 10분에 한 번
+         */
+        post: operations["refresh"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2335,6 +2416,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/realtime/boss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 보스에게 도전
+         * @description 앱 게임 전국 자리를 든 AI 보스(고수 세기)와 바로 한 판. 하루 3번. 이기면 전국 챔피언 (docs/ai-residents.md 3)
+         */
+        post: operations["challengeBoss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/{key}/realtime/ai": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 주민과 바로 한 판
+         * @description 대기실의 'AI 주민 기다리는 중'을 눌렀을 때. 기다리는 사람에게 붙지 않고 그 AI(botId)와 바로 시작한다. 하던 판이 있으면 그 판
+         */
+        post: operations["playAi"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/{key}/plays": {
         parameters: {
             query?: never;
@@ -2527,7 +2648,7 @@ export interface paths {
         put?: never;
         /**
          * 봇 부르기
-         * @description 방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.
+         * @description 방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다. botId(AI 주민)를 주면 기다리지 않고 그 주민이 들어온다.
          */
         post: operations["callBot"];
         delete?: never;
@@ -4301,6 +4422,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/game-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 경기 선수들의 게임 아이디
+         * @description 다른 게임 안에서 하는 규칙의 경기일 때만. 선수·신청자·연 사람만 본다. 아니면 204
+         */
+        get: operations["forGame"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/comments/tree": {
         parameters: {
             query?: never;
@@ -4501,6 +4642,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/game-accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 게임 계정
+         * @description 게임마다 하나. 적지 않은 게임은 handle이 null
+         */
+        get: operations["mine_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/friends/status/{targetId}": {
         parameters: {
             query?: never;
@@ -4633,6 +4794,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/external-games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 인기 게임 목록
+         * @description 규칙을 할 수 있는 다른 게임들. 아이디 이름·티어 연결 여부
+         */
+        get: operations["catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clubs/search": {
         parameters: {
             query?: never;
@@ -4681,7 +4862,7 @@ export interface paths {
             cookie?: never;
         };
         /** 내 동호회 */
-        get: operations["mine_3"];
+        get: operations["mine_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4830,6 +5011,26 @@ export interface paths {
          * @description 내가 속한 자리(소속·동네·전국)의 챔피언, 기본 자리부터 최대 3개. 빈자리는 champion이 null
          */
         get: operations["ruleSeats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/champions/rules/{ruleId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 역대 챔피언
+         * @description 앱 게임 전국 자리의 챔피언을 오래된 것부터. AI 보스는 ai=true (docs/ai-residents.md 3). 기록을 '나만'으로 둔 사람은 이름을 가린다
+         */
+        get: operations["history_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5601,6 +5802,29 @@ export interface components {
         UpdateRequest: {
             enabled: boolean;
         };
+        SaveAccountRequest: {
+            handle: string;
+        };
+        AccountView: {
+            game: components["schemas"]["ExternalGameView"];
+            handle?: string;
+            tier?: string;
+            /** Format: date-time */
+            tierCheckedAt?: string;
+        };
+        ExternalGameView: {
+            key: string;
+            label: string;
+            short: string;
+            handleLabel: string;
+            handleHint: string;
+            platform: string;
+            tierAvailable: boolean;
+        };
+        SaveResult: {
+            account: components["schemas"]["AccountView"];
+            tierError?: string;
+        };
         ClubUpdateRequest: {
             name?: string;
             intro?: string;
@@ -6029,6 +6253,10 @@ export interface components {
             rejectionReason?: string;
             appGameKey?: string;
             category?: components["schemas"]["GameCategoryView"];
+            /** Format: int32 */
+            rank?: number;
+            extGame?: string;
+            extGameLabel?: string;
         };
         GameCategoryView: {
             face: components["schemas"]["CategoryValue"];
@@ -6316,6 +6544,9 @@ export interface components {
             sameRate: number;
             /** Format: int32 */
             people: number;
+            byAi: boolean;
+            /** Format: int32 */
+            minVotes: number;
         };
         VerifyRequest: {
             /** Format: double */
@@ -6503,6 +6734,9 @@ export interface components {
         };
         ReviewSubmitResult: {
             revealed: boolean;
+        };
+        ProofResponse: {
+            url: string;
         };
         PictureUploadResponse: {
             success: boolean;
@@ -6723,6 +6957,7 @@ export interface components {
             view?: components["schemas"]["TurnView"];
             /** Format: int32 */
             lobbySeconds: number;
+            bossChallenge: boolean;
         };
         RealtimeStone: {
             /** Format: int32 */
@@ -6894,6 +7129,7 @@ export interface components {
         };
         LobbyList: {
             lobbies: components["schemas"]["LobbyCard"][];
+            residents: components["schemas"]["LobbyResident"][];
             goldenHour: boolean;
             /** Format: int32 */
             goldenHourStart: number;
@@ -6901,6 +7137,14 @@ export interface components {
             nightAlarm: boolean;
             /** Format: date-time */
             serverNow: string;
+        };
+        LobbyResident: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            key: string;
+            title: string;
+            icon: string;
         };
         LobbyTonight: {
             key: string;
@@ -7150,6 +7394,8 @@ export interface components {
             top3Rules: components["schemas"]["Top3RuleStatsDto"][];
             recentGames: components["schemas"]["RecentGameSummaryDto"][];
             recordsHidden: boolean;
+            isBot: boolean;
+            aiAppGames: string[];
         };
         UserStatsDto: {
             /** Format: int32 */
@@ -7317,6 +7563,7 @@ export interface components {
             nickname: string;
             avatar?: string;
             intro?: string;
+            isBot: boolean;
         };
         MyProfileResponse: {
             nickname: string;
@@ -7354,6 +7601,11 @@ export interface components {
             /** Format: date-time */
             offlineBannedUntil?: string;
         };
+        RankingBaseline: {
+            label: string;
+            /** Format: int32 */
+            rating: number;
+        };
         RankingSeat: {
             key: string;
             label: string;
@@ -7370,6 +7622,9 @@ export interface components {
             areaName?: string;
             seats: components["schemas"]["RankingSeat"][];
             noOrg: boolean;
+            baselines: components["schemas"]["RankingBaseline"][];
+            /** Format: int64 */
+            aiGames: number;
         };
         UserGameStatisticsDTO: {
             /** Format: int64 */
@@ -7677,6 +7932,8 @@ export interface components {
             mine?: string;
             correct: boolean;
             myTaste?: string;
+            /** Format: int32 */
+            minVotes: number;
         };
         NotificationResponse: {
             /** Format: int64 */
@@ -7685,14 +7942,14 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT" | "PARTNER_NEARBY";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
         };
         SettingDto: {
             /** @enum {string} */
-            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
+            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
             label: string;
             description: string;
             enabled: boolean;
@@ -7778,6 +8035,7 @@ export interface components {
             id: number;
             nickname: string;
             profileUrl?: string;
+            isBot: boolean;
         };
         GameDetailResponse: {
             /** Format: int64 */
@@ -7813,6 +8071,7 @@ export interface components {
             /** @enum {string} */
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             sides: components["schemas"]["SideScore"][];
+            resultProofUrl?: string;
         };
         SideScore: {
             /** Format: int32 */
@@ -7882,6 +8141,7 @@ export interface components {
             startDate: string;
             /** Format: int32 */
             newChampionIdx: number;
+            resultProofUrl?: string;
             confirmed: boolean;
             /** Format: int64 */
             resultSubmittedById?: number;
@@ -8081,11 +8341,23 @@ export interface components {
             totalCount: number;
             likers: components["schemas"]["GameLikerInfo"][];
         };
+        GameAccounts: {
+            game: components["schemas"]["ExternalGameView"];
+            players: components["schemas"]["PlayerAccount"][];
+        };
+        PlayerAccount: {
+            /** Format: int64 */
+            userId: number;
+            nickname: string;
+            handle?: string;
+            tier?: string;
+        };
         AuthorSummary: {
             /** Format: int64 */
             id: number;
             nickname: string;
             profileImageUrl?: string;
+            isBot: boolean;
         };
         CommentResponse: {
             /** Format: int64 */
@@ -8505,6 +8777,19 @@ export interface components {
             /** Format: date-time */
             since?: string;
             mine: boolean;
+            boss: boolean;
+            /** Format: int32 */
+            bossTriesLeft?: number;
+        };
+        ChampionHistoryLine: {
+            /** Format: int64 */
+            userId?: number;
+            nickname: string;
+            ai: boolean;
+            /** Format: date-time */
+            since: string;
+            /** Format: date-time */
+            until?: string;
         };
         BodyBuilder: Record<string, never>;
         SocialProviders: {
@@ -8868,7 +9153,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY";
+                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
             };
             cookie?: never;
         };
@@ -8884,6 +9169,54 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    save_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                game: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SaveResult"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                game: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
             };
         };
     };
@@ -9796,6 +10129,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    hide: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                targetId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": boolean;
+                };
             };
         };
     };
@@ -10712,6 +11067,35 @@ export interface operations {
             };
         };
     };
+    proof: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProofResponse"];
+                };
+            };
+        };
+    };
     getGamePictures: {
         parameters: {
             query?: never;
@@ -10923,7 +11307,7 @@ export interface operations {
             };
         };
     };
-    hide: {
+    hide_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -11227,6 +11611,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                game: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SaveResult"];
+                };
             };
         };
     };
@@ -11926,6 +12332,52 @@ export interface operations {
             };
         };
     };
+    challengeBoss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
+    playAi: {
+        parameters: {
+            query?: {
+                botId?: number;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
     start_2: {
         parameters: {
             query?: {
@@ -12162,7 +12614,9 @@ export interface operations {
     };
     callBot: {
         parameters: {
-            query?: never;
+            query?: {
+                botId?: number;
+            };
             header?: never;
             path: {
                 gameId: number;
@@ -12426,7 +12880,9 @@ export interface operations {
     };
     battleBot: {
         parameters: {
-            query?: never;
+            query?: {
+                botId?: number;
+            };
             header?: never;
             path: {
                 gameId: number;
@@ -13220,7 +13676,7 @@ export interface operations {
                 minor?: string;
                 /** @description 검색어 */
                 search?: string;
-                /** @description 정렬 기준(recent 또는 popular) */
+                /** @description 정렬: rank(순위, 별점과 판 수를 합침) · plays(판 수, 예전 이름 popular) · rating(별점, 평가가 적으면 전체 평균 쪽으로 당김) · recent(최신) */
                 sort?: string;
                 /** @description 찾기: 어디서 (Place 이름) */
                 place?: "PHONE" | "HOME" | "OUTSIDE" | "GATHERING" | "SPORTS";
@@ -13234,6 +13690,8 @@ export interface operations {
                 ability?: "STRENGTH" | "ENDURANCE" | "SPEED" | "PRECISION" | "BALANCE" | "FLEXIBILITY" | "RHYTHM" | "EXPRESSION" | "READING" | "SPATIAL" | "MEMORY" | "KNOWLEDGE" | "LANGUAGE" | "CALCULATION" | "SENSE" | "SOCIAL" | "PERSUASION" | "TEAMWORK" | "GRIT" | "CONSISTENCY" | "CREATIVITY" | "HUMOR";
                 /** @description 앱 게임도 넣기 (둘러보기). 경기를 열 규칙을 고를 때는 false */
                 withApp?: boolean;
+                /** @description 종류: ALL(모두) · OFFLINE(만나서 하는 경기) · APP(앱 게임). withApp=false면 늘 OFFLINE */
+                kind?: "ALL" | "OFFLINE" | "APP" | "POPULAR";
             };
             header?: never;
             path?: never;
@@ -14308,6 +14766,28 @@ export interface operations {
             };
         };
     };
+    forGame: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GameAccounts"];
+                };
+            };
+        };
+    };
     getCommentsTree: {
         parameters: {
             query?: never;
@@ -14519,6 +14999,26 @@ export interface operations {
             };
         };
     };
+    mine_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountView"][];
+                };
+            };
+        };
+    };
     getFriendStatus: {
         parameters: {
             query?: never;
@@ -14684,6 +15184,26 @@ export interface operations {
             };
         };
     };
+    catalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExternalGameView"][];
+                };
+            };
+        };
+    };
     search_3: {
         parameters: {
             query: {
@@ -14726,7 +15246,7 @@ export interface operations {
             };
         };
     };
-    mine_3: {
+    mine_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -14918,6 +15438,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SeatChampionView"][];
+                };
+            };
+        };
+    };
+    history_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChampionHistoryLine"][];
                 };
             };
         };

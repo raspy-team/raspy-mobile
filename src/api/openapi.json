@@ -26,6 +26,10 @@
       "description": "인앱 알림 API"
     },
     {
+      "name": "External Game",
+      "description": "인기 게임 연결: 내 게임 계정·티어, 경기 상대 아이디, 결과 스크린샷"
+    },
+    {
       "name": "Admin User Management",
       "description": "관리자 전용 유저 관리 API"
     },
@@ -206,7 +210,8 @@
                 "COMMENT",
                 "LIKE",
                 "DM",
-                "DAILY"
+                "DAILY",
+                "NEIGHBOR"
               ]
             }
           }
@@ -224,6 +229,77 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/game-accounts/{game}": {
+      "put": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "게임 계정 적기·바꾸기",
+        "description": "티어 연결이 되는 게임이면 바로 가져온다. 실패해도 아이디는 저장하고 tierError로 알린다",
+        "operationId": "save_1",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "게임 계정 지우기",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
           }
         }
       }
@@ -1586,6 +1662,39 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/plaza/hide/{targetId}": {
+      "post": {
+        "tags": [
+          "plaza-controller"
+        ],
+        "summary": "광장에서 차단한 뒤",
+        "description": "차단한 상대 화면에서도 나를 지운다 (서로 보이지 않게). 차단이 있어야 한다",
+        "operationId": "hide",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -2995,6 +3104,57 @@
         }
       }
     },
+    "/api/games/{gameId}/result/proof": {
+      "post": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "결과 스크린샷 올리기",
+        "description": "선수만, 진행 중이거나 결과 확인을 기다릴 때. 다시 올리면 바뀐다",
+        "operationId": "proof",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProofResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/pictures": {
       "get": {
         "tags": [
@@ -3348,7 +3508,7 @@
         ],
         "summary": "관중 사진·영상 내리기",
         "description": "그 경기 선수나 올린 사람만",
-        "operationId": "hide",
+        "operationId": "hide_1",
         "parameters": [
           {
             "name": "gameId",
@@ -3795,6 +3955,38 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/game-accounts/{game}/refresh": {
+      "post": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "티어 다시 가져오기",
+        "description": "10분에 한 번",
+        "operationId": "refresh",
+        "parameters": [
+          {
+            "name": "game",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveResult"
+                }
+              }
+            }
           }
         }
       }
@@ -4814,6 +5006,79 @@
         }
       }
     },
+    "/api/app-games/{key}/realtime/boss": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "AI 보스에게 도전",
+        "description": "앱 게임 전국 자리를 든 AI 보스(고수 세기)와 바로 한 판. 하루 3번. 이기면 전국 챔피언 (docs/ai-residents.md 3)",
+        "operationId": "challengeBoss",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/{key}/realtime/ai": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "AI 주민과 바로 한 판",
+        "description": "대기실의 'AI 주민 기다리는 중'을 눌렀을 때. 기다리는 사람에게 붙지 않고 그 AI(botId)와 바로 시작한다. 하던 판이 있으면 그 판",
+        "operationId": "playAi",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/{key}/plays": {
       "post": {
         "tags": [
@@ -5182,13 +5447,22 @@
           "app-game-controller"
         ],
         "summary": "봇 부르기",
-        "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다.",
+        "description": "방을 연 지 15초가 지나도 아무도 안 오면 봇이 들어온다. botId(AI 주민)를 주면 기다리지 않고 그 주민이 들어온다.",
         "operationId": "callBot",
         "parameters": [
           {
             "name": "gameId",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -5599,6 +5873,15 @@
             "name": "gameId",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "botId",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -6717,7 +7000,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "정렬 기준(recent 또는 popular)",
+            "description": "정렬: rank(순위, 별점과 판 수를 합침) · plays(판 수, 예전 이름 popular) · rating(별점, 평가가 적으면 전체 평균 쪽으로 당김) · recent(최신)",
             "required": false,
             "schema": {
               "type": "string",
@@ -6826,6 +7109,22 @@
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "종류: ALL(모두) · OFFLINE(만나서 하는 경기) · APP(앱 게임). withApp=false면 늘 OFFLINE",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ALL",
+                "OFFLINE",
+                "APP",
+                "POPULAR"
+              ],
+              "default": "ALL"
             }
           }
         ],
@@ -8447,6 +8746,39 @@
         }
       }
     },
+    "/api/games/{gameId}/game-accounts": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "경기 선수들의 게임 아이디",
+        "description": "다른 게임 안에서 하는 규칙의 경기일 때만. 선수·신청자·연 사람만 본다. 아니면 204",
+        "operationId": "forGame",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameAccounts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{gameId}/comments/tree": {
       "get": {
         "tags": [
@@ -8745,6 +9077,31 @@
         }
       }
     },
+    "/api/game-accounts/me": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "내 게임 계정",
+        "description": "게임마다 하나. 적지 않은 게임은 handle이 null",
+        "operationId": "mine_3",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/friends/status/{targetId}": {
       "get": {
         "tags": [
@@ -9008,6 +9365,31 @@
         }
       }
     },
+    "/api/external-games": {
+      "get": {
+        "tags": [
+          "External Game"
+        ],
+        "summary": "인기 게임 목록",
+        "description": "규칙을 할 수 있는 다른 게임들. 아이디 이름·티어 연결 여부",
+        "operationId": "catalog",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalGameView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/clubs/search": {
       "get": {
         "tags": [
@@ -9074,7 +9456,7 @@
           "club-controller"
         ],
         "summary": "내 동호회",
-        "operationId": "mine_3",
+        "operationId": "mine_4",
         "responses": {
           "200": {
             "description": "OK",
@@ -9336,6 +9718,42 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/SeatChampionView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/champions/rules/{ruleId}/history": {
+      "get": {
+        "tags": [
+          "champion-controller"
+        ],
+        "summary": "역대 챔피언",
+        "description": "앱 게임 전국 자리의 챔피언을 오래된 것부터. AI 보스는 ai=true (docs/ai-residents.md 3). 기록을 '나만'으로 둔 사람은 이름을 가린다",
+        "operationId": "history_1",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChampionHistoryLine"
                   }
                 }
               }
@@ -10678,6 +11096,87 @@
         "properties": {
           "enabled": {
             "type": "boolean"
+          }
+        }
+      },
+      "SaveAccountRequest": {
+        "required": [
+          "handle"
+        ],
+        "type": "object",
+        "properties": {
+          "handle": {
+            "type": "string"
+          }
+        }
+      },
+      "AccountView": {
+        "required": [
+          "game"
+        ],
+        "type": "object",
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/ExternalGameView"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          },
+          "tierCheckedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExternalGameView": {
+        "required": [
+          "handleHint",
+          "handleLabel",
+          "key",
+          "label",
+          "platform",
+          "short",
+          "tierAvailable"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "handleLabel": {
+            "type": "string"
+          },
+          "handleHint": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "tierAvailable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SaveResult": {
+        "required": [
+          "account"
+        ],
+        "type": "object",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/AccountView"
+          },
+          "tierError": {
+            "type": "string"
           }
         }
       },
@@ -12059,6 +12558,16 @@
           },
           "category": {
             "$ref": "#/components/schemas/GameCategoryView"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "extGame": {
+            "type": "string"
+          },
+          "extGameLabel": {
+            "type": "string"
           }
         }
       },
@@ -13011,8 +13520,10 @@
       },
       "TasteResult": {
         "required": [
+          "byAi",
           "choice",
           "id",
+          "minVotes",
           "people",
           "sameRate"
         ],
@@ -13029,6 +13540,13 @@
             "format": "int32"
           },
           "people": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "byAi": {
+            "type": "boolean"
+          },
+          "minVotes": {
             "type": "integer",
             "format": "int32"
           }
@@ -13620,6 +14138,17 @@
           }
         }
       },
+      "ProofResponse": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
       "PictureUploadResponse": {
         "required": [
           "message",
@@ -14188,6 +14717,7 @@
       },
       "RealtimeState": {
         "required": [
+          "bossChallenge",
           "botAfterSeconds",
           "fixture",
           "gameId",
@@ -14318,6 +14848,9 @@
           "lobbySeconds": {
             "type": "integer",
             "format": "int32"
+          },
+          "bossChallenge": {
+            "type": "boolean"
           }
         }
       },
@@ -14862,6 +15395,7 @@
           "goldenHourStart",
           "lobbies",
           "nightAlarm",
+          "residents",
           "serverNow"
         ],
         "type": "object",
@@ -14870,6 +15404,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/LobbyCard"
+            }
+          },
+          "residents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LobbyResident"
             }
           },
           "goldenHour": {
@@ -14888,6 +15428,34 @@
           "serverNow": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "LobbyResident": {
+        "required": [
+          "icon",
+          "key",
+          "nickname",
+          "title",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
           }
         }
       },
@@ -15611,7 +16179,9 @@
       },
       "UserProfileResponse": {
         "required": [
+          "aiAppGames",
           "id",
+          "isBot",
           "isMe",
           "mannerScore",
           "myChampions",
@@ -15701,6 +16271,15 @@
           },
           "recordsHidden": {
             "type": "boolean"
+          },
+          "isBot": {
+            "type": "boolean"
+          },
+          "aiAppGames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -16202,6 +16781,7 @@
       "UserSearchResultDto": {
         "required": [
           "id",
+          "isBot",
           "nickname",
           "username"
         ],
@@ -16222,6 +16802,9 @@
           },
           "intro": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -16331,6 +16914,22 @@
           }
         }
       },
+      "RankingBaseline": {
+        "required": [
+          "label",
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RankingSeat": {
         "required": [
           "key",
@@ -16348,6 +16947,8 @@
       },
       "RuleRankingResponse": {
         "required": [
+          "aiGames",
+          "baselines",
           "noOrg",
           "rankings",
           "ruleId",
@@ -16393,6 +16994,16 @@
           },
           "noOrg": {
             "type": "boolean"
+          },
+          "baselines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankingBaseline"
+            }
+          },
+          "aiGames": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -17397,6 +18008,7 @@
           "byFirst",
           "correct",
           "id",
+          "minVotes",
           "people",
           "q"
         ],
@@ -17436,6 +18048,10 @@
           },
           "myTaste": {
             "type": "string"
+          },
+          "minVotes": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -17500,7 +18116,8 @@
               "SAFETY",
               "DAILY_PUZZLE",
               "ORG_VERIFY",
-              "CHAMPION_SEAT"
+              "CHAMPION_SEAT",
+              "PARTNER_NEARBY"
             ]
           },
           "createdAt": {
@@ -17532,7 +18149,8 @@
               "COMMENT",
               "LIKE",
               "DM",
-              "DAILY"
+              "DAILY",
+              "NEIGHBOR"
             ]
           },
           "label": {
@@ -17798,6 +18416,7 @@
       "UserSummary": {
         "required": [
           "id",
+          "isBot",
           "nickname"
         ],
         "type": "object",
@@ -17811,6 +18430,9 @@
           },
           "profileUrl": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -17926,6 +18548,9 @@
             "items": {
               "$ref": "#/components/schemas/SideScore"
             }
+          },
+          "resultProofUrl": {
+            "type": "string"
           }
         }
       },
@@ -18148,6 +18773,9 @@
           "newChampionIdx": {
             "type": "integer",
             "format": "int32"
+          },
+          "resultProofUrl": {
+            "type": "string"
           },
           "confirmed": {
             "type": "boolean"
@@ -18798,9 +19426,50 @@
           }
         }
       },
+      "GameAccounts": {
+        "required": [
+          "game",
+          "players"
+        ],
+        "type": "object",
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/ExternalGameView"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerAccount"
+            }
+          }
+        }
+      },
+      "PlayerAccount": {
+        "required": [
+          "nickname",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          }
+        }
+      },
       "AuthorSummary": {
         "required": [
           "id",
+          "isBot",
           "nickname"
         ],
         "type": "object",
@@ -18814,6 +19483,9 @@
           },
           "profileImageUrl": {
             "type": "string"
+          },
+          "isBot": {
+            "type": "boolean"
           }
         }
       },
@@ -20226,6 +20898,7 @@
       },
       "SeatChampionView": {
         "required": [
+          "boss",
           "mine",
           "seat",
           "seatName",
@@ -20251,6 +20924,41 @@
           },
           "mine": {
             "type": "boolean"
+          },
+          "boss": {
+            "type": "boolean"
+          },
+          "bossTriesLeft": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChampionHistoryLine": {
+        "required": [
+          "ai",
+          "nickname",
+          "since"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "ai": {
+            "type": "boolean"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

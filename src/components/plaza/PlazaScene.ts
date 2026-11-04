@@ -104,6 +104,19 @@ export class PlazaScene extends Phaser.Scene {
       if (over.length || ptr.getDistance() > 12) return
       this.walkMeTo(ptr.worldX, ptr.worldY)
     })
+    // 컴퓨터: 방향키·WASD로 한 걸음씩 (말 칸에 쓰는 중이면 무시)
+    this.input.keyboard?.on('keydown', (e: KeyboardEvent) => {
+      const tag = (document.activeElement?.tagName ?? '').toLowerCase()
+      if (tag === 'input' || tag === 'textarea') return
+      const step: Record<string, [number, number]> = {
+        ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0],
+      }
+      const d = step[e.code]
+      const me = this.walkers.get(this.meId)
+      if (!d || !me) return
+      e.preventDefault()
+      this.walkMeTo(me.x + d[0] * 40, me.y + d[1] * 40)
+    })
     // 끌어서 둘러보기: 손가락으로 끌면 잠깐 따라가기를 멈춘다
     this.input.on('pointermove', (ptr: Phaser.Input.Pointer) => {
       if (!ptr.isDown || ptr.getDistance() < 12) return

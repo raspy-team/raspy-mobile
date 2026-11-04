@@ -2254,6 +2254,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/realtime/boss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 보스에게 도전
+         * @description 앱 게임 전국 자리를 든 AI 보스(고수 세기)와 바로 한 판. 하루 3번. 이기면 전국 챔피언 (docs/ai-residents.md 3)
+         */
+        post: operations["challengeBoss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/{key}/plays": {
         parameters: {
             query?: never;
@@ -4681,6 +4701,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/champions/rules/{ruleId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 역대 챔피언
+         * @description 앱 게임 전국 자리의 챔피언을 오래된 것부터. AI 보스는 ai=true (docs/ai-residents.md 3). 기록을 '나만'으로 둔 사람은 이름을 가린다
+         */
+        get: operations["history_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/block": {
         parameters: {
             query?: never;
@@ -6432,6 +6472,7 @@ export interface components {
             view?: components["schemas"]["TurnView"];
             /** Format: int32 */
             lobbySeconds: number;
+            bossChallenge: boolean;
         };
         RealtimeStone: {
             /** Format: int32 */
@@ -7063,6 +7104,11 @@ export interface components {
             /** Format: date-time */
             offlineBannedUntil?: string;
         };
+        RankingBaseline: {
+            label: string;
+            /** Format: int32 */
+            rating: number;
+        };
         RankingSeat: {
             key: string;
             label: string;
@@ -7079,6 +7125,9 @@ export interface components {
             areaName?: string;
             seats: components["schemas"]["RankingSeat"][];
             noOrg: boolean;
+            baselines: components["schemas"]["RankingBaseline"][];
+            /** Format: int64 */
+            aiGames: number;
         };
         UserGameStatisticsDTO: {
             /** Format: int64 */
@@ -8214,6 +8263,19 @@ export interface components {
             /** Format: date-time */
             since?: string;
             mine: boolean;
+            boss: boolean;
+            /** Format: int32 */
+            bossTriesLeft?: number;
+        };
+        ChampionHistoryLine: {
+            /** Format: int64 */
+            userId?: number;
+            nickname: string;
+            ai: boolean;
+            /** Format: date-time */
+            since: string;
+            /** Format: date-time */
+            until?: string;
         };
         BodyBuilder: Record<string, never>;
         SocialProviders: {
@@ -11529,6 +11591,28 @@ export interface operations {
             };
         };
     };
+    challengeBoss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RealtimeState"];
+                };
+            };
+        };
+    };
     start_2: {
         parameters: {
             query?: {
@@ -14435,6 +14519,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SeatChampionView"][];
+                };
+            };
+        };
+    };
+    history_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChampionHistoryLine"][];
                 };
             };
         };

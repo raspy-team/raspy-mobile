@@ -304,23 +304,26 @@
           <section v-if="tab === 'rank'" class="mt-4">
             <UiTabs v-if="game.recordable" v-model="boardKind" :options="BOARDS" class="mb-3" />
             <template v-if="boardKind === 'RATING'">
-              <UiList v-if="ranking.length">
-                <UiListItem
-                  v-for="r in ranking"
-                  :key="r.userId"
-                  :title="r.isCurrentUser ? `${r.userName} (나)` : r.userName"
-                  :subtitle="`${r.playCount}판`"
-                  chevron
-                  @click="router.push('/profile/' + r.userId)"
-                >
-                  <template #leading>
-                    <span class="w-6 t-mono text-center">{{ r.rank }}</span>
-                    <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
-                  </template>
-                  <template #trailing><span class="t-mono">{{ r.rating }}</span></template>
-                </UiListItem>
+              <UiEmptyState v-if="!ranking.length" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="game.dailyLimit === 1 ? '5일 풀면 첫 이름이 올라가요. 먼저 올라가 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'" />
+              <!-- AI 기준선이 사이에 낀다 (docs/ai-residents.md 2). 사람이 20명을 넘으면 빼고 순위 전체 보기에서 편다 -->
+              <UiList v-if="rankingRows.length" :class="{ 'mt-3': !ranking.length }">
+                <template v-for="(x, i) in rankingRows" :key="x.kind === 'user' ? x.row.userId : `ai-${i}`">
+                  <BaselineRow v-if="x.kind === 'ai'" :line="x.line" />
+                  <UiListItem
+                    v-else
+                    :title="x.row.isCurrentUser ? `${x.row.userName} (나)` : x.row.userName"
+                    :subtitle="`${x.row.playCount}판`"
+                    chevron
+                    @click="router.push('/profile/' + x.row.userId)"
+                  >
+                    <template #leading>
+                      <span class="w-6 t-mono text-center">{{ x.row.rank }}</span>
+                      <UiAvatar :src="x.row.userAvatar" :name="x.row.userName" :user-id="x.row.userId" size="sm" />
+                    </template>
+                    <template #trailing><span class="t-mono">{{ x.row.rating }}</span></template>
+                  </UiListItem>
+                </template>
               </UiList>
-              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="game.dailyLimit === 1 ? '5일 풀면 첫 이름이 올라가요. 먼저 올라가 보세요' : '5판을 넘기면 첫 이름이 올라가요. 먼저 올라가 보세요'" />
               <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">순위 전체 보기</UiButton>
             </template>
             <template v-else>
@@ -382,6 +385,8 @@ import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import BrandFace from '../../components/BrandFace.vue'
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
+import BaselineRow from '../../components/champion/BaselineRow.vue'
+import { FOLD_AT, withBaselines } from '../../components/champion/rankingBaselines'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
@@ -473,6 +478,10 @@ watch(result, (now, before) => {
 let justSubmitted = false
 const votes = ref<Schemas['AppVoteCard'][]>([])
 const ranking = ref<Schemas['UserRankingDto'][]>([])
+const rankingTotal = ref(0)
+const baselines = ref<Schemas['RankingBaseline'][]>([])
+// 위 10명만 보이니, 다 보일 때만 맨 아래 기준선까지. 20명을 넘으면 기준선을 접는다 (순위 전체 보기에서 편다)
+const rankingRows = computed(() => withBaselines(ranking.value, rankingTotal.value > FOLD_AT ? [] : baselines.value, rankingTotal.value <= ranking.value.length))
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))
 const finished = computed(() => duels.value.filter((d) => DONE.includes(d.status)))
@@ -509,7 +518,12 @@ async function load() {
   duels.value = mine.data
   // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
   if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
-  if (game.value) ranking.value = ((await GET('/api/rules/{ruleId}/rankings', { path: { ruleId: game.value.ruleId } })).data.rankings ?? []).slice(0, 10)
+  if (game.value) {
+    const data = (await GET('/api/rules/{ruleId}/rankings', { path: { ruleId: game.value.ruleId } })).data
+    ranking.value = (data.rankings ?? []).slice(0, 10)
+    rankingTotal.value = data.rankings?.length ?? 0
+    baselines.value = data.baselines ?? []
+  }
   if (game.value?.recordable) await loadBoard()
   if (game.value?.judge === 'VOTE') votes.value = (await GET('/api/app-games/{key}/votes', { path: { key: key.value } })).data
 }

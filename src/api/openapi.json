@@ -4684,6 +4684,38 @@
         }
       }
     },
+    "/api/app-games/{key}/realtime/boss": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "AI 보스에게 도전",
+        "description": "앱 게임 전국 자리를 든 AI 보스(고수 세기)와 바로 한 판. 하루 3번. 이기면 전국 챔피언 (docs/ai-residents.md 3)",
+        "operationId": "challengeBoss",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/{key}/plays": {
       "post": {
         "tags": [
@@ -7032,11 +7064,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           },
           {
@@ -7045,11 +7077,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ],
-              "default": "UNITS"
+              ]
             }
           }
         ],
@@ -9092,6 +9124,42 @@
         }
       }
     },
+    "/api/champions/rules/{ruleId}/history": {
+      "get": {
+        "tags": [
+          "champion-controller"
+        ],
+        "summary": "역대 챔피언",
+        "description": "앱 게임 전국 자리의 챔피언을 오래된 것부터. AI 보스는 ai=true (docs/ai-residents.md 3). 기록을 '나만'으로 둔 사람은 이름을 가린다",
+        "operationId": "history_1",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChampionHistoryLine"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/block": {
       "get": {
         "tags": [
@@ -9308,11 +9376,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -9933,13 +10001,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ],
-              "default": "PENDING"
+              ]
             }
           }
         ],
@@ -13481,6 +13549,7 @@
       },
       "RealtimeState": {
         "required": [
+          "bossChallenge",
           "botAfterSeconds",
           "fixture",
           "gameId",
@@ -13611,6 +13680,9 @@
           "lobbySeconds": {
             "type": "integer",
             "format": "int32"
+          },
+          "bossChallenge": {
+            "type": "boolean"
           }
         }
       },
@@ -15624,6 +15696,22 @@
           }
         }
       },
+      "RankingBaseline": {
+        "required": [
+          "label",
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RankingSeat": {
         "required": [
           "key",
@@ -15641,6 +15729,8 @@
       },
       "RuleRankingResponse": {
         "required": [
+          "aiGames",
+          "baselines",
           "noOrg",
           "rankings",
           "ruleId",
@@ -15686,6 +15776,16 @@
           },
           "noOrg": {
             "type": "boolean"
+          },
+          "baselines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RankingBaseline"
+            }
+          },
+          "aiGames": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -19519,6 +19619,7 @@
       },
       "SeatChampionView": {
         "required": [
+          "boss",
           "mine",
           "seat",
           "seatName",
@@ -19544,6 +19645,41 @@
           },
           "mine": {
             "type": "boolean"
+          },
+          "boss": {
+            "type": "boolean"
+          },
+          "bossTriesLeft": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChampionHistoryLine": {
+        "required": [
+          "ai",
+          "nickname",
+          "since"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "ai": {
+            "type": "boolean"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

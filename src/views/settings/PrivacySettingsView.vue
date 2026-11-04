@@ -20,7 +20,7 @@
           <UiSwitch
             :model-value="settings[item.key] === 'EVERYONE'"
             :label="`${item.label} 다른 사람에게 보이기`"
-            :disabled="savingKey === item.key"
+            :disabled="saving.includes(item.key)"
             @update:model-value="toggle(item.key, $event)"
           />
         </li>
@@ -61,7 +61,8 @@ const { showToast } = useToast()
 const settings = ref<Settings>({ age: 'ONLY_ME', gender: 'ONLY_ME', region: 'EVERYONE', records: 'EVERYONE' })
 const loading = ref(true)
 const error = ref(false)
-const savingKey = ref<Key | ''>('')
+// 저장 중인 항목들 (스위치 둘을 잇달아 눌러도 먼저 끝난 쪽이 다른 쪽의 '저장 중'을 풀지 않게)
+const saving = ref<Key[]>([])
 
 async function load() {
   loading.value = true
@@ -78,14 +79,16 @@ async function load() {
 async function toggle(key: Key, on: boolean) {
   const before = settings.value[key]
   settings.value = { ...settings.value, [key]: on ? 'EVERYONE' : 'ONLY_ME' }
-  savingKey.value = key
+  saving.value = [...saving.value, key]
   try {
-    settings.value = (await PATCH('/api/privacy/me', { body: { [key]: settings.value[key] } })).data
+    // 이 항목만 서버 값으로 맞춘다: 다른 스위치를 그사이 눌렀으면 그 값이 이 응답(옛 값)으로 잠깐 되돌아가 보였다
+    const saved = (await PATCH('/api/privacy/me', { body: { [key]: settings.value[key] } })).data
+    settings.value = { ...settings.value, [key]: saved[key] }
   } catch {
     settings.value = { ...settings.value, [key]: before }
     showToast('바꾸지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
-    savingKey.value = ''
+    saving.value = saving.value.filter((k) => k !== key)
   }
 }
 

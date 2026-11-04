@@ -5,6 +5,9 @@ import { API_BASE_URL } from '@/config/server'
 
 let routerInstance = null
 
+// 사람이 누른 게 아니라 앱이 뒤에서 부르는 요청 (401이어도 화면을 옮기지 않는다)
+const BACKGROUND_CALLS = ['/api/access/daily-first', '/api/guest/plays/claim', '/api/partner-requests/claim']
+
 export const setRouter = (router) => {
   routerInstance = router
 }
@@ -89,6 +92,12 @@ api.interceptors.response.use(
 
     // 그 외 401은 시작 화면으로. 보던 주소는 기억해 두고 로그인 뒤 돌려보낸다
     localStorage.removeItem('raspy_access_token2')
+    // 부른 쪽이 갈 곳을 직접 정하는 요청 (라우터 가드: 가입 없이 한 판 링크는 /try로). 여기서 /init으로 보내면 가드의 결정을 덮는다
+    // 뒤에서 조용히 부르는 요청(앱을 열 때 한 번)도 화면을 옮기지 않는다: 갈 곳은 라우터 가드가 정한다.
+    // 둘이 함께 옮기면 먼저 끝난 쪽이 이겨, 가입 없이 한 판 링크가 /try 대신 /init으로 가곤 했다
+    if (config?.skipAuthRedirect || BACKGROUND_CALLS.some((u) => requestUrl?.includes(u))) return Promise.reject(error)
+    // 가입 없이 쓰는 화면(가입 전 한 판·상대 구하기)은 로그인이 필요 없다: 끝난 토큰만 지우고 그 화면에 둔다
+    if (currentPath.startsWith('/try/')) return Promise.reject(error)
     rememberReturnTo(routerInstance?.currentRoute.value.fullPath || window.location.pathname + window.location.search)
     if (routerInstance) {
       routerInstance.push('/init')

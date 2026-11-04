@@ -6944,6 +6944,7 @@ export interface components {
             me: components["schemas"]["AppPlayer"];
             opponent?: components["schemas"]["AppPlayer"];
             startWord: string;
+            title: string;
             summary: string;
             howTo: string[];
             moves: components["schemas"]["RealtimeMove"][];

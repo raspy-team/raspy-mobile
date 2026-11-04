@@ -80,9 +80,9 @@
         </UiButton>
         <UiButton block variant="ghost" to="/group/login" @click="tapId">이미 계정이 있어요</UiButton>
         <p class="pt-2 text-center t-micro">
-          <button type="button" class="underline underline-offset-2 px-1 py-2" @click="openTerm = TERMS[0]">{{ TERMS[0].title }}</button>
+          <button type="button" class="underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[0]">{{ TERMS[0].title }}</button>
           ·
-          <button type="button" class="underline underline-offset-2 px-1 py-2" @click="openTerm = TERMS[1]">{{ TERMS[1].title }}</button>
+          <button type="button" class="underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[1]">{{ TERMS[1].title }}</button>
         </p>
       </div>
     </main>

@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center justify-between">
       <span class="t-caption">아래 문장을 그대로 쳐 주세요</span>
-      <span class="t-mono tabular-nums" :class="remaining <= 10 ? 'text-danger' : 'text-fg-muted'">{{ remaining }}s</span>
+      <span class="t-mono tabular-nums" :class="remaining <= 10 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 
     <!-- 친 만큼 글자색이 바뀐다. 틀린 글자만 빨강 -->
@@ -33,6 +33,8 @@ const input = ref<{ focus: () => void } | null>(null)
 const chars = computed(() => [...props.problem])
 const startedAt = Date.now()
 const remaining = ref(props.timeLimitSeconds)
+// 다른 판처럼 분:초 ('113s'처럼 영어 단위가 섞이지 않게)
+const clock = computed(() => `${Math.floor(remaining.value / 60)}:${String(remaining.value % 60).padStart(2, '0')}`)
 let timer: ReturnType<typeof setInterval> | undefined
 
 function charClass(i: number) {

@@ -13,7 +13,13 @@
             {{ done.waiting > 0 ? `이 동네에서 ${done.waiting}명이 먼저 기다리고 있어요` : '이 동네 첫 등록이에요' }}
           </p>
         </UiCard>
-        <UiCard class="mt-4">
+        <!-- 이미 로그인한 사람에게 '시작해 주세요'는 맞지 않는다: 등록을 바로 내 계정에 붙이고 홈으로 -->
+        <UiCard v-if="loggedIn" class="mt-4">
+          <p class="t-title">상대가 생기면 알려 드릴게요</p>
+          <p class="t-caption mt-1">내 계정에 등록했어요</p>
+          <UiButton block size="lg" class="mt-4" to="/">홈으로</UiButton>
+        </UiCard>
+        <UiCard v-else class="mt-4">
           <p class="t-title">상대가 생기면 알려 드릴게요</p>
           <p class="t-caption mt-1">알림을 받으려면 시작해 주세요. 등록한 내용은 그대로 이어져요</p>
           <UiButton block size="lg" class="mt-4" @click="join">1초 만에 시작하기</UiButton>
@@ -23,6 +29,11 @@
       <template v-else>
         <p class="t-display">같이 할 사람,<br />동네에서 구해요</p>
         <p class="t-caption mt-2">가입 없이 세 가지만 골라 주세요</p>
+        <!-- 고를 칸을 못 받으면 빈 화면 대신 다시 불러오기 (예전에는 맨 아래 한 줄로만 '다시 열어 주세요') -->
+        <div v-if="optionsFailed" class="mt-6 text-center">
+          <p class="t-caption text-danger">고를 칸을 불러오지 못했어요</p>
+          <UiButton variant="secondary" class="mt-3" @click="loadOptions">다시 불러오기</UiButton>
+        </div>
 
         <!-- 1. 종목 -->
         <UiSection title="1. 무엇을" class="mt-6">
@@ -30,8 +41,8 @@
             <UiButton
               v-for="s in options?.sports ?? []"
               :key="s.value"
-              size="sm"
               :variant="sport === s.value ? 'primary' : 'secondary'"
+              :aria-pressed="sport === s.value"
               @click="pickSport(s.value)"
             >
               {{ s.label }}
@@ -56,6 +67,7 @@
                 </button>
               </li>
             </ul>
+            <p v-if="!found.length && searched && searched === query.trim()" class="t-caption mt-2">'{{ searched }}'에 맞는 동네가 없어요. 동 이름으로 찾아 주세요 (예: 합정동)</p>
             <p class="t-micro mt-2">위치는 동네를 찾는 데만 쓰고 남기지 않아요</p>
           </template>
         </UiSection>
@@ -66,8 +78,8 @@
             <UiButton
               v-for="t in options?.times ?? []"
               :key="t.value"
-              size="sm"
               :variant="times.includes(t.value) ? 'primary' : 'secondary'"
+              :aria-pressed="times.includes(t.value)"
               @click="toggleTime(t.value)"
             >
               {{ t.label }}
@@ -102,7 +114,8 @@ type Schemas = components['schemas']
 type DongOption = Schemas['DongOption']
 
 const router = useRouter()
-if (localStorage.getItem('raspy_access_token2')) track('partner_open_loggedin')
+const loggedIn = !!localStorage.getItem('raspy_access_token2')
+if (loggedIn) track('partner_open_loggedin')
 
 const options = ref<Schemas['Options'] | null>(null)
 const sport = ref('')
@@ -121,13 +134,18 @@ const sportLabel = computed(() => options.value?.sports.find((s) => s.value === 
 // 지금 몇 단계까지 왔나 (그만둔 곳을 남기려고): 1 종목, 2 동네, 3 때, 4 등록함
 const stage = computed(() => (done.value ? 4 : times.value.length && dong.value && sport.value ? 3 : dong.value ? 2 : sport.value ? 1 : 0))
 
-onMounted(async () => {
-  track('partner_open', { value: window.location.search.slice(1, 400) || undefined })
+const optionsFailed = ref(false)
+async function loadOptions() {
+  optionsFailed.value = false
   try {
     options.value = (await GET('/api/partner-requests/options')).data
   } catch {
-    error.value = '불러오지 못했어요. 다시 열어 주세요'
+    optionsFailed.value = true
   }
+}
+onMounted(() => {
+  track('partner_open', { value: window.location.search.slice(1, 400) || undefined })
+  loadOptions()
 })
 
 function pickSport(v: string) {
@@ -182,16 +200,28 @@ function useGps() {
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
+// 늦게 온 옛 검색 결과가 새 결과를 덮지 않게 마지막 검색만 받는다
+let searchSeq = 0
+const searched = ref('') // 결과가 없을 때 '찾지 못했어요'를 보일 검색어
 function onQuery() {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(async () => {
     const q = query.value.trim()
-    if (q.length < 1) return (found.value = [])
+    const seq = ++searchSeq
+    if (q.length < 1) {
+      searched.value = ''
+      return (found.value = [])
+    }
     try {
-      found.value = (await GET('/api/partner-requests/dongs', { query: { q } })).data
+      const list = (await GET('/api/partner-requests/dongs', { query: { q } })).data
+      if (seq !== searchSeq) return
+      found.value = list
+      searched.value = q
       track('partner_search', { step: 2, value: `${q}:${found.value.length}` })
     } catch {
+      if (seq !== searchSeq) return
       found.value = []
+      searched.value = ''
     }
   }, 300)
 }
@@ -218,7 +248,7 @@ async function register() {
     ).data
     markPartnerRegistered()
     // 이미 로그인했으면 바로 내 계정에 붙인다: 같은 동네·종목에 사람이 모였는지 그때 알린다 (이웃 알림, 로그인 전이면 아무 일 없다)
-    claimGuestPlays()
+    if (loggedIn) claimGuestPlays()
     track('partner_done', { step: 4, value: `waiting=${done.value.waiting}` })
   } catch (e) {
     error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '등록하지 못했어요'

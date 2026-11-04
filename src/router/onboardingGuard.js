@@ -11,20 +11,23 @@ export function markOnboarded() {
   done = true
 }
 
+/** 로그인 전(또는 토큰이 끝난) 사람이 갈 곳: 조사의 도착 게임은 가입 없이 한 판부터 (3단계 '로그인을 미룰까' C), 나머지는 시작 화면 */
+function toStart(to) {
+  const key = to.path.match(/^\/play\/([^/]+)$/)?.[1]
+  if (key && GUEST_GAMES[key]) return { path: `/try/${key}`, query: to.query }
+  rememberReturnTo(to.fullPath)
+  return '/init'
+}
+
 export function installOnboardingGuard(router) {
   router.beforeEach(async (to) => {
     if (done || OPEN.some((p) => to.path.startsWith(p))) return true
     // 로그인 전이면 화면을 그리기 전에 시작 화면으로 (보던 주소는 기억)
-    if (!localStorage.getItem('raspy_access_token2')) {
-      // 조사의 도착 게임은 가입 없이 한 판부터 (3단계 '로그인을 미룰까' C). 끝나면 가입을 권한다
-      const key = to.path.match(/^\/play\/([^/]+)$/)?.[1]
-      if (key && GUEST_GAMES[key]) return { path: `/try/${key}`, query: to.query }
-      rememberReturnTo(to.fullPath)
-      return '/init'
-    }
+    if (!localStorage.getItem('raspy_access_token2')) return toStart(to)
     try {
       // 첫 화면을 그리기 전에 묻는 것이라 짧게 기다린다. 답이 없으면 막지 않고 들여보낸다
-      const { data } = await api.get('/api/auth/onboarding', { timeout: 6000 })
+      // 401이면 갈 곳은 여기서 정한다 (api.js가 따로 /init으로 보내지 않게)
+      const { data } = await api.get('/api/auth/onboarding', { timeout: 6000, skipAuthRedirect: true })
       if (data.termsAgreed && data.onboarded) {
         done = true
         return true
@@ -32,10 +35,8 @@ export function installOnboardingGuard(router) {
       rememberReturnTo(to.fullPath)
       return '/welcome'
     } catch (e) {
-      if (e.response?.status === 401) {
-        rememberReturnTo(to.fullPath)
-        return '/init'
-      }
+      // 토큰이 끝났다: 로그인 전과 같이 (광고 링크로 온 사람이 예전 로그인 흔적 때문에 한 판 대신 시작 화면을 보지 않게, 9e)
+      if (e.response?.status === 401) return toStart(to)
       return true // 서버를 못 부르면 막지 않는다
     }
   })

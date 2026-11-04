@@ -16,6 +16,8 @@
       :disabled="submitting || state === 'done'"
       :aria-label="state === 'tap' ? '두드리기' : state === 'listen' ? '듣는 중' : '들어 보기'"
       @pointerdown.prevent="press"
+      @keydown.enter.prevent="!$event.repeat && press($event)"
+      @keydown.space.prevent="!$event.repeat && press($event)"
     >
       {{ state === 'tap' ? `${taps.length} / ${current.length}` : state === 'listen' ? '' : state === 'scored' ? '다음 판' : '들어 보기' }}
     </button>
@@ -136,7 +138,7 @@ function endRound() {
   } else state.value = 'scored'
 }
 
-function press(e: PointerEvent) {
+function press(e: Event) {
   if (state.value === 'ready' || state.value === 'scored') return listen()
   if (state.value !== 'tap') return
   if (!taps.value.length) firstStamp = e.timeStamp

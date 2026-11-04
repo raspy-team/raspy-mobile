@@ -242,9 +242,17 @@ function message(e: unknown, fallback: string) {
   if (r?.status === 404) return '없거나 이미 끝난 경기예요'
   return r?.data?.message || fallback
 }
-// AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다. 한 번만
+// AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다. 한 번만.
+// 주소의 ?ai는 들어간 뒤에 지운다. 화면은 주소마다 새로 그려져(App.vue의 key) 먼저 지우면 새 화면이 따로 방을 열고,
+// 지우는 순간 이 화면이 내려가며 나가기(leave)를 해 막 연 방이 취소됐다 (11/6 ff가 RealtimeView에서 찾은 것과 같다).
+// 주소만 지울 때는 방을 두고, 새로 그려진 화면이 join으로 그 방을 이어 받는다
 let aiId = Number(route.query.ai) || null
-if (aiId) router.replace({ query: {} })
+let keepRoom = false
+function clearQuery() {
+  if (!route.query.ai) return
+  keepRoom = true
+  router.replace({ query: {} })
+}
 async function join() {
   error.value = ''
   try {
@@ -255,6 +263,7 @@ async function join() {
       botCalled = true
       apply((await POST('/api/app-games/battle/{gameId}/bot', { path: { gameId: state.value.gameId }, query: { botId: ai } })).data)
     }
+    clearQuery()
   } catch (e) {
     error.value = message(e, '들어가지 못했어요')
   }
@@ -308,6 +317,6 @@ onBeforeUnmount(() => {
   clearInterval(timer)
   stop?.()
   disconnect()
-  if (state.value?.status === 'WAITING') POST('/api/app-games/battle/{gameId}/leave', { path: { gameId: state.value.gameId } }).catch(() => {})
+  if (state.value?.status === 'WAITING' && !keepRoom) POST('/api/app-games/battle/{gameId}/leave', { path: { gameId: state.value.gameId } }).catch(() => {})
 })
 </script>

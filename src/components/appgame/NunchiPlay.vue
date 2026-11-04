@@ -90,8 +90,11 @@ function record(choice: 'a' | 'b' | '-', ms: number) {
   if (choice !== '-') feel('tap')
   index.value++
   if (index.value < list.value.length) {
-    // 누른 쪽이 눌린 게 보이게 잠깐 두고 다음으로
-    setTimeout(show, 180)
+    // 누른 쪽이 눌린 게 보이게 잠깐 두고 다음으로. 그사이 화면을 떠나면 다음 문제의 3초를 켜지 않는다 (떠난 뒤 저절로 답이 나가지 않게)
+    timer = setTimeout(() => {
+      timer = null
+      if (!unmounted) show()
+    }, 180)
   } else {
     finished = true
     track('nunchi_done', { gameKey: 'nunchi', step: list.value.length, value: answers.join(',') })
@@ -128,7 +131,9 @@ function leave() {
 }
 window.addEventListener('pagehide', leave)
 
+let unmounted = false
 onBeforeUnmount(() => {
+  unmounted = true
   if (timer) clearTimeout(timer)
   window.removeEventListener('pagehide', leave)
   leave()

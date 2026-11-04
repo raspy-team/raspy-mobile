@@ -23,6 +23,11 @@
       <template v-else>
         <p class="t-display">같이 할 사람,<br />동네에서 구해요</p>
         <p class="t-caption mt-2">가입 없이 세 가지만 골라 주세요</p>
+        <!-- 고를 칸을 못 받으면 빈 화면 대신 다시 불러오기 (예전에는 맨 아래 한 줄로만 '다시 열어 주세요') -->
+        <div v-if="optionsFailed" class="mt-6 text-center">
+          <p class="t-caption text-danger">고를 칸을 불러오지 못했어요</p>
+          <UiButton variant="secondary" class="mt-3" @click="loadOptions">다시 불러오기</UiButton>
+        </div>
 
         <!-- 1. 종목 -->
         <UiSection title="1. 무엇을" class="mt-6">
@@ -30,8 +35,8 @@
             <UiButton
               v-for="s in options?.sports ?? []"
               :key="s.value"
-              size="sm"
               :variant="sport === s.value ? 'primary' : 'secondary'"
+              :aria-pressed="sport === s.value"
               @click="pickSport(s.value)"
             >
               {{ s.label }}
@@ -56,6 +61,7 @@
                 </button>
               </li>
             </ul>
+            <p v-if="!found.length && searched && searched === query.trim()" class="t-caption mt-2">'{{ searched }}'에 맞는 동네가 없어요. 동 이름으로 찾아 주세요 (예: 합정동)</p>
             <p class="t-micro mt-2">위치는 동네를 찾는 데만 쓰고 남기지 않아요</p>
           </template>
         </UiSection>
@@ -66,8 +72,8 @@
             <UiButton
               v-for="t in options?.times ?? []"
               :key="t.value"
-              size="sm"
               :variant="times.includes(t.value) ? 'primary' : 'secondary'"
+              :aria-pressed="times.includes(t.value)"
               @click="toggleTime(t.value)"
             >
               {{ t.label }}
@@ -121,13 +127,18 @@ const sportLabel = computed(() => options.value?.sports.find((s) => s.value === 
 // 지금 몇 단계까지 왔나 (그만둔 곳을 남기려고): 1 종목, 2 동네, 3 때, 4 등록함
 const stage = computed(() => (done.value ? 4 : times.value.length && dong.value && sport.value ? 3 : dong.value ? 2 : sport.value ? 1 : 0))
 
-onMounted(async () => {
-  track('partner_open', { value: window.location.search.slice(1, 400) || undefined })
+const optionsFailed = ref(false)
+async function loadOptions() {
+  optionsFailed.value = false
   try {
     options.value = (await GET('/api/partner-requests/options')).data
   } catch {
-    error.value = '불러오지 못했어요. 다시 열어 주세요'
+    optionsFailed.value = true
   }
+}
+onMounted(() => {
+  track('partner_open', { value: window.location.search.slice(1, 400) || undefined })
+  loadOptions()
 })
 
 function pickSport(v: string) {
@@ -182,16 +193,28 @@ function useGps() {
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
+// 늦게 온 옛 검색 결과가 새 결과를 덮지 않게 마지막 검색만 받는다
+let searchSeq = 0
+const searched = ref('') // 결과가 없을 때 '찾지 못했어요'를 보일 검색어
 function onQuery() {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(async () => {
     const q = query.value.trim()
-    if (q.length < 1) return (found.value = [])
+    const seq = ++searchSeq
+    if (q.length < 1) {
+      searched.value = ''
+      return (found.value = [])
+    }
     try {
-      found.value = (await GET('/api/partner-requests/dongs', { query: { q } })).data
+      const list = (await GET('/api/partner-requests/dongs', { query: { q } })).data
+      if (seq !== searchSeq) return
+      found.value = list
+      searched.value = q
       track('partner_search', { step: 2, value: `${q}:${found.value.length}` })
     } catch {
+      if (seq !== searchSeq) return
       found.value = []
+      searched.value = ''
     }
   }, 300)
 }

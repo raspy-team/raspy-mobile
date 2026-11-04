@@ -6,13 +6,14 @@
     </div>
 
     <!-- 두 팀과 내 예상 스코어 -->
-    <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 mt-8">
+    <!-- 320px 폭에서도 두 팀 칸이 화면 밖으로 넘치지 않게 칸 최소 폭을 0으로, 간격은 좁게 -->
+    <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:gap-3 mt-8">
       <div v-for="(side, i) in sides" :key="side.team" class="flex flex-col items-center text-center" :class="i === 1 ? 'col-start-3' : ''">
-        <p class="t-heading min-h-[3rem] flex items-center">{{ side.team }}</p>
+        <p class="t-heading min-h-[3rem] flex items-center break-keep">{{ side.team }}</p>
         <p class="t-micro">{{ i === 0 ? '홈' : '원정' }}</p>
-        <div class="flex items-center gap-3 mt-4">
+        <div class="flex items-center gap-1 sm:gap-3 mt-4">
           <UiIconButton icon="minus" :label="`${side.team} 한 골 빼기`" :disabled="goals[i] === 0" @click="goals[i]--" />
-          <span class="t-display tabular-nums w-10 text-center" aria-live="polite">{{ goals[i] }}</span>
+          <span class="t-display tabular-nums w-8 sm:w-10 text-center" aria-live="polite">{{ goals[i] }}</span>
           <UiIconButton icon="plus" :label="`${side.team} 한 골 더하기`" :disabled="goals[i] >= 20" @click="goals[i]++" />
         </div>
       </div>

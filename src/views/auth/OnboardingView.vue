@@ -92,7 +92,7 @@
           label="아이디"
           icon="fas fa-at"
           :maxlength="12"
-          placeholder="영문 소문자·숫자"
+          placeholder="영문 소문자·숫자·밑줄(_)"
           hint="친구가 나를 찾을 때 써요"
           :error="usernameError"
           autocomplete="username"

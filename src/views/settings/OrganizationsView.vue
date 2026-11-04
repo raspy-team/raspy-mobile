@@ -110,8 +110,10 @@
           <p class="t-caption mb-2">아이폰 사진이 안 올라가면 스크린샷으로 올려 주세요</p>
           <input ref="fileInput" type="file" accept="application/pdf,image/jpeg,image/png" class="hidden" @change="onFile" />
           <UiButton variant="secondary" block icon="file-lines" @click="fileInput?.click()">
-            {{ file ? `${file.name} (${sizeText(file.size)})` : '파일 고르기' }}
+            {{ file ? '다른 파일 고르기' : '파일 고르기' }}
           </UiButton>
+          <!-- 긴 파일 이름이 버튼을 넘치지 않게 이름은 버튼 아래 한 줄로 -->
+          <p v-if="file" class="t-caption text-fg mt-1 truncate">{{ file.name }} ({{ sizeText(file.size) }})</p>
           <p v-if="fileError" class="t-caption text-danger mt-1">{{ fileError }}</p>
         </div>
 

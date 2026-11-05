@@ -117,7 +117,8 @@
       </UiEmptyState>
 
       <div v-else class="divide-y divide-line ui-appear transition-opacity" :class="{ 'opacity-60': loading }">
-        <RuleListCard v-for="rule in rules" :key="rule.id" :rule="rule" />
+        <!-- 경기 만들기에서 고르는 중이면 누르면 바로 돌아간다 (고른 때·방식·인원 그대로) -->
+        <RuleListCard v-for="rule in rules" :key="rule.id" :rule="rule" :to="picking ? pickTo(rule) : null" />
       </div>
     </main>
 
@@ -172,6 +173,8 @@ const FILTER_KEYS = [...SITUATIONS.map((f) => f.key), 'ability']
 const route = useRoute()
 const router = useRouter()
 const picking = computed(() => !!route.query.fromGameCreate)
+const CARRY = ['when', 'venue', 'format', 'size']
+const pickTo = (rule) => ({ path: '/create-game', query: { ruleId: String(rule.id), ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) } })
 
 const options = ref(null)
 const rules = ref([])

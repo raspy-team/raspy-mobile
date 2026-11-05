@@ -52,7 +52,7 @@
             <p v-if="winSummary(rule)" class="t-caption">{{ winSummary(rule) }}</p>
           </div>
           <!-- 종목은 점점 늘어나고 예외도 있으니, 골라 준 규칙은 늘 바꿀 수 있게 (같은 종목 규칙부터 보여 준다) -->
-          <UiButton variant="ghost" size="sm" @click="router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked && pickedSport ? { q: pickedSport } : {}) } })">바꾸기</UiButton>
+          <UiButton variant="ghost" size="sm" @click="changeRule">바꾸기</UiButton>
         </UiCard>
         <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
         <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
@@ -248,6 +248,11 @@ watch(rule, (r) => {
 
 // 종목 고르기: 규칙을 많이 쓴 순으로 받아 종목마다 맨 위 규칙을 고른다. 종목 이름은 분류(category.sport) → 제목·분류에서 찾은 종목
 const createdLine = ref('')
+// 규칙 바꾸기: 고른 때·방식·인원을 실어 보내고, 규칙을 고르면 그대로 돌아온다 (예전엔 규칙 상세 → '경기 열기' → 처음부터 다시)
+function changeRule() {
+  const keep = { when: when.value, venue: venue.value, format: format.value, ...(format.value !== 'DUEL' ? { size: String(size.value) } : {}) }
+  router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked.value && pickedSport.value ? { q: pickedSport.value } : {}), ...keep } })
+}
 const sports = ref(null)
 // '다른 게임에서'는 롤·피파처럼 다른 게임 안에서 하는 규칙에만 (배드민턴에 '다른 게임에서'가 보였다)
 const venueOptions = computed(() => VENUES.filter((v) => v.value !== 'ONLINE' || rule.value?.extGame || venue.value === 'ONLINE'))

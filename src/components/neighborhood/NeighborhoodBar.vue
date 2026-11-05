@@ -3,7 +3,7 @@
     <!-- 동네가 있으면: 이름을 눌러 다른 동네로 바꾼다 (당근의 왼쪽 위 동네 이름) -->
     <button v-if="active" type="button" class="flex items-center gap-1.5 h-10 -ml-1 px-1 t-heading" :aria-label="`지금 동네 ${active.name}, 바꾸기`" @click="open = true">
       {{ active.name }}
-      <span v-if="active.nearbyCount" class="t-caption font-normal">근처 {{ active.nearbyCount }}곳</span>
+      <span v-if="active.nearbyCount" class="t-caption font-normal">근처 {{ active.nearbyCount }}개 동까지</span>
       <UiIcon name="chevron-down" class="text-xs" aria-hidden="true" />
     </button>
     <p v-if="active?.expired" class="t-caption text-danger-fg">

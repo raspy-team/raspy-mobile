@@ -23,6 +23,9 @@ const DIRS = ['right', 'up', 'left', 'down'] as const
 type Dir = (typeof DIRS)[number]
 const SPEED = 72 // px/초
 const FONT = '"Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif'
+const VIRTUAL = new Set(['place', 'gate'])
+// 실제 장소 종류 → 그림 글자 (서버 PlazaMaps.Place.kind)
+const ICONS: Record<string, string> = { station: '🚇', school: '🏫', hospital: '🏥', mall: '🛒', cafe: '☕', park: '🌳', store: '🏪', dong: '🏘', gu: '🏙', city: '🏙' }
 
 interface Walker {
   p: Person
@@ -68,7 +71,8 @@ export class PlazaScene extends Phaser.Scene {
   preload() {
     this.load.crossOrigin = 'anonymous'
     this.load.spritesheet('terrain', `${ART}/map/terrain.png`, { frameWidth: 16, frameHeight: 16 })
-    for (const s of new Set(this.data0.map.objects.map((o) => o.s))) this.load.image(`o:${s}`, `${ART}/map/${s}.png`)
+    // place·gate는 그림 없이 그리는 팻말 (실제 장소, 다른 광장 문)
+    for (const s of new Set(this.data0.map.objects.map((o) => o.s))) if (!VIRTUAL.has(s)) this.load.image(`o:${s}`, `${ART}/map/${s}.png`)
     const sheets = new Set([this.data0.me, ...this.data0.people, ...this.data0.resting].map((p) => p.sheet))
     if (this.data0.statue) sheets.add(this.data0.statue.sheet)
     for (const s of sheets) this.loadSheet(s)
@@ -86,6 +90,7 @@ export class PlazaScene extends Phaser.Scene {
     this.drawGround()
     for (const o of m.objects) this.drawObject(o)
     if (this.data0.statue) this.drawStatue()
+    this.drawTitle()
 
     this.addWalker(this.data0.me)
     for (const p of this.data0.people) this.addWalker(p)
@@ -130,7 +135,8 @@ export class PlazaScene extends Phaser.Scene {
   /** 화면 폭에 맞춘 정수 배율 (픽셀이 흐려지지 않게) */
   private zoomFor() {
     const w = this.scale.width
-    return w >= 900 ? 3 : w >= 360 ? 2 : 1.5
+    // 폰에서는 1.5배: 2배면 광장의 한 귀퉁이만 보여 동네 팻말·게시판을 찾아 걸어야 했다 (11/6)
+    return w >= 900 ? 3 : w >= 600 ? 2 : 1.5
   }
 
   private drawGround() {
@@ -153,12 +159,89 @@ export class PlazaScene extends Phaser.Scene {
     layer.setDepth(-10)
   }
 
+  /** 광장 이름을 흙 광장 바로 위에 크게 (어느 동네인지 들어오자마자 보이게) */
+  private drawTitle() {
+    const m = this.data0.map
+    const cx = m.plaza.x + m.plaza.w / 2
+    this.add
+      .text(cx, m.plaza.y - 30, m.name, { fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#ffffff', stroke: '#1b1b1f', strokeThickness: 4, resolution: 4 })
+      .setOrigin(0.5, 1)
+      .setDepth(m.plaza.y - 30)
+    if (m.subtitle)
+      this.add
+        .text(cx, m.plaza.y - 16, m.subtitle, { fontFamily: FONT, fontSize: '9px', color: '#e8ff59', stroke: '#1b1b1f', strokeThickness: 3, resolution: 4 })
+        .setOrigin(0.5, 1)
+        .setDepth(m.plaza.y - 30)
+  }
+
+  /** 실제 장소·다른 광장 문 팻말: 나무 판에 그림 글자와 이름, 아래에 방향·거리 */
+  private drawBoard(o: MapObj) {
+    const gate = o.s === 'gate'
+    const w = gate ? 72 : 96
+    const h = gate ? 26 : 30
+    const g = this.add.graphics().setDepth(o.y + 44)
+    g.fillStyle(0x5b3a22, 1).fillRect(o.x + w / 2 - 3, o.y + h - 2, 6, 14) // 기둥
+    g.fillStyle(gate ? 0x2d6cdf : 0x8b5a2b, 1).fillRoundedRect(o.x, o.y, w, h, 5)
+    g.lineStyle(2, 0x2b1a0e, 1).strokeRoundedRect(o.x, o.y, w, h, 5)
+    const icon = ICONS[o.icon ?? ''] ?? ''
+    const title = this.add
+      .text(o.x + w / 2, o.y + (o.sub ? 3 : h / 2 - 6), `${icon}${icon ? ' ' : ''}${o.label ?? ''}`, { fontFamily: FONT, fontSize: '8px', fontStyle: 'bold', color: '#ffffff', resolution: 4, fixedWidth: w - 6, align: 'center' })
+      .setOrigin(0.5, 0)
+      .setDepth(o.y + 45)
+    if (o.sub)
+      this.add
+        .text(o.x + w / 2, o.y + 16, o.sub, { fontFamily: FONT, fontSize: '7px', color: '#f3e3c3', resolution: 4 })
+        .setOrigin(0.5, 0)
+        .setDepth(o.y + 45)
+    const hit = this.add.zone(o.x, o.y, w, h + 12).setOrigin(0, 0).setInteractive({ useHandCursor: true })
+    hit.on('pointerup', (ptr: Phaser.Input.Pointer) => ptr.getDistance() <= 12 && this.cb.onTapObject(o))
+    void title
+  }
+
+  /** 이 동네 모집 중인 경기: 동네 가운데에서 그 경기 장소의 실제 방향에 핀으로 (누르면 그 경기) */
+  addPins(pins: { id: number; title: string; when: string; lat: number; lon: number }[]) {
+    const m = this.data0.map
+    if (!m.center || m.center.length < 2) return
+    const [lat0, lon0] = m.center
+    const cx = m.plaza.x + m.plaza.w / 2
+    const cy = m.plaza.y + m.plaza.h / 2
+    const rx = (m.w * m.tile) / 2 - 150
+    const ry = (m.h * m.tile) / 2 - 110
+    const used: { x: number; y: number }[] = []
+    for (const p of pins.slice(0, 8)) {
+      const east = (p.lon - lon0) * 111320 * Math.cos((lat0 * Math.PI) / 180)
+      const north = (p.lat - lat0) * 110540
+      let t = Math.atan2(north, east)
+      let x = 0
+      let y = 0
+      for (let k = 0; k < 10; k++) {
+        x = cx + Math.cos(t) * rx
+        y = cy - Math.sin(t) * ry
+        if (!used.some((u) => Math.hypot(u.x - x, u.y - y) < 48)) break
+        t += 0.22
+      }
+      used.push({ x, y })
+      const c = this.add.container(x, y).setDepth(y + 60)
+      const bg = this.add.graphics()
+      bg.fillStyle(0xe8ff59, 1).fillRoundedRect(-40, -22, 80, 18, 6)
+      bg.fillTriangle(-4, -4, 4, -4, 0, 2)
+      const t1 = this.add
+        .text(0, -13, `📍 ${p.title}`, { fontFamily: FONT, fontSize: '7px', fontStyle: 'bold', color: '#121214', resolution: 4, fixedWidth: 76, align: 'center' })
+        .setOrigin(0.5, 0.5)
+      const t2 = this.add.text(0, 8, p.when, { fontFamily: FONT, fontSize: '6px', color: '#ffffff', stroke: '#1b1b1f', strokeThickness: 2, resolution: 4 }).setOrigin(0.5, 0)
+      c.add([bg, t1, t2])
+      const hit = this.add.zone(x - 40, y - 22, 80, 36).setOrigin(0, 0).setDepth(y + 61).setInteractive({ useHandCursor: true })
+      hit.on('pointerup', (ptr: Phaser.Input.Pointer) => ptr.getDistance() <= 12 && this.cb.onTapObject({ s: 'pin', x, y, action: `gameid:${p.id}` }))
+    }
+  }
+
   private drawObject(o: MapObj) {
+    if (VIRTUAL.has(o.s)) return this.drawBoard(o)
     const img = this.add.image(o.x, o.y, `o:${o.s}`).setOrigin(0, 0)
     img.setDepth(o.y + img.height)
     if (o.label) {
       const label = this.add
-        .text(o.x + img.width / 2, o.y - 2, o.label, { fontFamily: FONT, fontSize: '7px', color: '#ffffff', stroke: '#1b1b1f', strokeThickness: 2, resolution: 4 })
+        .text(o.x + img.width / 2, o.y - 2, o.label, { fontFamily: FONT, fontSize: '9px', color: '#ffffff', stroke: '#1b1b1f', strokeThickness: 3, resolution: 4 })
         .setOrigin(0.5, 1)
         .setDepth(100000)
       if (o.action) label.setStyle({ color: '#e8ff59' })
@@ -216,12 +299,12 @@ export class PlazaScene extends Phaser.Scene {
     const mine = p.id === this.meId
     const label = (p.champion ? '👑 ' : '') + p.name
     const name = this.add
-      .text(p.x, p.y - FRAME_H - 1, label, { fontFamily: FONT, fontSize: '6px', color: mine ? '#e8ff59' : '#ffffff', stroke: '#1b1b1f', strokeThickness: 2, resolution: 4 })
+      .text(p.x, p.y - FRAME_H - 1, label, { fontFamily: FONT, fontSize: '8px', color: mine ? '#e8ff59' : '#ffffff', stroke: '#1b1b1f', strokeThickness: 3, resolution: 4 })
       .setOrigin(0.5, 1)
     const w: Walker = { p, sprite, name, path: [], x: p.x, y: p.y, dir: 'down', resting }
     if (p.bot) {
       w.badge = this.add
-        .text(0, 0, 'AI', { fontFamily: FONT, fontSize: '5px', color: '#121214', backgroundColor: '#9ad0ff', padding: { x: 1, y: 0 }, resolution: 4 })
+        .text(0, 0, 'AI', { fontFamily: FONT, fontSize: '7px', color: '#121214', backgroundColor: '#9ad0ff', padding: { x: 1, y: 0 }, resolution: 4 })
         .setOrigin(0, 1)
     }
     if (resting) {
@@ -276,7 +359,7 @@ export class PlazaScene extends Phaser.Scene {
     w.bubbleTimer?.remove()
     const t = this.add.text(0, 0, text, {
       fontFamily: FONT,
-      fontSize: big ? '12px' : '6px',
+      fontSize: big ? '14px' : '8px',
       color: '#121214',
       backgroundColor: '#ffffff',
       padding: { x: 3, y: 2 },
@@ -465,6 +548,11 @@ export class PlazaScene extends Phaser.Scene {
   hide(id: number) {
     this.hidden.add(id)
     this.removeWalker(id)
+  }
+
+  /** 지금 이 칸의 모두 (쉬는 중이면 restingMinutes가 있다) */
+  everyone(): Person[] {
+    return [...this.walkers.values()].map((w) => (w.resting ? { ...w.p, restingMinutes: w.p.restingMinutes ?? 0 } : w.p))
   }
 
   person(id: number): Person | undefined {

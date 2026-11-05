@@ -7154,13 +7154,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "OFFLINE",
                 "APP",
                 "POPULAR"
-              ],
-              "default": "ALL"
+              ]
             }
           }
         ],
@@ -7497,11 +7497,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           },
           {
@@ -7510,11 +7510,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ],
-              "default": "UNITS"
+              ]
             }
           }
         ],
@@ -10014,11 +10014,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -10639,13 +10639,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ],
-              "default": "PENDING"
+              ]
             }
           }
         ],
@@ -13169,6 +13169,8 @@
           "h",
           "name",
           "objects",
+          "places",
+          "plaza",
           "room",
           "rows",
           "spawn",
@@ -13184,6 +13186,9 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "subtitle": {
             "type": "string"
           },
           "w": {
@@ -13208,6 +13213,22 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Obj"
+            }
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Place"
+            }
+          },
+          "plaza": {
+            "$ref": "#/components/schemas/Rect"
+          },
+          "center": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
             }
           },
           "cell": {
@@ -13267,6 +13288,12 @@
           },
           "action": {
             "type": "string"
+          },
+          "sub": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
           }
         }
       },
@@ -13311,6 +13338,43 @@
           "restingMinutes": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "Place": {
+        "required": [
+          "dir",
+          "distanceM",
+          "east",
+          "kind",
+          "name",
+          "north"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "east": {
+            "type": "number",
+            "format": "double"
+          },
+          "north": {
+            "type": "number",
+            "format": "double"
+          },
+          "target": {
+            "type": "string"
+          },
+          "distanceM": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dir": {
+            "type": "string"
           }
         }
       },
@@ -17835,50 +17899,6 @@
               "VOTING",
               "AWAITING_RESULT"
             ]
-          }
-        }
-      },
-      "Place": {
-        "required": [
-          "address",
-          "category",
-          "kakaoId",
-          "lat",
-          "lon",
-          "name",
-          "public"
-        ],
-        "type": "object",
-        "properties": {
-          "kakaoId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "category": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "roadAddress": {
-            "type": "string"
-          },
-          "lat": {
-            "type": "number",
-            "format": "double"
-          },
-          "lon": {
-            "type": "number",
-            "format": "double"
-          },
-          "distanceM": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "public": {
-            "type": "boolean"
           }
         }
       },

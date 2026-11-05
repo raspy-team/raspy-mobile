@@ -130,7 +130,7 @@
 
     <!-- 수정 제안: 만든 사람에게 DM으로 -->
     <UiSheet v-model="suggestOpen" title="수정 제안하기">
-      <p class="t-caption mb-4">{{ rule?.createdBy?.nickname || '만든 사람' }}님에게 DM으로 보내요. 답이 오면 메시지에서 이어서 이야기할 수 있어요.</p>
+      <p class="t-caption mb-4">{{ rule?.createdBy?.nickname || '만든 사람' }}님에게 메시지로 보내요</p>
       <UiInput v-model="suggestText" multiline :rows="4" :maxlength="1000" placeholder="예: 3세트는 길어요. 2세트 선승으로 바꾸면 어때요?" />
       <template #footer>
         <UiButton block :disabled="suggestText.trim().length < 5" :loading="suggesting" @click="submitSuggest">보내기</UiButton>

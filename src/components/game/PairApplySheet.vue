@@ -2,7 +2,7 @@
   <UiSheet :model-value="!!game" title="친구와 둘이 신청" @update:model-value="(v) => !v && emit('close')">
     <p class="t-caption mb-3">같은 팀에 친구와 함께 신청해요. 주최자가 받으면 둘 다 들어가고, 친구에게도 알림이 가요</p>
     <UiListSkeleton v-if="loading" :rows="3" />
-    <UiEmptyState v-else-if="!friends.length" mascot="match" title="아직 친구가 없어요" description="친구를 맺으면 둘이 신청할 수 있어요" />
+    <UiEmptyState v-else-if="!friends.length" mascot="match" title="아직 친구가 없어요" />
     <UiList v-else>
       <UiListItem v-for="f in friends" :key="f.id" :title="f.nickname" :subtitle="'@' + f.username" @click="pick(f)">
         <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>

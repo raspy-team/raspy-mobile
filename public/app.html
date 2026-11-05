@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>매치 - 동네 운동 상대 찾기</title>
+<meta name="description" content="탁구·배드민턴·풋살 상대를 동네에서 찾아요. 운동 친구가 없어도 오늘 한 판, 폰 게임도 함께" />
+<meta property="og:title" content="매치 - 동네 운동 상대 찾기" />
+<meta property="og:description" content="탁구·배드민턴·풋살 상대를 동네에서 찾아요. 운동 친구가 없어도 오늘 한 판" />
+<meta property="og:image" content="https://matchapp.me/og-image.png" />
+<meta name="robots" content="noindex" />
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #121214; color: #f4f4f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+  main { padding: 24px 16px; text-align: center; max-width: 360px; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  p { color: #a1a1aa; font-size: 14px; margin: 0 0 24px; }
+  a { display: block; margin: 10px 0; padding: 14px; border-radius: 12px; background: #27272a; color: #f4f4f5; text-decoration: none; font-weight: 600; }
+  a.primary { background: #d4ff3f; color: #121214; }
+</style>
+</head>
+<body>
+<main>
+  <h1>매치로 가는 중…</h1>
+  <p>자동으로 넘어가지 않으면 아래를 눌러 주세요</p>
+  <a id="go" class="primary" href="/">웹에서 바로 시작</a>
+  <a id="ios" href="#" hidden>App Store에서 받기</a>
+  <a id="android" href="#" hidden>Google Play에서 받기</a>
+</main>
+<script>
+// matchapp.me/app : 홍보 링크 하나 (11/5). 광고·인스타·QR은 스토어 검색을 거치지 않게 이 주소를 쓴다.
+// 아이폰이면 App Store, 안드로이드면 Google Play, 그 밖(컴퓨터·스토어 출시 전)은 웹으로 보낸다.
+// 꼬리표(?utm_source=...&utm_campaign=...)는 웹이면 그대로 넘기고, 스토어면 방문을 먼저 남긴 뒤 스토어 꼬리표로 옮긴다.
+// ★ 스토어에 정식 출시되면 아래 두 줄을 true로 바꾼다 (지금 Play는 비공개 테스트, App Store는 심사 전)
+var IOS_LIVE = false
+var ANDROID_LIVE = false
+
+var APP_STORE = 'https://apps.apple.com/kr/app/id6830950453'
+var PLAY = 'https://play.google.com/store/apps/details?id=com.songostudio.match'
+var API = 'https://raspy-api.fly.dev'
+
+var ua = navigator.userAgent
+var q = new URLSearchParams(location.search)
+var isApp = /raspy-(ios|android)/i.test(ua)
+var isIos = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+var isAndroid = /Android/i.test(ua)
+
+function utm() {
+  var o = {}
+  ;['utm_source', 'utm_medium', 'utm_campaign'].forEach(function (k) { if (q.get(k)) o[k] = q.get(k) })
+  return o
+}
+// Play 설치 꼬리표: 설치 뒤 Play Console에서 어느 홍보로 왔는지 보인다
+function playUrl() {
+  var t = new URLSearchParams(utm()).toString()
+  return t ? PLAY + '&referrer=' + encodeURIComponent(t) : PLAY
+}
+// App Store 캠페인 꼬리표(ct): App Store Connect 분석에서 보인다
+function appStoreUrl() {
+  var c = q.get('utm_campaign') || q.get('utm_source')
+  return c ? APP_STORE + '?ct=' + encodeURIComponent(c.slice(0, 40)) : APP_STORE
+}
+// 스토어로 가면 웹 방문 기록이 안 남으니 먼저 남긴다 (웹 src/utils/visit.ts와 같은 기기 번호)
+function logVisit(dest) {
+  try {
+    var id = localStorage.getItem('visitor_id')
+    if (!id) {
+      id = (crypto.randomUUID && crypto.randomUUID()) || Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 14)
+      localStorage.setItem('visitor_id', id)
+    }
+    var u = utm()
+    fetch(API + '/api/track/visit', {
+      method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visitorId: id, source: u.utm_source, medium: u.utm_medium, campaign: u.utm_campaign,
+        referrer: document.referrer || undefined, landingPath: '/app/' + dest, standalone: false }),
+    }).catch(function () {})
+  } catch (e) { /* 세지 못해도 넘어간다 */ }
+}
+
+var web = '/' + (location.search || '')
+document.getElementById('go').href = web
+if (IOS_LIVE) { var i = document.getElementById('ios'); i.href = appStoreUrl(); i.hidden = false }
+if (ANDROID_LIVE) { var a = document.getElementById('android'); a.href = playUrl(); a.hidden = false }
+
+if (!isApp && isIos && IOS_LIVE) {
+  logVisit('ios'); setTimeout(function () { location.replace(appStoreUrl()) }, 150)
+} else if (!isApp && isAndroid && ANDROID_LIVE) {
+  logVisit('android'); setTimeout(function () { location.replace(playUrl()) }, 150)
+} else {
+  location.replace(web)
+}
+</script>
+</body>
+</html>

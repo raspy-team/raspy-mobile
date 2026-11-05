@@ -27,10 +27,10 @@
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhoto" />
       </div>
 
-      <UiInput v-model="form.nickname" label="닉네임" :maxlength="NICKNAME_MAX" :hint="`다른 사람에게 보이는 이름. ${NICKNAME_MAX}자까지`" :error="errors.nickname" />
-      <UiInput v-model="form.username" label="친구 찾기 아이디" icon="fas fa-at" :maxlength="12" hint="친구가 나를 찾을 때 써요. 영문 소문자·숫자·밑줄(_)로 적어요. 로그인 아이디와 달라도 돼요" :error="errors.username" />
+      <UiInput v-model="form.nickname" label="닉네임" :maxlength="NICKNAME_MAX" :error="errors.nickname" />
+      <UiInput v-model="form.username" label="친구 찾기 아이디" icon="fas fa-at" :maxlength="12" hint="영문 소문자·숫자·밑줄(_)" :error="errors.username" />
       <!-- 활동 지역은 고르지 않고 동네 인증으로 정한다 (GPS) -->
-      <UiField label="동네" :hint="form.region ? '누르면 동네를 바꾸거나 다시 인증해요' : '지금 있는 곳으로 인증해요. 내 동네 근처 경기가 보여요'">
+      <UiField label="동네">
         <RouterLink to="/neighborhood" class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
           <UiIcon name="location-dot" aria-hidden="true" />
           <span class="flex-1 t-body">{{ form.region || '동네 인증하기' }}</span>
@@ -39,7 +39,7 @@
       </UiField>
       <!-- 나이: 다칠 수 있는 규칙은 만 19세 이상이라 확인한다 -->
       <div id="age">
-        <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세 이상만 할 수 있어요. 남에게 보일지는 설정 > 내 정보 공개에서 정해요" :error="errors.age" />
+        <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세부터예요" :error="errors.age" />
       </div>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
       <!-- 예전에 직접 적은 소속: 새로 적을 수 없고 지우기만 된다. 학교·회사는 설정 > 소속에서 인증한다 (docs/organizations.md 2) -->

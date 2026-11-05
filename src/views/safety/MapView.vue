@@ -5,7 +5,7 @@
 
     <KakaoMap v-if="kakaoMapKey && center" :center="center" :pins="pins" :selected-id="selected" :level="7" @select="openPin" @moved="onMoved" />
     <p v-else-if="center" class="t-caption rounded-xl bg-surface px-4 py-3">지도가 아직 켜지지 않아 목록으로 보여 드려요</p>
-    <UiEmptyState v-else-if="checked" mascot="kok" title="동네를 먼저 인증해 주세요" description="내 동네 가까운 곳의 경기를 지도에서 보여 드려요">
+    <UiEmptyState v-else-if="checked" mascot="kok" title="동네를 먼저 인증해 주세요">
       <UiButton to="/neighborhood">동네 인증하기</UiButton>
     </UiEmptyState>
 
@@ -16,7 +16,7 @@
         <p class="t-label flex-1 truncate">{{ group.name }} · {{ shown.length }}개</p>
         <UiChip icon="xmark" @click="selected = null">전체 보기</UiChip>
       </div>
-      <UiEmptyState v-if="!items.length" class="mt-6" mascot="match" :title="tab === 'open' ? '이 근처에 모집 중인 경기가 없어요' : '이 근처에서 끝난 경기가 없어요'" description="지도를 옮기면 그 근처를 다시 찾아요">
+      <UiEmptyState v-if="!items.length" class="mt-6" mascot="match" :title="tab === 'open' ? '이 근처에 모집 중인 경기가 없어요' : '이 근처에서 끝난 경기가 없어요'">
         <UiButton v-if="tab === 'open'" to="/create-game" variant="secondary">경기 열기</UiButton>
       </UiEmptyState>
       <UiList v-else class="mt-3">

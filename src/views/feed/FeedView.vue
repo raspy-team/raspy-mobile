@@ -39,7 +39,7 @@
         </div>
       </UiEmptyState>
 
-      <UiEmptyState v-else-if="!visible.length" class="pt-16" mascot="tong" title="아직 끝난 경기가 없어요" description="이기든 지든 끝난 경기는 여기 남아요">
+      <UiEmptyState v-else-if="!visible.length" class="pt-16" mascot="tong" title="아직 끝난 경기가 없어요">
         <UiButton to="/">경기 찾기</UiButton>
       </UiEmptyState>
 
@@ -120,7 +120,7 @@
           v-for="t in picking?.targets || []"
           :key="t.id"
           :title="t.name"
-          :subtitle="picking?.kind === 'watch' && picking.post.watching?.includes(t.id) ? '보는 중 · 누르면 그만 봐요' : ''"
+          :subtitle="picking?.kind === 'watch' && picking.post.watching?.includes(t.id) ? '보는 중' : ''"
           chevron
           @click="act(picking.post, picking.kind, t)"
         />

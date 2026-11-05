@@ -21,7 +21,7 @@
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
         <UiButton :to="`/games/${gameId}`">경기로 돌아가기</UiButton>
       </UiEmptyState>
-      <UiEmptyState v-else-if="!talks.length" class="pt-12" mascot="match" title="첫 말을 남겨 보세요" description="언제 어디서 볼지, 늦으면 몇 분 늦는지 여기서 나눠요">
+      <UiEmptyState v-else-if="!talks.length" class="pt-12" mascot="match" title="첫 말을 남겨 보세요">
         <div class="flex flex-wrap justify-center gap-2">
           <UiChip v-for="q in QUICK" :key="q" :disabled="!info?.writable" @click="send(q)">{{ q }}</UiChip>
         </div>

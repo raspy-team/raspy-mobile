@@ -12,7 +12,7 @@
 
     <!-- 경기 기록을 '나만'으로 둔 사람 (서버 403, 내 정보 공개). 다시 불러와도 같으니 버튼을 두지 않는다 -->
     <main v-else-if="hidden" class="max-w-2xl mx-auto px-4 pt-16">
-      <UiEmptyState icon="eye-slash" title="기록을 공개하지 않았어요" description="이 사람이 경기 기록을 나만 보도록 해 두었어요" />
+      <UiEmptyState icon="eye-slash" title="기록을 공개하지 않았어요" />
     </main>
     <main v-else-if="error" class="max-w-2xl mx-auto px-4 pt-16">
       <!-- 서버가 이유를 말했으면(없는 사람·차단) 그 말만, 연결 오류면 다시 불러오기 -->
@@ -23,7 +23,7 @@
     </main>
 
     <main v-else-if="!s.total.games && !s.practiceGames" class="max-w-2xl mx-auto px-4 pt-16">
-      <UiEmptyState mascot="match" title="아직 기록이 없어요" :description="isMe ? '한 판 하면 이번 주 기록·실력 점수·순위가 여기 쌓여요' : '경기를 하면 기록이 쌓여요'">
+      <UiEmptyState mascot="match" title="아직 기록이 없어요">
         <UiButton v-if="isMe" to="/games">한 판 하러 가기</UiButton>
       </UiEmptyState>
     </main>
@@ -54,7 +54,6 @@
             <p class="t-micro mt-0.5">{{ c.label }}</p>
           </div>
         </div>
-        <p v-if="!s.total.games" class="t-micro mt-3">AI 주민과 한 판은 연습이라 승률에 넣지 않아요. 사람과 한 판부터 쌓여요</p>
       </section>
 
       <!-- 활동: 한 판 이상 한 주가 몇 주 이어졌나 + 26주 달력 (연습 포함) -->
@@ -73,7 +72,7 @@
             <span>{{ Number(s.activitySince.slice(5, 7)) }}월</span>
             <span>오늘</span>
           </div>
-          <p class="t-caption mt-3">{{ streakLine }}</p>
+          <p v-if="streakLine" class="t-caption mt-3">{{ streakLine }}</p>
         </div>
       </section>
 
@@ -85,22 +84,8 @@
             {{ s.streak.count }}{{ s.streak.kind === 'win' ? '연승' : s.streak.kind === 'lose' ? '연패' : '연속 무승부' }} 중
           </UiBadge>
         </div>
-        <!-- 왼쪽이 오래된 경기, 오른쪽이 가장 최근 -->
-        <div class="flex gap-1.5">
-          <button
-            v-for="m in strip"
-            :key="m.gameId"
-            type="button"
-            class="flex-1 max-w-10 h-10 rounded-lg flex items-center justify-center t-label"
-            :class="RESULT[m.result].class"
-            :aria-label="`${m.ruleTitle} ${matchWho(m)} ${RESULT[m.result].word}`"
-            @click="openMatch(m)"
-          >
-            {{ m.players > 2 && !m.teams ? m.place : RESULT[m.result].label }}
-          </button>
-        </div>
-        <p class="t-micro mt-2">왼쪽이 오래된 경기예요. 셋 이상이 한 판은 등수로 보여요</p>
-        <UiList class="mt-3">
+        <!-- 승패 칸 줄(왼쪽이 오래된 경기)은 이 목록과 같은 내용이라 뺐다 (UX 리뷰 ⑥) -->
+        <UiList>
           <UiListItem
             v-for="m in allMatches ? s.matches : s.matches.slice(0, 5)"
             :key="m.gameId"
@@ -110,7 +95,7 @@
             @click="openMatch(m)"
           >
             <template #leading>
-              <span class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 t-label" :class="RESULT[m.result].class">{{ RESULT[m.result].label }}</span>
+              <span class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 t-label" :class="RESULT[m.result].class">{{ m.players > 2 && !m.teams ? `${m.place}등` : RESULT[m.result].label }}</span>
             </template>
           </UiListItem>
         </UiList>
@@ -131,17 +116,22 @@
             <p class="t-caption">종합</p>
             <!-- 가진 1위 (자리마다, 새벽 4시에 정한다) -->
             <span v-if="crownText('OVERALL', 'ALL')" class="t-micro text-signal-fg"><UiIcon name="fas fa-crown" /> {{ crownText('OVERALL', 'ALL') }}</span>
-            <p class="t-title tabular-nums ml-auto">{{ overview.overall.rating }}</p>
-            <p class="t-caption tabular-nums">±{{ overview.overall.margin }}</p>
+            <!-- 잠정이면 숫자 대신 한 줄 (④ 결과 화면과 같은 기준: 첫 몇 판의 숫자는 크게 흔들린다) -->
+            <p v-if="overview.overall.provisional" class="t-caption ml-auto">몇 판 더 하면 나와요</p>
+            <template v-else>
+              <p class="t-title tabular-nums ml-auto">{{ overview.overall.rating }}</p>
+              <p class="t-caption tabular-nums">±{{ overview.overall.margin }}</p>
+            </template>
           </button>
-          <p class="t-label mt-1 text-right" :class="overview.overall.provisional ? 'text-fg-muted' : ''">
-            {{ overview.overall.provisional ? '잠정 · 판이 쌓이면 정해져요' : standing(overview.overall.rank, overview.overall.people) }}
+          <p v-if="!overview.overall.provisional && showRank(overview.overall.rank, overview.overall.people)" class="t-label mt-1 text-right">
+            {{ standing(overview.overall.rank, overview.overall.people) }}
           </p>
           <div v-if="overview.groups.length" class="grid gap-2 mt-3" :style="{ gridTemplateColumns: `repeat(${overview.groups.length}, minmax(0, 1fr))` }">
             <button v-for="g in overview.groups" :key="g.key" type="button" class="rounded-lg bg-surface-2 px-3 py-2 text-left" @click="router.push(`/rankings/GROUP/${g.key}`)">
               <p class="t-micro">{{ g.label }}</p>
-              <p class="t-heading tabular-nums">{{ g.rating }}</p>
-              <p v-if="!g.provisional && g.rank" class="t-micro tabular-nums">{{ standing(g.rank, g.people) }}</p>
+              <p v-if="g.provisional" class="t-caption">몇 판 더</p>
+              <p v-else class="t-heading tabular-nums">{{ g.rating }}</p>
+              <p v-if="!g.provisional && showRank(g.rank, g.people)" class="t-micro tabular-nums">{{ standing(g.rank, g.people) }}</p>
               <p v-if="crownText('GROUP', g.key)" class="t-micro text-signal-fg truncate"><UiIcon name="fas fa-crown" /> {{ crownText('GROUP', g.key) }}</p>
             </button>
           </div>
@@ -157,7 +147,11 @@
           <div v-if="ratedRules.length > 1" class="flex gap-2 -mx-4 px-4 mb-3 overflow-x-auto no-scrollbar" role="tablist" aria-label="게임 고르기">
             <UiChip v-for="r in ratedRules" :key="r.ruleId" class="flex-shrink-0 whitespace-nowrap" :selected="picked?.ruleId === r.ruleId" @click="pickedId = r.ruleId">{{ r.ruleTitle }}</UiChip>
           </div>
-          <div v-if="picked" class="rounded-xl bg-surface p-4">
+          <div v-if="picked?.provisional" class="rounded-xl bg-surface p-4">
+            <p class="t-body">실력 점수는 몇 판 더 하면 나와요</p>
+            <p v-if="untilRanked(picked)" class="t-caption mt-1">{{ untilRanked(picked) }}</p>
+          </div>
+          <div v-else-if="picked" class="rounded-xl bg-surface p-4">
             <div class="flex items-baseline gap-2">
               <p class="t-title tabular-nums">{{ picked.rating }}점</p>
               <p class="t-caption tabular-nums">±{{ picked.margin }}</p>
@@ -212,7 +206,7 @@
             v-for="b in s.bests"
             :key="b.key"
             :title="b.title"
-            :subtitle="`기록 순위 ${b.rank}위 / ${b.players}명`"
+            :subtitle="showRank(b.rank, b.players) ? `기록 순위 ${b.rank}위 / ${b.players}명` : ''"
             chevron
             @click="router.push(`/play/${b.key}`)"
           >
@@ -273,7 +267,7 @@
           <div v-if="s.skill" class="rounded-xl bg-surface p-4">
             <p class="t-caption">상대가 본 실력</p>
             <p class="t-title tabular-nums mt-1">★ {{ s.skill.average.toFixed(1) }}</p>
-            <p class="t-micro mt-0.5">{{ s.skill.count }}명이 평가 · 실력 점수와 따로</p>
+            <p class="t-micro mt-0.5">{{ s.skill.count }}명이 평가</p>
           </div>
         </div>
         <ul v-if="s.reviews.length" class="space-y-3 mt-3">
@@ -310,6 +304,7 @@ import { GET } from '@/api/client'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiRollNumber, UiSheet, UiSkeleton, UiTabs, UiTopBar } from '../../components/ui'
 import { timeAgo } from '../../utils/format'
+import { showRank } from '@/utils/rank'
 
 const RESULT = {
   win: { label: '승', word: '이김', class: 'bg-fg text-canvas' },
@@ -390,12 +385,12 @@ const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0
 // 주가 끝나기 전엔 연속이 끊기지 않는다. 이번 주가 비었으면 '한 판 하면 N주 연속' (목표가 눈앞에 보이게)
 const streakLine = computed(() => {
   const n = s.value.weekStreak
-  if (s.value.activeThisWeek) return n >= 2 ? `${n}주째 매주 한 판 이상 했어요` : '이번 주에 한 판 했어요. 다음 주에도 하면 2주 연속이에요'
+  // 이번 주에 했으면 위의 큰 숫자와 'N주 연속' 표가 이미 말한다
+  if (s.value.activeThisWeek) return ''
   if (n) return isMe.value ? `이번 주에 한 판 하면 ${n + 1}주 연속이에요` : `지난주까지 ${n}주 연속 했어요`
-  return isMe.value ? '이번 주에 한 판 해 보세요. 매주 하면 연속 주가 쌓여요' : '이번 주엔 아직 안 했어요'
+  return ''
 })
 
-const strip = computed(() => s.value.matches.slice(0, 10).reverse())
 function matchWho(m) {
   if (m.teams) return m.opponent ? `${m.opponent.nickname} 팀과` : '팀 경기'
   if (m.players > 2) return `${m.players}명 중 ${m.place}등`
@@ -410,11 +405,12 @@ function standing(rank, people) {
   return `상위 ${Math.max(1, Math.ceil((rank * 100) / people))}%`
 }
 function untilRanked(r) {
-  const need = [r.needGames && `${r.needGames}판`, r.needOpponents && `상대 ${r.needOpponents}명`].filter(Boolean).join(' · ')
-  return need ? `순위까지 ${need}` : ''
+  // '순위까지 3판 · 상대 1명'은 뜻이 헷갈렸다: 더 필요한 것만, '더'를 붙여
+  const need = [r.needGames && `${r.needGames}판`, r.needOpponents && `새 상대 ${r.needOpponents}명`].filter(Boolean).join(', ')
+  return need ? `순위까지 ${need} 더` : ''
 }
-const rankLine = (r) => (r.rank ? `전국 ${r.rank}위 · ${standing(r.rank, r.rankedPlayers)}` : untilRanked(r))
-const rankShort = (r) => (r.rank ? `${r.rank}위` : untilRanked(r))
+const rankLine = (r) => (r.rank ? (showRank(r.rank, r.rankedPlayers) ? `전국 ${r.rank}위 · ${standing(r.rank, r.rankedPlayers)}` : '') : untilRanked(r))
+const rankShort = (r) => (r.rank ? (showRank(r.rank, r.rankedPlayers) ? `${r.rank}위` : '') : untilRanked(r))
 const score = (v) => (Number.isInteger(v) ? v : v.toFixed(1))
 
 // 실력 점수가 있는 게임 (게임별 줄 + 흐름). 흐름은 /api/rankings/history

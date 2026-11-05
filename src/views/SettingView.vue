@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="설정" back="/profile/0" />
+    <UiTopBar title="설정" back fallback="/profile/0" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-32 space-y-8">
       <!-- 나 -->

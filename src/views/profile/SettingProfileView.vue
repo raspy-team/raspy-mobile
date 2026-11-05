@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="프로필 편집" back="/profile/0" />
+    <UiTopBar title="프로필 편집" back fallback="/profile/0" />
 
     <main v-if="loading" class="max-w-md mx-auto px-4 pt-6 space-y-6" role="status" aria-label="불러오는 중">
       <UiSkeleton class="w-24 h-24 rounded-full mx-auto" />

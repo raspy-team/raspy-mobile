@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="detail?.club.name || '동호회'" back="/clubs">
+    <UiTopBar :title="detail?.club.name || '동호회'" back fallback="/clubs">
       <template v-if="isStaff" #right>
         <UiIconButton icon="pen" label="동호회 꾸미기" @click="openSettings" />
       </template>

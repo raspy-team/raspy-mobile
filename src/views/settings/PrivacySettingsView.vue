@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="내 정보 공개" back="/settings" />
+    <UiTopBar title="내 정보 공개" back fallback="/settings" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
       <p class="t-caption py-3">끄면 나만 봐요</p>

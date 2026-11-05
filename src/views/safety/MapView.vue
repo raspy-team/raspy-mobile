@@ -1,5 +1,5 @@
 <template>
-  <UiTopBar title="지도" back="/" />
+  <UiTopBar title="지도" back fallback="/" />
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiTabs v-model="tab" :options="TABS" class="mb-3" />
 

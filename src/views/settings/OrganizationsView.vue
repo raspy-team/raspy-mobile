@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="소속" back="/settings" />
+    <UiTopBar title="소속" back fallback="/settings" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-32 space-y-8">
       <p class="t-caption pt-3">인증하면 프로필에 ✓ 소속이 붙어요</p>

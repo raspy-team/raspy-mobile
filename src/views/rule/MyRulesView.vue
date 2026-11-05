@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="내 규칙" back="/rules">
+    <UiTopBar title="내 규칙" back fallback="/rules">
       <template #right>
         <UiIconButton icon="fas fa-plus" label="규칙 만들기" @click="router.push('/rules/create')" />
       </template>

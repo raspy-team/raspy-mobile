@@ -25,10 +25,16 @@ import { useRouter } from 'vue-router'
 const props = defineProps({
   title: { type: String, default: '' },
   back: { type: [Boolean, String], default: false }, // true면 이전 화면, 문자열이면 그 주소로
+  // back이 true일 때: 앞 화면이 없으면(링크로 바로 들어옴) 갈 곳. 문자열 back은 늘 그 주소로 '새로' 가서,
+  // 그 주소의 뒤로(=이전 화면)가 다시 여기로 와 둘 사이에 갇혔다 (동호회 ↔ 동호회 목록, 11/5)
+  fallback: { type: String, default: '' },
 })
 const router = useRouter()
 function goBack() {
   if (typeof props.back === 'string') router.push(props.back)
+  // 앱 안에서 온 앞 화면이 있으면 그리로 (vue-router가 history.state.back에 적는다)
+  else if (window.history.state?.back) router.back()
+  else if (props.fallback) router.replace(props.fallback)
   else if (window.history.length > 1) router.back()
   else router.push('/')
 }

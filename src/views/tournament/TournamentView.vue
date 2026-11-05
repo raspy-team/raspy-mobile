@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="v?.summary.title || '대회'" back="/tournaments" />
+    <UiTopBar :title="v?.summary.title || '대회'" back fallback="/tournaments" />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!v && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />

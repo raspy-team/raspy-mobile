@@ -54,6 +54,7 @@ npx capacitor-assets generate --android --ios # 아이콘·시작 화면 다시 
 
 - 스토어에 올릴 때마다 `android/app/build.gradle`의 `versionCode`를 1씩 올린다
 - **빌드 전에 꼭 `npx cap sync`**: 페이스북 SDK를 빼는 설정(`capacitor.config.ts`의 `SocialLogin.providers`)은 sync 때 `node_modules` 안 플러그인에 적힌다. `npm install` 뒤 sync 없이 빌드하면 페이스북 SDK와 광고 ID 권한(AD_ID)이 다시 들어간다. 푸시에는 `~/.config/match/google-services.json`을 `android/app/`에 복사해 둔다
+- **카카오 로그인**은 앱 안 로컬 플러그인 `native/kakao-login`(카카오 SDK)이 카카오톡 앱으로 한다. 네이티브 앱 키는 리포 밖 `~/.config/match/kakao_native_key`에 두고 빌드 때 넣는다(안드로이드 `build.gradle`, iOS 빌드 설정 `KAKAO_NATIVE_KEY`). 키 없이 빌드하면 앱의 카카오 버튼은 예전처럼 웹 로그인으로 간다. 카카오 콘솔의 네이티브 앱 키에는 패키지·번들 ID와 키 해시 셋(Play 앱 서명·업로드·디버그)이 등록돼 있다
 - iOS는 Xcode가 있어야 빌드된다 (`npx cap open ios`). TestFlight에 올리기는 `scripts/ios-upload.sh` 한 줄이다(Xcode에 개발자 계정 로그인 필요). 올릴 때마다 `ios/App/App.xcodeproj`의 `CURRENT_PROJECT_VERSION`(빌드 번호)을 1씩 올린다. 푸시는 `~/.config/match/GoogleService-Info.plist`가 있어야 등록된다(빌드 때 자동 복사). 사용자 할 일은 워크스페이스 `docs/store/ios.md`
 
 ## 폴더

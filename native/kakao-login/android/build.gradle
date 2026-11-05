@@ -1,0 +1,40 @@
+// 카카오톡 로그인 플러그인 (raspy-mobile 안의 로컬 패키지). cap sync가 android 앱에 넣는다
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.13.0'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace = "me.matchapp.kakao"
+    compileSdk = project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 36
+    defaultConfig {
+        minSdkVersion project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 24
+        targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 36
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+    lintOptions {
+        abortOnError = false
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' }
+}
+
+dependencies {
+    implementation project(':capacitor-android')
+    implementation "androidx.appcompat:appcompat:${project.hasProperty('androidxAppCompatVersion') ? rootProject.ext.androidxAppCompatVersion : '1.7.1'}"
+    implementation 'com.kakao.sdk:v2-user:2.26.0'
+}

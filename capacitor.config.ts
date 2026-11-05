@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
   android: { appendUserAgent: 'raspy-android' },
   ios: { appendUserAgent: 'raspy-ios' },
   plugins: {
-    // 앱 안 로그인은 구글만 쓴다(카카오·애플은 웹). 페이스북 SDK는 광고 ID(AD_ID) 권한과
+    // 앱 안 로그인: 구글·애플은 이 플러그인, 카카오는 native/kakao-login(카카오톡 앱으로). 페이스북 SDK는 광고 ID(AD_ID) 권한과
     // 앱 이벤트 전송을 끌고 와서 Play 데이터 보안 '공유 안 함'과 어긋나므로 뺀다 (11/5)
     SocialLogin: { providers: { google: true, facebook: false, apple: true, twitter: false } },
   },

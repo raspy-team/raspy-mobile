@@ -115,7 +115,7 @@ import { API_BASE_URL } from '@/config/server'
 import { TERMS } from '../content/legal'
 import { UiButton, UiCard, UiSheet } from '../components/ui'
 import { peekReturnTo, takeReturnTo } from '../utils/authRedirect'
-import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin } from '../utils/nativeBridge'
+import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin, nativeKakaoLogin, hasNativeKakao } from '../utils/nativeBridge'
 import { trackEvent } from '../utils/visit'
 
 const FEATURES = [
@@ -134,10 +134,11 @@ const route = useRoute()
 const openTerm = ref(null)
 const pending = ref('')
 
-// 서버에 키가 있는 소셜 로그인 (/api/auth/providers). 앱 안에서는 구글·애플을 앱이 직접 하고(구글은 앱 안 웹 화면 로그인을 막는다), 카카오는 웹으로
+// 서버에 키가 있는 소셜 로그인 (/api/auth/providers). 앱 안에서는 구글·애플·카카오를 앱이 직접 한다(구글은 앱 안 웹 화면 로그인을 막고,
+// 카카오는 웹 화면이면 카카오톡으로 못 넘어가 아이디·비밀번호를 쳐야 한다). 아이폰 앱은 카카오 플러그인이 든 빌드부터 구글을 보인다
 const enabled = ref({ google: false, kakao: false, apple: false })
 const show = computed(() => ({
-  google: isAndroidApp || (!isIosApp && enabled.value.google),
+  google: isAndroidApp || (isIosApp && hasNativeKakao) || (!isIosApp && enabled.value.google),
   kakao: enabled.value.kakao,
   apple: isIosApp || (!isAndroidApp && enabled.value.apple),
 }))
@@ -203,6 +204,19 @@ function loginWith(provider) {
       pending.value = ''
       // 계정 고르기를 닫은 건 오류가 아니다
       if (!/cancel/i.test(String(e?.message || e))) nativeError.value = LOGIN_ERRORS.failed
+    })
+    return
+  } else if (provider === 'kakao' && hasNativeKakao) {
+    nativeError.value = ''
+    nativeKakaoLogin().catch((e) => {
+      const msg = String(e?.message || e)
+      // 플러그인이 없는 옛 앱 빌드·키 없는 빌드는 예전처럼 웹 로그인으로
+      if (/unavailable|not implemented/i.test(msg)) {
+        window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`
+        return
+      }
+      pending.value = ''
+      if (!/cancel/i.test(msg)) nativeError.value = LOGIN_ERRORS.failed
     })
     return
   } else if (provider === 'google' && window.AndroidApp?.loginWithGoogle) {

@@ -7,9 +7,14 @@ android {
         applicationId "com.songostudio.match"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.3"
+        versionCode 5
+        versionName "1.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // 카카오 네이티브 앱 키는 리포 밖에 둔다 (~/.config/match/kakao_native_key). 없으면 앱의 카카오 로그인이 웹 로그인으로 간다
+        def kakaoKeyFile = new File(System.getenv('MATCH_KAKAO_NATIVE_KEY_FILE') ?: "${System.getProperty('user.home')}/.config/match/kakao_native_key")
+        def kakaoKey = kakaoKeyFile.exists() ? kakaoKeyFile.text.trim() : ''
+        resValue "string", "kakao_native_key", kakaoKey
+        manifestPlaceholders = [kakaoScheme: kakaoKey ? "kakao${kakaoKey}" : "kakaonone"]
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61

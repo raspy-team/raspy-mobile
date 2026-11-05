@@ -1,5 +1,5 @@
 // iOS·안드로이드 앱(웹뷰) 쪽으로 보내는 신호
-import { Capacitor } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 import { API_BASE_URL } from '../config/server'
 
 const ua = navigator.userAgent.toLowerCase()
@@ -8,6 +8,10 @@ export const isAndroidApp = ua.includes('raspy-android')
 
 // Capacitor 앱(11/4~)인지. 옛 앱은 window.AndroidApp·iosBridge로 따로 연결했다
 export const isCapacitorApp = Capacitor.isNativePlatform()
+
+// 카카오톡 로그인 플러그인(native/kakao-login)이 든 앱 빌드인지 (안드로이드 versionCode 5·아이폰 빌드 2부터).
+// 아이폰 구글 로그인도 같은 빌드부터 된다: 그 전 빌드엔 구글이 돌아올 주소(Info.plist)가 없어 누르면 앱이 꺼진다
+export const hasNativeKakao = isCapacitorApp && Capacitor.isPluginAvailable('MatchKakao')
 
 // 로그인 뒤 푸시 알림 토큰을 서버에 등록하도록 앱에 알린다
 export function registerFcmToken(jwt) {
@@ -99,10 +103,20 @@ async function registerCapacitorPush() {
 // 구글은 앱 안 웹 화면 로그인을 막는다. 앱이 직접 구글 계정을 고르게 하고, 받은 토큰을 서버에 넘긴다.
 // 서버가 웹 로그인과 같은 곳(/oauth/callback)으로 돌려보낸다. 토큰의 aud는 웹 클라이언트 ID다
 const GOOGLE_WEB_CLIENT_ID = '241935491220-e9jmpcr15l5dird6rqt6d7nviris7l4q.apps.googleusercontent.com'
+// 아이폰 앱용 OAuth 클라이언트 (11/5). 앱 Info.plist에 거꾸로 쓴 주소(com.googleusercontent.apps....)가 있어야 돌아온다.
+// iOSServerClientId를 웹 클라이언트로 주어 토큰의 aud가 안드로이드와 같은 웹 클라이언트가 되게 한다
+const GOOGLE_IOS_CLIENT_ID = '241935491220-t233q7lgpq134n0a2cmue2af3avpfnk3.apps.googleusercontent.com'
 
 export async function nativeGoogleLogin() {
   const { SocialLogin } = await import('@capgo/capacitor-social-login')
-  await SocialLogin.initialize({ google: { webClientId: GOOGLE_WEB_CLIENT_ID, skipAuthOnlyAuthorizationAfterSignIn: true } })
+  await SocialLogin.initialize({
+    google: {
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+      iOSClientId: GOOGLE_IOS_CLIENT_ID,
+      iOSServerClientId: GOOGLE_WEB_CLIENT_ID,
+      skipAuthOnlyAuthorizationAfterSignIn: true,
+    },
+  })
   const { result } = await SocialLogin.login({ provider: 'google', options: {} })
   if (!result.idToken) throw new Error('no id token')
   window.location.href = `${API_BASE_URL}/login/oauth2/google/token?id_token=${encodeURIComponent(result.idToken)}`
@@ -116,4 +130,14 @@ export async function nativeAppleLogin() {
   const { result } = await SocialLogin.login({ provider: 'apple', options: { scopes: ['email', 'name'] } })
   if (!result.idToken) throw new Error('no id token')
   window.location.href = `${API_BASE_URL}/login/oauth2/apple/token?id_token=${encodeURIComponent(result.idToken)}`
+}
+
+// 앱의 카카오 로그인 (11/5): 카카오톡 앱으로 로그인하고(없으면 카카오계정 창), 받은 액세스 토큰을 서버에 넘긴다.
+// 서버(KakaoMobileAuthController /login/oauth2/kakao/token)가 우리 앱 ID로 받은 토큰인지 보고 /oauth/callback으로 돌려보낸다.
+// 플러그인(native/kakao-login)이 없는 옛 앱 빌드나 키 없이 만든 빌드는 'unavailable'로 실패한다 → 부르는 쪽이 웹 로그인으로 간다
+export async function nativeKakaoLogin() {
+  const MatchKakao = registerPlugin('MatchKakao')
+  const { accessToken } = await MatchKakao.login()
+  if (!accessToken) throw new Error('no access token')
+  window.location.href = `${API_BASE_URL}/login/oauth2/kakao/token?access_token=${encodeURIComponent(accessToken)}`
 }

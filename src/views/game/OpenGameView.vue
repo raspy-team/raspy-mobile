@@ -52,9 +52,12 @@
           :closed="!['MATCHING', 'SCHEDULED'].includes(game.gameStatus)"
         />
         <!-- 팀 경기 단톡방: 승인된 둘 이상이면 (11/5 C) -->
-        <UiButton v-if="teamChatOpen(game, myId)" block variant="secondary" icon="far fa-comment" class="mt-4" :to="`/games/${game.id}/chat`">단톡방</UiButton>
-        <UiButton v-if="game.ownerId === myId || game.players?.some((p) => p.id === myId)" block variant="secondary" class="mt-4" to="/game">내 경기에서 보기</UiButton>
-        <UiButton v-else block variant="ghost" class="mt-4" to="/">다른 경기 찾기</UiButton>
+        <!-- 보조 행동은 글자 버튼으로 (애플식: 꽉 찬 버튼은 화면의 주된 행동 하나만, UX 버튼 크기) -->
+        <div class="mt-4 flex flex-wrap justify-center gap-x-2">
+          <UiButton v-if="teamChatOpen(game, myId)" variant="ghost" icon="far fa-comment" :to="`/games/${game.id}/chat`">단톡방</UiButton>
+          <UiButton v-if="game.ownerId === myId || game.players?.some((p) => p.id === myId)" variant="ghost" to="/game">내 경기에서 보기</UiButton>
+          <UiButton v-else variant="ghost" to="/">다른 경기 찾기</UiButton>
+        </div>
       </template>
     </main>
   </div>

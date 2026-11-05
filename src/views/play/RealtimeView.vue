@@ -41,7 +41,7 @@
         <UiButton v-if="longLobby && !state.fixture && !state.invitee" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
           {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 AI 주민과 할 수 있어요` : '기다리지 않고 AI 주민과 하기' }}
         </UiButton>
-        <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="secondary" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
+        <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="ghost" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">{{ state.invitee ? '도전 취소' : '그만 찾기' }}</UiButton>
         <!-- 다른 게임에서 기다리는 사람이 있으면 그쪽으로 붙는 게 빠르다 -->

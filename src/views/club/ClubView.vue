@@ -30,7 +30,7 @@
         </UiCard>
 
         <template v-if="isMember">
-          <UiButton block size="lg" class="mt-5" icon="plus" @click="openGame">동호회 경기 열기</UiButton>
+          <UiButton block class="mt-5" icon="plus" @click="openGame">동호회 경기 열기</UiButton>
           <div class="flex gap-2 mt-2">
             <UiButton v-if="detail.chatLink" class="flex-1" variant="secondary" icon="comment" @click="openChat">단톡방</UiButton>
             <UiButton class="flex-1" variant="secondary" icon="share" @click="share">초대 링크</UiButton>

@@ -15,7 +15,8 @@
     <NeighborhoodBar class="mt-5 mb-3" @changed="fetchGames" />
 
     <!-- 위쪽 버튼은 두 가지만: 채운 주 행동 하나 + 같은 모양의 갈 곳 셋 (11/3) -->
-    <UiButton block size="lg" icon="plus" to="/create-game">경기 만들기</UiButton>
+    <!-- 홈 맨 위의 52px 흰 막대가 화면을 눌렀다 (UX 버튼 크기, 애플식): 보통 크기 -->
+    <UiButton block icon="plus" to="/create-game">경기 만들기</UiButton>
     <nav class="mt-3 grid grid-cols-3 gap-2" aria-label="둘러보기">
       <RouterLink v-for="d in DESTINATIONS" :key="d.to" :to="d.to" class="flex flex-col items-center gap-1.5 rounded-xl bg-surface py-3.5 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]">
         <UiIcon :name="d.icon" class="text-xl text-fg-muted" />

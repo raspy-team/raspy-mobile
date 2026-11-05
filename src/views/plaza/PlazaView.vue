@@ -85,13 +85,15 @@
       </div>
       <template #footer>
         <div v-if="card && card.id !== enter?.me.id" class="space-y-2">
-          <UiButton block size="lg" @click="pickerOpen = true">{{ card.bot ? 'AI와 한 판' : restingText(card) ? '도전장 남기기' : '한 판 하자' }}</UiButton>
-          <div class="flex gap-2">
+          <UiButton block size="lg" @click="pickerOpen = true">{{ restingText(card) ? '도전장 남기기' : '도전하기' }}</UiButton>
+          <!-- 주된 버튼 하나 + 작은 버튼 (애플식). 신고·차단은 글자로 -->
+          <div class="flex items-center gap-2">
             <!-- 친구 추가 (UX ⑤: 광장에서 만난 사람을 친구로 할 길이 없었다). 이미 친구면 숨긴다 -->
-            <UiButton v-if="!card.bot && friend && !friend.isFriend" class="flex-1" variant="secondary" :disabled="friend.sent" @click="addFriend(card.id)">{{ friend.sent ? '요청 보냄' : friend.received ? '친구 받기' : '친구 추가' }}</UiButton>
-            <UiButton v-if="!card.bot" class="flex-1" variant="secondary" @click="router.push(`/profile/${card.id}`)">프로필</UiButton>
-            <UiButton v-if="!card.bot" class="flex-1" variant="secondary" @click="reportOpen = true">신고</UiButton>
-            <UiButton v-if="!card.bot" class="flex-1" variant="secondary" @click="block(card.id)">차단</UiButton>
+            <UiButton v-if="!card.bot && friend && !friend.isFriend" size="sm" variant="secondary" :disabled="friend.sent" @click="addFriend(card.id)">{{ friend.sent ? '요청 보냄' : friend.received ? '친구 받기' : '친구 추가' }}</UiButton>
+            <UiButton v-if="!card.bot" size="sm" variant="secondary" @click="router.push(`/profile/${card.id}`)">프로필</UiButton>
+            <span class="flex-1" />
+            <UiButton v-if="!card.bot" size="sm" variant="ghost" @click="reportOpen = true">신고</UiButton>
+            <UiButton v-if="!card.bot" size="sm" variant="ghost" @click="block(card.id)">차단</UiButton>
           </div>
         </div>
         <UiButton v-else block variant="secondary" @click="router.push('/plaza/avatar')">꾸미기</UiButton>
@@ -155,7 +157,7 @@
             </span>
           </button>
           <!-- 걷지 않고 바로 게임 고르기 -->
-          <UiButton size="sm" variant="secondary" class="shrink-0" @click="peopleOpen = false; card = p; loadGames(); pickerOpen = true">한 판</UiButton>
+          <UiButton size="sm" variant="secondary" class="shrink-0" @click="peopleOpen = false; card = p; loadGames(); pickerOpen = true">도전</UiButton>
         </li>
       </ul>
     </UiSheet>

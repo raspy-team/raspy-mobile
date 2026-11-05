@@ -192,7 +192,7 @@
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
-        <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" block variant="secondary" icon="share" class="mt-3" :loading="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
+        <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" block variant="ghost" icon="share" class="mt-1" :loading="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '알림' }}</p>
           <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>

@@ -1,0 +1,10 @@
+{
+  "name": "match-kakao-login",
+  "version": "1.0.0",
+  "private": true,
+  "description": "앱에서 카카오톡으로 로그인 (카카오 SDK). 받은 액세스 토큰을 서버 /login/oauth2/kakao/token에 넘긴다",
+  "capacitor": {
+    "ios": { "src": "ios" },
+    "android": { "src": "android" }
+  }
+}

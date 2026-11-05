@@ -21,6 +21,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // 카카오 SDK (native/kakao-login)
+        maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' }
     }
 }
 

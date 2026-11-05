@@ -7,3 +7,6 @@ project(':capacitor-push-notifications').projectDir = new File('../node_modules/
 
 include ':capgo-capacitor-social-login'
 project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/@capgo/capacitor-social-login/android')
+
+include ':match-kakao-login'
+project(':match-kakao-login').projectDir = new File('../native/kakao-login/android')

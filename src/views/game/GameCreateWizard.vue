@@ -161,9 +161,9 @@ import { GET } from '@/api/client'
 import { categoryKey, winSummary } from '../../utils/rule'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { feel } from '../../utils/feel'
-import { shareLink } from '../../utils/share'
+import { shareGameInvite } from '../../utils/share'
 import { localIso, quickTimes } from '../../utils/when'
 import { matchTime } from '../../utils/format'
 import { allowedFormats, TEAM_SIZES, GROUP_SIZES, VENUES, isRemote } from '../../utils/gameFormat'
@@ -221,11 +221,8 @@ const sharing = ref(false)
 async function shareGame() {
   sharing.value = true
   try {
-    const { data } = await api.post('/api/invite', null, { params: { gameId: createdId.value } })
-    const msg = await shareLink(data.url, `${rule.value?.ruleTitle || '경기'} 한 판 할래요? 매치에서 신청해 주세요`)
+    const msg = await shareGameInvite(createdId.value, `${rule.value?.ruleTitle || '경기'} 한 판 할래요? 매치에서 신청해 주세요`)
     if (msg) showToast(msg)
-  } catch {
-    showToast('링크를 만들지 못했어요')
   } finally {
     sharing.value = false
   }

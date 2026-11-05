@@ -25,7 +25,7 @@ import { useRoute } from 'vue-router'
 import { GET } from '../../api/client'
 import type { components } from '../../api/schema'
 import { UiButton } from '../ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { copyText } from '../../utils/clipboard'
 import { getMyId } from '../../utils/me'
 

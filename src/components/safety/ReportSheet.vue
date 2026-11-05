@@ -17,7 +17,7 @@
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiButton, UiChip, UiInput, UiSheet } from '../ui'
 import { POST } from '../../api/client'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },

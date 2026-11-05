@@ -76,17 +76,14 @@ api.interceptors.response.use(
     // 현재 페이지 경로 확인
     const currentPath = window.location.pathname
 
-    // /api/auth/login 또는 /invite-fall-back/ 페이지면 라우터 변경하지 않음
     if (requestUrl && requestUrl.includes('/api/auth/login')) {
         // 로그인 API에서 401은 라우터 변경하지 않음
         localStorage.removeItem('raspy_access_token2')
         return Promise.reject(error)
     }
 
-    // /invite-fall-back/ 페이지에서의 모든 401은 무시
-    if (currentPath && 
-      currentPath.startsWith('/invite-fall-back/') || 
-    currentPath.startsWith('/group/login'))  {
+    // 단체 로그인 화면의 401은 그 화면이 직접 보인다
+    if (currentPath.startsWith('/group/login')) {
         return Promise.reject(error)
     }
 
@@ -177,27 +174,6 @@ export const playWithMeTooAPI = {
     const response = await api.get('/api/play-with-me-too/status-with-user', {
       params: { otherUserId }
     })
-    return response.data
-  }
-}
-
-// 또 보고싶어요 API
-export const likeAPI = {
-  // 또 보고싶어요 토글
-  async toggleLike(gameId) {
-    const response = await api.post(`/api/games/${gameId}/like`)
-    return response.data
-  },
-
-  // 좋아요 상태 조회
-  async getLikeStatus(gameId) {
-    const response = await api.get(`/api/games/${gameId}/like`)
-    return response.data
-  },
-
-  // 좋아요한 사용자 전체 목록
-  async getLikers(gameId) {
-    const response = await api.get(`/api/games/${gameId}/like/users`)
     return response.data
   }
 }

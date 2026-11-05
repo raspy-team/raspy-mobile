@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps } from 'vue'
-import { useActiveGamePolling } from '../composable/useActiveGamePolling'
+import { useActiveGamePolling } from '../composables/useActiveGamePolling'
 defineProps({ tab: String })
 
 // 상대가 나를 기다리는 일(결과 확인·신청 승인)이 있으면 '내 경기'에 숫자를 단다

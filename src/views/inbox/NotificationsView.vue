@@ -91,7 +91,7 @@ import api from '../../api/api'
 import {
   UiAvatar, UiButton, UiEmptyState, UiIconButton, UiList, UiListItem, UiListSkeleton, UiPullIndicator, UiSheet, UiTopBar,
 } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { markAllNotificationsRead, markNotificationRead, refreshInbox, useInbox } from '../../stores/inbox'
 import { timeAgo } from '../../utils/format'

@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, watch, defineProps, defineEmits, onMounted, onUnmounted } from 'vue'
-import { compressImage, dataUrlToFile } from '../utils/gamePictureStorage'
+import { compressImage, dataUrlToFile, photoFromFile } from '../utils/image'
 import { UiButton, UiIcon, UiSheet } from './ui'
 
 const props = defineProps({
@@ -148,22 +148,10 @@ onUnmounted(() => {
 const onImageChange = async (e) => {
   const file = e.target.files?.[0]
   if (file) {
-    const reader = new FileReader()
-    reader.onload = async () => {
-      try {
-        // 이미지 압축 (화질 30%)
-        const compressedDataUrl = await compressImage(reader.result)
-        capturedImage.value = compressedDataUrl
-        // 압축된 이미지를 File 객체로 변환
-        selectedFile.value = dataUrlToFile(compressedDataUrl, file.name)
-      } catch (error) {
-        console.error('이미지 압축 실패:', error)
-        // 압축 실패 시 원본 사용
-        selectedFile.value = file
-        capturedImage.value = URL.createObjectURL(file)
-      }
-    }
-    reader.readAsDataURL(file)
+    // 줄이지 못하면 원본을 쓴다
+    const p = await photoFromFile(file).catch(() => null)
+    selectedFile.value = p?.file ?? file
+    capturedImage.value = p?.dataUrl ?? URL.createObjectURL(file)
   }
   // input 초기화 (같은 파일 재선택 가능하도록)
   e.target.value = ''

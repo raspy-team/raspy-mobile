@@ -69,7 +69,7 @@ import { useRoute } from 'vue-router'
 import { GET, PUT, POST, DELETE } from '../../api/client'
 import type { components } from '../../api/schema'
 import { UiButton, UiEmptyState, UiIcon, UiInput, UiListSkeleton, UiSheet, UiTopBar } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 type Account = components['schemas']['AccountView']
 

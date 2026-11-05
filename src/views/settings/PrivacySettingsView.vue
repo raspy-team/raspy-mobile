@@ -41,7 +41,7 @@ import { useRouter } from 'vue-router'
 import { GET, PATCH } from '../../api/client'
 import type { components } from '../../api/schema'
 import { UiButton, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiSwitch, UiTopBar } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 type Settings = components['schemas']['PrivacySettings']
 type Key = 'age' | 'gender' | 'region' | 'records'

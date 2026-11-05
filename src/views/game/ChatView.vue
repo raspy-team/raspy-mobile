@@ -12,7 +12,7 @@ import { matchTime } from '../../utils/format'
 import api, { playWithMeTooAPI } from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 const route = useRoute()
 const { showToast } = useToast()

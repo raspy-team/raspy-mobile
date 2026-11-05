@@ -69,8 +69,8 @@ import { UiButton, UiChip, UiIcon, UiInput, UiSheet } from '../ui'
 import { GET, POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
-import { useToast } from '../../composable/useToast'
-import { copyText } from '../../utils/clipboard'
+import { useToast } from '../../composables/useToast'
+import { shareLink } from '../../utils/share'
 
 const props = defineProps({ gameId: { type: Number, required: true } })
 const { showToast } = useToast()
@@ -132,15 +132,8 @@ async function appeal() {
 }
 
 async function send(text) {
-  if (navigator.share) {
-    try {
-      await navigator.share({ text })
-      return
-    } catch (e) {
-      if (e.name === 'AbortError') return
-    }
-  }
-  showToast((await copyText(text)) ? '링크를 복사했어요. 친구에게 붙여 넣어 보내세요' : '복사하지 못했어요')
+  const msg = await shareLink('', text, { copied: '링크를 복사했어요. 친구에게 붙여 넣어 보내세요' })
+  if (msg) showToast(msg)
 }
 
 async function startShare() {

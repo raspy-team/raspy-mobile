@@ -3,7 +3,7 @@
 // 홍보 링크에는 ?utm_source=instagram&utm_campaign=1105 처럼 꼬리표를 단다
 import { POST } from '../api/client'
 import { isStandalone } from './install'
-import { useToast } from '../composable/useToast'
+import { useToast } from '../composables/useToast'
 
 const ID_KEY = 'visitor_id'
 const SENT_KEY = 'visit_sent' // '날짜|로그인했는지'

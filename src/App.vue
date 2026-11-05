@@ -51,7 +51,7 @@ import RouteProgress from './components/RouteProgress.vue'
 import SuspendedBanner from './components/safety/SuspendedBanner.vue'
 import { startInbox } from './stores/inbox'
 import ActiveGameBanner from './components/game/ActiveGameBanner.vue'
-import { useActiveGamePolling } from './composable/useActiveGamePolling'
+import { useActiveGamePolling } from './composables/useActiveGamePolling'
 import { serverDown, offline } from './stores/server'
 import { registerFcmToken, setupPushListeners } from './utils/nativeBridge'
 

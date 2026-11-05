@@ -19,7 +19,7 @@
 import { ref } from 'vue'
 import api from '../../api/api'
 import { UiButton, UiInput, UiTopBar } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 const { showToast } = useToast()
 const email = ref('')

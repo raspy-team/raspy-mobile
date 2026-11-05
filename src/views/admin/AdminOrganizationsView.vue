@@ -144,7 +144,7 @@ import { GET, POST, PUT } from '../../api/client'
 import type { components } from '../../api/schema'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { timeAgo } from '../../utils/format'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { confirmDialog } from '../../composables/useConfirm'
 import {
   UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiListSkeleton,

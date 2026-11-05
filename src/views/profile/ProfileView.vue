@@ -92,7 +92,7 @@
         <!-- 0이면 숨긴다 (가진 자리가 있을 때만 숫자) -->
         <div v-if="seatLines.length" class="flex-1">
           <p class="t-heading tabular-nums">{{ seatLines.length }}</p>
-          <p class="t-micro mt-0.5">챔피언 자리</p>
+          <p class="t-micro mt-0.5">챔피언</p>
         </div>
         <!-- AI 주민은 친구가 없다 (docs/ai-residents.md '채우지 않는 곳': 친구) -->
         <button v-if="!user.isBot" type="button" class="flex-1" @click="openFriends">
@@ -110,7 +110,7 @@
 
       <!-- 가진 자리: 규칙 챔피언(벨트)과 능력·종합·기록 1위. 동네·소속을 가린 사람은 '동네'·'소속'으로 온다 (docs/organizations.md 3-4) -->
       <section v-if="seatLines.length" class="mt-10">
-        <h2 class="t-heading mb-3">가진 자리</h2>
+        <h2 class="t-heading mb-3">챔피언</h2>
         <div class="flex flex-wrap gap-2">
           <component
             :is="l.to ? 'RouterLink' : 'span'"
@@ -272,7 +272,7 @@ import {
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { showRank } from '@/utils/rank'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { matchTime } from '../../utils/format'
 import { liveRoute } from '@/utils/battle'
 

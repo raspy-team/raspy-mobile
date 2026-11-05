@@ -68,7 +68,7 @@ import { useRouter, useRoute } from 'vue-router'
 import api from '../../api/api'
 import RuleComparisonModal from '../../components/admin/RuleComparisonModal.vue'
 import { confirmDialog } from '../../composables/useConfirm'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { timeAgo } from '../../utils/format'
 import {
   UiBadge, UiButton, UiCard, UiEmptyState, UiInput, UiListSkeleton, UiSheet, UiTabs, UiTopBar,

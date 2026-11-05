@@ -95,7 +95,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import NeighborhoodVerify from '../components/neighborhood/NeighborhoodVerify.vue'
 import { UiBadge, UiButton, UiCard, UiEmptyState, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
-import { useToast } from '../composable/useToast'
+import { useToast } from '../composables/useToast'
 import { confirmDialog } from '../composables/useConfirm'
 
 type Mine = components['schemas']['MyNeighborhoods']

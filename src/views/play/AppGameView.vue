@@ -146,7 +146,7 @@
               실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
             <!-- 첫 판에 +162처럼 크게 움직이면 고장으로 보였다. 만나서 한 경기 결과 화면과 같은 말 (11/4 밤샘, 실력 점수파 31세) -->
-            <p v-if="result.ratingChange != null && fewGames" class="t-caption mt-1">처음 몇 판은 크게 움직여요. 더 하면 자리를 잡아요</p>
+            <p v-if="result.ratingChange != null && fewGames" class="t-caption mt-1">처음 몇 판은 크게 움직여요. 판이 쌓이면 덜 움직여요</p>
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
@@ -427,7 +427,7 @@ import SquatPlay from '../../components/appgame/SquatPlay.vue'
 import { fixtureOf, kickoffLabel, predictionLine } from '@/utils/predict'
 import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiIconButton, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'

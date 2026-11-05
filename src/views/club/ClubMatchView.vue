@@ -78,7 +78,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET, POST, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
 import { confirmDialog } from '@/composables/useConfirm'
-import { useToast } from '@/composable/useToast'
+import { useToast } from '@/composables/useToast'
 import { refreshOnChange } from '@/websocket/userChannel'
 import {
   UiAvatar, UiButton, UiCard, UiEmptyState, UiIcon, UiList, UiListItem, UiListSkeleton, UiSection, UiSheet, UiSkeleton, UiTopBar,

@@ -4,7 +4,7 @@ import api from '../api/api'
 import { rememberReturnTo } from '../utils/authRedirect'
 import { GUEST_GAMES } from '../utils/guestGames'
 
-const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/invite', '/invite-fall-back', '/dev', '/club/join', '/s/', '/try/']
+const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/invite', '/dev', '/club/join', '/s/', '/try/']
 let done = false
 
 export function markOnboarded() {

@@ -17,7 +17,7 @@ import { computed, ref, watch } from 'vue'
 import { GET } from '@/api/client'
 import { UiList, UiListItem, UiSheet } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
-import { useToast } from '../../../composable/useToast'
+import { useToast } from '../../../composables/useToast'
 
 const props = defineProps<{
   /** 소식의 경기 한 장. null이면 닫힘 */

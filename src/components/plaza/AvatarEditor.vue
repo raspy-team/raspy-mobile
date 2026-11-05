@@ -174,7 +174,7 @@ const previewKey = computed(() => {
 })
 
 function buyLabel(i: Item) {
-  if (i.champion) return '챔피언 자리에 오르면 입을 수 있어요'
+  if (i.champion) return '챔피언이 되면 입을 수 있어요'
   const have = state.value?.balance ?? 0
   if (have < i.price) return `${i.label} ${i.price}P · ${i.price - have}P 모자라요`
   return `${i.label} ${i.price}P에 사기`

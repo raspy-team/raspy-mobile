@@ -96,7 +96,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
-import { useToast } from '@/composable/useToast'
+import { useToast } from '@/composables/useToast'
 import ClubRulePicker from '../club/ClubRulePicker.vue'
 import { UiButton, UiChip, UiInput, UiSheet, UiSwitch } from '../ui'
 import { localIso } from '@/utils/when'

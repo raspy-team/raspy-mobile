@@ -55,7 +55,8 @@ import type { components } from '@/api/schema'
 import { onLobbyChange, openUserChannel } from '@/websocket/userChannel'
 import { UiAiBadge, UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
 import { liveRoute } from '@/utils/battle'
-import { useToast } from '../../composable/useToast'
+import { waitText } from '@/utils/format'
+import { useToast } from '../../composables/useToast'
 
 const { showToast } = useToast()
 

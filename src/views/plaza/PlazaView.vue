@@ -205,7 +205,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { API_BASE_URL } from '@/config/server'
 import { subscribeTopic, publish, onUserEvent, openUserChannel } from '@/websocket/userChannel'
-import { useToast } from '@/composable/useToast'
+import { useToast } from '@/composables/useToast'
 import AvatarEditor from '../../components/plaza/AvatarEditor.vue'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import ReportSheet from '../../components/safety/ReportSheet.vue'
@@ -397,7 +397,7 @@ function tapObject(o: MapObj) {
   } else if (a === 'champion') {
     const s = enter.value?.statue
     if (!s) return showToast('아직 이 광장의 챔피언이 없어요. 첫 챔피언이 되어 보세요')
-    card.value = { id: s.id, name: s.name, sheet: s.sheet, x: 0, y: 0, bot: false, champion: `챔피언 자리 ${s.belts}개 · 이 광장 챔피언` }
+    card.value = { id: s.id, name: s.name, sheet: s.sheet, x: 0, y: 0, bot: false, champion: `챔피언 ${s.belts}개 · 이 광장 챔피언` }
     cardOpen.value = true
     loadGames()
   }

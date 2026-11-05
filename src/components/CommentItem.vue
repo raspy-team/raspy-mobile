@@ -92,7 +92,7 @@ import { defineProps, defineEmits, ref } from 'vue'
 import CommentItem from './CommentItem.vue'
 import ReportSheet from './safety/ReportSheet.vue'
 import { UiAiBadge, UiAvatar } from './ui'
-import { who } from '../utils/format'
+import { timeAgo, who } from '../utils/format'
 
 const props = defineProps({
   comment: { type: Object, required: true },
@@ -102,16 +102,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['reply', 'like', 'img-click'])
 
-function timeAgo(isoString) {
-  if (!isoString) return ''
-  const date = typeof isoString === 'string' ? new Date(isoString) : isoString
-  const now = new Date()
-  const diff = Math.floor((now - date) / 1000)
-  if (diff < 60) return `방금 전`
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
-  return `${date.getMonth() + 1}/${date.getDate()}`
-}
 // 댓글 글자를 HTML로 그리기 전에 먼저 이스케이프한다. 예전엔 그대로 v-html이라 댓글에 심은 스크립트가 보는 사람의 로그인 토큰을 가져갈 수 있었다 (11/3 밤 리뷰)
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])

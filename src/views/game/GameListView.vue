@@ -103,17 +103,17 @@ import Comment from '../GameCommentView.vue'
 import {
   UiButton, UiCard, UiEmptyState, UiIconButton, UiPullIndicator, UiSection, UiSkeleton, UiTopBar,
 } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { feel } from '../../utils/feel'
 
-// 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나 (사용자 11/3)
+// 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나라 맨 뒤 (사용자 11/3, 11/5)
 const DESTINATIONS = [
-  // 앱 게임은 목록으로 바로 (UX ⑤: 광장의 캐릭터 만들기부터 나와 게임을 찾지 못했다). 광장은 목록 맨 위 입구로
-  { to: '/games', icon: 'gamepad', label: '앱 게임' },
   { to: '/rules', icon: 'book-open', label: '규칙' },
   { to: '/clubs', icon: 'users', label: '동호회' },
+  // 앱 게임은 맨 뒤(조연, 11/5)이고 목록으로 바로 간다 (UX ⑤: 광장은 캐릭터 만들기부터 나와 게임을 찾지 못했다). 광장은 목록 맨 위 입구로
+  { to: '/games', icon: 'gamepad', label: '앱 게임' },
 ]
 
 const route = useRoute()

@@ -66,8 +66,8 @@ import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { UiAvatar, UiButton, UiEmptyState, UiField, UiInput, UiSkeleton, UiTopBar } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
-import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
+import { useToast } from '../../composables/useToast'
+import { photoFromFile } from '../../utils/image'
 import { containsProfanity } from '../../utils/profanity'
 
 const NICKNAME_MAX = 10
@@ -113,15 +113,10 @@ async function onPhoto(e) {
   e.target.value = ''
   if (!file) return
   if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라 주세요')
-  const dataUrl = await new Promise((resolve) => {
-    const r = new FileReader()
-    r.onload = () => resolve(r.result)
-    r.onerror = () => resolve(null)
-    r.readAsDataURL(file)
-  })
-  if (!dataUrl) return showToast('사진을 읽지 못했어요. 다른 사진을 골라 주세요')
-  preview.value = await compressImage(dataUrl)
-  photo.value = dataUrlToFile(preview.value, file.name)
+  const p = await photoFromFile(file)
+  if (!p) return showToast('사진을 읽지 못했어요. 다른 사진을 골라 주세요')
+  preview.value = p.dataUrl
+  photo.value = p.file
   photoState.value = 'updated'
 }
 function removePhoto() {

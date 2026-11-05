@@ -4,13 +4,13 @@
       <RuleThumb :rule="game.rule" :size="36" bare />
       <div class="flex-1 min-w-0">
         <p class="t-heading truncate">{{ game.rule?.ruleTitle }}</p>
-        <!-- 줄이 모자라면 장소가 잘리게 때를 앞에 ('11월 …'로 날짜가 잘렸다, 11/5 밤샘 C) -->
+        <!-- 때·장소는 두 줄까지 (한 줄로 자르면 '장…'처럼 장소 미정도 안 보였다). 줄이 모자라면 장소가 잘리게 때를 앞에 ('11월 …'로 날짜가 잘렸다, 11/5 밤샘 C) -->
         <button v-if="canSchedule" type="button" class="flex items-center gap-1.5 max-w-full text-left mt-0.5 py-2.5 -my-2.5" @click="emit('schedule')">
-          <span class="t-caption truncate">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</span>
+          <span class="t-caption line-clamp-2 min-w-0">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</span>
           <!-- 정한 뒤에도 두 선수 모두 바꿀 수 있다는 게 보이게 (예전 밑줄 글씨는 너무 작아 못 바꾸는 줄 알았다) -->
           <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-surface-3 text-fg text-xs font-medium flex-shrink-0"><UiIcon name="pen" class="text-[10px]" aria-hidden="true" />{{ needsSchedule ? '정하기' : '바꾸기' }}</span>
         </button>
-        <p v-else class="t-caption truncate mt-0.5">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</p>
+        <p v-else class="t-caption line-clamp-2 mt-0.5">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</p>
       </div>
       <UiBadge :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
     </div>

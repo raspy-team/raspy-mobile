@@ -1,5 +1,5 @@
 <template>
-  <RouterLink :to="`/rules/${rule.id}`" class="flex gap-4 py-4 active:opacity-70 transition-opacity">
+  <RouterLink :to="to || `/rules/${rule.id}`" class="flex gap-4 py-4 active:opacity-70 transition-opacity">
     <RuleThumb :rule="rule" :size="64" />
 
     <span class="flex-1 min-w-0">
@@ -34,6 +34,6 @@ import { computed, defineProps } from 'vue'
 import { ratingText, ruleKind, winSummary } from '../../utils/rule'
 import RuleThumb from './RuleThumb.vue'
 
-const props = defineProps({ rule: { type: Object, required: true } })
+const props = defineProps({ rule: { type: Object, required: true }, to: { type: [String, Object], default: null } })
 const rating = computed(() => ratingText(props.rule))
 </script>

@@ -9,6 +9,8 @@
           <UiIcon name="fas fa-check" />
         </span>
         <h1 class="t-title mt-5">경기가 열렸어요</h1>
+        <!-- 무슨 경기를 열었는지 (예전엔 없었다, '내일 저녁'이 몇 시인지도) -->
+        <p v-if="createdLine" class="t-body mt-2">{{ createdLine }}</p>
         <p class="t-caption mt-2">
           {{ friend ? `${friend.nickname}님에게 알렸어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
@@ -50,7 +52,7 @@
             <p v-if="winSummary(rule)" class="t-caption">{{ winSummary(rule) }}</p>
           </div>
           <!-- 종목은 점점 늘어나고 예외도 있으니, 골라 준 규칙은 늘 바꿀 수 있게 (같은 종목 규칙부터 보여 준다) -->
-          <UiButton variant="ghost" size="sm" @click="router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked && pickedSport ? { q: pickedSport } : {}) } })">바꾸기</UiButton>
+          <UiButton variant="ghost" size="sm" @click="changeRule">바꾸기</UiButton>
         </UiCard>
         <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
         <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
@@ -64,9 +66,10 @@
         <UiInput v-if="when === EXACT" v-model="exactTime" type="datetime-local" :min="nowLocal" class="mb-8" />
 
         <!-- 어디서: 만나서 / 화상으로 / 다른 게임에서. 화상·다른 게임은 동네 없이 전국에 보인다 -->
-        <h2 class="t-heading">어디서 할까요?</h2>
+        <!-- '어디서'라고 물으면 장소 칸을 찾았다: 보기는 방식(만나서·화상·다른 게임)이고 장소는 상대와 나중에 정한다 -->
+        <h2 class="t-heading">어떻게 할까요?</h2>
         <div class="flex flex-wrap gap-2 mt-3">
-          <UiChip v-for="v in VENUES" :key="v.value" :selected="venue === v.value" @click="venue = v.value">{{ v.label }}</UiChip>
+          <UiChip v-for="v in venueOptions" :key="v.value" :selected="venue === v.value" @click="venue = v.value">{{ v.label }}</UiChip>
         </div>
         <UiInput v-if="isRemote(venue)" v-model="venueDetail" class="mt-3" :placeholder="VENUES.find((v) => v.value === venue)?.placeholder" />
         <p v-if="isRemote(venue)" class="t-caption mt-2">장소가 없어서 동네와 상관없이 전국에서 보여요.</p>
@@ -162,6 +165,7 @@ import { useToast } from '../../composable/useToast'
 import { feel } from '../../utils/feel'
 import { shareLink } from '../../utils/share'
 import { localIso, quickTimes } from '../../utils/when'
+import { matchTime } from '../../utils/format'
 import { allowedFormats, TEAM_SIZES, GROUP_SIZES, VENUES, isRemote } from '../../utils/gameFormat'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton, UiSheet, UiSkeleton, UiSpinner, UiTopBar,
@@ -243,7 +247,15 @@ watch(rule, (r) => {
 })
 
 // 종목 고르기: 규칙을 많이 쓴 순으로 받아 종목마다 맨 위 규칙을 고른다. 종목 이름은 분류(category.sport) → 제목·분류에서 찾은 종목
+const createdLine = ref('')
+// 규칙 바꾸기: 고른 때·방식·인원을 실어 보내고, 규칙을 고르면 그대로 돌아온다 (예전엔 규칙 상세 → '경기 열기' → 처음부터 다시)
+function changeRule() {
+  const keep = { when: when.value, venue: venue.value, format: format.value, ...(format.value !== 'DUEL' ? { size: String(size.value) } : {}) }
+  router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked.value && pickedSport.value ? { q: pickedSport.value } : {}), ...keep } })
+}
 const sports = ref(null)
+// '다른 게임에서'는 롤·피파처럼 다른 게임 안에서 하는 규칙에만 (배드민턴에 '다른 게임에서'가 보였다)
+const venueOptions = computed(() => VENUES.filter((v) => v.value !== 'ONLINE' || rule.value?.extGame || venue.value === 'ONLINE'))
 const autoPicked = ref(false)
 const pickedSport = ref('')
 const wantSport = typeof route.query.sport === 'string' ? route.query.sport.trim().slice(0, 20) : ''
@@ -254,10 +266,14 @@ async function loadSports() {
     const bySport = new Map()
     for (const r of data || []) {
       const name = r.category?.sport || categoryKey(r)
-      if (name === '기타' || bySport.has(name)) continue
-      bySport.set(name, { name, top: r })
+      if (name === '기타') continue
+      const s = bySport.get(name)
+      if (s) { s.plays += r.playCount ?? 0; continue }
+      bySport.set(name, { name, top: r, plays: r.playCount ?? 0, ext: !!r.extGame })
     }
-    sports.value = [...bySport.values()]
+    // 종목은 그 종목 판 수가 많은 순, 같으면 만나서 하는 종목을 인기 게임(롤·피파 등)보다 먼저.
+    // 판 수가 같은 규칙끼리 순서가 없어 체스·카트라이더가 맨 위, 배드민턴·탁구가 첫 화면 밖에 있었다
+    sports.value = [...bySport.values()].sort((a, b) => b.plays - a.plays || Number(a.ext) - Number(b.ext))
     // 이웃 알림의 '먼저 경기를 열어 보세요'(?sport=배드민턴)로 왔으면 그 종목을 골라 둔다 (docs/ai-residents.md 4)
     if (wantSport && !ruleId.value) {
       const hit = sports.value.find((s) => s.name === wantSport) || sports.value.find((s) => s.name.includes(wantSport) || wantSport.includes(s.name))
@@ -328,6 +344,7 @@ async function create(target) {
     }
     const { data } = await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
     createdId.value = data
+    createdLine.value = [rule.value?.ruleTitle, matchDate ? matchTime(matchDate) : '시간은 나중에', isRemote(venue.value) ? null : dong.value?.name && `${dong.value.name} 근처`].filter(Boolean).join(' · ')
     friendsOpen.value = false
     created.value = true
     sessionStorage.removeItem(CLUB_KEY)

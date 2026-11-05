@@ -14,7 +14,7 @@
           <p class="t-caption mt-2">{{ info.summary }}. {{ info.live ? '지금 기다리고 있어요. 들어가면 바로 시작해요' : '같은 문제로 겨뤄요' }}</p>
         </UiCard>
         <!-- 실시간 게임은 그 사람만 들어오는 방으로 (RealtimeView ?invite=) -->
-        <UiButton v-if="info.open && !info.mine" block size="lg" class="mt-4" :to="info.live ? `/play/${info.key}/live?invite=${info.gameId}` : `/play/${info.key}?challenge=${info.gameId}`">도전 받기</UiButton>
+        <UiButton v-if="info.open && !info.mine" block size="lg" class="mt-4" :to="info.live ? `/play/${info.key}/live?invite=${info.gameId}` : `/play/${info.key}?challenge=${info.gameId}`">도전 수락</UiButton>
         <p v-else class="t-caption text-center mt-4">{{ closedLine }}</p>
         <UiButton block variant="ghost" class="mt-2" :to="`/play/${info.key}`">이 게임 둘러보기</UiButton>
       </template>

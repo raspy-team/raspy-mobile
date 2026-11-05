@@ -12,7 +12,7 @@
           </span>
         </span>
         <UiButton v-if="p.handle" variant="ghost" size="sm" @click="copy(p.handle)">복사</UiButton>
-        <UiButton v-else-if="p.userId === myId" variant="ghost" size="sm" :to="editTo">적기</UiButton>
+        <UiButton v-else-if="p.userId === myId" variant="ghost" size="sm" :to="editTo">입력</UiButton>
       </li>
     </ul>
   </section>

@@ -1,19 +1,16 @@
 <template>
-  <div class="min-h-dvh bg-canvas">
+  <!-- 스크롤 없이 한 화면 (애플식) -->
+  <div class="h-dvh overflow-hidden bg-canvas flex flex-col">
     <UiTopBar back="/init" />
 
-    <main class="max-w-md mx-auto px-4 pt-4 pb-12">
-      <h1 class="t-title">{{ isSignup ? '가입하기' : '로그인' }}</h1>
-      <p class="t-body text-fg-muted mt-2">
-        {{ isSignup ? '아이디와 비밀번호만 있으면 돼요.' : '다시 만나서 반가워요.' }}
-      </p>
+    <main class="flex-1 min-h-0 w-full max-w-md mx-auto px-4 pt-4 pb-6">
+      <h1 class="t-title">{{ isSignup ? '가입' : '로그인' }}</h1>
 
       <form class="mt-8 space-y-5" novalidate @submit.prevent="submit">
         <UiInput
           v-model="email"
           label="아이디"
           :maxlength="50"
-          :hint="isSignup ? '로그인할 때 써요' : ''"
           :error="emailError"
           autocomplete="username"
         />
@@ -35,7 +32,7 @@
 
         <p v-if="submitError" class="text-sm text-danger" role="alert">{{ submitError }}</p>
 
-        <UiButton type="submit" block size="lg" :loading="busy">{{ isSignup ? '가입하기' : '로그인' }}</UiButton>
+        <UiButton type="submit" block size="lg" :loading="busy">{{ isSignup ? '가입' : '로그인' }}</UiButton>
       </form>
 
       <!-- 아이디 계정은 비밀번호를 되찾을 이메일이 없다. 막다른 길 대신 어떻게 하면 되는지 (11/4 밤샘, 일주일 만에 온 45세) -->
@@ -50,7 +47,7 @@
 
       <p class="mt-6 text-center t-caption">
         {{ isSignup ? '이미 계정이 있나요?' : '처음이신가요?' }}
-        <UiButton variant="ghost" size="sm" @click="toggleMode">{{ isSignup ? '로그인' : '가입하기' }}</UiButton>
+        <UiButton variant="ghost" size="sm" @click="toggleMode">{{ isSignup ? '로그인' : '가입' }}</UiButton>
       </p>
     </main>
   </div>

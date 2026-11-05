@@ -13,7 +13,7 @@
     <template #footer>
       <div class="flex gap-2">
         <UiButton v-if="canTellFriend" class="flex-1" variant="secondary" icon="shield-halved" @click="emit('tell-friend')">친구에게 알리기</UiButton>
-        <UiButton class="flex-1" @click="emit('update:modelValue', false)">알겠어요</UiButton>
+        <UiButton class="flex-1" @click="emit('update:modelValue', false)">확인</UiButton>
       </div>
     </template>
   </UiSheet>

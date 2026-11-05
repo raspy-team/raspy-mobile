@@ -20,7 +20,7 @@
 
       <!-- 목록을 못 받으면 '찾는 게임이 없어요'(검색 결과처럼) 대신 다시 불러오기 -->
       <UiEmptyState v-else-if="loadFailed" class="pt-12" icon="fas fa-triangle-exclamation" title="게임 목록을 불러오지 못했어요" description="연결을 확인하고 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 
       <template v-else>

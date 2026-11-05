@@ -3,11 +3,11 @@
     <UiTopBar title="대회" back />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <p class="t-caption">리그(모두와 한 번씩)나 토너먼트(지면 끝)로 겨뤄요. 라운드마다 기간 안에 두 쪽이 시간·장소를 잡아 경기하면, 결과대로 대진이 저절로 나아가요.</p>
-      <UiButton block class="mt-4" icon="plus" @click="openCreate()">대회 열기</UiButton>
+      <UiButton block class="mt-4" icon="plus" @click="openCreate()">대회 만들기</UiButton>
 
       <UiTabs v-model="tab" :options="TABS" class="mt-6" />
       <UiEmptyState v-if="error" class="pt-10" icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
       <UiListSkeleton v-else-if="!list" :rows="3" class="mt-3" />
       <div v-else-if="list.length" class="space-y-2 mt-3">

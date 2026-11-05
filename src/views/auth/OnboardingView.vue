@@ -71,7 +71,7 @@
             <UiIcon name="fas fa-camera" aria-hidden="true" />
           </span>
         </button>
-        <UiButton v-if="preview" variant="ghost" size="sm" @click="clearPhoto">사진 빼기</UiButton>
+        <UiButton v-if="preview" variant="ghost" size="sm" @click="clearPhoto">사진 삭제</UiButton>
         <span v-else class="t-micro">사진 (선택)</span>
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhoto" />
       </div>
@@ -111,7 +111,7 @@
         <UiButton v-if="step === 'terms'" block size="lg" :disabled="!allAgreed" :loading="saving" @click="submitTerms">
           동의하고 {{ needProfile ? '다음' : '계속하기' }}
         </UiButton>
-        <UiButton v-else-if="step === 'neighborhood'" block size="lg" variant="ghost" @click="finish">나중에 할게요</UiButton>
+        <UiButton v-else-if="step === 'neighborhood'" block size="lg" variant="ghost" @click="finish">나중에</UiButton>
         <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">다음</UiButton>
         <p v-if="step === 'neighborhood'" class="t-micro text-center mt-2">행정동 경계: 통계청 SGIS(공공누리 제1유형) 가공 vuski/admdongkor, CC BY 4.0</p>
       </div>

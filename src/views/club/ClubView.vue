@@ -24,13 +24,13 @@
           <p class="t-caption mt-1">초대 링크를 동호회 단톡방에 올리면 누르기만 해도 들어와요. 대표 종목을 정하면 우리끼리 순위가 생겨요</p>
           <!-- 정하는 곳이 위의 연필 아이콘뿐이라 안내만 보고는 못 찾았다 (11/4 밤샘, 동호회 총무) -->
           <div class="flex gap-2 mt-3">
-            <UiButton size="sm" icon="share" @click="share">초대 링크 보내기</UiButton>
+            <UiButton size="sm" icon="share" @click="share">초대 링크 공유</UiButton>
             <UiButton v-if="isStaff && !detail.club.mainRuleTitle" size="sm" variant="secondary" @click="openSettings">대표 종목 정하기</UiButton>
           </div>
         </UiCard>
 
         <template v-if="isMember">
-          <UiButton block class="mt-5" icon="plus" @click="openGame">동호회 경기 열기</UiButton>
+          <UiButton block class="mt-5" icon="plus" @click="openGame">동호회 경기 만들기</UiButton>
           <div class="flex gap-2 mt-2">
             <UiButton v-if="detail.chatLink" class="flex-1" variant="secondary" icon="comment" @click="openChat">단톡방</UiButton>
             <UiButton class="flex-1" variant="secondary" icon="share" @click="share">초대 링크</UiButton>
@@ -40,13 +40,13 @@
           <UiCard v-if="detail.requested" class="mt-5">
             <p class="t-heading">가입을 신청했어요</p>
             <p class="t-caption mt-1">운영진이 받으면 알려 드려요</p>
-            <UiButton size="sm" variant="ghost" class="mt-2 -ml-3" @click="cancelRequest">신청 거두기</UiButton>
+            <UiButton size="sm" variant="ghost" class="mt-2 -ml-3" @click="cancelRequest">신청 취소</UiButton>
           </UiCard>
           <template v-else-if="detail.club.joinMode === 'APPROVAL'">
             <p class="t-caption mt-5">운영진이 받으면 들어와요{{ detail.joinQuestion ? '. 아래 질문에 답해 주세요' : '' }}</p>
             <p v-if="detail.joinQuestion" class="t-heading mt-3">{{ detail.joinQuestion }}</p>
             <UiInput v-if="detail.joinQuestion" v-model="answer" class="mt-2" :maxlength="200" placeholder="답" />
-            <UiButton block size="lg" class="mt-3" :loading="joining" :disabled="!!detail.joinQuestion && !answer.trim()" @click="join">가입 신청</UiButton>
+            <UiButton block size="lg" class="mt-3" :loading="joining" :disabled="!!detail.joinQuestion && !answer.trim()" @click="join">신청</UiButton>
           </template>
           <UiButton v-else block size="lg" class="mt-5" :loading="joining" @click="join">들어가기</UiButton>
         </template>
@@ -61,7 +61,7 @@
               </div>
               <p v-if="r.answer" class="t-body break-words">“{{ r.answer }}”</p>
               <div class="flex gap-2">
-                <UiButton size="sm" class="flex-1" :disabled="busy" @click="decide(r.userId, true)">받기</UiButton>
+                <UiButton size="sm" class="flex-1" :disabled="busy" @click="decide(r.userId, true)">수락</UiButton>
                 <UiButton size="sm" variant="secondary" class="flex-1" :disabled="busy" @click="decide(r.userId, false)">거절</UiButton>
               </div>
             </UiCard>
@@ -111,7 +111,7 @@
 
         <!-- 대회: 이 동호회가 연 대회 (월례대회 등) -->
         <UiSection title="대회" class="mt-8">
-          <template v-if="isStaff" #action><UiButton variant="ghost" size="sm" icon="trophy" @click="router.push(`/tournaments?create=1&clubId=${id}`)">대회 열기</UiButton></template>
+          <template v-if="isStaff" #action><UiButton variant="ghost" size="sm" icon="trophy" @click="router.push(`/tournaments?create=1&clubId=${id}`)">대회 만들기</UiButton></template>
           <div v-if="tournaments.length" class="space-y-2">
             <TournamentRow v-for="t in tournaments" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
           </div>
@@ -208,7 +208,7 @@
           <UiInput v-model="pr.matchDate" type="datetime-local" />
           <UiInput v-model="pr.placeRoad" :maxlength="100" placeholder="장소 (선택)" />
           <UiInput v-model="pr.message" :maxlength="200" placeholder="하고 싶은 말 (선택)" />
-          <UiButton block :loading="busy" :disabled="!opponent" @click="propose">신청하기</UiButton>
+          <UiButton block :loading="busy" :disabled="!opponent" @click="propose">신청</UiButton>
           <p class="t-caption">상대 운영진이 받으면, 양쪽이 판마다 선수를 정해요. 이긴 판이 많은 동호회가 이겨요</p>
         </template>
       </div>

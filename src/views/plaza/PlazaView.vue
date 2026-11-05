@@ -89,7 +89,7 @@
           <!-- 주된 버튼 하나 + 작은 버튼 (애플식). 신고·차단은 글자로 -->
           <div class="flex items-center gap-2">
             <!-- 친구 추가 (UX ⑤: 광장에서 만난 사람을 친구로 할 길이 없었다). 이미 친구면 숨긴다 -->
-            <UiButton v-if="!card.bot && friend && !friend.isFriend" size="sm" variant="secondary" :disabled="friend.sent" @click="addFriend(card.id)">{{ friend.sent ? '요청 보냄' : friend.received ? '친구 받기' : '친구 추가' }}</UiButton>
+            <UiButton v-if="!card.bot && friend && !friend.isFriend" size="sm" variant="secondary" :disabled="friend.sent" @click="addFriend(card.id)">{{ friend.sent ? '요청 보냄' : friend.received ? '친구 수락' : '친구 추가' }}</UiButton>
             <UiButton v-if="!card.bot" size="sm" variant="secondary" @click="router.push(`/profile/${card.id}`)">프로필</UiButton>
             <span class="flex-1" />
             <UiButton v-if="!card.bot" size="sm" variant="ghost" @click="reportOpen = true">신고</UiButton>
@@ -121,8 +121,8 @@
       <p v-if="invite" class="t-body text-fg">{{ invite.from }}님이 <strong>{{ invite.title }}</strong> 하재요</p>
       <template #footer>
         <div class="flex gap-2">
-          <UiButton class="flex-1" variant="secondary" @click="inviteOpen = false">다음에</UiButton>
-          <UiButton class="flex-1" @click="acceptInvite">받기</UiButton>
+          <UiButton class="flex-1" variant="secondary" @click="inviteOpen = false">나중에</UiButton>
+          <UiButton class="flex-1" @click="acceptInvite">수락</UiButton>
         </div>
       </template>
     </UiSheet>
@@ -141,7 +141,7 @@
         </li>
       </ul>
       <p v-if="!rooms.some((r) => r.kind === 'dong')" class="t-caption mt-3">동네를 인증하면 우리 동네 광장이 열려요</p>
-      <template v-if="!rooms.some((r) => r.kind === 'dong')" #footer><UiButton block variant="secondary" @click="router.push('/neighborhood')">동네 인증하기</UiButton></template>
+      <template v-if="!rooms.some((r) => r.kind === 'dong')" #footer><UiButton block variant="secondary" @click="router.push('/neighborhood')">동네 인증</UiButton></template>
     </UiSheet>
 
     <!-- 지금 여기 있는 사람: 걷지 않고 바로 한 판 -->
@@ -174,7 +174,7 @@
           </button>
         </li>
       </ul>
-      <template #footer><UiButton block @click="router.push('/create-game')">경기 열기</UiButton></template>
+      <template #footer><UiButton block @click="router.push('/create-game')">경기 만들기</UiButton></template>
     </UiSheet>
 
     <!-- 실제 장소 팻말 -->
@@ -185,7 +185,7 @@
           <UiButton v-if="place?.target" class="flex-1" @click="placeOpen = false; goRoom(place.target!)">이 광장으로 가기</UiButton>
           <template v-else>
             <UiButton class="flex-1" variant="secondary" @click="placeOpen = false; openBoard()">모집 중인 경기</UiButton>
-            <UiButton v-if="!['dong', 'gu', 'city'].includes(place?.kind ?? '')" class="flex-1" @click="router.push('/create-game')">여기서 경기 열기</UiButton>
+            <UiButton v-if="!['dong', 'gu', 'city'].includes(place?.kind ?? '')" class="flex-1" @click="router.push('/create-game')">여기서 경기 만들기</UiButton>
           </template>
         </div>
       </template>

@@ -43,7 +43,7 @@
           icon="location-dot"
           class="mt-3"
           :to="{ path: '/neighborhood', query: { back: route.fullPath } }"
-        >동네 인증하기</UiButton>
+        >동네 인증</UiButton>
         <!-- 상대가 정해진 남의 경기: 한쪽을 응원 (포인트) -->
         <CheerBar
           v-if="canCheer"

@@ -127,7 +127,7 @@
         </form>
         </template>
         <!-- 실시간 심사: 보는 사람들이 응원해 승패가 정해진다 -->
-        <UiButton v-if="state.liveJudged" block variant="secondary" icon="share" class="mt-4" @click="shareWatch">구경 링크 보내기</UiButton>
+        <UiButton v-if="state.liveJudged" block variant="secondary" icon="share" class="mt-4" @click="shareWatch">중계 링크 공유</UiButton>
         <p v-if="state.liveJudged" class="t-caption text-center mt-1">보는 사람들의 응원으로 승패가 정해져요</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">그만두기</UiButton>
       </template>

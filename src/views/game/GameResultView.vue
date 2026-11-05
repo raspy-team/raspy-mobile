@@ -43,7 +43,7 @@
         <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
           <p v-if="headline.line" class="t-body text-center mt-4">{{ headline.line }}</p>
           <div class="flex justify-center mt-4">
-            <UiButton size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">{{ headline.mark ? '한 판 더' : '다시 한 판' }}</UiButton>
+            <UiButton size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">한 판 더</UiButton>
           </div>
         </template>
 
@@ -311,7 +311,7 @@
 
             <div v-if="allPictures.length < 5" class="flex gap-2">
               <UiButton variant="secondary" icon="fas fa-camera" class="flex-1" @click="openCamera">사진 추가</UiButton>
-              <UiButton variant="secondary" icon="fas fa-video" class="flex-1" @click="openVideoRecorder">동영상 추가</UiButton>
+              <UiButton variant="secondary" icon="fas fa-video" class="flex-1" @click="openVideoRecorder">영상 추가</UiButton>
             </div>
           </div>
         </UiSection>
@@ -325,8 +325,8 @@
       <!-- 친구 · 공유 (덜 급한 것은 맨 아래) -->
       <div class="flex gap-2">
         <!-- 이미 친구면 숨기고, 보냈으면 '요청 보냄' (예전엔 친구 사이에도 늘 '친구 요청'이 보였다) -->
-        <UiButton v-if="isParticipant && format === 'DUEL' && friendState && !friendState.isFriend" variant="secondary" icon="fas fa-user-plus" class="flex-1" :disabled="friendState.sent" @click="sendFriendRequest">{{ friendState.sent ? '요청 보냄' : friendState.received ? '친구 받기' : '친구 요청' }}</UiButton>
-        <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유하기</UiButton>
+        <UiButton v-if="isParticipant && format === 'DUEL' && friendState && !friendState.isFriend" variant="secondary" icon="fas fa-user-plus" class="flex-1" :disabled="friendState.sent" @click="sendFriendRequest">{{ friendState.sent ? '요청 보냄' : friendState.received ? '친구 수락' : '친구 요청' }}</UiButton>
+        <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유</UiButton>
       </div>
 
     </template>

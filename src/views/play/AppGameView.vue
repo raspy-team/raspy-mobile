@@ -157,7 +157,7 @@
           <template v-else-if="result.status === 'VOTING'">
             <p class="t-title">투표 중이에요</p>
             <p class="t-caption mt-1">{{ until(result.votingEndsAt) }}까지 사람들이 투표해요. 끝나면 알려 드릴게요</p>
-            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 보내기</UiButton>
+            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 공유</UiButton>
           </template>
           <template v-else-if="result.status === 'CANCELED'">
             <p class="t-title">취소된 경기예요</p>
@@ -192,7 +192,7 @@
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
-        <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" block variant="ghost" icon="share" class="mt-1" :loading="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
+        <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" block variant="ghost" icon="share" class="mt-1" :loading="sharingResult" @click="openShare(result.gameId)">결과 공유</UiButton>
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '알림' }}</p>
           <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
@@ -242,7 +242,7 @@
           <UiButton class="mt-4" to="/games">게임 목록 보기</UiButton>
         </UiEmptyState>
         <UiEmptyState v-else-if="loadFailed" class="pt-16" icon="fas fa-triangle-exclamation" title="게임을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
-          <UiButton class="mt-4" @click="retry">다시 불러오기</UiButton>
+          <UiButton class="mt-4" @click="retry">다시 시도</UiButton>
         </UiEmptyState>
         <div v-else-if="!game" class="space-y-3">
           <UiSkeleton class="h-28 w-full" />
@@ -327,7 +327,7 @@
                   </UiListItem>
                 </template>
               </UiList>
-              <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">순위 전체 보기</UiButton>
+              <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">모두 보기</UiButton>
             </template>
             <template v-else>
               <UiList v-if="board?.entries.length">

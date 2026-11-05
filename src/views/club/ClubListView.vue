@@ -10,7 +10,7 @@
 
       <UiSection title="내 동호회" class="mt-8">
         <UiEmptyState v-if="loadError" icon="fas fa-triangle-exclamation" title="동호회를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
-          <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+          <UiButton variant="secondary" @click="load">다시 시도</UiButton>
         </UiEmptyState>
         <UiListSkeleton v-else-if="!mine" :rows="2" />
         <div v-else-if="mine.length" class="space-y-2">
@@ -24,7 +24,7 @@
         <UiListSkeleton v-else-if="!nearby" :rows="2" />
         <div v-else-if="nearby.length" class="space-y-2">
           <ClubRow v-for="c in nearby" :key="c.id" :club="c" @click="router.push(`/clubs/${c.id}`)">
-            <UiButton size="sm" variant="secondary" :loading="joining === c.id" @click.stop="join(c)">{{ c.joinMode === 'APPROVAL' ? '신청하기' : '들어가기' }}</UiButton>
+            <UiButton size="sm" variant="secondary" :loading="joining === c.id" @click.stop="join(c)">{{ c.joinMode === 'APPROVAL' ? '신청' : '들어가기' }}</UiButton>
           </ClubRow>
         </div>
         <!-- 동네를 인증하지 않았으면 '동네에 없어요'가 아니라 인증부터 -->

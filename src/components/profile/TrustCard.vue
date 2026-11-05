@@ -40,8 +40,8 @@
     <div v-if="vouch && (vouch.canVouch || vouch.mine)" class="mt-5 rounded-xl bg-surface px-4 py-3">
       <p class="t-body">{{ vouch.mine ? '내가 보증했어요' : '만나 보니 믿을 만했나요?' }}</p>
       <p class="t-caption mt-0.5">보증은 이름과 함께 남아요. 보증받은 사람의 보증일수록 무겁게 쳐요</p>
-      <UiButton v-if="!vouch.mine" size="sm" class="mt-3" icon="user-check" :loading="vouching" @click="toggleVouch">보증해요</UiButton>
-      <UiButton v-else size="sm" variant="ghost" class="mt-3" :loading="vouching" @click="toggleVouch">보증 거두기</UiButton>
+      <UiButton v-if="!vouch.mine" size="sm" class="mt-3" icon="user-check" :loading="vouching" @click="toggleVouch">보증</UiButton>
+      <UiButton v-else size="sm" variant="ghost" class="mt-3" :loading="vouching" @click="toggleVouch">보증 취소</UiButton>
     </div>
   </UiSheet>
 </template>

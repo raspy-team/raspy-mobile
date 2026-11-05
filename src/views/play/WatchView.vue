@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="구경하기" back="/" />
+    <UiTopBar title="중계 보기" back="/" />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">

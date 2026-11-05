@@ -29,7 +29,7 @@
       </section>
       <p v-else-if="v.status === 'LIVE'" class="t-caption mt-6">아직 위치가 오지 않았어요. {{ v.nickname }}님이 앱을 열면 보내져요</p>
 
-      <UiButton block variant="ghost" class="mt-6" icon="rotate-right" :loading="loading" @click="load">새로고침</UiButton>
+      <UiButton block variant="ghost" class="mt-6" icon="rotate-right" :loading="loading" @click="load">새로 고침</UiButton>
       <p class="t-micro mt-6">매치는 처음 보는 사람과 운동·게임을 하는 앱이에요. 만나서 하는 경기 동안 친구에게 위치를 공유하고, 끝나면 '잘 끝났어요'를 알려요</p>
     </template>
   </main>

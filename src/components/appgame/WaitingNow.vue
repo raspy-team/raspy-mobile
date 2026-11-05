@@ -23,7 +23,7 @@
             <p class="t-label truncate">{{ l.nickname }}님 · {{ l.title }}</p>
             <p class="t-micro tabular-nums">{{ l.waitedSeconds + since }}초째 기다리는 중</p>
           </div>
-          <UiButton size="sm" @click="join(l.key)">붙기</UiButton>
+          <UiButton size="sm" @click="join(l.key)">참여</UiButton>
         </UiCard>
         <!-- 사람이 2명보다 적으면 AI 주민이 기다린다 (docs/ai-residents.md 6). 누르면 그 AI와 바로 한 판. 사람이 늘면 서버가 빼 준다 -->
         <UiCard v-for="r in residents" :key="`ai-${r.userId}`" class="flex items-center gap-3 py-3">

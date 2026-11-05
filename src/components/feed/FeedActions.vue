@@ -24,7 +24,7 @@
         <!-- 320px 폰에선 한 줄에 다 안 들어가 '도전해/요'로 꺾였다: 좁으면 눈 아이콘만 (11/5 밤샘 C) -->
         <UiIcon name="eye" class="text-lg" aria-hidden="true" /><span class="max-[359px]:sr-only">{{ watchingAll ? '보는 중' : '또 보고 싶어요' }}</span>
       </button>
-      <UiButton size="sm" variant="tonal" icon="swords" class="whitespace-nowrap" @click="emit('challenge', targets)">도전해요</UiButton>
+      <UiButton size="sm" variant="tonal" icon="swords" class="whitespace-nowrap" @click="emit('challenge', targets)">도전</UiButton>
     </template>
   </footer>
 </template>

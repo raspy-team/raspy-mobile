@@ -7,7 +7,7 @@
 
       <UiListSkeleton v-if="loading" :rows="4" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="설정을 불러오지 못했어요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 
       <ul v-else class="divide-y divide-line ui-appear">

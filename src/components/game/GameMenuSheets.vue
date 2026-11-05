@@ -40,9 +40,7 @@
         :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())"
         :loading="reporting"
         @click="submitReport"
-      >
-        신고하기
-      </UiButton>
+      >신고</UiButton>
     </template>
   </UiSheet>
 </template>

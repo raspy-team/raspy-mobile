@@ -10,7 +10,7 @@
 
       <div>
         <p class="t-heading">종목</p>
-        <p class="t-caption mt-0.5">{{ ruleTitle ? `고른 규칙: ${ruleTitle}` : '규칙을 골라 주세요' }}</p>
+        <p v-if="ruleTitle" class="t-caption mt-0.5">{{ ruleTitle }}</p>
         <ClubRulePicker class="mt-2" with-app @pick="pickRule" />
         <p v-if="appGame" class="t-caption mt-1">앱 게임 대회예요. 판마다 두 사람이 기간 안에 '경기하기'를 눌러 앱에서 겨뤄요</p>
       </div>
@@ -56,13 +56,19 @@
       </div>
 
       <!-- 이름표가 없으면 '8'이 무엇인지, 날짜가 무엇의 날짜인지 몰랐다 (11/4 밤샘, 52세 탁구 대회 주최자) -->
-      <div class="grid grid-cols-[2fr_3fr] gap-2">
-        <UiInput v-model="f.maxEntrants" label="최대 인원" type="number" inputmode="numeric" placeholder="8" />
-        <UiInput v-model="f.startsAt" label="시작" type="datetime-local" />
+      <UiInput v-model="f.maxEntrants" label="최대 인원" type="number" inputmode="numeric" placeholder="8" />
+      <!-- 시작: 경기 만들기처럼 빠른 고르기가 먼저, 직접 고를 때만 날짜 칸 (UX 리뷰 ⑦) -->
+      <div>
+        <p class="t-heading">시작</p>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <UiChip v-for="q in startChoices" :key="q.label" :selected="startPick === q.label" @click="pickStart(q)">{{ q.label }}</UiChip>
+          <UiChip :selected="startPick === EXACT" @click="startPick = EXACT; f.startsAt = ''">{{ EXACT }}</UiChip>
+        </div>
+        <UiInput v-if="startPick === EXACT" v-model="f.startsAt" class="mt-2" type="datetime-local" />
+        <p v-else-if="f.startsAt" class="t-caption mt-1">{{ matchTime(f.startsAt) }}</p>
       </div>
       <div>
         <p class="t-heading">라운드 기간</p>
-        <p class="t-caption mt-0.5">기간 안에 두 쪽이 시간·장소를 잡아 경기해요</p>
         <div class="flex flex-wrap gap-2 mt-2">
           <UiChip v-for="d in [1, 3, 7, 14]" :key="d" :selected="f.roundDays === d" @click="f.roundDays = d">{{ d === 1 ? '하루' : `${d}일` }}</UiChip>
         </div>
@@ -80,7 +86,7 @@
       <UiInput v-model="f.description" :maxlength="300" placeholder="안내 (선택: 상품, 장소 등)" />
 
       <UiButton block :loading="busy" :disabled="!canCreate" @click="create">열기</UiButton>
-      <p class="t-caption">신청은 시작 때까지, 시작 24시간 전부터 체크인해요. 체크인한 참가자로 시작 때 대진이 나와요</p>
+      <p class="t-caption">시작 하루 전부터 체크인해요</p>
     </div>
   </UiSheet>
 </template>
@@ -93,6 +99,8 @@ import { GET, POST } from '@/api/client'
 import { useToast } from '@/composable/useToast'
 import ClubRulePicker from '../club/ClubRulePicker.vue'
 import { UiButton, UiChip, UiInput, UiSheet, UiSwitch } from '../ui'
+import { localIso } from '@/utils/when'
+import { matchTime } from '@/utils/format'
 
 const props = defineProps<{ modelValue: boolean; clubId?: number | null }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean] }>()
@@ -108,6 +116,23 @@ const f = reactive({
   title: '', ruleId: 0, format: 'KNOCKOUT' as 'LEAGUE' | 'KNOCKOUT', entrantType: 'USER' as 'USER' | 'CLUB', hostClubId: null as number | null,
   membersOnly: false, official: false, maxEntrants: '8', startsAt: '', roundDays: 7, thirdPlace: false, minRating: '', maxRating: '', description: '', boards: 3, perBoard: 1,
 })
+// 시작 빠른 고르기: 토요일 오후 2시. 체크인이 하루 전부터라 하루도 안 남은 주말은 빼고 다음 주로
+const EXACT = '직접 고르기'
+const startPick = ref('')
+function saturday(weeks: number) {
+  const d = new Date()
+  d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7) + weeks * 7)
+  d.setHours(14, 0, 0, 0)
+  return d
+}
+const startChoices = computed(() => {
+  const soon = Date.now() + 24 * 3600 * 1000
+  const sats = [0, 1, 2].map(saturday).filter((d) => d.getTime() > soon).slice(0, 2)
+  const names = sats[0] && sats[0].getTime() - Date.now() < 7 * 24 * 3600 * 1000 ? ['이번 주말', '다음 주말'] : ['다음 주말', '다다음 주말']
+  return sats.map((d, i) => ({ label: names[i], at: localIso(d) }))
+})
+function pickStart(q: { label: string; at: string }) { startPick.value = q.label; f.startsAt = q.at }
+
 const canCreate = computed(() => f.title.trim().length >= 2 && f.ruleId > 0 && !!f.startsAt && Number(f.maxEntrants) >= 2)
 
 // 동네 인증 여부 (불러오기 전 undefined). 동호회·공식 대회는 동네가 없어도 된다 (서버 TournamentService.create)

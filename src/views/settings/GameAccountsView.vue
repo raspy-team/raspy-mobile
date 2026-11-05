@@ -3,7 +3,7 @@
     <UiTopBar title="게임 계정" :back="backTo" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
-      <p class="t-caption py-3">롤·피파·브롤 같은 게임으로 붙을 때, 상대가 이 아이디로 나를 찾아요. 그 게임 경기의 선수에게만 보여요.</p>
+      <p class="t-caption py-3">그 게임으로 붙는 상대에게만 보여요</p>
 
       <UiListSkeleton v-if="loading" :rows="6" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="게임 계정을 불러오지 못했어요">

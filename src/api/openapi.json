@@ -7195,13 +7195,13 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "OFFLINE",
                 "APP",
                 "POPULAR"
-              ]
+              ],
+              "default": "ALL"
             }
           }
         ],
@@ -7538,11 +7538,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ]
+              ],
+              "default": "FRIENDS"
             }
           },
           {
@@ -7551,11 +7551,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ]
+              ],
+              "default": "UNITS"
             }
           }
         ],
@@ -10055,11 +10055,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -10713,13 +10713,13 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ]
+              ],
+              "default": "PENDING"
             }
           }
         ],
@@ -19054,6 +19054,10 @@
           },
           "dongName": {
             "type": "string"
+          },
+          "distanceM": {
+            "type": "integer",
+            "format": "int32"
           },
           "joinBlockedReason": {
             "type": "string"

@@ -11,6 +11,10 @@
           <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-surface-3 text-fg text-xs font-medium flex-shrink-0"><UiIcon name="pen" class="text-[10px]" aria-hidden="true" />{{ needsSchedule ? '정하기' : '바꾸기' }}</span>
         </button>
         <p v-else class="t-caption line-clamp-2 mt-0.5">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</p>
+        <!-- 만나러 갈 때 지도가 제일 필요하다: 장소를 카카오맵으로 (UX 리뷰 ⑦) -->
+        <a v-if="mapLink" :href="mapLink" target="_blank" rel="noopener" class="inline-flex items-center gap-1 h-7 px-2.5 mt-2 rounded-md bg-surface-3 text-fg text-xs font-medium" @click.stop>
+          <UiIcon name="map" class="text-xs" aria-hidden="true" />지도에서 보기
+        </a>
       </div>
       <UiBadge :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
     </div>
@@ -80,6 +84,7 @@ import { computed, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
 import { matchTime, place } from '../../utils/format'
 import { TEAM_NAMES, venuePlace, isRemote, teamChatOpen } from '../../utils/gameFormat'
+import { placeMapLink } from '../../utils/kakaoMap'
 
 const props = defineProps({
   game: { type: Object, required: true },
@@ -88,6 +93,7 @@ const props = defineProps({
   quiet: { type: Boolean, default: false },
 })
 const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule', 'chat', 'message', 'answer-time'])
+const mapLink = computed(() => placeMapLink(props.game))
 const chatOpen = computed(() => teamChatOpen(props.game, props.game.myId ?? props.me?.id))
 
 // 시작 전이면 선수(주최자·확정된 상대)가 시간·장소를 정하고 바꾼다

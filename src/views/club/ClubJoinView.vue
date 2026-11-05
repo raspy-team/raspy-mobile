@@ -10,7 +10,6 @@
         <p class="t-caption mt-1">{{ [club.dongName, `멤버 ${club.memberCount}명`].filter(Boolean).join(' · ') }}</p>
         <p v-if="club.intro" class="t-body mt-3">{{ club.intro }}</p>
         <UiButton block size="lg" class="mt-8" :loading="joining" @click="join">{{ !signedIn ? '시작하고 들어가기' : club.isMember ? '동호회로 가기' : '들어가기' }}</UiButton>
-        <p class="t-caption mt-2">들어가면 동호회 경기가 열릴 때 알림이 와요</p>
       </template>
     </main>
   </div>

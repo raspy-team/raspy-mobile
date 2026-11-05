@@ -3,7 +3,7 @@
     <UiTopBar title="내 정보 공개" back="/settings" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
-      <p class="t-caption py-3">끄면 나만 봐요. 다른 사람에게는 보이지 않아요. 상대 찾기·나이 제한·동네 경기에는 그대로 써요.</p>
+      <p class="t-caption py-3">끄면 나만 봐요</p>
 
       <UiListSkeleton v-if="loading" :rows="4" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="설정을 불러오지 못했어요">
@@ -14,7 +14,7 @@
         <li v-for="item in ITEMS" :key="item.key" class="flex items-center gap-4 py-4">
           <span class="flex-1 min-w-0">
             <span class="block t-body">{{ item.label }}</span>
-            <span class="block t-caption mt-0.5">{{ item.description }}</span>
+            <span v-if="item.description" class="block t-caption mt-0.5">{{ item.description }}</span>
           </span>
           <span class="t-caption w-8 text-right">{{ settings[item.key] === 'EVERYONE' ? '모두' : '나만' }}</span>
           <UiSwitch
@@ -47,10 +47,10 @@ type Settings = components['schemas']['PrivacySettings']
 type Key = 'age' | 'gender' | 'region' | 'records'
 
 const ITEMS: { key: Key; label: string; description: string }[] = [
-  { key: 'age', label: '나이', description: '프로필에 만 나이' },
-  { key: 'gender', label: '성별', description: '프로필에 성별' },
-  { key: 'region', label: '동네', description: '프로필의 지금 동네와 적어 둔 지역' },
-  { key: 'records', label: '경기 기록·전적', description: '승패·최근 경기·기록 화면, 순위표, 소식 카드, 공유 그림의 이름. 함께 뛴 사람은 그 경기를 봐요' },
+  { key: 'age', label: '나이', description: '' },
+  { key: 'gender', label: '성별', description: '' },
+  { key: 'region', label: '동네', description: '' },
+  { key: 'records', label: '경기 기록·전적', description: '함께 뛴 사람은 그 경기를 봐요' },
 ]
 const ORG_PATH = '/settings/organizations'
 

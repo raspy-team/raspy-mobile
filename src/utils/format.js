@@ -81,3 +81,11 @@ export function waitText(seconds) {
   if (seconds < 3600) return `${Math.round(seconds / 60)}분`
   return `${Math.round(seconds / 3600)}시간`
 }
+
+/** 내 동네에서 거리: 800m, 1.2km, 12km (UX 리뷰 ⑦). 없으면 '' */
+export function distance(m) {
+  // 같은 동(가운데끼리 0m)은 동 이름으로 충분하다
+  if (m == null || m < 50) return ''
+  if (m < 1000) return `${Math.max(100, Math.round(m / 100) * 100)}m`
+  return m < 10000 ? `${(m / 1000).toFixed(1)}km` : `${Math.round(m / 1000)}km`
+}

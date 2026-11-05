@@ -2,8 +2,7 @@
   <div class="min-h-dvh bg-canvas">
     <UiTopBar title="동호회" back />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
-      <p class="t-caption">같이 붙고, 같이 기록이 쌓이는 팀이에요. 정모·번개를 잡고, 우리끼리 순위를 보고, 다른 동호회와 교류전을 해요. 이미 있는 동호회는 초대 링크를 단톡방에 올리면 다 같이 들어와요.</p>
-      <div class="flex gap-2 mt-4">
+      <div class="flex gap-2">
         <UiButton class="flex-1" icon="plus" @click="createOpen = true">동호회 만들기</UiButton>
         <UiButton class="flex-1" variant="secondary" icon="trophy" to="/tournaments">대회</UiButton>
       </div>

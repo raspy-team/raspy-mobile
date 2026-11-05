@@ -19,6 +19,8 @@
           @challengers="challengersGame = game"
           @more="menuGame = game"
         />
+        <!-- 장소가 있으면 카카오맵으로 (UX 리뷰 ⑦) -->
+        <UiButton v-if="placeMapLink(game)" block variant="secondary" icon="map" class="mt-2" @click="openMap">지도에서 보기</UiButton>
         <!-- 롤·피파처럼 다른 게임 안에서 하는 경기: 선수들의 그 게임 아이디 (선수·신청자·연 사람만, 9번) -->
         <ExtGamePlayers v-if="game.rule?.extGame && (game.ownerId === myId || game.isAppliedByMe || game.players?.some((p) => p.id === myId))" :game-id="game.id" class="mt-2 border-b border-line" />
         <!-- 더보기·신청자: 홈 목록과 같은 시트 (예전엔 눌러도 아무 일이 없었다) -->
@@ -63,6 +65,7 @@
 <script setup>
 // 공유 링크로 들어온 열린 경기 하나 (/games/:gameId). 피드는 끝난 경기만 보여 줘서 예전엔 링크를 받아도 신청할 곳이 없었다
 import { ref, computed, onMounted } from 'vue'
+import { placeMapLink } from '../../utils/kakaoMap'
 import ExtGamePlayers from '../../components/external/ExtGamePlayers.vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -103,6 +106,9 @@ const applyHint = computed(() => {
   const ladder = !remote && (!g.format || g.format === 'DUEL') ? ' 처음 만나는 사이면 앱 게임 한 판을 먼저 해요.' : ''
   return base + ladder
 })
+
+// 앱 안 웹뷰에서도 밖(카카오맵 앱·브라우저)으로 연다
+function openMap() { window.open(placeMapLink(game.value), '_blank', 'noopener') }
 
 async function load() {
   try {

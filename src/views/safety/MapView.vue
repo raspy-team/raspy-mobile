@@ -3,7 +3,8 @@
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiTabs v-model="tab" :options="TABS" class="mb-3" />
 
-    <KakaoMap v-if="kakaoMapKey && center" :center="center" :pins="pins" :selected-id="selected" :level="7" @select="openPin" @moved="onMoved" />
+    <!-- 지도가 주인공: 화면 높이에 맞춰 크게 (예전 260px는 작았다, UX 리뷰 ⑦) -->
+    <KakaoMap v-if="kakaoMapKey && center" :center="center" :pins="pins" :selected-id="selected" :level="6" height="min(64dvh, 620px)" @select="openPin" @moved="onMoved" />
     <p v-else-if="center" class="t-caption rounded-xl bg-surface px-4 py-3">지도가 아직 켜지지 않아 목록으로 보여 드려요</p>
     <UiEmptyState v-else-if="checked" mascot="kok" title="동네를 먼저 인증해 주세요">
       <UiButton to="/neighborhood">동네 인증하기</UiButton>
@@ -11,7 +12,7 @@
 
     <UiListSkeleton v-if="center && !data" :rows="3" class="mt-4" />
     <template v-else-if="data">
-      <p class="t-micro mt-3">{{ tab === 'open' ? '모집 중인 경기만 보여요. 장소를 아직 안 정한 경기는 동네 가운데(점선)에 있어요. 상대가 정해진 경기의 위치는 안전을 위해 보이지 않아요' : '최근 90일 동안 공공장소에서 끝난 경기를 장소마다 모았어요. 누가 했는지는 보이지 않아요' }}</p>
+      <p class="t-micro mt-3">{{ tab === 'open' ? '상대가 정해진 경기는 위치를 감춰요' : '최근 90일 · 누가 했는지는 보이지 않아요' }}</p>
       <div v-if="group" class="flex items-center gap-2 mt-3">
         <p class="t-label flex-1 truncate">{{ group.name }} · {{ shown.length }}개</p>
         <UiChip icon="xmark" @click="selected = null">전체 보기</UiChip>
@@ -66,11 +67,14 @@ const groups = computed(() => {
 })
 const pins = computed(() => groups.value.map((g) => {
   const one = g.items.length === 1 ? g.items[0] : null
-  const label = tab.value === 'done'
-    ? `${g.items[0].placeName} ${g.items[0].count}`
-    : one && !one.approx ? one.ruleTitle : `${g.items[0].placeName} ${g.items.length}`
+  // 이름표는 짧게: 한 경기면 종목, 여럿이면 장소(동) 이름. 개수는 머리의 숫자로
+  const label = tab.value === 'done' ? g.items[0].placeName : one && !one.approx ? one.ruleTitle : g.approx ? `${g.items[0].placeName} 근처` : g.items[0].placeName
+  const titles = [...new Set(g.items.map((x) => x.ruleTitle).filter(Boolean))]
   return {
     id: g.id, lat: g.lat, lon: g.lon, label,
+    // 머리 아이콘: 종목이 하나면 그 종목, 섞였으면 점
+    icon: titles.length === 1 ? { ruleTitle: titles[0] } : null,
+    count: tab.value === 'done' ? g.items[0].count : g.items.length,
     aria: tab.value === 'done' ? `${g.name}, 경기 ${g.items[0].count}번` : `${g.name}, 모집 중 ${g.items.length}개`,
     tone: tab.value === 'done' ? 'muted' : g.approx ? 'approx' : 'primary',
   }

@@ -6,8 +6,8 @@
         <RuleThumb :rule="game.rule" :size="36" bare />
         <span class="flex-1 min-w-0">
           <span class="block t-heading truncate">{{ game.rule?.ruleTitle }}</span>
-          <!-- 만나서 하는 경기는 동네 이름부터 (화상·다른 게임은 동네가 없다) -->
-          <span class="block t-caption line-clamp-2 mt-0.5">{{ [game.dongName, matchTime(game.matchDate), venuePlace(game, place)].filter(Boolean).join(' · ') }}</span>
+          <!-- 만나서 하는 경기는 동네 이름과 내 동네에서 거리부터 (화상·다른 게임은 동네가 없다) -->
+          <span class="block t-caption line-clamp-2 mt-0.5">{{ [[game.dongName, distance(game.distanceM)].filter(Boolean).join(' '), matchTime(game.matchDate), venuePlace(game, place)].filter(Boolean).join(' · ') }}</span>
           <!-- 여럿이 하는 경기: 형식과 모인 인원 -->
           <span v-if="multi" class="block t-micro mt-0.5">{{ formatLabel(game.format, game.maxPlayers) }} · {{ game.currentParticipantCounts }}/{{ game.maxPlayers }}명 모임</span>
         </span>
@@ -73,7 +73,7 @@ const STATUS_LABEL = { SCHEDULED: '상대 정해짐', IN_PROGRESS: '경기 중',
 import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton, UiList, UiListItem, UiSheet } from '../ui'
-import { matchTime, place, ratingLine, timeAgo } from '../../utils/format'
+import { distance, matchTime, place, ratingLine, timeAgo } from '../../utils/format'
 import { formatLabel, TEAM_NAMES, venuePlace } from '../../utils/gameFormat'
 
 const props = defineProps({

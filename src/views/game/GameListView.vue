@@ -1,6 +1,6 @@
 <template>
   <UiTopBar title="찾기">
-    <template #right><UiIconButton icon="location-dot" label="지도" @click="router.push('/map')" /><InboxButtons /></template>
+    <template #right><UiIconButton icon="map" label="지도" @click="router.push('/map')" /><InboxButtons /></template>
   </UiTopBar>
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">

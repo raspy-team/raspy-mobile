@@ -3,7 +3,7 @@
     <UiTopBar title="소속" back="/settings" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-32 space-y-8">
-      <p class="t-caption pt-3">학교·회사를 인증하면 프로필에 ✓ 소속이 붙고, 그 안에서 순위와 챔피언을 겨뤄요.</p>
+      <p class="t-caption pt-3">인증하면 프로필에 ✓ 소속이 붙어요</p>
 
       <UiListSkeleton v-if="loading" :rows="3" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="소속을 불러오지 못했어요">

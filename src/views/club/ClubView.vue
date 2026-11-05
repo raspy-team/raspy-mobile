@@ -19,9 +19,9 @@
         </UiCard>
 
         <!-- 막 만든 동호회: 단톡방에 링크부터 -->
-        <UiCard v-if="route.query.made && detail.inviteCode" class="mt-4">
+        <UiCard v-if="justMade" class="mt-4">
           <p class="t-heading">동호회를 만들었어요</p>
-          <p class="t-caption mt-1">초대 링크를 동호회 단톡방에 올리면 누르기만 해도 들어와요. 대표 종목을 정하면 우리끼리 순위가 생겨요</p>
+          <p class="t-caption mt-1">초대 링크를 단톡방에 올리면 누르기만 해도 들어와요</p>
           <!-- 정하는 곳이 위의 연필 아이콘뿐이라 안내만 보고는 못 찾았다 (11/4 밤샘, 동호회 총무) -->
           <div class="flex gap-2 mt-3">
             <UiButton size="sm" icon="share" @click="share">초대 링크 보내기</UiButton>
@@ -31,9 +31,10 @@
 
         <template v-if="isMember">
           <UiButton block size="lg" class="mt-5" icon="plus" @click="openGame">동호회 경기 열기</UiButton>
-          <div class="flex gap-2 mt-2">
+          <!-- 막 만든 카드에 '초대 링크 보내기'가 있으면 여기 것은 숨긴다 (같은 버튼이 두 번이었다, UX 리뷰 ⑦) -->
+          <div v-if="detail.chatLink || !justMade" class="flex gap-2 mt-2">
             <UiButton v-if="detail.chatLink" class="flex-1" variant="secondary" icon="comment" @click="openChat">단톡방</UiButton>
-            <UiButton class="flex-1" variant="secondary" icon="share" @click="share">초대 링크</UiButton>
+            <UiButton v-if="!justMade" class="flex-1" variant="secondary" icon="share" @click="share">초대 링크</UiButton>
           </div>
         </template>
         <template v-else>
@@ -91,7 +92,7 @@
               </div>
             </UiCard>
           </div>
-          <p v-else class="t-caption">{{ isStaff ? '정모·번개를 잡으면 멤버에게 알림이 가고, 누가 오는지 한눈에 보여요' : '다가오는 일정이 없어요' }}</p>
+          <p v-else class="t-caption">다가오는 일정이 없어요</p>
         </UiSection>
 
         <!-- 교류전: 동호회 대 동호회 -->
@@ -106,7 +107,7 @@
               <p class="t-caption mt-0.5">{{ [m.ruleTitle, `${m.boards}판 ${m.perBoard === 2 ? '2:2' : '1:1'}`, MATCH_STATUS[m.status], m.matchDate ? when(m.matchDate) : ''].filter(Boolean).join(' · ') }}</p>
             </UiCard>
           </div>
-          <p v-else class="t-caption">아직 교류전이 없어요{{ isStaff ? '. 다른 동호회에 신청해 보세요' : '' }}</p>
+          <p v-else class="t-caption">아직 교류전이 없어요</p>
         </UiSection>
 
         <!-- 대회: 이 동호회가 연 대회 (월례대회 등) -->
@@ -115,7 +116,7 @@
           <div v-if="tournaments.length" class="space-y-2">
             <TournamentRow v-for="t in tournaments" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
           </div>
-          <p v-else class="t-caption">{{ isStaff ? '월례대회를 열면 멤버에게 알림이 가고, 대진·순위가 저절로 나와요' : '아직 연 대회가 없어요' }}</p>
+          <p v-else class="t-caption">아직 연 대회가 없어요</p>
         </UiSection>
 
         <!-- 우리끼리 순위: 대표 종목 실력 점수 -->
@@ -136,7 +137,7 @@
               <p class="t-caption mt-0.5">{{ g.hostNickname }}님이 열었어요 · {{ STATUS[g.status] || g.status }}</p>
             </UiCard>
           </div>
-          <p v-else class="t-caption">아직 동호회 경기가 없어요. 경기를 열면 멤버 모두에게 알림이 가요</p>
+          <p v-else class="t-caption">아직 동호회 경기가 없어요</p>
         </UiSection>
 
         <UiSection :title="`멤버 ${detail.members.length}`" class="mt-8">
@@ -274,6 +275,7 @@ const id = Number(route.params.id)
 
 const isMember = computed(() => !!detail.value?.myRole)
 const isStaff = computed(() => detail.value?.myRole === 'OWNER' || detail.value?.myRole === 'STAFF')
+const justMade = computed(() => !!route.query.made && !!detail.value?.inviteCode)
 const faceLine = computed(() => {
   const d = detail.value
   if (!d) return ''

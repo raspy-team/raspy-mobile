@@ -20,3 +20,10 @@ export function loadKakaoMap() {
 
 /** 지도 앱에서 열기 (키가 없어도 된다) */
 export const kakaoMapLink = (name, lat, lon) => `https://map.kakao.com/link/map/${encodeURIComponent(name)},${lat},${lon}`
+
+/** 경기 장소를 카카오맵에서 (UX 리뷰 ⑦). 검색으로 고른 곳은 그 자리, 직접 적은 주소는 그 말로 검색. 원격 경기·장소 없음은 null */
+export function placeMapLink(game) {
+  if (!game?.matchLocation?.trim() || (game.venue && game.venue !== 'IN_PERSON')) return null
+  if (game.placeLat != null && game.placeLon != null) return kakaoMapLink(game.matchLocation, game.placeLat, game.placeLon)
+  return `https://map.kakao.com/link/search/${encodeURIComponent(game.matchLocation)}`
+}

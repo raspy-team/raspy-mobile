@@ -8253,6 +8253,8 @@ export interface components {
             /** Format: double */
             placeLon?: number;
             dongName?: string;
+            /** Format: int32 */
+            distanceM?: number;
             joinBlockedReason?: string;
             rule: components["schemas"]["FullRuleResponse"];
             /** Format: date-time */

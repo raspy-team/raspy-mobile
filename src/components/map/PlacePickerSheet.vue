@@ -5,7 +5,7 @@
       <UiInput v-model="q" class="flex-1" placeholder="예: 망원 탁구장, 체육공원" enterkeyhint="search" />
       <UiButton type="submit" :loading="busy" :disabled="!q.trim()">찾기</UiButton>
     </form>
-    <KakaoMap v-if="kakaoMapKey && results.length" class="mt-3" :center="{ lat: results[0].lat, lon: results[0].lon }" :pins="pins" :level="5" height="200px" @select="(p) => pick(results.find((r) => r.kakaoId === p.id))" />
+    <KakaoMap v-if="kakaoMapKey && results.length" class="mt-3" :center="{ lat: results[0].lat, lon: results[0].lon }" :pins="pins" :level="5" height="200px" fit @select="(p) => pick(results.find((r) => r.kakaoId === p.id))" />
     <p v-if="error" class="t-caption text-danger-fg mt-3">{{ error }}</p>
     <UiList v-if="results.length" class="mt-3">
       <UiListItem

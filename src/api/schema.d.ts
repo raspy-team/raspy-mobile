@@ -4179,7 +4179,7 @@ export interface paths {
         };
         /**
          * 지도의 경기
-         * @description 중심(lat·lon)에서 radiusKm(최대 20) 안: 모집 중인 경기(장소를 검색으로 고른 것)와 최근 90일 끝난 경기의 장소별 횟수
+         * @description 중심(lat·lon)에서 radiusKm(최대 20) 안: 모집 중인 경기(장소를 고른 것은 그 자리, 아직 안 고른 것은 동 가운데에 approx)와 최근 90일 끝난 경기의 공공장소별 횟수
          */
         get: operations["games"];
         put?: never;
@@ -8011,6 +8011,7 @@ export interface components {
             /** Format: date-time */
             lastAt?: string;
             public: boolean;
+            approx: boolean;
         };
         LandingResponse: {
             title: string;

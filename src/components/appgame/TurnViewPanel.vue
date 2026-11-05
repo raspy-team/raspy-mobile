@@ -35,7 +35,8 @@
         >
           <span v-if="kind(cell) === 'me'" class="w-[78%] h-[78%] rounded-full bg-fg" :class="{ 'ring-2 ring-signal': last(cell) }"></span>
           <span v-else-if="kind(cell) === 'op'" class="w-[78%] h-[78%] rounded-full bg-canvas border-2 border-fg" :class="{ 'ring-2 ring-signal': last(cell) }"></span>
-          <span v-else-if="kind(cell) === 'ship'" class="w-full h-full bg-surface-3"></span>
+          <!-- 내 배: 빈칸과 거의 같은 색이라 안 보였다 (UX ⑤). 밝은 칸으로 -->
+          <span v-else-if="kind(cell) === 'ship'" class="w-[86%] h-[86%] rounded-md bg-fg-subtle"></span>
           <span v-else-if="kind(cell) === 'hit'" class="w-full h-full flex items-center justify-center bg-danger-soft text-danger-fg" :class="{ 'ring-2 ring-inset ring-signal': last(cell) }"><UiIcon name="xmark" /></span>
           <span v-else-if="kind(cell) === 'mine'" class="w-full h-full flex items-center justify-center bg-surface-3 text-fg-muted"><UiIcon name="bomb" /></span>
           <span v-else-if="kind(cell) === 'miss'" class="w-2 h-2 rounded-full bg-fg-subtle" :class="{ 'ring-2 ring-signal': last(cell) }"></span>

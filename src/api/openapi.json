@@ -10184,6 +10184,39 @@
         }
       }
     },
+    "/api/app-games/realtime/{gameId}/invite": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "받은 도전장 미리 보기",
+        "description": "받는 사람만. 누가 무슨 게임으로 도전했는지와 아직 받을 수 있는지",
+        "operationId": "invitePreview",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitePreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/realtime/lobbies": {
       "get": {
         "tags": [
@@ -21371,6 +21404,39 @@
           "score": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "InvitePreview": {
+        "required": [
+          "fromId",
+          "fromNickname",
+          "gameId",
+          "key",
+          "open",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "fromId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fromNickname": {
+            "type": "string"
+          },
+          "open": {
+            "type": "boolean"
           }
         }
       },

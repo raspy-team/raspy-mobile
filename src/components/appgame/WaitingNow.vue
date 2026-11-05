@@ -2,8 +2,7 @@
   <div v-if="list && (anyButton || list.tonight || list.lobbies.length || residents.length || showEmpty)">
     <!-- 아무거나 바로 붙기: 어느 게임이든 기다리는 사람에게, 없으면 오늘 밤의 게임으로 (docs/lobby.md 5) -->
     <template v-if="anyButton">
-      <UiButton block :disabled="joining" @click="joinAny">아무거나 바로 붙기</UiButton>
-      <p class="t-micro text-center mt-2 mb-4">{{ anyLine }}</p>
+      <UiButton block class="mb-4" :disabled="joining" @click="joinAny">아무거나 바로 붙기</UiButton>
     </template>
     <!-- 오늘 밤의 게임: 밤 9시대에 사람을 게임 하나에 모은다 (docs/lobby.md 4-C) -->
     <UiCard v-if="list.tonight" class="flex items-center gap-3 py-3 mb-3" :class="list.goldenHour ? 'bg-signal-soft' : ''">
@@ -11,8 +10,7 @@
       <div class="flex-1 min-w-0">
         <p class="t-label truncate">{{ list.goldenHour ? `지금은 ${list.tonight.title} 시간` : `오늘 밤 ${nightHour}시 · ${list.tonight.title}` }}</p>
         <!-- 좁은 화면에서 '8시 / 55분'처럼 시각이 갈라지지 않게 덩어리마다 줄을 바꾼다 (11/5 c6 320 검토) -->
-        <p v-if="list.goldenHour" class="t-micro tabular-nums">{{ nightHour }}시대에는 이 게임에 사람이 모여요</p>
-        <p v-else class="t-micro tabular-nums"><span class="whitespace-nowrap">{{ left }} 남음</span> · <span class="whitespace-nowrap">{{ list.nightAlarm ? '' : '켜면 ' }}{{ nightHour - 1 }}시 55분에</span> 알려 드려요</p>
+        <p v-if="!list.goldenHour" class="t-micro tabular-nums">{{ left }} 남음</p>
       </div>
       <UiButton v-if="list.goldenHour" size="sm" @click="join(list.tonight.key)">바로 하기</UiButton>
       <UiSwitch v-else :model-value="list.nightAlarm" :disabled="saving" :label="`${nightHour - 1}시 55분에 알려 주기`" @update:model-value="setAlarm" />
@@ -33,13 +31,13 @@
           <MatchMascot who="bibi" :size="24" class="-mx-0.5" />
           <div class="flex-1 min-w-0">
             <p class="t-label flex items-center min-w-0"><span class="truncate">{{ r.nickname }}</span><UiAiBadge /><span class="truncate">&nbsp;· {{ r.title }}</span></p>
-            <p class="t-micro">기다리는 중 · 바로 시작해요</p>
+            <p class="t-micro">기다리는 중</p>
           </div>
           <UiButton size="sm" variant="secondary" :disabled="joining" @click="playAi(r)">한 판</UiButton>
         </UiCard>
       </div>
       <!-- AI 주민만 기다릴 때 '기다리는 사람이 없어요'라고 하면 바로 위 목록과 어긋난다 (first10 검토) -->
-      <p v-if="!list.lobbies.length" class="t-caption" :class="residents.length ? 'mt-3' : ''">{{ residents.length ? '지금은 AI 주민만 기다려요' : '지금 기다리는 사람이 없어요' }}. 매일 밤 {{ nightHour }}시대{{ list.tonight ? `, ${list.tonight.title}에` : '에' }} 가장 많이 모여요</p>
+      <p v-if="!list.lobbies.length && !residents.length" class="t-caption">지금 기다리는 사람이 없어요</p>
     </UiSection>
   </div>
 </template>
@@ -57,7 +55,6 @@ import type { components } from '@/api/schema'
 import { onLobbyChange, openUserChannel } from '@/websocket/userChannel'
 import { UiAiBadge, UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
 import { liveRoute } from '@/utils/battle'
-import { waitText } from '@/utils/format'
 import { useToast } from '../../composable/useToast'
 
 const { showToast } = useToast()
@@ -118,14 +115,6 @@ async function setAlarm(on: boolean) {
     saving.value = false
   }
 }
-
-const anyLine = computed(() => {
-  const n = list.value?.lobbies.length ?? 0
-  if (n) return `지금 ${n}명이 기다려요. 실력이 가까운 사람과 바로 붙어요`
-  // 아무도 없으면 서버가 오늘 밤의 게임에 방을 연다. 그 방도 botAfterSeconds 뒤 AI 주민이 상대가 된다 (밤 9시대는 길게, 9e)
-  const ai = `${waitText(list.value?.botAfterSeconds ?? 15)} 안에 아무도 안 오면 AI 주민이 상대가 돼요`
-  return list.value?.tonight ? `기다리는 사람이 없으면 ${list.value.tonight.title}에서 기다려요. ${ai}` : `기다리는 사람이 없으면 방을 열어요. ${ai}`
-})
 
 // 붙을 게임은 서버가 정한다. 그 게임 화면으로 가면 들어가 있는 판을 이어서 보여 준다
 const joining = ref(false)

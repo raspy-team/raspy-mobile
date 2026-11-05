@@ -253,8 +253,7 @@
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
             <!-- 준비 중인 게임에는 첫 판을 권하지 않는다 (바로 밑의 '준비 중인 게임이에요'와 어긋났다) -->
-            <p v-if="!played && game.available" class="t-body mt-3">아직 안 해 봤어요. 첫 판부터 실력 점수가 쌓여요</p>
-            <div v-else-if="played" class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
+            <div v-if="played" class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
                 <span class="block t-micro">실력 점수</span>
@@ -280,11 +279,12 @@
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
-            <template v-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님만 들어오는 방을 열고 메시지로 도전장을 보내요. 들어오면 바로 시작해요</template>
-            <template v-else-if="ladderTo && fromFeed">{{ ladderName }}님에게 도전해요. 먼저 한 판 하면 같은 문제로 도전장을 메시지로 보내요</template>
-            <template v-else-if="ladderTo">만나기 전에 {{ ladderName }}님과 한 판 해요. 끝나면 같은 문제로 도전장을 메시지로 보내요</template>
-            <template v-else-if="game.dailyLimit === 1">하루 한 번 풀 수 있어요. 오늘 같은 문제를 푼 사람들과 견줘요</template>
-            <template v-else>{{ waitLine }}<template v-if="game.dailyLimit"> · 하루 {{ game.dailyLimit }}판</template></template>
+            <template v-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 도전장을 보내요</template>
+            <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 문제로 도전장이 가요</template>
+            <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 문제로 도전장이 가요</template>
+            <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
+            <!-- 기다림·AI 주민 안내는 대기실 화면이 말한다 (UX ⑤: 여기서 미리 두 줄로 설명했다) -->
+            <template v-else-if="game.dailyLimit">하루 {{ game.dailyLimit }}판</template>
           </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
 
@@ -459,20 +459,6 @@ const result = ref<Duel | null>(null)
 const ladderTo = Number(route.query.to) || null
 const ladderName = String(route.query.toName || '상대')
 
-// 시작 버튼 밑 한 줄: 사람이 안 오면 어떻게 되나. 초는 서버가 실제로 기다리는 시간 (밤 9시대 오늘 밤의 게임은 길다, 9e)
-const waitLine = computed(() => {
-  const g = game.value
-  if (!g) return ''
-  const after = g.botAfterSeconds
-  if (g.shared) return '열린 판에 들어가 여럿이 함께 겨뤄요'
-  if (g.playMode === 'REALTIME') {
-    // 하루 기다리는 게임(편지 오목): AI 주민이 저절로 오지 않고, 원하면 부른다
-    if (!after) return '기다리는 사람이 있으면 바로 시작해요. 없으면 상대가 올 때 알려 드려요. 기다리기 싫으면 AI 주민과 해도 돼요'
-    return `기다리는 사람이 있으면 바로 시작하고, ${waitText(after)} 안에 아무도 안 오면 AI 주민이 상대가 돼요`
-  }
-  if (!after) return '같은 문제를 푼 사람과 견줘요'
-  return `기다리는 사람이 있으면 같은 문제로 바로 겨뤄요. ${waitText(after)} 안에 아무도 안 풀면 AI 주민이 풀어요`
-})
 // 소식 카드의 '도전해요'로 왔다 (같은 길, 문구만 다르다)
 const fromFeed = route.query.from === 'feed'
 let ladderSent = false
@@ -501,7 +487,8 @@ const ranking = ref<Schemas['UserRankingDto'][]>([])
 const rankingTotal = ref(0)
 const baselines = ref<Schemas['RankingBaseline'][]>([])
 // 위 10명만 보이니, 다 보일 때만 맨 아래 기준선까지. 20명을 넘으면 기준선을 접는다 (순위 전체 보기에서 편다)
-const rankingRows = computed(() => withBaselines(ranking.value, rankingTotal.value > FOLD_AT ? [] : baselines.value, rankingTotal.value <= ranking.value.length))
+// 순위가 비었으면 기준선(1800·1500)만 덩그러니 보였다 (UX ⑤): 사람이 있을 때만
+const rankingRows = computed(() => withBaselines(ranking.value, rankingTotal.value > FOLD_AT || !ranking.value.length ? [] : baselines.value, rankingTotal.value <= ranking.value.length))
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))
 const finished = computed(() => duels.value.filter((d) => DONE.includes(d.status)))

@@ -5305,6 +5305,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/realtime/{gameId}/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 받은 도전장 미리 보기
+         * @description 받는 사람만. 누가 무슨 게임으로 도전했는지와 아직 받을 수 있는지
+         */
+        get: operations["invitePreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/realtime/lobbies": {
         parameters: {
             query?: never;
@@ -8930,6 +8950,16 @@ export interface components {
             player: components["schemas"]["AppPlayer"];
             /** Format: double */
             score: number;
+        };
+        InvitePreview: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            title: string;
+            /** Format: int64 */
+            fromId: number;
+            fromNickname: string;
+            open: boolean;
         };
         AdminUserResponse: {
             /** Format: int64 */
@@ -15831,6 +15861,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    invitePreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InvitePreview"];
                 };
             };
         };

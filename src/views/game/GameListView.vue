@@ -114,7 +114,8 @@ import { todayBrandLine } from '@/utils/brandLines'
 
 // 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나 (사용자 11/3)
 const DESTINATIONS = [
-  { to: '/plaza', icon: 'gamepad', label: '앱 게임' },
+  // 앱 게임은 목록으로 바로 (UX ⑤: 광장의 캐릭터 만들기부터 나와 게임을 찾지 못했다). 광장은 목록 맨 위 입구로
+  { to: '/games', icon: 'gamepad', label: '앱 게임' },
   { to: '/rules', icon: 'book-open', label: '규칙' },
   { to: '/clubs', icon: 'users', label: '동호회' },
 ]

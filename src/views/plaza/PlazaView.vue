@@ -3,7 +3,6 @@
     <!-- 처음 들어온 사람: 기본 꾸미기부터 -->
     <div v-if="phase === 'avatar'" class="absolute inset-0 bg-canvas flex flex-col">
       <UiTopBar title="내 캐릭터 만들기" back />
-      <p class="px-4 t-body text-fg-muted">광장에서 이웃을 만날 내 모습이에요. 기본 옷 중에서 골라 시작하고, 포인트가 모이면 하나씩 꾸며요</p>
       <AvatarEditor class="flex-1 min-h-0" mode="start" @saved="afterAvatar" />
     </div>
 
@@ -78,7 +77,7 @@
             {{ card.name }}
             <span v-if="card.bot" class="t-micro px-1.5 rounded bg-[#9ad0ff] text-[#121214] font-semibold">AI</span>
           </p>
-          <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="24" /> AI 주민 · 매치가 만든 연습 상대예요</p>
+          <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="24" /> AI 주민</p>
           <p v-if="card.champion" class="t-caption text-fg">👑 {{ card.champion }}</p>
           <p v-if="card.area" class="t-caption">{{ card.area }}</p>
           <p v-if="restingText(card)" class="t-caption">{{ restingText(card) }}</p>
@@ -88,6 +87,8 @@
         <div v-if="card && card.id !== enter?.me.id" class="space-y-2">
           <UiButton block size="lg" @click="pickerOpen = true">{{ card.bot ? 'AI와 한 판' : restingText(card) ? '도전장 남기기' : '한 판 하자고 하기' }}</UiButton>
           <div class="flex gap-2">
+            <!-- 친구 추가 (UX ⑤: 광장에서 만난 사람을 친구로 할 길이 없었다). 이미 친구면 숨긴다 -->
+            <UiButton v-if="!card.bot && friend && !friend.isFriend" class="flex-1" variant="secondary" :disabled="friend.sent" @click="addFriend(card.id)">{{ friend.sent ? '요청 보냄' : friend.received ? '친구 받기' : '친구 추가' }}</UiButton>
             <UiButton v-if="!card.bot" class="flex-1" variant="secondary" @click="router.push(`/profile/${card.id}`)">프로필</UiButton>
             <UiButton v-if="!card.bot" class="flex-1" variant="secondary" @click="reportOpen = true">신고</UiButton>
             <UiButton v-if="!card.bot" class="flex-1" variant="secondary" @click="block(card.id)">차단</UiButton>
@@ -115,7 +116,7 @@
 
     <!-- 받은 도전 -->
     <UiSheet v-model="inviteOpen" title="한 판 하재요">
-      <p v-if="invite" class="t-body text-fg">{{ invite.from }}님이 <strong>{{ invite.title }}</strong> 한 판 하재요</p>
+      <p v-if="invite" class="t-body text-fg">{{ invite.from }}님이 <strong>{{ invite.title }}</strong> 하재요</p>
       <template #footer>
         <div class="flex gap-2">
           <UiButton class="flex-1" variant="secondary" @click="inviteOpen = false">다음에</UiButton>
@@ -143,7 +144,7 @@
 
     <!-- 지금 여기 있는 사람: 걷지 않고 바로 한 판 -->
     <UiSheet v-model="peopleOpen" title="지금 여기 있는 사람">
-      <p v-if="!peopleHere.length" class="t-body text-fg-muted">아직 아무도 없어요. 노점에서 게임을 고르면 AI 주민이 상대가 돼요</p>
+      <p v-if="!peopleHere.length" class="t-body text-fg-muted">아직 아무도 없어요</p>
       <ul class="space-y-1">
         <li v-for="p in peopleHere" :key="p.id" class="flex items-center gap-2">
           <button type="button" class="flex-1 min-w-0 flex items-center gap-3 rounded-2xl px-2 py-2 active:bg-surface-2 text-left" @click="peopleOpen = false; openCardFor(p)">
@@ -177,7 +178,6 @@
     <!-- 실제 장소 팻말 -->
     <UiSheet v-model="placeOpen" :title="place?.name ?? ''">
       <p v-if="place" class="t-body text-fg">{{ PLACE_KIND[place.kind] ?? '장소' }}<template v-if="place.kind !== 'city' && place.kind !== 'gu'"> · {{ place.dir }}쪽 {{ place.distanceM < 1000 ? `${place.distanceM}m` : `${(place.distanceM / 1000).toFixed(1)}km` }}</template></p>
-      <p class="t-caption mt-1">{{ enter?.map.center ? '광장 가운데가 우리 동네 한가운데예요. 팻말은 실제 방향에 있어요' : '팻말은 실제 방향에 있어요' }}</p>
       <template #footer>
         <div class="flex gap-2">
           <UiButton v-if="place?.target" class="flex-1" @click="placeOpen = false; goRoom(place.target!)">이 광장으로 가기</UiButton>
@@ -199,7 +199,8 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import api from '@/api/api'
 import { matchTime } from '@/utils/format'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
+import { keepSpot, cameBack, STAY_ROUTES } from '../../components/plaza/plazaAway'
 import type Phaser from 'phaser'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -289,9 +290,13 @@ async function go(r: S['RoomInfo']) {
   board.value = null
   setTimeout(pinGames, 1500)
   pingTimer = setInterval(() => publish(`/app/plaza/${data.instance}/ping`), 25_000)
-  const others = data.people.filter((p) => !p.bot).length
-  hint.value = others ? `지금 ${others}명이 광장에 있어요. 땅을 누르면 걸어가요` : '노점은 그 게임, 팻말은 실제 동네 장소예요. 땅을 누르면 걸어가요'
-  setTimeout(() => (hint.value = ''), 5000)
+  // 걷는 법은 처음 한 번만 (UX ⑤: 들어올 때마다 같은 안내가 떴다)
+  let seen = false
+  try { seen = localStorage.getItem('plazaHintSeen') === '1'; localStorage.setItem('plazaHintSeen', '1') } catch { /* 이번만 */ }
+  if (!seen) {
+    hint.value = '땅을 누르면 걸어가요'
+    setTimeout(() => (hint.value = ''), 5000)
+  }
 }
 
 async function switchRoom(r: S['RoomInfo']) {
@@ -340,14 +345,30 @@ function openCardFor(p: Person) {
   card.value = p
   cardOpen.value = true
   loadGames()
+  loadFriend(p)
 }
 
 function openCard(id: number) {
   const p = scene()?.person(id)
-  if (!p) return
-  card.value = p
-  cardOpen.value = true
-  loadGames()
+  if (p) openCardFor(p)
+}
+
+// 친구 상태 (카드의 '친구 추가'). 받은 요청이 있으면 받는다
+const friend = ref<{ isFriend?: boolean; sent?: boolean; received?: boolean } | null>(null)
+async function loadFriend(p: Person) {
+  friend.value = null
+  if (p.bot || p.id === enter.value?.me.id) return
+  friend.value = (await api.get(`/api/friends/status/${p.id}`).catch(() => null))?.data ?? null
+}
+async function addFriend(id: number) {
+  const received = friend.value?.received
+  try {
+    await api.post(received ? `/api/friends/accept/${id}` : `/api/friends/request/${id}`)
+    friend.value = { ...friend.value, sent: !received, isFriend: !!received }
+    showToast(received ? '친구가 됐어요' : '친구 요청을 보냈어요')
+  } catch (e) {
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '친구 요청을 보내지 못했어요')
+  }
 }
 
 async function loadGames() {
@@ -468,10 +489,12 @@ async function onInvite(gameId: number) {
   let title = '한 판'
   let from = '누군가'
   try {
-    const s = (await GET('/api/app-games/realtime/{gameId}', { path: { gameId } })).data
+    // 받기 전에는 판을 못 봐서(403) 예전엔 '누군가님이 한 판 한 판 하재요'였다 (UX ⑤). 받는 사람만 보는 미리 보기로
+    const s = (await GET('/api/app-games/realtime/{gameId}/invite', { path: { gameId } })).data
+    if (!s.open) return
     key = s.key
-    from = (s.me.userId === enter.value?.me.id ? s.opponent?.nickname : s.me.nickname) ?? from
-    title = games.value.find((g) => g.key === s.key)?.title ?? title
+    from = s.fromNickname
+    title = `${s.title} 한 판`
   } catch {
     // 그대로
   }
@@ -507,6 +530,7 @@ function teardown(leave = true) {
 }
 
 onMounted(() => {
+  cameBack()
   openUserChannel()
   offUser = onUserEvent((e: { type: string; gameId?: number }) => {
     if (e.type === 'REALTIME_INVITE' && e.gameId) onInvite(e.gameId)
@@ -518,9 +542,17 @@ onMounted(() => {
   start()
 })
 
+// 프로필·꾸미기·메시지·모집 경기로 잠깐 가면 광장을 나가지 않는다 (UX ⑤: 남들 화면에서 사라졌다 다시 생겼다). 게임·다른 탭이면 나간다
+let away = false
+onBeforeRouteLeave((to) => {
+  away = phase.value === 'plaza' && !!enter.value && STAY_ROUTES.some((r) => r.test(to.path))
+})
+
 onBeforeUnmount(() => {
   offUser?.()
-  teardown(true)
+  const inst = enter.value?.instance
+  teardown(!away)
+  if (away && inst) keepSpot(inst)
 })
 </script>
 

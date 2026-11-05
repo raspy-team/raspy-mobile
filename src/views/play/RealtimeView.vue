@@ -20,7 +20,7 @@
           <p class="t-heading mt-4">{{ state.invitee ? `${state.invitee.nickname}님을 기다리고 있어요` : state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
           <!-- 초대 방: 그 사람만 들어온다. 봇·친구 부르기·다른 게임은 두지 않는다 -->
           <template v-if="state.invitee">
-            <p class="t-caption mt-1">메시지로 도전장을 보냈어요. 들어오면 바로 시작해요</p>
+            <p class="t-caption mt-1">도전장을 보냈어요</p>
             <p v-if="inviteLeft" class="t-micro mt-2 tabular-nums">{{ inviteLeft }} 남음 · 이 화면을 나가면 도전이 취소돼요</p>
           </template>
           <p v-else-if="state.fixture" class="t-caption mt-1">상대에게 알렸어요. 상대가 들어오면 바로 시작해요</p>
@@ -64,10 +64,11 @@
         <p class="t-caption flex items-center min-w-0 mb-1"><span class="shrink-0">상대&nbsp;·&nbsp;</span><OpponentName :player="state.opponent" /></p>
         <div class="flex items-center justify-between">
           <span class="t-heading">{{ turnLine }}</span>
-          <span class="t-mono tabular-nums" :class="left <= 5 ? 'text-danger' : 'text-fg-muted'">{{ leftText }}</span>
+          <span class="t-mono tabular-nums" :class="hurry ? 'text-danger font-semibold' : 'text-fg-muted'">{{ leftText }}</span>
         </div>
+        <!-- 내 차례가 10초 안 남으면 빨갛게 (UX ⑤: 시간이 지나면 바로 지는데 알아채기 어려웠다) -->
         <div class="h-1 rounded-full bg-surface-3 mt-2 overflow-hidden">
-          <div class="h-full bg-fg transition-[width] duration-200" :style="{ width: `${(left / state.turnSeconds) * 100}%` }" />
+          <div class="h-full transition-[width] duration-200" :class="hurry ? 'bg-danger' : 'bg-fg'" :style="{ width: `${(left / state.turnSeconds) * 100}%` }" />
         </div>
 
         <!-- 어떻게 하나요: 처음 하는 게임이면 펼쳐 둔다 ('아무거나'로 처음 보는 게임에 붙어도 알게) -->
@@ -141,17 +142,21 @@
             <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ resultCount }}</p>
+            <p v-if="timedOut" class="t-body mt-3">{{ timedOut === 'me' ? '시간이 지나서 졌어요' : '상대가 시간을 넘겼어요' }}</p>
             <p v-if="state.bossChallenge" class="t-body mt-4">{{ state.result === 'WIN' ? 'AI 보스를 꺾고 전국 챔피언이 됐어요' : '보스 도전은 하루 3번까지예요' }}</p>
             <p v-else-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
+          <!-- 다음 행동은 결과 바로 밑에 (UX ⑤: 판 두 개 아래에 있어 스크롤해야 보였다) -->
+          <div class="mt-6 px-4 space-y-2">
+            <UiButton block size="lg" @click="again">한 판 더</UiButton>
+            <UiButton block variant="ghost" :to="`/play/${key}`">돌아가기</UiButton>
+          </div>
         </UiCard>
         <TurnViewPanel v-if="state.view?.boards?.length" class="mt-3" :view="{ ...state.view, note: undefined, choices: [] }" :my-turn="false" :sending="false" />
         <UiCard v-if="state.moves.length && !state.stones && !state.view" class="mt-3">
           <p class="t-caption">{{ [state.startWord, ...state.moves.map((m) => m.word)].join(' → ') }}</p>
         </UiCard>
-        <UiButton block size="lg" class="mt-4" @click="again">한 판 더</UiButton>
-        <UiButton block variant="ghost" class="mt-2" :to="`/play/${key}`">돌아가기</UiButton>
       </template>
     </main>
   </div>
@@ -200,6 +205,10 @@ const now = ref(Date.now())
 const offset = ref(0) // 서버 시각 - 기기 시각
 
 const myTurn = computed(() => state.value?.turnUserId === state.value?.me.userId)
+// 내 차례 10초 아래
+const hurry = computed(() => myTurn.value && left.value <= 10)
+// 시간이 다 돼서 끝났나: 마감에 닿은 순간 누구 차례였는지 (서버는 차례인 사람을 진 것으로 한다)
+const timedOut = ref<'me' | 'them' | null>(null)
 const lastChar = computed(() => {
   const moves = state.value?.moves ?? []
   return (moves[moves.length - 1]?.word ?? state.value?.startWord ?? '').slice(-1)
@@ -442,6 +451,7 @@ async function leave() {
 }
 
 async function again() {
+  timedOut.value = null
   state.value = null
   await join()
 }
@@ -460,10 +470,13 @@ const timer = setInterval(async () => {
       .then(({ data }) => apply(data))
       .catch(() => setTimeout(() => (botCalled = false), 5000))
   }
+  // 마감 전에 다음 차례로 넘어갔으면(1초 여유 안에 냈다) 시간 초과가 아니다
+  if (s.status === 'PLAYING' && left.value > 0) timedOut.value = null
   // 마감 시각마다 한 번 (레이스·같이 내기는 moves가 그대로여도 판이 바뀐다)
   const due = s.turnEndsAt ? new Date(s.turnEndsAt).getTime() : -1
   if (s.status === 'PLAYING' && left.value === 0 && timeoutSentFor !== due) {
     timeoutSentFor = due
+    if (!s.simultaneous) timedOut.value = myTurn.value ? 'me' : 'them'
     // 서버는 1초 여유를 둔다
     setTimeout(async () => {
       if (state.value?.gameId !== s.gameId) return

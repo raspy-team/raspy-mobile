@@ -573,7 +573,8 @@ export function createPlaza(parent: HTMLElement, enter: Enter, cb: PlazaCallback
     pixelArt: true,
     roundPixels: true,
     scale: { mode: Phaser.Scale.RESIZE, width: parent.clientWidth, height: parent.clientHeight },
-    input: { activePointers: 2 },
+    // 캔버스에서 일어난 손짓만 받는다: 화면 전체(window)에서 받으면 위 막대 버튼을 누르고 뗄 때 그 아래 노점이 눌렸다 (UX ⑤)
+    input: { activePointers: 2, windowEvents: false },
     banner: false,
     scene: [],
   })

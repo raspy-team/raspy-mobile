@@ -9,6 +9,8 @@
         <UiChip v-for="s in STRUCTURES" :key="s.value" :selected="structure === s.value" @click="structure = structure === s.value ? '' : s.value">
           {{ s.label }}
         </UiChip>
+        <!-- 광장 입구 (UX ⑤: 홈의 '앱 게임'이 목록으로 바로 오고, 광장은 여기서) -->
+        <UiChip icon="map" @click="router.push('/plaza')">광장</UiChip>
       </div>
       <p v-if="structure" class="t-caption mt-2">{{ STRUCTURES.find((s) => s.value === structure)?.hint }}</p>
 
@@ -34,8 +36,10 @@
 
         <UiSection :title="query || structure ? `찾은 게임 ${filtered.length}` : '많이 하는 게임'" class="mt-6">
           <div v-if="filtered.length" class="grid grid-cols-2 gap-3">
-            <AppGameTile v-for="g in filtered" :key="g.key" :game="g" />
+            <AppGameTile v-for="g in shown" :key="g.key" :game="g" />
           </div>
+          <!-- 처음엔 많이 하는 8개만 (UX ⑤: 56개가 한 줄로 길었다). 찾거나 고르면 모두 -->
+          <UiButton v-if="shown.length < filtered.length" block variant="secondary" class="mt-3" @click="all = true">모두 보기 {{ filtered.length }}</UiButton>
           <UiEmptyState v-else mascot="dol" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
         </UiSection>
       </template>
@@ -46,6 +50,7 @@
 <script setup lang="ts">
 // 모든 앱 게임 (/games). 게임이 100개가 되어도: 검색 + 구조(지금 바로 붙기 / 편할 때 하기) + 최근에 한 게임 + 많이 하는 순
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import { STRUCTURES } from '@/utils/appGame'
@@ -54,6 +59,7 @@ import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import { UiButton, UiChip, UiEmptyState, UiInput, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
 
 type AppGameSummary = components['schemas']['AppGameSummary']
+const router = useRouter()
 const games = ref<AppGameSummary[]>([])
 const loading = ref(true)
 const query = ref('')
@@ -65,6 +71,8 @@ const recent = computed(() =>
     .sort((a, b) => (b.myLastPlayedAt ?? '').localeCompare(a.myLastPlayedAt ?? ''))
     .slice(0, 3),
 )
+const all = ref(false)
+const shown = computed(() => (all.value || query.value.trim() || structure.value ? filtered.value : filtered.value.slice(0, 8)))
 const filtered = computed(() => {
   const q = query.value.trim()
   return games.value

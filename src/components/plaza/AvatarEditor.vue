@@ -7,7 +7,6 @@
       </div>
       <p v-if="state" class="t-caption mt-2">
         포인트 <strong class="text-fg">{{ state.balance.toLocaleString() }}P</strong>
-        <span v-if="mode === 'start'"> · 처음엔 기본 옷 중에서 골라요. 더 꾸미는 건 포인트로</span>
       </p>
     </div>
 

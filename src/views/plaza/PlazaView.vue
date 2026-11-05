@@ -85,7 +85,7 @@
       </div>
       <template #footer>
         <div v-if="card && card.id !== enter?.me.id" class="space-y-2">
-          <UiButton block size="lg" @click="pickerOpen = true">{{ card.bot ? 'AI와 한 판' : restingText(card) ? '도전장 남기기' : '한 판 하자고 하기' }}</UiButton>
+          <UiButton block size="lg" @click="pickerOpen = true">{{ card.bot ? 'AI와 한 판' : restingText(card) ? '도전장 남기기' : '한 판 하자' }}</UiButton>
           <div class="flex gap-2">
             <!-- 친구 추가 (UX ⑤: 광장에서 만난 사람을 친구로 할 길이 없었다). 이미 친구면 숨긴다 -->
             <UiButton v-if="!card.bot && friend && !friend.isFriend" class="flex-1" variant="secondary" :disabled="friend.sent" @click="addFriend(card.id)">{{ friend.sent ? '요청 보냄' : friend.received ? '친구 받기' : '친구 추가' }}</UiButton>

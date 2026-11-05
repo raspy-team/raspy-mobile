@@ -77,7 +77,7 @@
     </UiSheet>
 
     <!-- 인증하기 -->
-    <UiSheet v-model="formOpen" title="소속 인증하기">
+    <UiSheet v-model="formOpen" title="소속 인증">
       <div class="space-y-5">
         <!-- 1. 조직 -->
         <div>
@@ -216,7 +216,7 @@ async function leave(m: Membership) {
 const canceling = ref(false)
 async function cancel() {
   const p = mine.value?.pending
-  if (!p || !(await confirmDialog({ title: '신청을 취소할까요?', message: '올린 서류도 바로 지워요.', confirmText: '취소하기' }))) return
+  if (!p || !(await confirmDialog({ title: '신청을 취소할까요?', message: '올린 서류도 바로 지워요.', confirmText: '신청 취소' }))) return
   canceling.value = true
   try {
     await DELETE('/api/organizations/requests/{id}', { path: { id: p.id } })

@@ -23,7 +23,7 @@
       </div>
 
       <UiEmptyState v-else-if="error && !posts.length" class="pt-16" icon="fas fa-triangle-exclamation" title="소식을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="reload">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="reload">다시 시도</UiButton>
       </UiEmptyState>
 
       <UiEmptyState
@@ -109,7 +109,7 @@
         <UiListItem icon="fas fa-flag-checkered" title="경기 결과 보기" chevron @click="go(`/games/${menuPost.id}/result`)" />
         <UiListItem v-if="menuPost?.rule?.id" icon="rotate-right" title="이 규칙으로 한 판" subtitle="같은 규칙으로 경기를 열어요" chevron @click="go(`/create-game?ruleId=${menuPost.rule.id}`)" />
         <UiListItem icon="fas fa-arrow-up-from-bracket" title="결과 보내기" subtitle="링크 · 스토리 그림 · 글자" @click="share(menuPost)" />
-        <UiListItem v-if="!menuPost?.isMyGame" icon="far fa-flag" title="신고하기" danger @click="openReport(menuPost)" />
+        <UiListItem v-if="!menuPost?.isMyGame" icon="far fa-flag" title="신고" danger @click="openReport(menuPost)" />
       </UiList>
     </UiSheet>
 
@@ -135,7 +135,7 @@
       </div>
       <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
       <template #footer>
-        <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고하기</UiButton>
+        <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고</UiButton>
       </template>
     </UiSheet>
 

@@ -10,7 +10,7 @@
     <!-- 지금 값을 못 불러오면 저장하지 않는다 (빈 칸으로 덮어쓰지 않게) -->
     <main v-else-if="loadError" class="max-w-md mx-auto px-4 pt-16">
       <UiEmptyState icon="fas fa-triangle-exclamation" title="프로필을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
     </main>
 
@@ -23,7 +23,7 @@
             <UiIcon name="fas fa-camera" aria-hidden="true" />
           </span>
         </button>
-        <UiButton v-if="preview" variant="ghost" size="sm" @click="removePhoto">사진 빼기</UiButton>
+        <UiButton v-if="preview" variant="ghost" size="sm" @click="removePhoto">사진 삭제</UiButton>
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhoto" />
       </div>
 
@@ -33,7 +33,7 @@
       <UiField label="동네">
         <RouterLink to="/neighborhood" class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
           <UiIcon name="location-dot" aria-hidden="true" />
-          <span class="flex-1 t-body">{{ form.region || '동네 인증하기' }}</span>
+          <span class="flex-1 t-body">{{ form.region || '동네 인증' }}</span>
           <UiIcon name="chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
         </RouterLink>
       </UiField>
@@ -46,7 +46,7 @@
       <UiField v-if="original?.affiliation" label="예전에 적은 소속" :hint="form.affiliation ? '이제 소속은 증명서로 인증해요. 예전 글은 지울 수만 있어요' : '저장하면 지워져요'">
         <div class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
           <span class="flex-1 t-body text-fg-subtle truncate" :class="{ 'line-through': !form.affiliation }">{{ original?.affiliation }}</span>
-          <UiButton v-if="form.affiliation" variant="ghost" size="sm" class="-mr-2" @click="form.affiliation = ''">지우기</UiButton>
+          <UiButton v-if="form.affiliation" variant="ghost" size="sm" class="-mr-2" @click="form.affiliation = ''">삭제</UiButton>
           <UiButton v-else variant="ghost" size="sm" class="-mr-2" @click="form.affiliation = original?.affiliation || ''">되돌리기</UiButton>
         </div>
       </UiField>

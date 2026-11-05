@@ -30,7 +30,7 @@
     <main v-else-if="loadError" class="max-w-2xl mx-auto px-4 pt-16">
       <!-- 서버가 이유를 말했으면(차단·없음·탈퇴) 그 말만, 연결 오류면 다시 불러오기 -->
       <UiEmptyState icon="fas fa-user-slash" :title="loadError" :description="loadFailed ? '잠시 뒤 다시 해 주세요' : ''">
-        <UiButton v-if="loadFailed" variant="secondary" @click="reload">다시 불러오기</UiButton>
+        <UiButton v-if="loadFailed" variant="secondary" @click="reload">다시 시도</UiButton>
         <UiButton v-else variant="secondary" @click="router.back()">돌아가기</UiButton>
       </UiEmptyState>
     </main>
@@ -182,7 +182,7 @@
       <section v-if="user.recentGames?.length" class="mt-10">
         <div class="flex items-center justify-between mb-1">
           <h2 class="t-heading">최근 경기</h2>
-          <UiButton size="sm" variant="ghost" class="-mr-2" :to="`/feed?userId=${user.id}`">전체 보기</UiButton>
+          <UiButton size="sm" variant="ghost" class="-mr-2" :to="`/feed?userId=${user.id}`">모두 보기</UiButton>
         </div>
         <UiList>
           <UiListItem
@@ -212,8 +212,8 @@
     <UiSheet v-model="menuOpen">
       <UiList>
         <UiListItem v-if="friend.isFriend" icon="fas fa-user-minus" title="친구 끊기" @click="unfriend" />
-        <UiListItem icon="far fa-flag" title="신고하기" @click="openReport" />
-        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="block" />
+        <UiListItem icon="far fa-flag" title="신고" @click="openReport" />
+        <UiListItem icon="fas fa-ban" title="차단" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="block" />
       </UiList>
     </UiSheet>
 
@@ -225,7 +225,7 @@
       </div>
       <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
       <template #footer>
-        <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고하기</UiButton>
+        <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고</UiButton>
       </template>
     </UiSheet>
 

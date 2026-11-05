@@ -11,7 +11,7 @@
         :description="editId ? '관리자가 확인하면 바뀌어요. 내 규칙에서 상태를 볼 수 있어요' : [done.ruleTitle, ...(done.category?.abilities ?? []).map((a) => a.label)].join(' · ')"
       >
         <div class="w-full space-y-2">
-          <UiButton v-if="!editId" block size="lg" :to="`/create-game?ruleId=${done.id}`">이 규칙으로 경기 열기</UiButton>
+          <UiButton v-if="!editId" block size="lg" :to="`/create-game?ruleId=${done.id}`">이 규칙으로 경기 만들기</UiButton>
           <UiButton block :variant="editId ? 'primary' : 'ghost'" :to="editId ? '/rules/my-rules' : `/rules/${done.id}`">
             {{ editId ? '내 규칙 보기' : '규칙 보기' }}
           </UiButton>

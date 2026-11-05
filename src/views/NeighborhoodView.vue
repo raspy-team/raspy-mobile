@@ -16,7 +16,7 @@
 
       <!-- 못 불러왔을 때 '동네가 없다'로 보이지 않게 -->
       <UiEmptyState v-else-if="loadError" class="pt-16" icon="fas fa-triangle-exclamation" title="동네를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 
       <!-- 아직 동네가 없으면 인증부터 -->
@@ -45,11 +45,11 @@
               <span class="t-micro">{{ n.expired ? '다시 인증해야 경기를 열고 신청할 수 있어요' : `${dateText(n.expiresAt)}까지 인증` }}</span>
               <span class="flex -mr-2">
                 <UiButton variant="ghost" size="sm" @click="openVerify(n.code)">다시 인증</UiButton>
-                <UiButton variant="ghost" size="sm" @click="confirmRemove(n)">지우기</UiButton>
+                <UiButton variant="ghost" size="sm" @click="confirmRemove(n)">삭제</UiButton>
               </span>
             </div>
           </UiCard>
-          <UiButton v-if="list.length < maxCount" block variant="secondary" icon="plus" @click="openVerify('')">동네 추가하기</UiButton>
+          <UiButton v-if="list.length < maxCount" block variant="secondary" icon="plus" @click="openVerify('')">동네 추가</UiButton>
         </section>
 
         <!-- 범위: 지금 동네 기준 -->
@@ -163,7 +163,7 @@ async function confirmRemove(n: Mine['neighborhoods'][number]) {
   const ok = await confirmDialog({
     title: `${n.name}을 지울까요?`,
     message: last ? '동네가 없으면 경기를 열거나 신청할 수 없어요' : n.active ? '남은 동네가 지금 동네가 돼요' : '다시 쓰려면 그 동네에서 인증해야 해요',
-    confirmText: '지우기',
+    confirmText: '삭제',
     danger: true,
   })
   if (!ok) return

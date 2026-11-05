@@ -82,7 +82,7 @@
             </template>
           </UiListItem>
         </UiList>
-        <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">순위 전체 보기</UiButton>
+        <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">모두 보기</UiButton>
       </section>
 
       <!-- 사람 순위가 아직 없는 앱 게임: AI 주민과 둔 판 수와 기준선으로 채운다 (docs/ai-residents.md 6). 오프라인 규칙은 그대로 -->
@@ -100,7 +100,7 @@
           <UiIcon name="far fa-comment" aria-hidden="true" /> 수정 제안하기
         </button>
         <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openReport">
-          <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고하기
+          <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고
         </button>
       </div>
     </main>
@@ -113,23 +113,23 @@
           <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : aiGames ? `AI 주민과 ${aiGames}판 했어요` : '첫 경기를 열어 보세요' }}</p>
         </div>
         <UiButton v-if="rule.appGameKey" size="lg" :to="`/play/${rule.appGameKey}`">한 판 하기</UiButton>
-        <UiButton v-else size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 열기</UiButton>
+        <UiButton v-else size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 만들기</UiButton>
       </div>
     </div>
 
     <!-- 더보기 -->
     <UiSheet v-model="menuOpen">
       <UiList>
-        <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유하기" subtitle="링크를 복사해요" @click="share" />
-        <UiListItem v-if="isMine" icon="fas fa-pen" title="수정 요청하기" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
+        <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유" subtitle="링크를 복사해요" @click="share" />
+        <UiListItem v-if="isMine" icon="fas fa-pen" title="수정 요청" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
         <UiListItem icon="fas fa-ranking-star" title="순위 보기" @click="goRanking" />
-        <UiListItem v-if="!isMine" icon="far fa-comment" title="수정 제안하기" subtitle="만든 사람에게 DM으로 보내요" @click="openSuggest" />
-        <UiListItem v-if="!isMine" icon="far fa-flag" title="신고하기" danger @click="openReport" />
+        <UiListItem v-if="!isMine" icon="far fa-comment" title="수정 제안" subtitle="만든 사람에게 메시지로 보내요" @click="openSuggest" />
+        <UiListItem v-if="!isMine" icon="far fa-flag" title="신고" danger @click="openReport" />
       </UiList>
     </UiSheet>
 
     <!-- 수정 제안: 만든 사람에게 DM으로 -->
-    <UiSheet v-model="suggestOpen" title="수정 제안하기">
+    <UiSheet v-model="suggestOpen" title="수정 제안">
       <p class="t-caption mb-4">{{ rule?.createdBy?.nickname || '만든 사람' }}님에게 메시지로 보내요</p>
       <UiInput v-model="suggestText" multiline :rows="4" :maxlength="1000" placeholder="예: 3세트는 길어요. 2세트 선승으로 바꾸면 어때요?" />
       <template #footer>
@@ -145,7 +145,7 @@
       </div>
       <UiInput v-if="reportReason === '기타'" v-model="reportDetail" multiline :rows="3" placeholder="자세히 적어 주세요" />
       <template #footer>
-        <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고하기</UiButton>
+        <UiButton block variant="danger" :disabled="!reportReason || (reportReason === '기타' && !reportDetail.trim())" :loading="reporting" @click="submitReport">신고</UiButton>
       </template>
     </UiSheet>
   </div>
@@ -230,7 +230,7 @@ async function submitSuggest() {
   try {
     const { data } = await POST('/api/rules/{ruleId}/suggestions', { path: { ruleId: rule.value.id }, body: { message: suggestText.value.trim() } })
     suggestOpen.value = false
-    showToast(`${data.targetNickname}님에게 DM으로 보냈어요`)
+    showToast(`${data.targetNickname}님에게 메시지로 보냈어요`)
   } catch (e) {
     showToast(e.response?.data?.message || '보내지 못했어요. 다시 해 주세요')
   } finally {

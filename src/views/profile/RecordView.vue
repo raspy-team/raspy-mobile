@@ -18,13 +18,13 @@
       <!-- 서버가 이유를 말했으면(없는 사람·차단) 그 말만, 연결 오류면 다시 불러오기 -->
       <UiEmptyState icon="fas fa-triangle-exclamation" :title="error" :description="told ? '' : '잠시 뒤 다시 해 주세요'">
         <UiButton v-if="told" variant="secondary" @click="router.back()">돌아가기</UiButton>
-        <UiButton v-else variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton v-else variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
     </main>
 
     <main v-else-if="!s.total.games && !s.practiceGames" class="max-w-2xl mx-auto px-4 pt-16">
       <UiEmptyState mascot="match" title="아직 기록이 없어요">
-        <UiButton v-if="isMe" to="/games">한 판 하러 가기</UiButton>
+        <UiButton v-if="isMe" to="/games">한 판 하기</UiButton>
       </UiEmptyState>
     </main>
 

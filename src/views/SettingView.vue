@@ -48,7 +48,7 @@
 
       <UiSection title="도움말과 정보">
         <UiList>
-          <UiListItem icon="far fa-envelope" title="문의하기" subtitle="yeonkoh@protonmail.com" chevron @click="contact" />
+          <UiListItem icon="far fa-envelope" title="문의" subtitle="yeonkoh@protonmail.com" chevron @click="contact" />
           <UiListItem icon="fab fa-instagram" title="인스타그램" subtitle="@matchmobileapp" chevron @click="openInstagram" />
           <UiListItem v-for="t in TERMS" :key="t.id" icon="far fa-file-lines" :title="t.title" chevron @click="openTerm = t" />
         </UiList>
@@ -88,7 +88,7 @@
         <UiListItem v-for="u in blocked" :key="u.id" plain :title="u.nickname">
           <template #leading><UiAvatar :src="u.profile?.profilePicture" :name="u.nickname" :user-id="u.id" size="sm" /></template>
           <template #trailing>
-            <UiButton size="sm" variant="secondary" :loading="unblockingId === u.id" @click="unblock(u)">차단 풀기</UiButton>
+            <UiButton size="sm" variant="secondary" :loading="unblockingId === u.id" @click="unblock(u)">차단 해제</UiButton>
           </template>
         </UiListItem>
       </UiList>

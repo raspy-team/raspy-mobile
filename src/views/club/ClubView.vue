@@ -53,7 +53,7 @@
         </template>
 
         <!-- 가입 신청 (회장·운영진) -->
-        <UiSection v-if="detail.pendingRequests.length" :title="`가입 신청 ${detail.pendingRequests.length}`" class="mt-8">
+        <UiSection v-if="detail.pendingRequests.length" :title="`신청 ${detail.pendingRequests.length}`" class="mt-8">
           <div class="space-y-2">
             <UiCard v-for="r in detail.pendingRequests" :key="r.userId" class="space-y-2">
               <div class="flex items-center gap-3">
@@ -366,7 +366,7 @@ async function answerEvent(eventId: number, going: boolean) {
   if (r && detail.value) detail.value.events = detail.value.events.map((e) => (e.id === eventId ? r.data : e))
 }
 async function cancelEvent(eventId: number) {
-  if (!(await confirmDialog({ title: '일정을 취소할까요?', message: "'갈게요'한 사람에게 알려요", confirmText: '취소하기', danger: true }))) return
+  if (!(await confirmDialog({ title: '일정을 취소할까요?', message: "'갈게요'한 사람에게 알려요", confirmText: '일정 취소', danger: true }))) return
   await run(() => POST('/api/clubs/events/{eventId}/cancel', { path: { eventId } }), '취소하지 못했어요')
   await load()
 }

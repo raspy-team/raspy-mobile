@@ -1,5 +1,5 @@
 <template>
-  <UiSheet :model-value="modelValue" title="대회 열기" @update:model-value="(v) => emit('update:modelValue', v)">
+  <UiSheet :model-value="modelValue" title="대회 만들기" @update:model-value="(v) => emit('update:modelValue', v)">
     <div class="space-y-4">
       <!-- 개인 대회는 동네 대회라 인증이 먼저다. 다 채운 뒤 '열기'에서야 알게 하지 않는다 (11/4 밤샘, 52세 대회 주최자) -->
       <div v-if="needsDong" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3">
@@ -81,7 +81,7 @@
         </div>
       </div>
       <label class="flex items-center justify-between">
-        <span class="t-body">신청을 내가 받기</span><UiSwitch v-model="approval" />
+        <span class="t-body">신청을 내가 수락</span><UiSwitch v-model="approval" />
       </label>
       <UiInput v-model="f.description" :maxlength="300" placeholder="안내 (선택: 상품, 장소 등)" />
 

@@ -519,8 +519,8 @@ const closeErrorModal = () => {
 
     <UiSheet v-model="menuOpen">
       <UiList>
-        <UiListItem icon="far fa-flag" title="신고하기" subtitle="메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
-        <UiListItem icon="fas fa-ban" title="차단하기" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="blockUser" />
+        <UiListItem icon="far fa-flag" title="신고" subtitle="메시지 하나는 길게 눌러 신고해요" @click="reportUser" />
+        <UiListItem icon="fas fa-ban" title="차단" subtitle="서로 메시지·신청·도전을 할 수 없어요" danger @click="blockUser" />
       </UiList>
     </UiSheet>
     <ReportSheet v-model="report.open" :title="report.title" :target-type="report.type" :target-id="report.id" :context="roomId ? String(roomId) : null" />

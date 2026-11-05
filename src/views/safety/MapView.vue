@@ -7,7 +7,7 @@
     <KakaoMap v-if="kakaoMapKey && center" :center="center" :pins="pins" :selected-id="selected" :level="6" height="min(64dvh, 620px)" @select="openPin" @moved="onMoved" />
     <p v-else-if="center" class="t-caption rounded-xl bg-surface px-4 py-3">지도가 아직 켜지지 않아 목록으로 보여 드려요</p>
     <UiEmptyState v-else-if="checked" mascot="kok" title="동네를 먼저 인증해 주세요">
-      <UiButton to="/neighborhood">동네 인증하기</UiButton>
+      <UiButton to="/neighborhood">동네 인증</UiButton>
     </UiEmptyState>
 
     <UiListSkeleton v-if="center && !data" :rows="3" class="mt-4" />
@@ -15,10 +15,10 @@
       <p class="t-micro mt-3">{{ tab === 'open' ? '상대가 정해진 경기는 위치를 감춰요' : '최근 90일 · 누가 했는지는 보이지 않아요' }}</p>
       <div v-if="group" class="flex items-center gap-2 mt-3">
         <p class="t-label flex-1 truncate">{{ group.name }} · {{ shown.length }}개</p>
-        <UiChip icon="xmark" @click="selected = null">전체 보기</UiChip>
+        <UiChip icon="xmark" @click="selected = null">모두 보기</UiChip>
       </div>
       <UiEmptyState v-if="!items.length" class="mt-6" mascot="match" :title="tab === 'open' ? '이 근처에 모집 중인 경기가 없어요' : '이 근처에서 끝난 경기가 없어요'">
-        <UiButton v-if="tab === 'open'" to="/create-game" variant="secondary">경기 열기</UiButton>
+        <UiButton v-if="tab === 'open'" to="/create-game" variant="secondary">경기 만들기</UiButton>
       </UiEmptyState>
       <UiList v-else class="mt-3">
         <UiListItem

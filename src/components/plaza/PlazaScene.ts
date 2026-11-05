@@ -18,6 +18,8 @@ export interface PlazaCallbacks {
 const ART = `${API_BASE_URL}/api/plaza/art`
 const FRAME_W = 16
 const FRAME_H = 32
+// 그림 칸(32px) 위쪽은 비어 있다: 머리 꼭대기는 발에서 약 22px. 이름표·말풍선은 여기에 붙인다
+const HEAD = 23
 const PER_ROW = 56
 const DIRS = ['right', 'up', 'left', 'down'] as const
 type Dir = (typeof DIRS)[number]
@@ -107,7 +109,8 @@ export class PlazaScene extends Phaser.Scene {
 
     // 빈 땅을 누르면 거기까지 걷는다 (사람·물건을 누른 것은 그쪽에서 처리하고 여기로 오지 않게)
     this.input.on('pointerup', (ptr: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
-      if (over.length || ptr.getDistance() > 12) return
+      // 두 번째 손가락을 뗄 때는 걷지 않는다 (두 손가락으로 만지다 엉뚱한 곳으로 걸어갔다)
+      if (over.length || ptr.getDistance() > 12 || ptr === this.input.pointer2) return
       this.walkMeTo(ptr.worldX, ptr.worldY)
     })
     // 컴퓨터: 방향키·WASD로 한 걸음씩 (말 칸에 쓰는 중이면 무시)
@@ -123,9 +126,16 @@ export class PlazaScene extends Phaser.Scene {
       e.preventDefault()
       this.walkMeTo(me.x + d[0] * 40, me.y + d[1] * 40)
     })
-    // 끌어서 둘러보기: 손가락으로 끌면 잠깐 따라가기를 멈춘다
+    // 끌어서 둘러보기: 손가락으로 끌면 잠깐 따라가기를 멈춘다.
+    // 캔버스 안에서 누른 때만 (위·아래 막대를 누르다 끌어 들어와도 움직이지 않게), 캔버스 밖에서 마우스를 떼면 끝 (예전엔 계속 끌렸다)
+    let dragging = false
+    this.input.on('pointerdown', () => (dragging = true))
+    this.input.on('pointerup', () => (dragging = false))
+    this.input.on('gameout', () => (dragging = false))
     this.input.on('pointermove', (ptr: Phaser.Input.Pointer) => {
-      if (!ptr.isDown || ptr.getDistance() < 12) return
+      if (!dragging || !ptr.isDown || ptr.getDistance() < 12) return
+      // 두 손가락이면 카메라가 두 번씩 움직여 튀었다: 첫 손가락만
+      if (ptr === this.input.pointer2) return
       cam.stopFollow()
       cam.scrollX -= (ptr.x - ptr.prevPosition.x) / cam.zoom
       cam.scrollY -= (ptr.y - ptr.prevPosition.y) / cam.zoom
@@ -156,7 +166,12 @@ export class PlazaScene extends Phaser.Scene {
         layer.putTileAt(bx + cx + (by + cy) * cols, a.x + x, a.y + y)
       }
     }
-    layer.setDepth(-10)
+    // 1.5배처럼 정수가 아닌 배율에서는 타일 경계가 옆 타일 색을 집어 노란 점선 줄이 생겼다 (320px, UX 광장 점검).
+    // 땅은 움직이지 않으니 한 장의 그림으로 굽고 타일 층은 버린다
+    const rt = this.add.renderTexture(0, 0, m.w * 16, m.h * 16).setOrigin(0, 0).setDepth(-10)
+    rt.draw(layer)
+    layer.destroy()
+    map.destroy()
   }
 
   /** 광장 이름을 흙 광장 바로 위에 크게 (어느 동네인지 들어오자마자 보이게) */
@@ -264,7 +279,7 @@ export class PlazaScene extends Phaser.Scene {
     const make = () => {
       const st = this.add.sprite(x, y - 7, key, 3).setOrigin(0.5, 1).setScale(1.5).setDepth(y + 1).setTint(0xf2e6c8)
       st.setInteractive({ useHandCursor: true })
-      st.on('pointerup', () => this.cb.onTapObject(spot))
+      st.on('pointerup', (ptr: Phaser.Input.Pointer) => ptr.getDistance() <= 12 && this.cb.onTapObject(spot))
       this.add.text(x, y - 56, '👑', { fontSize: '10px', resolution: 4 }).setOrigin(0.5, 1).setDepth(y + 2)
     }
     if (this.textures.exists(key)) make()
@@ -299,7 +314,7 @@ export class PlazaScene extends Phaser.Scene {
     const mine = p.id === this.meId
     const label = (p.champion ? '👑 ' : '') + p.name
     const name = this.add
-      .text(p.x, p.y - FRAME_H - 1, label, { fontFamily: FONT, fontSize: '8px', color: mine ? '#e8ff59' : '#ffffff', stroke: '#1b1b1f', strokeThickness: 3, resolution: 4 })
+      .text(p.x, p.y - HEAD, label, { fontFamily: FONT, fontSize: '8px', color: mine ? '#e8ff59' : '#ffffff', stroke: '#1b1b1f', strokeThickness: 3, resolution: 4 })
       .setOrigin(0.5, 1)
     const w: Walker = { p, sprite, name, path: [], x: p.x, y: p.y, dir: 'down', resting }
     if (p.bot) {
@@ -357,28 +372,41 @@ export class PlazaScene extends Phaser.Scene {
     if (!w) return
     w.bubble?.destroy()
     w.bubbleTimer?.remove()
-    const t = this.add.text(0, 0, text, {
-      fontFamily: FONT,
-      fontSize: big ? '14px' : '8px',
-      color: '#121214',
-      backgroundColor: '#ffffff',
-      padding: { x: 3, y: 2 },
-      wordWrap: { width: 90, useAdvancedWrap: true },
-      resolution: 4,
-    })
-    t.setOrigin(0.5, 1)
-    w.bubble = this.add.container(w.x, w.y - FRAME_H - 9, [t]).setDepth(200000)
+    let parts: Phaser.GameObjects.GameObject[]
+    if (big) {
+      // 이모티콘: 상자 없이 크게 (예전엔 흰 네모 안에 있었다)
+      parts = [this.add.text(0, -1, text, { fontFamily: FONT, fontSize: '16px', resolution: 4 }).setOrigin(0.5, 1)]
+    } else {
+      // 말: 둥근 흰 풍선 + 아래 꼬리 (예전엔 꼬리 없는 네모라 누가 말했는지 헷갈렸다)
+      const t = this.add.text(0, -6, text, { fontFamily: FONT, fontSize: '8px', color: '#121214', wordWrap: { width: 96, useAdvancedWrap: true }, resolution: 4, align: 'center' }).setOrigin(0.5, 1)
+      const bw = Math.ceil(t.width) + 10
+      const bh = Math.ceil(t.height) + 6
+      const g = this.add.graphics()
+      g.fillStyle(0x1b1b1f, 0.18).fillRoundedRect(-bw / 2, -bh - 3 + 1, bw, bh, 5) // 그림자
+      g.fillStyle(0xffffff, 1).fillRoundedRect(-bw / 2, -bh - 3, bw, bh, 5)
+      g.fillTriangle(-3, -3.5, 3, -3.5, 0, 1)
+      g.lineStyle(1, 0x1b1b1f, 0.35).strokeRoundedRect(-bw / 2, -bh - 3, bw, bh, 5)
+      t.setY(-6)
+      parts = [g, t]
+    }
+    const c = this.add.container(Math.round(w.x), Math.round(w.y) - HEAD - 11, parts).setDepth(200000)
+    // 톡 튀어나오게
+    c.setScale(0.6)
+    this.tweens.add({ targets: c, scale: 1, duration: 140, ease: 'Back.Out' })
+    w.bubble = c
     w.bubbleTimer = this.time.delayedCall(big ? 2500 : 5000, () => {
-      w.bubble?.destroy()
+      if (w.bubble !== c) return
+      this.tweens.add({ targets: c, alpha: 0, duration: 200, onComplete: () => c.destroy() })
       w.bubble = undefined
     })
   }
 
   private place(w: Walker) {
     w.sprite.setPosition(Math.round(w.x), Math.round(w.y)).setDepth(w.y)
-    w.name.setPosition(Math.round(w.x), Math.round(w.y) - FRAME_H + 2).setDepth(150000)
-    if (w.badge) w.badge.setPosition(Math.round(w.x) + w.name.width / 2 + 1, Math.round(w.y) - FRAME_H + 1).setDepth(150000)
-    w.bubble?.setPosition(Math.round(w.x), Math.round(w.y) - FRAME_H - 7)
+    w.name.setPosition(Math.round(w.x), Math.round(w.y) - HEAD).setDepth(150000)
+    if (w.badge) w.badge.setPosition(Math.round(w.x) + w.name.width / 2 + 1, Math.round(w.y) - HEAD - 1).setDepth(150000)
+    // 말풍선은 이름표 위 (이름표가 숨어 있어도 같은 자리)
+    w.bubble?.setPosition(Math.round(w.x), Math.round(w.y) - HEAD - 11)
   }
 
   private nextDeclutter = 0

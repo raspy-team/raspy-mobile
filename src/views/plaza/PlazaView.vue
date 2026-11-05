@@ -10,7 +10,7 @@
       <div ref="stage" class="absolute inset-0" />
 
       <!-- 위: 광장 고르기 -->
-      <div class="absolute top-0 inset-x-0 z-10 px-3 pt-[calc(env(safe-area-inset-top)+8px)] flex items-center gap-2">
+      <div class="absolute top-0 inset-x-0 z-10 max-w-xl mx-auto px-3 pt-[calc(env(safe-area-inset-top)+8px)] flex items-center gap-2">
         <UiIconButton icon="arrow-left" label="뒤로" class="bg-canvas/80 backdrop-blur" @click="goBack" />
         <!-- 지금 광장 하나만 크게, 누르면 다른 광장 (칩 셋이 좁은 화면에서 밀려 동네 칩이 안 보였다, 11/6) -->
         <button type="button" class="min-w-0 flex-1 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur flex items-center gap-1 t-body font-semibold text-fg" aria-label="광장 바꾸기" @click="roomsOpen = true">
@@ -42,7 +42,7 @@
       </div>
 
       <!-- 아래: 말하기 -->
-      <div v-if="phase === 'plaza'" class="absolute bottom-0 inset-x-0 z-10 px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 space-y-2">
+      <div v-if="phase === 'plaza'" class="absolute bottom-0 inset-x-0 z-10 max-w-xl mx-auto px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 space-y-2">
         <div v-if="quickOpen" class="flex gap-1.5 overflow-x-auto no-scrollbar">
           <button v-for="e in enter?.emotes ?? []" :key="e" type="button" class="shrink-0 w-11 h-11 rounded-full bg-canvas/85 text-xl" :aria-label="`이모티콘 ${e}`" @click="emote(e)">{{ e }}</button>
         </div>
@@ -57,7 +57,7 @@
             v-model="text"
             maxlength="60"
             enterkeyhint="send"
-            class="flex-1 h-11 rounded-full bg-canvas/85 px-4 t-body text-fg placeholder:text-fg-subtle outline-none"
+            class="flex-1 min-w-0 h-11 rounded-full bg-canvas/85 px-4 text-base text-fg placeholder:text-fg-subtle outline-none"
             placeholder="광장에 말하기"
             aria-label="광장에 말하기"
           />
@@ -455,7 +455,8 @@ const peopleHere = computed(() => {
   return s.everyone().filter((p) => p.id !== enter.value?.me.id).sort((a, b) => Number(a.restingMinutes != null) - Number(b.restingMinutes != null) || Number(a.bot) - Number(b.bot))
 })
 const peopleTick = ref(0)
-setInterval(() => peopleTick.value++, 3000)
+// 화면을 나가면 멈춘다 (예전엔 들어올 때마다 하나씩 늘어 계속 돌았다)
+const peopleTimer = setInterval(() => peopleTick.value++, 3000)
 
 // 실제 장소 팻말
 const placeOpen = ref(false)
@@ -551,6 +552,7 @@ onBeforeRouteLeave((to) => {
 })
 
 onBeforeUnmount(() => {
+  clearInterval(peopleTimer)
   offUser?.()
   const inst = enter.value?.instance
   teardown(!away)

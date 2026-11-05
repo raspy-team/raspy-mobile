@@ -53,12 +53,12 @@
       </UiCard>
 
       <UiCard v-else-if="!games.length">
-        <UiEmptyState mascot="match" title="아직 모집 중인 경기가 없어요" description="앱 게임은 전국 누구와도 바로 할 수 있어요">
+        <UiEmptyState mascot="match" title="아직 모집 중인 경기가 없어요">
           <UiButton to="/create-game">경기 만들기</UiButton>
           <!-- 동네에 아직 사람이 없을 때 바로 할 수 있는 것: 범위 넓히기(동네 경기 화면이라 먼저), 전국 앱 게임 (11/4 밤샘, 제주에서 온 사람. 문구·모양 C) -->
           <div class="flex flex-wrap justify-center gap-2 mt-2">
             <UiButton size="sm" variant="secondary" to="/neighborhood">범위 넓히기</UiButton>
-            <UiButton size="sm" variant="ghost" to="/games">앱 게임 하기</UiButton>
+            <UiButton size="sm" variant="ghost" to="/games">앱 게임</UiButton>
           </div>
         </UiEmptyState>
       </UiCard>

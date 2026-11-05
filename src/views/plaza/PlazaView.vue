@@ -73,10 +73,7 @@
           <div class="avatar-front" :style="{ backgroundImage: `url(${ART}/avatar/${card.sheet}.png)` }" />
         </div>
         <div class="min-w-0 space-y-1">
-          <p class="t-body text-fg flex items-center gap-1.5">
-            {{ card.name }}
-            <span v-if="card.bot" class="t-micro px-1.5 rounded bg-[#9ad0ff] text-[#121214] font-semibold">AI</span>
-          </p>
+          <!-- 이름은 시트 제목에 있다 (두 번 쓰지 않는다). AI 주민은 아래 줄이 말한다 -->
           <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="24" /> AI 주민</p>
           <p v-if="card.champion" class="t-caption text-fg">👑 {{ card.champion }}</p>
           <p v-if="card.area" class="t-caption">{{ card.area }}</p>

@@ -16,7 +16,8 @@
           <UiIcon name="map" class="text-xs" aria-hidden="true" />지도에서 보기
         </a>
       </div>
-      <UiBadge :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
+      <!-- 버튼이 같은 말을 하면 배지는 숨긴다 ('결과 확인' 배지 + '결과 확인' 버튼) -->
+      <UiBadge v-if="state.label !== state.actionLabel" :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
     </div>
 
     <!-- 시간 바꾸기 제안 (확정된 1:1): 받는 사람은 좋아요·그대로, 낸 사람은 기다림 -->

@@ -6,10 +6,6 @@
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
-    <!-- 브랜드 한 줄 (docs/essence.md: 줄 말고 판). 하루에 하나. 제목처럼 외치지 않고 본문 크기로 조용히, 핵심 낱말만 진하게 볼트 밑줄 (11/3) -->
-    <p class="t-body text-fg-muted">
-      {{ brandLine.before }}<span class="font-semibold text-fg underline decoration-signal decoration-[0.14em] underline-offset-[0.22em]">{{ brandLine.mark }}</span>{{ brandLine.after }}
-    </p>
 
     <!-- 지금 동네 (경기 목록이 이 동네 범위를 따른다) -->
     <NeighborhoodBar class="mt-5 mb-3" @changed="fetchGames" />
@@ -111,7 +107,6 @@ import { useToast } from '../../composable/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { feel } from '../../utils/feel'
-import { todayBrandLine } from '@/utils/brandLines'
 
 // 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나 (사용자 11/3)
 const DESTINATIONS = [
@@ -120,7 +115,6 @@ const DESTINATIONS = [
   { to: '/rules', icon: 'book-open', label: '규칙' },
   { to: '/clubs', icon: 'users', label: '동호회' },
 ]
-const brandLine = todayBrandLine()
 
 const route = useRoute()
 const router = useRouter()

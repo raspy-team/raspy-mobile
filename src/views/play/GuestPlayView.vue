@@ -3,7 +3,7 @@
     <UiTopBar :title="meta?.title || '한 판'" />
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
-      <UiEmptyState v-if="!meta" title="가입하고 할 수 있는 게임이에요" description="시작하면 모든 게임을 할 수 있어요">
+      <UiEmptyState v-if="!meta" mascot="kok" title="가입하고 할 수 있는 게임이에요" description="시작하면 모든 게임을 할 수 있어요">
         <UiButton to="/init">시작하기</UiButton>
       </UiEmptyState>
 
@@ -39,7 +39,7 @@
       <!-- 끝난 판: 점수를 보여 주고, 저장하고 사람과 붙으려면 가입 -->
       <template v-else-if="result">
         <UiCard class="text-center py-8">
-          <BrandFace :mood="result.score > 0 ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
+          <MatchMascot who="kok" :mood="result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
           <p v-if="key === 'nunchi'" class="t-micro">눈치 점수</p>
           <UiRollNumber class="t-display tabular-nums" :value="result.score" />
           <p class="t-caption">{{ result.scoreUnit }}</p>
@@ -139,7 +139,8 @@
       <!-- 시작 전 -->
       <template v-else>
         <UiCard class="py-8 text-center">
-          <BrandFace mood="wow" :size="64" class="mx-auto mb-3" />
+          <!-- 처음 온 사람의 길잡이는 콕이 (docs/mascots.md) -->
+          <MatchMascot who="kok" mood="wow" :size="72" class="mx-auto mb-3" />
           <p class="t-display">{{ meta.title }}</p>
           <p class="t-body text-fg-muted mt-3 break-keep">{{ meta.line }}</p>
           <p v-if="fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. 같은 문제로 붙어요</p>
@@ -162,7 +163,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
-import BrandFace from '../../components/BrandFace.vue'
+import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'

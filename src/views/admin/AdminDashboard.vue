@@ -10,7 +10,8 @@
         <UiListSkeleton v-if="loading" :rows="3" />
         <UiCard v-else-if="!shownReports.length">
           <UiEmptyState
-            icon="fas fa-flag"
+            mascot="match"
+            mood="smile"
             :title="reportTab === 'open' ? '처리할 신고가 없어요' : '들어온 신고가 없어요'"
           />
         </UiCard>
@@ -85,7 +86,7 @@
         <UiTabs v-model="acqDays" :options="acqTabs" class="mb-3" />
         <UiListSkeleton v-if="!acq" :rows="3" />
         <UiCard v-else-if="!acq.rows.length">
-          <UiEmptyState icon="fas fa-chart-simple" title="아직 들어온 사람이 없어요" description="홍보 링크에 ?utm_source=instagram 처럼 꼬리표를 달면 채널별로 나눠 셀 수 있어요" />
+          <UiEmptyState mascot="match" title="아직 들어온 사람이 없어요" description="홍보 링크에 ?utm_source=instagram 처럼 꼬리표를 달면 채널별로 나눠 셀 수 있어요" />
         </UiCard>
         <UiCard v-else class="!p-0 overflow-x-auto">
           <table class="w-full text-sm tabular-nums">
@@ -156,7 +157,7 @@
         <UiTabs v-model="safetyDays" :options="acqTabs" class="mb-3" />
         <UiListSkeleton v-if="!safety" :rows="2" />
         <UiCard v-else-if="!safety.meetings">
-          <UiEmptyState icon="fas fa-shield-halved" title="아직 만나서 한 경기가 없어요" description="경기 시간이 지난, 만나서 하는 경기부터 셉니다" />
+          <UiEmptyState mascot="match" title="아직 만나서 한 경기가 없어요" description="경기 시간이 지난, 만나서 하는 경기부터 셉니다" />
         </UiCard>
         <template v-else>
           <div class="grid grid-cols-2 gap-2">
@@ -252,7 +253,7 @@
     <UiSheet v-model="showUsers" title="사용자 찾기">
       <UiInput v-model="userSearch" icon="fas fa-magnifying-glass" placeholder="닉네임이나 아이디" class="mb-3" />
       <UiListSkeleton v-if="loadingUsers" :rows="5" />
-      <UiEmptyState v-else-if="!filteredUsers.length" icon="fas fa-user" title="찾는 사람이 없어요" />
+      <UiEmptyState v-else-if="!filteredUsers.length" mascot="match" title="찾는 사람이 없어요" />
       <UiList v-else>
         <UiListItem
           v-for="u in filteredUsers"

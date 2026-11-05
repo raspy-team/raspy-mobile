@@ -17,6 +17,8 @@
 
     <!-- 1. 약관 -->
     <main v-else-if="step === 'terms'" class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
+      <!-- 가입 길잡이 콕이 (docs/mascots.md) -->
+      <MatchMascot who="kok" :mood="needProfile ? 'wow' : 'smile'" :size="56" class="mb-3" />
       <h1 class="t-title">{{ needProfile ? '반가워요!' : '약관을 확인해 주세요' }}</h1>
       <p class="t-body text-fg-muted mt-2">
         {{ needProfile ? '시작하기 전에 약관에 동의해 주세요.' : '그동안 동의를 기록하지 못했어요. 한 번만 확인해 주세요.' }}
@@ -49,6 +51,7 @@
 
     <!-- 3. 동네 (건너뛸 수 있다) -->
     <main v-else-if="step === 'neighborhood'" class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
+      <MatchMascot who="kok" :size="56" class="mb-3" />
       <h1 class="t-title">어느 동네에서 겨룰까요?</h1>
       <p class="t-body text-fg-muted mt-2">만나서 하는 경기는 내 동네 근처 사람들과 해요. 앱 게임은 동네와 상관없이 바로 할 수 있어요.</p>
       <NeighborhoodVerify class="mt-4" @verified="onNeighborhood" />
@@ -131,6 +134,7 @@ import api from '../../api/api'
 import { AGREEMENTS as TERMS } from '../../content/legal'
 import { UiAvatar, UiButton, UiCard, UiInput, UiSheet, UiSkeleton } from '../../components/ui'
 import NeighborhoodVerify from '../../components/neighborhood/NeighborhoodVerify.vue'
+import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { useToast } from '../../composable/useToast'
 import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { containsProfanity } from '../../utils/profanity'

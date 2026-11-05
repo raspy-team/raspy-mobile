@@ -106,7 +106,7 @@
       <UiEmptyState
         v-else-if="!rules.length"
         class="pt-16"
-        icon="fas fa-magnifying-glass"
+        mascot="match"
         title="맞는 규칙이 없어요"
         :description="filtered ? '검색어나 조건을 바꿔 보거나, 직접 만들어 보세요' : '첫 규칙을 만들어 보세요'"
       >

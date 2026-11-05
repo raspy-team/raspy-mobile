@@ -29,7 +29,7 @@
       <UiEmptyState
         v-else-if="!visible.length && tab === 'friends' && !userId"
         class="pt-16"
-        icon="fas fa-user-group"
+        mascot="tong"
         title="친구의 경기가 아직 없어요"
         description="함께 겨룬 사람에게 친구를 걸거나, 친구를 초대해 보세요"
       >
@@ -39,7 +39,7 @@
         </div>
       </UiEmptyState>
 
-      <UiEmptyState v-else-if="!visible.length" class="pt-16" icon="fas fa-flag-checkered" title="아직 끝난 경기가 없어요" description="이기든 지든 끝난 경기는 여기 남아요">
+      <UiEmptyState v-else-if="!visible.length" class="pt-16" mascot="tong" title="아직 끝난 경기가 없어요" description="이기든 지든 끝난 경기는 여기 남아요">
         <UiButton to="/">경기 찾기</UiButton>
       </UiEmptyState>
 

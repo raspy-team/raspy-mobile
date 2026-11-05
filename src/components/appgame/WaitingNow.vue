@@ -29,7 +29,8 @@
         </UiCard>
         <!-- 사람이 2명보다 적으면 AI 주민이 기다린다 (docs/ai-residents.md 6). 누르면 그 AI와 바로 한 판. 사람이 늘면 서버가 빼 준다 -->
         <UiCard v-for="r in residents" :key="`ai-${r.userId}`" class="flex items-center gap-3 py-3">
-          <UiIcon :name="gameIcon(r.key, r.icon)" class="text-fg-muted" />
+          <!-- AI 주민 자리는 게임 아이콘 대신 비비 (docs/mascots.md). 게임 이름은 오른쪽 글에 있다 -->
+          <MatchMascot who="bibi" :size="24" class="-mx-0.5" />
           <div class="flex-1 min-w-0">
             <p class="t-label flex items-center min-w-0"><span class="truncate">{{ r.nickname }}</span><UiAiBadge /><span class="truncate">&nbsp;· {{ r.title }}</span></p>
             <p class="t-micro">기다리는 중 · 바로 시작해요</p>
@@ -45,6 +46,7 @@
 
 <script setup lang="ts">
 import { gameIcon } from '@/utils/appGameIcon'
+import MatchMascot from '../mascot/MatchMascot.vue'
 // 지금 기다리는 사람: 사람이 적을 때 게임마다 흩어지면 서로 못 만난다. 누가 어디서 기다리는지 보여 주고 한 번에 붙게 한다
 // 목록은 /topic/lobbies 신호가 올 때만 다시 불러온다 (폴링하지 않는다)
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'

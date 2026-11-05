@@ -1,7 +1,8 @@
 <template>
   <section v-if="state" class="rounded-xl bg-surface p-4" aria-label="응원">
-    <div class="flex items-center justify-between">
-      <h2 class="t-heading">누가 이길까요?</h2>
+    <div class="flex items-center justify-between gap-2">
+      <!-- 응원 칸은 응원단장 통통 (docs/mascots.md). 맞히면 신나고, 못 맞혀도 담담하게 -->
+      <h2 class="t-heading flex items-center gap-2"><MatchMascot who="tong" :mood="state.mine?.outcome === 'WIN' ? 'cheer' : state.mine?.outcome === 'LOSS' ? 'sad' : 'smile'" :size="32" aria-hidden="true" />누가 이길까요?</h2>
       <span class="t-micro">시작 전에만 · 고를 때 배수가 정해져요</span>
     </div>
     <!-- 편마다 배수(이기면 몇 배로 돌려받나)·이길 확률·응원 수. 편은 1:1이면 사람, 팀이면 팀 -->
@@ -56,6 +57,7 @@ import { ref, computed, onMounted } from 'vue'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { UiButton, UiChip } from '../ui'
+import MatchMascot from '../mascot/MatchMascot.vue'
 import { useToast } from '../../composable/useToast'
 
 const props = defineProps<{ gameId: number; closed?: boolean }>()

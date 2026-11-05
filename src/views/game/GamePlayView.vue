@@ -173,7 +173,7 @@
 
   <!-- 경기 기록 -->
   <UiSheet v-model="showLogModal" title="경기 기록">
-    <UiEmptyState v-if="!logs.length" icon="fas fa-list" title="아직 기록이 없어요" />
+    <UiEmptyState v-if="!logs.length" mascot="match" title="아직 기록이 없어요" />
     <ol v-else class="space-y-1">
       <li v-for="(log, i) in logs" :key="i" class="flex gap-3 py-2 border-b border-line last:border-0 text-sm">
         <span class="t-micro tabular-nums w-12 flex-shrink-0 pt-0.5">{{ log.elapsed }}</span>

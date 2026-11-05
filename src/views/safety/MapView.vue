@@ -5,14 +5,14 @@
 
     <KakaoMap v-if="kakaoMapKey && center" :center="center" :pins="pins" @select="openPin" @moved="onMoved" />
     <p v-else-if="center" class="t-caption rounded-xl bg-surface px-4 py-3">지도가 아직 켜지지 않아 목록으로 보여 드려요</p>
-    <UiEmptyState v-else icon="location-dot" title="동네를 먼저 인증해 주세요" description="내 동네 가까운 곳의 경기를 지도에서 보여 드려요">
+    <UiEmptyState v-else mascot="kok" title="동네를 먼저 인증해 주세요" description="내 동네 가까운 곳의 경기를 지도에서 보여 드려요">
       <UiButton to="/neighborhood">동네 인증하기</UiButton>
     </UiEmptyState>
 
     <UiListSkeleton v-if="center && !data" :rows="3" class="mt-4" />
     <template v-else-if="data">
       <p class="t-micro mt-3">{{ tab === 'open' ? '모집 중인 경기만 보여요. 상대가 정해진 경기의 위치는 안전을 위해 보이지 않아요' : '최근 90일 동안 끝난 경기를 장소마다 모았어요. 누가 했는지는 보이지 않아요' }}</p>
-      <UiEmptyState v-if="!items.length" class="mt-6" icon="location-dot" :title="tab === 'open' ? '이 근처에 모집 중인 경기가 없어요' : '이 근처에서 끝난 경기가 없어요'" description="지도를 옮기면 그 근처를 다시 찾아요" />
+      <UiEmptyState v-if="!items.length" class="mt-6" mascot="match" :title="tab === 'open' ? '이 근처에 모집 중인 경기가 없어요' : '이 근처에서 끝난 경기가 없어요'" description="지도를 옮기면 그 근처를 다시 찾아요" />
       <UiList v-else class="mt-3">
         <UiListItem
           v-for="p in items"

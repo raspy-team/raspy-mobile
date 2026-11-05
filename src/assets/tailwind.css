@@ -29,6 +29,8 @@
     --signal-soft: 0.12;
     --c-danger: 255 92 92;
     --c-danger-fg: 255 122 122;
+    /* 캐릭터 픽셀판(MatchMascot)의 바깥 한 칸. 짙은 외곽선이 다크 바탕에 묻히지 않게 옅게 밝힌다 */
+    --mascot-halo: rgb(255 255 255 / 0.16);
   }
   html[data-theme='light'] {
     color-scheme: light;
@@ -48,6 +50,7 @@
     --signal-soft: 0.35;
     --c-danger: 220 38 38;
     --c-danger-fg: 200 30 30;
+    --mascot-halo: transparent;
   }
   html {
     @apply font-sans bg-canvas text-fg;

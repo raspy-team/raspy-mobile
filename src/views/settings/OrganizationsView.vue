@@ -25,7 +25,7 @@
             />
           </UiList>
           <UiCard v-else>
-            <UiEmptyState icon="building" title="아직 인증한 소속이 없어요" description="증명서 한 장이면 돼요. 확인이 끝나면 바로 지워요" />
+            <UiEmptyState mascot="kok" title="아직 인증한 소속이 없어요" description="증명서 한 장이면 돼요. 확인이 끝나면 바로 지워요" />
           </UiCard>
         </UiSection>
 

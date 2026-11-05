@@ -6,7 +6,7 @@
       <!-- 끝: 등록됨 → 가입 -->
       <template v-if="done">
         <UiCard class="text-center py-8">
-          <BrandFace mood="wow" :size="64" class="mx-auto mb-3" />
+          <MatchMascot who="kok" mood="cheer" :size="72" class="mx-auto mb-3" />
           <p class="t-display">등록했어요</p>
           <p class="t-body mt-3">{{ done.dongName }} · {{ sportLabel }}</p>
           <p class="t-caption mt-2">
@@ -104,7 +104,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
-import BrandFace from '../../components/BrandFace.vue'
+import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { UiButton, UiCard, UiInput, UiSection, UiTopBar } from '../../components/ui'
 import { claimGuestPlays, getVisitorId, markPartnerRegistered } from '@/utils/visit'
 import { track, flush } from '@/utils/trackLog'

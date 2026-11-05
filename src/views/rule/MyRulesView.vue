@@ -17,7 +17,7 @@
         </div>
       </div>
 
-      <UiEmptyState v-else-if="!rules.length" class="pt-16" icon="far fa-folder-open" title="아직 만든 규칙이 없어요" description="우리끼리 하던 놀이도 규칙이 되면 정식 종목이에요">
+      <UiEmptyState v-else-if="!rules.length" class="pt-16" mascot="match" title="아직 만든 규칙이 없어요" description="우리끼리 하던 놀이도 규칙이 되면 정식 종목이에요">
         <UiButton to="/rules/create">규칙 만들기</UiButton>
       </UiEmptyState>
 

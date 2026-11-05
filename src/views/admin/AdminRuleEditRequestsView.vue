@@ -7,7 +7,7 @@
 
       <UiListSkeleton v-if="loading" :rows="3" shape="tile" />
       <UiCard v-else-if="!requests.length">
-        <UiEmptyState icon="fas fa-inbox" :title="`${STATUS[selectedTab].label} 요청이 없어요`" />
+        <UiEmptyState mascot="match" mood="smile" :title="`${STATUS[selectedTab].label} 요청이 없어요`" />
       </UiCard>
 
       <ul v-else class="space-y-2">

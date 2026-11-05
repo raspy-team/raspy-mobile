@@ -84,7 +84,7 @@
           </template>
         </UiListItem>
       </UiList>
-      <UiEmptyState v-else icon="fas fa-user-check" title="모두 답했어요" />
+      <UiEmptyState v-else mascot="kok" mood="smile" title="모두 답했어요" />
     </UiSheet>
   </div>
 </template>

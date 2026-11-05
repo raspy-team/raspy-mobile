@@ -36,7 +36,7 @@
           </template>
         </UiCard>
 
-        <UiEmptyState v-if="!rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="baselines.length ? '사람과 5판을 하면 첫 이름이 올라가요. 아래 AI 기준선과 견줘 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'">
+        <UiEmptyState v-if="!rankings.length" class="pt-12" mascot="match" title="아직 순위가 비어 있어요" :description="baselines.length ? '사람과 5판을 하면 첫 이름이 올라가요. 아래 AI 기준선과 견줘 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'">
           <UiButton variant="secondary" :to="appGameKey ? `/play/${appGameKey}` : `/create-game?ruleId=${ruleId}`">
             {{ appGameKey ? '한 판 하기' : '경기 열기' }}
           </UiButton>

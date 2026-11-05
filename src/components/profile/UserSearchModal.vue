@@ -5,7 +5,7 @@
     <div class="mt-4 min-h-[40vh]">
       <UiListSkeleton v-if="userSearching" :rows="3" />
 
-      <UiEmptyState v-else-if="!userSearchResult.length && userSearch.trim()" icon="user-slash" title="찾는 사람이 없어요" description="다른 이름으로 찾아보세요" />
+      <UiEmptyState v-else-if="!userSearchResult.length && userSearch.trim()" mascot="match" title="찾는 사람이 없어요" description="다른 이름으로 찾아보세요" />
 
       <UiList v-else-if="userSearchResult.length">
         <UiListItem

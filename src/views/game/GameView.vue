@@ -80,6 +80,8 @@
               @more="menuGame = game"
               @schedule="openSchedule(game)"
               @chat="router.push(`/games/${game.id}/chat`)"
+              @message="dmTarget(game) && router.push('/chat/' + dmTarget(game).id)"
+              @answer-time="(ok) => answerTime(game, ok)"
             />
             <!-- 만나서 하는 경기: 도착·끝 확인, 노쇼, 위치 공유 (안전·신뢰 C) -->
             <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" />
@@ -116,7 +118,7 @@
 
   <!-- 신뢰 사다리: 처음 보는 사람과 1:1로 만나기 전에 앱 게임 한 판 (안전·신뢰 D) -->
   <UiSheet :model-value="!!ladderFor" title="먼저 앱 게임 한 판" @update:model-value="ladderFor = null">
-    <p class="t-caption mb-4">{{ ladderFor?.applicantNickname }}님과는 처음 만나요. 앱 게임을 한 판 같이 하면 승인할 수 있어요. 내가 먼저 하면 같은 문제로 도전장이 메시지로 가고, 상대가 하면 끝나요</p>
+    <p class="t-caption mb-4">게임을 고르면 {{ ladderFor?.applicantNickname }}님께 도전장이 가요. 둘 다 하면 승인할 수 있어요</p>
     <UiList>
       <UiListItem v-for="g in LADDER_GAMES" :key="g.key" :icon="g.icon" :title="g.title" :subtitle="g.sub" chevron @click="startLadder(g.key)" />
     </UiList>
@@ -127,10 +129,11 @@
     <UiList v-if="menuGame">
       <UiListItem icon="fas fa-book-open" title="규칙 보기" @click="openRule(menuGame)" />
       <UiListItem v-if="needsSafety(menuGame)" icon="shield-halved" title="만나기 전 안전 수칙" @click="openSafety(menuGame)" />
-      <UiListItem v-if="canReschedule(menuGame)" icon="pen" title="시간·장소 바꾸기" subtitle="바꾸면 상대에게 알려요" @click="openScheduleFromMenu(menuGame)" />
+      <UiListItem v-if="canReschedule(menuGame)" icon="pen" title="시간·장소 바꾸기" @click="openScheduleFromMenu(menuGame)" />
       <UiListItem v-if="dmTarget(menuGame)" icon="far fa-paper-plane" :title="`${dmTarget(menuGame).name}에게 메시지`" @click="router.push('/chat/' + dmTarget(menuGame).id)" />
       <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
       <UiListItem v-if="canTellFriend(menuGame)" icon="shield-halved" title="친구에게 일정 알리기" subtitle="누구와 언제 어디서 만나는지 보내 둬요" @click="tellFriend(menuGame)" />
+      <UiListItem v-if="menuGame.type === 'sent' && menuGame.status === 'REQUESTED'" icon="fas fa-xmark" title="신청 취소" danger @click="cancelRequest(menuGame); menuGame = null" />
       <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
       <UiListItem v-if="canLeave(menuGame)" icon="fas fa-right-from-bracket" title="이 경기에서 빠지기" subtitle="연 사람과 남은 사람에게 알려요" danger @click="leaveGame(menuGame)" />
     </UiList>
@@ -160,7 +163,7 @@
     <div class="space-y-5">
       <!-- 정하기 전에 상대와 이야기할 수 있게 (예전엔 시트를 닫고 채팅을 따로 찾아가야 했다) -->
       <div v-if="scheduleGame && dmTarget(scheduleGame)" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3">
-        <p class="flex-1 t-caption">{{ dmTarget(scheduleGame).name }}님과 먼저 맞춰 보세요</p>
+        <p class="flex-1 t-caption">{{ dmTarget(scheduleGame).name }}님과 먼저 맞춰 봐요</p>
         <UiButton size="sm" variant="secondary" icon="far fa-paper-plane" @click="router.push('/chat/' + dmTarget(scheduleGame).id)">메시지</UiButton>
       </div>
       <div>
@@ -205,7 +208,6 @@
         </template>
       </div>
       <PlacePickerSheet v-model="pickerOpen" :near="myArea?.lat ? { lat: myArea.lat, lon: myArea.lon } : null" @picked="(p) => { pickedPlace = p; placeMode = 'picked' }" />
-      <p class="t-micro">정하면 상대에게 알려요. 정한 뒤에도 경기 시작 전까지 두 사람 모두 언제든 바꿀 수 있어요.</p>
     </div>
     <template #footer>
       <UiButton block :disabled="!canSubmitSchedule" :loading="busy" @click="submitSchedule">{{ scheduleDecided(scheduleGame) ? '바꾸기' : '정하기' }}</UiButton>
@@ -333,13 +335,21 @@ function bucket(g) {
   if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
     return g.resultSubmittedById === (g.myId ?? me.value.id) ? 'waiting' : 'todo'
   }
+  if (g.proposedMatchDate && g.proposedById !== (g.myId ?? me.value.id)) return 'todo'
+  if (canReschedule(g) && dmTarget(g) && (!g.matchDate || (!g.matchLocation && !isRemote(g.venue)))) return 'todo'
   if (g.type === 'my-game') {
     if (g.status === 'COMPLETED' || g.status === 'CANCELED') return 'done'
-    if (g.status === 'SCHEDULED' && g.isOwner !== false) return 'todo'
+    if (g.status === 'SCHEDULED' && g.isOwner !== false && isMatchDay(g)) return 'todo'
     if (g.status === 'MATCHING' && g.applicants.some((a) => !a.approved)) return 'todo'
     return 'waiting'
   }
   return g.status === 'REJECTED' ? 'done' : 'waiting'
+}
+// 경기 날(그날 0시부터)인가. 그 전의 확정 경기는 '기다리는 중' (MyGameCard와 같은 기준)
+function isMatchDay(g) {
+  if (!g.matchDate) return true
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  return new Date(g.matchDate).getTime() < today.getTime() + 86_400_000
 }
 const byTime = (a, b) => new Date(a.matchDate || a.startedAt || 0) - new Date(b.matchDate || b.startedAt || 0)
 const groups = computed(() =>
@@ -387,9 +397,9 @@ function canApprove(game, a) {
 function applicantsHint(game) {
   // 승인 버튼 대신 '앱 게임 한 판'만 보이면 왜 승인이 안 되는지 먼저 말한다 (11/4 밤샘: 처음 연 경기에서 승인 버튼을 못 찾았다)
   const ladder = (game?.applicants || []).some((a) => a.needsAppGameFirst && !a.approved)
-    ? ' 처음 만나는 사람은 앱 게임을 한 판 같이 한 뒤에 승인할 수 있어요.'
+    ? ' 처음 만나는 사람과는 앱 게임 한 판 뒤에 승인해요.'
     : ''
-  if (!isMulti(game)) return '한 명을 승인하면 경기가 확정되고, 나머지 신청은 자동으로 마감돼요.' + ladder
+  if (!isMulti(game)) return '한 명을 승인하면 확정돼요.' + ladder
   const n = (game.players || []).length
   return `${game.maxPlayers}명이 모이면 경기가 확정돼요. 지금 ${n}명이에요.` + ladder
 }
@@ -473,7 +483,7 @@ function closeSafety() {
 watch(allGames, (list) => {
   // 시간·장소를 정하러 왔으면(채팅 위 경기 칸) 그 시트가 먼저. 수칙은 다음에 볼 때
   if (safetyGame.value || scheduleGame.value || Number(route.query.schedule)) return
-  const g = list.find((x) => needsSafety(x) && !safetySeen.includes(x.id))
+  const g = list.find((x) => needsSafety(x) && x.firstMeeting && !safetySeen.includes(x.id))
   if (g) safetyGame.value = g
 })
 
@@ -636,6 +646,23 @@ function openSchedule(g) {
   schedPlace.value = isRemote(g.venue) ? g.matchLocation || '' : ''
 }
 
+// 확정된 1:1에서 정한 시간을 바꾸면 상대가 받아야 바뀐다 (서버 GameService.needsTimeAgreement와 같게)
+function timeNeedsAgreement(g) {
+  if (!g?.matchDate || !schedTime.value || isMulti(g) || !dmTarget(g)) return false
+  const confirmed = g.type === 'my-game' ? g.status === 'SCHEDULED' : g.gameStatus === 'SCHEDULED'
+  return confirmed && String(g.matchDate).slice(0, 16) !== schedTime.value.slice(0, 16)
+}
+async function answerTime(g, ok) {
+  try {
+    await api.post(`/api/games/${g.id}/schedule/answer`, null, { params: { accept: ok } })
+    feel('success')
+    showToast(ok ? '시간을 바꿨어요' : '원래 시간으로 둘게요')
+    await fetchGames()
+  } catch (e) {
+    showToast(e.response?.data?.message || '답하지 못했어요')
+  }
+}
+
 // 시간·장소가 둘 다 정해져 있었을 때만 '바꾸기'. 하나라도 미정이면 처음 정하는 것
 const scheduleDecided = (g) => !!g?.matchDate && !!g?.matchLocation
 
@@ -655,9 +682,11 @@ async function submitSchedule() {
       place: mode === 'picked' ? { kakaoId: pickedPlace.value.kakaoId, name: pickedPlace.value.name, lat: pickedPlace.value.lat, lon: pickedPlace.value.lon } : null,
     })
     const changed = scheduleDecided(scheduleGame.value)
+    const proposed = timeNeedsAgreement(scheduleGame.value)
+    const who = dmTarget(scheduleGame.value)?.name
     scheduleGame.value = null
     feel('success')
-    showToast(changed ? '바꿨어요. 상대에게 알렸어요' : '정했어요. 상대에게 알렸어요')
+    showToast(proposed ? `${who}님이 좋다고 하면 바뀌어요` : changed ? '바꿨어요' : '정했어요')
     await fetchGames()
   } catch (e) {
     showToast(e.response?.data?.message || '정하지 못했어요')

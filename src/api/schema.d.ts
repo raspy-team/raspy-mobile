@@ -1338,6 +1338,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{id}/schedule/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 시간 바꾸기 제안에 답하기
+         * @description 확정된 1:1에서 상대가 바꾸자고 한 시간을 받거나(accept=true) 원래 시간으로 둔다(accept=false).
+         */
+        post: operations["answerTimeProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{id}/result": {
         parameters: {
             query?: never;
@@ -8439,6 +8459,11 @@ export interface components {
             rule: components["schemas"]["FullRuleResponse"];
             /** Format: date-time */
             matchDate?: string;
+            /** Format: date-time */
+            proposedMatchDate?: string;
+            /** Format: int64 */
+            proposedById?: number;
+            firstMeeting: boolean;
             matchLocation?: string;
             placePublic?: boolean;
             /** Format: double */
@@ -8480,6 +8505,11 @@ export interface components {
             placeLon?: number;
             /** Format: date-time */
             matchDate?: string;
+            /** Format: date-time */
+            proposedMatchDate?: string;
+            /** Format: int64 */
+            proposedById?: number;
+            firstMeeting: boolean;
             rule: components["schemas"]["FullRuleResponse"];
             isOwner: boolean;
             /** Format: int64 */
@@ -10927,6 +10957,30 @@ export interface operations {
                 "application/json": components["schemas"]["GameScheduleRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    answerTimeProposal: {
+        parameters: {
+            query: {
+                accept: boolean;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {

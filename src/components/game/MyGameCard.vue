@@ -15,6 +15,18 @@
       <UiBadge :tone="state.tone" class="mt-0.5">{{ state.label }}</UiBadge>
     </div>
 
+    <!-- 시간 바꾸기 제안 (확정된 1:1): 받는 사람은 좋아요·그대로, 낸 사람은 기다림 -->
+    <div v-if="game.proposedMatchDate" class="mx-4 mb-3 rounded-xl bg-surface px-3 py-2.5">
+      <template v-if="game.proposedById === me?.id">
+        <p class="t-caption">{{ matchTime(game.proposedMatchDate) }}로 바꾸자고 했어요</p>
+      </template>
+      <div v-else class="flex items-center gap-2">
+        <p class="flex-1 min-w-0 t-caption">{{ opponent?.name }}님: {{ matchTime(game.proposedMatchDate) }}로 바꿀까요?</p>
+        <UiButton size="sm" variant="secondary" @click="emit('answer-time', false)">그대로</UiButton>
+        <UiButton size="sm" @click="emit('answer-time', true)">좋아요</UiButton>
+      </div>
+    </div>
+
     <!-- 여럿이 하는 경기: 팀(또는 모두)의 얼굴과 빈자리 -->
     <div v-if="multi" class="px-4 pb-4 space-y-2">
       <div v-for="row in rows" :key="row.key" class="flex items-center gap-2 min-w-0">
@@ -75,7 +87,7 @@ const props = defineProps({
   /** 볼트(내 차례) 버튼을 보통 채운 버튼으로. 한 화면에 볼트는 하나라 목록의 둘째부터 */
   quiet: { type: Boolean, default: false },
 })
-const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule', 'chat'])
+const emit = defineEmits(['profile', 'play', 'start', 'applicants', 'share', 'cancel-request', 'result', 'more', 'schedule', 'chat', 'message', 'answer-time'])
 const chatOpen = computed(() => teamChatOpen(props.game, props.game.myId ?? props.me?.id))
 
 // 시작 전이면 선수(주최자·확정된 상대)가 시간·장소를 정하고 바꾼다
@@ -88,6 +100,13 @@ const canSchedule = computed(() => {
 const needsSchedule = computed(() => !props.game.matchDate || (!props.game.matchLocation && !isRemote(props.game.venue)))
 
 const isMine = computed(() => props.game.type === 'my-game')
+// 경기 날(그날 0시부터)이 되면 '경기 시작'. 그 전에는 상대에게 메시지가 할 일이다
+const matchDay = computed(() => {
+  const d = props.game.matchDate && new Date(props.game.matchDate)
+  if (!d) return true
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  return d.getTime() < today.getTime() + 86_400_000
+})
 const approved = computed(() => (props.game.applicants || []).find((a) => a.approved))
 
 // 내 경기 응답에는 내 정보(my*)가 있고, 신청한 경기 응답에는 없어서 화면이 넘겨준다
@@ -143,6 +162,7 @@ const state = computed(() => {
     if (g.status === 'CANCELED') return { label: '취소됨', tone: 'neutral', hint: '취소된 경기예요' }
     if (g.status === 'SCHEDULED') {
       if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
+      if (!multi.value && opponent.value && (!matchDay.value || g.isOwner === false)) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${opponent.value.name}에게 메시지`, actionVariant: 'secondary' }
       return g.isOwner === false
         ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
         : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
@@ -151,15 +171,15 @@ const state = computed(() => {
     if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 보내서 더 부르기', actionVariant: 'secondary' }
     return { label: '상대 구하는 중', tone: 'neutral', action: 'share', actionLabel: '링크 공유하기', actionVariant: 'secondary' }
   }
-  if (g.status === 'REQUESTED') return { label: '승인 대기', tone: 'neutral', action: 'cancel-request', actionLabel: '신청 취소', actionVariant: 'secondary' }
+  if (g.status === 'REQUESTED') return { label: '승인 대기', tone: 'neutral', hint: `${g.ownerNickname}님이 승인하면 알려 드려요` }
   // 여럿이 하는 경기는 승인돼도 다 모일 때까지 확정이 아니다
   if (g.status === 'APPROVED' && multi.value && g.gameStatus === 'MATCHING') {
     return { label: '승인됨', tone: 'neutral', hint: `${gathered.value} 모였어요. 다 모이면 확정돼요` }
   }
   if (g.status === 'APPROVED') {
-    return needsSchedule.value
-      ? { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
-      : { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
+    if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
+    if (!multi.value) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${g.ownerNickname}에게 메시지`, actionVariant: 'secondary' }
+    return { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
   }
   if (g.status === 'REJECTED') return { label: '거절됨', tone: 'danger', hint: '다른 경기를 찾아보세요' }
   return { label: '대기', tone: 'neutral', hint: '' }

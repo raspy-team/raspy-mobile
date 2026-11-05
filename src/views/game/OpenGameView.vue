@@ -33,7 +33,7 @@
           <template v-else-if="game.joinBlockedReason">
             <span class="text-fg-muted">{{ game.joinBlockedReason }}</span>
           </template>
-          <template v-else>신청하면 {{ game.ownerNickname }}님이 승인하고, 장소와 시간을 함께 정해요.</template>
+          <template v-else>{{ applyHint }}</template>
         </p>
         <!-- 인증하고 이 경기로 돌아온다 (11/4 밤샘: 링크로 온 동료가 인증 뒤 경기를 다시 찾아야 했다).
              예전엔 글 끝의 작은 밑줄 글씨(51×18)라 누르기 어려웠다 (11/5 c6 320 검토) -->
@@ -75,7 +75,7 @@ import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
 import Comment from '../GameCommentView.vue'
 import { UiButton, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
-import { teamChatOpen } from '../../utils/gameFormat'
+import { teamChatOpen, isRemote } from '../../utils/gameFormat'
 
 const route = useRoute()
 const router = useRouter()
@@ -92,6 +92,16 @@ const canCheer = computed(() => {
   const g = game.value
   return g && g.rule?.judge !== 'OUTCOME' && (g.players?.length || 0) >= 2 && !g.players.some((p) => p.id === myId.value)
     && ['MATCHING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED'].includes(g.gameStatus)
+})
+
+// 신청 전 한 줄: 승인 뒤에 무엇이 남았나. 처음 만나는 1:1은 앱 게임 한 판이 먼저라는 것도 (신뢰 사다리, 서버 TrustLadder)
+const applyHint = computed(() => {
+  const g = game.value
+  const remote = isRemote(g.venue)
+  const decided = !!g.matchDate && (remote || !!g.matchLocation)
+  const base = decided ? `${g.ownerNickname}님이 승인하면 확정돼요.` : `${g.ownerNickname}님이 승인하면 ${remote ? '시간을' : '시간·장소를'} 함께 정해요.`
+  const ladder = !remote && (!g.format || g.format === 'DUEL') ? ' 처음 만나는 사이면 앱 게임 한 판을 먼저 해요.' : ''
+  return base + ladder
 })
 
 async function load() {

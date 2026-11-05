@@ -2835,6 +2835,47 @@
         }
       }
     },
+    "/api/games/{id}/schedule/answer": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "시간 바꾸기 제안에 답하기",
+        "description": "확정된 1:1에서 상대가 바꾸자고 한 시간을 받거나(accept=true) 원래 시간으로 둔다(accept=false).",
+        "operationId": "answerTimeProposal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accept",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{id}/result": {
       "post": {
         "tags": [
@@ -7154,13 +7195,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "OFFLINE",
                 "APP",
                 "POPULAR"
-              ],
-              "default": "ALL"
+              ]
             }
           }
         ],
@@ -7497,11 +7538,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           },
           {
@@ -7510,11 +7551,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ],
-              "default": "UNITS"
+              ]
             }
           }
         ],
@@ -10014,11 +10055,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -10639,13 +10680,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ],
-              "default": "PENDING"
+              ]
             }
           }
         ],
@@ -19696,6 +19737,7 @@
       "RequestedGameResponse": {
         "required": [
           "applicants",
+          "firstMeeting",
           "format",
           "gameStatus",
           "id",
@@ -19720,6 +19762,17 @@
           "matchDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "proposedMatchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "proposedById": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstMeeting": {
+            "type": "boolean"
           },
           "matchLocation": {
             "type": "string"
@@ -19819,6 +19872,7 @@
       },
       "MyGameResponse": {
         "required": [
+          "firstMeeting",
           "format",
           "id",
           "isOwner",
@@ -19855,6 +19909,17 @@
           "matchDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "proposedMatchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "proposedById": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstMeeting": {
+            "type": "boolean"
           },
           "rule": {
             "$ref": "#/components/schemas/FullRuleResponse"

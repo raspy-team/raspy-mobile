@@ -20,7 +20,7 @@
     </div>
 
     <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
-    <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length" class="pt-6">
+    <section v-else-if="!allGames.length && !appDuels.length && !appointments.length && !pendingReviews.length" class="pt-6">
       <h2 class="t-title">첫 경기를 잡아 볼까요</h2>
       <p class="t-caption mt-2">확정된 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
       <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
@@ -83,6 +83,19 @@
             <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" />
           </div>
         </div>
+      </UiSection>
+      <!-- 앱 게임 약속 (11/5): 같이 두는 게임의 도전장. 시간을 정해야 하거나 지금 들어갈 수 있는 것이 먼저 -->
+      <UiSection v-if="appointments.length" :title="`앱 게임 약속 ${appointments.length}`">
+        <UiList>
+          <UiListItem
+            v-for="ap in appointments"
+            :key="ap.gameId"
+            :title="`${ap.title} · ${(ap.mine ? ap.guest : ap.host)?.nickname ?? ''}`"
+            :subtitle="appointmentLine(ap)"
+            chevron
+            @click="router.push(`/challenge/${ap.gameId}`)"
+          />
+        </UiList>
       </UiSection>
       <!-- 앱 게임에서 아직 안 끝난 대결: 게임마다 흩어지지 않게 여기 모은다. 앱 게임은 조연이라 실제 경기 아래 (11/5) -->
       <UiSection v-if="appDuels.length" :title="`앱 게임 ${appDuels.length}`">
@@ -299,6 +312,13 @@ const sentGames = ref([])
 const myGames = ref([])
 const applicantsMap = ref({})
 const appDuels = ref([])
+const appointments = ref([])
+const appointmentRank = (ap) => (ap.state === 'OPEN' ? 0 : ap.state === 'ASKED' && !ap.mine ? 1 : 2)
+function appointmentLine(ap) {
+  if (ap.state === 'OPEN') return '지금 들어갈 수 있어요'
+  if (ap.state === 'ASKED') return ap.mine ? '상대가 시간을 정하는 중' : '시간을 정해 주세요'
+  return matchTime(ap.matchDate)
+}
 const me = ref({ name: '나' })
 const applicantsGame = ref(null)
 const menuGame = ref(null)
@@ -349,14 +369,17 @@ const groups = computed(() =>
 
 async function fetchGames() {
   try {
-    const [applicantsRes, sentRes, myRes, duels] = await Promise.all([
+    const [applicantsRes, sentRes, myRes, duels, apps] = await Promise.all([
       api.get('/api/games/my-games/applicants'),
       api.get('/api/games/my-requests'),
       api.get('/api/games/my-games'),
       // 앱 대결은 못 불러와도 오프라인 경기 목록은 보여 준다
       GET('/api/app-games/duels/active').then(({ data }) => data).catch(() => null),
+      GET('/api/app-games/appointments').then(({ data }) => data).catch(() => null),
     ])
     if (duels) appDuels.value = duels
+    // 내가 답할 것(시간 정하기)·지금 들어갈 것이 먼저
+    if (apps) appointments.value = [...apps].sort((x, y) => appointmentRank(x) - appointmentRank(y))
     applicantsMap.value = Object.fromEntries(applicantsRes.data.map((g) => [g.gameId, g.applicants || []]))
     sentGames.value = sentRes.data
     myGames.value = myRes.data

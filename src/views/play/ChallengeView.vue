@@ -6,6 +6,8 @@
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
         <UiButton class="mt-4" to="/games">다른 게임 둘러보기</UiButton>
       </UiEmptyState>
+      <!-- 같이 두는 실시간 게임의 도전장은 약속: 시간 정하기·들어가기 (11/5) -->
+      <AppointmentPanel v-else-if="info?.appointment" :game-id="info.gameId" />
       <template v-else-if="info">
         <UiCard class="text-center py-8">
           <UiAvatar :src="info.challenger.profilePicture" :name="info.challenger.nickname" :user-id="info.challenger.userId" size="lg" class="mx-auto" />
@@ -29,6 +31,7 @@ import { useRoute } from 'vue-router'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import { UiAvatar, UiButton, UiCard, UiEmptyState, UiSkeleton, UiTopBar } from '../../components/ui'
+import AppointmentPanel from '../../components/appgame/AppointmentPanel.vue'
 
 const route = useRoute()
 const info = ref<components['schemas']['AppChallenge'] | null>(null)

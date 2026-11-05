@@ -5150,6 +5150,47 @@
         }
       }
     },
+    "/api/app-games/{key}/appointments": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "약속 도전장 보내기",
+        "description": "실시간 게임 도전은 대기방에서 기다리지 않는다: 도전장만 보내고, 받은 사람이 시간을 정한다 (AppAppointmentService)",
+        "operationId": "openAppointment",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppAppointment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/votes/{gameId}": {
       "get": {
         "tags": [
@@ -5862,6 +5903,114 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/BattleStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/appointments/{gameId}/schedule": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "약속 시간 정하기·바꾸기",
+        "description": "받은 사람이 처음 정하면 받은 것. 그 뒤엔 둘 다 바꿀 수 있다. at이 없으면 지금",
+        "operationId": "scheduleAppointment",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppAppointment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/appointments/{gameId}/decline": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "약속 거절·취소",
+        "description": "받은 사람은 '다음에', 보낸 사람은 '도전 취소'",
+        "operationId": "declineAppointment",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppAppointment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/appointments/{gameId}/arrive": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "약속에 들어왔다",
+        "description": "약속 시간 10분 전부터. 기다리는 화면은 90초 안에 다시 부른다. 둘 다 들어와 있으면 시작한다(state STARTED)",
+        "operationId": "arriveAppointment",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppAppointment"
                 }
               }
             }
@@ -7121,13 +7270,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "OFFLINE",
                 "APP",
                 "POPULAR"
-              ],
-              "default": "ALL"
+              ]
             }
           }
         ],
@@ -7464,11 +7613,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           },
           {
@@ -7477,11 +7626,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "UNITS",
               "enum": [
                 "UNITS",
                 "POINTS"
-              ],
-              "default": "UNITS"
+              ]
             }
           }
         ],
@@ -9764,11 +9913,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -10131,6 +10280,63 @@
         }
       }
     },
+    "/api/app-games/appointments": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "내 약속",
+        "description": "보냈거나 받은 앱 게임 약속 중 시작 전 (내 경기)",
+        "operationId": "myAppointments",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppAppointment"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/appointments/{gameId}": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "약속 하나",
+        "operationId": "appointment",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppAppointment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/users": {
       "get": {
         "tags": [
@@ -10422,13 +10628,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ],
-              "default": "PENDING"
+              ]
             }
           }
         ],
@@ -15054,6 +15260,57 @@
           }
         }
       },
+      "AppAppointment": {
+        "required": [
+          "gameId",
+          "host",
+          "key",
+          "meReady",
+          "mine",
+          "otherReady",
+          "state",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "host": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "guest": {
+            "$ref": "#/components/schemas/AppPlayer"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "matchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "type": "string"
+          },
+          "meReady": {
+            "type": "boolean"
+          },
+          "otherReady": {
+            "type": "boolean"
+          },
+          "answerUntil": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "VoteRequest": {
         "required": [
           "playId"
@@ -15540,6 +15797,7 @@
       },
       "AppChallenge": {
         "required": [
+          "appointment",
           "challenger",
           "forMe",
           "gameId",
@@ -15582,6 +15840,9 @@
             "type": "boolean"
           },
           "forMe": {
+            "type": "boolean"
+          },
+          "appointment": {
             "type": "boolean"
           }
         }

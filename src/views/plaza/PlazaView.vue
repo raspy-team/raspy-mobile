@@ -102,15 +102,28 @@
       <UiSkeleton v-if="!games.length" class="h-40 w-full" />
       <div class="grid grid-cols-2 gap-2">
         <button
-          v-for="g in games"
+          v-for="g in pickable"
           :key="g.key"
           type="button"
-          class="h-14 rounded-2xl bg-surface px-3 text-left t-body text-fg active:bg-surface-2"
-          @click="challenge(g.key)"
+          class="h-14 rounded-2xl bg-surface px-3 text-left active:bg-surface-2"
+          @click="challenge(g)"
         >
-          {{ g.title }}
+          <span class="block t-body text-fg truncate">{{ g.title }}</span>
+          <!-- 같이 두는 게임은 약속(시간 정하기), 각자 한 판은 내가 먼저 (AI는 늘 바로) -->
+          <span v-if="!card?.bot" class="block t-micro">{{ g.together ? '같이 두기' : '각자 한 판' }}</span>
         </button>
       </div>
+    </UiSheet>
+
+    <!-- 같이 두는 게임을 골랐고 상대가 지금 광장에 있다: 도전장이 기본, 지금 바로는 고를 수 있게 -->
+    <UiSheet v-model="howOpen" :title="`${card?.name ?? ''}님에게 ${howGame?.title ?? ''}`">
+      <p class="t-body text-fg">{{ card?.name }}님이 지금 광장에 있어요</p>
+      <template #footer>
+        <div class="space-y-2">
+          <UiButton block size="lg" :loading="sending" @click="sendAppointment(howGame!)">도전장 보내기</UiButton>
+          <UiButton block variant="secondary" @click="playNow(howGame!)">지금 바로 한 판</UiButton>
+        </div>
+      </template>
     </UiSheet>
 
     <!-- 받은 도전 -->
@@ -230,7 +243,7 @@ const card = ref<Person | null>(null)
 const cardOpen = ref(false)
 const pickerOpen = ref(false)
 const reportOpen = ref(false)
-const games = ref<{ key: string; title: string }[]>([])
+const games = ref<{ key: string; title: string; together: boolean }[]>([])
 const invite = ref<{ gameId: number; key: string; title: string; from: string } | null>(null)
 const inviteOpen = ref(false)
 
@@ -373,11 +386,14 @@ async function addFriend(id: number) {
 async function loadGames() {
   if (games.value.length) return
   const list = (await GET('/api/app-games')).data
+  // 도전할 수 있는 게임: 같이 두는 실시간 게임(약속으로)과 각자 한 판 게임(내가 먼저 하고 도전장). 하루 한 문제 퍼즐·함께 쓰는 판·대전은 빼고
   games.value = list
-    .filter((g) => g.playMode === 'REALTIME' && g.available && !g.battle && !g.shared)
+    .filter((g) => g.available && !g.battle && !g.shared && g.dailyLimit !== 1 && (g.playMode === 'REALTIME' || g.playMode === 'NON_REALTIME'))
     .sort((a, b) => b.playCount - a.playCount)
-    .map((g) => ({ key: g.key, title: g.title }))
+    .map((g) => ({ key: g.key, title: g.title, together: g.playMode === 'REALTIME' }))
 }
+// AI 주민은 같이 두는 게임만 (늘 그 자리에 있어 바로 붙는다)
+const pickable = computed(() => (card.value?.bot ? games.value.filter((g) => g.together) : games.value))
 
 function tapObject(o: MapObj) {
   const a = o.action ?? ''
@@ -461,13 +477,50 @@ const place = ref<S['Place'] | null>(null)
 const PLACE_KIND: Record<string, string> = { station: '지하철역', school: '학교', hospital: '병원', mall: '마트', cafe: '카페', park: '공원·명소', store: '편의점', dong: '이웃 동네', gu: '구·군', city: '도시' }
 
 /** 한 판: 사람이면 그 사람만 들어오는 방을 열고(받는 사람 화면에 '받기'가 뜬다), AI면 그 AI 주민을 바로 부른다 */
-function challenge(key: string) {
+/**
+ * 한 판 하자고 하기 (11/5, 고병연: 상대가 자고 있을 수도 있는데 대기방에서 기다리는 건 웃기다):
+ * - AI 주민: 늘 그 자리에 있으니 바로
+ * - 각자 한 판 게임: 내가 먼저 하고, 끝나면 같은 문제로 도전장이 간다 (AppGameView ?to)
+ * - 같이 두는 게임: 도전장만 보내고 상대가 시간을 정한다. 상대가 지금 광장에 있으면 '지금 바로'도 고를 수 있다
+ */
+type Pick = { key: string; title: string; together: boolean }
+const howOpen = ref(false)
+const howGame = ref<Pick | null>(null)
+const sending = ref(false)
+function challenge(g: Pick) {
   const p = card.value
   if (!p) return
   pickerOpen.value = false
   cardOpen.value = false
-  if (p.bot) router.push({ path: `/play/${key}/live`, query: { ai: String(p.id) } }) // 그 AI 주민이 바로 들어온다 (ai-a)
-  else router.push({ path: `/play/${key}/live`, query: { to: String(p.id) } })
+  if (p.bot) return router.push({ path: `/play/${g.key}/live`, query: { ai: String(p.id) } }) // 그 AI 주민이 바로 들어온다 (ai-a)
+  if (!g.together) return router.push({ path: `/play/${g.key}`, query: { to: String(p.id), toName: p.name } })
+  // 지금 광장에 있고 쉬는 중이 아니면 지금 바로도 고를 수 있게
+  if (p.restingMinutes == null && scene()?.person(p.id) && !scene()?.isResting(p.id)) {
+    howGame.value = g
+    howOpen.value = true
+    return
+  }
+  sendAppointment(g)
+}
+async function sendAppointment(g: Pick) {
+  const p = card.value
+  if (!p) return
+  sending.value = true
+  try {
+    await POST('/api/app-games/{key}/appointments', { path: { key: g.key }, query: { to: p.id } })
+    howOpen.value = false
+    showToast(`${p.name}님에게 도전장을 보냈어요. 시간을 정하면 알려 드려요`)
+  } catch (e) {
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '도전장을 보내지 못했어요')
+  } finally {
+    sending.value = false
+  }
+}
+function playNow(g: Pick) {
+  const p = card.value
+  if (!p) return
+  howOpen.value = false
+  router.push({ path: `/play/${g.key}/live`, query: { to: String(p.id) } })
 }
 
 async function block(id: number) {

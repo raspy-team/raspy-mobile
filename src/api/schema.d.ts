@@ -2480,6 +2480,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/{key}/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 약속 도전장 보내기
+         * @description 실시간 게임 도전은 대기방에서 기다리지 않는다: 도전장만 보내고, 받은 사람이 시간을 정한다 (AppAppointmentService)
+         */
+        post: operations["openAppointment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/votes/{gameId}": {
         parameters: {
             query?: never;
@@ -2823,6 +2843,66 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["battleBot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/appointments/{gameId}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 약속 시간 정하기·바꾸기
+         * @description 받은 사람이 처음 정하면 받은 것. 그 뒤엔 둘 다 바꿀 수 있다. at이 없으면 지금
+         */
+        post: operations["scheduleAppointment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/appointments/{gameId}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 약속 거절·취소
+         * @description 받은 사람은 '다음에', 보낸 사람은 '도전 취소'
+         */
+        post: operations["declineAppointment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/appointments/{gameId}/arrive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 약속에 들어왔다
+         * @description 약속 시간 10분 전부터. 기다리는 화면은 90초 안에 다시 부른다. 둘 다 들어와 있으면 시작한다(state STARTED)
+         */
+        post: operations["arriveAppointment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5260,6 +5340,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 약속
+         * @description 보냈거나 받은 앱 게임 약속 중 시작 전 (내 경기)
+         */
+        get: operations["myAppointments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/appointments/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 약속 하나 */
+        get: operations["appointment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/users": {
         parameters: {
             query?: never;
@@ -6951,6 +7068,22 @@ export interface components {
             /** @enum {string} */
             result?: "WIN" | "LOSE" | "DRAW";
         };
+        AppAppointment: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            title: string;
+            host: components["schemas"]["AppPlayer"];
+            guest?: components["schemas"]["AppPlayer"];
+            mine: boolean;
+            /** Format: date-time */
+            matchDate?: string;
+            state: string;
+            meReady: boolean;
+            otherReady: boolean;
+            /** Format: date-time */
+            answerUntil?: string;
+        };
         VoteRequest: {
             /** Format: int64 */
             playId: number;
@@ -7111,6 +7244,7 @@ export interface components {
             challengeUntil?: string;
             live: boolean;
             forMe: boolean;
+            appointment: boolean;
         };
         SuspendRequest: {
             /** Format: int64 */
@@ -12294,6 +12428,30 @@ export interface operations {
             };
         };
     };
+    openAppointment: {
+        parameters: {
+            query: {
+                to: number;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppAppointment"];
+                };
+            };
+        };
+    };
     voteCard: {
         parameters: {
             query?: never;
@@ -12746,6 +12904,74 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BattleStateResponse"];
+                };
+            };
+        };
+    };
+    scheduleAppointment: {
+        parameters: {
+            query?: {
+                at?: string;
+            };
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppAppointment"];
+                };
+            };
+        };
+    };
+    declineAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppAppointment"];
+                };
+            };
+        };
+    };
+    arriveAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppAppointment"];
                 };
             };
         };
@@ -15597,6 +15823,48 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BattleStateResponse"];
+                };
+            };
+        };
+    };
+    myAppointments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppAppointment"][];
+                };
+            };
+        };
+    };
+    appointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppAppointment"];
                 };
             };
         };

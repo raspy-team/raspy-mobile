@@ -279,11 +279,11 @@
           </UiCard>
           <!-- 하루 한 번 게임을 오늘 이미 냈으면 버튼 대신 한 줄 (누르면 '오늘은 다 했어요'만 떴다, 11/5 밤샘 C 검토) -->
           <p v-if="dailyDone" class="t-body text-center mt-5">오늘 몫을 냈어요. 새 문제는 내일 0시에 나와요</p>
-          <UiButton v-else block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
+          <UiButton v-else block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">{{ ladderTo && game.playMode === 'REALTIME' ? '도전장 보내기' : '한 판 하기' }}</UiButton>
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
-            <template v-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 도전장을 보내요</template>
+            <template v-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님이 시간을 정하면 그때 같이 해요</template>
             <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 문제로 도전장이 가요</template>
             <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 문제로 도전장이 가요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
@@ -561,7 +561,20 @@ async function start() {
     startError.value = '이 게임은 아직 도전장을 보낼 수 없어요'
     return
   }
-  if (ladderTo && game.value?.playMode === 'REALTIME') return router.push({ path: `/play/${key.value}/live`, query: { to: ladderTo, toName: ladderName } })
+  // 같이 두는 실시간 게임: 대기방에서 기다리지 않는다. 도전장만 보내고 받은 사람이 시간을 정한다 (약속, 11/5)
+  if (ladderTo && game.value?.playMode === 'REALTIME') {
+    starting.value = true
+    try {
+      const a = (await POST('/api/app-games/{key}/appointments', { path: { key: key.value }, query: { to: ladderTo } })).data
+      showToast(`${ladderName}님에게 도전장을 보냈어요. 시간을 정하면 알려 드려요`)
+      return router.replace(`/challenge/${a.gameId}`)
+    } catch (e) {
+      startError.value = errorMessage(e, '도전장을 보내지 못했어요')
+      return
+    } finally {
+      starting.value = false
+    }
+  }
   if (game.value?.shared) return router.push(`/play/${key.value}/board`)
   if (game.value?.playMode === 'REALTIME') return router.push(game.value.battle ? `/play/${key.value}/battle` : liveRoute(key.value))
   starting.value = true

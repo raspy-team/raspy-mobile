@@ -214,21 +214,7 @@
     </template>
   </UiSheet>
 
-  <!-- 경기 시작 ① 정해둔 장소가 있으면 그대로 시작할지 -->
-  <UiSheet v-model="showPlaceConfirm" title="이 장소에서 하나요?">
-    <UiCard class="flex items-center gap-3">
-      <UiIcon name="fas fa-location-dot" class="text-fg-muted" aria-hidden="true" />
-      <span class="t-body">{{ startGame?.matchLocation }}</span>
-    </UiCard>
-    <template #footer>
-      <div class="flex gap-2">
-        <UiButton variant="secondary" block @click="openPlaceForm">장소 바꾸기</UiButton>
-        <UiButton block @click="goCamera">이 장소로 시작</UiButton>
-      </div>
-    </template>
-  </UiSheet>
-
-  <!-- 경기 시작 ② 장소 정하기: 지역(챔피언 단위) + 장소 이름. Google 자동완성은 키가 있을 때 덤 -->
+  <!-- 경기 시작: 장소가 없을 때만 장소 정하기: 지역(챔피언 단위) + 장소 이름. Google 자동완성은 키가 있을 때 덤 -->
   <UiSheet v-model="showPlaceForm" title="어디서 하나요?">
     <div class="space-y-4">
       <div v-if="!selectedPlace" class="grid grid-cols-2 gap-2">
@@ -250,11 +236,11 @@
     </template>
   </UiSheet>
 
-  <!-- 경기 시작 ③ 인증샷 (선택). 사진을 고르거나 '사진 없이 시작'을 누르면 바로 시작한다 (한 번 더 묻지 않는다) -->
+  <!-- 경기 시작 인증샷 (선택). 사진을 고르거나 '사진 없이 시작'을 누르면 바로 시작한다 (한 번 더 묻지 않는다) -->
   <CameraCapture
     :is-visible="showCameraModal"
     title="경기 시작 인증샷"
-    :subtitle="`${startMessage} 사진은 소식에 보여요.`"
+    :subtitle="startSubtitle"
     allow-skip
     @capture="onPhotoCapture"
     @skip="onPhotoCapture(null)"
@@ -592,7 +578,6 @@ async function doLeave(g, reason) {
 // ---------- 경기 시작: 장소 → 인증샷(선택) → 확인 ----------
 
 const startGame = ref(null)
-const showPlaceConfirm = ref(false)
 const showPlaceForm = ref(false)
 const showCameraModal = ref(false)
 const capturedPhotoFile = ref(null)
@@ -704,22 +689,19 @@ const canSubmitPlace = computed(
   () => !!selectedPlace.value || !!(manualRegion1.value && manualRegion2.value && searchQuery.value.trim()),
 )
 
-const startMessage = computed(() => {
-  const dur = startGame.value?.rule?.duration
-  const time = !dur || dur < 0 ? '시간 제한 없이' : `${Math.floor(dur / 60) ? Math.floor(dur / 60) + '분 ' : ''}${dur % 60 ? (dur % 60) + '초 ' : ''}동안`
-  return `${time} 진행돼요. 시작하면 상대에게도 바로 보여요.`
-})
+// 인증샷 창의 한 줄: 어디서 하는지와 사진이 어디에 보이는지만
+const startSubtitle = computed(() => [startGame.value?.matchLocation?.trim(), '사진은 소식에 보여요'].filter(Boolean).join(' · '))
 
 function openStart(game) {
   startGame.value = game
   // 화상·다른 게임은 장소를 묻지 않는다
   if (isRemote(game.venue)) return goCamera()
-  if (game.matchLocation && game.matchLocation.trim()) showPlaceConfirm.value = true
+  // 장소가 정해져 있으면 확인 창 없이 바로 인증샷으로 (UX ④: 창이 두 번 떴다). 장소는 카드의 '바꾸기'로 미리 바꾼다
+  if (game.matchLocation && game.matchLocation.trim()) goCamera()
   else openPlaceForm()
 }
 
 function openPlaceForm() {
-  showPlaceConfirm.value = false
   searchQuery.value = ''
   detailedPlace.value = ''
   selectedPlace.value = null
@@ -771,7 +753,6 @@ async function submitPlace() {
 }
 
 function goCamera() {
-  showPlaceConfirm.value = false
   capturedPhotoFile.value = null
   showCameraModal.value = true
 }

@@ -32,13 +32,13 @@
         <!-- 증인: 결과를 낸 순간 중계를 보던 관중 (docs/live-spectator-review.md C) -->
         <p v-if="witnesses" class="t-caption text-center mt-1">관중 {{ witnesses }}명이 지켜본 경기</p>
         <!-- 이 경기로 바뀐 내 실력 점수: 이긴 사람이 가장 먼저 궁금한 숫자라 결과 바로 밑에 -->
-        <p v-if="myRating && confirmed" class="mt-3 flex items-baseline justify-center gap-2 feel-rise feel-rise-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
+        <p v-if="myRating && confirmed && !myRating.provisional" class="mt-3 flex items-baseline justify-center gap-2 feel-rise feel-rise-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
           <span class="t-caption">실력 점수</span>
           <span class="t-heading tabular-nums">{{ myRating.before }} → {{ myRating.after }}</span>
           <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta === 0 ? "±0" : ratingDelta }}</span>
         </p>
-        <!-- 첫 몇 판은 점수가 크게 움직인다. 숫자만 보여 주면 이긴 쪽은 착각하고 진 쪽은 상처받는다 -->
-        <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-1">처음 몇 판은 크게 움직여요. 더 하면 자리를 잡아요</p>
+        <!-- 첫 몇 판은 점수가 크게 움직인다. 숫자(첫 판에 -162)를 보여 주면 이긴 쪽은 착각하고 진 쪽은 상처받는다 (UX ④: 숫자 대신 한 줄) -->
+        <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-3">실력 점수는 몇 판 더 하면 나와요</p>
         <!-- 다음 판: 이기든 지든 같은 규칙으로 바로 -->
         <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
           <p v-if="headline.line" class="t-body text-center mt-4">{{ headline.line }}</p>
@@ -107,7 +107,7 @@
 
         <!-- 세트별 점수: 표로 -->
         <!-- 세트 점수: 상자 없이 줄만 -->
-        <div v-if="setResults.length" class="mt-10 border-y border-line divide-y divide-line">
+        <div v-if="setResults.length > 1" class="mt-10 border-y border-line divide-y divide-line">
           <div class="grid grid-cols-[3rem_1fr_auto_1fr] items-center px-1 h-10 t-micro">
             <span>세트</span>
             <span class="text-right truncate">{{ sides[0].user.nickname }}<UiAiBadge v-if="sides[0].user.isBot" /></span>
@@ -121,7 +121,7 @@
             <span class="text-lg" :class="setRight(s) >= setLeft(s) ? 'text-fg' : 'text-fg-subtle'">{{ setRight(s) }}</span>
           </div>
         </div>
-        <p v-else class="t-caption text-center mt-6">세트 점수 없이 승패만 기록한 경기예요</p>
+        <p v-else-if="!setResults.length" class="t-caption text-center mt-6">세트 점수 없이 승패만 기록한 경기예요</p>
         </template>
       </section>
 
@@ -139,7 +139,7 @@
       <!-- 상대 확인을 기다리는 결과 -->
       <UiCard v-else-if="!confirmed" class="space-y-3">
         <div class="flex items-start gap-3">
-          <span class="w-10 h-10 rounded-full bg-surface-2 text-fg-muted flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <span v-if="!pending.canAnswer" class="w-10 h-10 rounded-full bg-surface-2 text-fg-muted flex items-center justify-center flex-shrink-0" aria-hidden="true">
             <UiIcon name="fas fa-hourglass-half" />
           </span>
           <div class="min-w-0">
@@ -193,9 +193,10 @@
                 <span v-if="row.value" class="t-caption ml-1">{{ row.value }}/5</span>
               </div>
             </div>
-            <UiInput v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
+            <!-- 별 두 줄과 '또 만나고 싶나요'만 먼저. 한마디·규칙·사진은 남기고 싶은 사람만 (UX ④: 한 화면에 아홉 가지였다) -->
+            <UiInput v-if="reviewMore" v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
             <!-- 기록에서 뽑은 사실 한 줄 (소식 이야기 줄). 누르면 한마디에 넣는다. 고르지 않아도 된다 -->
-            <div v-if="beatChoices.length" class="-mt-2">
+            <div v-if="reviewMore && beatChoices.length" class="-mt-2">
               <p class="t-micro mb-1.5">기록에서 한 줄 고르기</p>
               <div class="flex flex-wrap gap-2">
                 <UiChip v-for="b in beatChoices" :key="b" :selected="review.text === b" @click="review.text = review.text === b ? '' : b">{{ b }}</UiChip>
@@ -203,21 +204,19 @@
             </div>
             <!-- 또 만나고 싶나요? (만나서 한 경기만, 안전·신뢰 B). 상대에게 보이지 않고 신뢰 온도에만 -->
             <div v-if="game?.venue === 'IN_PERSON'">
-              <p class="t-label mb-1">또 만나서 하고 싶나요?</p>
+              <p class="t-label mb-1">또 만나서 하고 싶나요? <span class="t-micro">상대에게 안 보여요</span></p>
               <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="또 만나서 하고 싶나요?">
                 <UiChip :selected="review.meetAgain === true" @click="review.meetAgain = review.meetAgain === true ? null : true">네, 또 하고 싶어요</UiChip>
                 <UiChip :selected="review.meetAgain === false" @click="review.meetAgain = review.meetAgain === false ? null : false">아니요</UiChip>
               </div>
-              <p class="t-micro mt-1.5">이 답은 상대에게 보이지 않아요</p>
             </div>
-            <p class="t-micro">평가는 둘 다 남기거나 7일이 지나면 함께 공개돼요. 상대가 먼저 본 뒤 맞받아 쓰지 못하게요</p>
+            <button v-if="!reviewMore" type="button" class="t-caption underline underline-offset-2" @click="reviewMore = true">더 남기기</button>
           </UiCard>
         </UiSection>
 
         <!-- 규칙 평가 -->
-        <UiSection title="이 규칙은 어땠나요?">
+        <UiSection v-if="reviewMore" title="이 규칙은 어땠나요?">
           <UiCard class="space-y-4">
-            <p class="t-caption">재미있고, 알기 쉽고, 공평했나요? 다음 사람이 규칙을 고를 때 참고해요.</p>
             <div class="flex items-center -ml-2" role="radiogroup" aria-label="규칙 평가">
               <button
                 v-for="n in 5"
@@ -239,7 +238,7 @@
         </UiSection>
 
         <!-- 사진·동영상 -->
-        <UiSection title="사진·영상 (선택)">
+        <UiSection v-if="reviewMore || allPictures.length" title="사진·영상">
           <template #action><span class="t-micro">{{ allPictures.length }}/5</span></template>
 
           <!-- 없을 때는 큰 빈 상자 대신 한 줄: 평가보다 앞서지 않게 -->
@@ -422,7 +421,6 @@ function setRuleRating(n) {
   ruleRating.value = n
 }
 
-let reviewRevealed = false
 function submitReviewAndGoHome() {
   // 리뷰 제출 전 유효성 검사
   if (review.value.manner === 0 || review.value.performance === 0) {
@@ -442,8 +440,7 @@ function submitReviewAndGoHome() {
       // 화면이 "○○님은 어땠나요?"라고 묻는 그 사람을 평가한다 (팀·각자 경기는 서버가 대상을 꼭 받는다)
       return api.post(`/api/games/${gameId}/review`, { ...review.value, targetId: opponent.value.id })
     })
-    .then((res) => {
-      reviewRevealed = !!res?.data?.revealed
+    .then(() => {
       // 규칙 평가 제출 (점수가 있을 때만)
       if (ruleRating.value > 0) {
         return api.post(`/api/rules/${game.value.rule.id}/rating`, {
@@ -455,7 +452,7 @@ function submitReviewAndGoHome() {
       return Promise.resolve()
     })
     .then(() => {
-      showToast(reviewRevealed ? '평가를 보냈어요. 상대도 남겨서 함께 공개됐어요' : '평가를 보냈어요. 상대도 남기거나 7일이 지나면 공개돼요')
+      showToast('평가를 보냈어요')
       setTimeout(() => {
         goHome()
       }, 500)
@@ -613,18 +610,18 @@ const pending = computed(() => {
   if (peerVoting.value) return { canAnswer: false, title: '투표로 정하는 중이에요', description: '함께 한 사람들이 모두 뽑으면 바로 기록돼요' }
   const submitter = resSides.value.flatMap((s) => s.members).find((u) => u.id === resultSubmittedById.value)
     || [user1.value, user2.value].find((u) => u.id === resultSubmittedById.value)
-  const until = autoConfirmAt.value ? `${matchTime(autoConfirmAt.value)}까지` : '24시간 안에'
+  const at = autoConfirmAt.value ? `${matchTime(autoConfirmAt.value)}에` : '24시간 뒤에'
   if (!isParticipant.value) return { canAnswer: false, title: '확인 중인 결과예요', description: '두 선수가 확인하면 기록돼요' }
   // 팀 경기는 상대 팀이, 각자 경기는 낸 사람 말고 누구든 확인한다
   const waitingFor = format.value === 'TEAMS' ? '상대 팀' : format.value === 'FREE_FOR_ALL' ? '다른 사람' : `${opponent.value.nickname}님`
   const sameTeam = format.value === 'TEAMS' && mySide.value === submitterSide.value
   if (resultSubmittedById.value === currentUserId.value || sameTeam) {
-    return { canAnswer: false, title: `${waitingFor}의 확인을 기다려요`, description: `확인하면 전적과 실력 점수에 반영돼요. ${until} 답이 없으면 그대로 확정돼요` }
+    return { canAnswer: false, title: `${waitingFor}의 확인을 기다려요`, description: `답이 없으면 ${at} 확정돼요` }
   }
   return {
     canAnswer: true,
     title: `${submitter?.nickname || '상대'}님이 ${rejectsLeft.value < 3 ? '고쳐 보낸' : '낸'} 결과예요. 맞나요?`,
-    description: `맞으면 전적과 실력 점수에 반영돼요. ${until} 확인하지 않으면 그대로 확정돼요` + (rejectsLeft.value <= 1 ? '. 한 번 더 돌려보내면 이 경기는 기록하지 않아요' : ''),
+    description: `답이 없으면 ${at} 그대로 확정돼요` + (rejectsLeft.value <= 1 ? '. 한 번 더 돌려보내면 기록하지 않아요' : ''),
   }
 })
 
@@ -653,6 +650,7 @@ async function onCountered() {
   showToast(disputed.value ? '결과가 맞지 않아 이 경기는 기록하지 않아요' : `고친 결과를 보냈어요. ${by} 확인해요`)
 }
 
+const reviewMore = ref(false)
 const reviewRows = computed(() => [
   { key: 'manner', label: '매너', value: review.value.manner, set: setManner },
   { key: 'performance', label: '실력', value: review.value.performance, set: setPerformance },

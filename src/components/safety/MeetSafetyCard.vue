@@ -30,14 +30,13 @@
     <div class="flex gap-2 flex-wrap">
       <UiButton v-if="s.canArrive && !s.arrivedAt" size="sm" class="flex-1" icon="location-dot" :loading="busy" @click="arrive">도착했어요</UiButton>
       <UiButton v-if="s.arrivedAt && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="circle-check" :loading="busy" @click="finish">잘 끝났어요</UiButton>
-      <UiButton v-if="s.canShare && !s.shareUrl && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="share" @click="shareOpen = true">친구에게 내 위치 공유</UiButton>
+      <UiButton v-if="s.canShare && !s.shareUrl && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="share" @click="shareOpen = true">위치 공유</UiButton>
       <template v-if="s.shareUrl">
         <UiButton size="sm" variant="secondary" icon="share" @click="send(s.shareUrl)">링크 다시 보내기</UiButton>
         <UiButton size="sm" variant="ghost" :loading="busy" @click="stop">공유 그만</UiButton>
       </template>
     </div>
     <p v-if="s.shareUrl" class="t-micro">앱을 열어 둔 동안 1분마다 위치가 갱신돼요. '잘 끝났어요'를 누르면 공유가 끝나요</p>
-    <p v-else-if="s.canArrive && !s.arrivedAt" class="t-micro">도착을 눌러 두면 상대가 안 왔을 때 노쇼로 알릴 수 있어요</p>
   </div>
 
   <!-- 위치 공유: 링크는 누구에게나, 매치 친구를 고르면 끝 확인이 늦을 때 그 친구에게 알림이 가요 -->

@@ -86,7 +86,8 @@
 
     <!-- 아래: 다음 단계 둘만. 되돌릴 수 없는 '취소·처음부터'는 손이 자주 가는 이 줄에 두지 않고 더보기로 -->
     <footer class="flex-shrink-0 px-4 pb-4 flex gap-2">
-      <UiButton v-if="!isSetOver && !isGameOver && !isCountingDown" size="lg" variant="secondary" class="flex-1" @click="manualFinishSet">세트 끝내기</UiButton>
+      <!-- 한 세트짜리 규칙은 세트를 끝내는 게 곧 경기를 끝내는 것이라 숨긴다 (UX ④) -->
+      <UiButton v-if="(game.rule?.setsToWin || 1) > 1 && !isSetOver && !isGameOver && !isCountingDown" size="lg" variant="secondary" class="flex-1" @click="manualFinishSet">세트 끝내기</UiButton>
       <!-- 점수를 내는 동안 주 행동은 점수 칸이다. 경기 끝내기는 승부가 난 뒤에만 채운 버튼으로 (0:0에도 가장 눈에 띄어 잘못 누르기 쉬웠다, 11/5 밤샘 C) -->
       <UiButton size="lg" :variant="isSetOver || isGameOver ? 'primary' : 'secondary'" class="flex-1" @click="openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기', false)">
         경기 끝내기

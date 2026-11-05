@@ -9,7 +9,7 @@
       <form class="mt-8 space-y-5" novalidate @submit.prevent="submit">
         <UiInput
           v-model="email"
-          placeholder="아이디"
+          label="아이디"
           :maxlength="50"
           :error="emailError"
           autocomplete="username"
@@ -17,7 +17,7 @@
         <div>
           <UiInput
             v-model="password"
-            placeholder="비밀번호"
+            label="비밀번호"
             :type="showPassword ? 'text' : 'password'"
             :maxlength="20"
             :hint="isSignup ? '8~20자' : ''"

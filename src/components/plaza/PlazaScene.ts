@@ -92,7 +92,6 @@ export class PlazaScene extends Phaser.Scene {
     this.drawGround()
     for (const o of m.objects) this.drawObject(o)
     if (this.data0.statue) this.drawStatue()
-    this.drawTitle()
 
     this.addWalker(this.data0.me)
     for (const p of this.data0.people) this.addWalker(p)
@@ -174,20 +173,7 @@ export class PlazaScene extends Phaser.Scene {
     map.destroy()
   }
 
-  /** 광장 이름을 흙 광장 바로 위에 크게 (어느 동네인지 들어오자마자 보이게) */
-  private drawTitle() {
-    const m = this.data0.map
-    const cx = m.plaza.x + m.plaza.w / 2
-    this.add
-      .text(cx, m.plaza.y - 30, m.name, { fontFamily: FONT, fontSize: '18px', fontStyle: 'bold', color: '#ffffff', stroke: '#1b1b1f', strokeThickness: 4, resolution: 4 })
-      .setOrigin(0.5, 1)
-      .setDepth(m.plaza.y - 30)
-    if (m.subtitle)
-      this.add
-        .text(cx, m.plaza.y - 16, m.subtitle, { fontFamily: FONT, fontSize: '9px', color: '#e8ff59', stroke: '#1b1b1f', strokeThickness: 3, resolution: 4 })
-        .setOrigin(0.5, 1)
-        .setDepth(m.plaza.y - 30)
-  }
+  // 광장 이름은 그림에 쓰지 않는다: 위 막대의 광장 이름과 겹쳤다 (고병연 11/5)
 
   /** 실제 장소·다른 광장 문 팻말: 나무 판에 그림 글자와 이름, 아래에 방향·거리 */
   private drawBoard(o: MapObj) {

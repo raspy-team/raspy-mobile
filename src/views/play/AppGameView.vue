@@ -1,12 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="game?.title || '게임'" back>
-      <!-- 결과 공유는 위 막대 아이콘 (애플식). 하루 퍼즐은 칸 그림, 나머지는 소식 카드 링크 -->
-      <template #right>
-        <UiIconButton v-if="result && DAILY_SHARE.includes(key) && result.myFeedback" icon="share" label="오늘 결과 공유" @click="shareDaily(result.myFeedback)" />
-        <UiIconButton v-else-if="result && result.status === 'COMPLETED' && game?.dailyLimit !== 1" icon="share" label="결과 공유" :disabled="sharingResult" @click="openShare(result.gameId)" />
-      </template>
-    </UiTopBar>
+    <UiTopBar :title="game?.title || '게임'" back />
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <!-- 시작 전 3·2·1: 끝날 때까지 문제를 가린다 -->
@@ -198,11 +192,13 @@
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
+        <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" block variant="ghost" icon="share" class="mt-1" :loading="sharingResult" @click="openShare(result.gameId)">결과 공유</UiButton>
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '알림' }}</p>
           <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
         </UiCard>
         <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
+        <UiButton v-if="DAILY_SHARE.includes(key) && result.myFeedback" block variant="secondary" icon="share" class="mt-3" @click="shareDaily(result.myFeedback)">오늘 결과 공유</UiButton>
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 문장</p>
@@ -429,7 +425,7 @@ import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import { useToast } from '../../composable/useToast'
 import {
-  UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiIconButton, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
+  UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
 
 type Schemas = components['schemas']

@@ -1,9 +1,6 @@
 <template>
   <div>
-  <UiTopBar title="경기 결과" back="/game">
-    <!-- 공유는 위 막대 아이콘 하나 (애플식: 아래 '공유' 버튼은 이름 없이도 안다) -->
-    <template #right><UiIconButton icon="share" label="공유" @click="onShare" /></template>
-  </UiTopBar>
+  <UiTopBar title="경기 결과" back="/game" />
 
   <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
   <main v-if="!isLoading && resultError" class="px-4 pt-4 max-w-xl mx-auto">
@@ -325,10 +322,11 @@
       <!-- AI 주민의 경기에는 현장이 없다: 관중 사진을 받지 않는다 (docs/ai-residents.md 6, 사람이 찾아가지 않게) -->
       <LiveMediaStrip v-if="game?.venue === 'IN_PERSON' && !aiGame" :game-id="Number(gameId)" />
 
-      <!-- 친구 (공유는 위 막대로 옮겼다) -->
+      <!-- 친구 · 공유 (덜 급한 것은 맨 아래) -->
       <div class="flex gap-2">
         <!-- 이미 친구면 숨기고, 보냈으면 '요청 보냄' (예전엔 친구 사이에도 늘 '친구 요청'이 보였다) -->
-        <UiButton v-if="isParticipant && format === 'DUEL' && friendState && !friendState.isFriend" variant="secondary" icon="fas fa-user-plus" class="flex-1" :disabled="friendState.sent" @click="sendFriendRequest">{{ friendState.sent ? '요청 보냄' : friendState.received ? '친구 수락' : '친구 추가' }}</UiButton>
+        <UiButton v-if="isParticipant && format === 'DUEL' && friendState && !friendState.isFriend" variant="secondary" icon="fas fa-user-plus" class="flex-1" :disabled="friendState.sent" @click="sendFriendRequest">{{ friendState.sent ? '요청 보냄' : friendState.received ? '친구 수락' : '친구 요청' }}</UiButton>
+        <UiButton variant="secondary" icon="share" class="flex-1" @click="onShare">공유</UiButton>
       </div>
 
     </template>
@@ -389,7 +387,7 @@ import { NEXT_ROUND } from '@/utils/verdict'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import LiveMediaStrip from '../../components/live/LiveMediaStrip.vue'
 import {
-  UiAiBadge, UiAvatar, UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
+  UiAiBadge, UiAvatar, UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiInput, UiSection, UiRollNumber, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'

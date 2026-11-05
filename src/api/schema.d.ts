@@ -6439,6 +6439,7 @@ export interface components {
         MapSpec: {
             room: string;
             name: string;
+            subtitle?: string;
             /** Format: int32 */
             w: number;
             /** Format: int32 */
@@ -6447,6 +6448,9 @@ export interface components {
             tile: number;
             ground: components["schemas"]["Area"][];
             objects: components["schemas"]["Obj"][];
+            places: components["schemas"]["Place"][];
+            plaza: components["schemas"]["Rect"];
+            center?: number[];
             /** Format: int32 */
             cell: number;
             walk: string;
@@ -6468,6 +6472,8 @@ export interface components {
             y: number;
             label?: string;
             action?: string;
+            sub?: string;
+            icon?: string;
         };
         PersonView: {
             /** Format: int64 */
@@ -6483,6 +6489,18 @@ export interface components {
             champion?: string;
             /** Format: int64 */
             restingMinutes?: number;
+        };
+        Place: {
+            kind: string;
+            name: string;
+            /** Format: double */
+            east: number;
+            /** Format: double */
+            north: number;
+            target?: string;
+            /** Format: int32 */
+            distanceM: number;
+            dir: string;
         };
         Rect: {
             /** Format: int32 */
@@ -7882,20 +7900,6 @@ export interface components {
             gameId?: number;
             /** @enum {string} */
             gameStatus?: "MATCHING" | "SCHEDULED" | "IN_PROGRESS" | "RESULT_PENDING" | "COMPLETED" | "CANCELED" | "DELETED" | "WAITING" | "PLAYING" | "VOTING" | "AWAITING_RESULT";
-        };
-        Place: {
-            kakaoId: string;
-            name: string;
-            category: string;
-            address: string;
-            roadAddress?: string;
-            /** Format: double */
-            lat: number;
-            /** Format: double */
-            lon: number;
-            /** Format: int32 */
-            distanceM?: number;
-            public: boolean;
         };
         Option: {
             value: string;

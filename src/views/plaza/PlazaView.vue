@@ -13,19 +13,14 @@
       <!-- 위: 광장 고르기 -->
       <div class="absolute top-0 inset-x-0 z-10 px-3 pt-[calc(env(safe-area-inset-top)+8px)] flex items-center gap-2">
         <UiIconButton icon="arrow-left" label="뒤로" class="bg-canvas/80 backdrop-blur" @click="goBack" />
-        <div class="flex gap-1.5 overflow-x-auto no-scrollbar flex-1">
-          <button
-            v-for="r in rooms"
-            :key="r.id"
-            type="button"
-            class="shrink-0 h-9 px-3 rounded-full t-caption font-semibold backdrop-blur"
-            :class="r.id === room?.id ? 'bg-fg text-canvas' : r.open ? 'bg-canvas/80 text-fg' : 'bg-canvas/60 text-fg-subtle'"
-            @click="switchRoom(r)"
-          >
-            {{ r.name }}<span v-if="r.open && r.online" class="ml-1 opacity-70">{{ r.online }}</span>
-            <UiIcon v-if="!r.open" name="lock" class="ml-1 text-[10px]" />
-          </button>
-        </div>
+        <!-- 지금 광장 하나만 크게, 누르면 다른 광장 (칩 셋이 좁은 화면에서 밀려 동네 칩이 안 보였다, 11/6) -->
+        <button type="button" class="min-w-0 flex-1 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur flex items-center gap-1 t-body font-semibold text-fg" aria-label="광장 바꾸기" @click="roomsOpen = true">
+          <span class="truncate">{{ room?.name ?? '광장' }}</span>
+          <UiIcon name="chevron-down" class="text-sm shrink-0" />
+        </button>
+        <button v-if="phase === 'plaza'" type="button" class="shrink-0 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur t-caption font-semibold text-fg flex items-center gap-1" aria-label="지금 여기 있는 사람" @click="peopleOpen = true">
+          <UiIcon name="users" /> {{ peopleHere.filter((p) => p.restingMinutes == null).length }}
+        </button>
         <UiIconButton icon="list" label="게임 목록으로 보기" class="bg-canvas/80 backdrop-blur" @click="router.push('/games')" />
         <UiIconButton icon="shirt" label="꾸미기" class="bg-canvas/80 backdrop-blur" @click="router.push('/plaza/avatar')" />
       </div>
@@ -129,6 +124,71 @@
       </template>
     </UiSheet>
 
+    <!-- 광장 고르기 -->
+    <UiSheet v-model="roomsOpen" title="어느 광장으로 갈까요?">
+      <ul class="space-y-1">
+        <li v-for="r in rooms" :key="r.id">
+          <button type="button" class="w-full flex items-center justify-between rounded-2xl px-3 py-3 active:bg-surface-2 text-left" @click="roomsOpen = false; switchRoom(r)">
+            <span>
+              <span class="t-body text-fg block">{{ r.name }}<span v-if="r.id === room?.id" class="t-caption ml-1">· 지금</span></span>
+              <span class="t-caption block">{{ r.open ? (r.kind === 'dong' ? '우리 동네 사람들과' : r.kind === 'city' ? '같은 도시 사람들과' : '전국 누구나') : r.reason }}</span>
+            </span>
+            <span class="t-caption shrink-0">{{ r.open ? `${r.online}명` : '' }}<UiIcon v-if="!r.open" name="lock" /></span>
+          </button>
+        </li>
+      </ul>
+      <p v-if="!rooms.some((r) => r.kind === 'dong')" class="t-caption mt-3">동네를 인증하면 우리 동네 광장이 열려요</p>
+      <template v-if="!rooms.some((r) => r.kind === 'dong')" #footer><UiButton block variant="secondary" @click="router.push('/neighborhood')">동네 인증하기</UiButton></template>
+    </UiSheet>
+
+    <!-- 지금 여기 있는 사람: 걷지 않고 바로 한 판 -->
+    <UiSheet v-model="peopleOpen" title="지금 여기 있는 사람">
+      <p v-if="!peopleHere.length" class="t-body text-fg-muted">아직 아무도 없어요. 노점에서 게임을 고르면 AI 주민이 상대가 돼요</p>
+      <ul class="space-y-1">
+        <li v-for="p in peopleHere" :key="p.id" class="flex items-center gap-2">
+          <button type="button" class="flex-1 min-w-0 flex items-center gap-3 rounded-2xl px-2 py-2 active:bg-surface-2 text-left" @click="peopleOpen = false; openCardFor(p)">
+            <span class="w-9 h-12 rounded-xl bg-surface-2 overflow-hidden flex items-end justify-center shrink-0"><span class="avatar-mini" :style="{ backgroundImage: `url(${ART}/avatar/${p.sheet}.png)` }" /></span>
+            <span class="min-w-0 flex-1">
+              <span class="t-body text-fg flex items-center gap-1.5"><span class="truncate">{{ p.name }}</span><span v-if="p.bot" class="t-micro px-1.5 rounded bg-[#9ad0ff] text-[#121214] font-semibold">AI</span></span>
+              <span class="block t-caption truncate">{{ p.champion ? `👑 ${p.champion}` : restingText(p) || p.area || '광장에 있어요' }}</span>
+            </span>
+          </button>
+          <!-- 걷지 않고 바로 게임 고르기 -->
+          <UiButton size="sm" variant="secondary" class="shrink-0" @click="peopleOpen = false; card = p; loadGames(); pickerOpen = true">한 판</UiButton>
+        </li>
+      </ul>
+    </UiSheet>
+
+    <!-- 게시판: 이 동네 모집 중인 경기 -->
+    <UiSheet v-model="boardOpen" title="모집 중인 경기">
+      <UiSkeleton v-if="!board" class="h-32 w-full" />
+      <p v-else-if="!board.length" class="t-body text-fg-muted">지금 모집 중인 경기가 없어요. 처음으로 열어 보세요</p>
+      <ul v-else class="space-y-1">
+        <li v-for="g in board" :key="g.id">
+          <button type="button" class="w-full rounded-2xl px-3 py-2.5 active:bg-surface-2 text-left" @click="router.push(`/games/${g.id}`)">
+            <span class="t-body text-fg block">{{ g.title }}</span>
+            <span class="t-caption block">{{ g.when }} · {{ g.where }} · {{ g.people }}</span>
+          </button>
+        </li>
+      </ul>
+      <template #footer><UiButton block @click="router.push('/create-game')">경기 열기</UiButton></template>
+    </UiSheet>
+
+    <!-- 실제 장소 팻말 -->
+    <UiSheet v-model="placeOpen" :title="place?.name ?? ''">
+      <p v-if="place" class="t-body text-fg">{{ PLACE_KIND[place.kind] ?? '장소' }}<template v-if="place.kind !== 'city' && place.kind !== 'gu'"> · {{ place.dir }}쪽 {{ place.distanceM < 1000 ? `${place.distanceM}m` : `${(place.distanceM / 1000).toFixed(1)}km` }}</template></p>
+      <p class="t-caption mt-1">{{ enter?.map.center ? '광장 가운데가 우리 동네 한가운데예요. 팻말은 실제 방향에 있어요' : '팻말은 실제 방향에 있어요' }}</p>
+      <template #footer>
+        <div class="flex gap-2">
+          <UiButton v-if="place?.target" class="flex-1" @click="placeOpen = false; goRoom(place.target!)">이 광장으로 가기</UiButton>
+          <template v-else>
+            <UiButton class="flex-1" variant="secondary" @click="placeOpen = false; openBoard()">모집 중인 경기</UiButton>
+            <UiButton v-if="!['dong', 'gu', 'city'].includes(place?.kind ?? '')" class="flex-1" @click="router.push('/create-game')">여기서 경기 열기</UiButton>
+          </template>
+        </div>
+      </template>
+    </UiSheet>
+
     <ReportSheet v-model="reportOpen" target-type="USER" :target-id="card?.id" :context="`광장 ${room?.name ?? ''}`" :title="`${card?.name ?? ''}님을 신고할까요?`" />
   </div>
 </template>
@@ -136,7 +196,9 @@
 <script setup lang="ts">
 // 광장 (/plaza, 11/5): 앱 게임 화면을 2D 로비로. 전국 → 도시 → 동네 광장에서 사람을 마주치고, 말을 걸고, 게임을 신청한다.
 // 처음 들어오면 기본 꾸미기부터. 걷기·말은 웹소켓(/app/plaza/…), 들어가기는 REST. 지도·그림은 서버가 준다
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import api from '@/api/api'
+import { matchTime } from '@/utils/format'
 import { useRouter } from 'vue-router'
 import type Phaser from 'phaser'
 import { GET, POST } from '@/api/client'
@@ -224,9 +286,11 @@ async function go(r: S['RoomInfo']) {
   // 개발 서버에서만: 브라우저 시험이 장면을 직접 누를 수 있게
   if (import.meta.env.DEV) (window as unknown as { __plaza?: unknown }).__plaza = { scene, openCard, tapObject }
   offTopic = subscribeTopic(`/topic/plaza/${data.instance}`, onEvent)
+  board.value = null
+  setTimeout(pinGames, 1500)
   pingTimer = setInterval(() => publish(`/app/plaza/${data.instance}/ping`), 25_000)
   const others = data.people.filter((p) => !p.bot).length
-  hint.value = others ? `지금 ${others}명이 광장에 있어요. 땅을 누르면 걸어가요` : '땅을 누르면 걸어가요. 노점을 누르면 그 게임으로 가요'
+  hint.value = others ? `지금 ${others}명이 광장에 있어요. 땅을 누르면 걸어가요` : '노점은 그 게임, 팻말은 실제 동네 장소예요. 땅을 누르면 걸어가요'
   setTimeout(() => (hint.value = ''), 5000)
 }
 
@@ -272,6 +336,12 @@ function restingText(p: Person) {
   return `쉬는 중 · ${m < 60 ? `${Math.max(1, m)}분` : `${Math.floor(m / 60)}시간`} 전에 다녀갔어요`
 }
 
+function openCardFor(p: Person) {
+  card.value = p
+  cardOpen.value = true
+  loadGames()
+}
+
 function openCard(id: number) {
   const p = scene()?.person(id)
   if (!p) return
@@ -292,9 +362,19 @@ async function loadGames() {
 function tapObject(o: MapObj) {
   const a = o.action ?? ''
   if (a.startsWith('game:')) router.push(`/play/${a.slice(5)}`)
+  else if (a.startsWith('gameid:')) router.push(`/games/${a.slice(7)}`)
   else if (a === 'games') router.push('/games')
-  else if (a === 'board') router.push('/')
-  else if (a === 'champion') {
+  else if (a === 'board') openBoard()
+  else if (a === 'shop') router.push('/plaza/avatar')
+  else if (a === 'people') peopleOpen.value = true
+  else if (a.startsWith('room:')) goRoom(a.slice(5))
+  else if (a.startsWith('place:')) {
+    const p = enter.value?.map.places[Number(a.slice(6))]
+    if (p) {
+      place.value = p
+      placeOpen.value = true
+    }
+  } else if (a === 'champion') {
     const s = enter.value?.statue
     if (!s) return showToast('아직 이 광장의 챔피언이 없어요. 첫 챔피언이 되어 보세요')
     card.value = { id: s.id, name: s.name, sheet: s.sheet, x: 0, y: 0, bot: false, champion: `챔피언 자리 ${s.belts}개 · 이 광장 챔피언` }
@@ -302,6 +382,62 @@ function tapObject(o: MapObj) {
     loadGames()
   }
 }
+
+/** 문·도시 팻말: kr·city·dong을 내 실제 방으로 바꿔 들어간다 */
+function goRoom(target: string) {
+  const r = target.startsWith('city-') ? rooms.value.find((x) => x.id === target) : rooms.value.find((x) => x.kind === target)
+  if (!r) return showToast(target === 'dong' || target === 'city' ? '동네를 인증하면 열려요. 설정 > 동네 인증' : '내 동네가 있는 도시 광장만 들어갈 수 있어요')
+  switchRoom(r)
+}
+
+// 게시판: 이 동네(내 동네 범위) 모집 중인 경기. 지도 위 핀과 같은 목록
+const boardOpen = ref(false)
+const board = ref<{ id: number; title: string; when: string; where: string; people: string }[] | null>(null)
+async function loadBoard() {
+  const list = (await api.get('/api/games/list', { params: { sort: 'latest' } })).data as S['GameSummaryResponse'][]
+  board.value = list.slice(0, 12).map((g) => ({
+    id: g.id,
+    title: g.rule?.ruleTitle ?? '경기',
+    when: g.matchDate ? matchTime(g.matchDate) : '시간 정하는 중',
+    where: g.dongName || g.matchLocation || '',
+    people: `${g.currentParticipantCounts}/${g.maxPlayers}명`,
+  }))
+  return list
+}
+function openBoard() {
+  boardOpen.value = true
+  if (!board.value) loadBoard().catch(() => (board.value = []))
+}
+/** 동네 광장이면 모집 중인 경기를 실제 방향에 핀으로 꽂는다 */
+async function pinGames() {
+  if (!enter.value?.map.center) return
+  try {
+    const list = await loadBoard()
+    const pins = list
+      .filter((g) => g.placeLat != null && g.placeLon != null && g.placePublic !== false)
+      .map((g) => ({ id: g.id, title: g.rule?.ruleTitle ?? '경기', when: g.matchDate ? matchTime(g.matchDate) : '시간 정하는 중', lat: g.placeLat!, lon: g.placeLon! }))
+    scene()?.addPins(pins)
+  } catch {
+    // 핀이 없어도 광장은 쓴다
+  }
+}
+
+// 지금 여기 있는 사람 (분수·위 막대): 걷지 않고 바로 카드로
+const peopleOpen = ref(false)
+const roomsOpen = ref(false)
+const peopleHere = computed(() => {
+  void peopleTick.value
+  const s = scene()
+  if (!s) return []
+  return s.everyone().filter((p) => p.id !== enter.value?.me.id).sort((a, b) => Number(a.restingMinutes != null) - Number(b.restingMinutes != null) || Number(a.bot) - Number(b.bot))
+})
+const peopleTick = ref(0)
+setInterval(() => peopleTick.value++, 3000)
+
+// 실제 장소 팻말
+const placeOpen = ref(false)
+const place = ref<S['Place'] | null>(null)
+const PLACE_KIND: Record<string, string> = { station: '지하철역', school: '학교', hospital: '병원', mall: '마트', cafe: '카페', park: '공원·명소', store: '편의점', dong: '이웃 동네', gu: '구·군', city: '도시' }
 
 /** 한 판: 사람이면 그 사람만 들어오는 방을 열고(받는 사람 화면에 '받기'가 뜬다), AI면 그 AI 주민을 바로 부른다 */
 function challenge(key: string) {
@@ -390,6 +526,15 @@ onBeforeUnmount(() => {
 
 <style scoped>
 /* 16×32 칸을 3배로: 0줄 넷째 칸(앞을 본 모습) */
+.avatar-mini {
+  width: 32px;
+  height: 64px;
+  background-size: 1792px 192px;
+  background-position: -96px 0;
+  image-rendering: pixelated;
+  transform: scale(0.75);
+  transform-origin: bottom center;
+}
 .avatar-front {
   width: 48px;
   height: 96px;

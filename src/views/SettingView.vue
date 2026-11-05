@@ -28,13 +28,13 @@
 
       <UiSection title="이 기기">
         <UiList>
-          <UiListItem v-if="!installed" icon="download" title="홈 화면에 추가" subtitle="앱처럼 아이콘을 눌러 바로 열어요" chevron @click="addToHome" />
+          <UiListItem v-if="!installed" icon="download" title="홈 화면에 추가" chevron @click="addToHome" />
           <UiListItem icon="sun-moon" title="화면" :subtitle="THEME_OPTIONS.find((o) => o.value === theme).label" chevron @click="themeOpen = true" />
           <!-- 손맛 (utils/feel): 이 기기에만 저장. 켜면 바로 한 번 들려주고 울린다 -->
-          <UiListItem icon="volume" title="효과음" subtitle="점수·승부 같은 순간에 짧게">
+          <UiListItem icon="volume" title="효과음">
             <template #trailing><UiSwitch :model-value="soundOn" label="효과음" @update:model-value="setSound" /></template>
           </UiListItem>
-          <UiListItem icon="vibrate" title="진동" subtitle="누르고 끝나는 순간에 가볍게">
+          <UiListItem icon="vibrate" title="진동">
             <template #trailing><UiSwitch :model-value="hapticsOn" label="진동" @update:model-value="setHaptics" /></template>
           </UiListItem>
         </UiList>

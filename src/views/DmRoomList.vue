@@ -14,7 +14,7 @@
         <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
       </UiEmptyState>
 
-      <UiEmptyState v-else-if="!rooms.length" class="pt-16" mascot="match" title="아직 주고받은 메시지가 없어요" description="경기 약속을 잡거나 친구에게 먼저 말을 걸어 보세요">
+      <UiEmptyState v-else-if="!rooms.length" class="pt-16" mascot="match" title="아직 주고받은 메시지가 없어요">
         <UiButton @click="openFriends">친구에게 메시지 보내기</UiButton>
       </UiEmptyState>
 

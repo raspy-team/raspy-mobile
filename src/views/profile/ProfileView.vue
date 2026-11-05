@@ -89,7 +89,8 @@
           <p class="t-heading tabular-nums">{{ stats.winRate }}%</p>
           <p class="t-micro mt-0.5">승률 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
-        <div class="flex-1">
+        <!-- 0이면 숨긴다 (가진 자리가 있을 때만 숫자) -->
+        <div v-if="seatLines.length" class="flex-1">
           <p class="t-heading tabular-nums">{{ seatLines.length }}</p>
           <p class="t-micro mt-0.5">챔피언 자리</p>
         </div>
@@ -154,7 +155,7 @@
             v-for="r in user.top3Rules"
             :key="r.ruleId"
             :title="r.ruleTitle"
-            :subtitle="`${r.rating}점 · 경기 ${r.playCount}번`"
+            :subtitle="`경기 ${r.playCount}번`"
             chevron
             @click="router.push(`/rules/${r.ruleId}`)"
           >
@@ -162,7 +163,8 @@
               <RuleThumb :rule="r" :size="36" bare />
             </template>
             <template #trailing>
-              <UiBadge v-if="r.myRank" :tone="r.myRank === 1 ? 'primary' : 'neutral'">{{ r.myRank }}위 / {{ r.totalPlayers }}명</UiBadge>
+              <!-- 순위는 겨룬 사람이 셋 이상일 때만 (혼자 1위는 뜻이 없다) -->
+              <UiBadge v-if="showRank(r.myRank, r.totalPlayers)" :tone="r.myRank === 1 ? 'primary' : 'neutral'">{{ r.myRank }}위 / {{ r.totalPlayers }}명</UiBadge>
             </template>
           </UiListItem>
         </UiList>
@@ -171,7 +173,6 @@
           v-else
           mascot="match"
           title="아직 한 경기가 없어요"
-          :description="user.isMe ? '모집 중인 경기에 신청하거나 직접 열어 보세요' : ''"
         >
           <UiButton v-if="user.isMe" to="/">경기 찾기</UiButton>
         </UiEmptyState>
@@ -244,7 +245,7 @@
           <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
-      <UiEmptyState v-else mascot="match" title="아직 친구가 없어요" :description="user?.isMe ? '경기를 함께한 사람에게 친구를 걸어 보세요' : ''" />
+      <UiEmptyState v-else mascot="match" title="아직 친구가 없어요" />
     </UiSheet>
 
     <UserSearchModal v-if="showSearch" @close="showSearch = false" />
@@ -270,6 +271,7 @@ import {
   UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
+import { showRank } from '@/utils/rank'
 import { useToast } from '../../composable/useToast'
 import { matchTime } from '../../utils/format'
 import { liveRoute } from '@/utils/battle'

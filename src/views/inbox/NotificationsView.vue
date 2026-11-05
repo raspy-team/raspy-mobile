@@ -33,13 +33,7 @@
 
         <!-- 비었을 때: 무엇이 오는지 보여주고 설정으로 -->
         <section v-if="!groups.length && !inbox.friendRequests.length" class="pt-10">
-          <UiEmptyState mascot="kok" title="새 알림이 없어요" description="이럴 때 알려 드려요" class="!pb-6" />
-          <UiList>
-            <UiListItem plain icon="user-plus" title="누가 내 경기에 신청했을 때" />
-            <UiListItem plain icon="clipboard-check" title="상대가 결과를 확인해 달라고 할 때" />
-            <UiListItem plain icon="comment" title="댓글·친구 요청·메시지가 왔을 때" />
-          </UiList>
-          <UiButton block variant="ghost" class="mt-3" to="/settings/notifications">알림 설정</UiButton>
+          <UiEmptyState mascot="kok" title="새 알림이 없어요" />
         </section>
 
         <section v-for="g in groups" :key="g.label" class="pt-6 ui-appear">
@@ -56,7 +50,7 @@
                 </span>
                 <span class="flex-1 min-w-0">
                   <span class="block text-sm leading-snug" :class="item.unread ? 'text-fg font-medium' : 'text-fg-muted'">{{ item.head.title }}</span>
-                  <span v-if="item.head.message && item.head.message !== item.head.title" class="block t-caption mt-0.5 line-clamp-2">{{ item.head.message }}</span>
+                  <span v-if="showMessage(item.head)" class="block t-caption mt-0.5 line-clamp-2">{{ item.head.message }}</span>
                   <span class="block t-micro mt-1">
                     {{ timeAgo(item.head.createdAt) }}<template v-if="item.more"> · 비슷한 알림 {{ item.more }}개 더</template>
                   </span>
@@ -106,6 +100,9 @@ const router = useRouter()
 const { showToast } = useToast()
 const { inbox } = useInbox()
 const { pull, refreshing } = usePullToRefresh(refreshInbox)
+
+// 둘째 줄은 할 말이 있을 때만. 예전 알림의 '눌러서 결과를 봐요' 같은 줄은 누르면 되는 걸 말할 뿐이라 숨긴다 (UX 리뷰 ⑥)
+const showMessage = (n) => !!n.message && n.message !== n.title && !n.message.startsWith('눌러서 ')
 
 const requestsOpen = ref(false)
 const busyId = ref(null)

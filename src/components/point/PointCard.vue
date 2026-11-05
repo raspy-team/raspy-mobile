@@ -1,9 +1,8 @@
 <template>
   <!-- 프로필에는 잔액만. 어디서 벌었나·버는 법·내역은 눌러서 (점진적 공개, 11/3) -->
-  <button v-if="sources" type="button" class="block w-full rounded-xl bg-surface p-4 text-left active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]" :aria-label="`포인트 ${sources.balance}P. 자세히 보기`" @click="openSheet">
+  <button v-if="sources" type="button" class="flex flex-col justify-start w-full rounded-xl bg-surface p-4 text-left active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]" :aria-label="`포인트 ${sources.balance}P. 자세히 보기`" @click="openSheet">
     <span class="flex items-center gap-1 t-label">포인트<UiIcon name="info-circle" class="text-fg-subtle" /></span>
     <span class="block t-title tabular-nums mt-1">{{ sources.balance.toLocaleString() }}P</span>
-    <span class="block t-caption mt-0.5">{{ isMe ? '응원에 쓸 수 있어요' : '경기로 모은 포인트' }}</span>
   </button>
 
   <UiSheet v-model="open" title="포인트">

@@ -128,11 +128,11 @@
       <UiListSkeleton v-if="friendsLoading" :rows="4" />
       <UiEmptyState
         v-else-if="!friends.length"
-        icon="fas fa-user-group"
+        mascot="match"
         title="아직 친구가 없어요"
         description="'아무나'로 열거나, 경기를 한 상대에게 친구 요청을 보내 보세요"
       />
-      <UiEmptyState v-else-if="!filteredFriends.length" icon="fas fa-magnifying-glass" title="찾는 친구가 없어요" />
+      <UiEmptyState v-else-if="!filteredFriends.length" mascot="match" title="찾는 친구가 없어요" />
       <UiList v-else>
         <UiListItem
           v-for="f in filteredFriends"

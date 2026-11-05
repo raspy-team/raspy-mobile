@@ -4,7 +4,7 @@
 
   <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
   <main v-if="!isLoading && resultError" class="px-4 pt-4 max-w-xl mx-auto">
-    <UiEmptyState icon="fas fa-flag-checkered" :title="resultError" :description="resultMissing ? '주소가 바뀌었거나 지워진 경기예요' : '경기가 끝나면 여기서 결과를 볼 수 있어요'">
+    <UiEmptyState :icon="resultMissing ? 'fas fa-circle-xmark' : ''" mascot="match" :title="resultError" :description="resultMissing ? '주소가 바뀌었거나 지워진 경기예요' : '경기가 끝나면 여기서 결과를 볼 수 있어요'">
       <UiButton to="/game">내 경기로</UiButton>
     </UiEmptyState>
   </main>
@@ -21,12 +21,12 @@
       <section>
         <!-- 이긴 순간: 매치 얼굴이 통통 튀어 오른다 -->
         <span v-if="headline.mark && isParticipant" class="relative block w-fit mx-auto mb-4 text-fg win-bounce">
-          <BrandFace :size="48" />
+          <MatchMascot who="match" mood="cheer" :size="64" />
           <!-- 이긴 순간 얼굴 둘레로 볼트 불꽃 -->
           <span v-for="n in 10" :key="n" class="win-spark" :style="{ '--a': n * 36 + 'deg' }" aria-hidden="true"></span>
         </span>
         <!-- 진 순간에도 같은 얼굴이 곁에 있다. 표정만 담담하게 (11/3, essence: 진 판도 기록, 다음 판) -->
-        <span v-else-if="headline.line && isParticipant" class="block w-fit mx-auto mb-4 text-fg"><BrandFace :size="48" mood="neutral" /></span>
+        <span v-else-if="headline.line && isParticipant" class="block w-fit mx-auto mb-4 text-fg"><MatchMascot who="match" mood="sad" :size="64" /></span>
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<template v-if="playedOn"> · {{ playedOn }}</template></p>
         <h1 class="t-display text-center mt-3 feel-rise" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
         <!-- 증인: 결과를 낸 순간 중계를 보던 관중 (docs/live-spectator-review.md C) -->
@@ -158,7 +158,9 @@
 
       <!-- 새 챔피언 -->
       <UiCard v-if="championUser" class="flex items-center gap-3">
-        <span class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <!-- 내가 챔피언 자리를 차지한 순간은 매치가 신나게 (docs/mascots.md 이긴 순간). 남이 차지했으면 왕관만 -->
+        <MatchMascot v-if="championUser.id === currentUserId" who="match" mood="cheer" :size="40" aria-hidden="true" />
+        <span v-else class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
           <UiIcon name="crown" />
         </span>
         <div class="min-w-0">
@@ -381,7 +383,7 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
 import { matchTime, who } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
-import BrandFace from '../../components/BrandFace.vue'
+import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import LiveMediaStrip from '../../components/live/LiveMediaStrip.vue'

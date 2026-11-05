@@ -6,12 +6,12 @@
   </UiTopBar>
 
   <main class="px-4 pb-32 pt-4 space-y-10">
-    <!-- 공식 캐릭터 (docs/mascots.md): 위는 앱 안 선, 아래는 인스타·스티커용 색 -->
+    <!-- 공식 캐릭터 픽셀판 (docs/mascots.md). 가로: 매치·콕이·통통·돌돌·비비, 세로: 웃음·놀람·담담·신남 -->
     <section id="mascots">
       <h2 class="t-heading mb-3">캐릭터</h2>
-      <div v-for="v in ['line', 'color']" :key="v" class="grid grid-cols-5 gap-2 mb-3">
+      <div class="grid grid-cols-5 gap-2 mb-3">
         <div v-for="w in ['match', 'kok', 'tong', 'dol', 'bibi']" :key="w" class="flex flex-col items-center gap-1">
-          <MatchMascot v-for="m in ['smile', 'wow', 'sad', 'cheer']" :key="m" :who="w" :mood="m" :variant="v" :size="56" class="text-fg" />
+          <MatchMascot v-for="m in ['smile', 'wow', 'sad', 'cheer']" :key="m" :who="w" :mood="m" :size="56" />
         </div>
       </div>
     </section>
@@ -110,7 +110,7 @@
 
     <UiSection title="빈 상태 · 불러오는 중">
       <UiCard>
-        <UiEmptyState icon="fas fa-calendar" title="아직 잡힌 경기가 없어요" description="모집 중인 경기에 신청하거나 직접 만들어 보세요">
+        <UiEmptyState mascot="match" title="아직 잡힌 경기가 없어요" description="모집 중인 경기에 신청하거나 직접 만들어 보세요">
           <UiButton>경기 찾기</UiButton>
         </UiEmptyState>
       </UiCard>

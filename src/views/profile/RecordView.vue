@@ -23,7 +23,7 @@
     </main>
 
     <main v-else-if="!s.total.games && !s.practiceGames" class="max-w-2xl mx-auto px-4 pt-16">
-      <UiEmptyState icon="fas fa-chart-simple" title="아직 기록이 없어요" :description="isMe ? '한 판 하면 이번 주 기록·실력 점수·순위가 여기 쌓여요' : '경기를 하면 기록이 쌓여요'">
+      <UiEmptyState mascot="match" title="아직 기록이 없어요" :description="isMe ? '한 판 하면 이번 주 기록·실력 점수·순위가 여기 쌓여요' : '경기를 하면 기록이 쌓여요'">
         <UiButton v-if="isMe" to="/games">한 판 하러 가기</UiButton>
       </UiEmptyState>
     </main>

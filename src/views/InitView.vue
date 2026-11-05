@@ -12,6 +12,8 @@
           <!-- 가입 전에 한 판 하고 '점수 저장하고 상대와 붙기'로 온 사람: 그 점수가 어디 가는지 (first10 검토) -->
           <p class="t-caption text-fg mt-3">{{ guestPlayed ? '시작하면 방금 한 판 점수가 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
         </UiCard>
+        <!-- 처음 온 사람의 길잡이 콕이 (docs/mascots.md). 링크로 온 사람은 시작 버튼이 한 화면에 들어오게 뺀다 -->
+        <MatchMascot v-if="!landing" who="kok" mood="wow" :size="72" class="mt-10 -mb-4" />
         <h1 class="t-display text-[44px] mt-10">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
         <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
 
@@ -96,6 +98,7 @@
 
 <script setup>
 import BrandMark from '../components/BrandMark.vue'
+import MatchMascot from '../components/mascot/MatchMascot.vue'
 // 시작 화면: 무슨 앱인지 한눈에 + 소셜로 1초 만에 시작(곧 가입). 약관·닉네임·동네는 가입 뒤 /welcome에서 받는다
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

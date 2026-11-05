@@ -92,7 +92,7 @@
           </template>
         </UiListItem>
       </UiList>
-      <UiEmptyState v-else icon="fas fa-ban" title="차단한 사람이 없어요" />
+      <UiEmptyState v-else mascot="match" mood="smile" title="차단한 사람이 없어요" />
     </UiSheet>
 
     <!-- 약관·고지 원문 -->

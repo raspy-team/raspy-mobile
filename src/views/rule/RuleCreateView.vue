@@ -5,7 +5,8 @@
     <!-- 다 만들었을 때: 바로 경기로 이어지게 -->
     <main v-if="done" class="max-w-xl mx-auto px-4 pt-16">
       <UiEmptyState
-        icon="fas fa-check"
+        mascot="match"
+        mood="cheer"
         :title="editId ? '수정 요청을 보냈어요' : '규칙을 만들었어요'"
         :description="editId ? '관리자가 확인하면 바뀌어요. 내 규칙에서 상태를 볼 수 있어요' : [done.ruleTitle, ...(done.category?.abilities ?? []).map((a) => a.label)].join(' · ')"
       >

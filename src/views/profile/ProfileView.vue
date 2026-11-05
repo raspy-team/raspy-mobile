@@ -169,8 +169,8 @@
         <UiEmptyState v-else-if="user.recordsHidden" icon="eye-slash" title="기록을 공개하지 않았어요" />
         <UiEmptyState
           v-else
-          icon="fas fa-trophy"
-          :title="user.isMe ? '아직 한 경기가 없어요' : '아직 한 경기가 없어요'"
+          mascot="match"
+          title="아직 한 경기가 없어요"
           :description="user.isMe ? '모집 중인 경기에 신청하거나 직접 열어 보세요' : ''"
         >
           <UiButton v-if="user.isMe" to="/">경기 찾기</UiButton>
@@ -244,7 +244,7 @@
           <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
-      <UiEmptyState v-else icon="fas fa-user-group" title="아직 친구가 없어요" :description="user?.isMe ? '경기를 함께한 사람에게 친구를 걸어 보세요' : ''" />
+      <UiEmptyState v-else mascot="match" title="아직 친구가 없어요" :description="user?.isMe ? '경기를 함께한 사람에게 친구를 걸어 보세요' : ''" />
     </UiSheet>
 
     <UserSearchModal v-if="showSearch" @close="showSearch = false" />

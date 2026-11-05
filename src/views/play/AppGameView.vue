@@ -119,7 +119,7 @@
         <UiCard class="text-center py-8">
           <template v-if="result.status === 'COMPLETED'">
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
-            <BrandFace :mood="result.result === 'WIN' ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
+            <MatchMascot who="match" :mood="result.result === 'WIN' ? 'cheer' : result.result === 'DRAW' ? 'smile' : 'sad'" :size="72" class="mx-auto mb-3" />
             <p class="t-display">{{ VERDICT[result.result || 'DRAW'] }}</p>
             <p class="t-caption mt-2">
               <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
@@ -307,7 +307,7 @@
           <section v-if="tab === 'rank'" class="mt-4">
             <UiTabs v-if="game.recordable" v-model="boardKind" :options="BOARDS" class="mb-3" />
             <template v-if="boardKind === 'RATING'">
-              <UiEmptyState v-if="!ranking.length" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="game.dailyLimit === 1 ? '5일 풀면 첫 이름이 올라가요. 먼저 올라가 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'" />
+              <UiEmptyState v-if="!ranking.length" mascot="dol" title="아직 순위가 비어 있어요" :description="game.dailyLimit === 1 ? '5일 풀면 첫 이름이 올라가요. 먼저 올라가 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'" />
               <!-- AI 기준선이 사이에 낀다 (docs/ai-residents.md 2). 사람이 20명을 넘으면 빼고 순위 전체 보기에서 편다 -->
               <UiList v-if="rankingRows.length" :class="{ 'mt-3': !ranking.length }">
                 <template v-for="(x, i) in rankingRows" :key="x.kind === 'user' ? x.row.userId : `ai-${i}`">
@@ -344,7 +344,7 @@
                   <template #trailing><span class="t-mono">{{ e.score }}{{ game.scoreUnit }}</span></template>
                 </UiListItem>
               </UiList>
-              <UiEmptyState v-else icon="fas fa-ranking-star" title="아직 기록이 없어요" description="첫 기록의 주인공이 되어 보세요" />
+              <UiEmptyState v-else mascot="dol" title="아직 기록이 없어요" description="첫 기록의 주인공이 되어 보세요" />
               <p v-if="board?.mine && !board.entries.some((e) => e.player.userId === board?.mine?.player.userId)" class="t-caption mt-3">
                 내 순위 {{ board.mine.rank }}위 · {{ board.mine.score }}{{ game.scoreUnit }}
               </p>
@@ -359,14 +359,14 @@
                 </template>
               </UiListItem>
             </UiList>
-            <UiEmptyState v-else icon="fas fa-trophy" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
+            <UiEmptyState v-else mascot="dol" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
           </section>
 
           <section v-else class="mt-4">
             <div v-if="votes.length" class="space-y-3">
               <VoteCard v-for="(c, i) in votes" :key="c.gameId" :card="c" @voted="votes[i] = $event" />
             </div>
-            <UiEmptyState v-else icon="fas fa-check" title="지금 투표할 경기가 없어요" description="다른 사람들의 문장이 모이면 여기에 올라와요" />
+            <UiEmptyState v-else mascot="dol" title="지금 투표할 경기가 없어요" description="다른 사람들의 문장이 모이면 여기에 올라와요" />
           </section>
         </template>
       </template>
@@ -388,7 +388,7 @@ import { GET, POST } from '@/api/client'
 import api from '../../api/api'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
-import BrandFace from '../../components/BrandFace.vue'
+import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
 import BaselineRow from '../../components/champion/BaselineRow.vue'
 import { FOLD_AT, withBaselines } from '../../components/champion/rankingBaselines'

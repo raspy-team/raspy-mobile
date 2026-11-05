@@ -30,7 +30,7 @@
           </span>
         </UiCard>
 
-        <UiEmptyState v-if="!data.rankings.length" class="pt-12" icon="fas fa-ranking-star" title="아직 순위가 비어 있어요" :description="`${data.label}에 드는 게임을 사람과 5판 하면 첫 이름이 올라가요`">
+        <UiEmptyState v-if="!data.rankings.length" class="pt-12" mascot="dol" title="아직 순위가 비어 있어요" :description="`${data.label}에 드는 게임을 사람과 5판 하면 첫 이름이 올라가요`">
           <UiButton to="/games">한 판 하러 가기</UiButton>
         </UiEmptyState>
 

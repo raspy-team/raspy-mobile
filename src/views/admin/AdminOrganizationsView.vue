@@ -7,7 +7,7 @@
         <UiTabs v-model="tab" :options="tabs" class="mb-3" />
         <UiListSkeleton v-if="loading" :rows="3" />
         <UiCard v-else-if="!requests.length">
-          <UiEmptyState icon="building" :title="tab === 'PENDING' ? '확인할 신청이 없어요' : '처리한 신청이 없어요'" />
+          <UiEmptyState mascot="match" mood="smile" :title="tab === 'PENDING' ? '확인할 신청이 없어요' : '처리한 신청이 없어요'" />
         </UiCard>
         <ul v-else class="space-y-2">
           <li v-for="r in requests" :key="r.id">

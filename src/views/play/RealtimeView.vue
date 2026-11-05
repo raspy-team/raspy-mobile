@@ -136,7 +136,7 @@
         <UiCard class="text-center py-8">
           <template v-if="state.status === 'COMPLETED'">
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
-            <BrandFace :mood="state.result === 'WIN' ? 'wow' : 'neutral'" :size="64" class="mx-auto mb-3" />
+            <MatchMascot who="match" :mood="state.result === 'WIN' ? 'cheer' : state.result === 'DRAW' ? 'smile' : 'sad'" :size="72" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
             <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
@@ -167,7 +167,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
-import BrandFace from '../../components/BrandFace.vue'
+import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'

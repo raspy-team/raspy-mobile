@@ -111,7 +111,7 @@
         </template>
       </UiListItem>
     </UiList>
-    <UiEmptyState v-else icon="fas fa-user-group" title="아직 신청한 사람이 없어요" description="링크를 공유하면 더 빨리 모여요" />
+    <UiEmptyState v-else mascot="match" title="아직 신청한 사람이 없어요" description="링크를 공유하면 더 빨리 모여요" />
   </UiSheet>
 
   <!-- 신뢰 사다리: 처음 보는 사람과 1:1로 만나기 전에 앱 게임 한 판 (안전·신뢰 D) -->

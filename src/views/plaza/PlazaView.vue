@@ -42,7 +42,7 @@
       <!-- 아래 말하기 칸 바로 위에 (위에 두면 노점 이름을 가렸다, 11/6) -->
       <div v-if="phase === 'plaza' && hint" class="absolute bottom-[calc(env(safe-area-inset-bottom)+84px)] inset-x-0 z-10 flex justify-center pointer-events-none">
         <div class="flex items-center gap-2 rounded-full bg-canvas/85 backdrop-blur pl-1.5 pr-4 py-1.5 max-w-[92%]">
-          <MatchMascot who="match" :size="30" class="text-fg shrink-0" />
+          <MatchMascot who="match" :size="32" class="shrink-0" />
           <span class="t-caption text-fg">{{ hint }}</span>
         </div>
       </div>
@@ -83,7 +83,7 @@
             {{ card.name }}
             <span v-if="card.bot" class="t-micro px-1.5 rounded bg-[#9ad0ff] text-[#121214] font-semibold">AI</span>
           </p>
-          <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="20" /> AI 주민 · 매치가 만든 연습 상대예요</p>
+          <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="24" /> AI 주민 · 매치가 만든 연습 상대예요</p>
           <p v-if="card.champion" class="t-caption text-fg">👑 {{ card.champion }}</p>
           <p v-if="card.area" class="t-caption">{{ card.area }}</p>
           <p v-if="restingText(card)" class="t-caption">{{ restingText(card) }}</p>

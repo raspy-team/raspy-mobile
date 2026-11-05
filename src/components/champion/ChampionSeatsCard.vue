@@ -2,7 +2,10 @@
   <!-- 게임 화면의 챔피언 카드: 내가 속한 자리(소속·동네·전국)의 챔피언만 한 줄씩, 최대 3 (docs/organizations.md 4) -->
   <div v-if="seats.length" class="divide-y divide-line">
     <div v-for="s in seats" :key="s.seat" class="flex items-center gap-3 py-4">
+      <!-- AI 보스가 든 자리는 왕관 대신 비비 (docs/mascots.md: AI 주민은 비비) -->
+      <MatchMascot v-if="s.boss && s.champion" who="bibi" :size="40" aria-hidden="true" />
       <span
+        v-else
         class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
         :class="s.champion ? 'bg-signal-soft text-signal-fg' : 'bg-surface-2 text-fg-subtle'"
         aria-hidden="true"
@@ -46,6 +49,7 @@ import { useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import { track } from '@/utils/trackLog'
 import { UiAiBadge, UiButton } from '../ui'
+import MatchMascot from '../mascot/MatchMascot.vue'
 
 const props = defineProps<{ ruleId: number | null | undefined; appGameKey?: string | null }>()
 const router = useRouter()

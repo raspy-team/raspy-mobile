@@ -13,7 +13,7 @@
         <template #leading><UiAvatar :src="c.applicantProfileUrl" :name="c.applicantNickname" :user-id="c.userId" size="sm" /></template>
       </UiListItem>
     </UiList>
-    <UiEmptyState v-else icon="fas fa-user-group" title="아직 신청한 사람이 없어요" />
+    <UiEmptyState v-else mascot="match" title="아직 신청한 사람이 없어요" />
   </UiSheet>
 
   <!-- 더보기 -->

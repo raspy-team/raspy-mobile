@@ -8,8 +8,10 @@
         <UiCard class="text-center py-8">
           <MatchMascot who="kok" mood="cheer" :size="72" class="mx-auto mb-3" />
           <p class="t-display">등록했어요</p>
-          <p class="t-body mt-3">{{ done.dongName }} · {{ sportLabel }}</p>
-          <p class="t-caption mt-2">
+          <p class="t-body mt-3">{{ done.dongName }} · {{ doneSportLabel }}</p>
+          <p v-if="doneTimes" class="t-caption mt-1">{{ doneTimes }}</p>
+          <!-- 다시 온 사람에게는 그때의 숫자가 지금과 다를 수 있어 빼고 보인다 -->
+          <p v-if="!restored" class="t-caption mt-2">
             {{ done.waiting > 0 ? `이 동네에서 ${done.waiting}명이 먼저 기다리고 있어요` : '이 동네 첫 등록이에요' }}
           </p>
         </UiCard>
@@ -24,6 +26,9 @@
           <p class="t-caption mt-1">알림을 받으려면 시작해 주세요. 등록한 내용은 그대로 이어져요</p>
           <UiButton block size="lg" class="mt-4" @click="join">1초 만에 시작하기</UiButton>
         </UiCard>
+        <!-- 등록하고 나면 가입 말고 할 것이 없었다: 기다리는 동안 가입 없이 할 수 있는 게임 하나 -->
+        <UiButton block variant="secondary" class="mt-3" to="/try/nunchi">기다리는 동안 눈치 한 판</UiButton>
+        <UiButton v-if="restored" block variant="ghost" class="mt-1" @click="registerAgain">다른 종목도 등록하기</UiButton>
       </template>
 
       <template v-else>
@@ -106,7 +111,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { UiButton, UiCard, UiInput, UiSection, UiTopBar } from '../../components/ui'
-import { claimGuestPlays, getVisitorId, markPartnerRegistered } from '@/utils/visit'
+import { claimGuestPlays, getVisitorId, markPartnerRegistered, readPartnerInfo, forgetPartnerInfo } from '@/utils/visit'
 import { track, flush } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
 
@@ -131,6 +136,25 @@ const error = ref('')
 const done = ref<Schemas['RegisterResponse'] | null>(null)
 const ready = computed(() => !!sport.value && !!dong.value && times.value.length > 0)
 const sportLabel = computed(() => options.value?.sports.find((s) => s.value === sport.value)?.label ?? '')
+const timeLabels = computed(() => times.value.map((t) => options.value?.times.find((o) => o.value === t)?.label ?? t))
+// 이 기기에서 이미 등록했으면 빈 양식 대신 '등록했어요'부터 (다시 들어와 같은 걸 또 등록했다)
+const saved = readPartnerInfo()
+const restored = ref(false)
+if (saved) {
+  done.value = { dongName: saved.dongName, waiting: 0 } as Schemas['RegisterResponse']
+  restored.value = true
+}
+const doneSportLabel = computed(() => (restored.value ? saved?.sportLabel : sportLabel.value) ?? '')
+const doneTimes = computed(() => (restored.value ? saved?.timeLabels : timeLabels.value)?.join(' · ') ?? '')
+
+function registerAgain() {
+  forgetPartnerInfo()
+  restored.value = false
+  done.value = null
+  sport.value = ''
+  times.value = []
+  track('partner_again')
+}
 // 지금 몇 단계까지 왔나 (그만둔 곳을 남기려고): 1 종목, 2 동네, 3 때, 4 등록함
 const stage = computed(() => (done.value ? 4 : times.value.length && dong.value && sport.value ? 3 : dong.value ? 2 : sport.value ? 1 : 0))
 
@@ -246,7 +270,7 @@ async function register() {
         body: { visitorId, sport: sport.value, dongCode: dong.value.code, times: times.value, dongSource: dongSource.value || undefined },
       })
     ).data
-    markPartnerRegistered()
+    markPartnerRegistered({ sport: sport.value, sportLabel: sportLabel.value, dongName: done.value.dongName, timeLabels: timeLabels.value })
     // 이미 로그인했으면 바로 내 계정에 붙인다: 같은 동네·종목에 사람이 모였는지 그때 알린다 (이웃 알림, 로그인 전이면 아무 일 없다)
     if (loggedIn) claimGuestPlays()
     track('partner_done', { step: 4, value: `waiting=${done.value.waiting}` })

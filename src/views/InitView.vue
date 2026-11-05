@@ -2,7 +2,7 @@
   <div class="min-h-dvh bg-canvas flex flex-col pt-safe pb-safe">
     <main class="flex-1 w-full max-w-md mx-auto px-6 flex flex-col">
       <!-- 무슨 앱인지 -->
-      <div class="flex-1 flex flex-col justify-center py-10">
+      <div class="flex flex-col justify-center" :class="compact ? 'flex-1 py-10' : 'pt-10 pb-8'">
         <BrandMark size="22px" />
         <!-- 링크로 들어온 사람: 무엇에 불려 왔는지 먼저 (인스타 게임 링크, 친구의 도전장). 가입하면 그 화면으로 돌아간다 -->
         <UiCard v-if="landing" class="mt-8">
@@ -12,22 +12,16 @@
           <!-- 가입 전에 한 판 하고 '점수 저장하고 상대와 붙기'로 온 사람: 그 점수가 어디 가는지 (first10 검토) -->
           <p class="t-caption text-fg mt-3">{{ guestPlayed ? '시작하면 방금 한 판 점수가 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
         </UiCard>
+        <!-- 상대 구하기를 등록하고 온 사람: 그 등록이 어디로 가는지 -->
+        <UiCard v-else-if="fromPartner" class="mt-8">
+          <p class="t-title">상대 구하기를 등록했어요</p>
+          <p class="t-caption mt-1">시작하면 내 계정에 붙어요. 상대가 생기면 알림으로 알려 드려요</p>
+        </UiCard>
         <!-- 처음 온 사람의 길잡이 콕이 (docs/mascots.md). 링크로 온 사람은 시작 버튼이 한 화면에 들어오게 뺀다 -->
-        <MatchMascot v-if="!landing" who="kok" mood="wow" :size="72" class="mt-10 -mb-4" />
+        <MatchMascot v-if="!compact" who="kok" mood="wow" :size="72" class="mt-10 -mb-4" />
         <h1 class="t-display text-[44px] mt-10">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
         <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
 
-        <!-- 아이콘 상자 대신 번호와 글자로 (장식보다 내용) -->
-        <!-- 링크로 온 사람은 하려던 것이 있으니 소개를 접어 시작 버튼이 한 화면에 들어오게 -->
-        <ol v-if="!landing" class="mt-12 border-t border-line">
-          <li v-for="(f, i) in FEATURES" :key="f.title" class="flex items-baseline gap-4 py-4 border-b border-line">
-            <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
-            <span>
-              <span class="block text-[0.9375rem] font-semibold text-fg tracking-[-0.02em]">{{ f.title }}</span>
-              <span class="block t-caption mt-0.5">{{ f.body }}</span>
-            </span>
-          </li>
-        </ol>
       </div>
 
       <!-- 시작: 소셜 로그인이 곧 가입이다 (따로 가입 화면 없음). 버튼은 서버에 키가 있는 것만 -->
@@ -88,6 +82,20 @@
           <button type="button" class="underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[1]">{{ TERMS[1].title }}</button>
         </p>
       </div>
+      <!-- 매치 소개: 시작 버튼 아래에 (위에 두면 휴대폰 첫 화면에 버튼이 하나도 안 보였다). 아이콘 상자 대신 번호와 글자로 -->
+      <!-- 링크·광고 게임에서 온 사람은 하려던 것이 있으니 접는다 -->
+      <section v-if="!compact" class="pb-10">
+        <p class="t-label mb-1">매치는 이렇게 해요</p>
+        <ol class="border-t border-line">
+          <li v-for="(f, i) in FEATURES" :key="f.title" class="flex items-baseline gap-4 py-4 border-b border-line">
+            <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
+            <span>
+              <span class="block text-[0.9375rem] font-semibold text-fg tracking-[-0.02em]">{{ f.title }}</span>
+              <span class="block t-caption mt-0.5">{{ f.body }}</span>
+            </span>
+          </li>
+        </ol>
+      </section>
     </main>
 
     <UiSheet :model-value="!!openTerm" :title="openTerm?.title" @update:model-value="openTerm = null">
@@ -165,6 +173,9 @@ onMounted(async () => {
 })
 
 // 버튼 누름을 센다 (3단계 수요 조사 B): 가입 전 한 판 끝에서 왔으면 guest, 아니면 init
+// 광고 게임·상대 구하기·받은 링크에서 왔으면 소개를 접고 버튼부터
+const fromPartner = route.query.from === 'partner'
+const compact = computed(() => !!landing.value || !!route.query.from)
 const tapPlace = route.query.from === 'guest' ? 'guest' : route.query.from === 'partner' ? 'partner' : 'init'
 function tapId() {
   trackEvent('tap_id', tapPlace)

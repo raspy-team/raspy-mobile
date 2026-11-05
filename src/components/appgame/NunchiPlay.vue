@@ -12,14 +12,14 @@
         <span>{{ index + 1 }} / {{ list.length }}</span>
         <span>맞힌 건 끝나고 알려 드려요</span>
       </div>
-      <!-- 3초 막대: 줄어드는 것만 보여 준다 (숫자보다 덜 조급하게) -->
-      <div class="h-1.5 rounded-full bg-surface-2 mt-2 overflow-hidden">
-        <div :key="index" class="h-full bg-primary nunchi-bar" :style="{ animationDuration: `${LIMIT_MS}ms` }" />
-      </div>
 
-      <UiCard class="mt-4 py-8 text-center">
+      <!-- 3초 막대는 질문 카드 아래 가장자리에: '1 / 10' 바로 밑에 두면 진행 막대로 읽혔다 (첫 문제인데 80% 찬 막대) -->
+      <UiCard :pad="false" class="mt-3 px-4 pt-8 text-center overflow-hidden">
         <p class="t-micro">남들은 어느 쪽을 더 많이 골랐을까요?</p>
         <p class="t-title mt-2 break-keep">{{ current.q }}</p>
+        <div class="h-1 bg-surface-2 mt-7 -mx-4" aria-hidden="true">
+          <div :key="index" class="h-full bg-primary nunchi-bar" :style="{ animationDuration: `${LIMIT_MS}ms` }" />
+        </div>
       </UiCard>
 
       <div class="grid grid-cols-2 gap-3 mt-4">
@@ -27,7 +27,8 @@
           v-for="side in (['a', 'b'] as const)"
           :key="side"
           type="button"
-          class="rounded-2xl border border-line bg-surface px-3 py-8 text-[1.0625rem] font-semibold text-fg break-keep active:scale-[0.98] transition disabled:opacity-50"
+          class="rounded-2xl border px-3 py-8 text-[1.0625rem] font-semibold break-keep active:scale-[0.98] transition"
+          :class="picked === side ? 'border-fg bg-fg text-canvas' : picked ? 'border-line bg-surface text-fg opacity-40' : 'border-line bg-surface text-fg'"
           :disabled="locked"
           @click="pick(side)"
         >
@@ -64,6 +65,8 @@ const loadError = ref('')
 const index = ref(0)
 const answers: string[] = []
 const locked = ref(false)
+/** 방금 고른 쪽: 다음 문제로 넘어가기 전 잠깐 뒤집어 보여 준다 (눌렸는지 몰랐다) */
+const picked = ref<'a' | 'b' | null>(null)
 let shownAt = 0
 let timer: ReturnType<typeof setTimeout> | null = null
 let finished = false
@@ -71,6 +74,7 @@ const current = computed(() => (index.value < list.value.length ? list.value[ind
 
 function show() {
   locked.value = false
+  picked.value = null
   shownAt = performance.now()
   track('nunchi_view', { gameKey: 'nunchi', step: index.value, value: current.value?.id })
   timer = setTimeout(() => record('-', LIMIT_MS), LIMIT_MS)
@@ -87,15 +91,17 @@ function record(choice: 'a' | 'b' | '-', ms: number) {
   locked.value = true
   answers.push(choice === '-' ? '-' : `${choice}:${ms}`)
   track(choice === '-' ? 'nunchi_timeout' : 'nunchi_answer', { gameKey: 'nunchi', step: index.value, value: `${current.value?.id}:${choice}:${ms}` })
-  if (choice !== '-') feel('tap')
-  index.value++
-  if (index.value < list.value.length) {
+  if (choice !== '-') { feel('tap'); picked.value = choice }
+  const last = index.value + 1 >= list.value.length
+  if (!last) {
     // 누른 쪽이 눌린 게 보이게 잠깐 두고 다음으로. 그사이 화면을 떠나면 다음 문제의 3초를 켜지 않는다 (떠난 뒤 저절로 답이 나가지 않게)
     timer = setTimeout(() => {
       timer = null
+      index.value++
       if (!unmounted) show()
-    }, 180)
+    }, choice === '-' ? 0 : 260)
   } else {
+    index.value++
     finished = true
     track('nunchi_done', { gameKey: 'nunchi', step: list.value.length, value: answers.join(',') })
     emit('submit', answers.join(','))

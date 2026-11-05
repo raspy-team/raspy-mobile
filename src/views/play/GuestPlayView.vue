@@ -3,8 +3,11 @@
     <UiTopBar :title="meta?.title || '한 판'" />
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
-      <UiEmptyState v-if="!meta" mascot="kok" title="가입하고 할 수 있는 게임이에요" description="시작하면 모든 게임을 할 수 있어요">
-        <UiButton to="/init">시작하기</UiButton>
+      <UiEmptyState v-if="!meta" mascot="kok" title="가입하고 할 수 있는 게임이에요" description="시작하면 모든 게임을 할 수 있어요. 가입 없이 바로 해 볼 수 있는 게임도 있어요">
+        <div class="flex flex-col items-center gap-2">
+          <UiButton to="/init">시작하기</UiButton>
+          <UiButton to="/try/nunchi" variant="ghost">가입 없이 눈치 한 판</UiButton>
+        </div>
       </UiEmptyState>
 
       <!-- 시작 전 3·2·1 -->
@@ -71,6 +74,30 @@
         <!-- 하루 판 수를 넘기면 '한 판 더'가 아무 말 없이 멈추지 않게 이유를 보인다 -->
         <p v-if="startError" class="t-caption text-danger mt-2 text-center">{{ startError }}</p>
 
+        <!-- 눈치 한 판: 문제마다 정답과 몇 명 기준 -->
+        <UiSection v-if="key === 'nunchi' && review" title="문제마다" class="mt-6">
+          <!-- 표가 적은 문제의 'AI 추정'은 여기 한 번만 (줄마다 열 번 되풀이되면 읽기 힘들었다) -->
+          <p v-if="aiCount" class="t-caption mb-3">{{ aiCount === review.items.length ? '아직 표가 적어 정답은 AI 추정이에요' : `${aiCount}문제는 아직 표가 적어 AI 추정이에요` }}. 사람이 {{ review.items[0]?.minVotes ?? 5 }}명 모이면 실제 취향으로 바뀌어요</p>
+          <ul class="space-y-2">
+            <li v-for="it in review.items" :key="it.id">
+              <UiCard>
+                <!-- 맞음·틀림은 그림 글자 대신 아이콘 + 읽어 주는 말. 틀림을 빨강으로 칠하지 않는다 (ui/README: 패배는 흐린 글자) -->
+                <p class="t-body text-fg break-keep flex items-start gap-1.5">
+                  <UiIcon :name="it.correct ? 'check' : 'xmark'" class="mt-1 flex-shrink-0" :class="it.correct ? 'text-signal-fg' : 'text-fg-subtle'" aria-hidden="true" />
+                  <span><span class="sr-only">{{ it.correct ? '맞힘: ' : '틀림: ' }}</span>{{ it.q }}</span>
+                </p>
+                <p class="t-caption mt-1">
+                  <!-- 비율은 정답 쪽 것만: '정답 집 · 노래방 35%'처럼 다른 보기의 비율이 붙으면 무엇이 몇 %인지 헷갈렸다 (first10 검토) -->
+                  정답 <b class="text-fg">{{ answerLabel(it) }}</b>
+                  <template v-if="it.percentA != null && it.answer !== 'tie'"> · {{ it.answer === 'a' ? it.percentA : 100 - it.percentA }}%</template>
+                  · {{ it.byFirst ? 'AI 추정' : `${it.people}명 기준` }}
+                </p>
+                <p class="t-micro mt-0.5">내 답: {{ it.mine === 'a' ? it.a : it.mine === 'b' ? it.b : '시간 안에 못 골랐어요' }}</p>
+              </UiCard>
+            </li>
+          </ul>
+        </UiSection>
+
         <!-- 눈치 한 판: 내 취향이 다음 사람의 정답이 된다 (건너뛸 수 있다) -->
         <UiCard v-if="key === 'nunchi' && review && tasteState !== 'skipped' && (tasteCandidates.length || tasteState === 'done')" class="mt-4">
           <template v-if="tasteState === 'done'">
@@ -79,10 +106,11 @@
               <li v-for="t in tasteResults" :key="t.id" class="t-body">
                 <span class="text-fg-muted">{{ itemOf(t.id)?.q }}</span> · {{ choiceLabel(t.id, t.choice) }}
                 <!-- 표가 적으면 '100%(1명 중)' 대신 AI 추정 비율이라고 밝힌다 (docs/ai-residents.md 6) -->
-                <span v-if="t.byAi" class="block t-caption">같은 답 <b class="text-fg">{{ t.sameRate }}%</b> · AI 추정 · 사람 {{ t.minVotes }}명 모이면 바뀌어요</span>
+                <span v-if="t.byAi" class="block t-caption">같은 답 <b class="text-fg">{{ t.sameRate }}%</b> · AI 추정</span>
                 <span v-else class="block t-caption">당신과 같은 답을 고른 사람 <b class="text-fg">{{ t.sameRate }}%</b> ({{ t.people }}명 중)</span>
               </li>
             </ul>
+            <p v-if="tasteResults.some((t) => t.byAi)" class="t-micro mt-3">AI 추정은 사람이 {{ tasteResults[0]?.minVotes ?? 5 }}명 모이면 실제 비율로 바뀌어요</p>
           </template>
           <template v-else>
             <p class="t-title">다음 사람의 정답이 돼요</p>
@@ -113,27 +141,6 @@
           </template>
         </UiCard>
 
-        <!-- 눈치 한 판: 문제마다 정답과 몇 명 기준 -->
-        <UiSection v-if="key === 'nunchi' && review" title="문제마다" class="mt-6">
-          <ul class="space-y-2">
-            <li v-for="it in review.items" :key="it.id">
-              <UiCard>
-                <!-- 맞음·틀림은 그림 글자 대신 아이콘 + 읽어 주는 말. 틀림을 빨강으로 칠하지 않는다 (ui/README: 패배는 흐린 글자) -->
-                <p class="t-body text-fg break-keep flex items-start gap-1.5">
-                  <UiIcon :name="it.correct ? 'check' : 'xmark'" class="mt-1 flex-shrink-0" :class="it.correct ? 'text-signal-fg' : 'text-fg-subtle'" aria-hidden="true" />
-                  <span><span class="sr-only">{{ it.correct ? '맞힘: ' : '틀림: ' }}</span>{{ it.q }}</span>
-                </p>
-                <p class="t-caption mt-1">
-                  <!-- 비율은 정답 쪽 것만: '정답 집 · 노래방 35%'처럼 다른 보기의 비율이 붙으면 무엇이 몇 %인지 헷갈렸다 (first10 검토) -->
-                  정답 <b class="text-fg">{{ answerLabel(it) }}</b>
-                  <template v-if="it.percentA != null && it.answer !== 'tie'"> {{ it.answer === 'a' ? it.percentA : 100 - it.percentA }}%</template>
-                  · {{ it.byFirst ? `AI 추정 · 사람 ${it.minVotes}명 모이면 바뀌어요` : `${it.people}명 기준` }}
-                </p>
-                <p class="t-micro mt-0.5">내 답: {{ it.mine === 'a' ? it.a : it.mine === 'b' ? it.b : '시간 안에 못 골랐어요' }}</p>
-              </UiCard>
-            </li>
-          </ul>
-        </UiSection>
       </template>
 
       <!-- 시작 전 -->
@@ -142,7 +149,13 @@
           <!-- 처음 온 사람의 길잡이는 콕이 (docs/mascots.md) -->
           <MatchMascot who="kok" mood="wow" :size="72" class="mx-auto mb-3" />
           <p class="t-display">{{ meta.title }}</p>
-          <p class="t-body text-fg-muted mt-3 break-keep">{{ meta.line }}</p>
+          <!-- 광고에서 본 질문(?q=)을 그대로 보여 준다: 광고 → 처음 보는 화면 사이가 끊기지 않게 -->
+          <template v-if="adQuestion">
+            <p class="t-title mt-4 break-keep">{{ adQuestion.q }}</p>
+            <p class="t-body mt-1"><b>{{ adQuestion.a }}</b> <span class="text-fg-subtle">vs</span> <b>{{ adQuestion.b }}</b></p>
+            <p class="t-caption mt-2 break-keep">남들은 뭘 골랐을까? 이 문제부터 열 문제, 문제당 3초</p>
+          </template>
+          <p v-else class="t-body text-fg-muted mt-3 break-keep">{{ meta.line }}</p>
           <p v-if="fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. 같은 문제로 붙어요</p>
           <p class="t-caption mt-3">가입 없이 바로 한 판 해 볼 수 있어요</p>
         </UiCard>
@@ -208,6 +221,13 @@ const startError = ref('')
 const submitError = ref('')
 const sharing = ref<'' | 'challenge' | 'share'>('')
 const rounds = ref(0)
+
+// 광고 질문의 글자 (없거나 못 불러오면 원래 소개 한 줄)
+const adQuestion = ref<{ q: string; a: string; b: string } | null>(null)
+if (key.value === 'nunchi' && firstQuestion) {
+  GET('/api/nunchi/questions', { query: { ids: firstQuestion } }).then(({ data }) => { adQuestion.value = data[0] ?? null }).catch(() => {})
+}
+const aiCount = computed(() => review.value?.items.filter((it) => it.byFirst).length ?? 0)
 
 const topPercent = computed(() => {
   const r = result.value

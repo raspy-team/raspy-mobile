@@ -3,6 +3,7 @@
 // 홍보 링크에는 ?utm_source=instagram&utm_campaign=1105 처럼 꼬리표를 단다
 import { POST } from '../api/client'
 import { isStandalone } from './install'
+import { useToast } from '../composable/useToast'
 
 const ID_KEY = 'visitor_id'
 const SENT_KEY = 'visit_sent' // '날짜|로그인했는지'
@@ -71,11 +72,35 @@ export function trackEvent(event: 'tap_kakao' | 'tap_google' | 'tap_apple' | 'ta
 const GUEST_KEY = 'guest_played' // 가입 전에 한 판 했다 (로그인하면 기록으로 옮긴다)
 const PARTNER_KEY = 'partner_registered' // 가입 전에 상대 구하기를 등록했다 (로그인하면 계정에 붙인다)
 
-export function markPartnerRegistered() {
+const PARTNER_INFO_KEY = 'partner_info' // 무엇을 등록했나: 다시 오면 '등록했어요'부터, 가입 뒤 온보딩·알림 문구에 쓴다
+
+export type PartnerInfo = { sport: string; sportLabel: string; dongName: string; timeLabels: string[]; at: number }
+
+export function markPartnerRegistered(info?: Omit<PartnerInfo, 'at'>) {
   try {
     localStorage.setItem(PARTNER_KEY, '1')
+    if (info) localStorage.setItem(PARTNER_INFO_KEY, JSON.stringify({ ...info, at: Date.now() }))
   } catch {
     // 못 남기면 붙이지 못할 뿐이다
+  }
+}
+
+/** 이 기기에서 등록한 상대 구하기 (2주가 지나면 잊는다) */
+export function readPartnerInfo(): PartnerInfo | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(PARTNER_INFO_KEY) || 'null') as PartnerInfo | null
+    if (!v?.dongName || Date.now() - v.at > 14 * 24 * 3600_000) return null
+    return v
+  } catch {
+    return null
+  }
+}
+
+export function forgetPartnerInfo() {
+  try {
+    localStorage.removeItem(PARTNER_INFO_KEY)
+  } catch {
+    // 지우지 못하면 2주 뒤 저절로 잊는다
   }
 }
 
@@ -94,7 +119,12 @@ export async function claimGuestPlays(): Promise<number> {
   // 상대 구하기 등록(H2)도 함께 붙인다
   if (localStorage.getItem(PARTNER_KEY)) {
     POST('/api/partner-requests/claim', { body: { visitorId: id } })
-      .then(() => localStorage.removeItem(PARTNER_KEY))
+      .then(() => {
+        localStorage.removeItem(PARTNER_KEY)
+        // 가입하면 등록이 사라진 것처럼 보였다: 붙였다고 한 번 알린다
+        const info = readPartnerInfo()
+        useToast().showToast(info ? `${info.dongName} ${info.sportLabel} 상대 구하기를 내 계정에 붙였어요. 상대가 생기면 알려 드려요` : '상대 구하기를 내 계정에 붙였어요. 상대가 생기면 알려 드려요')
+      })
       .catch(() => {})
   }
   if (!localStorage.getItem(GUEST_KEY)) return 0

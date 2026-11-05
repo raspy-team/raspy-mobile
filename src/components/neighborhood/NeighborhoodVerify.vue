@@ -35,7 +35,8 @@
     </div>
 
     <!-- 공공누리 제1유형 · CC BY 4.0 출처 표시 (raspy-api resources/neighborhood/README.md) -->
-    <p class="t-micro mt-6 text-center">행정동 경계: 통계청 SGIS(공공누리 제1유형) 가공 vuski/admdongkor, CC BY 4.0</p>
+    <!-- 온보딩처럼 처음 온 사람의 화면에서는 부모가 맨 아래에 따로 둔다 (credit=false) -->
+    <p v-if="credit" class="t-micro mt-6 text-center">행정동 경계: 통계청 SGIS(공공누리 제1유형) 가공 vuski/admdongkor, CC BY 4.0</p>
   </div>
 </template>
 
@@ -51,7 +52,7 @@ type Mine = components['schemas']['MyNeighborhoods']
 type Found = components['schemas']['DongView']
 
 // expectCode: 이 동네를 다시 인증한다 (지금 위치가 그 동네여야 한다)
-const props = withDefaults(defineProps<{ current?: Mine['neighborhoods']; maxCount?: number; expectCode?: string }>(), { current: () => [], maxCount: 2, expectCode: '' })
+const props = withDefaults(defineProps<{ current?: Mine['neighborhoods']; maxCount?: number; expectCode?: string; credit?: boolean }>(), { current: () => [], maxCount: 2, expectCode: '', credit: true })
 const emit = defineEmits<{ verified: [Mine] }>()
 
 const locating = ref(false)

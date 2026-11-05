@@ -53,8 +53,10 @@
     <main v-else-if="step === 'neighborhood'" class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
       <MatchMascot who="kok" :size="56" class="mb-3" />
       <h1 class="t-title">어느 동네에서 겨룰까요?</h1>
-      <p class="t-body text-fg-muted mt-2">만나서 하는 경기는 내 동네 근처 사람들과 해요. 앱 게임은 동네와 상관없이 바로 할 수 있어요.</p>
-      <NeighborhoodVerify class="mt-4" @verified="onNeighborhood" />
+      <!-- 상대 구하기에서 동네를 이미 골랐으면 그걸 이어서 묻는다 (같은 걸 처음부터 또 묻는 것처럼 보였다) -->
+      <p v-if="partner" class="t-body text-fg-muted mt-2">상대 구하기에서 고른 <b class="text-fg">{{ partner.dongName }}</b>, 지금 있는 곳으로 한 번만 확인해요. 확인하면 그 동네 경기를 보고 신청할 수 있어요.</p>
+      <p v-else class="t-body text-fg-muted mt-2">만나서 하는 경기는 내 동네 근처 사람들과 해요. 앱 게임은 동네와 상관없이 바로 할 수 있어요.</p>
+      <NeighborhoodVerify class="mt-4" :credit="false" @verified="onNeighborhood" />
     </main>
 
     <!-- 2. 닉네임 · 사진 -->
@@ -111,6 +113,7 @@
         </UiButton>
         <UiButton v-else-if="step === 'neighborhood'" block size="lg" variant="ghost" @click="finish">나중에 할게요</UiButton>
         <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">다음</UiButton>
+        <p v-if="step === 'neighborhood'" class="t-micro text-center mt-2">행정동 경계: 통계청 SGIS(공공누리 제1유형) 가공 vuski/admdongkor, CC BY 4.0</p>
       </div>
     </div>
 
@@ -140,6 +143,7 @@ import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
 import { containsProfanity } from '../../utils/profanity'
 import { takeReturnTo } from '../../utils/authRedirect'
 import { markOnboarded } from '../../router/onboardingGuard'
+import { readPartnerInfo } from '../../utils/visit'
 
 const NICKNAME_MAX = 10
 const USERNAME_PATTERN = /^[a-z0-9_]{1,12}$/
@@ -152,6 +156,8 @@ const saving = ref(false)
 const needTerms = ref(true)
 const needProfile = ref(true)
 const step = ref('terms')
+// 상대 구하기를 등록하고 가입했으면 그 동네를 이어서 묻는다
+const partner = readPartnerInfo()
 const steps = ref([]) // 처음에 보여 줄 단계들 (단계 표시용)
 
 // 약관 + 만 14세 이상 (당근처럼 가입 때 필수로 체크만 받는다. 본인인증은 만나서 하는 경기에서)

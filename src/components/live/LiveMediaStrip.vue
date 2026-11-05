@@ -45,7 +45,7 @@
       </template>
       <template #footer>
         <div class="flex gap-2">
-          <UiButton v-if="open?.canHide" variant="secondary" class="flex-1" :loading="hiding" @click="hide">{{ open?.mine ? '지우기' : '내리기' }}</UiButton>
+          <UiButton v-if="open?.canHide" variant="secondary" class="flex-1" :loading="hiding" @click="hide">{{ open?.mine ? '삭제' : '내리기' }}</UiButton>
           <UiButton v-if="open && !open.mine" variant="ghost" class="flex-1" @click="reporting = open.id; open = null">신고</UiButton>
         </div>
       </template>

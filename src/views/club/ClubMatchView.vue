@@ -16,7 +16,7 @@
 
         <!-- 받는 동호회 운영진: 받기·거절 -->
         <div v-if="m.status === 'PROPOSED' && m.mySide === 'AWAY'" class="flex gap-2 mt-5">
-          <UiButton class="flex-1" :loading="busy" @click="respond(true)">받기</UiButton>
+          <UiButton class="flex-1" :loading="busy" @click="respond(true)">수락</UiButton>
           <UiButton class="flex-1" variant="secondary" :loading="busy" @click="respond(false)">거절</UiButton>
         </div>
         <p v-else-if="m.status === 'PROPOSED'" class="t-caption text-center mt-5">{{ m.away.name }} 운영진이 답하기를 기다려요</p>
@@ -49,7 +49,7 @@
         <!-- 대회 판의 교류전은 취소하지 않는다 (서버도 막는다). 못 하게 되면 주최자가 정한다 -->
         <p v-if="m.tournament && m.mySide && m.status === 'ACCEPTED'" class="t-caption text-center mt-8">대회 경기라 취소할 수 없어요. 못 하게 되면 주최자에게 알려 주세요</p>
         <UiButton v-else-if="m.mySide && (m.status === 'PROPOSED' || m.status === 'ACCEPTED')" block variant="ghost" class="mt-8 text-danger" @click="cancel">
-          {{ m.status === 'PROPOSED' && m.mySide === 'HOME' ? '신청 거두기' : '교류전 취소' }}
+          {{ m.status === 'PROPOSED' && m.mySide === 'HOME' ? '신청 취소' : '교류전 취소' }}
         </UiButton>
       </template>
     </main>

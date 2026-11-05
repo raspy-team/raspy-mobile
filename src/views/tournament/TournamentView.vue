@@ -30,7 +30,7 @@
             <p class="t-caption mt-1">{{ myHint }}</p>
             <div class="flex gap-2 mt-3">
               <UiButton v-if="v.canCheckIn && v.my.status !== 'CHECKED_IN'" class="flex-1" variant="signal" :loading="busy" @click="checkIn">체크인</UiButton>
-              <UiButton v-if="v.my.status !== 'REJECTED'" size="sm" variant="ghost" :loading="busy" @click="withdraw">신청 거두기</UiButton>
+              <UiButton v-if="v.my.status !== 'REJECTED'" size="sm" variant="ghost" :loading="busy" @click="withdraw">신청 취소</UiButton>
             </div>
           </UiCard>
           <template v-else>
@@ -40,7 +40,7 @@
                 <UiButton v-for="c in v.myStaffClubs" :key="c.clubId" :loading="busy" @click="apply(c.clubId)">{{ withRo(c.name) }} 신청</UiButton>
               </div>
             </div>
-            <UiButton v-else block size="lg" class="mt-4" :loading="busy" :disabled="full" @click="apply()">{{ full ? '자리가 다 찼어요' : '신청하기' }}</UiButton>
+            <UiButton v-else block size="lg" class="mt-4" :loading="busy" :disabled="full" @click="apply()">{{ full ? '자리가 다 찼어요' : '신청' }}</UiButton>
           </template>
         </template>
 
@@ -125,7 +125,7 @@
             <UiListItem v-for="e in shownEntries" :key="e.id" :title="(e.seed ? `${e.seed}. ` : '') + e.name" :subtitle="entrySub(e)" :to="e.userId ? `/profile/${e.userId}` : e.clubId ? `/clubs/${e.clubId}` : undefined">
               <template v-if="v.isHost && e.status === 'APPLIED'" #trailing>
                 <span class="flex gap-1">
-                  <UiButton size="sm" @click.prevent.stop="decideEntry(e.id, true)">받기</UiButton>
+                  <UiButton size="sm" @click.prevent.stop="decideEntry(e.id, true)">수락</UiButton>
                   <UiButton size="sm" variant="secondary" @click.prevent.stop="decideEntry(e.id, false)">거절</UiButton>
                 </span>
               </template>

@@ -6,7 +6,7 @@
     </div>
     <UiInput v-if="reason === '기타'" v-model="detail" multiline :rows="3" placeholder="자세히 적어 주세요" />
     <template #footer>
-      <UiButton block variant="danger" :disabled="!ready" :loading="sending" @click="submit">신고하기</UiButton>
+      <UiButton block variant="danger" :disabled="!ready" :loading="sending" @click="submit">신고</UiButton>
     </template>
   </UiSheet>
 </template>

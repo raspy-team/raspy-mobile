@@ -4,7 +4,7 @@
     <!-- 못 불러오면 빠져나갈 길: 다시 불러오기 (누르는 동안 문구는 그대로, 다시 실패해도 그대로) -->
     <div v-else-if="loadError" class="py-10 text-center">
       <p class="t-caption text-danger">{{ loadError }}</p>
-      <UiButton variant="secondary" class="mt-4" :loading="loading" @click="load">다시 불러오기</UiButton>
+      <UiButton variant="secondary" class="mt-4" :loading="loading" @click="load">다시 시도</UiButton>
     </div>
 
     <template v-else-if="current">

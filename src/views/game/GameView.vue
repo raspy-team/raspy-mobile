@@ -22,7 +22,7 @@
     <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
     <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length" class="pt-6">
       <h2 class="t-title">첫 경기를 잡아 볼까요</h2>
-      <p class="t-caption mt-2">잡힌 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
+      <p class="t-caption mt-2">확정된 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
       <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
         <li v-for="(s, i) in FIRST_STEPS" :key="s.title" class="flex items-baseline gap-4 px-4 py-4">
           <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
@@ -135,7 +135,7 @@
       <UiListItem v-if="canTellFriend(menuGame)" icon="shield-halved" title="친구에게 일정 알리기" subtitle="누구와 언제 어디서 만나는지 보내 둬요" @click="tellFriend(menuGame)" />
       <UiListItem v-if="menuGame.type === 'sent' && menuGame.status === 'REQUESTED'" icon="fas fa-xmark" title="신청 취소" danger @click="cancelRequest(menuGame); menuGame = null" />
       <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
-      <UiListItem v-if="canLeave(menuGame)" icon="fas fa-right-from-bracket" title="이 경기에서 빠지기" subtitle="연 사람과 남은 사람에게 알려요" danger @click="leaveGame(menuGame)" />
+      <UiListItem v-if="canLeave(menuGame)" icon="fas fa-right-from-bracket" title="이 경기에서 빠지기" subtitle="주최자와 남은 사람에게 알려요" danger @click="leaveGame(menuGame)" />
     </UiList>
   </UiSheet>
 
@@ -239,7 +239,7 @@
   <!-- 경기 시작 인증샷 (선택). 사진을 고르거나 '사진 없이 시작'을 누르면 바로 시작한다 (한 번 더 묻지 않는다) -->
   <CameraCapture
     :is-visible="showCameraModal"
-    title="경기 시작 인증샷"
+    title="경기 시작 사진"
     :subtitle="startSubtitle"
     allow-skip
     @capture="onPhotoCapture"
@@ -286,7 +286,7 @@ import { quickTimes } from '../../utils/when'
 
 const FIRST_STEPS = [
   { title: '모집 중인 경기에 신청하거나 직접 열기', body: '규칙을 고르면 누구나 신청할 수 있게 올라가요' },
-  { title: '상대가 정해지면 장소·시간 맞추기', body: '채팅으로 정하고, 그날 경기 화면에서 시작해요' },
+  { title: '상대가 정해지면 장소·시간 맞추기', body: '메시지로 정하고, 그날 경기 화면에서 시작해요' },
   { title: '끝나면 결과 남기기', body: '상대가 확인하면 실력 점수와 챔피언에 반영돼요' },
 ]
 
@@ -555,7 +555,7 @@ async function leaveGame(g) {
     lateLeave.value = g
     return
   }
-  const ok = await confirmDialog({ title: '이 경기에서 빠질까요?', message: '연 사람과 남은 사람에게 빠졌다고 알려요. 경기는 다시 모집 중이 돼요.', confirmText: '빠지기', danger: true })
+  const ok = await confirmDialog({ title: '이 경기에서 빠질까요?', message: '주최자와 남은 사람에게 빠졌다고 알려요. 경기는 다시 모집 중이 돼요.', confirmText: '빠지기', danger: true })
   if (!ok) return
   await doLeave(g, '')
 }

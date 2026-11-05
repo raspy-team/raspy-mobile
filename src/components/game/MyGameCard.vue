@@ -61,15 +61,17 @@
         <UiAvatar :src="opponent.avatar" :name="opponent.name" :user-id="opponent.id" size="sm" />
       </button>
       <span v-else class="flex-1 flex items-center justify-end gap-2 min-w-0">
-        <span class="t-caption truncate">상대 구하는 중</span>
+        <span class="t-caption truncate">모집 중</span>
         <span class="w-8 h-8 rounded-full border border-dashed border-line-strong flex-shrink-0" aria-hidden="true"></span>
       </span>
     </div>
 
     <!-- 지금 이 경기에서 할 일 하나 + 더보기 -->
     <div class="flex items-center gap-2 px-4 pb-4">
-      <UiButton v-if="state.action" block :variant="quiet && state.actionVariant === 'signal' ? 'primary' : state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
-      <p v-else class="flex-1 t-caption">{{ state.hint }}</p>
+      <!-- 카드 안의 할 일은 내용 크기만 한 캡슐 (애플식: 카드마다 꽉 찬 막대가 목록을 눌렀다) -->
+      <UiButton v-if="state.action" size="sm" :variant="quiet && state.actionVariant === 'signal' ? 'primary' : state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
+      <p v-if="!state.action" class="flex-1 t-caption">{{ state.hint }}</p>
+      <span v-else class="flex-1" />
       <!-- 팀 경기 단톡방: 승인된 둘 이상이면 (11/5 C) -->
       <UiIconButton v-if="chatOpen" icon="far fa-comment" label="단톡방" class="flex-shrink-0" @click="emit('chat')" />
       <UiIconButton icon="fas fa-ellipsis" label="더보기" class="flex-shrink-0" @click="emit('more')" />
@@ -160,7 +162,7 @@ const state = computed(() => {
   if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
     return !canConfirm.value
       ? { label: '확인 대기', tone: 'neutral', hint: multi.value ? '상대 쪽에서 확인하면 기록돼요' : '상대가 확인하면 기록돼요', action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }
-      : { label: '결과 확인', tone: 'primary', action: 'result', actionLabel: '결과 확인하기', actionVariant: 'signal' }
+      : { label: '결과 확인', tone: 'primary', action: 'result', actionLabel: '결과 확인', actionVariant: 'signal' }
   }
   if (isMine.value) {
     const n = (g.applicants || []).filter((a) => !a.approved || !multi.value).length
@@ -173,9 +175,9 @@ const state = computed(() => {
         ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
         : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
     }
-    if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청자 보고 승인하기', actionVariant: 'signal' }
-    if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 보내서 더 부르기', actionVariant: 'secondary' }
-    return { label: '상대 구하는 중', tone: 'neutral', action: 'share', actionLabel: '링크 공유하기', actionVariant: 'secondary' }
+    if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청 보기', actionVariant: 'signal' }
+    if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 공유', actionVariant: 'secondary' }
+    return { label: '모집 중', tone: 'neutral', action: 'share', actionLabel: '링크 공유', actionVariant: 'secondary' }
   }
   if (g.status === 'REQUESTED') return { label: '승인 대기', tone: 'neutral', hint: `${g.ownerNickname}님이 승인하면 알려 드려요` }
   // 여럿이 하는 경기는 승인돼도 다 모일 때까지 확정이 아니다

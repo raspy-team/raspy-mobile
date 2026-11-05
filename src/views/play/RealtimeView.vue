@@ -41,7 +41,7 @@
         <UiButton v-if="longLobby && !state.fixture && !state.invitee" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
           {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 AI 주민과 할 수 있어요` : '기다리지 않고 AI 주민과 하기' }}
         </UiButton>
-        <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="secondary" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
+        <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="ghost" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">{{ state.invitee ? '도전 취소' : '그만 찾기' }}</UiButton>
         <!-- 다른 게임에서 기다리는 사람이 있으면 그쪽으로 붙는 게 빠르다 -->
@@ -127,7 +127,7 @@
         </form>
         </template>
         <!-- 실시간 심사: 보는 사람들이 응원해 승패가 정해진다 -->
-        <UiButton v-if="state.liveJudged" block variant="secondary" icon="share" class="mt-4" @click="shareWatch">구경 링크 보내기</UiButton>
+        <UiButton v-if="state.liveJudged" block variant="secondary" icon="share" class="mt-4" @click="shareWatch">중계 링크 공유</UiButton>
         <p v-if="state.liveJudged" class="t-caption text-center mt-1">보는 사람들의 응원으로 승패가 정해져요</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">그만두기</UiButton>
       </template>

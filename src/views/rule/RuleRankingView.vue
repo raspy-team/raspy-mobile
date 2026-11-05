@@ -9,7 +9,7 @@
       </div>
 
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 
       <template v-else>
@@ -31,14 +31,14 @@
               <span class="block t-caption mt-0.5">이 규칙으로 5판 하면 순위에 올라가요</span>
             </span>
             <UiButton size="sm" variant="tonal" :to="appGameKey ? `/play/${appGameKey}` : `/create-game?ruleId=${ruleId}`">
-              {{ appGameKey ? '한 판 하기' : '경기 열기' }}
+              {{ appGameKey ? '한 판 하기' : '경기 만들기' }}
             </UiButton>
           </template>
         </UiCard>
 
         <UiEmptyState v-if="!rankings.length" class="pt-12" mascot="match" title="아직 순위가 비어 있어요" :description="baselines.length ? '사람과 5판을 하면 첫 이름이 올라가요. 아래 AI 기준선과 견줘 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'">
           <UiButton variant="secondary" :to="appGameKey ? `/play/${appGameKey}` : `/create-game?ruleId=${ruleId}`">
-            {{ appGameKey ? '한 판 하기' : '경기 열기' }}
+            {{ appGameKey ? '한 판 하기' : '경기 만들기' }}
           </UiButton>
         </UiEmptyState>
 

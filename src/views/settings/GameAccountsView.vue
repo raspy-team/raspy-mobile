@@ -7,7 +7,7 @@
 
       <UiListSkeleton v-if="loading" :rows="6" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="게임 계정을 불러오지 못했어요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 
       <ul v-else class="divide-y divide-line ui-appear">
@@ -47,16 +47,14 @@
           <template v-else>티어 연결은 준비 중이에요. 아이디는 바로 상대에게 보여요.</template>
         </p>
         <div class="flex gap-2">
-          <UiButton v-if="editing.handle" type="button" variant="secondary" :disabled="busy" @click="remove">지우기</UiButton>
+          <UiButton v-if="editing.handle" type="button" variant="secondary" :disabled="busy" @click="remove">삭제</UiButton>
           <UiButton
             v-if="editing.handle && editing.game.tierAvailable"
             type="button"
             variant="secondary"
             :disabled="busy"
             @click="refresh"
-          >
-            티어 새로
-          </UiButton>
+          >새로 고침</UiButton>
           <UiButton type="submit" class="flex-1" :disabled="busy || !handle.trim()">{{ busy ? '저장 중…' : '저장' }}</UiButton>
         </div>
       </form>

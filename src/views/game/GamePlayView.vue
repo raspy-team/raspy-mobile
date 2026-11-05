@@ -98,7 +98,7 @@
     <UiSheet v-model="showMenu">
       <UiList>
         <UiListItem icon="book-open" title="규칙 보기" @click="menu(() => (game.showRuleDetail = true))" />
-        <UiListItem icon="eye" title="중계" subtitle="구경 링크 보내기, 응원 보기" @click="menu(() => router.push(`/live/${gameId}`))" />
+        <UiListItem icon="eye" title="중계" subtitle="중계 링크 공유, 응원 보기" @click="menu(() => router.push(`/live/${gameId}`))" />
         <UiListItem icon="volume" :title="soundOn ? '관중 소리 끄기' : '관중 소리 켜기'" subtitle="관중이 응원하면 이 휴대폰에서 박수 소리가 나요" @click="menu(toggleSound)" />
         <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menu(() => (showLogModal = true))" />
         <UiListItem icon="camera" title="사진 찍기" @click="menu(triggerPhotoCapture)" />
@@ -131,9 +131,7 @@
           {{ currentSet }}세트 시작
         </UiButton>
         <!-- 점수판은 원하는 사람만. 끝나고 점수만 넣어도 된다 -->
-        <UiButton v-if="currentSet === 1 && !currentScore1 && !currentScore2" variant="ghost" class="mt-2" @click="showResultEntry = true">
-          점수만 입력하기
-        </UiButton>
+        <UiButton v-if="currentSet === 1 && !currentScore1 && !currentScore2" variant="ghost" class="mt-2" @click="showResultEntry = true">점수만 입력</UiButton>
         <UiButton v-if="nothingScored" variant="ghost" class="mt-1 text-fg-muted" @click="openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소')">
           경기 취소
         </UiButton>

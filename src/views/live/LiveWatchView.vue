@@ -58,8 +58,8 @@
 
         <!-- 선수: 구경 링크 보내기, 구경 끄기 -->
         <template v-if="live.isPlayer">
-          <UiButton block variant="secondary" icon="share" class="mt-5" @click="share">구경 링크 보내기</UiButton>
-          <UiButton block variant="ghost" class="mt-2" :loading="toggling" @click="toggleWatch">{{ live.watchOff ? '구경 다시 켜기' : '구경 끄기' }}</UiButton>
+          <UiButton block variant="secondary" icon="share" class="mt-5" @click="share">중계 링크 공유</UiButton>
+          <UiButton block variant="ghost" class="mt-2" :loading="toggling" @click="toggleWatch">{{ live.watchOff ? '중계 다시 켜기' : '중계 끄기' }}</UiButton>
           <!-- 버튼에 괄호 설명을 넣지 않고 아래 한 줄로 (ui/README 문구) -->
           <p class="t-caption text-center mt-1">{{ live.watchOff ? '지금은 선수 말고는 이 경기를 볼 수 없어요' : '끄면 선수 말고는 이 경기를 볼 수 없어요' }}</p>
         </template>

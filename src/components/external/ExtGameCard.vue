@@ -12,7 +12,7 @@
         <template v-else>결과 화면을 찍어 올리면 확인이 빨라요</template>
       </span>
     </span>
-    <UiButton v-if="mine" variant="ghost" size="sm" :to="editTo">{{ mine.handle ? '바꾸기' : '적기' }}</UiButton>
+    <UiButton v-if="mine" variant="ghost" size="sm" :to="editTo">{{ mine.handle ? '바꾸기' : '입력' }}</UiButton>
   </div>
 </template>
 

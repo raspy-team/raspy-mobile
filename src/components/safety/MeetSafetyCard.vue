@@ -11,7 +11,7 @@
     <div v-if="s.noShowReportId" class="rounded-lg bg-surface-2 px-3 py-2.5 t-caption">
       <p class="text-danger-fg font-semibold">노쇼로 기록됐어요</p>
       <p class="mt-0.5">{{ s.noShowAppealed ? '이의를 냈어요. 운영진이 확인하고 있어요' : '갔는데 잘못 기록됐다면 이의를 내 주세요. 운영진이 확인해요' }}</p>
-      <UiButton v-if="!s.noShowAppealed" size="sm" variant="secondary" class="mt-2" @click="appealOpen = true">이의 내기</UiButton>
+      <UiButton v-if="!s.noShowAppealed" size="sm" variant="secondary" class="mt-2" @click="appealOpen = true">이의 제기</UiButton>
     </div>
 
     <!-- 도착 -->
@@ -32,8 +32,8 @@
       <UiButton v-if="s.arrivedAt && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="circle-check" :loading="busy" @click="finish">잘 끝났어요</UiButton>
       <UiButton v-if="s.canShare && !s.shareUrl && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="share" @click="shareOpen = true">위치 공유</UiButton>
       <template v-if="s.shareUrl">
-        <UiButton size="sm" variant="secondary" icon="share" @click="send(s.shareUrl)">링크 다시 보내기</UiButton>
-        <UiButton size="sm" variant="ghost" :loading="busy" @click="stop">공유 그만</UiButton>
+        <UiButton size="sm" variant="secondary" icon="share" @click="send(s.shareUrl)">다시 공유</UiButton>
+        <UiButton size="sm" variant="ghost" :loading="busy" @click="stop">공유 중지</UiButton>
       </template>
     </div>
     <p v-if="s.shareUrl" class="t-micro">앱을 열어 둔 동안 1분마다 위치가 갱신돼요. '잘 끝났어요'를 누르면 공유가 끝나요</p>
@@ -48,7 +48,7 @@
       <p v-if="!friends.length" class="t-caption">매치 친구가 없어요. 링크만 보내도 돼요</p>
     </div>
     <template #footer>
-      <UiButton block :loading="busy" @click="startShare">링크 만들어 보내기</UiButton>
+      <UiButton block :loading="busy" @click="startShare">링크 공유</UiButton>
     </template>
   </UiSheet>
 

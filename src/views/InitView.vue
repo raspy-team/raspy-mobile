@@ -1,9 +1,10 @@
 <template>
-  <div class="min-h-dvh bg-canvas flex flex-col pt-safe pb-safe">
-    <main class="flex-1 w-full max-w-md mx-auto px-6 flex flex-col">
+  <!-- 한 화면에 다 들어가게, 스크롤 없이 (애플식 시작 화면, 마스코트 없이) -->
+  <div class="h-dvh overflow-hidden bg-canvas flex flex-col pt-safe pb-safe">
+    <main class="flex-1 min-h-0 w-full max-w-md mx-auto px-6 flex flex-col">
       <!-- 무슨 앱인지 -->
-      <div class="flex flex-col justify-center" :class="compact ? 'flex-1 py-10' : 'pt-10 pb-8'">
-        <BrandMark size="22px" />
+      <div class="flex-1 min-h-0 flex flex-col justify-center py-6">
+        <span class="text-[22px] font-semibold leading-none tracking-[-0.055em] text-fg">match</span>
         <!-- 링크로 들어온 사람: 무엇에 불려 왔는지 먼저 (인스타 게임 링크, 친구의 도전장). 가입하면 그 화면으로 돌아간다 -->
         <UiCard v-if="landing" class="mt-8">
           <p class="t-caption">받은 링크</p>
@@ -17,9 +18,7 @@
           <p class="t-title">상대 구하기를 등록했어요</p>
           <p class="t-caption mt-1">시작하면 내 계정에 붙어요. 상대가 생기면 알림으로 알려 드려요</p>
         </UiCard>
-        <!-- 처음 온 사람의 길잡이 콕이 (docs/mascots.md). 링크로 온 사람은 시작 버튼이 한 화면에 들어오게 뺀다 -->
-        <MatchMascot v-if="!compact" who="kok" mood="wow" :size="72" class="mt-10 -mb-4" />
-        <h1 class="t-display text-[44px] mt-10">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
+        <h1 class="t-display text-[44px] mt-8">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
         <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
 
       </div>
@@ -82,20 +81,6 @@
           <button type="button" class="underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[1]">{{ TERMS[1].title }}</button>
         </p>
       </div>
-      <!-- 매치 소개: 시작 버튼 아래에 (위에 두면 휴대폰 첫 화면에 버튼이 하나도 안 보였다). 아이콘 상자 대신 번호와 글자로 -->
-      <!-- 링크·광고 게임에서 온 사람은 하려던 것이 있으니 접는다 -->
-      <section v-if="!compact" class="pb-10">
-        <p class="t-label mb-1">매치는 이렇게 해요</p>
-        <ol class="border-t border-line">
-          <li v-for="(f, i) in FEATURES" :key="f.title" class="flex items-baseline gap-4 py-4 border-b border-line">
-            <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
-            <span>
-              <span class="block text-[0.9375rem] font-semibold text-fg tracking-[-0.02em]">{{ f.title }}</span>
-              <span class="block t-caption mt-0.5">{{ f.body }}</span>
-            </span>
-          </li>
-        </ol>
-      </section>
     </main>
 
     <UiSheet :model-value="!!openTerm" :title="openTerm?.title" @update:model-value="openTerm = null">
@@ -105,8 +90,6 @@
 </template>
 
 <script setup>
-import BrandMark from '../components/BrandMark.vue'
-import MatchMascot from '../components/mascot/MatchMascot.vue'
 // 시작 화면: 무슨 앱인지 한눈에 + 소셜로 1초 만에 시작(곧 가입). 약관·닉네임·동네는 가입 뒤 /welcome에서 받는다
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -117,17 +100,6 @@ import { UiButton, UiCard, UiSheet } from '../components/ui'
 import { peekReturnTo, takeReturnTo } from '../utils/authRedirect'
 import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin, nativeKakaoLogin, hasNativeKakao } from '../utils/nativeBridge'
 import { trackEvent } from '../utils/visit'
-
-const FEATURES = [
-  // 처음 온 사람의 짧은 안내. 한 줄에 한 가지, 실제로 하는 순서대로 (11/3)
-  { icon: 'fas fa-user-group', title: '동네에서 상대 찾기', body: '모집 중인 경기에 신청하거나 직접 열어요' },
-  // 안전·신뢰 J: 처음 보는 사람과 만나는 앱이라 가장 큰 걱정을 첫 화면에서 푼다 (있는 기능만: 신뢰 온도·보증·위치 공유)
-  { icon: 'fas fa-shield-halved', title: '처음 보는 사람과도 안심하고', body: '신뢰 온도와 만나 본 사람의 보증을 보고, 경기 동안 친구에게 위치를 알려요' },
-  { icon: 'fas fa-stopwatch', title: '만나서 한 판', body: '점수는 둘이 같은 화면에 함께 남겨요' },
-  { icon: 'fas fa-crown', title: '실력 점수가 쌓여요', body: '이기면 오르고, 동네 챔피언에 도전할 수 있어요' },
-  // AI 주민을 숨기지 않는다 (docs/ai-residents.md 'AI 표시': 약관·소개에 한 단락)
-  { icon: 'fas fa-robot', title: 'AI 주민도 있어요', body: '연습 상대가 되고 빈 곳을 채워요. 이름 옆에 AI가 붙어요' },
-]
 
 const router = useRouter()
 const route = useRoute()
@@ -176,7 +148,6 @@ onMounted(async () => {
 // 버튼 누름을 센다 (3단계 수요 조사 B): 가입 전 한 판 끝에서 왔으면 guest, 아니면 init
 // 광고 게임·상대 구하기·받은 링크에서 왔으면 소개를 접고 버튼부터
 const fromPartner = route.query.from === 'partner'
-const compact = computed(() => !!landing.value || !!route.query.from)
 const tapPlace = route.query.from === 'guest' ? 'guest' : route.query.from === 'partner' ? 'partner' : 'init'
 function tapId() {
   trackEvent('tap_id', tapPlace)

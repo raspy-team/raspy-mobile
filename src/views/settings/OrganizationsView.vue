@@ -7,7 +7,7 @@
 
       <UiListSkeleton v-if="loading" :rows="3" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="소속을 불러오지 못했어요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 
       <template v-else-if="mine">
@@ -48,7 +48,7 @@
           <p class="t-caption">{{ mine.lastDecided.rejectReason }}</p>
         </UiCard>
 
-        <UiButton v-if="mine.canRequest" block size="lg" @click="openForm">소속 인증하기</UiButton>
+        <UiButton v-if="mine.canRequest" block size="lg" @click="openForm">소속 인증</UiButton>
         <p v-else-if="!mine.pending" class="t-caption text-center">소속은 {{ mine.maxOrgs }}개까지예요. 하나를 떼면 다시 인증할 수 있어요.</p>
       </template>
     </main>
@@ -125,7 +125,7 @@
           </span>
         </button>
 
-        <UiButton block size="lg" :disabled="!canSubmit" :loading="submitting" @click="submit">신청하기</UiButton>
+        <UiButton block size="lg" :disabled="!canSubmit" :loading="submitting" @click="submit">신청</UiButton>
       </div>
     </UiSheet>
   </div>

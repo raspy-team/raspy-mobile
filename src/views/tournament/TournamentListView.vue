@@ -2,11 +2,11 @@
   <div class="min-h-dvh bg-canvas">
     <UiTopBar title="대회" back />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
-      <UiButton block icon="plus" @click="openCreate()">대회 열기</UiButton>
+      <UiButton block icon="plus" @click="openCreate()">대회 만들기</UiButton>
 
       <UiTabs v-model="tab" :options="TABS" class="mt-6" />
       <UiEmptyState v-if="error" class="pt-10" icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
       <UiListSkeleton v-else-if="!list" :rows="3" class="mt-3" />
       <div v-else-if="list.length" class="space-y-2 mt-3">

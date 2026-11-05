@@ -9,7 +9,7 @@
       </div>
 
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load()">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load()">다시 시도</UiButton>
       </UiEmptyState>
 
       <template v-else-if="data">
@@ -31,7 +31,7 @@
         </UiCard>
 
         <UiEmptyState v-if="!data.rankings.length" class="pt-12" mascot="dol" title="아직 순위가 비어 있어요" :description="`${data.label}에 드는 게임을 사람과 5판 하면 첫 이름이 올라가요`">
-          <UiButton to="/games">한 판 하러 가기</UiButton>
+          <UiButton to="/games">한 판 하기</UiButton>
         </UiEmptyState>
 
         <UiList v-else class="mt-6">

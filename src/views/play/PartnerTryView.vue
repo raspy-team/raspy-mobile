@@ -37,7 +37,7 @@
         <!-- 고를 칸을 못 받으면 빈 화면 대신 다시 불러오기 (예전에는 맨 아래 한 줄로만 '다시 열어 주세요') -->
         <div v-if="optionsFailed" class="mt-6 text-center">
           <p class="t-caption text-danger">고를 칸을 불러오지 못했어요</p>
-          <UiButton variant="secondary" class="mt-3" @click="loadOptions">다시 불러오기</UiButton>
+          <UiButton variant="secondary" class="mt-3" @click="loadOptions">다시 시도</UiButton>
         </div>
 
         <!-- 1. 종목 -->

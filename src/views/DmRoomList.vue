@@ -11,7 +11,7 @@
       <UiListSkeleton v-if="loading" :rows="6" />
 
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" title="메시지를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
-        <UiButton variant="secondary" @click="load">다시 불러오기</UiButton>
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 
       <UiEmptyState v-else-if="!rooms.length" class="pt-16" mascot="match" title="아직 주고받은 메시지가 없어요">

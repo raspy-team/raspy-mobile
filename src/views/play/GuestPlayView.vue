@@ -187,7 +187,7 @@ import { getVisitorId, markGuestPlayed, trackEvent } from '@/utils/visit'
 import { track } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
 import { shareLink } from '@/utils/share'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { feel } from '@/utils/feel'
 
 type Schemas = components['schemas']

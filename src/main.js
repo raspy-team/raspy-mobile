@@ -15,7 +15,7 @@ import  { setRouter } from './api/api'
 import autocomplete from './utils/autocomplete'
 
 import DefaultAvatar from './assets/default.png'
-import { useToast } from './composable/useToast'
+import { useToast } from './composables/useToast'
 
 setRouter(router) // api.js에 router 주입
 followIosTextSize() // 아이폰 글자 크기 설정을 따른다

@@ -63,8 +63,8 @@ import { ref, onMounted, onBeforeUnmount, defineProps } from 'vue'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { subscribeTopic } from '@/websocket/userChannel'
-import { useToast } from '@/composable/useToast'
-import { compressImage, dataUrlToFile } from '@/utils/gamePictureStorage'
+import { useToast } from '@/composables/useToast'
+import { compressImage, dataUrlToFile, readAsDataUrl } from '@/utils/image'
 import ReportSheet from '../safety/ReportSheet.vue'
 import { UiButton, UiIcon, UiSheet, UiSpinner } from '../ui'
 
@@ -87,15 +87,6 @@ async function load() {
   } catch {
     data.value = null
   }
-}
-
-function readAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const r = new FileReader()
-    r.onload = () => resolve(r.result as string)
-    r.onerror = reject
-    r.readAsDataURL(file)
-  })
 }
 
 async function onPick(e: Event) {

@@ -24,7 +24,7 @@
 
     <main v-else-if="!s.total.games && !s.practiceGames" class="max-w-2xl mx-auto px-4 pt-16">
       <UiEmptyState mascot="match" title="아직 기록이 없어요" :description="isMe ? '한 판 하면 이번 주 기록·실력 점수·순위가 여기 쌓여요' : '경기를 하면 기록이 쌓여요'">
-        <UiButton v-if="isMe" to="/games">한 판 하러 가기</UiButton>
+        <UiButton v-if="isMe" to="/">한 판 하러 가기</UiButton>
       </UiEmptyState>
     </main>
 
@@ -261,9 +261,9 @@
         </UiList>
       </section>
 
-      <!-- 상대가 준 평가: 실력 점수(이기고 진 결과)와 다른, 상대가 매긴 별점 -->
+      <!-- 받은 별점: 실력 점수(이기고 진 결과)와 다른, 상대가 매긴 별점. ★로 점수와 구분한다 -->
       <section v-if="s.manner || s.skill || s.reviews.length">
-        <h2 class="t-heading mb-3">상대가 준 평가</h2>
+        <h2 class="t-heading mb-3">받은 별점</h2>
         <div v-if="s.manner || s.skill" class="grid grid-cols-2 gap-3">
           <div v-if="s.manner" class="rounded-xl bg-surface p-4">
             <p class="t-caption">매너</p>
@@ -271,9 +271,9 @@
             <p class="t-micro mt-0.5">{{ s.manner.count }}명이 평가</p>
           </div>
           <div v-if="s.skill" class="rounded-xl bg-surface p-4">
-            <p class="t-caption">상대가 본 실력</p>
+            <p class="t-caption">실력</p>
             <p class="t-title tabular-nums mt-1">★ {{ s.skill.average.toFixed(1) }}</p>
-            <p class="t-micro mt-0.5">{{ s.skill.count }}명이 평가 · 실력 점수와 따로</p>
+            <p class="t-micro mt-0.5">{{ s.skill.count }}명이 평가</p>
           </div>
         </div>
         <ul v-if="s.reviews.length" class="space-y-3 mt-3">

@@ -62,7 +62,7 @@ export async function setupPushListeners() {
     })
     // 앱을 보고 있을 때 온 알림은 안드로이드가 띄우지 않는다. 화면 안에 짧게 보여 준다 (목록은 화면이 신호로 새로 불러온다)
     await PushNotifications.addListener('pushNotificationReceived', async (n) => {
-      const { useToast } = await import('../composable/useToast')
+      const { useToast } = await import('../composables/useToast')
       if (n?.title) useToast().showToast(n.title)
     })
   } catch {

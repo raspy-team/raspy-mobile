@@ -57,7 +57,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import ClubRow from '../../components/club/ClubRow.vue'
 import { UiButton, UiEmptyState, UiInput, UiListSkeleton, UiSection, UiSheet, UiTopBar } from '../../components/ui'
-import { useToast } from '@/composable/useToast'
+import { useToast } from '@/composables/useToast'
 
 type Club = components['schemas']['ClubSummary']
 const router = useRouter()

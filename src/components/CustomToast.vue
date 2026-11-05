@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { toastMsg, toastGoTo } from '../composable/useToast'
+import { toastMsg, toastGoTo } from '../composables/useToast'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

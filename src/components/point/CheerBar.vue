@@ -58,7 +58,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { UiButton, UiChip } from '../ui'
 import MatchMascot from '../mascot/MatchMascot.vue'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 const props = defineProps<{ gameId: number; closed?: boolean }>()
 const AMOUNTS = [0, 10, 30, 50, 100]

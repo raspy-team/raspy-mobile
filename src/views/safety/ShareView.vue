@@ -23,7 +23,7 @@
       </section>
 
       <section v-if="v.lastLat != null" class="mt-6">
-        <p class="t-caption mb-2">마지막 위치 · {{ ago(v.lastAt) }}</p>
+        <p class="t-caption mb-2">마지막 위치 · {{ timeAgo(v.lastAt) }}</p>
         <KakaoMap v-if="kakaoMapKey" class="mb-2" :center="{ lat: v.lastLat, lon: v.lastLon }" :pins="[{ id: 'me', lat: v.lastLat, lon: v.lastLon, label: v.nickname }]" :level="4" height="220px" />
         <UiButton block variant="secondary" icon="location-dot" @click="openMap">지도에서 보기</UiButton>
       </section>
@@ -40,7 +40,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { GET } from '../../api/client'
-import { matchTime } from '../../utils/format'
+import { matchTime, timeAgo } from '../../utils/format'
 import { UiButton, UiEmptyState, UiListSkeleton } from '../../components/ui'
 import BrandMark from '../../components/BrandMark.vue'
 import KakaoMap from '../../components/map/KakaoMap.vue'
@@ -71,12 +71,6 @@ function openMap(e) {
   e?.preventDefault?.()
   window.open(mapUrl.value, '_blank', 'noopener')
 }
-function ago(t) {
-  if (!t) return ''
-  const m = Math.round((Date.now() - new Date(t).getTime()) / 60000)
-  return m < 1 ? '방금' : m < 60 ? `${m}분 전` : `${Math.floor(m / 60)}시간 전`
-}
-
 async function load() {
   loading.value = true
   try {

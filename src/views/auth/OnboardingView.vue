@@ -138,8 +138,8 @@ import { AGREEMENTS as TERMS } from '../../content/legal'
 import { UiAvatar, UiButton, UiCard, UiInput, UiSheet, UiSkeleton } from '../../components/ui'
 import NeighborhoodVerify from '../../components/neighborhood/NeighborhoodVerify.vue'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
-import { useToast } from '../../composable/useToast'
-import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
+import { useToast } from '../../composables/useToast'
+import { photoFromFile } from '../../utils/image'
 import { containsProfanity } from '../../utils/profanity'
 import { takeReturnTo } from '../../utils/authRedirect'
 import { markOnboarded } from '../../router/onboardingGuard'
@@ -201,15 +201,10 @@ async function onPhoto(e) {
   e.target.value = ''
   if (!file) return
   if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라 주세요')
-  const dataUrl = await new Promise((resolve, reject) => {
-    const r = new FileReader()
-    r.onload = () => resolve(r.result)
-    r.onerror = reject
-    r.readAsDataURL(file)
-  }).catch(() => null)
-  if (!dataUrl) return showToast('사진을 읽지 못했어요. 다른 사진을 골라 주세요')
-  preview.value = await compressImage(dataUrl)
-  photo.value = dataUrlToFile(preview.value, file.name)
+  const p = await photoFromFile(file)
+  if (!p) return showToast('사진을 읽지 못했어요. 다른 사진을 골라 주세요')
+  preview.value = p.dataUrl
+  photo.value = p.file
 }
 function clearPhoto() {
   photo.value = null

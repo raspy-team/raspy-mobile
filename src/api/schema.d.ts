@@ -38,7 +38,7 @@ export interface paths {
         get?: never;
         /**
          * 소속 공개 범위
-         * @description ALL 모두 / SAME_ORG 같은 조직만 / HIDDEN 숨김(순위·소속 자리에서도 빠진다)
+         * @description ALL 모두 / SAME_ORG 같은 조직만 / HIDDEN 숨김(순위·챔피언에서도 빠진다)
          */
         put: operations["visibility"];
         post?: never;
@@ -950,26 +950,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/notifications/clear": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 알림 전체 삭제
-         * @description 로그인한 사용자의 모든 알림을 삭제합니다.
-         */
-        post: operations["clearAllNotifications"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/neighborhoods/verify": {
         parameters: {
             query?: never;
@@ -1189,7 +1169,7 @@ export interface paths {
         put?: never;
         /**
          * 초대 링크 생성
-         * @description 게임 ID로 브랜치 초대 링크를 생성합니다.
+         * @description 게임 ID로 공유할 경기 주소를 만듭니다.
          */
         post: operations["createInvite"];
         delete?: never;
@@ -1942,26 +1922,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/comments/{commentId}/dislike": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 댓글 싫어요
-         * @description 해당 댓글에 싫어요 추가
-         */
-        post: operations["dislikeComment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/clubs": {
         parameters: {
             query?: never;
@@ -2354,22 +2314,6 @@ export interface paths {
          * @description 아이디·닉네임을 정하고 설정을 마친 것으로 기록한다. 아이디가 겹치면 409
          */
         post: operations["completeOauth"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/check-username": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["checkUsername"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4014,26 +3958,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/nunchi/plays/{playId}/review": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * 내 판 돌아보기
-         * @description 로그인한 사람의 낸 판
-         */
-        get: operations["myReview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/nunchi/guest-plays/{playId}/review": {
         parameters: {
             query?: never;
@@ -4346,46 +4270,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/games/{gameId}/ranking": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * 게임 랭킹 스냅샷 조회
-         * @description 종료된 게임의 랭킹 스냅샷을 조회합니다. '게임 참여자들과 그들의 친구들 <교집합> 나' 유저들의 레이팅 변화와 등수 변화를 확인할 수 있습니다.
-         */
-        get: operations["getGameRanking"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/games/{gameId}/participants/{email}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * 참가 신청 ID 조회
-         * @description gameId와 email로 참가 신청 엔티티의 ID를 조회합니다.
-         */
-        get: operations["getParticipationIdByGameAndEmail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/games/{gameId}/live": {
         parameters: {
             query?: never;
@@ -4494,26 +4378,6 @@ export interface paths {
          * @description 게임 ID를 기반으로 간략한 게임 정보를 반환합니다.
          */
         get: operations["gameInfo"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/games/request-count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * 경기 요청 개수 조회
-         * @description 나의 경기 참가 신청 개수와 내가 받은 경기 참가 신청 개수를 반환합니다.
-         */
-        get: operations["getRequestCount"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4722,22 +4586,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/friends/my/sent": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getMyFriendRequestsSent"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/friends/my/received": {
         parameters: {
             query?: never;
@@ -4806,26 +4654,6 @@ export interface paths {
          * @description 특정 게임 ID로 피드 아이템을 단건 조회합니다.
          */
         get: operations["getFeedItemByGameId"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/external-games": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * 인기 게임 목록
-         * @description 규칙을 할 수 있는 다른 게임들. 아이디 이름·티어 연결 여부
-         */
-        get: operations["catalog"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5071,22 +4899,6 @@ export interface paths {
          * @description 현재 로그인한 사용자가 차단한 유저의 ID 목록을 조회합니다.
          */
         get: operations["getBlockedUserIds"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/requestWithdraw": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["requestWithdraw"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6940,9 +6752,6 @@ export interface components {
             username: string;
             nickname: string;
         };
-        CheckUsernameRequest: {
-            username: string;
-        };
         AppPlayer: {
             /** Format: int64 */
             userId: number;
@@ -8284,30 +8093,6 @@ export interface components {
             id: number;
             nickname: string;
         };
-        GameRankingResponse: {
-            /** Format: int64 */
-            gameId: number;
-            rankings: components["schemas"]["RankingItemDto"][];
-        };
-        RankingItemDto: {
-            /** Format: int64 */
-            userId: number;
-            nickname: string;
-            profilePicture?: string;
-            /** Format: int32 */
-            ratingBefore: number;
-            /** Format: int32 */
-            ratingAfter: number;
-            /** Format: int32 */
-            ratingChange: number;
-            /** Format: int32 */
-            rankBefore?: number;
-            /** Format: int32 */
-            rankAfter: number;
-            /** Format: int32 */
-            rankChange?: number;
-            isPlayer: boolean;
-        };
         GamePictureResponse: {
             /** Format: int64 */
             id: number;
@@ -8830,7 +8615,6 @@ export interface components {
             /** Format: date-time */
             until?: string;
         };
-        BodyBuilder: Record<string, never>;
         SocialProviders: {
             google: boolean;
             kakao: boolean;
@@ -10453,24 +10237,6 @@ export interface operations {
             };
         };
     };
-    clearAllNotifications: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     verify: {
         parameters: {
             query?: never;
@@ -11758,26 +11524,6 @@ export interface operations {
             };
         };
     };
-    dislikeComment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                commentId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     create_1: {
         parameters: {
             query?: never;
@@ -12298,32 +12044,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    checkUsername: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckUsernameRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": {
-                        [key: string]: boolean;
-                    };
-                };
             };
         };
     };
@@ -14337,30 +14057,6 @@ export interface operations {
             };
         };
     };
-    myReview: {
-        parameters: {
-            query?: {
-                visitorId?: string;
-            };
-            header?: never;
-            path: {
-                playId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["Review"];
-                };
-            };
-        };
-    };
     guestReview: {
         parameters: {
             query: {
@@ -14710,60 +14406,6 @@ export interface operations {
             };
         };
     };
-    getGameRanking: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                gameId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description 랭킹 스냅샷 조회 성공 */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["GameRankingResponse"];
-                };
-            };
-            /** @description 랭킹 스냅샷을 찾을 수 없음 */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["GameRankingResponse"];
-                };
-            };
-        };
-    };
-    getParticipationIdByGameAndEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                gameId: number;
-                email: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": number;
-                };
-            };
-        };
-    };
     live: {
         parameters: {
             query?: never;
@@ -14892,26 +14534,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GameSummaryResponse"];
-                };
-            };
-        };
-    };
-    getRequestCount: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": number;
                 };
             };
         };
@@ -15127,26 +14749,6 @@ export interface operations {
             };
         };
     };
-    getMyFriendRequestsSent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["UserSearchResultDto"][];
-                };
-            };
-        };
-    };
     getMyFriendRequestsReceived: {
         parameters: {
             query?: never;
@@ -15244,26 +14846,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FeedItemResponse"];
-                };
-            };
-        };
-    };
-    catalog: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ExternalGameView"][];
                 };
             };
         };
@@ -15544,26 +15126,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UserSummaryDto"][];
-                };
-            };
-        };
-    };
-    requestWithdraw: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["BodyBuilder"];
                 };
             };
         };

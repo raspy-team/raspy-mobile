@@ -10,7 +10,7 @@
 import { useRouter } from 'vue-router'
 import AvatarEditor from '../../components/plaza/AvatarEditor.vue'
 import { UiTopBar } from '../../components/ui'
-import { useToast } from '@/composable/useToast'
+import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
 const { showToast } = useToast()

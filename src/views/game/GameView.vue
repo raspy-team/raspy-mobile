@@ -39,10 +39,6 @@
     </section>
 
     <template v-else>
-      <!-- 앱 게임에서 아직 안 끝난 대결: 게임마다 흩어지지 않게 여기 모은다 -->
-      <UiSection v-if="appDuels.length" :title="`앱 게임 ${appDuels.length}`">
-        <AppDuelList :duels="appDuels" />
-      </UiSection>
       <UiSection v-if="pendingReviews.length" :title="`평가 남기기 ${pendingReviews.length}`">
         <UiList>
           <UiListItem
@@ -85,6 +81,10 @@
             <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" />
           </div>
         </div>
+      </UiSection>
+      <!-- 앱 게임에서 아직 안 끝난 대결: 게임마다 흩어지지 않게 여기 모은다. 앱 게임은 조연이라 실제 경기 아래 (11/5) -->
+      <UiSection v-if="appDuels.length" :title="`앱 게임 ${appDuels.length}`">
+        <AppDuelList :duels="appDuels" />
       </UiSection>
     </template>
   </main>
@@ -282,16 +282,15 @@ import {
   UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton, UiTopBar
 } from '../../components/ui'
 import regionMap from '../../assets/regionMap.json'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { confirmDialog } from '../../composables/useConfirm'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { feel } from '../../utils/feel'
-import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
+import { useActiveGamePolling } from '../../composables/useActiveGamePolling'
 import { parseRegion } from '../../utils/regionParser'
-import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
-import { copyText } from '../../utils/clipboard'
-import { shareLink } from '../../utils/share'
+import { compressImage, dataUrlToFile } from '../../utils/image'
+import { shareLink, shareGameInvite } from '../../utils/share'
 import { matchTime, place, ratingLine } from '../../utils/format'
 import { venuePlace } from '../../utils/gameFormat'
 import { quickTimes } from '../../utils/when'
@@ -492,13 +491,8 @@ function openRule(g) {
 
 async function share(g) {
   menuGame.value = null
-  try {
-    const { data } = await api.post('/api/invite', null, { params: { gameId: g.id } })
-    const msg = await shareLink(data.url, `'${g.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`)
-    if (msg) showToast(msg === '링크를 복사했어요' ? '링크를 복사했어요. 같이 할 사람에게 보내 보세요' : msg)
-  } catch {
-    showToast('링크를 만들지 못했어요')
-  }
+  const msg = await shareGameInvite(g.id, `'${g.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`, { copied: '링크를 복사했어요. 같이 할 사람에게 보내 보세요' })
+  if (msg) showToast(msg)
 }
 
 // 친구에게 일정 알리기 (기능 검토 #1, 처음 보는 사람을 만날 때): 누구와·언제·어디서를 한 문장으로 카톡 등에 보낸다
@@ -508,15 +502,8 @@ async function tellFriend(g) {
   const who = dmTarget(g)
   const where = venuePlace(g, place)
   const text = `나 ${matchTime(g.matchDate)}에 ${where ? where + '에서 ' : ''}${who.name}님이랑 '${g.rule?.ruleTitle ?? '경기'}' 하기로 했어. 혹시 연락 안 되면 확인해 줘 (Match)`
-  if (navigator.share) {
-    try {
-      await navigator.share({ text })
-      return
-    } catch (e) {
-      if (e.name === 'AbortError') return
-    }
-  }
-  showToast((await copyText(text)) ? '일정을 복사했어요. 친구에게 붙여 넣어 보내세요' : '복사하지 못했어요')
+  const msg = await shareLink('', text, { copied: '일정을 복사했어요. 친구에게 붙여 넣어 보내세요' })
+  if (msg) showToast(msg)
 }
 
 async function removeGame(g) {

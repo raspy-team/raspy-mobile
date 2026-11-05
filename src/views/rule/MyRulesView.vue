@@ -52,7 +52,7 @@ import api from '../../api/api'
 import RuleListCard from '../../components/rule/RuleListCard.vue'
 import { UiBadge, UiButton, UiEmptyState, UiIconButton, UiSkeleton, UiTopBar } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 const router = useRouter()
 const { showToast } = useToast()

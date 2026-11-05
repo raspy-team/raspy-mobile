@@ -149,7 +149,7 @@
           "Organization"
         ],
         "summary": "소속 공개 범위",
-        "description": "ALL 모두 / SAME_ORG 같은 조직만 / HIDDEN 숨김(순위·소속 자리에서도 빠진다)",
+        "description": "ALL 모두 / SAME_ORG 같은 조직만 / HIDDEN 숨김(순위·챔피언에서도 빠진다)",
         "operationId": "visibility",
         "parameters": [
           {
@@ -2112,21 +2112,6 @@
         }
       }
     },
-    "/api/notifications/clear": {
-      "post": {
-        "tags": [
-          "Notification"
-        ],
-        "summary": "알림 전체 삭제",
-        "description": "로그인한 사용자의 모든 알림을 삭제합니다.",
-        "operationId": "clearAllNotifications",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/neighborhoods/verify": {
       "post": {
         "tags": [
@@ -2514,7 +2499,7 @@
           "invite-controller"
         ],
         "summary": "초대 링크 생성",
-        "description": "게임 ID로 브랜치 초대 링크를 생성합니다.",
+        "description": "게임 ID로 공유할 경기 주소를 만듭니다.",
         "operationId": "createInvite",
         "parameters": [
           {
@@ -4095,32 +4080,6 @@
         }
       }
     },
-    "/api/comments/{commentId}/dislike": {
-      "post": {
-        "tags": [
-          "comment-controller"
-        ],
-        "summary": "댓글 싫어요",
-        "description": "해당 댓글에 싫어요 추가",
-        "operationId": "dislikeComment",
-        "parameters": [
-          {
-            "name": "commentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/clubs": {
       "post": {
         "tags": [
@@ -4888,39 +4847,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/auth/check-username": {
-      "post": {
-        "tags": [
-          "auth-controller"
-        ],
-        "operationId": "checkUsername",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CheckUsernameRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -8035,47 +7961,6 @@
         }
       }
     },
-    "/api/nunchi/plays/{playId}/review": {
-      "get": {
-        "tags": [
-          "눈치 한 판"
-        ],
-        "summary": "내 판 돌아보기",
-        "description": "로그인한 사람의 낸 판",
-        "operationId": "myReview",
-        "parameters": [
-          {
-            "name": "playId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "visitorId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/Review"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/nunchi/guest-plays/{playId}/review": {
       "get": {
         "tags": [
@@ -8600,91 +8485,6 @@
         }
       }
     },
-    "/api/games/{gameId}/ranking": {
-      "get": {
-        "tags": [
-          "game-ranking-snapshot-controller"
-        ],
-        "summary": "게임 랭킹 스냅샷 조회",
-        "description": "종료된 게임의 랭킹 스냅샷을 조회합니다. '게임 참여자들과 그들의 친구들 <교집합> 나' 유저들의 레이팅 변화와 등수 변화를 확인할 수 있습니다.",
-        "operationId": "getGameRanking",
-        "parameters": [
-          {
-            "name": "gameId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "랭킹 스냅샷 조회 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GameRankingResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "랭킹 스냅샷을 찾을 수 없음",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GameRankingResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/games/{gameId}/participants/{email}": {
-      "get": {
-        "tags": [
-          "game-controller"
-        ],
-        "summary": "참가 신청 ID 조회",
-        "description": "gameId와 email로 참가 신청 엔티티의 ID를 조회합니다.",
-        "operationId": "getParticipationIdByGameAndEmail",
-        "parameters": [
-          {
-            "name": "gameId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "email",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int64"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/games/{gameId}/live": {
       "get": {
         "tags": [
@@ -8877,29 +8677,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/GameSummaryResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/games/request-count": {
-      "get": {
-        "tags": [
-          "game-controller"
-        ],
-        "summary": "경기 요청 개수 조회",
-        "description": "나의 경기 참가 신청 개수와 내가 받은 경기 참가 신청 개수를 반환합니다.",
-        "operationId": "getRequestCount",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int32"
                 }
               }
             }
@@ -9208,29 +8985,6 @@
         }
       }
     },
-    "/api/friends/my/sent": {
-      "get": {
-        "tags": [
-          "friend-controller"
-        ],
-        "operationId": "getMyFriendRequestsSent",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserSearchResultDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/friends/my/received": {
       "get": {
         "tags": [
@@ -9394,31 +9148,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/FeedItemResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/external-games": {
-      "get": {
-        "tags": [
-          "External Game"
-        ],
-        "summary": "인기 게임 목록",
-        "description": "규칙을 할 수 있는 다른 게임들. 아이디 이름·티어 연결 여부",
-        "operationId": "catalog",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExternalGameView"
-                  }
                 }
               }
             }
@@ -9817,26 +9546,6 @@
                   "items": {
                     "$ref": "#/components/schemas/UserSummaryDto"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/requestWithdraw": {
-      "get": {
-        "tags": [
-          "auth-controller"
-        ],
-        "operationId": "requestWithdraw",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BodyBuilder"
                 }
               }
             }
@@ -14769,17 +14478,6 @@
           }
         }
       },
-      "CheckUsernameRequest": {
-        "required": [
-          "username"
-        ],
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          }
-        }
-      },
       "AppPlayer": {
         "required": [
           "isBot",
@@ -19208,76 +18906,6 @@
           }
         }
       },
-      "GameRankingResponse": {
-        "required": [
-          "gameId",
-          "rankings"
-        ],
-        "type": "object",
-        "properties": {
-          "gameId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "rankings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RankingItemDto"
-            }
-          }
-        }
-      },
-      "RankingItemDto": {
-        "required": [
-          "isPlayer",
-          "nickname",
-          "rankAfter",
-          "ratingAfter",
-          "ratingBefore",
-          "ratingChange",
-          "userId"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "profilePicture": {
-            "type": "string"
-          },
-          "ratingBefore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ratingAfter": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ratingChange": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rankBefore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rankAfter": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rankChange": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "isPlayer": {
-            "type": "boolean"
-          }
-        }
-      },
       "GamePictureResponse": {
         "required": [
           "displayOrder",
@@ -21071,9 +20699,6 @@
             "format": "date-time"
           }
         }
-      },
-      "BodyBuilder": {
-        "type": "object"
       },
       "SocialProviders": {
         "required": [

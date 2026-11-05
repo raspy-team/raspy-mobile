@@ -250,7 +250,7 @@ import { GET, POST, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
 import { shareLink } from '@/utils/share'
 import { confirmDialog } from '@/composables/useConfirm'
-import { useToast } from '@/composable/useToast'
+import { useToast } from '@/composables/useToast'
 import ClubRulePicker from '../../components/club/ClubRulePicker.vue'
 import TournamentRow from '../../components/tournament/TournamentRow.vue'
 import {

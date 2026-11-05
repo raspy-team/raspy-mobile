@@ -38,7 +38,7 @@
           <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta === 0 ? "±0" : ratingDelta }}</span>
         </p>
         <!-- 첫 몇 판은 점수가 크게 움직인다. 숫자만 보여 주면 이긴 쪽은 착각하고 진 쪽은 상처받는다 -->
-        <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-1">처음 몇 판은 크게 움직여요. 더 하면 자리를 잡아요</p>
+        <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-1">처음 몇 판은 크게 움직여요. 판이 쌓이면 덜 움직여요</p>
         <!-- 다음 판: 이기든 지든 같은 규칙으로 바로 -->
         <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
           <p v-if="headline.line" class="t-body text-center mt-4">{{ headline.line }}</p>
@@ -165,7 +165,7 @@
         </span>
         <div class="min-w-0">
           <p class="t-heading">{{ championUser.id === currentUserId ? '새 챔피언이 됐어요' : `${championUser.nickname}님이 새 챔피언이에요` }}</p>
-          <p class="t-caption mt-0.5">이 규칙의 챔피언 자리는 다음 승자에게 넘어가요</p>
+          <p class="t-caption mt-0.5">이 규칙의 챔피언은 다음 승자에게 넘어가요</p>
         </div>
       </UiCard>
 
@@ -380,7 +380,7 @@ import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { GET, POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
-import { useActiveGamePolling } from '../../composable/useActiveGamePolling'
+import { useActiveGamePolling } from '../../composables/useActiveGamePolling'
 import { matchTime, who } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
@@ -392,16 +392,16 @@ import {
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'
-import { copyText } from '../../utils/clipboard'
-import { useToast } from '../../composable/useToast'
+import { shareGameInvite } from '../../utils/share'
+import { useToast } from '../../composables/useToast'
 import {
   getGamePictures,
   removeGamePicture,
   addGamePicture,
   addGameVideo,
-  compressImage,
   compressVideo,
 } from '../../utils/gamePictureStorage'
+import { compressImage, dataUrlToFile } from '../../utils/image'
 
 const { showToast } = useToast()
 const isSubmitting = ref(false)
@@ -982,19 +982,6 @@ const submitPictures = async () => {
   }
 }
 
-// base64를 File 객체로 변환
-const dataUrlToFile = (dataUrl, filename) => {
-  const arr = dataUrl.split(',')
-  const mime = arr[0].match(/:(.*?);/)[1]
-  const bstr = atob(arr[1])
-  let n = bstr.length
-  const u8arr = new Uint8Array(n)
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n)
-  }
-  return new File([u8arr], filename, { type: mime })
-}
-
 const goHome = () => router.push(`/profile/0?id=${gameId}`)
 
 // 친구 요청
@@ -1018,20 +1005,9 @@ async function sendFriendRequest() {
 
 // 경기 공유
 async function onShare() {
-  try {
-    const res = await api.post('/api/invite', null, { params: { gameId: `${gameId}` } })
-    const url = res.data.url
-    const opponentName = who(user1.value.id === currentUserId.value ? user2.value : user1.value)
-    const text = `${opponentName}님과의 경기 결과 – Match`
-
-    if (navigator.share) {
-      await navigator.share({ title: 'Match', text, url })
-    } else {
-      showToast((await copyText(url)) ? '링크를 복사했어요' : '복사하지 못했어요')
-    }
-  } catch (e) {
-    if (e?.name !== 'AbortError' && e?.message !== 'Share canceled') showToast('링크를 만들지 못했어요')
-  }
+  const opponentName = who(user1.value.id === currentUserId.value ? user2.value : user1.value)
+  const msg = await shareGameInvite(Number(gameId), `${opponentName}님과의 경기 결과 – Match`, { title: 'Match' })
+  if (msg) showToast(msg)
 }
 </script>
 

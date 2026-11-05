@@ -200,13 +200,13 @@ import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import ExtGamePlayers from '../../components/external/ExtGamePlayers.vue'
 import { UiAvatar, UiButton, UiEmptyState, UiIconButton, UiList, UiListItem, UiSheet, UiSpinner } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import {
   addGamePicture,
   addGameVideo,
-  compressImage,
   compressVideo,
 } from '../../utils/gamePictureStorage'
+import { compressImage } from '../../utils/image'
 
 const route = useRoute()
 const router = useRouter()

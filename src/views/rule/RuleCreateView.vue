@@ -29,7 +29,7 @@
       <template v-else>
         <div>
           <p class="t-title">{{ aiAvailable ? '이렇게 분류했어요' : '어떤 게임인지 골라 주세요' }}</p>
-          <p class="t-caption mt-1">{{ aiAvailable ? '틀린 곳만 고치면 돼요. 이 분류로 게임을 찾고, 능력치가 쌓여요' : '이 분류로 게임을 찾고, 능력치가 쌓여요' }}</p>
+          <p class="t-caption mt-1">{{ aiAvailable ? '틀린 곳만 고치면 돼요. 이 분류로 게임을 찾아요' : '이 분류로 게임을 찾아요' }}</p>
         </div>
         <UiInput v-model="form.ruleTitle" label="규칙 이름" :maxlength="20" placeholder="예: 탁구 11점 3판 2선승" />
         <CategoryEditor v-model="category" />

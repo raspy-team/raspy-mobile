@@ -98,7 +98,7 @@ import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import { UiButton, UiCard, UiEmptyState, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 
 type State = components['schemas']['BattleStateResponse']
 // 퐁: b 공, p 라켓, s 점수. 흔들기: c 횟수, left 남은 초

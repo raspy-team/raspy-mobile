@@ -53,9 +53,9 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
 import { UiAvatar, UiButton, UiChip, UiEmptyState, UiInput, UiList, UiListItem, UiSheet } from '../ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { ratingLine } from '../../utils/format'
-import { shareLink } from '../../utils/share'
+import { shareGameInvite } from '../../utils/share'
 
 defineProps({
   menu: { type: Object, default: null },
@@ -74,13 +74,8 @@ const reporting = ref(false)
 
 async function share(game) {
   emit('update:menu', null)
-  try {
-    const { data } = await api.post('/api/invite', null, { params: { gameId: game.id } })
-    const msg = await shareLink(data.url, `'${game.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`)
-    if (msg) showToast(msg)
-  } catch {
-    showToast('링크를 만들지 못했어요')
-  }
+  const msg = await shareGameInvite(game.id, `'${game.rule?.ruleTitle ?? '경기'}' 같이 한 판 해요`)
+  if (msg) showToast(msg)
 }
 
 function openReport(game) {

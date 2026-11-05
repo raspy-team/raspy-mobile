@@ -15,7 +15,7 @@
 // 친구와 둘이 신청 (팀 경기). 두 자리가 남은 팀 중 자리가 더 많은 팀으로 함께 신청한다
 import { ref, watch } from 'vue'
 import api from '../../api/api'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { UiAvatar, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiSheet } from '../ui'
 
 const props = defineProps({ game: { type: Object, default: null } })

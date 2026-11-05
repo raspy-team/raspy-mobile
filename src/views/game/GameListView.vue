@@ -52,12 +52,12 @@
       </UiCard>
 
       <UiCard v-else-if="!games.length">
-        <UiEmptyState mascot="match" title="아직 모집 중인 경기가 없어요" description="처음 여는 사람이 판을 깔아요. 앱 게임은 전국 누구와도 바로 할 수 있어요">
+        <UiEmptyState mascot="match" title="아직 모집 중인 경기가 없어요" description="처음 여는 사람이 판을 깔아요">
           <UiButton to="/create-game">경기 만들기</UiButton>
           <!-- 동네에 아직 사람이 없을 때 바로 할 수 있는 것: 범위 넓히기(동네 경기 화면이라 먼저), 전국 앱 게임 (11/4 밤샘, 제주에서 온 사람. 문구·모양 C) -->
           <div class="flex flex-wrap justify-center gap-2 mt-2">
             <UiButton size="sm" variant="secondary" to="/neighborhood">범위 넓히기</UiButton>
-            <UiButton size="sm" variant="ghost" to="/games">앱 게임 하기</UiButton>
+            <UiButton size="sm" variant="ghost" to="/plaza">앱 게임 하기</UiButton>
           </div>
         </UiEmptyState>
       </UiCard>
@@ -106,17 +106,17 @@ import Comment from '../GameCommentView.vue'
 import {
   UiButton, UiCard, UiEmptyState, UiIconButton, UiPullIndicator, UiSection, UiSkeleton, UiTopBar,
 } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { feel } from '../../utils/feel'
 import { todayBrandLine } from '@/utils/brandLines'
 
-// 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나 (사용자 11/3)
+// 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나라 맨 뒤 (사용자 11/3, 11/5)
 const DESTINATIONS = [
-  { to: '/plaza', icon: 'gamepad', label: '앱 게임' },
   { to: '/rules', icon: 'book-open', label: '규칙' },
   { to: '/clubs', icon: 'users', label: '동호회' },
+  { to: '/plaza', icon: 'gamepad', label: '앱 게임' },
 ]
 const brandLine = todayBrandLine()
 

@@ -140,7 +140,7 @@ import { GET, PUT, DELETE } from '../../api/client'
 import type { components } from '../../api/schema'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { timeAgo } from '../../utils/format'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { confirmDialog } from '../../composables/useConfirm'
 import {
   UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiListSkeleton,
@@ -158,7 +158,7 @@ const TYPE_ORDER: OrgType[] = ['UNIVERSITY', 'COMPANY', 'OTHER']
 const VISIBILITY: Record<Visibility, { label: string; hint: string }> = {
   ALL: { label: '모두', hint: '내 프로필을 보는 누구에게나 보여요' },
   SAME_ORG: { label: '같은 조직만', hint: '이 소속을 인증한 사람에게만 보여요' },
-  HIDDEN: { label: '숨김', hint: '아무에게도 안 보이고, 이 소속 순위와 챔피언 자리에서도 빠져요' },
+  HIDDEN: { label: '숨김', hint: '아무에게도 안 보이고, 이 소속 순위와 챔피언에서도 빠져요' },
 }
 const VISIBILITY_ORDER: Visibility[] = ['ALL', 'SAME_ORG', 'HIDDEN']
 const MAX_BYTES = 10 * 1024 * 1024
@@ -186,7 +186,7 @@ const leaving = ref(false)
 
 async function setVisibility(m: Membership, v: Visibility) {
   if (m.visibility === v) return
-  if (v === 'HIDDEN' && !(await confirmDialog({ title: '숨길까요?', message: `${m.name} 순위와 챔피언 자리에서도 빠져요. 언제든 다시 바꿀 수 있어요.`, confirmText: '숨기기' }))) return
+  if (v === 'HIDDEN' && !(await confirmDialog({ title: '숨길까요?', message: `${m.name} 순위와 챔피언에서도 빠져요. 언제든 다시 바꿀 수 있어요.`, confirmText: '숨기기' }))) return
   savingVisibility.value = v
   try {
     await PUT('/api/organizations/{orgId}/visibility', { path: { orgId: m.orgId }, body: { visibility: v } })

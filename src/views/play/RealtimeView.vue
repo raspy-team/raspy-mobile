@@ -176,7 +176,7 @@ import TurnViewPanel from '../../components/appgame/TurnViewPanel.vue'
 import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import OpponentName from '../../components/appgame/OpponentName.vue'
 import { shareLink } from '../../utils/share'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { UiButton, UiCard, UiEmptyState, UiIcon, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['RealtimeState']

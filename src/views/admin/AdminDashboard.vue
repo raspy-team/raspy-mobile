@@ -277,7 +277,7 @@ import { useRouter } from 'vue-router'
 import api from '../../api/api'
 import { GET, POST } from '../../api/client'
 import { timeAgo } from '../../utils/format'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { confirmDialog } from '../../composables/useConfirm'
 import {
   UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiInput, UiList, UiListItem, UiListSkeleton,

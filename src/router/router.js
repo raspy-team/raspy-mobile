@@ -21,19 +21,26 @@ const RuleDetail = () => import('../views/rule/RuleDetailView.vue')
 const DmRoomList = () => import('../views/DmRoomList.vue')
 const OauthCallback = () => import('../views/OauthCallBack.vue')
 const Onboarding = () => import('../views/auth/OnboardingView.vue')
-import { useToast } from '../composable/useToast'
+import { useToast } from '../composables/useToast'
 import { installOnboardingGuard } from './onboardingGuard'
 
 const GroupUserLogin = () => import('../views/auth/LoginView.vue')
 const GroupUserRegister = () => import('../views/admin/GroupUserRegister.vue')
-const InviteView = () => import('../views/InviteView.vue')
-const InviteDeep = () => import('../views/InviteDeep.vue')
 
 const Feed = () => import('../views/feed/FeedView.vue')
 const GameView = () => import('../views/game/GameView.vue')
 
 const AdminDashboard = () => import('../views/admin/AdminDashboard.vue')
 const AdminRuleEditRequests = () => import('../views/admin/AdminRuleEditRequestsView.vue')
+
+function openEncodedLink(to) {
+  try {
+    const url = new URL(decodeURIComponent(to.params.encodedUrl))
+    return url.pathname + url.search
+  } catch {
+    return '/'
+  }
+}
 
 const routes = [
   {
@@ -94,10 +101,9 @@ const routes = [
     component: GameResult,
     props: true
   },
-  {
-    path: '/invite/:encodedUrl',
-    component: InviteView,
-  },
+  // 옛 초대 링크(/invite/…, Branch 딥링크의 /invite-fall-back/…): 안에 담긴 주소로 바로 보낸다
+  { path: '/invite/:encodedUrl', redirect: openEncodedLink },
+  { path: '/invite-fall-back/:encodedUrl', redirect: openEncodedLink },
   { path: '/profile/:id/stats', component: () => import('../views/profile/RecordView.vue') },
   // 능력·종합 순위 (kind: OVERALL·GROUP·ABILITY, key: ALL·BODY·능력 이름)
   { path: '/rankings/:kind/:key', component: () => import('../views/profile/ScopeRankingView.vue') },
@@ -156,7 +162,6 @@ const routes = [
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/password-reset', component: () => import('../views/auth/PasswordResetView.vue') },
   { path: '/group/login', component: GroupUserLogin},
-  {path:'/invite-fall-back/:encodedUrl', component : InviteDeep},
   { path: '/feed', component: Feed},
 
   // Admin routes

@@ -162,8 +162,8 @@ import RuleBody from '../../components/rule/RuleBody.vue'
 import {
   UiAvatar, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
-import { copyText } from '../../utils/clipboard'
+import { useToast } from '../../composables/useToast'
+import { shareLink } from '../../utils/share'
 import { timeAgo } from '../../utils/format'
 import { ratingText, ruleKind, winSummary } from '../../utils/rule'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
@@ -202,15 +202,8 @@ const isMine = computed(() => rule.value?.createdBy?.id === myId.value)
 async function share() {
   menuOpen.value = false
   const url = `${window.location.origin}/rules/${rule.value.id}`
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: rule.value.ruleTitle, url })
-      return
-    } catch (e) {
-      if (e?.name === 'AbortError') return
-    }
-  }
-  showToast((await copyText(url)) ? '링크를 복사했어요' : '복사하지 못했어요')
+  const msg = await shareLink(url, '', { title: rule.value.ruleTitle })
+  if (msg) showToast(msg)
 }
 function goEdit() {
   menuOpen.value = false

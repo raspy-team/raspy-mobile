@@ -161,10 +161,10 @@ import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
   UiAiBadge, UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
-import { useToast } from '../../composable/useToast'
+import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
-import { copyText } from '../../utils/clipboard'
-import { compressImage, dataUrlToFile } from '../../utils/gamePictureStorage'
+import { shareLink } from '../../utils/share'
+import { compressImage, dataUrlToFile, readAsDataUrl } from '../../utils/image'
 import Comment from '../GameCommentView.vue'
 import { DELETE, POST } from '@/api/client'
 import { playWithMeTooAPI } from '../../api/api'
@@ -283,12 +283,7 @@ async function uploadPhoto(e) {
   if (!file || !p) return
   try {
     // 폰 사진은 10MB를 넘기 쉽다 (서버 한 파일 10MB). 피드에 충분한 크기로 줄여 올린다
-    const raw = await new Promise((resolve, reject) => {
-      const r = new FileReader()
-      r.onload = () => resolve(r.result)
-      r.onerror = reject
-      r.readAsDataURL(file)
-    })
+    const raw = await readAsDataUrl(file)
     const small = await compressImage(raw, 1280, 0.75)
     const form = new FormData()
     form.append('pictures', dataUrlToFile(small, `game_${p.id}.jpg`))
@@ -372,15 +367,8 @@ function share(p) {
 }
 async function inviteFriends() {
   const url = window.location.origin
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: 'Match', text: '같이 한 판 할래요? Match에서 경기를 잡아요', url })
-      return
-    } catch (e) {
-      if (e?.name === 'AbortError') return
-    }
-  }
-  showToast((await copyText(url)) ? '초대 링크를 복사했어요' : '복사하지 못했어요')
+  const msg = await shareLink(url, '같이 한 판 할래요? Match에서 경기를 잡아요', { title: 'Match', copied: '초대 링크를 복사했어요' })
+  if (msg) showToast(msg)
 }
 function openReport(p) {
   menuPost.value = null

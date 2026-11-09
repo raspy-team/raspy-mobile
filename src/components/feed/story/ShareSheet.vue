@@ -2,8 +2,8 @@
   <!-- 결과 밖으로 보내기 (docs/feed-media.md 2겹): 링크(미리보기 그림이 펼쳐진다) · 스토리 그림 · 글자 격자 -->
   <UiSheet :model-value="!!post" title="결과 보내기" @update:model-value="close">
     <UiList>
+      <UiListItem icon="fab fa-instagram" title="인스타 스토리에 올리기" :subtitle="saving ? '그림을 만드는 중…' : '인스타그램 → 스토리를 고르세요'" @click="saveStory" />
       <UiListItem icon="fas fa-link" title="링크 보내기" subtitle="카톡·메시지에 붙이면 경기 그림이 펼쳐져요" @click="sendLink" />
-      <UiListItem icon="images" title="스토리에 올릴 그림" :subtitle="saving ? '그림을 만드는 중…' : '세로 그림 한 장을 저장해요'" @click="saveStory" />
       <UiListItem icon="file-lines" title="글자로 복사" subtitle="X·단톡방에 붙여 넣는 몇 줄. 이름은 넣지 않아요" @click="copyGrid" />
     </UiList>
     <pre v-if="post" class="mt-3 rounded-xl bg-surface-2 px-4 py-3 text-sm whitespace-pre-line font-sans tabular-nums text-fg-muted">{{ grid }}</pre>
@@ -18,6 +18,7 @@ import { GET } from '@/api/client'
 import { UiList, UiListItem, UiSheet } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
 import { useToast } from '../../../composables/useToast'
+import { shareStoryFile, storyFile } from '../../../utils/storyShare'
 
 const props = defineProps<{
   /** 소식의 경기 한 장. null이면 닫힘 */
@@ -100,28 +101,24 @@ async function sendLink() {
 }
 
 async function saveStory() {
-  const id = props.post?.id
-  if (!id || saving.value || !shared.value) return
+  const post = props.post
+  if (!post?.id || saving.value) return
   saving.value = true
   try {
-    const res = await fetch(shared.value.storyImage)
-    if (!res.ok) throw new Error()
-    const file = new File([await res.blob()], `match-${id}.png`, { type: 'image/png' })
-    // 폰은 공유 시트로 넘겨 바로 인스타 스토리에 올리게 한다. 안 되면 내려받기
-    if (navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file] })
-        return close()
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return
-      }
+    // 앱 화면 그대로 찍은 그림. 못 찍으면(오래된 브라우저) 서버 그림으로 물러선다
+    let file: File
+    try {
+      file = await storyFile(post, props.myId ?? null)
+    } catch {
+      if (!shared.value) throw new Error()
+      const res = await fetch(shared.value.storyImage)
+      if (!res.ok) throw new Error()
+      file = new File([await res.blob()], `match-${post.id}.png`, { type: 'image/png' })
     }
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(file)
-    a.download = file.name
-    a.click()
-    setTimeout(() => URL.revokeObjectURL(a.href), 10_000)
-    showToast('그림을 저장했어요')
+    const r = await shareStoryFile(file)
+    if (r === 'cancelled') return
+    if (r === 'unsupported') return showToast('이 앱에서는 아직 못 올려요. 휴대폰 브라우저의 matchapp.me에서 올려 주세요')
+    if (r === 'saved') showToast('그림을 저장했어요. 인스타 스토리에서 올려 주세요')
     close()
   } catch {
     showToast('그림을 만들지 못했어요')

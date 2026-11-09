@@ -1,9 +1,9 @@
 <template>
-  <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
+  <article :class="[still ? '' : 'border-b border-line py-5', { 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }]">
     <FeedStoryLine :story="post.story" />
     <!-- 무엇을 · 어디서 · 언제 (이름은 아래 결과에 한 번만) -->
     <header class="flex items-center gap-3">
-      <span class="flex -space-x-2 flex-shrink-0">
+      <span v-if="!still" class="flex -space-x-2 flex-shrink-0">
         <UiAvatar v-for="pl in players" :key="pl.id" :src="pl.avatar" :name="pl.name" :user-id="pl.id" size="sm" class="ring-2 ring-canvas" />
       </span>
       <button type="button" class="flex-1 min-w-0 text-left" @click="emit('rule')">
@@ -12,7 +12,7 @@
         </span>
         <span class="block t-micro truncate">{{ [post.meta?.place, when].filter(Boolean).join(' · ') }}</span>
       </button>
-      <UiIconButton icon="fas fa-ellipsis" label="더보기" class="-mr-3 flex-shrink-0" @click="emit('more')" />
+      <UiIconButton v-if="!still" icon="fas fa-ellipsis" label="더보기" class="-mr-3 flex-shrink-0" @click="emit('more')" />
     </header>
 
     <!-- 결과: 이 카드의 주인공. 승자 이름에 형광펜. 카드 안에 상자를 또 두지 않는다 (11/3) -->
@@ -56,7 +56,7 @@
     </div>
 
     <!-- 사진·영상 (있을 때만) -->
-    <div v-if="post.photos?.length" class="mt-3 -mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+    <div v-if="post.photos?.length && !still" class="mt-3 -mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory">
       <template v-for="(m, i) in post.photos" :key="i">
         <video
           v-if="m.mediaType === 'VIDEO'"
@@ -86,7 +86,7 @@
     <FeedVoice :post="post" />
 
     <!-- 반응 + 사람에게 잇는 행동 ('이 규칙으로 한 판'은 더보기에) -->
-    <FeedActions :post="post" :my-id="myId" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
+    <FeedActions v-if="!still" :post="post" :my-id="myId" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
   </article>
 </template>
 
@@ -106,6 +106,8 @@ const props = defineProps({
   post: { type: Object, required: true },
   highlight: { type: Boolean, default: false },
   myId: { type: Number, default: null },
+  /** 그림으로 찍을 때 (인스타 스토리 그림): 누르는 것·사진·얼굴을 빼고 결과만 */
+  still: { type: Boolean, default: false },
 })
 const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'watch', 'challenge', 'more', 'photo'])
 

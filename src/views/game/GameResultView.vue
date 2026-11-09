@@ -367,6 +367,8 @@
   <!-- 숨겨진 카메라·동영상 입력 -->
   <input ref="cameraInputRef" type="file" accept="image/*" capture="environment" class="hidden" @change="onCameraChange" />
   <input ref="videoInputRef" type="file" accept="video/*" capture="environment" class="hidden" @change="onVideoChange" />
+  <!-- 확정된 경기: 인스타 스토리·링크·글자로 보내기 (소식과 같은 시트) -->
+  <ShareSheet :post="sharePost" :my-id="currentUserId || null" @close="sharePost = null" />
   </div>
 </template>
 
@@ -394,6 +396,7 @@ import {
 import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'
 import { shareGameInvite } from '../../utils/share'
+import ShareSheet from '../../components/feed/story/ShareSheet.vue'
 import { useToast } from '../../composables/useToast'
 import {
   getGamePictures,
@@ -1003,8 +1006,17 @@ async function sendFriendRequest() {
   }
 }
 
-// 경기 공유
+// 경기 공유: 확정된 경기는 소식 카드로 시트를 연다(인스타 스토리 그림이 첫 줄). 확정 전이면 경기 링크
+const sharePost = ref(null)
 async function onShare() {
+  if (confirmed.value && !disputed.value) {
+    try {
+      const { data } = await GET('/api/feed/game/{gameId}', { path: { gameId: Number(gameId) } })
+      if (data) return void (sharePost.value = data)
+    } catch {
+      // 소식 카드가 없는 경기(봇 연습 등)는 아래 링크로
+    }
+  }
   const opponentName = who(user1.value.id === currentUserId.value ? user2.value : user1.value)
   const msg = await shareGameInvite(Number(gameId), `${opponentName}님과의 경기 결과 – Match`, { title: 'Match' })
   if (msg) showToast(msg)

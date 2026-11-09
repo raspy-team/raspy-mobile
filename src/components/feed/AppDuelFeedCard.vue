@@ -1,5 +1,5 @@
 <template>
-  <article class="border-b border-line py-5" :class="{ 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }">
+  <article :class="[still ? '' : 'border-b border-line py-5', { 'bg-surface-2/40 -mx-4 px-4 rounded-xl': highlight }]">
     <FeedStoryLine v-if="!voting" :story="post.story" />
     <header class="flex items-center gap-3">
       <span class="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0" aria-hidden="true">
@@ -53,7 +53,7 @@
     <!-- 투표 중에는 이름을 가린 동안이라 사람에게 잇는 행동(또 보고 싶어요·도전해요)을 두지 않는다 -->
     <template v-if="!voting">
       <FeedVoice :post="post" />
-      <FeedActions :post="post" :my-id="myId ?? undefined" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
+      <FeedActions v-if="!still" :post="post" :my-id="myId ?? undefined" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
     </template>
   </article>
 </template>
@@ -73,7 +73,7 @@ import { UiAiBadge, UiIcon, UiSkeleton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 type Post = components['schemas']['FeedItemResponse']
-const props = defineProps<{ post: Post; highlight?: boolean; myId?: number | null }>()
+const props = defineProps<{ post: Post; highlight?: boolean; myId?: number | null; /** 그림으로 찍을 때: 누르는 것을 빼고 결과만 */ still?: boolean }>()
 type Player = { id: number; name: string; isBot?: boolean }
 const emit = defineEmits<{ profile: [id?: number]; like: []; comment: []; play: []; watch: [targets: Player[]]; challenge: [targets: Player[]] }>()
 

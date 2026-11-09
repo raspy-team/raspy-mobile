@@ -11,7 +11,8 @@
      바탕은 Material 다크 기준 #121214, 층은 한 칸에 밝기(L*) 4~5씩 띄운다. 그림자 없이 바탕 밝기로 층을 나누니
      예전 #0A0A0B·#111113(차이 L* 2.3)은 카드가 바탕에 묻혀 화면이 까만 판 하나로 보였다.
      글자는 모든 바탕에서 4.5:1 이상 (가장 낮은 곳: fg-subtle on surface-3 4.60) */
-  :root, html[data-theme='dark'] {
+  /* .theme-dark: 화면 설정과 상관없이 다크로 그릴 곳 (인스타 스토리 그림, src/components/share/StoryCard.vue) */
+  :root, html[data-theme='dark'], .theme-dark {
     color-scheme: dark;
     --c-canvas: 18 18 20;        /* #121214 */
     --c-surface: 28 28 31;       /* #1C1C1F */

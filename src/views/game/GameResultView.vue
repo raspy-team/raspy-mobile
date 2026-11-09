@@ -397,6 +397,7 @@ import { confirmDialog } from '../../composables/useConfirm'
 import { containsProfanity } from '../../utils/profanity'
 import { shareGameInvite } from '../../utils/share'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
+import { liveEnd } from '../../utils/liveActivity'
 import { useToast } from '../../composables/useToast'
 import {
   getGamePictures,
@@ -741,6 +742,8 @@ async function loadWitnesses() {
 
 let stopWatching = null
 onMounted(() => {
+  // 결과 화면이면 경기는 끝났다: 잠금화면 점수판을 끈다 (utils/liveActivity.ts)
+  liveEnd(Number(gameId))
   // 소식 카드(이야기 줄)는 확정된 경기에만 있다. 확인 전에 부르면 404가 났다
   const withBeats = () => load().then(() => confirmed.value && loadBeats())
   withBeats()

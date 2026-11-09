@@ -1,0 +1,4 @@
+// 잠금화면 점수판 확장만 iOS 17부터 (잠금화면 버튼이 iOS 17 기능). 프로젝트 파일에 적지 않고 여기에 둔다:
+// Capacitor CLI(cap sync)가 project.pbxproj의 첫 IPHONEOS_DEPLOYMENT_TARGET을 앱 최소 버전으로 읽어
+// 확장의 17.0을 읽으면 플러그인 패키지가 모두 iOS 17 전용이 된다 (11/9 빌드 4)
+IPHONEOS_DEPLOYMENT_TARGET = 17.0

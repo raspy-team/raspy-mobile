@@ -184,7 +184,8 @@
 
 <script setup>
 import { TEAM_NAMES } from '../../utils/gameFormat'
-import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
+import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue'
+import { liveEnd, liveSync } from '../../utils/liveActivity'
 import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -917,6 +918,28 @@ async function onVideoChange(e) {
   // input 초기화
   e.target.value = ''
 }
+
+// 아이폰 잠금화면 점수판 (Live Activity, utils/liveActivity.ts): 점수·세트·진행이 바뀔 때마다 맞춘다. 경기가 끝나면 끈다.
+// 점수판 화면을 떠나도 경기 중이면 잠금화면에 남는다 (폰을 주머니에 넣고 잠금화면에서 누를 수 있게)
+watch(
+  () => [user1.value?.id, user2.value?.id, currentSet.value, currentScore1.value, currentScore2.value, user1SetsWon.value, user2SetsWon.value, isSetOver.value, isGameOver.value, isCountingDown.value, showStartButton.value, game.setStartedAt],
+  () => {
+    if (!user1.value?.id || !user2.value?.id) return
+    if (isGameOver.value) return liveEnd(Number(gameId))
+    liveSync(
+      { gameId: Number(gameId), title: game.rule?.ruleTitle || '경기', user1Id: user1.value.id, user2Id: user2.value.id, name1: user1.value.nickname || '', name2: user2.value.nickname || '' },
+      {
+        setIndex: currentSet.value,
+        score1: currentScore1.value,
+        score2: currentScore2.value,
+        sets1: user1SetsWon.value,
+        sets2: user2SetsWon.value,
+        canScore: !isSetOver.value && !isCountingDown.value && !showStartButton.value,
+        setStartedAt: game.setStartedAt ? new Date(game.setStartedAt).getTime() : null,
+      },
+    )
+  },
+)
 
 onUnmounted(() => {
   clearInterval(timerRef.value)

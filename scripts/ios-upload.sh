@@ -19,6 +19,8 @@ xcodebuild -project App.xcodeproj -scheme App -configuration Release -destinatio
   KAKAO_NATIVE_KEY="$(cat ~/.config/match/kakao_native_key 2>/dev/null)"
 APP="$OUT/Match.xcarchive/Products/Applications/App.app"
 for f in "$APP"/Frameworks/*.framework(N); do codesign -f -s - "$f"; done
+# 위젯 확장(잠금화면 점수판 MatchLiveActivity)도 임시 서명. 내보낼 때 Xcode가 확장의 App Store 프로필로 다시 서명한다
+for f in "$APP"/PlugIns/*.appex(N); do codesign -f -s - "$f"; done
 codesign -f -s - --entitlements App/App.entitlements "$APP"
 cat > "$OUT/opts.plist" <<PL
 <?xml version="1.0" encoding="UTF-8"?>

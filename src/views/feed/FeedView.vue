@@ -74,6 +74,7 @@
           @profile="(id) => id && router.push('/profile/' + id)"
           @like="toggleLike(p)"
           @comment="commentId = Number(p.id)"
+          @share="share(p)"
           @play="router.push(`/play/${p.appDuel.key}`)"
           :my-id="myId"
           @watch="(t) => pick(p, 'watch', t)"
@@ -88,6 +89,7 @@
           @rule="router.push(`/rules/${p.rule.id}`)"
           @like="toggleLike(p)"
           @comment="commentId = Number(p.id)"
+          @share="share(p)"
           :my-id="myId"
           @watch="(t) => pick(p, 'watch', t)"
           @challenge="(t) => pick(p, 'challenge', t)"
@@ -108,7 +110,6 @@
       <UiList>
         <UiListItem icon="fas fa-flag-checkered" title="경기 결과 보기" chevron @click="go(`/games/${menuPost.id}/result`)" />
         <UiListItem v-if="menuPost?.rule?.id" icon="rotate-right" title="이 규칙으로 한 판" subtitle="같은 규칙으로 경기를 열어요" chevron @click="go(`/create-game?ruleId=${menuPost.rule.id}`)" />
-        <UiListItem icon="fas fa-arrow-up-from-bracket" title="결과 보내기" subtitle="링크 · 스토리 그림 · 글자" @click="share(menuPost)" />
         <UiListItem v-if="!menuPost?.isMyGame" icon="far fa-flag" title="신고" danger @click="openReport(menuPost)" />
       </UiList>
     </UiSheet>
@@ -357,7 +358,7 @@ function go(path) {
   menuPost.value = null
   router.push(path)
 }
-// 결과 보내기: 링크(경기마다 미리보기 그림) · 스토리 그림 · 글자 격자 (components/feed/story/ShareSheet)
+// 공유(카드의 댓글 옆 아이콘): 그림 미리보기 + 인스타 스토리·카톡·링크 (components/feed/story/ShareSheet)
 const sharePost = ref(null)
 const myId = ref(null)
 getMyId().then((id) => (myId.value = id)).catch(() => {})

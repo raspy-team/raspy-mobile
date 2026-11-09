@@ -53,7 +53,7 @@
     <!-- 투표 중에는 이름을 가린 동안이라 사람에게 잇는 행동(또 보고 싶어요·도전해요)을 두지 않는다 -->
     <template v-if="!voting">
       <FeedVoice :post="post" />
-      <FeedActions v-if="!still" :post="post" :my-id="myId ?? undefined" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
+      <FeedActions v-if="!still" :post="post" :my-id="myId ?? undefined" shareable @like="emit('like')" @comment="emit('comment')" @share="emit('share')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
     </template>
   </article>
 </template>
@@ -75,7 +75,7 @@ import { timeAgo } from '../../utils/format'
 type Post = components['schemas']['FeedItemResponse']
 const props = defineProps<{ post: Post; highlight?: boolean; myId?: number | null; /** 그림으로 찍을 때: 누르는 것을 빼고 결과만 */ still?: boolean }>()
 type Player = { id: number; name: string; isBot?: boolean }
-const emit = defineEmits<{ profile: [id?: number]; like: []; comment: []; play: []; watch: [targets: Player[]]; challenge: [targets: Player[]] }>()
+const emit = defineEmits<{ profile: [id?: number]; like: []; comment: []; share: []; play: []; watch: [targets: Player[]]; challenge: [targets: Player[]] }>()
 
 const duel = computed(() => props.post.appDuel!)
 const voting = computed(() => props.post.type === 'app_vote')

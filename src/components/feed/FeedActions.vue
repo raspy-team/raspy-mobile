@@ -10,6 +10,10 @@
         <UiIcon name="far fa-comment" class="text-lg" aria-hidden="true" />
         <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
       </button>
+      <!-- 공유: 인스타 스토리·카톡·링크 (Strava처럼 반응 옆에) -->
+      <button v-if="shareable" type="button" class="h-11 px-3 flex items-center text-sm text-fg-muted" aria-label="공유" @click="emit('share')">
+        <UiIcon name="share" class="text-lg" aria-hidden="true" />
+      </button>
     </template>
     <div class="flex-1"></div>
     <template v-if="targets.length">
@@ -38,8 +42,10 @@ const props = defineProps({
   post: { type: Object, required: true },
   myId: { type: Number, default: null },
   reactions: { type: Boolean, default: true },
+  /** 공유 아이콘 (끝난 경기만) */
+  shareable: { type: Boolean, default: false },
 })
-const emit = defineEmits(['like', 'comment', 'watch', 'challenge'])
+const emit = defineEmits(['like', 'comment', 'share', 'watch', 'challenge'])
 
 const targets = computed(() => (props.post.players || []).filter((p) => p.id !== props.myId && !p.isBot))
 const watchingAll = computed(() => targets.value.length > 0 && targets.value.every((p) => (props.post.watching || []).includes(p.id)))

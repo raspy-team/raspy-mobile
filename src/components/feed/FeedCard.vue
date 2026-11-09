@@ -86,7 +86,7 @@
     <FeedVoice :post="post" />
 
     <!-- 반응 + 사람에게 잇는 행동 ('이 규칙으로 한 판'은 더보기에) -->
-    <FeedActions v-if="!still" :post="post" :my-id="myId" @like="emit('like')" @comment="emit('comment')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
+    <FeedActions v-if="!still" :post="post" :my-id="myId" shareable @like="emit('like')" @comment="emit('comment')" @share="emit('share')" @watch="(t) => emit('watch', t)" @challenge="(t) => emit('challenge', t)" />
   </article>
 </template>
 
@@ -109,7 +109,7 @@ const props = defineProps({
   /** 그림으로 찍을 때 (인스타 스토리 그림): 누르는 것·사진·얼굴을 빼고 결과만 */
   still: { type: Boolean, default: false },
 })
-const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'watch', 'challenge', 'more', 'photo'])
+const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'share', 'watch', 'challenge', 'more', 'photo'])
 
 const players = computed(() => props.post.players || [])
 const ranking = computed(() => props.post.result?.ranking || [])

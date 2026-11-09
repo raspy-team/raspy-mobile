@@ -24,10 +24,14 @@ export function useOverlay(isOpen, close) {
 
   const onPop = () => {
     if (!token) return
+    // 시트 위에 시트를 연 경우(일정 정하기 → 공공장소 찾기): 위의 것이 닫히며 기록을 걷어내면 아래 시트의 기록으로 돌아온다.
+    // 그때는 아래 시트가 다시 맨 위가 된 것이지 닫힌 것이 아니다 (11/9: 장소를 고르면 일정 시트까지 닫혀 처음부터 다시 했다)
+    if (history.state?.__overlay === token) return
     token = null
     close()
   }
-  const onKey = (e) => e.key === 'Escape' && close()
+  // Esc는 맨 위 시트만 닫는다
+  const onKey = (e) => e.key === 'Escape' && history.state?.__overlay === token && close()
 
   function opened() {
     hookNavigation()

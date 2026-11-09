@@ -1,6 +1,9 @@
 package me.matchapp.instagram;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Base64;
@@ -35,7 +38,7 @@ public class MatchInstagramPlugin extends Plugin {
         call.resolve(ret);
     }
 
-    /** appId · sticker(PNG base64) · background(PNG base64, 없으면 색) · topColor · bottomColor */
+    /** appId · sticker(PNG base64) · background(PNG base64, 없으면 색) · topColor · bottomColor · link(클립보드에) */
     @PluginMethod
     public void shareToStory(PluginCall call) {
         Activity a = getActivity();
@@ -58,6 +61,12 @@ public class MatchInstagramPlugin extends Plugin {
                 Uri s = write(sticker, "ig-sticker.png");
                 intent.putExtra("interactive_asset_uri", s);
                 a.grantUriPermission(INSTAGRAM, s, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            // 스티커에 링크를 붙이는 공개 방법은 없다. 링크를 클립보드에 넣어 인스타 '링크' 스티커에 붙여 넣게 한다 (Strava 방식)
+            String link = call.getString("link");
+            if (link != null && !link.isEmpty()) {
+                ClipboardManager cm = (ClipboardManager) a.getSystemService(Context.CLIPBOARD_SERVICE);
+                if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("매치", link));
             }
             intent.putExtra("top_background_color", call.getString("topColor", "#121214"));
             intent.putExtra("bottom_background_color", call.getString("bottomColor", "#121214"));

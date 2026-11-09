@@ -113,10 +113,13 @@ export const isPhone = /iphone|ipad|android/i.test(navigator.userAgent)
  * 스티커: 투명 그림을 클립보드에 넣고 인스타 스토리 카메라를 연다. 인스타는 클립보드의 그림을 '스티커 추가'로 띄운다
  * (Strava의 '클립보드에 복사' 길). 클립보드에 그림을 못 넣는 브라우저면 false
  */
-export async function copyStickerAndOpenInstagram(file: File): Promise<boolean> {
+export async function copyStickerAndOpenInstagram(file: File, link?: string): Promise<boolean> {
   try {
     if (!navigator.clipboard || typeof ClipboardItem === 'undefined') return false
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': file })])
+    // 그림과 함께 링크도 (인스타 '링크' 스티커에 붙여 넣는다)
+    const types: Record<string, Blob> = { 'image/png': file }
+    if (link) types['text/plain'] = new Blob([link], { type: 'text/plain' })
+    await navigator.clipboard.write([new ClipboardItem(types)])
   } catch {
     return false
   }
@@ -147,12 +150,17 @@ function dataUrl(file: File): Promise<string> {
  * 앱(native/instagram-stories): 스포티파이처럼 인스타 스토리 편집기를 바로 연다. 배경은 고른 디자인의 색,
  * 위에는 결과 카드 스티커(투명 바탕, 손가락으로 옮기고 키운다). 인스타가 없으면 'not_installed'
  */
-export async function openInstagramStoryNative(sticker: File, variant: StoryVariant): Promise<'opened' | 'not_installed' | 'failed'> {
+export async function openInstagramStoryNative(sticker: File, variant: StoryVariant, link?: string): Promise<'opened' | 'not_installed' | 'failed'> {
   const [topColor, bottomColor] = STORY_BG[variant]
   try {
-    await (MatchInstagram as any).shareToStory({ appId: INSTAGRAM_APP_ID, sticker: await dataUrl(sticker), topColor, bottomColor })
+    await (MatchInstagram as any).shareToStory({ appId: INSTAGRAM_APP_ID, sticker: await dataUrl(sticker), topColor, bottomColor, link })
     return 'opened'
   } catch (e: any) {
     return String(e?.message || e).includes('not_installed') ? 'not_installed' : 'failed'
   }
+}
+
+/** 인스타 스토리에서 '링크' 스티커로 붙일 우리 홈 주소 (어느 경기에서 왔는지 꼬리표) */
+export function storyHomeLink(postId: number | string): string {
+  return `https://matchapp.me/?utm_source=instagram&utm_medium=story&utm_campaign=m${postId}`
 }

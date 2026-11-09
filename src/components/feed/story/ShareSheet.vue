@@ -52,7 +52,7 @@ import { GET } from '@/api/client'
 import { UiSheet, UiSkeleton, UiSpinner } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
 import { useToast } from '../../../composables/useToast'
-import { copyStickerAndOpenInstagram, openInstagramStoryNative, shareFiles, storyFile, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
+import { copyStickerAndOpenInstagram, openInstagramStoryNative, shareFiles, storyFile, storyHomeLink, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
 import { hasNativeInstagram } from '../../../utils/nativeBridge'
 import { storyLine } from '../../../utils/storyLine'
 
@@ -163,6 +163,11 @@ const line = computed(() => (props.post ? storyLine(props.post, props.myId ?? nu
 const close = () => emit('close')
 const copied = (url: string, msg = '링크를 복사했어요') => void copyText(url).then((ok) => showToast(ok ? msg : '복사하지 못했어요'))
 
+// 스토리 속 카드를 누르면 홈으로 가게 하는 공개 방법은 없다(스포티파이 링크는 메타 제휴 전용). 링크를 클립보드에 넣어 두었으니 링크 스티커로 붙이게 알린다
+function linkTip() {
+  showToast('홈 링크를 복사했어요. 인스타에서 링크 스티커에 붙여 넣으세요')
+  close()
+}
 function after(r: ShareResult) {
   if (r === 'cancelled') return
   if (r === 'unsupported') return showToast('이 앱에서는 아직 못 올려요. 휴대폰 브라우저의 matchapp.me에서 올려 주세요')
@@ -183,23 +188,26 @@ function go(key: Dest) {
   }
   const file = files[current.value]
   if (!file) return showToast('그림을 만드는 중이에요')
+  const home = storyHomeLink(props.post.id)
   if (key === 'story' && hasNativeInstagram && files.sticker) {
     // 앱: 스포티파이처럼 인스타 편집기에 배경색 + 움직이는 결과 카드
-    return void openInstagramStoryNative(files.sticker, current.value).then((r) => {
-      if (r === 'opened') return close()
+    return void openInstagramStoryNative(files.sticker, current.value, home).then((r) => {
+      if (r === 'opened') return linkTip()
       if (r === 'not_installed') return showToast('인스타그램 앱이 있어야 올릴 수 있어요')
       shareFiles([file]).then(after)
     })
   }
   if (key === 'story') {
     if (current.value === 'sticker') {
-      return void copyStickerAndOpenInstagram(file).then((ok) => {
-        if (ok) return close()
+      return void copyStickerAndOpenInstagram(file, home).then((ok) => {
+        if (ok) return linkTip()
         // 클립보드에 그림을 못 넣는 브라우저: 그림을 넘겨 인스타에서 고르게
         shareFiles([file]).then(after)
       })
     }
-    return void shareFiles([file]).then(after)
+    // 그림을 넘기면서 링크는 클립보드에 (같은 누름 안에서 둘 다 시작해야 사파리가 막지 않는다)
+    void navigator.clipboard?.writeText(home).catch(() => null)
+    return void shareFiles([file]).then((r) => (r === 'shared' ? linkTip() : after(r)))
   }
   // 더보기: 그림과 한 줄·링크를 함께 (폰이 아는 모든 곳)
   const url = link('link')

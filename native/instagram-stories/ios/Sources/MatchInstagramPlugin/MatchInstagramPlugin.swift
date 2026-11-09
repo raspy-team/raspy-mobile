@@ -21,7 +21,7 @@ public class MatchInstagramPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// appId · sticker(PNG base64) · background(PNG base64, 없으면 색) · topColor · bottomColor
+    /// appId · sticker(PNG base64) · background(PNG base64, 없으면 색) · topColor · bottomColor · link(붙여넣기 칸에)
     @objc func shareToStory(_ call: CAPPluginCall) {
         guard let appId = call.getString("appId"), !appId.isEmpty,
               let url = URL(string: "instagram-stories://share?source_application=\(appId)") else {
@@ -42,6 +42,10 @@ public class MatchInstagramPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             if let b = MatchInstagramPlugin.png(call.getString("background")) {
                 item["com.instagram.sharedSticker.backgroundImage"] = b
+            }
+            // 스티커에 링크를 붙이는 공개 방법은 없다. 같은 붙여넣기 칸에 링크도 넣어 인스타 '링크' 스티커에 붙여 넣게 한다 (Strava 방식)
+            if let link = call.getString("link"), !link.isEmpty {
+                item["public.utf8-plain-text"] = link
             }
             UIPasteboard.general.setItems([item], options: [.expirationDate: Date().addingTimeInterval(60 * 5)])
             UIApplication.shared.open(url, options: [:]) { ok in

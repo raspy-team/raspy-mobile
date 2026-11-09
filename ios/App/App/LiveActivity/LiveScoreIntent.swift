@@ -34,9 +34,34 @@ struct LiveScoreIntent: LiveActivityIntent {
 enum LiveScoreClient {
     private static let service = "me.matchapp.live-activity"
 
-    static func save(apiBase: String, token: String) {
+    static func save(apiBase: String, token: String, fcmToken: String?) {
         set("apiBase", apiBase)
         set("token", token)
+        if let f = fcmToken, !f.isEmpty { set("fcm", f) }
+    }
+
+    /// 서버에 이 잠금화면 점수판의 푸시 주소를 알린다. 상대 폰이 낸 점수를 서버가 바로 보내 준다 (raspy-api LiveActivityService).
+    /// 서버는 경기 동안만 메모리에 두므로, 서버가 다시 켜져도 이어지게 버튼을 누를 때·점수판이 바뀔 때도 다시 알린다 (1분에 한 번)
+    static func registerPush(_ activity: Activity<MatchScoreAttributes>, force: Bool = false) async {
+        guard let tokenData = activity.pushToken else { return }
+        let key = "pushRegisteredAt-\(activity.id)"
+        let last = UserDefaults.standard.double(forKey: key)
+        if !force && Date().timeIntervalSince1970 - last < 60 { return }
+        guard let base = get("apiBase"), let token = get("token"), let fcm = get("fcm"),
+              let url = URL(string: "\(base)/api/games/\(activity.attributes.gameId)/live-activity") else { return }
+        let push = tokenData.map { String(format: "%02x", $0) }.joined()
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.timeoutInterval = 10
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: [
+            "pushToken": push, "fcmToken": fcm,
+            "user1Id": activity.attributes.user1Id, "user2Id": activity.attributes.user2Id,
+        ])
+        if let (_, res) = try? await URLSession.shared.data(for: req), (res as? HTTPURLResponse)?.statusCode == 200 {
+            UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: key)
+        }
     }
 
     static func send(gameId: Int, targetUserId: Int, delta: Int) async {
@@ -69,6 +94,7 @@ enum LiveScoreClient {
         state.score1 = (scores[String(attrs.user1Id)] as? NSNumber)?.intValue ?? 0
         state.score2 = (scores[String(attrs.user2Id)] as? NSNumber)?.intValue ?? 0
         await activity.update(ActivityContent(state: state, staleDate: nil))
+        await registerPush(activity)
     }
 
     // MARK: 키체인

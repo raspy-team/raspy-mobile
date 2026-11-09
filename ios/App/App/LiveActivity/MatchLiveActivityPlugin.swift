@@ -32,7 +32,7 @@ public class MatchLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             return call.reject("bad_args")
         }
         if let base = call.getString("apiBase"), let token = call.getString("token") {
-            LiveScoreClient.save(apiBase: base, token: token)
+            LiveScoreClient.save(apiBase: base, token: token, fcmToken: call.getString("fcmToken"))
         }
         let attrs = MatchScoreAttributes(gameId: gameId, title: call.getString("title") ?? "경기", user1Id: u1, user2Id: u2,
                                          name1: call.getString("name1") ?? "", name2: call.getString("name2") ?? "")
@@ -41,12 +41,15 @@ public class MatchLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             // 같은 경기가 이미 떠 있으면 그것을 바꾼다 (화면을 다시 열 때마다 새로 띄우지 않게)
             if let existing = Activity<MatchScoreAttributes>.activities.first(where: { $0.attributes.gameId == gameId }) {
                 await existing.update(ActivityContent(state: state, staleDate: nil))
+                Self.watchPushToken(existing)
                 return call.resolve(["id": existing.id])
             }
             // 다른 경기의 것은 닫는다 (한 번에 한 경기)
             for a in Activity<MatchScoreAttributes>.activities { await a.end(nil, dismissalPolicy: .immediate) }
             do {
-                let a = try Activity.request(attributes: attrs, content: ActivityContent(state: state, staleDate: nil), pushType: nil)
+                // pushType .token: 서버가 상대 폰의 점수를 이 점수판에 바로 보낼 수 있게 (FCM Live Activity 푸시)
+                let a = try Activity.request(attributes: attrs, content: ActivityContent(state: state, staleDate: nil), pushType: .token)
+                Self.watchPushToken(a)
                 call.resolve(["id": a.id])
             } catch {
                 call.reject(error.localizedDescription)
@@ -60,6 +63,7 @@ public class MatchLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         Task {
             for a in Activity<MatchScoreAttributes>.activities where a.attributes.gameId == gameId {
                 await a.update(ActivityContent(state: state, staleDate: nil))
+                await LiveScoreClient.registerPush(a)
             }
             call.resolve()
         }
@@ -73,6 +77,19 @@ public class MatchLiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
                 await a.end(nil, dismissalPolicy: .immediate)
             }
             call.resolve()
+        }
+    }
+
+    /// 활동마다 한 번: 푸시 주소가 나오거나 바뀌면 서버에 알린다
+    private static var watching = Set<String>()
+    @available(iOS 17.0, *)
+    private static func watchPushToken(_ activity: Activity<MatchScoreAttributes>) {
+        guard !watching.contains(activity.id) else { return }
+        watching.insert(activity.id)
+        Task {
+            for await _ in activity.pushTokenUpdates {
+                await LiveScoreClient.registerPush(activity, force: true)
+            }
         }
     }
 

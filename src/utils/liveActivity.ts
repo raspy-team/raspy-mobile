@@ -3,7 +3,7 @@
 // 잠금화면의 −1·+1은 앱이 뒤에 있어도 서버(POST /api/games/{id}/live-score)로 점수를 내므로, 로그인 토큰과 서버 주소를 함께 넘긴다
 import { Capacitor, registerPlugin } from '@capacitor/core'
 import { API_BASE_URL } from '../config/server'
-import { isCapacitorApp } from './nativeBridge'
+import { isCapacitorApp, pushToken } from './nativeBridge'
 
 const MatchLiveActivity = registerPlugin<any>('MatchLiveActivity')
 
@@ -41,7 +41,8 @@ export function liveSync(game: LiveScoreGame, state: LiveScoreState) {
   } catch {
     // 저장소를 못 읽으면 잠금화면 버튼만 안 된다
   }
-  MatchLiveActivity.start({ ...game, ...s, apiBase: API_BASE_URL, token }).catch(() => {
+  // fcmToken: 서버가 상대 폰의 점수를 이 잠금화면에 바로 보낼 때 쓴다 (FCM Live Activity 푸시는 앱의 FCM 토큰도 필요하다)
+  MatchLiveActivity.start({ ...game, ...s, apiBase: API_BASE_URL, token, fcmToken: pushToken() || '' }).catch(() => {
     started = null
   })
 }

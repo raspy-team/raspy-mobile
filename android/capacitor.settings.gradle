@@ -10,3 +10,6 @@ project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/
 
 include ':match-kakao-login'
 project(':match-kakao-login').projectDir = new File('../native/kakao-login/android')
+
+include ':match-instagram-stories'
+project(':match-instagram-stories').projectDir = new File('../native/instagram-stories/android')

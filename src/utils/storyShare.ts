@@ -6,7 +6,7 @@ import { createApp, h, nextTick } from 'vue'
 import { snapdom } from '@zumer/snapdom'
 import StoryCard from '../components/share/StoryCard.vue'
 import UiIcon from '../components/ui/UiIcon.vue'
-import { isCapacitorApp } from './nativeBridge'
+import { isCapacitorApp, MatchInstagram } from './nativeBridge'
 
 /** dark·volt: 스토리 한 장(1080×1920) · sticker: 투명 바탕 카드, 내 사진 위에 붙인다 */
 export type StoryVariant = 'dark' | 'volt' | 'sticker'
@@ -122,4 +122,37 @@ export async function copyStickerAndOpenInstagram(file: File): Promise<boolean> 
   }
   if (isPhone) window.location.href = 'instagram://story-camera'
   return true
+}
+
+/** 인스타 공식 '스토리로 공유'에 쓰는 페이스북 앱 ID (developers.facebook.com '매치', 11/9). 비밀값이 아니다 */
+export const INSTAGRAM_APP_ID = '1427683232858104'
+
+/** 디자인마다 인스타 편집기의 배경색 (위·아래가 다르면 인스타가 그러데이션을 만든다) */
+const STORY_BG: Record<StoryVariant, [string, string]> = {
+  dark: ['#121214', '#2E2E33'],
+  volt: ['#D2FF4D', '#D2FF4D'],
+  sticker: ['#121214', '#121214'],
+}
+
+function dataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(String(r.result))
+    r.onerror = () => reject(r.error)
+    r.readAsDataURL(file)
+  })
+}
+
+/**
+ * 앱(native/instagram-stories): 스포티파이처럼 인스타 스토리 편집기를 바로 연다. 배경은 고른 디자인의 색,
+ * 위에는 결과 카드 스티커(투명 바탕, 손가락으로 옮기고 키운다). 인스타가 없으면 'not_installed'
+ */
+export async function openInstagramStoryNative(sticker: File, variant: StoryVariant): Promise<'opened' | 'not_installed' | 'failed'> {
+  const [topColor, bottomColor] = STORY_BG[variant]
+  try {
+    await (MatchInstagram as any).shareToStory({ appId: INSTAGRAM_APP_ID, sticker: await dataUrl(sticker), topColor, bottomColor })
+    return 'opened'
+  } catch (e: any) {
+    return String(e?.message || e).includes('not_installed') ? 'not_installed' : 'failed'
+  }
 }

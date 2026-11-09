@@ -13,6 +13,11 @@ export const isCapacitorApp = Capacitor.isNativePlatform()
 // 아이폰 구글 로그인도 같은 빌드부터 된다: 그 전 빌드엔 구글이 돌아올 주소(Info.plist)가 없어 누르면 앱이 꺼진다
 export const hasNativeKakao = isCapacitorApp && Capacitor.isPluginAvailable('MatchKakao')
 
+// 인스타 스토리 편집기로 바로 보내는 플러그인(native/instagram-stories)이 든 앱 빌드인지 (안드로이드 versionCode 6·아이폰 빌드 3부터).
+// 스포티파이처럼 배경색 + 움직이는 결과 카드 스티커를 넘긴다 (components/feed/story/ShareSheet.vue)
+export const hasNativeInstagram = isCapacitorApp && Capacitor.isPluginAvailable('MatchInstagram')
+export const MatchInstagram = registerPlugin('MatchInstagram')
+
 // 로그인 뒤 푸시 알림 토큰을 서버에 등록하도록 앱에 알린다
 export function registerFcmToken(jwt) {
   if (isCapacitorApp) registerCapacitorPush()

@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 안드로이드 11부터 다른 앱이 깔렸는지 보려면 미리 적어 둔다 (인스타가 없으면 'not_installed') -->
+    <queries>
+        <package android:name="com.instagram.android" />
+    </queries>
+</manifest>

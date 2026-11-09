@@ -40,7 +40,7 @@
       </button>
     </div>
     <!-- 스티커일 때만 보이지만 자리는 늘 잡아 둔다 (넘길 때 시트 높이가 튀지 않게) -->
-    <p class="mt-4 t-caption text-center break-keep" :class="{ invisible: current !== 'sticker' }">인스타에서 사진을 고르면 이 카드가 스티커로 붙어요</p>
+    <p class="mt-4 t-caption text-center break-keep" :class="{ invisible: current !== 'sticker' || hasNativeInstagram }">인스타에서 사진을 고르면 이 카드가 스티커로 붙어요</p>
   </UiSheet>
 </template>
 
@@ -52,7 +52,8 @@ import { GET } from '@/api/client'
 import { UiSheet, UiSkeleton, UiSpinner } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
 import { useToast } from '../../../composables/useToast'
-import { copyStickerAndOpenInstagram, shareFiles, storyFile, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
+import { copyStickerAndOpenInstagram, openInstagramStoryNative, shareFiles, storyFile, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
+import { hasNativeInstagram } from '../../../utils/nativeBridge'
 import { storyLine } from '../../../utils/storyLine'
 
 const props = defineProps<{
@@ -82,7 +83,8 @@ const files = reactive<Partial<Record<StoryVariant, File>>>({})
 const urls = reactive<Partial<Record<StoryVariant, string>>>({})
 const active = ref(0)
 const current = computed(() => VARIANTS[active.value].key)
-const ready = computed(() => !!files[current.value])
+// 앱에서 인스타 스토리는 늘 스티커 그림을 넘긴다 (배경은 고른 디자인의 색)
+const ready = computed(() => !!files[current.value] && (!hasNativeInstagram || !!files.sticker))
 const rail = ref<HTMLElement | null>(null)
 
 // 서명(k)이 붙은 주소는 서버가 준다 (번호만으로는 열리지 않는다)
@@ -97,7 +99,9 @@ watch(
     GET('/api/games/{gameId}/share-link', { path: { gameId: Number(id) } }).then(({ data }) => {
       if (data && my === run) shared.value = data
     }, () => null)
-    for (const v of VARIANTS) {
+    // 앱(인스타 플러그인)에서는 인스타 버튼이 스티커를 쓰니 스티커부터 찍는다
+    const order = hasNativeInstagram ? [VARIANTS[2], VARIANTS[0], VARIANTS[1]] : VARIANTS
+    for (const v of order) {
       try {
         const f = await storyFile(props.post, props.myId ?? null, v.key)
         if (my !== run) return
@@ -179,6 +183,14 @@ function go(key: Dest) {
   }
   const file = files[current.value]
   if (!file) return showToast('그림을 만드는 중이에요')
+  if (key === 'story' && hasNativeInstagram && files.sticker) {
+    // 앱: 스포티파이처럼 인스타 편집기에 배경색 + 움직이는 결과 카드
+    return void openInstagramStoryNative(files.sticker, current.value).then((r) => {
+      if (r === 'opened') return close()
+      if (r === 'not_installed') return showToast('인스타그램 앱이 있어야 올릴 수 있어요')
+      shareFiles([file]).then(after)
+    })
+  }
   if (key === 'story') {
     if (current.value === 'sticker') {
       return void copyStickerAndOpenInstagram(file).then((ok) => {

@@ -86,7 +86,8 @@
         <template v-if="improv">
           <div class="grid grid-cols-2 gap-2 mt-4">
             <UiButton icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
-            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 도전</UiButton>
+            <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
+            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '친구에게 결과 보내기' : '친구에게 도전' }}</UiButton>
           </div>
           <UiCard v-for="(s, i) in improvShown" :key="s.id" class="mt-3">
             <p class="t-micro">{{ s.who }}</p>
@@ -440,12 +441,21 @@ async function challengeFriend() {
   trackEvent('challenge', key.value === 'improv' ? 'improv' : 'nunchi')
   sharing.value = 'challenge'
   try {
-    const text = improv.value
+    const c = result.value?.challengerScore
+    const text = improv.value && c != null
+      ? (result.value!.score > c
+          ? `네 도전장 받았는데 내가 이김 ㅋㅋ 나 ${improv.value.grade}등급. 다시 붙을래?`
+          : result.value!.score < c
+            ? `네 도전장… 졌다. 나 ${improv.value.grade}등급. 이번엔 내 상황으로 붙자`
+            : `네 도전장 비김 ㅋ 둘 다 ${improv.value.grade}등급. 한 판 더?`)
+      : improv.value
       ? `${improvShareLine(improv.value.grade)} 같은 상황으로 붙어 보자`
       : `눈치 한 판 ${result.value?.score ?? 0}점. 같은 문제로 붙어 볼래요? 문제당 3초예요`
     const msg = await shareLink(`${window.location.origin}/try/${key.value}?c=${playId.value}`, text)
     track('result_challenge_shared', { gameKey: key.value, value: msg || 'share' })
-    if (msg) showToast(msg)
+    // 보낸 사람에게 결과를 볼 곳을 알린다 (손님은 알림이 없어 이 링크(/try/improv)로 다시 와야 본다)
+    if (key.value === 'improv' && result.value?.challengerScore == null) showToast(msg ? `${msg}. 친구가 하면 이 화면에서 승패가 보여요` : '친구가 하면 이 화면에서 승패가 보여요')
+    else if (msg) showToast(msg)
   } finally {
     sharing.value = ''
   }

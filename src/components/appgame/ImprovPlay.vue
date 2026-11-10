@@ -80,7 +80,8 @@ const input = ref<{ focus?: () => void } | null>(null)
 // 반응이 5초를 넘으면 "생각하는 중" 한 줄을 더한다. 인물 이름은 짧게 (교수님·선배·동기)
 const slow = ref(false)
 const whoShort = computed(() => ({ UP: '교수님이', SENIOR: '선배가', PEER: '동기가' })[current.value?.slot ?? ''] ?? '상대가')
-const REACT_TIMEOUT_MS = 15_000
+// 반응은 AI라 가끔 10초를 넘는다(걷기: 첫 반응 10.9·15.3초). 45초까지 기다리되, 5초부터 '생각하는 중'으로 안심시킨다
+const REACT_TIMEOUT_MS = 45_000
 
 let shownAt = Date.now()
 const startedAt = Date.now()
@@ -110,11 +111,8 @@ async function say() {
   slow.value = false
   const slowTimer = setTimeout(() => (slow.value = true), 5000)
   try {
-    // 15초를 넘기면 기다리지 않고 넘어간다. 점수는 끝에 다시 채점된다 (같은 답이면 저장한 채점을 쓴다)
-    const { data } = await Promise.race([
-      POST('/api/improv/react', { body: { situationId: current.value.id, text: line } }),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REACT_TIMEOUT_MS)),
-    ])
+    // 45초를 넘기면 기다리지 않고 넘어간다. 점수는 끝에 다시 채점된다 (같은 답이면 저장한 채점을 쓴다)
+    const { data } = await POST('/api/improv/react', { body: { situationId: current.value.id, text: line }, timeout: REACT_TIMEOUT_MS, quiet: true })
     reactions.value[index.value] = data?.reaction || '…'
   } catch {
     reactions.value[index.value] = '(반응을 받지 못했어요. 점수는 끝에 나와요)'

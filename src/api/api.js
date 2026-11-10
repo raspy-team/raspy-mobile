@@ -37,7 +37,8 @@ api.interceptors.response.use(
     return response
   },
   async error => {
-    markServer(error)
+    // 오래 걸려도 되는 요청(임기응변 반응 등)은 시간 초과를 '서버가 안 된다' 띠로 알리지 않는다. 그 화면이 스스로 알린다
+    if (!error.config?.quiet) markServer(error)
     const config = error.config
 
     // 재시도 횟수 제한

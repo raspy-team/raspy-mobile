@@ -26,6 +26,10 @@ type Ok<O> = O extends { responses: { 200: { content: { '*/*': infer T } } } }
 type Options<O> = ([PathParams<O>] extends [never] ? { path?: never } : { path: PathParams<O> }) & {
   query?: QueryParams<O>
   body?: Body<O>
+  /** 이 요청만 기다리는 시간(ms). 없으면 공통 15초 */
+  timeout?: number
+  /** 실패해도 앱 전체의 '서버에 연결하지 못했어요' 띠를 띄우지 않는다 (그 화면이 알아서 알린다) */
+  quiet?: boolean
 }
 
 function toUrl(path: string, params?: Record<string, unknown>) {
@@ -34,13 +38,15 @@ function toUrl(path: string, params?: Record<string, unknown>) {
 
 function call<M extends Method>(method: M) {
   return async <P extends PathsWith<M>>(path: P, options?: Options<Op<P, M>>): Promise<{ data: Ok<Op<P, M>> }> => {
-    const opts = (options ?? {}) as { path?: Record<string, unknown>; query?: object; body?: unknown }
+    const opts = (options ?? {}) as { path?: Record<string, unknown>; query?: object; body?: unknown; timeout?: number; quiet?: boolean }
     const res = await api.request({
       method,
       url: toUrl(path as string, opts.path),
       params: opts.query,
       data: opts.body,
-    })
+      ...(opts.timeout ? { timeout: opts.timeout } : {}),
+      ...(opts.quiet ? { quiet: true } : {}),
+    } as any)
     return { data: res.data }
   }
 }

@@ -349,7 +349,9 @@ async function submit(answer: string) {
   submitting.value = true
   submitError.value = ''
   try {
-    result.value = (await POST('/api/guest/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { visitorId, answer } })).data
+    // 임기응변은 반응을 못 받은 답을 여기서 다시 채점해 15초를 넘을 수 있다: 60초까지 기다리고, 막히면 이 화면이 '다시 채점하기'로 알린다
+    const slow = key.value === 'improv' ? { timeout: 60_000, quiet: true } : {}
+    result.value = (await POST('/api/guest/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { visitorId, answer }, ...slow })).data
     markGuestPlayed()
     feel(result.value.score > 0 ? 'success' : 'lose')
     track('guest_play_result', { gameKey: key.value, step: rounds.value, value: `score=${result.value.score};rank=${result.value.rank ?? ''}/${result.value.rankOf ?? ''}` })

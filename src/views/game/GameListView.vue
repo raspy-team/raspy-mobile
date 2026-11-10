@@ -7,6 +7,16 @@
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
 
+    <!-- 최근 2주 안에 하던 앱 게임: 다시 연 사람이 하던 것부터 (3-5 걷기 P6) -->
+    <RouterLink v-if="lastGame" :to="`/play/${lastGame.key}`" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 active:bg-surface-2">
+      <UiIcon name="play" class="text-fg-muted" aria-hidden="true" />
+      <span class="flex-1 min-w-0">
+        <span class="block t-micro">이어서 하기</span>
+        <span class="block t-heading truncate">{{ lastGame.title }}</span>
+      </span>
+      <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
+    </RouterLink>
+
     <!-- 지금 동네 (경기 목록이 이 동네 범위를 따른다) -->
     <NeighborhoodBar class="mt-5 mb-3" @changed="fetchGames" />
 
@@ -93,6 +103,16 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
+
+// 최근 2주 안에 연 앱 게임 (AppGameView가 남긴다)
+const lastGame = (() => {
+  try {
+    const v = JSON.parse(localStorage.getItem('last_app_game') || 'null')
+    return v?.key && Date.now() - v.at < 14 * 24 * 3600_000 ? v : null
+  } catch {
+    return null
+  }
+})()
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import MatchRuleModal from '../../components/MatchModal.vue'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'

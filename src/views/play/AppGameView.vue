@@ -567,6 +567,14 @@ async function load() {
   const games = await GET('/api/app-games')
   const first = !game.value
   game.value = games.data.find((g) => g.key === key.value) ?? null
+  // 다시 앱을 열면 홈 맨 위에 '이어서 하기'로 (3-5 걷기 P6: 다시 열면 동네 경기 목록이라 "내가 하던 게임 어디 있어?")
+  if (game.value) {
+    try {
+      localStorage.setItem('last_app_game', JSON.stringify({ key: game.value.key, title: game.value.title, at: Date.now() }))
+    } catch {
+      // 못 남기면 홈에 안 보일 뿐이다
+    }
+  }
   missing.value = !game.value
   if (!game.value) return
   const mine = await GET('/api/app-games/{key}/duels', { path: { key: key.value } })

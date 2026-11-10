@@ -39,7 +39,7 @@ export function improvShareLine(grade: number): string {
 }
 
 /** 송현(서울대 의대생)이 실제로 해서 나온 등급. 해 보기 전에는 null이고, 그동안 숫자를 지어내지 않는다 */
-export const SONGHYUN_GRADE: number | null = null
+export const SONGHYUN_GRADE: number | null = 4
 
 /** 게임 소개 한 줄 (고병연 문구, 송현 등급이 정해지면 숫자가 들어간다) */
 export const IMPROV_LINE = SONGHYUN_GRADE

@@ -36,7 +36,10 @@
     <!-- 임기응변 등급: 점수 막대 대신 등급과 '첫 마디 → 대답' 한 쌍 (막대가 자리를 먹어 정작 대답이 잘렸다, 3-5 P6 나머지) -->
     <div v-if="improvText" class="mt-7 rounded-2xl bg-surface text-fg px-4 py-5">
       <p class="text-[13px] text-fg-muted">임기응변 등급</p>
-      <p class="mt-2 text-[17px] leading-[1.35] font-semibold break-keep line-clamp-6">{{ improvText }}</p>
+      <!-- 등급은 크게, 받은 말은 흐리게, 내 대답은 굵게 (한 덩어리로 읽혔다) -->
+      <p v-if="improvParts.grade" class="mt-1 text-[28px] leading-none font-semibold tracking-[-0.04em]">{{ improvParts.grade }}</p>
+      <p v-if="improvParts.asked" class="mt-3 text-[14px] leading-[1.35] text-fg-muted break-keep line-clamp-2">“{{ improvParts.asked }}”</p>
+      <p class="mt-2 text-[17px] leading-[1.35] font-semibold break-keep line-clamp-4">{{ improvParts.answer }}</p>
     </div>
     <div v-else class="mt-7 min-h-0 shrink overflow-hidden rounded-2xl bg-surface text-fg px-4 py-5">
       <AppDuelFeedCard v-if="post.appDuel" :post="post" :my-id="myId ?? undefined" still />
@@ -73,5 +76,10 @@ const improvText = computed(() => {
   if (d?.key !== 'improv') return ''
   const i = Math.max(0, (props.post.players || []).findIndex((p: any) => String(p.id) === String(props.myId)))
   return d.texts?.[i] || d.texts?.find((t: string) => t) || ''
+})
+// '9등급 · “첫 마디” → “대답”'을 나눈다 (모양이 다르면 통째로 대답 칸에)
+const improvParts = computed(() => {
+  const m = improvText.value.match(/^(\d등급) · (?:“(.+)” → )?“(.+)”$/)
+  return m ? { grade: m[1], asked: m[2] ?? '', answer: m[3] } : { grade: '', asked: '', answer: improvText.value }
 })
 </script>

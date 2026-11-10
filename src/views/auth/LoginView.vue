@@ -11,6 +11,7 @@
           v-model="email"
           placeholder="아이디"
           :maxlength="50"
+          :hint="isSignup ? '영문 소문자·숫자·밑줄로 12자까지. 친구가 나를 찾을 때 써요' : ''"
           :error="emailError"
           autocomplete="username"
         />

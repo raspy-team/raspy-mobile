@@ -31,13 +31,16 @@ const TIP: Record<string, string> = {
 /**
  * 한마디 읽기. 첫 줄 "7등급 · 100명 중 86등"(11/11 전 판은 "상위 86%"), 둘째 줄이 "잘한 것: …"이면 왜 그 등급인지, 나머지는 인물 반응
  */
-export function improvFeedback(feedback?: string | null): { grade: number; rank: number; strong?: string; weak?: string; tip?: string; reactions: string[] } | null {
+export function improvFeedback(feedback?: string | null): { grade: number; rank: number; strong?: string; weak?: string; tip?: string; next?: string; reactions: string[] } | null {
   const [head, ...rest] = (feedback || '').split('\n')
   const m = head.match(/(\d)등급 · (?:100명 중 (\d+)등|상위 (\d+)%)/)
   if (!m) return null
-  const why = rest[0]?.match(/^잘한 것: (.+) · 아쉬운 것: (.+)$/)
-  const reactions = (why ? rest.slice(1) : rest).map((l) => l.replace(/^[^:]+:\s*/, ''))
-  return { grade: Number(m[1]), rank: Number(m[2] ?? m[3]), strong: why?.[1], weak: why?.[2], tip: why ? TIP[why[2]] : undefined, reactions }
+  // 둘째 줄부터: '잘한 것: …'(있으면), '다음 등급: N등급까지 n점'(1등급이 아니면), 나머지는 '인물: 반응'
+  const whyLine = rest.find((l) => l.startsWith('잘한 것: '))
+  const nextLine = rest.find((l) => l.startsWith('다음 등급: '))
+  const why = whyLine?.match(/^잘한 것: (.+) · 아쉬운 것: (.+)$/)
+  const reactions = rest.filter((l) => l !== whyLine && l !== nextLine).map((l) => l.replace(/^[^:]+:\s*/, ''))
+  return { grade: Number(m[1]), rank: Number(m[2] ?? m[3]), strong: why?.[1], weak: why?.[2], tip: why ? TIP[why[2]] : undefined, next: nextLine?.replace('다음 등급: ', ''), reactions }
 }
 
 /**

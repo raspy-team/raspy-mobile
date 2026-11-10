@@ -67,6 +67,8 @@
             <!-- 왜 이 등급인가, 다음엔 무엇을 (걷기 P1-7) -->
             <p v-if="improv.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improv.strong }}</b> · 아쉬운 것 <b>{{ improv.weak }}</b></p>
             <p v-if="improv.tip" class="t-caption mt-1 break-keep">다음엔 {{ improv.tip }}</p>
+            <!-- 다음 판의 목표 (3-5 마지막 걷기: "다음 판 목표가 안 보임") -->
+            <p v-if="improv.next" class="t-label mt-3"><span class="hl">{{ improv.next }}</span></p>
           </template>
           <template v-if="!improv">
           <UiRollNumber class="t-display tabular-nums" :value="result.score" />

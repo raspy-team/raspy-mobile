@@ -203,6 +203,7 @@
               <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등 · {{ result.myScore ?? 0 }}점</p>
               <p v-if="improvResult.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
               <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
+              <p v-if="improvResult.next" class="t-label mt-3"><span class="hl">{{ improvResult.next }}</span></p>
             </template>
             <template v-else>
               <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />

@@ -75,7 +75,7 @@
           @like="toggleLike(p)"
           @comment="commentId = Number(p.id)"
           @share="share(p)"
-          @play="router.push(`/play/${p.appDuel.key}`)"
+          @play="openDuel(p)"
           :my-id="myId"
           @watch="(t) => pick(p, 'watch', t)"
           @challenge="(t) => pick(p, 'challenge', t)"
@@ -361,6 +361,12 @@ function go(path) {
 // 공유(카드의 댓글 옆 아이콘): 그림 미리보기 + 인스타 스토리·카톡·링크 (components/feed/story/ShareSheet)
 const sharePost = ref(null)
 const myId = ref(null)
+
+// 앱 게임 소식 카드를 누르면: 내가 낀 대결이면 그 대결 결과로(?duel=), 아니면 그 게임으로 (3-5 P6 나머지: 누르면 게임 첫 화면이었다)
+function openDuel(p) {
+  const mine = myId.value != null && (p.players || []).some((pl) => String(pl.id) === String(myId.value))
+  router.push(mine ? { path: `/play/${p.appDuel.key}`, query: { duel: p.appDuel.gameId } } : `/play/${p.appDuel.key}`)
+}
 getMyId().then((id) => (myId.value = id)).catch(() => {})
 function share(p) {
   menuPost.value = null

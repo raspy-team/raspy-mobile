@@ -32,12 +32,13 @@
     <!-- 보내는 사람의 한 줄: 이기면 자랑, 지면 다음 사람에게 넘긴다 (product/growth/viral-structures-adoption.md 3절 ①) -->
     <p class="mt-9 text-[34px] leading-[1.18] font-semibold tracking-[-0.045em] break-keep">{{ line }}</p>
 
-    <div class="mt-7 rounded-2xl bg-surface text-fg px-4 py-5">
+    <!-- 카드가 길어도 꼬리(나도 한 판·주소)는 그림 안에: 카드 칸이 줄고 넘치는 것은 가린다 (3-5 P6 나머지 F1) -->
+    <div class="mt-7 min-h-0 shrink overflow-hidden rounded-2xl bg-surface text-fg px-4 py-5">
       <AppDuelFeedCard v-if="post.appDuel" :post="post" :my-id="myId ?? undefined" still />
       <FeedCard v-else :post="post" :my-id="myId ?? undefined" still />
     </div>
 
-    <div class="mt-auto pt-6">
+    <div class="mt-auto pt-6 shrink-0">
       <p class="text-[15px] break-keep" :class="volt ? 'text-signal-on/70' : 'text-fg-muted'">나도 한 판 붙어 보기</p>
       <p
         class="mt-2 inline-flex items-center rounded-full px-4 h-10 text-[17px] font-semibold tracking-[-0.01em]"

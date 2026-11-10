@@ -44,7 +44,8 @@
         :unit="duel.scoreUnit"
       />
       <div v-if="sides.some((s) => s.text)" class="mt-4 space-y-2">
-        <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body">
+        <!-- 그림으로 찍을 때(still)는 세 줄까지: 긴 대답이 카드를 늘려 스토리 그림의 꼬리(주소)가 밀려났다 (3-5 P6 나머지 F1) -->
+        <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body" :class="still ? 'line-clamp-3' : ''">
           <span class="t-micro block">{{ side.name }}<UiAiBadge v-if="side.isBot" /></span>{{ side.text }}
         </p>
       </div>

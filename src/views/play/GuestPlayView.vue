@@ -209,7 +209,8 @@
           <p v-else class="break-keep" :class="key === 'improv' ? 't-title' : 't-body text-fg-muted mt-3'">{{ introLine }}</p>
           <!-- 임기응변 도전장: 친구가 몇 등급을 받았는지가 곧 이유다 (걷기 P4: "도전장 첫 화면에 친구 등급이 없음") -->
           <p v-if="fromPlay && key === 'improv' && challengeGrade" class="t-heading mt-4 break-keep">친구가 <span class="hl">{{ challengeGrade }}</span> 받은 상황이에요. 이길 수 있어요?</p>
-          <p v-else-if="fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. {{ key === 'improv' ? '같은 상황으로 붙어요' : '같은 문제로 붙어요' }}</p>
+          <!-- 임기응변은 열쇠가 맞아 친구 등급을 받았을 때만 도전장이다 (열쇠 없는 ?c=는 서버가 보통 판으로 준다) -->
+          <p v-else-if="fromPlay && key !== 'improv'" class="t-heading mt-4">친구가 보낸 도전장이에요. 같은 문제로 붙어요</p>
           <p class="t-caption mt-3">가입 없이 바로 한 판 해 볼 수 있어요</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">{{ key === 'improv' ? '시작하기' : '한 판 하기' }}</UiButton>
@@ -306,7 +307,8 @@ const topPercent = computed(() => {
 })
 
 onMounted(() => {
-  if (key.value === 'improv' && !fromPlay) restoreLast()
+  // 도전장으로 온 친구도 같은 도전장 링크로 돌아오면 자기 결과를 본다 (걷기 2: 카톡 갔다 오면 결과가 없고 같은 상황을 또 풀 수 있었다)
+  if (key.value === 'improv') restoreLast()
   // 들어온 곳: 꼬리표(utm)·첫 질문·도전장. 방문(visit)과 같은 기기 번호로 잇는다
   track('try_open', { gameKey: key.value, value: window.location.search.slice(1, 400) || undefined })
 })
@@ -372,7 +374,7 @@ async function submit(answer: string) {
       saveLast()
     }
   } catch (e) {
-    submitError.value = errorMessage(e, '답을 내지 못했어요. 다시 해 주세요')
+    submitError.value = key.value === 'improv' ? '채점이 잠깐 막혔어요. 쓴 답은 그대로 있어요' : errorMessage(e, '답을 내지 못했어요. 다시 해 주세요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
     // 임기응변은 판을 닫지 않는다: 쓴 답 셋을 그대로 두고 '다시 채점하기'로 같은 답을 다시 낸다 (서버는 채점이 끝나야 판을 닫는다)
     if (key.value === 'improv') return
@@ -414,7 +416,7 @@ const LAST_KEY = 'improv_last_result'
 const LAST_MS = 2 * 3600_000
 function saveLast() {
   try {
-    localStorage.setItem(LAST_KEY, JSON.stringify({ at: Date.now(), playId: playId.value, result: result.value, problem: lastProblem.value, answer: lastAnswer.value }))
+    localStorage.setItem(LAST_KEY, JSON.stringify({ at: Date.now(), playId: playId.value, from: fromPlay ?? null, result: result.value, problem: lastProblem.value, answer: lastAnswer.value }))
   } catch {
     // 못 남기면 돌아왔을 때 처음 화면일 뿐이다
   }
@@ -423,6 +425,8 @@ function restoreLast(): boolean {
   try {
     const v = JSON.parse(localStorage.getItem(LAST_KEY) || 'null')
     if (!v?.result || Date.now() - v.at > LAST_MS) return false
+    // 다른 도전장 링크로 왔으면 그 도전장을 풀게 한다 (같은 도전장이거나 도전장 없이 왔을 때만 되살린다)
+    if (fromPlay && v.from !== fromPlay) return false
     playId.value = v.playId
     result.value = v.result
     lastProblem.value = v.problem

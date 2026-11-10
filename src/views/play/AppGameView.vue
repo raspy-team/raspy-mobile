@@ -210,7 +210,7 @@
             <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
             <template v-if="ladderTo">
               <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
-              <p class="t-caption mt-1">도전장을 메시지로 보냈어요. {{ ladderName }}님이 같은 문제를 풀면 승패가 나요</p>
+              <p class="t-caption mt-1">도전장을 메시지로 보냈어요. {{ ladderName }}님이 같은 {{ key === 'improv' ? '상황' : '문제' }}을 풀면 승패가 나요</p>
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
@@ -309,7 +309,8 @@
                 <span class="block t-micro">전적</span>
               </span>
               <span v-if="game.recordable && game.myBest != null">
-                <span class="block t-title tabular-nums">{{ game.myBest }}</span>
+                <!-- 단위를 붙인다 ('44 최고 기록'은 무엇이 44인지 몰랐다, 걷기 2) -->
+                <span class="block t-title tabular-nums">{{ game.myBest }}<span class="t-caption">{{ game.scoreUnit }}</span></span>
                 <span class="block t-micro">최고 기록</span>
               </span>
               <span v-else-if="!game.recordable">
@@ -326,8 +327,8 @@
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
             <template v-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 도전장을 보내요</template>
-            <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 문제로 도전장이 가요</template>
-            <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 문제로 도전장이 가요</template>
+            <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
+            <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
             <!-- 기다림·AI 주민 안내는 대기실 화면이 말한다 (UX ⑤: 여기서 미리 두 줄로 설명했다) -->
             <template v-else-if="game.dailyLimit">하루 {{ game.dailyLimit }}판</template>

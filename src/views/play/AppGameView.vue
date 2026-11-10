@@ -59,6 +59,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <ImprovPlay
+          v-else-if="key === 'improv'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <QuizSetPlay
           v-else-if="key === 'daily-chosung'"
           :problem="play.problem"
@@ -142,6 +149,7 @@
                 <span class="flex items-center justify-center t-micro max-w-[8rem]"><OpponentName :player="result.opponent" /><span v-if="isVote" class="shrink-0">&nbsp;(표)</span></span>
               </span>
             </div>
+            <p v-if="improvGrade" class="t-heading mt-4">{{ improvGrade }}</p>
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
               실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
@@ -150,7 +158,7 @@
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
-            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : `${judgeName}가 채점하고 있어요` }}</p>
+            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : `${judgeName}${josaIga(judgeName)} 채점하고 있어요` }}</p>
             <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 알림으로 알려 드릴게요</p>
           </template>
           <!-- 스코어 맞히기: 둘 다 냈고 실제 경기가 끝나길 기다린다 -->
@@ -181,6 +189,7 @@
           <template v-else>
             <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
             <p class="t-caption">{{ game?.scoreUnit }}</p>
+            <p v-if="improvGrade" class="t-heading mt-2">{{ improvGrade }}</p>
             <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
             <template v-if="ladderTo">
               <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
@@ -213,8 +222,17 @@
             <p class="t-body mt-1 whitespace-pre-line break-keep">{{ result.opponentAnswer }}</p>
           </UiCard>
         </template>
+        <!-- 임기응변 등급: 상황마다 내 대답과 상대 대답 -->
+        <template v-if="key === 'improv' && result.myAnswer">
+          <UiCard v-for="(s, i) in improvSituations(result.problem)" :key="s.id" class="mt-3">
+            <p class="t-micro">{{ s.who }}</p>
+            <p class="t-caption mt-1 break-keep">“{{ s.line }}”</p>
+            <p class="t-body mt-2 break-keep">나: {{ improvAnswers(result.myAnswer)[i] || '(대답 없음)' }}</p>
+            <p v-if="result.opponentAnswer" class="t-caption mt-1 break-keep">{{ who(result.opponent) }}: {{ improvAnswers(result.opponentAnswer)[i] || '(대답 없음)' }}</p>
+          </UiCard>
+        </template>
         <!-- 말싸움: 주고받은 말 -->
-        <template v-if="key === 'debate'">
+        <template v-else-if="key === 'debate'">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 말싸움</p>
             <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ result.myAnswer }}</p>
@@ -402,6 +420,8 @@ import TypingPlay from '../../components/appgame/TypingPlay.vue'
 import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
+import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
+import { improvAnswers, improvSituations } from '@/utils/improv'
 import { shareLink } from '@/utils/share'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
 import { getMyId } from '@/utils/me'
@@ -679,6 +699,15 @@ async function shareVote(gameId: number) {
 }
 
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
+// 임기응변 등급: 문제의 상황 셋, 답 셋(JSON), 한마디 첫 줄의 등급 (utils/improv.ts)
+const improvGrade = computed(() => (key.value === 'improv' && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))
+
+// 이름 뒤 조사 이/가 (AI 심판이, AI 셰프가). 받침이 없는 글자·한글이 아니면 '가'
+function josaIga(name: string) {
+  const c = name.charCodeAt(name.length - 1) - 0xac00
+  return c >= 0 && c <= 11171 && c % 28 !== 0 ? '이' : '가'
+}
+
 // AI가 채점하는 게임마다 심판 이름
 const judgeName = computed(() => (key.value === 'recipe' ? 'AI 셰프' : key.value === 'trial' ? 'AI 판사' : 'AI 심판'))
 
@@ -710,7 +739,7 @@ function duelSubtitle(d: Duel) {
   if (d.status === 'CANCELED') return d.myFeedback || '시간 안에 내지 않아 취소됐어요'
   if (d.status === 'VOTING') return `투표 마감 ${until(d.votingEndsAt)}`
   if (d.status === 'AWAITING_RESULT' || (key.value === 'predict' && d.myAnswer)) return `내 예상 ${predictionLine(d.problem, d.myAnswer)}`
-  if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : `${judgeName.value}가 채점하고 있어요`
+  if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : `${judgeName.value}${josaIga(judgeName.value)} 채점하고 있어요`
   if (isVote.value) return d.myAnswer ?? ''
   // 실시간 판은 '내기'가 없다: 하는 중인 판으로 돌아가게 (11/5 9e)
   if (d.playMode === 'REALTIME') return d.opponent ? '하는 중이에요 · 눌러서 돌아가기' : '상대를 기다리는 중이에요'

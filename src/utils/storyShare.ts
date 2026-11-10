@@ -16,11 +16,16 @@ const H = 1920
 
 /** 소식의 경기 한 장(post)을 그림 파일로 */
 export async function storyFile(post: any, myId: number | null, variant: StoryVariant = 'dark'): Promise<File> {
+  return componentFile(StoryCard, { post, myId, variant }, variant, `match-${post?.id ?? 'story'}-${variant}.png`)
+}
+
+/** 아무 카드 컴포넌트를 화면 밖에 그려 그림 파일로 (임기응변 등급 결과 카드 등). 크기·글꼴 처리는 storyFile과 같다 */
+export async function componentFile(component: any, props: Record<string, unknown>, variant: StoryVariant, name: string): Promise<File> {
   const host = document.createElement('div')
   // 화면 밖에. display:none이면 크기가 0이라 찍히지 않는다
   host.style.cssText = 'position:fixed;left:-10000px;top:0;pointer-events:none;'
   document.body.appendChild(host)
-  const app = createApp({ render: () => h(StoryCard, { post, myId, variant }) })
+  const app = createApp({ render: () => h(component, props) })
   app.component('UiIcon', UiIcon) // main.ts가 전역으로 등록하는 것과 같게
   app.mount(host)
   try {
@@ -62,7 +67,7 @@ export async function storyFile(post: any, myId: number | null, variant: StoryVa
       blob = next
     }
     if (!blob || !blob.size) throw new Error('empty')
-    return new File([blob], `match-${post?.id ?? 'story'}-${variant}.png`, { type: 'image/png' })
+    return new File([blob], name, { type: 'image/png' })
   } finally {
     app.unmount()
     host.remove()

@@ -42,6 +42,10 @@
       "description": "안전·신뢰: 내 이용 상태, 운영진 제재"
     },
     {
+      "name": "임기응변 등급",
+      "description": "판 중에 인물의 반응을 받는다"
+    },
+    {
       "name": "Admin Report",
       "description": "관리자 전용 신고 처리 API"
     },
@@ -2571,6 +2575,38 @@
         }
       }
     },
+    "/api/improv/react": {
+      "post": {
+        "tags": [
+          "임기응변 등급"
+        ],
+        "summary": "인물의 반응",
+        "description": "로그인 없이(가입 전 한 판도). 상황 하나에 낸 답을 채점해 두고 인물의 한 줄 반응만 돌려준다. 점수는 판이 끝나야 보인다. 같은 답은 같은 채점",
+        "operationId": "react",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImprovReactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovReactResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/identity/verify": {
       "post": {
         "tags": [
@@ -3451,7 +3487,7 @@
         ],
         "summary": "반응 보내기",
         "description": "이모지 한 개. 저장하지 않고 보는 사람들에게 흘려보낸다 (한 사람 1초에 한 번)",
-        "operationId": "react",
+        "operationId": "react_1",
         "parameters": [
           {
             "name": "gameId",
@@ -13875,6 +13911,32 @@
         "type": "object",
         "properties": {
           "text": {
+            "type": "string"
+          }
+        }
+      },
+      "ImprovReactRequest": {
+        "required": [
+          "situationId",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "situationId": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "ImprovReactResponse": {
+        "required": [
+          "reaction"
+        ],
+        "type": "object",
+        "properties": {
+          "reaction": {
             "type": "string"
           }
         }

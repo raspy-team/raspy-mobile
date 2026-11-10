@@ -1198,6 +1198,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/improv/react": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 인물의 반응
+         * @description 로그인 없이(가입 전 한 판도). 상황 하나에 낸 답을 채점해 두고 인물의 한 줄 반응만 돌려준다. 점수는 판이 끝나야 보인다. 같은 답은 같은 채점
+         */
+        post: operations["react"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/identity/verify": {
         parameters: {
             query?: never;
@@ -1611,7 +1631,7 @@ export interface paths {
          * 반응 보내기
          * @description 이모지 한 개. 저장하지 않고 보는 사람들에게 흘려보낸다 (한 사람 1초에 한 번)
          */
-        post: operations["react"];
+        post: operations["react_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6599,6 +6619,13 @@ export interface components {
         AppealRequest: {
             text: string;
         };
+        ImprovReactRequest: {
+            situationId: string;
+            text: string;
+        };
+        ImprovReactResponse: {
+            reaction: string;
+        };
         IdentityResult: {
             verified: boolean;
             /** Format: int32 */
@@ -10705,6 +10732,30 @@ export interface operations {
             };
         };
     };
+    react: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImprovReactRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImprovReactResponse"];
+                };
+            };
+        };
+    };
     verify_1: {
         parameters: {
             query?: never;
@@ -11245,7 +11296,7 @@ export interface operations {
             };
         };
     };
-    react: {
+    react_1: {
         parameters: {
             query?: never;
             header?: never;

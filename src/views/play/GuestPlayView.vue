@@ -22,6 +22,13 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <ImprovPlay
+          v-else-if="key === 'improv'"
+          :problem="play.problem"
+          :time-limit-seconds="secondsLeft(play)"
+          :submitting="submitting"
+          @submit="submit"
+        />
         <QuizSetPlay
           v-else-if="key === 'daily-chosung'"
           :problem="play.problem"
@@ -44,19 +51,40 @@
         <UiCard class="text-center py-8">
           <MatchMascot who="kok" :mood="result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
           <p v-if="key === 'nunchi'" class="t-micro">눈치 점수</p>
+          <template v-if="improv">
+            <p class="t-micro">임기응변 등급</p>
+            <p class="t-display tabular-nums">{{ improv.grade }}<span class="t-title ml-1">등급</span></p>
+            <p class="t-caption mt-1">상위 {{ improv.topPercent }}% · {{ result.score }}점</p>
+          </template>
+          <template v-if="!improv">
           <UiRollNumber class="t-display tabular-nums" :value="result.score" />
           <p class="t-caption">{{ result.scoreUnit }}</p>
-          <p v-if="topPercent != null" class="t-heading mt-5">
+          </template>
+          <p v-if="topPercent != null && !improv" class="t-heading mt-5">
             상위 <span class="hl">{{ topPercent }}%</span>
             <span class="t-caption block mt-1">{{ result.rankOf }}명 중 {{ result.rank }}등</span>
           </p>
-          <p v-if="result.feedback" class="t-body mt-3 whitespace-pre-line">{{ result.feedback }}</p>
+          <p v-if="result.feedback && !improv" class="t-body mt-3 whitespace-pre-line">{{ result.feedback }}</p>
           <!-- 친구의 도전장으로 온 판 -->
           <p v-if="review?.challengerScore != null" class="t-heading mt-4">
             친구 {{ review.challengerScore }}점 ·
             {{ result.score > review.challengerScore ? '내가 이겼어요' : result.score < review.challengerScore ? '친구가 이겼어요' : '비겼어요' }}
           </p>
         </UiCard>
+
+        <!-- 임기응변 등급: 상황마다 내 대답과 인물 반응 -->
+        <template v-if="improv">
+          <UiCard v-for="(s, i) in improvShown" :key="s.id" class="mt-3">
+            <p class="t-micro">{{ s.who }}</p>
+            <p class="t-caption mt-1 break-keep">“{{ s.line }}”</p>
+            <p class="t-body mt-2 break-keep">나: {{ improvSaid[i] || '(대답 없음)' }}</p>
+            <p v-if="improv.reactions[i]" class="t-caption mt-1 break-keep">→ {{ improv.reactions[i] }}</p>
+          </UiCard>
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <UiButton variant="secondary" icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
+            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 도전</UiButton>
+          </div>
+        </template>
 
         <!-- 다음 행동: 친구에게 도전 · 공유 -->
         <div v-if="key === 'nunchi'" class="grid grid-cols-2 gap-2 mt-4">
@@ -181,6 +209,12 @@ import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
 import NunchiPlay from '../../components/appgame/NunchiPlay.vue'
+import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
+import ImprovStoryCard from '../../components/share/ImprovStoryCard.vue'
+import { improvFeedback, improvShareLine, improvSituations, improvAnswers } from '@/utils/improv'
+import { componentFile, shareFiles } from '@/utils/storyShare'
+import { withShareRef } from '@/utils/shareRef'
+import { copyText } from '@/utils/clipboard'
 import { UiButton, UiCard, UiEmptyState, UiRollNumber, UiSection, UiTopBar } from '../../components/ui'
 import { GUEST_GAMES } from '@/utils/guestGames'
 import { getVisitorId, markGuestPlayed, trackEvent } from '@/utils/visit'
@@ -283,6 +317,8 @@ function again() {
 async function submit(answer: string) {
   const visitorId = getVisitorId()
   if (!play.value || !visitorId) return
+  lastProblem.value = play.value.problem
+  lastAnswer.value = answer
   submitting.value = true
   try {
     result.value = (await POST('/api/guest/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { visitorId, answer } })).data
@@ -291,6 +327,7 @@ async function submit(answer: string) {
     track('guest_play_result', { gameKey: key.value, step: rounds.value, value: `score=${result.value.score};rank=${result.value.rank ?? ''}/${result.value.rankOf ?? ''}` })
     play.value = null
     if (key.value === 'nunchi') loadReview()
+    if (key.value === 'improv') prepareStory()
   } catch (e) {
     submitError.value = errorMessage(e, '답을 내지 못했어요. 다시 해 주세요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
@@ -325,14 +362,54 @@ function join(name: 'result_join' | 'intro_join') {
   router.push({ path: '/init', query: { from: result.value ? 'guest' : undefined } })
 }
 
+// ── 임기응변 등급: 결과 읽기, 스토리 그림 ──
+const lastProblem = ref('')
+const lastAnswer = ref('')
+const improv = computed(() => (key.value === 'improv' && result.value ? improvFeedback(result.value.feedback) : null))
+const improvShown = computed(() => improvSituations(lastProblem.value))
+const improvSaid = computed(() => improvAnswers(lastAnswer.value))
+// 스토리 그림은 결과가 나오자마자 미리 찍어 둔다 (누른 순간 바로 넘겨야 사파리가 공유를 막지 않는다)
+const storyFile = ref<File | null>(null)
+const storyReady = computed(() => !!storyFile.value)
+async function prepareStory() {
+  storyFile.value = null
+  const r = improv.value
+  if (!r || !result.value) return
+  // 가장 잘한 대답: 반응이 있는 대답 중 가장 긴 것 (점수는 상황마다 보이지 않으니 읽을거리가 많은 쪽)
+  const i = improvSaid.value.reduce((best, a, k) => ((a?.length ?? 0) > (improvSaid.value[best]?.length ?? 0) ? k : best), 0)
+  const s = improvShown.value[i]
+  const best = s && improvSaid.value[i] ? { who: s.who, line: s.line, answer: improvSaid.value[i], reaction: r.reactions[i] } : null
+  try {
+    storyFile.value = await componentFile(ImprovStoryCard, { grade: r.grade, topPercent: r.topPercent, score: result.value.score, best }, 'dark', `match-improv-${playId.value}.png`)
+  } catch {
+    storyFile.value = null
+  }
+}
+// 그림을 넘기면서, 그림을 누른 사람이 같은 상황을 풀 링크(공유 번호 포함)를 클립보드에 (인스타 링크 스티커에 붙인다)
+function shareStory() {
+  const file = storyFile.value
+  if (!file || !playId.value) return
+  track('result_share', { gameKey: key.value, step: rounds.value, value: 'story' })
+  const link = withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&utm_source=instagram&utm_medium=story`)
+  void copyText(link)
+  void shareFiles([file]).then((r) => {
+    track('result_share_shared', { gameKey: key.value, value: `story:${r}` })
+    if (r === 'shared') showToast('링크를 복사했어요. 인스타에서 링크 스티커에 붙여 넣으세요')
+    else if (r === 'saved') showToast('그림을 저장했어요. 링크도 복사했어요')
+  })
+}
+
 // ── 눈치 한 판: 친구 도전·공유 ──
 async function challengeFriend() {
   if (!playId.value) return
   track('result_challenge', { gameKey: key.value, step: rounds.value, value: `play=${playId.value}` })
-  trackEvent('challenge', 'nunchi')
+  trackEvent('challenge', key.value === 'improv' ? 'improv' : 'nunchi')
   sharing.value = 'challenge'
   try {
-    const msg = await shareLink(`${window.location.origin}/try/nunchi?c=${playId.value}`, `눈치 한 판 ${result.value?.score ?? 0}점. 같은 문제로 붙어 볼래요? 문제당 3초예요`)
+    const text = improv.value
+      ? `${improvShareLine(improv.value.grade)} 같은 상황으로 붙어 보자`
+      : `눈치 한 판 ${result.value?.score ?? 0}점. 같은 문제로 붙어 볼래요? 문제당 3초예요`
+    const msg = await shareLink(`${window.location.origin}/try/${key.value}?c=${playId.value}`, text)
     track('result_challenge_shared', { gameKey: key.value, value: msg || 'share' })
     if (msg) showToast(msg)
   } finally {

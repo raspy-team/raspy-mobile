@@ -64,7 +64,7 @@ export function getVisitorId() {
 }
 
 /** 로그인 버튼 누름 등 행동 하나. place: init(시작 화면), guest(가입 전 한 판 끝 화면) */
-export function trackEvent(event: 'tap_kakao' | 'tap_google' | 'tap_apple' | 'tap_id' | 'challenge', place: 'init' | 'guest' | 'partner' | 'nunchi') {
+export function trackEvent(event: 'tap_kakao' | 'tap_google' | 'tap_apple' | 'tap_id' | 'challenge', place: 'init' | 'guest' | 'partner' | 'nunchi' | 'improv') {
   const id = visitorId()
   if (!id) return
   POST('/api/track/event', { body: { visitorId: id, event, place } }).catch(() => {})

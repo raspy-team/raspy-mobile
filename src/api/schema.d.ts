@@ -4254,6 +4254,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/improv/situations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 상황 하나 (광고·글이 보여 준 상황)
+         * @description 로그인 없이. ?q=로 온 사람의 시작 화면에 그 상황을 보여 준다. 기준 답은 주지 않는다
+         */
+        get: operations["situation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/identity": {
         parameters: {
             query?: never;
@@ -4266,6 +4286,26 @@ export interface paths {
          * @description 켜져 있는지, 포트원 창을 여는 값, 내가 이미 했는지, 이번에 쓸 인증 번호
          */
         get: operations["config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/plays/challenges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내가 보낸 도전장의 결과
+         * @description 로그인 없이. 이 기기의 판으로 온 친구들의 판(점수·한마디 첫 줄). 손님은 알림이 없어 다시 오면 여기서 본다
+         */
+        get: operations["challenges"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6669,6 +6709,9 @@ export interface components {
             rank?: number;
             /** Format: int32 */
             rankOf?: number;
+            /** Format: double */
+            challengerScore?: number;
+            challengerLine?: string;
         };
         GameRegionRequest: {
             roadAddress: string;
@@ -8008,12 +8051,31 @@ export interface components {
             /** Format: int64 */
             championId?: number;
         };
+        ShownSituation: {
+            id: string;
+            slot: string;
+            who: string;
+            context: string;
+            line: string;
+        };
         IdentityConfig: {
             available: boolean;
             storeId?: string;
             channelKey?: string;
             verified: boolean;
             verificationId: string;
+        };
+        SentChallenge: {
+            /** Format: int64 */
+            myPlayId: number;
+            /** Format: double */
+            myScore: number;
+            myLine?: string;
+            /** Format: double */
+            theirScore: number;
+            theirLine?: string;
+            /** Format: date-time */
+            at: string;
         };
         LogMessage: {
             /** Format: date-time */
@@ -14584,6 +14646,28 @@ export interface operations {
             };
         };
     };
+    situation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ShownSituation"];
+                };
+            };
+        };
+    };
     config: {
         parameters: {
             query?: never;
@@ -14600,6 +14684,29 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["IdentityConfig"];
+                };
+            };
+        };
+    };
+    challenges: {
+        parameters: {
+            query: {
+                visitorId: string;
+                key: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SentChallenge"][];
                 };
             };
         };

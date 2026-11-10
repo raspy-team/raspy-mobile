@@ -44,6 +44,8 @@
           @submit="submit"
         />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
+        <!-- 임기응변: 채점이 막혀도 쓴 답을 잃지 않는다. 같은 답으로 다시 낸다 (걷기 C7) -->
+        <UiButton v-if="submitError && key === 'improv' && lastAnswer" block class="mt-2" :loading="submitting" @click="submit(lastAnswer)">다시 채점하기</UiButton>
       </template>
 
       <!-- 끝난 판: 점수를 보여 주고, 저장하고 사람과 붙으려면 가입 -->
@@ -54,7 +56,15 @@
           <template v-if="improv">
             <p class="t-micro">임기응변 등급</p>
             <p class="t-display tabular-nums">{{ improv.grade }}<span class="t-title ml-1">등급</span></p>
-            <p class="t-caption mt-1">상위 {{ improv.topPercent }}% · {{ result.score }}점</p>
+            <p class="t-caption mt-1">100명 중 {{ improv.rank }}등 · {{ result.score }}점</p>
+            <!-- 친구의 도전장으로 온 판: 누가 이겼나 (걷기 C1: "붙자고 해서 했는데 누가 이겼는지가 안 나와") -->
+            <p v-if="result.challengerScore != null" class="t-heading mt-4">
+              친구 {{ challengerGrade }} ·
+              {{ result.score > result.challengerScore ? '내가 이겼어요' : result.score < result.challengerScore ? '친구가 이겼어요' : '비겼어요' }}
+            </p>
+            <!-- 왜 이 등급인가, 다음엔 무엇을 (걷기 P1-7) -->
+            <p v-if="improv.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improv.strong }}</b> · 아쉬운 것 <b>{{ improv.weak }}</b></p>
+            <p v-if="improv.tip" class="t-caption mt-1 break-keep">다음엔 {{ improv.tip }}</p>
           </template>
           <template v-if="!improv">
           <UiRollNumber class="t-display tabular-nums" :value="result.score" />
@@ -72,18 +82,19 @@
           </p>
         </UiCard>
 
-        <!-- 임기응변 등급: 상황마다 내 대답과 인물 반응 -->
+        <!-- 임기응변 등급: 보내기가 등급 바로 밑 (걷기 C5: 카드 셋 아래라 "버튼이 어디 있어"), 그 아래 상황마다 내 대답과 인물 반응 -->
         <template v-if="improv">
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <UiButton icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
+            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 도전</UiButton>
+          </div>
           <UiCard v-for="(s, i) in improvShown" :key="s.id" class="mt-3">
             <p class="t-micro">{{ s.who }}</p>
             <p class="t-caption mt-1 break-keep">“{{ s.line }}”</p>
             <p class="t-body mt-2 break-keep">나: {{ improvSaid[i] || '(대답 없음)' }}</p>
             <p v-if="improv.reactions[i]" class="t-caption mt-1 break-keep">→ {{ improv.reactions[i] }}</p>
           </UiCard>
-          <div class="grid grid-cols-2 gap-2 mt-4">
-            <UiButton variant="secondary" icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
-            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 도전</UiButton>
-          </div>
+          <ImprovSentChallenges :visitor-id="visitorIdNow" class="mt-4" />
         </template>
 
         <!-- 다음 행동: 친구에게 도전 · 공유 -->
@@ -94,8 +105,8 @@
 
         <UiCard class="mt-4">
           <!-- 가입하며 옮긴 판은 기록(최고 기록·기록 순위)에만 남고 승패는 없다(0승 0패). 지키지 못하는 말을 하지 않는다 (first10 검토) -->
-          <p class="t-title">점수 저장하고 사람과 붙기</p>
-          <p class="t-caption mt-1">시작하면 이 점수가 내 기록에 남아 기록 순위에 올라가요. 다음 판부터는 사람과 승패를 내요</p>
+          <p class="t-title">{{ improv ? '등급 남기고 사람과 붙기' : '점수 저장하고 사람과 붙기' }}</p>
+          <p class="t-caption mt-1">{{ improv ? '시작하면 이 등급이 내 기록에 남아요. 다음 판부터는 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요' : '시작하면 이 점수가 내 기록에 남아 기록 순위에 올라가요. 다음 판부터는 사람과 승패를 내요' }}</p>
           <UiButton block size="lg" class="mt-4" @click="join('result_join')">1초 만에 시작하기</UiButton>
         </UiCard>
         <UiButton v-if="key !== 'daily-chosung'" block variant="ghost" class="mt-2" :loading="starting" @click="again">한 판 더</UiButton>
@@ -176,18 +187,27 @@
         <UiCard class="py-8 text-center">
           <!-- 처음 온 사람의 길잡이는 콕이 (docs/mascots.md) -->
           <MatchMascot who="kok" mood="wow" :size="72" class="mx-auto mb-3" />
-          <p class="t-display">{{ meta.title }}</p>
+          <!-- 임기응변: 이름은 위 막대에 이미 있다 (걷기 P1-2: 두 번 보였다). 큰 글자 자리는 광고 상황·소개가 쓴다 -->
+          <p v-if="key !== 'improv'" class="t-display">{{ meta.title }}</p>
           <!-- 광고에서 본 질문(?q=)을 그대로 보여 준다: 광고 → 처음 보는 화면 사이가 끊기지 않게 -->
-          <template v-if="adQuestion">
+          <!-- 임기응변: 광고·글이 보여 준 상황(?q=)이 곧 시작 화면이다 (걷기 C3·P1-1: "광고에서 본 교수님 질문은 어디 있어?") -->
+          <template v-if="adSituation">
+            <p class="t-caption mt-4 break-keep">{{ adSituation.who }}</p>
+            <p class="t-title mt-1 break-keep">“{{ adSituation.line }}”</p>
+            <p class="t-caption mt-2 break-keep">45초 안에 뭐라고 할래? 교수님·선배·동기, 상황 셋이면 등급이 나와요</p>
+          </template>
+          <template v-else-if="adQuestion">
             <p class="t-title mt-4 break-keep">{{ adQuestion.q }}</p>
             <p class="t-body mt-1"><b>{{ adQuestion.a }}</b> <span class="text-fg-subtle">vs</span> <b>{{ adQuestion.b }}</b></p>
             <p class="t-caption mt-2 break-keep">남들은 뭘 골랐을까? 이 문제부터 열 문제, 문제당 3초</p>
           </template>
-          <p v-else class="t-body text-fg-muted mt-3 break-keep">{{ meta.line }}</p>
-          <p v-if="fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. 같은 문제로 붙어요</p>
+          <p v-else class="break-keep" :class="key === 'improv' ? 't-title' : 't-body text-fg-muted mt-3'">{{ meta.line }}</p>
+          <p v-if="fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. {{ key === 'improv' ? '같은 상황으로 붙어요' : '같은 문제로 붙어요' }}</p>
           <p class="t-caption mt-3">가입 없이 바로 한 판 해 볼 수 있어요</p>
         </UiCard>
-        <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">한 판 하기</UiButton>
+        <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">{{ adSituation ? '대답하기' : '한 판 하기' }}</UiButton>
+        <!-- 임기응변: 내가 보낸 도전장의 결과 (손님은 알림이 없어 다시 오면 여기서 본다, 걷기 C2) -->
+        <ImprovSentChallenges v-if="key === 'improv'" :visitor-id="visitorIdNow" class="mt-6" />
         <p v-if="startError" class="t-caption text-danger mt-3 text-center">{{ startError }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="join('intro_join')">이미 계정이 있어요</UiButton>
       </template>
@@ -211,6 +231,7 @@ import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
 import NunchiPlay from '../../components/appgame/NunchiPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import ImprovStoryCard from '../../components/share/ImprovStoryCard.vue'
+import ImprovSentChallenges from '../../components/appgame/ImprovSentChallenges.vue'
 import { improvFeedback, improvShareLine, improvSituations, improvAnswers } from '@/utils/improv'
 import { componentFile, shareFiles } from '@/utils/storyShare'
 import { withShareRef } from '@/utils/shareRef'
@@ -261,6 +282,12 @@ const adQuestion = ref<{ q: string; a: string; b: string } | null>(null)
 if (key.value === 'nunchi' && firstQuestion) {
   GET('/api/nunchi/questions', { query: { ids: firstQuestion } }).then(({ data }) => { adQuestion.value = data[0] ?? null }).catch(() => {})
 }
+// 임기응변: 광고·글이 보여 준 상황 (?q=)
+const adSituation = ref<{ who: string; line: string } | null>(null)
+if (key.value === 'improv' && firstQuestion) {
+  GET('/api/improv/situations/{id}', { path: { id: firstQuestion } }).then(({ data }) => { adSituation.value = data ?? null }).catch(() => {})
+}
+const visitorIdNow = getVisitorId() ?? ''
 const aiCount = computed(() => review.value?.items.filter((it) => it.byFirst).length ?? 0)
 
 const topPercent = computed(() => {
@@ -320,6 +347,7 @@ async function submit(answer: string) {
   lastProblem.value = play.value.problem
   lastAnswer.value = answer
   submitting.value = true
+  submitError.value = ''
   try {
     result.value = (await POST('/api/guest/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { visitorId, answer } })).data
     markGuestPlayed()
@@ -331,6 +359,8 @@ async function submit(answer: string) {
   } catch (e) {
     submitError.value = errorMessage(e, '답을 내지 못했어요. 다시 해 주세요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
+    // 임기응변은 판을 닫지 않는다: 쓴 답 셋을 그대로 두고 '다시 채점하기'로 같은 답을 다시 낸다 (서버는 채점이 끝나야 판을 닫는다)
+    if (key.value === 'improv') return
     // 판이 닫히면 시작 화면으로 돌아가니, 판 아래에 둔 오류 대신 시작 화면 오류 칸에 남긴다 (안 그러면 아무 말 없이 처음으로 돌아간다)
     startError.value = submitError.value
     play.value = null
@@ -368,6 +398,8 @@ const lastAnswer = ref('')
 const improv = computed(() => (key.value === 'improv' && result.value ? improvFeedback(result.value.feedback) : null))
 const improvShown = computed(() => improvSituations(lastProblem.value))
 const improvSaid = computed(() => improvAnswers(lastAnswer.value))
+// 도전장을 보낸 친구의 등급 줄에서 "N등급"만
+const challengerGrade = computed(() => result.value?.challengerLine?.match(/\d등급/)?.[0] ?? `${result.value?.challengerScore ?? 0}점`)
 // 스토리 그림은 결과가 나오자마자 미리 찍어 둔다 (누른 순간 바로 넘겨야 사파리가 공유를 막지 않는다)
 const storyFile = ref<File | null>(null)
 const storyReady = computed(() => !!storyFile.value)
@@ -380,7 +412,7 @@ async function prepareStory() {
   const s = improvShown.value[i]
   const best = s && improvSaid.value[i] ? { who: s.who, line: s.line, answer: improvSaid.value[i], reaction: r.reactions[i] } : null
   try {
-    storyFile.value = await componentFile(ImprovStoryCard, { grade: r.grade, topPercent: r.topPercent, score: result.value.score, best }, 'dark', `match-improv-${playId.value}.png`)
+    storyFile.value = await componentFile(ImprovStoryCard, { grade: r.grade, rank: r.rank, score: result.value.score, best }, 'dark', `match-improv-${playId.value}.png`)
   } catch {
     storyFile.value = null
   }

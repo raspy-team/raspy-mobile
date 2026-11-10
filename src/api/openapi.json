@@ -8495,6 +8495,38 @@
         }
       }
     },
+    "/api/improv/situations/{id}": {
+      "get": {
+        "tags": [
+          "임기응변 등급"
+        ],
+        "summary": "상황 하나 (광고·글이 보여 준 상황)",
+        "description": "로그인 없이. ?q=로 온 사람의 시작 화면에 그 상황을 보여 준다. 기준 답은 주지 않는다",
+        "operationId": "situation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShownSituation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/identity": {
       "get": {
         "tags": [
@@ -8510,6 +8542,49 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/IdentityConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/plays/challenges": {
+      "get": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "내가 보낸 도전장의 결과",
+        "description": "로그인 없이. 이 기기의 판으로 온 친구들의 판(점수·한마디 첫 줄). 손님은 알림이 없어 다시 오면 여기서 본다",
+        "operationId": "challenges",
+        "parameters": [
+          {
+            "name": "visitorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SentChallenge"
+                  }
                 }
               }
             }
@@ -14073,6 +14148,13 @@
           "rankOf": {
             "type": "integer",
             "format": "int32"
+          },
+          "challengerScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "challengerLine": {
+            "type": "string"
           }
         }
       },
@@ -18479,6 +18561,33 @@
           }
         }
       },
+      "ShownSituation": {
+        "required": [
+          "context",
+          "id",
+          "line",
+          "slot",
+          "who"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "who": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          },
+          "line": {
+            "type": "string"
+          }
+        }
+      },
       "IdentityConfig": {
         "required": [
           "available",
@@ -18501,6 +18610,39 @@
           },
           "verificationId": {
             "type": "string"
+          }
+        }
+      },
+      "SentChallenge": {
+        "required": [
+          "at",
+          "myPlayId",
+          "myScore",
+          "theirScore"
+        ],
+        "type": "object",
+        "properties": {
+          "myPlayId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "myScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "myLine": {
+            "type": "string"
+          },
+          "theirScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "theirLine": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

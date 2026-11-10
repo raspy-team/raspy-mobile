@@ -19,12 +19,25 @@ export function improvAnswers(answer?: string | null): string[] {
   }
 }
 
-/** 한마디에서 등급·상위 %·반응 셋 */
-export function improvFeedback(feedback?: string | null): { grade: number; topPercent: number; reactions: string[] } | null {
+/** 기준마다 다음 판에 해 볼 한 줄 (아쉬운 것에 붙인다) */
+const TIP: Record<string, string> = {
+  '상황 읽기': '상대가 진짜 묻는 게 뭔지 한 번 더 생각해 보기',
+  관계: '상대 체면도 살려 주는 한마디 붙이기',
+  '나 지키기': '얼버무리지 말고 내 입장도 솔직하게 한마디',
+  재치: '웃음 포인트 하나 넣어 보기',
+  자연스러움: '실제로 그 자리에서 할 법한 말로 짧게',
+}
+
+/**
+ * 한마디 읽기. 첫 줄 "7등급 · 100명 중 86등"(11/11 전 판은 "상위 86%"), 둘째 줄이 "잘한 것: …"이면 왜 그 등급인지, 나머지는 인물 반응
+ */
+export function improvFeedback(feedback?: string | null): { grade: number; rank: number; strong?: string; weak?: string; tip?: string; reactions: string[] } | null {
   const [head, ...rest] = (feedback || '').split('\n')
-  const m = head.match(/(\d)등급 · 상위 (\d+)%/)
+  const m = head.match(/(\d)등급 · (?:100명 중 (\d+)등|상위 (\d+)%)/)
   if (!m) return null
-  return { grade: Number(m[1]), topPercent: Number(m[2]), reactions: rest.map((l) => l.replace(/^[^:]+:\s*/, '')) }
+  const why = rest[0]?.match(/^잘한 것: (.+) · 아쉬운 것: (.+)$/)
+  const reactions = (why ? rest.slice(1) : rest).map((l) => l.replace(/^[^:]+:\s*/, ''))
+  return { grade: Number(m[1]), rank: Number(m[2] ?? m[3]), strong: why?.[1], weak: why?.[2], tip: why ? TIP[why[2]] : undefined, reactions }
 }
 
 /**

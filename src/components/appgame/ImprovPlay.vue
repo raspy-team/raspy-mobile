@@ -17,7 +17,8 @@
       <template v-if="phase === 'answer'">
         <div class="mt-5">
           <UiInput ref="input" v-model="text" multiline :rows="3" :maxlength="120" placeholder="그 자리에서 할 말을 써요" />
-          <p class="t-micro text-right mt-1">{{ text.length }}/120</p>
+          <!-- 한 번만 말한다는 걸 먼저 알린다 (걷기 P1-3: "고칠 수 있는 줄 알고 대충 눌렀는데 바로 넘어갔어") -->
+          <p class="t-micro mt-1 flex justify-between gap-2"><span>한 번만 말할 수 있어요. 시간이 다 되면 쓴 데까지 보내요</span><span class="shrink-0 tabular-nums">{{ text.length }}/120</span></p>
         </div>
         <UiButton block size="lg" class="mt-3" :disabled="!text.trim()" @click="say">말하기</UiButton>
       </template>
@@ -29,7 +30,11 @@
           <p class="t-body !text-signal-on break-keep whitespace-pre-line">{{ said[index] || '(아무 말도 못 했다)' }}</p>
         </div>
         <div class="mt-3 max-w-[85%] rounded-2xl rounded-tl-md bg-surface-2 px-4 py-3">
-          <UiSpinner v-if="phase === 'reacting'" />
+          <!-- 반응을 기다리는 동안 인물이 '생각 중'이다. 도는 표시만 있으면 "멈췄나?" (걷기 P1-4: 첫 반응 10.9초) -->
+          <p v-if="phase === 'reacting'" class="t-body text-fg-muted" aria-live="polite">
+            <span class="thinking" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span v-if="slow" class="ml-2">{{ whoShort }} 생각하는 중이에요</span>
+          </p>
           <p v-else class="t-body break-keep">{{ reactions[index] }}</p>
         </div>
         <UiButton v-if="phase === 'reacted'" block size="lg" class="mt-5" :loading="submitting" @click="next">
@@ -47,7 +52,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { POST } from '@/api/client'
 import { track } from '@/utils/trackLog'
-import { UiButton, UiInput, UiSpinner } from '../ui'
+import { UiButton, UiInput } from '../ui'
 
 type Shown = { id: string; slot: string; who: string; context: string; line: string }
 
@@ -72,6 +77,10 @@ const said = ref<string[]>([])
 const reactions = ref<string[]>([])
 const remaining = ref(PER_SITUATION)
 const input = ref<{ focus?: () => void } | null>(null)
+// 반응이 5초를 넘으면 "생각하는 중" 한 줄을 더한다. 인물 이름은 짧게 (교수님·선배·동기)
+const slow = ref(false)
+const whoShort = computed(() => ({ UP: '교수님이', SENIOR: '선배가', PEER: '동기가' })[current.value?.slot ?? ''] ?? '상대가')
+const REACT_TIMEOUT_MS = 15_000
 
 let shownAt = Date.now()
 const startedAt = Date.now()
@@ -98,12 +107,20 @@ async function say() {
     phase.value = 'reacted'
     return
   }
+  slow.value = false
+  const slowTimer = setTimeout(() => (slow.value = true), 5000)
   try {
-    const { data } = await POST('/api/improv/react', { body: { situationId: current.value.id, text: line } })
+    // 15초를 넘기면 기다리지 않고 넘어간다. 점수는 끝에 다시 채점된다 (같은 답이면 저장한 채점을 쓴다)
+    const { data } = await Promise.race([
+      POST('/api/improv/react', { body: { situationId: current.value.id, text: line } }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REACT_TIMEOUT_MS)),
+    ])
     reactions.value[index.value] = data?.reaction || '…'
   } catch {
     reactions.value[index.value] = '(반응을 받지 못했어요. 점수는 끝에 나와요)'
     track('improv_react_failed', { gameKey: 'improv', step: index.value + 1 })
+  } finally {
+    clearTimeout(slowTimer)
   }
   phase.value = 'reacted'
 }
@@ -129,3 +146,13 @@ onMounted(() => {
 })
 onBeforeUnmount(() => clearInterval(timer))
 </script>
+
+<style scoped>
+/* 말줄임 점 셋이 차례로 떠오른다 (메신저의 '입력 중') */
+.thinking { display: inline-flex; gap: 4px; vertical-align: middle; }
+.thinking i { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; opacity: 0.35; animation: think 1.2s infinite ease-in-out; }
+.thinking i:nth-child(2) { animation-delay: 0.15s; }
+.thinking i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes think { 0%, 60%, 100% { opacity: 0.35; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .thinking i { animation: none; } }
+</style>

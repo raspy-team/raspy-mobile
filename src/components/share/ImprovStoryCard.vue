@@ -12,7 +12,7 @@
 
     <div class="mt-5 flex items-end gap-3">
       <p class="text-[72px] leading-none font-semibold tracking-[-0.05em] text-signal-fg tabular-nums">{{ grade }}<span class="text-[28px] ml-1 text-fg">등급</span></p>
-      <p class="pb-2 text-[15px] text-fg-muted">상위 {{ topPercent }}% · {{ score }}점</p>
+      <p class="pb-2 text-[15px] text-fg-muted">100명 중 {{ rank }}등 · {{ score }}점</p>
     </div>
 
     <div v-if="best" class="mt-6 rounded-2xl bg-surface px-4 py-4">
@@ -36,7 +36,8 @@ import { improvShareLine } from '../../utils/improv'
 
 const props = defineProps<{
   grade: number
-  topPercent: number
+  /** 100명 중 몇 등 */
+  rank: number
   score: number
   /** 가장 잘한 대답 하나 (없으면 비운다) */
   best?: { who: string; line: string; answer: string; reaction?: string } | null

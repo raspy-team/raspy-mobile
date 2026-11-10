@@ -160,7 +160,15 @@ export async function openInstagramStoryNative(sticker: File, variant: StoryVari
   }
 }
 
-/** 인스타 스토리에서 '링크' 스티커로 붙일 우리 홈 주소 (어느 경기에서 왔는지 꼬리표) */
-export function storyHomeLink(postId: number | string): string {
-  return `https://matchapp.me/?utm_source=instagram&utm_medium=story&utm_campaign=m${postId}`
+/**
+ * 인스타 스토리에서 '링크' 스티커로 붙일 주소. 경기 주소(서명 붙은 /m/{경기})가 있으면 그 경기로, 없으면 홈으로.
+ * 꼬리표(어느 경기에서 왔는지)와 공유 번호(누가 보냈는지)를 단다
+ */
+export function storyHomeLink(postId: number | string, postUrl?: string, shareCode?: string): string {
+  const u = new URL(postUrl || 'https://matchapp.me/')
+  u.searchParams.set('utm_source', 'instagram')
+  u.searchParams.set('utm_medium', 'story')
+  u.searchParams.set('utm_campaign', `m${postId}`)
+  if (shareCode) u.searchParams.set('r', shareCode)
+  return u.toString()
 }

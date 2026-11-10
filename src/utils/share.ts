@@ -1,6 +1,7 @@
 // 보내기: 폰에서는 공유 시트(카톡·메시지로 바로), 안 되면 복사. 돌려준 문장을 토스트로 보여 준다 (빈 문장이면 보일 것 없음)
 import { copyText } from './clipboard'
 import { POST } from '@/api/client'
+import { withShareRef } from './shareRef'
 
 type ShareOptions = {
   /** 공유 시트의 제목 */
@@ -11,6 +12,8 @@ type ShareOptions = {
 
 /** 링크(url)와 한 줄(text)을 보낸다. url이 비면 글만 보내고, 복사할 때도 글을 복사한다 */
 export async function shareLink(url: string, text: string, opts: ShareOptions = {}): Promise<string> {
+  // 우리 주소면 공유 번호를 단다 (누가 데려왔는지 센다)
+  url = withShareRef(url)
   if (navigator.share) {
     try {
       await navigator.share({ title: opts.title, text, ...(url ? { url } : {}) })

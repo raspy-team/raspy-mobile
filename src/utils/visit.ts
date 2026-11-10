@@ -46,6 +46,7 @@ export async function trackVisit() {
         referrer,
         landingPath: landing.pathname,
         standalone: isStandalone(),
+        share: q.get('r') ?? undefined, // 공유 링크로 왔으면 그 번호 (utils/shareRef.ts)
       },
     })
     localStorage.setItem(SENT_KEY, mark)

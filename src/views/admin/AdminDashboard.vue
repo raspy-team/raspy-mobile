@@ -311,8 +311,13 @@ const ACQ_COLS = [
   { key: 'visitors', label: '방문' },
   { key: 'signups', label: '가입' },
   { key: 'played', label: '경기' },
+  // 본업 전환: 처음 온 날부터 7일 안에 진짜 사람과 끝낸 판 (봇·AI 주민 빼고, 11/10)
+  { key: 'versusPeople', label: '사람과 한 판' },
   { key: 'returned', label: '재방문' },
   { key: 'homescreen', label: '홈 화면' },
+  // 공유: 보낸 사람, 공유 링크로 온 사람 (보낸 사람의 채널로 센다)
+  { key: 'sharers', label: '공유함' },
+  { key: 'viaShare', label: '공유로 옴' },
 ]
 // 가입 전 한 판 표의 열 (서버 AcquisitionService.EventRow.counts의 키)
 const EVENT_COLS = [

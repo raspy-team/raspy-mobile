@@ -785,6 +785,48 @@
         }
       }
     },
+    "/api/track/share": {
+      "post": {
+        "tags": [
+          "유입 측정"
+        ],
+        "summary": "공유 등록",
+        "description": "로그인 없이. 공유 링크에 단 ?r= 번호(영문 소문자·숫자 8~16자, 보낸 기기가 만든다)를 등록한다. 그 링크로 들어온 사람은 보낸 사람의 처음 채널로 센다. 같은 번호는 한 번만",
+        "operationId": "share",
+        "parameters": [
+          {
+            "name": "User-Agent",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/track/log": {
       "post": {
         "tags": [
@@ -2245,7 +2287,7 @@
         ],
         "summary": "위치 공유 시작",
         "description": "링크를 친구에게 보낸다. friendId를 주면 그 매치 친구에게도 알리고, 끝 확인이 늦으면 그 친구에게 알린다",
-        "operationId": "share",
+        "operationId": "share_1",
         "parameters": [
           {
             "name": "gameId",
@@ -3608,6 +3650,85 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live-score": {
+      "post": {
+        "tags": [
+          "live-score-controller"
+        ],
+        "summary": "점수 한 번 (잠금화면 버튼)",
+        "description": "진행 중인 경기의 선수만. delta는 +1 또는 -1, 0 아래로는 내려가지 않는다. 점수판 웹소켓과 같은 기록·알림을 한다",
+        "operationId": "score",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveScoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveScoreResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live-activity": {
+      "post": {
+        "tags": [
+          "live-score-controller"
+        ],
+        "summary": "잠금화면 점수판 등록 (Live Activity 푸시)",
+        "description": "진행 중인 경기의 선수만. 상대가 점수를 내면 서버가 이 폰의 잠금화면 점수판을 바로 바꾼다. 경기 동안만 메모리에 둔다",
+        "operationId": "registerLiveActivity",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveActivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -11570,6 +11691,27 @@
           },
           "standalone": {
             "type": "boolean"
+          },
+          "share": {
+            "type": "string"
+          }
+        }
+      },
+      "ShareInput": {
+        "required": [
+          "code",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
           }
         }
       },
@@ -14255,6 +14397,73 @@
           "side": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "LiveScoreRequest": {
+        "required": [
+          "delta",
+          "setIndex",
+          "targetUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "setIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "delta": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LiveScoreResponse": {
+        "required": [
+          "scores",
+          "setIndex"
+        ],
+        "type": "object",
+        "properties": {
+          "setIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scores": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "LiveActivityRequest": {
+        "required": [
+          "fcmToken",
+          "pushToken",
+          "user1Id",
+          "user2Id"
+        ],
+        "type": "object",
+        "properties": {
+          "pushToken": {
+            "type": "string"
+          },
+          "fcmToken": {
+            "type": "string"
+          },
+          "user1Id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user2Id": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -21629,7 +21838,10 @@
           "homescreen",
           "played",
           "returned",
+          "sharers",
           "signups",
+          "versusPeople",
+          "viaShare",
           "visitors"
         ],
         "type": "object",
@@ -21654,6 +21866,18 @@
             "format": "int32"
           },
           "homescreen": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sharers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "viaShare": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "versusPeople": {
             "type": "integer",
             "format": "int32"
           }

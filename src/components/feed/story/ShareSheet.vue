@@ -55,6 +55,7 @@ import { useToast } from '../../../composables/useToast'
 import { copyStickerAndOpenInstagram, openInstagramStoryNative, shareFiles, storyFile, storyHomeLink, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
 import { hasNativeInstagram } from '../../../utils/nativeBridge'
 import { storyLine } from '../../../utils/storyLine'
+import { newShareCode, registerShare } from '../../../utils/shareRef'
 
 const props = defineProps<{
   /** 소식의 경기 한 장. null이면 닫힘 */
@@ -89,6 +90,9 @@ const rail = ref<HTMLElement | null>(null)
 
 // 서명(k)이 붙은 주소는 서버가 준다 (번호만으로는 열리지 않는다)
 const shared = ref<{ url: string; storyImage: string } | null>(null)
+// 공유 번호: 시트를 열 때마다 새로 (아래 link·markShared)
+const shareCode = ref('')
+let registered = false
 let run = 0
 watch(
   () => props.post?.id,
@@ -96,6 +100,8 @@ watch(
     const my = ++run
     reset()
     if (!id) return
+    shareCode.value = newShareCode()
+    registered = false
     GET('/api/games/{gameId}/share-link', { path: { gameId: Number(id) } }).then(({ data }) => {
       if (data && my === run) shared.value = data
     }, () => null)
@@ -154,10 +160,17 @@ function pick(i: number) {
 }
 
 // 서버 주소의 앞(matchapp.me)을 지금 연 곳으로 바꾼다 (미리보기·로컬에서도 같은 곳으로 돌아오게)
+// r: 공유 번호 (누가 보냈는지). 시트를 열 때 하나 만들어 어디로 보내든 같은 번호를 쓴다 (utils/shareRef.ts)
 const link = (s: string) => {
   if (!shared.value) return ''
   const u = new URL(shared.value.url)
-  return `${location.origin}${u.pathname}${u.search}&s=${s}`
+  return `${location.origin}${u.pathname}${u.search}&s=${s}&r=${shareCode.value}`
+}
+/** 처음 보낼 때 번호를 서버에 남긴다 (시트만 열고 닫으면 남기지 않는다) */
+function markShared() {
+  if (registered || !shareCode.value) return
+  registered = true
+  registerShare(shareCode.value, shared.value ? new URL(shared.value.url).pathname : `/m/${props.post?.id ?? ''}`)
 }
 const line = computed(() => (props.post ? storyLine(props.post, props.myId ?? null) : ''))
 const close = () => emit('close')
@@ -177,6 +190,7 @@ function after(r: ShareResult) {
 
 // 누른 그 자리에서 공유 창을 연다 (앞에 await를 두지 않는다)
 function go(key: Dest) {
+  markShared()
   if (key === 'copy' || key === 'message') {
     const url = link(key === 'copy' ? 'copy' : 'kakao')
     if (!url) return showToast('링크를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요')
@@ -188,7 +202,8 @@ function go(key: Dest) {
   }
   const file = files[current.value]
   if (!file) return showToast('그림을 만드는 중이에요')
-  const home = storyHomeLink(props.post.id)
+  // 스토리 링크 스티커: 그 경기로 바로 (서명 주소가 아직 없으면 홈)
+  const home = storyHomeLink(props.post.id, shared.value ? link('story') : undefined, shareCode.value)
   if (key === 'story' && hasNativeInstagram && files.sticker) {
     // 앱: 스포티파이처럼 인스타 편집기에 배경색 + 움직이는 결과 카드
     return void openInstagramStoryNative(files.sticker, current.value, home).then((r) => {

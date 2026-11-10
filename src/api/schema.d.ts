@@ -272,6 +272,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/track/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 공유 등록
+         * @description 로그인 없이. 공유 링크에 단 ?r= 번호(영문 소문자·숫자 8~16자, 보낸 기기가 만든다)를 등록한다. 그 링크로 들어온 사람은 보낸 사람의 처음 채널로 센다. 같은 번호는 한 번만
+         */
+        post: operations["share"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/track/log": {
         parameters: {
             query?: never;
@@ -1037,7 +1057,7 @@ export interface paths {
          * 위치 공유 시작
          * @description 링크를 친구에게 보낸다. friendId를 주면 그 매치 친구에게도 알리고, 끝 확인이 늦으면 그 친구에게 알린다
          */
-        post: operations["share"];
+        post: operations["share_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1656,6 +1676,46 @@ export interface paths {
          * @description 어느 편인지 한 번. 한 번 고른 편은 바꿀 수 없다. 선수는 못 한다
          */
         post: operations["cheer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live-score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 점수 한 번 (잠금화면 버튼)
+         * @description 진행 중인 경기의 선수만. delta는 +1 또는 -1, 0 아래로는 내려가지 않는다. 점수판 웹소켓과 같은 기록·알림을 한다
+         */
+        post: operations["score"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{gameId}/live-activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 잠금화면 점수판 등록 (Live Activity 푸시)
+         * @description 진행 중인 경기의 선수만. 상대가 점수를 내면 서버가 이 폰의 잠금화면 점수판을 바로 바꾼다. 경기 동안만 메모리에 둔다
+         */
+        post: operations["registerLiveActivity"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5869,6 +5929,12 @@ export interface components {
             referrer?: string;
             landingPath?: string;
             standalone: boolean;
+            share?: string;
+        };
+        ShareInput: {
+            visitorId: string;
+            code: string;
+            path?: string;
         };
         EventInput: {
             visitorId: string;
@@ -6695,6 +6761,29 @@ export interface components {
         CheerRequest: {
             /** Format: int32 */
             side: number;
+        };
+        LiveScoreRequest: {
+            /** Format: int64 */
+            targetUserId: number;
+            /** Format: int32 */
+            setIndex: number;
+            /** Format: int32 */
+            delta: number;
+        };
+        LiveScoreResponse: {
+            /** Format: int32 */
+            setIndex: number;
+            scores: {
+                [key: string]: number;
+            };
+        };
+        LiveActivityRequest: {
+            pushToken: string;
+            fcmToken: string;
+            /** Format: int64 */
+            user1Id: number;
+            /** Format: int64 */
+            user2Id: number;
         };
         GameLikeToggleResponse: {
             isLiked: boolean;
@@ -8937,6 +9026,12 @@ export interface components {
             returned: number;
             /** Format: int32 */
             homescreen: number;
+            /** Format: int32 */
+            sharers: number;
+            /** Format: int32 */
+            viaShare: number;
+            /** Format: int32 */
+            versusPeople: number;
         };
         EventRow: {
             channel: string;
@@ -9417,6 +9512,32 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["VisitInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
+    share: {
+        parameters: {
+            query?: never;
+            header?: {
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShareInput"];
             };
         };
         responses: {
@@ -10395,7 +10516,7 @@ export interface operations {
             };
         };
     };
-    share: {
+    share_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -11247,6 +11368,56 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["LiveGame"];
                 };
+            };
+        };
+    };
+    score: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LiveScoreRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveScoreResponse"];
+                };
+            };
+        };
+    };
+    registerLiveActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LiveActivityRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

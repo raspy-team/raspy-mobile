@@ -56,7 +56,8 @@ import { UiButton, UiInput } from '../ui'
 
 type Shown = { id: string; slot: string; who: string; context: string; line: string }
 
-const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
+// playId·visitorId: 반응을 이 판에 묶는다 (서버가 판에 없는 상황·낸 판이면 거절한다). 손님이면 visitorId, 로그인 판이면 비운다
+const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean; playId: number; visitorId?: string }>()
 const emit = defineEmits<{ submit: [answer: string] }>()
 
 const SLOT: Record<string, string> = { UP: '윗사람', SENIOR: '선배', PEER: '동기' }
@@ -112,7 +113,7 @@ async function say() {
   const slowTimer = setTimeout(() => (slow.value = true), 5000)
   try {
     // 45초를 넘기면 기다리지 않고 넘어간다. 점수는 끝에 다시 채점된다 (같은 답이면 저장한 채점을 쓴다)
-    const { data } = await POST('/api/improv/react', { body: { situationId: current.value.id, text: line }, timeout: REACT_TIMEOUT_MS, quiet: true })
+    const { data } = await POST('/api/improv/react', { body: { situationId: current.value.id, text: line, playId: props.playId, visitorId: props.visitorId || undefined }, timeout: REACT_TIMEOUT_MS, quiet: true })
     reactions.value[index.value] = data?.reaction || '…'
   } catch {
     reactions.value[index.value] = '(반응을 받지 못했어요. 점수는 끝에 나와요)'

@@ -61,6 +61,7 @@
         />
         <ImprovPlay
           v-else-if="key === 'improv'"
+          :play-id="play.playId"
           :problem="play.problem"
           :time-limit-seconds="secondsLeft(play)"
           :submitting="submitting"
@@ -138,6 +139,14 @@
               <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
             </p>
             <p v-if="NEXT_ROUND[result.result || '']" class="t-body mt-3">{{ NEXT_ROUND[result.result || ''] }}</p>
+            <!-- 임기응변: '다음 판에서 갚아요'의 그 사람과 다시 붙는 길 (신뢰 사다리 ?to=: 한 판 하면 그 사람에게 같은 상황으로 도전장이 간다, 3-5 걷기 P6) -->
+            <UiButton
+              v-if="key === 'improv' && result.opponent && !result.opponent.isBot"
+              size="sm"
+              variant="secondary"
+              class="mt-4"
+              :to="{ path: '/play/improv', query: { to: result.opponent.userId, toName: result.opponent.nickname } }"
+            >{{ result.opponent.nickname }}님과 다시 붙기</UiButton>
             <div class="flex items-center justify-center gap-6 mt-6">
               <span>
                 <UiRollNumber class="t-title tabular-nums" :value="result.myScore ?? 0" />
@@ -187,9 +196,17 @@
             <UiButton v-if="(result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
           <template v-else>
-            <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
-            <p class="t-caption">{{ game?.scoreUnit }}</p>
-            <p v-if="improvGrade" class="t-heading mt-2">{{ improvGrade }}</p>
+            <!-- 임기응변: 손님 결과와 같은 모양. 등급이 크게, 점수는 작게 (3-5 걷기 P6: "가입하니 점수가 커졌네") -->
+            <template v-if="improvResult">
+              <p class="t-display tabular-nums">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></p>
+              <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등 · {{ result.myScore ?? 0 }}점</p>
+              <p v-if="improvResult.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
+              <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
+            </template>
+            <template v-else>
+              <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
+              <p class="t-caption">{{ game?.scoreUnit }}</p>
+            </template>
             <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
             <template v-if="ladderTo">
               <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
@@ -197,7 +214,7 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 문제를 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민이 풀어요.` : '' }} 결과가 나오면 알려 드릴게요</p>
+              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민(앱이 만든 연습 상대)이 풀어요.` : '' }} 결과가 나오면 알려 드릴게요</p>
             </template>
             <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
@@ -207,7 +224,8 @@
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
-        <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT'" class="mt-3">
+        <!-- 임기응변은 한마디(등급·인물 반응)를 위 카드와 상황 카드에 나눠 보여 주므로 따로 두지 않는다 (등급이 두 번 보였다) -->
+        <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT' && !improvResult" class="mt-3">
           <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '알림' }}</p>
           <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
         </UiCard>
@@ -228,6 +246,7 @@
             <p class="t-micro">{{ s.who }}</p>
             <p class="t-caption mt-1 break-keep">“{{ s.line }}”</p>
             <p class="t-body mt-2 break-keep">나: {{ improvAnswers(result.myAnswer)[i] || '(대답 없음)' }}</p>
+            <p v-if="improvResult?.reactions[i]" class="t-caption mt-1 break-keep">→ {{ improvResult.reactions[i] }}</p>
             <p v-if="result.opponentAnswer" class="t-caption mt-1 break-keep">{{ who(result.opponent) }}: {{ improvAnswers(result.opponentAnswer)[i] || '(대답 없음)' }}</p>
           </UiCard>
         </template>
@@ -271,6 +290,11 @@
           <UiSkeleton class="h-14 w-full" />
         </div>
         <template v-else>
+          <!-- 가입 전 한 판을 하고 막 가입한 사람: 그 판이 어디 갔는지 먼저 (3-5 걷기 P5: "내 4등급은? 60은 뭐지") -->
+          <UiCard v-if="joinedFrom" class="mb-3">
+            <p class="t-title">방금 판 <span class="hl">{{ joinedFrom.grade }}등급</span>이 내 기록에 남았어요</p>
+            <p class="t-caption mt-1">이제 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요</p>
+          </UiCard>
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
@@ -421,7 +445,7 @@ import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
-import { improvAnswers, improvSituations } from '@/utils/improv'
+import { improvAnswers, improvFeedback, improvSituations } from '@/utils/improv'
 import { shareLink } from '@/utils/share'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
 import { getMyId } from '@/utils/me'
@@ -700,6 +724,19 @@ async function shareVote(gameId: number) {
 
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
 // 임기응변 등급: 문제의 상황 셋, 답 셋(JSON), 한마디 첫 줄의 등급 (utils/improv.ts)
+// 가입 전 한 판(임기응변)의 결과가 이 기기에 남아 있으면, 막 가입한 사람에게 한 번 보여 주고 지운다 (GuestPlayView의 improv_last_result)
+const joinedFrom = ref<{ grade: number } | null>(null)
+if (key.value === 'improv') {
+  try {
+    const v = JSON.parse(localStorage.getItem('improv_last_result') || 'null')
+    const r = v && Date.now() - v.at < 2 * 3600_000 ? improvFeedback(v.result?.feedback) : null
+    if (r) joinedFrom.value = { grade: r.grade }
+    localStorage.removeItem('improv_last_result')
+  } catch {
+    // 못 읽으면 보이지 않을 뿐이다
+  }
+}
+const improvResult = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.myFeedback) : null))
 const improvGrade = computed(() => (key.value === 'improv' && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))
 
 // 이름 뒤 조사 이/가 (AI 심판이, AI 셰프가). 받침이 없는 글자·한글이 아니면 '가'
@@ -709,7 +746,8 @@ function josaIga(name: string) {
 }
 
 // AI가 채점하는 게임마다 심판 이름
-const judgeName = computed(() => (key.value === 'recipe' ? 'AI 셰프' : key.value === 'trial' ? 'AI 판사' : 'AI 심판'))
+// 임기응변은 판 내내 인물이 반응했으니 끝에 '심판'이라는 새 인물을 들이지 않는다 (3-5 용어 8)
+const judgeName = computed(() => (key.value === 'recipe' ? 'AI 셰프' : key.value === 'trial' ? 'AI 판사' : key.value === 'improv' ? 'AI' : 'AI 심판'))
 
 function dish(answer: string) {
   const [name, ...rest] = answer.split('\n')

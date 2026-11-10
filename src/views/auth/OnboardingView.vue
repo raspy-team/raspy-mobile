@@ -62,7 +62,7 @@
     <!-- 2. 닉네임 · 사진 -->
     <main v-else class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
       <h1 class="t-title">어떻게 불러드릴까요?</h1>
-      <p class="t-body text-fg-muted mt-2">경기 상대에게 보이는 정보예요.</p>
+      <p class="t-body text-fg-muted mt-2">상대에게 보이는 이름이에요.</p>
 
       <div class="mt-8 flex flex-col items-center gap-2">
         <button type="button" class="relative" aria-label="프로필 사진 고르기" @click="fileInput?.click()">
@@ -141,7 +141,7 @@ import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { useToast } from '../../composables/useToast'
 import { photoFromFile } from '../../utils/image'
 import { containsProfanity } from '../../utils/profanity'
-import { takeReturnTo } from '../../utils/authRedirect'
+import { peekReturnTo, takeReturnTo } from '../../utils/authRedirect'
 import { markOnboarded } from '../../router/onboardingGuard'
 import { readPartnerInfo } from '../../utils/visit'
 
@@ -156,6 +156,8 @@ const saving = ref(false)
 const needTerms = ref(true)
 const needProfile = ref(true)
 const step = ref('terms')
+// 가입하고 앱 게임으로 돌아가나 (/play/…). 그러면 동네 단계를 건너뛴다
+const toAppGame = (peekReturnTo() || '').startsWith('/play/')
 // 상대 구하기를 등록하고 가입했으면 그 동네를 이어서 묻는다
 const partner = readPartnerInfo()
 const steps = ref([]) // 처음에 보여 줄 단계들 (단계 표시용)
@@ -252,6 +254,8 @@ async function submitProfile() {
   }
   saving.value = false
   markOnboarded()
+  // 앱 게임으로 돌아가는 사람(가입 전 한 판 → 가입)은 동네를 묻지 않는다. 앱 게임은 동네와 상관없다 (3-5 걷기 P5: '1초'가 6화면)
+  if (toAppGame) return finish()
   step.value = 'neighborhood'
 }
 
@@ -273,7 +277,7 @@ onMounted(async () => {
     needProfile.value = !data.onboarded
     if (!needTerms.value && !needProfile.value) return finish()
     step.value = needTerms.value ? 'terms' : 'profile'
-    steps.value = [needTerms.value && 'terms', ...(needProfile.value ? ['profile', 'neighborhood'] : [])].filter(Boolean)
+    steps.value = [needTerms.value && 'terms', ...(needProfile.value ? ['profile', ...(toAppGame ? [] : ['neighborhood'])] : [])].filter(Boolean)
     // 자동으로 붙은 아이디(u_...)는 비워 두고, 사람이 정한 것만 채운다
     username.value = data.username?.startsWith('u_') ? '' : data.username || ''
     // 아이디로 막 가입했으면 그 아이디를 채워 둔다 (같은 걸 두 번 묻지 않게)

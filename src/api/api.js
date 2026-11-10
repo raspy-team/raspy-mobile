@@ -49,7 +49,8 @@ api.interceptors.response.use(
       (error.response && error.response.status === 503) ||
       (error.code === 'ERR_FAILED' && error.message.includes('503'))
 
-    if (isRetryable503 && config.__retryCount < maxRetries) {
+    // quiet 요청(임기응변 반응·채점)은 다시 보내지 않는다: AI 채점이 여러 번 돌 수 있다 (11/11 리뷰 R6)
+    if (isRetryable503 && !config.quiet && config.__retryCount < maxRetries) {
       config.__retryCount += 1
       await new Promise(resolve => setTimeout(resolve, 500))
       return api(config)

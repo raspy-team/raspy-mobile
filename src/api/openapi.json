@@ -8549,6 +8549,47 @@
         }
       }
     },
+    "/api/guest/plays/{playId}/challenge": {
+      "get": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "도전장의 친구 점수",
+        "description": "로그인 없이. 도전장 링크(?c=)로 온 사람의 첫 화면에 보낸 친구의 점수와 등급 줄. 답은 주지 않는다",
+        "operationId": "challenge",
+        "parameters": [
+          {
+            "name": "playId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/guest/plays/challenges": {
       "get": {
         "tags": [
@@ -10275,7 +10316,7 @@
           "app-game-controller"
         ],
         "summary": "도전 정보 (링크로 들어온 사람)",
-        "operationId": "challenge",
+        "operationId": "challenge_1",
         "parameters": [
           {
             "name": "gameId",
@@ -14002,6 +14043,13 @@
           },
           "text": {
             "type": "string"
+          },
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "visitorId": {
+            "type": "string"
           }
         }
       },
@@ -14054,6 +14102,9 @@
           "from": {
             "type": "integer",
             "format": "int64"
+          },
+          "k": {
+            "type": "string"
           }
         }
       },
@@ -14154,6 +14205,12 @@
             "format": "double"
           },
           "challengerLine": {
+            "type": "string"
+          },
+          "challengerAnswer": {
+            "type": "string"
+          },
+          "challengeKey": {
             "type": "string"
           }
         }
@@ -18609,6 +18666,21 @@
             "type": "boolean"
           },
           "verificationId": {
+            "type": "string"
+          }
+        }
+      },
+      "ChallengeInfo": {
+        "required": [
+          "score"
+        ],
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "line": {
             "type": "string"
           }
         }

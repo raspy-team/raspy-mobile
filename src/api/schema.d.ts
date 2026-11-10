@@ -4294,6 +4294,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/guest/plays/{playId}/challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 도전장의 친구 점수
+         * @description 로그인 없이. 도전장 링크(?c=)로 온 사람의 첫 화면에 보낸 친구의 점수와 등급 줄. 답은 주지 않는다
+         */
+        get: operations["challenge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/guest/plays/challenges": {
         parameters: {
             query?: never;
@@ -5339,7 +5359,7 @@ export interface paths {
             cookie?: never;
         };
         /** 도전 정보 (링크로 들어온 사람) */
-        get: operations["challenge"];
+        get: operations["challenge_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6662,6 +6682,9 @@ export interface components {
         ImprovReactRequest: {
             situationId: string;
             text: string;
+            /** Format: int64 */
+            playId?: number;
+            visitorId?: string;
         };
         ImprovReactResponse: {
             reaction: string;
@@ -6678,6 +6701,7 @@ export interface components {
             first?: string;
             /** Format: int64 */
             from?: number;
+            k?: string;
         };
         GuestPlayResponse: {
             /** Format: int64 */
@@ -6712,6 +6736,8 @@ export interface components {
             /** Format: double */
             challengerScore?: number;
             challengerLine?: string;
+            challengerAnswer?: string;
+            challengeKey?: string;
         };
         GameRegionRequest: {
             roadAddress: string;
@@ -8064,6 +8090,11 @@ export interface components {
             channelKey?: string;
             verified: boolean;
             verificationId: string;
+        };
+        ChallengeInfo: {
+            /** Format: double */
+            score: number;
+            line?: string;
         };
         SentChallenge: {
             /** Format: int64 */
@@ -14688,6 +14719,30 @@ export interface operations {
             };
         };
     };
+    challenge: {
+        parameters: {
+            query?: {
+                k?: string;
+            };
+            header?: never;
+            path: {
+                playId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChallengeInfo"];
+                };
+            };
+        };
+    };
     challenges: {
         parameters: {
             query: {
@@ -15864,7 +15919,7 @@ export interface operations {
             };
         };
     };
-    challenge: {
+    challenge_1: {
         parameters: {
             query?: never;
             header?: never;

@@ -24,6 +24,8 @@
         />
         <ImprovPlay
           v-else-if="key === 'improv'"
+          :play-id="play.playId"
+          :visitor-id="visitorIdNow"
           :problem="play.problem"
           :time-limit-seconds="secondsLeft(play)"
           :submitting="submitting"
@@ -87,13 +89,15 @@
           <div class="grid grid-cols-2 gap-2 mt-4">
             <UiButton icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
             <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
-            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '친구에게 결과 보내기' : '친구에게 도전' }}</UiButton>
+            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '결과 보내기' : '도전장 보내기' }}</UiButton>
           </div>
           <UiCard v-for="(s, i) in improvShown" :key="s.id" class="mt-3">
             <p class="t-micro">{{ s.who }}</p>
             <p class="t-caption mt-1 break-keep">“{{ s.line }}”</p>
             <p class="t-body mt-2 break-keep">나: {{ improvSaid[i] || '(대답 없음)' }}</p>
             <p v-if="improv.reactions[i]" class="t-caption mt-1 break-keep">→ {{ improv.reactions[i] }}</p>
+            <!-- 도전장: 친구의 답을 나란히 (놀림 거리가 바로 이것, 걷기 P4) -->
+            <p v-if="friendSaid.length" class="t-body mt-3 pt-3 border-t border-line break-keep text-fg-muted">친구: {{ friendSaid[i] || '(대답 없음)' }}</p>
           </UiCard>
           <ImprovSentChallenges :visitor-id="visitorIdNow" class="mt-4" />
         </template>
@@ -108,7 +112,7 @@
           <!-- 가입하며 옮긴 판은 기록(최고 기록·기록 순위)에만 남고 승패는 없다(0승 0패). 지키지 못하는 말을 하지 않는다 (first10 검토) -->
           <p class="t-title">{{ improv ? '등급 남기고 사람과 붙기' : '점수 저장하고 사람과 붙기' }}</p>
           <p class="t-caption mt-1">{{ improv ? '시작하면 이 등급이 내 기록에 남아요. 다음 판부터는 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요' : '시작하면 이 점수가 내 기록에 남아 기록 순위에 올라가요. 다음 판부터는 사람과 승패를 내요' }}</p>
-          <UiButton block size="lg" class="mt-4" @click="join('result_join')">1초 만에 시작하기</UiButton>
+          <UiButton block size="lg" class="mt-4" @click="join('result_join')">{{ improv ? '등급 남기기' : '1초 만에 시작하기' }}</UiButton>
         </UiCard>
         <UiButton v-if="key !== 'daily-chosung'" block variant="ghost" class="mt-2" :loading="starting" @click="again">한 판 더</UiButton>
         <!-- 하루 판 수를 넘기면 '한 판 더'가 아무 말 없이 멈추지 않게 이유를 보인다 -->
@@ -202,11 +206,13 @@
             <p class="t-body mt-1"><b>{{ adQuestion.a }}</b> <span class="text-fg-subtle">vs</span> <b>{{ adQuestion.b }}</b></p>
             <p class="t-caption mt-2 break-keep">남들은 뭘 골랐을까? 이 문제부터 열 문제, 문제당 3초</p>
           </template>
-          <p v-else class="break-keep" :class="key === 'improv' ? 't-title' : 't-body text-fg-muted mt-3'">{{ meta.line }}</p>
-          <p v-if="fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. {{ key === 'improv' ? '같은 상황으로 붙어요' : '같은 문제로 붙어요' }}</p>
+          <p v-else class="break-keep" :class="key === 'improv' ? 't-title' : 't-body text-fg-muted mt-3'">{{ introLine }}</p>
+          <!-- 임기응변 도전장: 친구가 몇 등급을 받았는지가 곧 이유다 (걷기 P4: "도전장 첫 화면에 친구 등급이 없음") -->
+          <p v-if="fromPlay && key === 'improv' && challengeGrade" class="t-heading mt-4 break-keep">친구가 <span class="hl">{{ challengeGrade }}</span> 받은 상황이에요. 이길 수 있어요?</p>
+          <p v-else-if="fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. {{ key === 'improv' ? '같은 상황으로 붙어요' : '같은 문제로 붙어요' }}</p>
           <p class="t-caption mt-3">가입 없이 바로 한 판 해 볼 수 있어요</p>
         </UiCard>
-        <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">{{ adSituation ? '대답하기' : '한 판 하기' }}</UiButton>
+        <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">{{ key === 'improv' ? '시작하기' : '한 판 하기' }}</UiButton>
         <!-- 임기응변: 내가 보낸 도전장의 결과 (손님은 알림이 없어 다시 오면 여기서 본다, 걷기 C2) -->
         <ImprovSentChallenges v-if="key === 'improv'" :visitor-id="visitorIdNow" class="mt-6" />
         <p v-if="startError" class="t-caption text-danger mt-3 text-center">{{ startError }}</p>
@@ -261,6 +267,8 @@ const meta = computed(() => (GUEST_GAMES as Record<string, { title: string; line
 // 광고가 보여 준 질문(?q=)으로 시작, 친구의 도전장(?c=그 친구의 판)이면 같은 문제
 const firstQuestion = typeof route.query.q === 'string' ? route.query.q : undefined
 const fromPlay = Number(route.query.c) || undefined
+// 도전장 열쇠 (?k=): 손님 판 번호는 차례로 늘어, 열쇠가 맞아야 친구의 판으로 친다
+const challengeK = typeof route.query.k === 'string' ? route.query.k : undefined
 
 // 이미 로그인했으면 원래 게임 화면으로
 if (localStorage.getItem('raspy_access_token2')) router.replace({ path: `/play/${key.value}`, query: route.query })
@@ -298,6 +306,7 @@ const topPercent = computed(() => {
 })
 
 onMounted(() => {
+  if (key.value === 'improv' && !fromPlay) restoreLast()
   // 들어온 곳: 꼬리표(utm)·첫 질문·도전장. 방문(visit)과 같은 기기 번호로 잇는다
   track('try_open', { gameKey: key.value, value: window.location.search.slice(1, 400) || undefined })
 })
@@ -316,7 +325,7 @@ async function start(from: 'start' | 'again') {
   startError.value = ''
   try {
     // 한 판 더는 광고 질문·도전장 없이 새 문제로
-    const body = { visitorId, key: key.value, first: from === 'start' ? firstQuestion : undefined, from: from === 'start' ? fromPlay : undefined }
+    const body = { visitorId, key: key.value, first: from === 'start' ? firstQuestion : undefined, from: from === 'start' ? fromPlay : undefined, k: from === 'start' ? challengeK : undefined }
     const p = (await POST('/api/guest/plays', { body })).data
     offset = new Date(p.serverNow).getTime() - Date.now()
     counting.value = new Date(p.startedAt).getTime() > Date.now() + offset
@@ -358,7 +367,10 @@ async function submit(answer: string) {
     track('guest_play_result', { gameKey: key.value, step: rounds.value, value: `score=${result.value.score};rank=${result.value.rank ?? ''}/${result.value.rankOf ?? ''}` })
     play.value = null
     if (key.value === 'nunchi') loadReview()
-    if (key.value === 'improv') prepareStory()
+    if (key.value === 'improv') {
+      prepareStory()
+      saveLast()
+    }
   } catch (e) {
     submitError.value = errorMessage(e, '답을 내지 못했어요. 다시 해 주세요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
@@ -395,12 +407,56 @@ function join(name: 'result_join' | 'intro_join') {
   router.push({ path: '/init', query: { from: result.value ? 'guest' : undefined } })
 }
 
+// ── 임기응변 등급: 결과 남겨 두기 ──
+// 결과를 보고 인스타 스토리에 올리러 갔다가 같은 링크로 돌아오면 결과가 사라져 처음 화면이었다 (걷기 P1).
+// 이 기기에 2시간 남겨 두고, 친구 도전장(?c=)으로 온 게 아니면 돌아왔을 때 그 결과를 다시 보여 준다
+const LAST_KEY = 'improv_last_result'
+const LAST_MS = 2 * 3600_000
+function saveLast() {
+  try {
+    localStorage.setItem(LAST_KEY, JSON.stringify({ at: Date.now(), playId: playId.value, result: result.value, problem: lastProblem.value, answer: lastAnswer.value }))
+  } catch {
+    // 못 남기면 돌아왔을 때 처음 화면일 뿐이다
+  }
+}
+function restoreLast(): boolean {
+  try {
+    const v = JSON.parse(localStorage.getItem(LAST_KEY) || 'null')
+    if (!v?.result || Date.now() - v.at > LAST_MS) return false
+    playId.value = v.playId
+    result.value = v.result
+    lastProblem.value = v.problem
+    lastAnswer.value = v.answer
+    prepareStory()
+    track('improv_result_restored', { gameKey: 'improv' })
+    return true
+  } catch {
+    return false
+  }
+}
+
 // ── 임기응변 등급: 결과 읽기, 스토리 그림 ──
 const lastProblem = ref('')
 const lastAnswer = ref('')
 const improv = computed(() => (key.value === 'improv' && result.value ? improvFeedback(result.value.feedback) : null))
 const improvShown = computed(() => improvSituations(lastProblem.value))
 const improvSaid = computed(() => improvAnswers(lastAnswer.value))
+// 소개 한 줄은 들어온 곳마다 (상황·규칙은 같고 말만 다르다). 펨코(20~30대)에게 '대학생이 될 준비'는 남의 얘기였다 (걷기 P3)
+const introLine = computed(() =>
+  key.value === 'improv' && route.query.utm_source === 'fmkorea'
+    ? '교수님·선배·처음 보는 동기한테 45초 안에 한마디. AI가 수능처럼 1~9등급을 매겨요. 서울대 의대생은 4등급'
+    : key.value === 'improv' && route.query.utm_source === 'everytime'
+      ? '새내기 때로 돌아가면 나는 몇 등급? 교수님·선배·처음 보는 동기, 상황마다 45초. 서울대 의대생은 4등급'
+      : meta.value?.line ?? '',
+)
+const friendSaid = computed(() => improvAnswers(result.value?.challengerAnswer))
+// 도전장 링크의 첫 화면: 보낸 친구의 등급
+const challengeGrade = ref('')
+if (key.value === 'improv' && fromPlay) {
+  GET('/api/guest/plays/{playId}/challenge', { path: { playId: fromPlay }, query: { k: challengeK } })
+    .then(({ data }) => { challengeGrade.value = data?.line?.match(/\d등급/)?.[0] ?? '' })
+    .catch(() => {})
+}
 // 도전장을 보낸 친구의 등급 줄에서 "N등급"만
 const challengerGrade = computed(() => result.value?.challengerLine?.match(/\d등급/)?.[0] ?? `${result.value?.challengerScore ?? 0}점`)
 // 스토리 그림은 결과가 나오자마자 미리 찍어 둔다 (누른 순간 바로 넘겨야 사파리가 공유를 막지 않는다)
@@ -425,7 +481,7 @@ function shareStory() {
   const file = storyFile.value
   if (!file || !playId.value) return
   track('result_share', { gameKey: key.value, step: rounds.value, value: 'story' })
-  const link = withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&utm_source=instagram&utm_medium=story`)
+  const link = withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&k=${result.value?.challengeKey ?? ''}&utm_source=instagram&utm_medium=story`)
   void copyText(link)
   void shareFiles([file]).then((r) => {
     track('result_share_shared', { gameKey: key.value, value: `story:${r}` })
@@ -451,7 +507,8 @@ async function challengeFriend() {
       : improv.value
       ? `${improvShareLine(improv.value.grade)} 같은 상황으로 붙어 보자`
       : `눈치 한 판 ${result.value?.score ?? 0}점. 같은 문제로 붙어 볼래요? 문제당 3초예요`
-    const msg = await shareLink(`${window.location.origin}/try/${key.value}?c=${playId.value}`, text)
+    const ck = key.value === 'improv' && result.value?.challengeKey ? `&k=${result.value.challengeKey}` : ''
+    const msg = await shareLink(`${window.location.origin}/try/${key.value}?c=${playId.value}${ck}`, text)
     track('result_challenge_shared', { gameKey: key.value, value: msg || 'share' })
     // 보낸 사람에게 결과를 볼 곳을 알린다 (손님은 알림이 없어 이 링크(/try/improv)로 다시 와야 본다)
     if (key.value === 'improv' && result.value?.challengerScore == null) showToast(msg ? `${msg}. 친구가 하면 이 화면에서 승패가 보여요` : '친구가 하면 이 화면에서 승패가 보여요')

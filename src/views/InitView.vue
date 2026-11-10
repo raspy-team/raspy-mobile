@@ -7,19 +7,27 @@
         <span class="text-[22px] font-semibold leading-none tracking-[-0.055em] text-fg">match</span>
         <!-- 링크로 들어온 사람: 무엇에 불려 왔는지 먼저 (인스타 게임 링크, 친구의 도전장). 가입하면 그 화면으로 돌아간다 -->
         <UiCard v-if="landing" class="mt-8">
-          <p class="t-caption">받은 링크</p>
+          <!-- 방금 손님으로 한 판 한 사람에게 '받은 링크'는 남의 말이다 (3-5 걷기 P5) -->
+          <p class="t-caption">{{ guestPlayed ? '방금 한 판' : '받은 링크' }}</p>
           <p class="t-title mt-1">{{ landing.title }}</p>
           <p class="t-caption mt-1">{{ landing.line }}</p>
           <!-- 가입 전에 한 판 하고 '점수 저장하고 상대와 붙기'로 온 사람: 그 점수가 어디 가는지 (first10 검토) -->
-          <p class="t-caption text-fg mt-3">{{ guestPlayed ? '시작하면 방금 한 판 점수가 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
+          <p class="t-caption text-fg mt-3">{{ guestPlayed ? '시작하면 방금 한 판이 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
         </UiCard>
         <!-- 상대 구하기를 등록하고 온 사람: 그 등록이 어디로 가는지 -->
         <UiCard v-else-if="fromPartner" class="mt-8">
           <p class="t-title">상대 구하기를 등록했어요</p>
           <p class="t-caption mt-1">시작하면 내 계정에 붙어요. 상대가 생기면 알림으로 알려 드려요</p>
         </UiCard>
-        <h1 class="t-display text-[44px] mt-8">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
-        <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
+        <!-- 게임 링크로 온 사람에게 '종목과 규칙을 정하고'는 다른 앱 이야기다. 받은 게임 이야기로 (3-5 걷기 P5) -->
+        <template v-if="landing">
+          <h1 class="t-display text-[40px] mt-8">기록 남기고<br /><span class="hl hl-draw">사람과</span> 붙기</h1>
+          <p class="t-body text-fg-muted mt-4 max-w-[30ch]">다음 판부터는 모르는 사람과 1:1로 승패를 내요.</p>
+        </template>
+        <template v-else>
+          <h1 class="t-display text-[44px] mt-8">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
+          <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
+        </template>
 
       </div>
 

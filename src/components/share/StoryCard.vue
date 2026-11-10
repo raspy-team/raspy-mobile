@@ -33,7 +33,12 @@
     <p class="mt-9 text-[34px] leading-[1.18] font-semibold tracking-[-0.045em] break-keep">{{ line }}</p>
 
     <!-- 카드가 길어도 꼬리(나도 한 판·주소)는 그림 안에: 카드 칸이 줄고 넘치는 것은 가린다 (3-5 P6 나머지 F1) -->
-    <div class="mt-7 min-h-0 shrink overflow-hidden rounded-2xl bg-surface text-fg px-4 py-5">
+    <!-- 임기응변 등급: 점수 막대 대신 등급과 '첫 마디 → 대답' 한 쌍 (막대가 자리를 먹어 정작 대답이 잘렸다, 3-5 P6 나머지) -->
+    <div v-if="improvText" class="mt-7 rounded-2xl bg-surface text-fg px-4 py-5">
+      <p class="text-[13px] text-fg-muted">임기응변 등급</p>
+      <p class="mt-2 text-[17px] leading-[1.35] font-semibold break-keep line-clamp-6">{{ improvText }}</p>
+    </div>
+    <div v-else class="mt-7 min-h-0 shrink overflow-hidden rounded-2xl bg-surface text-fg px-4 py-5">
       <AppDuelFeedCard v-if="post.appDuel" :post="post" :my-id="myId ?? undefined" still />
       <FeedCard v-else :post="post" :my-id="myId ?? undefined" still />
     </div>
@@ -62,4 +67,11 @@ const H = 640
 const volt = computed(() => props.variant === 'volt')
 const logo = (px: number) => logoSvg.replace('<svg ', `<svg width="${px}" height="${px}" `)
 const line = computed(() => storyLine(props.post, props.myId ?? null))
+// 임기응변 대결이면 내 쪽 글(서버가 '9등급 · “첫 마디” → “대답”'으로 만든다), 없으면 첫 글
+const improvText = computed(() => {
+  const d = props.post?.appDuel
+  if (d?.key !== 'improv') return ''
+  const i = Math.max(0, (props.post.players || []).findIndex((p: any) => String(p.id) === String(props.myId)))
+  return d.texts?.[i] || d.texts?.find((t: string) => t) || ''
+})
 </script>

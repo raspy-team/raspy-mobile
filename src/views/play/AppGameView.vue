@@ -142,7 +142,6 @@
             <!-- 임기응변: '다음 판에서 갚아요'의 그 사람과 다시 붙는 길 (신뢰 사다리 ?to=: 한 판 하면 그 사람에게 같은 상황으로 도전장이 간다, 3-5 걷기 P6) -->
             <UiButton
               v-if="key === 'improv' && result.opponent && !result.opponent.isBot"
-              size="sm"
               variant="secondary"
               class="mt-4"
               :to="{ path: '/play/improv', query: { to: result.opponent.userId, toName: result.opponent.nickname } }"
@@ -159,6 +158,8 @@
               </span>
             </div>
             <p v-if="improvGrade" class="t-heading mt-4">{{ improvGrade }}</p>
+            <!-- 끝난 판에도 왜 그 등급인지 (3-5 UI) -->
+            <p v-if="improvResult?.strong" class="t-body mt-2 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
               실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>

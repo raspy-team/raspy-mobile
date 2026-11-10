@@ -102,6 +102,8 @@ async function submit() {
         await api.post('/api/auth/register', { email: id, password: password.value })
       } catch (err) {
         if (err.response?.status === 409) emailError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어 주세요'
+        // 너무 많이 가입한 주소(429)면 서버 말 그대로: 언제 다시 하면 되는지가 들어 있다 (3-5 UI U1)
+        else if (err.response?.status === 429) submitError.value = err.response?.data?.message || '이 인터넷에서 가입이 많았어요. 15분 뒤 다시 해 주세요'
         else submitError.value = '가입하지 못했어요. 잠시 뒤 다시 해 주세요'
         return
       }

@@ -53,7 +53,7 @@
       <!-- 끝난 판: 점수를 보여 주고, 저장하고 사람과 붙으려면 가입 -->
       <template v-else-if="result">
         <UiCard class="text-center py-8">
-          <MatchMascot who="kok" :mood="result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
+          <MatchMascot :who="key === 'improv' ? 'match' : 'kok'" :mood="result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
           <p v-if="key === 'nunchi'" class="t-micro">눈치 점수</p>
           <template v-if="improv">
             <p class="t-micro">임기응변 등급</p>
@@ -191,7 +191,8 @@
       <template v-else>
         <UiCard class="py-8 text-center">
           <!-- 처음 온 사람의 길잡이는 콕이 (docs/mascots.md) -->
-          <MatchMascot who="kok" mood="wow" :size="72" class="mx-auto mb-3" />
+          <!-- 임기응변은 요리사 모자(콕이) 대신 매치 얼굴 (3-5 UI) -->
+          <MatchMascot :who="key === 'improv' ? 'match' : 'kok'" mood="wow" :size="72" class="mx-auto mb-3" />
           <!-- 임기응변: 이름은 위 막대에 이미 있다 (걷기 P1-2: 두 번 보였다). 큰 글자 자리는 광고 상황·소개가 쓴다 -->
           <p v-if="key !== 'improv'" class="t-display">{{ meta.title }}</p>
           <!-- 광고에서 본 질문(?q=)을 그대로 보여 준다: 광고 → 처음 보는 화면 사이가 끊기지 않게 -->
@@ -206,7 +207,12 @@
             <p class="t-body mt-1"><b>{{ adQuestion.a }}</b> <span class="text-fg-subtle">vs</span> <b>{{ adQuestion.b }}</b></p>
             <p class="t-caption mt-2 break-keep">남들은 뭘 골랐을까? 이 문제부터 열 문제, 문제당 3초</p>
           </template>
-          <p v-else class="break-keep" :class="key === 'improv' ? 't-title' : 't-body text-fg-muted mt-3'">{{ introLine }}</p>
+          <!-- 임기응변: 짧은 제목 + 본문 크기 설명 (320폭에서 제목 크기 다섯 줄이라 눈 둘 곳이 없었다, 3-5 UI U2) -->
+          <template v-else-if="key === 'improv'">
+            <p class="t-title break-keep">{{ intro.title }}</p>
+            <p class="t-body text-fg-muted mt-2 break-keep">{{ intro.body }}</p>
+          </template>
+          <p v-else class="t-body text-fg-muted mt-3 break-keep">{{ meta.line }}</p>
           <!-- 임기응변 도전장: 친구가 몇 등급을 받았는지가 곧 이유다 (걷기 P4: "도전장 첫 화면에 친구 등급이 없음") -->
           <p v-if="fromPlay && key === 'improv' && challengeGrade" class="t-heading mt-4 break-keep">친구가 <span class="hl">{{ challengeGrade }}</span> 받은 상황이에요. 이길 수 있어요?</p>
           <!-- 임기응변은 열쇠가 맞아 친구 등급을 받았을 때만 도전장이다 (열쇠 없는 ?c=는 서버가 보통 판으로 준다) -->
@@ -446,12 +452,12 @@ const improv = computed(() => (key.value === 'improv' && result.value ? improvFe
 const improvShown = computed(() => improvSituations(lastProblem.value))
 const improvSaid = computed(() => improvAnswers(lastAnswer.value))
 // 소개 한 줄은 들어온 곳마다 (상황·규칙은 같고 말만 다르다). 펨코(20~30대)에게 '대학생이 될 준비'는 남의 얘기였다 (걷기 P3)
-const introLine = computed(() =>
-  key.value === 'improv' && route.query.utm_source === 'fmkorea'
-    ? '교수님·선배·처음 보는 동기한테 45초 안에 한마디. AI가 수능처럼 1~9등급을 매겨요. 서울대 의대생은 4등급'
-    : key.value === 'improv' && route.query.utm_source === 'everytime'
-      ? '새내기 때로 돌아가면 나는 몇 등급? 교수님·선배·처음 보는 동기, 상황마다 45초. 서울대 의대생은 4등급'
-      : meta.value?.line ?? '',
+const intro = computed(() =>
+  route.query.utm_source === 'fmkorea'
+    ? { title: 'AI가 매기는 임기응변 등급', body: '교수님·선배·처음 보는 동기한테 45초 안에 한마디. 수능처럼 1~9등급이에요. 서울대 의대생은 4등급' }
+    : route.query.utm_source === 'everytime'
+      ? { title: '새내기 때로 돌아가면 몇 등급?', body: '교수님·선배·처음 보는 동기, 상황마다 45초. 서울대 의대생은 4등급' }
+      : { title: '서울대 의대생도 4등급 맞은 시험', body: '우리 중 누가 가장 대학생이 될 준비가 됐을까? 교수님·선배·처음 보는 동기, 상황마다 45초' },
 )
 const friendSaid = computed(() => improvAnswers(result.value?.challengerAnswer))
 // 도전장 링크의 첫 화면: 보낸 친구의 등급

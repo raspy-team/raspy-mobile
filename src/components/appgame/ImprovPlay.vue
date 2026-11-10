@@ -18,7 +18,8 @@
         <div class="mt-5">
           <UiInput ref="input" v-model="text" multiline :rows="3" :maxlength="120" placeholder="그 자리에서 할 말을 써요" />
           <!-- 한 번만 말한다는 걸 먼저 알린다 (걷기 P1-3: "고칠 수 있는 줄 알고 대충 눌렀는데 바로 넘어갔어") -->
-          <p class="t-micro mt-1 flex justify-between gap-2"><span>한 번만 말할 수 있어요. 시간이 다 되면 쓴 데까지 보내요</span><span class="shrink-0 tabular-nums">{{ text.length }}/120</span></p>
+          <p class="t-micro text-right mt-1 tabular-nums">{{ text.length }}/120</p>
+          <p class="t-caption mt-1 break-keep">한 번만 말할 수 있어요. 시간이 다 되면 쓴 데까지 보내요</p>
         </div>
         <UiButton block size="lg" class="mt-3" :disabled="!text.trim()" @click="say">말하기</UiButton>
       </template>

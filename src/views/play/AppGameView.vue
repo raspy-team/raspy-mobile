@@ -244,7 +244,7 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민(앱이 만든 연습 상대)이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
+              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민${botExplained ? '' : '(앱이 만든 연습 상대)'}이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
             </template>
             <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
             <div v-if="!improvResult || improvResult.empty" class="flex flex-wrap justify-center gap-2 mt-4">
@@ -554,6 +554,14 @@ const game = ref<Schemas['AppGameSummary'] | null>(null)
 const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
 const board = ref<Schemas['AppRecordBoard'] | null>(null)
+// 'AI 주민'이 무엇인지는 처음 세 번만 풀어 쓴다 (11/11 쌓이는 피로: 판마다 같은 괄호). 게임 화면을 열 때마다 센다
+const botExplained = (() => {
+  try {
+    const n = Number(localStorage.getItem('bot_explained') || 0)
+    localStorage.setItem('bot_explained', String(n + 1))
+    return n >= 3
+  } catch { return false }
+})()
 const boardKind = ref<'RATING' | 'WEEK' | 'ALL'>('RATING')
 const play = ref<Play | null>(null)
 const counting = ref(false)
@@ -682,7 +690,7 @@ async function start() {
       return
     }
   }
-  if (ladderTo && !noLadder.value && game.value?.playMode === 'REALTIME') return router.push({ path: `/play/${key.value}/live`, query: { to: ladderTo, toName: ladderName } })
+  if (ladderTo && !noLadder.value && game.value?.playMode === 'REALTIME') return router.push({ path: `/play/${key.value}/live`, query: { to: ladderTo, toName: ladderName, from: fromFeed ? 'feed' : 'ladder' } })
   if (game.value?.shared) return router.push(`/play/${key.value}/board`)
   if (game.value?.playMode === 'REALTIME') return router.push(game.value.battle ? `/play/${key.value}/battle` : liveRoute(key.value))
   starting.value = true

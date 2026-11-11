@@ -47,7 +47,7 @@ export const socket = {
       },
       onWebSocketClose: () => {
         if (_onDisconnected) _onDisconnected()
-        if (currentRoomId) {
+        if (currentRoomId && !hiddenPause) {
           // 네트워크 단절 등 재연결
           setTimeout(() => socket.connect(currentRoomId), 2000)
         }
@@ -141,4 +141,20 @@ export const socket = {
     }
     return false
   },
+}
+
+// 앱을 내려놓으면 방 연결을 끊고, 다시 보면 같은 방에 다시 붙는다 (11/11 쌓이는 피로).
+// 서버는 방에 붙어 있는 사람에게 메시지 알림을 보내지 않는다. 내려놓은 폰의 연결이 살아 있으면 알림을 못 받는다
+let hiddenPause = false
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      if (!currentRoomId || !stompClient) return
+      hiddenPause = true
+      socket.disconnect({ clearRoomId: false })
+    } else if (hiddenPause) {
+      hiddenPause = false
+      if (currentRoomId) socket.connect(currentRoomId)
+    }
+  })
 }

@@ -353,6 +353,8 @@ function apply(s: State) {
 
 // 정한 사람과 한 판 (11/4): ?to=사람 이면 그 사람만 들어오는 방을 열고, ?invite=경기 면 받은 초대로 들어간다. 한 번만 쓴다 (다시 한 판은 보통 대기실)
 let inviteTo = Number(route.query.to) || null
+// 어디서 부른 초대인가: 소식 카드(feed)·만나기 전 계단(ladder). 광장·챔피언 카드는 없다 (초대 메시지의 이유가 달라진다)
+const inviteFrom = ['feed', 'ladder'].includes(String(route.query.from)) ? String(route.query.from) : undefined
 let inviteId = Number(route.query.invite) || null
 // AI 보스 도전 (?boss=1, 챔피언 카드의 '도전하기'): 보스와 바로 붙는다. 한 번만 쓴다 (docs/ai-residents.md 3)
 let bossChallenge = route.query.boss === '1'
@@ -389,7 +391,7 @@ async function join() {
     if (game) apply((await GET('/api/app-games/realtime/{gameId}', { path: { gameId: game } })).data)
     else if (boss) apply((await POST('/api/app-games/{key}/realtime/boss', { path: { key: key.value } })).data)
     else if (invite) apply((await POST('/api/app-games/realtime/{gameId}/accept', { path: { gameId: invite } })).data)
-    else if (to) apply((await POST('/api/app-games/{key}/realtime/invite', { path: { key: key.value }, query: { to } })).data)
+    else if (to) apply((await POST('/api/app-games/{key}/realtime/invite', { path: { key: key.value }, query: { to, from: inviteFrom } })).data)
     else {
       apply((await POST('/api/app-games/{key}/realtime', { path: { key: key.value } })).data)
       const ai = aiId

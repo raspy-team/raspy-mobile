@@ -11,7 +11,8 @@
           <UiAvatar :src="info.challenger.profilePicture" :name="info.challenger.nickname" :user-id="info.challenger.userId" size="lg" class="mx-auto" />
           <p class="t-title mt-4">{{ info.challenger.nickname }}님의 도전장</p>
           <p class="t-heading mt-1">{{ info.title }}</p>
-          <p class="t-caption mt-2">{{ info.summary }}. {{ info.live ? '지금 기다리고 있어요. 들어가면 바로 시작해요' : `같은 ${info.key === 'improv' ? '상황' : '문제'}으로 겨뤄요` }}</p>
+          <!-- '지금 기다리고 있어요'는 열린 초대에만: 끝난 초대에 아래 '나갔거나 시간이 지났어요'와 함께 떠 서로 어긋났다 (11/11 두 계정 확인) -->
+          <p class="t-caption mt-2">{{ info.summary }}. {{ info.live && info.open ? '지금 기다리고 있어요. 들어가면 바로 시작해요' : `같은 ${info.key === 'improv' ? '상황' : '문제'}으로 겨뤄요` }}</p>
         </UiCard>
         <!-- 실시간 게임은 그 사람만 들어오는 방으로 (RealtimeView ?invite=) -->
         <UiButton v-if="info.open && !info.mine" block size="lg" class="mt-4" :to="info.live ? `/play/${info.key}/live?invite=${info.gameId}` : `/play/${info.key}?challenge=${info.gameId}`">도전 수락</UiButton>

@@ -85,7 +85,8 @@
               <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '결과 보내기' : '도전장 보내기' }}</UiButton>
             </div>
             <!-- 링크 스티커 안내는 누르기 전에: 공유가 끝난 뒤 뜬 토스트는 인스타 편집기에 있는 동안 못 봤다 (경로 10 훑기) -->
-            <p class="t-micro mt-2 break-keep">스토리를 누르면 링크도 복사돼요. 인스타에서 링크 스티커에 붙여 넣으세요</p>
+            <!-- 한 번 올려 본 사람에게는 같은 말이라 뺀다 (11/11 쌓이는 피로: 판마다 같은 안내) -->
+            <p v-if="!storyShownBefore" class="t-micro mt-2 break-keep">스토리를 누르면 링크도 복사돼요. 인스타에서 링크 스티커에 붙여 넣으세요</p>
             <!-- 왜 이 등급인가, 다음엔 무엇을 (걷기 P1-7) -->
             <p v-if="improv.weak" class="t-body mt-4 break-keep"><template v-if="improv.strong">잘한 것 <b>{{ improv.strong }}</b> · </template>아쉬운 것 <b>{{ improv.weak }}</b></p>
             <p v-if="improv.tip" class="t-caption mt-1 break-keep">다음엔 {{ improv.tip }}</p>
@@ -577,6 +578,7 @@ function shareStory() {
   if (!file || !playId.value || !story) return  // 그림이 있으면 모듈도 이미 받았다
   const { shareFiles } = story
   track('result_share', { gameKey: key.value, step: rounds.value, value: `story${gradeTag()}` })
+  try { localStorage.setItem('story_shared', '1') } catch { /* 못 남기면 안내가 다시 보일 뿐 */ }
   const link = withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&k=${result.value?.challengeKey ?? ''}&utm_source=instagram&utm_medium=story`)
   void copyText(link)
   void shareFiles([file]).then((r) => {
@@ -588,6 +590,8 @@ function shareStory() {
   })
 }
 const saveView = ref<string | null>(null)
+// 스토리를 한 번이라도 올려 봤나 (링크 스티커 안내를 그때까지만)
+const storyShownBefore = (() => { try { return localStorage.getItem('story_shared') === '1' } catch { return false } })()
 
 // ── 눈치 한 판: 친구 도전·공유 ──
 async function challengeFriend() {

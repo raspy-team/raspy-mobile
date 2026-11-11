@@ -263,6 +263,7 @@
 // 끝나면 "점수 저장하고 상대와 붙기"로 시작 화면에 보낸다. 로그인하면 claimGuestPlays가 이 판을 기록으로 옮긴다
 // 눈치 한 판(?q=첫 질문, ?c=친구의 판)은 결과에 문제마다 정답, 내 취향 받기, 친구 도전·공유가 붙는다. 버튼 하나하나 원본 기록(trackLog)에 남긴다
 import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
+import { hasNativeInstagram } from '@/utils/nativeBridge'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -581,6 +582,15 @@ function shareStory() {
   try { localStorage.setItem('story_shared', '1') } catch { /* 못 남기면 안내가 다시 보일 뿐 */ }
   const link = withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&k=${result.value?.challengeKey ?? ''}&utm_source=instagram&utm_medium=story`)
   void copyText(link)
+  // 앱: 소식 공유와 같이 인스타 스토리 편집기를 바로 열고 결과 카드를 붙인다 (11/11: 임기응변 결과만 일반 공유 창이라 그림 저장으로 끝났다)
+  if (hasNativeInstagram) {
+    void story.openInstagramStoryNative(file, 'dark', link).then((r) => {
+      if (r === 'opened') return
+      if (r === 'not_installed') return showToast('인스타그램 앱이 있어야 스토리에 올릴 수 있어요')
+      void story!.shareFiles([file])
+    })
+    return
+  }
   void shareFiles([file]).then((r) => {
     track('result_share_shared', { gameKey: key.value, value: `story:${r}` })
     // 링크 스티커 안내는 버튼 밑에 미리 있다(공유 뒤 토스트는 인스타 편집기에선 못 봤다). 저장으로 끝난 때만 알린다

@@ -499,7 +499,7 @@ import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import { improvAnswers, improvFeedback, improvSituations, improvShareLine } from '@/utils/improv'
 import { track } from '@/utils/trackLog'
 import { shareLink } from '@/utils/share'
-import { askPushPermission, isCapacitorApp } from '@/utils/nativeBridge'
+import { askPushPermission, isCapacitorApp, hasNativeInstagram } from '@/utils/nativeBridge'
 import { guestClaimResult } from '@/utils/visit'
 // 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 임기응변 결과가 나올 때 받는다. 모든 게임 화면에 실려 첫 화면을 늦췄다 (11/11 몸과 시간)
 let story: typeof import('@/utils/storyShare') | null = null
@@ -931,8 +931,18 @@ function shareStory() {
   // 손님 결과와 같은 이름: 등급마다 보내는 비율을 본다 (11/11 감정과 체면)
   track('result_share', { gameKey: key.value, value: `story${improvResult.value?.grade ? `;grade=${improvResult.value.grade}` : ''}` })
   // 그림을 누른 사람이 가입 없이 바로 해 볼 링크를 클립보드에 (인스타 링크 스티커에 붙인다)
-  void copyText(withShareRef(`${window.location.origin}/try/improv?utm_source=instagram&utm_medium=story`))
+  const link = withShareRef(`${window.location.origin}/try/improv?utm_source=instagram&utm_medium=story`)
+  void copyText(link)
   if (!story) return // 그림이 있으면 모듈도 이미 받았다
+  // 앱: 소식 공유와 같이 인스타 스토리 편집기를 바로 열고 결과 카드를 붙인다 (11/11: 임기응변 결과만 일반 공유 창이라 그림 저장으로 끝났다)
+  if (hasNativeInstagram) {
+    void story.openInstagramStoryNative(file, 'dark', link).then((r) => {
+      if (r === 'opened') return
+      if (r === 'not_installed') return showToast('인스타그램 앱이 있어야 스토리에 올릴 수 있어요')
+      void story!.shareFiles([file])
+    })
+    return
+  }
   const { shareFiles, inAppBrowser } = story
   void shareFiles([file]).then((r) => {
     // 앱 안 브라우저는 내려받기가 저장되지 않는다: 그림을 띄워 길게 눌러 저장하게 (11/11 몸과 시간)

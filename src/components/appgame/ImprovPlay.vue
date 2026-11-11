@@ -1,13 +1,16 @@
 <template>
-  <div>
+  <div ref="root" class="scroll-mt-16">
     <div class="flex items-center justify-between">
       <span class="t-caption">상황 {{ index + 1 }}/{{ situations.length }} · {{ SLOT[current?.slot ?? ''] ?? '' }}</span>
       <span v-if="phase === 'answer'" class="t-mono tabular-nums" :class="remaining <= 10 ? 'text-danger-fg' : 'text-fg-muted'">0:{{ String(remaining).padStart(2, '0') }}</span>
     </div>
 
     <template v-if="current">
-      <p class="t-caption mt-4 break-keep">{{ current.who }}</p>
-      <p class="t-micro mt-0.5 break-keep">{{ current.context }}</p>
+      <!-- 쓰는 동안(키보드가 올라온 동안)은 인물·사정 줄을 접어, 받은 말과 시계가 입력칸 위에 함께 보이게 한다 (목적 판정 11/11 10번: 높이 400에서 둘 다 화면 밖) -->
+      <template v-if="!typing">
+        <p class="t-caption mt-4 break-keep">{{ current.who }}</p>
+        <p class="t-micro mt-0.5 break-keep">{{ current.context }}</p>
+      </template>
       <!-- 인물의 첫 마디 -->
       <div class="mt-3 rounded-2xl rounded-tl-md bg-surface-2 px-4 py-3">
         <p class="t-title break-keep">“{{ current.line }}”</p>
@@ -16,7 +19,7 @@
       <!-- 내 대답 -->
       <template v-if="phase === 'answer'">
         <div class="mt-5">
-          <UiInput ref="input" v-model="text" multiline :rows="3" :maxlength="120" placeholder="그 자리에서 할 말을 써요" />
+          <UiInput ref="input" v-model="text" multiline :rows="typing ? 2 : 3" :maxlength="120" placeholder="그 자리에서 할 말을 써요" @focusin="onTypeStart" @focusout="typing = false" />
           <!-- 한 번만 말한다는 걸 먼저 알린다 (걷기 P1-3: "고칠 수 있는 줄 알고 대충 눌렀는데 바로 넘어갔어") -->
           <p class="t-micro text-right mt-1 tabular-nums">{{ text.length }}/120</p>
           <p class="t-caption mt-1 break-keep">한 번만 말할 수 있어요. 시간이 다 되면 쓴 데까지 보내요</p>
@@ -84,6 +87,15 @@ const slow = ref(false)
 const whoShort = computed(() => ({ UP: '교수님이', SENIOR: '선배가', PEER: '동기가' })[current.value?.slot ?? ''] ?? '상대가')
 // 반응은 AI라 가끔 10초를 넘는다(걷기: 첫 반응 10.9·15.3초). 45초까지 기다리되, 5초부터 '생각하는 중'으로 안심시킨다
 const REACT_TIMEOUT_MS = 45_000
+
+// 키보드가 올라오면 판 머리(상황 번호·시계)부터 보이게 끌어올린다
+const typing = ref(false)
+const root = ref<HTMLElement | null>(null)
+function onTypeStart() {
+  typing.value = true
+  // 키보드가 다 올라온 뒤에 맞춘다
+  setTimeout(() => root.value?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 250)
+}
 
 let shownAt = Date.now()
 let startedAt = Date.now()
@@ -174,6 +186,8 @@ function next() {
 
 onMounted(() => {
   restore()
+  // 첫 상황도 둘째·셋째처럼 바로 쓸 수 있게 입력칸에 초점 (예전엔 첫째만 칸을 한 번 더 눌러야 했다)
+  if (phase.value === 'answer') nextTick(() => input.value?.focus?.())
   timer = setInterval(() => {
     // 판 전체 마감(서버)이 먼저 오면 쓴 데까지 낸다
     if ((Date.now() - startedAt) / 1000 >= props.timeLimitSeconds) return finish()

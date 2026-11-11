@@ -1,40 +1,52 @@
 <template>
-  <UiTopBar title="찾기">
-    <template #right><UiIconButton icon="map" label="지도" @click="router.push('/map')" /><InboxButtons /></template>
+  <!-- 홈 (목적 판정 11/11 4번): 홈을 다시 여는 사람의 이유는 "하던 판을 이어 가려고"다.
+       앱 게임 판을 낸 사람: '내 판'(마지막 판·기다리는 결과·한 판 더) + 동네 경기 한 줄.
+       낸 적 없는 사람(동네 경기만): 지금처럼 동네 경기 목록. 지도·경기 만들기는 동네 경기 머리에,
+       동호회·내 규칙은 내 정보로 옮겼다. 동네 인증은 필요한 순간에 묻는다 -->
+  <UiTopBar title="홈">
+    <template #right><InboxButtons /></template>
   </UiTopBar>
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
+    <template v-if="appPlayer">
+      <UiSection title="내 판">
+        <UiCard v-if="lastGame">
+          <p class="t-micro">마지막 판</p>
+          <p class="t-heading mt-0.5 truncate">{{ lastGame.title }}<span v-if="lastGame.line" class="t-body text-fg-muted ml-2">{{ lastGame.line }}</span></p>
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <UiButton :to="`/play/${lastGame.key}`">한 판 더</UiButton>
+            <UiButton variant="secondary" to="/games">다른 게임</UiButton>
+          </div>
+        </UiCard>
+        <!-- 결과가 나왔나·내 차례인가·상대를 기다리나: 다시 연 이유 그 자체 -->
+        <AppDuelList v-if="duels.length" :duels="duels.slice(0, 3)" :class="lastGame ? 'mt-3' : ''" />
+        <RouterLink v-if="duels.length > 3" to="/game" class="block t-caption text-center mt-2 py-2">{{ duels.length - 3 }}개 더 보기</RouterLink>
+        <UiButton v-if="!lastGame" block variant="secondary" class="mt-3" to="/games">다른 게임</UiButton>
+      </UiSection>
 
-    <!-- 최근 2주 안에 하던 앱 게임: 다시 연 사람이 하던 것부터 (3-5 걷기 P6) -->
-    <RouterLink v-if="lastGame" :to="`/play/${lastGame.key}`" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 active:bg-surface-2">
-      <UiIcon name="play" class="text-fg-muted" aria-hidden="true" />
-      <span class="flex-1 min-w-0">
-        <span class="block t-micro">이어서 하기</span>
-        <span class="block t-heading truncate">{{ lastGame.title }}</span>
-      </span>
+      <button v-if="!showLocal" type="button" class="mt-6 w-full flex items-center justify-between rounded-xl bg-surface px-4 py-3.5 active:bg-surface-2" @click="showLocal = true">
+        <span class="t-heading">동네 경기</span>
+        <span class="t-caption flex items-center gap-1">{{ games.length ? `${games.length}개` : '' }}<UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" /></span>
+      </button>
+    </template>
+
+    <template v-if="!appPlayer || showLocal">
+    <!-- 앱 게임을 아직 안 한 사람에게 하나: 가입 없이도 되는 한 판 (예전 '갈 곳 셋' 중 이것만 남겼다) -->
+    <RouterLink v-if="!appPlayer" to="/games" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 active:bg-surface-2">
+      <UiIcon name="gamepad" class="text-fg-muted" aria-hidden="true" />
+      <span class="flex-1 t-heading">앱 게임 한 판</span>
       <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
     </RouterLink>
 
-    <!-- 지금 동네 (경기 목록이 이 동네 범위를 따른다) -->
-    <NeighborhoodBar class="mt-5 mb-3" @changed="fetchGames" />
-
-    <!-- 위쪽 버튼은 두 가지만: 채운 주 행동 하나 + 같은 모양의 갈 곳 셋 (11/3) -->
-    <!-- 홈 맨 위의 52px 흰 막대가 화면을 눌렀다 (UX 버튼 크기, 애플식): 보통 크기 -->
-    <UiButton block icon="plus" to="/create-game">경기 만들기</UiButton>
-    <nav class="mt-3 grid grid-cols-3 gap-2" aria-label="둘러보기">
-      <RouterLink v-for="d in DESTINATIONS" :key="d.to" :to="d.to" class="flex flex-col items-center gap-1.5 rounded-xl bg-surface py-3.5 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]">
-        <UiIcon :name="d.icon" class="text-xl text-fg-muted" />
-        <span class="t-label text-fg">{{ d.label }}</span>
-      </RouterLink>
-    </nav>
-
-    <UiSection title="모집 중인 경기" class="mt-8">
+    <UiSection title="동네 경기" :class="appPlayer ? 'mt-6' : 'mt-6'">
       <template #action>
-        <span v-if="games.length" class="t-micro">{{ games.length }}개</span>
+        <span v-if="games.length" class="t-micro mr-1">{{ games.length }}개</span>
+        <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
+        <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
       </template>
-
+      <NeighborhoodBar class="mb-3" @changed="fetchGames" />
       <!-- 불러오는 중 -->
       <div v-if="loading && !games.length" class="space-y-3">
         <UiCard v-for="n in 3" :key="n">
@@ -76,7 +88,7 @@
           :game="game"
           :is-mine="game.ownerId === myId"
           :busy="busyId === game.id"
-          @rule="ruleGame = game"
+          @rule="router.push(`/games/${game.id}`)"
           @profile="router.push('/profile/' + game.ownerId)"
           @apply="(team) => apply(game, team)"
           @pair="pairGame = game"
@@ -86,6 +98,7 @@
         />
       </div>
     </UiSection>
+    </template>
   </main>
 
   <!-- 친구와 둘이 신청 (팀 경기) -->
@@ -98,13 +111,13 @@
 </template>
 
 <script setup>
-// 첫 화면: 참가할 수 있는 열린 경기 목록. 주 행동은 '경기 만들기' 하나
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+// 홈: 앱 게임을 한 사람은 '내 판'이 먼저, 동네 경기만 하는 사람은 동네 경기 목록 (목적 판정 11/11 4번)
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 
-// 최근 2주 안에 연 앱 게임 (AppGameView가 남긴다)
+// 최근 2주 안에 낸 앱 게임 (AppGameView가 판을 낼 때 남긴다)
 const lastGame = (() => {
   try {
     const v = JSON.parse(localStorage.getItem('last_app_game') || 'null')
@@ -119,22 +132,21 @@ import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
+import AppDuelList from '../../components/appgame/AppDuelList.vue'
+import { GET } from '@/api/client'
 import Comment from '../GameCommentView.vue'
 import {
-  UiButton, UiCard, UiEmptyState, UiIconButton, UiPullIndicator, UiSection, UiSkeleton, UiTopBar,
+  UiButton, UiCard, UiEmptyState, UiIcon, UiIconButton, UiPullIndicator, UiSection, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { feel } from '../../utils/feel'
 
-// 갈 곳 셋: 같은 모양으로. 앱 게임은 주인공이 아니라 갈 곳 중 하나라 맨 뒤 (사용자 11/3, 11/5)
-const DESTINATIONS = [
-  { to: '/rules', icon: 'book-open', label: '규칙' },
-  { to: '/clubs', icon: 'users', label: '동호회' },
-  // 앱 게임은 맨 뒤(조연, 11/5)이고 목록으로 바로 간다 (UX ⑤: 광장은 캐릭터 만들기부터 나와 게임을 찾지 못했다). 광장은 목록 맨 위 입구로
-  { to: '/games', icon: 'gamepad', label: '앱 게임' },
-]
+// 아직 안 끝난 앱 대결 (내 경기 화면과 같은 자료)
+const duels = ref([])
+const appPlayer = computed(() => !!lastGame || duels.value.length > 0)
+const showLocal = ref(false)
 
 const route = useRoute()
 const router = useRouter()
@@ -152,7 +164,11 @@ const menuGame = ref(null)
 
 // 못 불러온 것과 비어 있는 것을 구분한다 (서버가 꺼졌는데 '열린 경기가 없어요'로 보이지 않게)
 const loadFailed = ref(false)
+async function fetchDuels() {
+  duels.value = (await GET('/api/app-games/duels/active').catch(() => ({ data: null }))).data ?? duels.value
+}
 async function fetchGames() {
+  fetchDuels()
   try {
     const { data } = await api.get('/api/games/list', { params: { sort: 'latest' } })
     games.value = data

@@ -74,6 +74,11 @@
           <UiButton class="flex-1" variant="secondary" icon="far fa-paper-plane" :to="`/chat/${user.id}`">메시지</UiButton>
         </template>
       </div>
+      <!-- 내 동호회·내 규칙: 홈 첫 화면에서 옮겨 왔다. 홈은 하던 판을 이어 가는 곳이고, 이 둘은 '내 것'을 보러 온 사람이 찾는다 (목적 판정 11/11 4번) -->
+      <div v-if="user.isMe" class="grid grid-cols-2 gap-2 mt-2">
+        <UiButton variant="ghost" size="sm" icon="users" to="/clubs">동호회</UiButton>
+        <UiButton variant="ghost" size="sm" icon="book-open" to="/rules/my-rules">내 규칙</UiButton>
+      </div>
 
       <!-- 숫자 한 줄: 상자 없이, 승률은 경기가 있을 때만 -->
       <div class="mt-5 flex text-center">

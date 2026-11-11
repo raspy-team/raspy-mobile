@@ -11,15 +11,8 @@
       <RouterLink to="/neighborhood" class="underline underline-offset-2">다시 인증하기</RouterLink>
     </p>
 
-    <!-- 동네가 없으면: 전국 경기를 보여 주고 인증을 권한다 -->
-    <UiCard v-else-if="loaded && !active" class="flex items-center gap-3">
-      <UiIcon name="location-dot" class="text-lg" aria-hidden="true" />
-      <div class="flex-1 min-w-0">
-        <p class="t-heading">동네를 인증해 주세요</p>
-        <p class="t-caption mt-0.5">지금은 전국 경기가 보여요. 인증하면 가까운 경기만 보고 신청할 수 있어요</p>
-      </div>
-      <UiButton size="sm" to="/neighborhood">인증</UiButton>
-    </UiCard>
+    <!-- 동네가 없을 때의 '동네를 인증해 주세요' 카드는 뺐다: 경기를 보러 온 사람에게 위치 인증부터 권했다.
+         동네가 필요한 순간(신청·열기)엔 서버가 묻고(428) 인증 뒤 하던 화면으로 돌려보낸다 (목적 판정 11/11 4번) -->
 
     <UiSheet v-model="open" title="동네 고르기">
       <UiList>
@@ -38,7 +31,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
-import { UiButton, UiCard, UiList, UiListItem, UiSheet } from '../ui'
+import { UiList, UiListItem, UiSheet } from '../ui'
 
 type Mine = components['schemas']['MyNeighborhoods']
 

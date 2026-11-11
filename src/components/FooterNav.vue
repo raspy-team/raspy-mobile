@@ -6,9 +6,9 @@ defineProps({ tab: String })
 // 상대가 나를 기다리는 일(결과 확인·신청 승인)이 있으면 '내 경기'에 숫자를 단다
 const { waitingOnMeCount } = useActiveGamePolling()
 
-// 첫 탭은 참가할 경기를 '찾는' 곳. '경기'와 '내 경기'는 글자 하나 차이라 헷갈려 이름을 갈랐다 (11/3)
+// 첫 탭은 '홈': 다시 연 사람이 하던 판을 이어 가는 곳이라 '찾기'는 하는 일과 이름이 달랐다 (목적 판정 11/11 4번)
 const tabs = [
-  { key: 'home', to: '/', icon: 'search', label: '찾기' },
+  { key: 'home', to: '/', icon: 'home', label: '홈' },
   { key: 'feed', to: '/feed', icon: 'feed', label: '소식' },
   { key: 'game', to: '/game', icon: 'calendar-check', label: '내 경기' },
   { key: 'profile', to: '/profile/0', icon: 'user', label: '내 정보' },

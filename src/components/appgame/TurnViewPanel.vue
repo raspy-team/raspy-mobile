@@ -12,7 +12,7 @@
     <!-- 글로 답하기 (퀴즈) -->
     <!-- 긴 글(두 진실 한 거짓의 문장 셋)은 여러 줄 칸으로. 한 줄 칸이면 320px에서 앞 문장이 가려졌다. 줄을 바꿔 쓰면 ' / '로 나눠 보낸다 -->
     <form v-if="view.input" class="mt-4 flex gap-2" :class="longInput ? 'flex-col' : ''" @submit.prevent="answer">
-      <UiInput ref="field" v-model="text" class="flex-1" :multiline="longInput" :rows="3" :maxlength="view.inputMax ?? 30" :placeholder="myTurn ? view.input : '다음 문제를 기다려요'" :disabled="!myTurn" @enter="answer" />
+      <UiInput ref="field" v-model="text" class="flex-1" :multiline="longInput" :rows="3" :maxlength="view.inputMax ?? 30" :placeholder="myTurn ? view.input : '다음 문제를 기다려요'" :disabled="!myTurn" />
       <UiButton :disabled="!myTurn || !text.trim()" :loading="sending" @click="answer">내기</UiButton>
     </form>
 
@@ -94,8 +94,9 @@ function boardStyle(b: TurnBoard) {
 const text = ref('')
 const field = ref<{ focus: () => void } | null>(null)
 const longInput = computed(() => (props.view.inputMax ?? 30) > 60)
+// 엔터는 폼 제출 한 길로만 온다(칸의 enter까지 받으면 한 번에 두 번 나갔다). 보내는 중에도 막는다 (목적 판정 8)
 function answer() {
-  if (!props.myTurn || !text.value.trim()) return
+  if (!props.myTurn || props.sending || !text.value.trim()) return
   const t = longInput.value ? text.value.split('\n').map((l) => l.trim()).filter(Boolean).join(' / ') : text.value
   emit('move', t.trim())
 }

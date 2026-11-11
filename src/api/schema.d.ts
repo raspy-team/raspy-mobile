@@ -6723,6 +6723,7 @@ export interface components {
         SubmitRequest: {
             visitorId: string;
             answer: string;
+            k?: string;
         };
         GuestResultResponse: {
             key: string;

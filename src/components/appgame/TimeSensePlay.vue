@@ -33,6 +33,7 @@
     >
       {{ state === 'running' ? '멈춤' : state === 'stopped' ? '다음' : '시작' }}
     </button>
+    <UiButton v-if="failed && !submitting" block size="lg" class="mt-4" @click="finish">다시 내기</UiButton>
 
     <ol class="mt-8 space-y-1 text-left">
       <li v-for="(r, i) in records" :key="i" class="flex justify-between t-caption tabular-nums">
@@ -46,8 +47,9 @@
 <script setup lang="ts">
 // 감 잡기 (서버 TimeSenseGame): 문제는 목표 초 셋 "7.5,3.0,11.5", 답은 잰 밀리초 셋 "7512,2987,11630".
 // 시간은 화면이 잰다(누른 순간의 event.timeStamp). 서버는 세 값의 합이 자기가 잰 시간 안인지만 본다
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { haptic } from '../../utils/haptics'
+import { UiButton } from '../ui'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
 const emit = defineEmits<{ submit: [answer: string] }>()
@@ -114,17 +116,24 @@ const clock = computed(() => `${Math.floor(remaining.value / 60)}:${String(remai
 let timer: ReturnType<typeof setInterval> | undefined
 
 let done = false
+let autoSent = false
+// 내기가 실패했다(부모가 이 판을 그대로 둔 채 '보내는 중'이 끝났다): 잰 기록 그대로 다시 낼 수 있게 (목적 판정 8)
+const failed = ref(false)
 function finish() {
   if (done || props.submitting) return
   done = true
+  failed.value = false
   emit('submit', records.value.map((r) => r.measured).join(','))
 }
+watch(() => props.submitting, (now, before) => {
+  if (before && !now && done) { done = false; failed.value = true }
+})
 
 onMounted(() => {
   timer = setInterval(() => {
     remaining.value = Math.max(0, props.timeLimitSeconds - Math.floor((Date.now() - startedAt) / 1000))
-    // 시간이 다 되면 잰 데까지만 낸다 (셋을 못 채우면 서버가 받지 않아 0점)
-    if (remaining.value === 0) finish()
+    // 시간이 다 되면 잰 데까지만 한 번 낸다 (셋을 못 채우면 서버가 받지 않아 0점)
+    if (remaining.value === 0 && !autoSent) { autoSent = true; finish() }
   }, 500)
 })
 onBeforeUnmount(() => {

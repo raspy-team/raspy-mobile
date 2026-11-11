@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 // 문제 여러 줄을 한 번에 푸는 판 (오늘의 초성). 문제는 줄마다 하나, 답도 줄마다 하나로 낸다
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { UiButton, UiInput } from '../ui'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
@@ -46,16 +46,20 @@ function next(i: number) {
 }
 
 let done = false
+let autoSent = false
 function finish() {
   if (done || props.submitting) return
   done = true
   emit('submit', answers.value.map((a) => a.trim()).join('\n'))
 }
+// 내기가 실패하면(부모가 이 판을 그대로 둔 채 '보내는 중'이 끝나면) 다시 낼 수 있게. 예전엔 버튼이 영영 아무 일도 안 했다 (목적 판정 8)
+watch(() => props.submitting, (now, before) => { if (before && !now) done = false })
 
 onMounted(() => {
   timer = setInterval(() => {
     remaining.value = Math.max(0, props.timeLimitSeconds - Math.floor((Date.now() - startedAt) / 1000))
-    if (remaining.value === 0) finish()
+    // 시간이 다 되면 한 번만 저절로 낸다 (실패 뒤 되풀이해 보내지 않게)
+    if (remaining.value === 0 && !autoSent) { autoSent = true; finish() }
   }, 500)
 })
 onBeforeUnmount(() => clearInterval(timer))

@@ -73,7 +73,7 @@ const STATUS_LABEL = { SCHEDULED: '상대 정해짐', IN_PROGRESS: '경기 중',
 import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton, UiList, UiListItem, UiSheet } from '../ui'
-import { distance, matchTime, place, ratingLine, timeAgo } from '../../utils/format'
+import { distance, matchTime, place } from '../../utils/format'
 import { formatLabel, TEAM_NAMES, venuePlace } from '../../utils/gameFormat'
 
 const props = defineProps({
@@ -102,18 +102,16 @@ function pick(cb) {
 
 const applicants = computed(() => props.game.challengers?.length || 0)
 // 올린 지 얼마나 됐는지는 경기 시간보다 덜 중요해서 위 줄이 아니라 여기에
-const ownerLine = computed(() =>
-  [
-    // 매치 온도 (만나도 되는 사람인지, 기능 검토 #1)
+// 갈지 정하는 데 필요한 것만: 믿을 만한가(온도)와 해 볼 만한가(이길 확률을 말로). 레이팅·올린 때는 프로필·경기 화면에서 (목적 판정 8: 한 줄에 숫자 넷이었다)
+const ownerLine = computed(() => {
+  const c = props.game.myWinChance
+  const chance = c == null ? null : c >= 40 && c <= 60 ? '해 볼 만' : c < 40 ? '나보다 잘해요' : '내가 더 잘해요'
+  return [
     props.game.ownerTemperature != null && `${props.game.ownerTemperature.toFixed(1)}°`,
-    // 둘 다 이 규칙 레이팅이 있으면 이길 확률 (비슷한 실력인지 고르는 데 쓴다). 40~60%면 '해 볼 만'
-    props.game.myWinChance != null && `이길 확률 ${props.game.myWinChance}%${props.game.myWinChance >= 40 && props.game.myWinChance <= 60 ? ' 해 볼 만' : ''}`,
-    // 롤·피파처럼 다른 게임에서 하는 경기면 주최자의 그 게임 티어 (9번)
-    props.game.ownerExtTier,
-    ratingLine(props.game.ruleStatisticsOfOwner),
-    props.game.createdAt && `${timeAgo(props.game.createdAt)} 올림`,
-  ].filter(Boolean).join(' · '),
-)
+    // 이길 확률이 없으면(레이팅이 없으면) 롤·피파 같은 다른 게임 티어가 그 자리를 대신한다
+    chance ?? props.game.ownerExtTier,
+  ].filter(Boolean).join(' · ')
+})
 </script>
 
 <style>

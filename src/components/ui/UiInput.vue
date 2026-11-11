@@ -4,7 +4,9 @@
       <UiIcon v-if="icon" :name="icon" class="absolute left-4 top-1/2 -translate-y-1/2 text-fg-subtle" aria-hidden="true" />
       <textarea
         v-if="multiline"
+        ref="inputRef"
         :value="modelValue"
+        :disabled="disabled"
         :rows="rows"
         :placeholder="placeholder"
         :maxlength="maxlength"
@@ -16,6 +18,7 @@
         v-else
         ref="inputRef"
         :value="modelValue"
+        :disabled="disabled"
         :type="type"
         :inputmode="inputmode"
         :placeholder="placeholder"
@@ -49,6 +52,8 @@ defineProps({
   autocomplete: { type: String, default: 'off' },
   multiline: { type: Boolean, default: false },
   rows: { type: [String, Number], default: 3 },
+  // 막힌 칸 (예: 내 차례가 아닐 때). 예전엔 받지 않아 바깥 label에만 붙고 칸은 써졌다
+  disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue', 'enter'])
 const inputRef = ref(null)

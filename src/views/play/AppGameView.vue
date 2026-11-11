@@ -163,8 +163,7 @@
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
               실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
-            <!-- 첫 판에 +162처럼 크게 움직이면 고장으로 보였다. 만나서 한 경기 결과 화면과 같은 말 (11/4 밤샘, 실력 점수파 31세) -->
-            <p v-if="result.ratingChange != null && fewGames" class="t-caption mt-1">처음 몇 판은 크게 움직여요. 판이 쌓이면 덜 움직여요</p>
+            <!-- '처음 몇 판은 크게 움직여요' 숫자 설명은 뺐다 (목적 판정 11/11 부분 2 다시 훑기) -->
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
@@ -198,7 +197,13 @@
           </template>
           <template v-else>
             <!-- 임기응변: 손님 결과와 같은 모양. 등급이 크게, 점수는 작게 (3-5 걷기 P6: "가입하니 점수가 커졌네") -->
-            <template v-if="improvResult">
+            <!-- 등급이 안 나온 판(셋 다 빈 답)도 임기응변 틀 그대로 (손님 결과와 같다) -->
+            <template v-if="improvResult?.empty">
+              <p class="t-micro">임기응변 등급</p>
+              <p class="t-title mt-2 break-keep">{{ improvResult.empty }}</p>
+              <p class="t-caption mt-2 break-keep">상황마다 한마디만 써도 등급이 나와요</p>
+            </template>
+            <template v-else-if="improvResult">
               <p class="t-display tabular-nums">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></p>
               <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등 · {{ result.myScore ?? 0 }}점</p>
               <p v-if="improvResult.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
@@ -223,12 +228,12 @@
         </UiCard>
         <!-- 다음 행동은 결과 바로 밑에. 긴 답·한마디는 그 아래 -->
         <!-- 하루 한 판 게임(오늘의 초성)은 '한 판 더'를 눌러도 할 수 없어 빼고, 공유가 다음 행동이 된다 -->
-        <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">한 판 더</UiButton>
+        <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">{{ improvResult?.empty ? '다시 하기' : '한 판 더' }}</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
         <!-- 임기응변은 한마디(등급·인물 반응)를 위 카드와 상황 카드에 나눠 보여 주므로 따로 두지 않는다 (등급이 두 번 보였다) -->
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT' && !improvResult" class="mt-3">
-          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '알림' }}</p>
+          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
           <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
         </UiCard>
         <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
@@ -320,7 +325,7 @@
                 <span class="block t-micro">무승부</span>
               </span>
             </div>
-            <p v-if="played" class="t-micro mt-3 text-center">전적·실력 점수는 사람과 한 판만 세요. AI 주민과 한 판은 연습이에요</p>
+            <!-- '전적·실력 점수는 사람과 한 판만 세요' 규칙 설명은 첫 화면에서 뺐다 (목적 판정 11/11 부분 2 다시 훑기) -->
           </UiCard>
           <!-- 하루 한 번 게임을 오늘 이미 냈으면 버튼 대신 한 줄 (누르면 '오늘은 다 했어요'만 떴다, 11/5 밤샘 C 검토) -->
           <p v-if="dailyDone" class="t-body text-center mt-5">오늘 몫을 냈어요. 새 문제는 내일 0시에 나와요</p>
@@ -328,12 +333,13 @@
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
-            <template v-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 도전장을 보내요</template>
+            <!-- 도전장이 없는 게임(공유 판·실시간 대전)으로 '○○님에게 도전'이 왔으면 처음부터 그렇다고 말하고 그냥 한 판 (목적 판정 11/11 부분 2: 누를 수 있는 버튼이 늘 거절했다) -->
+            <template v-if="noLadder">이 게임은 도전장이 없어요 · 그냥 한 판 해요</template>
+            <template v-else-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 도전장을 보내요</template>
             <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
             <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
-            <!-- 기다림·AI 주민 안내는 대기실 화면이 말한다 (UX ⑤: 여기서 미리 두 줄로 설명했다) -->
-            <template v-else-if="game.dailyLimit">하루 {{ game.dailyLimit }}판</template>
+            <!-- '하루 20판'은 다 할 사람이 없는 수라 정보가 아니다. 한도에 닿으면 서버가 말한다 (목적 판정 11/11 부분 2) -->
           </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
 
@@ -348,10 +354,13 @@
 
           <!-- 챔피언: 내가 속한 자리(소속·동네·전국). 하루 퍼즐은 맞붙는 판이 없어 벨트가 없다 -->
           <!-- 준비 중(AI 키 없음 등)인 게임은 이길 수 없으니 챔피언 자리를 보이지 않는다 (11/5 9e) -->
-          <ChampionSeatsCard v-if="game.dailyLimit !== 1 && game.available" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
+          <!-- 처음 하러 온 사람에게는 챔피언 자리를 미룬다: '한 판 하기' 바로 밑에서 눈을 뺏었다 (목적 판정 11/11 부분 2 다시 훑기) -->
+          <ChampionSeatsCard v-if="game.dailyLimit !== 1 && game.available && played" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
 
           <!-- 나머지는 탭 하나로: 순위 · 내 대결 · 투표 -->
-          <UiTabs v-model="tab" :options="tabs" class="mt-8" />
+          <!-- 빈 탭은 그리지 않는다. 탭이 하나뿐이면 탭 없이 목록만 (목적 판정 11/11 부분 2 다시 훑기) -->
+          <UiTabs v-if="tabs.length > 1" v-model="tab" :options="tabs" class="mt-8" />
+          <div v-else class="mt-8"></div>
 
           <section v-if="tab === 'rank'" class="mt-4">
             <UiTabs v-if="game.recordable" v-model="boardKind" :options="BOARDS" class="mb-3" />
@@ -450,6 +459,7 @@ import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import { improvAnswers, improvFeedback, improvSituations } from '@/utils/improv'
 import { shareLink } from '@/utils/share'
+import { askPushPermission } from '@/utils/nativeBridge'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
 import { getMyId } from '@/utils/me'
 import WritePlay from '../../components/appgame/WritePlay.vue'
@@ -497,7 +507,6 @@ const key = computed(() => String(route.params.key))
 const game = ref<Schemas['AppGameSummary'] | null>(null)
 // 봇과만 한 판은 전적(사람과 한 판)에 안 들어가니, 해 봤는지는 마지막으로 한 때로도 본다 (11/3 통계 개편)
 // 이 게임을 몇 판 안 했으면 실력 점수가 크게 움직인다 (서버는 RD가 크면 잠정으로 본다)
-const fewGames = computed(() => ((game.value?.myWins || 0) + (game.value?.myLosses || 0) + (game.value?.myDraws || 0)) < 5)
 const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
 const board = ref<Schemas['AppRecordBoard'] | null>(null)
@@ -506,6 +515,8 @@ const play = ref<Play | null>(null)
 const counting = ref(false)
 let offset = 0 // 서버 시각 - 기기 시각
 const result = ref<Duel | null>(null)
+// 알림 권한은 쓸모가 보일 때 묻는다: 상대를 기다리는 결과가 떴을 때 (앱을 켤 때 묻지 않는다, 목적 판정 11/11 부분 1)
+watch(() => result.value?.status, (st) => { if (st === 'AWAITING_RESULT') askPushPermission() })
 // 신뢰 사다리 (안전·신뢰 D): 경기 신청자와 만나기 전에 한 판. ?to=사람&toName=이름으로 오면 새 판을 열고, 끝나면 그 사람에게 도전장을 메시지로 보낸다
 const ladderTo = Number(route.query.to) || null
 const ladderName = String(route.query.toName || '상대')
@@ -549,13 +560,15 @@ const dailyDone = computed(() => {
   const today = new Date().toDateString()
   return duels.value.some((d) => new Date(d.deadlineAt ?? d.createdAt).toDateString() === today && (d.myScore != null || DONE.includes(d.status)))
 })
-// 투표 게임은 투표가 먼저 (남의 글에 표를 주는 게 이 게임의 절반)
+// 처음 탭은 순위. 투표 탭은 투표할 글이 있을 때만 '투표 N'으로 알린다 (한 판 하러 온 사람에게 남의 글 투표가 첫 탭이었다, 목적 판정 11/11 부분 2)
 const tab = ref<'rank' | 'mine' | 'vote'>('rank')
 const tabs = computed(() => [
-  ...(isVote.value ? [{ value: 'vote', label: '투표', count: votes.value.length || undefined }] : []),
   { value: 'rank', label: '순위' },
-  { value: 'mine', label: '내 경기', count: finished.value.length || undefined },
+  ...(finished.value.length ? [{ value: 'mine', label: '내 경기', count: finished.value.length }] : []),
+  ...(isVote.value && votes.value.length ? [{ value: 'vote', label: '투표', count: votes.value.length }] : []),
 ])
+// 공유 판·실시간 대전은 도전장이 없다
+const noLadder = computed(() => !!ladderTo && !!(game.value?.shared || game.value?.battle))
 const { showToast } = useToast()
 const starting = ref(false)
 const submitting = ref(false)
@@ -569,18 +582,9 @@ async function load() {
   const games = await GET('/api/app-games')
   const first = !game.value
   game.value = games.data.find((g) => g.key === key.value) ?? null
-  // 다시 앱을 열면 홈 맨 위에 '이어서 하기'로 (3-5 걷기 P6: 다시 열면 동네 경기 목록이라 "내가 하던 게임 어디 있어?")
-  if (game.value) {
-    try {
-      localStorage.setItem('last_app_game', JSON.stringify({ key: game.value.key, title: game.value.title, at: Date.now() }))
-    } catch {
-      // 못 남기면 홈에 안 보일 뿐이다
-    }
-  }
   missing.value = !game.value
   if (!game.value) return
   const mine = await GET('/api/app-games/{key}/duels', { path: { key: key.value } })
-  if (first && game.value?.judge === 'VOTE') tab.value = 'vote'
   duels.value = mine.data
   // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
   if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
@@ -612,11 +616,12 @@ function begin(p: Play) {
 
 async function start() {
   // 실시간 게임은 대기실 화면으로. 정한 사람에게 도전하면 그 사람만 들어오는 방(턴제만. 함께 쓰는 판·실시간 대전은 아직 없다)
-  if (ladderTo && (game.value?.shared || game.value?.battle)) {
-    startError.value = '이 게임은 아직 도전장을 보낼 수 없어요'
+  // 스쿼트는 카메라가 있어야 한다. 판을 열기 전에 알린다 (판이 열리고 0점으로 끝났다, 목적 판정 11/11 부분 2)
+  if (key.value === 'squat' && !navigator.mediaDevices?.getUserMedia) {
+    startError.value = '이 브라우저에서는 카메라를 쓸 수 없어 스쿼트를 할 수 없어요. 앱이나 다른 브라우저로 열어 주세요'
     return
   }
-  if (ladderTo && game.value?.playMode === 'REALTIME') return router.push({ path: `/play/${key.value}/live`, query: { to: ladderTo, toName: ladderName } })
+  if (ladderTo && !noLadder.value && game.value?.playMode === 'REALTIME') return router.push({ path: `/play/${key.value}/live`, query: { to: ladderTo, toName: ladderName } })
   if (game.value?.shared) return router.push(`/play/${key.value}/board`)
   if (game.value?.playMode === 'REALTIME') return router.push(game.value.battle ? `/play/${key.value}/battle` : liveRoute(key.value))
   starting.value = true
@@ -632,12 +637,24 @@ async function start() {
   }
 }
 
+// 홈 맨 위 '내 판'에 쓴다. 판을 낸 때만 남긴다: 예전엔 게임 화면을 열기만 해도 바뀌어 하지도 않은 게임이 '이어서 하기'에 떴다 (목적 판정 11/11 4번)
+function rememberLastGame() {
+  if (!game.value) return
+  const r = result.value as { myScore?: number; myFeedback?: string } | null
+  try {
+    localStorage.setItem('last_app_game', JSON.stringify({ key: game.value.key, title: game.value.title, at: Date.now(), line: r?.myFeedback?.split('\n')[0]?.match(/^\d등급/) ? r.myFeedback.split('\n')[0].split(' · ')[0] : r?.myScore != null ? `${r.myScore}${game.value.scoreUnit ?? '점'}` : '' }))
+  } catch {
+    // 못 남기면 홈에 안 보일 뿐이다
+  }
+}
+
 async function submit(answer: string) {
   if (!play.value) return
   submitting.value = true
   try {
     justSubmitted = true
     result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { answer } })).data
+    rememberLastGame()
     play.value = null
     startError.value = ''
     load().catch(() => {})
@@ -693,6 +710,7 @@ async function sendChallenge(gameId: number) {
     // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
     const msg = await shareLink(`${window.location.origin}/challenge/${gameId}`, `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
     if (msg) showToast(`${msg}. 하루 동안 이 링크로만 받을 수 있어요`)
+    askPushPermission() // 친구가 받으면 알려 드릴 수 있게
   } catch (e) {
     showToast(errorMessage(e, '도전장을 만들지 못했어요'))
   } finally {
@@ -741,14 +759,18 @@ if (key.value === 'improv') {
   try {
     const v = JSON.parse(localStorage.getItem('improv_last_result') || 'null')
     const r = v && Date.now() - v.at < 2 * 3600_000 ? improvFeedback(v.result?.feedback) : null
-    if (r) joinedFrom.value = { grade: r.grade }
+    if (r && !r.empty) {
+      joinedFrom.value = { grade: r.grade }
+      // 가입하며 옮긴 판도 홈 '내 판'의 마지막 판으로 (예전엔 남지 않아 막 가입한 사람이 홈에서 옛 목록만 봤다)
+      localStorage.setItem('last_app_game', JSON.stringify({ key: 'improv', title: '임기응변 등급', at: Date.now(), line: `${r.grade}등급` }))
+    }
     localStorage.removeItem('improv_last_result')
   } catch {
     // 못 읽으면 보이지 않을 뿐이다
   }
 }
 const improvResult = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.myFeedback) : null))
-const improvGrade = computed(() => (key.value === 'improv' && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))
+const improvGrade = computed(() => (key.value === 'improv' && !improvResult.value?.empty && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))
 
 // 이름 뒤 조사 이/가 (AI 심판이, AI 셰프가). 받침이 없는 글자·한글이 아니면 '가'
 function josaIga(name: string) {

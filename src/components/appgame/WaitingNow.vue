@@ -139,7 +139,11 @@ async function playAi(r: Resident) {
   try {
     await POST('/api/app-games/{key}/realtime/ai', { path: { key: r.key }, query: { botId: r.userId } })
     emit('join', r.key)
-    router.push(`/play/${r.key}/live`)
+    // 손으로 하는 게임(pong·shake)은 그 판 화면으로 (다른 버튼과 같은 liveRoute, 목적 판정 8)
+    router.push(liveRoute(r.key))
+  } catch (e) {
+    // 실패하면 말없이 멈추지 않는다 (목적 판정 8)
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '한 판을 열지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     joining.value = false
   }

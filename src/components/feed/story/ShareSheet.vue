@@ -102,9 +102,7 @@ watch(
     if (!id) return
     shareCode.value = newShareCode()
     registered = false
-    GET('/api/games/{gameId}/share-link', { path: { gameId: Number(id) } }).then(({ data }) => {
-      if (data && my === run) shared.value = data
-    }, () => null)
+    fetchLink(my, Number(id))
     // 앱(인스타 플러그인)에서는 인스타 버튼이 스티커를 쓰니 스티커부터 찍는다
     const order = hasNativeInstagram ? [VARIANTS[2], VARIANTS[0], VARIANTS[1]] : VARIANTS
     for (const v of order) {
@@ -121,6 +119,16 @@ watch(
   },
   { immediate: true },
 )
+// 서명 주소 받기. 실패하면 '만드는 중'만 되풀이하지 않게 표시해 두고, 누를 때 다시 받는다 (목적 판정 8)
+const linkFailed = ref(false)
+function fetchLink(my = run, id = Number(props.post?.id)) {
+  linkFailed.value = false
+  GET('/api/games/{gameId}/share-link', { path: { gameId: id } }).then(({ data }) => {
+    if (data && my === run) shared.value = data
+  }, () => {
+    if (my === run) linkFailed.value = true
+  })
+}
 async function serverStory(my: number) {
   for (let i = 0; i < 20 && !shared.value && my === run; i++) await new Promise((r) => setTimeout(r, 200))
   if (!shared.value || my !== run) return
@@ -193,6 +201,10 @@ function go(key: Dest) {
   markShared()
   if (key === 'copy' || key === 'message') {
     const url = link(key === 'copy' ? 'copy' : 'kakao')
+    if (!url && linkFailed.value) {
+      fetchLink()
+      return showToast('링크를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요')
+    }
     if (!url) return showToast('링크를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요')
     if (key === 'copy' || !navigator.share) return copied(url, key === 'copy' ? '링크를 복사했어요' : '링크를 복사했어요. 붙여 넣어 보내세요')
     // 카톡·메시지: 링크만 보낸다. 카톡이 경기 그림을 펼쳐 보여 준다 (미리보기 그림 og.png)

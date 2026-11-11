@@ -31,8 +31,13 @@ const TIP: Record<string, string> = {
 /**
  * 한마디 읽기. 첫 줄 "7등급 · 100명 중 86등"(11/11 전 판은 "상위 86%"), 둘째 줄이 "잘한 것: …"이면 왜 그 등급인지, 나머지는 인물 반응
  */
-export function improvFeedback(feedback?: string | null): { grade: number; rank: number; strong?: string; weak?: string; tip?: string; next?: string; reactions: string[] } | null {
+/** 등급이 나오지 않은 판의 서버 한마디 (improv/ImprovGame.kt NO_ANSWER, 마감 넘김). 이때도 임기응변 결과 틀로 보여 준다 */
+export const IMPROV_NO_GRADE = ['대답이 없어 등급이 안 나왔어요', '시간 안에 내지 않았어요']
+
+export function improvFeedback(feedback?: string | null): { grade: number; rank: number; strong?: string; weak?: string; tip?: string; next?: string; reactions: string[]; empty?: string } | null {
   const [head, ...rest] = (feedback || '').split('\n')
+  // 등급이 없는 판: 다른 게임의 점수 화면으로 바뀌지 않게 '빈 등급'으로 돌려준다 (목적 판정: 빈 답 결과가 갑자기 다른 모양이었다)
+  if (IMPROV_NO_GRADE.includes(head.trim())) return { grade: 0, rank: 0, reactions: [], empty: head.trim() }
   const m = head.match(/(\d)등급 · (?:100명 중 (\d+)등|상위 (\d+)%)/)
   if (!m) return null
   // 둘째 줄부터: '잘한 것: …'(있으면), '다음 등급: N등급까지 n점'(1등급이 아니면), 나머지는 '인물: 반응'

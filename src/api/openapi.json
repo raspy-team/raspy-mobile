@@ -11694,12 +11694,14 @@
       },
       "ClubSummary": {
         "required": [
+          "hasJoinQuestion",
           "id",
           "isMember",
           "isOwner",
           "joinMode",
           "memberCount",
-          "name"
+          "name",
+          "requested"
         ],
         "type": "object",
         "properties": {
@@ -11734,6 +11736,12 @@
           },
           "record": {
             "$ref": "#/components/schemas/ClubRecord"
+          },
+          "hasJoinQuestion": {
+            "type": "boolean"
+          },
+          "requested": {
+            "type": "boolean"
           }
         }
       },
@@ -14163,6 +14171,9 @@
             "type": "string"
           },
           "answer": {
+            "type": "string"
+          },
+          "k": {
             "type": "string"
           }
         }

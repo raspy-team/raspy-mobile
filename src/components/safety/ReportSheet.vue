@@ -44,11 +44,13 @@ async function submit() {
     const { data } = await POST('/api/reports', { body: { targetType: props.targetType, targetId: props.targetId, reason: text, context: props.context } })
     showToast(data?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
     emit('done')
+    emit('update:modelValue', false)
   } catch (e) {
-    showToast(e?.response?.data?.message || '신고하지 못했어요. 잠시 뒤 다시 해 주세요')
+    showToast(e?.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
+    // 서버가 이유를 말한 거절(이미 신고함 등)만 닫는다. 연결이 끊긴 실패는 고른 사유·쓴 글을 둔 채 열어 둔다 (목적 판정 8)
+    if (e?.response?.status && e.response.status < 500) emit('update:modelValue', false)
   } finally {
     sending.value = false
-    emit('update:modelValue', false)
   }
 }
 </script>

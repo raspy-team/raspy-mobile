@@ -63,6 +63,7 @@
 
     <div class="px-4 py-3 border-t border-line space-y-2" :style="{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }">
       <p v-if="error" class="t-caption text-danger text-center">{{ error }}</p>
+      <UiButton v-if="loadFailed" block size="lg" variant="secondary" @click="fetchAvatar">다시 시도</UiButton>
       <UiButton v-if="locked" block size="lg" :loading="busy" :disabled="!locked.buyable || (state?.balance ?? 0) < locked.price" @click="buy(locked)">
         {{ buyLabel(locked) }}
       </UiButton>
@@ -194,13 +195,19 @@ function load(s: S['AvatarState']) {
   draft.acc = s.parts.acc ?? undefined
 }
 
-onMounted(async () => {
+// 처음 불러오기가 실패하면 그 자리에서 다시 (예전엔 '다시 열어 주세요'뿐이라 광장 처음이면 나아갈 길이 없었다, 목적 판정 8)
+const loadFailed = ref(false)
+async function fetchAvatar() {
+  loadFailed.value = false
+  error.value = ''
   try {
     load((await GET('/api/plaza/avatar')).data)
   } catch {
-    error.value = '불러오지 못했어요. 다시 열어 주세요'
+    loadFailed.value = true
+    error.value = '불러오지 못했어요'
   }
-})
+}
+onMounted(fetchAvatar)
 
 watch(layer, () => (error.value = ''))
 

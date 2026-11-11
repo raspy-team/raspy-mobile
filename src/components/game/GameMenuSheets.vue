@@ -90,7 +90,7 @@ async function submitReport() {
     const { data: done } = await api.post('/api/reports', { targetType: 'GAME', targetId: reportGame.value.id, reason })
     showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
   } catch (e) {
-    showToast(e.response?.data?.message || '이미 신고한 경기예요')
+    showToast(e.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
   } finally {
     reporting.value = false
     reportGame.value = null

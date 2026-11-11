@@ -29,7 +29,8 @@
 
     <div class="flex gap-2 flex-wrap">
       <UiButton v-if="s.canArrive && !s.arrivedAt" size="sm" class="flex-1" icon="location-dot" :loading="busy" @click="arrive">도착했어요</UiButton>
-      <UiButton v-if="s.arrivedAt && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="circle-check" :loading="busy" @click="finish">잘 끝났어요</UiButton>
+      <!-- 끝 확인은 경기가 시작된 뒤에만. 도착하자마자 '잘 끝났어요'가 떠서 시작할 차례를 가렸다 (11/11) -->
+      <UiButton v-if="live && s.arrivedAt && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="circle-check" :loading="busy" @click="finish">잘 끝났어요</UiButton>
       <UiButton v-if="s.canShare && !s.shareUrl && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="share" @click="shareOpen = true">위치 공유</UiButton>
       <template v-if="s.shareUrl">
         <UiButton size="sm" variant="secondary" icon="share" @click="send(s.shareUrl)">다시 공유</UiButton>
@@ -74,7 +75,7 @@ import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composables/useToast'
 import { shareLink } from '../../utils/share'
 
-const props = defineProps({ gameId: { type: Number, required: true } })
+const props = defineProps({ gameId: { type: Number, required: true }, live: { type: Boolean, default: false } })
 const { showToast } = useToast()
 
 const s = ref(null)

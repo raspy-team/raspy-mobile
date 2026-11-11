@@ -78,7 +78,7 @@
               @answer-time="(ok) => answerTime(game, ok)"
             />
             <!-- 만나서 하는 경기: 도착·끝 확인, 노쇼, 위치 공유 (안전·신뢰 C) -->
-            <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" />
+            <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" :live="game.status === 'IN_PROGRESS' || game.gameStatus === 'IN_PROGRESS'" />
           </div>
         </div>
         <!-- 앱 대결도 할 일·기다리는 중에 섞는다: 결과·내 차례·이어서 하기가 맨 아래 따로 있어 할 일인 줄 몰랐다 (목적 판정 11/11 4번) -->

@@ -50,16 +50,17 @@ export function improvFeedback(feedback?: string | null): { grade: number; rank:
   const m = head.match(/(\d)등급 · (?:100명 중 (\d+)등|상위 (\d+)%)/)
   if (!m) return null
   // 둘째 줄부터: '잘한 것: …'(있으면), '다음 등급: N등급까지 n점'(1등급이 아니면), 나머지는 '인물: 반응'
-  const whyLine = rest.find((l) => l.startsWith('잘한 것: '))
+  // 잘한 것이 없는 판은 '아쉬운 것: …'만 온다 (서버 ImprovGame.WEAK_ONLY_PREFIX, 11/11): 칭찬은 지어내지 않고 다음 할 일은 준다
+  const whyLine = rest.find((l) => l.startsWith('잘한 것: ') || l.startsWith('아쉬운 것: '))
   const nextLine = rest.find((l) => l.startsWith('다음 등급: '))
   // 가장 높게 매겨진 대답의 상황 번호 (서버 ImprovGame.BEST_PREFIX). 11/11 전 판엔 없다
   const bestLine = rest.find((l) => l.startsWith('가장 잘한 대답: '))
-  const why = whyLine?.match(/^잘한 것: (.+) · 아쉬운 것: (.+)$/)
+  const why = whyLine?.match(/^잘한 것: (.+) · 아쉬운 것: (.+)$/) ?? whyLine?.match(/^아쉬운 것: ()(.+)$/)
   const reactions = rest.filter((l) => l !== whyLine && l !== nextLine && l !== bestLine).map((l) => l.replace(/^[^:]+:\s*/, ''))
   const best = bestLine ? Number(bestLine.replace('가장 잘한 대답: ', '')) - 1 : undefined
   return {
     grade: Number(m[1]), rank: Number(m[2] ?? m[3]),
-    strong: why ? LABEL[why[1]] ?? why[1] : undefined, weak: why ? LABEL[why[2]] ?? why[2] : undefined,
+    strong: why?.[1] ? LABEL[why[1]] ?? why[1] : undefined, weak: why ? LABEL[why[2]] ?? why[2] : undefined,
     tip: why ? TIP[why[2]] : undefined, next: nextLine?.replace('다음 등급: ', ''),
     best: best != null && best >= 0 ? best : undefined, reactions,
   }
@@ -74,6 +75,15 @@ export function improvShareLine(grade: number): string {
   if (grade <= 4) return `임기응변 ${grade}등급. 너는 몇 등급 나와?`
   if (grade <= 6) return `임기응변 ${grade}등급… 누가 나보다 잘하나 보자.`
   return `임기응변 ${grade}등급 ㅋㅋ 이길 사람?`
+}
+
+/**
+ * 기록에 무엇이 남나. 기록(내 정보·기록 순위)엔 가장 좋은 판만 남는다(UserStatsService.bests).
+ * 4등급(서울대 의대생 등급)까지는 '이 등급이 남는다'가 자랑이고, 5등급부터는 같은 말이 '이 등급이 박힌다'로 들려
+ * 가입을 망설이게 한다. 사실 그대로 '가장 좋은 등급만'을 말한다 (11/11 감정과 체면)
+ */
+export function improvKeepLine(grade: number): string {
+  return grade && grade <= 4 ? '이 등급이 내 기록에 남아요' : '내 기록엔 가장 좋은 등급만 남아요'
 }
 
 /** 송현(서울대 의대생)이 실제로 해서 나온 등급. 해 보기 전에는 null이고, 그동안 숫자를 지어내지 않는다 */

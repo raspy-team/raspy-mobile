@@ -59,7 +59,7 @@
       <!-- 끝난 판: 점수를 보여 주고, 저장하고 사람과 붙으려면 가입 -->
       <template v-else-if="result">
         <UiCard class="text-center py-8">
-          <MatchMascot :who="key === 'improv' ? 'match' : 'kok'" :mood="result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
+          <MatchMascot :who="key === 'improv' ? 'match' : 'kok'" :mood="improv ? (improv.grade && improv.grade <= 4 ? 'cheer' : 'smile') : result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
           <p v-if="key === 'nunchi'" class="t-micro">눈치 점수</p>
           <p v-if="improv?.empty" class="t-micro">임기응변 등급</p>
           <!-- 등급이 안 나온 판(셋 다 빈 답·마감 넘김)도 임기응변 틀 그대로, 할 일은 '다시 하기' 하나 -->
@@ -87,7 +87,7 @@
             <!-- 링크 스티커 안내는 누르기 전에: 공유가 끝난 뒤 뜬 토스트는 인스타 편집기에 있는 동안 못 봤다 (경로 10 훑기) -->
             <p class="t-micro mt-2 break-keep">스토리를 누르면 링크도 복사돼요. 인스타에서 링크 스티커에 붙여 넣으세요</p>
             <!-- 왜 이 등급인가, 다음엔 무엇을 (걷기 P1-7) -->
-            <p v-if="improv.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improv.strong }}</b> · 아쉬운 것 <b>{{ improv.weak }}</b></p>
+            <p v-if="improv.weak" class="t-body mt-4 break-keep"><template v-if="improv.strong">잘한 것 <b>{{ improv.strong }}</b> · </template>아쉬운 것 <b>{{ improv.weak }}</b></p>
             <p v-if="improv.tip" class="t-caption mt-1 break-keep">다음엔 {{ improv.tip }}</p>
             <!-- 다음 판의 목표 (3-5 마지막 걷기: "다음 판 목표가 안 보임") -->
             <p v-if="improv.next" class="t-label mt-3"><span class="hl">{{ improv.next }}</span></p>
@@ -129,7 +129,7 @@
           <!-- 가입하며 옮긴 판은 기록(최고 기록·기록 순위)에만 남고 승패는 없다(0승 0패). 지키지 못하는 말을 하지 않는다 (first10 검토) -->
           <p class="t-title">{{ improv ? '등급 남기고 사람과 붙기' : '점수 저장하고 사람과 붙기' }}</p>
           <!-- '시작'은 판 시작과 가입 두 뜻이었다: 가입은 '가입' (경로 3·10 훑기) -->
-          <p class="t-caption mt-1">{{ improv ? '가입하면 이 등급이 내 기록에 남아요. 다음 판부터는 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요' : '가입하면 이 점수가 내 기록에 남아 기록 순위에 올라가요. 다음 판부터는 사람과 승패를 내요' }}</p>
+          <p class="t-caption mt-1">{{ improv ? `가입하면 ${improvKeepLine(improv.grade)}. 다음 판부터는 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요` : '가입하면 이 점수가 내 기록에 남아 기록 순위에 올라가요. 다음 판부터는 사람과 승패를 내요' }}</p>
           <UiButton block size="lg" class="mt-4" @click="join('result_join')">{{ improv ? '등급 남기기' : '점수 남기기' }}</UiButton>
         </UiCard>
         <UiButton v-if="key !== 'daily-chosung' && !improv && !startLimit" block variant="ghost" class="mt-2" :loading="starting" @click="again">한 판 더</UiButton>
@@ -273,7 +273,7 @@ import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
 import NunchiPlay from '../../components/appgame/NunchiPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import ImprovSentChallenges from '../../components/appgame/ImprovSentChallenges.vue'
-import { improvFeedback, improvShareLine, improvSituations, improvAnswers } from '@/utils/improv'
+import { improvFeedback, improvShareLine, improvKeepLine, improvSituations, improvAnswers } from '@/utils/improv'
 // 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 결과가 나올 때 받는다. 광고로 온 첫 화면에 실려
 // 느린 폰에서 '시작하기'가 3.9초에야 보였다 (11/11 몸과 시간). 누른 순간 바로 공유해야 사파리가 막지 않으니, 누를 때가 아니라 결과가 뜰 때 미리 받는다
 let story: typeof import('@/utils/storyShare') | null = null
@@ -476,9 +476,14 @@ function secondsLeft(p: Play) {
   return Math.max(1, Math.min(p.timeLimitSeconds, left))
 }
 
+/** 기록에 붙이는 등급 (';grade=7'). 등급마다 보내고 가입하는 비율이 다른지 본다 (11/11 감정과 체면) */
+function gradeTag() {
+  return improv.value?.grade ? `;grade=${improv.value.grade}` : ''
+}
+
 /** 시작 화면으로. 가입하면 이 게임 화면으로 돌아오고, 시작 화면은 버튼 누름을 '가입 전 한 판 끝'에서 센다 */
 function join(name: 'result_join' | 'intro_join' | 'limit_join') {
-  track(name, { gameKey: key.value, step: rounds.value })
+  track(name, { gameKey: key.value, step: rounds.value, value: gradeTag().slice(1) || undefined })
   rememberReturnTo(`/play/${key.value}`)
   router.push({ path: '/init', query: { from: result.value ? 'guest' : undefined } })
 }
@@ -571,7 +576,7 @@ function shareStory() {
   const file = storyFile.value
   if (!file || !playId.value || !story) return  // 그림이 있으면 모듈도 이미 받았다
   const { shareFiles } = story
-  track('result_share', { gameKey: key.value, step: rounds.value, value: 'story' })
+  track('result_share', { gameKey: key.value, step: rounds.value, value: `story${gradeTag()}` })
   const link = withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&k=${result.value?.challengeKey ?? ''}&utm_source=instagram&utm_medium=story`)
   void copyText(link)
   void shareFiles([file]).then((r) => {
@@ -587,7 +592,7 @@ const saveView = ref<string | null>(null)
 // ── 눈치 한 판: 친구 도전·공유 ──
 async function challengeFriend() {
   if (!playId.value) return
-  track('result_challenge', { gameKey: key.value, step: rounds.value, value: `play=${playId.value}` })
+  track('result_challenge', { gameKey: key.value, step: rounds.value, value: `play=${playId.value}${gradeTag()}` })
   trackEvent('challenge', key.value === 'improv' ? 'improv' : 'nunchi')
   sharing.value = 'challenge'
   try {

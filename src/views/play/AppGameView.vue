@@ -173,7 +173,7 @@
             <p v-if="improvGrade && !(improvResult && !improvResult.empty)" class="t-heading mt-4">{{ improvGrade }}</p>
             <p v-else-if="improvResult && !improvResult.empty" class="t-caption mt-3">100명 중 {{ improvResult.rank }}등</p>
             <!-- 끝난 판에도 왜 그 등급인지 (3-5 UI) -->
-            <p v-if="improvResult?.strong" class="t-body mt-2 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
+            <p v-if="improvResult?.weak" class="t-body mt-2 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
               실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
             </p>
@@ -229,7 +229,7 @@
                 <UiButton size="sm" icon="instagram" :disabled="!storyFile" @click="shareStory">인스타 스토리</UiButton>
                 <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
               </div>
-              <p v-if="improvResult.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
+              <p v-if="improvResult.weak" class="t-body mt-4 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
               <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
               <p v-if="improvResult.next" class="t-label mt-3"><span class="hl">{{ improvResult.next }}</span></p>
             </template>
@@ -326,7 +326,8 @@
           <!-- 가입 전 한 판을 하고 막 가입한 사람: 그 판이 어디 갔는지 먼저 (3-5 걷기 P5: "내 4등급은? 60은 뭐지") -->
           <UiCard v-if="joinedFrom" class="mb-3">
             <p class="t-title">방금 판 <span class="hl">{{ joinedFrom.grade }}등급</span>이 내 기록에 남았어요</p>
-            <p class="t-caption mt-1">이제 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요</p>
+            <!-- 5등급부터는 '남았다'가 박혔다로 들린다: 기록엔 가장 좋은 판만 남는다는 사실을 함께 (11/11 감정과 체면) -->
+            <p class="t-caption mt-1">{{ Number(joinedFrom.grade) > 4 ? '기록엔 가장 좋은 등급만 남아요. ' : '' }}이제 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요</p>
           </UiCard>
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
@@ -489,6 +490,7 @@ import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import { improvAnswers, improvFeedback, improvSituations } from '@/utils/improv'
+import { track } from '@/utils/trackLog'
 import { shareLink } from '@/utils/share'
 import { askPushPermission, isCapacitorApp } from '@/utils/nativeBridge'
 import { guestClaimResult } from '@/utils/visit'
@@ -793,6 +795,7 @@ function until(at?: string) {
 /** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
 const challenging = ref(false)
 async function sendChallenge(gameId: number) {
+  track('result_challenge', { gameKey: key.value, value: `duel=${gameId}${improvResult.value?.grade ? `;grade=${improvResult.value.grade}` : ''}` })
   challenging.value = true
   try {
     await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
@@ -890,6 +893,8 @@ watch(() => [result.value?.gameId, result.value?.myFeedback], async () => {
 function shareStory() {
   const file = storyFile.value
   if (!file) return
+  // 손님 결과와 같은 이름: 등급마다 보내는 비율을 본다 (11/11 감정과 체면)
+  track('result_share', { gameKey: key.value, value: `story${improvResult.value?.grade ? `;grade=${improvResult.value.grade}` : ''}` })
   // 그림을 누른 사람이 가입 없이 바로 해 볼 링크를 클립보드에 (인스타 링크 스티커에 붙인다)
   void copyText(withShareRef(`${window.location.origin}/try/improv?utm_source=instagram&utm_medium=story`))
   if (!story) return // 그림이 있으면 모듈도 이미 받았다

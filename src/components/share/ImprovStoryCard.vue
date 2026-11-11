@@ -12,7 +12,8 @@
 
     <div class="mt-5 flex items-end gap-3">
       <p class="text-[72px] leading-none font-semibold tracking-[-0.05em] text-signal-fg tabular-nums">{{ grade }}<span class="text-[28px] ml-1 text-fg">등급</span></p>
-      <p class="pb-2 text-[15px] text-fg-muted">100명 중 {{ rank }}등 · {{ score }}점</p>
+      <!-- 등수는 자랑일 때만(1~3등급), 점수는 늘 뺀다 (11/11 감정과 체면, docs/overnight/2026-11-11-emotion.md) -->
+      <p v-if="grade <= 3" class="pb-2 text-[15px] text-fg-muted">100명 중 {{ rank }}등</p>
     </div>
 
     <div v-if="best" class="mt-6 rounded-2xl bg-surface px-4 py-4">

@@ -9,7 +9,7 @@
         <!-- 방금 손님으로 한 판 한 사람: 결과 카드에서 이미 마음먹고 왔다. 게임 설명·약속을 되풀이하지 않고 방금 결과만 (목적 판정 11/11 부분 1) -->
         <UiCard v-if="guestLine" class="mt-8">
           <p class="t-title">{{ guestLine }}</p>
-          <p class="t-caption mt-1">시작하면 내 기록에 남아요</p>
+          <p class="t-caption mt-1">시작하면 {{ guestKeep }}</p>
         </UiCard>
         <UiCard v-else-if="landing" class="mt-8">
           <!-- '방금 한 판'은 손님 결과에서 바로 왔을 때만. 어제 한 판의 표시(guest_played)로 새 링크를 '방금 한 판'이라 불렀다 -->
@@ -117,6 +117,7 @@
 <script setup>
 // 시작 화면: 무슨 앱인지 한눈에 + 소셜로 1초 만에 시작(곧 가입). 약관·닉네임·동네는 가입 뒤 /welcome에서 받는다
 import { NOTICE } from '../utils/notice'
+import { improvKeepLine } from '@/utils/improv'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
@@ -166,6 +167,9 @@ const guestLine = (() => {
   } catch { /* 없으면 받은 링크 카드로 */ }
   return ''
 })()
+
+// 5등급부터는 '이 등급이 남는다'가 박힌다로 들린다. 기록엔 가장 좋은 판만 남는다 (utils/improv.improvKeepLine)
+const guestKeep = improvKeepLine(Number(guestLine.match(/(\d)등급/)?.[1] ?? 0))
 
 const returnTo = peekReturnTo()
 const canOpenOutside = isAndroidUa || /kakaotalk/i.test(navigator.userAgent)

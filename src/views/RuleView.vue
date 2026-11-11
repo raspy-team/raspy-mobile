@@ -178,7 +178,8 @@ const FILTER_KEYS = [...SITUATIONS.map((f) => f.key), 'ability']
 const route = useRoute()
 const router = useRouter()
 const picking = computed(() => !!route.query.fromGameCreate)
-const CARRY = ['when', 'venue', 'format', 'size']
+// exact·venueDetail도 싣는다: 규칙을 바꾸러 다녀오면 고른 날짜·시간과 화상·게임 칸 글이 사라졌다 (목적 판정 11/11 4번)
+const CARRY = ['when', 'exact', 'venue', 'venueDetail', 'format', 'size']
 // 규칙 만들기로 갈 때: 고르는 중이면 넘겨받은 값과 '고르는 중' 표시를 그대로
 const createTo = computed(() => (picking.value
   ? { path: '/rules/create', query: { fromGameCreate: '1', ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) } }

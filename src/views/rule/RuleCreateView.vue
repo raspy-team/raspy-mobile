@@ -162,7 +162,8 @@ const router = useRouter()
 const aiSummary = ref('')
 const editingCategory = ref(false)
 // 경기 만들기에서 규칙을 고르다 왔으면 넘겨 둔 때·장소·방식·인원을 그대로 들고 돌아간다 (목적 판정 6)
-const CARRY = ['when', 'venue', 'format', 'size']
+// exact·venueDetail도 싣는다: 규칙을 바꾸러 다녀오면 고른 날짜·시간과 화상·게임 칸 글이 사라졌다 (목적 판정 11/11 4번)
+const CARRY = ['when', 'exact', 'venue', 'venueDetail', 'format', 'size']
 const gameTo = computed(() => ({
   path: '/create-game',
   query: { ruleId: String(done.value?.id ?? ''), ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) },

@@ -51,6 +51,11 @@
               @img-click="onImagePreview"
             />
           </template>
+          <!-- 못 불러온 것을 '댓글이 없어요'로 보였다 (목적 판정 11/11 4번) -->
+          <div v-else-if="loadFailed" class="text-center mt-16 px-6">
+            <p class="t-heading">댓글을 불러오지 못했어요</p>
+            <button type="button" class="t-label mt-3 underline underline-offset-2" @click="fetchComments">다시 시도</button>
+          </div>
           <div v-else class="text-center mt-16 px-6">
             <p class="t-heading">아직 댓글이 없어요</p>
             <p class="t-caption mt-1">첫 댓글로 응원이나 한마디를 남겨 보세요</p>
@@ -155,11 +160,13 @@ import {
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
+import { useToast } from '../composables/useToast'
 import CommentItem from '../components/CommentItem.vue'
 import { photoFromFile } from '../utils/image'
 
 // Props/emit
 const props = defineProps({ id: { type: [String, Number], required: true } })
+const { showToast } = useToast()
 const emit = defineEmits(['close'])
 
 const showModal = ref(false)
@@ -207,17 +214,22 @@ const replyNickname = ref('')
 const previewImg = ref(null)
 
 // 댓글 불러오기
+const loadFailed = ref(false)
 const fetchComments = async () => {
   isLoading.value = true
   try {
     const res = await api.get(`/api/games/${props.id}/comments/tree`)
     threadedComments.value = res.data
+    loadFailed.value = false
+  } catch {
+    loadFailed.value = true
   } finally {
     isLoading.value = false
   }
 }
 // 댓글 등록
-const canSubmit = computed(() => inputContent.value.trim().length > 0)
+// 사진만 있어도 올릴 수 있다 (사진만 고르고 '올리기'가 안 눌렸다)
+const canSubmit = computed(() => inputContent.value.trim().length > 0 || !!inputImage.value)
 const submitInput = async () => {
   if (!canSubmit.value || isLoading.value) return
   isLoading.value = true
@@ -230,6 +242,9 @@ const submitInput = async () => {
     await fetchComments()
     resetInput()
     nextTick(() => commentInputRef.value && commentInputRef.value.focus())
+  } catch (e) {
+    // 실패해도 말이 없어 올라간 줄 알았다. 쓴 글은 그대로 둔다
+    showToast(e.response?.data?.message || '올리지 못했어요. 다시 해 주세요')
   } finally {
     isLoading.value = false
   }

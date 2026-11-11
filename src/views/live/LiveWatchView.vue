@@ -3,7 +3,10 @@
     <UiTopBar :title="live?.title || '경기 중계'" back />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-56 relative">
       <UiSkeleton v-if="!live && !error" class="h-48 w-full" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-eye-slash" :title="error" />
+      <!-- 볼 수 없는 중계에서 누를 것이 없었다 (목적 판정 11/11 5번) -->
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-eye-slash" :title="error">
+        <UiButton variant="secondary" to="/">홈으로</UiButton>
+      </UiEmptyState>
       <template v-else-if="live">
         <p class="t-caption text-center">
           <span v-if="live.status === 'IN_PROGRESS'" class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-signal-fg motion-safe:animate-pulse" aria-hidden="true"></span>LIVE · {{ live.setIndex ? `${live.setIndex}세트` : '곧 시작' }}</span>
@@ -178,6 +181,9 @@ async function toggleWatch() {
   toggling.value = true
   try {
     live.value = (await POST('/api/games/{gameId}/live/watch-off', { path: { gameId }, body: { off: !live.value.watchOff } })).data
+  } catch (e) {
+    // 실패해도 말이 없어 끈 줄 알았다 (사생활)
+    showToast((e as { response?: { data?: { message?: string } } })?.response?.data?.message || '바꾸지 못했어요. 다시 해 주세요')
   } finally {
     toggling.value = false
   }

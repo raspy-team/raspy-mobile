@@ -31,9 +31,10 @@
       <UiIconButton icon="ellipsis" label="더보기" @click="showMenu = true" />
     </header>
     <!-- 관중: 지금 보는 사람 수 (누르면 중계). 응원은 소리로, 세트가 끝나면 한 장으로 (docs/live-spectator-review.md A·B) -->
-    <button v-if="viewers" type="button" class="flex-shrink-0 mx-auto -mt-2 mb-1 t-micro tabular-nums inline-flex items-center gap-1" @click="router.push(`/live/${gameId}`)">
+    <!-- 보는 사람이 있다는 건 재미라 줄은 남긴다. 누르면 경기 중에 점수판을 떠나 연결이 끊겨 누르는 길은 뺐다 (목적 판정 11/11 5번) -->
+    <p v-if="viewers" class="flex-shrink-0 mx-auto -mt-2 mb-1 t-micro tabular-nums inline-flex items-center gap-1">
       <span class="w-1.5 h-1.5 rounded-full bg-danger" aria-hidden="true"></span>관중 {{ viewers }}명이 보고 있어요
-    </button>
+    </p>
 
     <!-- 규칙 요약 한 줄 + 시계 -->
     <section class="flex-shrink-0 text-center px-4">
@@ -98,7 +99,8 @@
     <UiSheet v-model="showMenu">
       <UiList>
         <UiListItem icon="book-open" title="규칙 보기" @click="menu(() => (game.showRuleDetail = true))" />
-        <UiListItem icon="eye" title="중계" subtitle="중계 링크 공유, 응원 보기" @click="menu(() => router.push(`/live/${gameId}`))" />
+        <!-- 점수판을 떠나지 않고 링크만 보낸다 (예전엔 중계 화면으로 가 경기 중 연결이 끊겼다) -->
+        <UiListItem icon="eye" title="중계 링크 보내기" subtitle="보내면 친구가 점수를 보며 응원해요" @click="menu(shareLive)" />
         <UiListItem icon="volume" :title="soundOn ? '관중 소리 끄기' : '관중 소리 켜기'" subtitle="관중이 응원하면 이 휴대폰에서 박수 소리가 나요" @click="menu(toggleSound)" />
         <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menu(() => (showLogModal = true))" />
         <UiListItem icon="camera" title="사진 찍기" @click="menu(triggerPhotoCapture)" />
@@ -147,6 +149,11 @@
     </div>
 
     <MatchModal v-if="game.showRuleDetail" :rule="game.rule" @close="game.showRuleDetail = false" />
+  </div>
+  <!-- 불러오는 동안 빈 화면이었다: '경기 시작'을 누르고 아무것도 없는 화면을 봤다 (목적 판정 11/11 5번) -->
+  <div v-else class="h-dvh flex flex-col items-center justify-center gap-3 bg-canvas pt-safe pb-safe" aria-busy="true">
+    <UiSpinner />
+    <p class="t-caption">점수판을 여는 중이에요</p>
   </div>
 
   <!-- 숨겨진 카메라·동영상 입력 -->
@@ -207,6 +214,7 @@ import {
   compressVideo,
 } from '../../utils/gamePictureStorage'
 import { compressImage } from '../../utils/image'
+import { shareLink } from '../../utils/share'
 
 const route = useRoute()
 const router = useRouter()
@@ -519,53 +527,15 @@ function addLog(log) {
 
 onMounted(async () => {
   listenCrowd()
-  // 안드로이드 네이티브 카메라 콜백 등록
-  if (typeof window !== 'undefined') {
-    // 사진 촬영 콜백 핸들러
-    const handleCameraResult = async (base64Image) => {
-      try {
-        const compressed = await compressImage(base64Image)
-        await addGamePicture(gameId, compressed)
-        showToast('사진을 저장했어요')
-      } catch (error) {
-        console.error('Failed to process camera image:', error)
-        if (error.message === 'QUOTA_EXCEEDED') {
-          showToast('폰 저장 공간이 모자라요. 사진·영상 몇 개를 지우고 다시 해 주세요')
-        } else {
-          showToast('사진을 저장하지 못했어요')
-        }
-      }
-    }
-
-    // 동영상 촬영 콜백 핸들러
-    const handleVideoCameraResult = async (base64Video, duration) => {
-      try {
-        // duration은 밀리초 단위로 전달된다고 가정
-        await addGameVideo(gameId, base64Video, duration || 0)
-        showToast('동영상을 저장했어요')
-      } catch (error) {
-        console.error('Failed to process video:', error)
-        if (error.message === 'QUOTA_EXCEEDED') {
-          showToast('폰 저장 공간이 모자라요. 사진·영상 몇 개를 지우고 다시 해 주세요')
-        } else {
-          showToast('동영상을 저장하지 못했어요')
-        }
-      }
-    }
-
-    // 여러 콜백 이름을 모두 등록 (안드로이드/iOS 호환성)
-    window.onCameraResult = handleCameraResult
-    window.onGameCameraResult = handleCameraResult
-    window.onVideoCameraResult = handleVideoCameraResult
-    window.onGameVideoCameraResult = handleVideoCameraResult
-  }
+  // 옛 안드로이드·iOS 앱의 카메라 콜백은 뺐다: 옛 앱이 없고, Capacitor iOS는 UA에 raspy-ios가 붙어 없는 다리를 부르다 떨어졌다. 파일 입력 하나로 (목적 판정 11/11 5번)
 
   const currentUserId = await getMyId()
 
   // 시작 전 경기(신청만 있거나 승인 전)는 점수판이 없다: 경기 화면으로. 끝난 경기는 결과로 (11/4 밤샘)
   const res = await api.get(`/api/games/${gameId}/detail`).catch(() => null)
   if (!res || res.data.gameStatus != 'IN_PROGRESS') {
-    router.replace(res?.data.gameStatus === 'COMPLETED' ? `/games/${gameId}/result` : `/games/${gameId}`)
+    // 결과 확인을 기다리는 경기도 결과로: 확인하러 온 사람이 모집 카드를 봤다 (목적 판정 11/11 5번)
+    router.replace(['COMPLETED', 'RESULT_PENDING'].includes(res?.data.gameStatus) ? `/games/${gameId}/result` : `/games/${gameId}`)
     return
   }
 
@@ -750,105 +720,41 @@ async function keepScreenOn() {
   }
 }
 
+async function shareLive() {
+  const msg = await shareLink(`${window.location.origin}/live/${gameId}`, `${game.rule?.ruleTitle || '경기'} 지금 하는 중이에요. 같이 봐요`)
+  if (msg) showToast(msg)
+}
+
+// 끊긴 동안 누르면 아무 일도 없어 고장 난 줄 알았다: 점수 칸처럼 다시 누르라고 알린다 (목적 판정 11/11 5번)
+function sendOrWarn(event) {
+  if (socket.sendGameEvent(chatRoomId.value, event)) return true
+  feel('error')
+  showToast('연결이 끊겼어요. 연결되면 다시 눌러 주세요')
+  return false
+}
+
 function socket_startSet() {
-  socket.sendGameEvent(chatRoomId.value, {
-    type: 'START',
-    setIndex: currentSet.value,
-    userId: 0,
-    scoreDelta: 0,
-  })
+  sendOrWarn({ type: 'START', setIndex: currentSet.value, userId: 0, scoreDelta: 0 })
 }
 
 function socket_nextSet() {
-  socket.sendGameEvent(chatRoomId.value, {
-    type: 'SET',
-    setIndex: currentSet.value,
-    userId: 0,
-    scoreDelta: 0,
-  })
+  sendOrWarn({ type: 'SET', setIndex: currentSet.value, userId: 0, scoreDelta: 0 })
 }
 
 function socket_finishGame() {
-  socket.sendGameEvent(chatRoomId.value, {
-    type: 'FINISH',
-  })
+  sendOrWarn({ type: 'FINISH' })
 }
 
 function socket_resetGame() {
-  socket.sendGameEvent(chatRoomId.value, {
-    type: 'RESET',
-  })
+  sendOrWarn({ type: 'RESET' })
 }
 
-// 안드로이드 웹뷰 감지
-function isAndroidWebView() {
-  return window.AndroidApp !== undefined
-}
-
-function isIOSWebView() {
-  const userAgent = navigator.userAgent.toLowerCase()
-  return (
-    userAgent.includes('raspy-ios') ||
-    (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosBridge)
-  )
-}
-
-// 사진 촬영 트리거
+// 사진·영상 찍기: 기기의 카메라 입력 하나로
 function triggerPhotoCapture() {
-  if (isAndroidWebView()) {
-    try {
-      window.AndroidApp.openCamera()
-      // 콜백은 window.onGameCameraResult로 받음
-    } catch (error) {
-      console.error('Failed to call Android camera:', error)
-      // 실패 시 fallback
-      cameraInputRef.value?.click()
-    }
-  } else if (isIOSWebView()) {
-    try {
-      window.webkit.messageHandlers.iosBridge.postMessage({
-        action: 'openCamera',
-        type: 'photo',
-      })
-      // 콜백은 window.onGameCameraResult로 받음
-    } catch (error) {
-      console.error('Failed to call iOS camera:', error)
-      // 실패 시 fallback
-      cameraInputRef.value?.click()
-    }
-  } else {
-    // 일반 웹
-    cameraInputRef.value?.click()
-  }
+  cameraInputRef.value?.click()
 }
-
-// 동영상 촬영 트리거
 function triggerVideoCapture() {
-  if (isAndroidWebView()) {
-    try {
-      window.AndroidApp.openVideoCamera()
-      // 콜백은 window.onGameVideoCameraResult로 받음
-    } catch (error) {
-      console.error('Failed to call Android video camera:', error)
-      // 실패 시 fallback
-      videoInputRef.value?.click()
-    }
-  } else if (isIOSWebView()) {
-    try {
-      window.webkit.messageHandlers.iosBridge.postMessage({
-        action: 'openCamera',
-        type: 'video',
-      })
-      // 콜백은 window.onGameVideoCameraResult로 받음
-    } catch (error) {
-      console.error('Failed to call iOS video camera:', error)
-      // 실패 시 fallback
-      videoInputRef.value?.click()
-    }
-  } else {
-    // 일반 웹
-    videoInputRef.value?.click()
-  }
+  videoInputRef.value?.click()
 }
 
 // 카메라 파일 선택 완료
@@ -947,13 +853,6 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
   wakeLock?.release().catch(() => {})
 
-  // 안드로이드 네이티브 카메라 콜백 정리
-  if (typeof window !== 'undefined') {
-    window.onCameraResult = null
-    window.onGameCameraResult = null
-    window.onVideoCameraResult = null
-    window.onGameVideoCameraResult = null
-  }
 
   offLive?.()
   // 소켓 핸들러 정리

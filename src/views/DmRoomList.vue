@@ -47,6 +47,10 @@
           <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
+      <!-- 못 불러온 것을 '친구가 없어요'로 보였다 (목적 판정 11/11 5번) -->
+      <UiEmptyState v-else-if="friendsFailed" icon="fas fa-rotate-right" title="친구 목록을 불러오지 못했어요">
+        <UiButton variant="secondary" @click="openFriends">다시 시도</UiButton>
+      </UiEmptyState>
       <UiEmptyState v-else mascot="match" title="아직 친구가 없어요" description="경기를 함께한 사람의 프로필에서 메시지를 보낼 수 있어요" />
     </UiSheet>
   </div>
@@ -72,6 +76,7 @@ const error = ref(false)
 const friendsOpen = ref(false)
 const friendsLoading = ref(false)
 const friends = ref([])
+const friendsFailed = ref(false)
 
 async function load() {
   error.value = false
@@ -88,10 +93,12 @@ const { pull, refreshing } = usePullToRefresh(load)
 async function openFriends() {
   friendsOpen.value = true
   friendsLoading.value = true
+  friendsFailed.value = false
   try {
     friends.value = (await api.get('/api/friends/my', { params: { userId: 0 } })).data
   } catch {
     friends.value = []
+    friendsFailed.value = true
   } finally {
     friendsLoading.value = false
   }

@@ -19,19 +19,17 @@
       </UiCard>
     </div>
 
-    <!-- 아직 경기가 없을 때: 무엇을 하면 되는지 순서로 -->
+    <!-- 못 불러온 것을 '첫 경기를 잡아 볼까요'로 보였다: 경기가 있는 사람이 '없다'고 봤다 (목적 판정 11/11 4번) -->
+    <UiCard v-else-if="loadFailed && !allGames.length && !appDuels.length">
+      <UiEmptyState icon="fas fa-rotate-right" title="내 경기를 불러오지 못했어요" description="연결이 돌아오면 다시 해 주세요">
+        <UiButton variant="secondary" @click="retry">다시 시도</UiButton>
+      </UiEmptyState>
+    </UiCard>
+
+    <!-- 아직 경기가 없을 때: 버튼 둘만 (할 일 3단계 설명은 길었다) -->
     <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length" class="pt-6">
       <h2 class="t-title">첫 경기를 잡아 볼까요</h2>
       <p class="t-caption mt-2">확정된 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
-      <ol class="mt-8 bg-surface rounded-xl divide-y divide-line">
-        <li v-for="(s, i) in FIRST_STEPS" :key="s.title" class="flex items-baseline gap-4 px-4 py-4">
-          <span class="t-mono w-6 flex-shrink-0">{{ String(i + 1).padStart(2, '0') }}</span>
-          <span>
-            <span class="block text-[0.9375rem] font-semibold text-fg">{{ s.title }}</span>
-            <span class="block t-caption mt-0.5">{{ s.body }}</span>
-          </span>
-        </li>
-      </ol>
       <div class="flex gap-2 mt-6">
         <UiButton class="flex-1" to="/">경기 찾기</UiButton>
         <UiButton class="flex-1" variant="secondary" to="/create-game">경기 만들기</UiButton>
@@ -52,7 +50,7 @@
           />
         </UiList>
       </UiSection>
-      <UiSection v-for="(g, gi) in groups" :key="g.key" :title="`${g.title} ${g.items.length}`">
+      <UiSection v-for="(g, gi) in groups" :key="g.key" :title="`${g.title} ${g.items.length + g.duels.length}`">
         <div class="space-y-3">
           <div
             v-for="(game, i) in g.items"
@@ -83,10 +81,8 @@
             <MeetSafetyCard v-if="needsMeetCard(game)" :game-id="game.id" />
           </div>
         </div>
-      </UiSection>
-      <!-- 앱 게임에서 아직 안 끝난 대결: 게임마다 흩어지지 않게 여기 모은다. 앱 게임은 조연이라 실제 경기 아래 (11/5) -->
-      <UiSection v-if="appDuels.length" :title="`앱 게임 ${appDuels.length}`">
-        <AppDuelList :duels="appDuels" />
+        <!-- 앱 대결도 할 일·기다리는 중에 섞는다: 결과·내 차례·이어서 하기가 맨 아래 따로 있어 할 일인 줄 몰랐다 (목적 판정 11/11 4번) -->
+        <AppDuelList v-if="g.duels.length" :duels="g.duels" :class="g.items.length ? 'mt-3' : ''" />
       </UiSection>
     </template>
   </main>
@@ -265,6 +261,7 @@ import SafetyTipsSheet from '../../components/game/SafetyTipsSheet.vue'
 import MeetSafetyCard from '../../components/safety/MeetSafetyCard.vue'
 import PlacePickerSheet from '../../components/map/PlacePickerSheet.vue'
 import { GET } from '@/api/client'
+import { canResumeDuel } from '@/utils/appGame'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
   UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton, UiTopBar
@@ -283,11 +280,6 @@ import { matchTime, place, ratingLine } from '../../utils/format'
 import { venuePlace } from '../../utils/gameFormat'
 import { quickTimes } from '../../utils/when'
 
-const FIRST_STEPS = [
-  { title: '모집 중인 경기에 신청하거나 직접 열기', body: '규칙을 고르면 누구나 신청할 수 있게 올라가요' },
-  { title: '상대가 정해지면 장소·시간 맞추기', body: '메시지로 정하고, 그날 경기 화면에서 시작해요' },
-  { title: '끝나면 결과 남기기', body: '상대가 확인하면 실력 점수와 챔피언에 반영돼요' },
-]
 
 const router = useRouter()
 const route = useRoute()
@@ -337,14 +329,16 @@ function isMatchDay(g) {
   return new Date(g.matchDate).getTime() < today.getTime() + 86_400_000
 }
 const byTime = (a, b) => new Date(a.matchDate || a.startedAt || 0) - new Date(b.matchDate || b.startedAt || 0)
+// 앱 대결: 내가 할 일이 남았으면(하는 중·이어서 하기) 할 일, 아니면 기다리는 중 (AppDuelList의 칠한 배지와 같은 기준)
+const duelBucket = (d) => ((d.playMode === 'REALTIME' && d.opponent) || canResumeDuel(d) ? 'todo' : 'waiting')
+// '끝난 경기' 무리는 뺐다: 서버가 끝난 경기를 보내지 않아 한 번도 나온 적이 없다 (목적 판정 11/11 4번)
 const groups = computed(() =>
   [
     { key: 'todo', title: '할 일' },
     { key: 'waiting', title: '기다리는 중' },
-    { key: 'done', title: '끝난 경기' },
   ]
-    .map((g) => ({ ...g, items: allGames.value.filter((x) => bucket(x) === g.key).sort(byTime) }))
-    .filter((g) => g.items.length),
+    .map((g) => ({ ...g, items: allGames.value.filter((x) => bucket(x) === g.key).sort(byTime), duels: appDuels.value.filter((d) => duelBucket(d) === g.key) }))
+    .filter((g) => g.items.length || g.duels.length),
 )
 
 async function fetchGames() {
@@ -362,9 +356,17 @@ async function fetchGames() {
     myGames.value = myRes.data
     // 열려 있는 신청자 시트도 새 값으로
     if (applicantsGame.value) applicantsGame.value = allGames.value.find((g) => g.type === 'my-game' && g.id === applicantsGame.value.id) || null
+    loadFailed.value = false
+  } catch {
+    loadFailed.value = true
   } finally {
     loading.value = false
   }
+}
+const loadFailed = ref(false)
+function retry() {
+  loading.value = true
+  fetchGames()
 }
 const { pull, refreshing } = usePullToRefresh(fetchGames)
 

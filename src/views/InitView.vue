@@ -28,7 +28,8 @@
           <h1 class="t-display text-[40px] mt-8">기록 남기고<br /><span class="hl hl-draw">사람과</span> 붙기</h1>
           <p class="t-body text-fg-muted mt-4 max-w-[30ch]">다음 판부터는 모르는 사람과 1:1로 승패를 내요.</p>
         </template>
-        <template v-else-if="!landing">
+        <!-- 손님 판에서 온 사람은 링크가 없어도(landing 없음) 위 카드가 할 말을 다 했다 -->
+        <template v-else-if="!landing && !guestPlayed">
           <h1 class="t-display text-[44px] mt-8">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
           <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
         </template>

@@ -46,7 +46,9 @@
         <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
           <p v-if="headline.line" class="t-body text-center mt-4">{{ headline.line }}</p>
           <div class="flex justify-center mt-4">
-            <UiButton size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">한 판 더</UiButton>
+            <!-- 1:1이면 이 상대와 다시: 예전엔 아무나 모집하는 새 경기를 열었다. 소식의 '도전'과 같은 '나랑도해'로 그 사람에게 (목적 판정 11/11 5번) -->
+            <UiButton v-if="rematchTarget" size="sm" variant="tonal" icon="rotate-right" :loading="rematching" @click="rematch">{{ rematchTarget.nickname }}님과 한 판 더</UiButton>
+            <UiButton v-else size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">한 판 더</UiButton>
           </div>
         </template>
 
@@ -240,8 +242,15 @@
           </UiCard>
         </UiSection>
 
-        <!-- 사진·동영상 -->
-        <UiSection v-if="reviewMore || allPictures.length" title="사진·영상">
+      </template>
+      <!-- 평가를 보냈으면 칸을 접고 이 화면에 남는다 (예전엔 내 프로필로 데려갔다) -->
+      <UiCard v-if="reviewSent" class="text-center py-5">
+        <p class="t-heading">평가를 보냈어요</p>
+        <p class="t-caption mt-1">상대 프로필의 받은 별점에 더해져요</p>
+      </UiCard>
+
+        <!-- 사진·동영상: 평가와 떼어 모든 참가자에게. 팀·여럿 경기, 이미 평가한 1:1은 점수판에서 찍은 것을 올릴 곳이 없었다 (목적 판정 11/11 5번) -->
+        <UiSection v-if="(canReview && (reviewMore || allPictures.length)) || (photoOnly && allPictures.length)" title="사진·영상">
           <template #action><span class="t-micro">{{ allPictures.length }}/5</span></template>
 
           <!-- 없을 때는 큰 빈 상자 대신 한 줄: 평가보다 앞서지 않게 -->
@@ -316,10 +325,10 @@
               <UiButton variant="secondary" icon="fas fa-camera" class="flex-1" @click="openCamera">사진 추가</UiButton>
               <UiButton variant="secondary" icon="fas fa-video" class="flex-1" @click="openVideoRecorder">영상 추가</UiButton>
             </div>
+            <!-- 평가가 없는 사람은 사진만 따로 올린다 -->
+            <UiButton v-if="photoOnly && selectedPictures.length" block :loading="uploadingPictures" @click="uploadPicturesOnly">고른 {{ selectedPictures.length }}개 올리기</UiButton>
           </div>
         </UiSection>
-
-      </template>
 
       <!-- 관중이 찍은 장면: 선수·관중 모두 본다. 관중은 끝나고 하루 안까지 올린다 -->
       <!-- AI 주민의 경기에는 현장이 없다: 관중 사진을 받지 않는다 (docs/ai-residents.md 6, 사람이 찾아가지 않게) -->
@@ -379,7 +388,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
-import api from '../../api/api'
+import api, { playWithMeTooAPI } from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { GET, POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
@@ -458,10 +467,9 @@ function submitReviewAndGoHome() {
       return Promise.resolve()
     })
     .then(() => {
-      showToast('평가를 보냈어요')
-      setTimeout(() => {
-        goHome()
-      }, 500)
+      feel('success')
+      isSubmitting.value = false
+      reviewSent.value = true
     })
     .catch((error) => {
       isSubmitting.value = false
@@ -518,7 +526,27 @@ const myRating = ref(null)
 const ratingDelta = computed(() => (myRating.value ? myRating.value.after - myRating.value.before : 0))
 // 평가는 아직 안 남긴 1:1 경기에서만 묻는다 (이미 낸 사람에게 다시 묻지 않게)
 const { pendingReviewGameIds } = useActiveGamePolling()
-const canReview = computed(() => isParticipant.value && confirmed.value && format.value === 'DUEL' && pendingReviewGameIds.value.includes(Number(gameId)))
+const reviewSent = ref(false)
+const canReview = computed(() => !reviewSent.value && isParticipant.value && confirmed.value && format.value === 'DUEL' && pendingReviewGameIds.value.includes(Number(gameId)))
+// 평가 없이 사진만 올릴 수 있는 사람: 확정된 경기의 참가자 중 평가 칸이 없는 사람
+const photoOnly = computed(() => !canReview.value && isParticipant.value && confirmed.value && !aiGame.value)
+const uploadingPictures = ref(false)
+async function uploadPicturesOnly() {
+  uploadingPictures.value = true
+  try {
+    await submitPictures()
+    // 올린 것은 목록에서 빼고, 다음에 고른 것은 다시 올릴 수 있게
+    const sent = new Set(selectedPictures.value.map((p) => p.id))
+    allPictures.value = allPictures.value.filter((p) => !sent.has(p.id))
+    selectedPictures.value = []
+    picturesUploaded = false
+    showToast('올렸어요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '올리지 못했어요. 다시 해 주세요')
+  } finally {
+    uploadingPictures.value = false
+  }
+}
 
 // 사진 관련 상태
 const allPictures = ref([])
@@ -572,6 +600,21 @@ const isParticipant = computed(() => !!currentUserId.value && (format.value === 
   ? user1.value.id === currentUserId.value || user2.value.id === currentUserId.value
   : mySide.value >= 0))
 const opponent = computed(() => (user1.value.id === currentUserId.value ? user2.value : user1.value))
+// 1:1 사람 상대면 '한 판 더'는 그 사람에게 (AI 주민·팀·여럿은 같은 규칙으로 새 경기)
+const rematchTarget = computed(() => (format.value === 'DUEL' && isParticipant.value && opponent.value?.id && !opponent.value.isBot ? opponent.value : null))
+const rematching = ref(false)
+async function rematch() {
+  rematching.value = true
+  try {
+    await playWithMeTooAPI.sendRequest(rematchTarget.value.id, game.value.rule?.id)
+    feel('tap')
+    showToast(`${rematchTarget.value.nickname}님에게 도전했어요. 받으면 메시지로 이어져요`)
+  } catch (e) {
+    showToast(e.response?.data?.message || '도전을 보내지 못했어요')
+  } finally {
+    rematching.value = false
+  }
+}
 // newChampionIdx는 서버 기준 순서라 화면 순서로 바꾼다
 const championUser = computed(() => {
   if (!championIdx.value) return null
@@ -957,8 +1000,10 @@ const handleTouchEnd = (dropIndex) => {
 }
 
 // 사진/동영상 제출
+// 평가 보내기가 사진을 올린 뒤 실패하면 다시 누를 때 같은 사진이 또 올라갔다: 올린 뒤엔 고른 것을 비운다
+let picturesUploaded = false
 const submitPictures = async () => {
-  if (selectedPictures.value.length === 0) {
+  if (selectedPictures.value.length === 0 || picturesUploaded) {
     return Promise.resolve()
   }
 
@@ -980,6 +1025,7 @@ const submitPictures = async () => {
         'Content-Type': 'multipart/form-data',
       },
     })
+    picturesUploaded = true
 
     return Promise.resolve()
   } catch (err) {
@@ -988,7 +1034,6 @@ const submitPictures = async () => {
   }
 }
 
-const goHome = () => router.push(`/profile/0?id=${gameId}`)
 
 // 친구 요청
 const friendState = ref(null)

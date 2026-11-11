@@ -144,10 +144,13 @@ onMounted(async () => {
       errorMessage.value = e.response.data?.message || '메시지를 보낼 수 없어요'
       showErrorModal.value = true
     } else {
-      showToast('메시지를 불러오지 못했어요')
+      // 방을 못 만들면 빈 '첫 대화'가 보이고 칩을 눌러도 '끊겼어요'였다: 실패를 말하고 다시 시도 (목적 판정 11/11 5번)
+      loadFailed.value = true
     }
   }
 })
+const loadFailed = ref(false)
+const reloadPage = () => window.location.reload()
 
 // 엔터로 보내기 (줄바꿈은 Shift+엔터). 한글 조합 중의 엔터는 글자 확정이라 보내지 않는다
 function onEnter(e) {
@@ -462,6 +465,11 @@ const closeErrorModal = () => {
         />
       </div>
 
+      <div v-else-if="loadFailed" class="h-full flex flex-col items-center justify-center">
+        <UiEmptyState icon="fas fa-rotate-right" title="대화를 불러오지 못했어요" description="연결이 돌아오면 다시 해 주세요">
+          <UiButton variant="secondary" @click="reloadPage">다시 시도</UiButton>
+        </UiEmptyState>
+      </div>
       <div v-else-if="!visibleMessages.length" class="h-full flex flex-col items-center justify-center">
         <UiEmptyState mascot="match" mood="smile" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="첫마디가 어려우면 하나 골라 보내 보세요" />
         <!-- 빠른 첫마디: 누르면 바로 보낸다 -->

@@ -19,7 +19,8 @@
     <main ref="listRef" class="flex-1 overflow-y-auto px-4 py-3 space-y-2" :style="{ paddingBottom: info?.writable ? '88px' : '24px' }" aria-live="polite">
       <UiListSkeleton v-if="loading" :rows="4" />
       <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
-        <UiButton :to="`/games/${gameId}`">경기로 돌아가기</UiButton>
+        <UiButton variant="secondary" @click="loadAndConnect">다시 시도</UiButton>
+        <UiButton variant="ghost" class="mt-2" :to="`/games/${gameId}`">경기로 돌아가기</UiButton>
       </UiEmptyState>
       <UiEmptyState v-else-if="!talks.length" class="pt-12" mascot="match" title="첫 말을 남겨 보세요">
         <div class="flex flex-wrap justify-center gap-2">
@@ -142,18 +143,26 @@ function onEnter(e: KeyboardEvent) {
 
 const { showToast } = useToast()
 let stop: (() => void) | null = null
-onMounted(async () => {
-  me.value = await getMyId()
+// 처음 불러오기가 실패하면 소켓을 붙이지 않아, 나중에 다시 불러와 방이 보여도 보내기가 늘 '끊겼어요'였다.
+// 불러올 때마다 방이 생겼으면 소켓을 붙인다(이미 붙어 있으면 그대로) (목적 판정 11/11 5번)
+let listening = false
+async function loadAndConnect() {
   await load()
-  if (info.value) {
+  if (!info.value) return
+  if (!listening) {
+    listening = true
     socket.onMessage((msg: Msg) => {
       messages.value.push(msg)
       if (msg.senderId !== me.value) api.post(`/api/chat-room/${info.value!.roomId}/read`).catch(() => {})
       scrollToBottom()
     })
-    socket.connect(info.value.roomId)
   }
-  stop = refreshOnChange(load)
+  socket.connect(info.value.roomId)
+}
+onMounted(async () => {
+  me.value = await getMyId()
+  await loadAndConnect()
+  stop = refreshOnChange(loadAndConnect)
 })
 // 나갈 때 콜백과 방 번호까지 지운다: 남겨 두면 끊긴 소켓이 다시 붙어 이 방의 새 글을 '읽음'으로 보냈다 (ChatView와 같은 문제)
 onBeforeUnmount(() => {

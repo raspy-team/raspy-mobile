@@ -58,7 +58,8 @@
         <div class="mt-4 flex flex-wrap justify-center gap-x-2">
           <UiButton v-if="teamChatOpen(game, myId)" variant="ghost" icon="far fa-comment" :to="`/games/${game.id}/chat`">단톡방</UiButton>
           <UiButton v-if="game.ownerId === myId || game.players?.some((p) => p.id === myId)" variant="ghost" to="/game">내 경기에서 보기</UiButton>
-          <UiButton v-else variant="ghost" to="/">다른 경기 찾기</UiButton>
+          <!-- 신청할 수 있는 경기에선 '신청'과 나란히 다른 데로 가는 길이 됐다: 찼거나 끝난 경기에만 (목적 판정 11/11 4번) -->
+          <UiButton v-else-if="game.gameStatus !== 'MATCHING' || game.joinBlockedReason" variant="ghost" to="/">다른 경기 찾기</UiButton>
         </div>
       </template>
     </main>
@@ -67,7 +68,8 @@
 
 <script setup>
 // 공유 링크로 들어온 열린 경기 하나 (/games/:gameId). 피드는 끝난 경기만 보여 줘서 예전엔 링크를 받아도 신청할 곳이 없었다
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { refreshOnChange } from '../../websocket/userChannel'
 import { placeMapLink } from '../../utils/kakaoMap'
 import ExtGamePlayers from '../../components/external/ExtGamePlayers.vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -149,8 +151,12 @@ async function cancel() {
   }
 }
 
+// 연 채로 승인·마감돼도 그대로였다: 서버의 바뀜 신호로 다시 불러온다 (폴링 없이)
+let stopWatching = null
 onMounted(async () => {
   myId.value = await getMyId()
   await load()
+  stopWatching = refreshOnChange(() => load())
 })
+onBeforeUnmount(() => stopWatching?.())
 </script>

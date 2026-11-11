@@ -12,11 +12,12 @@
         <!-- 무슨 경기를 열었는지 (예전엔 없었다, '내일 저녁'이 몇 시인지도) -->
         <p v-if="createdLine" class="t-body mt-2">{{ createdLine }}</p>
         <p class="t-caption mt-2">
-          {{ friend ? `${friend.nickname}님에게 알렸어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
+          <!-- 서버가 친구에게 알림을 보내지 않는데 '알렸어요'라고 했다. 링크로 직접 알리게 한다 (목적 판정 11/11 4번) -->
+          {{ friend ? `${friend.nickname}님에게 링크를 보내 알려 주세요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
         <!-- 아무나로 열었으면, 기다리기만 하기보다 아는 사람을 먼저 부르게 -->
-        <UiButton v-if="!friend && createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">{{ format === 'DUEL' ? '링크 보내서 상대 부르기' : '링크 보내서 같이 할 사람 부르기' }}</UiButton>
-        <UiButton block size="lg" :variant="!friend && createdId ? 'ghost' : 'primary'" :class="!friend && createdId ? 'mt-2' : 'mt-10'" to="/game">내 경기 보기</UiButton>
+        <UiButton v-if="createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">{{ friend ? `${friend.nickname}님에게 링크 보내기` : format === 'DUEL' ? '링크 보내서 상대 부르기' : '링크 보내서 같이 할 사람 부르기' }}</UiButton>
+        <UiButton block size="lg" :variant="createdId ? 'ghost' : 'primary'" :class="createdId ? 'mt-2' : 'mt-10'" @click="router.replace('/game')">내 경기 보기</UiButton>
       </section>
 
       <!-- 종목부터: 사람들은 규칙이 아니라 '토요일에 배드민턴'을 하고 싶다. 고르면 그 종목에서 가장 많이 쓰는 규칙으로 (11/3) -->
@@ -26,6 +27,11 @@
         <p v-if="sportMissing" class="t-caption mt-2">아직 {{ wantSport }} 규칙이 없어요. 비슷한 종목을 고르거나 규칙을 직접 골라 주세요.</p>
         <div v-if="!sports" class="grid grid-cols-3 gap-2 mt-6">
           <UiSkeleton v-for="n in 9" :key="n" class="h-24 rounded-xl" />
+        </div>
+        <!-- 실패하면 칸 없이 '직접 고를래요'만 남아 이유를 몰랐다 (목적 판정 11/11 4번) -->
+        <div v-else-if="sportsFailed" class="mt-6 text-center">
+          <p class="t-caption">종목을 불러오지 못했어요</p>
+          <UiButton class="mt-3" size="sm" variant="secondary" @click="retrySports">다시 시도</UiButton>
         </div>
         <div v-else class="grid grid-cols-3 gap-2 mt-6">
           <button
@@ -54,6 +60,7 @@
           <!-- 종목은 점점 늘어나고 예외도 있으니, 골라 준 규칙은 늘 바꿀 수 있게 (같은 종목 규칙부터 보여 준다) -->
           <UiButton variant="ghost" size="sm" @click="changeRule">바꾸기</UiButton>
         </UiCard>
+        <button v-if="autoPicked && pickedSport" type="button" class="t-caption underline underline-offset-2 -mt-6 mb-8 block" @click="backToSports">{{ pickedSport }} 말고 다른 종목</button>
         <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
         <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
 
@@ -63,7 +70,8 @@
           <UiChip v-for="w in WHEN" :key="w.label" :selected="when === w.label" @click="when = w.label">{{ w.label }}</UiChip>
         </div>
         <!-- 이미 정해 둔 때가 있으면 날짜·시간을 바로 (빠른 고르기 셋만으로는 '토요일 3시'를 못 적었다) -->
-        <UiInput v-if="when === EXACT" v-model="exactTime" type="datetime-local" :min="nowLocal" class="mb-8" />
+        <!-- 고르고 비워 두면 말없이 '나중에'로 열렸다: 비운 채 다른 것을 고르러 나가면 칩도 '나중에 정하기'로 되돌린다 -->
+        <UiInput v-if="when === EXACT" v-model="exactTime" type="datetime-local" :min="nowLocal" class="mb-8" @focusout="!exactTime && (when = '나중에 정하기')" />
 
         <!-- 어디서: 만나서 / 화상으로 / 다른 게임에서. 화상·다른 게임은 동네 없이 전국에 보인다 -->
         <!-- '어디서'라고 물으면 장소 칸을 찾았다: 보기는 방식(만나서·화상·다른 게임)이고 장소는 상대와 나중에 정한다 -->
@@ -184,7 +192,7 @@ const OPTIONS = [
 const options = computed(() => (format.value === 'DUEL' ? OPTIONS : OPTIONS.filter((o) => o.value === 'anyone')))
 
 const venue = ref(route.query.venue ? String(route.query.venue) : 'IN_PERSON')
-const venueDetail = ref('')
+const venueDetail = ref(route.query.venueDetail ? String(route.query.venueDetail).slice(0, 100) : '')
 
 const formats = computed(() => allowedFormats(rule.value))
 const dangerous = computed(() => (rule.value?.category?.traits || []).some((t) => t.key === 'DANGER'))
@@ -247,7 +255,12 @@ watch(rule, (r) => {
 const createdLine = ref('')
 // 규칙 바꾸기: 고른 때·방식·인원을 실어 보내고, 규칙을 고르면 그대로 돌아온다 (예전엔 규칙 상세 → '경기 열기' → 처음부터 다시)
 function changeRule() {
-  const keep = { when: when.value, venue: venue.value, format: format.value, ...(format.value !== 'DUEL' ? { size: String(size.value) } : {}) }
+  const keep = {
+    when: when.value, venue: venue.value, format: format.value,
+    ...(format.value !== 'DUEL' ? { size: String(size.value) } : {}),
+    ...(when.value === EXACT && exactTime.value ? { exact: exactTime.value } : {}),
+    ...(isRemote(venue.value) && venueDetail.value ? { venueDetail: venueDetail.value } : {}),
+  }
   router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked.value && pickedSport.value ? { q: pickedSport.value } : {}), ...keep } })
 }
 const sports = ref(null)
@@ -283,7 +296,21 @@ async function loadSports() {
     }
   } catch {
     sports.value = []
+    sportsFailed.value = true
   }
+}
+const sportsFailed = ref(false)
+function retrySports() {
+  sportsFailed.value = false
+  sports.value = null
+  loadSports()
+}
+// 종목을 다시 고르려면 '바꾸기'로 규칙 목록까지 가야 했다: 자동으로 고른 규칙이면 종목 고르기로 돌아간다
+function backToSports() {
+  ruleId.value = 0
+  rule.value = null
+  autoPicked.value = false
+  pickedSport.value = ''
 }
 function pickSport(s) {
   ruleId.value = s.top.id

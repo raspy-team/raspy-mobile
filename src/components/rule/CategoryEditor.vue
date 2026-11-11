@@ -74,6 +74,11 @@
 
     <UiInput v-model="model.sport" label="바탕이 되는 종목" optional :maxlength="40" placeholder="예: 탁구 (없으면 비워 두세요)" />
   </div>
+  <!-- 선택지를 못 받으면 회색 상자로 멈추고 '규칙 만들기'는 빠진 분류만 말했다: 다 쓰고도 이유를 몰랐다 (목적 판정 6) -->
+  <div v-else-if="failed" class="rounded-xl bg-surface-2 p-4">
+    <p class="t-body">분류를 불러오지 못했어요</p>
+    <UiButton variant="secondary" size="sm" class="mt-3" @click="loadOptions">다시 시도</UiButton>
+  </div>
   <UiSkeleton v-else class="h-64 w-full" />
 </template>
 
@@ -84,7 +89,7 @@ import { ref, onMounted } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import { FACE_HELP, type CategoryInput } from '@/utils/category'
-import { UiChip, UiField, UiInput, UiSkeleton } from '../ui'
+import { UiButton, UiChip, UiField, UiInput, UiSkeleton } from '../ui'
 
 const model = defineModel<CategoryInput>({ required: true })
 const options = ref<components['schemas']['CategoryOptions'] | null>(null)
@@ -95,7 +100,14 @@ function toggle(key: ListKey, value: string) {
   model.value[key] = list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 }
 
-onMounted(async () => {
-  options.value = (await GET('/api/rules/category-options')).data
-})
+const failed = ref(false)
+async function loadOptions() {
+  failed.value = false
+  try {
+    options.value = (await GET('/api/rules/category-options')).data
+  } catch {
+    failed.value = true
+  }
+}
+onMounted(loadOptions)
 </script>

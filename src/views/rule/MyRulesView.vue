@@ -17,6 +17,11 @@
         </div>
       </div>
 
+      <!-- 실패를 '만든 규칙이 없어요'로 보이면 내 규칙이 사라진 줄 안다 (목적 판정 6) -->
+      <UiEmptyState v-else-if="loadFailed" class="pt-16" icon="fas fa-wifi" title="규칙을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
+      </UiEmptyState>
+
       <UiEmptyState v-else-if="!rules.length" class="pt-16" mascot="match" title="아직 만든 규칙이 없어요" description="우리끼리 하던 놀이도 규칙이 되면 정식 종목이에요">
         <UiButton to="/rules/create">규칙 만들기</UiButton>
       </UiEmptyState>
@@ -59,12 +64,14 @@ const { showToast } = useToast()
 const rules = ref([])
 const loading = ref(true)
 const cancelingId = ref(null)
+const loadFailed = ref(false)
 
 async function load() {
+  loadFailed.value = false
   try {
     rules.value = (await api.get('/api/rules/my-rules')).data
   } catch {
-    showToast('규칙을 불러오지 못했어요. 잠시 뒤 다시 해 주세요')
+    loadFailed.value = true
   } finally {
     loading.value = false
   }

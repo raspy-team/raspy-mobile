@@ -32,7 +32,8 @@
           <p v-else class="t-title mt-8">폰을 흔드세요!</p>
           <!-- 아이폰은 센서를 쓰려면 한 번 눌러 허락을 받아야 한다 -->
           <UiButton v-if="sensor === 'ask'" block size="lg" class="mt-6" @click="askSensor">센서 켜기</UiButton>
-          <UiButton v-else-if="sensor === 'none'" block size="lg" class="mt-6" :disabled="counting" @click="sendShake">흔들 수 없으면 눌러서</UiButton>
+          <!-- 센서를 허락했는데 값이 오지 않는 폰(일부 안드로이드 웹뷰)은 흔들어도 아무 일이 없었다: 시작 2초 동안 흔들림이 없으면 누르기 버튼을 띄운다 -->
+          <UiButton v-else-if="sensor === 'none' || (!counting && !motionSeen && sinceStart > 2000)" block size="lg" class="mt-6" :disabled="counting" @click="sendShake">흔들 수 없으면 눌러서</UiButton>
         </div>
         <UiButton block variant="ghost" class="mt-6" @click="leave">그만두기</UiButton>
       </template>
@@ -207,9 +208,12 @@ function sendShake() {
   if (!client?.connected || !state.value || counting.value) return
   client.publish({ destination: `/app/battle/${state.value.gameId}`, body: JSON.stringify({ x: '1' }) })
 }
+const motionSeen = ref(false)
+const sinceStart = computed(() => now.value + offset.value - startsAt.value)
 function onMotion(e: DeviceMotionEvent) {
   const a = e.accelerationIncludingGravity
   if (!a || a.x == null || a.y == null || a.z == null) return
+  motionSeen.value = true
   // 중력(9.8)을 빼고 크게 흔들렸을 때만, 120ms에 한 번까지
   const force = Math.abs(Math.hypot(a.x, a.y, a.z) - 9.8)
   const t = Date.now()

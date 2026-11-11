@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-dvh bg-canvas">
     <UiTopBar back>
-      <template #right>
+      <!-- 규칙을 못 불러왔을 때는 공유·더보기를 숨긴다: 눌러도 아무 일이 없거나 '이미 신고한 규칙'이라는 거짓 문구가 떴다 (목적 판정 6) -->
+      <template v-if="rule" #right>
         <UiIconButton icon="fas fa-arrow-up-from-bracket" label="공유" @click="share" />
         <UiIconButton icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
       </template>
@@ -12,6 +13,13 @@
       <UiSkeleton class="h-7 w-2/3" />
       <UiSkeleton class="h-4 w-1/3" />
       <UiSkeleton class="h-20 w-full" />
+    </main>
+
+    <!-- 연결 오류를 '지워졌거나 주소가 잘못됐어요'로 보이면 친구가 보낸 링크가 지워진 줄 안다 (목적 판정 6) -->
+    <main v-else-if="!rule && loadFailed" class="max-w-2xl mx-auto px-4 pt-10">
+      <UiEmptyState icon="fas fa-wifi" title="규칙을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
+      </UiEmptyState>
     </main>
 
     <main v-else-if="!rule" class="max-w-2xl mx-auto px-4 pt-10">
@@ -92,17 +100,10 @@
         <UiList v-if="baselines.length">
           <BaselineRow v-for="b in baselines" :key="b.label" :line="b" />
         </UiList>
-        <UiButton block variant="secondary" class="mt-4" :to="`/play/${rule.appGameKey}`">한 판 하기</UiButton>
+        <!-- '한 판 하기'는 아래 고정 줄 하나만: 한 화면에 같은 버튼이 둘이었다 (목적 판정 6) -->
       </section>
 
-      <div v-if="!isMine" class="mt-10 flex items-center gap-5">
-        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openSuggest">
-          <UiIcon name="far fa-comment" aria-hidden="true" /> 수정 제안하기
-        </button>
-        <button type="button" class="flex items-center gap-2 t-caption underline underline-offset-2 py-3 -my-3" @click="openReport">
-          <UiIcon name="far fa-flag" aria-hidden="true" /> 이 규칙 신고
-        </button>
-      </div>
+      <!-- 수정 제안·신고는 더보기(…) 안에만 둔다. 규칙을 보러 온 사람의 눈 둘 곳만 늘렸다 (목적 판정 6) -->
     </main>
 
     <!-- 아래 고정: 요약 + 경기 열기 -->
@@ -120,7 +121,6 @@
     <!-- 더보기 -->
     <UiSheet v-model="menuOpen">
       <UiList>
-        <UiListItem icon="fas fa-arrow-up-from-bracket" title="공유" subtitle="링크를 복사해요" @click="share" />
         <UiListItem v-if="isMine" icon="fas fa-pen" title="수정 요청" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
         <UiListItem icon="fas fa-ranking-star" title="순위 보기" @click="goRanking" />
         <UiListItem v-if="!isMine" icon="far fa-comment" title="수정 제안" subtitle="만든 사람에게 메시지로 보내요" @click="openSuggest" />
@@ -243,14 +243,18 @@ async function submitReport() {
     const { data: done } = await api.post('/api/reports', { targetType: 'RULE', targetId: rule.value.id, reason })
     showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
   } catch (e) {
-    showToast(e.response?.data?.message || '이미 신고한 규칙이에요')
+    // 연결이 끊겨도 '이미 신고했다'고 해 신고가 된 줄 알았다 (목적 판정 6)
+    showToast(e.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
   } finally {
     reporting.value = false
     reportOpen.value = false
   }
 }
 
-onMounted(async () => {
+const loadFailed = ref(false)
+async function load() {
+  loading.value = true
+  loadFailed.value = false
   const id = route.params.ruleId
   const [ruleRes, meRes, rankRes] = await Promise.allSettled([
     api.get(`/api/rules/${id}`),
@@ -258,6 +262,8 @@ onMounted(async () => {
     api.get(`/api/rules/${id}/rankings`),
   ])
   if (ruleRes.status === 'fulfilled') rule.value = ruleRes.value.data
+  // 서버가 답을 못 준 것(연결·서버 오류)과 없는 규칙을 가른다
+  else loadFailed.value = !ruleRes.reason?.response || ruleRes.reason.response.status >= 500
   if (meRes.status === 'fulfilled') myId.value = meRes.value
   if (rankRes.status === 'fulfilled') {
     top.value = (rankRes.value.data.rankings || []).slice(0, 3)
@@ -267,5 +273,6 @@ onMounted(async () => {
     aiGames.value = rankRes.value.data.aiGames || 0
   }
   loading.value = false
-})
+}
+onMounted(load)
 </script>

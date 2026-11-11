@@ -4,7 +4,8 @@
     <UiTopBar :title="picking ? '어떤 규칙으로 할까요?' : '규칙'" back="/">
       <template #right>
         <UiButton v-if="!picking" variant="ghost" size="sm" to="/rules/my-rules">내 규칙</UiButton>
-        <UiIconButton icon="fas fa-plus" label="규칙 만들기" @click="router.push('/rules/create')" />
+        <!-- 경기를 만들다 고를 규칙이 없어 만들러 가면, 넘겨 둔 때·장소·방식을 들고 가서 다 만들면 그 경기 만들기로 돌아온다 (목적 판정 6) -->
+        <UiIconButton icon="fas fa-plus" label="규칙 만들기" @click="router.push(createTo)" />
       </template>
     </UiTopBar>
 
@@ -41,8 +42,8 @@
         </UiChip>
       </div>
 
-      <!-- 잘하려면: 능력 칩 (가로로 넘긴다) -->
-      <div v-if="options" class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-2 pb-3 overflow-x-auto no-scrollbar" role="group" aria-label="잘하려면">
+      <!-- 잘하려면: 능력 칩 (가로로 넘긴다). 경기에 쓸 규칙을 고르는 중이면 숨긴다: 종목·인원이 이미 정해져 능력으로 찾지 않는다 (목적 판정 6) -->
+      <div v-if="options && !picking" class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-2 pb-3 overflow-x-auto no-scrollbar" role="group" aria-label="잘하려면">
         <span class="t-micro flex-shrink-0">잘하려면</span>
         <UiChip
           v-for="a in options.abilities"
@@ -103,6 +104,11 @@
         </div>
       </div>
 
+      <!-- 실패를 '맞는 규칙이 없어요'로 보이면 이미 있는 규칙을 또 만들게 된다 (목적 판정 6) -->
+      <UiEmptyState v-else-if="loadFailed" class="pt-16" icon="fas fa-wifi" title="규칙을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+        <UiButton variant="secondary" @click="load">다시 시도</UiButton>
+      </UiEmptyState>
+
       <UiEmptyState
         v-else-if="!rules.length"
         class="pt-16"
@@ -112,7 +118,7 @@
       >
         <div class="flex gap-2">
           <UiButton v-if="filtered" variant="secondary" @click="clearFilters">조건 지우기</UiButton>
-          <UiButton to="/rules/create">규칙 만들기</UiButton>
+          <UiButton :to="createTo">규칙 만들기</UiButton>
         </div>
       </UiEmptyState>
 
@@ -143,10 +149,9 @@ import RuleListCard from '../components/rule/RuleListCard.vue'
 import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
 
 // 순위는 별점(평가가 적으면 전체 평균 쪽으로 당김)과 경기 수를 합친 것. 서버 RuleRanking
+// 정렬은 둘만: 고를 것을 찾는 사람에게 기준 넷은 많고, '순위순'이 경기 수와 별점을 이미 담는다 (목적 판정 6)
 const SORTS = [
   { value: 'rank', label: '순위순' },
-  { value: 'plays', label: '경기순' },
-  { value: 'rating', label: '별점순' },
   { value: 'recent', label: '최신순' },
 ]
 const KINDS = [
@@ -174,16 +179,21 @@ const route = useRoute()
 const router = useRouter()
 const picking = computed(() => !!route.query.fromGameCreate)
 const CARRY = ['when', 'venue', 'format', 'size']
+// 규칙 만들기로 갈 때: 고르는 중이면 넘겨받은 값과 '고르는 중' 표시를 그대로
+const createTo = computed(() => (picking.value
+  ? { path: '/rules/create', query: { fromGameCreate: '1', ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) } }
+  : '/rules/create'))
 const pickTo = (rule) => ({ path: '/create-game', query: { ruleId: String(rule.id), ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) } })
 
 const options = ref(null)
 const rules = ref([])
 const loading = ref(true)
+const loadFailed = ref(false)
 const sheet = ref('')
 
 const ability = computed(() => route.query.ability || '')
-// 예전 주소의 popular는 경기순
-const sort = computed(() => (route.query.sort === 'popular' ? 'plays' : route.query.sort) || 'rank')
+// 예전 주소의 경기순·별점순·popular는 순위순으로 (정렬을 둘로 줄였다)
+const sort = computed(() => (route.query.sort === 'recent' ? 'recent' : 'rank'))
 const kind = computed(() => route.query.kind || 'ALL')
 const kinds = computed(() => (picking.value ? PICK_KINDS : KINDS))
 const q = ref(route.query.q || '')
@@ -222,6 +232,7 @@ let seq = 0
 async function load() {
   const mine = ++seq
   loading.value = true
+  loadFailed.value = false
   try {
     // 둘러보기는 앱 게임도 보여 준다. 경기를 열 규칙을 고를 때만 뺀다
     const params = { sort: sort.value, withApp: !picking.value, kind: kind.value }
@@ -230,7 +241,10 @@ async function load() {
     const { data } = await api.get('/api/rules/list', { params })
     if (mine === seq) rules.value = data
   } catch {
-    if (mine === seq) rules.value = []
+    if (mine === seq) {
+      rules.value = []
+      loadFailed.value = true
+    }
   } finally {
     if (mine === seq) loading.value = false
   }

@@ -31,7 +31,8 @@
       <!-- 서버가 이유를 말했으면(차단·없음·탈퇴) 그 말만, 연결 오류면 다시 불러오기 -->
       <UiEmptyState icon="fas fa-user-slash" :title="loadError" :description="loadFailed ? '잠시 뒤 다시 해 주세요' : ''">
         <UiButton v-if="loadFailed" variant="secondary" @click="reload">다시 시도</UiButton>
-        <UiButton v-else variant="secondary" @click="router.back()">돌아가기</UiButton>
+        <!-- 링크로 바로 열어 돌아갈 기록이 없으면 홈으로 (목적 판정 6: 눌러도 아무 일이 없었다) -->
+        <UiButton v-else variant="secondary" @click="goBack">돌아가기</UiButton>
       </UiEmptyState>
     </main>
 
@@ -124,13 +125,14 @@
         </div>
       </section>
 
-      <!-- 많이 한 능력 (규칙의 '잘하려면'을 판 수로 센다). 누르면 그 능력 게임 둘러보기 -->
+      <!-- 많이 한 능력 (규칙의 '잘하려면'을 판 수로 센다). 그 사람을 보여 주는 글이라 누르지 않는다:
+           남의 '순발력'을 보다 그 능력 규칙 목록으로 갈 사람이 없다 (목적 판정 6, 경로 제거) -->
       <section v-if="abilities.length" class="mt-10">
         <h2 class="t-heading mb-3">많이 쓴 능력</h2>
         <div class="flex flex-wrap gap-2">
-          <UiChip v-for="a in abilities" :key="a.key" @click="router.push({ path: '/rules', query: { ability: a.key } })">
-            {{ a.label }}<span class="text-fg-subtle">{{ a.games }}판</span>
-          </UiChip>
+          <span v-for="a in abilities" :key="a.key" class="t-label rounded-full bg-surface-2 px-3 py-1.5">
+            {{ a.label }}<span class="text-fg-subtle ml-1">{{ a.games }}판</span>
+          </span>
         </div>
       </section>
 
@@ -138,7 +140,7 @@
       <section v-if="gameTiers.length" class="mt-10">
         <h2 class="t-heading mb-3">게임 티어</h2>
         <div class="flex flex-wrap gap-2">
-          <UiChip v-for="t in gameTiers" :key="t.game" @click="router.push({ path: '/rules', query: { kind: 'POPULAR', q: t.label } })">
+          <UiChip v-for="t in gameTiers" :key="t.game" @click="openTierGame(t)">
             {{ t.label }}<span class="text-fg-subtle">{{ t.tier }}</span>
           </UiChip>
         </div>
@@ -245,6 +247,9 @@
           <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
+      <UiEmptyState v-else-if="friendsFailed" icon="fas fa-wifi" title="친구 목록을 불러오지 못했어요">
+        <UiButton variant="secondary" @click="openFriends">다시 시도</UiButton>
+      </UiEmptyState>
       <UiEmptyState v-else mascot="match" title="아직 친구가 없어요" />
     </UiSheet>
 
@@ -381,7 +386,8 @@ async function block() {
   try {
     await api.post(`/api/block/${user.value.id}`)
     showToast('차단했어요')
-    router.replace('/profile/0')
+    // 차단하고 나면 보던 곳(소식·채팅)으로 돌아간다. 예전엔 내 프로필이 갑자기 떴다 (목적 판정 6)
+    goBack()
   } catch (e) {
     showToast(e.response?.data?.message || '차단하지 못했어요')
   }
@@ -408,13 +414,33 @@ async function submitReport() {
   }
 }
 
+// 뒤로 갈 앱 안 기록이 없으면(링크로 바로 열었으면) 홈으로
+function goBack() {
+  if (window.history.state?.back) router.back()
+  else router.replace('/')
+}
+
+// 'LoL 골드'를 누른 사람은 "이 게임으로 붙자": 그 게임 규칙이 하나면 그 규칙(경기 만들기가 있는 곳)으로 바로,
+// 여럿이면 그 게임 규칙 목록으로 (목적 판정 6)
+async function openTierGame(t) {
+  try {
+    const { data } = await api.get('/api/rules/list', { params: { kind: 'POPULAR', search: t.label, withApp: false } })
+    if (Array.isArray(data) && data.length === 1) return router.push(`/rules/${data[0].id}`)
+  } catch { /* 목록으로 */ }
+  router.push({ path: '/rules', query: { kind: 'POPULAR', q: t.label } })
+}
+
+const friendsFailed = ref(false)
 async function openFriends() {
   friendsOpen.value = true
   friendsLoading.value = true
+  friendsFailed.value = false
   try {
     friends.value = (await api.get('/api/friends/my', { params: { userId: user.value.id } })).data
   } catch {
+    // 실패를 '친구 없음'으로 보이면 친구가 사라진 줄 안다 (목적 판정 6)
     friends.value = []
+    friendsFailed.value = true
   } finally {
     friendsLoading.value = false
   }

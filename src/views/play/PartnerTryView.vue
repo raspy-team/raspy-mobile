@@ -11,8 +11,9 @@
           <p class="t-body mt-3">{{ done.dongName }} · {{ doneSportLabel }}</p>
           <p v-if="doneTimes" class="t-caption mt-1">{{ doneTimes }}</p>
           <!-- 다시 온 사람에게는 그때의 숫자가 지금과 다를 수 있어 빼고 보인다 -->
-          <p v-if="!restored" class="t-caption mt-2">
-            {{ done.waiting > 0 ? `이 동네에서 ${done.waiting}명이 먼저 기다리고 있어요` : '이 동네 첫 등록이에요' }}
+          <!-- '첫 등록'은 "아무도 없다"로 읽혀 기운을 뺐다: 먼저 기다리는 사람이 있을 때만 말한다 -->
+          <p v-if="!restored && done.waiting > 0" class="t-caption mt-2">
+            {{ `이 동네에서 ${done.waiting}명이 먼저 기다리고 있어요` }}
           </p>
         </UiCard>
         <!-- 이미 로그인한 사람에게 '시작해 주세요'는 맞지 않는다: 등록을 바로 내 계정에 붙이고 홈으로 -->
@@ -27,7 +28,7 @@
           <UiButton block size="lg" class="mt-4" @click="join">1초 만에 시작하기</UiButton>
         </UiCard>
         <!-- 등록하고 나면 가입 말고 할 것이 없었다: 기다리는 동안 가입 없이 할 수 있는 게임 하나 -->
-        <UiButton block variant="secondary" class="mt-3" to="/try/nunchi">기다리는 동안 눈치 한 판</UiButton>
+        <UiButton block variant="secondary" class="mt-3" to="/try/improv">기다리는 동안 임기응변 등급</UiButton>
         <UiButton v-if="restored" block variant="ghost" class="mt-1" @click="registerAgain">다른 종목도 등록하기</UiButton>
       </template>
 

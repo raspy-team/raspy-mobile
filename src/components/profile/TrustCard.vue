@@ -52,11 +52,13 @@
 import { computed, ref, watch } from 'vue'
 import type { components } from '@/api/schema'
 import { GET, POST, DELETE } from '@/api/client'
+import { useToast } from '@/composables/useToast'
 import { UiBadge, UiButton, UiIcon, UiList, UiListItem, UiSheet } from '../ui'
 
 type Trust = components['schemas']['TrustSummary']
 const props = defineProps<{ trust: Trust; userId?: number; isMe?: boolean }>()
 
+const { showToast } = useToast()
 const open = ref(false)
 // 보증 (안전·신뢰 E): 남의 프로필에서 시트를 열 때만 묻는다
 const vouch = ref<components['schemas']['VouchState'] | null>(null)
@@ -71,6 +73,9 @@ async function toggleVouch() {
   try {
     const path = { userId: props.userId }
     vouch.value = (vouch.value.mine ? await DELETE('/api/vouch/{userId}', { path }) : await POST('/api/vouch/{userId}', { path })).data
+  } catch (e) {
+    // 실패해도 말이 없어 됐는지 몰랐다 (목적 판정 6)
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '반영하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     vouching.value = false
   }

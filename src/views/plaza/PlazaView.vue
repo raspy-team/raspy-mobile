@@ -20,7 +20,6 @@
         <button v-if="phase === 'plaza'" type="button" class="shrink-0 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur t-caption font-semibold text-fg flex items-center gap-1" aria-label="지금 여기 있는 사람" @click="peopleOpen = true">
           <UiIcon name="users" /> {{ peopleHere.filter((p) => p.restingMinutes == null).length }}
         </button>
-        <UiIconButton icon="list" label="게임 목록으로 보기" class="bg-canvas/80 backdrop-blur" @click="router.push('/games')" />
         <UiIconButton icon="shirt" label="꾸미기" class="bg-canvas/80 backdrop-blur" @click="router.push('/plaza/avatar')" />
       </div>
 
@@ -99,7 +98,12 @@
 
     <!-- 게임 고르기 -->
     <UiSheet v-model="pickerOpen" title="어떤 게임으로 할까요?">
-      <UiSkeleton v-if="!games.length" class="h-40 w-full" />
+      <!-- 불러오기 실패면 회색 칸이 끝나지 않았다 (목적 판정 11/11 3번) -->
+      <div v-if="gamesError" class="py-6 text-center">
+        <p class="t-caption">게임을 불러오지 못했어요</p>
+        <UiButton class="mt-3" size="sm" variant="secondary" @click="loadGames">다시 시도</UiButton>
+      </div>
+      <UiSkeleton v-else-if="!games.length" class="h-40 w-full" />
       <div class="grid grid-cols-2 gap-2">
         <button
           v-for="g in games"
@@ -177,14 +181,9 @@
     <!-- 실제 장소 팻말 -->
     <UiSheet v-model="placeOpen" :title="place?.name ?? ''">
       <p v-if="place" class="t-body text-fg">{{ PLACE_KIND[place.kind] ?? '장소' }}<template v-if="place.kind !== 'city' && place.kind !== 'gu'"> · {{ place.dir }}쪽 {{ place.distanceM < 1000 ? `${place.distanceM}m` : `${(place.distanceM / 1000).toFixed(1)}km` }}</template></p>
-      <template #footer>
-        <div class="flex gap-2">
-          <UiButton v-if="place?.target" class="flex-1" @click="placeOpen = false; goRoom(place.target!)">이 광장으로 가기</UiButton>
-          <template v-else>
-            <UiButton class="flex-1" variant="secondary" @click="placeOpen = false; openBoard()">모집 중인 경기</UiButton>
-            <UiButton v-if="!['dong', 'gu', 'city'].includes(place?.kind ?? '')" class="flex-1" @click="router.push('/create-game')">여기서 경기 만들기</UiButton>
-          </template>
-        </div>
+      <!-- '모집 중인 경기'(장소와 상관없는 전국 목록)와 '여기서 경기 만들기'(장소를 넘기지 못해 처음부터 다시 고름)는 뺐다 (목적 판정 11/11 3번) -->
+      <template v-if="place?.target" #footer>
+        <UiButton block @click="placeOpen = false; goRoom(place.target!)">이 광장으로 가기</UiButton>
       </template>
     </UiSheet>
 
@@ -206,6 +205,7 @@ import type { components } from '@/api/schema'
 import { API_BASE_URL } from '@/config/server'
 import { subscribeTopic, publish, onUserEvent, openUserChannel } from '@/websocket/userChannel'
 import { useToast } from '@/composables/useToast'
+import { confirmDialog } from '@/composables/useConfirm'
 import AvatarEditor from '../../components/plaza/AvatarEditor.vue'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import ReportSheet from '../../components/safety/ReportSheet.vue'
@@ -370,9 +370,17 @@ async function addFriend(id: number) {
   }
 }
 
+const gamesError = ref(false)
 async function loadGames() {
   if (games.value.length) return
-  const list = (await GET('/api/app-games')).data
+  gamesError.value = false
+  let list
+  try {
+    list = (await GET('/api/app-games')).data
+  } catch {
+    gamesError.value = true
+    return
+  }
   games.value = list
     .filter((g) => g.playMode === 'REALTIME' && g.available && !g.battle && !g.shared)
     .sort((a, b) => b.playCount - a.playCount)
@@ -406,7 +414,10 @@ function tapObject(o: MapObj) {
 /** 문·도시 팻말: kr·city·dong을 내 실제 방으로 바꿔 들어간다 */
 function goRoom(target: string) {
   const r = target.startsWith('city-') ? rooms.value.find((x) => x.id === target) : rooms.value.find((x) => x.kind === target)
-  if (!r) return showToast(target === 'dong' || target === 'city' ? '동네를 인증하면 열려요. 설정 > 동네 인증' : '내 동네가 있는 도시 광장만 들어갈 수 있어요')
+  // 막힌 이유만 말하고 갈 길이 없었다: 누르면 동네 인증으로 가서 인증 뒤 광장으로 돌아온다
+  if (!r) return target === 'dong' || target === 'city'
+    ? showToast('동네를 인증하면 열려요', `/neighborhood?back=${encodeURIComponent('/plaza')}`)
+    : showToast('내 동네가 있는 도시 광장만 들어갈 수 있어요')
   switchRoom(r)
 }
 
@@ -471,6 +482,8 @@ function challenge(key: string) {
 }
 
 async function block(id: number) {
+  // 확인 없이 바로 차단돼 잘못 누르면 되돌릴 길이 없었다. 프로필의 차단과 같게 한 번 묻는다
+  if (!(await confirmDialog({ title: `${card.value?.name ?? '이 사람'}님을 차단할까요?`, message: '서로 메시지·신청·도전을 할 수 없고, 광장에서도 보이지 않아요', confirmText: '차단', danger: true }))) return
   try {
     await POST('/api/block/{targetId}', { path: { targetId: id } })
   } catch {

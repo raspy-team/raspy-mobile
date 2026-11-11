@@ -10,6 +10,8 @@ const state = reactive({
   friendRequests: [],
   dmUnread: 0,
   loaded: false,
+  // 셋 다 실패했다: '새 알림이 없어요'로 보이면 푸시를 보고 들어온 사람이 '없다'고 믿는다 (목적 판정 6)
+  failed: false,
 })
 
 let inflight = null
@@ -28,6 +30,7 @@ export function refreshInbox() {
     if (n.status === 'fulfilled') state.notifications = n.value.data
     if (f.status === 'fulfilled') state.friendRequests = f.value.data
     if (d.status === 'fulfilled') state.dmUnread = d.value.data.count || 0
+    state.failed = [n, f, d].every((r) => r.status === 'rejected')
     state.loaded = true
   }).finally(() => (inflight = null))
   return inflight
@@ -50,6 +53,7 @@ export function stopInbox() {
   state.friendRequests = []
   state.dmUnread = 0
   state.loaded = false
+  state.failed = false
 }
 
 export async function markNotificationRead(n) {

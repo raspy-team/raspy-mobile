@@ -24,12 +24,15 @@ import { useRouter } from 'vue-router'
 
 const props = defineProps({
   title: { type: String, default: '' },
-  back: { type: [Boolean, String], default: false }, // true면 이전 화면, 문자열이면 그 주소로
+  back: { type: [Boolean, String], default: false }, // true면 이전 화면. 문자열은 앱 안에서 온 곳이 없을 때(링크로 바로 열었을 때) 갈 주소
 })
 const router = useRouter()
+// 뒤로는 늘 온 곳으로 (목적 판정 11/11 8번). 예전엔 주소를 정해 둔 25곳이 그 주소로 '앞으로' 가서
+// 규칙 고르다 홈으로, 차단 뒤 내 프로필로, 교류전에서 동호회 목록으로 떨어졌다.
+// 앱 안에서 온 기록은 vue-router가 history.state.back에 적어 둔다(시트가 쌓는 칸도 이 값을 이어받는다).
+// history.length는 앞으로 칸까지 세서 공유 링크로 연 첫 화면에서 눌러도 아무 일이 없었다
 function goBack() {
-  if (typeof props.back === 'string') router.push(props.back)
-  else if (window.history.length > 1) router.back()
-  else router.push('/')
+  if (window.history.state?.back) router.back()
+  else router.push(typeof props.back === 'string' ? props.back : '/')
 }
 </script>

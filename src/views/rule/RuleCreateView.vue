@@ -11,8 +11,9 @@
         :description="editId ? '관리자가 확인하면 바뀌어요. 내 규칙에서 상태를 볼 수 있어요' : [done.ruleTitle, ...(done.category?.abilities ?? []).map((a) => a.label)].join(' · ')"
       >
         <div class="w-full space-y-2">
-          <UiButton v-if="!editId" block size="lg" :to="`/create-game?ruleId=${done.id}`">이 규칙으로 경기 만들기</UiButton>
-          <UiButton block :variant="editId ? 'primary' : 'ghost'" :to="editId ? '/rules/my-rules' : `/rules/${done.id}`">
+          <!-- 끝난 만들기 화면은 기록에서 바꿔 끼운다(replace): 다음 화면에서 뒤로를 누르면 빈 만들기 칸으로 돌아왔다 -->
+          <UiButton v-if="!editId" block size="lg" @click="router.replace(gameTo)">이 규칙으로 경기 만들기</UiButton>
+          <UiButton block :variant="editId ? 'primary' : 'ghost'" @click="router.replace(editId ? '/rules/my-rules' : `/rules/${done.id}`)">
             {{ editId ? '내 규칙 보기' : '규칙 보기' }}
           </UiButton>
         </div>
@@ -32,7 +33,13 @@
           <p v-if="aiAvailable" class="t-caption mt-1">틀린 곳만 고치면 돼요</p>
         </div>
         <UiInput v-model="form.ruleTitle" label="규칙 이름" :maxlength="20" placeholder="예: 탁구 11점 3판 2선승" />
-        <CategoryEditor v-model="category" />
+        <!-- AI가 다 채웠으면 아홉 칸을 펼치지 않고 한 줄로. 만드는 사람의 목적은 규칙을 올리는 것이고 "틀린 곳만 고치면" 된다 (목적 판정 6) -->
+        <UiCard v-if="aiSummary && !editingCategory">
+          <p class="t-micro">분류</p>
+          <p class="t-body mt-1 break-keep">{{ aiSummary }}</p>
+          <UiButton variant="secondary" size="sm" class="mt-3" @click="editingCategory = true">고치기</UiButton>
+        </UiCard>
+        <CategoryEditor v-else v-model="category" />
         <p v-if="error" class="text-sm text-danger" role="alert">{{ error }}</p>
         <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
           <div class="max-w-xl mx-auto px-4 py-3 flex gap-2">
@@ -109,7 +116,9 @@
 // 규칙 만들기: ① 경기를 설명한다 → ② AI가 이름·분류를 채워 보여 주고 만든 사람이 고친다 → 저장.
 // 올릴 수 없는 규칙(외모·동의 없는 대상·실력 없음)은 ②에서 이유를 보여 준다. 서버도 저장할 때 다시 거른다.
 // 수정(editId)은 한 화면: 기존 값을 채워 두고 /api/rules/edit-requests로 보낸다 (관리자 승인 때 다시 분류)
-import { ref, reactive, onMounted, defineProps } from 'vue'
+import { ref, reactive, computed, onMounted, defineProps } from 'vue'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { confirmDialog } from '../../composables/useConfirm'
 import api from '../../api/api'
 import { POST } from '@/api/client'
 import CategoryEditor from '../../components/rule/CategoryEditor.vue'
@@ -147,6 +156,17 @@ const aiAvailable = ref(true)
 const submitting = ref(false)
 const loading = ref(!!props.editId)
 const done = ref(null)
+const route = useRoute()
+const router = useRouter()
+// AI가 채운 분류를 한 줄로 (빠진 칸이 있으면 펼친다)
+const aiSummary = ref('')
+const editingCategory = ref(false)
+// 경기 만들기에서 규칙을 고르다 왔으면 넘겨 둔 때·장소·방식·인원을 그대로 들고 돌아간다 (목적 판정 6)
+const CARRY = ['when', 'venue', 'format', 'size']
+const gameTo = computed(() => ({
+  path: '/create-game',
+  query: { ruleId: String(done.value?.id ?? ''), ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) },
+}))
 
 function validate() {
   if (props.editId && !form.ruleTitle.trim()) return '규칙 이름을 적어 주세요'
@@ -180,6 +200,11 @@ async function next() {
     blocked.value = data.blocked ?? ''
     if (data.title && !form.ruleTitle.trim()) form.ruleTitle = data.title
     category.value = data.category ? toInput(data.category) : emptyCategory()
+    const c = data.category
+    editingCategory.value = false
+    aiSummary.value = data.aiAvailable && c && !missing(category.value)
+      ? [c.face?.label, c.abilities?.map((a) => a.label).join('·'), c.places?.map((x) => x.label).join('·'), c.parties?.map((x) => x.label).join('·'), c.length?.label].filter(Boolean).join(' · ')
+      : ''
     step.value = 'confirm'
     window.scrollTo(0, 0)
   } catch (e) {
@@ -191,7 +216,10 @@ async function next() {
 
 async function submit() {
   error.value = props.editId ? validate() : !form.ruleTitle.trim() ? '규칙 이름을 적어 주세요' : missing(category.value)
-  if (error.value) return
+  if (error.value) {
+    if (!props.editId && form.ruleTitle.trim()) editingCategory.value = true // 빠진 분류는 펼쳐서 보이게
+    return
+  }
   submitting.value = true
   try {
     if (props.editId) {
@@ -207,6 +235,20 @@ async function submit() {
     submitting.value = false
   }
 }
+
+// 뒤로(위 버튼·폰 뒤로 모두): ② 확인 단계면 화면을 떠나지 않고 ① 설명으로. ①에 쓴 글이 있으면 나갈지 묻는다.
+// 예전엔 ②에서 뒤로를 누르면 쓴 설명이 경고 없이 다 사라졌다 (목적 판정 6)
+onBeforeRouteLeave(async () => {
+  if (done.value || submitting.value) return true
+  if (step.value === 'confirm') {
+    step.value = 'write'
+    window.scrollTo(0, 0)
+    return false
+  }
+  const typed = Object.entries(form).some(([k, v]) => k !== 'ruleTitle' && String(v).trim()) || (!props.editId && form.ruleTitle.trim())
+  if (!typed || props.editId) return true
+  return confirmDialog({ title: '만들던 규칙을 두고 나갈까요?', message: '쓴 설명은 지워져요', confirmText: '나가기', danger: true })
+})
 
 onMounted(async () => {
   if (!props.editId) return

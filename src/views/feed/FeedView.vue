@@ -94,12 +94,13 @@
           @watch="(t) => pick(p, 'watch', t)"
           @challenge="(t) => pick(p, 'challenge', t)"
           @more="menuPost = p"
-          @photo="pickPhoto(p)"
         />
         </template>
         <!-- 끝에 닿으면 다음 장 -->
         <div ref="sentinel" class="h-16 flex items-center justify-center">
           <UiSpinner v-if="loading" class="text-fg-subtle" />
+          <!-- 둘째 장부터 실패하면 아무 말 없이 멈췄다: 끝인지 망가졌는지 몰랐다 (목적 판정 6) -->
+          <p v-else-if="error && posts.length" class="t-caption">더 불러오지 못했어요 · <button class="underline" @click="loadMore">다시 시도</button></p>
           <p v-else-if="done" class="t-micro">모두 봤어요</p>
         </div>
       </div>
@@ -109,7 +110,7 @@
     <UiSheet :model-value="!!menuPost" @update:model-value="menuPost = null">
       <UiList>
         <UiListItem icon="fas fa-flag-checkered" title="경기 결과 보기" chevron @click="go(`/games/${menuPost.id}/result`)" />
-        <UiListItem v-if="menuPost?.rule?.id" icon="rotate-right" title="이 규칙으로 한 판" subtitle="같은 규칙으로 경기를 열어요" chevron @click="go(`/create-game?ruleId=${menuPost.rule.id}`)" />
+        <UiListItem v-if="menuPost?.rule?.id" icon="rotate-right" title="이 규칙으로 경기 만들기" subtitle="같은 규칙으로 사람을 모아요" chevron @click="go(`/create-game?ruleId=${menuPost.rule.id}`)" />
         <UiListItem v-if="!menuPost?.isMyGame" icon="far fa-flag" title="신고" danger @click="openReport(menuPost)" />
       </UiList>
     </UiSheet>
@@ -142,7 +143,6 @@
 
     <ShareSheet :post="sharePost" :my-id="myId" @close="sharePost = null" />
 
-    <input ref="photoInput" type="file" accept="image/*" capture="environment" class="hidden" @change="uploadPhoto" />
     <Comment v-if="commentId" :id="commentId" @close="commentId = 0" />
   </div>
 </template>
@@ -165,7 +165,6 @@ import {
 import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { shareLink } from '../../utils/share'
-import { compressImage, dataUrlToFile, readAsDataUrl } from '../../utils/image'
 import Comment from '../GameCommentView.vue'
 import { DELETE, POST } from '@/api/client'
 import { playWithMeTooAPI } from '../../api/api'
@@ -270,32 +269,7 @@ watch(tab, (t) => {
   reload()
 })
 
-// 사진 한 장 남기기: 고르거나 찍으면 바로 올리고 카드에 보인다 (서버 피드는 1분 안에 따라온다)
-const photoInput = ref(null)
-const photoPost = ref(null)
-function pickPhoto(p) {
-  photoPost.value = p
-  photoInput.value?.click()
-}
-async function uploadPhoto(e) {
-  const file = e.target.files?.[0]
-  e.target.value = ''
-  const p = photoPost.value
-  if (!file || !p) return
-  try {
-    // 폰 사진은 10MB를 넘기 쉽다 (서버 한 파일 10MB). 피드에 충분한 크기로 줄여 올린다
-    const raw = await readAsDataUrl(file)
-    const small = await compressImage(raw, 1280, 0.75)
-    const form = new FormData()
-    form.append('pictures', dataUrlToFile(small, `game_${p.id}.jpg`))
-    const { data } = await api.post(`/api/games/${p.id}/pictures`, form)
-    if (data?.success === false) throw new Error(data.message)
-    p.photos = [{ url: small, mediaType: 'IMAGE' }]
-    showToast('사진을 올렸어요')
-  } catch (err) {
-    showToast(err?.response?.data?.message || err?.message || '사진을 올리지 못했어요')
-  }
-}
+// 사진 남기기는 닿을 수 없는 길이라 지웠다 (카드가 신호를 보내지 않았다, 목적 판정 6 경로 제거)
 
 // 또 보고 싶어요 · 도전해요 (카드의 선수 중 나·봇을 뺀 사람에게)
 const picking = ref(null)
@@ -390,7 +364,8 @@ async function submitReport() {
     const { data: done } = await api.post('/api/reports', { targetType: 'GAME', targetId: Number(reportPost.value.id), reason })
     showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
   } catch (e) {
-    showToast(e.response?.data?.message || '이미 신고한 경기예요')
+    // 연결이 끊겨도 '이미 신고했다'고 해 신고가 된 줄 알았다 (목적 판정 6)
+    showToast(e.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
   } finally {
     reporting.value = false
     reportPost.value = null

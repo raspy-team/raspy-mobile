@@ -5,6 +5,8 @@
     <div class="mt-4 min-h-[40vh]">
       <UiListSkeleton v-if="userSearching" :rows="3" />
 
+      <!-- 실패하면 회색 줄이 끝없이 돌았다: 찾는 중인지 망가졌는지 알 수 없었다 (목적 판정 6) -->
+      <UiEmptyState v-else-if="searchFailed" icon="fas fa-wifi" title="찾지 못했어요. 다시 해 주세요" />
       <UiEmptyState v-else-if="!userSearchResult.length && userSearch.trim()" mascot="match" title="찾는 사람이 없어요" />
 
       <UiList v-else-if="userSearchResult.length">
@@ -43,6 +45,7 @@ let searchTimeout
 
 onMounted(() => userinput.value?.focus())
 
+const searchFailed = ref(false)
 function onUserSearch() {
   clearTimeout(searchTimeout)
   if (!userSearch.value.trim()) {
@@ -50,10 +53,17 @@ function onUserSearch() {
     return
   }
   userSearching.value = true
+  searchFailed.value = false
   searchTimeout = setTimeout(async () => {
-    const res = await api.get(`/api/user-profile/search?keyword=${encodeURIComponent(userSearch.value)}`)
-    userSearchResult.value = res.data
-    userSearching.value = false
+    try {
+      const res = await api.get(`/api/user-profile/search?keyword=${encodeURIComponent(userSearch.value)}`)
+      userSearchResult.value = res.data
+    } catch {
+      userSearchResult.value = []
+      searchFailed.value = true
+    } finally {
+      userSearching.value = false
+    }
   }, 350)
 }
 

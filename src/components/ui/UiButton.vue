@@ -6,7 +6,9 @@
     :disabled="to ? undefined : disabled || loading"
     :aria-busy="loading || undefined"
     class="relative inline-flex items-center justify-center gap-2 rounded-xl select-none transition-[background-color,color,transform] motion-safe:active:scale-[0.97] disabled:pointer-events-none"
-    :class="[VARIANTS[variant], SIZES[size], block ? 'w-full' : '', disabled && !loading ? 'opacity-40' : '']"
+    :class="[VARIANTS[variant], SIZES[size], block ? 'w-full' : '', disabled && !loading ? 'opacity-40' : '', to && (disabled || loading) ? 'pointer-events-none' : '']"
+    :aria-disabled="to && (disabled || loading) ? 'true' : undefined"
+    :tabindex="to && (disabled || loading) ? -1 : undefined"
   >
     <!-- 기다리는 동안 글자 자리는 그대로 두고 그 위에 스피너 (버튼 폭이 흔들리지 않게) -->
     <span v-if="loading" class="absolute inset-0 flex items-center justify-center"><UiSpinner size="sm" /></span>

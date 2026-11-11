@@ -25,7 +25,8 @@
     <main v-else-if="!s.total.games && !s.practiceGames" class="max-w-2xl mx-auto px-4 pt-16">
       <UiEmptyState mascot="match" title="아직 기록이 없어요">
         <!-- 기록이 없으면 찾기로 (정리 11/5: 앱 게임이 아니라 동네 경기가 주인공) -->
-        <UiButton v-if="isMe" to="/">한 판 하기</UiButton>
+        <!-- 프로필 빈 상태와 같은 말: 같은 "한 판 하기"가 순위 화면에선 앱 게임으로 가서 헷갈렸다 (목적 판정 6) -->
+        <UiButton v-if="isMe" to="/">경기 찾기</UiButton>
       </UiEmptyState>
     </main>
 

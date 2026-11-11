@@ -33,9 +33,8 @@
       <template v-if="isMe">
         <h3 class="t-heading mt-7">이번 주 응원 리그</h3>
         <div class="flex flex-wrap gap-2 mt-2">
+          <!-- 정렬 칩(보는 눈·포인트)은 뺐다: 포인트를 보러 온 사람이 기준 둘을 고를 이유가 없다. 자랑거리는 '보는 눈' 하나 (목적 판정 6) -->
           <UiChip v-for="o in SCOPES" :key="o.key" :selected="scope === o.key" @click="loadLeague(o.key, sort)">{{ o.label }}</UiChip>
-          <span class="w-px bg-line mx-1" aria-hidden="true" />
-          <UiChip v-for="o in SORTS" :key="o.key" :selected="sort === o.key" @click="loadLeague(scope, o.key)">{{ o.label }}</UiChip>
         </div>
         <UiList v-if="league?.rows.length" class="mt-2">
           <UiListItem v-for="r in league.rows.slice(0, 5)" :key="r.userId" :title="`${r.rank}. ${r.nickname}`" :subtitle="`${r.picks}번 중 ${r.hits}번`">
@@ -102,7 +101,6 @@ async function openSheet() {
 type Scope = 'FRIENDS' | 'NEIGHBORHOOD'
 type Sort = 'UNITS' | 'POINTS'
 const SCOPES: { key: Scope; label: string }[] = [{ key: 'FRIENDS', label: '친구' }, { key: 'NEIGHBORHOOD', label: '동네' }]
-const SORTS: { key: Sort; label: string }[] = [{ key: 'UNITS', label: '보는 눈' }, { key: 'POINTS', label: '포인트' }]
 const scope = ref<Scope>('FRIENDS')
 const sort = ref<Sort>('UNITS')
 const league = ref<components['schemas']['BetLeague'] | null>(null)

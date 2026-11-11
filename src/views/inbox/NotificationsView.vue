@@ -32,7 +32,12 @@
         </button>
 
         <!-- 비었을 때: 무엇이 오는지 보여주고 설정으로 -->
-        <section v-if="!groups.length && !inbox.friendRequests.length" class="pt-10">
+        <section v-if="inbox.failed && !groups.length && !inbox.friendRequests.length" class="pt-10">
+          <UiEmptyState icon="fas fa-wifi" title="알림을 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+            <UiButton variant="secondary" @click="refreshInbox">다시 시도</UiButton>
+          </UiEmptyState>
+        </section>
+        <section v-else-if="!groups.length && !inbox.friendRequests.length" class="pt-10">
           <UiEmptyState mascot="kok" title="새 알림이 없어요" />
         </section>
 

@@ -2865,6 +2865,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/duels/{gameId}/bot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 기다리지 않고 AI 주민과
+         * @description 내가 연 대결에 상대를 기다리지 않고 AI 주민을 바로 붙여 승패를 낸다. 친구 도전 기간·대회 판은 안 된다
+         */
+        post: operations["playBotNow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/challenges/{gameId}/accept": {
         parameters: {
             query?: never;
@@ -6544,9 +6564,9 @@ export interface components {
                 [key: string]: Record<string, never>;
             };
             /** Format: int32 */
-            rows: number;
-            /** Format: int32 */
             cols: number;
+            /** Format: int32 */
+            rows: number;
         };
         Obj: {
             s: string;
@@ -13118,6 +13138,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppChallenge"];
+                };
+            };
+        };
+    };
+    playBotNow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
                 };
             };
         };

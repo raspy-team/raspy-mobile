@@ -29,7 +29,7 @@
         <UiSection v-if="recent.length && !query" title="최근에 한 게임" class="mt-6">
           <!-- 이어 하기 줄: 옆으로 밀어 고른다 -->
           <div class="flex gap-3 -mx-4 px-4 overflow-x-auto no-scrollbar">
-            <AppGameTile v-for="g in recent" :key="g.key" :game="g" compact />
+            <AppGameTile v-for="g in recent" :key="g.key" :game="g" compact :again="g.available && g.playMode !== 'REALTIME' && g.dailyLimit !== 1" />
           </div>
         </UiSection>
 

@@ -5965,6 +5965,39 @@
         }
       }
     },
+    "/api/app-games/duels/{gameId}/bot": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "기다리지 않고 AI 주민과",
+        "description": "내가 연 대결에 상대를 기다리지 않고 AI 주민을 바로 붙여 승패를 낸다. 친구 도전 기간·대회 판은 안 된다",
+        "operationId": "playBotNow",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/challenges/{gameId}/accept": {
       "post": {
         "tags": [
@@ -13524,11 +13557,11 @@
               "type": "object"
             }
           },
-          "rows": {
+          "cols": {
             "type": "integer",
             "format": "int32"
           },
-          "cols": {
+          "rows": {
             "type": "integer",
             "format": "int32"
           }

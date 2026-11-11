@@ -251,6 +251,8 @@
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
               <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민${botExplained ? '' : '(앱이 만든 연습 상대)'}이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
             </template>
+            <!-- 기다리지 않고 AI 주민과 바로 승패 (실시간 대기실과 같다, 11/11 귀찮음 재검토: 사람을 못 만나면 한 시간을 기다렸다) -->
+            <UiButton v-if="!ladderTo && challengeSentFor !== result.gameId && (result.myScore ?? 0) > 0" size="sm" variant="secondary" class="mt-4" :loading="botNow" @click="playBotNow(result.gameId)">기다리지 않고 AI 주민과 하기</UiButton>
             <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
             <div v-if="!improvResult || improvResult.empty" class="flex flex-wrap justify-center gap-2 mt-4">
               <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
@@ -809,6 +811,18 @@ function until(at?: string) {
 
 /** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
 const challenging = ref(false)
+const botNow = ref(false)
+async function playBotNow(gameId: number) {
+  botNow.value = true
+  try {
+    await POST('/api/app-games/duels/{gameId}/bot', { path: { gameId } })
+    await load()
+  } catch (e) {
+    showToast(errorMessage(e, 'AI 주민을 부르지 못했어요. 잠시 뒤 다시 해 주세요'))
+  } finally {
+    botNow.value = false
+  }
+}
 // 친구에게 도전장을 보낸 판 (기다림 문구가 바뀐다)
 const challengeSentFor = ref<number | null>(null)
 async function sendChallenge(gameId: number) {

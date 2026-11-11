@@ -19,8 +19,10 @@ export const hasNativeInstagram = isCapacitorApp && Capacitor.isPluginAvailable(
 export const MatchInstagram = registerPlugin('MatchInstagram')
 
 // 로그인 뒤 푸시 알림 토큰을 서버에 등록하도록 앱에 알린다
-export function registerFcmToken(jwt) {
-  if (isCapacitorApp) registerCapacitorPush()
+// ask=false(앱을 켤 때)면 이미 허락한 기기만 다시 등록하고 묻지 않는다. 묻는 것은 알림이 쓸모 있는 순간에 askPushPermission으로 (목적 판정 11/11 부분 1:
+// 앱을 열고 5초 만에 이유 없는 OS 창이 앞을 막았고, 한 번 거절하면 다시 물을 수 없다)
+export function registerFcmToken(jwt, ask = false) {
+  if (isCapacitorApp) registerCapacitorPush(ask)
   else if (window.AndroidApp?.registerFcmToken) window.AndroidApp.registerFcmToken(jwt)
   else window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'registerFcmToken', jwt })
 }
@@ -92,12 +94,17 @@ async function openInApp(path) {
   }
 }
 
-async function registerCapacitorPush() {
+/** 알림이 쓸모 있는 순간(상대를 기다릴 때, 도전장을 보낸 직후)에 부른다. 웹이면 아무 일도 없다 */
+export function askPushPermission() {
+  if (isCapacitorApp) registerCapacitorPush(true)
+}
+
+async function registerCapacitorPush(ask) {
   try {
     await setupPushListeners()
     const { PushNotifications } = await import('@capacitor/push-notifications')
     let perm = await PushNotifications.checkPermissions()
-    if (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale') perm = await PushNotifications.requestPermissions()
+    if (ask && (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale')) perm = await PushNotifications.requestPermissions()
     if (perm.receive !== 'granted') return
     await PushNotifications.register()
   } catch {

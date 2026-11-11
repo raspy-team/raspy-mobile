@@ -33,15 +33,6 @@ const GameView = () => import('../views/game/GameView.vue')
 const AdminDashboard = () => import('../views/admin/AdminDashboard.vue')
 const AdminRuleEditRequests = () => import('../views/admin/AdminRuleEditRequestsView.vue')
 
-function openEncodedLink(to) {
-  try {
-    const url = new URL(decodeURIComponent(to.params.encodedUrl))
-    return url.pathname + url.search
-  } catch {
-    return '/'
-  }
-}
-
 const routes = [
   {
     path: '/init',
@@ -101,9 +92,7 @@ const routes = [
     component: GameResult,
     props: true
   },
-  // 옛 초대 링크(/invite/…, Branch 딥링크의 /invite-fall-back/…): 안에 담긴 주소로 바로 보낸다
-  { path: '/invite/:encodedUrl', redirect: openEncodedLink },
-  { path: '/invite-fall-back/:encodedUrl', redirect: openEncodedLink },
+  // 옛 초대 링크(/invite/…, /invite-fall-back/…)는 뺐다: 지금 코드·서버가 만들지 않고, 링크 속 경기는 이미 끝났다 (목적 판정 11/11 부분 1)
   { path: '/profile/:id/stats', component: () => import('../views/profile/RecordView.vue') },
   // 능력·종합 순위 (kind: OVERALL·GROUP·ABILITY, key: ALL·BODY·능력 이름)
   { path: '/rankings/:kind/:key', component: () => import('../views/profile/ScopeRankingView.vue') },
@@ -196,7 +185,12 @@ router.onError((error, to) => {
   }
   const key = `chunk_reload_${to.fullPath}`
   try {
-    if (sessionStorage.getItem(key)) return // 한 번 새로 열었는데도 안 되면 되풀이하지 않는다
+    // 한 번 새로 열었는데도 안 되면 되풀이하지 않는다. 대신 말없이 멈추지 않게 알린다 (목적 판정 11/11 부분 1)
+    if (sessionStorage.getItem(key)) {
+      useToast().showToast('화면을 불러오지 못했어요. 다시 눌러 주세요')
+      sessionStorage.removeItem(key)
+      return
+    }
     sessionStorage.setItem(key, '1')
   } catch {
     return

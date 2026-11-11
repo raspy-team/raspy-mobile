@@ -40,8 +40,9 @@
       <div v-if="!isSignup" class="mt-4 text-center">
         <button v-if="!forgotOpen" type="button" class="t-caption underline underline-offset-2" @click="forgotOpen = true">비밀번호를 잊었나요?</button>
         <p v-else class="t-caption text-left rounded-xl bg-surface px-4 py-3">
-          본인인증을 했던 아이디 계정이면 <RouterLink class="underline underline-offset-2 text-fg" to="/password-reset">휴대폰 본인인증으로 찾아요</RouterLink>.
-          본인인증을 한 적이 없으면 아이디를 적어 <a class="underline underline-offset-2 text-fg" :href="forgotMail">yeonkoh@protonmail.com</a>으로 알려 주세요.
+          <!-- 본인인증이 열려 있을 때만 그 길을 보인다. 준비 전에는 가 봐야 "준비 중"뿐이었다 (목적 판정 11/11 부분 1) -->
+          <template v-if="resetAvailable">본인인증을 했던 아이디 계정이면 <RouterLink class="underline underline-offset-2 text-fg" to="/password-reset">휴대폰 본인인증으로 찾아요</RouterLink>.
+          본인인증을 한 적이 없으면</template> 아이디를 적어 <a class="underline underline-offset-2 text-fg" :href="forgotMail">yeonkoh@protonmail.com</a>으로 알려 주세요.
           카카오·구글로 시작했다면 그 버튼으로 다시 들어오면 돼요.
         </p>
       </div>
@@ -59,6 +60,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
+import { GET } from '@/api/client'
 import { UiButton, UiInput, UiTopBar } from '../../components/ui'
 import { takeReturnTo } from '../../utils/authRedirect'
 import { registerFcmToken } from '../../utils/nativeBridge'
@@ -74,6 +76,8 @@ const emailError = ref('')
 const passwordError = ref('')
 const submitError = ref('')
 const forgotOpen = ref(false)
+const resetAvailable = ref(false)
+GET('/api/auth/password-reset/config').then(({ data }) => (resetAvailable.value = !!data?.available)).catch(() => {})
 const forgotMail = 'mailto:yeonkoh@protonmail.com?subject=' + encodeURIComponent('[Match] 비밀번호를 잊었어요')
 const busy = ref(false)
 const isSignup = ref(route.query.mode === 'signup')
@@ -117,14 +121,17 @@ async function submit() {
     }
     let token
     let tooMany = false
+    let noAnswer = false
     try {
       token = (await api.post('/api/auth/login', { email: id, password: password.value })).data?.token
     } catch (err) {
       token = null
       tooMany = err.response?.status === 429 // 15분에 8번 넘게 틀림 (서버 LoginThrottle)
+      // 답이 없거나 서버가 뜨는 중이면 비밀번호 탓이 아니다. 맞는 비밀번호를 넣은 사람이 비밀번호를 의심하지 않게 (목적 판정 11/11 부분 1)
+      noAnswer = !err.response || [502, 503, 504].includes(err.response.status)
     }
     if (!token) {
-      submitError.value = tooMany ? '로그인 시도가 너무 많아요. 15분 뒤 다시 해 주세요' : '아이디나 비밀번호가 맞지 않아요'
+      submitError.value = tooMany ? '로그인 시도가 너무 많아요. 15분 뒤 다시 해 주세요' : noAnswer ? '연결이 끊겼어요. 다시 해 주세요' : '아이디나 비밀번호가 맞지 않아요'
       return
     }
     localStorage.setItem('raspy_access_token2', token)

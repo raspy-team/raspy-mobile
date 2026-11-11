@@ -17,7 +17,8 @@
       <div class="mx-4 mt-2 rounded-xl bg-surface-2 border border-line-strong px-4 py-3 flex items-center gap-3 text-sm">
         <UiIcon name="fas fa-plug-circle-exclamation" class="text-fg-muted" aria-hidden="true" />
         <span class="flex-1 text-fg">{{ offline ? '인터넷 연결이 끊겼어요. 연결되면 다시 해 주세요' : '서버에 연결하지 못했어요. 잠시 뒤 다시 해 주세요' }}</span>
-        <button type="button" class="text-primary font-bold flex-shrink-0 px-1 py-2" @click="reload">다시 시도</button>
+        <!-- 다시 시도는 페이지를 새로 열지 않고 서버에 닿는지만 다시 묻는다. 새로 열면 판·글쓰기 중 쓴 것이 사라졌다 (목적 판정 11/11 부분 1) -->
+        <button v-if="!offline" type="button" class="text-primary font-bold flex-shrink-0 px-1 py-2" @click="recheck">다시 시도</button>
       </div>
     </div>
 
@@ -56,7 +57,16 @@ import { serverDown, offline } from './stores/server'
 import { registerFcmToken, setupPushListeners } from './utils/nativeBridge'
 
 const route = useRoute()
-const reload = () => window.location.reload()
+// 서버가 다시 답하면 띠를 거둔다. 보던 화면은 다음 요청에서 저절로 이어진다
+async function recheck() {
+  try {
+    await api.get('/actuator/health', { timeout: 5000 })
+    serverDown.value = false
+  } catch (e) {
+    // 답이 오면(어떤 코드든) 서버는 살아 있다
+    if (e?.response && ![502, 503, 504].includes(e.response.status)) serverDown.value = false
+  }
+}
 const router = useRouter()
 
 // 하단 탭을 보여줄 화면과 그때 켜질 탭. null이면 탭을 숨긴다 (가입·경기 진행·채팅처럼 한 가지에 집중하는 화면)

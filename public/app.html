@@ -78,7 +78,12 @@ function logVisit(dest) {
   } catch (e) { /* 세지 못해도 넘어간다 */ }
 }
 
-var web = '/' + (location.search || '')
+// 웹 도착지: 로그인 전이면 가입 없이 바로 해 볼 수 있는 지금 홍보하는 게임으로 (목적 판정 11/11 부분 1: 광고를 보고 온 사람의 첫 화면이 가입 벽이었다).
+// 로그인한 사람은 홈. 꼬리표는 그대로 넘긴다
+var PROMO = '/try/improv'
+var signedIn = false
+try { signedIn = !!localStorage.getItem('raspy_access_token2') } catch (e) { /* 모르면 손님으로 */ }
+var web = (signedIn ? '/' : PROMO) + (location.search || '')
 document.getElementById('go').href = web
 if (IOS_LIVE) { var i = document.getElementById('ios'); i.href = appStoreUrl(); i.hidden = false }
 if (ANDROID_LIVE) { var a = document.getElementById('android'); a.href = playUrl(); a.hidden = false }

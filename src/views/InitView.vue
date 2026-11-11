@@ -6,12 +6,15 @@
       <div class="flex-1 min-h-0 flex flex-col justify-center py-6">
         <span class="text-[22px] font-semibold leading-none tracking-[-0.055em] text-fg">match</span>
         <!-- 링크로 들어온 사람: 무엇에 불려 왔는지 먼저 (인스타 게임 링크, 친구의 도전장). 가입하면 그 화면으로 돌아간다 -->
-        <UiCard v-if="landing" class="mt-8">
-          <!-- 방금 손님으로 한 판 한 사람에게 '받은 링크'는 남의 말이다 (3-5 걷기 P5) -->
+        <!-- 방금 손님으로 한 판 한 사람: 결과 카드에서 이미 마음먹고 왔다. 게임 설명·약속을 되풀이하지 않고 방금 결과만 (목적 판정 11/11 부분 1) -->
+        <UiCard v-if="guestPlayed && guestLine" class="mt-8">
+          <p class="t-title">{{ guestLine }}</p>
+          <p class="t-caption mt-1">시작하면 내 기록에 남아요</p>
+        </UiCard>
+        <UiCard v-else-if="landing" class="mt-8">
           <p class="t-caption">{{ guestPlayed ? '방금 한 판' : '받은 링크' }}</p>
           <p class="t-title mt-1">{{ landing.title }}</p>
-          <p class="t-caption mt-1">{{ landing.line }}</p>
-          <!-- 가입 전에 한 판 하고 '점수 저장하고 상대와 붙기'로 온 사람: 그 점수가 어디 가는지 (first10 검토) -->
+          <p v-if="!guestPlayed" class="t-caption mt-1">{{ landing.line }}</p>
           <p class="t-caption text-fg mt-3">{{ guestPlayed ? '시작하면 방금 한 판이 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
         </UiCard>
         <!-- 상대 구하기를 등록하고 온 사람: 그 등록이 어디로 가는지 -->
@@ -20,11 +23,12 @@
           <p class="t-caption mt-1">시작하면 내 계정에 붙어요. 상대가 생기면 알림으로 알려 드려요</p>
         </UiCard>
         <!-- 게임 링크로 온 사람에게 '종목과 규칙을 정하고'는 다른 앱 이야기다. 받은 게임 이야기로 (3-5 걷기 P5) -->
-        <template v-if="landing">
+        <!-- 손님 판에서 온 사람에게는 큰 제목·설명이 결과 화면 카드의 같은 약속을 되풀이한다 (목적 판정 11/11 부분 1). 받은 링크로 온 사람에게만 -->
+        <template v-if="landing && !guestPlayed">
           <h1 class="t-display text-[40px] mt-8">기록 남기고<br /><span class="hl hl-draw">사람과</span> 붙기</h1>
           <p class="t-body text-fg-muted mt-4 max-w-[30ch]">다음 판부터는 모르는 사람과 1:1로 승패를 내요.</p>
         </template>
-        <template v-else>
+        <template v-else-if="!landing">
           <h1 class="t-display text-[44px] mt-8">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
           <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
         </template>
@@ -79,10 +83,13 @@
           Apple로 계속하기
         </button>
 
-        <UiButton block size="lg" :variant="anySocial ? 'ghost' : 'primary'" to="/group/login?mode=signup" @click="tapId">
-          {{ anySocial ? '아이디로 시작하기' : '시작하기' }}
-        </UiButton>
-        <UiButton block variant="ghost" to="/group/login" @click="tapId">이미 계정이 있어요</UiButton>
+        <!-- 소셜이 있으면 아이디 길은 링크 하나로. '이미 계정이 있어요'는 아이디 로그인만 가서 카카오로 가입한 사람을 헷갈리게 했다.
+             로그인 화면 안에 가입·로그인 전환이 있다 (목적 판정 11/11 부분 1 다시 훑기) -->
+        <UiButton v-if="anySocial" block variant="ghost" to="/group/login" @click="tapId">아이디로 로그인·가입</UiButton>
+        <template v-else>
+          <UiButton block size="lg" to="/group/login?mode=signup" @click="tapId">시작하기</UiButton>
+          <UiButton block variant="ghost" to="/group/login" @click="tapId">이미 계정이 있어요</UiButton>
+        </template>
         <p class="pt-2 text-center t-micro">
           <button type="button" class="underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[0]">{{ TERMS[0].title }}</button>
           ·
@@ -105,7 +112,7 @@ import { GET } from '@/api/client'
 import { API_BASE_URL } from '@/config/server'
 import { TERMS } from '../content/legal'
 import { UiButton, UiCard, UiSheet } from '../components/ui'
-import { peekReturnTo, takeReturnTo } from '../utils/authRedirect'
+import { peekReturnTo } from '../utils/authRedirect'
 import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin, nativeKakaoLogin, hasNativeKakao } from '../utils/nativeBridge'
 import { trackEvent } from '../utils/visit'
 
@@ -126,7 +133,7 @@ const anySocial = computed(() => show.value.google || show.value.kakao || show.v
 
 // 소셜 로그인이 막혀 돌아왔을 때 (서버 SocialRedirect.failure)
 const LOGIN_ERRORS = {
-  id_account: '이 이메일은 아이디로 가입돼 있어요. "이미 계정이 있어요"로 아이디 로그인해 주세요',
+  id_account: '이 이메일은 아이디로 가입돼 있어요. "아이디로 로그인·가입"에서 로그인해 주세요',
   email: '확인된 이메일이 있어야 시작할 수 있어요. 계정의 이메일을 확인해 주세요',
   failed: '로그인하지 못했어요. 다시 해 주세요',
 }
@@ -138,6 +145,15 @@ if (localStorage.getItem('raspy_access_token2')) router.replace('/')
 // 링크로 왔으면 그 링크가 무엇인지 (/api/landing, 로그인 전). 모르는 주소면 비어 있다
 const landing = ref(null)
 const guestPlayed = (() => { try { return !!localStorage.getItem('guest_played') } catch { return false } })()
+// 방금 손님 판 결과 한 줄 ("방금 임기응변 6등급"). 임기응변은 결과를 2시간 남겨 둔다(GuestPlayView)
+const guestLine = (() => {
+  try {
+    const last = JSON.parse(localStorage.getItem('improv_last_result') || 'null')
+    const grade = last?.result?.feedback?.match(/(\d)등급/)?.[1]
+    if (grade && Date.now() - (last.at ?? 0) < 2 * 3600_000) return `방금 임기응변 ${grade}등급`
+  } catch { /* 없으면 받은 링크 카드로 */ }
+  return ''
+})()
 
 onMounted(async () => {
   const returnTo = peekReturnTo()
@@ -173,8 +189,6 @@ function loginWith(provider) {
       if (!/cancel|1001/i.test(String(e?.message || e))) nativeError.value = LOGIN_ERRORS.failed
     })
     return
-  } else if (provider === 'apple' && isIosApp) {
-    window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'appleLogin' })
   } else if (provider === 'apple') {
     window.location.href = `${API_BASE_URL}/login/oauth2/apple/web/start`
   } else if (provider === 'google' && isCapacitorApp) {
@@ -198,8 +212,6 @@ function loginWith(provider) {
       if (!/cancel/i.test(msg)) nativeError.value = LOGIN_ERRORS.failed
     })
     return
-  } else if (provider === 'google' && window.AndroidApp?.loginWithGoogle) {
-    window.AndroidApp.loginWithGoogle()
   } else {
     window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`
   }
@@ -207,11 +219,5 @@ function loginWith(provider) {
   setTimeout(() => (pending.value = ''), 8000)
 }
 
-// 앱의 소셜 로그인이 끝나면 앱이 부른다. 첫 설정이 남았으면 라우터 가드가 /welcome으로 보낸다
-function onNativeLogin({ token }) {
-  localStorage.setItem('raspy_access_token2', token)
-  window.location.href = takeReturnTo() || '/'
-}
-window.onKakaoLoginSuccess = onNativeLogin
-window.onGoogleLoginSuccess = onNativeLogin
+// 옛 앱 다리(옛 안드로이드 구글·옛 iOS 애플·onKakaoLoginSuccess)는 뺐다. 지금 앱은 Capacitor 플러그인 길만 쓴다 (목적 판정 11/11 부분 1)
 </script>

@@ -4,7 +4,7 @@ import api from '../api/api'
 import { rememberReturnTo } from '../utils/authRedirect'
 import { GUEST_GAMES } from '../utils/guestGames'
 
-const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/invite', '/dev', '/club/join', '/s/', '/try/']
+const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/dev', '/club/join', '/s/', '/try/']
 let done = false
 
 export function markOnboarded() {
@@ -15,7 +15,8 @@ export function markOnboarded() {
 function toStart(to) {
   const key = to.path.match(/^\/play\/([^/]+)$/)?.[1]
   if (key && GUEST_GAMES[key]) return { path: `/try/${key}`, query: to.query }
-  rememberReturnTo(to.fullPath)
+  // 없는 주소는 기억하지 않는다: 가입까지 하고 도착한 곳이 '없는 페이지'였다 (목적 판정 11/11 부분 1)
+  if (!to.matched.some((r) => r.path.includes(':pathMatch'))) rememberReturnTo(to.fullPath)
   return '/init'
 }
 
@@ -32,7 +33,7 @@ export function installOnboardingGuard(router) {
         done = true
         return true
       }
-      rememberReturnTo(to.fullPath)
+      if (!to.matched.some((r) => r.path.includes(':pathMatch'))) rememberReturnTo(to.fullPath)
       return '/welcome'
     } catch (e) {
       // 토큰이 끝났다: 로그인 전과 같이 (광고 링크로 온 사람이 예전 로그인 흔적 때문에 한 판 대신 시작 화면을 보지 않게, 9e)

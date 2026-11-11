@@ -9,7 +9,7 @@
         <p class="t-body text-fg-muted mt-4">주소가 바뀌었거나 지워졌어요.</p>
       </div>
       <div class="pb-6">
-        <UiButton block size="lg" to="/">경기 보러 가기</UiButton>
+        <UiButton block size="lg" to="/">처음으로</UiButton>
       </div>
     </main>
   </div>

@@ -48,6 +48,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { Client } from '@stomp/stompjs'
 import { GET, POST } from '@/api/client'
+import { useToast } from '../../composables/useToast'
 import type { components } from '@/api/schema'
 import { WS_URL } from '@/config/server'
 import { feel } from '../../utils/feel'
@@ -67,6 +68,8 @@ async function load() {
     state.value = (await GET('/api/app-games/realtime/{gameId}/watch', { path: { gameId } })).data
   } catch (e) {
     const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
+    // 보던 중 다시 불러오기가 실패하면 판을 지우지 않고 한 줄만 (말없이 멈췄다, 목적 판정 11/11 부분 2)
+    if (state.value) return useToast().showToast('판을 새로 불러오지 못했어요')
     error.value = r?.status === 404 ? '없거나 지워진 판이에요' : r?.data?.message || '볼 수 없는 판이에요'
   }
 }
@@ -76,6 +79,7 @@ async function cheer(side: number) {
     state.value = (await POST('/api/app-games/realtime/{gameId}/cheer', { path: { gameId }, body: { side } })).data
     feel('tap')
   } catch {
+    useToast().showToast('응원을 보내지 못했어요. 다시 눌러 주세요')
     await load()
   } finally {
     busy.value = false

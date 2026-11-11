@@ -15,8 +15,11 @@
         </UiCard>
         <!-- 실시간 게임은 그 사람만 들어오는 방으로 (RealtimeView ?invite=) -->
         <UiButton v-if="info.open && !info.mine" block size="lg" class="mt-4" :to="info.live ? `/play/${info.key}/live?invite=${info.gameId}` : `/play/${info.key}?challenge=${info.gameId}`">도전 수락</UiButton>
-        <p v-else class="t-caption text-center mt-4">{{ closedLine }}</p>
-        <UiButton block variant="ghost" class="mt-2" :to="`/play/${info.key}`">이 게임 둘러보기</UiButton>
+        <!-- 받을 수 있는 도전장에서는 '이 게임 둘러보기'를 뺐다: 수락하러 온 사람을 도전장 밖으로 뺐다. 지났거나 내 것이면 그 게임 한 판으로 (목적 판정 11/11 부분 2) -->
+        <template v-else>
+          <p class="t-caption text-center mt-4">{{ closedLine }}</p>
+          <UiButton block class="mt-3" :to="`/play/${info.key}`">{{ info.title }} 한 판 하기</UiButton>
+        </template>
       </template>
     </main>
   </div>

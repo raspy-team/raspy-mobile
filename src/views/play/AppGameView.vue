@@ -724,7 +724,8 @@ async function submit(answer: string) {
   } catch (e) {
     // 판이 닫히면 첫 화면으로 돌아가니 오류는 시작 버튼 밑 칸에 남긴다 (판 아래 칸은 판과 함께 사라져 아무 말 없이 돌아갔다)
     pendingSubmit.value = { playId, answer }
-    submitError.value = startError.value = errorMessage(e, '내지 못했어요. 쓴 답은 남아 있어요')
+    // 끊김이면 그렇다고 말하고, 연결이 돌아오면 저절로 다시 낸다 (11/11 몸과 시간: 지하철)
+    submitError.value = startError.value = !navigator.onLine ? '인터넷이 끊겨 내지 못했어요. 쓴 답은 남아 있고, 연결되면 바로 다시 내요' : errorMessage(e, '내지 못했어요. 쓴 답은 남아 있어요')
     play.value = null
     load().catch(() => {})
   } finally {
@@ -732,8 +733,11 @@ async function submit(answer: string) {
   }
 }
 
-// 내지 못한 답: 같은 판에 그대로 다시 낸다
+// 내지 못한 답: 같은 판에 그대로 다시 낸다. 연결이 돌아오면 저절로
 const pendingSubmit = ref<{ playId: number; answer: string } | null>(null)
+const resubmitWhenOnline = () => { if (pendingSubmit.value && !submitting.value) resubmit() }
+window.addEventListener('online', resubmitWhenOnline)
+onBeforeUnmount(() => window.removeEventListener('online', resubmitWhenOnline))
 async function resubmit() {
   const p = pendingSubmit.value
   if (!p) return

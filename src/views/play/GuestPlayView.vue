@@ -262,7 +262,7 @@
 // 끝나면 "점수 저장하고 상대와 붙기"로 시작 화면에 보낸다. 로그인하면 claimGuestPlays가 이 판을 기록으로 옮긴다
 // 눈치 한 판(?q=첫 질문, ?c=친구의 판)은 결과에 문제마다 정답, 내 취향 받기, 친구 도전·공유가 붙는다. 버튼 하나하나 원본 기록(trackLog)에 남긴다
 import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -442,13 +442,23 @@ async function submit(answer: string) {
     if (key.value === 'improv') prepareStory()
     saveLast()
   } catch (e) {
-    submitError.value = key.value === 'improv' ? '채점이 잠깐 막혔어요. 쓴 답은 그대로 있어요' : errorMessage(e, '답을 내지 못했어요. 쓴 답은 그대로 있어요')
+    // 인터넷이 끊긴 것이면 그렇다고 말한다: '채점이 막혔어요'는 서버 탓처럼 들렸다. 연결이 돌아오면 저절로 다시 낸다 (11/11 몸과 시간: 지하철)
+    submitError.value = !navigator.onLine
+      ? '인터넷이 끊겨 내지 못했어요. 쓴 답은 그대로 있고, 연결되면 바로 다시 내요'
+      : key.value === 'improv' ? '채점이 잠깐 막혔어요. 쓴 답은 그대로 있어요' : errorMessage(e, '답을 내지 못했어요. 쓴 답은 그대로 있어요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
     // 판을 닫지 않는다: 쓴 답을 그대로 두고 같은 답으로 다시 낸다 (예전엔 임기응변 밖의 게임은 판이 닫히고 시작 화면으로 가 하던 판이 사라진 것 같았다, 경로 3 훑기)
   } finally {
     submitting.value = false
   }
 }
+
+// 연결이 돌아오면 못 낸 답을 저절로 다시 낸다 (사람이 '다시 채점하기'를 눌러야 했다)
+function resubmitWhenOnline() {
+  if (submitError.value && lastAnswer.value && !submitting.value && play.value) submit(lastAnswer.value)
+}
+window.addEventListener('online', resubmitWhenOnline)
+onBeforeUnmount(() => window.removeEventListener('online', resubmitWhenOnline))
 
 async function loadReview() {
   const visitorId = getVisitorId()

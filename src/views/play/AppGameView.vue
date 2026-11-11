@@ -489,7 +489,7 @@ import RecipePlay from '../../components/appgame/RecipePlay.vue'
 import SentencePlay from '../../components/appgame/SentencePlay.vue'
 import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
-import { improvAnswers, improvFeedback, improvSituations } from '@/utils/improv'
+import { improvAnswers, improvFeedback, improvSituations, improvShareLine } from '@/utils/improv'
 import { track } from '@/utils/trackLog'
 import { shareLink } from '@/utils/share'
 import { askPushPermission, isCapacitorApp } from '@/utils/nativeBridge'
@@ -802,7 +802,10 @@ async function sendChallenge(gameId: number) {
     // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
     // 가입 없이 할 수 있는 게임이면 받은 친구가 가입 없이 바로 같은 문제로 (경로 2 리뷰 N1: /challenge는 가입 벽이었다)
     const link = key.value in GUEST_GAMES ? `${window.location.origin}/try/${key.value}?d=${gameId}` : `${window.location.origin}/challenge/${gameId}`
-    const msg = await shareLink(link, `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
+    // 임기응변은 손님 결과와 같은 등급대 한 줄: 9등급이 '나보다 잘할 수 있어요?'를 보내면 뜻하지 않게 우스웠다 (11/11 감정과 체면)
+    const g = key.value === 'improv' ? improvResult.value?.grade : 0
+    const line = g ? improvShareLine(g) : ''
+    const msg = await shareLink(link, line ? `${line}${/[.?!]$/.test(line) ? '' : '.'} 같은 상황으로 붙자` : `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
     // '하루 동안 이 링크로만'은 뜻이 안 읽혔고, 복사가 실패해도 붙었다 (경로 2 리뷰 N4)
     if (msg) showToast(/못/.test(msg) ? msg : `${msg}. 친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황' : '문제'}으로 붙어요`)
     askPushPermission() // 친구가 받으면 알려 드릴 수 있게

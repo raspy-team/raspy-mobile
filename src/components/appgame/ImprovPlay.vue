@@ -86,14 +86,47 @@ const whoShort = computed(() => ({ UP: '교수님이', SENIOR: '선배가', PEER
 const REACT_TIMEOUT_MS = 45_000
 
 let shownAt = Date.now()
-const startedAt = Date.now()
+let startedAt = Date.now()
 let timer: ReturnType<typeof setInterval> | undefined
 let done = false
+
+// 판 중 새로 고침·뒤로 가기에도 쓴 답과 받은 반응을 잃지 않는다 (경로 10 막힘 1). 판마다 따로, 이 탭에만 둔다.
+// 시계(shownAt·startedAt)도 함께 두어, 새로 고침이 시간을 다시 주지 않는다
+const SAVE_KEY = `improv_play_${props.playId}`
+function save() {
+  try {
+    sessionStorage.setItem(SAVE_KEY, JSON.stringify({ index: index.value, said: said.value, reactions: reactions.value, shownAt, startedAt }))
+  } catch { /* 저장이 막힌 브라우저면 예전처럼 처음부터 */ }
+}
+function restore() {
+  try {
+    const raw = sessionStorage.getItem(SAVE_KEY)
+    if (!raw) return
+    const s = JSON.parse(raw)
+    if (typeof s.index !== 'number' || s.index < 0 || s.index >= situations.value.length) return
+    index.value = s.index
+    said.value = Array.isArray(s.said) ? s.said : []
+    reactions.value = Array.isArray(s.reactions) ? s.reactions : []
+    shownAt = Number(s.shownAt) || Date.now()
+    startedAt = Number(s.startedAt) || Date.now()
+    if (said.value[index.value] !== undefined) {
+      // 이 상황엔 이미 말했다. 반응을 기다리다 끊겼으면 다시 부르지 않고 넘어갈 수 있게 한다 (점수는 끝에 채점된다)
+      if (reactions.value[index.value] === undefined) reactions.value[index.value] = '(반응을 받지 못했어요. 점수는 끝에 나와요)'
+      phase.value = 'reacted'
+    } else {
+      remaining.value = Math.max(0, PER_SITUATION - Math.floor((Date.now() - shownAt) / 1000))
+    }
+  } catch { /* 깨진 저장은 무시한다 */ }
+}
+function clearSave() {
+  try { sessionStorage.removeItem(SAVE_KEY) } catch { /* 없음 */ }
+}
 
 function finish() {
   if (done) return
   done = true
   clearInterval(timer)
+  clearSave()
   emit('submit', JSON.stringify(situations.value.map((_, i) => said.value[i] ?? '')))
 }
 
@@ -101,6 +134,7 @@ async function say() {
   if (phase.value !== 'answer' || !current.value) return
   const line = text.value.trim()
   said.value[index.value] = line
+  save()
   // 잴 것 (game-plan.md ③ 11): 상황마다 답했나·시간 초과·답 길이·쓴 시간
   const sec = Math.round((Date.now() - shownAt) / 1000)
   track('improv_say', { gameKey: 'improv', step: index.value + 1, value: `id=${current.value.id};len=${line.length};sec=${sec};timeout=${remaining.value === 0 ? 1 : 0}` })
@@ -108,6 +142,7 @@ async function say() {
   if (!line) {
     reactions.value[index.value] = '…'
     phase.value = 'reacted'
+    save()
     return
   }
   slow.value = false
@@ -123,6 +158,7 @@ async function say() {
     clearTimeout(slowTimer)
   }
   phase.value = 'reacted'
+  save()
 }
 
 function next() {
@@ -132,10 +168,12 @@ function next() {
   phase.value = 'answer'
   shownAt = Date.now()
   remaining.value = PER_SITUATION
+  save()
   nextTick(() => input.value?.focus?.())
 }
 
 onMounted(() => {
+  restore()
   timer = setInterval(() => {
     // 판 전체 마감(서버)이 먼저 오면 쓴 데까지 낸다
     if ((Date.now() - startedAt) / 1000 >= props.timeLimitSeconds) return finish()

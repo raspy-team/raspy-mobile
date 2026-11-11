@@ -21,6 +21,19 @@ export async function storyFile(post: any, myId: number | null, variant: StoryVa
 
 /** 아무 카드 컴포넌트를 화면 밖에 그려 그림 파일로 (임기응변 등급 결과 카드 등). 크기·글꼴 처리는 storyFile과 같다 */
 export async function componentFile(component: any, props: Record<string, unknown>, variant: StoryVariant, name: string): Promise<File> {
+  // 글꼴 받기나 그림 찍기가 끝나지 않으면 버튼이 영원히 돌았다(11/11 폰). 시간이 지나면 못 찍은 것으로 본다
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const limit = new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error('timeout')), SNAP_LIMIT_MS) })
+  try {
+    return await Promise.race([snapFile(component, props, variant, name), limit])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+const SNAP_LIMIT_MS = 15_000
+
+async function snapFile(component: any, props: Record<string, unknown>, variant: StoryVariant, name: string): Promise<File> {
   const host = document.createElement('div')
   // 화면 밖에. display:none이면 크기가 0이라 찍히지 않는다
   host.style.cssText = 'position:fixed;left:-10000px;top:0;pointer-events:none;'

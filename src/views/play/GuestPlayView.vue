@@ -80,7 +80,8 @@
             <!-- 보내기는 등급 바로 밑: 등급을 막 본 순간이 자랑하고 싶은 마음이 가장 센 때다. '한 판 더'를 다음 목표 옆으로 올리며
                  보내기가 그 아래로 밀려났었다 (11/11 목적 다시 보기: 자랑·교류 동기, 3단계가 재는 것이 공유율) -->
             <div class="grid grid-cols-2 gap-2 mt-5">
-              <UiButton icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
+              <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
+              <UiButton v-if="!storyFailed" icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
               <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
               <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '결과 보내기' : '도전장 보내기' }}</UiButton>
             </div>
@@ -557,9 +558,11 @@ if (fromPlay) {
 const challengerGrade = computed(() => result.value?.challengerLine?.match(/\d등급/)?.[0] ?? `${result.value?.challengerScore ?? 0}점`)
 // 스토리 그림은 결과가 나오자마자 미리 찍어 둔다 (누른 순간 바로 넘겨야 사파리가 공유를 막지 않는다)
 const storyFile = ref<File | null>(null)
+const storyFailed = ref(false)
 const storyReady = computed(() => !!storyFile.value)
 async function prepareStory() {
   storyFile.value = null
+  storyFailed.value = false
   const r = improv.value
   if (!r || r.empty || !result.value) return
   // 가장 잘한 대답: 서버가 가장 높게 매긴 상황 (경로 10 리뷰 I7). 옛 판엔 없어서 그때만 가장 긴 대답
@@ -571,6 +574,7 @@ async function prepareStory() {
     storyFile.value = await componentFile(storyCard!, { grade: r.grade, rank: r.rank, score: result.value!.score, best }, 'dark', `match-improv-${playId.value}.png`)
   } catch {
     storyFile.value = null
+    storyFailed.value = true
   }
 }
 // 그림을 넘기면서, 그림을 누른 사람이 같은 상황을 풀 링크(공유 번호 포함)를 클립보드에 (인스타 링크 스티커에 붙인다)

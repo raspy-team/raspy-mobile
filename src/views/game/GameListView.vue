@@ -39,10 +39,15 @@
         <UiButton v-if="!lastGame" block variant="secondary" class="mt-3" to="/games">다른 게임</UiButton>
       </UiSection>
 
-      <button v-if="!showLocal" type="button" class="mt-6 w-full flex items-center justify-between rounded-xl bg-surface px-4 py-3.5 active:bg-surface-2" @click="showLocal = true">
-        <span class="t-heading">동네 경기</span>
-        <span class="t-caption flex items-center gap-1">{{ games.length ? `${games.length}개` : '' }}<UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" /></span>
-      </button>
+      <!-- 접혀 있어도 지도·경기 만들기는 바로 (앱 게임을 한 번 하면 홈이 계속 이 모양이라, 경기 만들기가 펼쳐야만 보였다 11/11) -->
+      <div v-if="!showLocal" class="mt-6 flex items-center rounded-xl bg-surface pr-2">
+        <button type="button" class="flex-1 min-w-0 flex items-center justify-between pl-4 pr-2 py-3.5 rounded-l-xl active:bg-surface-2" @click="showLocal = true">
+          <span class="t-heading">동네 경기</span>
+          <span class="t-caption flex items-center gap-1">{{ games.length ? `${games.length}개` : '' }}<UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" /></span>
+        </button>
+        <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
+        <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
+      </div>
     </template>
 
     <template v-if="!appPlayer || showLocal">

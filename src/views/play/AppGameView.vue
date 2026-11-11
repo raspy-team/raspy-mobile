@@ -226,7 +226,8 @@
               <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등</p>
               <!-- 보내기는 등급 바로 밑 (손님 결과와 같은 순서, 11/11 목적 다시 보기: 등급을 막 본 순간이 자랑 동기가 가장 세다) -->
               <div class="flex flex-wrap justify-center gap-2 mt-4">
-                <UiButton size="sm" icon="instagram" :disabled="!storyFile" @click="shareStory">인스타 스토리</UiButton>
+                <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
+                <UiButton v-if="!storyFailed" size="sm" icon="instagram" :disabled="!storyFile" @click="shareStory">인스타 스토리</UiButton>
                 <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
               </div>
               <p v-if="improvResult.weak" class="t-body mt-4 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
@@ -908,8 +909,10 @@ const NOTICE = isCapacitorApp ? '알림으로 알려 드릴게요' : '알림함(
 
 // 로그인한 임기응변 결과의 스토리 그림 (손님 결과와 같은 그림). 누른 순간 바로 넘겨야 사파리가 공유를 막지 않아 미리 찍어 둔다
 const storyFile = ref<File | null>(null)
+const storyFailed = ref(false)
 watch(() => [result.value?.gameId, result.value?.myFeedback], async () => {
   storyFile.value = null
+  storyFailed.value = false
   const r = improvResult.value
   const res = result.value
   if (!r || r.empty || !res || res.status === 'COMPLETED') return
@@ -923,6 +926,7 @@ watch(() => [result.value?.gameId, result.value?.myFeedback], async () => {
     storyFile.value = await componentFile(storyCard!, { grade: r.grade, rank: r.rank, score: res.myScore ?? 0, best }, 'dark', `match-improv-${res.gameId}.png`)
   } catch {
     storyFile.value = null
+    storyFailed.value = true
   }
 })
 function shareStory() {

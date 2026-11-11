@@ -100,9 +100,9 @@ const inAppBrowser = /Instagram|KAKAOTALK|FBAN|FBAV|Line\//i.test(navigator.user
 const active = ref(0)
 const storyShownBefore = (() => { try { return localStorage.getItem('story_shared') === '1' } catch { return false } })()
 const current = computed(() => VARIANTS[active.value].key)
-// 앱에서 인스타 스토리는 스티커 그림을 넘긴다 (배경은 고른 디자인의 색). 스티커를 못 찍었으면 고른 그림을 그대로 붙인다
-// (스티커만 기다리다 버튼이 끝없이 돌았다, 11/11 폰)
-const ready = computed(() => !!files[current.value] && (!hasNativeInstagram || !!files.sticker || !!failed.sticker))
+// 앱에서 인스타 스토리는 스티커 그림을 넘긴다 (배경은 고른 디자인의 색). 스티커가 아직 없으면 고른 그림을 그대로 붙인다
+// (스티커를 기다리다 버튼이 끝없이 돌았다, 11/11 아이폰)
+const ready = computed(() => !!files[current.value])
 const rail = ref<HTMLElement | null>(null)
 
 // 서명(k)이 붙은 주소는 서버가 준다 (번호만으로는 열리지 않는다)
@@ -123,8 +123,9 @@ watch(
     // 지난번에 고른 모양으로 연다 (열 때마다 첫 모양으로 돌아가 다시 넘겼다, 11/11 쌓이는 피로 전수표)
     const last = (() => { try { return Number(localStorage.getItem('share_variant') || 0) } catch { return 0 } })()
     if (last > 0 && last < VARIANTS.length) nextTick(() => pick(last))
-    // 앱(인스타 플러그인)에서는 인스타 버튼이 스티커를 쓰니 스티커부터 찍는다
-    const order = hasNativeInstagram ? [VARIANTS[2], VARIANTS[0], VARIANTS[1]] : VARIANTS
+    // 지금 보이는 그림부터 찍는다(버튼이 그 그림만 있으면 된다). 앱에서는 그다음 스티커 (인스타 편집기에 붙일 카드)
+    const first = VARIANTS[last > 0 && last < VARIANTS.length ? last : 0]
+    const order = [first, ...(hasNativeInstagram && first.key !== 'sticker' ? [VARIANTS[2]] : []), ...VARIANTS].filter((v, i, a) => a.indexOf(v) === i)
     for (const v of order) {
       try {
         const f = await storyFile(props.post, props.myId ?? null, v.key)
@@ -270,7 +271,7 @@ function go(key: Dest) {
   }
   // 스토리 링크 스티커: 그 경기로 바로 (서명 주소가 아직 없으면 홈)
   const home = storyHomeLink(props.post.id, shared.value ? link('story') : undefined, shareCode.value)
-  if (key === 'story' && hasNativeInstagram && (files.sticker || failed.sticker)) {
+  if (key === 'story' && hasNativeInstagram) {
     // 앱: 스포티파이처럼 인스타 편집기에 배경색 + 움직이는 결과 카드 (스티커를 못 찍었으면 고른 그림을 붙인다)
     return void openInstagramStoryNative(files.sticker || file, current.value, home).then((r) => {
       if (r === 'opened') return linkTip()

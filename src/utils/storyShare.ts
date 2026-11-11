@@ -31,7 +31,10 @@ export async function componentFile(component: any, props: Record<string, unknow
   }
 }
 
-const SNAP_LIMIT_MS = 15_000
+// 첫 장은 아이폰에서 오래 걸린다(글꼴을 받아 그림에 넣는다). 끝없이 돌지만 않게, 첫 장을 버리지는 않을 만큼
+const SNAP_LIMIT_MS = 45_000
+// 글꼴을 넣은 그림을 한 번 제대로 찍었나 (그 뒤로는 한 장이면 된다)
+let warmed = false
 
 async function snapFile(component: any, props: Record<string, unknown>, variant: StoryVariant, name: string): Promise<File> {
   const host = document.createElement('div')
@@ -71,15 +74,23 @@ async function snapFile(component: any, props: Record<string, unknown>, variant:
       excludeFonts: { domains: ['fonts.gstatic.com', 'fonts.googleapis.com'] },
     } as any
     // 사파리는 그림 속에 넣은 글꼴을 처음 몇 장에서 아직 못 읽어 대체 글꼴로 찍는다(점수가 줄을 넘었다).
-    // 첫 장은 버리고, 연달아 찍은 두 장이 바이트까지 같아지면 그것을 쓴다 (시험: 웹킷 새 창 첫 장 20번 모두 같은 그림, 11/9)
-    await snapdom.toBlob(el, opts).catch(() => null)
-    let blob: Blob = await snapdom.toBlob(el, opts)
-    for (let i = 0; i < 3; i++) {
-      const next: Blob = await snapdom.toBlob(el, opts)
-      if (await sameBytes(blob, next)) break
-      blob = next
+    // 첫 장은 버리고, 연달아 찍은 두 장이 바이트까지 같아지면 그것을 쓴다 (시험: 웹킷 새 창 첫 장 20번 모두 같은 그림, 11/9).
+    // 이 기다림은 화면을 연 뒤 처음 한 번만 하면 된다. 아이폰은 첫 장이 수십 초 걸리는데 그림마다 4~5번씩 다시 찍어
+    // 공유 시트의 인스타 버튼이 끝없이 돌았다 (11/11 아이폰 시뮬레이터: 첫 그림 10~30초, 그다음 0.5초)
+    let blob: Blob
+    if (!warmed) {
+      await snapdom.toBlob(el, opts).catch(() => null)
+      blob = await snapdom.toBlob(el, opts)
+      for (let i = 0; i < 3; i++) {
+        const next: Blob = await snapdom.toBlob(el, opts)
+        if (await sameBytes(blob, next)) break
+        blob = next
+      }
+    } else {
+      blob = await snapdom.toBlob(el, opts)
     }
     if (!blob || !blob.size) throw new Error('empty')
+    warmed = true
     return new File([blob], name, { type: 'image/png' })
   } finally {
     app.unmount()

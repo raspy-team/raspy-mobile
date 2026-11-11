@@ -15,7 +15,7 @@
         >
           <img v-if="urls[v.key]" :src="urls[v.key]" :alt="`${v.label} 미리보기`" class="w-full h-full" :class="v.key === 'sticker' ? 'object-contain p-3' : 'object-cover'" />
           <!-- 못 찍은 그림은 돌기만 하지 않고 그렇다고 말한다 (경로 8 P2) -->
-          <span v-else-if="failed[v.key]" class="w-full h-full flex items-center justify-center px-3 t-caption text-center break-keep">이 그림은 만들지 못했어요</span>
+          <span v-else-if="failed[v.key]" class="w-full h-full flex items-center justify-center px-3 t-caption text-center break-keep">이 그림은 잘 안 나왔어요</span>
           <UiSkeleton v-else class="w-full h-full rounded-none" />
         </button>
       </div>
@@ -47,7 +47,7 @@
     <!-- 인스타·카톡 앱 안 브라우저는 내려받기가 되지 않는다: 그림을 크게 띄워 길게 눌러 저장하게 한다 (경로 8: 저장되지 않아도 "그림을 저장했어요"라고 했다) -->
     <div v-if="saveView" class="fixed inset-0 z-[60] bg-black/90 flex flex-col items-center justify-center p-6" @click.self="saveView = ''">
       <img :src="saveView" alt="저장할 그림" class="max-h-[70dvh] rounded-2xl" />
-      <p class="mt-4 t-body text-white text-center break-keep">그림을 길게 눌러 저장하세요</p>
+      <p class="mt-4 t-body text-white text-center break-keep">그림을 꾹 눌러서 저장해 주세요</p>
       <button type="button" class="mt-3 h-11 px-5 rounded-full bg-white/15 text-white t-label" @click="saveView = ''">닫기</button>
     </div>
   </UiSheet>
@@ -62,7 +62,7 @@ import { UiSheet, UiSkeleton, UiSpinner } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
 import { useToast } from '../../../composables/useToast'
 import { copyStickerAndOpenInstagram, openInstagramStoryNative, shareFiles, storyFile, storyHomeLink, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
-import { hasNativeInstagram, isCapacitorApp } from '../../../utils/nativeBridge'
+import { hasNativeInstagram } from '../../../utils/nativeBridge'
 import { storyLine } from '../../../utils/storyLine'
 import { newShareCode, registerShare } from '../../../utils/shareRef'
 
@@ -75,15 +75,11 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 const { showToast } = useToast()
 
-const ALL_VARIANTS: { key: StoryVariant; label: string }[] = [
+const VARIANTS: { key: StoryVariant; label: string }[] = [
   { key: 'dark', label: '어둡게' },
   { key: 'volt', label: '볼트' },
   { key: 'sticker', label: '스티커' },
 ]
-// 앱(아이폰·안드로이드 웹뷰)에서는 화면을 그림으로 찍지 않고 서버가 그린 스토리 그림(/m/{경기}/story.png) 한 장을 쓴다.
-// 아이폰 앱에서 찍기가 끝나지 않아 공유 시트가 끝없이 돌았다(글꼴을 빼도 그대로, 11/12). 서버 그림은 받기만 하면 된다
-const serverOnly = isCapacitorApp
-const VARIANTS = serverOnly ? ALL_VARIANTS.slice(0, 1) : ALL_VARIANTS
 const DESTS = [
   { key: 'story', icon: 'instagram', label: '인스타 스토리' },
   { key: 'message', icon: 'comment', label: '카톡·메시지' },
@@ -115,6 +111,9 @@ const shared = ref<{ url: string; storyImage: string } | null>(null)
 const shareCode = ref('')
 let registered = false
 let run = 0
+// 아래 watch(immediate)가 바로 fetchLink를 부르므로 그보다 먼저 선언한다. 뒤에 두면 시트를 연 순간 오류가 나
+// 그림 찍기가 시작되지 않고 인스타 버튼이 끝없이 돌았다 (11/12, 소식에서 공유: 시트가 게시물을 들고 열려 처음부터 부른다)
+const linkFailed = ref(false)
 watch(
   () => props.post?.id,
   async (id) => {
@@ -127,13 +126,9 @@ watch(
     // 지난번에 고른 모양으로 연다 (열 때마다 첫 모양으로 돌아가 다시 넘겼다, 11/11 쌓이는 피로 전수표)
     const last = (() => { try { return Number(localStorage.getItem('share_variant') || 0) } catch { return 0 } })()
     if (last > 0 && last < VARIANTS.length) nextTick(() => pick(last))
-    if (serverOnly) {
-      serverStory(my).then((ok) => { if (!ok && my === run) failed.dark = true })
-      return
-    }
     // 지금 보이는 그림부터 찍는다(버튼이 그 그림만 있으면 된다). 앱에서는 그다음 스티커 (인스타 편집기에 붙일 카드)
     const first = VARIANTS[last > 0 && last < VARIANTS.length ? last : 0]
-    const order = [first, ...(hasNativeInstagram && first.key !== 'sticker' ? [ALL_VARIANTS[2]] : []), ...VARIANTS].filter((v, i, a) => a.indexOf(v) === i)
+    const order = [first, ...(hasNativeInstagram && first.key !== 'sticker' ? [VARIANTS[2]] : []), ...VARIANTS].filter((v, i, a) => a.indexOf(v) === i)
     for (const v of order) {
       try {
         const f = await storyFile(props.post, props.myId ?? null, v.key)
@@ -151,7 +146,6 @@ watch(
   { immediate: true },
 )
 // 서명 주소 받기. 실패하면 '만드는 중'만 되풀이하지 않게 표시해 두고, 누를 때 다시 받는다 (목적 판정 8)
-const linkFailed = ref(false)
 function fetchLink(my = run, id = Number(props.post?.id)) {
   linkFailed.value = false
   GET('/api/games/{gameId}/share-link', { path: { gameId: id } }).then(({ data }) => {
@@ -161,8 +155,7 @@ function fetchLink(my = run, id = Number(props.post?.id)) {
   })
 }
 async function serverStory(my: number): Promise<boolean> {
-  // 서명 주소가 올 때까지 (못 받았으면 바로 실패로)
-  for (let i = 0; i < 75 && !shared.value && !linkFailed.value && my === run; i++) await new Promise((r) => setTimeout(r, 200))
+  for (let i = 0; i < 20 && !shared.value && my === run; i++) await new Promise((r) => setTimeout(r, 200))
   if (!shared.value || my !== run) return false
   const res = await fetch(shared.value.storyImage).catch(() => null)
   if (!res?.ok || my !== run) return false
@@ -219,21 +212,21 @@ function markShared() {
 }
 const line = computed(() => (props.post ? storyLine(props.post, props.myId ?? null) : ''))
 const close = () => emit('close')
-const copied = (url: string, msg = '링크를 복사했어요') => void copyText(url).then((ok) => {
+const copied = (url: string, msg = '링크 복사해 뒀어요') => void copyText(url).then((ok) => {
   if (ok) markShared()
-  showToast(ok ? msg : '복사하지 못했어요')
+  showToast(ok ? msg : '복사가 안 됐어요. 한 번만 다시 눌러 주세요')
 })
 
 // 스토리 속 카드를 누르면 홈으로 가게 하는 공개 방법은 없다(스포티파이 링크는 메타 제휴 전용). 링크를 클립보드에 넣어 두었으니 링크 스티커로 붙이게 알린다
 function linkTip() {
   markShared()
   // 스토리를 올려 본 사람에게는 어디에 붙이는지 다시 말하지 않는다 (story_shared, 손님 결과와 같은 표시)
-  showToast(storyShownBefore ? '홈 링크를 복사했어요' : '홈 링크를 복사했어요. 인스타에서 링크 스티커에 붙여 넣으세요')
+  showToast(storyShownBefore ? '링크 복사해 뒀어요' : '링크 복사해 뒀어요. 인스타에서 링크 스티커에 붙여 넣으시면 돼요')
   close()
 }
 function after(r: ShareResult, file?: File) {
   if (r === 'cancelled') return
-  if (r === 'unsupported') return showToast('이 앱에서는 아직 못 올려요. 휴대폰 브라우저의 matchapp.me에서 올려 주세요')
+  if (r === 'unsupported') return showToast('죄송해요, 앱에서는 아직 안 돼요. 휴대폰 브라우저로 matchapp.me에 들어가서 올려 주세요')
   markShared()
   if (r === 'saved') {
     // 앱 안 브라우저는 내려받기가 실제로 되지 않는다: 그림을 띄워 길게 눌러 저장하게 한다
@@ -241,7 +234,7 @@ function after(r: ShareResult, file?: File) {
       saveView.value = URL.createObjectURL(file)
       return
     }
-    showToast('그림을 내려받았어요')
+    showToast('그림 저장해 뒀어요')
   }
   close()
 }
@@ -253,10 +246,10 @@ function go(key: Dest) {
     const url = link(key === 'copy' ? 'copy' : 'kakao')
     if (!url && linkFailed.value) {
       fetchLink()
-      return showToast('링크를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요')
+      return showToast('링크가 잘 안 만들어졌어요. 조금 있다가 다시 눌러 주세요')
     }
-    if (!url) return showToast('링크를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요')
-    if (key === 'copy' || !navigator.share) return copied(url, key === 'copy' ? '링크를 복사했어요' : '링크를 복사했어요. 붙여 넣어 보내세요')
+    if (!url) return showToast('링크 만드는 중이에요. 잠깐만요')
+    if (key === 'copy' || !navigator.share) return copied(url, key === 'copy' ? '링크 복사해 뒀어요' : '링크 복사해 뒀어요. 붙여 넣어서 보내 주세요')
     // 카톡·메시지: 링크만 보낸다. 카톡이 경기 그림을 펼쳐 보여 준다 (미리보기 그림 og.png)
     return void navigator.share({ text: line.value, url }).then(() => {
       markShared()
@@ -272,11 +265,11 @@ function go(key: Dest) {
       const other = VARIANTS.findIndex((v) => files[v.key])
       if (other >= 0) {
         pick(other)
-        return showToast('이 그림은 만들지 못했어요. 다른 그림으로 바꿨어요')
+        return showToast('이 그림은 잘 안 나와서 다른 걸로 바꿔 드렸어요')
       }
-      return showToast('그림을 만들지 못했어요. 링크로 보내 주세요')
+      return showToast('죄송해요, 그림이 잘 안 나왔어요. 링크로 보내 주세요')
     }
-    return showToast('그림을 만드는 중이에요')
+    return showToast('그림 만드는 중이에요. 잠깐만요')
   }
   // 스토리 링크 스티커: 그 경기로 바로 (서명 주소가 아직 없으면 홈)
   const home = storyHomeLink(props.post.id, shared.value ? link('story') : undefined, shareCode.value)
@@ -284,7 +277,7 @@ function go(key: Dest) {
     // 앱: 스포티파이처럼 인스타 편집기에 배경색 + 움직이는 결과 카드 (스티커를 못 찍었으면 고른 그림을 붙인다)
     return void openInstagramStoryNative(files.sticker || file, current.value, home).then((r) => {
       if (r === 'opened') return linkTip()
-      if (r === 'not_installed') return showToast('인스타그램 앱이 있어야 올릴 수 있어요')
+      if (r === 'not_installed') return showToast('인스타그램 앱이 깔려 있어야 올릴 수 있어요')
       shareFiles([file]).then((r) => after(r, file))
     })
   }

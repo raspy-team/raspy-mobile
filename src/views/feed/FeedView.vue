@@ -189,7 +189,9 @@ const { showToast } = useToast()
 const userId = route.query.userId ? Number(route.query.userId) : null
 const focusId = route.query.gameId || null
 const userName = ref('')
-const tab = ref(['friends', 'all'].includes(route.query.tab) ? route.query.tab : 'near')
+// 주소에 탭이 없으면 마지막으로 본 탭 (열 때마다 '동네'로 돌아가 다시 골랐다, 11/11 쌓이는 피로 전수표)
+const lastTab = (() => { try { return localStorage.getItem('feed_tab') } catch { return null } })()
+const tab = ref(['friends', 'all'].includes(route.query.tab) ? route.query.tab : ['near', 'friends', 'all'].includes(lastTab) ? lastTab : 'near')
 const posts = ref([])
 const page = ref(0)
 // 첫 장이 매긴 기준 시각. 다음 장도 같은 기준으로 받아야 순서가 흔들리지 않는다

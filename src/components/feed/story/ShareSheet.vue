@@ -42,7 +42,7 @@
       </button>
     </div>
     <!-- 스티커일 때만 보이지만 자리는 늘 잡아 둔다 (넘길 때 시트 높이가 튀지 않게) -->
-    <p class="mt-4 t-caption text-center break-keep" :class="{ invisible: current !== 'sticker' || hasNativeInstagram }">인스타에서 사진을 고르면 이 카드가 스티커로 붙어요</p>
+    <p class="mt-4 t-caption text-center break-keep" :class="{ invisible: current !== 'sticker' || hasNativeInstagram || storyShownBefore }">인스타에서 사진을 고르면 이 카드가 스티커로 붙어요</p>
 
     <!-- 인스타·카톡 앱 안 브라우저는 내려받기가 되지 않는다: 그림을 크게 띄워 길게 눌러 저장하게 한다 (경로 8: 저장되지 않아도 "그림을 저장했어요"라고 했다) -->
     <div v-if="saveView" class="fixed inset-0 z-[60] bg-black/90 flex flex-col items-center justify-center p-6" @click.self="saveView = ''">
@@ -56,7 +56,7 @@
 <script setup lang="ts">
 // 공유 주소는 matchapp.me/m/{경기}. Vercel이 서버로 넘겨 경기마다 미리보기 그림을 낸다 (raspy-api share/)
 // ?s= 는 어디로 보냈는지. 받은 사람이 '나도 한 판'을 누르면 유입 꼬리표(utm_source)가 되어 관리자 > 유입에 잡힌다
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch, nextTick } from 'vue'
 import { GET } from '@/api/client'
 import { UiSheet, UiSkeleton, UiSpinner } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
@@ -98,6 +98,7 @@ const currentFailed = computed(() => !!failed[VARIANTS[active.value].key])
 const saveView = ref('')
 const inAppBrowser = /Instagram|KAKAOTALK|FBAN|FBAV|Line\//i.test(navigator.userAgent)
 const active = ref(0)
+const storyShownBefore = (() => { try { return localStorage.getItem('story_shared') === '1' } catch { return false } })()
 const current = computed(() => VARIANTS[active.value].key)
 // 앱에서 인스타 스토리는 늘 스티커 그림을 넘긴다 (배경은 고른 디자인의 색)
 const ready = computed(() => !!files[current.value] && (!hasNativeInstagram || !!files.sticker))
@@ -118,6 +119,9 @@ watch(
     shareCode.value = newShareCode()
     registered = false
     fetchLink(my, Number(id))
+    // 지난번에 고른 모양으로 연다 (열 때마다 첫 모양으로 돌아가 다시 넘겼다, 11/11 쌓이는 피로 전수표)
+    const last = (() => { try { return Number(localStorage.getItem('share_variant') || 0) } catch { return 0 } })()
+    if (last > 0 && last < VARIANTS.length) nextTick(() => pick(last))
     // 앱(인스타 플러그인)에서는 인스타 버튼이 스티커를 쓰니 스티커부터 찍는다
     const order = hasNativeInstagram ? [VARIANTS[2], VARIANTS[0], VARIANTS[1]] : VARIANTS
     for (const v of order) {
@@ -185,6 +189,7 @@ function pick(i: number) {
   const item = el?.children[i] as HTMLElement | undefined
   if (el && item) el.scrollTo({ left: item.offsetLeft - (el.clientWidth - item.offsetWidth) / 2, behavior: 'smooth' })
   active.value = i
+  try { localStorage.setItem('share_variant', String(i)) } catch { /* 못 남기면 첫 모양부터 */ }
 }
 
 // 서버 주소의 앞(matchapp.me)을 지금 연 곳으로 바꾼다 (미리보기·로컬에서도 같은 곳으로 돌아오게)
@@ -196,6 +201,7 @@ const link = (s: string) => {
 }
 /** 처음 보낼 때 번호를 서버에 남긴다 (시트만 열고 닫으면 남기지 않는다) */
 function markShared() {
+  try { localStorage.setItem('story_shared', '1') } catch { /* 안내가 한 번 더 보일 뿐 */ }
   if (registered || !shareCode.value) return
   registered = true
   registerShare(shareCode.value, shared.value ? new URL(shared.value.url).pathname : `/m/${props.post?.id ?? ''}`)
@@ -210,7 +216,8 @@ const copied = (url: string, msg = '링크를 복사했어요') => void copyText
 // 스토리 속 카드를 누르면 홈으로 가게 하는 공개 방법은 없다(스포티파이 링크는 메타 제휴 전용). 링크를 클립보드에 넣어 두었으니 링크 스티커로 붙이게 알린다
 function linkTip() {
   markShared()
-  showToast('홈 링크를 복사했어요. 인스타에서 링크 스티커에 붙여 넣으세요')
+  // 스토리를 올려 본 사람에게는 어디에 붙이는지 다시 말하지 않는다 (story_shared, 손님 결과와 같은 표시)
+  showToast(storyShownBefore ? '홈 링크를 복사했어요' : '홈 링크를 복사했어요. 인스타에서 링크 스티커에 붙여 넣으세요')
   close()
 }
 function after(r: ShareResult, file?: File) {

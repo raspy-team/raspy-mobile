@@ -98,7 +98,7 @@ import {
 } from '../../components/ui'
 import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
-import { markAllNotificationsRead, markNotificationRead, refreshInbox, useInbox } from '../../stores/inbox'
+import { markAllNotificationsRead, markNotificationRead, refreshInbox, useInbox, markInboxSeen } from '../../stores/inbox'
 import { timeAgo } from '../../utils/format'
 
 const router = useRouter()
@@ -218,6 +218,7 @@ function goProfile(id) {
 }
 
 onMounted(async () => {
+  markInboxSeen()
   await refreshInbox()
   // 위 줄이 맡은 친구 요청 알림은 여기서 읽은 것으로 (안 읽은 점이 보이지 않는 알림 때문에 남지 않게)
   inbox.notifications.filter((n) => isPersonFriendRequest(n) && !n.isRead).forEach(markNotificationRead)

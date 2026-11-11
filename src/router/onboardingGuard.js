@@ -8,11 +8,18 @@ import { GUEST_GAMES } from '../utils/guestGames'
 const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/dev', '/club/join', '/s/', '/try/', '/live/', '/watch/', '/vote/']
 // 확인한 표시는 그 로그인(토큰)에만 붙인다. 로그아웃이 페이지를 새로 열지 않아, 같은 탭에서 첫 설정을 안 끝낸 아이디로 로그인하면
 // /welcome을 건너뛰었고, 로그아웃한 사람도 열린 주소처럼 지나갔다 (경로 1 리뷰 N12)
-let doneFor = null
+// 확인한 토큰은 기기에도 남긴다: 첫 설정은 한 번 끝나면 되돌아가지 않는데, 앱을 열 때마다 첫 화면이 서버 답(최대 6초)을 기다렸다 (11/11 쌓이는 피로 전수표)
+const KEY = 'onboarded_for'
+let doneFor = (() => { try { return localStorage.getItem(KEY) } catch { return null } })()
 const token = () => localStorage.getItem('raspy_access_token2')
 
+function remember(t) {
+  doneFor = t
+  try { if (t) localStorage.setItem(KEY, t) } catch { /* 다음에 한 번 더 물을 뿐 */ }
+}
+
 export function markOnboarded() {
-  doneFor = token()
+  remember(token())
 }
 
 /** 로그인 전(또는 토큰이 끝난) 사람이 갈 곳: 조사의 도착 게임은 가입 없이 한 판부터 (3단계 '로그인을 미룰까' C), 나머지는 시작 화면 */
@@ -35,7 +42,7 @@ export function installOnboardingGuard(router) {
       // 401이면 갈 곳은 여기서 정한다 (api.js가 따로 /init으로 보내지 않게)
       const { data } = await api.get('/api/auth/onboarding', { timeout: 6000, skipAuthRedirect: true })
       if (data.termsAgreed && data.onboarded) {
-        doneFor = token()
+        remember(token())
         return true
       }
       if (!to.matched.some((r) => r.path.includes(':pathMatch'))) rememberReturnTo(to.fullPath)

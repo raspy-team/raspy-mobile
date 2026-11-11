@@ -1,8 +1,9 @@
 <template>
   <UiSheet :model-value="modelValue" :title="counter ? '내가 생각하는 점수' : '점수만 적기'" @update:model-value="emit('update:modelValue', $event)">
     <p v-if="counter" class="t-caption mb-4">고친 결과가 새 결과가 되고, 이번엔 {{ isGroup ? '다른 사람' : opponentName + (format === 'TEAMS' ? '' : '님') }}이 확인해요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
-    <p v-else-if="isGroup" class="t-caption mb-4">다른 사람 한 명이 확인하면 기록돼요.</p>
-    <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워 두세요. {{ opponentName }}{{ format === 'TEAMS' ? '' : '님' }}이 확인하면 기록돼요.</p>
+    <!-- 상대가 확인하지 않아도 24시간 뒤 확정된다는 것을 처음 낼 때도 (고쳐 낼 때만 말했다: 상대가 답하지 않으면 끝없이 기다리는 줄 알았다, 11/11 다른 사람 전수표) -->
+    <p v-else-if="isGroup" class="t-caption mb-4">다른 사람 한 명이 확인하면 기록돼요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
+    <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워 두세요. {{ opponentName }}{{ format === 'TEAMS' ? '' : '님' }}이 확인하면 기록되고, 24시간 안에 답이 없으면 그대로 확정돼요.</p>
     <p v-if="warning" class="text-sm text-danger-fg mb-4">{{ warning }}</p>
 
     <!-- 셋 이상이 각자: 등수로 또는 점수로 -->

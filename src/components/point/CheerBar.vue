@@ -6,7 +6,8 @@
       <span class="t-micro">시작 전에만</span>
     </div>
     <!-- 처음 보는 사람에게 포인트·배수·확률이 무슨 뜻인지 한 줄로 (경로 4 훑기) -->
-    <p class="t-caption mt-1 break-keep">이길 쪽을 고르면 끝나고 맞혔는지 알려요. 포인트를 걸면 맞힐 때 배수만큼 돌려받아요(이길 확률이 낮을수록 배수가 커요)</p>
+    <!-- 세 번 본 뒤에는 뺀다 (경기마다 같은 설명이었다, 11/11 쌓이는 피로 전수표) -->
+    <p v-if="explainCheer" class="t-caption mt-1 break-keep">이길 쪽을 고르면 끝나고 맞혔는지 알려요. 포인트를 걸면 맞힐 때 배수만큼 돌려받아요(이길 확률이 낮을수록 배수가 커요)</p>
     <!-- 편마다 배수(이기면 몇 배로 돌려받나)·이길 확률·응원 수. 편은 1:1이면 사람, 팀이면 팀 -->
     <div class="mt-3 grid gap-2" :style="{ gridTemplateColumns: `repeat(${Math.min(state.board.length, 3)}, minmax(0, 1fr))` }">
       <button
@@ -56,6 +57,13 @@
 // 기본은 예측만(0P), 포인트(10~100P, 하루 300P)는 원할 때만. 배수 = 1 ÷ 이길 확률 (×1.05~×3.0), 고를 때 정해진다.
 // 편마다 못 고르는 까닭이 있으면 서버가 준다 (지금은 없다: 아는 사이도 다 연다, 고병연 11/3). 경기 중 응원(포인트 없음)은 중계 화면(/live)에서
 import { ref, computed, onMounted } from 'vue'
+const explainCheer = (() => {
+  try {
+    const n = Number(localStorage.getItem('explain_cheer') || 0)
+    localStorage.setItem('explain_cheer', String(n + 1))
+    return n < 3
+  } catch { return true }
+})()
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { UiButton, UiChip } from '../ui'

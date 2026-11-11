@@ -21,7 +21,9 @@
         </UiCard>
         <!-- 흔들기는 판이 시작되기 전에 허용해 둔다 (시작한 뒤에 누르면 그만큼 손해). '센서'라는 말은 쓰지 않는다 (경로 3 훑기) -->
         <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">흔들기 미리 허용하기</UiButton>
-        <UiButton block variant="ghost" class="mt-4" @click="leave">그만 찾기</UiButton>
+        <!-- 기다리지 않고 바로 AI 주민과 (실시간 대기실과 같다, 11/11 고병연) -->
+        <UiButton v-if="!state.fixture" block variant="secondary" class="mt-4" @click="callBotNow">기다리지 않고 AI 주민과 하기</UiButton>
+        <UiButton block variant="ghost" class="mt-2" @click="leave">그만 찾기</UiButton>
       </template>
 
       <!-- 흔들기 대결: 폰을 흔든 횟수를 서버가 센다 -->
@@ -317,6 +319,14 @@ async function again() {
 }
 
 let botCalled = false
+function callBotNow() {
+  const s = state.value
+  if (!s || botCalled) return
+  botCalled = true
+  POST('/api/app-games/battle/{gameId}/bot', { path: { gameId: s.gameId } })
+    .then(({ data }) => apply(data))
+    .catch(() => { botCalled = false; showToast('AI 주민을 부르지 못했어요. 잠시 뒤 다시 해 주세요') })
+}
 const timer = setInterval(() => {
   now.value = Date.now()
   const s = state.value

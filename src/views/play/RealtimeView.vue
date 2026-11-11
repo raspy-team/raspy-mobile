@@ -40,10 +40,9 @@
             <li v-for="(line, i) in state.howTo" :key="i" class="t-caption text-fg-muted break-keep">· {{ line }}</li>
           </ul>
         </section>
-        <!-- 하루 기다리는 게임은 봇을 저절로 부르지 않는다: 원하면 바로 봇과 -->
-        <UiButton v-if="longLobby && !state.fixture && !state.invitee" block variant="secondary" class="mt-4" :disabled="waited < state.botAfterSeconds" @click="callBot">
-          {{ waited < state.botAfterSeconds ? `${state.botAfterSeconds - waited}초 뒤 AI 주민과 할 수 있어요` : '기다리지 않고 AI 주민과 하기' }}
-        </UiButton>
+        <!-- 기다리지 않고 바로 AI 주민과: 처음부터 누를 수 있다 (11/11 고병연: 'N초 뒤 할 수 있어요'로 막아 두던 것을 없앤다).
+             사람을 기다리는 사람에게는 보통 대기실이면 botAfter 뒤 저절로 들어온다 -->
+        <UiButton v-if="!state.fixture && !state.invitee" block variant="secondary" class="mt-4" @click="callBot">기다리지 않고 AI 주민과 하기</UiButton>
         <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="ghost" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">{{ state.invitee ? '도전 취소' : '그만 찾기' }}</UiButton>
@@ -321,6 +320,7 @@ watch(key, async (_, before) => {
 async function callBot() {
   const s = state.value
   if (!s) return
+  botCalled = true  // 저절로 부르는 쪽(아래 타이머)과 겹치지 않게
   try {
     apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
   } catch (e) {

@@ -511,16 +511,16 @@ async function load() {
   } finally {
     loading.value = false
   }
-  await loadFriendStatus()
-  if (user.value) {
-    seats.value = (await GET('/api/champions/users/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: null }))).data ?? { belts: [], crowns: [] }
-    loadBests(user.value.id)
-  }
-  // 많이 쓴 능력 (없어도 화면은 그대로)
-  if (user.value) {
-    abilities.value = (await GET('/api/rules/top-played-abilities/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data
-    gameTiers.value = (await GET('/api/users/{userId}/game-tiers', { path: { userId: user.value.id } }).catch(() => ({ data: [] }))).data || []
-  }
+  // 프로필 다음 것들은 서로 기다릴 까닭이 없다: 한꺼번에 부른다 (예전엔 하나씩 기다려 열 때마다 네 번 기다렸다, 11/11 쌓이는 피로 전수표)
+  const uid = user.value?.id
+  await Promise.all([
+    loadFriendStatus(),
+    uid && GET('/api/champions/users/{userId}', { path: { userId: uid } }).catch(() => ({ data: null })).then((r) => (seats.value = r.data ?? { belts: [], crowns: [] })),
+    uid && loadBests(uid),
+    // 많이 쓴 능력 (없어도 화면은 그대로)
+    uid && GET('/api/rules/top-played-abilities/{userId}', { path: { userId: uid } }).catch(() => ({ data: [] })).then((r) => (abilities.value = r.data)),
+    uid && GET('/api/users/{userId}/game-tiers', { path: { userId: uid } }).catch(() => ({ data: [] })).then((r) => (gameTiers.value = r.data || [])),
+  ])
   // 경기 결과를 보내고 넘어온 경우(?id=경기) 그 경기를 보여준다
   if (highlightId.value) {
     await nextTick()

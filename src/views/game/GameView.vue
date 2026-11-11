@@ -424,7 +424,7 @@ async function cancelApproval(game, a) {
 }
 
 async function cancelRequest(game) {
-  if (!(await confirmDialog({ title: '신청을 취소할까요?', confirmText: '신청 취소' }))) return
+  // 확인창은 뺐다: 다시 신청할 수 있고, 홈 카드는 묻지 않았다 (11/11 쌓이는 피로 전수표)
   try {
     await api.post('/api/games/cancel-request', { gameId: game.id })
     sentGames.value = sentGames.value.filter((g) => g.id !== game.id)
@@ -761,13 +761,18 @@ async function submitPlace() {
   }
 }
 
+// 시작 사진을 세 번 연달아 건너뛴 사람은 시트 없이 바로 시작한다. 사진은 점수판 '더보기 › 사진 찍기'로 언제든 (11/11 쌓이는 피로 전수표)
+const skipKey = 'start_photo_skips'
+const skips = () => { try { return Number(localStorage.getItem(skipKey) || 0) } catch { return 0 } }
 function goCamera() {
   capturedPhotoFile.value = null
+  if (skips() >= 3) return confirmStart()
   showCameraModal.value = true
 }
 
 function onPhotoCapture(file) {
   capturedPhotoFile.value = file
+  try { localStorage.setItem(skipKey, file ? '0' : String(skips() + 1)) } catch { /* 다음에도 시트가 열릴 뿐 */ }
   confirmStart()
 }
 

@@ -240,7 +240,12 @@
             <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
             <template v-if="ladderTo">
               <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
-              <p class="t-caption mt-1">도전장을 메시지로 보냈어요. {{ ladderName }}님이 같은 {{ key === 'improv' ? '상황' : '문제' }}을 풀면 승패가 나요</p>
+              <p class="t-caption mt-1">도전장을 메시지로 보냈어요. {{ ladderName }}님이 하루 안에 같은 {{ key === 'improv' ? '상황' : '문제' }}을 풀면 승패가 나요</p>
+            </template>
+            <!-- 친구에게 도전장을 보냈으면 하루 동안은 그 친구만 기다린다: 'N분 안에 AI 주민이 풀어요'는 맞지 않았다 (11/11 다른 사람 전수표) -->
+            <template v-else-if="challengeSentFor === result.gameId">
+              <p class="t-heading mt-6">친구를 기다려요</p>
+              <p class="t-caption mt-1">친구가 하루 안에 링크를 열어 풀면 승패가 나요. 하루가 지나면 다른 사람과 붙어요. 결과가 나오면 {{ NOTICE }}</p>
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
@@ -638,23 +643,25 @@ async function load() {
   missing.value = !game.value
   if (!game.value) return
   // 게임 목록만 있으면 한 판은 할 수 있다. 내 대결·순위·기록·투표는 하나가 실패해도 그 칸만 비운다 (경로 2 리뷰 N11: 순위만 못 불러와도 '게임을 불러오지 못했어요'였다)
-  const mine = await GET('/api/app-games/{key}/duels', { path: { key: key.value } }).catch(() => null)
-  if (mine) duels.value = mine.data
-  // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
-  if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
-  if (game.value) {
-    const data = (await GET('/api/rules/{ruleId}/rankings', { path: { ruleId: game.value.ruleId } }).catch(() => null))?.data
-    if (data) {
-      ranking.value = (data.rankings ?? []).slice(0, 10)
-      rankingTotal.value = data.rankings?.length ?? 0
-      baselines.value = data.baselines ?? []
-    }
-  }
-  if (game.value?.recordable) await loadBoard().catch(() => {})
-  if (game.value?.judge === 'VOTE') {
-    const v = await GET('/api/app-games/{key}/votes', { path: { key: key.value } }).catch(() => null)
-    if (v) votes.value = v.data
-  }
+  // 서로 기다릴 까닭이 없어 한꺼번에 부른다 (열 때마다 넷을 줄지어 기다렸다, 11/11 쌓이는 피로 전수표)
+  const g = game.value
+  await Promise.all([
+    GET('/api/app-games/{key}/duels', { path: { key: key.value } }).catch(() => null).then((mine) => {
+      if (mine) duels.value = mine.data
+      // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
+      if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
+    }),
+    g && GET('/api/rules/{ruleId}/rankings', { path: { ruleId: g.ruleId } }).catch(() => null).then((r) => {
+      const data = r?.data
+      if (data) {
+        ranking.value = (data.rankings ?? []).slice(0, 10)
+        rankingTotal.value = data.rankings?.length ?? 0
+        baselines.value = data.baselines ?? []
+      }
+    }),
+    g?.recordable && loadBoard().catch(() => {}),
+    g?.judge === 'VOTE' && GET('/api/app-games/{key}/votes', { path: { key: key.value } }).catch(() => null).then((v) => { if (v) votes.value = v.data }),
+  ])
 }
 
 async function loadBoard() {
@@ -802,11 +809,14 @@ function until(at?: string) {
 
 /** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
 const challenging = ref(false)
+// 친구에게 도전장을 보낸 판 (기다림 문구가 바뀐다)
+const challengeSentFor = ref<number | null>(null)
 async function sendChallenge(gameId: number) {
   track('result_challenge', { gameKey: key.value, value: `duel=${gameId}${improvResult.value?.grade ? `;grade=${improvResult.value.grade}` : ''}` })
   challenging.value = true
   try {
     await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
+    challengeSentFor.value = gameId
     // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
     // 가입 없이 할 수 있는 게임이면 받은 친구가 가입 없이 바로 같은 문제로 (경로 2 리뷰 N1: /challenge는 가입 벽이었다)
     const link = key.value in GUEST_GAMES ? `${window.location.origin}/try/${key.value}?d=${gameId}` : `${window.location.origin}/challenge/${gameId}`

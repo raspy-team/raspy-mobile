@@ -125,7 +125,7 @@
 
 <script setup>
 // 홈: 앱 게임을 한 사람은 '내 판'이 먼저, 동네 경기만 하는 사람은 동네 경기 목록 (목적 판정 11/11 4번)
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
@@ -182,7 +182,9 @@ function gradeOf(d) {
   const m = d.myFeedback?.match(/^(\d)등급/)
   return m ? `${m[1]}등급` : d.myScore != null ? `${Math.round(d.myScore)}점` : ''
 }
-const showLocal = ref(false)
+// 동네 경기를 펼쳤는지 기억한다 (올 때마다 접혀 다시 눌렀다, 11/11 쌓이는 피로 전수표)
+const showLocal = ref((() => { try { return localStorage.getItem('home_show_local') === '1' } catch { return false } })())
+watch(showLocal, (v) => { try { localStorage.setItem('home_show_local', v ? '1' : '0') } catch { /* 다음에 접혀 있을 뿐 */ } })
 
 const route = useRoute()
 const router = useRouter()

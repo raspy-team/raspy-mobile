@@ -12,7 +12,17 @@ const state = reactive({
   loaded: false,
   // 셋 다 실패했다: '새 알림이 없어요'로 보이면 푸시를 보고 들어온 사람이 '없다'고 믿는다 (목적 판정 6)
   failed: false,
+  // 알림함을 마지막으로 연 때. 종의 점은 그 뒤에 온 안 읽은 알림만 센다 (11/11 쌓이는 피로 전수표: 끝난 알림·주변 소식이
+  // 하나라도 남으면 점이 꺼질 날이 없었다). 목록 안의 '안 읽음' 표시는 그대로
+  seenAt: (() => { try { return localStorage.getItem('inbox_seen_at') || '' } catch { return '' } })(),
 })
+
+/** 알림함을 열었다: 종의 점을 끈다 */
+export function markInboxSeen() {
+  const now = new Date().toISOString()
+  state.seenAt = now
+  try { localStorage.setItem('inbox_seen_at', now) } catch { /* 못 남기면 다음에 점이 다시 보일 뿐 */ }
+}
 
 let inflight = null
 // 계정이 바뀌면(로그아웃·탈퇴) 늘어난다: 앞 계정으로 보낸 요청이 늦게 돌아와도 담지 않는다
@@ -73,6 +83,7 @@ export async function markAllNotificationsRead() {
 }
 
 export function useInbox() {
-  const unreadNotifications = computed(() => state.notifications.filter((n) => !n.isRead).length + state.friendRequests.length)
+  const seen = () => (state.seenAt ? new Date(state.seenAt).getTime() : 0)
+  const unreadNotifications = computed(() => state.notifications.filter((n) => !n.isRead && new Date(n.createdAt).getTime() > seen()).length + state.friendRequests.length)
   return { inbox: state, unreadNotifications, dmUnread: computed(() => state.dmUnread) }
 }

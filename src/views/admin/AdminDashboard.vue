@@ -244,7 +244,6 @@
         <UiList>
           <UiListItem icon="fas fa-users" title="사용자 찾기" :subtitle="users.length ? userCount : ''" chevron @click="openUsers" />
           <UiListItem icon="fas fa-user-plus" title="그룹 계정 만들기" to="/group/register" chevron />
-          <UiListItem icon="fas fa-book-open" title="규칙 둘러보기" to="/rules" chevron />
         </UiList>
       </UiSection>
     </main>

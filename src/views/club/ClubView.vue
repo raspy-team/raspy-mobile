@@ -95,6 +95,9 @@
           <p v-else class="t-caption">다가오는 일정이 없어요</p>
         </UiSection>
 
+        <!-- 멤버가 아니면 교류전·대회·우리끼리 순위·친선전을 접는다: 들어갈지 고르러 온 사람은 얼굴 줄·소개·공지·멤버로 고른다 (목적 판정 7) -->
+        <UiButton v-if="!isMember && !activityOpen" block variant="ghost" class="mt-6" @click="activityOpen = true">교류전·대회·경기 보기</UiButton>
+        <template v-if="isMember || activityOpen">
         <!-- 교류전: 동호회 대 동호회 -->
         <UiSection title="교류전" class="mt-8">
           <template v-if="isStaff" #action><UiButton variant="ghost" size="sm" icon="swords" @click="openPropose">교류전 신청</UiButton></template>
@@ -112,7 +115,7 @@
 
         <!-- 대회: 이 동호회가 연 대회 (월례대회 등) -->
         <UiSection title="대회" class="mt-8">
-          <template v-if="isStaff" #action><UiButton variant="ghost" size="sm" icon="trophy" @click="router.push(`/tournaments?create=1&clubId=${id}`)">대회 만들기</UiButton></template>
+          <template v-if="isStaff" #action><UiButton variant="ghost" size="sm" icon="trophy" @click="tournamentOpen = true">대회 만들기</UiButton></template>
           <div v-if="tournaments.length" class="space-y-2">
             <TournamentRow v-for="t in tournaments" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
           </div>
@@ -139,6 +142,7 @@
           </div>
           <p v-else class="t-caption">아직 동호회 경기가 없어요</p>
         </UiSection>
+        </template>
 
         <UiSection :title="`멤버 ${detail.members.length}`" class="mt-8">
           <UiList>
@@ -188,7 +192,11 @@
     <!-- 교류전 신청 -->
     <UiSheet v-model="proposeOpen" title="교류전 신청">
       <div class="space-y-3">
-        <p v-if="!detail?.club.mainRuleTitle" class="t-caption">먼저 동호회 꾸미기에서 대표 종목을 정해 주세요. 교류전은 대표 종목으로 해요</p>
+        <template v-if="!detail?.club.mainRuleTitle">
+          <p class="t-caption">교류전은 대표 종목으로 해요. 먼저 대표 종목을 정해 주세요</p>
+          <!-- 글만 있고 버튼이 없어 시트를 닫고 연필을 찾아야 했다 (목적 판정 7) -->
+          <UiButton block @click="proposeOpen = false; openSettings()">대표 종목 정하기</UiButton>
+        </template>
         <template v-else>
           <p class="t-caption">종목: <b class="text-fg">{{ detail.club.mainRuleTitle }}</b></p>
           <UiInput v-model="opQuery" placeholder="상대 동호회 이름" @update:model-value="searchClubs" />
@@ -238,6 +246,9 @@
         <UiButton block :loading="busy" @click="saveSettings">저장</UiButton>
       </div>
     </UiSheet>
+
+    <!-- 대회 만들기: 이 화면에서 연다. 닫으면 동호회 그대로 (예전엔 대회 목록 위에서 열려 닫으면 다른 화면에 서 있었다, 목적 판정 7) -->
+    <TournamentCreateSheet v-model="tournamentOpen" :club-id="id" />
   </div>
 </template>
 
@@ -254,6 +265,7 @@ import { confirmDialog } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
 import ClubRulePicker from '../../components/club/ClubRulePicker.vue'
 import TournamentRow from '../../components/tournament/TournamentRow.vue'
+import TournamentCreateSheet from '../../components/tournament/TournamentCreateSheet.vue'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIcon, UiIconButton, UiInput, UiList, UiListItem, UiSection, UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
@@ -289,6 +301,8 @@ const when = (iso: string) => matchTime(iso)
 const message = (e: unknown, fallback: string) => (e as { response?: { data?: { message?: string } } }).response?.data?.message || fallback
 
 const tournaments = ref<Schemas['TournamentSummary'][]>([])
+const activityOpen = ref(false)
+const tournamentOpen = ref(false)
 async function load() {
   try {
     detail.value = (await GET('/api/clubs/{id}', { path: { id } })).data
@@ -433,8 +447,12 @@ async function saveSettings() {
 }
 
 // 규칙을 고르고 오는 동안 어느 동호회인지 기억해 둔다 (경기 만들기 화면이 꺼내 쓴다)
+// 대표 종목이 있으면 규칙 고르기를 건너뛰고 바로 만들기로 (목적 판정 7: 우리 동호회 경기를 만들러 왔는데 전체 규칙 목록부터 다시 찾았다).
+// 다른 종목은 만들기 화면에서 바꾼다. 대표 종목이 없을 때만 규칙 고르기
 function openGame() {
   sessionStorage.setItem('match_club_for_game', String(id))
+  const mainRuleId = detail.value?.mainRuleId
+  if (mainRuleId) return router.push({ path: '/create-game', query: { ruleId: String(mainRuleId), clubId: String(id) } })
   router.push('/rules?fromGameCreate=true')
 }
 function openChat() {

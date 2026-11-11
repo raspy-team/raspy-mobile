@@ -18,12 +18,10 @@ import { UiCard, UiIcon } from '../ui'
 
 const props = defineProps<{ club: components['schemas']['ClubSummary'] }>()
 const emit = defineEmits<{ click: [] }>()
-// 동호회의 얼굴: 동네 · 대표 종목 · 멤버 수 · 교류전 전적 · 승인 가입
+// 목록 한 줄: 동네 · 대표 종목 · 멤버 수. 교류전 전적은 들어갈지 고르는 데 쓰지 않아 동호회 화면에만 둔다 (목적 판정 7).
+// 승인 가입은 버튼 이름("신청"·"보고 신청")이 말한다
 const line = computed(() => {
   const c = props.club
-  const r = c.record
-  const played = r ? r.wins + r.draws + r.losses : 0
-  return [c.dongName, c.mainRuleTitle, `${c.memberCount}명`, played ? `교류전 ${r!.wins}승 ${r!.draws ? `${r!.draws}무 ` : ''}${r!.losses}패` : '', c.joinMode === 'APPROVAL' ? '승인 가입' : '']
-    .filter(Boolean).join(' · ') || c.intro || ''
+  return [c.dongName, c.mainRuleTitle, `${c.memberCount}명`].filter(Boolean).join(' · ') || c.intro || ''
 })
 </script>

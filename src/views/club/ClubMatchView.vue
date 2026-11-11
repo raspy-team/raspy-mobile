@@ -160,9 +160,17 @@ async function saveLineup() {
 
 // 판이 끝나면 점수가 바뀐다 (선수에게 오는 변경 신호, 화면에 돌아올 때)
 let off: (() => void) | undefined
-onMounted(() => {
-  load()
+onMounted(async () => {
+  await load()
   off = refreshOnChange(load)
+  // 대회 판의 "우리 선수 정하기"로 왔으면 우리 선수가 아직 없는 첫 판의 시트를 바로 연다
+  // (목적 판정 7: 선수를 정하러 눌렀는데 여기서 같은 버튼을 다시 찾아 눌러야 했다)
+  if (route.query.lineup && m.value?.status === 'ACCEPTED' && m.value.mySide) {
+    router.replace({ query: {} })
+    const mine = (b: Schemas['ClubMatchView']['boardList'][number]) => (m.value!.mySide === 'HOME' ? b.home : b.away)
+    const first = m.value.boardList.find((b) => !b.gameId && !mine(b).length) ?? m.value.boardList.find((b) => !b.gameId)
+    if (first) openLineup(first.boardNo)
+  }
 })
 onBeforeUnmount(() => off?.())
 </script>

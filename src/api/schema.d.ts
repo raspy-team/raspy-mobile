@@ -5978,6 +5978,8 @@ export interface components {
             mainRuleTitle?: string;
             joinMode: string;
             record?: components["schemas"]["ClubRecord"];
+            hasJoinQuestion: boolean;
+            requested: boolean;
         };
         ClubLineupRequest: {
             userIds: number[];

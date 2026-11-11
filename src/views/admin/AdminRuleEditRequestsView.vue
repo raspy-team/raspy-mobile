@@ -32,10 +32,8 @@
               {{ req.reviewedBy.nickname }} · {{ timeAgo(req.reviewedAt) }}
             </p>
 
-            <div v-if="req.status === 'PENDING'" class="flex gap-2">
-              <UiButton variant="secondary" size="sm" class="flex-1" @click.stop="openReject(req)">거절</UiButton>
-              <UiButton variant="secondary" size="sm" class="flex-1" @click.stop="approve(req)">승인</UiButton>
-            </div>
+            <!-- 승인·거절은 카드를 눌러 바뀐 내용을 본 뒤 비교 창 안에서만 (목적 판정 7: 보지 않고 처리할 수 있었고 길이 둘이었다) -->
+            <p v-if="req.status === 'PENDING'" class="t-caption">눌러서 바뀐 내용을 보고 승인·거절해요</p>
           </UiCard>
         </li>
       </ul>
@@ -50,14 +48,6 @@
       @reject="(id, reason) => handle(id, 'reject', reason)"
     />
 
-    <!-- 거절 이유 -->
-    <UiSheet v-model="rejectOpen" title="거절 이유">
-      <p class="t-caption mb-3">요청한 사람에게 그대로 보여요.</p>
-      <UiInput v-model="rejectionReason" multiline :rows="4" placeholder="예: 기존 규칙과 내용이 같아요" />
-      <template #footer>
-        <UiButton block variant="danger" :disabled="!rejectionReason.trim()" :loading="processing" @click="confirmReject">거절</UiButton>
-      </template>
-    </UiSheet>
   </div>
 </template>
 
@@ -67,11 +57,10 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../../api/api'
 import RuleComparisonModal from '../../components/admin/RuleComparisonModal.vue'
-import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composables/useToast'
 import { timeAgo } from '../../utils/format'
 import {
-  UiBadge, UiButton, UiCard, UiEmptyState, UiInput, UiListSkeleton, UiSheet, UiTabs, UiTopBar,
+  UiBadge, UiCard, UiEmptyState, UiListSkeleton, UiTabs, UiTopBar,
 } from '../../components/ui'
 
 const router = useRouter()
@@ -89,9 +78,6 @@ const selectedTab = ref(STATUS[route.query.status] ? route.query.status : 'PENDI
 const requests = ref([])
 const highlightedRequestId = ref(route.query.highlight ? Number(route.query.highlight) : null)
 const selectedRequest = ref(null)
-const rejectOpen = ref(false)
-const rejectTarget = ref(null)
-const rejectionReason = ref('')
 const processing = ref(false)
 
 const tabs = computed(() =>
@@ -113,26 +99,6 @@ async function loadRequests() {
   } finally {
     loading.value = false
   }
-}
-
-async function approve(req) {
-  const ok = await confirmDialog({
-    title: '수정 요청을 승인할까요?',
-    message: '승인하면 바로 원래 규칙에 반영돼요.',
-    confirmText: '승인',
-  })
-  if (ok) await handle(req.id, 'approve')
-}
-
-function openReject(req) {
-  rejectTarget.value = req
-  rejectionReason.value = ''
-  rejectOpen.value = true
-}
-
-async function confirmReject() {
-  await handle(rejectTarget.value.id, 'reject', rejectionReason.value.trim())
-  rejectOpen.value = false
 }
 
 async function handle(id, action, reason) {

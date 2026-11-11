@@ -5,6 +5,7 @@
     <UiList v-if="results.length" class="mt-2">
       <UiListItem v-for="r in results" :key="r.id" :title="r.ruleTitle" :subtitle="r.minorCategory || undefined" @click="emit('pick', { id: r.id, title: r.ruleTitle, appGameKey: r.appGameKey ?? null })" />
     </UiList>
+    <p v-else-if="failed && !loading" class="t-caption text-danger mt-2">찾지 못했어요. 다시 쳐 주세요</p>
     <p v-else-if="q.trim().length >= 1 && !loading" class="t-caption mt-2">맞는 규칙이 없어요</p>
   </div>
 </template>
@@ -19,6 +20,7 @@ const props = defineProps<{ withApp?: boolean }>()
 const emit = defineEmits<{ pick: [rule: { id: number; title: string; appGameKey: string | null }] }>()
 const q = ref('')
 const loading = ref(false)
+const failed = ref(false)
 const results = ref<components['schemas']['FullRuleResponse'][]>([])
 let timer: ReturnType<typeof setTimeout> | undefined
 
@@ -30,6 +32,11 @@ function search() {
     loading.value = true
     try {
       results.value = ((await GET('/api/rules/list', { query: { search: term, withApp: props.withApp ?? false } })).data || []).slice(0, 8)
+      failed.value = false
+    } catch {
+      // 실패하면 이전 이름의 결과를 남기지 않는다 (새로 친 이름의 결과인 줄 알았다, 목적 판정 8)
+      results.value = []
+      failed.value = true
     } finally {
       loading.value = false
     }

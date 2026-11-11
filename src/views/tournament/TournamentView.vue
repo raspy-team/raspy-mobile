@@ -247,7 +247,8 @@ async function decide(fixtureId: number, winner: 'HOME' | 'AWAY' | 'NONE') {
 }
 function goFixture(f: Fixture) {
   const key = v.value?.summary.appGameKey
-  if (f.clubMatchId) router.push(`/clubs/matches/${f.clubMatchId}`)
+  // 선수를 정하러 누른 거면 그 시트까지 바로 연다
+  if (f.clubMatchId) router.push({ path: `/clubs/matches/${f.clubMatchId}`, query: f.mine && f.status === 'OPEN' ? { lineup: '1' } : {} })
   else if (key && f.gameId) router.push(`/play/${key}?duel=${f.gameId}`)
   else if (f.gameId) router.push(f.status === 'DONE' ? `/games/${f.gameId}/result` : `/games/${f.gameId}`)
 }

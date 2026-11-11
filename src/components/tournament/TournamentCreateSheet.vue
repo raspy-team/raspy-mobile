@@ -15,33 +15,6 @@
         <p v-if="appGame" class="t-caption mt-1">앱 게임 대회예요. 판마다 두 사람이 기간 안에 '경기하기'를 눌러 앱에서 겨뤄요</p>
       </div>
 
-      <div>
-        <p class="t-heading">방식</p>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <UiChip :selected="f.format === 'LEAGUE'" @click="f.format = 'LEAGUE'">리그 · 모두와 한 번씩</UiChip>
-          <UiChip :selected="f.format === 'KNOCKOUT'" @click="f.format = 'KNOCKOUT'">토너먼트 · 지면 끝</UiChip>
-        </div>
-        <label v-if="f.format === 'KNOCKOUT'" class="flex items-center justify-between mt-3">
-          <span class="t-body">3·4위전</span><UiSwitch v-model="f.thirdPlace" />
-        </label>
-      </div>
-
-      <div>
-        <p class="t-heading">누가 나가나</p>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <UiChip :selected="f.entrantType === 'USER'" @click="f.entrantType = 'USER'">개인</UiChip>
-          <UiChip v-if="!appGame" :selected="f.entrantType === 'CLUB'" @click="f.entrantType = 'CLUB'">동호회끼리</UiChip>
-        </div>
-        <template v-if="f.entrantType === 'CLUB'">
-          <p class="t-caption mt-2">한 판이 교류전이에요. 판마다 운영진이 선수를 내요</p>
-          <div class="flex flex-wrap gap-2 mt-2">
-            <UiChip v-for="n in [1, 3, 5]" :key="n" :selected="f.boards === n" @click="f.boards = n">{{ n }}판</UiChip>
-            <UiChip :selected="f.perBoard === 1" @click="f.perBoard = 1">1:1</UiChip>
-            <UiChip :selected="f.perBoard === 2" @click="f.perBoard = 2">2:2</UiChip>
-          </div>
-        </template>
-      </div>
-
       <div v-if="hostClubs.length || isAdmin">
         <p class="t-heading">주최</p>
         <div class="flex gap-2 mt-2 flex-wrap">
@@ -55,8 +28,6 @@
         </label>
       </div>
 
-      <!-- 이름표가 없으면 '8'이 무엇인지, 날짜가 무엇의 날짜인지 몰랐다 (11/4 밤샘, 52세 탁구 대회 주최자) -->
-      <UiInput v-model="f.maxEntrants" label="최대 인원" type="number" inputmode="numeric" placeholder="8" />
       <!-- 시작: 경기 만들기처럼 빠른 고르기가 먼저, 직접 고를 때만 날짜 칸 (UX 리뷰 ⑦) -->
       <div>
         <p class="t-heading">시작</p>
@@ -85,6 +56,64 @@
       </label>
       <UiInput v-model="f.description" :maxlength="300" placeholder="안내 (선택: 상품, 장소 등)" />
 
+      <!-- 꼭 정할 것은 이름·종목·시작. 나머지는 기본값(토너먼트·개인·8명·라운드 7일·제한 없음·자동 수락)이 거의 늘 맞아 접어 둔다 (목적 판정 7: 결정 거리 아홉이 '열기'까지 끼어 있었다) -->
+      <button type="button" class="w-full flex items-center justify-between rounded-xl bg-surface px-4 py-3 text-left" :aria-expanded="moreOpen" @click="moreOpen = !moreOpen">
+        <span class="min-w-0">
+          <span class="t-heading block">더 정하기</span>
+          <span class="t-caption block truncate">{{ moreSummary }}</span>
+        </span>
+        <UiIcon :name="moreOpen ? 'chevron-up' : 'chevron-down'" class="text-fg-muted" />
+      </button>
+      <div v-if="moreOpen" class="space-y-4">
+        <div>
+          <p class="t-heading">방식</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <UiChip :selected="f.format === 'LEAGUE'" @click="f.format = 'LEAGUE'">리그 · 모두와 한 번씩</UiChip>
+            <UiChip :selected="f.format === 'KNOCKOUT'" @click="f.format = 'KNOCKOUT'">토너먼트 · 지면 끝</UiChip>
+          </div>
+          <label v-if="f.format === 'KNOCKOUT'" class="flex items-center justify-between mt-3">
+            <span class="t-body">3·4위전</span><UiSwitch v-model="f.thirdPlace" />
+          </label>
+        </div>
+
+        <div>
+          <p class="t-heading">누가 나가나</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <UiChip :selected="f.entrantType === 'USER'" @click="f.entrantType = 'USER'">개인</UiChip>
+            <UiChip v-if="!appGame" :selected="f.entrantType === 'CLUB'" @click="f.entrantType = 'CLUB'">동호회끼리</UiChip>
+          </div>
+          <template v-if="f.entrantType === 'CLUB'">
+            <p class="t-caption mt-2">한 판이 교류전이에요. 판마다 운영진이 선수를 내요</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <UiChip v-for="n in [1, 3, 5]" :key="n" :selected="f.boards === n" @click="f.boards = n">{{ n }}판</UiChip>
+              <UiChip :selected="f.perBoard === 1" @click="f.perBoard = 1">1:1</UiChip>
+              <UiChip :selected="f.perBoard === 2" @click="f.perBoard = 2">2:2</UiChip>
+            </div>
+          </template>
+        </div>
+
+        <!-- 이름표가 없으면 '8'이 무엇인지, 날짜가 무엇의 날짜인지 몰랐다 (11/4 밤샘, 52세 탁구 대회 주최자) -->
+        <UiInput v-model="f.maxEntrants" label="최대 인원" type="number" inputmode="numeric" placeholder="8" />
+        <div>
+          <p class="t-heading">라운드 기간</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <UiChip v-for="d in [1, 3, 7, 14]" :key="d" :selected="f.roundDays === d" @click="f.roundDays = d">{{ d === 1 ? '하루' : `${d}일` }}</UiChip>
+          </div>
+        </div>
+        <div>
+          <p class="t-heading">실력 점수 범위 (선택)</p>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <UiInput v-model="f.minRating" type="number" inputmode="numeric" placeholder="이상" />
+            <UiInput v-model="f.maxRating" type="number" inputmode="numeric" placeholder="이하" />
+          </div>
+        </div>
+        <label class="flex items-center justify-between">
+          <span class="t-body">신청을 내가 수락</span><UiSwitch v-model="approval" />
+        </label>
+        <UiInput v-model="f.description" :maxlength="300" placeholder="안내 (선택: 상품, 장소 등)" />
+
+      </div>
+
       <UiButton block :loading="busy" :disabled="!canCreate" @click="create">열기</UiButton>
       <p class="t-caption">시작 하루 전부터 체크인해요</p>
     </div>
@@ -98,7 +127,7 @@ import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import { useToast } from '@/composables/useToast'
 import ClubRulePicker from '../club/ClubRulePicker.vue'
-import { UiButton, UiChip, UiInput, UiSheet, UiSwitch } from '../ui'
+import { UiButton, UiChip, UiIcon, UiInput, UiSheet, UiSwitch } from '../ui'
 import { localIso } from '@/utils/when'
 import { matchTime } from '@/utils/format'
 
@@ -132,6 +161,16 @@ const startChoices = computed(() => {
   return sats.map((d, i) => ({ label: names[i], at: localIso(d) }))
 })
 function pickStart(q: { label: string; at: string }) { startPick.value = q.label; f.startsAt = q.at }
+
+const moreOpen = ref(false)
+const moreSummary = computed(() => [
+  f.format === 'LEAGUE' ? '리그' : '토너먼트',
+  f.entrantType === 'CLUB' ? `동호회끼리 ${f.boards}판 ${f.perBoard === 2 ? '2:2' : '1:1'}` : '개인',
+  `최대 ${f.maxEntrants || 8}명`,
+  f.roundDays === 1 ? '라운드 하루' : `라운드 ${f.roundDays}일`,
+  f.minRating || f.maxRating ? `실력 ${f.minRating || ''}~${f.maxRating || ''}` : '',
+  approval.value ? '신청 수락' : '',
+].filter(Boolean).join(' · '))
 
 const canCreate = computed(() => f.title.trim().length >= 2 && f.ruleId > 0 && !!f.startsAt && Number(f.maxEntrants) >= 2)
 

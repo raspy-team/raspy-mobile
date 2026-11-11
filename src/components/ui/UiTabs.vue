@@ -6,7 +6,7 @@
       type="button"
       role="tab"
       :aria-selected="modelValue === o.value"
-      class="flex-1 h-9 rounded-lg text-sm transition-colors"
+      class="hit flex-1 h-9 rounded-lg text-sm transition-colors"
       :class="modelValue === o.value ? 'bg-surface-3 text-fg font-semibold' : 'text-fg-muted'"
       @click="modelValue !== o.value && feel('select'); emit('update:modelValue', o.value)"
     >

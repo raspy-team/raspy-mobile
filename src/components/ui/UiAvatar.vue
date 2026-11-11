@@ -2,8 +2,8 @@
   <!-- userId를 주면 누르면 그 사람 프로필로 (사용자 11/3: 모든 프로필 사진은 누를 수 있게).
        버튼 안에도 들어가므로 button 대신 span + role=link, 눌림은 부모로 번지지 않게 -->
   <span
-    class="relative inline-flex flex-shrink-0 items-center justify-center rounded-full overflow-hidden text-fg/90 font-semibold tracking-[-0.02em]"
-    :class="userId ? 'cursor-pointer active:opacity-70' : ''"
+    class="relative inline-flex flex-shrink-0 items-center justify-center rounded-full text-fg/90 font-semibold tracking-[-0.02em]"
+    :class="userId ? 'hit cursor-pointer active:opacity-70' : ''"
     :role="userId ? 'link' : undefined"
     :tabindex="userId ? 0 : undefined"
     :aria-label="userId && name ? `${name} 프로필` : undefined"
@@ -17,7 +17,7 @@
       :alt="name ? `${name}의 프로필 사진` : ''"
       data-fallback="1"
       loading="lazy"
-      class="w-full h-full object-cover"
+      class="w-full h-full object-cover rounded-full"
       @error="failed = true"
     />
     <span v-else aria-hidden="true">{{ initial }}</span>

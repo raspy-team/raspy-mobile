@@ -251,6 +251,7 @@
       </template>
     </main>
   </div>
+  <SaveImageSheet :src="saveView" @close="saveView = null" />
 </template>
 
 <script setup lang="ts">
@@ -258,6 +259,7 @@
 // 조사 링크로 온 사람이 로그인 전에 도착 게임을 한 판 한다. 개인정보 없이 무작위 기기 번호(visitor_id)만 쓰고,
 // 끝나면 "점수 저장하고 상대와 붙기"로 시작 화면에 보낸다. 로그인하면 claimGuestPlays가 이 판을 기록으로 옮긴다
 // 눈치 한 판(?q=첫 질문, ?c=친구의 판)은 결과에 문제마다 정답, 내 취향 받기, 친구 도전·공유가 붙는다. 버튼 하나하나 원본 기록(trackLog)에 남긴다
+import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -268,10 +270,16 @@ import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
 import NunchiPlay from '../../components/appgame/NunchiPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
-import ImprovStoryCard from '../../components/share/ImprovStoryCard.vue'
 import ImprovSentChallenges from '../../components/appgame/ImprovSentChallenges.vue'
 import { improvFeedback, improvShareLine, improvSituations, improvAnswers } from '@/utils/improv'
-import { componentFile, shareFiles } from '@/utils/storyShare'
+// 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 결과가 나올 때 받는다. 광고로 온 첫 화면에 실려
+// 느린 폰에서 '시작하기'가 3.9초에야 보였다 (11/11 몸과 시간). 누른 순간 바로 공유해야 사파리가 막지 않으니, 누를 때가 아니라 결과가 뜰 때 미리 받는다
+let story: typeof import('@/utils/storyShare') | null = null
+let storyCard: typeof import('../../components/share/ImprovStoryCard.vue').default | null = null
+async function loadStory() {
+  if (!story) [story, storyCard] = await Promise.all([import('@/utils/storyShare'), import('../../components/share/ImprovStoryCard.vue').then((m) => m.default)])
+  return story
+}
 import { withShareRef } from '@/utils/shareRef'
 import { copyText } from '@/utils/clipboard'
 import { UiButton, UiCard, UiEmptyState, UiRollNumber, UiSection, UiTopBar } from '../../components/ui'
@@ -540,7 +548,8 @@ async function prepareStory() {
   const s = improvShown.value[i]
   const best = s && improvSaid.value[i] ? { who: s.who, line: s.line, answer: improvSaid.value[i], reaction: r.reactions[i] } : null
   try {
-    storyFile.value = await componentFile(ImprovStoryCard, { grade: r.grade, rank: r.rank, score: result.value.score, best }, 'dark', `match-improv-${playId.value}.png`)
+    const { componentFile } = await loadStory()
+    storyFile.value = await componentFile(storyCard!, { grade: r.grade, rank: r.rank, score: result.value!.score, best }, 'dark', `match-improv-${playId.value}.png`)
   } catch {
     storyFile.value = null
   }
@@ -548,16 +557,20 @@ async function prepareStory() {
 // 그림을 넘기면서, 그림을 누른 사람이 같은 상황을 풀 링크(공유 번호 포함)를 클립보드에 (인스타 링크 스티커에 붙인다)
 function shareStory() {
   const file = storyFile.value
-  if (!file || !playId.value) return
+  if (!file || !playId.value || !story) return  // 그림이 있으면 모듈도 이미 받았다
+  const { shareFiles } = story
   track('result_share', { gameKey: key.value, step: rounds.value, value: 'story' })
   const link = withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&k=${result.value?.challengeKey ?? ''}&utm_source=instagram&utm_medium=story`)
   void copyText(link)
   void shareFiles([file]).then((r) => {
     track('result_share_shared', { gameKey: key.value, value: `story:${r}` })
     // 링크 스티커 안내는 버튼 밑에 미리 있다(공유 뒤 토스트는 인스타 편집기에선 못 봤다). 저장으로 끝난 때만 알린다
-    if (r === 'saved') showToast('그림을 저장했어요. 링크도 복사했어요')
+    // 앱 안 브라우저는 내려받기가 저장되지 않는다: 그림을 띄워 길게 눌러 저장하게 (11/11 몸과 시간)
+    if (r === 'saved' && story?.inAppBrowser) saveView.value = URL.createObjectURL(file)
+    else if (r === 'saved') showToast('그림을 저장했어요. 링크도 복사했어요')
   })
 }
+const saveView = ref<string | null>(null)
 
 // ── 눈치 한 판: 친구 도전·공유 ──
 async function challengeFriend() {

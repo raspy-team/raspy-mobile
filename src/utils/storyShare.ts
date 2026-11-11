@@ -111,6 +111,9 @@ function download(file: File): ShareResult {
   return 'saved'
 }
 
+/** 인스타·카톡 같은 앱 안 브라우저: 내려받기가 실제로 저장되지 않는다 */
+export const inAppBrowser = /Instagram|KAKAOTALK|FBAN|FBAV|Line\//i.test(navigator.userAgent)
+
 /** 폰인지 (인스타 앱을 열 수 있는 곳) */
 export const isPhone = /iphone|ipad|android/i.test(navigator.userAgent)
 

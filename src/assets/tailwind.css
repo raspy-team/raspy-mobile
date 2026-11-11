@@ -214,3 +214,16 @@
   outline: 2px solid theme('colors.primary.DEFAULT');
   outline-offset: 2px;
 }
+
+/* 누르는 범위만 44pt로 넓힌다(보이는 크기는 그대로). 작은 버튼·칩·탭·글자 링크가 36·32·20pt라 손가락이 자주 빗나갔다.
+   애플 HIG 44pt (11/11 몸과 시간). 부모가 overflow로 자르면 그만큼만 넓어진다 */
+.hit { position: relative; }
+.hit::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}

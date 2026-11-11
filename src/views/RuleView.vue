@@ -84,7 +84,7 @@
             type="button"
             role="radio"
             :aria-checked="sort === o.value"
-            class="px-1.5 h-9 text-sm whitespace-nowrap"
+            class="hit px-1.5 h-9 text-sm whitespace-nowrap"
             :class="sort === o.value ? 'text-fg font-bold' : 'text-fg-subtle'"
             @click="setQuery({ sort: o.value })"
           >

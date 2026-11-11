@@ -455,9 +455,11 @@
     </main>
     <ShareSheet :post="sharePost" :my-id="myId" @close="sharePost = null" />
   </div>
+  <SaveImageSheet :src="saveView" @close="saveView = null" />
 </template>
 
 <script setup lang="ts">
+import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
 import { GUEST_GAMES } from '@/utils/guestGames'
 import { waitText, who } from '@/utils/format'
 import OpponentName from '../../components/appgame/OpponentName.vue'
@@ -486,8 +488,13 @@ import { improvAnswers, improvFeedback, improvSituations } from '@/utils/improv'
 import { shareLink } from '@/utils/share'
 import { askPushPermission, isCapacitorApp } from '@/utils/nativeBridge'
 import { guestClaimResult } from '@/utils/visit'
-import ImprovStoryCard from '../../components/share/ImprovStoryCard.vue'
-import { componentFile, shareFiles } from '@/utils/storyShare'
+// 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 임기응변 결과가 나올 때 받는다. 모든 게임 화면에 실려 첫 화면을 늦췄다 (11/11 몸과 시간)
+let story: typeof import('@/utils/storyShare') | null = null
+let storyCard: typeof import('../../components/share/ImprovStoryCard.vue').default | null = null
+async function loadStory() {
+  if (!story) [story, storyCard] = await Promise.all([import('@/utils/storyShare'), import('../../components/share/ImprovStoryCard.vue').then((m) => m.default)])
+  return story
+}
 import { withShareRef } from '@/utils/shareRef'
 import { copyText } from '@/utils/clipboard'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
@@ -865,7 +872,8 @@ watch(() => [result.value?.gameId, result.value?.myFeedback], async () => {
   const st = shown[i]
   const best = st && said[i] ? { who: st.who, line: st.line, answer: said[i], reaction: r.reactions[i] } : null
   try {
-    storyFile.value = await componentFile(ImprovStoryCard, { grade: r.grade, rank: r.rank, score: res.myScore ?? 0, best }, 'dark', `match-improv-${res.gameId}.png`)
+    const { componentFile } = await loadStory()
+    storyFile.value = await componentFile(storyCard!, { grade: r.grade, rank: r.rank, score: res.myScore ?? 0, best }, 'dark', `match-improv-${res.gameId}.png`)
   } catch {
     storyFile.value = null
   }
@@ -875,8 +883,15 @@ function shareStory() {
   if (!file) return
   // 그림을 누른 사람이 가입 없이 바로 해 볼 링크를 클립보드에 (인스타 링크 스티커에 붙인다)
   void copyText(withShareRef(`${window.location.origin}/try/improv?utm_source=instagram&utm_medium=story`))
-  void shareFiles([file]).then((r) => { if (r === 'saved') showToast('그림을 저장했어요. 링크도 복사했어요') })
+  if (!story) return // 그림이 있으면 모듈도 이미 받았다
+  const { shareFiles, inAppBrowser } = story
+  void shareFiles([file]).then((r) => {
+    // 앱 안 브라우저는 내려받기가 저장되지 않는다: 그림을 띄워 길게 눌러 저장하게 (11/11 몸과 시간)
+    if (r === 'saved' && inAppBrowser) saveView.value = URL.createObjectURL(file)
+    else if (r === 'saved') showToast('그림을 저장했어요. 링크도 복사했어요')
+  })
 }
+const saveView = ref<string | null>(null)
 
 const improvResult = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.myFeedback) : null))
 const opponentImprov = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.opponentFeedback) : null))

@@ -16,7 +16,7 @@
          동네가 필요한 순간(신청·열기)엔 서버가 묻고(428) 인증 뒤 하던 화면으로 돌려보낸다 (목적 판정 11/11 4번).
          대신 이 목록이 전국 경기라는 것만 한 줄로 (경로 4 리뷰 G2: 서울 사람이 부산 경기 카드를 봤다). 못 불러왔을 때는 말하지 않는다 -->
     <p v-else-if="loaded && !failed && !active" class="t-caption">
-      전국 경기예요 · <RouterLink to="/neighborhood" class="underline underline-offset-2">동네 인증</RouterLink>하면 가까운 경기만 보여요
+      전국 경기예요 · <RouterLink to="/neighborhood" class="hit underline underline-offset-2">동네 인증</RouterLink>하면 가까운 경기만 보여요
     </p>
 
     <UiSheet v-model="open" title="동네 고르기">

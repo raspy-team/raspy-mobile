@@ -53,7 +53,13 @@ app.component('UiIcon', UiIcon)
 
 // 운영 에러 추적. VITE_SENTRY_DSN이 있을 때만 켠다
 // 켤 때만 불러와서 첫 화면 번들에 싣지 않는다
-if (import.meta.env.VITE_SENTRY_DSN) {
+// 화면이 다 뜬 뒤 쉬는 틈에 붙인다: 앱이 켜지는 순간 받으면(압축 110KB) 광고로 온 첫 화면과 회선을 다퉜다 (11/11 몸과 시간)
+const whenIdle = (cb) => {
+  const go = () => ('requestIdleCallback' in window ? window.requestIdleCallback(cb, { timeout: 4000 }) : setTimeout(cb, 1500))
+  if (document.readyState === 'complete') go()
+  else window.addEventListener('load', go, { once: true })
+}
+if (import.meta.env.VITE_SENTRY_DSN) whenIdle(() => {
   import('@sentry/vue').then((Sentry) =>
     Sentry.init({
       app,
@@ -63,12 +69,25 @@ if (import.meta.env.VITE_SENTRY_DSN) {
       tracesSampleRate: 0.1,
     }),
   )
-}
+})
 
 app
   .use(router) 
   .directive('autocomplete', autocomplete)
   .mount('#app')
+
+// 글꼴은 첫 화면(그 화면 조각까지)을 그린 다음 붙인다 (index.html 설명). 처음 방문의 첫 순간만 기본 글꼴로 보이고 곧 바뀐다
+router.isReady().then(() => requestAnimationFrame(() => {
+  for (const href of [
+    'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css',
+    'https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap',
+  ]) {
+    const l = document.createElement('link')
+    l.rel = 'stylesheet'
+    l.href = href
+    document.head.appendChild(l)
+  }
+}))
 
 trackVisit()
 claimGuestPlays() // 가입 전 한 판을 하고 앱 로그인(새로 열림)으로 들어온 사람

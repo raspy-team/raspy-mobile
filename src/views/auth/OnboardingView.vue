@@ -86,7 +86,7 @@
         </p>
         <p v-else-if="username && !editingUsername" class="t-caption">
           아이디 <b class="text-fg">@{{ username }}</b>
-          <button type="button" class="underline underline-offset-2 ml-1" @click="editingUsername = true">바꾸기</button>
+          <button type="button" class="hit underline underline-offset-2 ml-1" @click="editingUsername = true">바꾸기</button>
         </p>
         <UiInput
           v-else
@@ -110,7 +110,7 @@
           <span class="text-sm text-fg">모두 동의 <span class="text-fg-subtle">(이용약관·개인정보·만 14세 이상)</span></span>
         </button>
         <p class="t-micro mt-1 pl-9">
-          <template v-for="(t, i) in CHECKS.filter((c) => c.body)" :key="t.id"><span v-if="i"> · </span><button type="button" class="underline underline-offset-2 min-h-[32px]" @click="openTerm = t">{{ t.title }} 보기</button></template>
+          <template v-for="(t, i) in CHECKS.filter((c) => c.body)" :key="t.id"><span v-if="i"> · </span><button type="button" class="hit underline underline-offset-2 min-h-[32px]" @click="openTerm = t">{{ t.title }} 보기</button></template>
         </p>
       </div>
     </main>
@@ -121,7 +121,7 @@
         <UiButton v-if="step === 'terms'" block size="lg" :disabled="!allAgreed" :loading="saving" @click="submitTerms">동의하고 계속하기</UiButton>
         <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">시작하기</UiButton>
         <!-- 잘못 들어온 계정이면 빠져나갈 길 (목적 판정 11/11 부분 1) -->
-        <button type="button" class="block mx-auto mt-1 t-micro underline underline-offset-2 min-h-[36px]" @click="otherAccount">다른 계정으로 시작</button>
+        <button type="button" class="hit block mx-auto mt-1 t-micro underline underline-offset-2 min-h-[36px]" @click="otherAccount">다른 계정으로 시작</button>
       </div>
     </div>
 

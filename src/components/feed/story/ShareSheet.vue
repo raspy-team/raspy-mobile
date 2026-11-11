@@ -62,7 +62,7 @@ import { UiSheet, UiSkeleton, UiSpinner } from '../../ui'
 import { copyText } from '../../../utils/clipboard'
 import { useToast } from '../../../composables/useToast'
 import { copyStickerAndOpenInstagram, openInstagramStoryNative, shareFiles, storyFile, storyHomeLink, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
-import { hasNativeInstagram } from '../../../utils/nativeBridge'
+import { hasNativeInstagram, isCapacitorApp } from '../../../utils/nativeBridge'
 import { storyLine } from '../../../utils/storyLine'
 import { newShareCode, registerShare } from '../../../utils/shareRef'
 
@@ -75,11 +75,15 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 const { showToast } = useToast()
 
-const VARIANTS: { key: StoryVariant; label: string }[] = [
+const ALL_VARIANTS: { key: StoryVariant; label: string }[] = [
   { key: 'dark', label: '어둡게' },
   { key: 'volt', label: '볼트' },
   { key: 'sticker', label: '스티커' },
 ]
+// 앱(아이폰·안드로이드 웹뷰)에서는 화면을 그림으로 찍지 않고 서버가 그린 스토리 그림(/m/{경기}/story.png) 한 장을 쓴다.
+// 아이폰 앱에서 찍기가 끝나지 않아 공유 시트가 끝없이 돌았다(글꼴을 빼도 그대로, 11/12). 서버 그림은 받기만 하면 된다
+const serverOnly = isCapacitorApp
+const VARIANTS = serverOnly ? ALL_VARIANTS.slice(0, 1) : ALL_VARIANTS
 const DESTS = [
   { key: 'story', icon: 'instagram', label: '인스타 스토리' },
   { key: 'message', icon: 'comment', label: '카톡·메시지' },
@@ -123,9 +127,13 @@ watch(
     // 지난번에 고른 모양으로 연다 (열 때마다 첫 모양으로 돌아가 다시 넘겼다, 11/11 쌓이는 피로 전수표)
     const last = (() => { try { return Number(localStorage.getItem('share_variant') || 0) } catch { return 0 } })()
     if (last > 0 && last < VARIANTS.length) nextTick(() => pick(last))
+    if (serverOnly) {
+      serverStory(my).then((ok) => { if (!ok && my === run) failed.dark = true })
+      return
+    }
     // 지금 보이는 그림부터 찍는다(버튼이 그 그림만 있으면 된다). 앱에서는 그다음 스티커 (인스타 편집기에 붙일 카드)
     const first = VARIANTS[last > 0 && last < VARIANTS.length ? last : 0]
-    const order = [first, ...(hasNativeInstagram && first.key !== 'sticker' ? [VARIANTS[2]] : []), ...VARIANTS].filter((v, i, a) => a.indexOf(v) === i)
+    const order = [first, ...(hasNativeInstagram && first.key !== 'sticker' ? [ALL_VARIANTS[2]] : []), ...VARIANTS].filter((v, i, a) => a.indexOf(v) === i)
     for (const v of order) {
       try {
         const f = await storyFile(props.post, props.myId ?? null, v.key)
@@ -153,7 +161,8 @@ function fetchLink(my = run, id = Number(props.post?.id)) {
   })
 }
 async function serverStory(my: number): Promise<boolean> {
-  for (let i = 0; i < 20 && !shared.value && my === run; i++) await new Promise((r) => setTimeout(r, 200))
+  // 서명 주소가 올 때까지 (못 받았으면 바로 실패로)
+  for (let i = 0; i < 75 && !shared.value && !linkFailed.value && my === run; i++) await new Promise((r) => setTimeout(r, 200))
   if (!shared.value || my !== run) return false
   const res = await fetch(shared.value.storyImage).catch(() => null)
   if (!res?.ok || my !== run) return false

@@ -48,7 +48,19 @@
       <h1 class="t-title">어떻게 불러드릴까요?</h1>
       <p class="t-body text-fg-muted mt-2">상대에게 보이는 이름이에요.</p>
 
-      <!-- 사진은 묻지 않는다. 등급을 남기러 온 사람이 이 순간 고를 이유가 없고, 큰 동그라미가 '해야 하나' 멈추게 했다. 내 정보 편집에 있다 (목적 판정 11/11 부분 1) -->
+      <!-- 사진(선택): 처음 온 사람이 재미로 내 얼굴을 고르는 곳이라 남긴다 (11/11 고병연: 재미·정체성은 귀찮음이 아니다) -->
+      <div class="mt-6 flex flex-col items-center gap-2">
+        <button type="button" class="relative" aria-label="프로필 사진 고르기" @click="fileInput?.click()">
+          <UiAvatar :src="preview" :name="nickname || '나'" size="xl" />
+          <span class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-surface-2 border border-line text-fg flex items-center justify-center text-sm">
+            <UiIcon name="fas fa-camera" aria-hidden="true" />
+          </span>
+        </button>
+        <UiButton v-if="preview" variant="ghost" size="sm" @click="clearPhoto">사진 삭제</UiButton>
+        <span v-else class="t-micro">사진 (선택)</span>
+        <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhoto" />
+      </div>
+
       <div class="mt-6 space-y-5">
         <UiInput
           v-model="nickname"
@@ -114,12 +126,13 @@
 <script setup>
 // 첫 설정: 한 화면에 닉네임 + 약관 한 줄. 아이디는 지어 둔 것을 접어 둔다.
 // 동네는 묻지 않는다: 경기를 열거나 신청할 때 서버가 428을 주면 api.js가 /neighborhood로 보내고 하던 화면으로 돌려보낸다 (목적 판정 11/11 부분 1)
-// 사진·나이·성별·소개·소속도 묻지 않는다 (프로필에서 나중에 채운다)
+// 사진은 고를 수 있게 둔다(선택). 나이·성별·소개·소속은 묻지 않는다 (프로필에서 나중에 채운다)
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
 import { AGREEMENTS as TERMS } from '../../content/legal'
-import { UiButton, UiCard, UiInput, UiSheet, UiSkeleton } from '../../components/ui'
+import { UiAvatar, UiButton, UiCard, UiIcon, UiInput, UiSheet, UiSkeleton } from '../../components/ui'
+import { photoFromFile } from '../../utils/image'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { useToast } from '../../composables/useToast'
 import { containsProfanity } from '../../utils/profanity'
@@ -182,6 +195,24 @@ async function submitTerms() {
   }
 }
 
+const fileInput = ref(null)
+const photo = ref(null)
+const preview = ref('')
+async function onPhoto(e) {
+  const file = e.target.files?.[0]
+  e.target.value = ''
+  if (!file) return
+  if (file.size > 10 * 1024 * 1024) return showToast('10MB 이하 사진을 골라 주세요')
+  const p = await photoFromFile(file)
+  if (!p) return showToast('사진을 읽지 못했어요. 다른 사진을 골라 주세요')
+  preview.value = p.dataUrl
+  photo.value = p.file
+}
+function clearPhoto() {
+  photo.value = null
+  preview.value = ''
+}
+
 async function submitProfile() {
   const nick = nickname.value.trim()
   const name = username.value.trim()
@@ -200,6 +231,16 @@ async function submitProfile() {
     if (e.response?.status === 409) usernameError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어 주세요'
     else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 해 주세요')
     return
+  }
+  // 사진은 프로필 저장 API로. 실패해도 설정은 끝난 것으로 두고 알려만 준다
+  if (photo.value) {
+    try {
+      const fd = new FormData()
+      fd.append('profile_picture', photo.value)
+      await api.patch('/api/user-profile/save', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    } catch {
+      showToast('사진은 저장하지 못했어요. 내 정보에서 다시 넣어 주세요')
+    }
   }
   saving.value = false
   finish()

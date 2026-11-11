@@ -151,8 +151,19 @@
         </div>
       </section>
 
+      <!-- 앱 게임 기록 (가입하며 옮긴 손님 판 포함): "시작하면 이 등급이 내 기록에 남아요"의 그 기록. 예전엔 막 가입한 사람이 '아직 한 경기가 없어요'를 봤다 (목적 판정 11/11) -->
+      <section v-if="bests.length" class="mt-10">
+        <h2 class="t-heading mb-1">내 게임 기록</h2>
+        <UiList>
+          <UiListItem v-for="b in bests" :key="b.key" :title="b.title" chevron @click="router.push(`/play/${b.key}`)">
+            <template #leading><RuleThumb :rule="{ ruleTitle: b.title, appGameKey: b.key }" :size="36" bare /></template>
+            <template #trailing><span class="t-heading tabular-nums">{{ b.line }}</span></template>
+          </UiListItem>
+        </UiList>
+      </section>
+
       <!-- 많이 한 규칙 -->
-      <section class="mt-10">
+      <section v-if="user.top3Rules?.length || !bests.length" class="mt-10">
         <div class="flex items-center justify-between mb-1">
           <h2 class="t-heading">많이 한 규칙</h2>
           <UiButton v-if="stats.totalGames" size="sm" variant="secondary" icon="fas fa-chart-simple" :to="`/profile/${user.id}/stats`">기록 보기</UiButton>
@@ -458,6 +469,13 @@ function goFriend(id) {
 const abilities = ref([])
 const gameTiers = ref([])
 
+// 앱 게임 최고 기록 (기록 화면과 같은 자료)
+const bests = ref([])
+async function loadBests(id) {
+  const { data } = await GET('/api/user-profile/{userId}/stats', { path: { userId: id } }).catch(() => ({ data: null }))
+  bests.value = (data?.bests ?? []).slice(0, 3).map((b) => ({ key: b.key, title: b.title, line: `${Math.round(b.score)}${b.scoreUnit || '점'}` }))
+}
+
 // 가진 자리 (벨트 먼저, 그다음 1위). 벨트는 그 게임으로, 능력·종합 1위는 그 순위로 간다
 const seats = ref({ belts: [], crowns: [] })
 const seatLines = computed(() => [
@@ -481,6 +499,7 @@ onMounted(async () => {
   await loadFriendStatus()
   if (user.value) {
     seats.value = (await GET('/api/champions/users/{userId}', { path: { userId: user.value.id } }).catch(() => ({ data: null }))).data ?? { belts: [], crowns: [] }
+    loadBests(user.value.id)
   }
   // 많이 쓴 능력 (없어도 화면은 그대로)
   if (user.value) {

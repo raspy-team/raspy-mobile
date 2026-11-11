@@ -224,6 +224,11 @@
               <p class="t-display tabular-nums">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></p>
               <!-- 손님 결과처럼 점수는 빼고 등수만 (경로 2 리뷰 N5) -->
               <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등</p>
+              <!-- 보내기는 등급 바로 밑 (손님 결과와 같은 순서, 11/11 목적 다시 보기: 등급을 막 본 순간이 자랑 동기가 가장 세다) -->
+              <div class="flex flex-wrap justify-center gap-2 mt-4">
+                <UiButton size="sm" icon="instagram" :disabled="!storyFile" @click="shareStory">인스타 스토리</UiButton>
+                <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+              </div>
               <p v-if="improvResult.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
               <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
               <p v-if="improvResult.next" class="t-label mt-3"><span class="hl">{{ improvResult.next }}</span></p>
@@ -241,9 +246,8 @@
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
               <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민(앱이 만든 연습 상대)이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
             </template>
-            <div class="flex flex-wrap justify-center gap-2 mt-4">
-              <!-- 가입한 뒤에도 등급을 자랑하는 길: 손님 결과와 같은 스토리 그림 (경로 2 리뷰 N9) -->
-              <UiButton v-if="improvResult && !improvResult.empty" size="sm" icon="instagram" :disabled="!storyFile" @click="shareStory">인스타 스토리</UiButton>
+            <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
+            <div v-if="!improvResult || improvResult.empty" class="flex flex-wrap justify-center gap-2 mt-4">
               <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
             </div>
           </template>

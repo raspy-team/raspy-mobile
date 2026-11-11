@@ -77,6 +77,15 @@
               친구 {{ challengerGrade }} ·
               {{ result.score > result.challengerScore ? '내가 이겼어요' : result.score < result.challengerScore ? '친구가 이겼어요' : '비겼어요' }}
             </p>
+            <!-- 보내기는 등급 바로 밑: 등급을 막 본 순간이 자랑하고 싶은 마음이 가장 센 때다. '한 판 더'를 다음 목표 옆으로 올리며
+                 보내기가 그 아래로 밀려났었다 (11/11 목적 다시 보기: 자랑·교류 동기, 3단계가 재는 것이 공유율) -->
+            <div class="grid grid-cols-2 gap-2 mt-5">
+              <UiButton icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
+              <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
+              <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '결과 보내기' : '도전장 보내기' }}</UiButton>
+            </div>
+            <!-- 링크 스티커 안내는 누르기 전에: 공유가 끝난 뒤 뜬 토스트는 인스타 편집기에 있는 동안 못 봤다 (경로 10 훑기) -->
+            <p class="t-micro mt-2 break-keep">스토리를 누르면 링크도 복사돼요. 인스타에서 링크 스티커에 붙여 넣으세요</p>
             <!-- 왜 이 등급인가, 다음엔 무엇을 (걷기 P1-7) -->
             <p v-if="improv.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improv.strong }}</b> · 아쉬운 것 <b>{{ improv.weak }}</b></p>
             <p v-if="improv.tip" class="t-caption mt-1 break-keep">다음엔 {{ improv.tip }}</p>
@@ -101,13 +110,6 @@
 
         <!-- 임기응변 등급: 보내기가 등급 바로 밑 (걷기 C5: 카드 셋 아래라 "버튼이 어디 있어"), 그 아래 상황마다 내 대답과 인물 반응 -->
         <template v-if="improv">
-          <div v-if="!improv.empty" class="grid grid-cols-2 gap-2 mt-4">
-            <UiButton icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
-            <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
-            <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '결과 보내기' : '도전장 보내기' }}</UiButton>
-          </div>
-          <!-- 링크 스티커 안내는 누르기 전에: 공유가 끝난 뒤 뜬 토스트는 인스타 편집기에 있는 동안 못 봤다 (경로 10 훑기) -->
-          <p v-if="!improv.empty" class="t-micro mt-2 break-keep">스토리를 누르면 링크도 복사돼요. 인스타에서 링크 스티커에 붙여 넣으세요</p>
           <UiCard v-for="(s, i) in improvShown" :key="s.id" class="mt-3">
             <p class="t-micro">{{ s.who }}</p>
             <p class="t-caption mt-1 break-keep">“{{ s.line }}”</p>

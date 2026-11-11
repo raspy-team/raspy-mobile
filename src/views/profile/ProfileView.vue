@@ -87,6 +87,12 @@
           <p class="t-heading text-fg-subtle">–</p>
           <p class="t-micro mt-0.5">경기</p>
         </div>
+        <!-- 앱 게임만 한 사람은 '0 경기'인데 아래에 '내 게임 기록 7등급'이 나와 앞뒤가 맞지 않았다(내 모습을 보러 온 사람의 정체성 동기).
+             겨룬 경기가 없고 게임 기록이 있으면 그 수를 보인다 (11/11 목적 다시 보기) -->
+        <RouterLink v-else-if="!stats.totalGames && bests.length" :to="`/profile/${user.id}/stats`" class="flex-1">
+          <p class="t-heading tabular-nums">{{ bests.length }}</p>
+          <p class="t-micro mt-0.5">게임 기록 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
+        </RouterLink>
         <RouterLink v-else :to="`/profile/${user.id}/stats`" class="flex-1">
           <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
           <p class="t-micro mt-0.5">경기 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>

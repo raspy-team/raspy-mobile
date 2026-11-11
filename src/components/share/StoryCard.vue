@@ -47,7 +47,7 @@
     </div>
 
     <div class="mt-auto pt-6 shrink-0">
-      <p class="text-[15px] break-keep" :class="volt ? 'text-signal-on/70' : 'text-fg-muted'">나도 한 판 붙어 보기</p>
+      <p class="text-[15px] break-keep" :class="volt ? 'text-signal-on/70' : 'text-fg-muted'">한 판 붙어 보실 분은 여기로</p>
       <p
         class="mt-2 inline-flex items-center rounded-full px-4 h-10 text-[17px] font-semibold tracking-[-0.01em]"
         :class="volt ? 'bg-signal-on text-signal' : 'bg-signal text-signal-on'"

@@ -24,7 +24,7 @@
     </div>
 
     <div class="mt-auto pt-6">
-      <p class="text-[17px] font-semibold break-keep">너도 풀어 봐!</p>
+      <p class="text-[17px] font-semibold break-keep">한번 풀어 보실래요?</p>
       <p class="mt-2 inline-flex items-center rounded-full px-4 h-10 text-[17px] font-semibold tracking-[-0.01em] bg-signal text-signal-on">matchapp.me/try/improv</p>
     </div>
   </div>

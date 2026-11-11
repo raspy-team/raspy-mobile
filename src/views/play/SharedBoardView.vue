@@ -22,6 +22,8 @@
         <p v-if="moveError" class="t-caption text-danger mt-2 text-center">{{ moveError }}</p>
         <p v-if="state.status === 'PLAYING'" class="t-caption mt-4">한 시간에 한 칸, 내 땅에 붙은 칸을 가져가요(남의 땅도). 사흘 뒤 가진 칸이 많은 순서로 등수가 매겨져요.</p>
         <UiButton v-if="state.status !== 'PLAYING'" block size="lg" class="mt-4" @click="again">새 판 들어가기</UiButton>
+        <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
+        <UiButton v-if="state.status !== 'PLAYING'" block variant="ghost" icon="home" class="mt-2" to="/">홈으로</UiButton>
       </template>
     </main>
   </div>

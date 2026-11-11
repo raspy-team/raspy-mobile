@@ -52,6 +52,8 @@
             <!-- 1:1이면 이 상대와 다시: 예전엔 아무나 모집하는 새 경기를 열었다. 소식의 '도전'과 같은 '나랑도해'로 그 사람에게 (목적 판정 11/11 5번) -->
             <UiButton v-if="rematchTarget" size="sm" variant="tonal" icon="rotate-right" :loading="rematching" @click="rematch">{{ rematchTarget.nickname }}님과 한 판 더</UiButton>
             <UiButton v-else size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">한 판 더</UiButton>
+            <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
+            <UiButton size="sm" variant="ghost" icon="home" class="ml-2" to="/">홈으로</UiButton>
           </div>
         </template>
 

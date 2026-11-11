@@ -152,7 +152,11 @@
           <!-- 다음 행동은 결과 바로 밑에 (UX ⑤: 판 두 개 아래에 있어 스크롤해야 보였다) -->
           <div class="mt-6 px-4 space-y-2">
             <UiButton block size="lg" @click="again">한 판 더</UiButton>
-            <UiButton block variant="ghost" :to="`/play/${key}`">돌아가기</UiButton>
+            <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
+            <div class="grid grid-cols-2 gap-2">
+              <UiButton block variant="ghost" :to="`/play/${key}`">돌아가기</UiButton>
+              <UiButton block variant="ghost" icon="home" to="/">홈으로</UiButton>
+            </div>
           </div>
         </UiCard>
         <TurnViewPanel v-if="state.view?.boards?.length" class="mt-3" :view="{ ...state.view, note: undefined, choices: [] }" :my-turn="false" :sending="false" />

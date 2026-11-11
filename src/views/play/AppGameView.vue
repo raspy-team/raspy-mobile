@@ -263,7 +263,11 @@
         <!-- 다음 행동은 결과 바로 밑에. 긴 답·한마디는 그 아래 -->
         <!-- 하루 한 판 게임(오늘의 초성)은 '한 판 더'를 눌러도 할 수 없어 빼고, 공유가 다음 행동이 된다 -->
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">{{ improvResult?.empty ? '다시 하기' : '한 판 더' }}</UiButton>
-        <UiButton block variant="ghost" class="mt-2" @click="closeResult">돌아가기</UiButton>
+        <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <UiButton block variant="ghost" @click="closeResult">돌아가기</UiButton>
+          <UiButton block variant="ghost" icon="home" to="/">홈으로</UiButton>
+        </div>
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
         <!-- 임기응변은 한마디(등급·인물 반응)를 위 카드와 상황 카드에 나눠 보여 주므로 따로 두지 않는다 (등급이 두 번 보였다) -->
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT' && !improvResult" class="mt-3">

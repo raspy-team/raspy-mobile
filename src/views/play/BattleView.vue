@@ -80,7 +80,11 @@
           <p v-else class="t-title">경기가 끝났어요</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" @click="again">한 판 더</UiButton>
-        <UiButton block variant="ghost" class="mt-2" :to="`/play/${key}`">돌아가기</UiButton>
+        <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <UiButton block variant="ghost" :to="`/play/${key}`">돌아가기</UiButton>
+          <UiButton block variant="ghost" icon="home" to="/">홈으로</UiButton>
+        </div>
       </template>
     </main>
   </div>

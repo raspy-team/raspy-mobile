@@ -202,7 +202,8 @@
               </div>
             </div>
             <!-- 별 두 줄과 '또 만나고 싶나요'만 먼저. 한마디·규칙·사진은 남기고 싶은 사람만 (UX ④: 한 화면에 아홉 가지였다) -->
-            <UiInput v-if="reviewMore" v-model="review.text" multiline :rows="3" label="한마디" optional placeholder="같이 해서 즐거웠던 점이나 아쉬웠던 점" />
+            <!-- 한마디는 상대 프로필에 내 이름과 함께 보인다: 쓰기 전에 알린다. 아쉬운 점은 공개 글이 아니라 아래 '또 만나서 하고 싶나요'(상대에게 안 보임)가 받는다 (11/11 감정과 체면 전수표) -->
+            <UiInput v-if="reviewMore" v-model="review.text" multiline :rows="3" label="한마디" optional hint="상대 프로필과 소식에 내 이름과 함께 보여요" placeholder="같이 해서 좋았던 점" />
             <!-- 기록에서 뽑은 사실 한 줄 (소식 이야기 줄). 누르면 한마디에 넣는다. 고르지 않아도 된다 -->
             <div v-if="reviewMore && beatChoices.length" class="-mt-2">
               <p class="t-micro mb-1.5">기록에서 한 줄 고르기</p>

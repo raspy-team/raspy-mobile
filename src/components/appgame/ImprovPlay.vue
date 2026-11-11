@@ -29,7 +29,7 @@
       <template v-else>
         <div class="mt-4 ml-auto max-w-[85%] rounded-2xl rounded-tr-md bg-signal px-4 py-3 text-signal-on">
           <!-- t-body가 글자색을 정하므로 볼트 바탕의 글자색을 여기서 다시 준다 (흐리게 읽혔다) -->
-          <p class="t-body !text-signal-on break-keep whitespace-pre-line">{{ said[index] || '(아무 말도 못 했다)' }}</p>
+          <p class="t-body !text-signal-on break-keep whitespace-pre-line">{{ said[index] || '(대답 없음)' }}</p>
         </div>
         <div class="mt-3 max-w-[85%] rounded-2xl rounded-tl-md bg-surface-2 px-4 py-3">
           <!-- 반응을 기다리는 동안 인물이 '생각 중'이다. 도는 표시만 있으면 "멈췄나?" (걷기 P1-4: 첫 반응 10.9초) -->

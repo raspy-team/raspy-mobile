@@ -363,9 +363,10 @@ const headerInfo = computed(() => {
         show: true,
         type: 'challenge_rejected',
         title: '도전이 거절됐어요',
-        description: `${targetUserNickname.value}님이 도전을 거절했어요`,
+        // 빨강 대신 회색, 다음 할 일을 함께 (11/11 감정과 체면 전수표, 원칙 3·4)
+        description: `${targetUserNickname.value}님이 도전을 거절했어요. 다른 상대와 한 판 해 봐요`,
         showActions: false,
-        statusColor: 'red',
+        statusColor: 'gray',
       }
     } else {
       return {
@@ -374,7 +375,7 @@ const headerInfo = computed(() => {
         title: '도전을 거절했어요',
         description: `${targetUserNickname.value}님의 도전 요청을 거절했어요`,
         showActions: false,
-        statusColor: 'red',
+        statusColor: 'gray',
       }
     }
   }

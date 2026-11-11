@@ -159,7 +159,7 @@ type Schemas = components['schemas']
 type Fixture = Schemas['TournamentFixtureView']
 const STATUS: Record<string, string> = { RECRUITING: '모집 중', RUNNING: '진행 중', COMPLETED: '끝남', CANCELED: '취소됨' }
 const MY: Record<string, string> = { APPLIED: '신청했어요 · 주최자가 받으면 참가', ACCEPTED: '참가가 정해졌어요', CHECKED_IN: '체크인했어요', REJECTED: '신청이 거절됐어요' }
-const RESULT: Record<string, string> = { BYE: '부전승', FORFEIT: '기권승 (마감)', DRAW: '무승부', BOTH_LOST: '둘 다 패 (마감)' }
+const RESULT: Record<string, string> = { BYE: '부전승', FORFEIT: '기권승 (마감)', DRAW: '무승부', BOTH_LOST: '둘 다 안 함 (마감)' }
 const route = useRoute()
 const router = useRouter()
 const { showToast } = useToast()
@@ -205,8 +205,9 @@ const myHint = computed(() => {
   if (x.canCheckIn) return '지금 체크인해야 대진에 들어가요'
   return '시작 24시간 전부터 체크인할 수 있어요. 체크인해야 대진에 들어가요'
 })
+// 실력 점수는 줄에 싣지 않는다: 기록을 숨긴 사람·처음 온 사람(1500)도 그대로 보였다. 대진 순서는 서버가 점수로 정한다 (11/11 감정과 체면 전수표)
 const entrySub = (e: Schemas['TournamentEntryView']) =>
-  [`실력 점수 ${e.rating}`, e.status === 'APPLIED' ? '신청' : e.status === 'CHECKED_IN' ? '체크인' : ''].filter(Boolean).join(' · ')
+  e.status === 'APPLIED' ? '신청' : e.status === 'CHECKED_IN' ? '체크인' : ''
 const won = (f: Fixture, side?: Schemas['TournamentSide']) => !!side && f.winnerEntryId === side.entryId
 const sideClass = (f: Fixture, side?: Schemas['TournamentSide']) =>
   f.status !== 'DONE' ? 'text-fg' : won(f, side) ? 'text-fg font-semibold' : 'text-fg-muted'

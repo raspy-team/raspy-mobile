@@ -11,7 +11,8 @@
         <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
       </button>
       <!-- 공유: 인스타 스토리·카톡·링크 (Strava처럼 반응 옆에) -->
-      <button v-if="shareable" type="button" class="h-11 px-3 flex items-center text-sm text-fg-muted" aria-label="공유" @click="emit('share')">
+      <!-- 앱 밖 공유는 그 경기에 뛴 사람만: 구경한 사람이 올리면 진 사람의 이름·점수가 고르지 않은 곳(인스타)에 나갔다 (11/11 감정과 체면 전수표) -->
+      <button v-if="shareable && iPlayed" type="button" class="h-11 px-3 flex items-center text-sm text-fg-muted" aria-label="공유" @click="emit('share')">
         <UiIcon name="share" class="text-lg" aria-hidden="true" />
       </button>
     </template>
@@ -48,6 +49,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['like', 'comment', 'share', 'watch', 'challenge'])
 
+const iPlayed = computed(() => props.myId != null && (props.post.players || []).some((p) => String(p.id) === String(props.myId)))
 const targets = computed(() => (props.post.players || []).filter((p) => p.id !== props.myId && !p.isBot))
 const watchingAll = computed(() => targets.value.length > 0 && targets.value.every((p) => (props.post.watching || []).includes(p.id)))
 </script>

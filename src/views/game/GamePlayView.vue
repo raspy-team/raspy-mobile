@@ -101,6 +101,8 @@
         <UiListItem icon="book-open" title="규칙 보기" @click="menuThen(() => (game.showRuleDetail = true))" />
         <!-- 점수판을 떠나지 않고 링크만 보낸다 (예전엔 중계 화면으로 가 경기 중 연결이 끊겼다) -->
         <UiListItem icon="eye" title="중계 링크 보내기" subtitle="보내면 친구가 점수를 보며 응원해요" @click="menu(shareLive)" />
+        <!-- 중계 끄기를 점수판에서: 예전엔 중계 화면에만 있어 끄려면 경기 중 점수판을 떠나야 했다 (11/11 감정과 체면 전수표, 원칙 2) -->
+        <UiListItem icon="eye-slash" :title="watchOff ? '중계 다시 켜기' : '중계 끄기'" :subtitle="watchOff ? '지금은 선수 말고는 이 경기를 볼 수 없어요' : '끄면 선수 말고는 이 경기를 볼 수 없어요'" @click="menu(toggleWatchOff)" />
         <UiListItem icon="volume" :title="soundOn ? '관중 소리 끄기' : '관중 소리 켜기'" subtitle="관중이 응원하면 이 휴대폰에서 박수 소리가 나요" @click="menu(toggleSound)" />
         <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menuThen(() => (showLogModal = true))" />
         <UiListItem icon="camera" title="사진 찍기" @click="menu(triggerPhotoCapture)" />
@@ -206,7 +208,7 @@ import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
 import { subscribeTopic } from '../../websocket/userChannel'
-import { GET } from '@/api/client'
+import { GET, POST } from '@/api/client'
 import { clap, crowdSoundOn, setCrowdSound } from '../../utils/crowdSound'
 import LiveBreakCard from '../../components/live/LiveBreakCard.vue'
 import MatchModal from '../../components/MatchModal.vue'
@@ -233,8 +235,21 @@ const viewers = ref(0)
 const lastBreak = ref(null)
 const soundOn = ref(crowdSoundOn())
 let offLive
+const watchOff = ref(false)
 async function loadViewers() {
-  viewers.value = (await GET('/api/games/{gameId}/live', { path: { gameId: Number(gameId) } }).catch(() => ({ data: null }))).data?.viewers ?? 0
+  const live = (await GET('/api/games/{gameId}/live', { path: { gameId: Number(gameId) } }).catch(() => ({ data: null }))).data
+  viewers.value = live?.viewers ?? 0
+  watchOff.value = !!live?.watchOff
+}
+async function toggleWatchOff() {
+  try {
+    const live = (await POST('/api/games/{gameId}/live/watch-off', { path: { gameId: Number(gameId) }, body: { off: !watchOff.value } })).data
+    watchOff.value = !!live?.watchOff
+    viewers.value = live?.viewers ?? viewers.value
+    showToast(watchOff.value ? '중계를 껐어요' : '중계를 다시 켰어요')
+  } catch {
+    showToast('바꾸지 못했어요. 다시 해 주세요')
+  }
 }
 function toggleSound() {
   soundOn.value = !soundOn.value

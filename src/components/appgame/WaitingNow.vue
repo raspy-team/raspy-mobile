@@ -25,7 +25,8 @@
           <div class="flex-1 min-w-0">
             <p class="t-label truncate">{{ l.nickname }}님 · {{ l.title }}</p>
             <!-- 몇 분이 지나면 '754초째'가 되던 것을 분·시간으로 (경로 8 P7) -->
-            <p class="t-micro tabular-nums">{{ waitText(l.waitedSeconds + since) }}째 기다리는 중</p>
+            <!-- 10분이 넘으면 얼마나 오래인지는 빼고 '기다리는 중'만: 긴 대기실에서 'N시간째'가 아무도 안 붙는 사람이라는 표시로 남들에게 보였다 (11/11 감정과 체면 전수표) -->
+            <p class="t-micro tabular-nums">{{ l.waitedSeconds + since > 600 ? '' : `${waitText(l.waitedSeconds + since)}째 ` }}기다리는 중</p>
           </div>
           <UiButton size="sm" :disabled="joining" @click="joinLobby(l)">참여</UiButton>
         </UiCard>

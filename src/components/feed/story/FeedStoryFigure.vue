@@ -4,7 +4,8 @@
     <!-- 왕관: 챔피언이 넘어감 -->
     <div v-if="kind === 'crown' && champ" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
       <span class="rounded-full bg-signal text-signal-on px-2 py-0.5 t-micro font-semibold">{{ champ.area }} 챔피언</span>
-      <span class="text-fg-subtle line-through decoration-line-strong">{{ champ.fromName }}</span>
+      <!-- 앞 챔피언 이름에 줄을 긋지 않는다: 남들 앞에서 이름에 줄이 그어졌다 (11/11 감정과 체면 전수표). 지킨 날수는 예우로 남긴다 -->
+      <span class="text-fg-subtle">{{ champ.fromName }}</span>
       <span class="text-fg-subtle" aria-hidden="true">→</span>
       <span class="font-semibold text-fg">{{ winnerName }}</span>
       <span v-if="champ.heldDays" class="w-full t-micro">{{ champ.fromName }}은 {{ champ.heldDays }}일 동안 지켰어요</span>

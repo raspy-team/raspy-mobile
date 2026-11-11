@@ -107,7 +107,8 @@
       <section v-if="s.matches.length">
         <div class="flex items-center justify-between mb-3">
           <h2 class="t-heading">최근 경기</h2>
-          <UiBadge v-if="s.streak && s.streak.count >= 2" :tone="s.streak.kind === 'win' ? 'success' : 'neutral'">
+          <!-- 연패는 나에게만: 남의 기록에서는 연승·연속 무승부만 (11/11 감정과 체면 전수표, 원칙 2) -->
+          <UiBadge v-if="s.streak && s.streak.count >= 2 && (isMe || s.streak.kind !== 'lose')" :tone="s.streak.kind === 'win' ? 'success' : 'neutral'">
             {{ s.streak.count }}{{ s.streak.kind === 'win' ? '연승' : s.streak.kind === 'lose' ? '연패' : '연속 무승부' }} 중
           </UiBadge>
         </div>
@@ -275,7 +276,8 @@
           >
             <template #leading><UiAvatar :src="o.player.avatar" :name="o.player.nickname" :user-id="o.player.id" size="sm" /></template>
             <template #trailing>
-              <UiBadge :tone="o.tally.wins > o.tally.losses ? 'success' : 'neutral'">
+              <!-- '열세'는 나에게만 (남의 기록에서는 우세·팽팽만) -->
+              <UiBadge v-if="isMe || o.tally.wins >= o.tally.losses" :tone="o.tally.wins > o.tally.losses ? 'success' : 'neutral'">
                 {{ o.tally.wins > o.tally.losses ? '우세' : o.tally.wins < o.tally.losses ? '열세' : '팽팽' }}
               </UiBadge>
             </template>

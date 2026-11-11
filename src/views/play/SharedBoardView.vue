@@ -57,7 +57,7 @@ const headline = computed(() => {
   const s = state.value
   if (!s) return ''
   if (s.status === 'COMPLETED') return s.myPlace ? `끝났어요 · ${s.myPlace}등` : '끝났어요'
-  if (s.status === 'CANCELED') return '혼자뿐이라 취소된 판이에요'
+  if (s.status === 'CANCELED') return '모이기 전에 닫힌 판이에요 · 기록에 남지 않아요'
   if (canMove.value) return '한 칸 가져가세요'
   const min = Math.ceil((nextAt.value - serverNow.value) / 60000)
   return `${min}분 뒤에 또 둘 수 있어요`

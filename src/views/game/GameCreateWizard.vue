@@ -13,7 +13,7 @@
         <p v-if="createdLine" class="t-body mt-2">{{ createdLine }}</p>
         <p class="t-caption mt-2">
           <!-- 서버가 친구에게 알림을 보내지 않는데 '알렸어요'라고 했다. 링크로 직접 알리게 한다 (목적 판정 11/11 4번) -->
-          {{ friend ? `${friend.nickname}님에게 링크를 보내 알려 주세요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
+          {{ friend ? `${friend.nickname}님에게 알림이 갔어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
         <!-- 아무나로 열었으면, 기다리기만 하기보다 아는 사람을 먼저 부르게 -->
         <UiButton v-if="createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">{{ friend ? `${friend.nickname}님에게 링크 보내기` : format === 'DUEL' ? '링크 보내서 상대 부르기' : '링크 보내서 같이 할 사람 부르기' }}</UiButton>

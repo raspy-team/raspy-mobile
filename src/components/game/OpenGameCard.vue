@@ -26,9 +26,11 @@
           <span class="block t-micro truncate">{{ ownerLine }}</span>
         </span>
       </button>
-      <button v-if="applicants" type="button" class="t-micro underline underline-offset-2 flex-shrink-0 px-2 -mx-2 py-3 -my-3" @click="emit('challengers')">
+      <!-- 신청자 목록은 주최자만 연다. 다른 사람에게는 몇 명인지만 (뽑히지 않은 사람이 남들에게 보이지 않게, 11/11 감정과 체면) -->
+      <button v-if="applicants && isMine" type="button" class="t-micro underline underline-offset-2 flex-shrink-0 px-2 -mx-2 py-3 -my-3" @click="emit('challengers')">
         {{ applicants }}명 신청
       </button>
+      <span v-else-if="applicants" class="t-micro flex-shrink-0">{{ applicants }}명 신청</span>
       <UiBadge v-if="isMine">내 경기</UiBadge>
       <!-- 신청이 된 순간: 체크로 바뀌며 볼트 불꽃이 튄다 (1.2초 뒤 '신청 취소'로) -->
       <span v-else-if="justApplied" class="apply-burst relative inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-signal text-signal-on text-sm font-semibold" role="status">

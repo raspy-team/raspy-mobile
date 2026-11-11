@@ -457,7 +457,7 @@
         </template>
       </template>
     </main>
-    <ShareSheet :post="sharePost" :my-id="myId" @close="sharePost = null" />
+    <ShareSheet v-if="sharePost" :post="sharePost" :my-id="myId" @close="sharePost = null" />
   </div>
   <SaveImageSheet :src="saveView" @close="saveView = null" />
 </template>
@@ -471,7 +471,7 @@ import OpponentName from '../../components/appgame/OpponentName.vue'
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
 import { liveRoute } from '@/utils/battle'
 import { canResumeDuel } from '@/utils/appGame'
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import api from '../../api/api'
@@ -501,7 +501,8 @@ async function loadStory() {
 }
 import { withShareRef } from '@/utils/shareRef'
 import { copyText } from '@/utils/clipboard'
-import ShareSheet from '../../components/feed/story/ShareSheet.vue'
+// 공유 시트(스토리 그림 찍기 포함, 압축 100KB 넘음)는 처음 열 때 받는다. 화면을 열 때마다 받아 첫 화면을 늦췄다 (11/11 몸과 시간)
+const ShareSheet = defineAsyncComponent(() => import('../../components/feed/story/ShareSheet.vue'))
 import { getMyId } from '@/utils/me'
 import WritePlay from '../../components/appgame/WritePlay.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'

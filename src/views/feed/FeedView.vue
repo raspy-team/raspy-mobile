@@ -142,7 +142,7 @@
       </template>
     </UiSheet>
 
-    <ShareSheet :post="sharePost" :my-id="myId" @close="sharePost = null" />
+    <ShareSheet v-if="sharePost" :post="sharePost" :my-id="myId" @close="sharePost = null" />
 
     <Comment v-if="commentId" :id="commentId" @close="commentId = 0" />
   </div>
@@ -152,13 +152,14 @@
 // 피드: 끝난 경기를 카드로 훑어본다 (예전의 한 장씩 넘기는 릴스 방식 대신)
 // - 동네(기본) / 친구 / 전국. 서버가 범위·순서를 정한다 (FeedService.getFeed). 동네 글이 적으면 아래에 '다른 동네' 줄
 // - ?gameId= 링크·알림으로 온 경기는 맨 위에 강조, ?userId= 는 그 사람의 경기만
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, defineAsyncComponent } from 'vue'
 import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import FeedCard from '../../components/feed/FeedCard.vue'
 import AppDuelFeedCard from '../../components/feed/AppDuelFeedCard.vue'
-import ShareSheet from '../../components/feed/story/ShareSheet.vue'
+// 공유 시트(스토리 그림 찍기 포함, 압축 100KB 넘음)는 처음 열 때 받는다. 화면을 열 때마다 받아 첫 화면을 늦췄다 (11/11 몸과 시간)
+const ShareSheet = defineAsyncComponent(() => import('../../components/feed/story/ShareSheet.vue'))
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
   UiAiBadge, UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,

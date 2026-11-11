@@ -56,8 +56,6 @@
     <UiSection title="동네 경기" :class="appPlayer ? 'mt-6' : 'mt-6'">
       <template #action>
         <span v-if="games.length" class="t-micro mr-1">{{ games.length }}개</span>
-        <!-- 동네 경기를 보러 온 사람이 동네 동호회도 여기서 찾는다 (경로 7 K4: 내 정보 속 버튼 하나뿐이었다) -->
-        <UiIconButton icon="users" label="동네 동호회" @click="router.push('/clubs')" />
         <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
         <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
       </template>

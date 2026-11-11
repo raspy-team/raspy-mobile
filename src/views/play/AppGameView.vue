@@ -382,8 +382,8 @@
 
           <!-- 챔피언: 내가 속한 자리(소속·동네·전국). 하루 퍼즐은 맞붙는 판이 없어 벨트가 없다 -->
           <!-- 준비 중(AI 키 없음 등)인 게임은 이길 수 없으니 챔피언 자리를 보이지 않는다 (11/5 9e) -->
-          <!-- 처음 온 사람에게도 보인다: "이기면 내가 챔피언"은 처음 하러 온 사람의 재미·자랑 동기다. 한 판 한 사람에게만 미뤘던 것을 되살림 (11/11 목적 다시 보기) -->
-          <ChampionSeatsCard v-if="game.dailyLimit !== 1 && game.available" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
+          <!-- 처음 하러 온 사람에게는 챔피언 자리를 미룬다: '한 판 하기' 바로 밑에서 눈을 뺏었다 (목적 판정 11/11 부분 2 다시 훑기, 고병연 확인) -->
+          <ChampionSeatsCard v-if="game.dailyLimit !== 1 && game.available && played" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
 
           <!-- 나머지는 탭 하나로: 순위 · 내 대결 · 투표 -->
           <!-- 빈 탭은 그리지 않는다. 탭이 하나뿐이면 탭 없이 목록만 (목적 판정 11/11 부분 2 다시 훑기) -->

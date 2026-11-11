@@ -20,7 +20,6 @@
         <button v-if="phase === 'plaza'" type="button" class="shrink-0 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur t-caption font-semibold text-fg flex items-center gap-1" aria-label="지금 여기 있는 사람" @click="peopleOpen = true">
           <UiIcon name="users" /> {{ peopleHere.filter((p) => p.restingMinutes == null).length }}
         </button>
-        <UiIconButton icon="shirt" label="꾸미기" class="bg-canvas/80 backdrop-blur" @click="router.push('/plaza/avatar')" />
       </div>
 
       <div v-if="phase === 'loading'" class="absolute inset-0 flex items-center justify-center">
@@ -406,7 +405,7 @@ function tapObject(o: MapObj) {
   else if (a === 'games') router.push('/games')
   else if (a === 'board') openBoard()
   else if (a === 'shop') router.push('/plaza/avatar')
-  else if (a === 'people') peopleOpen.value = true
+  // 분수 누르기는 뺐다: 누르면 사람 목록이 나올 줄 아무도 몰랐고, 위 막대 사람 수가 같은 일을 한다 (목적 판정 3, 고병연 확인)
   else if (a.startsWith('room:')) goRoom(a.slice(5))
   else if (a.startsWith('place:')) {
     const p = enter.value?.map.places[Number(a.slice(6))]

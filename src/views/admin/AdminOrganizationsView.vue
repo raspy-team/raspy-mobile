@@ -6,6 +6,12 @@
       <UiSection title="신청">
         <UiTabs v-model="tab" :options="tabs" class="mb-3" />
         <UiListSkeleton v-if="loading" :rows="3" />
+        <!-- 403이 아닌 실패가 토스트 뒤 '확인할 신청이 없어요'로 남았다 (경로 7 리뷰 K18) -->
+        <UiCard v-else-if="loadFailed">
+          <UiEmptyState icon="fas fa-triangle-exclamation" title="불러오지 못했어요">
+            <UiButton variant="secondary" @click="loading = true; load()">다시 시도</UiButton>
+          </UiEmptyState>
+        </UiCard>
         <UiCard v-else-if="!requests.length">
           <UiEmptyState mascot="match" mood="smile" :title="tab === 'PENDING' ? '확인할 신청이 없어요' : '처리한 신청이 없어요'" />
         </UiCard>
@@ -155,11 +161,11 @@ type AdminRequest = components['schemas']['AdminOrgRequest']
 type AdminOrg = components['schemas']['AdminOrg']
 type OrgType = AdminOrg['type']
 
-const TYPE_LABEL: Record<OrgType, string> = { UNIVERSITY: '대학교', COMPANY: '회사', OTHER: '기타' }
-const TYPE_ORDER: OrgType[] = ['UNIVERSITY', 'COMPANY', 'OTHER']
+const TYPE_LABEL: Record<OrgType, string> = { UNIVERSITY: '대학교', HIGH_SCHOOL: '중고등학교', COMPANY: '회사', OTHER: '기타' }
+const TYPE_ORDER: OrgType[] = ['UNIVERSITY', 'HIGH_SCHOOL', 'COMPANY', 'OTHER']
 const STATUS_LABEL: Record<string, string> = { PENDING: '대기', APPROVED: '승인', REJECTED: '거절', CANCELED: '취소' }
+// '중고등학교는 받지 않아요'는 11/9 결정(만 14세 이상이면 받는다)과 반대라 뺐다 (경로 7 리뷰)
 const REJECT_REASONS = [
-  '중고등학교는 받지 않아요',
   '서류에서 조직 이름이 보이지 않아요',
   '3개월이 지난 서류예요',
   '재학·재직 상태를 알 수 없어요',
@@ -174,15 +180,20 @@ const requests = ref<AdminRequest[]>([])
 const loading = ref(true)
 const acting = ref(false)
 
+const loadFailed = ref(false)
 async function load() {
+  loadFailed.value = false
   try {
+    // 'PENDING'이 아니면 서버는 승인·거절·취소를 모두 최근 순으로 준다 (APPROVED는 '처리한 것'이라는 뜻으로 보낸다)
     const status = tab.value === 'PENDING' ? 'PENDING' : 'APPROVED'
     requests.value = (await GET('/api/admin/organizations/requests', { query: { status } })).data || []
     if (tab.value === 'PENDING') tabs.value[0].count = requests.value.length
   } catch (e: unknown) {
     const status = (e as { response?: { status?: number } }).response?.status
-    showToast(status === 403 ? '관리자만 볼 수 있어요' : '불러오지 못했어요')
-    if (status === 403) router.replace('/')
+    if (status === 403) {
+      showToast('관리자만 볼 수 있어요')
+      router.replace('/')
+    } else loadFailed.value = true
   } finally {
     loading.value = false
   }

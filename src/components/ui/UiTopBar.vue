@@ -21,6 +21,7 @@
 // 오른쪽 아이콘 버튼은 #right 슬롯에 UiIconButton으로
 import { defineProps } from 'vue'
 import { useRouter } from 'vue-router'
+import { takePendingOverlay } from '../../composables/useOverlay'
 
 const props = defineProps({
   title: { type: String, default: '' },
@@ -32,7 +33,9 @@ const router = useRouter()
 // 앱 안에서 온 기록은 vue-router가 history.state.back에 적어 둔다(시트가 쌓는 칸도 이 값을 이어받는다).
 // history.length는 앞으로 칸까지 세서 공유 링크로 연 첫 화면에서 눌러도 아무 일이 없었다
 function goBack() {
-  if (window.history.state?.back) router.back()
+  // 방금 닫힌 시트의 칸이 아직 남아 있으면 그것까지 함께 걷는다 (한 번은 아무 일이 없던 것, 경로 8 2절)
+  const extra = takePendingOverlay()
+  if (window.history.state?.back) router.go(-1 - extra)
   else router.push(typeof props.back === 'string' ? props.back : '/')
 }
 </script>

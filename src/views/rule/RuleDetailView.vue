@@ -121,15 +121,16 @@
     <!-- 더보기 -->
     <UiSheet v-model="menuOpen">
       <UiList>
-        <UiListItem v-if="isMine" icon="fas fa-pen" title="수정 요청" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
+        <UiListItem v-if="isMine" icon="fas fa-pen" title="내 규칙 고치기" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
         <UiListItem icon="fas fa-ranking-star" title="순위 보기" @click="goRanking" />
-        <UiListItem v-if="!isMine" icon="far fa-comment" title="수정 제안" subtitle="만든 사람에게 메시지로 보내요" @click="openSuggest" />
+        <!-- '수정 제안'(남의 규칙)과 '수정 요청'(내 규칙)이 이름이 거의 같아 하는 일이 헷갈렸다 (경로 6 리뷰): 하는 일로 부른다 -->
+        <UiListItem v-if="!isMine" icon="far fa-comment" title="만든 사람에게 고칠 점 보내기" subtitle="메시지로 가요" @click="openSuggest" />
         <UiListItem v-if="!isMine" icon="far fa-flag" title="신고" danger @click="openReport" />
       </UiList>
     </UiSheet>
 
     <!-- 수정 제안: 만든 사람에게 DM으로 -->
-    <UiSheet v-model="suggestOpen" title="수정 제안">
+    <UiSheet v-model="suggestOpen" title="만든 사람에게 고칠 점 보내기">
       <p class="t-caption mb-4">{{ rule?.createdBy?.nickname || '만든 사람' }}님에게 메시지로 보내요</p>
       <UiInput v-model="suggestText" multiline :rows="4" :maxlength="1000" placeholder="예: 3세트는 길어요. 2세트 선승으로 바꾸면 어때요?" />
       <template #footer>
@@ -242,12 +243,14 @@ async function submitReport() {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     const { data: done } = await api.post('/api/reports', { targetType: 'RULE', targetId: rule.value.id, reason })
     showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
+    reportOpen.value = false
   } catch (e) {
     // 연결이 끊겨도 '이미 신고했다'고 해 신고가 된 줄 알았다 (목적 판정 6)
     showToast(e.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
+    // 연결 오류면 고른 사유·쓴 글을 버리지 않고 시트를 연 채로 둔다 (경로 6 리뷰 P7)
+    if (e.response?.data?.message) reportOpen.value = false
   } finally {
     reporting.value = false
-    reportOpen.value = false
   }
 }
 

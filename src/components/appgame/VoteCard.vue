@@ -42,7 +42,8 @@ import type { components } from '@/api/schema'
 import { UiBadge, UiCard } from '../ui'
 
 type Card = components['schemas']['AppVoteCard']
-const props = defineProps<{ card: Card }>()
+// visitorId: 로그인 전에 투표 링크를 연 사람이면 기기 번호로 한 표 (경로 2 리뷰 N3)
+const props = defineProps<{ card: Card; visitorId?: string }>()
 const emit = defineEmits<{ voted: [card: Card] }>()
 
 const voting = ref(false)
@@ -60,7 +61,9 @@ async function vote(playId: number) {
   voting.value = true
   error.value = ''
   try {
-    emit('voted', (await POST('/api/app-games/votes/{gameId}', { path: { gameId: props.card.gameId }, body: { playId } })).data)
+    emit('voted', props.visitorId
+      ? (await POST('/api/app-games/votes/{gameId}/guest', { path: { gameId: props.card.gameId }, body: { playId, visitorId: props.visitorId } })).data
+      : (await POST('/api/app-games/votes/{gameId}', { path: { gameId: props.card.gameId }, body: { playId } })).data)
   } catch (e) {
     error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '투표하지 못했어요'
   } finally {

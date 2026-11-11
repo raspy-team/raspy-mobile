@@ -45,7 +45,9 @@
     <p class="t-label mb-2">매치 친구에게도 알리기 <span class="t-micro">(고르지 않아도 돼요)</span></p>
     <div class="flex flex-wrap gap-2 mb-2">
       <UiChip v-for="f in friends" :key="f.id" :selected="friendId === f.id" @click="friendId = friendId === f.id ? null : f.id">{{ f.nickname }}</UiChip>
-      <p v-if="!friends.length" class="t-caption">매치 친구가 없어요. 링크만 보내도 돼요</p>
+      <!-- 못 불러온 것을 '친구가 없어요'로 보였다 (가로 훑기 3) -->
+      <p v-if="friendsFailed" class="t-caption">친구 목록을 불러오지 못했어요. 링크만 보내도 돼요</p>
+      <p v-else-if="!friends.length" class="t-caption">매치 친구가 없어요. 링크만 보내도 돼요</p>
     </div>
     <template #footer>
       <UiButton block :loading="busy" @click="startShare">링크 공유</UiButton>
@@ -111,7 +113,8 @@ async function run(fn, ok) {
     s.value = (await fn())?.data ?? s.value
     if (ok) showToast(ok)
   } catch (e) {
-    showToast(e?.response?.data?.message || e?.message || '처리하지 못했어요')
+    // 서버에 닿지 못하면 'Network Error'(영어)가 그대로 떴다. 신호가 약한 경기장에서 쓰는 카드다 (가로 훑기 6절)
+    showToast(e?.response?.data?.message || (/[가-힣]/.test(e?.message || '') ? e.message : !e?.response ? '연결이 약해요. 신호가 잡히면 다시 눌러 주세요' : '처리하지 못했어요'))
   } finally {
     busy.value = false
   }
@@ -172,9 +175,15 @@ watch(() => s.value?.shareUrl, (url) => {
   if (url && navigator.geolocation) watchId = navigator.geolocation.watchPosition(() => pushLocation(), () => {}, { maximumAge: 60_000 })
 })
 
+const friendsFailed = ref(false)
 watch(shareOpen, async (open) => {
   if (!open || friends.value.length) return
-  friends.value = (await GET('/api/friends/my').catch(() => ({ data: [] }))).data || []
+  try {
+    friends.value = (await GET('/api/friends/my')).data || []
+    friendsFailed.value = false
+  } catch {
+    friendsFailed.value = true
+  }
 })
 
 let off = null

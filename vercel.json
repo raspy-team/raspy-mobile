@@ -12,6 +12,17 @@
       "destination": "https://raspy-api.fly.dev/m/:id/:file"
     },
     {
+      "source": "/:path((?!m/|assets/).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(kakaotalk-scrap|facebookexternalhit|Facebot|meta-externalagent|Twitterbot|Slackbot|Discordbot|TelegramBot|WhatsApp|LinkedInBot|Yeti|Daumoa).*"
+        }
+      ],
+      "destination": "https://raspy-api.fly.dev/preview/:path"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index"
     }

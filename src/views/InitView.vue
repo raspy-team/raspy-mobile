@@ -7,29 +7,31 @@
         <span class="text-[22px] font-semibold leading-none tracking-[-0.055em] text-fg">match</span>
         <!-- 링크로 들어온 사람: 무엇에 불려 왔는지 먼저 (인스타 게임 링크, 친구의 도전장). 가입하면 그 화면으로 돌아간다 -->
         <!-- 방금 손님으로 한 판 한 사람: 결과 카드에서 이미 마음먹고 왔다. 게임 설명·약속을 되풀이하지 않고 방금 결과만 (목적 판정 11/11 부분 1) -->
-        <UiCard v-if="guestPlayed && guestLine" class="mt-8">
+        <UiCard v-if="guestLine" class="mt-8">
           <p class="t-title">{{ guestLine }}</p>
           <p class="t-caption mt-1">시작하면 내 기록에 남아요</p>
         </UiCard>
         <UiCard v-else-if="landing" class="mt-8">
-          <p class="t-caption">{{ guestPlayed ? '방금 한 판' : '받은 링크' }}</p>
+          <!-- '방금 한 판'은 손님 결과에서 바로 왔을 때만. 어제 한 판의 표시(guest_played)로 새 링크를 '방금 한 판'이라 불렀다 -->
+          <p class="t-caption">{{ fromGuest ? '방금 한 판' : '받은 링크' }}</p>
           <p class="t-title mt-1">{{ landing.title }}</p>
-          <p v-if="!guestPlayed" class="t-caption mt-1">{{ landing.line }}</p>
-          <p class="t-caption text-fg mt-3">{{ guestPlayed ? '시작하면 방금 한 판이 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
+          <p v-if="!fromGuest" class="t-caption mt-1">{{ landing.line }}</p>
+          <p class="t-caption text-fg mt-3">{{ fromGuest ? '시작하면 방금 한 판이 내 기록에 남아요' : '시작하면 바로 이어서 해요' }}</p>
         </UiCard>
         <!-- 상대 구하기를 등록하고 온 사람: 그 등록이 어디로 가는지 -->
         <UiCard v-else-if="fromPartner" class="mt-8">
           <p class="t-title">상대 구하기를 등록했어요</p>
-          <p class="t-caption mt-1">시작하면 내 계정에 붙어요. 상대가 생기면 알림으로 알려 드려요</p>
+          <p class="t-caption mt-1">시작하면 내 계정에 붙어요. 상대가 생기면 {{ NOTICE }}</p>
         </UiCard>
         <!-- 게임 링크로 온 사람에게 '종목과 규칙을 정하고'는 다른 앱 이야기다. 받은 게임 이야기로 (3-5 걷기 P5) -->
         <!-- 손님 판에서 온 사람에게는 큰 제목·설명이 결과 화면 카드의 같은 약속을 되풀이한다 (목적 판정 11/11 부분 1). 받은 링크로 온 사람에게만 -->
-        <template v-if="landing && !guestPlayed">
+        <!-- 큰 제목 '1:1로 승패'는 앱 게임 링크(/play)로 온 사람에게만. 투표·관전·규칙·경기·동호회 링크로 온 사람에겐 맞지 않는 약속이었다 (경로 2 리뷰 N3) -->
+        <template v-if="landing && !guestLine && returnTo?.startsWith('/play/')">
           <h1 class="t-display text-[40px] mt-8">기록 남기고<br /><span class="hl hl-draw">사람과</span> 붙기</h1>
           <p class="t-body text-fg-muted mt-4 max-w-[30ch]">다음 판부터는 모르는 사람과 1:1로 승패를 내요.</p>
         </template>
-        <!-- 손님 판에서 온 사람은 링크가 없어도(landing 없음) 위 카드가 할 말을 다 했다 -->
-        <template v-else-if="!landing && !guestPlayed">
+        <!-- 링크도 방금 결과도 없으면 앱 소개. 예전엔 손님 판을 한 적이 있으면(어제 인스타에서 한 판) 'match' 글자만 남았다 (경로 1 리뷰 N5) -->
+        <template v-else-if="!landing && !guestLine">
           <h1 class="t-display text-[44px] mt-8">오늘 <span class="hl hl-draw">한 판</span>,<br />붙어볼래요?</h1>
           <p class="t-body text-fg-muted mt-4 max-w-[28ch]">종목과 규칙을 정하고, 상대를 찾고, 점수를 남겨요.</p>
         </template>
@@ -39,7 +41,14 @@
       <!-- 시작: 소셜 로그인이 곧 가입이다 (따로 가입 화면 없음). 버튼은 서버에 키가 있는 것만 -->
       <div class="pb-6 space-y-2">
         <p v-if="loginError" class="t-caption text-danger-fg text-center pb-2" role="alert">{{ loginError }}</p>
-        <p v-if="anySocial" class="t-caption text-center pb-1">가입 절차 없이 <b class="text-fg">1초 만에</b> 시작해요</p>
+        <!-- '1초 만에'라고 했는데 다음 화면이 닉네임·약관이었다 (경로 1 리뷰 N10) -->
+        <p v-if="anySocial" class="t-caption text-center pb-1">따로 가입 없이 <b class="text-fg">닉네임만 정하면</b> 시작해요</p>
+        <!-- 인스타·카톡 앱 안 브라우저: 구글은 막혀 버튼을 숨기고, 기기 브라우저로 여는 길을 준다 (경로 1 리뷰 N4) -->
+        <p v-if="inAppBrowser && enabled.google && !isCapacitorApp" class="t-caption text-center pb-1 break-keep">
+          구글 로그인은 Safari·Chrome에서 돼요.
+          <button v-if="canOpenOutside" type="button" class="underline underline-offset-2 min-h-[36px]" @click="openOutside">브라우저로 열기</button>
+          <template v-else>오른쪽 위 ··· 에서 '외부 브라우저로 열기'</template>
+        </p>
 
         <!-- 카카오: 카카오 버튼 규칙(노란 바탕 #FEE500, 말풍선, 검정 85%) -->
         <button
@@ -107,6 +116,7 @@
 
 <script setup>
 // 시작 화면: 무슨 앱인지 한눈에 + 소셜로 1초 만에 시작(곧 가입). 약관·닉네임·동네는 가입 뒤 /welcome에서 받는다
+import { NOTICE } from '../utils/notice'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
@@ -114,7 +124,7 @@ import { API_BASE_URL } from '@/config/server'
 import { TERMS } from '../content/legal'
 import { UiButton, UiCard, UiSheet } from '../components/ui'
 import { peekReturnTo } from '../utils/authRedirect'
-import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin, nativeKakaoLogin, hasNativeKakao } from '../utils/nativeBridge'
+import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin, nativeKakaoLogin, hasNativeKakao, inAppBrowser, isAndroidUa, openInExternalBrowser } from '../utils/nativeBridge'
 import { trackEvent } from '../utils/visit'
 
 const router = useRouter()
@@ -126,7 +136,7 @@ const pending = ref('')
 // 카카오는 웹 화면이면 카카오톡으로 못 넘어가 아이디·비밀번호를 쳐야 한다). 아이폰 앱은 카카오 플러그인이 든 빌드부터 구글을 보인다
 const enabled = ref({ google: false, kakao: false, apple: false })
 const show = computed(() => ({
-  google: isAndroidApp || (isIosApp && hasNativeKakao) || (!isIosApp && enabled.value.google),
+  google: isAndroidApp || (isIosApp && hasNativeKakao) || (!isIosApp && !inAppBrowser && enabled.value.google),
   kakao: enabled.value.kakao,
   apple: isIosApp || (!isAndroidApp && enabled.value.apple),
 }))
@@ -134,7 +144,8 @@ const anySocial = computed(() => show.value.google || show.value.kakao || show.v
 
 // 소셜 로그인이 막혀 돌아왔을 때 (서버 SocialRedirect.failure)
 const LOGIN_ERRORS = {
-  id_account: '이 이메일은 아이디로 가입돼 있어요. "아이디로 로그인·가입"에서 로그인해 주세요',
+  // '이메일'과 '아이디'가 한 문장에 섞여 무엇으로 로그인하라는지 헷갈렸다 (경로 전부 훑기 1절)
+  id_account: '이 계정의 메일 주소로 이미 아이디 가입이 돼 있어요. 아래 "아이디로 로그인·가입"에서 그 아이디로 로그인해 주세요',
   email: '확인된 이메일이 있어야 시작할 수 있어요. 계정의 이메일을 확인해 주세요',
   failed: '로그인하지 못했어요. 다시 해 주세요',
 }
@@ -145,7 +156,7 @@ if (localStorage.getItem('raspy_access_token2')) router.replace('/')
 
 // 링크로 왔으면 그 링크가 무엇인지 (/api/landing, 로그인 전). 모르는 주소면 비어 있다
 const landing = ref(null)
-const guestPlayed = (() => { try { return !!localStorage.getItem('guest_played') } catch { return false } })()
+const fromGuest = route.query.from === 'guest'
 // 방금 손님 판 결과 한 줄 ("방금 임기응변 6등급"). 임기응변은 결과를 2시간 남겨 둔다(GuestPlayView)
 const guestLine = (() => {
   try {
@@ -156,8 +167,13 @@ const guestLine = (() => {
   return ''
 })()
 
+const returnTo = peekReturnTo()
+const canOpenOutside = isAndroidUa || /kakaotalk/i.test(navigator.userAgent)
+function openOutside() {
+  openInExternalBrowser()
+}
+
 onMounted(async () => {
-  const returnTo = peekReturnTo()
   if (returnTo) {
     GET('/api/landing', { query: { path: returnTo } })
       .then(({ data }) => (landing.value = data?.title ? data : null))

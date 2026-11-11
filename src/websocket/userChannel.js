@@ -10,10 +10,17 @@ const lobbyListeners = new Set()
 // 화면이 잠깐 듣는 공개 채널 (예: 경기 중계 /topic/game-live/{id}). 연결이 다시 붙으면 다시 구독한다
 const topics = new Map() // destination → { cb, sub, headers }
 
+let guestClient = false
 export async function openUserChannel() {
-  if (client) return
   const token = localStorage.getItem('raspy_access_token2')
-  if (!token) return
+  // 손님 연결로 중계를 보다가 로그인했으면 내 채널로 다시 붙는다
+  if (client && guestClient && token) closeUserChannel()
+  if (client) return
+  if (!token) {
+    // 로그인 전: 중계 같은 공개 채널을 들을 때만 손님으로 붙는다 (경로 5 리뷰 S1: 중계 링크가 가입 벽이었다)
+    if (topics.size) openGuestChannel()
+    return
+  }
   let myId
   try {
     myId = await getMyId()
@@ -39,9 +46,23 @@ export async function openUserChannel() {
   client.activate()
 }
 
+function openGuestChannel() {
+  guestClient = true
+  client = new Client({
+    brokerURL: WS_URL,
+    connectHeaders: { guest: '1' },
+    reconnectDelay: 5000,
+    onConnect: () => {
+      topics.forEach((t, destination) => { t.sub = client.subscribe(destination, ({ body }) => t.cb(JSON.parse(body)), t.headers) })
+    },
+  })
+  client.activate()
+}
+
 export function closeUserChannel() {
   client?.deactivate()
   client = null
+  guestClient = false
 }
 
 /** 신호를 받을 함수를 등록한다. 돌려받은 함수를 부르면 해제된다 */

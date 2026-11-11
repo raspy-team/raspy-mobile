@@ -1,5 +1,6 @@
 <template>
-  <div class="bg-surface rounded-xl p-4">
+  <!-- 바뀌지 않은 항목은 접어 둔다: 14개를 모두 보여 바뀐 한 곳을 찾으려면 끝까지 내려야 했다 (경로 7 리뷰 K16) -->
+  <div v-if="hasChanged || showAll" class="bg-surface rounded-xl p-4">
     <div class="flex items-center gap-2 mb-3">
       <UiIcon :name="'fas ' + icon" class="text-fg-muted" />
       <h3 class="t-heading text-base">{{ label }}</h3>
@@ -29,7 +30,7 @@
 </template>
 
 <script setup>
-import { computed, defineProps } from 'vue'
+import { computed, defineProps, inject, ref } from 'vue'
 
 const props = defineProps({
   label: String,
@@ -39,6 +40,7 @@ const props = defineProps({
   multiline: Boolean,
 })
 
+const showAll = inject('comparisonShowAll', ref(true))
 const hasChanged = computed(() => {
   const orig = props.original || ''
   const mod = props.modified || ''

@@ -34,7 +34,7 @@
           v-for="f in SITUATIONS"
           :key="f.key"
           class="flex-shrink-0 whitespace-nowrap"
-          :selected="!!route.query[f.key]"
+          :selected="!!qs[f.key]"
           @click="sheet = f.key"
         >
           {{ labelOf(f.key) || f.question }}
@@ -43,8 +43,9 @@
       </div>
 
       <!-- 잘하려면: 능력 칩 (가로로 넘긴다). 경기에 쓸 규칙을 고르는 중이면 숨긴다: 종목·인원이 이미 정해져 능력으로 찾지 않는다 (목적 판정 6) -->
-      <div v-if="options && !picking" class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-2 pb-3 overflow-x-auto no-scrollbar" role="group" aria-label="잘하려면">
-        <span class="t-micro flex-shrink-0">잘하려면</span>
+      <div v-if="options && !picking" class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-2 pb-3 overflow-x-auto no-scrollbar" role="group" aria-label="필요한 능력">
+        <!-- '잘하려면'만으로는 무슨 줄인지 몰랐다 (경로 6 리뷰): 무엇으로 찾는 줄인지 말한다 -->
+        <span class="t-micro flex-shrink-0">필요한 능력</span>
         <UiChip
           v-for="a in options.abilities"
           :key="a.key"
@@ -131,8 +132,8 @@
     <!-- 상황 하나 고르기 -->
     <UiSheet :model-value="!!sheet" :title="current?.question" @update:model-value="(v) => !v && (sheet = '')">
       <div v-if="current" class="flex flex-wrap gap-2">
-        <UiChip :selected="!route.query[current.key]" @click="pick('')">상관없음</UiChip>
-        <UiChip v-for="o in choices(current.key)" :key="o.key" :selected="route.query[current.key] === o.key" @click="pick(o.key)">{{ o.label }}</UiChip>
+        <UiChip :selected="!qs[current.key]" @click="pick('')">상관없음</UiChip>
+        <UiChip v-for="o in choices(current.key)" :key="o.key" :selected="qs[current.key] === o.key" @click="pick(o.key)">{{ o.label }}</UiChip>
       </div>
     </UiSheet>
   </div>
@@ -151,7 +152,8 @@ import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSheet, UiSkeleton, UiTo
 // 순위는 별점(평가가 적으면 전체 평균 쪽으로 당김)과 경기 수를 합친 것. 서버 RuleRanking
 // 정렬은 둘만: 고를 것을 찾는 사람에게 기준 넷은 많고, '순위순'이 경기 수와 별점을 이미 담는다 (목적 판정 6)
 const SORTS = [
-  { value: 'rank', label: '순위순' },
+  // '순위순'은 무엇의 순위인지 몰랐다: 많이 하고 별점 높은 순이다 (경로 6 리뷰)
+  { value: 'rank', label: '인기순' },
   { value: 'recent', label: '최신순' },
 ]
 const KINDS = [
@@ -159,12 +161,14 @@ const KINDS = [
   { value: 'OFFLINE', label: '오프라인' },
   { value: 'APP', label: '앱 게임' },
   // 롤·피파·브롤 같은 게임 안에서 붙는 규칙 (9번)
-  { value: 'POPULAR', label: '인기 게임' },
+  // '인기 게임'은 롤 같은 바깥 게임인데 이름만으로 몰랐다 (경로 6 리뷰)
+  { value: 'POPULAR', label: '롤·체스 같은 게임' },
 ]
 // 경기 열 규칙 고르기: 앱 게임은 뺀다
 const PICK_KINDS = [
   { value: 'ALL', label: '모두' },
-  { value: 'POPULAR', label: '인기 게임' },
+  // '인기 게임'은 롤 같은 바깥 게임인데 이름만으로 몰랐다 (경로 6 리뷰)
+  { value: 'POPULAR', label: '롤·체스 같은 게임' },
 ]
 // 주소 이름 → 질문, category-options의 목록 이름
 const SITUATIONS = [
@@ -177,14 +181,18 @@ const FILTER_KEYS = [...SITUATIONS.map((f) => f.key), 'ability']
 
 const route = useRoute()
 const router = useRouter()
-const picking = computed(() => !!route.query.fromGameCreate)
+// 조건(검색어·상황·능력·종류·정렬)은 이 화면 안의 값으로 들고, 주소에는 적어만 둔다.
+// router.replace로 query를 바꾸면 화면 key(App.vue)가 바뀌어 통째로 새로 그려졌다: 검색칸 초점·키보드가 내려가고
+// 치던 글자가 사라지고, 열려 있던 시트의 기록 칸이 엉켰다 (가로 훑기 1절, 경로 6 리뷰 P9)
+const qs = ref({ ...route.query })
+const picking = computed(() => !!qs.value.fromGameCreate)
 // exact·venueDetail도 싣는다: 규칙을 바꾸러 다녀오면 고른 날짜·시간과 화상·게임 칸 글이 사라졌다 (목적 판정 11/11 4번)
 const CARRY = ['when', 'exact', 'venue', 'venueDetail', 'format', 'size']
 // 규칙 만들기로 갈 때: 고르는 중이면 넘겨받은 값과 '고르는 중' 표시를 그대로
 const createTo = computed(() => (picking.value
-  ? { path: '/rules/create', query: { fromGameCreate: '1', ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) } }
+  ? { path: '/rules/create', query: { fromGameCreate: '1', ...Object.fromEntries(CARRY.filter((k) => qs.value[k]).map((k) => [k, String(qs.value[k])])) } }
   : '/rules/create'))
-const pickTo = (rule) => ({ path: '/create-game', query: { ruleId: String(rule.id), ...Object.fromEntries(CARRY.filter((k) => route.query[k]).map((k) => [k, String(route.query[k])])) } })
+const pickTo = (rule) => ({ path: '/create-game', query: { ruleId: String(rule.id), ...Object.fromEntries(CARRY.filter((k) => qs.value[k]).map((k) => [k, String(qs.value[k])])) } })
 
 const options = ref(null)
 const rules = ref([])
@@ -192,26 +200,28 @@ const loading = ref(true)
 const loadFailed = ref(false)
 const sheet = ref('')
 
-const ability = computed(() => route.query.ability || '')
+const ability = computed(() => qs.value.ability || '')
 // 예전 주소의 경기순·별점순·popular는 순위순으로 (정렬을 둘로 줄였다)
-const sort = computed(() => (route.query.sort === 'recent' ? 'recent' : 'rank'))
-const kind = computed(() => route.query.kind || 'ALL')
+const sort = computed(() => (qs.value.sort === 'recent' ? 'recent' : 'rank'))
+const kind = computed(() => qs.value.kind || 'ALL')
 const kinds = computed(() => (picking.value ? PICK_KINDS : KINDS))
-const q = ref(route.query.q || '')
+const q = ref(qs.value.q || '')
 const current = computed(() => SITUATIONS.find((f) => f.key === sheet.value))
-const filtered = computed(() => !!route.query.q || FILTER_KEYS.some((k) => route.query[k]))
+const filtered = computed(() => !!qs.value.q || FILTER_KEYS.some((k) => qs.value[k]))
 
 function choices(key) {
   return options.value?.[SITUATIONS.find((f) => f.key === key).list] ?? []
 }
 function labelOf(key) {
-  const v = route.query[key]
+  const v = qs.value[key]
   return v ? choices(key).find((o) => o.key === v)?.label : ''
 }
 function setQuery(patch) {
-  const next = { ...route.query, ...patch }
+  const next = { ...qs.value, ...patch }
   Object.keys(next).forEach((k) => !next[k] && delete next[k])
-  router.replace({ query: next })
+  qs.value = next
+  const url = router.resolve({ query: next }).fullPath
+  window.history.replaceState({ ...window.history.state, current: url }, '', url)
 }
 function pick(v) {
   setQuery({ [sheet.value]: v })
@@ -237,8 +247,8 @@ async function load() {
   try {
     // 둘러보기는 앱 게임도 보여 준다. 경기를 열 규칙을 고를 때만 뺀다
     const params = { sort: sort.value, withApp: !picking.value, kind: kind.value }
-    FILTER_KEYS.forEach((k) => route.query[k] && (params[k] = route.query[k]))
-    if (route.query.q) params.search = route.query.q
+    FILTER_KEYS.forEach((k) => qs.value[k] && (params[k] = qs.value[k]))
+    if (qs.value.q) params.search = qs.value.q
     const { data } = await api.get('/api/rules/list', { params })
     if (mine === seq) rules.value = data
   } catch {
@@ -251,7 +261,7 @@ async function load() {
   }
 }
 
-watch(() => [...FILTER_KEYS.map((k) => route.query[k]), sort.value, kind.value, route.query.q], load)
+watch(() => [...FILTER_KEYS.map((k) => qs.value[k]), sort.value, kind.value, qs.value.q], load)
 
 onMounted(async () => {
   load()

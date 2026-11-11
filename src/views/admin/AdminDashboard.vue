@@ -8,6 +8,11 @@
         <UiTabs v-model="reportTab" :options="reportTabs" class="mb-3" />
 
         <UiListSkeleton v-if="loading" :rows="3" />
+        <UiCard v-else-if="loadFailed">
+          <UiEmptyState icon="fas fa-triangle-exclamation" title="불러오지 못했어요">
+            <UiButton variant="secondary" @click="retryLoad">다시 시도</UiButton>
+          </UiEmptyState>
+        </UiCard>
         <UiCard v-else-if="!shownReports.length">
           <UiEmptyState
             mascot="match"
@@ -66,7 +71,11 @@
               <p class="t-body text-fg">{{ a.accusedNickname }}님 · {{ a.ruleTitle }}</p>
               <p class="t-caption">보고: {{ a.reporterNickname }}님 · {{ timeAgo(a.createdAt) }}</p>
               <p class="t-caption break-words">"{{ a.appeal }}"</p>
-              <UiButton size="sm" variant="secondary" :loading="sanctioningId === 'n' + a.id" @click="cancelNoShow(a)">노쇼 기록 지우기</UiButton>
+              <div class="flex gap-2">
+                <UiButton size="sm" variant="secondary" :loading="sanctioningId === 'n' + a.id" @click="cancelNoShow(a)">노쇼 기록 지우기</UiButton>
+                <!-- 맞지 않는 이의를 닫을 길이 없어 목록에 영영 남았다 (경로 7 리뷰 K15) -->
+                <UiButton size="sm" variant="ghost" :loading="sanctioningId === 'd' + a.id" @click="dismissAppeal(a)">이의 받지 않기</UiButton>
+              </div>
             </UiCard>
           </li>
         </ul>
@@ -213,7 +222,8 @@
       </UiSection>
 
       <!-- 예전 규칙에 카테고리 붙이기: 미리보기로 AI 답을 보고, 괜찮으면 적용 -->
-      <UiSection title="규칙 분류">
+      <!-- 옛 규칙에 카테고리를 붙이는 한 번 쓰는 도구: 남은 규칙이 없으면 눌리지 않는 버튼만 남았다 (경로 7 리뷰 K19) -->
+      <UiSection v-if="classify.remaining !== 0 || classify.items.length" title="규칙 분류">
         <p class="t-caption mb-3">
           카테고리가 없는 규칙 <span class="t-mono">{{ classify.remaining ?? '-' }}</span>개.
           미리보기는 저장하지 않아요. 적용하면 받지 않을 규칙은 지우지 않고 위 신고 목록에 올려요.
@@ -252,6 +262,10 @@
     <UiSheet v-model="showUsers" title="사용자 찾기">
       <UiInput v-model="userSearch" icon="fas fa-magnifying-glass" placeholder="닉네임이나 아이디" class="mb-3" />
       <UiListSkeleton v-if="loadingUsers" :rows="5" />
+      <!-- 불러오기 실패가 '찾는 사람이 없어요'로 보였다 (경로 7 리뷰 K17) -->
+      <UiEmptyState v-else-if="usersFailed" icon="fas fa-triangle-exclamation" title="사용자를 불러오지 못했어요">
+        <UiButton variant="secondary" @click="openUsers">다시 시도</UiButton>
+      </UiEmptyState>
       <UiEmptyState v-else-if="!filteredUsers.length" mascot="match" title="찾는 사람이 없어요" />
       <UiList v-else>
         <UiListItem
@@ -286,7 +300,8 @@ import {
 const router = useRouter()
 const { showToast } = useToast()
 
-const TYPE_LABEL = { USER: '사람', GAME: '경기', RULE: '규칙', COMMENT: '댓글', CHAT_MESSAGE: '메시지' }
+// 관중 사진 신고(GAME_MEDIA)는 배지가 비어 보였다 (경로 7 리뷰)
+const TYPE_LABEL = { USER: '사람', GAME: '경기', RULE: '규칙', COMMENT: '댓글', CHAT_MESSAGE: '메시지', GAME_MEDIA: '관중 사진' }
 
 const loading = ref(true)
 const reports = ref([])
@@ -422,6 +437,8 @@ async function loadClassifyRemaining() {
   }
 }
 async function runClassify(apply) {
+  // 적용은 확인 없이 바로 됐다 (경로 7 리뷰)
+  if (apply && !(await confirmDialog({ title: '10개에 분류를 적용할까요?', message: '받지 않을 규칙은 지우지 않고 신고 목록에 올려요', confirmText: '적용' }))) return
   classify.value.busy = apply ? 'apply' : 'preview'
   try {
     const { data } = await POST('/api/admin/rules/categories/backfill', { query: { apply, limit: 10 } })
@@ -473,11 +490,20 @@ async function load() {
     ruleRes.forEach((res, i) => (ruleStats.value[i].count = Array.isArray(res.data) ? res.data.length : 0))
     recentRequests.value = (Array.isArray(ruleRes[0].data) ? ruleRes[0].data : []).slice(0, 5)
   } catch (e) {
-    showToast(e.response?.status === 403 ? '관리자만 볼 수 있어요' : '불러오지 못했어요')
-    router.replace('/')
+    // 403이 아닌 실패(연결 오류)에도 관리자를 홈으로 밀어냈다 (경로 7 리뷰): 권한이 없을 때만 밀고, 그 밖은 다시 시도
+    if (e.response?.status === 403) {
+      showToast('관리자만 볼 수 있어요')
+      router.replace('/')
+    } else loadFailed.value = true
   } finally {
     loading.value = false
   }
+}
+const loadFailed = ref(false)
+function retryLoad() {
+  loadFailed.value = false
+  loading.value = true
+  load()
 }
 
 // 제재 (안전·신뢰 A)
@@ -493,6 +519,19 @@ async function cancelNoShow(a) {
     await POST('/api/admin/no-show/{reportId}/cancel', { path: { reportId: a.id } })
     await loadAppeals()
     showToast('노쇼 기록을 지웠어요')
+  } catch {
+    showToast('처리하지 못했어요')
+  } finally {
+    sanctioningId.value = null
+  }
+}
+async function dismissAppeal(a) {
+  if (!(await confirmDialog({ title: `${a.accusedNickname}님의 이의를 받지 않을까요?`, message: '노쇼 기록은 그대로 두고, 이의 낸 사람에게 알려요', confirmText: '받지 않기' }))) return
+  sanctioningId.value = 'd' + a.id
+  try {
+    await POST('/api/admin/no-show/{reportId}/dismiss', { path: { reportId: a.id } })
+    await loadAppeals()
+    showToast('이의를 닫았어요')
   } catch {
     showToast('처리하지 못했어요')
   } finally {
@@ -546,6 +585,8 @@ async function sanctionAge(report) {
   }
 }
 async function lift(report) {
+  // 확인 없이 바로 풀렸다 (경로 7 리뷰)
+  if (!(await confirmDialog({ title: `${report.accusedNickname}님 정지를 풀까요?`, confirmText: '정지 풀기' }))) return
   sanctioningId.value = report.id
   try {
     await POST('/api/admin/users/{userId}/unsuspend', { path: { userId: report.accusedId } })
@@ -571,14 +612,16 @@ async function resolve(report) {
   }
 }
 
+const usersFailed = ref(false)
 async function openUsers() {
   showUsers.value = true
   if (users.value.length) return
   loadingUsers.value = true
+  usersFailed.value = false
   try {
     users.value = (await api.get('/api/admin/users')).data
   } catch {
-    showToast('사용자를 불러오지 못했어요')
+    usersFailed.value = true
   } finally {
     loadingUsers.value = false
   }

@@ -37,7 +37,7 @@
               <span class="t-body text-fg flex-1 min-w-0 truncate">{{ mine.pending.name }}</span>
               <span class="t-micro">{{ timeAgo(mine.pending.createdAt) }}</span>
             </div>
-            <p class="t-caption">운영진이 서류를 보고 알려 드려요. 보통 하루 안에 끝나요.</p>
+            <p class="t-caption">운영진이 서류를 보면 결과가 알림함에 와요. 보통 하루 안에 끝나요.</p>
             <UiButton variant="secondary" size="sm" :loading="canceling" @click="cancel">신청 취소</UiButton>
           </UiCard>
         </UiSection>
@@ -90,25 +90,24 @@
             <span class="t-body text-fg flex-1 min-w-0 truncate">{{ picked.name }}</span>
             <UiButton variant="ghost" size="sm" @click="unpick">바꾸기</UiButton>
           </div>
+          <p v-else-if="searchFailed" class="t-caption text-danger-fg mt-3">찾지 못했어요. 이름을 다시 쳐 보거나 잠시 뒤 해 주세요</p>
           <div v-else-if="query.trim().length >= 2" class="mt-3">
             <p class="t-caption mb-2">목록에 없으면 새 이름으로 신청해요. 종류를 골라 주세요</p>
             <div class="flex gap-2">
               <UiChip v-for="t in TYPE_ORDER" :key="t" :selected="newType === t" @click="newType = t">{{ TYPE_LABEL[t] }}</UiChip>
             </div>
           </div>
-          <p class="t-micro mt-2">중고등학교는 받지 않아요.</p>
         </div>
 
         <!-- 2. 서류 -->
         <div>
           <p class="t-label text-fg mb-1">증명서 한 장</p>
           <p class="t-caption mb-2">
-            재학·재직·합격·졸업 증명서(3개월 안에 뗀 것), 학생증·사원증 사진. PDF·JPG·PNG, 10MB까지.
+            재학·재직·합격·졸업 증명서(3개월 안에 뗀 것), 학생증·사원증 사진. PDF나 사진, 10MB까지.
             학번·주민번호 뒷자리는 가려도 돼요. 확인이 끝나면 바로 지워요.
           </p>
-          <!-- 아이폰 사진(HEIC)은 받지 않는다 (org-all 결정 7) -->
-          <p class="t-caption mb-2">아이폰 사진이 안 올라가면 스크린샷으로 올려 주세요</p>
-          <input ref="fileInput" type="file" accept="application/pdf,image/jpeg,image/png" class="hidden" @change="onFile" />
+          <!-- 아이폰 사진(HEIC)은 서버가 받지 않아, 예전엔 "스크린샷으로 올려 주세요"라고 했다. 이제 화면이 JPG로 바꿔 올린다 (경로 6 리뷰) -->
+          <input ref="fileInput" type="file" accept="application/pdf,image/*" class="hidden" @change="onFile" />
           <UiButton variant="secondary" block icon="file-lines" @click="fileInput?.click()">
             {{ file ? '다른 파일 고르기' : '파일 고르기' }}
           </UiButton>
@@ -140,6 +139,7 @@ import { GET, PUT, DELETE } from '../../api/client'
 import type { components } from '../../api/schema'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { timeAgo } from '../../utils/format'
+import { photoFromFile } from '../../utils/image'
 import { useToast } from '../../composables/useToast'
 import { confirmDialog } from '../../composables/useConfirm'
 import {
@@ -153,8 +153,9 @@ type OrgSummary = components['schemas']['OrgSummary']
 type OrgType = OrgSummary['type']
 type Visibility = Membership['visibility']
 
-const TYPE_LABEL: Record<OrgType, string> = { UNIVERSITY: '대학교', COMPANY: '회사', OTHER: '기타' }
-const TYPE_ORDER: OrgType[] = ['UNIVERSITY', 'COMPANY', 'OTHER']
+// 중고등학교도 받는다 (만 14세 이상, 11/9 결정). 예전엔 "중고등학교는 받지 않아요"만 있었다 (경로 6 리뷰)
+const TYPE_LABEL: Record<OrgType, string> = { UNIVERSITY: '대학교', HIGH_SCHOOL: '중고등학교', COMPANY: '회사', OTHER: '기타' }
+const TYPE_ORDER: OrgType[] = ['UNIVERSITY', 'HIGH_SCHOOL', 'COMPANY', 'OTHER']
 const VISIBILITY: Record<Visibility, { label: string; hint: string }> = {
   ALL: { label: '모두', hint: '내 프로필을 보는 누구에게나 보여요' },
   SAME_ORG: { label: '같은 조직만', hint: '이 소속을 인증한 사람에게만 보여요' },
@@ -253,6 +254,7 @@ function openForm() {
 
 let searchTimer: ReturnType<typeof setTimeout> | undefined
 let searchSeq = 0
+const searchFailed = ref(false)
 function onQuery() {
   picked.value = null
   clearTimeout(searchTimer)
@@ -260,8 +262,11 @@ function onQuery() {
   if (!term) { results.value = []; return }
   searchTimer = setTimeout(async () => {
     const seq = ++searchSeq
-    const data = (await GET('/api/organizations/search', { query: { q: term } }).catch(() => ({ data: [] }))).data || []
-    if (seq === searchSeq) results.value = data
+    // 찾기가 실패하면 빈 결과로 보여 "목록에 없으면 새 이름으로"가 떠 있는 학교를 새로 신청하게 했다 (경로 6 리뷰 P12)
+    const res = await GET('/api/organizations/search', { query: { q: term } }).then((r) => ({ ok: true, data: r.data || [] })).catch(() => ({ ok: false, data: [] }))
+    if (seq !== searchSeq) return
+    searchFailed.value = !res.ok
+    results.value = res.data
   }, 250)
 }
 
@@ -275,14 +280,19 @@ function unpick() {
   onQuery()
 }
 
-function onFile(e: Event) {
+async function onFile(e: Event) {
   const input = e.target as HTMLInputElement
-  const f = input.files?.[0] || null
+  let f = input.files?.[0] || null
   input.value = ''
   fileError.value = ''
   if (!f) return
+  // PDF·JPG·PNG 밖의 사진(아이폰 HEIC 등)은 JPG로 바꾼다. 글씨가 읽히게 크게
+  if (!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)) {
+    const converted = f.type.startsWith('image/') || /\.hei[cf]$/i.test(f.name) ? await photoFromFile(f, { maxWidth: 2000, quality: 0.85, name: 'proof.jpg' }) : null
+    if (!converted) { file.value = null; fileError.value = 'PDF나 사진 파일만 올릴 수 있어요. 이 파일은 읽지 못했어요'; return }
+    f = converted.file as File
+  }
   if (f.size > MAX_BYTES) { file.value = null; fileError.value = '10MB까지 올릴 수 있어요'; return }
-  if (!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type)) { file.value = null; fileError.value = 'PDF·JPG·PNG 파일만 올릴 수 있어요. 아이폰 사진이면 스크린샷으로 올려 주세요'; return }
   file.value = f
 }
 
@@ -304,7 +314,7 @@ async function submit() {
     // 파일을 보내는 요청이라 타입 검사 client(JSON 본문) 대신 api로 보낸다. 주소는 check-api가 검사한다
     await api.post('/api/organizations/requests', form)
     formOpen.value = false
-    showToast('신청했어요. 결과는 알림으로 알려 드려요')
+    showToast('신청했어요. 결과는 알림함에 와요')
     await load()
   } catch (e: unknown) {
     const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message

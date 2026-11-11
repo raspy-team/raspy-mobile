@@ -21,7 +21,7 @@
     </div>
 
     <UiButton block size="lg" class="mt-10" :loading="submitting" @click="finish">{{ goals[0] }} : {{ goals[1] }}로 낼게요</UiButton>
-    <p class="t-caption text-center mt-2">경기가 끝나면 실제 스코어로 채점해요. 승패를 맞히면 5점, 골 차까지 +2, 골 수가 가까울수록 +3, 다 맞히면 10점</p>
+    <p class="t-caption text-center mt-2">경기가 끝나면 실제 스코어로 채점해요. 승패를 맞히면 5점, 골까지 맞힐수록 더 (최대 10점)</p>
   </div>
 </template>
 

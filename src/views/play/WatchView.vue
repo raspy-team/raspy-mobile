@@ -29,6 +29,7 @@
           </button>
         </div>
         <p v-if="state.player" class="t-caption mt-2 text-center">선수는 응원할 수 없어요</p>
+        <UiButton v-else-if="guest && state.status === 'PLAYING'" block class="mt-3" @click="joinToCheer">가입하고 응원하기</UiButton>
 
         <!-- 마디 -->
         <ol class="mt-6 space-y-2">
@@ -45,7 +46,8 @@
 // 실시간 심사 관전 (/watch/:gameId, 말 배틀). 선수가 아니어도 보고, 하는 중에 한쪽을 응원한다 (한 사람 한 표, 바꿀 수 있다).
 // 마디·응원이 바뀌면 서버가 /topic/watch/{gameId}로 신호를 보내고 그때 다시 불러온다 (폴링하지 않는다)
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { rememberReturnTo } from '@/utils/authRedirect'
 import { Client } from '@stomp/stompjs'
 import { GET, POST } from '@/api/client'
 import { useToast } from '../../composables/useToast'
@@ -57,15 +59,24 @@ import { UiAiBadge, UiAvatar, UiButton, UiEmptyState, UiSkeleton, UiTopBar } fro
 type State = components['schemas']['WatchState']
 
 const route = useRoute()
+const router = useRouter()
 const gameId = Number(route.params.gameId)
 const state = ref<State | null>(null)
 const error = ref('')
 const busy = ref(false)
-const canCheer = computed(() => state.value?.status === 'PLAYING' && !state.value.player)
+// 로그인 전에 관전 링크를 연 사람: 보기만 하고 응원은 가입한 뒤에 (경로 2 리뷰 N1·N3: 관전 링크가 가입 벽이었다)
+const guest = (() => { try { return !localStorage.getItem('raspy_access_token2') } catch { return true } })()
+const canCheer = computed(() => !guest && state.value?.status === 'PLAYING' && !state.value.player)
+function joinToCheer() {
+  rememberReturnTo(route.fullPath)
+  router.push('/init')
+}
 
 async function load() {
   try {
-    state.value = (await GET('/api/app-games/realtime/{gameId}/watch', { path: { gameId } })).data
+    state.value = guest
+      ? (await GET('/api/app-games/realtime/{gameId}/watch/guest', { path: { gameId } })).data
+      : (await GET('/api/app-games/realtime/{gameId}/watch', { path: { gameId } })).data
   } catch (e) {
     const r = (e as { response?: { status?: number; data?: { message?: string } } }).response
     // 보던 중 다시 불러오기가 실패하면 판을 지우지 않고 한 줄만 (말없이 멈췄다, 목적 판정 11/11 부분 2)
@@ -91,7 +102,7 @@ onMounted(async () => {
   await load()
   client = new Client({
     brokerURL: WS_URL,
-    connectHeaders: { token: localStorage.getItem('raspy_access_token2') || '' },
+    connectHeaders: guest ? { guest: '1' } : { token: localStorage.getItem('raspy_access_token2') || '' },
     reconnectDelay: 3000,
     debug: () => {},
     onConnect: () => client?.subscribe(`/topic/watch/${gameId}`, () => load()),

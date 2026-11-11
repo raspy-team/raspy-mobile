@@ -1,7 +1,11 @@
 <template>
   <UiTopBar title="본인인증" :back="back" />
   <main class="px-4 pt-6 pb-32 max-w-xl mx-auto">
-    <UiListSkeleton v-if="!cfg" :rows="2" />
+    <!-- 설정을 못 받은 연결 오류를 '준비 중, 인증 없이 해도 돼요'로 말했다: 다시 시도 (경로 5 리뷰 S17) -->
+    <UiEmptyState v-if="cfgFailed" class="pt-10" icon="rotate-right" title="본인인증을 불러오지 못했어요" description="연결이 돌아오면 다시 해 주세요">
+      <UiButton @click="loadCfg">다시 시도</UiButton>
+    </UiEmptyState>
+    <UiListSkeleton v-else-if="!cfg" :rows="2" />
     <template v-else>
       <h1 class="t-title">{{ cfg.verified ? '본인인증을 했어요' : '만나서 하기 전에 한 번만' }}</h1>
       <div class="mt-4 space-y-2 t-body">
@@ -27,7 +31,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '../../api/client'
-import { UiButton, UiListSkeleton, UiTopBar } from '../../components/ui'
+import { UiButton, UiEmptyState, UiListSkeleton, UiTopBar } from '../../components/ui'
 
 const route = useRoute()
 const router = useRouter()
@@ -74,21 +78,32 @@ async function start() {
       identityVerificationId: cfg.value.verificationId,
       redirectUrl: `${window.location.origin}/verify?back=${encodeURIComponent(back)}`,
     })
-    if (res?.code) { message.value = res.message || '인증을 마치지 않았어요'; return }
+    // 포트원 창이 주는 영어 오류는 한국어로 (가로 훑기 6절)
+    if (res?.code) { message.value = /[가-힣]/.test(res.message || '') ? res.message : '인증을 마치지 않았어요'; return }
     await confirm(cfg.value.verificationId)
   } catch (e) {
-    message.value = e?.message || '인증하지 못했어요'
+    message.value = /[가-힣]/.test(e?.message || '') ? e.message : '인증하지 못했어요'
   } finally {
     busy.value = false
   }
 }
 
+const cfgFailed = ref(false)
+async function loadCfg() {
+  cfgFailed.value = false
+  try {
+    cfg.value = (await GET('/api/identity')).data
+  } catch {
+    cfgFailed.value = true
+  }
+}
 onMounted(async () => {
-  cfg.value = (await GET('/api/identity').catch(() => ({ data: { available: false, verified: false } }))).data
+  await loadCfg()
+  if (!cfg.value) return
   // 휴대폰에서 인증하고 돌아왔을 때
   const id = route.query.identityVerificationId
   if (id && !cfg.value.verified) {
-    if (route.query.code) message.value = String(route.query.message || '인증을 마치지 않았어요')
+    if (route.query.code) message.value = /[가-힣]/.test(String(route.query.message || '')) ? String(route.query.message) : '인증을 마치지 않았어요'
     else await confirm(String(id))
   }
 })

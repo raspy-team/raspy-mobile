@@ -81,7 +81,8 @@ async function locate() {
     if (!data) error.value = '동네를 찾지 못했어요. 한국 안에서만 인증할 수 있어요'
     else found.value = data
   } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || '위치를 찾지 못했어요'
+    // 연결 오류의 영어 문구(Network Error)가 그대로 떴다. 위치 오류(utils/geo)는 한국어라 그대로 (가로 훑기 6절)
+    error.value = e?.response?.data?.message || (/[가-힣]/.test(e?.message || '') ? e.message : !e?.response ? '연결이 끊겼어요. 다시 해 주세요' : '위치를 찾지 못했어요')
   } finally {
     locating.value = false
   }

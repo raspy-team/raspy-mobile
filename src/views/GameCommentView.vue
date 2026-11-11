@@ -160,6 +160,7 @@ import {
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
+import { getMyId } from '@/utils/me'
 import { useToast } from '../composables/useToast'
 import CommentItem from '../components/CommentItem.vue'
 import { photoFromFile } from '../utils/image'
@@ -203,7 +204,9 @@ onBeforeUnmount(() => {
 })
 
 // 댓글 데이터/로딩/입력/답글/이미지/프리뷰 등 기존 로직 유지
-const currentUserId = ref(8)
+// 예전엔 8로 박혀 있었다. 내 댓글을 가리는 데 쓴다 (경로 전부 훑기 4 '내 댓글에도 신고')
+const currentUserId = ref(null)
+getMyId().then((id) => (currentUserId.value = id)).catch(() => {})
 const isLoading = ref(true)
 const threadedComments = ref([])
 const inputContent = ref('')
@@ -221,6 +224,7 @@ const fetchComments = async () => {
     const res = await api.get(`/api/games/${props.id}/comments/tree`)
     threadedComments.value = res.data
     loadFailed.value = false
+    scrollToParent()
   } catch {
     loadFailed.value = true
   } finally {
@@ -321,6 +325,18 @@ const closeModal = () => {
   showModal.value = false
 }
 const route = useRoute()
+// 답글 알림(?parent=)으로 왔으면 그 댓글로 굴려 잠깐 칠한다. 예전엔 맨 위에서 직접 찾아야 했다 (경로 9 Q6)
+function scrollToParent() {
+  const id = Number(route.query.parent)
+  if (!id) return
+  nextTick(() => {
+    const el = document.querySelector(`[data-comment-id="${id}"]`)
+    if (!el) return
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    el.classList.add('bg-surface-2')
+    setTimeout(() => el.classList.remove('bg-surface-2'), 2000)
+  })
+}
 const router = useRouter()
 const afterLeave = () => {
   modalVisible.value = false

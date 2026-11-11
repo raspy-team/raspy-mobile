@@ -22,11 +22,12 @@
         class="h-11 px-3 max-[359px]:px-2 flex items-center gap-1.5 text-sm whitespace-nowrap"
         :class="watchingAll ? 'text-fg font-semibold' : 'text-fg-muted'"
         :aria-pressed="watchingAll"
-        :aria-label="watchingAll ? '보는 중' : '또 보고 싶어요'"
+        :aria-label="watchingAll ? '다음 경기 알림 받는 중' : '이 사람 다음 경기 알림 받기'"
         @click="emit('watch', targets)"
       >
         <!-- 320px 폰에선 한 줄에 다 안 들어가 '도전해/요'로 꺾였다: 좁으면 눈 아이콘만 (11/5 밤샘 C) -->
-        <UiIcon name="eye" class="text-lg" aria-hidden="true" /><span class="max-[359px]:sr-only">{{ watchingAll ? '보는 중' : '또 보고 싶어요' }}</span>
+        <!-- '또 보고 싶어요'는 누르면 무슨 일이 생기는지(그 사람 경기 알림) 몰랐다 (경로 6 리뷰): 하는 일을 이름으로 -->
+        <UiIcon name="eye" class="text-lg" aria-hidden="true" /><span class="max-[359px]:sr-only">{{ watchingAll ? '알림 받는 중' : '다음 경기 알림' }}</span>
       </button>
       <UiButton size="sm" variant="tonal" icon="swords" class="whitespace-nowrap" @click="emit('challenge', targets)">도전</UiButton>
     </template>

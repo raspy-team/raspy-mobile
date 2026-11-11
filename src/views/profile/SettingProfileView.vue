@@ -28,7 +28,8 @@
       </div>
 
       <UiInput v-model="form.nickname" label="닉네임" :maxlength="NICKNAME_MAX" :error="errors.nickname" />
-      <UiInput v-model="form.username" label="친구 찾기 아이디" icon="fas fa-at" :maxlength="12" hint="영문 소문자·숫자·밑줄(_)" :error="errors.username" />
+      <!-- 같은 것을 화면마다 '아이디'·'친구가 찾는 아이디'·'친구 찾기 아이디'로 다르게 불렀다. '아이디' 하나로 (경로 전부 훑기 1절) -->
+      <UiInput v-model="form.username" label="아이디" icon="fas fa-at" :maxlength="12" hint="영문 소문자·숫자·밑줄(_). 친구가 나를 찾을 때 써요" :error="errors.username" />
       <!-- 활동 지역은 고르지 않고 동네 인증으로 정한다 (GPS) -->
       <UiField label="동네">
         <RouterLink to="/neighborhood" class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
@@ -43,7 +44,7 @@
       </div>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
       <!-- 예전에 직접 적은 소속: 새로 적을 수 없고 지우기만 된다. 학교·회사는 설정 > 소속에서 인증한다 (docs/organizations.md 2) -->
-      <UiField v-if="original?.affiliation" label="예전에 적은 소속" :hint="form.affiliation ? '이제 소속은 증명서로 인증해요. 예전 글은 지울 수만 있어요' : '저장하면 지워져요'">
+      <UiField v-if="original?.affiliation" label="예전에 적은 소속" :hint="form.affiliation ? '학교·회사는 설정 > 소속에서 붙여요. 예전 글은 지울 수만 있어요' : '저장하면 지워져요'">
         <div class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
           <span class="flex-1 t-body text-fg-subtle truncate" :class="{ 'line-through': !form.affiliation }">{{ original?.affiliation }}</span>
           <UiButton v-if="form.affiliation" variant="ghost" size="sm" class="-mr-2" @click="form.affiliation = ''">삭제</UiButton>
@@ -131,12 +132,14 @@ async function save() {
   if (!nick || nick.length > NICKNAME_MAX) return (errors.nickname = `닉네임을 1~${NICKNAME_MAX}자로 적어 주세요`)
   if (!USERNAME_PATTERN.test(name)) return (errors.username = '영문 소문자·숫자·밑줄(_)로 12자까지 적어 주세요')
   if (containsProfanity([nick, name, form.bio, form.affiliation].join(' '))) return showToast('쓰면 안 되는 말이 들어 있어요')
-  const ageText = String(form.age ?? '').trim()
+  // 숫자 칸을 비우면 0이 들어온다(UiInput). 0은 빈 칸으로 본다: 처음 넣다 지우면 '숫자로 적어 주세요'가 떠 저장할 수 없었다 (가로 훑기 8절)
+  const ageText = form.age === 0 || form.age === '0' ? '' : String(form.age ?? '').trim()
   // 한 번 넣은 나이는 지우지 않는다 (만 19세 확인에 쓴다). 예전엔 비우고 저장하면 '저장했어요'라고 하고 그대로 두었다
   if (!ageText && original.age != null) return (errors.age = '한 번 넣은 나이는 지울 수 없어요. 숨기려면 설정 > 내 정보 공개에서 정해요')
   if (ageText && !(Number.isInteger(Number(ageText)) && Number(ageText) >= 4 && Number(ageText) <= 120)) return (errors.age = '만 나이를 숫자로 적어 주세요')
 
   saving.value = true
+  let namesSaved = false
   try {
     // 아이디·닉네임이 바뀌었으면 먼저 (아이디가 겹치면 여기서 멈춘다)
     if (nick !== original.nickname || name !== original.username) {
@@ -147,6 +150,9 @@ async function save() {
         else showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 해 주세요')
         return
       }
+      // 닉네임·아이디는 여기서 이미 바뀌었다. 아래가 실패해도 다시 누르면 남은 것만 저장하게 원래 값을 맞춘다
+      original = { ...original, nickname: nick, username: name }
+      namesSaved = true
     }
     const fd = new FormData()
     fd.append('nickname', nick)
@@ -160,9 +166,12 @@ async function save() {
     else if (photoState.value === 'deleted') fd.append('profile_picture', 'null')
     await api.patch('/api/user-profile/save', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
     showToast('저장했어요')
-    router.replace('/profile/0')
+    // 온 곳으로(설정에서 왔으면 설정). 예전엔 늘 내 프로필로 갔다 (경로 전부 훑기 1절)
+    if (window.history.state?.back) router.back()
+    else router.replace('/profile/0')
   } catch (e) {
-    showToast(e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 해 주세요')
+    // 닉네임·아이디는 이미 바뀌었는데 '저장하지 못했어요'라고만 했다
+    showToast(namesSaved ? '닉네임·아이디는 바꿨어요. 나머지는 저장하지 못했어요. 다시 눌러 주세요' : e.response?.data?.message || '저장하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     saving.value = false
   }

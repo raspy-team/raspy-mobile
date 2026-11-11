@@ -110,7 +110,7 @@ const routes = [
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },
   // 동호회 (club/): 목록·만들기, 한 곳, 초대 링크
   { path: '/clubs', component: () => import('../views/club/ClubListView.vue') },
-  { path: '/clubs/matches/:matchId', component: () => import('../views/club/ClubMatchView.vue') },
+  { path: '/clubs/matches/:matchId', component: () => import('../views/club/ClubMatchView.vue'), meta: { keepOnQuery: true } },
   { path: '/clubs/:id', component: () => import('../views/club/ClubView.vue') },
   { path: '/club/join/:code', component: () => import('../views/club/ClubJoinView.vue') },
   // 대회 (tournament/): 리그·토너먼트
@@ -141,7 +141,7 @@ const routes = [
   { path: '/watch/:gameId', component: () => import('../views/play/WatchView.vue') },
   { path: '/vote/:gameId', component: () => import('../views/play/VoteView.vue') },
   { path: '/challenge/:gameId', component: () => import('../views/play/ChallengeView.vue') },
-  { path: '/rules', component:  Rule},
+  { path: '/rules', component:  Rule, meta: { keepOnQuery: true } },
   { path: '/rules/create', component: RuleCreate},
   { path: '/rules/my-rules', component: MyRules},
   // 수정은 만들기 화면을 그대로 쓴다 (수정 요청으로 보낸다)
@@ -149,8 +149,8 @@ const routes = [
   { path: '/rules/:ruleId(\\d+)', component: RuleDetail },
   { path: '/rules/:ruleId/ranking', component: RuleRanking, props: true},
   { path: '/group/register', component:  GroupUserRegister},
-  { path: '/password-reset', component: () => import('../views/auth/PasswordResetView.vue') },
-  { path: '/group/login', component: GroupUserLogin},
+  { path: '/password-reset', component: () => import('../views/auth/PasswordResetView.vue'), meta: { keepOnQuery: true } },
+  { path: '/group/login', component: GroupUserLogin, meta: { keepOnQuery: true } },
   { path: '/feed', component: Feed},
 
   // Admin routes

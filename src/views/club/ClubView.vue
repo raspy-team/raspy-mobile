@@ -7,7 +7,10 @@
     </UiTopBar>
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!detail && !error" class="h-40 w-full" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
+      <!-- 연결 오류도 '찾지 못했어요'였고 다시 시도가 없었다 (경로 7 리뷰): 없는 동호회와 연결 오류를 가른다 -->
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" :description="notFound ? '' : '잠시 뒤 다시 해 주세요'">
+        <UiButton v-if="!notFound" variant="secondary" @click="retryLoad">다시 시도</UiButton>
+      </UiEmptyState>
       <template v-else-if="detail">
         <!-- 동호회의 얼굴: 동네 · 대표 종목 · 멤버 · 이번 달 · 교류전 전적 -->
         <p class="t-caption">{{ faceLine }}</p>
@@ -40,7 +43,7 @@
         <template v-else>
           <UiCard v-if="detail.requested" class="mt-5">
             <p class="t-heading">가입을 신청했어요</p>
-            <p class="t-caption mt-1">운영진이 받으면 알려 드려요</p>
+            <p class="t-caption mt-1">운영진이 받으면 알림함에 와요</p>
             <UiButton size="sm" variant="ghost" class="mt-2 -ml-3" @click="cancelRequest">신청 취소</UiButton>
           </UiCard>
           <template v-else-if="detail.club.joinMode === 'APPROVAL'">
@@ -119,6 +122,8 @@
           <div v-if="tournaments.length" class="space-y-2">
             <TournamentRow v-for="t in tournaments" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
           </div>
+          <!-- 못 불러온 것을 '연 대회가 없어요'로 보이지 않게 (경로 7 리뷰) -->
+          <p v-else-if="tournamentsFailed" class="t-caption">대회를 불러오지 못했어요 · <button type="button" class="underline underline-offset-2" @click="loadTournaments">다시 시도</button></p>
           <p v-else class="t-caption">아직 연 대회가 없어요</p>
         </UiSection>
 
@@ -133,7 +138,8 @@
           <p v-else class="t-caption">{{ detail.club.mainRuleTitle }} 경기를 하면 우리끼리 순위가 생겨요</p>
         </UiSection>
 
-        <UiSection title="친선전" class="mt-8">
+        <!-- '친선전'과 '동호회 경기'로 같은 것을 다르게 불렀다 (경로 7 리뷰): 만들기 버튼과 같은 이름으로 -->
+        <UiSection title="동호회 경기" class="mt-8">
           <div v-if="detail.games.length" class="space-y-2">
             <UiCard v-for="g in detail.games" :key="g.gameId" class="py-3 cursor-pointer active:bg-surface-2" role="button" @click="router.push(`/games/${g.gameId}`)">
               <p class="t-heading">{{ g.title }}</p>
@@ -181,7 +187,8 @@
     <UiSheet v-model="eventOpen" title="일정 잡기">
       <div class="space-y-3">
         <UiInput v-model="ev.title" :maxlength="40" placeholder="제목 (예: 토요일 아침 정모)" />
-        <UiInput v-model="ev.startsAt" type="datetime-local" />
+        <!-- 날짜·시각 칸은 placeholder가 보이지 않아 무슨 칸인지 몰랐다 (경로 7 리뷰 K11) -->
+        <UiInput v-model="ev.startsAt" type="datetime-local" label="언제" />
         <UiInput v-model="ev.place" :maxlength="100" placeholder="장소 (선택)" />
         <UiInput v-model="ev.capacity" type="number" inputmode="numeric" placeholder="정원 (선택)" />
         <UiInput v-model="ev.note" :maxlength="200" placeholder="한 줄 안내 (선택)" />
@@ -203,6 +210,8 @@
           <UiList v-if="!opponent && opResults.length">
             <UiListItem v-for="c in opResults" :key="c.id" :title="c.name" :subtitle="[c.dongName, c.mainRuleTitle, `${c.memberCount}명`].filter(Boolean).join(' · ')" @click="opponent = c" />
           </UiList>
+          <p v-else-if="!opponent && opState === 'failed'" class="t-caption">동호회를 찾지 못했어요. 이름을 다시 쳐 주세요</p>
+          <p v-else-if="!opponent && opState === 'done'" class="t-caption">{{ opQuery.trim().length >= 2 ? '그 이름의 동호회가 없어요' : '우리 동네에 다른 동호회가 아직 없어요. 이름으로 찾아 보세요' }}</p>
           <UiCard v-if="opponent" class="flex items-center gap-2 py-3">
             <span class="t-heading flex-1 truncate">{{ opponent.name }}</span>
             <UiButton size="sm" variant="ghost" @click="opponent = null">바꾸기</UiButton>
@@ -214,7 +223,7 @@
             <UiChip :selected="pr.perBoard === 1" @click="pr.perBoard = 1">1:1</UiChip>
             <UiChip :selected="pr.perBoard === 2" @click="pr.perBoard = 2">2:2</UiChip>
           </div>
-          <UiInput v-model="pr.matchDate" type="datetime-local" />
+          <UiInput v-model="pr.matchDate" type="datetime-local" label="언제 (선택, 비워 두면 상대와 정해요)" />
           <UiInput v-model="pr.placeRoad" :maxlength="100" placeholder="장소 (선택)" />
           <UiInput v-model="pr.message" :maxlength="200" placeholder="하고 싶은 말 (선택)" />
           <UiButton block :loading="busy" :disabled="!opponent" @click="propose">신청</UiButton>
@@ -255,7 +264,8 @@
 <script setup lang="ts">
 // 동호회 한 곳 (/clubs/:id): 같이 붙고, 같이 기록이 쌓이는 팀 (docs/clubs.md).
 // 공지·단톡방 → 가입 신청(운영진) → 일정·참석 → 교류전 → 우리끼리 순위 → 친선전 → 멤버(운영진 관리)
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { refreshOnChange } from '@/websocket/userChannel'
 import { matchTime } from '@/utils/format'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST, PUT } from '@/api/client'
@@ -303,14 +313,31 @@ const message = (e: unknown, fallback: string) => (e as { response?: { data?: { 
 const tournaments = ref<Schemas['TournamentSummary'][]>([])
 const activityOpen = ref(false)
 const tournamentOpen = ref(false)
+const notFound = ref(false)
+const tournamentsFailed = ref(false)
 async function load() {
   try {
     detail.value = (await GET('/api/clubs/{id}', { path: { id } })).data
+    error.value = ''
     // 대회 목록만 못 불러오면 동호회는 그대로 보여 준다 (전에는 '동호회를 찾지 못했어요'가 떴다)
-    tournaments.value = await GET('/api/tournaments', { query: { scope: 'club', clubId: id } }).then((r) => r.data.slice(0, 5), () => [])
-  } catch {
-    error.value = '동호회를 찾지 못했어요'
+    loadTournaments()
+  } catch (e) {
+    const status = (e as { response?: { status?: number } }).response?.status
+    notFound.value = status === 404 || status === 403
+    if (!detail.value) error.value = notFound.value ? '동호회를 찾지 못했어요' : '동호회를 불러오지 못했어요'
   }
+}
+async function loadTournaments() {
+  tournamentsFailed.value = false
+  try {
+    tournaments.value = (await GET('/api/tournaments', { query: { scope: 'club', clubId: id } })).data.slice(0, 5)
+  } catch {
+    tournamentsFailed.value = true
+  }
+}
+function retryLoad() {
+  error.value = ''
+  load()
 }
 
 async function run<T>(task: () => Promise<T>, fallback: string): Promise<T | undefined> {
@@ -341,6 +368,8 @@ async function cancelRequest() {
   if (await run(() => POST('/api/clubs/{id}/leave', { path: { id } }), '취소하지 못했어요')) await load()
 }
 async function decide(userId: number, accept: boolean) {
+  // 거절은 신청자에게 바로 알림이 가고 되돌릴 수 없다: 한 번 묻는다 (경로 7 리뷰 K6)
+  if (!accept && !(await confirmDialog({ title: '가입 신청을 거절할까요?', message: '신청한 사람에게 알림이 가요', confirmText: '거절', danger: true }))) return
   const d = await run(() => POST('/api/clubs/{id}/requests/{userId}', { path: { id, userId }, query: { accept } }), '처리하지 못했어요')
   if (d) detail.value = d.data
 }
@@ -392,10 +421,12 @@ const opResults = ref<Schemas['ClubSummary'][]>([])
 const opponent = ref<Schemas['ClubSummary'] | null>(null)
 const pr = reactive({ boards: 3, perBoard: 1, matchDate: '', placeRoad: '', message: '' })
 let searchTimer: ReturnType<typeof setTimeout> | undefined
+// 상대 찾기 결과: 못 불러왔거나 없으면 빈칸이 아니라 말한다 (경로 7 리뷰 K13)
+const opState = ref<'idle' | 'failed' | 'done'>('idle')
 function openPropose() {
   proposeOpen.value = true
   // 처음엔 우리 동네 동호회를 후보로
-  if (!opResults.value.length) GET('/api/clubs/nearby').then((r) => (opResults.value = r.data)).catch(() => {})
+  if (!opResults.value.length) GET('/api/clubs/nearby').then((r) => { opResults.value = r.data.filter((c) => c.id !== id); opState.value = 'done' }).catch(() => (opState.value = 'failed'))
 }
 let searchSeq = 0
 function searchClubs() {
@@ -406,6 +437,7 @@ function searchClubs() {
     // 두 글자보다 짧으면 처음처럼 우리 동네 동호회 (예전엔 지난 검색 결과가 그대로 남았다). 늦게 온 앞 검색은 버린다
     const r = await (q.length < 2 ? GET('/api/clubs/nearby') : GET('/api/clubs/search', { query: { q } })).catch(() => null)
     if (seq !== searchSeq) return
+    opState.value = r ? 'done' : 'failed'
     opResults.value = (r?.data ?? []).filter((c) => c.id !== id)
   }, 250)
 }
@@ -477,5 +509,11 @@ async function leave() {
   if (await run(() => POST('/api/clubs/{id}/leave', { path: { id } }), '나가지 못했어요. 다시 해 주세요')) router.replace('/clubs')
 }
 
-onMounted(load)
+// 다른 사람이 신청·참석·답을 바꾸면 서버 신호로 다시 불러온다 (예전엔 다시 들어오기 전엔 그대로였다, 경로 7 리뷰)
+let stopWatching: (() => void) | null = null
+onMounted(() => {
+  load()
+  stopWatching = refreshOnChange(() => { load() })
+})
+onBeforeUnmount(() => stopWatching?.())
 </script>

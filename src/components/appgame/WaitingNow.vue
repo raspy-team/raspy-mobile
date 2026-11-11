@@ -9,8 +9,11 @@
       <UiIcon :name="gameIcon(list.tonight.key, list.tonight.icon)" class="text-fg-muted" />
       <div class="flex-1 min-w-0">
         <p class="t-label truncate">{{ list.goldenHour ? `지금은 ${list.tonight.title} 시간` : `오늘 밤 ${nightHour}시 · ${list.tonight.title}` }}</p>
-        <!-- 좁은 화면에서 '8시 / 55분'처럼 시각이 갈라지지 않게 덩어리마다 줄을 바꾼다 (11/5 c6 320 검토) -->
-        <p v-if="!list.goldenHour" class="t-micro tabular-nums">{{ left }} 남음</p>
+        <!-- '게임 시간'이 무엇인지 말한다 (경로 8 2절: 설명 없이 '지금은 ○○ 시간'만 있었다) -->
+        <p v-if="list.goldenHour" class="t-micro break-keep">밤 {{ nightHour }}시엔 다 같이 이 게임으로 모여 붙어요</p>
+        <!-- 좁은 화면에서 '8시 / 55분'처럼 시각이 갈라지지 않게 덩어리마다 줄을 바꾼다 (11/5 c6 320 검토).
+             스위치가 무엇을 켜는지 글로 보인다 (예전엔 화면 읽기용 이름에만 있어 스위치만 보였다) -->
+        <p v-else class="t-micro tabular-nums">{{ left }} 남음 · <span class="whitespace-nowrap">{{ nightHour - 1 }}시 55분에 알림</span></p>
       </div>
       <UiButton v-if="list.goldenHour" size="sm" @click="join(list.tonight.key)">바로 하기</UiButton>
       <UiSwitch v-else :model-value="list.nightAlarm" :disabled="saving" :label="`${nightHour - 1}시 55분에 알려 주기`" @update:model-value="setAlarm" />
@@ -21,9 +24,10 @@
           <UiIcon :name="gameIcon(l.key, l.icon)" class="text-fg-muted" />
           <div class="flex-1 min-w-0">
             <p class="t-label truncate">{{ l.nickname }}님 · {{ l.title }}</p>
-            <p class="t-micro tabular-nums">{{ l.waitedSeconds + since }}초째 기다리는 중</p>
+            <!-- 몇 분이 지나면 '754초째'가 되던 것을 분·시간으로 (경로 8 P7) -->
+            <p class="t-micro tabular-nums">{{ waitText(l.waitedSeconds + since) }}째 기다리는 중</p>
           </div>
-          <UiButton size="sm" @click="join(l.key)">참여</UiButton>
+          <UiButton size="sm" :disabled="joining" @click="joinLobby(l)">참여</UiButton>
         </UiCard>
         <!-- 사람이 2명보다 적으면 AI 주민이 기다린다 (docs/ai-residents.md 6). 누르면 그 AI와 바로 한 판. 사람이 늘면 서버가 빼 준다 -->
         <UiCard v-for="r in residents" :key="`ai-${r.userId}`" class="flex items-center gap-3 py-3">
@@ -152,6 +156,18 @@ async function playAi(r: Resident) {
 function join(key: string) {
   emit('join', key)
   router.push(liveRoute(key))
+}
+
+// 기다리던 사람이 아직 있는지 한 번 묻고 들어간다. 그사이 떠났으면 빈 대기실로 보내지 않고 알린다 (경로 8 2절 '참여')
+async function joinLobby(l: { gameId: number; key: string }) {
+  joining.value = true
+  try {
+    await load()
+    if (!list.value?.lobbies.some((x) => x.gameId === l.gameId)) return showToast('방금 다른 사람과 붙었어요. 다른 사람을 골라 주세요')
+    join(l.key)
+  } finally {
+    joining.value = false
+  }
 }
 
 let off: (() => void) | undefined

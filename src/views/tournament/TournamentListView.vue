@@ -16,7 +16,7 @@
       <UiEmptyState v-else-if="tab !== 'mine' && hasDong === false" class="pt-10" mascot="tong" title="동네를 인증하면 우리 동네 대회가 보여요" description="동호회 월례대회도 동네 대회로 열려요">
         <UiButton variant="secondary" to="/neighborhood">동네 인증</UiButton>
       </UiEmptyState>
-      <UiEmptyState v-else class="pt-10" mascot="tong" :title="tab === 'mine' ? '나간 대회가 없어요' : '동네에 열린 대회가 없어요'" />
+      <UiEmptyState v-else class="pt-10" mascot="tong" :title="tab === 'mine' ? '참가한 대회가 없어요' : '동네에 열린 대회가 없어요'" />
     </main>
 
     <TournamentCreateSheet v-model="createOpen" :club-id="clubId" />

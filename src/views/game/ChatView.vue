@@ -88,12 +88,20 @@ onMounted(async () => {
   })
   if (topRef.value) sizeObserver.observe(topRef.value)
   if (bottomRef.value) sizeObserver.observe(bottomRef.value)
+  await enter()
+})
+
+// 방에 들어가기 (처음, 그리고 '다시 시도'). 다시 시도가 페이지를 통째로 새로 열어 쓰던 글이 사라졌다 (가로 훑기 9절, 경로 5 S3)
+let socketReady = false
+async function enter() {
+  loadFailed.value = false
+  isLoadingMessages.value = true
   try {
     const { data } = await api.post('/api/chat-room/dm-room', null, {
       params: { targetUserId },
     })
     roomId.value = data.roomId
-    socket.onMessage((msg) => {
+    if (!socketReady) socket.onMessage((msg) => {
       messages.value.push(msg)
       // 보고 있는 방에 온 메시지는 바로 읽음으로 (목록·배지에 안 읽음으로 남지 않게)
       if (msg.senderId !== currentUserId.value) api.post(`/api/chat-room/${roomId.value}/read`).catch(() => {})
@@ -102,7 +110,8 @@ onMounted(async () => {
       if (msg.messageType === 'PLAY_WITH_ME_TOO') fetchChallengeStatus()
     })
 
-    socket.connect(roomId.value)
+    if (!socketReady) socket.connect(roomId.value)
+    socketReady = true
 
     currentUserId.value = await getMyId()
 
@@ -126,6 +135,7 @@ onMounted(async () => {
 
     // 그 밖의 변경(내 채널 신호)이나 앱으로 돌아왔을 때도 다시 불러온다 (예전엔 5초마다)
     fetchBetween()
+    stopWatchingStatus?.()
     stopWatchingStatus = refreshOnChange(() => { fetchChallengeStatus(); fetchBetween() })
 
     const res = await api.get(`/api/chat-room/${roomId.value}/chat-messages`)
@@ -148,9 +158,9 @@ onMounted(async () => {
       loadFailed.value = true
     }
   }
-})
+}
 const loadFailed = ref(false)
-const reloadPage = () => window.location.reload()
+const reloadPage = () => enter()
 
 // 엔터로 보내기 (줄바꿈은 Shift+엔터). 한글 조합 중의 엔터는 글자 확정이라 보내지 않는다
 function onEnter(e) {
@@ -188,10 +198,22 @@ function goToProfile() {
 // 신고·차단을 대화 안에서 (안전·신뢰 A, 11/3). 괴롭힘은 대부분 1:1 메시지에서 일어나는데 예전엔 프로필로 가야 했다.
 // 사람 신고는 이 대화방을 맥락으로 붙여 운영진이 앞뒤를 본다. 메시지 하나는 길게 눌러 신고한다
 const menuOpen = ref(false)
+// 더보기 시트를 닫고 다음 시트·확인 창을 열 때: 닫은 시트의 기록 칸이 걷힌 뒤에 연다. 바로 열면 닫은 뒤 뒤로를 두 번 눌러야 했다 (가로 훑기 2)
+function afterMenuClosed(cb) {
+  menuOpen.value = false
+  let done = false
+  const go = () => {
+    if (done) return
+    done = true
+    window.removeEventListener('popstate', go)
+    cb()
+  }
+  window.addEventListener('popstate', go)
+  setTimeout(go, 300)
+}
 const report = ref({ open: false, type: 'USER', id: null, title: '' })
 function reportUser() {
-  menuOpen.value = false
-  report.value = { open: true, type: 'USER', id: targetUserId, title: `${targetUserNickname.value}님을 신고할까요?` }
+  afterMenuClosed(() => (report.value = { open: true, type: 'USER', id: targetUserId, title: `${targetUserNickname.value}님을 신고할까요?` }))
 }
 function reportMessage(msg) {
   if (!msg.id || msg.senderId === currentUserId.value) return
@@ -205,8 +227,10 @@ function pressStart(msg) {
 function pressEnd() {
   clearTimeout(pressTimer)
 }
-async function blockUser() {
-  menuOpen.value = false
+function blockUser() {
+  afterMenuClosed(blockUserConfirmed)
+}
+async function blockUserConfirmed() {
   if (!(await confirmDialog({ title: `${targetUserNickname.value}님을 차단할까요?`, message: '서로 메시지·신청·도전을 할 수 없고 프로필도 보이지 않아요. 설정에서 풀 수 있어요', confirmText: '차단', danger: true }))) return
   try {
     await api.post(`/api/block/${targetUserId}`)
@@ -217,7 +241,8 @@ async function blockUser() {
   }
 }
 function goBack() {
-  router.go(-1)
+  if (window.history.state?.back) router.back()
+  else router.replace('/dm')
 }
 
 const QUICK_REPLIES = ['안녕하세요! 반가워요', '한 판 하실래요?', '언제 시간 괜찮으세요?', '어디서 할까요?']
@@ -274,8 +299,9 @@ const headerInfo = computed(() => {
         show: true,
         type: 'challenge_sent',
         title: '도전 대기 중',
-        description: `${targetUserNickname.value}님의 답을 기다리고 있어요`,
-        showActions: false,
+        description: `${targetUserNickname.value}님의 답을 기다리고 있어요. 3일 안에 답이 없으면 끝나요`,
+        showActions: true,
+        actionType: 'withdraw',
         statusColor: 'gray',
       }
     } else {
@@ -327,7 +353,10 @@ const headerInfo = computed(() => {
     }
   }
 
-  // REJECTED 상태
+  // REJECTED 상태. 하루가 지나면 할 일 없는 빨간 카드를 대화 위에서 내린다 (경로 5 리뷰 S19)
+  if (status === 'REJECTED' && Date.now() - new Date(challengeStatus.value.createdAt).getTime() > 24 * 3600_000) {
+    return { show: false }
+  }
   if (status === 'REJECTED') {
     if (isRequester) {
       return {
@@ -377,6 +406,22 @@ const handleReject = async () => {
   }
 }
 
+// 보낸 도전 거두기 (시나리오 T4)
+const withdrawing = ref(false)
+const handleWithdraw = async () => {
+  if (!challengeStatus.value) return
+  withdrawing.value = true
+  try {
+    await playWithMeTooAPI.cancelRequest(challengeStatus.value.toUserId)
+    challengeStatus.value = { ...challengeStatus.value, status: 'CANCELLED' }
+    showToast('도전을 거뒀어요')
+  } catch (error) {
+    showToast(error.response?.data?.message || '거두지 못했어요. 다시 해 주세요')
+  } finally {
+    withdrawing.value = false
+  }
+}
+
 const handleGoToGame = () => {
   if (headerInfo.value.gameId) {
     router.push(`/game?id=${headerInfo.value.gameId}`)
@@ -392,7 +437,7 @@ const handleViewResult = () => {
 // 에러 모달 확인 버튼 클릭 시
 const closeErrorModal = () => {
   showErrorModal.value = false
-  router.go(-1)
+  goBack()
 }
 </script>
 
@@ -427,6 +472,7 @@ const closeErrorModal = () => {
             <UiButton variant="secondary" size="sm" class="flex-1" @click="handleReject">거절</UiButton>
             <UiButton size="sm" class="flex-1" @click="handleAccept">수락</UiButton>
           </template>
+          <UiButton v-else-if="headerInfo.actionType === 'withdraw'" variant="ghost" size="sm" block :loading="withdrawing" @click="handleWithdraw">도전 거두기</UiButton>
           <UiButton v-else-if="headerInfo.actionType === 'go_to_game'" size="sm" block icon="fas fa-play" @click="handleGoToGame">경기로 가기</UiButton>
           <UiButton v-else-if="headerInfo.actionType === 'view_result'" variant="secondary" size="sm" block icon="fas fa-trophy" @click="handleViewResult">결과 보기</UiButton>
         </div>
@@ -435,7 +481,7 @@ const closeErrorModal = () => {
       <div v-if="!headerInfo.show && between" class="px-3 py-2 border-b border-line">
         <div class="flex items-start gap-3">
           <RuleThumb :rule="{ minorCategory: between.minorCategory, ruleTitle: between.ruleTitle }" :size="44" class="!rounded-lg" />
-          <button type="button" class="flex-1 min-w-0 text-left" @click="router.push('/game')">
+          <button type="button" class="flex-1 min-w-0 text-left" @click="router.push({ path: '/game', query: { id: between.gameId } })">
             <span class="flex items-center gap-2">
               <span class="t-body font-medium text-fg truncate">{{ between.ruleTitle }}</span>
               <UiBadge :tone="between.needsSchedule ? 'primary' : 'neutral'">{{ between.todo }}</UiBadge>

@@ -32,6 +32,8 @@
       <!-- 주간 응원 리그: 친구·동네, 유닛(보는 눈) 또는 포인트 순. 상은 없고 순위만 -->
       <template v-if="isMe">
         <h3 class="t-heading mt-7">이번 주 응원 리그</h3>
+        <!-- 무슨 리그인지, '보는 눈'이 무엇인지 몰랐다 (경로 6 리뷰): 한 줄로 -->
+        <p class="t-caption mt-1">남의 경기에서 이길 쪽을 누가 잘 맞히나 겨뤄요. 상은 없고 순위만 있어요</p>
         <div class="flex flex-wrap gap-2 mt-2">
           <!-- 정렬 칩(보는 눈·포인트)은 뺐다: 포인트를 보러 온 사람이 기준 둘을 고를 이유가 없다. 자랑거리는 '보는 눈' 하나 (목적 판정 6) -->
           <UiChip v-for="o in SCOPES" :key="o.key" :selected="scope === o.key" @click="loadLeague(o.key, sort)">{{ o.label }}</UiChip>
@@ -46,7 +48,7 @@
           <template v-else-if="league?.me">이번 주 {{ league.me.picks }}번 골랐어요. {{ league.minPicks }}번부터 순위에 들어요</template>
           <template v-else>남의 경기에서 이길 쪽을 {{ league?.minPicks ?? 3 }}번 맞혀 보면 순위에 들어요</template>
         </p>
-        <p class="t-micro mt-1">유닛: 맞히면 +(배수−1), 틀리면 −1. 건 포인트와 상관없이 보는 눈만 재요</p>
+        <p class="t-micro mt-1">점수: 맞히면 오르고 틀리면 내려가요. 이변을 맞힐수록 더 올라요. 건 포인트와는 상관없어요</p>
       </template>
 
       <!-- 한 줄에 한 가지. 숫자는 예로 -->

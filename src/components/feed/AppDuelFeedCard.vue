@@ -13,7 +13,9 @@
 
     <!-- 투표 중: 쓴 사람을 가린 채 그 자리에서 투표 -->
     <div v-if="voting" class="mt-3">
-      <UiSkeleton v-if="!card" class="h-40 w-full rounded-xl" />
+      <!-- 투표 카드를 못 받으면 회색 틀이 그대로 남았다 (경로 6 리뷰 P10) -->
+      <p v-if="cardFailed" class="t-caption py-6 text-center">투표를 불러오지 못했어요 · <button type="button" class="underline underline-offset-2" @click="loadCard">다시 시도</button></p>
+      <UiSkeleton v-else-if="!card" class="h-40 w-full rounded-xl" />
       <VoteCard v-else :card="card" @voted="card = $event" />
     </div>
 
@@ -34,7 +36,7 @@
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
         </span>
       </div>
-      <p class="text-center t-micro mt-2">{{ isDraw ? '무승부' : duel.scoreUnit }}</p>
+      <p class="text-center t-micro mt-2">{{ isDraw ? '무승부' : graded ? '등급' : duel.scoreUnit }}</p>
       <!-- 수 기록으로 그린 그림 (낱말 사슬·마지막 판·막대) -->
       <AppVisualFigure
         :visual="story?.appVisual"
@@ -90,7 +92,8 @@ const sides = computed(() =>
       id: p?.id,
       name: p?.name ?? '',
       isBot: !!p?.isBot,
-      score: Math.round(duel.value.scores?.[i] ?? 0),
+      // 임기응변은 큰 숫자도 등급으로: 점수(47 : 39)가 크고 등급은 아래 글에만 있었다 (경로 6 리뷰 P11)
+      score: gradeOf(duel.value.texts?.[i]) ?? Math.round(duel.value.scores?.[i] ?? 0),
       text: duel.value.texts?.[i] ?? '',
       won: p != null && p.id === duel.value.winnerId,
     }
@@ -101,12 +104,23 @@ const when = computed(() => (props.post.date ? timeAgo(props.post.date) : ''))
 const story = computed(() => (props.post as { story?: { appVisual?: any } | null }).story)
 const feedPlayers = computed(() => (props.post.players as unknown as { id: number; name: string; isBot?: boolean }[] | undefined) || [])
 
-onMounted(async () => {
-  if (!voting.value) return
+function gradeOf(text?: string): number | null {
+  const m = duel.value.key === 'improv' ? text?.match(/^(\d)등급/) : null
+  return m ? Number(m[1]) : null
+}
+const graded = computed(() => duel.value.key === 'improv' && (duel.value.texts ?? []).some((t) => gradeOf(t) != null))
+
+const cardFailed = ref(false)
+async function loadCard() {
+  cardFailed.value = false
   try {
     card.value = (await GET('/api/app-games/votes/{gameId}', { path: { gameId: duel.value.gameId } })).data
   } catch {
     card.value = null
+    cardFailed.value = true
   }
+}
+onMounted(() => {
+  if (voting.value) loadCard()
 })
 </script>

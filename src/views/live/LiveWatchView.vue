@@ -4,17 +4,23 @@
     <main class="max-w-xl mx-auto px-4 pt-4 pb-56 relative">
       <UiSkeleton v-if="!live && !error" class="h-48 w-full" />
       <!-- 볼 수 없는 중계에서 누를 것이 없었다 (목적 판정 11/11 5번) -->
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-eye-slash" :title="error">
-        <UiButton variant="secondary" to="/">홈으로</UiButton>
+      <!-- 연결 오류도 "볼 수 없는 경기예요"였다: 연결 오류는 다시 시도 (경로 5 리뷰 S14) -->
+      <UiEmptyState v-else-if="error" class="pt-16" :icon="offline ? 'fas fa-rotate-right' : 'fas fa-eye-slash'" :title="error" :description="offline ? '연결이 돌아오면 다시 해 주세요' : ''">
+        <UiButton v-if="offline" @click="load">다시 시도</UiButton>
+        <UiButton variant="secondary" :class="offline ? 'mt-2' : ''" to="/">홈으로</UiButton>
       </UiEmptyState>
       <template v-else-if="live">
         <p class="t-caption text-center">
           <span v-if="live.status === 'IN_PROGRESS'" class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-signal-fg motion-safe:animate-pulse" aria-hidden="true"></span>LIVE · {{ live.setIndex ? `${live.setIndex}세트` : '곧 시작' }}</span>
           <span v-else>{{ STATUS[live.status] || '끝난 경기' }}</span>
         </p>
+        <!-- 늦게 링크를 연 사람에게 결과로 가는 길 (경로 5 리뷰 S15) -->
+        <div v-if="live.status === 'COMPLETED' || live.status === 'RESULT_PENDING'" class="flex justify-center mt-2">
+          <UiButton size="sm" variant="secondary" :to="`/games/${gameId}/result`">결과 보기</UiButton>
+        </div>
 
         <!-- 킥오프 카드: 왜 이 경기인가 (match-28, 전적·흐름·이길 확률·라이벌·챔피언). 내용이 없으면 안 보인다 -->
-        <LiveKickoffCard class="mt-4" :game-id="gameId" />
+        <LiveKickoffCard v-if="!guest" class="mt-4" :game-id="gameId" />
 
         <!-- 같이 보는 사람: 수와 얼굴 (익명은 수에만) -->
         <!-- 끝난 경기에 '아직 관중이 없어요'는 어색하다: 지금 보는 사람이 없으면 줄을 숨긴다 (끝을 본 사람은 아래 증인 줄) -->
@@ -57,7 +63,7 @@
         <p v-if="live.witnesses" class="t-caption text-center mt-5">관중 {{ live.witnesses }}명이 이 경기의 끝을 지켜봤어요</p>
 
         <!-- 관중 사진·영상 (match-34, 비판 6: 장면이 없다). 사진 신호는 /topic/game-media로 따로 듣는다 -->
-        <LiveMediaStrip class="mt-5" :game-id="gameId" />
+        <LiveMediaStrip v-if="!guest" class="mt-5" :game-id="gameId" />
 
         <!-- 선수: 구경 링크 보내기, 구경 끄기 -->
         <template v-if="live.isPlayer">
@@ -67,6 +73,10 @@
           <p class="t-caption text-center mt-1">{{ live.watchOff ? '지금은 선수 말고는 이 경기를 볼 수 없어요' : '끄면 선수 말고는 이 경기를 볼 수 없어요' }}</p>
         </template>
         <!-- 관중: 익명으로 보기 (수에는 들지만 얼굴·기록은 남지 않는다) -->
+        <UiCard v-else-if="guest" class="mt-6 text-center">
+          <p class="t-body">가입하면 이 편 응원하고 반응을 보낼 수 있어요</p>
+          <UiButton block class="mt-3" @click="joinToCheer">가입하고 응원하기</UiButton>
+        </UiCard>
         <label v-else class="flex items-center justify-center gap-2 t-caption mt-6">
           <input v-model="anon" type="checkbox" class="accent-current" @change="resubscribe" />
           익명으로 보기 (얼굴과 관중 기록이 남지 않아요)
@@ -96,7 +106,8 @@
 // 관중 보완 (11/3 세션 2, docs/live-spectator-review.md): 같이 보는 사람, 편 고정, 정해진 응원 글, 세트 사이 한 장(BREAK)과 선수의 고마워요, 증인, 익명으로 보기
 // 점수는 /topic/game-live/{id}의 신호에만 다시 불러온다 (폴링하지 않는다)
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { rememberReturnTo } from '@/utils/authRedirect'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { subscribeTopic } from '@/websocket/userChannel'
@@ -111,6 +122,7 @@ const REACTIONS = ['👏', '🔥', '😮', '😂', '💪']
 const STATUS: Record<string, string> = { SCHEDULED: '곧 시작해요', RESULT_PENDING: '경기 끝 · 결과 확인 중', COMPLETED: '끝난 경기', CANCELED: '취소된 경기' }
 const ANON_KEY = 'live.anonymous'
 const route = useRoute()
+const router = useRouter()
 const { showToast } = useToast()
 const gameId = Number(route.params.gameId)
 const live = ref<components['schemas']['LiveGame'] | null>(null)
@@ -120,20 +132,38 @@ const toggling = ref(false)
 const lastBreak = ref<LiveBreak | null>(null)
 const thanksFrom = ref('')
 const anon = ref(readAnon())
-const canAct = computed(() => live.value?.status === 'IN_PROGRESS' || live.value?.status === 'SCHEDULED')
+// 로그인 전에 중계 링크를 연 사람: 점수만 보고, 응원·반응은 가입한 뒤에 (경로 5 리뷰 S1: 가입 화면부터 만났다)
+const guest = (() => { try { return !localStorage.getItem('raspy_access_token2') } catch { return true } })()
+const canAct = computed(() => !guest && (live.value?.status === 'IN_PROGRESS' || live.value?.status === 'SCHEDULED'))
+function joinToCheer() {
+  rememberReturnTo(route.fullPath)
+  router.push('/init')
+}
 
 function readAnon() {
   try { return localStorage.getItem(ANON_KEY) === 'true' } catch { return false }
 }
 
+const offline = ref(false)
 async function load() {
   try {
-    live.value = (await GET('/api/games/{gameId}/live', { path: { gameId } })).data
+    live.value = guest
+      ? (await GET('/api/games/{gameId}/live/guest', { path: { gameId } })).data
+      : (await GET('/api/games/{gameId}/live', { path: { gameId } })).data
     error.value = ''
+    offline.value = false
   } catch (e) {
+    const res = (e as { response?: { status?: number; data?: { message?: string } } }).response
+    // 연결 오류: 보던 중이면 점수판을 내리지 않고 그대로 둔다(다음 신호에 다시 부른다). 처음이면 다시 시도 (경로 5 리뷰 S14)
+    if (!res || (res.status ?? 0) >= 500) {
+      offline.value = true
+      if (live.value) return
+      error.value = '중계를 불러오지 못했어요'
+      return
+    }
     // 보던 중에 선수가 구경을 끄면 판도 반응 칸도 내린다
     live.value = null
-    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '볼 수 없는 경기예요'
+    error.value = res.data?.message || '볼 수 없는 경기예요'
   }
 }
 

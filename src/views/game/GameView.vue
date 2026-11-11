@@ -114,7 +114,7 @@
 
   <!-- 신뢰 사다리: 처음 보는 사람과 1:1로 만나기 전에 앱 게임 한 판 (안전·신뢰 D) -->
   <UiSheet :model-value="!!ladderFor" title="먼저 앱 게임 한 판" @update:model-value="ladderFor = null">
-    <p class="t-caption mb-4">게임을 고르면 {{ ladderFor?.applicantNickname }}님께 도전장이 가요. 둘 다 하면 승인할 수 있어요</p>
+    <p class="t-caption mb-4">{{ LADDER_GAMES.length > 1 ? '게임을 고르면' : '누르면' }} {{ ladderFor?.applicantNickname }}님께 도전장이 가요. 둘 다 하면 승인할 수 있어요</p>
     <UiList>
       <UiListItem v-for="g in LADDER_GAMES" :key="g.key" :icon="g.icon" :title="g.title" :subtitle="g.sub" chevron @click="startLadder(g.key)" />
     </UiList>
@@ -130,6 +130,8 @@
       <UiListItem v-if="menuGame.type === 'my-game' && menuGame.status === 'MATCHING'" icon="fas fa-share" title="링크 공유하기" @click="share(menuGame)" />
       <UiListItem v-if="canTellFriend(menuGame)" icon="shield-halved" title="친구에게 일정 알리기" subtitle="누구와 언제 어디서 만나는지 보내 둬요" @click="tellFriend(menuGame)" />
       <UiListItem v-if="menuGame.type === 'sent' && menuGame.status === 'REQUESTED'" icon="fas fa-xmark" title="신청 취소" danger @click="cancelRequest(menuGame); menuGame = null" />
+      <!-- 1:1은 승인하는 순간 확정돼 잘못 승인하면 되돌릴 길이 없었다. 시작 전이면 승인을 거두고 다시 신청을 받는다 (경로 전부 훑기 4) -->
+      <UiListItem v-if="canUnapprove(menuGame)" icon="rotate-left" :title="`${menuGame.opponentNickname}님 승인 취소`" subtitle="다시 신청을 받아요" danger @click="unapproveFromMenu(menuGame)" />
       <UiListItem v-if="canDelete(menuGame)" icon="fas fa-trash" title="경기 삭제" danger @click="removeGame(menuGame)" />
       <UiListItem v-if="canLeave(menuGame)" icon="fas fa-right-from-bracket" title="이 경기에서 빠지기" subtitle="주최자와 남은 사람에게 알려요" danger @click="leaveGame(menuGame)" />
     </UiList>
@@ -143,7 +145,7 @@
     </div>
     <UiInput v-if="leaveReason === '기타'" v-model="leaveOther" class="mt-3" :maxlength="100" placeholder="이유를 짧게 적어 주세요" />
     <UiButton block size="lg" class="mt-5" :disabled="!lateReasonText" @click="confirmLateLeave(lateReasonText)">이유를 알리고 빠지기</UiButton>
-    <UiButton block variant="ghost" class="mt-2 text-danger" @click="confirmLateLeave('')">이유 없이 빠지기</UiButton>
+    <UiButton block variant="ghost" class="mt-2 text-danger" @click="leaveWithoutReason">이유 없이 빠지기 (노쇼로 기록)</UiButton>
   </UiSheet>
 
   <SafetyTipsSheet
@@ -413,6 +415,9 @@ async function cancelApproval(game, a) {
     await api.post('/api/games/cancel-approve', { gameId: game.id, userId: a.userId })
     showToast('승인을 취소했어요. 다시 신청을 받아요')
     await fetchGames()
+  } catch (e) {
+    // 실패하면 말이 없어 취소된 줄 알았다 (경로 전부 훑기 4)
+    showToast(e.response?.data?.message || '승인을 취소하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     busy.value = false
   }
@@ -420,9 +425,13 @@ async function cancelApproval(game, a) {
 
 async function cancelRequest(game) {
   if (!(await confirmDialog({ title: '신청을 취소할까요?', confirmText: '신청 취소' }))) return
-  await api.post('/api/games/cancel-request', { gameId: game.id })
-  sentGames.value = sentGames.value.filter((g) => g.id !== game.id)
-  showToast('신청을 취소했어요')
+  try {
+    await api.post('/api/games/cancel-request', { gameId: game.id })
+    sentGames.value = sentGames.value.filter((g) => g.id !== game.id)
+    showToast('신청을 취소했어요')
+  } catch (e) {
+    showToast(e.response?.data?.message || '신청을 취소하지 못했어요. 잠시 뒤 다시 해 주세요')
+  }
 }
 
 // ---------- 더보기 ----------
@@ -481,6 +490,12 @@ function openScheduleFromMenu(g) {
   openSchedule(g)
 }
 const canDelete = (g) => g.type === 'my-game' && g.isOwner !== false && ['MATCHING', 'SCHEDULED'].includes(g.status)
+const canUnapprove = (g) => g.type === 'my-game' && g.isOwner !== false && g.status === 'SCHEDULED' && !isMulti(g) && !!g.opponentId
+async function unapproveFromMenu(g) {
+  menuGame.value = null
+  if (!(await confirmDialog({ title: `${g.opponentNickname}님 승인을 취소할까요?`, message: '상대에게 알리고, 경기는 다시 모집 중이 돼요', confirmText: '승인 취소', danger: true }))) return
+  await cancelApproval(g, { userId: g.opponentId })
+}
 
 function openRule(g) {
   menuGame.value = null
@@ -499,7 +514,7 @@ async function tellFriend(g) {
   menuGame.value = null
   const who = dmTarget(g)
   const where = venuePlace(g, place)
-  const text = `나 ${matchTime(g.matchDate)}에 ${where ? where + '에서 ' : ''}${who.name}님이랑 '${g.rule?.ruleTitle ?? '경기'}' 하기로 했어. 혹시 연락 안 되면 확인해 줘 (Match)`
+  const text = `나 ${matchTime(g.matchDate)}에 ${where ? where + '에서 ' : ''}${who.name}님이랑 '${g.rule?.ruleTitle ?? '경기'}' 하기로 했어. 혹시 연락 안 되면 확인해 줘 (매치)`
   const msg = await shareLink('', text, { copied: '일정을 복사했어요. 친구에게 붙여 넣어 보내세요' })
   if (msg) showToast(msg)
 }
@@ -547,6 +562,11 @@ async function leaveGame(g) {
   const ok = await confirmDialog({ title: '이 경기에서 빠질까요?', message: '주최자와 남은 사람에게 빠졌다고 알려요. 경기는 다시 모집 중이 돼요.', confirmText: '빠지기', danger: true })
   if (!ok) return
   await doLeave(g, '')
+}
+// 확인 없이 바로 빠지고 노쇼로 기록됐다: 한 번 묻는다 (경로 전부 훑기 4)
+async function leaveWithoutReason() {
+  if (!(await confirmDialog({ title: '이유 없이 빠질까요?', message: '노쇼로 기록되고 신뢰 온도가 내려가요', confirmText: '빠지기', danger: true }))) return
+  confirmLateLeave('')
 }
 async function confirmLateLeave(reason) {
   const g = lateLeave.value

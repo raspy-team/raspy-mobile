@@ -6,8 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover">
- <meta property="og:title" content="match — 경기에 초대받았어요" />
- <meta property="og:description" content="규칙을 고르고, 한 판 붙고, 기록을 남겨요." />
+ <!-- 기본 미리보기. 링크마다 다른 미리보기는 로봇만 서버 /preview로 넘겨 낸다 (vercel.json, 경로 1 리뷰 N2) -->
+ <meta property="og:title" content="매치 — 친구가 불렀어요" />
+ <meta property="og:description" content="무엇이든 정식 대결로. 한 판 붙고 기록을 남겨요" />
  <meta property="og:image" content="https://matchapp.me/og-image.png" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- or black -->
@@ -23,10 +24,11 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <!-- 홈 화면에 추가(PWA): 앱스토어 전까지 웹으로 들어온 사람이 앱처럼 다시 연다 -->
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="apple-mobile-web-app-title" content="match">
+  <meta name="apple-mobile-web-app-title" content="매치">
   <!-- 기본은 다크. 라이트를 고른 사람은 아래 스크립트가 바꾼다 (src/utils/theme.js와 같은 값) -->
   <meta name="theme-color" content="#121214">
-  <title>match</title>
+  <!-- 탭·홈 화면 이름은 한글 앱 이름으로 (경로 1 리뷰 N14) -->
+  <title>매치</title>
 
   <script>
     // 화면 모드(설정 > 화면). 첫 화면을 그리기 전에 적용해 깜빡이지 않게

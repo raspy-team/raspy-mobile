@@ -4,11 +4,12 @@
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-32 space-y-8">
       <!-- 나 -->
-      <button type="button" class="w-full flex items-center gap-3 py-3 text-left" @click="router.push('/set-profile')">
+      <button type="button" class="w-full flex items-center gap-3 py-3 text-left" @click="meFailed ? loadMe() : router.push('/set-profile')">
         <UiAvatar :src="me.avatar" :name="me.nickname || '나'" user-id="0" size="md" />
         <span class="flex-1 min-w-0">
-          <span class="block t-heading truncate">{{ me.nickname || ' ' }}</span>
-          <span class="block t-caption truncate">{{ me.username ? `@${me.username}` : '' }}</span>
+          <!-- 못 받으면 빈칸이었다 (경로 6 리뷰): 못 불러왔다고 말하고, 누르면 다시 받는다 -->
+          <span class="block t-heading truncate">{{ meFailed ? '내 정보를 불러오지 못했어요' : me.nickname || ' ' }}</span>
+          <span class="block t-caption truncate">{{ meFailed ? '눌러서 다시 시도' : me.username ? `@${me.username}` : '' }}</span>
         </span>
         <span class="t-caption">프로필 편집</span>
         <UiIcon name="fas fa-chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
@@ -48,7 +49,7 @@
 
       <UiSection title="도움말과 정보">
         <UiList>
-          <UiListItem icon="far fa-envelope" title="문의" subtitle="yeonkoh@protonmail.com" chevron @click="contact" />
+          <UiListItem icon="far fa-envelope" title="문의" :subtitle="CONTACT_EMAIL" chevron @click="contact" />
           <UiListItem icon="fab fa-instagram" title="인스타그램" subtitle="@matchmobileapp" chevron @click="openInstagram" />
           <UiListItem v-for="t in TERMS" :key="t.id" icon="far fa-file-lines" :title="t.title" chevron @click="openTerm = t" />
         </UiList>
@@ -92,6 +93,10 @@
           </template>
         </UiListItem>
       </UiList>
+      <!-- 못 불러온 것을 '없어요'로 보이지 않게 (경로 6 리뷰) -->
+      <UiEmptyState v-else-if="blockedFailed" icon="fas fa-triangle-exclamation" title="목록을 불러오지 못했어요">
+        <UiButton variant="secondary" @click="openBlocked">다시 시도</UiButton>
+      </UiEmptyState>
       <UiEmptyState v-else mascot="match" mood="smile" title="차단한 사람이 없어요" />
     </UiSheet>
 
@@ -103,6 +108,7 @@
 </template>
 
 <script setup>
+import { CONTACT_EMAIL, contactMailto } from '../config/contact'
 // 설정: 나 → 알림과 사람 → 도움말과 정보 → 로그아웃 → (맨 아래) 계정 삭제
 import { ref, onMounted, defineOptions } from 'vue'
 import { useRouter } from 'vue-router'
@@ -179,11 +185,12 @@ async function deleteAccount() {
 async function openBlocked() {
   blockedOpen.value = true
   blockedLoading.value = true
+  blockedFailed.value = false
   try {
     blocked.value = (await api.get('/api/block')).data
   } catch {
     blocked.value = []
-    showToast('목록을 불러오지 못했어요')
+    blockedFailed.value = true
   } finally {
     blockedLoading.value = false
   }
@@ -202,7 +209,8 @@ async function unblock(u) {
 }
 
 function contact() {
-  window.location.href = 'mailto:yeonkoh@protonmail.com?subject=' + encodeURIComponent('[Match] 문의')
+  // 문의처는 한 곳(config/contact)에서 (가로 훑기 9절)
+  window.location.href = contactMailto('문의')
 }
 function openInstagram() {
   window.open('https://www.instagram.com/matchmobileapp/', '_blank', 'noopener')
@@ -210,9 +218,20 @@ function openInstagram() {
 
 const isAdmin = ref(false)
 
-onMounted(async () => {
+const meFailed = ref(false)
+const blockedFailed = ref(false)
+async function loadMe() {
+  meFailed.value = false
+  try {
+    const { data } = await api.get('/api/user-profile/my/profile')
+    me.value = { nickname: data.nickname, username: data.username, avatar: data.profilePicture }
+  } catch {
+    meFailed.value = true
+  }
+}
+
+onMounted(() => {
   api.get('/api/auth/onboarding').then(({ data }) => (isAdmin.value = !!data.isAdmin)).catch(() => {})
-  const { data } = await api.get('/api/user-profile/my/profile').catch(() => ({ data: {} }))
-  me.value = { nickname: data.nickname, username: data.username, avatar: data.profilePicture }
+  loadMe()
 })
 </script>

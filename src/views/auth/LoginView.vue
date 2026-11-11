@@ -10,8 +10,8 @@
         <UiInput
           v-model="email"
           placeholder="아이디"
-          :maxlength="50"
-          :hint="isSignup ? '영문 소문자·숫자·밑줄로 12자까지. 친구가 나를 찾을 때 써요' : ''"
+          :maxlength="isSignup ? 12 : 50"
+          :hint="isSignup ? '영문 소문자·숫자·밑줄로 12자까지. 친구가 나를 찾을 때도 써요' : ''"
           :error="emailError"
           autocomplete="username"
         />
@@ -42,7 +42,7 @@
         <p v-else class="t-caption text-left rounded-xl bg-surface px-4 py-3">
           <!-- 본인인증이 열려 있을 때만 그 길을 보인다. 준비 전에는 가 봐야 "준비 중"뿐이었다 (목적 판정 11/11 부분 1) -->
           <template v-if="resetAvailable">본인인증을 했던 아이디 계정이면 <RouterLink class="underline underline-offset-2 text-fg" to="/password-reset">휴대폰 본인인증으로 찾아요</RouterLink>.
-          본인인증을 한 적이 없으면</template> 아이디를 적어 <a class="underline underline-offset-2 text-fg" :href="forgotMail">yeonkoh@protonmail.com</a>으로 알려 주세요.
+          본인인증을 한 적이 없으면</template> <a class="underline underline-offset-2 text-fg" :href="forgotMail">{{ CONTACT_EMAIL }}</a>로 아이디를 적어 보내 주세요.
           카카오·구글로 시작했다면 그 버튼으로 다시 들어오면 돼요.
         </p>
       </div>
@@ -65,6 +65,7 @@ import { UiButton, UiInput, UiTopBar } from '../../components/ui'
 import { takeReturnTo } from '../../utils/authRedirect'
 import { registerFcmToken } from '../../utils/nativeBridge'
 import { trackVisit, claimGuestPlays } from '../../utils/visit'
+import { CONTACT_EMAIL, contactMailto } from '../../config/contact'
 
 const router = useRouter()
 const route = useRoute()
@@ -78,7 +79,7 @@ const submitError = ref('')
 const forgotOpen = ref(false)
 const resetAvailable = ref(false)
 GET('/api/auth/password-reset/config').then(({ data }) => (resetAvailable.value = !!data?.available)).catch(() => {})
-const forgotMail = 'mailto:yeonkoh@protonmail.com?subject=' + encodeURIComponent('[Match] 비밀번호를 잊었어요')
+const forgotMail = contactMailto('비밀번호를 잊었어요')
 const busy = ref(false)
 const isSignup = ref(route.query.mode === 'signup')
 
@@ -90,8 +91,12 @@ function toggleMode() {
   router.replace({ query: isSignup.value ? { mode: 'signup' } : {} })
 }
 
+// 가입 아이디는 친구가 찾는 아이디와 같은 규칙. 예전엔 아무 글자나 50자까지 받아, 규칙에 안 맞으면 첫 설정에서 아이디를 또 적어
+// 로그인 아이디와 친구가 찾는 아이디가 둘이 됐다 (경로 1 리뷰 N9)
+const SIGNUP_ID = /^[a-z0-9_]{1,12}$/
 function validate() {
-  emailError.value = email.value.trim() ? '' : '아이디를 적어 주세요'
+  if (isSignup.value) email.value = email.value.trim().toLowerCase()
+  emailError.value = !email.value.trim() ? '아이디를 적어 주세요' : isSignup.value && !SIGNUP_ID.test(email.value) ? '영문 소문자·숫자·밑줄(_)로 12자까지 적어 주세요' : ''
   passwordError.value = password.value.length >= 8 && password.value.length <= 20 ? '' : '비밀번호는 8~20자로 적어 주세요'
   submitError.value = ''
   return !emailError.value && !passwordError.value
@@ -109,7 +114,9 @@ async function submit() {
         if (err.response?.status === 409) emailError.value = '이미 누가 쓰는 아이디예요. 다른 걸 적어 주세요'
         // 너무 많이 가입한 주소(429)면 서버 말 그대로: 언제 다시 하면 되는지가 들어 있다 (3-5 UI U1)
         else if (err.response?.status === 429) submitError.value = err.response?.data?.message || '이 인터넷에서 가입이 많았어요. 15분 뒤 다시 해 주세요'
-        else submitError.value = '가입하지 못했어요. 잠시 뒤 다시 해 주세요'
+        // 이유를 말한다: 연결이 끊김 / 서버가 말한 이유(형식 등) (경로 1 리뷰, 경로 전부 훑기 1절)
+        else if (!err.response || [502, 503, 504].includes(err.response.status)) submitError.value = '연결이 끊겼어요. 다시 해 주세요'
+        else submitError.value = err.response?.data?.message || '가입하지 못했어요. 아이디와 비밀번호를 확인해 주세요'
         return
       }
       // 첫 설정의 '아이디' 칸에 다시 묻지 않고 채워 둔다 (OnboardingView)

@@ -3,7 +3,8 @@
     <UiTopBar title="내 정보 공개" back="/settings" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
-      <p class="t-caption py-3">끄면 나만 봐요</p>
+      <!-- 스위치와 '모두/나만' 글이 함께 있어 켠 게 숨기는 건지 보이는 건지 헷갈렸다 (경로 6 리뷰): 스위치 하나로, 뜻은 한 줄로 -->
+      <p class="t-caption py-3">켜면 다른 사람에게 보이고, 끄면 나만 봐요</p>
 
       <UiListSkeleton v-if="loading" :rows="4" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="설정을 불러오지 못했어요">
@@ -16,7 +17,7 @@
             <span class="block t-body">{{ item.label }}</span>
             <span v-if="item.description" class="block t-caption mt-0.5">{{ item.description }}</span>
           </span>
-          <span class="t-caption w-8 text-right">{{ settings[item.key] === 'EVERYONE' ? '모두' : '나만' }}</span>
+          <span class="t-caption whitespace-nowrap text-right">{{ settings[item.key] === 'EVERYONE' ? '보여요' : '나만 봐요' }}</span>
           <UiSwitch
             :model-value="settings[item.key] === 'EVERYONE'"
             :label="`${item.label} 다른 사람에게 보이기`"

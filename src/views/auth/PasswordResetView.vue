@@ -11,11 +11,17 @@
       <h1 class="t-title">휴대폰 본인인증으로 찾아요</h1>
       <div class="mt-4 space-y-2 t-body">
         <p>만나서 하는 경기 전에 본인인증을 했던 아이디 계정이면, 같은 사람인지 확인하고 새 비밀번호를 정해요.</p>
-        <p class="t-caption">본인인증을 한 적 없는 계정은 이 방법으로 찾을 수 없어요. 아이디를 적어 <a class="underline underline-offset-2" :href="mail">yeonkoh@protonmail.com</a>으로 알려 주세요. 카카오·구글로 시작했다면 그 버튼으로 들어오면 돼요.</p>
+        <p class="t-caption">본인인증을 한 적이 없으면 <a class="underline underline-offset-2" :href="mail">{{ CONTACT_EMAIL }}</a>로 아이디를 적어 보내 주세요. 카카오·구글로 시작했다면 그 버튼으로 들어오면 돼요.</p>
       </div>
       <p v-if="message" class="t-caption text-danger-fg mt-4" role="alert">{{ message }}</p>
       <UiButton v-if="cfg.available" block size="lg" class="mt-8" icon="shield-halved" :loading="busy" @click="start">휴대폰으로 본인인증</UiButton>
-      <p v-else class="t-caption mt-8 rounded-xl bg-surface px-4 py-3">본인인증이 아직 준비 중이에요. 아이디를 적어 문의로 알려 주세요</p>
+      <!-- 설정을 못 불러온 것과 준비 중을 가른다: 연결이 끊겨도 '준비 중'이라고 했다 (가로 훑기 10절과 같은 종류) -->
+      <div v-else-if="cfgFailed" class="mt-8 text-center">
+        <p class="t-caption">본인인증 정보를 불러오지 못했어요</p>
+        <UiButton class="mt-3" size="sm" variant="secondary" @click="loadCfg">다시 시도</UiButton>
+      </div>
+      <!-- 본인인증이 준비 전이면 막다른 길 대신 문의 메일로 (고병연 11/11) -->
+      <p v-else class="t-caption mt-8 rounded-xl bg-surface px-4 py-3">본인인증은 아직 준비 중이에요. <a class="underline underline-offset-2" :href="mail">{{ CONTACT_EMAIL }}</a>로 아이디를 적어 보내 주세요</p>
     </template>
     <!-- 인증을 먼저 하고 그다음에 적는다: 휴대폰은 인증 창이 이 주소로 돌아오며 적던 것이 사라진다 (비밀번호는 주소에 싣지 않는다) -->
     <form v-else class="space-y-4" @submit.prevent="submit">
@@ -34,6 +40,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import { UiButton, UiInput, UiListSkeleton, UiTopBar } from '../../components/ui'
+import { CONTACT_EMAIL, contactMailto } from '../../config/contact'
 
 const route = useRoute()
 const router = useRouter()
@@ -44,7 +51,10 @@ const newPassword = ref('')
 const busy = ref(false)
 const done = ref(false)
 const message = ref('')
-const mail = 'mailto:yeonkoh@protonmail.com?subject=' + encodeURIComponent('[Match] 비밀번호를 잊었어요')
+const mail = contactMailto('비밀번호를 잊었어요')
+const cfgFailed = ref(false)
+// 본인인증 창(포트원)이 영어 오류를 그대로 주면 한국어로 (가로 훑기 6절)
+const korean = (m: string | undefined, fallback: string) => (m && /[가-힣]/.test(m) ? m : fallback)
 
 function loadSdk(): Promise<{ requestIdentityVerification: (o: object) => Promise<{ code?: string; message?: string } | undefined> }> {
   const w = window as unknown as { PortOne?: never }
@@ -70,10 +80,10 @@ async function start() {
       identityVerificationId: cfg.value.verificationId,
       redirectUrl: `${window.location.origin}/password-reset`,
     })
-    if (res?.code) { message.value = res.message || '인증을 마치지 않았어요'; return }
+    if (res?.code) { message.value = korean(res.message, '인증을 마치지 않았어요'); return }
     verifiedId.value = cfg.value.verificationId
   } catch (e) {
-    message.value = (e as Error)?.message || '인증하지 못했어요'
+    message.value = korean((e as Error)?.message, '인증하지 못했어요')
   } finally {
     busy.value = false
   }
@@ -92,18 +102,29 @@ async function submit() {
     if (!/비밀번호는/.test(message.value)) {
       verifiedId.value = ''
       router.replace({ query: {} })
-    }''
+    }
   } finally {
     busy.value = false
   }
 }
 
+async function loadCfg() {
+  cfgFailed.value = false
+  cfg.value = null
+  try {
+    cfg.value = (await GET('/api/auth/password-reset/config')).data
+  } catch {
+    cfgFailed.value = true
+    cfg.value = { available: false, verificationId: '' }
+  }
+}
+
 onMounted(async () => {
-  cfg.value = (await GET('/api/auth/password-reset/config').catch(() => ({ data: { available: false, verificationId: '' } }))).data
+  await loadCfg()
   // 휴대폰에서 인증하고 돌아왔을 때
   const id = route.query.identityVerificationId
   if (id) {
-    if (route.query.code) message.value = String(route.query.message || '인증을 마치지 않았어요')
+    if (route.query.code) message.value = korean(route.query.message ? String(route.query.message) : undefined, '인증을 마치지 않았어요')
     else verifiedId.value = String(id)
   }
 })

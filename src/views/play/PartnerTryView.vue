@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="상대 구하기" />
+    <!-- 앱 안에서 왔으면 뒤로 (바깥 링크로 바로 열었으면 갈 곳이 없어 두지 않는다, 경로 3 훑기) -->
+    <UiTopBar title="상대 구하기" :back="hasHistory" />
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <!-- 끝: 등록됨 → 가입 -->
@@ -17,15 +18,16 @@
           </p>
         </UiCard>
         <!-- 이미 로그인한 사람에게 '시작해 주세요'는 맞지 않는다: 등록을 바로 내 계정에 붙이고 홈으로 -->
+        <!-- 웹(인스타 앱 안 포함)은 휴대폰 알림이 없다: 지킬 수 있는 말로 (경로 3 리뷰 R2) -->
         <UiCard v-if="loggedIn" class="mt-4">
-          <p class="t-title">상대가 생기면 알려 드릴게요</p>
-          <p class="t-caption mt-1">내 계정에 등록했어요</p>
+          <p class="t-title">상대가 생기면 알림함에 남겨 드려요</p>
+          <p class="t-caption mt-1">내 계정에 등록했어요. 매치 앱에서는 휴대폰 알림으로도 와요</p>
           <UiButton block size="lg" class="mt-4" to="/">홈으로</UiButton>
         </UiCard>
         <UiCard v-else class="mt-4">
-          <p class="t-title">상대가 생기면 알려 드릴게요</p>
-          <p class="t-caption mt-1">알림을 받으려면 시작해 주세요. 등록한 내용은 그대로 이어져요</p>
-          <UiButton block size="lg" class="mt-4" @click="join">1초 만에 시작하기</UiButton>
+          <p class="t-title">가입하면 상대가 생겼을 때 {{ NOTICE }}</p>
+          <p class="t-caption mt-1">등록한 내용은 그대로 내 계정에 붙어요. 알림함에 남고, 매치 앱에서는 휴대폰 알림으로도 와요</p>
+          <UiButton block size="lg" class="mt-4" @click="join">가입하고 알림 받기</UiButton>
         </UiCard>
         <!-- 등록하고 나면 가입 말고 할 것이 없었다: 기다리는 동안 가입 없이 할 수 있는 게임 하나 -->
         <UiButton block variant="secondary" class="mt-3" to="/try/improv">기다리는 동안 임기응변 등급</UiButton>
@@ -106,6 +108,7 @@
 // 상대 구하기 등록 (/try/partner, 3단계 수요 조사 H2, 11/5): 가입 없이 종목·동네·편한 때를 남긴다.
 // 개인정보는 받지 않는다(기기 번호, 행정동, 고른 칸). 위치 좌표는 동네를 찾는 데만 쓰고 서버도 남기지 않는다.
 // 단계마다(무엇을 골랐나, 어디서 그만뒀나) 원본 기록에 남긴다. 가입하면 claimGuestPlays가 계정에 붙인다
+import { NOTICE } from '../../utils/notice'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -121,6 +124,8 @@ type DongOption = Schemas['DongOption']
 
 const router = useRouter()
 const loggedIn = !!localStorage.getItem('raspy_access_token2')
+// 앱 안에서 이 화면으로 왔나 (vue-router가 history.state.back에 적는다)
+const hasHistory = !!window.history.state?.back
 if (loggedIn) track('partner_open_loggedin')
 
 const options = ref<Schemas['Options'] | null>(null)

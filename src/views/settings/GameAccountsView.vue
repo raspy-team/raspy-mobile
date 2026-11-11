@@ -44,7 +44,8 @@
           <template v-if="editing.game.tierAvailable">
             저장하면 공식 정보에서 티어를 가져와요<template v-if="editing.tier"> · 지금 {{ editing.tier }}</template>
           </template>
-          <template v-else>티어 연결은 준비 중이에요. 아이디는 바로 상대에게 보여요.</template>
+          <!-- '준비 중'인 기능을 안내하지 않는다 (경로 6 리뷰): 지금 되는 것만 -->
+          <template v-else>저장하면 아이디가 상대에게 바로 보여요.</template>
         </p>
         <div class="flex gap-2">
           <UiButton v-if="editing.handle" type="button" variant="secondary" :disabled="busy" @click="remove">삭제</UiButton>
@@ -65,7 +66,7 @@
 <script setup lang="ts">
 // 설정 > 게임 계정 (9번, 11/6): 인기 게임마다 내 아이디를 적고, 되는 게임은 공식 정보로 티어를 가져온다
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { GET, PUT, POST, DELETE } from '../../api/client'
 import type { components } from '../../api/schema'
 import { UiButton, UiEmptyState, UiIcon, UiInput, UiListSkeleton, UiSheet, UiTopBar } from '../../components/ui'
@@ -77,6 +78,8 @@ const route = useRoute()
 const { showToast } = useToast()
 // 규칙·경기 화면에서 왔으면 거기로 돌아간다
 const backTo = computed(() => (typeof route.query.from === 'string' && route.query.from.startsWith('/') ? route.query.from : '/settings'))
+const fromPage = computed(() => typeof route.query.from === 'string' && route.query.from.startsWith('/') && !!route.query.game)
+const router = useRouter()
 
 const accounts = ref<Account[]>([])
 const loading = ref(true)
@@ -132,6 +135,8 @@ async function save() {
       showToast(data.tierError ? `저장했어요. ${data.tierError}` : '저장했어요')
     }
     editing.value = null
+    // 경기·규칙 화면의 "입력"으로 온 사람은 아이디를 적으러 왔다: 저장하면 그 화면으로 돌아간다 (경로 6 리뷰 P14)
+    if (fromPage.value) router.back()
   } catch (e) {
     formError.value = message(e, '저장하지 못했어요')
   } finally {

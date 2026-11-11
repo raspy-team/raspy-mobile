@@ -50,6 +50,11 @@
 
       <!-- 누구와 -->
       <template v-else>
+        <!-- 규칙을 못 불러오면 규칙 칸이 말없이 비어 무엇으로 여는지 몰랐다 (가로 훑기 3) -->
+        <UiCard v-if="ruleFailed && !rule" class="flex items-center gap-3 mb-8">
+          <p class="flex-1 t-caption">규칙을 불러오지 못했어요</p>
+          <UiButton size="sm" variant="secondary" @click="loadRule">다시 시도</UiButton>
+        </UiCard>
         <UiCard v-if="rule" class="flex items-center gap-3 mb-8">
           <RuleThumb :rule="rule" :size="36" bare />
           <div class="flex-1 min-w-0">
@@ -137,6 +142,10 @@
     <UiSheet v-model="friendsOpen" title="누구와 할까요?">
       <UiInput v-model="q" icon="fas fa-magnifying-glass" placeholder="닉네임이나 아이디" class="mb-3" />
       <UiListSkeleton v-if="friendsLoading" :rows="4" />
+      <!-- 못 불러온 것을 '아직 친구가 없어요'로 보였다: 다시 불러오는 길 (가로 훑기 3) -->
+      <UiEmptyState v-else-if="friendsFailed" icon="fas fa-rotate-right" title="친구 목록을 불러오지 못했어요">
+        <UiButton variant="secondary" @click="loadFriends">다시 시도</UiButton>
+      </UiEmptyState>
       <UiEmptyState
         v-else-if="!friends.length"
         mascot="match"
@@ -223,6 +232,11 @@ api.get('/api/clubs/mine').then(({ data }) => {
   clubs.value = data
   if (clubId.value && !data.some((c) => c.id === clubId.value)) clubId.value = null
 }).catch(() => {})
+const ruleFailed = ref(false)
+function loadRule() {
+  ruleFailed.value = false
+  api.get(`/api/rules/${ruleId.value}`).then(({ data }) => (rule.value = data)).catch(() => (ruleFailed.value = true))
+}
 const createdId = ref(null)
 const sharing = ref(false)
 
@@ -381,12 +395,14 @@ async function create(target) {
   }
 }
 
+const friendsFailed = ref(false)
 async function loadFriends() {
   friendsLoading.value = true
+  friendsFailed.value = false
   try {
     friends.value = (await api.get('/api/friends/my')).data || []
   } catch {
-    showToast('친구 목록을 불러오지 못했어요')
+    friendsFailed.value = true
   } finally {
     friendsLoading.value = false
   }
@@ -395,7 +411,7 @@ async function loadFriends() {
 onMounted(() => {
   // 규칙 없이 들어오면 종목부터 고른다 (규칙 목록으로 보내지 않는다)
   if (!ruleId.value) loadSports()
-  else api.get(`/api/rules/${ruleId.value}`).then(({ data }) => (rule.value = data)).catch(() => {})
+  else loadRule()
   dong.value = undefined
   api.get('/api/neighborhoods/me')
     .then(({ data }) => (dong.value = data.neighborhoods.find((n) => n.active) ?? null))

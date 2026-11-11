@@ -31,9 +31,26 @@ api.interceptors.request.use(config => {
 })
 
 
+// 알림이 쓸모 있어지는 순간: 상대·주최자·결과를 기다리게 되는 요청이 성공했을 때 휴대폰 알림 권한을 묻는다(앱만, 한 번).
+// 앱 게임 화면에서만 묻던 것을 만나서 하는 경기(신청·열기·결과 내기)와 도전·동호회·대회 신청까지 넓혔다 (경로 1 리뷰 N1, 경로 9 Q2)
+const WAIT_CALLS = [
+  /^\/api\/games\/create/, /^\/api\/games\/\d+\/apply/, /^\/api\/games\/\d+\/result$/, /^\/api\/play-with-me-too\/request/,
+  /^\/api\/app-games\/plays\/\d+\/submit/, /^\/api\/app-games\/duels\/\d+\/challenge/, /^\/api\/app-games\/[^/]+\/realtime\/invite/,
+  /^\/api\/clubs\/join/, /^\/api\/clubs\/\d+\/matches/, /^\/api\/tournaments\/\d+\/apply/, /^\/api\/partner-requests$/, /^\/api\/friends\/request/,
+]
+let pushAsked = false
+function maybeAskPush(config) {
+  if (pushAsked || String(config?.method).toLowerCase() !== 'post') return
+  const url = String(config.url || '').replace(/^https?:\/\/[^/]+/, '').split('?')[0]
+  if (!WAIT_CALLS.some((r) => r.test(url))) return
+  pushAsked = true
+  import('../utils/nativeBridge').then(({ askPushPermission }) => askPushPermission()).catch(() => {})
+}
+
 api.interceptors.response.use(
   response => {
     markServer(null)
+    maybeAskPush(response.config)
     return response
   },
   async error => {

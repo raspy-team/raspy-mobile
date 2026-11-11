@@ -98,16 +98,16 @@
     <!-- 더보기: 아이콘마다 이름을 붙여 고른다 -->
     <UiSheet v-model="showMenu">
       <UiList>
-        <UiListItem icon="book-open" title="규칙 보기" @click="menu(() => (game.showRuleDetail = true))" />
+        <UiListItem icon="book-open" title="규칙 보기" @click="menuThen(() => (game.showRuleDetail = true))" />
         <!-- 점수판을 떠나지 않고 링크만 보낸다 (예전엔 중계 화면으로 가 경기 중 연결이 끊겼다) -->
         <UiListItem icon="eye" title="중계 링크 보내기" subtitle="보내면 친구가 점수를 보며 응원해요" @click="menu(shareLive)" />
         <UiListItem icon="volume" :title="soundOn ? '관중 소리 끄기' : '관중 소리 켜기'" subtitle="관중이 응원하면 이 휴대폰에서 박수 소리가 나요" @click="menu(toggleSound)" />
-        <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menu(() => (showLogModal = true))" />
+        <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menuThen(() => (showLogModal = true))" />
         <UiListItem icon="camera" title="사진 찍기" @click="menu(triggerPhotoCapture)" />
         <UiListItem icon="video" title="영상 찍기" @click="menu(triggerVideoCapture)" />
-        <UiListItem icon="pen-to-square" title="점수만 적기" subtitle="점수판을 안 쓰고 끝난 점수를 적어요" @click="menu(() => (showResultEntry = true))" />
-        <UiListItem v-if="!nothingScored" icon="rotate-left" title="처음부터 다시" danger @click="menu(() => openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터'))" />
-        <UiListItem icon="xmark" title="경기 취소" danger @click="menu(() => openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소'))" />
+        <UiListItem icon="pen-to-square" title="점수만 적기" subtitle="점수판을 안 쓰고 끝난 점수를 적어요" @click="menuThen(() => (showResultEntry = true))" />
+        <UiListItem v-if="!nothingScored" icon="rotate-left" title="처음부터 다시" danger @click="menuThen(() => openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터'))" />
+        <UiListItem icon="xmark" title="경기 취소" danger @click="menuThen(() => openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소'))" />
       </UiList>
     </UiSheet>
 
@@ -133,7 +133,7 @@
           {{ currentSet }}세트 시작
         </UiButton>
         <!-- 점수판은 원하는 사람만. 끝나고 점수만 넣어도 된다 -->
-        <UiButton v-if="currentSet === 1 && !currentScore1 && !currentScore2" variant="ghost" class="mt-2" @click="showResultEntry = true">점수만 입력</UiButton>
+        <UiButton v-if="currentSet === 1 && !currentScore1 && !currentScore2" variant="ghost" class="mt-2" @click="showResultEntry = true">점수만 적기</UiButton>
         <UiButton v-if="nothingScored" variant="ghost" class="mt-1 text-fg-muted" @click="openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소')">
           경기 취소
         </UiButton>
@@ -149,6 +149,13 @@
     </div>
 
     <MatchModal v-if="game.showRuleDetail" :rule="game.rule" @close="game.showRuleDetail = false" />
+  </div>
+  <!-- 연결 오류로 못 불러왔으면 모집 카드로 보내지 않고 여기서 다시 (경로 5 리뷰 S5: 경기 중 새로 고침한 사람이 점수판을 잃었다) -->
+  <div v-else-if="loadFailed" class="h-dvh flex flex-col items-center justify-center gap-3 bg-canvas pt-safe pb-safe px-8 text-center">
+    <p class="t-heading">점수판을 불러오지 못했어요</p>
+    <p class="t-caption">연결이 돌아오면 다시 눌러 주세요. 점수는 서버에 남아 있어요</p>
+    <UiButton class="mt-2" @click="init">다시 시도</UiButton>
+    <UiButton variant="ghost" @click="goBack">뒤로</UiButton>
   </div>
   <!-- 불러오는 동안 빈 화면이었다: '경기 시작'을 누르고 아무것도 없는 화면을 봤다 (목적 판정 11/11 5번) -->
   <div v-else class="h-dvh flex flex-col items-center justify-center gap-3 bg-canvas pt-safe pb-safe" aria-busy="true">
@@ -296,6 +303,19 @@ function menu(cb) {
   showMenu.value = false
   cb()
 }
+// 다음 시트·확인 창을 여는 갈래: 더보기 시트의 기록 칸이 걷힌 뒤에 연다. 바로 열면 칸이 남아 닫은 뒤 뒤로를 두 번 눌러야 했다 (경로 5 리뷰 S7)
+function menuThen(cb) {
+  showMenu.value = false
+  let done = false
+  const go = () => {
+    if (done) return
+    done = true
+    window.removeEventListener('popstate', go)
+    cb()
+  }
+  window.addEventListener('popstate', go)
+  setTimeout(go, 300)
+}
 
 // 점수판 두 칸 (왼쪽 user1, 오른쪽 user2)
 const sides = computed(() => [
@@ -380,7 +400,22 @@ function checkSetOver() {
   // 수동으로 '세트종료' 버튼을 눌러야 다음 세트로 진행
 }
 
-function manualFinishSet() {
+// '세트 끝내기'는 서버에 알려 두 폰이 같은 순간 함께 끝낸다. 예전엔 누른 폰에서만 끝나 두 폰의 세트 수가 갈렸다 (경로 5 리뷰, 막힘)
+async function manualFinishSet() {
+  // 목표 점수 전에 끝내면 무승부 세트다. 말없이 무승부가 됐다 (경로 5 리뷰 S8)
+  const draw = game.rule.winBy != 'MOST_SETS_AND_POINTS' || currentScore1.value === currentScore2.value
+  if (draw && !(await confirmDialog({
+    title: `${currentSet.value}세트를 끝낼까요?`,
+    message: game.rule.winBy != 'MOST_SETS_AND_POINTS' && game.rule.pointsToWin != -1
+      ? `아직 ${game.rule.pointsToWin}점에 닿은 사람이 없어 이 세트는 무승부가 돼요`
+      : '점수가 같아 이 세트는 무승부가 돼요',
+    confirmText: '세트 끝내기',
+  }))) return
+  sendOrWarn({ type: 'END_SET', setIndex: currentSet.value, userId: 0, scoreDelta: 0 })
+}
+
+// 서버가 알린 '세트 끝내기'를 두 폰이 같은 규칙으로 처리한다
+function applyManualFinishSet() {
   // 수동으로 세트 종료 (시간 초과 시)
   if (game.rule.winBy == 'MOST_SETS_AND_POINTS') {
     if (currentScore1.value > currentScore2.value) {
@@ -478,8 +513,10 @@ function goToResult() {
   router.replace(`/games/${gameId}/result`)
 }
 
+// 알림으로 바로 들어와 앱 안 기록이 없으면 갈 곳이 없었다 (경로 전부 훑기 5)
 function goBack() {
-  router.back()
+  if (window.history.state?.back) router.back()
+  else router.replace('/game')
 }
 
 function handleVisibilityChange() {
@@ -504,17 +541,23 @@ function addLog(log) {
   const seconds = String(diffSec % 60).padStart(2, '0')
   const elapsed = `${minutes}:${seconds}`
 
+  // 사람의 말로: '-1점 실점 (변경자 - 김철수)'·'리셋함'·'알 수 없는 이벤트'는 개발자 말이었다 (경로 5 리뷰 S9)
   let message = ''
+  const by = log.userSummary?.nickname
   if (log.type === 'SCORE') {
-    message = `${log.targetId == user1.value.id ? user1.value.nickname : user2.value.nickname} ${log.delta}점 ${log.delta > 0 ? '득점' : '실점'} (변경자 - ${log.userSummary.nickname})`
+    const target = log.targetId == user1.value.id ? user1.value.nickname : user2.value.nickname
+    message = log.delta > 0 ? `${target} +${log.delta}점` : `${target} 점수 ${-log.delta}점 내림`
+    if (by && by !== target) message += ` · ${by}님이 눌렀어요`
   } else if (log.type === 'SET') {
-    message = `${log.userSummary?.nickname || ''}님이 ${log.setIndex ? log.setIndex + '세트를 ' : '세트를 '}시작`
+    message = `${by ? by + '님이 ' : ''}${log.setIndex ? log.setIndex + '세트를 ' : '세트를 '}시작했어요`
+  } else if (log.type === 'END_SET') {
+    message = `${by ? by + '님이 ' : ''}${log.setIndex}세트를 끝냈어요`
   } else if (log.type === 'RESET') {
-    message = `${log.userSummary.nickname} 경기를 리셋함`
+    message = `${by ? by + '님이 ' : ''}처음부터 다시 했어요`
   } else if (log.type === 'FINISH') {
     message = `경기를 끝냈어요`
   } else {
-    message = '알 수 없는 이벤트'
+    return
   }
 
   logs.value.push({
@@ -525,19 +568,37 @@ function addLog(log) {
   })
 }
 
-onMounted(async () => {
+const loadFailed = ref(false)
+let socketReady = false
+onMounted(() => {
   listenCrowd()
+  init()
+})
+
+async function init() {
   // 옛 안드로이드·iOS 앱의 카메라 콜백은 뺐다: 옛 앱이 없고, Capacitor iOS는 UA에 raspy-ios가 붙어 없는 다리를 부르다 떨어졌다. 파일 입력 하나로 (목적 판정 11/11 5번)
 
-  const currentUserId = await getMyId()
+  loadFailed.value = false
+  const currentUserId = await getMyId().catch(() => null)
 
   // 시작 전 경기(신청만 있거나 승인 전)는 점수판이 없다: 경기 화면으로. 끝난 경기는 결과로 (11/4 밤샘)
   const res = await api.get(`/api/games/${gameId}/detail`).catch(() => null)
-  if (!res || res.data.gameStatus != 'IN_PROGRESS') {
+  if (!res) {
+    loadFailed.value = true
+    return
+  }
+  if (res.data.gameStatus != 'IN_PROGRESS') {
     // 결과 확인을 기다리는 경기도 결과로: 확인하러 온 사람이 모집 카드를 봤다 (목적 판정 11/11 5번)
     router.replace(['COMPLETED', 'RESULT_PENDING'].includes(res?.data.gameStatus) ? `/games/${gameId}/result` : `/games/${gameId}`)
     return
   }
+  applyDetail(res.data, currentUserId)
+  connectSocket()
+}
+
+// 서버 기록으로 점수판을 맞춘다 (처음 열 때, 다시 연결됐을 때, 처음부터 다시 신호를 받았을 때)
+function applyDetail(data, currentUserId) {
+  const res = { data }
 
   // reactive에 직접 대입 (전체 덮어쓰기)
   Object.assign(game, res.data)
@@ -617,10 +678,28 @@ onMounted(async () => {
     }
   }
 
-  const logResponse = await api.get(`/api/games/${gameId}/game-logs`)
-  const rawLogs = logResponse.data
-  rawLogs.forEach((log) => addLog(log))
+  // 경기 기록은 덤이다. 못 받아도 점수판·연결은 그대로 연다 (경로 5 리뷰 S6: 기록 실패에 소켓을 아예 붙이지 않아 점수가 안 올라갔다)
+  api.get(`/api/games/${gameId}/game-logs`).then(({ data: rawLogs }) => {
+    logs.value = []
+    rawLogs.forEach((log) => addLog(log))
+  }).catch(() => {})
+}
 
+// 다시 연결됐을 때: 화면을 처음부터 다시 그리지 않고(다른 앱에 다녀올 때마다 깜빡였다) 서버 기록만 다시 받아 맞춘다
+async function resync() {
+  const currentUserId = await getMyId().catch(() => null)
+  const res = await api.get(`/api/games/${gameId}/detail`).catch(() => null)
+  if (!res) return
+  if (res.data.gameStatus != 'IN_PROGRESS') {
+    router.replace(['COMPLETED', 'RESULT_PENDING'].includes(res.data.gameStatus) ? `/games/${gameId}/result` : `/game`)
+    return
+  }
+  applyDetail(res.data, currentUserId)
+}
+
+function connectSocket() {
+  if (socketReady) return
+  socketReady = true
   // 소켓 핸들러 등록
   socket.onConnecting(() => {
     socketStatus.value = 'connecting'
@@ -628,8 +707,8 @@ onMounted(async () => {
   let everConnected = false
   socket.onConnected(() => {
     socketStatus.value = 'connected'
-    // 끊긴 사이 상대 폰에서 오른 점수를 놓쳤을 수 있다. 다시 연결되면 서버 기록으로 화면을 다시 만든다
-    if (everConnected) router.replace({ path: route.path, query: { ...route.query, reload: Date.now() } })
+    // 끊긴 사이 상대 폰에서 오른 점수를 놓쳤을 수 있다. 다시 연결되면 서버 기록으로 맞춘다
+    if (everConnected) resync()
     everConnected = true
   })
   socket.onDisconnected(() => {
@@ -667,14 +746,16 @@ onMounted(async () => {
       // (전엔 점수판에 그대로 남아, 뒤로 가면 확인·평가 기회 없이 나가게 됐다)
       clearInterval(timerRef.value)
       setTimeout(goToResult, 600)
+    } else if (payload.type === 'END_SET') {
+      if (payload.setIndex === currentSet.value && !isSetOver.value && !isGameOver.value) applyManualFinishSet()
+      addLog(payload)
     } else if (payload.type === 'CANCELED') {
       showToast(`${payload.nickname}님이 경기를 취소했어요`)
       router.replace('/game')
     } else if (payload.type === 'RESET') {
-      router.replace({
-        path: route.fullPath,
-        query: { ...route.query, reload: Date.now() },
-      })
+      // 처음부터 다시: 화면을 새로 그리지 않고 서버 기록(0:0, 1세트)으로 맞춘다
+      startedSetIndex = 0
+      resync()
       addLog(payload)
     }
   })
@@ -682,7 +763,7 @@ onMounted(async () => {
 
   document.addEventListener('visibilitychange', handleVisibilityChange)
   keepScreenOn()
-})
+}
 
 function socket_sendScore(userIndex, scoreDelta) {
   const sent = socket.sendGameEvent(chatRoomId.value, {
@@ -775,7 +856,8 @@ async function onCameraChange(e) {
       // IndexedDB에 저장
       await addGamePicture(gameId, compressed)
 
-      showToast('사진을 저장했어요')
+      // 휴대폰 사진첩이 아니라 이 기기 안에 담아 둔다. 결과 화면에서 골라 올려야 남는다 (경로 5 리뷰 S10)
+      showToast('사진을 담아 뒀어요. 경기가 끝나면 결과 화면에서 올려요')
     } catch (error) {
       console.error('사진 저장 실패:', error)
       if (error.message === 'QUOTA_EXCEEDED') {
@@ -811,7 +893,7 @@ async function onVideoChange(e) {
     // IndexedDB에 저장
     await addGameVideo(gameId, dataUrl, duration)
 
-    showToast(`동영상을 저장했어요 (${Math.floor(duration)}초)`)
+    showToast(`영상(${Math.floor(duration)}초)을 담아 뒀어요. 경기가 끝나면 결과 화면에서 올려요`)
   } catch (error) {
     console.error('동영상 저장 실패:', error)
     if (error.message === 'QUOTA_EXCEEDED') {
@@ -855,10 +937,12 @@ onUnmounted(() => {
 
 
   offLive?.()
-  // 소켓 핸들러 정리
+  // 소켓 핸들러 정리. 메시지 처리기와 연결도 끊는다: 남겨 두면 점수판을 떠난 뒤에도 상대의 '경기 취소'·'처음부터 다시'가 지금 화면을 옮겼다 (경로 5 리뷰 S4)
   socket.onConnecting(null)
   socket.onConnected(null)
   socket.onDisconnected(null)
+  socket.onMessage(null)
+  socket.disconnect({ clearRoomId: true })
 })
 </script>
 

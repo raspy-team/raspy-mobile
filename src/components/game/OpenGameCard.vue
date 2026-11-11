@@ -35,6 +35,8 @@
         <UiIcon name="check" class="text-base" />신청했어요
         <span v-for="n in 8" :key="n" class="apply-spark" :style="{ '--a': n * 45 + 'deg' }" aria-hidden="true"></span>
       </span>
+      <!-- 이미 승인된 선수: '신청'이 다시 보여 누르면 거절됐다. 빠지기는 내 경기에서 (경로 4 리뷰) -->
+      <UiBadge v-else-if="game.isApprovedMe" tone="success">승인됐어요</UiBadge>
       <UiButton v-else-if="game.isAppliedByMe" size="sm" variant="secondary" :loading="busy" @click="emit('cancel')">신청 취소</UiButton>
       <!-- 상대가 다 정해졌거나 시작한 경기는 신청할 수 없다 (공유 링크로 들어온 경기 화면) -->
       <UiBadge v-else-if="game.gameStatus && game.gameStatus !== 'MATCHING'">{{ STATUS_LABEL[game.gameStatus] || '모집 끝' }}</UiBadge>
@@ -53,6 +55,8 @@
         :title="TEAM_NAMES[team]"
         :subtitle="left > 0 ? `${left}자리 남았어요` : '자리가 없어요'"
         :chevron="left > 0"
+        :class="left > 0 ? '' : 'opacity-40 pointer-events-none'"
+        :aria-disabled="left > 0 ? undefined : 'true'"
         @click="left > 0 && pick(() => emit('apply', team))"
       />
       <UiListItem
@@ -95,9 +99,21 @@ watch(() => props.game.isAppliedByMe, (now, before) => {
 })
 
 const teamPick = ref(false)
+// 시트를 닫고 바로 다음 시트를 열면 닫은 시트의 기록 칸이 남아 뒤로를 두 번 눌러야 했다: 칸이 걷힌 뒤 연다 (가로 훑기 2)
+function afterSheetClosed(cb) {
+  let done = false
+  const go = () => {
+    if (done) return
+    done = true
+    window.removeEventListener('popstate', go)
+    cb()
+  }
+  window.addEventListener('popstate', go)
+  setTimeout(go, 300)
+}
 function pick(cb) {
   teamPick.value = false
-  cb()
+  afterSheetClosed(cb)
 }
 
 const applicants = computed(() => props.game.challengers?.length || 0)
@@ -105,9 +121,10 @@ const applicants = computed(() => props.game.challengers?.length || 0)
 // 갈지 정하는 데 필요한 것만: 믿을 만한가(온도)와 해 볼 만한가(이길 확률을 말로). 레이팅·올린 때는 프로필·경기 화면에서 (목적 판정 8: 한 줄에 숫자 넷이었다)
 const ownerLine = computed(() => {
   const c = props.game.myWinChance
-  const chance = c == null ? null : c >= 40 && c <= 60 ? '해 볼 만' : c < 40 ? '나보다 잘해요' : '내가 더 잘해요'
+  // 주최자 이름 옆 '나보다 잘해요'는 누구의 '나'인지 헷갈렸다: 내가 보는 상대로 말한다. 온도는 무엇의 온도인지 붙인다 (경로 4 리뷰 G6)
+  const chance = c == null ? null : c >= 40 && c <= 60 ? '해 볼 만한 상대' : c < 40 ? '나보다 센 상대' : '내가 앞서는 상대'
   return [
-    props.game.ownerTemperature != null && `${props.game.ownerTemperature.toFixed(1)}°`,
+    props.game.ownerTemperature != null && `매너 ${props.game.ownerTemperature.toFixed(1)}°`,
     // 이길 확률이 없으면(레이팅이 없으면) 롤·피파 같은 다른 게임 티어가 그 자리를 대신한다
     chance ?? props.game.ownerExtTier,
   ].filter(Boolean).join(' · ')

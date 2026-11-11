@@ -3,7 +3,10 @@
     <UiTopBar title="교류전" back />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!m && !error" class="h-40 w-full" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
+      <!-- 한 번 실패하면 이 문구가 굳고 다시 시도가 없었다 (경로 7 리뷰) -->
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
+        <UiButton variant="secondary" @click="retry">다시 시도</UiButton>
+      </UiEmptyState>
       <template v-else-if="m">
         <!-- 두 동호회와 점수 -->
         <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 mt-2">
@@ -21,6 +24,8 @@
         </div>
         <p v-else-if="m.status === 'PROPOSED'" class="t-caption text-center mt-5">{{ m.away.name }} 운영진이 답하기를 기다려요</p>
         <!-- 판이 다 열렸으면 선수를 정하라는 말 대신 다음 할 일 -->
+        <!-- 운영진이 아닌 멤버·구경하는 사람은 할 일이 없는데 아무 말이 없었다 (경로 7 리뷰): 누가 무엇을 하는지 -->
+        <p v-if="m.status === 'ACCEPTED' && !m.mySide" class="t-caption text-center mt-5">선수는 두 동호회 운영진이 정해요. 판이 열리면 아래에서 경기를 볼 수 있어요</p>
         <p v-if="m.status === 'ACCEPTED' && m.mySide" class="t-caption text-center mt-5">{{ m.boardList.every((b) => b.gameId) ? '판마다 경기가 열렸어요. 경기에서 결과를 내면 점수가 올라가요' : '판마다 우리 선수를 정해 주세요. 양쪽이 다 정하면 그 판의 경기가 열려요' }}</p>
 
         <UiSection title="판" class="mt-8">
@@ -103,9 +108,16 @@ const message = (e: unknown, fallback: string) => (e as { response?: { data?: { 
 async function load() {
   try {
     m.value = (await GET('/api/clubs/matches/{matchId}', { path: { matchId } })).data
-  } catch {
-    error.value = '교류전을 찾지 못했어요'
+    error.value = ''
+  } catch (e) {
+    // 보고 있던 교류전이 있으면 그대로 두고, 처음부터 못 받았을 때만 실패 화면. 없는 것과 연결 오류를 가른다
+    const status = (e as { response?: { status?: number } }).response?.status
+    if (!m.value) error.value = status === 404 || status === 403 ? '교류전을 찾지 못했어요' : '교류전을 불러오지 못했어요'
   }
+}
+function retry() {
+  error.value = ''
+  load()
 }
 
 /** 됐으면 true */
@@ -122,7 +134,11 @@ async function act(task: () => Promise<{ data: Schemas['ClubMatchView'] }>, fall
     busy.value = false
   }
 }
-const respond = (accept: boolean) => act(() => POST('/api/clubs/matches/{matchId}/respond', { path: { matchId }, query: { accept } }), '답하지 못했어요')
+async function respond(accept: boolean) {
+  // 거절은 확인 없이 바로 됐다 (경로 7 리뷰)
+  if (!accept && !(await confirmDialog({ title: '교류전을 거절할까요?', message: '상대 운영진에게 알려요', confirmText: '거절', danger: true }))) return
+  await act(() => POST('/api/clubs/matches/{matchId}/respond', { path: { matchId }, query: { accept } }), '답하지 못했어요')
+}
 async function cancel() {
   if (!(await confirmDialog({ title: '교류전을 취소할까요?', message: '상대 운영진에게 알려요. 시작한 판이 있으면 취소할 수 없어요', confirmText: '취소하기', danger: true }))) return
   await act(() => POST('/api/clubs/matches/{matchId}/cancel', { path: { matchId } }), '취소하지 못했어요')
@@ -166,7 +182,9 @@ onMounted(async () => {
   // 대회 판의 "우리 선수 정하기"로 왔으면 우리 선수가 아직 없는 첫 판의 시트를 바로 연다
   // (목적 판정 7: 선수를 정하러 눌렀는데 여기서 같은 버튼을 다시 찾아 눌러야 했다)
   if (route.query.lineup && m.value?.status === 'ACCEPTED' && m.value.mySide) {
-    router.replace({ query: {} })
+    // 주소의 lineup만 지운다. router.replace로 지우면 화면 key(App.vue)가 바뀌어 통째로 새로 그려지고 시트가 열리지 않았다 (경로 7 리뷰 K1)
+    const url = router.resolve({ query: {} }).fullPath
+    window.history.replaceState({ ...window.history.state, current: url }, '', url)
     const mine = (b: Schemas['ClubMatchView']['boardList'][number]) => (m.value!.mySide === 'HOME' ? b.home : b.away)
     const first = m.value.boardList.find((b) => !b.gameId && !mine(b).length) ?? m.value.boardList.find((b) => !b.gameId)
     if (first) openLineup(first.boardNo)

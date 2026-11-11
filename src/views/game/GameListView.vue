@@ -16,10 +16,23 @@
           <p class="t-micro">마지막 판</p>
           <p class="t-heading mt-0.5 truncate">{{ lastGame.title }}<span v-if="lastGame.line" class="t-body text-fg-muted ml-2">{{ lastGame.line }}</span></p>
           <div class="grid grid-cols-2 gap-2 mt-4">
-            <UiButton :to="`/play/${lastGame.key}`">한 판 더</UiButton>
+            <!-- '한 판 더'는 게임 첫 화면을 거치지 않고 바로 판으로 (경로 4 리뷰 G3, again=1은 게임 화면이 받아 바로 시작) -->
+            <UiButton :to="`/play/${lastGame.key}?again=1`">한 판 더</UiButton>
             <UiButton variant="secondary" to="/games">다른 게임</UiButton>
           </div>
         </UiCard>
+        <!-- 막 끝난 결과: 이겼나 졌나. 대결이 끝나는 순간 아래 목록에서 빠져 홈에서 결과를 볼 길이 없었다 (경로 4 리뷰 G1, 시나리오 T7) -->
+        <ul v-if="recentResults.length" class="mt-3 rounded-xl bg-surface divide-y divide-line">
+          <li v-for="d in recentResults" :key="d.gameId">
+            <RouterLink :to="`/play/${d.key}?duel=${d.gameId}`" class="flex items-center gap-3 px-4 py-3 active:bg-surface-2">
+              <span class="flex-1 min-w-0">
+                <span class="block t-body text-fg truncate">{{ resultLine(d) }}</span>
+                <span class="block t-micro truncate">{{ d.title }}<template v-if="gradeOf(d)"> · {{ gradeOf(d) }}</template></span>
+              </span>
+              <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
+            </RouterLink>
+          </li>
+        </ul>
         <!-- 결과가 나왔나·내 차례인가·상대를 기다리나: 다시 연 이유 그 자체 -->
         <AppDuelList v-if="duels.length" :duels="duels.slice(0, 3)" :class="lastGame ? 'mt-3' : ''" />
         <RouterLink v-if="duels.length > 3" to="/game" class="block t-caption text-center mt-2 py-2">{{ duels.length - 3 }}개 더 보기</RouterLink>
@@ -43,6 +56,8 @@
     <UiSection title="동네 경기" :class="appPlayer ? 'mt-6' : 'mt-6'">
       <template #action>
         <span v-if="games.length" class="t-micro mr-1">{{ games.length }}개</span>
+        <!-- 동네 경기를 보러 온 사람이 동네 동호회도 여기서 찾는다 (경로 7 K4: 내 정보 속 버튼 하나뿐이었다) -->
+        <UiIconButton icon="users" label="동네 동호회" @click="router.push('/clubs')" />
         <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
         <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
       </template>
@@ -117,8 +132,9 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 
-// 최근 2주 안에 낸 앱 게임 (AppGameView가 판을 낼 때 남긴다)
-const lastGame = (() => {
+// 최근 2주 안에 낸 앱 게임 (AppGameView가 판을 낼 때 남긴다). 같은 폰에서 계정을 바꾸면 앞 사람 것이 떴다:
+// 남긴 사람(uid)이 있으면 지금 계정과 맞을 때만 (경로 4 리뷰 G4)
+const savedLast = (() => {
   try {
     const v = JSON.parse(localStorage.getItem('last_app_game') || 'null')
     return v?.key && Date.now() - v.at < 14 * 24 * 3600_000 ? v : null
@@ -145,7 +161,29 @@ import { feel } from '../../utils/feel'
 
 // 아직 안 끝난 앱 대결 (내 경기 화면과 같은 자료)
 const duels = ref([])
-const appPlayer = computed(() => !!lastGame || duels.value.length > 0)
+const myIdNow = ref(null)
+const lastGame = computed(() => (savedLast && (!savedLast.uid || savedLast.uid === myIdNow.value) ? savedLast : null))
+const appPlayer = computed(() => !!lastGame.value || duels.value.length > 0)
+
+// 막 끝난 대결 (하루 안). 마지막 판 게임의 내 대결에서 결과가 난 것
+const recentResults = ref([])
+async function fetchRecentResults() {
+  const key = lastGame.value?.key
+  if (!key) return
+  const list = (await GET('/api/app-games/{key}/duels', { path: { key } }).catch(() => ({ data: null }))).data
+  if (!list) return
+  const dayAgo = Date.now() - 24 * 3600_000
+  recentResults.value = list.filter((d) => d.result && new Date(d.createdAt).getTime() > dayAgo).slice(0, 2)
+}
+function resultLine(d) {
+  const name = d.opponent?.nickname ? `${d.opponent.nickname}님` : '상대'
+  return d.result === 'WIN' ? `${name}에게 이겼어요` : d.result === 'LOSE' ? `${name}에게 졌어요` : `${name}와 비겼어요`
+}
+// 임기응변은 점수 대신 등급이 이 사람의 말이다
+function gradeOf(d) {
+  const m = d.myFeedback?.match(/^(\d)등급/)
+  return m ? `${m[1]}등급` : d.myScore != null ? `${Math.round(d.myScore)}점` : ''
+}
 const showLocal = ref(false)
 
 const route = useRoute()
@@ -166,6 +204,7 @@ const menuGame = ref(null)
 const loadFailed = ref(false)
 async function fetchDuels() {
   duels.value = (await GET('/api/app-games/duels/active').catch(() => ({ data: null }))).data ?? duels.value
+  fetchRecentResults()
 }
 async function fetchGames() {
   fetchDuels()
@@ -192,10 +231,12 @@ async function apply(game, team) {
     await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
     game.isAppliedByMe = true
     feel('success')
-    showToast('신청했어요. 주최자가 승인하면 알려 드려요')
+    showToast('신청했어요. 주최자가 승인하면 알림에 떠요')
   } catch (e) {
     // 428(동네 인증 필요)은 api.js가 내 동네 화면으로 보내며 같은 말을 맨 위에 보인다. 토스트로 두 번 말하지 않는다 (first10 검토)
-    if (e.response?.status !== 428) showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
+    // 본인인증이 필요하면(400 '휴대폰 본인인증') api.js가 인증 화면으로 보낸다. 거기서도 토스트를 띄우지 않는다 (경로 전부 훑기 4)
+    const identity = String(e.response?.data?.message || '').includes('휴대폰 본인인증')
+    if (e.response?.status !== 428 && !identity) showToast(e.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     busyId.value = null
   }
@@ -217,6 +258,7 @@ async function cancelApply(game) {
 let stopWatching = null
 onMounted(async () => {
   myId.value = await getMyId().catch(() => null)
+  myIdNow.value = myId.value
   fetchGames()
   // 신청·승인 같은 변화가 생기면 다시 불러온다
   stopWatching = refreshOnChange(fetchGames)

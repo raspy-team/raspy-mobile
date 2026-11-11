@@ -6,6 +6,8 @@
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
         <UiButton variant="secondary" @click="join">다시 들어가기</UiButton>
+        <!-- 끝난 초대·없는 방이면 '다시 들어가기'는 같은 오류만 되풀이했다: 같은 게임을 새로 하는 길 (경로 3 리뷰 R4) -->
+        <UiButton class="mt-2" variant="ghost" :to="`/play/${key}`">이 게임 한 판</UiButton>
       </UiEmptyState>
 
       <!-- 대기실 -->
@@ -17,8 +19,8 @@
           <!-- 실시간 게임 대기실과 같은 말: 곧 AI 주민이 온다 -->
           <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ waitText(state.botAfterSeconds) }} 안에 사람이 안 오면 AI 주민이 상대가 돼요</p>
         </UiCard>
-        <!-- 흔들기는 판이 시작되기 전에 센서를 켜 둔다 (시작한 뒤에 누르면 그만큼 손해) -->
-        <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">센서 미리 켜기</UiButton>
+        <!-- 흔들기는 판이 시작되기 전에 허용해 둔다 (시작한 뒤에 누르면 그만큼 손해). '센서'라는 말은 쓰지 않는다 (경로 3 훑기) -->
+        <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">흔들기 미리 허용하기</UiButton>
         <UiButton block variant="ghost" class="mt-4" @click="leave">그만 찾기</UiButton>
       </template>
 
@@ -31,7 +33,7 @@
           <p v-if="counting" class="t-display tabular-nums mt-8">{{ countdown }}</p>
           <p v-else class="t-title mt-8">폰을 흔드세요!</p>
           <!-- 아이폰은 센서를 쓰려면 한 번 눌러 허락을 받아야 한다 -->
-          <UiButton v-if="sensor === 'ask'" block size="lg" class="mt-6" @click="askSensor">센서 켜기</UiButton>
+          <UiButton v-if="sensor === 'ask'" block size="lg" class="mt-6" @click="askSensor">흔들기 허용하기</UiButton>
           <!-- 센서를 허락했는데 값이 오지 않는 폰(일부 안드로이드 웹뷰)은 흔들어도 아무 일이 없었다: 시작 2초 동안 흔들림이 없으면 누르기 버튼을 띄운다 -->
           <UiButton v-else-if="sensor === 'none' || (!counting && !motionSeen && sinceStart > 2000)" block size="lg" class="mt-6" :disabled="counting" @click="sendShake">흔들 수 없으면 눌러서</UiButton>
         </div>
@@ -119,7 +121,19 @@ const title = computed(() => ({ pong: '퐁', shake: '흔들기 대결' } as Reco
 const state = ref<State | null>(null)
 // 게임 중에 뒤로 가기(안드로이드 하드웨어 버튼 포함)로 나가면 한 번 묻는다 (11/6 b2 앱 껍데기 점검).
 // 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다
-onBeforeRouteLeave(() => state.value?.status !== 'PLAYING' || window.confirm('게임이 진행 중이에요. 나가면 이 판은 진 것으로 남을 수 있어요. 나갈까요?'))
+// 판 중에 나가려 하면 앱의 확인 창으로 묻는다 (브라우저 기본 창은 모양이 달랐다, 경로 3 훑기).
+// 이동은 일단 멈추고(뒤로 버튼이면 라우터가 기록을 되돌린다), 그 뒤에 창을 띄워 '나가기'면 다시 간다
+let leaveOk = false
+onBeforeRouteLeave((to) => {
+  if (leaveOk || state.value?.status !== 'PLAYING') return true
+  setTimeout(async () => {
+    if (await confirmDialog({ title: '게임이 진행 중이에요', message: '나가면 이 판은 진 것으로 남을 수 있어요.', confirmText: '나가기', cancelText: '계속하기', danger: true })) {
+      leaveOk = true
+      router.push(to.fullPath)
+    }
+  }, 80)
+  return false
+})
 const error = ref('')
 const snap = ref<Snapshot | null>(null)
 const connected = ref(false)

@@ -165,7 +165,12 @@
 
     <!-- 게시판: 이 동네 모집 중인 경기 -->
     <UiSheet v-model="boardOpen" title="모집 중인 경기">
-      <UiSkeleton v-if="!board" class="h-32 w-full" />
+      <!-- 못 불러온 것과 없는 것을 가른다: 실패를 "없어요. 처음으로 열어 보세요"로 보였다 (경로 3 리뷰 R3) -->
+      <div v-if="boardFailed" class="py-4 text-center">
+        <p class="t-caption">모집 중인 경기를 불러오지 못했어요</p>
+        <UiButton class="mt-3" size="sm" variant="secondary" @click="retryBoard">다시 시도</UiButton>
+      </div>
+      <UiSkeleton v-else-if="!board" class="h-32 w-full" />
       <p v-else-if="!board.length" class="t-body text-fg-muted">지금 모집 중인 경기가 없어요. 처음으로 열어 보세요</p>
       <ul v-else class="space-y-1">
         <li v-for="g in board" :key="g.id">
@@ -318,11 +323,18 @@ function onEvent(e: { t: string; id?: number; p?: Person; path?: number[][]; tex
   else if (e.t === 'emote' && e.id && e.text) s.sayBubble(e.id, e.text, true)
 }
 
+// 서버가 버리는 말(2초 안 다시, 10초 안 같은 말)은 내 화면에도 띄우지 않는다: 내 화면엔 말풍선이 떴는데 남에게는 안 보였다 (경로 3 훑기)
+let lastSayAt = 0
+let lastSaid = ''
 function say(raw: string) {
   const t = raw.trim()
   if (!t || !enter.value) return
+  const now = Date.now()
+  if (now - lastSayAt < 2000 || (t === lastSaid && now - lastSayAt < 10_000)) return showToast(t === lastSaid ? '같은 말은 잠깐 뒤에 다시 할 수 있어요' : '잠깐 뒤에 말할 수 있어요')
   if (!publish(`/app/plaza/${enter.value.instance}/say`, { text: t })) return showToast('연결하는 중이에요. 잠깐 뒤 다시 해 주세요')
   // 내 말은 서버가 거른 글로 돌아오지 않으니(내 신호는 무시) 바로 띄운다. 거른 글자는 남에게 #으로 보인다
+  lastSayAt = now
+  lastSaid = t
   scene()?.sayBubble(enter.value.me.id, t)
   text.value = ''
   quickOpen.value = false
@@ -435,9 +447,14 @@ async function loadBoard() {
   }))
   return list
 }
+const boardFailed = ref(false)
 function openBoard() {
   boardOpen.value = true
-  if (!board.value) loadBoard().catch(() => (board.value = []))
+  if (!board.value) retryBoard()
+}
+function retryBoard() {
+  boardFailed.value = false
+  loadBoard().catch(() => (boardFailed.value = true))
 }
 /** 동네 광장이면 모집 중인 경기를 실제 방향에 핀으로 꽂는다 */
 async function pinGames() {

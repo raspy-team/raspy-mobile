@@ -60,7 +60,8 @@
           <p class="text-sm text-danger-fg">{{ request.rejectionReason }}</p>
         </div>
 
-        <!-- 필드별 비교 -->
+        <!-- 필드별 비교 (바뀐 것만, 원하면 모두) -->
+        <button type="button" class="t-caption underline underline-offset-2" @click="showAll = !showAll">{{ showAll ? '바뀐 항목만 보기' : '바뀌지 않은 항목도 보기' }}</button>
         <div class="space-y-4">
           <!-- 규칙 제목 -->
           <ComparisonField
@@ -200,8 +201,9 @@
           <UiIcon name="fas fa-times" class="mr-1" />거절
         </button>
         <button
+          :disabled="!!loadError"
           @click="openApproveModal"
-          class="flex-1 py-3 bg-primary text-primary-on font-bold rounded-xl transition"
+          class="flex-1 py-3 bg-primary text-primary-on font-bold rounded-xl transition disabled:opacity-40"
         >
           <UiIcon name="fas fa-check" class="mr-1" />승인
         </button>
@@ -227,8 +229,9 @@
       <div class="bg-surface rounded-2xl p-6 max-w-md w-full">
         <h3 class="text-xl font-bold text-fg mb-3">수정 요청 승인</h3>
         <p class="text-fg-muted mb-6">
-          이 수정 요청을 승인하시겠습니까?<br />
-          승인 즉시 원본 규칙에 변경사항이 반영됩니다.
+          <!-- 앱 다른 곳은 '-요'체인데 여기만 '-습니까/-습니다'였다 (경로 7 리뷰) -->
+          이 수정 요청을 승인할까요?<br />
+          승인하면 바로 원래 규칙에 반영돼요.
         </p>
         <div class="flex gap-3">
           <button
@@ -260,7 +263,7 @@
           v-model="rejectionReason"
           class="w-full border border-line-strong rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-fg/30"
           rows="4"
-          placeholder="예: 규칙 내용이 부적절합니다."
+          placeholder="예: 규칙 내용이 맞지 않아요"
         ></textarea>
         <div class="flex gap-3 mt-4">
           <button
@@ -283,7 +286,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, defineEmits } from 'vue'
+import { ref, onMounted, defineProps, defineEmits, provide } from 'vue'
 import api from '../../api/api'
 import ComparisonField from './ComparisonField.vue'
 import { UiSkeleton } from '../ui'
@@ -297,6 +300,9 @@ const rejectionReason = ref('')
 const originalRule = ref({})
 const loading = ref(true)
 const loadError = ref('')
+// 바뀌지 않은 항목은 처음엔 접어 둔다. 원래 규칙을 못 불러오면 모두 '바뀜'으로 보이니 펼친다
+const showAll = ref(false)
+provide('comparisonShowAll', showAll)
 
 // 원본 규칙 데이터 가져오기
 onMounted(async () => {
@@ -306,7 +312,9 @@ onMounted(async () => {
       originalRule.value = data
     } catch (e) {
       console.error('Failed to load original rule:', e)
-      loadError.value = '원래 규칙을 불러오지 못했어요'
+      // 원래 규칙을 못 불러오면 모든 항목이 '바뀜'으로 보이고 승인이 그대로 눌렸다 (경로 7 리뷰 K16): 승인을 막는다
+      loadError.value = '원래 규칙을 불러오지 못했어요. 닫고 다시 열어 주세요'
+      showAll.value = true
     } finally {
       loading.value = false
     }

@@ -38,7 +38,7 @@
     <input ref="picker" type="file" accept="image/*,video/*" class="hidden" @change="onPick" />
 
     <!-- 크게 보기: 누가 올렸나, 내리기·신고 -->
-    <UiSheet :model-value="!!open" :title="open ? `${open.uploader?.nickname || '관중'}님이 올렸어요` : ''" @update:model-value="(v) => { if (!v) open = null }">
+    <UiSheet :model-value="!!open" :title="open ? `${open.uploader?.nickname || '관중'}님이 올린 ${open.mediaType === 'VIDEO' ? '영상' : '사진'}` : ''" @update:model-value="(v) => { if (!v) open = null }">
       <template v-if="open">
         <video v-if="open.mediaType === 'VIDEO'" :src="open.url" class="w-full max-h-[60vh] rounded-xl bg-black" controls playsinline autoplay></video>
         <img v-else :src="open.url" alt="" class="w-full max-h-[60vh] object-contain rounded-xl bg-surface-2" />
@@ -46,7 +46,7 @@
       <template #footer>
         <div class="flex gap-2">
           <UiButton v-if="open?.canHide" variant="secondary" class="flex-1" :loading="hiding" @click="hide">{{ open?.mine ? '삭제' : '내리기' }}</UiButton>
-          <UiButton v-if="open && !open.mine" variant="ghost" class="flex-1" @click="reporting = open.id; open = null">신고</UiButton>
+          <UiButton v-if="open && !open.mine" variant="ghost" class="flex-1" @click="openReport">신고</UiButton>
         </div>
       </template>
     </UiSheet>
@@ -55,6 +55,7 @@
 </template>
 
 <script setup lang="ts">
+import { confirmDialog } from '@/composables/useConfirm'
 // 관중이 찍은 장면 (리뷰 6번 "점수만 있고 장면이 없다"). 중계 화면과 결과 화면에 한 줄로 붙는다.
 // 관중은 경기 중·끝나고 하루 안에 올리고, 선수는 보고 내린다. 볼 수 없는 경기(차단·구경 끔·앱 게임)면 통째로 숨는다
 // 새 사진은 /topic/game-media/{id}의 MEDIA 신호에만 다시 불러온다 (폴링하지 않는다).
@@ -115,6 +116,8 @@ async function onPick(e: Event) {
 
 async function hide() {
   if (!open.value) return
+  // 한 번 누르면 되돌릴 수 없어 묻는다 (경로 8 P13)
+  if (!(await confirmDialog({ title: open.value.mine ? '이 장면을 삭제할까요?' : '이 장면을 내릴까요?', message: '선수와 관중 모두에게서 사라져요', confirmText: open.value.mine ? '삭제' : '내리기', danger: true }))) return
   hiding.value = true
   try {
     await POST('/api/games/{gameId}/live/media/{mediaId}/hide', { path: { gameId: props.gameId, mediaId: open.value.id } })
@@ -134,4 +137,19 @@ onMounted(() => {
   off = subscribeTopic(`/topic/game-media/${props.gameId}`, (e: { type: string }) => { if (e.type === 'MEDIA') load() })
 })
 onBeforeUnmount(() => off?.())
+
+// 크게 보기 시트를 닫고 신고 시트를 연다. 바로 열면 닫은 시트의 기록 칸이 남아 뒤로를 두 번 눌러야 했다 (가로 훑기 2)
+function openReport() {
+  const id = open.value?.id ?? null
+  open.value = null
+  let done = false
+  const go = () => {
+    if (done) return
+    done = true
+    window.removeEventListener('popstate', go)
+    reporting.value = id
+  }
+  window.addEventListener('popstate', go)
+  setTimeout(go, 300)
+}
 </script>

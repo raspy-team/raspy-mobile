@@ -13,8 +13,12 @@
         :style="dragY ? { transform: `translateY(${dragY}px)`, transition: dropping ? 'transform 0.2s ease-out' : 'none' } : undefined"
       >
         <!-- 손잡이·제목 줄을 아래로 끌면 닫힌다. 손잡이를 보면 사람은 끌어 내린다(아이폰·인스타 습관). 예전엔 모양만 있었다 (목적 판정 11/11 8번) -->
-        <div class="pt-2.5 pb-1 flex justify-center touch-none cursor-grab" aria-hidden="true" @pointerdown="dragStart">
-          <span class="w-10 h-1 rounded-full bg-line-strong"></span>
+        <div class="relative pt-2.5 pb-1 flex justify-center touch-none cursor-grab" :class="!title ? 'min-h-10' : ''" @pointerdown="dragStart">
+          <span class="w-10 h-1 rounded-full bg-line-strong" aria-hidden="true"></span>
+          <!-- 제목 없는 시트에도 닫기 X (예전엔 바깥을 눌러야만 닫혔다, 경로 8 2절) -->
+          <button v-if="!title" type="button" class="absolute right-2 top-1 w-9 h-9 flex items-center justify-center text-fg-muted" aria-label="닫기" @click="close">
+            <UiIcon name="xmark" class="text-xl" />
+          </button>
         </div>
         <div v-if="title" class="flex items-center justify-between px-5 pt-2 pb-3 touch-none" @pointerdown="dragStart">
           <h2 class="t-heading">{{ title }}</h2>

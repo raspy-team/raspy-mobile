@@ -8,7 +8,7 @@
       <span class="block t-body truncate">{{ label }} 안에서 해요</span>
       <span class="block t-caption mt-0.5 truncate">
         <template v-if="mine?.handle">내 {{ mine.game.handleLabel }} {{ mine.handle }}<template v-if="mine.tier"> · {{ mine.tier }}</template></template>
-        <template v-else-if="mine">상대가 나를 찾을 {{ mine.game.handleLabel }}를 적어 두세요</template>
+        <template v-else-if="mine">상대가 나를 찾을 {{ mine.game.handleLabel }}{{ eulReul(mine.game.handleLabel) }} 적어 두세요</template>
         <template v-else>결과 화면을 찍어 올리면 확인이 빨라요</template>
       </span>
     </span>
@@ -38,4 +38,9 @@ onMounted(async () => {
     mine.value = null
   }
 })
+// 받침이 있으면 '을', 없으면 '를' ('닉네임을'·'아이디를'). 늘 '를'이라 '닉네임를'이 됐다 (경로 6 훑기)
+function eulReul(word?: string) {
+  const c = String(word ?? '').charCodeAt(String(word ?? '').length - 1) - 0xac00
+  return c >= 0 && c <= 11171 && c % 28 !== 0 ? '을' : '를'
+}
 </script>

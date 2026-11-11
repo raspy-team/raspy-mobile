@@ -26,7 +26,7 @@
         :autocomplete="autocomplete"
         class="ui-control h-12"
         :class="{ 'pl-11': icon, 'border-danger': error }"
-        @input="emit('update:modelValue', type === 'number' ? Number($event.target.value) : $event.target.value)"
+        @input="emit('update:modelValue', type === 'number' ? toNumber($event.target.value) : $event.target.value)"
         @keyup.enter="emit('enter')"
       />
     </div>
@@ -56,6 +56,9 @@ defineProps({
   disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue', 'enter'])
+// 숫자 칸을 비우면 빈 값('')으로 둔다. 예전엔 Number('') = 0이 칸에 다시 들어앉아, 선택 칸('만 나이')이 저장을 막고
+// 대회 '최대 인원'을 고쳐 쓰려 지우면 0이 남았다 (경로 8 P1, 가로 훑기 8절)
+const toNumber = (v) => (v === '' || v == null ? '' : Number(v))
 const inputRef = ref(null)
 defineExpose({ focus: () => inputRef.value?.focus(), el: inputRef })
 </script>

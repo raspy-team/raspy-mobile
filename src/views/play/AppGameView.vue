@@ -123,6 +123,7 @@
           :submitting="submitting"
           :guide="WRITING[key].guide"
           :placeholder="WRITING[key].placeholder"
+          :vote="isVote"
           @submit="submit"
         />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
@@ -146,7 +147,19 @@
               class="mt-4"
               :to="{ path: '/play/improv', query: { to: result.opponent.userId, toName: result.opponent.nickname } }"
             >{{ result.opponent.nickname }}님과 다시 붙기</UiButton>
-            <div class="flex items-center justify-center gap-6 mt-6">
+            <!-- 임기응변: 승패도 등급으로 겨룬다. 큰 숫자가 점수라 기다릴 때(등급이 크게)와 잣대가 달랐다 (경로 10 리뷰 I5) -->
+            <div v-if="improvResult && !improvResult.empty" class="flex items-center justify-center gap-6 mt-6">
+              <span>
+                <span class="block t-title tabular-nums">{{ improvResult.grade }}등급</span>
+                <span class="block t-micro">나 · {{ result.myScore ?? 0 }}점</span>
+              </span>
+              <span class="t-caption">:</span>
+              <span>
+                <span class="block t-title tabular-nums text-fg-muted">{{ opponentImprov ? `${opponentImprov.grade}등급` : `${result.opponentScore ?? 0}점` }}</span>
+                <span class="flex items-center justify-center t-micro max-w-[8rem]"><OpponentName :player="result.opponent" /><span v-if="opponentImprov" class="shrink-0">&nbsp;· {{ result.opponentScore ?? 0 }}점</span></span>
+              </span>
+            </div>
+            <div v-else class="flex items-center justify-center gap-6 mt-6">
               <span>
                 <UiRollNumber class="t-title tabular-nums" :value="result.myScore ?? 0" />
                 <span class="block t-micro">나{{ isVote ? ' (표)' : '' }}</span>
@@ -157,7 +170,8 @@
                 <span class="flex items-center justify-center t-micro max-w-[8rem]"><OpponentName :player="result.opponent" /><span v-if="isVote" class="shrink-0">&nbsp;(표)</span></span>
               </span>
             </div>
-            <p v-if="improvGrade" class="t-heading mt-4">{{ improvGrade }}</p>
+            <p v-if="improvGrade && !(improvResult && !improvResult.empty)" class="t-heading mt-4">{{ improvGrade }}</p>
+            <p v-else-if="improvResult && !improvResult.empty" class="t-caption mt-3">100명 중 {{ improvResult.rank }}등</p>
             <!-- 끝난 판에도 왜 그 등급인지 (3-5 UI) -->
             <p v-if="improvResult?.strong" class="t-body mt-2 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
             <p v-if="result.ratingChange != null" class="t-mono mt-4">
@@ -168,22 +182,24 @@
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
             <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : `${judgeName}${josaIga(judgeName)} 채점하고 있어요` }}</p>
-            <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 알림으로 알려 드릴게요</p>
+            <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 {{ NOTICE }}</p>
           </template>
           <!-- 스코어 맞히기: 둘 다 냈고 실제 경기가 끝나길 기다린다 -->
           <template v-else-if="result.status === 'AWAITING_RESULT'">
             <p class="t-title">경기 결과를 기다려요</p>
-            <p class="t-caption mt-1">{{ kickoffLabel(fixtureOf(result.problem).kickoff) }} 경기가 끝나면 채점하고 알려 드릴게요</p>
+            <p class="t-caption mt-1">{{ kickoffLabel(fixtureOf(result.problem).kickoff) }} 경기가 끝나면 채점하고 {{ NOTICE }}</p>
             <p class="t-body mt-5">내 예상 <b class="tabular-nums">{{ predictionLine(result.problem, result.myAnswer) }}</b></p>
             <p v-if="result.opponentAnswer" class="t-caption mt-1">{{ who(result.opponent) }}님 예상 {{ predictionLine(result.problem, result.opponentAnswer) }}</p>
           </template>
           <template v-else-if="result.status === 'VOTING'">
             <p class="t-title">투표 중이에요</p>
-            <p class="t-caption mt-1">{{ until(result.votingEndsAt) }}까지 사람들이 투표해요. 끝나면 알려 드릴게요</p>
+            <p class="t-caption mt-1">{{ until(result.votingEndsAt) }}까지 사람들이 투표해요. 끝나면 {{ NOTICE }}</p>
             <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 공유</UiButton>
           </template>
           <template v-else-if="result.status === 'CANCELED'">
             <p class="t-title">취소된 경기예요</p>
+            <!-- 왜 취소됐는지 (경로 전부 훑기 2절): AI 채점이 막혔거나, 먼저 연 사람이 시간 안에 내지 않았다 -->
+            <p class="t-caption mt-1 break-keep">{{ result.myFeedback?.includes('채점') ? 'AI 채점이 막혀 이 판은 기록에 남지 않아요' : '시간 안에 답이 나지 않아 이 판은 기록에 남지 않아요' }}</p>
           </template>
           <template v-else-if="key === 'predict' && result.status === 'WAITING'">
             <p class="t-heading">내 예상 {{ predictionLine(result.problem, result.myAnswer) }}</p>
@@ -192,7 +208,8 @@
           </template>
           <template v-else-if="isVote">
             <p class="t-heading">{{ (result.myScore ?? 0) > 0 ? '문장이 올라갔어요' : '투표에 올리지 못했어요' }}</p>
-            <p class="t-caption mt-1">{{ (result.myScore ?? 0) > 0 ? '같은 제시어로 다른 사람이 쓰면 24시간 투표가 시작돼요' : '' }}</p>
+            <!-- 못 올린 이유를 말한다 (경로 전부 훑기 2절): 서버 한마디 첫 줄, 없으면 흔한 이유 -->
+            <p class="t-caption mt-1 break-keep">{{ (result.myScore ?? 0) > 0 ? '같은 제시어로 다른 사람이 쓰면 24시간 투표가 시작돼요' : (result.myFeedback?.split('\n')[0] || '글이 너무 짧거나 쓸 수 없는 말이 들어 있었어요') }}</p>
             <UiButton v-if="(result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
           </template>
           <template v-else>
@@ -205,7 +222,8 @@
             </template>
             <template v-else-if="improvResult">
               <p class="t-display tabular-nums">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></p>
-              <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등 · {{ result.myScore ?? 0 }}점</p>
+              <!-- 손님 결과처럼 점수는 빼고 등수만 (경로 2 리뷰 N5) -->
+              <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등</p>
               <p v-if="improvResult.strong" class="t-body mt-4 break-keep">잘한 것 <b>{{ improvResult.strong }}</b> · 아쉬운 것 <b>{{ improvResult.weak }}</b></p>
               <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
               <p v-if="improvResult.next" class="t-label mt-3"><span class="hl">{{ improvResult.next }}</span></p>
@@ -221,9 +239,13 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민(앱이 만든 연습 상대)이 풀어요.` : '' }} 결과가 나오면 알려 드릴게요</p>
+              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민(앱이 만든 연습 상대)이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
             </template>
-            <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+            <div class="flex flex-wrap justify-center gap-2 mt-4">
+              <!-- 가입한 뒤에도 등급을 자랑하는 길: 손님 결과와 같은 스토리 그림 (경로 2 리뷰 N9) -->
+              <UiButton v-if="improvResult && !improvResult.empty" size="sm" icon="instagram" :disabled="!storyFile" @click="shareStory">인스타 스토리</UiButton>
+              <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+            </div>
           </template>
         </UiCard>
         <!-- 다음 행동은 결과 바로 밑에. 긴 답·한마디는 그 아래 -->
@@ -342,6 +364,8 @@
             <!-- '하루 20판'은 다 할 사람이 없는 수라 정보가 아니다. 한도에 닿으면 서버가 말한다 (목적 판정 11/11 부분 2) -->
           </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
+          <!-- 내기가 실패해도 쓴 답을 잃지 않는다: 같은 판에 같은 답을 다시 낸다 (경로 2 리뷰 N10, 가로 훑기 4절). 예전엔 '다시 열어 이어서 낼 수 있어요'라 했지만 다시 열면 빈 칸이었다 -->
+          <UiButton v-if="pendingSubmit" block variant="secondary" class="mt-2" :loading="submitting" @click="resubmit">쓴 답 다시 내기</UiButton>
 
           <!-- 아직 안 끝난 내 대결은 시작 버튼 바로 밑에 -->
           <UiSection v-if="unfinished.length" title="진행 중" class="mt-8">
@@ -434,6 +458,7 @@
 </template>
 
 <script setup lang="ts">
+import { GUEST_GAMES } from '@/utils/guestGames'
 import { waitText, who } from '@/utils/format'
 import OpponentName from '../../components/appgame/OpponentName.vue'
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
@@ -459,7 +484,12 @@ import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import { improvAnswers, improvFeedback, improvSituations } from '@/utils/improv'
 import { shareLink } from '@/utils/share'
-import { askPushPermission } from '@/utils/nativeBridge'
+import { askPushPermission, isCapacitorApp } from '@/utils/nativeBridge'
+import { guestClaimResult } from '@/utils/visit'
+import ImprovStoryCard from '../../components/share/ImprovStoryCard.vue'
+import { componentFile, shareFiles } from '@/utils/storyShare'
+import { withShareRef } from '@/utils/shareRef'
+import { copyText } from '@/utils/clipboard'
 import ShareSheet from '../../components/feed/story/ShareSheet.vue'
 import { getMyId } from '@/utils/me'
 import WritePlay from '../../components/appgame/WritePlay.vue'
@@ -516,7 +546,8 @@ const counting = ref(false)
 let offset = 0 // 서버 시각 - 기기 시각
 const result = ref<Duel | null>(null)
 // 알림 권한은 쓸모가 보일 때 묻는다: 상대를 기다리는 결과가 떴을 때 (앱을 켤 때 묻지 않는다, 목적 판정 11/11 부분 1)
-watch(() => result.value?.status, (st) => { if (st === 'AWAITING_RESULT') askPushPermission() })
+// 결과를 기다리게 되는 순간 알림 권한을 묻는다. 보통 게임이 상대를 기다리는 상태는 WAITING이다 (경로 2 리뷰 W1)
+watch(() => result.value?.status, (st) => { if (st === 'AWAITING_RESULT' || st === 'WAITING' || st === 'VOTING') askPushPermission() })
 // 신뢰 사다리 (안전·신뢰 D): 경기 신청자와 만나기 전에 한 판. ?to=사람&toName=이름으로 오면 새 판을 열고, 끝나면 그 사람에게 도전장을 메시지로 보낸다
 const ladderTo = Number(route.query.to) || null
 const ladderName = String(route.query.toName || '상대')
@@ -584,18 +615,24 @@ async function load() {
   game.value = games.data.find((g) => g.key === key.value) ?? null
   missing.value = !game.value
   if (!game.value) return
-  const mine = await GET('/api/app-games/{key}/duels', { path: { key: key.value } })
-  duels.value = mine.data
+  // 게임 목록만 있으면 한 판은 할 수 있다. 내 대결·순위·기록·투표는 하나가 실패해도 그 칸만 비운다 (경로 2 리뷰 N11: 순위만 못 불러와도 '게임을 불러오지 못했어요'였다)
+  const mine = await GET('/api/app-games/{key}/duels', { path: { key: key.value } }).catch(() => null)
+  if (mine) duels.value = mine.data
   // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
   if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
   if (game.value) {
-    const data = (await GET('/api/rules/{ruleId}/rankings', { path: { ruleId: game.value.ruleId } })).data
-    ranking.value = (data.rankings ?? []).slice(0, 10)
-    rankingTotal.value = data.rankings?.length ?? 0
-    baselines.value = data.baselines ?? []
+    const data = (await GET('/api/rules/{ruleId}/rankings', { path: { ruleId: game.value.ruleId } }).catch(() => null))?.data
+    if (data) {
+      ranking.value = (data.rankings ?? []).slice(0, 10)
+      rankingTotal.value = data.rankings?.length ?? 0
+      baselines.value = data.baselines ?? []
+    }
   }
-  if (game.value?.recordable) await loadBoard()
-  if (game.value?.judge === 'VOTE') votes.value = (await GET('/api/app-games/{key}/votes', { path: { key: key.value } })).data
+  if (game.value?.recordable) await loadBoard().catch(() => {})
+  if (game.value?.judge === 'VOTE') {
+    const v = await GET('/api/app-games/{key}/votes', { path: { key: key.value } }).catch(() => null)
+    if (v) votes.value = v.data
+  }
 }
 
 async function loadBoard() {
@@ -621,6 +658,16 @@ async function start() {
     startError.value = '이 브라우저에서는 카메라를 쓸 수 없어 스쿼트를 할 수 없어요. 앱이나 다른 브라우저로 열어 주세요'
     return
   }
+  // 카메라가 있어도 허락하지 않았으면(가장 흔하다) 판을 열기 전에 묻고, 거절이면 알린다 (경로 2 리뷰 W2)
+  if (key.value === 'squat') {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      stream.getTracks().forEach((t) => t.stop())
+    } catch {
+      startError.value = '카메라를 허락해야 스쿼트를 할 수 있어요. 휴대폰 설정에서 이 앱(브라우저)의 카메라를 켜 주세요'
+      return
+    }
+  }
   if (ladderTo && !noLadder.value && game.value?.playMode === 'REALTIME') return router.push({ path: `/play/${key.value}/live`, query: { to: ladderTo, toName: ladderName } })
   if (game.value?.shared) return router.push(`/play/${key.value}/board`)
   if (game.value?.playMode === 'REALTIME') return router.push(game.value.battle ? `/play/${key.value}/battle` : liveRoute(key.value))
@@ -629,6 +676,7 @@ async function start() {
   try {
     begin((await POST('/api/app-games/{key}/plays', { path: { key: key.value }, query: ladderTo ? { solo: true } : undefined })).data)
     result.value = null
+    pendingSubmit.value = null
     submitError.value = ''
   } catch (e) {
     startError.value = errorMessage(e, '시작하지 못했어요. 잠시 뒤 다시 해 주세요')
@@ -642,7 +690,8 @@ function rememberLastGame() {
   if (!game.value) return
   const r = result.value as { myScore?: number; myFeedback?: string } | null
   try {
-    localStorage.setItem('last_app_game', JSON.stringify({ key: game.value.key, title: game.value.title, at: Date.now(), line: r?.myFeedback?.split('\n')[0]?.match(/^\d등급/) ? r.myFeedback.split('\n')[0].split(' · ')[0] : r?.myScore != null ? `${r.myScore}${game.value.scoreUnit ?? '점'}` : '' }))
+    // uid: 같은 폰에서 계정을 바꾸면 홈이 앞 사람의 판을 보이지 않게 (경로 4 리뷰 G4)
+    localStorage.setItem('last_app_game', JSON.stringify({ uid: myId.value, key: game.value.key, title: game.value.title, at: Date.now(), line: r?.myFeedback?.split('\n')[0]?.match(/^\d등급/) ? r.myFeedback.split('\n')[0].split(' · ')[0] : r?.myScore != null ? `${r.myScore}${game.value.scoreUnit ?? '점'}` : '' }))
   } catch {
     // 못 남기면 홈에 안 보일 뿐이다
   }
@@ -650,19 +699,43 @@ function rememberLastGame() {
 
 async function submit(answer: string) {
   if (!play.value) return
+  const playId = play.value.playId
   submitting.value = true
   try {
     justSubmitted = true
-    result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { answer } })).data
+    result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId }, body: { answer } })).data
     rememberLastGame()
+    // 낸 판의 임기응변 저장은 성공한 뒤에 지운다 (실패하면 다시 열어 이어 낼 수 있게 남겨 둔다, 가로 훑기 4)
+    try { sessionStorage.removeItem(`improv_play_${play.value.playId}`) } catch { /* 없음 */ }
     play.value = null
     startError.value = ''
     load().catch(() => {})
   } catch (e) {
     // 판이 닫히면 첫 화면으로 돌아가니 오류는 시작 버튼 밑 칸에 남긴다 (판 아래 칸은 판과 함께 사라져 아무 말 없이 돌아갔다)
-    submitError.value = startError.value = errorMessage(e, '내지 못했어요. 시간이 남았으면 다시 열어 이어서 낼 수 있어요')
+    pendingSubmit.value = { playId, answer }
+    submitError.value = startError.value = errorMessage(e, '내지 못했어요. 쓴 답은 남아 있어요')
     play.value = null
     load().catch(() => {})
+  } finally {
+    submitting.value = false
+  }
+}
+
+// 내지 못한 답: 같은 판에 그대로 다시 낸다
+const pendingSubmit = ref<{ playId: number; answer: string } | null>(null)
+async function resubmit() {
+  const p = pendingSubmit.value
+  if (!p) return
+  submitting.value = true
+  try {
+    justSubmitted = true
+    result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId: p.playId }, body: { answer: p.answer } })).data
+    rememberLastGame()
+    pendingSubmit.value = null
+    submitError.value = startError.value = ''
+    load().catch(() => {})
+  } catch (e) {
+    submitError.value = startError.value = errorMessage(e, '내지 못했어요. 쓴 답은 남아 있어요')
   } finally {
     submitting.value = false
   }
@@ -708,8 +781,11 @@ async function sendChallenge(gameId: number) {
   try {
     await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
     // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
-    const msg = await shareLink(`${window.location.origin}/challenge/${gameId}`, `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
-    if (msg) showToast(`${msg}. 하루 동안 이 링크로만 받을 수 있어요`)
+    // 가입 없이 할 수 있는 게임이면 받은 친구가 가입 없이 바로 같은 문제로 (경로 2 리뷰 N1: /challenge는 가입 벽이었다)
+    const link = key.value in GUEST_GAMES ? `${window.location.origin}/try/${key.value}?d=${gameId}` : `${window.location.origin}/challenge/${gameId}`
+    const msg = await shareLink(link, `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
+    // '하루 동안 이 링크로만'은 뜻이 안 읽혔고, 복사가 실패해도 붙었다 (경로 2 리뷰 N4)
+    if (msg) showToast(/못/.test(msg) ? msg : `${msg}. 친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황' : '문제'}으로 붙어요`)
     askPushPermission() // 친구가 받으면 알려 드릴 수 있게
   } catch (e) {
     showToast(errorMessage(e, '도전장을 만들지 못했어요'))
@@ -760,16 +836,50 @@ if (key.value === 'improv') {
     const v = JSON.parse(localStorage.getItem('improv_last_result') || 'null')
     const r = v && Date.now() - v.at < 2 * 3600_000 ? improvFeedback(v.result?.feedback) : null
     if (r && !r.empty) {
-      joinedFrom.value = { grade: r.grade }
-      // 가입하며 옮긴 판도 홈 '내 판'의 마지막 판으로 (예전엔 남지 않아 막 가입한 사람이 홈에서 옛 목록만 봤다)
-      localStorage.setItem('last_app_game', JSON.stringify({ key: 'improv', title: '임기응변 등급', at: Date.now(), line: `${r.grade}등급` }))
-    }
-    localStorage.removeItem('improv_last_result')
+      // '기록에 남았어요'는 옮기기가 된 때만 (실패해도 같은 말이 떴다, 경로 2 리뷰 N12). 실패면 결과를 지우지 않아 다음에 다시 옮길 때 보인다
+      guestClaimResult().then((n) => {
+        if (n < 0) return
+        joinedFrom.value = { grade: r.grade }
+        // 가입하며 옮긴 판도 홈 '내 판'의 마지막 판으로 (예전엔 남지 않아 막 가입한 사람이 홈에서 옛 목록만 봤다)
+        getMyId().then((uid) => localStorage.setItem('last_app_game', JSON.stringify({ uid, key: 'improv', title: '임기응변 등급', at: Date.now(), line: `${r.grade}등급` }))).catch(() => {})
+        localStorage.removeItem('improv_last_result')
+      }).catch(() => {})
+    } else localStorage.removeItem('improv_last_result')
   } catch {
     // 못 읽으면 보이지 않을 뿐이다
   }
 }
+// '알려 드릴게요'는 앱(휴대폰 알림)에서만 지킬 수 있다. 웹(인스타 앱 안 포함)은 알림함에 남는 데까지가 사실이다 (경로 2 리뷰 N2, 가로 훑기 7절)
+const NOTICE = isCapacitorApp ? '알림으로 알려 드릴게요' : '알림함(위 종)에 남겨 둘게요'
+
+// 로그인한 임기응변 결과의 스토리 그림 (손님 결과와 같은 그림). 누른 순간 바로 넘겨야 사파리가 공유를 막지 않아 미리 찍어 둔다
+const storyFile = ref<File | null>(null)
+watch(() => [result.value?.gameId, result.value?.myFeedback], async () => {
+  storyFile.value = null
+  const r = improvResult.value
+  const res = result.value
+  if (!r || r.empty || !res || res.status === 'COMPLETED') return
+  const shown = improvSituations(res.problem)
+  const said = improvAnswers(res.myAnswer)
+  const i = r.best ?? said.reduce((best, a, k) => ((a?.length ?? 0) > (said[best]?.length ?? 0) ? k : best), 0)
+  const st = shown[i]
+  const best = st && said[i] ? { who: st.who, line: st.line, answer: said[i], reaction: r.reactions[i] } : null
+  try {
+    storyFile.value = await componentFile(ImprovStoryCard, { grade: r.grade, rank: r.rank, score: res.myScore ?? 0, best }, 'dark', `match-improv-${res.gameId}.png`)
+  } catch {
+    storyFile.value = null
+  }
+})
+function shareStory() {
+  const file = storyFile.value
+  if (!file) return
+  // 그림을 누른 사람이 가입 없이 바로 해 볼 링크를 클립보드에 (인스타 링크 스티커에 붙인다)
+  void copyText(withShareRef(`${window.location.origin}/try/improv?utm_source=instagram&utm_medium=story`))
+  void shareFiles([file]).then((r) => { if (r === 'saved') showToast('그림을 저장했어요. 링크도 복사했어요') })
+}
+
 const improvResult = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.myFeedback) : null))
+const opponentImprov = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.opponentFeedback) : null))
 const improvGrade = computed(() => (key.value === 'improv' && !improvResult.value?.empty && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))
 
 // 이름 뒤 조사 이/가 (AI 심판이, AI 셰프가). 받침이 없는 글자·한글이 아니면 '가'
@@ -820,10 +930,11 @@ function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']
   if (d.status === 'CANCELED') return '취소'
   if (d.status === 'VOTING') return '투표 중'
-  if (d.status === 'AWAITING_RESULT') return '결과 기다림'
+  // '기다리는 중'과 '결과 기다림'이 어떻게 다른지 몰랐다: 무엇을 기다리는지 말한다 (경로 전부 훑기 2절)
+  if (d.status === 'AWAITING_RESULT') return '경기 결과 기다림'
   if (d.myJudging) return isVote.value ? '확인 중' : '채점 중'
-  if (d.playMode === 'REALTIME') return d.opponent ? '하는 중' : '기다리는 중'
-  return d.opponent ? '상대 차례' : '기다리는 중'
+  if (d.playMode === 'REALTIME') return d.opponent ? '하는 중' : '상대 기다림'
+  return d.opponent ? '상대가 푸는 중' : '상대 찾는 중'
 }
 // 끝나지 않은 실시간 판은 결과 카드 대신 그 판으로 (대기실·대전 화면)
 // 새로고침·뒤로 가기로 판을 놓쳤으면 내지 않은 판을 이어서 한다 (서버가 같은 판을 돌려준다).
@@ -859,6 +970,11 @@ onMounted(async () => {
   }
   // 내 경기의 '이어서 하기'로 왔으면 내지 않은 판을 바로 이어서 (서버가 같은 판을 돌려준다)
   if (route.query.resume) {
+    dropQuery()
+    await start()
+  }
+  // 홈 '한 판 더'(?again=1): 게임 첫 화면을 거치지 않고 바로 판으로 (경로 4 리뷰 G3)
+  if (route.query.again && !play.value && !result.value) {
     dropQuery()
     await start()
   }

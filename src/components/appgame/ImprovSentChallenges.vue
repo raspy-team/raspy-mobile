@@ -26,8 +26,9 @@ type Sent = components['schemas']['SentChallenge']
 const props = defineProps<{ visitorId: string }>()
 const rows = ref<Sent[]>([])
 
+// 등급이 안 나온 판(셋 다 비움·마감 넘김)은 점수 대신 그 말로: "친구 2 · 0점"만 다른 줄과 달랐다 (경로 10 리뷰 I8)
 function gradeOf(line?: string | null, score?: number) {
-  return line?.match(/\d등급/)?.[0] ?? `${score ?? 0}점`
+  return line?.match(/\d등급/)?.[0] ?? (score ? `${score}점` : '대답 없음')
 }
 
 onMounted(async () => {

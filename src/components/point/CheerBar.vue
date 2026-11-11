@@ -3,8 +3,10 @@
     <div class="flex items-center justify-between gap-2">
       <!-- 응원 칸은 응원단장 통통 (docs/mascots.md). 맞히면 신나고, 못 맞혀도 담담하게 -->
       <h2 class="t-heading flex items-center gap-2"><MatchMascot who="tong" :mood="state.mine?.outcome === 'WIN' ? 'cheer' : state.mine?.outcome === 'LOSS' ? 'sad' : 'smile'" :size="32" aria-hidden="true" />누가 이길까요?</h2>
-      <span class="t-micro">시작 전에만 · 고를 때 배수가 정해져요</span>
+      <span class="t-micro">시작 전에만</span>
     </div>
+    <!-- 처음 보는 사람에게 포인트·배수·확률이 무슨 뜻인지 한 줄로 (경로 4 훑기) -->
+    <p class="t-caption mt-1 break-keep">이길 쪽을 고르면 끝나고 맞혔는지 알려요. 포인트를 걸면 맞힐 때 배수만큼 돌려받아요(이길 확률이 낮을수록 배수가 커요)</p>
     <!-- 편마다 배수(이기면 몇 배로 돌려받나)·이길 확률·응원 수. 편은 1:1이면 사람, 팀이면 팀 -->
     <div class="mt-3 grid gap-2" :style="{ gridTemplateColumns: `repeat(${Math.min(state.board.length, 3)}, minmax(0, 1fr))` }">
       <button

@@ -39,8 +39,9 @@
         </div>
       </UiEmptyState>
 
+      <!-- 남의 경기 기록(?userId)을 보러 온 사람에게 '경기 찾기'는 엉뚱하다 (경로 6 리뷰 P13) -->
       <UiEmptyState v-else-if="!visible.length" class="pt-16" mascot="tong" title="아직 끝난 경기가 없어요">
-        <UiButton to="/">경기 찾기</UiButton>
+        <UiButton v-if="!userId" to="/">경기 찾기</UiButton>
       </UiEmptyState>
 
       <div v-else class="ui-appear">
@@ -116,13 +117,13 @@
     </UiSheet>
 
     <!-- 또 보고 싶어요 · 도전해요: 대상이 여럿이면 고른다 -->
-    <UiSheet :model-value="!!picking" :title="picking?.kind === 'watch' ? '누구 경기를 또 보고 싶어요?' : '누구에게 도전할까요?'" @update:model-value="picking = null">
+    <UiSheet :model-value="!!picking" :title="picking?.kind === 'watch' ? '누구의 다음 경기를 알림으로 받을까요?' : '누구에게 도전할까요?'" @update:model-value="picking = null">
       <UiList>
         <UiListItem
           v-for="t in picking?.targets || []"
           :key="t.id"
           :title="t.name"
-          :subtitle="picking?.kind === 'watch' && picking.post.watching?.includes(t.id) ? '보는 중' : ''"
+          :subtitle="picking?.kind === 'watch' && picking.post.watching?.includes(t.id) ? '알림 받는 중' : ''"
           chevron
           @click="act(picking.post, picking.kind, t)"
         />
@@ -264,8 +265,11 @@ async function loadFocus() {
   }
 }
 
+// 탭은 주소에만 적어 둔다(새로 고침해도 그 탭). router.replace로 query를 바꾸면 화면 key(App.vue)가 바뀌어
+// 통째로 새로 그려지고(맨 위로) 목록을 두 번 불렀다 (가로 훑기 1절)
 watch(tab, (t) => {
-  router.replace({ query: { ...route.query, tab: t === 'near' ? undefined : t } })
+  const url = router.resolve({ query: { ...route.query, tab: t === 'near' ? undefined : t } }).fullPath
+  window.history.replaceState({ ...window.history.state, current: url }, '', url)
   reload()
 })
 
@@ -304,7 +308,7 @@ async function toggleWatch(post, target) {
     })
     if (on) {
       feel('tap')
-      showToast(`${target.name}님 경기가 시작되면 알려 드릴게요`)
+      showToast(`${target.name}님 경기가 시작되면 알림함에 와요`)
     }
   } catch (e) {
     post.watching = !on ? [...(post.watching || []), target.id] : (post.watching || []).filter((id) => id !== target.id)
@@ -346,9 +350,10 @@ function share(p) {
   menuPost.value = null
   sharePost.value = p
 }
+// 친구 초대: 첫 주소로 보내면 받은 친구가 무엇에 초대받았는지 모른 채 가입 화면을 만났다. 가입 없이 바로 되는 한 판으로 (경로 6 리뷰 P3)
 async function inviteFriends() {
-  const url = window.location.origin
-  const msg = await shareLink(url, '같이 한 판 할래요? Match에서 경기를 잡아요', { title: 'Match', copied: '초대 링크를 복사했어요' })
+  const url = `${window.location.origin}/try/improv?utm_source=invite`
+  const msg = await shareLink(url, '나랑 임기응변 등급 붙어 볼래? 가입 없이 바로 돼', { title: '매치', copied: '초대 링크를 복사했어요' })
   if (msg) showToast(msg)
 }
 function openReport(p) {
@@ -363,12 +368,14 @@ async function submitReport() {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     const { data: done } = await api.post('/api/reports', { targetType: 'GAME', targetId: Number(reportPost.value.id), reason })
     showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
+    reportPost.value = null
   } catch (e) {
     // 연결이 끊겨도 '이미 신고했다'고 해 신고가 된 줄 알았다 (목적 판정 6)
     showToast(e.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
+    // 연결 오류면 고른 사유·쓴 글을 버리지 않고 시트를 연 채로 둔다 (경로 6 리뷰 P7)
+    if (e.response?.data?.message) reportPost.value = null
   } finally {
     reporting.value = false
-    reportPost.value = null
   }
 }
 

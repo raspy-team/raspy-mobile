@@ -127,6 +127,8 @@ const KINDS = {
   SAFETY: { icon: 'shield-halved', bg: 'bg-surface-2 text-fg' },
   ORG: { icon: 'building', bg: 'bg-surface-2 text-fg' },
   CHAMPION: { icon: 'crown', bg: 'bg-signal-soft text-signal-fg' },
+  // 동호회 가입·대회 참가: 예전엔 친구 알림 모양이었다 (경로 7 리뷰 K8)
+  CLUB: { icon: 'users', bg: 'bg-surface-2 text-fg' },
   OTHER: { icon: 'far fa-bell', bg: 'bg-surface-2 text-fg' },
 }
 function kind(type = '') {
@@ -139,6 +141,7 @@ function kind(type = '') {
   if (type === 'SAFETY') return KINDS.SAFETY
   if (type === 'ORG_VERIFY') return KINDS.ORG
   if (type === 'CHAMPION_SEAT') return KINDS.CHAMPION
+  if (type === 'CLUB') return KINDS.CLUB
   if (type.startsWith('GAME') || ['INBOX', 'MY_GAME', 'CREATOR_NEW_GAME'].includes(type)) return KINDS.GAME
   return KINDS.OTHER
 }
@@ -152,10 +155,15 @@ function dayLabel(iso) {
   return diff <= 0 ? '오늘' : diff === 1 ? '어제' : diff < 7 ? '이번 주' : '지난 알림'
 }
 
+// 사람이 보낸 친구 요청 알림은 맨 위 "친구 요청 n개" 줄이 맡는다. 목록에도 두 번 보였고, 수락·거절한 뒤에도 남아 있었다 (경로 6 리뷰 P5).
+// 동호회·대회 신청 알림도 같은 종류를 빌려 쓰지만 주소가 프로필이 아니라 남긴다
+const isPersonFriendRequest = (n) => n.type === 'FRIEND_REQUEST' && String(n.url ?? '').includes('/profile/')
+const listed = computed(() => inbox.notifications.filter((n) => !isPersonFriendRequest(n)))
+
 // 같은 날, 같은 종류, 같은 이동 주소(같은 경기)는 하나로 묶는다 ("비슷한 알림 N개 더")
 const groups = computed(() => {
   const out = []
-  for (const n of inbox.notifications) {
+  for (const n of listed.value) {
     const label = dayLabel(n.createdAt)
     let g = out.find((x) => x.label === label)
     if (!g) out.push((g = { label, items: [] }))
@@ -209,5 +217,9 @@ function goProfile(id) {
   router.push('/profile/' + id)
 }
 
-onMounted(refreshInbox)
+onMounted(async () => {
+  await refreshInbox()
+  // 위 줄이 맡은 친구 요청 알림은 여기서 읽은 것으로 (안 읽은 점이 보이지 않는 알림 때문에 남지 않게)
+  inbox.notifications.filter((n) => isPersonFriendRequest(n) && !n.isRead).forEach(markNotificationRead)
+})
 </script>

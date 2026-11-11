@@ -18,7 +18,8 @@
 
     <main ref="listRef" class="flex-1 overflow-y-auto px-4 py-3 space-y-2" :style="{ paddingBottom: info?.writable ? '88px' : '24px' }" aria-live="polite">
       <UiListSkeleton v-if="loading" :rows="4" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
+      <!-- 이미 대화가 보이는데 배경에서 다시 불러오기만 실패하면 대화를 덮지 않는다 (경로 5 리뷰 S21) -->
+      <UiEmptyState v-else-if="error && !messages.length" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
         <UiButton variant="secondary" @click="loadAndConnect">다시 시도</UiButton>
         <UiButton variant="ghost" class="mt-2" :to="`/games/${gameId}`">경기로 돌아가기</UiButton>
       </UiEmptyState>
@@ -32,14 +33,15 @@
           <p v-if="newDay(i)" class="text-center t-micro py-2">{{ day(m.timestamp) }}</p>
           <div v-if="m.senderId === me" class="flex justify-end items-end gap-1.5 pl-12">
             <span class="t-micro pb-1 flex-shrink-0">{{ time(m.timestamp) }}</span>
-            <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words">{{ m.content }}</p>
+            <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words"><ChatText :text="m.content" /></p>
           </div>
           <div v-else class="flex items-end gap-2 pr-12">
             <UiAvatar v-if="firstOfRun(i)" :src="avatarOf(m.senderId)" :name="m.sender" :user-id="m.senderId" size="xs" class="mb-0.5" />
             <span v-else class="w-6 flex-shrink-0" aria-hidden="true"></span>
             <div class="min-w-0">
               <p v-if="firstOfRun(i)" class="t-micro mb-0.5">{{ m.sender }}</p>
-              <p class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words">{{ m.content }}</p>
+              <!-- 1:1 채팅처럼 앱 주소는 눌리는 링크로 (경로 5 리뷰 S22) -->
+              <p class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words"><ChatText :text="m.content" /></p>
             </div>
             <span class="t-micro pb-1 flex-shrink-0">{{ time(m.timestamp) }}</span>
           </div>
@@ -63,6 +65,7 @@
 </template>
 
 <script setup lang="ts">
+import ChatText from '../../components/chat/ChatText.vue'
 // 팀 경기 단톡방. 방은 서버 TeamChatService가 연다(승인된 둘 이상). 메시지는 DM과 같은 웹소켓 길(/app/chat/{roomId})을 쓴다.
 // 멤버가 바뀌거나 경기가 끝나 닫히는 것은 내 채널 신호(refreshOnChange)로 다시 불러온다 (폴링하지 않는다)
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'

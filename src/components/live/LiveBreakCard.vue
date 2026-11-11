@@ -25,6 +25,8 @@
 import { ref } from 'vue'
 import { POST } from '@/api/client'
 import { UiButton } from '../ui'
+import { useToast } from '@/composables/useToast'
+const { showToast } = useToast()
 import MatchMascot from '../mascot/MatchMascot.vue'
 
 export type LiveBreak = { set: number; final: boolean; viewers: number; reactions: number; topEmoji?: string; shouts: { text: string; count: number }[] }
@@ -33,6 +35,9 @@ const thanked = ref(false)
 
 async function thank() {
   thanked.value = true
-  await POST('/api/games/{gameId}/live/thanks', { path: { gameId: props.gameId } }).catch(() => { thanked.value = false })
+  await POST('/api/games/{gameId}/live/thanks', { path: { gameId: props.gameId } }).catch(() => {
+    thanked.value = false
+    showToast('고마움을 전하지 못했어요. 다시 눌러 주세요') // 말없이 되돌아가 눌렸는지 몰랐다
+  })
 }
 </script>

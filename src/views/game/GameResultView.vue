@@ -2,13 +2,16 @@
   <div>
   <UiTopBar title="경기 결과" back="/game">
     <!-- 공유는 위 막대 아이콘 하나 (애플식: 아래 '공유' 버튼은 이름 없이도 안다) -->
-    <template #right><UiIconButton icon="share" label="공유" @click="onShare" /></template>
+    <!-- 확정 전에는 받은 사람이 볼 결과가 없어 소식에서 "그 경기를 찾지 못했어요"를 봤다: 확정된 뒤에만 (경로 5 리뷰 S13) -->
+    <template #right><UiIconButton v-if="!isLoading && !resultError && confirmed && !disputed" icon="share" label="공유" @click="onShare" /></template>
   </UiTopBar>
 
   <!-- 결과를 보여줄 수 없을 때 (아직 안 끝난 경기 등) -->
   <main v-if="!isLoading && resultError" class="px-4 pt-4 max-w-xl mx-auto">
-    <UiEmptyState :icon="resultMissing ? 'fas fa-circle-xmark' : ''" mascot="match" :title="resultError" :description="resultMissing ? '주소가 바뀌었거나 지워진 경기예요' : '경기가 끝나면 여기서 결과를 볼 수 있어요'">
-      <UiButton to="/game">내 경기로</UiButton>
+    <!-- 연결 오류도 "경기가 끝나면 볼 수 있어요"라 끝난 경기를 보러 온 사람이 결과가 없는 줄 알았다: 연결 오류는 다시 시도 (경로 5 리뷰 S11) -->
+    <UiEmptyState :icon="resultMissing ? 'fas fa-circle-xmark' : ''" mascot="match" :title="resultError" :description="resultMissing ? '주소가 바뀌었거나 지워진 경기예요' : resultOffline ? '연결이 돌아오면 다시 해 주세요' : '경기가 끝나면 여기서 결과를 볼 수 있어요'">
+      <UiButton v-if="resultOffline" @click="retryLoad">다시 시도</UiButton>
+      <UiButton :variant="resultOffline ? 'ghost' : 'primary'" to="/game">내 경기로</UiButton>
     </UiEmptyState>
   </main>
 
@@ -436,6 +439,7 @@ function setRuleRating(n) {
   ruleRating.value = n
 }
 
+let playerReviewSaved = false
 function submitReviewAndGoHome() {
   // 리뷰 제출 전 유효성 검사
   if (review.value.manner === 0 || review.value.performance === 0) {
@@ -453,7 +457,14 @@ function submitReviewAndGoHome() {
     .then(() => {
       // 상대방 리뷰 제출
       // 화면이 "○○님은 어땠나요?"라고 묻는 그 사람을 평가한다 (팀·각자 경기는 서버가 대상을 꼭 받는다)
+      // 앞서 상대 평가만 저장되고 규칙 평가가 실패했으면 다시 보낼 때 건너뛴다. 예전엔 "이미 평가했어요"에 막혀 끝내 보내지 못했다 (경로 5 리뷰 S12)
+      if (playerReviewSaved) return Promise.resolve()
       return api.post(`/api/games/${gameId}/review`, { ...review.value, targetId: opponent.value.id })
+        .then(() => (playerReviewSaved = true))
+        .catch((e) => {
+          if (/이미/.test(e.response?.data?.message || '')) return (playerReviewSaved = true)
+          throw e
+        })
     })
     .then(() => {
       // 규칙 평가 제출 (점수가 있을 때만)
@@ -527,7 +538,9 @@ const ratingDelta = computed(() => (myRating.value ? myRating.value.after - myRa
 // 평가는 아직 안 남긴 1:1 경기에서만 묻는다 (이미 낸 사람에게 다시 묻지 않게)
 const { pendingReviewGameIds } = useActiveGamePolling()
 const reviewSent = ref(false)
-const canReview = computed(() => !reviewSent.value && isParticipant.value && confirmed.value && format.value === 'DUEL' && pendingReviewGameIds.value.includes(Number(gameId)))
+// 평가할 수 있는지는 결과 응답이 알려 준다. 예전엔 진행 중 경기 폴링 목록을 아직 못 받으면 평가하러 온 사람이 칸을 못 찾았다 (경로 5 리뷰)
+const serverCanReview = ref(false)
+const canReview = computed(() => !reviewSent.value && isParticipant.value && confirmed.value && format.value === 'DUEL' && (serverCanReview.value || pendingReviewGameIds.value.includes(Number(gameId))))
 // 평가 없이 사진만 올릴 수 있는 사람: 확정된 경기의 참가자 중 평가 칸이 없는 사람
 const photoOnly = computed(() => !canReview.value && isParticipant.value && confirmed.value && !aiGame.value)
 const uploadingPictures = ref(false)
@@ -565,6 +578,12 @@ const unselectedPictures = computed(() => {
 const resultError = ref('')
 // 없는 경기(404)에 '끝나면 여기서 볼 수 있어요'는 맞지 않는다 (11/5 밤샘 C)
 const resultMissing = ref(false)
+const resultOffline = ref(false)
+function retryLoad() {
+  resultError.value = ''
+  isLoading.value = true
+  load().then(() => confirmed.value && loadBeats())
+}
 
 // 화면 계산: user1이 나(참가자면), winnerIdx 1·2도 user1·user2 기준으로 맞춰져 있다
 // 팀·각자 경기: 서버의 편(sides) 순서, 등수만 낸 결과인지
@@ -717,6 +736,7 @@ async function load() {
     rejectsLeft.value = res.data.rejectsLeft ?? 3
     disputed.value = !!res.data.disputed
     myRating.value = res.data.myRating ?? null
+    serverCanReview.value = !!res.data.canReview
     game.value = res.data.gameSummary
     startDate.value = res.data.startDate
     setResults.value = res.data.setResults
@@ -759,6 +779,7 @@ async function load() {
   } catch (err) {
     resultError.value = err.response?.data?.message || '결과를 불러오지 못했어요'
     resultMissing.value = err.response?.status === 404
+    resultOffline.value = !err.response || err.response.status >= 500
   } finally {
     isLoading.value = false
   }
@@ -1066,7 +1087,7 @@ async function onShare() {
     }
   }
   const opponentName = who(user1.value.id === currentUserId.value ? user2.value : user1.value)
-  const msg = await shareGameInvite(Number(gameId), `${opponentName}님과의 경기 결과 – Match`, { title: 'Match' })
+  const msg = await shareGameInvite(Number(gameId), `${opponentName}님과의 경기 결과`, { title: '매치' })
   if (msg) showToast(msg)
 }
 </script>

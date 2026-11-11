@@ -2581,6 +2581,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/votes/{gameId}/guest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 투표 카드 하나 (로그인 없이)
+         * @description 투표 링크를 받은 사람. 기기 번호마다 한 표
+         */
+        get: operations["guestVoteCard"];
+        put?: never;
+        /**
+         * 투표하기 (로그인 없이)
+         * @description 기기 번호마다 대결 하나에 한 표. 접속 주소로도 한도를 둔다
+         */
+        post: operations["guestVote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/realtime/{gameId}/timeout": {
         parameters: {
             query?: never;
@@ -3083,6 +3107,26 @@ export interface paths {
          * @description orgId로 기존 조직에 붙이거나, 없으면 name·type(비우면 신청한 이름·종류)으로 조직을 만든다. 파일은 바로 지운다
          */
         post: operations["approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/no-show/{reportId}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 노쇼 이의 받지 않기 (관리자 전용)
+         * @description 기록·처벌은 그대로, 이의만 닫고 이의 낸 사람에게 알린다
+         */
+        post: operations["dismiss"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4450,6 +4494,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{gameId}/live/guest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 경기 중계 보기 (로그인 없이)
+         * @description 중계 링크를 받은 사람. 점수·세트·응원 수만. 응원·반응은 가입한 뒤
+         */
+        get: operations["liveGuest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{gameId}/live/context": {
         parameters: {
             query?: never;
@@ -5257,6 +5321,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/app-games/realtime/{gameId}/watch/guest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 관전하기 (로그인 없이)
+         * @description 관전 링크를 받은 사람. 보기만, 응원은 가입한 뒤
+         */
+        get: operations["watchGuest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/app-games/realtime/{gameId}/invite": {
         parameters: {
             query?: never;
@@ -5987,7 +6071,7 @@ export interface components {
         OrgRenameRequest: {
             name: string;
             /** @enum {string} */
-            type?: "UNIVERSITY" | "COMPANY" | "OTHER";
+            type?: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
         };
         WatchFollowState: {
             watching: boolean;
@@ -6559,7 +6643,7 @@ export interface components {
             id: number;
             name: string;
             /** @enum {string} */
-            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
             /** @enum {string} */
             status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED";
             rejectReason?: string;
@@ -6704,6 +6788,8 @@ export interface components {
             /** Format: int64 */
             from?: number;
             k?: string;
+            /** Format: int64 */
+            duel?: number;
         };
         GuestPlayResponse: {
             /** Format: int64 */
@@ -7161,6 +7247,11 @@ export interface components {
             playId: number;
             text: string;
         };
+        GuestVoteRequest: {
+            /** Format: int64 */
+            playId: number;
+            visitorId: string;
+        };
         MoveRequest: {
             word: string;
         };
@@ -7332,7 +7423,7 @@ export interface components {
             orgId?: number;
             name?: string;
             /** @enum {string} */
-            type?: "UNIVERSITY" | "COMPANY" | "OTHER";
+            type?: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
         };
         DailyAccessResponse: {
             isFirstAccess: boolean;
@@ -7412,6 +7503,7 @@ export interface components {
             /** Format: int32 */
             players: number;
             teams: boolean;
+            appGameKey?: string;
         };
         Top3RuleStatsDto: {
             /** Format: int64 */
@@ -7511,6 +7603,8 @@ export interface components {
             /** Format: int32 */
             players: number;
             setThisWeek: boolean;
+            /** Format: int32 */
+            grade?: number;
         };
         DayCount: {
             /** Format: date */
@@ -7955,14 +8049,14 @@ export interface components {
             id: number;
             name: string;
             /** @enum {string} */
-            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
         };
         OrgMembership: {
             /** Format: int64 */
             orgId: number;
             name: string;
             /** @enum {string} */
-            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
             /** @enum {string} */
             visibility: "ALL" | "SAME_ORG" | "HIDDEN";
             /** Format: date-time */
@@ -8013,14 +8107,14 @@ export interface components {
             message: string;
             url?: string;
             /** @enum {string} */
-            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT" | "PARTNER_NEARBY";
+            type: "GAME_START" | "GAME_END" | "GAME_RESULT_CHECK" | "GAME_RESULT_REJECTED" | "GAME_COMMENT" | "COMMENT_REPLY" | "INBOX" | "MY_GAME" | "DM" | "TEAM_CHAT" | "GAME_JOIN_APPROVED" | "APP_TURN" | "REALTIME_CALL" | "FRIEND_REQUEST" | "FRIEND_APPROVE" | "FRIEND_REJECT" | "CLUB" | "FRIEND_CREATE_GAME" | "FRIEND_GAME_START" | "FRIEND_GAME_FINISH" | "GAME_LIKE" | "GAME_CONFIRMED" | "CREATOR_NEW_GAME" | "PLAY_WITH_ME_TOO_REQUEST" | "PLAY_WITH_ME_TOO_ACCEPT" | "PLAY_WITH_ME_TOO_REJECT" | "APP_DUEL_RESULT" | "APP_PLAY_JUDGED" | "APP_VOTE_STARTED" | "GAME_SCHEDULED" | "GAME_REMINDER" | "GAME_RESULT_DISPUTED" | "SAFETY" | "DAILY_PUZZLE" | "ORG_VERIFY" | "CHAMPION_SEAT" | "PARTNER_NEARBY";
             /** Format: date-time */
             createdAt: string;
             isRead: boolean;
         };
         SettingDto: {
             /** @enum {string} */
-            category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
+            category: "GAME" | "CHALLENGE" | "FRIEND" | "CLUB" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
             label: string;
             description: string;
             enabled: boolean;
@@ -8098,6 +8192,8 @@ export interface components {
             /** Format: double */
             score: number;
             line?: string;
+            gameKey: string;
+            answered: boolean;
         };
         SentChallenge: {
             /** Format: int64 */
@@ -8257,6 +8353,7 @@ export interface components {
             /** Format: int64 */
             myPeerVoteTargetId?: number;
             myRating?: components["schemas"]["MyRatingChange"];
+            canReview: boolean;
         };
         GameSummaryResponse: {
             /** Format: int64 */
@@ -8301,6 +8398,7 @@ export interface components {
             ruleStatisticsOfOwner?: components["schemas"]["UserGameStatisticsDTO"];
             challengers: components["schemas"]["ApplicantInfo"][];
             isAppliedByMe: boolean;
+            isApprovedMe: boolean;
             /** @enum {string} */
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             /** @enum {string} */
@@ -9081,7 +9179,7 @@ export interface components {
             id: number;
             name: string;
             /** @enum {string} */
-            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
             /** Format: int64 */
             members: number;
             /** Format: date-time */
@@ -9098,7 +9196,7 @@ export interface components {
             orgId?: number;
             name: string;
             /** @enum {string} */
-            type: "UNIVERSITY" | "COMPANY" | "OTHER";
+            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
             /** @enum {string} */
             status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED";
             rejectReason?: string;
@@ -9259,7 +9357,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                category: "GAME" | "CHALLENGE" | "FRIEND" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
+                category: "GAME" | "CHALLENGE" | "FRIEND" | "CLUB" | "FRIEND_ACTIVITY" | "RULE" | "COMMENT" | "LIKE" | "DM" | "DAILY" | "NEIGHBOR";
             };
             cookie?: never;
         };
@@ -10452,7 +10550,7 @@ export interface operations {
             query?: {
                 orgId?: number;
                 name?: string;
-                type?: "UNIVERSITY" | "COMPANY" | "OTHER";
+                type?: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
                 agree?: boolean;
             };
             header?: never;
@@ -12660,6 +12758,56 @@ export interface operations {
             };
         };
     };
+    guestVoteCard: {
+        parameters: {
+            query: {
+                visitorId: string;
+            };
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppVoteCard"];
+                };
+            };
+        };
+    };
+    guestVote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuestVoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppVoteCard"];
+                };
+            };
+        };
+    };
     timeout: {
         parameters: {
             query?: never;
@@ -13277,6 +13425,26 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["Unit"];
                 };
+            };
+        };
+    };
+    dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -14726,6 +14894,7 @@ export interface operations {
         parameters: {
             query?: {
                 k?: string;
+                visitorId?: string;
             };
             header?: never;
             path: {
@@ -14880,6 +15049,28 @@ export interface operations {
         };
     };
     live: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LiveGame"];
+                };
+            };
+        };
+    };
+    liveGuest: {
         parameters: {
             query?: never;
             header?: never;
@@ -15795,6 +15986,28 @@ export interface operations {
         };
     };
     watch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["WatchState"];
+                };
+            };
+        };
+    };
+    watchGuest: {
         parameters: {
             query?: never;
             header?: never;

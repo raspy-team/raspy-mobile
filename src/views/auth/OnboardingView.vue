@@ -9,6 +9,13 @@
       <UiSkeleton class="h-32 w-full mt-8" />
     </main>
 
+    <!-- 불러오기 실패: 막 가입한 사람에게 예전 가입자용 약관 화면이 뜨던 것 대신 (경로 1 리뷰 N8) -->
+    <main v-else-if="loadFailed" class="flex-1 max-w-md w-full mx-auto px-4 pt-16 text-center">
+      <p class="t-title">불러오지 못했어요</p>
+      <p class="t-body text-fg-muted mt-2">연결이 돌아오면 다시 해 주세요</p>
+      <UiButton class="mt-6" variant="secondary" @click="load">다시 시도</UiButton>
+    </main>
+
     <!-- 약관만 남은 사람(예전 가입자) -->
     <main v-else-if="step === 'terms'" class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-32">
       <!-- 가입 길잡이 콕이 (docs/mascots.md) -->
@@ -72,8 +79,13 @@
           autocomplete="nickname"
         />
         <!-- 아이디는 접어 둔다: 가입 때 적은 아이디, 소셜 가입이면 서버가 지어 둔 아이디(u_…). 영문 아이디를 지어내야 '다음'이 눌리던 것을 없앴다 (목적 판정 11/11 부분 1) -->
-        <p v-if="username && !editingUsername" class="t-caption">
-          친구가 찾는 아이디 <b class="text-fg">@{{ username }}</b>
+        <!-- 서버가 지어 둔 아이디(u_…)는 보이지 않는다: "@u_k3j9x2ab"가 고장 난 아이디처럼 보였다 (경로 1 리뷰 N7) -->
+        <p v-if="username && !editingUsername && username.startsWith('u_')" class="t-caption">
+          아이디는 나중에 정해도 돼요
+          <button type="button" class="underline underline-offset-2 ml-1" @click="username = ''; editingUsername = true">지금 정하기</button>
+        </p>
+        <p v-else-if="username && !editingUsername" class="t-caption">
+          아이디 <b class="text-fg">@{{ username }}</b>
           <button type="button" class="underline underline-offset-2 ml-1" @click="editingUsername = true">바꾸기</button>
         </p>
         <UiInput
@@ -257,7 +269,11 @@ function finish() {
   router.replace(back || '/')
 }
 
-onMounted(async () => {
+const loadFailed = ref(false)
+onMounted(load)
+async function load() {
+  loading.value = true
+  loadFailed.value = false
   try {
     const { data } = await api.get('/api/auth/onboarding')
     needTerms.value = !data.termsAgreed
@@ -277,10 +293,11 @@ onMounted(async () => {
         username.value = signupId
       }
     }
-  } catch {
-    // 401이면 api.js가 시작 화면으로 보낸다
+  } catch (e) {
+    // 401이면 api.js가 시작 화면으로 보낸다. 그 밖의 실패는 다시 시도
+    if (e?.response?.status !== 401) loadFailed.value = true
   } finally {
     loading.value = false
   }
-})
+}
 </script>

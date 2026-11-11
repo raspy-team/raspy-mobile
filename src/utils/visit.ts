@@ -1,6 +1,7 @@
 // 유입 측정: 어느 채널로 와서 → 가입 → 첫 경기 → 다시 왔는지 (관리자 > 유입).
 // 기기마다 무작위 id를 하나 만들어 두고, 하루 한 번 서버에 방문을 남긴다. 로그인 전에 남겼으면 로그인 뒤 한 번 더 (그 사람을 붙인다).
 // 홍보 링크에는 ?utm_source=instagram&utm_campaign=1105 처럼 꼬리표를 단다
+import { NOTICE } from './notice'
 import { POST } from '../api/client'
 import { isStandalone } from './install'
 import { useToast } from '../composables/useToast'
@@ -113,8 +114,18 @@ export function markGuestPlayed() {
   }
 }
 
-/** 로그인한 뒤: 이 기기의 가입 전 판을 내 기록으로 옮긴다. 옮긴 수를 돌려준다 (할 게 없으면 0) */
-export async function claimGuestPlays(): Promise<number> {
+/** 방금 부른 옮기기의 결과 (옮긴 수, 실패면 -1). 막 가입한 화면이 '기록에 남았어요'를 옮기기가 된 때만 말하게 (경로 2 리뷰 N12) */
+let lastClaim: Promise<number> | null = null
+export function guestClaimResult(): Promise<number> {
+  return lastClaim ?? Promise.resolve(localStorage.getItem(GUEST_KEY) ? -1 : 0)
+}
+
+/** 로그인한 뒤: 이 기기의 가입 전 판을 내 기록으로 옮긴다. 옮긴 수를 돌려준다 (할 게 없으면 0, 실패면 -1) */
+export function claimGuestPlays(): Promise<number> {
+  lastClaim = claimNow()
+  return lastClaim
+}
+async function claimNow(): Promise<number> {
   const id = visitorId()
   if (!id || !localStorage.getItem('raspy_access_token2')) return 0
   // 상대 구하기 등록(H2)도 함께 붙인다
@@ -124,7 +135,7 @@ export async function claimGuestPlays(): Promise<number> {
         localStorage.removeItem(PARTNER_KEY)
         // 가입하면 등록이 사라진 것처럼 보였다: 붙였다고 한 번 알린다
         const info = readPartnerInfo()
-        useToast().showToast(info ? `${info.dongName} ${info.sportLabel} 상대 구하기를 내 계정에 붙였어요. 상대가 생기면 알려 드려요` : '상대 구하기를 내 계정에 붙였어요. 상대가 생기면 알려 드려요')
+        useToast().showToast(info ? `${info.dongName} ${info.sportLabel} 상대 구하기를 내 계정에 붙였어요. 상대가 생기면 ${NOTICE}` : `상대 구하기를 내 계정에 붙였어요. 상대가 생기면 ${NOTICE}`)
       })
       .catch(() => {})
   }
@@ -134,6 +145,6 @@ export async function claimGuestPlays(): Promise<number> {
     localStorage.removeItem(GUEST_KEY)
     return data.claimed
   } catch {
-    return 0 // 다음에 열 때 다시
+    return -1 // 다음에 열 때 다시
   }
 }

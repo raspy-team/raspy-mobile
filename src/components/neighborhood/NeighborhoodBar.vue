@@ -3,7 +3,8 @@
     <!-- 동네가 있으면: 이름을 눌러 다른 동네로 바꾼다 (당근의 왼쪽 위 동네 이름) -->
     <button v-if="active" type="button" class="flex items-center gap-1.5 h-10 -ml-1 px-1 t-heading" :aria-label="`지금 동네 ${active.name}, 바꾸기`" @click="open = true">
       {{ active.name }}
-      <span v-if="active.nearbyCount" class="t-caption font-normal">근처 {{ active.nearbyCount }}개 동까지</span>
+      <!-- '근처 N개 동까지'는 무슨 범위인지 몰랐다: 보이는 경기의 범위라고 말한다 (경로 전부 훑기 4) -->
+      <span v-if="active.nearbyCount" class="t-caption font-normal">근처 동네 {{ active.nearbyCount }}곳 경기까지</span>
       <UiIcon name="chevron-down" class="text-xs" aria-hidden="true" />
     </button>
     <p v-if="active?.expired" class="t-caption text-danger-fg">
@@ -12,7 +13,11 @@
     </p>
 
     <!-- 동네가 없을 때의 '동네를 인증해 주세요' 카드는 뺐다: 경기를 보러 온 사람에게 위치 인증부터 권했다.
-         동네가 필요한 순간(신청·열기)엔 서버가 묻고(428) 인증 뒤 하던 화면으로 돌려보낸다 (목적 판정 11/11 4번) -->
+         동네가 필요한 순간(신청·열기)엔 서버가 묻고(428) 인증 뒤 하던 화면으로 돌려보낸다 (목적 판정 11/11 4번).
+         대신 이 목록이 전국 경기라는 것만 한 줄로 (경로 4 리뷰 G2: 서울 사람이 부산 경기 카드를 봤다). 못 불러왔을 때는 말하지 않는다 -->
+    <p v-else-if="loaded && !failed && !active" class="t-caption">
+      전국 경기예요 · <RouterLink to="/neighborhood" class="underline underline-offset-2">동네 인증</RouterLink>하면 가까운 경기만 보여요
+    </p>
 
     <UiSheet v-model="open" title="동네 고르기">
       <UiList>
@@ -30,6 +35,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
+import { useToast } from '@/composables/useToast'
 import type { components } from '@/api/schema'
 import { UiList, UiListItem, UiSheet } from '../ui'
 
@@ -44,20 +50,29 @@ const open = ref(false)
 const list = computed(() => data.value?.neighborhoods ?? [])
 const active = computed(() => list.value.find((n) => n.active))
 
+// 바꾸기가 실패하면 시트만 닫히고 말이 없었다 (경로 전부 훑기 4)
+const { showToast } = useToast()
 async function select(code: string) {
   open.value = false
   if (code === active.value?.code) return
-  data.value = (await POST('/api/neighborhoods/select', { body: { code } })).data
-  emit('changed')
+  try {
+    data.value = (await POST('/api/neighborhoods/select', { body: { code } })).data
+    emit('changed')
+  } catch (e) {
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '동네를 바꾸지 못했어요. 잠시 뒤 다시 해 주세요')
+  }
 }
 function go() {
   open.value = false
   router.push('/neighborhood')
 }
 
+const failed = ref(false)
 onMounted(async () => {
   try {
     data.value = (await GET('/api/neighborhoods/me')).data
+  } catch {
+    failed.value = true
   } finally {
     loaded.value = true
   }

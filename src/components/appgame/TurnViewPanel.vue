@@ -52,7 +52,7 @@
 
     <!-- 버튼: 가위바위보처럼 고르는 게임. 못 고르는 수는 흐리게 -->
     <div v-if="view.choices?.length" class="grid gap-2 mt-6" :style="{ gridTemplateColumns: `repeat(${choiceCols}, minmax(0, 1fr))` }">
-      <UiButton v-for="c in view.choices" :key="c.value" size="lg" variant="secondary" :icon="c.icon || undefined" :disabled="!myTurn || c.disabled" :loading="sending && picked === c.value" @click="pick(c.value)">
+      <UiButton v-for="c in view.choices" :key="c.value" size="lg" variant="secondary" :icon="c.icon || undefined" :disabled="!myTurn || c.disabled || (sending && picked !== c.value)" :loading="sending && picked === c.value" @click="pick(c.value)">
         {{ c.label }}
       </UiButton>
     </div>
@@ -118,7 +118,9 @@ const choiceCols = computed(() => {
 })
 
 const picked = ref('')
+// 보내는 중에는 다른 버튼을 막는다 (예전엔 스피너는 고른 버튼에만 돌고 다른 버튼이 눌렸다, 경로 8 P9)
 function pick(value: string) {
+  if (props.sending) return
   picked.value = value
   emit('move', value)
 }

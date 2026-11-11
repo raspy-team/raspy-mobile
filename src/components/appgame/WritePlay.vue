@@ -12,7 +12,8 @@
       <p class="t-micro text-right mt-1">{{ text.length }}/120</p>
     </div>
     <UiButton block size="lg" class="mt-3" :loading="submitting" :disabled="text.trim().length < 5" @click="finish">다 썼어요</UiButton>
-    <p class="t-caption text-center mt-2">두 사람의 글이 모이면 이름을 가리고 24시간 동안 투표를 받아요</p>
+    <!-- AI가 채점하는 글쓰기에는 투표가 없다: 투표 게임에만 (경로 2 리뷰) -->
+    <p v-if="vote" class="t-caption text-center mt-2">두 사람의 글이 모이면 이름을 가리고 24시간 동안 투표를 받아요</p>
   </div>
 </template>
 
@@ -21,7 +22,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton, UiInput } from '../ui'
 
-const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean; guide: string; placeholder: string }>()
+const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean; guide: string; placeholder: string; vote?: boolean }>()
 const emit = defineEmits<{ submit: [answer: string] }>()
 
 const text = ref('')

@@ -4,14 +4,14 @@
          칸마다 이미 배지가 있다. 고르는 길이 한 화면에 다섯이었다 (목적 판정 11/11 부분 2) -->
     <UiTopBar title="앱 게임" back>
       <template #right>
-        <UiIconButton icon="search" label="게임 찾기" @click="searching = !searching" />
-        <!-- 광장 입구 (UX ⑤: 홈의 '앱 게임'이 목록으로 바로 오고, 광장은 여기서) -->
-        <UiIconButton icon="map" label="광장" @click="router.push('/plaza')" />
+        <UiIconButton icon="search" label="게임 찾기" @click="toggleSearch" />
+        <!-- 광장 입구 (UX ⑤: 홈의 '앱 게임'이 목록으로 바로 오고, 광장은 여기서). '지도' 모양은 다른 화면에서 동네 경기 지도라 사람들 모양으로 (경로 2 리뷰 N7) -->
+        <UiIconButton icon="users" label="광장" @click="router.push('/plaza')" />
       </template>
     </UiTopBar>
 
     <main class="max-w-xl mx-auto px-4 pt-3 pb-16">
-      <UiInput v-if="searching" v-model="query" icon="search" placeholder="게임 찾기" />
+      <UiInput v-if="searching" ref="searchInput" v-model="query" icon="search" placeholder="게임 찾기" />
 
       <div v-if="loading" class="space-y-2 mt-5">
         <UiSkeleton v-for="n in 4" :key="n" class="h-20 w-full" />
@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 // 모든 앱 게임 (/games). 게임이 100개가 되어도: 검색 + 구조(지금 바로 붙기 / 편할 때 하기) + 최근에 한 게임 + 많이 하는 순
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -75,10 +75,19 @@ const all = ref(false)
 const shown = computed(() => (all.value || query.value.trim() ? filtered.value : filtered.value.slice(0, 8)))
 const filtered = computed(() => {
   const q = query.value.trim()
+  // 준비 중(할 수 없는) 게임은 목록에 섞지 않는다 (경로 전부 훑기 2절)
   return games.value
+    .filter((g) => g.available)
     .filter((g) => !q || g.title.includes(q) || g.summary.includes(q))
     .sort((a, b) => Number(b.available) - Number(a.available) || Number(b.key === PROMO) - Number(a.key === PROMO) || b.playCount - a.playCount)
 })
+
+// 돋보기를 누르면 칸에 바로 초점 (칸을 한 번 더 눌러야 키보드가 떴다, 경로 2 리뷰 N6)
+const searchInput = ref<{ focus?: () => void } | null>(null)
+function toggleSearch() {
+  searching.value = !searching.value
+  if (searching.value) nextTick(() => searchInput.value?.focus?.())
+}
 
 const loadFailed = ref(false)
 async function load() {

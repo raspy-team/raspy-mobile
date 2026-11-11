@@ -22,12 +22,37 @@
       </UiEmptyState>
     </main>
 
-    <main v-else-if="!s.total.games && !s.practiceGames" class="max-w-2xl mx-auto px-4 pt-16">
+    <!-- 앱 게임 기록(가입하며 옮긴 손님 판 포함)만 있는 사람도 '없음'이 아니다: 아래 '개인 최고 기록'을 보인다 (경로 6 리뷰 P4) -->
+    <main v-else-if="!s.total.games && !s.practiceGames && !s.bests.length" class="max-w-2xl mx-auto px-4 pt-16">
       <UiEmptyState mascot="match" title="아직 기록이 없어요">
         <!-- 기록이 없으면 찾기로 (정리 11/5: 앱 게임이 아니라 동네 경기가 주인공) -->
         <!-- 프로필 빈 상태와 같은 말: 같은 "한 판 하기"가 순위 화면에선 앱 게임으로 가서 헷갈렸다 (목적 판정 6) -->
         <UiButton v-if="isMe" to="/">경기 찾기</UiButton>
       </UiEmptyState>
+    </main>
+
+    <!-- 앱 게임 기록만 있는 사람: 빈 숫자 칸들 대신 그 기록만 -->
+    <main v-else-if="!s.total.games && !s.practiceGames" class="max-w-2xl mx-auto px-4 pt-4 pb-32 ui-appear">
+      <h2 class="t-heading mb-1">게임 기록</h2>
+      <UiList>
+        <UiListItem
+          v-for="b in s.bests"
+          :key="b.key"
+          :title="b.title"
+          :subtitle="showRank(b.rank, b.players) ? `기록 순위 ${b.rank}위 / ${b.players}명` : ''"
+          chevron
+          @click="router.push(`/play/${b.key}`)"
+        >
+          <template #leading>
+            <RuleThumb :rule="{ ruleTitle: b.title, appGameKey: b.key }" :size="36" bare />
+          </template>
+          <template #trailing>
+            <span v-if="b.grade" class="t-heading tabular-nums">{{ b.grade }}<span class="t-caption ml-0.5">등급</span></span>
+            <span v-else class="t-heading tabular-nums">{{ score(b.score) }}<span class="t-caption ml-0.5">{{ b.scoreUnit }}</span></span>
+          </template>
+        </UiListItem>
+      </UiList>
+      <p v-if="isMe" class="t-caption mt-6">사람과 한 판을 하면 승률·실력 점수가 여기에 생겨요</p>
     </main>
 
     <main v-else class="max-w-2xl mx-auto px-4 pt-4 pb-32 space-y-10 ui-appear">
@@ -218,7 +243,8 @@
             <template #trailing>
               <span class="flex items-center gap-2">
                 <UiBadge v-if="b.setThisWeek" tone="success">이번 주</UiBadge>
-                <span class="t-heading tabular-nums">{{ score(b.score) }}<span class="t-caption ml-0.5">{{ b.scoreUnit }}</span></span>
+                <span v-if="b.grade" class="t-heading tabular-nums">{{ b.grade }}<span class="t-caption ml-0.5">등급</span></span>
+                <span v-else class="t-heading tabular-nums">{{ score(b.score) }}<span class="t-caption ml-0.5">{{ b.scoreUnit }}</span></span>
               </span>
             </template>
           </UiListItem>
@@ -227,7 +253,7 @@
 
       <!-- 봇과 한 판은 사람 레이팅·순위와 따로 -->
       <section v-if="overview?.practice?.length">
-        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">AI 주민과 한 판 · 순위에 안 들어가요</span></h2>
+        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">AI 주민(앱이 만든 연습 상대)과 한 판으로만 매겨요 · 순위에 안 들어가요</span></h2>
         <UiList>
           <UiListItem v-for="p in overview.practice" :key="p.ruleId" :title="p.ruleTitle" :subtitle="`${p.games}판`" chevron @click="router.push(`/rules/${p.ruleId}`)">
             <template #trailing><span class="t-heading tabular-nums">{{ p.rating }}</span></template>
@@ -290,8 +316,10 @@
         <li><strong>±</strong>는 아직 확실하지 않은 정도예요. 판이 쌓이면 좁아지고, 오래 쉬면 다시 넓어져요. <strong>잠정</strong>은 아직 판이 적다는 뜻이에요.</li>
         <li><strong>순위</strong>는 그 게임을 사람과 5판, 서로 다른 상대 3명 이상과 하면 붙어요. AI 주민과 한 판은 연습이라 따로 세요.</li>
         <li><strong>종합</strong>은 게임별 점수를 모은 거예요. 판을 많이 해서 확실한 점수일수록 크게 쳐요.</li>
+        <li>종합 아래 작은 칸은 <strong>비슷한 게임끼리</strong>(예: 라켓 운동) 모은 점수, 그 아래 칩은 <strong>능력별</strong>(예: 순발력) 점수예요.</li>
       </ul>
-      <p class="t-micro mt-4">체스 사이트 lichess와 같은 Glicko-2 방식이에요.</p>
+      <!-- 영어 사이트 이름·전문어 대신 (경로 6 리뷰: 'Glicko-2·lichess') -->
+      <p class="t-micro mt-4">체스 순위에 쓰는 계산법과 같아요.</p>
     </UiSheet>
   </div>
 </template>
@@ -398,7 +426,8 @@ function matchWho(m) {
   if (m.players > 2) return `${m.players}명 중 ${m.place}등`
   return m.opponent ? `vs ${m.opponent.nickname}` : ''
 }
-const openMatch = (m) => router.push(`/feed?gameId=${m.gameId}`)
+// 최근 경기 줄은 그 경기 결과로 (소식 목록이 아니라, 경로 6 리뷰). 앱 대결은 그 대결 화면
+const openMatch = (m) => router.push(m.appGameKey ? `/play/${m.appGameKey}?duel=${m.gameId}` : `/games/${m.gameId}/result`)
 
 // 순위 문구: 10명 미만이면 '5명 중 2위', 넘으면 '상위 12%'
 function standing(rank, people) {

@@ -5,7 +5,9 @@
     <!-- 들어가면 오른쪽에서, 뒤로 가면 왼쪽에서 살짝. 하단 탭끼리는 움직이지 않는다 -->
     <RouterView v-slot="{ Component }">
       <Transition :name="pageTransition" mode="out-in">
-        <div :key="route.fullPath" class="h-full"><component :is="Component" class="h-full" /></div>
+        <!-- 화면 key는 주소 전체. 단 query만 바꾸는 화면(meta.keepOnQuery: 검색·가입/로그인 바꾸기·비밀번호 찾기 결과·선수 시트)은 경로만:
+             query를 바꿀 때마다 통째로 새로 그려져 쓰던 글·띄운 문구·키보드·열린 시트가 사라졌다 (가로 훑기 1절) -->
+        <div :key="route.meta.keepOnQuery ? route.path : route.fullPath" class="h-full"><component :is="Component" class="h-full" /></div>
       </Transition>
     </RouterView>
 

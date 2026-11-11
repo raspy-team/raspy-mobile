@@ -33,7 +33,9 @@
     >
       {{ state === 'running' ? '멈춤' : state === 'stopped' ? '다음' : '시작' }}
     </button>
-    <UiButton v-if="failed && !submitting" block size="lg" class="mt-4" @click="finish">다시 내기</UiButton>
+    <!-- 셋을 다 재지 못하면 서버가 받지 않는다: '다시 내기' 대신 이유를 (경로 8 P8) -->
+    <p v-if="failed && !submitting && records.length < targets.length" class="t-caption text-center mt-4 break-keep">시간 안에 셋을 다 재지 못해 기록이 남지 않았어요. 한 판 더 해 보세요</p>
+    <UiButton v-else-if="failed && !submitting" block size="lg" class="mt-4" @click="finish">다시 내기</UiButton>
 
     <ol class="mt-8 space-y-1 text-left">
       <li v-for="(r, i) in records" :key="i" class="flex justify-between t-caption tabular-nums">
@@ -133,7 +135,8 @@ onMounted(() => {
   timer = setInterval(() => {
     remaining.value = Math.max(0, props.timeLimitSeconds - Math.floor((Date.now() - startedAt) / 1000))
     // 시간이 다 되면 잰 데까지만 한 번 낸다 (셋을 못 채우면 서버가 받지 않아 0점)
-    if (remaining.value === 0 && !autoSent) { autoSent = true; finish() }
+    // 시간이 다 되면 큰 버튼도 멈춘다. 예전엔 낸 뒤에도 눌려 더 재는 줄 알았다 (경로 8 P8)
+    if (remaining.value === 0 && !autoSent) { autoSent = true; state.value = 'done'; finish() }
   }, 500)
 })
 onBeforeUnmount(() => {

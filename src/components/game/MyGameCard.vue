@@ -173,14 +173,14 @@ const state = computed(() => {
       if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
       if (!multi.value && opponent.value && (!matchDay.value || g.isOwner === false)) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${opponent.value.name}에게 메시지`, actionVariant: 'secondary' }
       return g.isOwner === false
-        ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
+        ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알림에 떠요' }
         : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
     }
     if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청 보기', actionVariant: 'signal' }
     if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 공유', actionVariant: 'secondary' }
     return { label: '모집 중', tone: 'neutral', action: 'share', actionLabel: '링크 공유', actionVariant: 'secondary' }
   }
-  if (g.status === 'REQUESTED') return { label: '승인 대기', tone: 'neutral', hint: `${g.ownerNickname}님이 승인하면 알려 드려요` }
+  if (g.status === 'REQUESTED') return { label: '승인 대기', tone: 'neutral', hint: `${g.ownerNickname}님이 승인하면 알림에 떠요` }
   // 여럿이 하는 경기는 승인돼도 다 모일 때까지 확정이 아니다
   if (g.status === 'APPROVED' && multi.value && g.gameStatus === 'MATCHING') {
     return { label: '승인됨', tone: 'neutral', hint: `${gathered.value} 모였어요. 다 모이면 확정돼요` }
@@ -188,7 +188,7 @@ const state = computed(() => {
   if (g.status === 'APPROVED') {
     if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
     if (!multi.value) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${g.ownerNickname}에게 메시지`, actionVariant: 'secondary' }
-    return { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알려 드려요' }
+    return { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알림에 떠요' }
   }
   if (g.status === 'REJECTED') return { label: '거절됨', tone: 'danger', hint: '다른 경기를 찾아보세요' }
   return { label: '대기', tone: 'neutral', hint: '' }

@@ -6,20 +6,18 @@
     </div>
 
     <template v-if="current">
-      <!-- 쓰는 동안(키보드가 올라온 동안)은 인물·사정 줄을 접어, 받은 말과 시계가 입력칸 위에 함께 보이게 한다 (목적 판정 11/11 10번: 높이 400에서 둘 다 화면 밖) -->
-      <template v-if="!typing">
-        <p class="t-caption mt-4 break-keep">{{ current.who }}</p>
-        <p class="t-micro mt-0.5 break-keep">{{ current.context }}</p>
-      </template>
+      <!-- 인물·사정은 늘 보인다. 쓰는 동안 접었더니 자동 초점과 겹쳐 누가 어떤 자리에서 한 말인지 읽기도 전에 접혔고,
+           '말하기'를 누를 때 다시 펼쳐지며 버튼이 손가락 밑에서 밀렸다 (경로 10 리뷰 I1·I2). 대신 한 덩어리로 좁게 쓰고, 키보드가 오르면 판 머리부터 보이게 올린다 -->
+      <p class="t-caption mt-3 break-keep">{{ current.who }} <span class="t-micro">· {{ current.context }}</span></p>
       <!-- 인물의 첫 마디 -->
-      <div class="mt-3 rounded-2xl rounded-tl-md bg-surface-2 px-4 py-3">
+      <div class="mt-2 rounded-2xl rounded-tl-md bg-surface-2 px-4 py-3">
         <p class="t-title break-keep">“{{ current.line }}”</p>
       </div>
 
       <!-- 내 대답 -->
       <template v-if="phase === 'answer'">
-        <div class="mt-5">
-          <UiInput ref="input" v-model="text" multiline :rows="typing ? 2 : 3" :maxlength="120" placeholder="그 자리에서 할 말을 써요" @focusin="onTypeStart" @focusout="typing = false" />
+        <div class="mt-4">
+          <UiInput ref="input" v-model="text" multiline :rows="3" :maxlength="120" placeholder="그 자리에서 할 말을 써요" @focusin="onTypeStart" />
           <!-- 한 번만 말한다는 걸 먼저 알린다 (걷기 P1-3: "고칠 수 있는 줄 알고 대충 눌렀는데 바로 넘어갔어") -->
           <p class="t-micro text-right mt-1 tabular-nums">{{ text.length }}/120</p>
           <p class="t-caption mt-1 break-keep">한 번만 말할 수 있어요. 시간이 다 되면 쓴 데까지 보내요</p>
@@ -41,7 +39,8 @@
           </p>
           <p v-else class="t-body break-keep">{{ reactions[index] }}</p>
         </div>
-        <UiButton v-if="phase === 'reacted'" block size="lg" class="mt-5" :loading="submitting" @click="next">
+        <!-- 채점이 막히면 이 버튼은 숨긴다: 판 아래 '다시 채점하기'가 같은 답을 다시 낸다 (경로 10 리뷰 I3: 눌러도 아무 일이 없는 버튼이었다) -->
+        <UiButton v-if="phase === 'reacted' && !failed" block size="lg" class="mt-5" :loading="submitting" @click="next">
           {{ index + 1 < situations.length ? '다음 상황' : '점수 보기' }}
         </UiButton>
       </template>
@@ -53,7 +52,7 @@
 // 임기응변 등급 한 판 (3단계 첫 게임, product/growth/game-plan.md ③): 상황 셋, 상황마다 45초 안에 한 번 대답한다.
 // 대답하면 인물이 한 줄로 반응하고(/api/improv/react, 가입 전에도), 되받아칠 수 없이 다음 상황으로. 셋이 끝나면 답 셋을 낸다.
 // 반응을 받으며 서버가 채점해 두므로 점수는 낼 때 바로 나온다. 반응을 못 받아도 판은 이어 간다
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { POST } from '@/api/client'
 import { track } from '@/utils/trackLog'
 import { UiButton, UiInput } from '../ui'
@@ -88,14 +87,17 @@ const whoShort = computed(() => ({ UP: '교수님이', SENIOR: '선배가', PEER
 // 반응은 AI라 가끔 10초를 넘는다(걷기: 첫 반응 10.9·15.3초). 45초까지 기다리되, 5초부터 '생각하는 중'으로 안심시킨다
 const REACT_TIMEOUT_MS = 45_000
 
-// 키보드가 올라오면 판 머리(상황 번호·시계)부터 보이게 끌어올린다
-const typing = ref(false)
+// 키보드가 올라오면 판 머리(상황 번호·시계·인물)부터 보이게 끌어올린다. 줄을 접지 않아 화면이 흔들리지 않는다
 const root = ref<HTMLElement | null>(null)
 function onTypeStart() {
-  typing.value = true
   // 키보드가 다 올라온 뒤에 맞춘다
   setTimeout(() => root.value?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 250)
 }
+// 낸 답의 채점이 막혔다(부모가 이 판을 그대로 두고 '다시 채점하기'를 보인다)
+const failed = ref(false)
+watch(() => props.submitting, (now, before) => {
+  if (before && !now && done) failed.value = true
+})
 
 let shownAt = Date.now()
 let startedAt = Date.now()
@@ -107,7 +109,7 @@ let done = false
 const SAVE_KEY = `improv_play_${props.playId}`
 function save() {
   try {
-    sessionStorage.setItem(SAVE_KEY, JSON.stringify({ index: index.value, said: said.value, reactions: reactions.value, shownAt, startedAt }))
+    sessionStorage.setItem(SAVE_KEY, JSON.stringify({ index: index.value, said: said.value, reactions: reactions.value, shownAt, startedAt, draft: text.value }))
   } catch { /* 저장이 막힌 브라우저면 예전처럼 처음부터 */ }
 }
 function restore() {
@@ -127,18 +129,18 @@ function restore() {
       phase.value = 'reacted'
     } else {
       remaining.value = Math.max(0, PER_SITUATION - Math.floor((Date.now() - shownAt) / 1000))
+      // '말하기' 전에 쓰던 글도 되살린다 (경로 3 리뷰 R1: 낸 상황만 남고 쓰던 글은 사라졌다)
+      if (typeof s.draft === 'string') text.value = s.draft
     }
   } catch { /* 깨진 저장은 무시한다 */ }
-}
-function clearSave() {
-  try { sessionStorage.removeItem(SAVE_KEY) } catch { /* 없음 */ }
 }
 
 function finish() {
   if (done) return
   done = true
   clearInterval(timer)
-  clearSave()
+  // 낸 뒤에도 이 탭의 저장은 지우지 않는다: 로그인 판은 제출이 실패하면 판을 닫고 "다시 열어 이어서 낼 수 있어요"라는데,
+  // 지웠더니 다시 열면 첫 상황부터 빈칸이었다 (가로 훑기 4). 저장은 판 번호마다 따로라 다음 판과 섞이지 않는다
   emit('submit', JSON.stringify(situations.value.map((_, i) => said.value[i] ?? '')))
 }
 
@@ -172,6 +174,9 @@ async function say() {
   phase.value = 'reacted'
   save()
 }
+
+// 쓰는 글도 이 탭에 (새로 고침·인스타 앱 안 브라우저를 닫았다 연 경우)
+watch(text, () => { if (phase.value === 'answer') save() })
 
 function next() {
   if (index.value + 1 >= situations.value.length) return finish()

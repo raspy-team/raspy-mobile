@@ -15,6 +15,7 @@
         <p v-if="appGame" class="t-caption mt-1">앱 게임 대회예요. 판마다 두 사람이 기간 안에 '경기하기'를 눌러 앱에서 겨뤄요</p>
       </div>
 
+      <p v-if="clubsFailed" class="t-caption text-danger-fg">내 동호회를 불러오지 못했어요. {{ clubId ? '이 동호회 대회로 열어요' : '동호회 대회는 동호회 화면에서 열어 주세요' }}</p>
       <div v-if="hostClubs.length || isAdmin">
         <p class="t-heading">주최</p>
         <div class="flex gap-2 mt-2 flex-wrap">
@@ -38,24 +39,7 @@
         <UiInput v-if="startPick === EXACT" v-model="f.startsAt" class="mt-2" type="datetime-local" />
         <p v-else-if="f.startsAt" class="t-caption mt-1">{{ matchTime(f.startsAt) }}</p>
       </div>
-      <div>
-        <p class="t-heading">라운드 기간</p>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <UiChip v-for="d in [1, 3, 7, 14]" :key="d" :selected="f.roundDays === d" @click="f.roundDays = d">{{ d === 1 ? '하루' : `${d}일` }}</UiChip>
-        </div>
-      </div>
-      <div>
-        <p class="t-heading">실력 점수 범위 (선택)</p>
-        <div class="grid grid-cols-2 gap-2 mt-2">
-          <UiInput v-model="f.minRating" type="number" inputmode="numeric" placeholder="이상" />
-          <UiInput v-model="f.maxRating" type="number" inputmode="numeric" placeholder="이하" />
-        </div>
-      </div>
-      <label class="flex items-center justify-between">
-        <span class="t-body">신청을 내가 수락</span><UiSwitch v-model="approval" />
-      </label>
-      <UiInput v-model="f.description" :maxlength="300" placeholder="안내 (선택: 상품, 장소 등)" />
-
+      <!-- 라운드 기간·실력 범위·수락·안내가 '더 정하기' 위에도 남아 같은 칸이 두 벌이었다 (경로 7 리뷰 K2): 아래 접힌 곳에만 -->
       <!-- 꼭 정할 것은 이름·종목·시작. 나머지는 기본값(토너먼트·개인·8명·라운드 7일·제한 없음·자동 수락)이 거의 늘 맞아 접어 둔다 (목적 판정 7: 결정 거리 아홉이 '열기'까지 끼어 있었다) -->
       <button type="button" class="w-full flex items-center justify-between rounded-xl bg-surface px-4 py-3 text-left" :aria-expanded="moreOpen" @click="moreOpen = !moreOpen">
         <span class="min-w-0">
@@ -172,22 +156,33 @@ const moreSummary = computed(() => [
   approval.value ? '신청 수락' : '',
 ].filter(Boolean).join(' · '))
 
-const canCreate = computed(() => f.title.trim().length >= 2 && f.ruleId > 0 && !!f.startsAt && Number(f.maxEntrants) >= 2)
+const canCreate = computed(() => f.title.trim().length >= 2 && f.ruleId > 0 && !!f.startsAt && Number(f.maxEntrants || 8) >= 2) // 칸을 비우면 자리표시의 8로 (가로 훑기 8: 지우면 '열기'가 이유 없이 막혔다)
 
 // 동네 인증 여부 (불러오기 전 undefined). 동호회·공식 대회는 동네가 없어도 된다 (서버 TournamentService.create)
 const hasDong = ref<boolean | undefined>(undefined)
 const needsDong = computed(() => hasDong.value === false && !f.hostClubId && !f.official)
 function verifyDong() {
   emit('update:modelValue', false)
-  router.push({ path: '/neighborhood', query: { back: '/tournaments?create=1', reason: '동네를 인증하면 대회를 열 수 있어요' } })
+  // 동호회 화면에서 연 시트면 인증 뒤 그 동호회로 돌아간다 (예전엔 대회 목록으로 가 동호회 주최가 풀렸다, 경로 7 리뷰 K3)
+  router.push({ path: '/neighborhood', query: { back: props.clubId ? `/clubs/${props.clubId}` : '/tournaments?create=1', reason: '동네를 인증하면 대회를 열 수 있어요' } })
 }
+const clubsFailed = ref(false)
 
 // 내가 회장·운영진인 동호회를 주최로 고를 수 있다
 watch(() => props.modelValue, async (open) => {
   if (!open) return
+  // 동호회 화면(운영진만 버튼이 보인다)에서 열었으면 그 동호회를 주최로 먼저 고른다. 목록을 다 받을 때까지 '나'로 있다가
+  // 동네 인증 안내가 뜨거나, 목록이 실패하면 동호회 대회가 개인 대회로 열렸다 (경로 7 리뷰 K3)
+  if (props.clubId && !f.official) { f.hostClubId = props.clubId; f.membersOnly = true }
+  clubsFailed.value = false
   GET('/api/neighborhoods/me').then(({ data }) => (hasDong.value = data.neighborhoods.some((n) => n.active && !n.expired))).catch(() => {})
   GET('/api/auth/onboarding').then(({ data }) => (isAdmin.value = !!data.isAdmin)).catch(() => {})
-  const mine = (await GET('/api/clubs/mine')).data
+  const mine = await GET('/api/clubs/mine').then((r) => r.data).catch(() => null)
+  if (!mine) {
+    // 못 받으면 주최 칸이 아무 말 없이 사라졌다 (경로 7 리뷰): 말하고, 동호회에서 연 시트면 그 동호회 주최는 그대로 둔다
+    clubsFailed.value = true
+    return
+  }
   const details = await Promise.all(mine.map((c) => GET('/api/clubs/{id}', { path: { id: c.id } }).then((r) => r.data).catch(() => null)))
   hostClubs.value = details.filter((d) => d && (d.myRole === 'OWNER' || d.myRole === 'STAFF')).map((d) => ({ id: d!.club.id, name: d!.club.name }))
   if (props.clubId && hostClubs.value.some((c) => c.id === props.clubId)) {
@@ -212,7 +207,7 @@ async function create() {
     const { data } = await POST('/api/tournaments', {
       body: {
         title: f.title.trim(), ruleId: f.ruleId, format: f.format, entrantType: f.entrantType, hostClubId: f.hostClubId ?? undefined,
-        membersOnly: f.membersOnly && f.entrantType === 'USER', joinMode: approval.value ? 'APPROVAL' : 'OPEN', maxEntrants: Number(f.maxEntrants),
+        membersOnly: f.membersOnly && f.entrantType === 'USER', joinMode: approval.value ? 'APPROVAL' : 'OPEN', maxEntrants: Number(f.maxEntrants || 8),
         minRating: f.minRating ? Number(f.minRating) : undefined, maxRating: f.maxRating ? Number(f.maxRating) : undefined,
         startsAt: f.startsAt, roundDays: f.roundDays, thirdPlace: f.format === 'KNOCKOUT' && f.thirdPlace,
         boards: f.boards, perBoard: f.perBoard, description: f.description.trim() || undefined, official: f.official,

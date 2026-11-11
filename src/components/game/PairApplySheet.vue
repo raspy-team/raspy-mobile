@@ -2,7 +2,8 @@
   <UiSheet :model-value="!!game" title="친구와 둘이 신청" @update:model-value="(v) => !v && emit('close')">
     <p class="t-caption mb-3">같은 팀에 친구와 함께 신청해요. 주최자가 받으면 둘 다 들어가고, 친구에게도 알림이 가요</p>
     <UiListSkeleton v-if="loading" :rows="3" />
-    <UiEmptyState v-else-if="loadFailed" mascot="match" title="친구 목록을 불러오지 못했어요" description="닫고 다시 열어 주세요" />
+    <!-- 닫고 다시 열라던 안내 대신 그 자리에서 다시 (경로 8 P14) -->
+    <UiEmptyState v-else-if="loadFailed" mascot="match" title="친구 목록을 불러오지 못했어요"><UiButton size="sm" variant="secondary" @click="loadFriends">다시 시도</UiButton></UiEmptyState>
     <UiEmptyState v-else-if="!friends.length" mascot="match" title="아직 친구가 없어요" />
     <UiList v-else>
       <UiListItem v-for="f in friends" :key="f.id" :title="f.nickname" :subtitle="'@' + f.username" @click="pick(f)">
@@ -17,7 +18,7 @@
 import { ref, watch } from 'vue'
 import api from '../../api/api'
 import { useToast } from '../../composables/useToast'
-import { UiAvatar, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiSheet } from '../ui'
+import { UiAvatar, UiButton, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiSheet } from '../ui'
 
 const props = defineProps({ game: { type: Object, default: null } })
 const emit = defineEmits(['close', 'done'])
@@ -28,8 +29,7 @@ const loading = ref(false)
 const loadFailed = ref(false)
 let busy = false
 
-watch(() => props.game, async (g) => {
-  if (!g) return
+async function loadFriends() {
   loading.value = true
   loadFailed.value = false
   try {
@@ -40,7 +40,8 @@ watch(() => props.game, async (g) => {
   } finally {
     loading.value = false
   }
-})
+}
+watch(() => props.game, (g) => { if (g) loadFriends() })
 
 async function pick(friend) {
   const g = props.game

@@ -10,7 +10,8 @@
       </p>
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
-        <UiButton variant="secondary" @click="join">다시 들어가기</UiButton>
+        <!-- 끝난 부름·없는 방(서버가 이유를 말함)은 다시 들어가도 같은 실패라 숨긴다. 연결 오류일 때만 (경로 9 Q5) -->
+        <UiButton v-if="retryable" variant="secondary" @click="join">다시 들어가기</UiButton>
         <!-- 끝난 초대·없는 방으로 온 사람에게 되풀이만 주었다: 같은 게임을 새로 하는 길 (목적 판정 11/11 3번) -->
         <UiButton class="mt-2" variant="ghost" :to="`/play/${key}`">이 게임 한 판</UiButton>
       </UiEmptyState>
@@ -26,7 +27,7 @@
             <p v-if="inviteLeft" class="t-micro mt-2 tabular-nums">{{ inviteLeft }} 남음 · 이 화면을 나가면 도전이 취소돼요</p>
           </template>
           <p v-else-if="state.fixture" class="t-caption mt-1">상대에게 알렸어요. 상대가 들어오면 바로 시작해요</p>
-          <p v-else-if="longLobby" class="t-caption mt-1">상대가 오면 알려 드려요. 이 화면을 닫아도 돼요</p>
+          <p v-else-if="longLobby" class="t-caption mt-1">상대가 오면 {{ NOTICE }}. 이 화면을 닫아도 돼요</p>
           <p v-else class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
           <!-- 처음 온 사람이 기다리다 나가지 않게: 곧 연습 상대가 온다고 말해 둔다 (세션 B 흐름 검토) -->
           <!-- 초는 서버가 정한다: 밤 9시대 오늘 밤의 게임은 사람끼리 만날 틈을 주려고 길게 기다린다 (AppRealtimeService.botAfterFor) -->
@@ -165,6 +166,7 @@
 </template>
 
 <script setup lang="ts">
+import { NOTICE } from '../../utils/notice'
 import { waitText, who, withRo } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
@@ -197,7 +199,19 @@ const title = computed(() => state.value?.title || '실시간 경기')
 const state = ref<State | null>(null)
 // 게임 중에 뒤로 가기(안드로이드 하드웨어 버튼 포함)로 나가면 한 번 묻는다 (11/6 b2 앱 껍데기 점검).
 // 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다
-onBeforeRouteLeave(() => state.value?.status !== 'PLAYING' || window.confirm('게임이 진행 중이에요. 나가도 판은 계속되고, 차례 시간이 지나면 질 수 있어요. 나갈까요?'))
+// 판 중에 나가려 하면 앱의 확인 창으로 묻는다 (브라우저 기본 창은 모양이 달랐다, 경로 3 훑기).
+// 이동은 일단 멈추고(뒤로 버튼이면 라우터가 기록을 되돌린다), 그 뒤에 창을 띄워 '나가기'면 다시 간다
+let leaveOk = false
+onBeforeRouteLeave((to) => {
+  if (leaveOk || state.value?.status !== 'PLAYING') return true
+  setTimeout(async () => {
+    if (await confirmDialog({ title: '게임이 진행 중이에요', message: '나가도 판은 계속되고, 차례 시간이 지나면 질 수 있어요.', confirmText: '나가기', cancelText: '계속하기', danger: true })) {
+      leaveOk = true
+      router.push(to.fullPath)
+    }
+  }, 80)
+  return false
+})
 const error = ref('')
 const word = ref('')
 const moveError = ref('')
@@ -393,8 +407,11 @@ async function join() {
     bossChallenge = boss
     gameParam = game
     error.value = message(e, '들어가지 못했어요')
+    const status = (e as { response?: { status?: number } })?.response?.status
+    retryable.value = !status || status >= 500
   }
 }
+const retryable = ref(true)
 
 async function reload() {
   if (!state.value) return

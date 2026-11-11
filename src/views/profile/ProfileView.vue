@@ -153,7 +153,8 @@
 
       <!-- 앱 게임 기록 (가입하며 옮긴 손님 판 포함): "시작하면 이 등급이 내 기록에 남아요"의 그 기록. 예전엔 막 가입한 사람이 '아직 한 경기가 없어요'를 봤다 (목적 판정 11/11) -->
       <section v-if="bests.length" class="mt-10">
-        <h2 class="t-heading mb-1">내 게임 기록</h2>
+        <!-- 남의 프로필엔 '내'가 붙지 않게 (경로 6 리뷰 P1) -->
+        <h2 class="t-heading mb-1">{{ user.isMe ? '내 게임 기록' : '게임 기록' }}</h2>
         <UiList>
           <UiListItem v-for="b in bests" :key="b.key" :title="b.title" chevron @click="router.push(`/play/${b.key}`)">
             <template #leading><RuleThumb :rule="{ ruleTitle: b.title, appGameKey: b.key }" :size="36" bare /></template>
@@ -211,7 +212,7 @@
             :subtitle="`${g.players > 2 && !g.teams ? `${g.players}명 중 ${g.place}등` : `vs ${g.opponentNickname}`} · ${matchTime(g.playedAt)}`"
             :class="{ 'bg-surface-2': highlightId === g.gameId }"
             chevron
-            @click="router.push(`/feed?gameId=${g.gameId}`)"
+            @click="router.push(g.appGameKey ? `/play/${g.appGameKey}?duel=${g.gameId}` : `/games/${g.gameId}/result`)"
           >
             <template #leading>
               <span class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 t-label" :class="RESULT[resultKey(g.result)].class">
@@ -315,8 +316,13 @@ const user = ref(null)
 const loading = ref(true)
 const loadError = ref('')
 const loadFailed = ref(false) // 서버가 이유를 말하지 않은 실패 (연결·서버 오류)
-// 화면은 주소마다 새로 그려지니(App.vue의 key) 다시 불러오기는 새로고침으로
-const reload = () => window.location.reload()
+// 다시 시도는 페이지를 통째로 새로 열지 않고 이 화면만 다시 불러온다 (경로 6 리뷰)
+const reload = () => {
+  loading.value = true
+  loadFailed.value = false
+  loadError.value = ''
+  load()
+}
 const friend = ref({ sent: false, isFriend: false, received: false })
 const busy = ref(false)
 const menuOpen = ref(false)
@@ -421,12 +427,14 @@ async function submitReport() {
     const reason = reportReason.value === '기타' ? reportDetail.value.trim() : reportReason.value
     const { data: done } = await api.post('/api/reports', { targetType: 'USER', targetId: user.value.id, reason })
     showToast(done?.message || '신고가 접수됐어요. 운영진이 바로 확인하고 처리해요')
+    reportOpen.value = false
   } catch (e) {
     // 서버가 이유를 주면 그대로 (이미 신고했으면 서버가 그렇게 알려 준다). 연결 오류를 '이미 신고했어요'로 보이지 않게
     showToast(e.response?.data?.message || '신고하지 못했어요. 다시 해 주세요')
+    // 연결 오류면 고른 사유·쓴 글을 버리지 않고 시트를 연 채로 둔다 (경로 6 리뷰 P7)
+    if (e.response?.data?.message) reportOpen.value = false
   } finally {
     reporting.value = false
-    reportOpen.value = false
   }
 }
 
@@ -469,11 +477,11 @@ function goFriend(id) {
 const abilities = ref([])
 const gameTiers = ref([])
 
-// 앱 게임 최고 기록 (기록 화면과 같은 자료)
+// 앱 게임 최고 기록 (기록 화면과 같은 자료). 임기응변은 서버가 준 등급으로 (경로 6 리뷰 P2)
 const bests = ref([])
 async function loadBests(id) {
   const { data } = await GET('/api/user-profile/{userId}/stats', { path: { userId: id } }).catch(() => ({ data: null }))
-  bests.value = (data?.bests ?? []).slice(0, 3).map((b) => ({ key: b.key, title: b.title, line: `${Math.round(b.score)}${b.scoreUnit || '점'}` }))
+  bests.value = (data?.bests ?? []).slice(0, 3).map((b) => ({ key: b.key, title: b.title, line: b.grade ? `${b.grade}등급` : `${Math.round(b.score)}${b.scoreUnit || '점'}` }))
 }
 
 // 가진 자리 (벨트 먼저, 그다음 1위). 벨트는 그 게임으로, 능력·종합 1위는 그 순위로 간다
@@ -487,7 +495,8 @@ const seatLines = computed(() => [
   })),
 ])
 
-onMounted(async () => {
+onMounted(() => load())
+async function load() {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
   } catch (e) {
@@ -512,5 +521,5 @@ onMounted(async () => {
     gameRefs[highlightId.value]?.scrollIntoView({ block: 'center', behavior: 'smooth' })
     setTimeout(() => (highlightId.value = null), 2000)
   }
-})
+}
 </script>

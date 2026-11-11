@@ -18,9 +18,10 @@
           <span class="flex items-center t-heading min-w-0">
             <span class="truncate">{{ s.champion.nickname }}</span><UiAiBadge />
           </span>
-          <span class="block t-caption mt-0.5 break-keep">{{ s.seatName }} AI 보스 · {{ bossHint(s) }}</span>
+          <span class="block t-caption mt-0.5 break-keep">{{ bossHint(s) }}</span>
         </button>
-        <UiButton variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI 보스 ${s.champion.nickname}에게 도전`" @click="challengeBoss">도전하기</UiButton>
+        <!-- 앱 게임이 아닌 자리의 보스는 붙을 판이 없다: 눌러도 아무 일 없던 버튼을 뺀다 (경로 8 2절) -->
+        <UiButton v-if="appGameKey" variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI ${s.champion.nickname}에게 도전`" @click="challengeBoss">도전하기</UiButton>
       </template>
       <template v-else>
         <button
@@ -36,20 +37,23 @@
             {{ s.mine ? '지면 챔피언이 넘어가요. 30일 쉬어도 넘어가요' : s.champion ? '챔피언을 이기면 내가 챔피언이 돼요' : emptyHint(s.seat) }}
           </span>
         </button>
-        <UiButton v-if="s.champion && !s.mine" variant="tonal" :aria-label="`${s.champion.nickname}님에게 도전`" @click="challenge(s.champion)">도전</UiButton>
+        <!-- 기록을 숨긴 챔피언은 지목할 수 없어 '도전'이 아니라 그냥 한 판·경기 만들기다. 이름이 하는 일과 같게 (경로 8 2절) -->
+        <UiButton v-if="s.champion && !s.mine" variant="tonal" :aria-label="s.champion.id ? `${s.champion.nickname}님에게 도전` : undefined" :loading="sending" @click="challenge(s.champion)">{{ s.champion.id ? '도전' : appGameKey ? '한 판 하기' : '경기 만들기' }}</UiButton>
       </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// 챔피언 카드 (규칙 상세·앱 게임 화면). '도전'은 앱 게임이면 그 사람에게만 가는 도전장(?to=), 만나서 하는 경기면 경기 열기
+// 챔피언 카드 (규칙 상세·앱 게임 화면). '도전'은 앱 게임이면 그 사람에게만 가는 도전장(?to=), 만나서 하는 경기면 그 챔피언에게 '나랑도해'
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import { track } from '@/utils/trackLog'
 import { UiAiBadge, UiButton } from '../ui'
 import MatchMascot from '../mascot/MatchMascot.vue'
+import { playWithMeTooAPI } from '../../api/api'
+import { useToast } from '../../composables/useToast'
 
 const props = defineProps<{ ruleId: number | null | undefined; appGameKey?: string | null }>()
 const router = useRouter()
@@ -73,10 +77,12 @@ function emptyHint(seat: string) {
   return seat === 'NATIONAL' ? '누구든 이기면 첫 챔피언이 돼요' : '여기 사람을 이기면 첫 챔피언이 돼요'
 }
 
+// '자리'·'AI 보스'·'첫 사람 챔피언' 같은 말 대신 무슨 일인지 그대로 (경로 8 2절: 무슨 뜻인지 모른다)
 function bossHint(s: Seat) {
-  if (s.bossTriesLeft === 0) return '오늘 도전을 다 썼어요. 내일 다시 도전해 주세요'
-  const win = s.bossReclaimed ? 'AI 보스가 되찾았어요 · 이기면 챔피언' : '이기면 첫 사람 챔피언이 돼요'
-  return s.bossTriesLeft != null ? `${win} · 오늘 ${s.bossTriesLeft}번 남았어요` : `${win} · 하루 3번`
+  const keep = `${s.seatName} 챔피언 자리를 AI가 지키고 있어요`
+  if (s.bossTriesLeft === 0) return `${keep} · 오늘 도전을 다 썼어요. 내일 다시 해 주세요`
+  const win = s.bossReclaimed ? '챔피언이 30일 쉬어 AI가 되찾았어요 · 이기면 내가 챔피언' : '이기면 내가 첫 챔피언'
+  return s.bossTriesLeft != null ? `${keep} · ${win} · 오늘 ${s.bossTriesLeft}번 더 할 수 있어요` : `${keep} · ${win} · 하루 3번`
 }
 
 // 보스 도전: 실시간 화면이 ?boss=1을 보고 보스와 바로 붙는다
@@ -86,10 +92,22 @@ function challengeBoss() {
   if (props.appGameKey) router.push({ path: `/play/${props.appGameKey}/live`, query: { boss: 1 } })
 }
 
-function challenge(c: { id?: number | null; nickname: string }) {
-  // 기록을 숨긴 챔피언(id 없음)은 지목하지 않고 그 게임 짝짓기로
-  if (props.appGameKey) router.push(c.id ? { path: `/play/${props.appGameKey}`, query: { to: c.id, toName: c.nickname } } : `/play/${props.appGameKey}`)
-  else router.push(`/create-game?ruleId=${props.ruleId}`)
+// 만나서 하는 규칙의 '도전'은 예전엔 아무나 모집하는 경기 만들기로 갔다. 이제 그 챔피언에게 '나랑도해'를 보낸다 (경로 8 P11, 소식의 '도전'과 같은 길)
+const sending = ref(false)
+const { showToast } = useToast()
+async function challenge(c: { id?: number | null; nickname: string }) {
+  // 기록을 숨긴 챔피언(id 없음)은 지목하지 않고 그 게임 짝짓기·경기 만들기로
+  if (props.appGameKey) return router.push(c.id ? { path: `/play/${props.appGameKey}`, query: { to: c.id, toName: c.nickname } } : `/play/${props.appGameKey}`)
+  if (!c.id || !props.ruleId) return router.push(`/create-game?ruleId=${props.ruleId}`)
+  sending.value = true
+  try {
+    await playWithMeTooAPI.sendRequest(c.id, props.ruleId)
+    showToast(`${c.nickname}님에게 도전했어요. 받으면 메시지로 이어져요`)
+  } catch (e) {
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '도전을 보내지 못했어요')
+  } finally {
+    sending.value = false
+  }
 }
 
 async function load() {

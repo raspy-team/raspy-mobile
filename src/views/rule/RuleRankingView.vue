@@ -36,7 +36,7 @@
           </template>
         </UiCard>
 
-        <UiEmptyState v-if="!rankings.length" class="pt-12" mascot="match" title="아직 순위가 비어 있어요" :description="baselines.length ? '사람과 5판을 하면 첫 이름이 올라가요. 아래 AI 기준선과 견줘 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'">
+        <UiEmptyState v-if="!rankings.length" class="pt-12" mascot="match" title="아직 순위가 비어 있어요" :description="baselines.length ? '사람과 5판을 하면 첫 이름이 올라가요. 아래 AI 고수·보통 점수와 견줘 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'">
           <UiButton variant="secondary" :to="appGameKey ? `/play/${appGameKey}` : `/create-game?ruleId=${ruleId}`">
             {{ appGameKey ? '한 판 하기' : '경기 만들기' }}
           </UiButton>
@@ -65,7 +65,8 @@
         </UiList>
         <!-- 사람이 20명을 넘으면 기준선을 접는다 (7 물러나기) -->
         <UiButton v-if="baselines.length && folded" block variant="ghost" class="mt-2" @click="showAi = !showAi">
-          {{ showAi ? 'AI 기준 접기' : 'AI 기준 보기' }}
+          <!-- 'AI 기준'이 무엇인지 몰랐다 (경로 6 리뷰): 사이에 끼는 'AI 고수·AI 보통' 점수 줄이다 -->
+          {{ showAi ? 'AI 고수·보통 점수 줄 접기' : 'AI 고수·보통 점수 줄과 견주기' }}
         </UiButton>
 
         <!-- 역대 전국 챔피언 (앱 게임). AI 보스는 첫 줄에 AI 표시 -->

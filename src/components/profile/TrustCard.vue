@@ -39,7 +39,8 @@
     <!-- 보증해요 (안전·신뢰 E, 카우치서핑 방식): 만나서 경기해 본 사람만. 보증받은 사람의 보증이 더 무겁다 -->
     <div v-if="vouch && (vouch.canVouch || vouch.mine)" class="mt-5 rounded-xl bg-surface px-4 py-3">
       <p class="t-body">{{ vouch.mine ? '내가 보증했어요' : '만나 보니 믿을 만했나요?' }}</p>
-      <p class="t-caption mt-0.5">보증은 이름과 함께 남아요. 보증받은 사람의 보증일수록 무겁게 쳐요</p>
+      <!-- '보증'이 무엇을 하는지 몰랐다 (경로 6 리뷰): 하는 일부터 -->
+      <p class="t-caption mt-0.5">보증하면 이 사람의 신뢰 온도가 오르고, 다른 사람이 만나기 전에 내 보증을 봐요. 보증은 내 이름과 함께 남아요</p>
       <UiButton v-if="!vouch.mine" size="sm" class="mt-3" icon="user-check" :loading="vouching" @click="toggleVouch">보증</UiButton>
       <UiButton v-else size="sm" variant="ghost" class="mt-3" :loading="vouching" @click="toggleVouch">보증 취소</UiButton>
     </div>

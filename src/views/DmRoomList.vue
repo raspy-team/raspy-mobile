@@ -10,7 +10,8 @@
       <UiPullIndicator :pull="pull" :refreshing="refreshing" />
       <UiListSkeleton v-if="loading" :rows="6" />
 
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" title="메시지를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
+      <!-- 목록이 이미 보이면 배경 다시 불러오기 실패로 덮지 않는다 (경로 5 리뷰 S21) -->
+      <UiEmptyState v-else-if="error && !rooms.length" class="pt-16" icon="fas fa-triangle-exclamation" title="메시지를 불러오지 못했어요" description="잠시 뒤 다시 해 주세요">
         <UiButton variant="secondary" @click="load">다시 시도</UiButton>
       </UiEmptyState>
 

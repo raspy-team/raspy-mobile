@@ -3,8 +3,10 @@
     <UiTopBar title="경기" back="/" />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!game && !error" class="h-36 w-full" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
-        <UiButton to="/">다른 경기 찾기</UiButton>
+      <!-- 연결 오류도 "경기를 찾지 못했어요"로 굳었다: 연결 오류는 다시 시도 (가로 훑기 5) -->
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" :description="offline ? '연결이 돌아오면 다시 해 주세요' : ''">
+        <UiButton v-if="offline" @click="retry">다시 시도</UiButton>
+        <UiButton :variant="offline ? 'ghost' : 'primary'" :class="offline ? 'mt-2' : ''" to="/">다른 경기 찾기</UiButton>
       </UiEmptyState>
       <template v-else-if="game">
         <OpenGameCard
@@ -29,8 +31,8 @@
         <PairApplySheet :game="pairOpen ? game : null" @close="pairOpen = false" @done="() => { game.isAppliedByMe = true; pairOpen = false }" />
         <p class="t-caption mt-4">
           <template v-if="game.gameStatus !== 'MATCHING'">{{ game.format && game.format !== 'DUEL' ? '이미 사람이 다 모인 경기예요.' : '이미 상대가 정해진 경기예요.' }}</template>
-          <template v-else-if="game.ownerId === myId">신청이 오면 알려 드려요. 내 경기에서 승인해요.</template>
-          <template v-else-if="game.isAppliedByMe">신청했어요. {{ game.ownerNickname }}님이 승인하면 알려 드려요.</template>
+          <template v-else-if="game.ownerId === myId">신청이 오면 알림에 떠요. 내 경기에서 승인해요.</template>
+          <template v-else-if="game.isAppliedByMe">신청했어요. {{ game.ownerNickname }}님이 승인하면 알림에 떠요.</template>
           <!-- 공유 링크로 다른 동네 경기에 들어온 경우: 누르기 전에 이유를 보여 준다 -->
           <template v-else-if="game.joinBlockedReason">
             <span class="text-fg-muted">{{ game.joinBlockedReason }}</span>
@@ -121,9 +123,19 @@ async function load() {
     // AI 주민의 경기는 끝난 결과만 보인다 (docs/ai-residents.md 6). 연 사람 카드(온도)·응원 칸 대신 결과로
     if (g.ownerIsBot) return router.replace(`/games/${g.id}/result`)
     game.value = g
-  } catch {
-    error.value = '경기를 찾지 못했어요'
+    error.value = ''
+    offline.value = false
+  } catch (e) {
+    offline.value = !e?.response || e.response.status >= 500
+    // 보던 중 다시 부르기만 실패하면 화면을 덮지 않는다
+    if (offline.value && game.value) return
+    error.value = offline.value ? '경기를 불러오지 못했어요' : (e.response?.data?.message || '경기를 찾지 못했어요')
   }
+}
+const offline = ref(false)
+function retry() {
+  error.value = ''
+  load()
 }
 
 async function apply(team) {

@@ -3,7 +3,10 @@
     <UiTopBar :title="v?.summary.title || '대회'" back="/tournaments" />
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!v && !error" class="h-40 w-full" />
-      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error" />
+      <!-- 한 번 실패하면 이 문구가 굳고 다시 시도가 없었다 (경로 7 리뷰) -->
+      <UiEmptyState v-else-if="error" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
+        <UiButton variant="secondary" @click="retry">다시 시도</UiButton>
+      </UiEmptyState>
       <template v-else-if="v">
         <!-- 일곱 가지를 한 줄에 잇지 않고 '무엇'과 '언제·누가' 두 줄로 (11/5 밤샘 C) -->
         <p class="t-caption">{{ infoLine[0] }}</p>
@@ -31,6 +34,8 @@
             <div class="flex gap-2 mt-3">
               <UiButton v-if="v.canCheckIn && v.my.status !== 'CHECKED_IN'" class="flex-1" variant="signal" :loading="busy" @click="checkIn">체크인</UiButton>
               <UiButton v-if="v.my.status !== 'REJECTED'" size="sm" variant="ghost" :loading="busy" @click="withdraw">신청 취소</UiButton>
+              <!-- 거절된 사람이 다시 신청할 버튼이 없었다 (경로 7 리뷰). 서버는 거절된 신청을 지우고 새로 받는다 -->
+              <UiButton v-else size="sm" variant="secondary" :loading="busy" :disabled="full" @click="apply(v.my.clubId ?? undefined)">다시 신청</UiButton>
             </div>
           </UiCard>
           <template v-else>
@@ -108,9 +113,9 @@
                   <div v-if="v.isHost && f.needsHost" class="space-y-1">
                     <p class="t-caption">마감이 지났는데 결과가 없어요. 정해 주세요</p>
                     <div class="flex gap-2">
-                      <UiButton size="sm" class="flex-1" variant="secondary" @click="decide(f.id, 'HOME')">{{ f.home?.name }} 승</UiButton>
-                      <UiButton size="sm" class="flex-1" variant="secondary" @click="decide(f.id, 'AWAY')">{{ f.away?.name }} 승</UiButton>
-                      <UiButton v-if="v.summary.format === 'LEAGUE'" size="sm" variant="secondary" @click="decide(f.id, 'NONE')">둘 다 패</UiButton>
+                      <UiButton size="sm" class="flex-1" variant="secondary" :disabled="busy" @click="decide(f.id, 'HOME')">{{ f.home?.name }} 승</UiButton>
+                      <UiButton size="sm" class="flex-1" variant="secondary" :disabled="busy" @click="decide(f.id, 'AWAY')">{{ f.away?.name }} 승</UiButton>
+                      <UiButton v-if="v.summary.format === 'LEAGUE'" size="sm" variant="secondary" :disabled="busy" @click="decide(f.id, 'NONE')">둘 다 패</UiButton>
                     </div>
                   </div>
                 </UiCard>
@@ -125,8 +130,8 @@
             <UiListItem v-for="e in shownEntries" :key="e.id" :title="(e.seed ? `${e.seed}. ` : '') + e.name" :subtitle="entrySub(e)" :to="e.userId ? `/profile/${e.userId}` : e.clubId ? `/clubs/${e.clubId}` : undefined">
               <template v-if="v.isHost && e.status === 'APPLIED'" #trailing>
                 <span class="flex gap-1">
-                  <UiButton size="sm" @click.prevent.stop="decideEntry(e.id, true)">수락</UiButton>
-                  <UiButton size="sm" variant="secondary" @click.prevent.stop="decideEntry(e.id, false)">거절</UiButton>
+                  <UiButton size="sm" :disabled="busy" @click.prevent.stop="decideEntry(e.id, true)">수락</UiButton>
+                  <UiButton size="sm" variant="secondary" :disabled="busy" @click.prevent.stop="decideEntry(e.id, false)">거절</UiButton>
                 </span>
               </template>
             </UiListItem>
@@ -192,7 +197,11 @@ const infoLine = computed(() => {
 const myHint = computed(() => {
   const x = v.value
   if (!x?.my) return ''
-  if (x.my.status === 'CHECKED_IN') return '시작 때 대진이 나오면 알려 드려요'
+  // 웹에는 휴대폰 알림이 없어 '알려 드려요'가 지킬 수 없었다: 알림함으로 (가로 훑기 7절)
+  if (x.my.status === 'CHECKED_IN') return '시작 때 대진이 나오면 알림함에 와요'
+  // 주최자가 아직 받지 않은 신청에 체크인 안내가 나왔다. 체크인은 받아야 할 수 있다 (경로 7 리뷰 K14)
+  if (x.my.status === 'APPLIED') return '주최자가 받으면 시작 24시간 전부터 체크인할 수 있어요'
+  if (x.my.status === 'REJECTED') return '주최자가 이번 신청을 받지 않았어요'
   if (x.canCheckIn) return '지금 체크인해야 대진에 들어가요'
   return '시작 24시간 전부터 체크인할 수 있어요. 체크인해야 대진에 들어가요'
 })
@@ -206,11 +215,20 @@ const message = (e: unknown, fallback: string) => (e as { response?: { data?: { 
 async function load() {
   try {
     v.value = (await GET('/api/tournaments/{id}', { path: { id } })).data
-  } catch {
-    error.value = '대회를 찾지 못했어요'
+    error.value = ''
+  } catch (e) {
+    // 보던 대회가 있으면 그대로 두고, 처음부터 못 받았을 때만 실패 화면. 없는 것과 연결 오류를 가른다
+    const status = (e as { response?: { status?: number } }).response?.status
+    if (!v.value) error.value = status === 404 || status === 403 ? '대회를 찾지 못했어요' : '대회를 불러오지 못했어요'
   }
 }
+function retry() {
+  error.value = ''
+  load()
+}
 async function act(task: () => Promise<{ data: Schemas['TournamentView'] }>, fallback: string, done?: string) {
+  // 누르는 동안 표시가 없어 판정·수락·거절이 두 번 눌렸다 (경로 7 리뷰)
+  if (busy.value) return
   busy.value = true
   try {
     v.value = (await task()).data
@@ -223,7 +241,11 @@ async function act(task: () => Promise<{ data: Schemas['TournamentView'] }>, fal
 }
 const apply = (clubId?: number) => act(() => POST('/api/tournaments/{id}/apply', { path: { id }, query: { clubId } }), '신청하지 못했어요', '신청했어요')
 const checkIn = () => act(() => POST('/api/tournaments/{id}/check-in', { path: { id }, query: { clubId: v.value?.my?.clubId ?? undefined } }), '체크인하지 못했어요', '체크인했어요')
-const withdraw = () => act(() => POST('/api/tournaments/{id}/withdraw', { path: { id }, query: { clubId: v.value?.my?.clubId ?? undefined } }), '거두지 못했어요')
+async function withdraw() {
+  // 확인 없이 바로 빠졌다 (경로 7 리뷰)
+  if (!(await confirmDialog({ title: '신청을 취소할까요?', message: '자리가 차면 다시 신청하지 못할 수 있어요', confirmText: '신청 취소', danger: true }))) return
+  await act(() => POST('/api/tournaments/{id}/withdraw', { path: { id }, query: { clubId: v.value?.my?.clubId ?? undefined } }), '취소하지 못했어요', '신청을 취소했어요')
+}
 const decideEntry = (entryId: number, accept: boolean) => act(() => POST('/api/tournaments/entries/{entryId}/decide', { path: { entryId }, query: { accept } }), '처리하지 못했어요')
 async function start() {
   if (!(await confirmDialog({ title: '지금 시작할까요?', message: '체크인한 참가자로 대진이 나와요. 체크인 안 한 사람은 빠져요', confirmText: '시작' }))) return

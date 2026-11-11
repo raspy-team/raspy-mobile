@@ -209,6 +209,7 @@
                 "GAME",
                 "CHALLENGE",
                 "FRIEND",
+                "CLUB",
                 "FRIEND_ACTIVITY",
                 "RULE",
                 "COMMENT",
@@ -2025,6 +2026,7 @@
               "type": "string",
               "enum": [
                 "UNIVERSITY",
+                "HIGH_SCHOOL",
                 "COMPANY",
                 "OTHER"
               ]
@@ -5380,6 +5382,88 @@
         }
       }
     },
+    "/api/app-games/votes/{gameId}/guest": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "투표 카드 하나 (로그인 없이)",
+        "description": "투표 링크를 받은 사람. 기기 번호마다 한 표",
+        "operationId": "guestVoteCard",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "visitorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVoteCard"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "투표하기 (로그인 없이)",
+        "description": "기기 번호마다 대결 하나에 한 표. 접속 주소로도 한도를 둔다",
+        "operationId": "guestVote",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestVoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVoteCard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/app-games/realtime/{gameId}/timeout": {
       "post": {
         "tags": [
@@ -6364,6 +6448,32 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/admin/no-show/{reportId}/dismiss": {
+      "post": {
+        "tags": [
+          "Meet"
+        ],
+        "summary": "노쇼 이의 받지 않기 (관리자 전용)",
+        "description": "기록·처벌은 그대로, 이의만 닫고 이의 낸 사람에게 알린다",
+        "operationId": "dismiss",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -8574,6 +8684,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "visitorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -8807,6 +8925,39 @@
         "summary": "경기 중계 보기",
         "description": "만나서 하는 경기의 지금 점수·세트·응원 수. 바뀌면 /topic/game-live/{gameId}로 알린다",
         "operationId": "live",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveGame"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/live/guest": {
+      "get": {
+        "tags": [
+          "live-watch-controller"
+        ],
+        "summary": "경기 중계 보기 (로그인 없이)",
+        "description": "중계 링크를 받은 사람. 점수·세트·응원 수만. 응원·반응은 가입한 뒤",
+        "operationId": "liveGuest",
         "parameters": [
           {
             "name": "gameId",
@@ -10141,6 +10292,39 @@
         "summary": "관전하기",
         "description": "말 배틀처럼 보는 사람이 응원해 승패를 정하는 실시간 게임. 선수가 아니어도 본다",
         "operationId": "watch",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/app-games/realtime/{gameId}/watch/guest": {
+      "get": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "관전하기 (로그인 없이)",
+        "description": "관전 링크를 받은 사람. 보기만, 응원은 가입한 뒤",
+        "operationId": "watchGuest",
         "parameters": [
           {
             "name": "gameId",
@@ -11773,6 +11957,7 @@
             "type": "string",
             "enum": [
               "UNIVERSITY",
+              "HIGH_SCHOOL",
               "COMPANY",
               "OTHER"
             ]
@@ -13648,6 +13833,7 @@
             "type": "string",
             "enum": [
               "UNIVERSITY",
+              "HIGH_SCHOOL",
               "COMPANY",
               "OTHER"
             ]
@@ -14113,6 +14299,10 @@
           },
           "k": {
             "type": "string"
+          },
+          "duel": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -15546,6 +15736,22 @@
           }
         }
       },
+      "GuestVoteRequest": {
+        "required": [
+          "playId",
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "playId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "visitorId": {
+            "type": "string"
+          }
+        }
+      },
       "MoveRequest": {
         "required": [
           "word"
@@ -16114,6 +16320,7 @@
             "type": "string",
             "enum": [
               "UNIVERSITY",
+              "HIGH_SCHOOL",
               "COMPANY",
               "OTHER"
             ]
@@ -16381,6 +16588,9 @@
           },
           "teams": {
             "type": "boolean"
+          },
+          "appGameKey": {
+            "type": "string"
           }
         }
       },
@@ -16698,6 +16908,10 @@
           },
           "setThisWeek": {
             "type": "boolean"
+          },
+          "grade": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -18165,6 +18379,7 @@
             "type": "string",
             "enum": [
               "UNIVERSITY",
+              "HIGH_SCHOOL",
               "COMPANY",
               "OTHER"
             ]
@@ -18192,6 +18407,7 @@
             "type": "string",
             "enum": [
               "UNIVERSITY",
+              "HIGH_SCHOOL",
               "COMPANY",
               "OTHER"
             ]
@@ -18382,6 +18598,7 @@
               "FRIEND_REQUEST",
               "FRIEND_APPROVE",
               "FRIEND_REJECT",
+              "CLUB",
               "FRIEND_CREATE_GAME",
               "FRIEND_GAME_START",
               "FRIEND_GAME_FINISH",
@@ -18428,6 +18645,7 @@
               "GAME",
               "CHALLENGE",
               "FRIEND",
+              "CLUB",
               "FRIEND_ACTIVITY",
               "RULE",
               "COMMENT",
@@ -18683,6 +18901,8 @@
       },
       "ChallengeInfo": {
         "required": [
+          "answered",
+          "gameKey",
           "score"
         ],
         "type": "object",
@@ -18693,6 +18913,12 @@
           },
           "line": {
             "type": "string"
+          },
+          "gameKey": {
+            "type": "string"
+          },
+          "answered": {
+            "type": "boolean"
           }
         }
       },
@@ -19071,6 +19297,7 @@
       },
       "GameResultResponse": {
         "required": [
+          "canReview",
           "confirmed",
           "disputed",
           "drawCount",
@@ -19194,6 +19421,9 @@
           },
           "myRating": {
             "$ref": "#/components/schemas/MyRatingChange"
+          },
+          "canReview": {
+            "type": "boolean"
           }
         }
       },
@@ -19206,6 +19436,7 @@
           "gameStatus",
           "id",
           "isAppliedByMe",
+          "isApprovedMe",
           "mannerScore",
           "maxPlayers",
           "ownerId",
@@ -19330,6 +19561,9 @@
             }
           },
           "isAppliedByMe": {
+            "type": "boolean"
+          },
+          "isApprovedMe": {
             "type": "boolean"
           },
           "format": {
@@ -21956,6 +22190,7 @@
             "type": "string",
             "enum": [
               "UNIVERSITY",
+              "HIGH_SCHOOL",
               "COMPANY",
               "OTHER"
             ]
@@ -22010,6 +22245,7 @@
             "type": "string",
             "enum": [
               "UNIVERSITY",
+              "HIGH_SCHOOL",
               "COMPANY",
               "OTHER"
             ]

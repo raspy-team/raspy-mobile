@@ -6,6 +6,24 @@ const ua = navigator.userAgent.toLowerCase()
 export const isIosApp = ua.includes('raspy-ios')
 export const isAndroidApp = ua.includes('raspy-android')
 
+// 인스타·페이스북·카톡·네이버·라인·에타 같은 앱 안 브라우저인지. 구글은 앱 안 웹 화면 로그인을 막는다(403 disallowed_useragent) (경로 1 리뷰 N4)
+export const inAppBrowser = /instagram|fban|fbav|kakaotalk|naver\(inapp|line\/|everytime|daumapps|whale.*inapp/.test(ua) && !ua.includes('raspy-')
+export const isAndroidUa = ua.includes('android')
+
+/** 앱 안 브라우저에서 같은 주소를 기기 브라우저로 연다. 안드로이드는 크롬으로 바로, 카톡은 카톡의 '외부 브라우저' 길로. 아이폰 인스타는 열 수 없어 false */
+export function openInExternalBrowser(url = window.location.href) {
+  if (ua.includes('kakaotalk')) {
+    window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`
+    return true
+  }
+  if (isAndroidUa) {
+    const u = new URL(url)
+    window.location.href = `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=https;package=com.android.chrome;end`
+    return true
+  }
+  return false
+}
+
 // Capacitor 앱(11/4~)인지. 옛 앱은 window.AndroidApp·iosBridge로 따로 연결했다
 export const isCapacitorApp = Capacitor.isNativePlatform()
 
@@ -68,9 +86,18 @@ export async function setupPushListeners() {
       }
     })
     // 앱을 보고 있을 때 온 알림은 안드로이드가 띄우지 않는다. 화면 안에 짧게 보여 준다 (목록은 화면이 신호로 새로 불러온다)
+    // 제목만 띄우면 무슨 일인지·어디로 가는지 없었다: 본문까지 보이고, 누르면 그 화면으로 (경로 전부 훑기 1절)
     await PushNotifications.addListener('pushNotificationReceived', async (n) => {
       const { useToast } = await import('../composables/useToast')
-      if (n?.title) useToast().showToast(n.title)
+      if (!n?.title) return
+      let goTo = ''
+      try {
+        const u = new URL(n.data?.url || '', window.location.origin)
+        if (n.data?.url && (u.host === window.location.host || u.hostname === 'matchapp.me')) goTo = u.pathname + u.search
+      } catch {
+        // 주소가 아니면 누를 곳 없이
+      }
+      useToast().showToast(n.body ? `${n.title} · ${n.body}` : n.title, goTo)
     })
   } catch {
     listening = false

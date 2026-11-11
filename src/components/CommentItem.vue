@@ -1,5 +1,6 @@
 <template>
   <div
+    :data-comment-id="comment.id"
     @click.stop="true"
     :class="[
       'flex gap-3 pt-3 group transition relative',
@@ -7,7 +8,8 @@
     ]"
   >
     <!-- 신고는 오른쪽 위 더보기로 (댓글마다 '신고하기' 글자가 떠 있으면 시끄럽다, 11/5 밤샘 C) -->
-    <button type="button" aria-label="댓글 신고" class="absolute -right-3 -top-1 w-11 h-11 flex items-center justify-center text-fg-subtle" @click.stop="openReportModal"><UiIcon name="fas fa-ellipsis" aria-hidden="true" /></button>
+    <!-- 내 댓글에는 신고를 두지 않는다 (경로 전부 훑기 4) -->
+    <button v-if="!currentUserId || comment.author.id != currentUserId" type="button" aria-label="댓글 신고" class="absolute -right-3 -top-1 w-11 h-11 flex items-center justify-center text-fg-subtle" @click.stop="openReportModal"><UiIcon name="fas fa-ellipsis" aria-hidden="true" /></button>
 
     <!-- 프로필 링크 -->
     <router-link :to="`/profile/${comment.author.id}`" class="flex-shrink-0" tabindex="-1">

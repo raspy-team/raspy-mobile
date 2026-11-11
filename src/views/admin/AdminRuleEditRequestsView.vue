@@ -6,6 +6,11 @@
       <UiTabs v-model="selectedTab" :options="tabs" class="mb-4" @update:model-value="loadRequests" />
 
       <UiListSkeleton v-if="loading" :rows="3" shape="tile" />
+      <UiCard v-else-if="loadFailed">
+        <UiEmptyState icon="fas fa-triangle-exclamation" title="불러오지 못했어요">
+          <UiButton variant="secondary" @click="loadRequests">다시 시도</UiButton>
+        </UiEmptyState>
+      </UiCard>
       <UiCard v-else-if="!requests.length">
         <UiEmptyState mascot="match" mood="smile" :title="`${STATUS[selectedTab].label} 요청이 없어요`" />
       </UiCard>
@@ -60,7 +65,7 @@ import RuleComparisonModal from '../../components/admin/RuleComparisonModal.vue'
 import { useToast } from '../../composables/useToast'
 import { timeAgo } from '../../utils/format'
 import {
-  UiBadge, UiCard, UiEmptyState, UiListSkeleton, UiTabs, UiTopBar,
+  UiBadge, UiButton, UiCard, UiEmptyState, UiListSkeleton, UiTabs, UiTopBar,
 } from '../../components/ui'
 
 const router = useRouter()
@@ -88,14 +93,19 @@ const tabs = computed(() =>
   })),
 )
 
+const loadFailed = ref(false)
 async function loadRequests() {
   loading.value = true
+  loadFailed.value = false
   try {
     const { data } = await api.get('/api/admin/rules/edit-requests', { params: { status: selectedTab.value } })
     requests.value = Array.isArray(data) ? data : []
-  } catch {
-    showToast('관리자만 볼 수 있어요')
-    router.replace('/admin')
+  } catch (e) {
+    // 연결 오류에도 관리자에게 '관리자만 볼 수 있어요'라 하고 밀어냈다 (경로 7 리뷰): 권한이 없을 때만 밀고, 그 밖은 다시 시도
+    if (e.response?.status === 403) {
+      showToast('관리자만 볼 수 있어요')
+      router.replace('/admin')
+    } else loadFailed.value = true
   } finally {
     loading.value = false
   }

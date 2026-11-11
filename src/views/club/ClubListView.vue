@@ -20,7 +20,7 @@
       <UiSection v-if="!loadError" title="우리 동네 동호회" class="mt-8">
         <UiListSkeleton v-if="!nearby" :rows="2" />
         <div v-else-if="nearby.length" class="space-y-2">
-          <ClubRow v-for="c in nearby" :key="c.id" :club="c" @click="router.push(`/clubs/${c.id}`)">
+          <ClubRow v-for="c in nearby" :key="c.id" :club="c" hide-dong @click="router.push(`/clubs/${c.id}`)">
             <UiButton size="sm" variant="secondary" :loading="joining === c.id" :disabled="c.requested" @click.stop="join(c)">{{ joinLabel(c) }}</UiButton>
           </ClubRow>
         </div>
@@ -101,7 +101,8 @@ async function join(club: Club) {
     await POST('/api/clubs/join', { body: { clubId } })
     if (club.joinMode === 'APPROVAL') {
       club.requested = true
-      showToast('신청했어요. 운영진이 받으면 알려 드려요')
+      // 웹에는 휴대폰 알림이 없어 '알려 드려요'가 지킬 수 없는 약속이었다 (경로 7 리뷰 K9): 어디서 보는지 말한다
+      showToast('신청했어요. 운영진이 받으면 알림함에 와요')
       return
     }
     router.push(`/clubs/${clubId}`)

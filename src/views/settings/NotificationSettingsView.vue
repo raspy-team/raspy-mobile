@@ -3,6 +3,18 @@
     <UiTopBar title="알림 설정" back />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
+      <!-- 이 기기가 휴대폰 알림을 받는지, 받게 켜는 곳이 없었다 (경로 6 리뷰 P6) -->
+      <div class="rounded-xl bg-surface px-4 py-4 mt-2">
+        <template v-if="isCapacitorApp">
+          <p class="t-body">휴대폰 알림</p>
+          <p class="t-caption mt-0.5">결과·도전장·내 차례를 휴대폰으로 받아요. 허락 창이 뜨면 '허용'을 눌러 주세요</p>
+          <UiButton size="sm" variant="secondary" class="mt-3" @click="turnOnPush">휴대폰 알림 켜기</UiButton>
+        </template>
+        <template v-else>
+          <p class="t-body">알림은 알림함에 모여요</p>
+          <p class="t-caption mt-0.5">웹에서는 휴대폰으로 알림이 오지 않아요. 위 종 모양에서 확인해 주세요. 매치 앱에서는 휴대폰으로도 와요</p>
+        </template>
+      </div>
       <p class="t-caption py-3">끈 알림은 휴대폰으로 오지 않아요</p>
 
       <UiListSkeleton v-if="loading" :rows="8" />
@@ -29,6 +41,7 @@ import { ref, onMounted } from 'vue'
 import api from '../../api/api'
 import { UiButton, UiEmptyState, UiListSkeleton, UiSwitch, UiTopBar } from '../../components/ui'
 import { useToast } from '../../composables/useToast'
+import { askPushPermission, isCapacitorApp } from '../../utils/nativeBridge'
 
 const { showToast } = useToast()
 const settings = ref([])
@@ -59,6 +72,11 @@ async function toggle(s, enabled) {
   } finally {
     savingKey.value = ''
   }
+}
+
+function turnOnPush() {
+  askPushPermission()
+  showToast('켰어요. 알림이 안 오면 휴대폰 설정 > 매치 > 알림을 켜 주세요')
 }
 
 onMounted(load)

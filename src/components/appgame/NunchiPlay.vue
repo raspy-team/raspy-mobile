@@ -115,6 +115,8 @@ async function load() {
   try {
     const ids = props.problem.split(',')
     const data = (await GET('/api/nunchi/questions', { query: { ids: ids.join(',') } })).data
+    // 빈 목록이면 스피너만 돌다 3초 뒤 빈 답이 나갔다: 실패와 같게 다시 시도 (경로 8 2절)
+    if (!data?.length) throw new Error('empty')
     loadError.value = ''
     list.value = data
     show()

@@ -6,6 +6,8 @@
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
         <UiButton variant="secondary" @click="join">다시 들어가기</UiButton>
+        <!-- 공유 판이 아닌 주소·끝난 판으로 온 사람에게 되풀이만 주었다: 같은 게임을 새로 (경로 2 리뷰) -->
+        <UiButton class="mt-2" variant="ghost" :to="`/play/${route.params.key}`">이 게임 한 판</UiButton>
       </UiEmptyState>
 
       <template v-else-if="state">

@@ -6,10 +6,15 @@
       <UiIconButton icon="rotate-right" label="새로 고침" :disabled="loading" @click="load" />
     </header>
 
-    <UiListSkeleton v-if="loading" :rows="3" />
+    <UiListSkeleton v-if="loading && !v" :rows="3" />
+    <!-- 연결 오류를 '끝난 링크'로 보였다. 늦음 경고를 보던 친구가 공유가 끝난 줄 알았다 (경로 5 리뷰 S16, 안전) -->
+    <UiEmptyState v-else-if="!v && offline" icon="rotate-right" title="불러오지 못했어요" description="연결이 돌아오면 다시 눌러 주세요. 공유는 그대로예요">
+      <UiButton @click="load">다시 시도</UiButton>
+    </UiEmptyState>
     <UiEmptyState v-else-if="!v" icon="circle-xmark" title="열 수 없는 링크예요" description="공유가 끝나고 하루가 지났거나 잘못된 주소예요" />
 
     <template v-else>
+      <p v-if="offline" class="t-caption text-center mb-2">연결이 끊겨 마지막으로 받은 상태예요. 위 새로 고침으로 다시 받아요</p>
       <!-- 지금 상태가 가장 먼저 -->
       <section class="rounded-xl px-4 py-4" :class="TONE[v.status]">
         <p class="t-title">{{ HEAD[v.status](v.nickname) }}</p>
@@ -71,12 +76,16 @@ function openMap(e) {
   e?.preventDefault?.()
   window.open(mapUrl.value, '_blank', 'noopener')
 }
+const offline = ref(false)
 async function load() {
   loading.value = true
   try {
     v.value = (await GET('/api/share/{token}', { path: { token: String(route.params.token) } })).data
-  } catch {
-    v.value = null
+    offline.value = false
+  } catch (e) {
+    // 서버가 '없다'고 한 때만 끝난 링크. 연결 오류면 보던 상태를 그대로 두고 알린다
+    if (!e?.response || e.response.status >= 500) offline.value = true
+    else v.value = null
   } finally {
     loading.value = false
   }

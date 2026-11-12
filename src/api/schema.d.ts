@@ -694,13 +694,13 @@ export interface paths {
         };
         /**
          * 경기 응원 현황
-         * @description 편마다 배수·이길 확률·응원한 사람 수와 포인트·못 고르는 까닭, 내 응원
+         * @description 편마다 이길 확률·맞히면 오를 유닛·응원한 사람 수·못 고르는 까닭, 내 응원
          */
         get: operations["pointCheerState"];
         put?: never;
         /**
          * 응원하기
-         * @description 선수가 다 모인 시작 전 남의 경기 한쪽을 고른다 (경기마다 한 번). amount 0은 예측만, 10~100은 포인트도 건다(하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 고를 때 정해짐)
+         * @description 선수가 다 모인 시작 전 남의 경기에서 이길 쪽을 고른다 (경기마다 한 번). 포인트는 걸지 않는다. 맞히면 응원 리그 유닛이 1 ÷ 이길 확률 − 1만큼 오른다
          */
         post: operations["cheerWithPoints"];
         delete?: never;
@@ -3798,7 +3798,7 @@ export interface paths {
         };
         /**
          * 주간 응원 리그
-         * @description 이번 주(월요일부터) 친구 또는 내 동네에서 응원을 잘 맞힌 순위. sort=UNITS(유닛: 맞히면 +(배수−1), 틀리면 −1) 또는 POINTS(응원으로 늘린 포인트). 3번 이상 맞혀 본 사람만
+         * @description 이번 주(월요일부터) 친구 또는 내 동네에서 응원을 잘 맞힌 순위. 유닛 순(맞히면 +(1÷이길 확률−1), 틀리면 −1). 3번 이상 골라 본 사람만
          */
         get: operations["cheerLeague"];
         put?: never;
@@ -6470,7 +6470,7 @@ export interface components {
             /** Format: int64 */
             sideUserId: number;
             /** Format: int32 */
-            amount: number;
+            amount?: number;
         };
         BetSide: {
             /** Format: int64 */
@@ -6483,8 +6483,6 @@ export interface components {
             multiplier: number;
             /** Format: int32 */
             cheerers: number;
-            /** Format: int32 */
-            points: number;
             lockedReason?: string;
             rated: boolean;
         };
@@ -6493,8 +6491,6 @@ export interface components {
             userId: number;
             /** Format: int32 */
             cheerers: number;
-            /** Format: int32 */
-            points: number;
         };
         CheerState: {
             sides: components["schemas"]["CheerSide"][];
@@ -6502,16 +6498,10 @@ export interface components {
             board: components["schemas"]["BetSide"][];
             canBet: boolean;
             blockedReason?: string;
-            /** Format: int64 */
-            stakedToday: number;
-            /** Format: int64 */
-            dailyStakeLimit: number;
         };
         MyCheer: {
             /** Format: int64 */
             sideUserId: number;
-            /** Format: int32 */
-            amount: number;
             settled: boolean;
             /** Format: double */
             bonusRate: number;
@@ -6564,9 +6554,9 @@ export interface components {
                 [key: string]: Record<string, never>;
             };
             /** Format: int32 */
-            cols: number;
-            /** Format: int32 */
             rows: number;
+            /** Format: int32 */
+            cols: number;
         };
         Obj: {
             s: string;
@@ -8003,8 +7993,6 @@ export interface components {
         BetLeague: {
             /** @enum {string} */
             scope: "FRIENDS" | "NEIGHBORHOOD";
-            /** @enum {string} */
-            sort: "UNITS" | "POINTS";
             /** Format: date */
             weekStart: string;
             /** Format: int32 */
@@ -8022,8 +8010,6 @@ export interface components {
             hits: number;
             /** Format: double */
             units: number;
-            /** Format: int32 */
-            points: number;
             /** Format: int32 */
             rank: number;
         };
@@ -14309,7 +14295,6 @@ export interface operations {
         parameters: {
             query?: {
                 scope?: "FRIENDS" | "NEIGHBORHOOD";
-                sort?: "UNITS" | "POINTS";
             };
             header?: never;
             path?: never;

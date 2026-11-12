@@ -10,7 +10,7 @@
       <p class="t-display tabular-nums">{{ sources.balance.toLocaleString() }}P</p>
       <p v-if="isMe && mine" class="t-caption mt-1">오늘 {{ mine.earnedToday }}P 벌었어요 (하루 {{ mine.dailyLimit }}P까지)</p>
 
-      <!-- 어디서 벌었나: 승리·경기·응원 보너스·출석·처음 선물 -->
+      <!-- 어디서 벌었나: 승리·경기·출석·처음 선물 -->
       <template v-if="sources.earned">
         <span class="flex h-1.5 mt-5 rounded-full overflow-hidden bg-surface-3" aria-hidden="true">
           <span v-for="l in sources.lines" :key="l.key" :class="TONE[l.key]" :style="{ width: `${(l.amount * 100) / sources.earned}%` }" />
@@ -29,14 +29,13 @@
         응원 {{ sources.cheerRecord.total }}번 중 <b class="tabular-nums">{{ sources.cheerRecord.hits }}번</b> 맞혔어요<template v-if="sources.cheerRecord.upsets"> · 이변 {{ sources.cheerRecord.upsets }}번</template><template v-if="sources.cheerRecord.streak > 1"> · {{ sources.cheerRecord.streak }}연속</template>
       </p>
 
-      <!-- 주간 응원 리그: 친구·동네, 유닛(보는 눈) 또는 포인트 순. 상은 없고 순위만 -->
+      <!-- 주간 응원 리그: 친구·동네, 유닛(보는 눈) 순. 상은 없고 순위만. 포인트와는 상관없다 -->
       <template v-if="isMe">
         <h3 class="t-heading mt-7">이번 주 응원 리그</h3>
         <!-- 무슨 리그인지, '보는 눈'이 무엇인지 몰랐다 (경로 6 리뷰): 한 줄로 -->
         <p class="t-caption mt-1">남의 경기에서 이길 쪽을 누가 잘 맞히나 겨뤄요. 상은 없고 순위만 있어요</p>
         <div class="flex flex-wrap gap-2 mt-2">
-          <!-- 정렬 칩(보는 눈·포인트)은 뺐다: 포인트를 보러 온 사람이 기준 둘을 고를 이유가 없다. 자랑거리는 '보는 눈' 하나 (목적 판정 6) -->
-          <UiChip v-for="o in SCOPES" :key="o.key" :selected="scope === o.key" @click="loadLeague(o.key, sort)">{{ o.label }}</UiChip>
+          <UiChip v-for="o in SCOPES" :key="o.key" :selected="scope === o.key" @click="loadLeague(o.key)">{{ o.label }}</UiChip>
         </div>
         <UiList v-if="league?.rows.length" class="mt-2">
           <UiListItem v-for="r in league.rows.slice(0, 5)" :key="r.userId" :title="`${r.rank}. ${r.nickname}`" :subtitle="`${r.picks}번 중 ${r.hits}번`">
@@ -48,7 +47,7 @@
           <template v-else-if="league?.me">이번 주 {{ league.me.picks }}번 골랐어요. {{ league.minPicks }}번부터 순위에 들어요</template>
           <template v-else>남의 경기에서 이길 쪽을 {{ league?.minPicks ?? 3 }}번 맞혀 보면 순위에 들어요</template>
         </p>
-        <p class="t-micro mt-1">점수: 맞히면 오르고 틀리면 내려가요. 이변을 맞힐수록 더 올라요. 건 포인트와는 상관없어요</p>
+        <p class="t-micro mt-1">점수: 맞히면 오르고 틀리면 내려가요. 이변을 맞힐수록 더 올라요. 포인트와는 상관없어요</p>
       </template>
 
       <!-- 한 줄에 한 가지. 숫자는 예로 -->
@@ -60,8 +59,8 @@
       </ul>
       <h3 class="t-heading mt-6">이렇게 써요</h3>
       <ul class="mt-2 space-y-2 t-body">
-        <li>선수가 다 모인 남의 경기에서 시작 전까지 이길 쪽을 골라요. 기본은 포인트 없이 예측만 해요.</li>
-        <li>원하면 10~100P를 걸어요(하루 300P). 편마다 배수가 보이고, 이길 것 같지 않은 쪽일수록 커요(최대 3배). 100P를 ×2.4에 걸고 이기면 240P, 지면 잃어요.</li>
+        <li>광장 꾸미기 상점에서 캐릭터 옷과 소품을 사요.</li>
+        <li>남의 경기 응원은 포인트 없이 이길 쪽을 맞히기만 해요.</li>
         <li>돈으로 사거나 바꿀 수 없고, 남에게 줄 수도 없어요.</li>
       </ul>
 
@@ -80,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-// 포인트 (기능 검토 #5): 잔액과 어디서 벌었나(승리·경기·응원 보너스·출석). 서버 PointService 주석 참고.
+// 포인트 (기능 검토 #5): 잔액과 어디서 벌었나(승리·경기·출석). 응원에는 걸지 않는다(11/13). 서버 PointService 주석 참고.
 // 프로필에는 잔액 타일만, 출처·버는 법·내 내역은 시트에서 (애플 HIG 점진적 공개, 11/3)
 import { ref, onMounted } from 'vue'
 import { GET } from '@/api/client'
@@ -90,29 +89,25 @@ import { timeAgo } from '../../utils/format'
 
 const props = defineProps<{ userId: number; isMe?: boolean }>()
 // 볼트는 승리 하나만. signal-fg는 어두운 화면에서 볼트와 같은 색이라 출석을 회색 단계로 둔다
-const TONE: Record<string, string> = { WIN: 'bg-signal', PLAY: 'bg-fg', ATTEND: 'bg-fg-muted', CHEER: 'bg-fg-subtle', WELCOME: 'bg-line-strong' }
+const TONE: Record<string, string> = { WIN: 'bg-signal', PLAY: 'bg-fg', ATTEND: 'bg-fg-muted', WELCOME: 'bg-line-strong' }
 const sources = ref<components['schemas']['PointSources'] | null>(null)
 const mine = ref<components['schemas']['PointSummary'] | null>(null)
 const open = ref(false)
 async function openSheet() {
   open.value = true
   if (props.isMe && !mine.value) mine.value = (await GET('/api/points/me').catch(() => ({ data: null }))).data
-  if (props.isMe && !league.value) loadLeague(scope.value, sort.value)
+  if (props.isMe && !league.value) loadLeague(scope.value)
 }
 
 type Scope = 'FRIENDS' | 'NEIGHBORHOOD'
-type Sort = 'UNITS' | 'POINTS'
 const SCOPES: { key: Scope; label: string }[] = [{ key: 'FRIENDS', label: '친구' }, { key: 'NEIGHBORHOOD', label: '동네' }]
 const scope = ref<Scope>('FRIENDS')
-const sort = ref<Sort>('UNITS')
 const league = ref<components['schemas']['BetLeague'] | null>(null)
-async function loadLeague(s: Scope, o: Sort) {
+async function loadLeague(s: Scope) {
   scope.value = s
-  sort.value = o
-  league.value = (await GET('/api/points/league', { query: { scope: s, sort: o } }).catch(() => ({ data: null }))).data
+  league.value = (await GET('/api/points/league', { query: { scope: s } }).catch(() => ({ data: null }))).data
 }
-const signed = (n: number, unit: string) => `${n > 0 ? '+' : ''}${n}${unit}`
-const score = (r: components['schemas']['BetLeagueRow']) => (sort.value === 'UNITS' ? signed(r.units, '유닛') : signed(r.points, 'P'))
+const score = (r: components['schemas']['BetLeagueRow']) => `${r.units > 0 ? '+' : ''}${r.units}점`
 
 onMounted(async () => {
   sources.value = (await GET('/api/points/users/{userId}/sources', { path: { userId: props.userId } }).catch(() => ({ data: null }))).data

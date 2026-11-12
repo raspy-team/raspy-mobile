@@ -1599,7 +1599,7 @@
           "point-controller"
         ],
         "summary": "경기 응원 현황",
-        "description": "편마다 배수·이길 확률·응원한 사람 수와 포인트·못 고르는 까닭, 내 응원",
+        "description": "편마다 이길 확률·맞히면 오를 유닛·응원한 사람 수·못 고르는 까닭, 내 응원",
         "operationId": "pointCheerState",
         "parameters": [
           {
@@ -1630,7 +1630,7 @@
           "point-controller"
         ],
         "summary": "응원하기",
-        "description": "선수가 다 모인 시작 전 남의 경기 한쪽을 고른다 (경기마다 한 번). amount 0은 예측만, 10~100은 포인트도 건다(하루 300). 이기면 건 포인트 × 배수(1 ÷ 이길 확률, 1.05~3.0, 고를 때 정해짐)",
+        "description": "선수가 다 모인 시작 전 남의 경기에서 이길 쪽을 고른다 (경기마다 한 번). 포인트는 걸지 않는다. 맞히면 응원 리그 유닛이 1 ÷ 이길 확률 − 1만큼 오른다",
         "operationId": "cheerWithPoints",
         "parameters": [
           {
@@ -7755,7 +7755,7 @@
           "point-controller"
         ],
         "summary": "주간 응원 리그",
-        "description": "이번 주(월요일부터) 친구 또는 내 동네에서 응원을 잘 맞힌 순위. sort=UNITS(유닛: 맞히면 +(배수−1), 틀리면 −1) 또는 POINTS(응원으로 늘린 포인트). 3번 이상 맞혀 본 사람만",
+        "description": "이번 주(월요일부터) 친구 또는 내 동네에서 응원을 잘 맞힌 순위. 유닛 순(맞히면 +(1÷이길 확률−1), 틀리면 −1). 3번 이상 골라 본 사람만",
         "operationId": "cheerLeague",
         "parameters": [
           {
@@ -7769,19 +7769,6 @@
                 "NEIGHBORHOOD"
               ],
               "default": "FRIENDS"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "UNITS",
-                "POINTS"
-              ],
-              "default": "UNITS"
             }
           }
         ],
@@ -13212,7 +13199,6 @@
       },
       "PointCheerRequest": {
         "required": [
-          "amount",
           "sideUserId"
         ],
         "type": "object",
@@ -13234,7 +13220,6 @@
           "label",
           "memberIds",
           "multiplier",
-          "points",
           "rated",
           "sideUserId"
         ],
@@ -13266,10 +13251,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "points": {
-            "type": "integer",
-            "format": "int32"
-          },
           "lockedReason": {
             "type": "string"
           },
@@ -13281,7 +13262,6 @@
       "CheerSide": {
         "required": [
           "cheerers",
-          "points",
           "userId"
         ],
         "type": "object",
@@ -13293,10 +13273,6 @@
           "cheerers": {
             "type": "integer",
             "format": "int32"
-          },
-          "points": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },
@@ -13304,9 +13280,7 @@
         "required": [
           "board",
           "canBet",
-          "dailyStakeLimit",
-          "sides",
-          "stakedToday"
+          "sides"
         ],
         "type": "object",
         "properties": {
@@ -13330,20 +13304,11 @@
           },
           "blockedReason": {
             "type": "string"
-          },
-          "stakedToday": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "dailyStakeLimit": {
-            "type": "integer",
-            "format": "int64"
           }
         }
       },
       "MyCheer": {
         "required": [
-          "amount",
           "bonusRate",
           "settled",
           "sideUserId"
@@ -13353,10 +13318,6 @@
           "sideUserId": {
             "type": "integer",
             "format": "int64"
-          },
-          "amount": {
-            "type": "integer",
-            "format": "int32"
           },
           "settled": {
             "type": "boolean"
@@ -13557,11 +13518,11 @@
               "type": "object"
             }
           },
-          "cols": {
+          "rows": {
             "type": "integer",
             "format": "int32"
           },
-          "rows": {
+          "cols": {
             "type": "integer",
             "format": "int32"
           }
@@ -18175,7 +18136,6 @@
           "minPicks",
           "rows",
           "scope",
-          "sort",
           "weekStart"
         ],
         "type": "object",
@@ -18185,13 +18145,6 @@
             "enum": [
               "FRIENDS",
               "NEIGHBORHOOD"
-            ]
-          },
-          "sort": {
-            "type": "string",
-            "enum": [
-              "UNITS",
-              "POINTS"
             ]
           },
           "weekStart": {
@@ -18218,7 +18171,6 @@
           "hits",
           "nickname",
           "picks",
-          "points",
           "rank",
           "units",
           "userId"
@@ -18243,10 +18195,6 @@
           "units": {
             "type": "number",
             "format": "double"
-          },
-          "points": {
-            "type": "integer",
-            "format": "int32"
           },
           "rank": {
             "type": "integer",

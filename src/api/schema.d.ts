@@ -4418,6 +4418,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/guest/plays/duels/{gameId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 도전장(?d=대결)을 보낸 사람
+         * @description 로그인 없이. 친구의 앱 대결 도전장 첫 화면에 보낸 사람 이름과 한마디 첫 줄(등급). 답은 주지 않는다
+         */
+        get: operations["duel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/guest/plays/challenges": {
         parameters: {
             query?: never;
@@ -5469,7 +5489,7 @@ export interface paths {
             cookie?: never;
         };
         /** 내 대결 하나 */
-        get: operations["duel"];
+        get: operations["duel_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6903,6 +6923,19 @@ export interface components {
             challengerLine?: string;
             challengerAnswer?: string;
             challengeKey?: string;
+            challengerName?: string;
+        };
+        GuestClaimResponse: {
+            /** Format: int32 */
+            claimed: number;
+            duels: components["schemas"]["JoinedDuel"][];
+        };
+        JoinedDuel: {
+            /** Format: int64 */
+            gameId: number;
+            key: string;
+            opponent: string;
+            result: string;
         };
         GameRegionRequest: {
             roadAddress: string;
@@ -8265,6 +8298,11 @@ export interface components {
             line?: string;
             gameKey: string;
             answered: boolean;
+        };
+        DuelInfo: {
+            name: string;
+            line?: string;
+            open: boolean;
         };
         SentChallenge: {
             /** Format: int64 */
@@ -11144,7 +11182,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ClaimResponse"];
+                    "*/*": components["schemas"]["GuestClaimResponse"];
                 };
             };
         };
@@ -15053,6 +15091,28 @@ export interface operations {
             };
         };
     };
+    duel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DuelInfo"];
+                };
+            };
+        };
+    };
     challenges: {
         parameters: {
             query: {
@@ -16231,7 +16291,7 @@ export interface operations {
             };
         };
     };
-    duel: {
+    duel_1: {
         parameters: {
             query?: never;
             header?: never;

@@ -2790,7 +2790,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ClaimResponse"
+                  "$ref": "#/components/schemas/GuestClaimResponse"
                 }
               }
             }
@@ -8785,6 +8785,39 @@
         }
       }
     },
+    "/api/guest/plays/duels/{gameId}": {
+      "get": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "도전장(?d=대결)을 보낸 사람",
+        "description": "로그인 없이. 친구의 앱 대결 도전장 첫 화면에 보낸 사람 이름과 한마디 첫 줄(등급). 답은 주지 않는다",
+        "operationId": "duel",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DuelInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/guest/plays/challenges": {
       "get": {
         "tags": [
@@ -10521,7 +10554,7 @@
           "app-game-controller"
         ],
         "summary": "내 대결 하나",
-        "operationId": "duel",
+        "operationId": "duel_1",
         "parameters": [
           {
             "name": "gameId",
@@ -14556,6 +14589,52 @@
             "type": "string"
           },
           "challengeKey": {
+            "type": "string"
+          },
+          "challengerName": {
+            "type": "string"
+          }
+        }
+      },
+      "GuestClaimResponse": {
+        "required": [
+          "claimed",
+          "duels"
+        ],
+        "type": "object",
+        "properties": {
+          "claimed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JoinedDuel"
+            }
+          }
+        }
+      },
+      "JoinedDuel": {
+        "required": [
+          "gameId",
+          "key",
+          "opponent",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "opponent": {
+            "type": "string"
+          },
+          "result": {
             "type": "string"
           }
         }
@@ -19049,6 +19128,24 @@
             "type": "string"
           },
           "answered": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DuelInfo": {
+        "required": [
+          "name",
+          "open"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "line": {
+            "type": "string"
+          },
+          "open": {
             "type": "boolean"
           }
         }

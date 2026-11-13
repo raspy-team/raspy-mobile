@@ -74,8 +74,8 @@
             <p class="t-caption mt-1">100명 중 {{ improv.rank }}등</p>
             <!-- 친구의 도전장으로 온 판: 누가 이겼나 (걷기 C1: "붙자고 해서 했는데 누가 이겼는지가 안 나와") -->
             <p v-if="result.challengerScore != null" class="t-heading mt-4">
-              친구 {{ challengerGrade }} ·
-              {{ result.score > result.challengerScore ? '내가 이겼어요' : result.score < result.challengerScore ? '친구가 이겼어요' : '비겼어요' }}
+              {{ friendName }} {{ challengerGrade }} ·
+              {{ result.score > result.challengerScore ? '내가 이겼어요' : result.score < result.challengerScore ? `${friendName}${friendName === '친구' ? '가' : '님이'} 이겼어요` : '비겼어요' }}
             </p>
             <!-- 보내기는 등급 바로 밑: 등급을 막 본 순간이 자랑하고 싶은 마음이 가장 센 때다. '한 판 더'를 다음 목표 옆으로 올리며
                  보내기가 그 아래로 밀려났었다 (11/11 목적 다시 보기: 자랑·교류 동기, 3단계가 재는 것이 공유율) -->
@@ -246,7 +246,10 @@
             <p v-if="key === 'improv' && challengeGrade" class="t-heading mt-4 break-keep">친구가 <span class="hl">{{ challengeGrade }}</span> 받은 상황이에요. 이길 수 있어요?</p>
             <p v-else class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 붙어요</p>
           </template>
-          <p v-else-if="fromDuel && !fromPlay" class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 붙어요</p>
+          <template v-else-if="fromDuel && !fromPlay">
+            <p v-if="key === 'improv' && duelBy?.grade" class="t-heading mt-4 break-keep">{{ duelBy.name }}님이 <span class="hl">{{ duelBy.grade }}</span> 받은 상황이에요. 이길 수 있어요?</p>
+            <p v-else class="t-heading mt-4 break-keep">{{ duelBy ? `${duelBy.name}님이` : '친구가' }} 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 붙어요</p>
+          </template>
           <p v-else-if="challenge?.answered" class="t-caption mt-4 break-keep">이미 푼 한 판이에요. 새 {{ key === 'improv' ? '상황으로' : '문제로' }} 한 판 해요</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">{{ key === 'improv' ? '시작하기' : '한 판 하기' }}</UiButton>
@@ -557,6 +560,15 @@ if (fromPlay) {
     })
     .catch(() => {})
 }
+// 가입한 친구의 도전장(?d=대결): 누가 보냈는지, 그 친구의 등급 (11/13 안드로이드 실제 기기 한 바퀴: '친구가'만 있고 누구인지 없었다)
+const duelBy = ref<{ name: string; grade: string; open: boolean } | null>(null)
+if (fromDuel && !fromPlay) {
+  GET('/api/guest/plays/duels/{gameId}', { path: { gameId: fromDuel } })
+    .then(({ data }) => (duelBy.value = { name: data.name, grade: data.line?.match(/\d등급/)?.[0] ?? '', open: !!data.open }))
+    .catch(() => {})
+}
+// 결과 줄의 상대 이름 (가입한 친구의 도전장이면 그 이름, 아니면 '친구')
+const friendName = computed(() => result.value?.challengerName || '친구')
 // 도전장을 보낸 친구의 등급 줄에서 "N등급"만
 const challengerGrade = computed(() => result.value?.challengerLine?.match(/\d등급/)?.[0] ?? `${result.value?.challengerScore ?? 0}점`)
 // 스토리 그림은 결과가 나오자마자 미리 찍어 둔다 (누른 순간 바로 넘겨야 사파리가 공유를 막지 않는다)

@@ -127,6 +127,7 @@
 // 첫 설정: 한 화면에 닉네임 + 약관 한 줄. 아이디는 지어 둔 것을 접어 둔다.
 // 동네는 묻지 않는다: 경기를 열거나 신청할 때 서버가 428을 주면 api.js가 /neighborhood로 보내고 하던 화면으로 돌려보낸다 (목적 판정 11/11 부분 1)
 // 사진·나이·성별·소개·소속도 묻지 않는다 (프로필에서 나중에 채운다)
+import { claimGuestPlays } from '../../utils/visit'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/api'
@@ -224,6 +225,7 @@ function otherAccount() {
 
 function finish() {
   markOnboarded()
+  claimGuestPlays() // 가입 전 한 판은 이름을 정한 뒤에 옮긴다 (친구의 도전장 결과 알림에 그 이름이 나간다)
   const back = takeReturnTo()
   router.replace(back || '/')
 }

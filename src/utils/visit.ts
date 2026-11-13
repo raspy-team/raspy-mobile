@@ -2,7 +2,7 @@
 // 기기마다 무작위 id를 하나 만들어 두고, 하루 한 번 서버에 방문을 남긴다. 로그인 전에 남겼으면 로그인 뒤 한 번 더 (그 사람을 붙인다).
 // 홍보 링크에는 ?utm_source=instagram&utm_campaign=1105 처럼 꼬리표를 단다
 import { NOTICE } from './notice'
-import { POST } from '../api/client'
+import { GET, POST } from '../api/client'
 import { isStandalone } from './install'
 import { useToast } from '../composables/useToast'
 
@@ -116,6 +116,8 @@ export function markGuestPlayed() {
 
 /** 방금 부른 옮기기의 결과 (옮긴 수, 실패면 -1). 막 가입한 화면이 '기록에 남았어요'를 옮기기가 된 때만 말하게 (경로 2 리뷰 N12) */
 let lastClaim: Promise<number> | null = null
+/** 가입하며 친구의 도전장 대결에 붙은 판들 (그 친구와 승패가 났다, 11/13) */
+export let claimedDuels: { gameId: number; key: string; opponent: string; result: string }[] = []
 export function guestClaimResult(): Promise<number> {
   return lastClaim ?? Promise.resolve(localStorage.getItem(GUEST_KEY) ? -1 : 0)
 }
@@ -141,8 +143,13 @@ async function claimNow(): Promise<number> {
   }
   if (!localStorage.getItem(GUEST_KEY)) return 0
   try {
+    // 첫 설정(닉네임)을 마친 뒤에 옮긴다: 친구의 도전장 판은 옮기는 순간 그 친구에게 결과 알림이 가는데,
+    // 그 전엔 이름이 자동 닉네임이라 친구가 '화려한 하마님과의 경기'를 받았다 (11/13). 첫 설정 화면이 끝나면 다시 부른다
+    const ob = (await GET('/api/auth/onboarding')).data
+    if (!(ob.termsAgreed && ob.onboarded)) return 0
     const { data } = await POST('/api/guest/plays/claim', { body: { visitorId: id } })
     localStorage.removeItem(GUEST_KEY)
+    claimedDuels = data.duels ?? []
     return data.claimed
   } catch {
     return -1 // 다음에 열 때 다시

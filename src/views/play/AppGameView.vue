@@ -339,7 +339,12 @@
           <UiCard v-if="joinedFrom" class="mb-3">
             <p class="t-title">방금 판 <span class="hl">{{ joinedFrom.grade }}등급</span>이 내 기록에 남았어요</p>
             <!-- 5등급부터는 '남았다'가 박혔다로 들린다: 기록엔 가장 좋은 판만 남는다는 사실을 함께 (11/11 감정과 체면) -->
-            <p class="t-caption mt-1">{{ Number(joinedFrom.grade) > 4 ? '기록엔 가장 좋은 등급만 남아요. ' : '' }}이제 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요</p>
+            <!-- 친구의 도전장으로 왔으면 그 친구와 승패가 났다 (11/13: '모르는 사람과 1:1'이라고 했다) -->
+            <template v-if="joinedFrom.vs">
+              <p class="t-body text-fg mt-1">{{ joinedFrom.vs.name }}님과의 승부: <strong>{{ joinedFrom.vs.result === 'WIN' ? '이겼어요' : joinedFrom.vs.result === 'LOSE' ? '졌어요' : '비겼어요' }}</strong> · {{ joinedFrom.vs.name }}님에게도 알렸어요</p>
+              <UiButton size="sm" variant="secondary" class="mt-3" :to="`/play/improv?duel=${joinedFrom.vs.gameId}`">결과 보기</UiButton>
+            </template>
+            <p v-else class="t-caption mt-1">{{ Number(joinedFrom.grade) > 4 ? '기록엔 가장 좋은 등급만 남아요. ' : '' }}이제 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요</p>
           </UiCard>
           <UiCard>
             <p class="t-caption">{{ game.summary }}</p>
@@ -461,7 +466,7 @@ import { improvAnswers, improvFeedback, improvSituations, improvShareLine } from
 import { track } from '@/utils/trackLog'
 import { shareLink } from '@/utils/share'
 import { askPushPermission, isCapacitorApp, hasNativeInstagram } from '@/utils/nativeBridge'
-import { guestClaimResult } from '@/utils/visit'
+import { guestClaimResult, claimedDuels } from '@/utils/visit'
 // 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 임기응변 결과가 나올 때 받는다. 모든 게임 화면에 실려 첫 화면을 늦췄다 (11/11 몸과 시간)
 let story: typeof import('@/utils/storyShare') | null = null
 let storyCard: typeof import('../../components/share/ImprovStoryCard.vue').default | null = null
@@ -820,7 +825,7 @@ async function shareVote(gameId: number) {
 /** 요리 답: 첫 줄은 이름, 나머지는 만드는 법 */
 // 임기응변 등급: 문제의 상황 셋, 답 셋(JSON), 한마디 첫 줄의 등급 (utils/improv.ts)
 // 가입 전 한 판(임기응변)의 결과가 이 기기에 남아 있으면, 막 가입한 사람에게 한 번 보여 주고 지운다 (GuestPlayView의 improv_last_result)
-const joinedFrom = ref<{ grade: number } | null>(null)
+const joinedFrom = ref<{ grade: number; vs: { gameId: number; name: string; result: string } | null } | null>(null)
 if (key.value === 'improv') {
   try {
     const v = JSON.parse(localStorage.getItem('improv_last_result') || 'null')
@@ -829,7 +834,8 @@ if (key.value === 'improv') {
       // '기록에 남았어요'는 옮기기가 된 때만 (실패해도 같은 말이 떴다, 경로 2 리뷰 N12). 실패면 결과를 지우지 않아 다음에 다시 옮길 때 보인다
       guestClaimResult().then((n) => {
         if (n < 0) return
-        joinedFrom.value = { grade: r.grade }
+        const vs = claimedDuels.find((d) => d.key === 'improv')
+        joinedFrom.value = { grade: r.grade, vs: vs ? { gameId: vs.gameId, name: vs.opponent, result: vs.result } : null }
         // 가입하며 옮긴 판도 홈 '내 판'의 마지막 판으로 (예전엔 남지 않아 막 가입한 사람이 홈에서 옛 목록만 봤다)
         getMyId().then((uid) => localStorage.setItem('last_app_game', JSON.stringify({ uid, key: 'improv', title: '임기응변 등급', at: Date.now(), line: `${r.grade}등급` }))).catch(() => {})
         localStorage.removeItem('improv_last_result')

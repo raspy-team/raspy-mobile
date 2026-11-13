@@ -103,7 +103,6 @@ import NeighborhoodPick from '../components/neighborhood/NeighborhoodPick.vue'
 import { UiBadge, UiButton, UiCard, UiEmptyState, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
 import { useToast } from '../composables/useToast'
 import { confirmDialog } from '../composables/useConfirm'
-import { askPushPermission } from '@/utils/nativeBridge'
 
 type Mine = components['schemas']['MyNeighborhoods']
 
@@ -140,9 +139,9 @@ async function onVerified(next: Mine) {
   data.value = next
   verifyOpen.value = false
   const name = next.neighborhoods.find((n) => n.active)?.name ?? '동네'
-  showToast(await continueApply() ? `${name} 인증을 마쳤고, 신청했어요` : `${name} 인증을 마쳤어요`)
-  const back = route.query.back
-  if (typeof back === 'string' && back.startsWith('/')) router.replace(back)
+  const applied = await continueApply()
+  showToast(applied ? `${name} 인증을 마쳤고, 신청했어요` : `${name} 인증을 마쳤어요`)
+  await goBack()
 }
 
 // 이름으로 골랐다: 막혔던 신청을 이어서 하고, 돌아갈 곳이 있으면 바로 (11/13)
@@ -151,9 +150,15 @@ async function onPicked(next: Mine) {
   pickOpen.value = false
   const name = next.neighborhoods.find((n) => n.active)?.name ?? '동네'
   const eul = (w: string) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c <= 11171 && c % 28 ? '을' : '를' } // 합정동을 · 신촌로를
-  showToast(await continueApply() ? `${name}${eul(name)} 골랐고, 신청했어요` : `${name}${eul(name)} 골랐어요`)
+  const applied = await continueApply()
+  showToast(applied ? `${name}${eul(name)} 골랐고, 신청했어요` : `${name}${eul(name)} 골랐어요`)
+  await goBack()
+}
+
+// 돌아갈 곳으로 (알림은 신청이 성공한 응답에서 api.js가 묻는다)
+async function goBack() {
   const back = route.query.back
-  if (typeof back === 'string' && back.startsWith('/')) router.replace(back)
+  if (typeof back === 'string' && back.startsWith('/')) await router.replace(back).catch(() => {})
 }
 
 // 신청하다 동네가 없어 막혔으면 그 신청을 이어서 한다 (api.js가 남긴 pending_apply)
@@ -162,8 +167,6 @@ async function continueApply() {
   try { pending = JSON.parse(sessionStorage.getItem('pending_apply') || 'null'); sessionStorage.removeItem('pending_apply') } catch { pending = null }
   if (!pending?.url) return false
   const ok = await api.post(pending.url, null, pending.params ? { params: pending.params } : undefined).then(() => true).catch(() => false)
-  // 신청한 바로 그때가 알림을 물을 때다 (경기 목록에서 신청한 것과 같다)
-  if (ok) setTimeout(() => askPushPermission('신청이 받아들여지면 바로 알려 드려요'), 800)
   return ok
 }
 

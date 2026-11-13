@@ -44,7 +44,13 @@ function maybeAskPush(config) {
   const url = String(config.url || '').replace(/^https?:\/\/[^/]+/, '').split('?')[0]
   if (!WAIT_CALLS.some((r) => r.test(url))) return
   pushAsked = true
-  import('../utils/nativeBridge').then(({ askPushPermission }) => askPushPermission()).catch(() => {})
+  // 무엇을 기다리게 됐는지로 이유를 말한다. 화면 이동·시트 닫기가 끝난 뒤에 묻는다: 그 사이에 열면 뒤로 신호에 창이 닫혀
+  // 아무도 안 눌렀는데 '나중에'로 적혔다 (11/13 안드로이드 실제 기기 한 바퀴)
+  const reason = /\/apply/.test(url) ? '신청이 받아들여지면 바로 알려 드려요'
+    : /\/games\/create/.test(url) ? '누가 신청하면 바로 알려 드려요'
+    : /\/result$/.test(url) ? '상대가 결과를 확인하면 알려 드려요'
+    : undefined
+  setTimeout(() => import('../utils/nativeBridge').then(({ askPushPermission }) => askPushPermission(reason)).catch(() => {}), 1500)
 }
 
 api.interceptors.response.use(

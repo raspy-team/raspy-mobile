@@ -126,7 +126,6 @@
 </template>
 
 <script setup>
-import { askPushPermission } from '@/utils/nativeBridge'
 // 홈: 앱 게임을 한 사람은 '내 판'이 먼저, 동네 경기만 하는 사람은 동네 경기 목록 (목적 판정 11/11 4번)
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -242,7 +241,6 @@ async function apply(game, team) {
   busyId.value = game.id
   try {
     await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
-    askPushPermission('신청이 받아들여지면 바로 알려 드려요')
     game.isAppliedByMe = true
     feel('success')
     showToast('신청했어요. 주최자가 승인하면 알림에 떠요')

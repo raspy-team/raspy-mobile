@@ -9,8 +9,11 @@ import './assets/tailwind.css'
 import { followIosTextSize } from './utils/textSize'
 import router from './router/router.js'
 import { setupPushListeners } from './utils/nativeBridge'
+import { setupAndroidBack } from './utils/androidBack'
 // 알림을 눌러 앱이 켜졌을 때의 신호를 가장 먼저 받는다 (App이 뜨기 전, 11/6 b2). 앱이 아니면 아무것도 하지 않는다
 setupPushListeners()
+// 안드로이드 뒤로 버튼: 시트 닫기 → 앞 화면 → 홈 → 앱을 뒤로 (11/13)
+setupAndroidBack(router)
 import  { setRouter } from './api/api'
 import autocomplete from './utils/autocomplete'
 

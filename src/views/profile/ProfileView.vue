@@ -186,8 +186,8 @@
               <RuleThumb :rule="r" :size="36" bare />
             </template>
             <template #trailing>
-              <!-- 순위는 겨룬 사람이 셋 이상일 때만 (혼자 1위는 뜻이 없다) -->
-              <UiBadge v-if="showRank(r.myRank, r.totalPlayers)" :tone="r.myRank === 1 ? 'primary' : 'neutral'">{{ r.myRank }}위 / {{ r.totalPlayers }}명</UiBadge>
+              <!-- 그 게임의 실력 점수. 순위는 뺐다: 견주고 싶으면 남의 프로필에서 점수를 본다 (11/13 숫자 정리) -->
+              <span class="t-heading tabular-nums">{{ r.rating }}점</span>
             </template>
           </UiListItem>
         </UiList>
@@ -292,11 +292,10 @@ import api from '../../api/api'
 import UserSearchModal from '../../components/profile/UserSearchModal.vue'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
-  UiAiBadge, UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiListSkeleton,
+  UiAiBadge, UiAvatar, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiListSkeleton,
   UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
-import { showRank } from '@/utils/rank'
 import { useToast } from '../../composables/useToast'
 import { matchTime } from '../../utils/format'
 import { liveRoute } from '@/utils/battle'
@@ -487,16 +486,11 @@ async function loadBests(id) {
   bests.value = (data?.bests ?? []).slice(0, 3).map((b) => ({ key: b.key, title: b.title, line: b.grade ? `${b.grade}등급` : `${Math.round(b.score)}${b.scoreUnit || '점'}` }))
 }
 
-// 가진 자리 (벨트 먼저, 그다음 1위). 벨트는 그 게임으로, 능력·종합 1위는 그 순위로 간다
+// 가진 챔피언 자리(벨트). 1위 왕관은 뺐다: "누가 최고인가"는 챔피언 하나로 말한다 (11/13 숫자 정리)
 const seats = ref({ belts: [], crowns: [] })
-const seatLines = computed(() => [
-  ...seats.value.belts.map((b) => ({ key: `b${b.ruleId}${b.seatLabel}`, title: b.title, to: b.appGameKey ? `/play/${b.appGameKey}` : `/rules/${b.ruleId}` })),
-  ...seats.value.crowns.map((c) => ({
-    key: `c${c.kind}${c.key}${c.seat}`,
-    title: c.title,
-    to: c.kind === 'RECORD' ? `/play/${c.key}` : `/rankings/${c.kind}/${c.key}`,
-  })),
-])
+const seatLines = computed(() =>
+  seats.value.belts.map((b) => ({ key: `b${b.ruleId}${b.seatLabel}`, title: b.title, to: b.appGameKey ? `/play/${b.appGameKey}` : `/rules/${b.ruleId}` })),
+)
 
 onMounted(() => load())
 async function load() {

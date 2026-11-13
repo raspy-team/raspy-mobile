@@ -15,7 +15,6 @@ const NotFoundView = () => import('../views/NotFoundView.vue')
 const Setting = () => import('../views/SettingView.vue')
 const Rule = () => import('../views/RuleView.vue')
 const RuleCreate = () => import('../views/rule/RuleCreateView.vue')
-const RuleRanking = () => import('../views/rule/RuleRankingView.vue')
 const MyRules = () => import('../views/rule/MyRulesView.vue')
 const RuleDetail = () => import('../views/rule/RuleDetailView.vue')
 const DmRoomList = () => import('../views/DmRoomList.vue')
@@ -95,7 +94,7 @@ const routes = [
   // 옛 초대 링크(/invite/…, /invite-fall-back/…)는 뺐다: 지금 코드·서버가 만들지 않고, 링크 속 경기는 이미 끝났다 (목적 판정 11/11 부분 1)
   { path: '/profile/:id/stats', component: () => import('../views/profile/RecordView.vue') },
   // 능력·종합 순위 (kind: OVERALL·GROUP·ABILITY, key: ALL·BODY·능력 이름)
-  { path: '/rankings/:kind/:key', component: () => import('../views/profile/ScopeRankingView.vue') },
+  { path: '/rankings/:kind/:key', redirect: '/' }, // 11/13 숫자 정리로 순위표를 뺐다
   { path: '/profile/:id', component: Profile },
 
   { path: '/settings', component:  Setting},
@@ -147,7 +146,7 @@ const routes = [
   // 수정은 만들기 화면을 그대로 쓴다 (수정 요청으로 보낸다)
   { path: '/rules/edit/:id', component: RuleCreate, props: (r) => ({ editId: Number(r.params.id) }) },
   { path: '/rules/:ruleId(\\d+)', component: RuleDetail },
-  { path: '/rules/:ruleId/ranking', component: RuleRanking, props: true},
+  { path: '/rules/:ruleId/ranking', redirect: (to) => `/rules/${to.params.ruleId}` }, // 11/13 순위표 뺌
   { path: '/group/register', component:  GroupUserRegister},
   { path: '/password-reset', component: () => import('../views/auth/PasswordResetView.vue'), meta: { keepOnQuery: true } },
   { path: '/group/login', component: GroupUserLogin, meta: { keepOnQuery: true } },

@@ -39,8 +39,7 @@
           v-for="b in s.bests"
           :key="b.key"
           :title="b.title"
-          :subtitle="showRank(b.rank, b.players) ? `기록 순위 ${b.rank}위 / ${b.players}명` : ''"
-          chevron
+                    chevron
           @click="router.push(`/play/${b.key}`)"
         >
           <template #leading>
@@ -132,76 +131,40 @@
         </UiButton>
       </section>
 
-      <!-- 실력 점수: 숫자만으로는 뜻이 없다. 같은 게임 하는 사람 중 어디쯤인지와 함께 -->
-      <section v-if="overview?.overall || ratedRules.length">
+      <!-- 실력 점수: 게임별 점수 하나와 흐름. 종합·묶음·능력 점수, ±오차, 순위는 뺐다 (11/13 숫자 정리: 처음 온 사람이 보는 숫자는 게임 점수와 챔피언 한 쌍) -->
+      <section v-if="ratedRules.length">
         <div class="flex items-center justify-between mb-3">
           <h2 class="t-heading">실력 점수</h2>
           <UiButton size="sm" variant="ghost" class="-mr-2" icon="circle-question" @click="helpOpen = true">점수가 뭔가요?</UiButton>
         </div>
 
-        <div v-if="overview?.overall" class="rounded-xl bg-surface p-4">
-          <button type="button" class="w-full flex items-baseline gap-2 text-left" @click="router.push('/rankings/OVERALL/ALL')">
-            <p class="t-caption">종합</p>
-            <!-- 가진 1위 (자리마다, 새벽 4시에 정한다) -->
-            <span v-if="crownText('OVERALL', 'ALL')" class="t-micro text-signal-fg"><UiIcon name="fas fa-crown" /> {{ crownText('OVERALL', 'ALL') }}</span>
-            <!-- 잠정이면 숫자 대신 한 줄 (④ 결과 화면과 같은 기준: 첫 몇 판의 숫자는 크게 흔들린다) -->
-            <p v-if="overview.overall.provisional" class="t-caption ml-auto">몇 판 더 하면 나와요</p>
-            <template v-else>
-              <p class="t-title tabular-nums ml-auto">{{ overview.overall.rating }}</p>
-              <p class="t-caption tabular-nums">±{{ overview.overall.margin }}</p>
-            </template>
-          </button>
-          <p v-if="!overview.overall.provisional && showRank(overview.overall.rank, overview.overall.people)" class="t-label mt-1 text-right">
-            {{ standing(overview.overall.rank, overview.overall.people) }}
-          </p>
-          <div v-if="overview.groups.length" class="grid gap-2 mt-3" :style="{ gridTemplateColumns: `repeat(${overview.groups.length}, minmax(0, 1fr))` }">
-            <button v-for="g in overview.groups" :key="g.key" type="button" class="rounded-lg bg-surface-2 px-3 py-2 text-left" @click="router.push(`/rankings/GROUP/${g.key}`)">
-              <p class="t-micro">{{ g.label }}</p>
-              <p v-if="g.provisional" class="t-caption">몇 판 더</p>
-              <p v-else class="t-heading tabular-nums">{{ g.rating }}</p>
-              <p v-if="!g.provisional && showRank(g.rank, g.people)" class="t-micro tabular-nums">{{ standing(g.rank, g.people) }}</p>
-              <p v-if="crownText('GROUP', g.key)" class="t-micro text-signal-fg truncate"><UiIcon name="fas fa-crown" /> {{ crownText('GROUP', g.key) }}</p>
-            </button>
-          </div>
-          <div v-if="overview.abilities.length" class="flex flex-wrap gap-1.5 mt-3">
-            <UiChip v-for="a in overview.abilities.slice(0, 6)" :key="a.key" :icon="crownText('ABILITY', a.key) ? 'fas fa-crown' : ''" @click="router.push(`/rankings/ABILITY/${a.key}`)">
-              {{ a.label }} {{ a.rating }}<template v-if="crownText('ABILITY', a.key)"> · {{ crownText('ABILITY', a.key) }}</template>
-            </UiChip>
-          </div>
-        </div>
-
-        <!-- 게임마다: 점수 · 순위(또는 순위까지 남은 것) · 흐름 -->
+        <!-- 게임마다: 점수 · 흐름 -->
         <div v-if="ratedRules.length" class="mt-3">
           <div v-if="ratedRules.length > 1" class="flex gap-2 -mx-4 px-4 mb-3 overflow-x-auto no-scrollbar" role="tablist" aria-label="게임 고르기">
             <UiChip v-for="r in ratedRules" :key="r.ruleId" class="flex-shrink-0 whitespace-nowrap" :selected="picked?.ruleId === r.ruleId" @click="pickedId = r.ruleId">{{ r.ruleTitle }}</UiChip>
           </div>
           <div v-if="picked?.provisional" class="rounded-xl bg-surface p-4">
             <p class="t-body">실력 점수는 몇 판 더 하면 나와요</p>
-            <p v-if="untilRanked(picked)" class="t-caption mt-1">{{ untilRanked(picked) }}</p>
           </div>
           <div v-else-if="picked" class="rounded-xl bg-surface p-4">
             <div class="flex items-baseline gap-2">
               <p class="t-title tabular-nums">{{ picked.rating }}점</p>
-              <p class="t-caption tabular-nums">±{{ picked.margin }}</p>
               <UiBadge v-if="picked.provisional" class="ml-auto">잠정</UiBadge>
               <p v-else-if="trend" class="t-caption tabular-nums ml-auto" :class="trend > 0 ? 'text-signal-fg' : ''">최근 5판 {{ trend > 0 ? '+' : '' }}{{ trend }}</p>
             </div>
-            <p v-if="rankLine(picked)" class="t-label mt-1">{{ rankLine(picked) }}</p>
             <svg v-if="chart" viewBox="0 0 300 72" class="w-full h-[72px] mt-3 text-fg" role="img" :aria-label="`${picked.ruleTitle} 실력 점수 흐름, 처음 ${chart.first}점에서 지금 ${picked.rating}점`">
-              <!-- 지금 점수의 ± 범위: 오른쪽 끝의 세로 막대 (지난 점수의 범위는 남기지 않아 그리지 않는다) -->
-              <line :x1="chart.lastX" :x2="chart.lastX" :y1="chart.bandTop" :y2="chart.bandBottom" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.15" />
               <polyline :points="chart.points" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
               <circle :cx="chart.lastX" :cy="chart.lastY" r="3.5" fill="currentColor" />
             </svg>
             <div v-if="chart" class="flex justify-between t-micro tabular-nums mt-1">
               <span>처음 {{ chart.first }}</span>
-              <span>지금 {{ picked.rating }} ±{{ picked.margin }}</span>
+              <span>지금 {{ picked.rating }}</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 게임(규칙)별: 모든 게임에 순위 또는 순위까지 남은 것 -->
+      <!-- 게임(규칙)별: 판 수·승패·승률 -->
       <section v-if="s.rules.length">
         <h2 class="t-heading mb-1">게임별 기록</h2>
         <UiList>
@@ -209,7 +172,7 @@
             v-for="r in allRules ? s.rules : s.rules.slice(0, 5)"
             :key="r.ruleId"
             :title="r.ruleTitle"
-            :subtitle="[`${r.tally.games}판 · ${r.tally.wins}승 ${r.tally.draws ? r.tally.draws + '무 ' : ''}${r.tally.losses}패`, rankShort(r)].filter(Boolean).join(' · ')"
+            :subtitle="`${r.tally.games}판 · ${r.tally.wins}승 ${r.tally.draws ? r.tally.draws + '무 ' : ''}${r.tally.losses}패`"
             chevron
             @click="router.push(r.appGameKey ? `/play/${r.appGameKey}` : `/rules/${r.ruleId}`)"
           >
@@ -234,7 +197,6 @@
             v-for="b in s.bests"
             :key="b.key"
             :title="b.title"
-            :subtitle="showRank(b.rank, b.players) ? `기록 순위 ${b.rank}위 / ${b.players}명` : ''"
             chevron
             @click="router.push(`/play/${b.key}`)"
           >
@@ -254,7 +216,7 @@
 
       <!-- 봇과 한 판은 사람 레이팅·순위와 따로 -->
       <section v-if="overview?.practice?.length">
-        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">AI 주민(앱이 만든 연습 상대)과 한 판으로만 매겨요 · 순위에 안 들어가요</span></h2>
+        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">AI 주민(앱이 만든 연습 상대)과 한 판으로만 매겨요</span></h2>
         <UiList>
           <UiListItem v-for="p in overview.practice" :key="p.ruleId" :title="p.ruleTitle" :subtitle="`${p.games}판`" chevron @click="router.push(`/rules/${p.ruleId}`)">
             <template #trailing><span class="t-heading tabular-nums">{{ p.rating }}</span></template>
@@ -315,13 +277,11 @@
         <li><strong>게임마다 따로</strong> 매겨요. 모두 <strong>1500점</strong>에서 시작해요.</li>
         <li>이기면 오르고 지면 내려가요. <strong>나보다 점수가 높은 사람을 이기면</strong> 더 많이 올라요.</li>
         <li><strong>200점 차이</strong>면 높은 쪽이 4판 중 3판쯤 이겨요. 400점 차이면 10판 중 9판이에요.</li>
-        <li><strong>±</strong>는 아직 확실하지 않은 정도예요. 판이 쌓이면 좁아지고, 오래 쉬면 다시 넓어져요. <strong>잠정</strong>은 아직 판이 적다는 뜻이에요.</li>
-        <li><strong>순위</strong>는 그 게임을 사람과 5판, 서로 다른 상대 3명 이상과 하면 붙어요. AI 주민과 한 판은 연습이라 따로 세요.</li>
-        <li><strong>종합</strong>은 게임별 점수를 모은 거예요. 판을 많이 해서 확실한 점수일수록 크게 쳐요.</li>
-        <li>종합 아래 작은 칸은 <strong>비슷한 게임끼리</strong>(예: 라켓 운동) 모은 점수, 그 아래 칩은 <strong>능력별</strong>(예: 순발력) 점수예요.</li>
+        <li>처음 몇 판은 점수가 크게 흔들려서, 판이 쌓인 뒤에 보여요. AI 주민과 한 판은 연습이라 따로 세요.</li>
+        <li>그 게임에서 가장 센 사람은 <strong>챔피언</strong>이에요. 챔피언을 이기면 자리를 가져와요.</li>
       </ul>
       <!-- 영어 사이트 이름·전문어 대신 (경로 6 리뷰: 'Glicko-2·lichess') -->
-      <p class="t-micro mt-4">체스 순위에 쓰는 계산법과 같아요.</p>
+      <p class="t-micro mt-4">체스 점수에 쓰는 계산법과 같아요.</p>
     </UiSheet>
   </div>
 </template>
@@ -329,14 +289,14 @@
 <script setup>
 // 기록 자세히 (/profile/:id/stats), 11/3 통계 개편.
 // 숫자는 모두 서버 한 곳(/user-profile/:id/stats, UserStatsService)에서 센다. 프로필 숫자 줄과 같은 수가 나온다.
-// 기간(이번 주가 먼저) → 활동 달력·연속 주 → 최근 경기 → 실력 점수(순위·상위 %와 함께) → 게임별 → 개인 최고 → 연습 → 상대 → 받은 평가
+// 기간(이번 주가 먼저) → 활동 달력·연속 주 → 최근 경기 → 실력 점수(게임별 점수·흐름) → 게임별 → 개인 최고 → 연습 → 상대 → 받은 평가.
+// 종합·묶음·능력 점수, ±오차, 순위, 1위 왕관은 뺐다 (11/13 숫자 정리)
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiRollNumber, UiSheet, UiSkeleton, UiTabs, UiTopBar } from '../../components/ui'
 import { timeAgo } from '../../utils/format'
-import { showRank } from '@/utils/rank'
 
 const RESULT = {
   win: { label: '승', word: '이김', class: 'bg-fg text-canvas' },
@@ -364,13 +324,6 @@ const nickname = ref('')
 const isMe = ref(route.params.id === '0')
 const ratings = ref([])
 const overview = ref(null)
-// 가진 능력·종합 1위 (docs/organizations.md 3-3)
-const crowns = ref([])
-/** '전국·합정동 1위'. 없으면 '' */
-function crownText(kind, key) {
-  const seats = crowns.value.filter((c) => c.kind === kind && c.key === key).map((c) => c.seatLabel)
-  return seats.length ? `${seats.join('·')} 1위` : ''
-}
 const periodKey = ref('WEEK')
 const pickedId = ref(null)
 const allRules = ref(false)
@@ -431,19 +384,6 @@ function matchWho(m) {
 // 최근 경기 줄은 그 경기 결과로 (소식 목록이 아니라, 경로 6 리뷰). 앱 대결은 그 대결 화면
 const openMatch = (m) => router.push(m.appGameKey ? `/play/${m.appGameKey}?duel=${m.gameId}` : `/games/${m.gameId}/result`)
 
-// 순위 문구: 10명 미만이면 '5명 중 2위', 넘으면 '상위 12%'
-function standing(rank, people) {
-  if (!rank || !people) return ''
-  if (people < 10) return `${people}명 중 ${rank}위`
-  return `상위 ${Math.max(1, Math.ceil((rank * 100) / people))}%`
-}
-function untilRanked(r) {
-  // '순위까지 3판 · 상대 1명'은 뜻이 헷갈렸다: 더 필요한 것만, '더'를 붙여
-  const need = [r.needGames && `${r.needGames}판`, r.needOpponents && `새 상대 ${r.needOpponents}명`].filter(Boolean).join(', ')
-  return need ? `순위까지 ${need} 더` : ''
-}
-const rankLine = (r) => (r.rank ? (showRank(r.rank, r.rankedPlayers) ? `전국 ${r.rank}위 · ${standing(r.rank, r.rankedPlayers)}` : '') : untilRanked(r))
-const rankShort = (r) => (r.rank ? (showRank(r.rank, r.rankedPlayers) ? `${r.rank}위` : '') : untilRanked(r))
 const score = (v) => (Number.isInteger(v) ? v : v.toFixed(1))
 
 // 실력 점수가 있는 게임 (게임별 줄 + 흐름). 흐름은 /api/rankings/history
@@ -480,12 +420,11 @@ async function load() {
   hidden.value = false
   try {
     const { data } = await GET('/api/user-profile/{userId}/stats', { path: { userId: Number(route.params.id) } })
-    const [history, ov, seatsRes] = await Promise.all([
+    const [history, ov] = await Promise.all([
       GET('/api/rankings/history', { query: { userId: data.userId } }).catch(() => ({ data: [] })),
+      // 연습 점수(AI 주민과 한 판)만 쓴다. 종합·묶음·능력은 화면에서 뺐다 (11/13)
       GET('/api/rankings/overview', { query: { userId: data.userId } }).catch(() => ({ data: null })),
-      GET('/api/champions/users/{userId}', { path: { userId: data.userId } }).catch(() => ({ data: null })),
     ])
-    crowns.value = seatsRes.data?.crowns ?? []
     nickname.value = data.nickname
     isMe.value = data.isMe
     ratings.value = history.data || []

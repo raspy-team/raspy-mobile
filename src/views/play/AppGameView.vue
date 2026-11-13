@@ -398,57 +398,11 @@
           <!-- 처음 하러 온 사람에게는 챔피언 자리를 미룬다: '한 판 하기' 바로 밑에서 눈을 뺏었다 (목적 판정 11/11 부분 2 다시 훑기, 고병연 확인) -->
           <ChampionSeatsCard v-if="game.dailyLimit !== 1 && game.available && played" :rule-id="game.ruleId" :app-game-key="game.key" class="mt-8" />
 
-          <!-- 나머지는 탭 하나로: 순위 · 내 대결 · 투표 -->
+          <!-- 나머지는 탭 하나로: 내 대결 · 투표 -->
           <!-- 빈 탭은 그리지 않는다. 탭이 하나뿐이면 탭 없이 목록만 (목적 판정 11/11 부분 2 다시 훑기) -->
           <UiTabs v-if="tabs.length > 1" v-model="tab" :options="tabs" class="mt-8" />
           <div v-else class="mt-8"></div>
 
-          <section v-if="tab === 'rank'" class="mt-4">
-            <UiTabs v-if="game.recordable" v-model="boardKind" :options="BOARDS" class="mb-3" />
-            <template v-if="boardKind === 'RATING'">
-              <UiEmptyState v-if="!ranking.length" mascot="dol" title="아직 순위가 비어 있어요" :description="game.dailyLimit === 1 ? '5일 풀면 첫 이름이 올라가요. 먼저 올라가 보세요' : '사람과 5판을 하면 첫 이름이 올라가요. 먼저 올라가 보세요'" />
-              <!-- AI 기준선이 사이에 낀다 (docs/ai-residents.md 2). 사람이 20명을 넘으면 빼고 순위 전체 보기에서 편다 -->
-              <UiList v-if="rankingRows.length" :class="{ 'mt-3': !ranking.length }">
-                <template v-for="(x, i) in rankingRows" :key="x.kind === 'user' ? x.row.userId : `ai-${i}`">
-                  <BaselineRow v-if="x.kind === 'ai'" :line="x.line" />
-                  <UiListItem
-                    v-else
-                    :title="x.row.isCurrentUser ? `${x.row.userName} (나)` : x.row.userName"
-                    :subtitle="`${x.row.playCount}판`"
-                    chevron
-                    @click="router.push('/profile/' + x.row.userId)"
-                  >
-                    <template #leading>
-                      <span class="w-6 t-mono text-center">{{ x.row.rank }}</span>
-                      <UiAvatar :src="x.row.userAvatar" :name="x.row.userName" :user-id="x.row.userId" size="sm" />
-                    </template>
-                    <template #trailing><span class="t-mono">{{ x.row.rating }}</span></template>
-                  </UiListItem>
-                </template>
-              </UiList>
-              <UiButton v-if="ranking.length" block variant="ghost" class="mt-2" :to="`/rules/${game.ruleId}/ranking`">모두 보기</UiButton>
-            </template>
-            <template v-else>
-              <UiList v-if="board?.entries.length">
-                <UiListItem
-                  v-for="e in board.entries"
-                  :key="e.player.userId"
-                  :title="e.player.userId === board.mine?.player.userId ? `${e.player.nickname} (나)` : e.player.nickname"
-                  @click="router.push('/profile/' + e.player.userId)"
-                >
-                  <template #leading>
-                    <span class="w-6 t-mono text-center">{{ e.rank }}</span>
-                    <UiAvatar :src="e.player.profilePicture" :name="e.player.nickname" :user-id="e.player.userId" size="sm" />
-                  </template>
-                  <template #trailing><span class="t-mono">{{ e.score }}{{ game.scoreUnit }}</span></template>
-                </UiListItem>
-              </UiList>
-              <UiEmptyState v-else mascot="dol" title="아직 기록이 없어요" description="첫 기록의 주인공이 되어 보세요" />
-              <p v-if="board?.mine && !board.entries.some((e) => e.player.userId === board?.mine?.player.userId)" class="t-caption mt-3">
-                내 순위 {{ board.mine.rank }}위 · {{ board.mine.score }}{{ game.scoreUnit }}
-              </p>
-            </template>
-          </section>
 
           <section v-else-if="tab === 'mine'" class="mt-4">
             <UiList v-if="finished.length">
@@ -492,8 +446,6 @@ import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
-import BaselineRow from '../../components/champion/BaselineRow.vue'
-import { FOLD_AT, withBaselines } from '../../components/champion/rankingBaselines'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import TypingPlay from '../../components/appgame/TypingPlay.vue'
@@ -550,11 +502,6 @@ type Duel = Schemas['AppDuelResponse']
 type Play = Schemas['AppPlayResponse']
 
 const VERDICT = { WIN: '이겼어요', LOSE: '졌어요', DRAW: '비겼어요' } as const
-const BOARDS = [
-  { value: 'RATING', label: '실력 점수' },
-  { value: 'WEEK', label: '이번 주 기록' },
-  { value: 'ALL', label: '전체 기록' },
-]
 const DONE = ['COMPLETED', 'CANCELED']
 
 const route = useRoute()
@@ -565,7 +512,6 @@ const game = ref<Schemas['AppGameSummary'] | null>(null)
 // 이 게임을 몇 판 안 했으면 실력 점수가 크게 움직인다 (서버는 RD가 크면 잠정으로 본다)
 const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
-const board = ref<Schemas['AppRecordBoard'] | null>(null)
 // 'AI 주민'이 무엇인지는 처음 세 번만 풀어 쓴다 (11/11 쌓이는 피로: 판마다 같은 괄호). 게임 화면을 열 때마다 센다
 const botExplained = (() => {
   try {
@@ -574,7 +520,6 @@ const botExplained = (() => {
     return n >= 3
   } catch { return false }
 })()
-const boardKind = ref<'RATING' | 'WEEK' | 'ALL'>('RATING')
 const play = ref<Play | null>(null)
 const counting = ref(false)
 let offset = 0 // 서버 시각 - 기기 시각
@@ -610,12 +555,6 @@ watch(result, (now, before) => {
 })
 let justSubmitted = false
 const votes = ref<Schemas['AppVoteCard'][]>([])
-const ranking = ref<Schemas['UserRankingDto'][]>([])
-const rankingTotal = ref(0)
-const baselines = ref<Schemas['RankingBaseline'][]>([])
-// 위 10명만 보이니, 다 보일 때만 맨 아래 기준선까지. 20명을 넘으면 기준선을 접는다 (순위 전체 보기에서 편다)
-// 순위가 비었으면 기준선(1800·1500)만 덩그러니 보였다 (UX ⑤): 사람이 있을 때만
-const rankingRows = computed(() => withBaselines(ranking.value, rankingTotal.value > FOLD_AT || !ranking.value.length ? [] : baselines.value, rankingTotal.value <= ranking.value.length))
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))
 const finished = computed(() => duels.value.filter((d) => DONE.includes(d.status)))
@@ -626,9 +565,9 @@ const dailyDone = computed(() => {
   return duels.value.some((d) => new Date(d.deadlineAt ?? d.createdAt).toDateString() === today && (d.myScore != null || DONE.includes(d.status)))
 })
 // 처음 탭은 순위. 투표 탭은 투표할 글이 있을 때만 '투표 N'으로 알린다 (한 판 하러 온 사람에게 남의 글 투표가 첫 탭이었다, 목적 판정 11/11 부분 2)
-const tab = ref<'rank' | 'mine' | 'vote'>('rank')
+// 순위 탭은 뺐다 (11/13 숫자 정리: 순위표 전부 없앰. 최고는 위의 챔피언 하나)
+const tab = ref<'mine' | 'vote'>('mine')
 const tabs = computed(() => [
-  { value: 'rank', label: '순위' },
   ...(finished.value.length ? [{ value: 'mine', label: '내 경기', count: finished.value.length }] : []),
   ...(isVote.value && votes.value.length ? [{ value: 'vote', label: '투표', count: votes.value.length }] : []),
 ])
@@ -649,7 +588,7 @@ async function load() {
   game.value = games.data.find((g) => g.key === key.value) ?? null
   missing.value = !game.value
   if (!game.value) return
-  // 게임 목록만 있으면 한 판은 할 수 있다. 내 대결·순위·기록·투표는 하나가 실패해도 그 칸만 비운다 (경로 2 리뷰 N11: 순위만 못 불러와도 '게임을 불러오지 못했어요'였다)
+  // 게임 목록만 있으면 한 판은 할 수 있다. 내 대결·투표는 하나가 실패해도 그 칸만 비운다 (경로 2 리뷰 N11: 순위만 못 불러와도 '게임을 불러오지 못했어요'였다)
   // 서로 기다릴 까닭이 없어 한꺼번에 부른다 (열 때마다 넷을 줄지어 기다렸다, 11/11 쌓이는 피로 전수표)
   const g = game.value
   await Promise.all([
@@ -658,22 +597,8 @@ async function load() {
       // 결과 화면을 보고 있는 대결이 끝났으면 바로 바꿔 보여준다
       if (result.value) result.value = duels.value.find((d) => d.gameId === result.value?.gameId) ?? result.value
     }),
-    g && GET('/api/rules/{ruleId}/rankings', { path: { ruleId: g.ruleId } }).catch(() => null).then((r) => {
-      const data = r?.data
-      if (data) {
-        ranking.value = (data.rankings ?? []).slice(0, 10)
-        rankingTotal.value = data.rankings?.length ?? 0
-        baselines.value = data.baselines ?? []
-      }
-    }),
-    g?.recordable && loadBoard().catch(() => {}),
     g?.judge === 'VOTE' && GET('/api/app-games/{key}/votes', { path: { key: key.value } }).catch(() => null).then((v) => { if (v) votes.value = v.data }),
   ])
-}
-
-async function loadBoard() {
-  if (boardKind.value === 'RATING') return
-  board.value = (await GET('/api/app-games/{key}/records', { path: { key: key.value }, query: { period: boardKind.value } })).data
 }
 
 function errorMessage(e: unknown, fallback: string) {
@@ -1030,7 +955,6 @@ function openUnfinished(d: Duel) {
   else result.value = d
 }
 
-watch(boardKind, loadBoard)
 
 let stop: (() => void) | undefined
 onMounted(async () => {

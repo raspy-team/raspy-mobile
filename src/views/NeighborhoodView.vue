@@ -55,7 +55,7 @@
         <!-- 범위: 지금 동네 기준 -->
         <section v-if="active" class="mt-10">
           <h2 class="t-heading">{{ active.name }}에서 어디까지 볼까요?</h2>
-          <p class="t-caption mt-1">경기 목록과 동네 순위가 이 범위를 따라요</p>
+          <p class="t-caption mt-1">경기 목록이 이 범위를 따라요</p>
           <div class="flex p-1 mt-4 bg-surface rounded-xl" role="radiogroup" aria-label="동네 범위">
             <button
               v-for="r in ranges"

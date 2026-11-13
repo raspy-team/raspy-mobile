@@ -39,13 +39,9 @@
       </div>
 
       <!-- 숫자는 상자 없이 한 줄, 있는 것만 (빈 값을 '–'로 보이지 않는다, 11/3) -->
-      <p v-if="rule.playCount || rating || myRank" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 t-body text-fg-muted">
+      <p v-if="rule.playCount || rating" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 t-body text-fg-muted">
         <span v-if="rating" class="inline-flex items-center gap-1 text-fg"><UiIcon name="fas fa-star" class="text-sm" aria-hidden="true" />{{ rating }}<span class="text-fg-muted">({{ rule.ratingCount }})</span></span>
         <span v-if="rule.playCount">경기 <b class="text-fg tabular-nums">{{ rule.playCount }}</b>번</span>
-        <button v-if="myRank" type="button" class="inline-flex items-center gap-1 py-2.5 -my-2.5" @click="router.push(`/rules/${rule.id}/ranking`)">
-          {{ rankingArea ? '동네' : '내' }} 순위 <b class="text-fg tabular-nums">{{ myRank }}위</b><UiIcon name="chevron-right" class="text-xs" aria-hidden="true" />
-        </button>
-        <button v-else-if="rule.playCount" type="button" class="inline-flex items-center gap-1 underline underline-offset-2 py-2.5 -my-2.5" @click="router.push(`/rules/${rule.id}/ranking`)">순위 보기</button>
       </p>
 
       <!-- 만든 사람 -->
@@ -73,36 +69,6 @@
         <RuleBody :rule="rule" />
       </div>
 
-      <!-- 랭킹 미리보기 -->
-      <section v-if="top.length" class="mt-10 pt-8 border-t border-line">
-        <h2 class="t-heading mb-3">{{ rankingArea ? `${rankingArea} 순위` : '순위' }}</h2>
-        <UiList>
-          <UiListItem
-            v-for="r in top"
-            :key="r.userId"
-            :title="r.userName"
-            :subtitle="`${r.rating}점 · 경기 ${r.playCount}번`"
-            @click="router.push('/profile/' + r.userId)"
-          >
-            <template #leading>
-              <span class="w-6 text-center t-heading tabular-nums">{{ r.rank }}</span>
-              <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
-            </template>
-          </UiListItem>
-        </UiList>
-        <UiButton block variant="secondary" class="mt-4" :to="`/rules/${rule.id}/ranking`">모두 보기</UiButton>
-      </section>
-
-      <!-- 사람 순위가 아직 없는 앱 게임: AI 주민과 둔 판 수와 기준선으로 채운다 (docs/ai-residents.md 6). 오프라인 규칙은 그대로 -->
-      <section v-else-if="rule.appGameKey && (baselines.length || aiGames)" class="mt-10 pt-8 border-t border-line">
-        <h2 class="t-heading">순위</h2>
-        <p class="t-caption mt-1 mb-3">아직 사람 순위는 없어요{{ aiGames ? ` · AI 주민과 ${aiGames}판 했어요` : '' }}</p>
-        <UiList v-if="baselines.length">
-          <BaselineRow v-for="b in baselines" :key="b.label" :line="b" />
-        </UiList>
-        <!-- '한 판 하기'는 아래 고정 줄 하나만: 한 화면에 같은 버튼이 둘이었다 (목적 판정 6) -->
-      </section>
-
       <!-- 수정 제안·신고는 더보기(…) 안에만 둔다. 규칙을 보러 온 사람의 눈 둘 곳만 늘렸다 (목적 판정 6) -->
     </main>
 
@@ -122,7 +88,6 @@
     <UiSheet v-model="menuOpen">
       <UiList>
         <UiListItem v-if="isMine" icon="fas fa-pen" title="내 규칙 고치기" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
-        <UiListItem icon="fas fa-ranking-star" title="순위 보기" @click="goRanking" />
         <!-- '수정 제안'(남의 규칙)과 '수정 요청'(내 규칙)이 이름이 거의 같아 하는 일이 헷갈렸다 (경로 6 리뷰): 하는 일로 부른다 -->
         <UiListItem v-if="!isMine" icon="far fa-comment" title="만든 사람에게 고칠 점 보내기" subtitle="메시지로 가요" @click="openSuggest" />
         <UiListItem v-if="!isMine" icon="far fa-flag" title="신고" danger @click="openReport" />
@@ -170,7 +135,6 @@ import { ratingText, ruleKind, winSummary } from '../../utils/rule'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import RuleCategory from '../../components/rule/RuleCategory.vue'
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
-import BaselineRow from '../../components/champion/BaselineRow.vue'
 import ExtGameCard from '../../components/external/ExtGameCard.vue'
 
 const REPORT_REASONS = ['욕설·비방', '위험한 규칙', '광고·스팸', '기타']
@@ -182,10 +146,6 @@ const { showToast } = useToast()
 const rule = ref(null)
 const loading = ref(true)
 const myId = ref(null)
-const top = ref([])
-const myRank = ref(null)
-const rankingArea = ref('') // 동네 순위면 '합정동 근처'
-const baselines = ref([]) // AI 기준선 (앱 게임)
 const aiGames = ref(0) // AI 주민과 둔 판 수 (앱 게임)
 const menuOpen = ref(false)
 const reportOpen = ref(false)
@@ -209,10 +169,6 @@ async function share() {
 function goEdit() {
   menuOpen.value = false
   router.push(`/rules/edit/${rule.value.id}`)
-}
-function goRanking() {
-  menuOpen.value = false
-  router.push(`/rules/${rule.value.id}/ranking`)
 }
 function openSuggest() {
   menuOpen.value = false
@@ -269,10 +225,7 @@ async function load() {
   else loadFailed.value = !ruleRes.reason?.response || ruleRes.reason.response.status >= 500
   if (meRes.status === 'fulfilled') myId.value = meRes.value
   if (rankRes.status === 'fulfilled') {
-    top.value = (rankRes.value.data.rankings || []).slice(0, 3)
-    myRank.value = rankRes.value.data.currentUserRanking?.rank || null
-    rankingArea.value = rankRes.value.data.scope === 'dong' ? rankRes.value.data.areaName : ''
-    baselines.value = rankRes.value.data.baselines || []
+    // 순위는 뺐다(11/13). AI 주민과 둔 판 수만 아래 줄에 쓴다
     aiGames.value = rankRes.value.data.aiGames || 0
   }
   loading.value = false

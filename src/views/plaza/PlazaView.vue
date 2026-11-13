@@ -122,12 +122,13 @@
     </UiSheet>
 
     <!-- 받은 도전 -->
-    <UiSheet v-model="inviteOpen" title="한 판 하재요">
-      <p v-if="invite" class="t-body text-fg">{{ invite.from }}님이 <strong>{{ invite.title }}</strong> 하재요</p>
+    <!-- 앱 어디서나 받는 창(RealtimeInviteHost)과 같은 말로 (11/13 '한 판 붙자' 하나로) -->
+    <UiSheet v-model="inviteOpen" :title="invite ? `${invite.from}님이 한 판 붙자고 해요` : '한 판 붙자'">
+      <p v-if="invite" class="t-body text-fg"><strong>{{ invite.title.replace(/ 한 판$/, '') }}</strong> · 받으면 바로 시작해요</p>
       <template #footer>
         <div class="flex gap-2">
           <UiButton class="flex-1" variant="secondary" @click="inviteOpen = false">나중에</UiButton>
-          <UiButton class="flex-1" @click="acceptInvite">수락</UiButton>
+          <UiButton class="flex-1" @click="acceptInvite">받기</UiButton>
         </div>
       </template>
     </UiSheet>

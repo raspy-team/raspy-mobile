@@ -144,7 +144,7 @@
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
             <MatchMascot who="match" :mood="state.result === 'WIN' ? 'cheer' : state.result === 'DRAW' ? 'smile' : 'sad'" :size="72" class="mx-auto mb-3" />
             <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
-            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ state.view.note }}</p>
+            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ resultNote(state.view.note) }}</p>
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ resultCount }}</p>
             <p v-if="timedOut" class="t-body mt-3">{{ timedOut === 'me' ? '시간이 지나서 졌어요' : '상대가 시간을 넘겼어요' }}</p>
@@ -354,6 +354,11 @@ watch(
   (r, before) => r && !before && feel(r === 'WIN' ? 'win' : r === 'DRAW' ? 'success' : 'lose'),
 )
 
+// 끝난 판의 한 줄은 점수만: 하는 중에 쓰던 '5/7 문제'·'지난 문제: 143 · 아무도 못 맞혔어요'가 결과에 남았다 (11/13 실제 기기 한 바퀴)
+function resultNote(note?: string | null) {
+  return (note ?? '').split('\n')[0].replace(/^\d+\/\d+\s*(문제|판|라운드)\s*·\s*/, '').replace(/지난 [^·]*·[^·]*$/, '').trim()
+}
+
 function apply(s: State) {
   offset.value = new Date(s.serverNow).getTime() - Date.now()
   const was = state.value?.status
@@ -485,7 +490,18 @@ async function leave() {
   if (state.value?.status === 'CANCELED') router.replace(`/play/${key.value}`)
 }
 
+// 하는 중·끝난 판은 주소에 그 판을 남긴다(?game). 앱이 뒤에서 닫혔다 다시 열리거나 새로 고치면 그 판으로 돌아온다.
+// 예전엔 주소가 그냥 /live라 다시 열면 끝난 판 대신 새 상대를 찾기 시작했다 (11/13 실제 기기 한 바퀴).
+// join의 clearQuery가 들어온 ?game을 지운 뒤에 적도록 다음 차례로 미룬다. 화면은 다시 그리지 않는다
+watch(() => [state.value?.status, state.value?.gameId] as const, ([status, id]) => {
+  if (!id || (status !== 'PLAYING' && status !== 'COMPLETED')) return
+  setTimeout(() => {
+    if (state.value?.gameId === id && !location.search.includes(`game=${id}`)) history.replaceState(history.state, '', `${route.path}?game=${id}`)
+  }, 0)
+})
+
 async function again() {
+  history.replaceState(history.state, '', route.path) // 한 판 더는 새 판: 앞 판 주소를 지운다
   timedOut.value = null
   state.value = null
   await join()

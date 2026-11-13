@@ -69,7 +69,8 @@
           <UiButton v-if="friend.received" class="flex-1" :loading="busy" @click="friendAction('accept')">친구 수락</UiButton>
           <UiButton v-if="friend.received" class="flex-1" variant="secondary" :disabled="busy" @click="friendAction('reject')">거절</UiButton>
           <UiButton v-else-if="friend.sent" class="flex-1" variant="secondary" :loading="busy" @click="friendAction('cancel')">친구 요청 취소</UiButton>
-          <UiButton v-else-if="!friend.isFriend" class="flex-1" icon="fas fa-user-plus" :loading="busy" @click="friendAction('request')">친구 추가</UiButton>
+          <!-- 흰 버튼은 '한 판 붙자' 하나: 둘 다 희면 무엇을 누를지 몰랐다 (11/13 실제 기기 한 바퀴) -->
+          <UiButton v-else-if="!friend.isFriend" class="flex-1" variant="secondary" icon="fas fa-user-plus" :loading="busy" @click="friendAction('request')">친구 추가</UiButton>
           <UiButton v-else class="flex-1" variant="secondary" icon="fas fa-user-check" @click="menuOpen = true">친구</UiButton>
           <UiButton class="flex-1" variant="secondary" icon="far fa-paper-plane" :to="`/chat/${user.id}`">메시지</UiButton>
         </template>
@@ -171,7 +172,8 @@
       </section>
 
       <!-- 많이 한 규칙 -->
-      <section v-if="user.top3Rules?.length || !bests.length" class="mt-10">
+      <!-- 남의 프로필에서 빈 칸은 그리지 않는다: 위 '경기 0'이 이미 말한다 (11/13 실제 기기 한 바퀴) -->
+      <section v-if="user.top3Rules?.length || (!bests.length && (user.isMe || user.recordsHidden))" class="mt-10">
         <div class="flex items-center justify-between mb-1">
           <h2 class="t-heading">많이 한 규칙</h2>
           <UiButton v-if="stats.totalGames" size="sm" variant="secondary" icon="fas fa-chart-simple" :to="`/profile/${user.id}/stats`">기록 보기</UiButton>

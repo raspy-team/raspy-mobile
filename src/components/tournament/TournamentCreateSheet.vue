@@ -4,7 +4,7 @@
       <!-- 개인 대회는 동네 대회라 인증이 먼저다. 다 채운 뒤 '열기'에서야 알게 하지 않는다 (11/4 밤샘, 52세 대회 주최자) -->
       <div v-if="needsDong" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3">
         <p class="flex-1 t-caption">개인이 여는 대회는 동네 대회예요. 동네를 먼저 인증해 주세요</p>
-        <UiButton size="sm" variant="secondary" @click="verifyDong">동네 인증</UiButton>
+        <UiButton size="sm" variant="secondary" @click="verifyDong">동네 고르기</UiButton>
       </div>
       <UiInput v-model="f.title" :maxlength="40" placeholder="대회 이름 (예: 11월 망원 탁구 월례대회)" />
 
@@ -164,7 +164,7 @@ const needsDong = computed(() => hasDong.value === false && !f.hostClubId && !f.
 function verifyDong() {
   emit('update:modelValue', false)
   // 동호회 화면에서 연 시트면 인증 뒤 그 동호회로 돌아간다 (예전엔 대회 목록으로 가 동호회 주최가 풀렸다, 경로 7 리뷰 K3)
-  router.push({ path: '/neighborhood', query: { back: props.clubId ? `/clubs/${props.clubId}` : '/tournaments?create=1', reason: '동네를 인증하면 대회를 열 수 있어요' } })
+  router.push({ path: '/neighborhood', query: { back: props.clubId ? `/clubs/${props.clubId}` : '/tournaments?create=1', reason: '동네를 고르면 대회를 열 수 있어요' } })
 }
 const clubsFailed = ref(false)
 

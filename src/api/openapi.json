@@ -2042,6 +2042,38 @@
         }
       }
     },
+    "/api/organizations/pick": {
+      "post": {
+        "tags": [
+          "Organization"
+        ],
+        "summary": "소속 고르기 (서류 없이)",
+        "description": "11/13: 학교는 고르기만 하면 바로 붙는다(학교 대항·학교 챔피언으로 가는 길을 서류가 막았다). 기존 조직이면 orgId, 없으면 name·type. '✓'은 서류 인증(/requests)일 때만",
+        "operationId": "pick",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgPickRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgMine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/nunchi/tastes": {
       "post": {
         "tags": [
@@ -2235,6 +2267,38 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyNeighborhoods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neighborhoods/pick": {
+      "post": {
+        "tags": [
+          "neighborhood-controller"
+        ],
+        "summary": "동네 고르기 (GPS 없이)",
+        "description": "동네 이름으로 골라 지금 동네로 한다. 바로 경기를 열고 신청할 수 있다. '동네 인증 ✓'은 GPS 인증(/verify)일 때만. 이미 2개면 replaceCode",
+        "operationId": "pick_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickRequest"
               }
             }
           },
@@ -7389,13 +7453,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "OFFLINE",
                 "APP",
                 "POPULAR"
-              ],
-              "default": "ALL"
+              ]
             }
           }
         ],
@@ -7732,11 +7796,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           }
         ],
@@ -10176,11 +10240,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -10867,13 +10931,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ],
-              "default": "PENDING"
+              ]
             }
           }
         ],
@@ -13803,6 +13867,100 @@
           }
         }
       },
+      "OrgPickRequest": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "HIGH_SCHOOL",
+              "COMPANY",
+              "OTHER"
+            ]
+          }
+        }
+      },
+      "OrgMembership": {
+        "required": [
+          "name",
+          "orgId",
+          "type",
+          "verified",
+          "verifiedAt",
+          "visibility"
+        ],
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "HIGH_SCHOOL",
+              "COMPANY",
+              "OTHER"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "SAME_ORG",
+              "HIDDEN"
+            ]
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OrgMine": {
+        "required": [
+          "canRequest",
+          "maxOrgs",
+          "memberships"
+        ],
+        "type": "object",
+        "properties": {
+          "memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgMembership"
+            }
+          },
+          "pending": {
+            "$ref": "#/components/schemas/OrgRequestView"
+          },
+          "lastDecided": {
+            "$ref": "#/components/schemas/OrgRequestView"
+          },
+          "maxOrgs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "canRequest": {
+            "type": "boolean"
+          }
+        }
+      },
       "TastePick": {
         "required": [
           "choice",
@@ -13935,6 +14093,7 @@
           "expired",
           "expiresAt",
           "fullName",
+          "gpsVerified",
           "name",
           "nearbyCount",
           "nearbyNames",
@@ -13982,6 +14141,9 @@
             "format": "date-time"
           },
           "expired": {
+            "type": "boolean"
+          },
+          "gpsVerified": {
             "type": "boolean"
           },
           "lat": {
@@ -14034,6 +14196,20 @@
           "level": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "PickRequest": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "replaceCode": {
+            "type": "string"
           }
         }
       },
@@ -18313,75 +18489,6 @@
               "COMPANY",
               "OTHER"
             ]
-          }
-        }
-      },
-      "OrgMembership": {
-        "required": [
-          "name",
-          "orgId",
-          "type",
-          "verifiedAt",
-          "visibility"
-        ],
-        "type": "object",
-        "properties": {
-          "orgId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "UNIVERSITY",
-              "HIGH_SCHOOL",
-              "COMPANY",
-              "OTHER"
-            ]
-          },
-          "visibility": {
-            "type": "string",
-            "enum": [
-              "ALL",
-              "SAME_ORG",
-              "HIDDEN"
-            ]
-          },
-          "verifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OrgMine": {
-        "required": [
-          "canRequest",
-          "maxOrgs",
-          "memberships"
-        ],
-        "type": "object",
-        "properties": {
-          "memberships": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrgMembership"
-            }
-          },
-          "pending": {
-            "$ref": "#/components/schemas/OrgRequestView"
-          },
-          "lastDecided": {
-            "$ref": "#/components/schemas/OrgRequestView"
-          },
-          "maxOrgs": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "canRequest": {
-            "type": "boolean"
           }
         }
       },

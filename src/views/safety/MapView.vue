@@ -11,7 +11,7 @@
       <UiButton variant="secondary" @click="init">다시 시도</UiButton>
     </UiEmptyState>
     <UiEmptyState v-else-if="checked" mascot="kok" title="동네를 먼저 인증해 주세요">
-      <UiButton to="/neighborhood">동네 인증</UiButton>
+      <UiButton to="/neighborhood">동네 고르기</UiButton>
     </UiEmptyState>
 
     <UiListSkeleton v-if="center && !data" :rows="3" class="mt-4" />

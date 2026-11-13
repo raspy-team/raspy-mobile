@@ -11,21 +11,21 @@
       </UiEmptyState>
 
       <template v-else-if="mine">
-        <!-- 인증한 소속 -->
-        <UiSection title="인증한 소속">
+        <!-- 내 소속: 고르기만 해도 붙는다(11/13). 서류로 인증한 곳만 ✓ -->
+        <UiSection title="내 소속">
           <UiList v-if="mine.memberships.length">
             <UiListItem
               v-for="m in mine.memberships"
               :key="m.orgId"
               icon="building"
-              :title="`${m.name} ✓`"
+              :title="`${m.name}${m.verified ? ' ✓' : ''}`"
               :subtitle="`${TYPE_LABEL[m.type]} · ${VISIBILITY[m.visibility].label}`"
               chevron
               @click="openMember = m"
             />
           </UiList>
           <UiCard v-else>
-            <UiEmptyState mascot="kok" title="아직 인증한 소속이 없어요" description="증명서 한 장이면 돼요. 확인이 끝나면 바로 지워요" />
+            <UiEmptyState mascot="kok" title="아직 소속이 없어요" description="학교를 고르면 학교 대항과 학교 챔피언에 들어가요" />
           </UiCard>
         </UiSection>
 
@@ -48,15 +48,15 @@
           <p class="t-caption">{{ mine.lastDecided.rejectReason }}</p>
         </UiCard>
 
-        <UiButton v-if="mine.canRequest" block size="lg" @click="openForm">소속 인증</UiButton>
-        <p v-else-if="!mine.pending" class="t-caption text-center">소속은 {{ mine.maxOrgs }}개까지예요. 하나를 떼면 다시 인증할 수 있어요.</p>
+        <UiButton v-if="mine.canRequest" block size="lg" @click="openForm">소속 고르기</UiButton>
+        <p v-else-if="!mine.pending" class="t-caption text-center">소속은 {{ mine.maxOrgs }}개까지예요. 하나를 떼면 다시 고를 수 있어요.</p>
       </template>
     </main>
 
     <!-- 소속 하나: 공개 범위·떼기 -->
     <UiSheet :model-value="!!openMember" :title="openMember?.name" @update:model-value="openMember = null">
       <template v-if="openMember">
-        <p class="t-caption mb-3">{{ TYPE_LABEL[openMember.type] }} · {{ dateText(openMember.verifiedAt) }} 인증</p>
+        <p class="t-caption mb-3">{{ TYPE_LABEL[openMember.type] }} · {{ dateText(openMember.verifiedAt) }} {{ openMember.verified ? '인증 ✓' : '고름' }}</p>
         <p class="t-label text-fg mb-2">누가 볼 수 있나요</p>
         <UiList>
           <UiListItem
@@ -76,8 +76,8 @@
       </template>
     </UiSheet>
 
-    <!-- 인증하기 -->
-    <UiSheet v-model="formOpen" title="소속 인증">
+    <!-- 고르기 (서류는 ✓을 원할 때만) -->
+    <UiSheet v-model="formOpen" title="소속 고르기">
       <div class="space-y-5">
         <!-- 1. 조직 -->
         <div>
@@ -92,16 +92,16 @@
           </div>
           <p v-else-if="searchFailed" class="t-caption text-danger-fg mt-3">찾지 못했어요. 이름을 다시 쳐 보거나 잠시 뒤 해 주세요</p>
           <div v-else-if="query.trim().length >= 2" class="mt-3">
-            <p class="t-caption mb-2">목록에 없으면 새 이름으로 신청해요. 종류를 골라 주세요</p>
+            <p class="t-caption mb-2">목록에 없으면 새 이름으로 붙여요. 종류를 골라 주세요</p>
             <div class="flex gap-2">
               <UiChip v-for="t in TYPE_ORDER" :key="t" :selected="newType === t" @click="newType = t">{{ TYPE_LABEL[t] }}</UiChip>
             </div>
           </div>
         </div>
 
-        <!-- 2. 서류 -->
+        <!-- 2. 서류 (고를 때는 없어도 된다. '✓'을 붙이고 싶을 때만, 11/13) -->
         <div>
-          <p class="t-label text-fg mb-1">증명서 한 장</p>
+          <p class="t-label text-fg mb-1">증명서 한 장 <span class="t-caption">(선택 · ✓을 붙이고 싶을 때)</span></p>
           <p class="t-caption mb-2">
             재학·재직·합격·졸업 증명서(3개월 안에 뗀 것), 학생증·사원증 사진. PDF나 사진, 10MB까지.
             학번·주민번호 뒷자리는 가려도 돼요. 확인이 끝나면 바로 지워요.
@@ -116,15 +116,15 @@
           <p v-if="fileError" class="t-caption text-danger mt-1">{{ fileError }}</p>
         </div>
 
-        <!-- 3. 동의 -->
-        <button type="button" role="checkbox" :aria-checked="agreed" class="w-full flex items-start gap-3 text-left" @click="agreed = !agreed">
+        <!-- 3. 동의 (서류를 올릴 때만) -->
+        <button v-if="file" type="button" role="checkbox" :aria-checked="agreed" class="w-full flex items-start gap-3 text-left" @click="agreed = !agreed">
           <UiIcon name="fas fa-check" class="w-6 text-center mt-0.5" :class="agreed ? 'text-primary' : 'text-line-strong'" aria-hidden="true" />
           <span class="text-sm text-fg">
             소속 확인을 위해 조직 이름·종류와 확인 서류를 받고, 확인이 끝나면 서류를 바로 지우는 데 동의해요 <span class="text-fg-subtle">(필수)</span>
           </span>
         </button>
 
-        <UiButton block size="lg" :disabled="!canSubmit" :loading="submitting" @click="submit">신청</UiButton>
+        <UiButton block size="lg" :disabled="!canSubmit" :loading="submitting" @click="submit">{{ file ? '고르고 ✓ 인증 신청' : '고르기' }}</UiButton>
       </div>
     </UiSheet>
   </div>
@@ -296,11 +296,13 @@ async function onFile(e: Event) {
   file.value = f
 }
 
-const canSubmit = computed(() =>
-  !!file.value && agreed.value && (!!picked.value || (query.value.trim().length >= 2 && !!newType.value)))
+const chosen = computed(() => !!picked.value || (query.value.trim().length >= 2 && !!newType.value))
+// 서류가 없으면 고르기만, 있으면 동의까지 해야 인증 신청 (11/13)
+const canSubmit = computed(() => chosen.value && (!file.value || agreed.value))
 
 async function submit() {
-  if (!canSubmit.value || !file.value) return
+  if (!canSubmit.value) return
+  if (!file.value) return pickOnly()
   const form = new FormData()
   if (picked.value) form.append('orgId', String(picked.value.id))
   else {
@@ -319,6 +321,23 @@ async function submit() {
   } catch (e: unknown) {
     const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message
     showToast(msg || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
+  } finally {
+    submitting.value = false
+  }
+}
+
+// 서류 없이 고르기: 바로 붙는다 (11/13 앱 기능 좁히기)
+async function pickOnly() {
+  submitting.value = true
+  try {
+    const body = picked.value ? { orgId: picked.value.id } : { name: query.value.trim(), type: newType.value as string }
+    await api.post('/api/organizations/pick', body)
+    formOpen.value = false
+    showToast(`${picked.value?.name ?? query.value.trim()}를 골랐어요`)
+    await load()
+  } catch (e: unknown) {
+    const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message
+    showToast(msg || '고르지 못했어요. 잠시 뒤 다시 해 주세요')
   } finally {
     submitting.value = false
   }

@@ -256,7 +256,8 @@
       </UiCard>
 
         <!-- 사진·동영상: 평가와 떼어 모든 참가자에게. 팀·여럿 경기, 이미 평가한 1:1은 점수판에서 찍은 것을 올릴 곳이 없었다 (목적 판정 11/11 5번) -->
-        <UiSection v-if="(canReview && (reviewMore || allPictures.length)) || (photoOnly && allPictures.length)" title="사진·영상">
+        <!-- 11/13: 경기 시작 때 인증샷 창을 뺐다. 사진은 여기서 붙인다. 그래서 찍은 것이 없어도 '사진 추가' 한 줄은 늘 보인다 -->
+        <UiSection v-if="canReview || photoOnly" title="사진·영상">
           <template #action><span class="t-micro">{{ allPictures.length }}/5</span></template>
 
           <!-- 없을 때는 큰 빈 상자 대신 한 줄: 평가보다 앞서지 않게 -->

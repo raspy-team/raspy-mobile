@@ -17,7 +17,7 @@
          대신 이 목록이 전국 경기라는 것만 한 줄로 (경로 4 리뷰 G2: 서울 사람이 부산 경기 카드를 봤다). 못 불러왔을 때는 말하지 않는다 -->
     <p v-else-if="loaded && !failed && !active" class="t-caption">
       <!-- '전국 경기예요'는 늘, 동네 인증 권유는 세 번까지 (11/11 쌓이는 피로 전수표) -->
-      전국 경기예요<template v-if="nudgeLeft"> · <RouterLink to="/neighborhood" class="hit underline underline-offset-2">동네 인증</RouterLink>하면 가까운 경기만 보여요</template>
+      전국 경기예요<template v-if="nudgeLeft"> · <RouterLink to="/neighborhood" class="hit underline underline-offset-2">동네를 고르면</RouterLink> 가까운 경기만 보여요</template>
     </p>
 
     <UiSheet v-model="open" title="동네 고르기">

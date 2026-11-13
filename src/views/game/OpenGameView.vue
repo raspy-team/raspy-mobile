@@ -47,7 +47,7 @@
           icon="location-dot"
           class="mt-3"
           :to="{ path: '/neighborhood', query: { back: route.fullPath } }"
-        >동네 인증</UiButton>
+        >동네 고르기</UiButton>
         <!-- 팀 경기 단톡방: 승인된 둘 이상이면 (11/5 C) -->
         <!-- 보조 행동은 글자 버튼으로 (애플식: 꽉 찬 버튼은 화면의 주된 행동 하나만, UX 버튼 크기) -->
         <div class="mt-4 flex flex-wrap justify-center gap-x-2">
@@ -90,14 +90,14 @@ const menuGame = ref(null)
 const challengersGame = ref(null)
 const commentId = ref(0)
 const myId = ref(null)
-// 신청 전 한 줄: 승인 뒤에 무엇이 남았나. 처음 만나는 1:1은 앱 게임 한 판이 먼저라는 것도 (신뢰 사다리, 서버 TrustLadder)
+// 신청 전 한 줄: 승인 뒤에 무엇이 남았나
 const applyHint = computed(() => {
   const g = game.value
   const remote = isRemote(g.venue)
   const decided = !!g.matchDate && (remote || !!g.matchLocation)
   const base = decided ? `${g.ownerNickname}님이 승인하면 확정돼요.` : `${g.ownerNickname}님이 승인하면 ${remote ? '시간을' : '시간·장소를'} 함께 정해요.`
-  const ladder = !remote && (!g.format || g.format === 'DUEL') ? ' 처음 만나는 사이면 앱 게임 한 판을 먼저 해요.' : ''
-  return base + ladder
+  // 처음 만나는 사이의 '앱 게임 한 판 먼저'는 강제에서 권장으로 바꿨다 (11/13). 신청 전 문구에서 뺀다
+  return base
 })
 
 // 앱 안 웹뷰에서도 밖(카카오맵 앱·브라우저)으로 연다

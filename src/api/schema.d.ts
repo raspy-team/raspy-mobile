@@ -890,6 +890,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/organizations/pick": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 소속 고르기 (서류 없이)
+         * @description 11/13: 학교는 고르기만 하면 바로 붙는다(학교 대항·학교 챔피언으로 가는 길을 서류가 막았다). 기존 조직이면 orgId, 없으면 name·type. '✓'은 서류 인증(/requests)일 때만
+         */
+        post: operations["pick"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/nunchi/tastes": {
         parameters: {
             query?: never;
@@ -1018,6 +1038,26 @@ export interface paths {
          * @description 0 내 동네만 · 1 가까운 동네 · 2 조금 먼 동네 · 3 먼 동네
          */
         post: operations["range"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neighborhoods/pick": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 동네 고르기 (GPS 없이)
+         * @description 동네 이름으로 골라 지금 동네로 한다. 바로 경기를 열고 신청할 수 있다. '동네 인증 ✓'은 GPS 인증(/verify)일 때만. 이미 2개면 replaceCode
+         */
+        post: operations["pick_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6636,6 +6676,33 @@ export interface components {
             /** Format: date-time */
             decidedAt?: string;
         };
+        OrgPickRequest: {
+            /** Format: int64 */
+            orgId?: number;
+            name?: string;
+            /** @enum {string} */
+            type?: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
+        };
+        OrgMembership: {
+            /** Format: int64 */
+            orgId: number;
+            name: string;
+            /** @enum {string} */
+            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
+            /** @enum {string} */
+            visibility: "ALL" | "SAME_ORG" | "HIDDEN";
+            /** Format: date-time */
+            verifiedAt: string;
+            verified: boolean;
+        };
+        OrgMine: {
+            memberships: components["schemas"]["OrgMembership"][];
+            pending?: components["schemas"]["OrgRequestView"];
+            lastDecided?: components["schemas"]["OrgRequestView"];
+            /** Format: int32 */
+            maxOrgs: number;
+            canRequest: boolean;
+        };
         TastePick: {
             id: string;
             choice: string;
@@ -6689,6 +6756,7 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
             expired: boolean;
+            gpsVerified: boolean;
             /** Format: double */
             lat?: number;
             /** Format: double */
@@ -6706,6 +6774,10 @@ export interface components {
             code: string;
             /** Format: int32 */
             level: number;
+        };
+        PickRequest: {
+            code: string;
+            replaceCode?: string;
         };
         ShareRequest: {
             /** Format: int64 */
@@ -8030,25 +8102,6 @@ export interface components {
             name: string;
             /** @enum {string} */
             type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
-        };
-        OrgMembership: {
-            /** Format: int64 */
-            orgId: number;
-            name: string;
-            /** @enum {string} */
-            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
-            /** @enum {string} */
-            visibility: "ALL" | "SAME_ORG" | "HIDDEN";
-            /** Format: date-time */
-            verifiedAt: string;
-        };
-        OrgMine: {
-            memberships: components["schemas"]["OrgMembership"][];
-            pending?: components["schemas"]["OrgRequestView"];
-            lastDecided?: components["schemas"]["OrgRequestView"];
-            /** Format: int32 */
-            maxOrgs: number;
-            canRequest: boolean;
         };
         QuestionView: {
             id: string;
@@ -10535,6 +10588,30 @@ export interface operations {
             };
         };
     };
+    pick: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgPickRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrgMine"];
+                };
+            };
+        };
+    };
     tastes: {
         parameters: {
             query?: never;
@@ -10681,6 +10758,30 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["RangeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyNeighborhoods"];
+                };
+            };
+        };
+    };
+    pick_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PickRequest"];
             };
         };
         responses: {

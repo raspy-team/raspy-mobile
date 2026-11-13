@@ -34,7 +34,7 @@
       <UiField label="동네">
         <RouterLink to="/neighborhood" class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">
           <UiIcon name="location-dot" aria-hidden="true" />
-          <span class="flex-1 t-body">{{ form.region || '동네 인증' }}</span>
+          <span class="flex-1 t-body">{{ form.region || '동네 고르기' }}</span>
           <UiIcon name="chevron-right" class="text-fg-subtle text-sm" aria-hidden="true" />
         </RouterLink>
       </UiField>

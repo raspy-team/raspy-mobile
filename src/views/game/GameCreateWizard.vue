@@ -337,7 +337,7 @@ const anyoneLine = computed(() => {
   // 화상·다른 게임은 동네와 상관없이 전국 목록에 올라간다
   if (isRemote(venue.value)) return '전국 경기 목록에 올려서 신청을 받아요'
   if (dong.value === undefined) return OPTIONS[0].description
-  if (!dong.value) return '동네를 인증하면 내 동네 경기 목록에 올릴 수 있어요'
+  if (!dong.value) return '동네를 고르면 내 동네 경기 목록에 올릴 수 있어요'
   if (dong.value.expired) return `${dong.value.name} 인증이 지났어요. 다시 인증하면 열 수 있어요`
   return `${dong.value.name} 근처 경기 목록에 올려서 신청을 받아요`
 })

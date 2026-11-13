@@ -404,7 +404,7 @@
           <div v-else class="mt-8"></div>
 
 
-          <section v-else-if="tab === 'mine'" class="mt-4">
+          <section v-if="tab === 'mine'" class="mt-4">
             <UiList v-if="finished.length">
               <UiListItem v-for="d in finished" :key="d.gameId" :title="duelTitle(d)" :subtitle="duelSubtitle(d)" @click="result = d">
                 <template #trailing>

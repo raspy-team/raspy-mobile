@@ -103,9 +103,12 @@
         </template>
         <template #trailing>
           <UiButton v-if="a.approved" size="sm" variant="secondary" :loading="busy" @click.stop="cancelApproval(applicantsGame, a)">승인 취소</UiButton>
-          <!-- 처음 보는 사람과 만나서 하는 1:1은 앱 게임 한 판이 먼저 (안전·신뢰 D) -->
-          <UiButton v-else-if="a.needsAppGameFirst" size="sm" variant="secondary" icon="paper-plane" @click.stop="ladderFor = a">앱 게임 한 판</UiButton>
-          <UiButton v-else size="sm" :disabled="!canApprove(applicantsGame, a)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
+          <!-- 처음 보는 사람이면 '먼저 한 판'은 권장만: 승인은 바로 된다 (11/13 앱 기능 좁히기: 강제는 본업으로 가는 길을 며칠씩 멈췄다).
+               불안한 사람은 신뢰 온도를 보고, 원하면 먼저 앱 게임 한 판을 보낸다 -->
+          <span v-else class="flex items-center gap-1">
+            <UiButton v-if="a.needsAppGameFirst" size="sm" variant="ghost" icon="paper-plane" :aria-label="`${a.applicantNickname}님과 먼저 앱 게임 한 판`" @click.stop="ladderFor = a">먼저 한 판</UiButton>
+            <UiButton size="sm" :disabled="!canApprove(applicantsGame, a)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
+          </span>
         </template>
       </UiListItem>
     </UiList>
@@ -384,9 +387,9 @@ function canApprove(game, a) {
   return true
 }
 function applicantsHint(game) {
-  // 승인 버튼 대신 '앱 게임 한 판'만 보이면 왜 승인이 안 되는지 먼저 말한다 (11/4 밤샘: 처음 연 경기에서 승인 버튼을 못 찾았다)
+  // 처음 만나는 사람이 있으면 '먼저 한 판'은 고를 수 있다는 것만 (11/13: 강제 → 권장)
   const ladder = (game?.applicants || []).some((a) => a.needsAppGameFirst && !a.approved)
-    ? ' 처음 만나는 사람과는 앱 게임 한 판 뒤에 승인해요.'
+    ? ' 처음 만나는 사람이 걱정되면 먼저 앱 게임 한 판을 해 볼 수 있어요.'
     : ''
   if (!isMulti(game)) return '한 명을 승인하면 확정돼요.' + ladder
   const n = (game.players || []).length
@@ -584,7 +587,7 @@ async function doLeave(g, reason) {
   }
 }
 
-// ---------- 경기 시작: 장소 → 인증샷(선택) → 확인 ----------
+// ---------- 경기 시작: 장소 → 바로 시작 (인증샷은 결과 화면으로, 11/13) ----------
 
 const startGame = ref(null)
 const showPlaceForm = ref(false)
@@ -764,10 +767,11 @@ async function submitPlace() {
 // 시작 사진을 세 번 연달아 건너뛴 사람은 시트 없이 바로 시작한다. 사진은 점수판 '더보기 › 사진 찍기'로 언제든 (11/11 쌓이는 피로 전수표)
 const skipKey = 'start_photo_skips'
 const skips = () => { try { return Number(localStorage.getItem(skipKey) || 0) } catch { return 0 } }
+// 시작은 한 번에: 인증샷 창은 띄우지 않는다 (11/13 앱 기능 좁히기: 코트에 마주 선 순간 매번 단계 하나를 더 거쳤다).
+// 사진은 끝난 뒤 결과 화면에서 원하면 붙인다 (자랑하고 싶은 때도, 사진이 쓰이는 결과 카드·공유 그림도 끝이다)
 function goCamera() {
   capturedPhotoFile.value = null
-  if (skips() >= 3) return confirmStart()
-  showCameraModal.value = true
+  confirmStart()
 }
 
 function onPhotoCapture(file) {

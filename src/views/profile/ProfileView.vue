@@ -74,6 +74,9 @@
           <UiButton class="flex-1" variant="secondary" icon="far fa-paper-plane" :to="`/chat/${user.id}`">메시지</UiButton>
         </template>
       </div>
+      <!-- 한 판 붙자 (11/13 도전 하나로): 사람에게 보내는 길은 링크와 여기 프로필 -->
+      <UiButton v-if="!user.isMe && !user.isBot" block class="mt-2" icon="fas fa-gamepad" @click="oneGameOpen = true">한 판 붙자</UiButton>
+      <OneGameSheet v-if="!user.isMe && !user.isBot" v-model="oneGameOpen" :user-id="user.id" :name="user.nickname" :rules="user.top3Rules" />
       <!-- 내 규칙: 홈 첫 화면에서 옮겨 왔다 (목적 판정 11/11 4번). 동호회는 뺐다 (11/13 앱 기능 좁히기: 카톡이 더 잘한다) -->
       <div v-if="user.isMe" class="mt-2">
         <UiButton block variant="ghost" size="sm" icon="book-open" to="/rules/my-rules">내 규칙</UiButton>
@@ -280,6 +283,7 @@
 
 <script setup>
 import RuleThumb from '../../components/rule/RuleThumb.vue'
+import OneGameSheet from '../../components/game/OneGameSheet.vue'
 import TrustCard from '../../components/profile/TrustCard.vue'
 import LiveRecordLine from '../../components/live/LiveRecordLine.vue'
 // 프로필 (/profile/0 = 나, /profile/:id = 다른 사람)
@@ -328,6 +332,7 @@ const reload = () => {
 const friend = ref({ sent: false, isFriend: false, received: false })
 const busy = ref(false)
 const menuOpen = ref(false)
+const oneGameOpen = ref(false)
 const reportOpen = ref(false)
 const reportReason = ref('')
 const reportDetail = ref('')

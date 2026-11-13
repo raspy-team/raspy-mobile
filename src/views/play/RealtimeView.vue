@@ -6,7 +6,7 @@
       <!-- AI 보스 도전 판 (docs/ai-residents.md 3): 보통 판과 같은 화면, 위에 띠 하나 -->
       <p v-if="state?.bossChallenge" class="mb-3 flex items-center gap-2 rounded-lg bg-signal-soft text-signal-fg px-3 py-2 t-label">
         <UiIcon name="fas fa-crown" aria-hidden="true" />
-        <span class="min-w-0">챔피언 도전 · {{ state.status === 'COMPLETED' ? '보스와 한 판' : '이기면 전국 챔피언' }}</span>
+        <span class="min-w-0">AI 보스와 한 판 · {{ state.status === 'COMPLETED' ? '보스와 한 판' : '이기면 전국 챔피언' }}</span>
       </p>
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
       <UiEmptyState v-else-if="error && !state" class="pt-16" icon="fas fa-triangle-exclamation" :title="error">
@@ -23,8 +23,8 @@
           <p class="t-heading mt-4">{{ state.invitee ? `${state.invitee.nickname}님을 기다리고 있어요` : state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
           <!-- 초대 방: 그 사람만 들어온다. 봇·친구 부르기·다른 게임은 두지 않는다 -->
           <template v-if="state.invitee">
-            <p class="t-caption mt-1">도전장을 보냈어요</p>
-            <p v-if="inviteLeft" class="t-micro mt-2 tabular-nums">{{ inviteLeft }} 남음 · 이 화면을 나가면 도전이 취소돼요</p>
+            <p class="t-caption mt-1">한 판 붙자고 했어요</p>
+            <p v-if="inviteLeft" class="t-micro mt-2 tabular-nums">{{ inviteLeft }} 남음 · 이 화면을 나가면 취소돼요</p>
           </template>
           <p v-else-if="state.fixture" class="t-caption mt-1">상대에게 알렸어요. 상대가 들어오면 바로 시작해요</p>
           <p v-else-if="longLobby" class="t-caption mt-1">상대가 오면 {{ NOTICE }}. 이 화면을 닫아도 돼요</p>
@@ -45,7 +45,7 @@
         <UiButton v-if="!state.fixture && !state.invitee" block variant="secondary" class="mt-4" @click="callBot">기다리지 않고 AI 주민과 하기</UiButton>
         <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="ghost" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
-        <UiButton block variant="ghost" class="mt-2" @click="leave">{{ state.invitee ? '도전 취소' : '그만 찾기' }}</UiButton>
+        <UiButton block variant="ghost" class="mt-2" @click="leave">{{ state.invitee ? '보내기 취소' : '그만 찾기' }}</UiButton>
         <!-- 다른 게임에서 기다리는 사람이 있으면 그쪽으로 붙는 게 빠르다 -->
         <WaitingNow v-if="!state.invitee" class="mt-6" title="다른 게임에서 기다리는 사람" :exclude-game-id="state.gameId" :ai="false" />
       </template>
@@ -145,7 +145,7 @@
             <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
             <p v-else class="t-caption mt-2">{{ resultCount }}</p>
             <p v-if="timedOut" class="t-body mt-3">{{ timedOut === 'me' ? '시간이 지나서 졌어요' : '상대가 시간을 넘겼어요' }}</p>
-            <p v-if="state.bossChallenge" class="t-body mt-4">{{ state.result === 'WIN' ? 'AI 보스를 꺾고 전국 챔피언이 됐어요' : '보스 도전은 하루 3번까지예요' }}</p>
+            <p v-if="state.bossChallenge" class="t-body mt-4">{{ state.result === 'WIN' ? 'AI 보스를 꺾고 전국 챔피언이 됐어요' : 'AI 보스와는 하루 3번까지예요' }}</p>
             <p v-else-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>

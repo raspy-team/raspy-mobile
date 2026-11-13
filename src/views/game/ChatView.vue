@@ -298,7 +298,7 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'challenge_sent',
-        title: '도전 대기 중',
+        title: '한 판 붙자고 했어요',
         description: `${targetUserNickname.value}님의 답을 기다리고 있어요. 3일 안에 답이 없으면 끝나요`,
         showActions: true,
         actionType: 'withdraw',
@@ -309,7 +309,7 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'challenge_received',
-        title: '도전 요청을 받았어요',
+        title: '한 판 붙자고 해요',
         description: `${targetUserNickname.value}님이 함께 경기하고 싶어 해요`,
         showActions: true,
         actionType: 'accept_reject',
@@ -331,7 +331,7 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'game_completed',
-        title: `${challengerNickname} 도전한 경기가 끝났어요`,
+        title: `${challengerNickname} 붙은 경기가 끝났어요`,
         description: '경기 결과를 확인하세요',
         showActions: true,
         actionType: 'view_result',
@@ -345,7 +345,7 @@ const headerInfo = computed(() => {
       show: true,
       type: 'game_in_progress',
       title: '경기 진행 예정',
-      description: '도전자가 바로 경기를 시작할 수 있어요',
+      description: '보낸 사람이 바로 경기를 시작할 수 있어요',
       showActions: true,
       actionType: 'go_to_game',
       gameId,
@@ -362,9 +362,9 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'challenge_rejected',
-        title: '도전이 거절됐어요',
+        title: '거절했대요',
         // 빨강 대신 회색, 다음 할 일을 함께 (11/11 감정과 체면 전수표, 원칙 3·4)
-        description: `${targetUserNickname.value}님이 도전을 거절했어요. 다른 상대와 한 판 해 봐요`,
+        description: `${targetUserNickname.value}님이 거절했어요. 다른 상대와 한 판 해 봐요`,
         showActions: false,
         statusColor: 'gray',
       }
@@ -372,8 +372,8 @@ const headerInfo = computed(() => {
       return {
         show: true,
         type: 'challenge_rejected',
-        title: '도전을 거절했어요',
-        description: `${targetUserNickname.value}님의 도전 요청을 거절했어요`,
+        title: '거절했어요',
+        description: `${targetUserNickname.value}님의 한 판을 거절했어요`,
         showActions: false,
         statusColor: 'gray',
       }
@@ -415,7 +415,7 @@ const handleWithdraw = async () => {
   try {
     await playWithMeTooAPI.cancelRequest(challengeStatus.value.toUserId)
     challengeStatus.value = { ...challengeStatus.value, status: 'CANCELLED' }
-    showToast('도전을 거뒀어요')
+    showToast('거뒀어요')
   } catch (error) {
     showToast(error.response?.data?.message || '거두지 못했어요. 다시 해 주세요')
   } finally {
@@ -473,7 +473,7 @@ const closeErrorModal = () => {
             <UiButton variant="secondary" size="sm" class="flex-1" @click="handleReject">거절</UiButton>
             <UiButton size="sm" class="flex-1" @click="handleAccept">수락</UiButton>
           </template>
-          <UiButton v-else-if="headerInfo.actionType === 'withdraw'" variant="ghost" size="sm" block :loading="withdrawing" @click="handleWithdraw">도전 거두기</UiButton>
+          <UiButton v-else-if="headerInfo.actionType === 'withdraw'" variant="ghost" size="sm" block :loading="withdrawing" @click="handleWithdraw">거두기</UiButton>
           <UiButton v-else-if="headerInfo.actionType === 'go_to_game'" size="sm" block icon="fas fa-play" @click="handleGoToGame">경기로 가기</UiButton>
           <UiButton v-else-if="headerInfo.actionType === 'view_result'" variant="secondary" size="sm" block icon="fas fa-trophy" @click="handleViewResult">결과 보기</UiButton>
         </div>

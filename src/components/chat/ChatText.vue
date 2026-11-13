@@ -47,7 +47,7 @@ function toPart(raw: string): Part {
 
 /** 긴 주소 대신 무엇인지 */
 function labelFor(path: string) {
-  if (path.startsWith('/challenge/')) return '도전장 열기'
+  if (path.startsWith('/challenge/')) return '한 판 열기'
   if (path.startsWith('/games/')) return '경기 보기'
   if (path.startsWith('/clubs/') || path.startsWith('/club/')) return '동호회 보기'
   if (path.startsWith('/vote/')) return '투표하기'

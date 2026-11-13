@@ -631,9 +631,9 @@ async function rematch() {
   try {
     await playWithMeTooAPI.sendRequest(rematchTarget.value.id, game.value.rule?.id)
     feel('tap')
-    showToast(`${rematchTarget.value.nickname}님에게 도전했어요. 받으면 메시지로 이어져요`)
+    showToast(`${rematchTarget.value.nickname}님에게 한 판 붙자고 했어요. 받으면 메시지로 이어져요`)
   } catch (e) {
-    showToast(e.response?.data?.message || '도전을 보내지 못했어요')
+    showToast(e.response?.data?.message || '보내지 못했어요')
   } finally {
     rematching.value = false
   }

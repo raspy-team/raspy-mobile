@@ -30,7 +30,7 @@
         <!-- '또 보고 싶어요'는 누르면 무슨 일이 생기는지(그 사람 경기 알림) 몰랐다 (경로 6 리뷰): 하는 일을 이름으로 -->
         <UiIcon name="eye" class="text-lg" aria-hidden="true" /><span class="max-[359px]:sr-only">{{ watchingAll ? '알림 받는 중' : '다음 경기 알림' }}</span>
       </button>
-      <UiButton size="sm" variant="tonal" icon="swords" class="whitespace-nowrap" @click="emit('challenge', targets)">도전</UiButton>
+      <!-- '도전'은 뺐다 (11/13 도전 하나로: '한 판 붙자'는 링크와 프로필 두 곳에서만 보낸다) -->
     </template>
   </footer>
 </template>

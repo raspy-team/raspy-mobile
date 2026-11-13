@@ -117,7 +117,7 @@
 
   <!-- 신뢰 사다리: 처음 보는 사람과 1:1로 만나기 전에 앱 게임 한 판 (안전·신뢰 D) -->
   <UiSheet :model-value="!!ladderFor" title="먼저 앱 게임 한 판" @update:model-value="ladderFor = null">
-    <p class="t-caption mb-4">{{ LADDER_GAMES.length > 1 ? '게임을 고르면' : '누르면' }} {{ ladderFor?.applicantNickname }}님께 도전장이 가요. 둘 다 하면 승인할 수 있어요</p>
+    <p class="t-caption mb-4">{{ LADDER_GAMES.length > 1 ? '게임을 고르면' : '누르면' }} {{ ladderFor?.applicantNickname }}님께 한 판 붙자고 해요. 둘이 먼저 한 판 해 볼 수 있어요</p>
     <UiList>
       <UiListItem v-for="g in LADDER_GAMES" :key="g.key" :icon="g.icon" :title="g.title" :subtitle="g.sub" chevron @click="startLadder(g.key)" />
     </UiList>

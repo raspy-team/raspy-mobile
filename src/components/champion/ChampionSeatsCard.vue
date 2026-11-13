@@ -21,7 +21,7 @@
           <span class="block t-caption mt-0.5 break-keep">{{ bossHint(s) }}</span>
         </button>
         <!-- 앱 게임이 아닌 자리의 보스는 붙을 판이 없다: 눌러도 아무 일 없던 버튼을 뺀다 (경로 8 2절) -->
-        <UiButton v-if="appGameKey" variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI ${s.champion.nickname}에게 도전`" @click="challengeBoss">도전하기</UiButton>
+        <UiButton v-if="appGameKey" variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI 보스 ${s.champion.nickname}와 한 판`" @click="challengeBoss">AI 보스와 한 판</UiButton>
       </template>
       <template v-else>
         <button
@@ -38,7 +38,7 @@
           </span>
         </button>
         <!-- 기록을 숨긴 챔피언은 지목할 수 없어 '도전'이 아니라 그냥 한 판·경기 만들기다. 이름이 하는 일과 같게 (경로 8 2절) -->
-        <UiButton v-if="s.champion && !s.mine" variant="tonal" :aria-label="s.champion.id ? `${s.champion.nickname}님에게 도전` : undefined" :loading="sending" @click="challenge(s.champion)">{{ s.champion.id ? '도전' : appGameKey ? '한 판 하기' : '경기 만들기' }}</UiButton>
+        <UiButton v-if="s.champion && !s.mine" variant="tonal" :aria-label="s.champion.id ? `${s.champion.nickname}님에게 한 판 붙자` : undefined" :loading="sending" @click="challenge(s.champion)">{{ s.champion.id ? '도전' : appGameKey ? '한 판 하기' : '경기 만들기' }}</UiButton>
       </template>
     </div>
   </div>
@@ -80,7 +80,7 @@ function emptyHint(seat: string) {
 // '자리'·'AI 보스'·'첫 사람 챔피언' 같은 말 대신 무슨 일인지 그대로 (경로 8 2절: 무슨 뜻인지 모른다)
 function bossHint(s: Seat) {
   const keep = `${s.seatName} 챔피언 자리를 AI가 지키고 있어요`
-  if (s.bossTriesLeft === 0) return `${keep} · 오늘 도전을 다 썼어요. 내일 다시 해 주세요`
+  if (s.bossTriesLeft === 0) return `${keep} · 오늘 보스와 할 판을 다 썼어요. 내일 다시 해 주세요`
   const win = s.bossReclaimed ? '챔피언이 30일 쉬어 AI가 되찾았어요 · 이기면 내가 챔피언' : '이기면 내가 첫 챔피언'
   return s.bossTriesLeft != null ? `${keep} · ${win} · 오늘 ${s.bossTriesLeft}번 더 할 수 있어요` : `${keep} · ${win} · 하루 3번`
 }
@@ -102,9 +102,9 @@ async function challenge(c: { id?: number | null; nickname: string }) {
   sending.value = true
   try {
     await playWithMeTooAPI.sendRequest(c.id, props.ruleId)
-    showToast(`${c.nickname}님에게 도전했어요. 받으면 메시지로 이어져요`)
+    showToast(`${c.nickname}님에게 한 판 붙자고 했어요. 받으면 메시지로 이어져요`)
   } catch (e) {
-    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '도전을 보내지 못했어요')
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '보내지 못했어요')
   } finally {
     sending.value = false
   }

@@ -65,7 +65,7 @@
             <span class="flex items-center t-heading min-w-0"><span class="truncate">{{ p.players[0]?.name }}</span><UiAiBadge /></span>
             <span class="block t-caption mt-0.5 break-keep">{{ p.caption }}</span>
           </span>
-          <span class="t-caption flex items-center gap-1 flex-shrink-0">도전<UiIcon name="chevron-right" aria-hidden="true" /></span>
+          <span class="t-caption flex items-center gap-1 flex-shrink-0">한 판<UiIcon name="chevron-right" aria-hidden="true" /></span>
         </RouterLink>
         <AppDuelFeedCard
           v-else-if="p.appDuel"

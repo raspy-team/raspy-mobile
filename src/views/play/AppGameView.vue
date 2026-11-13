@@ -204,7 +204,7 @@
           <template v-else-if="key === 'predict' && result.status === 'WAITING'">
             <p class="t-heading">내 예상 {{ predictionLine(result.problem, result.myAnswer) }}</p>
             <p class="t-caption mt-1">같은 경기를 맞힐 상대를 찾고 있어요. 경기가 끝나면 채점해요</p>
-            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+            <UiButton size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
           </template>
           <template v-else-if="isVote">
             <p class="t-heading">{{ (result.myScore ?? 0) > 0 ? '문장이 올라갔어요' : '투표에 올리지 못했어요' }}</p>
@@ -241,7 +241,7 @@
             <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
             <template v-if="ladderTo">
               <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
-              <p class="t-caption mt-1">도전장을 메시지로 보냈어요. {{ ladderName }}님이 하루 안에 같은 {{ key === 'improv' ? '상황' : '문제' }}을 풀면 승패가 나요</p>
+              <p class="t-caption mt-1">메시지로 한 판 붙자고 했어요. {{ ladderName }}님이 하루 안에 같은 {{ key === 'improv' ? '상황' : '문제' }}을 풀면 승패가 나요</p>
             </template>
             <!-- 친구에게 도전장을 보냈으면 하루 동안은 그 친구만 기다린다: 'N분 안에 AI 주민이 풀어요'는 맞지 않았다 (11/11 다른 사람 전수표) -->
             <template v-else-if="challengeSentFor === result.gameId">
@@ -373,9 +373,9 @@
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
             <!-- 도전장이 없는 게임(공유 판·실시간 대전)으로 '○○님에게 도전'이 왔으면 처음부터 그렇다고 말하고 그냥 한 판 (목적 판정 11/11 부분 2: 누를 수 있는 버튼이 늘 거절했다) -->
-            <template v-if="noLadder">이 게임은 도전장이 없어요 · 그냥 한 판 해요</template>
-            <template v-else-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 도전장을 보내요</template>
-            <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
+            <template v-if="noLadder">이 게임은 보내기가 없어요 · 그냥 한 판 해요</template>
+            <template v-else-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 한 판 붙자고 해요</template>
+            <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 한 판 붙자고 해요</template>
             <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
             <!-- '하루 20판'은 다 할 사람이 없는 수라 정보가 아니다. 한도에 닿으면 서버가 말한다 (목적 판정 11/11 부분 2) -->
@@ -539,10 +539,10 @@ watch(() => result.value?.gameId, async (gameId) => {
   ladderSent = true
   try {
     await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId }, query: { to: ladderTo, from: fromFeed ? 'feed' : undefined } })
-    showToast(`${ladderName}님에게 도전장을 메시지로 보냈어요. 받으면 같은 문제로 붙어요`)
+    showToast(`${ladderName}님에게 메시지로 한 판 붙자고 했어요. 받으면 같은 문제로 붙어요`)
   } catch (e) {
     ladderSent = false
-    showToast(errorMessage(e, '도전장을 보내지 못했어요'))
+    showToast(errorMessage(e, '보내지 못했어요'))
   }
 })
 // 결과가 '끝남'으로 바뀌는 순간 한 번 (지난 경기를 다시 열어 볼 때는 조용히)
@@ -767,12 +767,12 @@ async function sendChallenge(gameId: number) {
     // 임기응변은 손님 결과와 같은 등급대 한 줄: 9등급이 '나보다 잘할 수 있어요?'를 보내면 뜻하지 않게 우스웠다 (11/11 감정과 체면)
     const g = key.value === 'improv' ? improvResult.value?.grade : 0
     const line = g ? improvShareLine(g) : ''
-    const msg = await shareLink(link, line ? `${line}${/[.?!]$/.test(line) ? '' : '.'} 같은 상황으로 붙자` : `${game.value?.title ?? '한 판'} 도전장이에요. 나보다 잘할 수 있어요?`)
+    const msg = await shareLink(link, line ? `${line}${/[.?!]$/.test(line) ? '' : '.'} 같은 상황으로 붙자` : `${game.value?.title ?? '한 판'} 한 판 붙자. 나보다 잘할 수 있어?`)
     // '하루 동안 이 링크로만'은 뜻이 안 읽혔고, 복사가 실패해도 붙었다 (경로 2 리뷰 N4)
     if (msg) showToast(/못/.test(msg) ? msg : `${msg}. 친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황' : '문제'}으로 붙어요`)
     askPushPermission() // 친구가 받으면 알려 드릴 수 있게
   } catch (e) {
-    showToast(errorMessage(e, '도전장을 만들지 못했어요'))
+    showToast(errorMessage(e, '링크를 만들지 못했어요'))
   } finally {
     challenging.value = false
   }
@@ -970,7 +970,7 @@ onMounted(async () => {
     try {
       begin((await POST('/api/app-games/challenges/{gameId}/accept', { path: { gameId: challengeId } })).data)
     } catch (e) {
-      startError.value = errorMessage(e, '도전을 받지 못했어요')
+      startError.value = errorMessage(e, '받지 못했어요')
     }
     dropQuery()
   }

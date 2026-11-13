@@ -84,7 +84,7 @@
       </div>
       <template #footer>
         <div v-if="card && card.id !== enter?.me.id" class="space-y-2">
-          <UiButton block size="lg" @click="pickerOpen = true">{{ restingText(card) ? '도전장 남기기' : '도전하기' }}</UiButton>
+          <UiButton block size="lg" @click="pickerOpen = true">{{ restingText(card) ? '한 판 붙자 남기기' : '한 판 붙자' }}</UiButton>
           <!-- 주된 버튼 하나 + 작은 버튼 (애플식). 신고·차단은 글자로 -->
           <div class="flex items-center gap-2">
             <!-- 친구 추가 (UX ⑤: 광장에서 만난 사람을 친구로 할 길이 없었다). 이미 친구면 숨긴다 -->
@@ -145,7 +145,7 @@
             </span>
           </button>
           <!-- 걷지 않고 바로 게임 고르기 -->
-          <UiButton size="sm" variant="secondary" class="shrink-0" @click="peopleOpen = false; card = p; loadGames(); pickerOpen = true">도전</UiButton>
+          <UiButton size="sm" variant="secondary" class="shrink-0" @click="peopleOpen = false; card = p; loadGames(); pickerOpen = true">한 판 붙자</UiButton>
         </li>
       </ul>
     </UiSheet>
@@ -530,7 +530,7 @@ async function acceptInvite() {
     const s = (await POST('/api/app-games/realtime/{gameId}/accept', { path: { gameId: i.gameId } })).data
     router.push({ path: `/play/${s.key}/live`, query: { invite: String(i.gameId) } })
   } catch (e) {
-    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '도전이 끝났어요')
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '끝난 한 판이에요')
   }
 }
 

@@ -7,8 +7,8 @@ android {
         applicationId "com.songostudio.match"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "1.6"
+        versionCode 8
+        versionName "1.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         // 카카오 네이티브 앱 키는 리포 밖에 둔다 (~/.config/match/kakao_native_key). 없으면 앱의 카카오 로그인이 웹 로그인으로 간다
         def kakaoKeyFile = new File(System.getenv('MATCH_KAKAO_NATIVE_KEY_FILE') ?: "${System.getProperty('user.home')}/.config/match/kakao_native_key")

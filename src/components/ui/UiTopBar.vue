@@ -2,7 +2,7 @@
   <!-- 아이폰은 키보드가 열리면 화면을 위로 밀어 올려, 고정 바가 시계·노치 밑으로 들어갔다 (11/13 실제 기기 한 바퀴).
        보이는 화면(visualViewport)의 맨 위를 따라가게 한다 -->
   <header class="fixed top-0 inset-x-0 z-header bg-canvas pt-safe" :style="shift ? { transform: `translateY(${shift}px)` } : undefined">
-    <div class="max-w-4xl mx-auto h-14 px-2 flex items-center gap-1">
+    <div class="max-w-xl mx-auto h-14 px-2 flex items-center gap-1">
       <button v-if="back" type="button" class="w-11 h-11 flex items-center justify-center text-fg" aria-label="뒤로" @click="goBack">
         <UiIcon name="chevron-left" class="text-[22px]" />
       </button>

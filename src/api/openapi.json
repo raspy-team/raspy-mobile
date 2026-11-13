@@ -7453,13 +7453,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "OFFLINE",
                 "APP",
                 "POPULAR"
-              ],
-              "default": "ALL"
+              ]
             }
           }
         ],
@@ -7796,11 +7796,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ],
-              "default": "FRIENDS"
+              ]
             }
           }
         ],
@@ -8714,6 +8714,50 @@
         }
       }
     },
+    "/api/improv/schools": {
+      "get": {
+        "tags": [
+          "임기응변 등급"
+        ],
+        "summary": "학교 대항 순위",
+        "description": "로그인 없이도. 학교를 고른 사람들의 임기응변 최고 등급 평균으로 줄 세운다. 로그인했으면 내 학교의 평균·순위(mine)도",
+        "operationId": "schools",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Standings"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/improv/pulse": {
+      "get": {
+        "tags": [
+          "임기응변 등급"
+        ],
+        "summary": "지금 사람이 있나",
+        "description": "로그인 없이. 임기응변을 오늘 몇 명이 몇 판 했고 지금 몇 명이 푸는 중인지 (실제 수, AI 주민 제외)",
+        "operationId": "pulse",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pulse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/identity": {
       "get": {
         "tags": [
@@ -8785,6 +8829,41 @@
         }
       }
     },
+    "/api/guest/plays/versus": {
+      "get": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "아직 가입 안 한 친구와의 승부",
+        "description": "로그인한 사람만. 도전장으로 붙었지만 상대가 손님인 판들의 승패와 상대 답. 둘 다 가입하면 1:1 경기로 바뀌어 내 대결 목록에 나온다",
+        "operationId": "versus",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Versus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/guest/plays/duels/{gameId}": {
       "get": {
         "tags": [
@@ -8801,6 +8880,23 @@
             "schema": {
               "type": "integer",
               "format": "int64"
+            }
+          },
+          {
+            "name": "u",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -10298,11 +10394,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ],
-              "default": "ALL"
+              ]
             }
           },
           {
@@ -10989,13 +11085,13 @@
             "required": false,
             "schema": {
               "type": "string",
+              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ],
-              "default": "PENDING"
+              ]
             }
           }
         ],
@@ -14480,6 +14576,10 @@
           "duel": {
             "type": "integer",
             "format": "int64"
+          },
+          "u": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -14550,7 +14650,8 @@
           "key",
           "score",
           "scoreUnit",
-          "title"
+          "title",
+          "versus"
         ],
         "type": "object",
         "properties": {
@@ -14593,6 +14694,9 @@
           },
           "challengerName": {
             "type": "string"
+          },
+          "versus": {
+            "type": "boolean"
           }
         }
       },
@@ -16326,6 +16430,13 @@
           "votingEndsAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "shareKey": {
+            "type": "string"
+          },
+          "myUserId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -19084,6 +19195,89 @@
           }
         }
       },
+      "School": {
+        "required": [
+          "avgGrade",
+          "members",
+          "name",
+          "orgId",
+          "rank"
+        ],
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "members": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgGrade": {
+            "type": "number",
+            "format": "double"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Standings": {
+        "required": [
+          "hasSchool",
+          "schools",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "schools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/School"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mine": {
+            "$ref": "#/components/schemas/School"
+          },
+          "hasSchool": {
+            "type": "boolean"
+          },
+          "myGrade": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Pulse": {
+        "required": [
+          "peopleToday",
+          "playingNow",
+          "playsToday"
+        ],
+        "type": "object",
+        "properties": {
+          "playsToday": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "peopleToday": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playingNow": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "IdentityConfig": {
         "required": [
           "available",
@@ -19129,6 +19323,60 @@
           },
           "answered": {
             "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Versus": {
+        "required": [
+          "at",
+          "id",
+          "myScore",
+          "problem",
+          "result",
+          "role",
+          "theirScore"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "role": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "myScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "myLine": {
+            "type": "string"
+          },
+          "myAnswer": {
+            "type": "string"
+          },
+          "theirScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "theirLine": {
+            "type": "string"
+          },
+          "theirAnswer": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -19154,8 +19402,7 @@
         "required": [
           "at",
           "myPlayId",
-          "myScore",
-          "theirScore"
+          "myScore"
         ],
         "type": "object",
         "properties": {

@@ -4378,6 +4378,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/improv/schools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 학교 대항 순위
+         * @description 로그인 없이도. 학교를 고른 사람들의 임기응변 최고 등급 평균으로 줄 세운다. 로그인했으면 내 학교의 평균·순위(mine)도
+         */
+        get: operations["schools"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/improv/pulse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 지금 사람이 있나
+         * @description 로그인 없이. 임기응변을 오늘 몇 명이 몇 판 했고 지금 몇 명이 푸는 중인지 (실제 수, AI 주민 제외)
+         */
+        get: operations["pulse"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/identity": {
         parameters: {
             query?: never;
@@ -4410,6 +4450,26 @@ export interface paths {
          * @description 로그인 없이. 도전장 링크(?c=)로 온 사람의 첫 화면에 보낸 친구의 점수와 등급 줄. 답은 주지 않는다
          */
         get: operations["challenge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/plays/versus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 아직 가입 안 한 친구와의 승부
+         * @description 로그인한 사람만. 도전장으로 붙었지만 상대가 손님인 판들의 승패와 상대 답. 둘 다 가입하면 1:1 경기로 바뀌어 내 대결 목록에 나온다
+         */
+        get: operations["versus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6886,6 +6946,8 @@ export interface components {
             k?: string;
             /** Format: int64 */
             duel?: number;
+            /** Format: int64 */
+            u?: number;
         };
         GuestPlayResponse: {
             /** Format: int64 */
@@ -6924,6 +6986,7 @@ export interface components {
             challengerAnswer?: string;
             challengeKey?: string;
             challengerName?: string;
+            versus: boolean;
         };
         GuestClaimResponse: {
             /** Format: int32 */
@@ -7468,6 +7531,9 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             votingEndsAt?: string;
+            shareKey?: string;
+            /** Format: int64 */
+            myUserId?: number;
         };
         DialogSayRequest: {
             text: string;
@@ -8285,6 +8351,34 @@ export interface components {
             context: string;
             line: string;
         };
+        School: {
+            /** Format: int64 */
+            orgId: number;
+            name: string;
+            /** Format: int32 */
+            members: number;
+            /** Format: double */
+            avgGrade: number;
+            /** Format: int32 */
+            rank: number;
+        };
+        Standings: {
+            schools: components["schemas"]["School"][];
+            /** Format: int32 */
+            total: number;
+            mine?: components["schemas"]["School"];
+            hasSchool: boolean;
+            /** Format: int32 */
+            myGrade?: number;
+        };
+        Pulse: {
+            /** Format: int32 */
+            playsToday: number;
+            /** Format: int32 */
+            peopleToday: number;
+            /** Format: int32 */
+            playingNow: number;
+        };
         IdentityConfig: {
             available: boolean;
             storeId?: string;
@@ -8298,6 +8392,24 @@ export interface components {
             line?: string;
             gameKey: string;
             answered: boolean;
+            name?: string;
+        };
+        Versus: {
+            /** Format: int64 */
+            id: number;
+            role: string;
+            result: string;
+            problem: string;
+            /** Format: double */
+            myScore: number;
+            myLine?: string;
+            myAnswer?: string;
+            /** Format: double */
+            theirScore: number;
+            theirLine?: string;
+            theirAnswer?: string;
+            /** Format: date-time */
+            at: string;
         };
         DuelInfo: {
             name: string;
@@ -8311,7 +8423,7 @@ export interface components {
             myScore: number;
             myLine?: string;
             /** Format: double */
-            theirScore: number;
+            theirScore?: number;
             theirLine?: string;
             /** Format: date-time */
             at: string;
@@ -15046,6 +15158,46 @@ export interface operations {
             };
         };
     };
+    schools: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Standings"];
+                };
+            };
+        };
+    };
+    pulse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Pulse"];
+                };
+            };
+        };
+    };
     config: {
         parameters: {
             query?: never;
@@ -15091,9 +15243,34 @@ export interface operations {
             };
         };
     };
+    versus: {
+        parameters: {
+            query: {
+                key: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Versus"][];
+                };
+            };
+        };
+    };
     duel: {
         parameters: {
-            query?: never;
+            query?: {
+                u?: number;
+                k?: string;
+            };
             header?: never;
             path: {
                 gameId: number;

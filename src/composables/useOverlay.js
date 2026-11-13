@@ -22,6 +22,19 @@ function hookNavigation() {
 // 시트를 닫자마자 다른 시트·확인 창을 여는 곳이 20곳 넘게 있다(더보기 → 신고, 더보기 → 차단 확인, 친구 → 사람 찾기 …).
 // 예전엔 닫힌 시트의 기록 칸이 남아, 다음 것을 닫은 뒤 뒤로를 한 번 더 눌러야 앞 화면으로 갔다 (가로 훑기 2절, 경로 8 P6).
 // 이제 닫힌 시트의 칸은 잠깐(RELEASE_MS) 남겨 두고, 그사이 새 시트가 열리면 그 칸을 넘겨받는다(새로 쌓지 않는다)
+// 사용자의 '뒤로'가 방금 있었나. 뒤로가 부른 창(게임 중 나가기 확인 같은 라우터 가드의 확인 창)은 기록 칸을 잡지 않는다:
+// 그때는 라우터가 아직 그 이동을 붙들고 있어서, 칸을 쌓으면 앞쪽 기록이 잘리고 라우터의 되돌리기와 엉켜
+// 창이 뜨자마자 닫혔다 (11/14: 게임 중 첫 '뒤로'는 아무 일도 없고 두 번째에야 확인 창이 떴다)
+let lastUserPopAt = 0
+let ownBack = false // 우리가 부른 history.back()의 신호는 사용자의 뒤로가 아니다
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => {
+    if (ownBack) ownBack = false
+    else lastUserPopAt = Date.now()
+  }, true)
+}
+const AFTER_POP_MS = 800
+
 const RELEASE_MS = 300
 let pending = null // { token, timer }: 닫혔지만 아직 걷지 않은 칸
 let backInFlight = null // history.back()을 부르고 popstate를 기다리는 중이면 그 Promise
@@ -45,6 +58,7 @@ function releaseLater(token) {
         // popstate가 오지 않는 환경을 대비해 끝을 둔다
         setTimeout(done, 500)
       })
+      ownBack = true
       history.back()
     }, RELEASE_MS),
   }
@@ -101,6 +115,7 @@ export function useOverlay(isOpen, close) {
     queueMicrotask(async () => {
       if (backInFlight) await backInFlight
       if (token !== mine) return // 그사이 닫혔다
+      if (Date.now() - lastUserPopAt < AFTER_POP_MS) return // 뒤로가 부른 창: 기록을 건드리지 않는다 (버튼으로만 닫는다)
       claimEntry(mine)
     })
   }

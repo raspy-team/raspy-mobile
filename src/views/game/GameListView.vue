@@ -10,6 +10,8 @@
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
     <HomeUpcoming />
+    <!-- 지금 사람이 있나: 실제 수가 넉넉할 때만 한 줄 (11/14 '빈 식당') -->
+    <ImprovPulse variant="home" />
 
     <template v-if="appPlayer">
       <UiSection title="내 판">
@@ -151,6 +153,7 @@ import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
 import HomeUpcoming from '../../components/game/HomeUpcoming.vue'
+import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
 import { GET } from '@/api/client'
 import Comment from '../GameCommentView.vue'
 import {

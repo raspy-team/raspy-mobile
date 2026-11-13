@@ -1,17 +1,10 @@
 <template>
-  <!-- 내가 보낸 도전장의 결과 (임기응변 등급, 가입 전). 손님에게는 알림이 없어서, 다시 오면 여기서 친구들의 승패를 본다 (3-5 걷기 C2).
-       친구는 누군지 모른다(가입 전). 그래서 '친구 1, 2…'로 부르고, 최근 것부터 -->
+  <!-- 내가 보낸 한 판을 친구들이 풀었다 (임기응변 등급, 가입 전). 손님에게는 알림이 없어서 다시 오면 여기서 안다.
+       누가 이겼는지·친구 답은 가입하면 본다 (11/14 초대받은 1:1: 예전엔 여기서 승패를 다 보여 가입할 이유가 없었다) -->
   <UiCard v-if="rows.length">
-    <p class="t-title">보낸 한 판</p>
-    <p class="t-caption mt-1">내 링크로 친구 {{ rows.length }}명이 붙었어요</p>
-    <ul class="mt-3 space-y-2">
-      <li v-for="(r, i) in rows" :key="i" class="flex items-center justify-between gap-3 t-body">
-        <span class="min-w-0 truncate">친구 {{ rows.length - i }} · {{ gradeOf(r.theirLine, r.theirScore) }}</span>
-        <span class="shrink-0" :class="r.myScore > r.theirScore ? 'text-signal-fg font-semibold' : 'text-fg-muted'">
-          {{ r.myScore > r.theirScore ? '내가 이김' : r.myScore < r.theirScore ? '친구가 이김' : '비김' }}
-        </span>
-      </li>
-    </ul>
+    <p class="t-title">내 링크로 친구 {{ rows.length }}명이 풀었어요</p>
+    <p class="t-caption mt-1 break-keep">누가 이겼는지, 친구가 뭐라고 답했는지는 가입하면 바로 보여요. 친구도 가입하면 둘의 1:1 기록으로 남아요</p>
+    <UiButton block class="mt-3" @click="emit('join')">누가 이겼는지 보기</UiButton>
   </UiCard>
 </template>
 
@@ -19,17 +12,13 @@
 import { onMounted, ref } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
-import { UiCard } from '../ui'
+import { UiButton, UiCard } from '../ui'
 
 type Sent = components['schemas']['SentChallenge']
 
 const props = defineProps<{ visitorId: string }>()
+const emit = defineEmits<{ (e: 'join'): void }>()
 const rows = ref<Sent[]>([])
-
-// 등급이 안 나온 판(셋 다 비움·마감 넘김)은 점수 대신 그 말로: "친구 2 · 0점"만 다른 줄과 달랐다 (경로 10 리뷰 I8)
-function gradeOf(line?: string | null, score?: number) {
-  return line?.match(/\d등급/)?.[0] ?? (score ? `${score}점` : '대답 없음')
-}
 
 onMounted(async () => {
   if (!props.visitorId) return

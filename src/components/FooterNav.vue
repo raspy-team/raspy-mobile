@@ -17,7 +17,7 @@ const tabs = [
 
 <template>
   <nav class="fixed bottom-0 left-0 w-full bg-canvas border-t border-line z-nav pb-safe">
-    <div class="max-w-4xl mx-auto h-16 grid grid-cols-3 text-xs">
+    <div class="max-w-xl mx-auto h-16 grid grid-cols-3 text-xs">
       <router-link
         v-for="t in tabs"
         :key="t.key"

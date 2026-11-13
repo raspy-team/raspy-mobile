@@ -8,7 +8,9 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   backgroundColor: '#121214',
   server: {
-    url: 'https://matchapp.me',
+    // 시뮬레이터로 브랜치를 걸어 볼 때만 CAP_SERVER_URL=http://localhost:8081 (11/13 실제 기기 한 바퀴). 스토어 빌드는 늘 운영 웹
+    url: process.env.CAP_SERVER_URL || 'https://matchapp.me',
+    cleartext: !!process.env.CAP_SERVER_URL,
     // 이 주소 밖은 시스템 브라우저로 연다. 카카오 로그인은 앱 안에서 끝나야 해서 넣는다
     allowNavigation: ['raspy-api.fly.dev', 'kauth.kakao.com', 'accounts.kakao.com', 'logins.daum.net', 'appleid.apple.com'],
   },

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-dvh bg-canvas">
     <UiTopBar v-if="userId" :title="userName ? `${userName}님의 경기` : '경기 기록'" back />
-    <UiTopBar v-else title="소식">
+    <UiTopBar v-else title="소식" back="/">
       <template #right><InboxButtons /></template>
     </UiTopBar>
 

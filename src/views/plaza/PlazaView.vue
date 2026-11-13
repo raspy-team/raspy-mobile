@@ -12,11 +12,8 @@
       <!-- 위: 광장 고르기 -->
       <div class="absolute top-0 inset-x-0 z-10 max-w-xl mx-auto px-3 pt-[calc(env(safe-area-inset-top)+8px)] flex items-center gap-2">
         <UiIconButton icon="arrow-left" label="뒤로" class="bg-canvas/80 backdrop-blur" @click="goBack" />
-        <!-- 지금 광장 하나만 크게, 누르면 다른 광장 (칩 셋이 좁은 화면에서 밀려 동네 칩이 안 보였다, 11/6) -->
-        <button type="button" class="min-w-0 flex-1 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur flex items-center gap-1 t-body font-semibold text-fg" aria-label="광장 바꾸기" @click="roomsOpen = true">
-          <span class="truncate">{{ room?.name ?? '광장' }}</span>
-          <UiIcon name="chevron-down" class="text-sm shrink-0" />
-        </button>
+        <!-- 광장은 하나라 고르기가 없다 (11/13) -->
+        <p class="min-w-0 flex-1 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur flex items-center t-body font-semibold text-fg"><span class="truncate">{{ room?.name ?? '광장' }}</span></p>
         <button v-if="phase === 'plaza'" type="button" class="shrink-0 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur t-caption font-semibold text-fg flex items-center gap-1" aria-label="지금 여기 있는 사람" @click="peopleOpen = true">
           <UiIcon name="users" /> {{ peopleHere.filter((p) => p.restingMinutes == null).length }}
         </button>
@@ -24,6 +21,13 @@
 
       <div v-if="phase === 'loading'" class="absolute inset-0 flex items-center justify-center">
         <UiSpinner />
+      </div>
+      <!-- 닫힌 시간: 광장은 매일 밤 10시~11시에만 연다 (11/13 앱 기능 좁히기: 공간 대신 시간으로 사람을 모은다). 꾸미기는 늘 열려 있다 -->
+      <div v-if="phase === 'closed'" class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
+        <p class="t-heading text-white">{{ closedReason }}</p>
+        <p class="t-caption text-white/80">그 시간에 모두 한곳에 모여요. 그 전에 캐릭터를 꾸며 둘 수 있어요</p>
+        <UiButton @click="router.push('/plaza/avatar')">캐릭터 꾸미기</UiButton>
+        <UiButton variant="secondary" @click="router.push('/games')">게임 목록으로 보기</UiButton>
       </div>
       <div v-if="phase === 'error'" class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
         <p class="t-body text-white">{{ error }}</p>
@@ -127,22 +131,6 @@
       </template>
     </UiSheet>
 
-    <!-- 광장 고르기 -->
-    <UiSheet v-model="roomsOpen" title="어느 광장으로 갈까요?">
-      <ul class="space-y-1">
-        <li v-for="r in rooms" :key="r.id">
-          <button type="button" class="w-full flex items-center justify-between rounded-2xl px-3 py-3 active:bg-surface-2 text-left" @click="roomsOpen = false; switchRoom(r)">
-            <span>
-              <span class="t-body text-fg block">{{ r.name }}<span v-if="r.id === room?.id" class="t-caption ml-1">· 지금</span></span>
-              <span class="t-caption block">{{ r.open ? (r.kind === 'dong' ? '우리 동네 사람들과' : r.kind === 'city' ? '같은 도시 사람들과' : '전국 누구나') : r.reason }}</span>
-            </span>
-            <span class="t-caption shrink-0">{{ r.open ? `${r.online}명` : '' }}<UiIcon v-if="!r.open" name="lock" /></span>
-          </button>
-        </li>
-      </ul>
-      <p v-if="!rooms.some((r) => r.kind === 'dong')" class="t-caption mt-3">동네를 인증하면 우리 동네 광장이 열려요</p>
-      <template v-if="!rooms.some((r) => r.kind === 'dong')" #footer><UiButton block variant="secondary" @click="router.push('/neighborhood')">동네 인증</UiButton></template>
-    </UiSheet>
 
     <!-- 지금 여기 있는 사람: 걷지 않고 바로 한 판 -->
     <UiSheet v-model="peopleOpen" title="지금 여기 있는 사람">
@@ -221,7 +209,8 @@ const router = useRouter()
 const { showToast } = useToast()
 const ART = `${API_BASE_URL}/api/plaza/art`
 
-const phase = ref<'loading' | 'avatar' | 'plaza' | 'error'>('loading')
+const phase = ref<'loading' | 'avatar' | 'plaza' | 'error' | 'closed'>('loading')
+const closedReason = ref('')
 const error = ref('')
 const rooms = ref<S['RoomInfo'][]>([])
 const room = ref<S['RoomInfo'] | null>(null)
@@ -255,11 +244,14 @@ async function start() {
       return
     }
     rooms.value = (await GET('/api/plaza/rooms')).data
-    // 열린 곳 중 가장 가까운 곳(동네 → 도시 → 전국)부터. 단, 사람이 아무도 없으면 사람이 더 있는 넓은 곳으로
-    const open = rooms.value.filter((r) => r.open)
-    const near = [...open].reverse()
-    const pick = near.find((r) => r.online > 0) ?? near.find((r) => r.kind === 'dong') ?? open[0]
-    await go(pick)
+    // 광장은 하나다 (11/13). 닫힌 시간이면 언제 열리는지 보인다
+    const only = rooms.value[0]
+    if (!only?.open) {
+      closedReason.value = only?.reason || '광장은 매일 밤 10시부터 11시까지 열려요'
+      phase.value = 'closed'
+      return
+    }
+    await go(only)
   } catch (e) {
     error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '광장에 들어가지 못했어요'
     phase.value = 'error'
@@ -471,7 +463,6 @@ async function pinGames() {
 
 // 지금 여기 있는 사람 (분수·위 막대): 걷지 않고 바로 카드로
 const peopleOpen = ref(false)
-const roomsOpen = ref(false)
 const peopleHere = computed(() => {
   void peopleTick.value
   const s = scene()

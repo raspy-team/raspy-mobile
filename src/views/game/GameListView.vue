@@ -117,6 +117,7 @@
       </div>
     </UiSection>
     </template>
+    <HomeFeedPeek />
   </main>
 
   <!-- 친구와 둘이 신청 (팀 경기) -->
@@ -152,6 +153,7 @@ import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import AppDuelList from '../../components/appgame/AppDuelList.vue'
+import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
 import { GET } from '@/api/client'
 import Comment from '../GameCommentView.vue'
 import {

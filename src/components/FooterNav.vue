@@ -6,10 +6,10 @@ defineProps({ tab: String })
 // 상대가 나를 기다리는 일(결과 확인·신청 승인)이 있으면 '내 경기'에 숫자를 단다
 const { waitingOnMeCount } = useActiveGamePolling()
 
-// 첫 탭은 '홈': 다시 연 사람이 하던 판을 이어 가는 곳이라 '찾기'는 하는 일과 이름이 달랐다 (목적 판정 11/11 4번)
+// 첫 탭은 '홈': 다시 연 사람이 하던 판을 이어 가는 곳이라 '찾기'는 하는 일과 이름이 달랐다 (목적 판정 11/11 4번).
+// 소식 탭은 홈 아래 몇 줄로 합쳤다 (11/13 앱 기능 좁히기: 사람이 적으면 탭 하나가 통째로 비었다)
 const tabs = [
   { key: 'home', to: '/', icon: 'home', label: '홈' },
-  { key: 'feed', to: '/feed', icon: 'feed', label: '소식' },
   { key: 'game', to: '/game', icon: 'calendar-check', label: '내 경기' },
   { key: 'profile', to: '/profile/0', icon: 'user', label: '내 정보' },
 ]
@@ -17,7 +17,7 @@ const tabs = [
 
 <template>
   <nav class="fixed bottom-0 left-0 w-full bg-canvas border-t border-line z-nav pb-safe">
-    <div class="max-w-4xl mx-auto h-16 grid grid-cols-4 text-xs">
+    <div class="max-w-4xl mx-auto h-16 grid grid-cols-3 text-xs">
       <router-link
         v-for="t in tabs"
         :key="t.key"

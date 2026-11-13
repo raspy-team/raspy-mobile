@@ -75,7 +75,8 @@ const router = useRouter()
 const footerTab = computed(() => {
   const p = route.path
   if (p === '/') return 'home'
-  if (p === '/feed') return route.query.userId ? null : 'feed'
+  // 소식은 홈 아래에서 '더 보기'로 연다 (11/13). 탭은 홈에 켠다
+  if (p === '/feed') return route.query.userId ? null : 'home'
   if (p === '/game') return 'game'
   if (p === '/profile/0' || p === '/settings') return 'profile'
   if (p.startsWith('/profile/')) return ''

@@ -416,8 +416,7 @@
                 </template>
               </UiListItem>
             </UiList>
-            <!-- 가입 전에 한 판을 하고 막 온 사람에게 '끝난 경기가 없다'는 틀린 말이다 (11/13 실제 기기 한 바퀴) -->
-            <UiEmptyState v-else-if="!joinedFrom && !ladderTo" mascot="dol" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
+            <!-- 끝난 판이 없으면 아무것도 그리지 않는다: 바로 위 '한 판 하기'와 '첫 판을 해 보세요'가 같은 말이었다 (11/13 실제 기기 한 바퀴) -->
           </section>
 
           <section v-else class="mt-4">

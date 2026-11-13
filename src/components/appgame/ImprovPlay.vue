@@ -1,5 +1,6 @@
 <template>
-  <div ref="root" class="scroll-mt-16">
+  <!-- 끌어올릴 때 위 막대(상태 표시줄 + 제목 바)만큼 띄운다. 예전 4rem은 막대보다 작아 인물·사정 줄이 막대 밑에 숨었다 (11/13 실제 기기 한 바퀴) -->
+  <div ref="root" class="scroll-mt-[calc(env(safe-area-inset-top)+4.5rem)]">
     <div class="flex items-center justify-between">
       <span class="t-caption">상황 {{ index + 1 }}/{{ situations.length }} · {{ SLOT[current?.slot ?? ''] ?? '' }}</span>
       <span v-if="phase === 'answer'" class="t-mono tabular-nums" :class="remaining <= 10 ? 'text-danger-fg' : 'text-fg-muted'">0:{{ String(remaining).padStart(2, '0') }}</span>

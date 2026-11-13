@@ -1,6 +1,9 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="title" back />
+    <UiTopBar :title="title" back>
+      <!-- 끝난 판은 어디서든 공유 (11/13: 실시간·대전 결과에만 없었다) -->
+      <template #right><ShareResultButton v-if="state?.status === 'COMPLETED' && state.gameId" :game-id="state.gameId" /></template>
+    </UiTopBar>
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <!-- AI 보스 도전 판 (docs/ai-residents.md 3): 보통 판과 같은 화면, 위에 띠 하나 -->
@@ -189,6 +192,7 @@ import WaitingNow from '../../components/appgame/WaitingNow.vue'
 import OpponentName from '../../components/appgame/OpponentName.vue'
 import { shareLink } from '../../utils/share'
 import { useToast } from '../../composables/useToast'
+import ShareResultButton from '../../components/share/ShareResultButton.vue'
 import { UiButton, UiCard, UiEmptyState, UiIcon, UiInput, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 
 type State = components['schemas']['RealtimeState']

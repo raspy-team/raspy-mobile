@@ -4,7 +4,8 @@
          칸마다 이미 배지가 있다. 고르는 길이 한 화면에 다섯이었다 (목적 판정 11/11 부분 2) -->
     <UiTopBar title="앱 게임" back>
       <template #right>
-        <UiIconButton icon="search" label="게임 찾기" @click="toggleSearch" />
+        <!-- 게임이 몇 개 안 되면 찾을 일이 없다 (11/13 앱 기능 좁히기로 여섯) -->
+        <UiIconButton v-if="games.length > 8" icon="search" label="게임 찾기" @click="toggleSearch" />
         <!-- 광장 입구 (UX ⑤: 홈의 '앱 게임'이 목록으로 바로 오고, 광장은 여기서). '지도' 모양은 다른 화면에서 동네 경기 지도라 사람들 모양으로 (경로 2 리뷰 N7) -->
         <UiIconButton icon="users" label="광장" @click="router.push('/plaza')" />
       </template>
@@ -33,13 +34,14 @@
           </div>
         </UiSection>
 
-        <UiSection :title="query ? `찾은 게임 ${filtered.length}` : '많이 하는 게임'" class="mt-6">
+        <UiSection :title="query ? `찾은 게임 ${filtered.length}` : shown.length < filtered.length ? '많이 하는 게임' : '모든 게임'" class="mt-6">
           <div v-if="filtered.length" class="grid grid-cols-2 gap-3">
             <AppGameTile v-for="g in shown" :key="g.key" :game="g" />
           </div>
           <!-- 처음엔 많이 하는 8개만 (UX ⑤: 56개가 한 줄로 길었다). 찾거나 고르면 모두 -->
           <UiButton v-if="shown.length < filtered.length" block variant="secondary" class="mt-3" @click="all = true">모두 보기 {{ filtered.length }}</UiButton>
-          <UiEmptyState v-else mascot="dol" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
+          <!-- 예전엔 '모두 보기'의 v-else라 게임이 다 보일 때마다 '찾는 게임이 없어요'가 붙었다 (11/13 실제 기기 한 바퀴) -->
+          <UiEmptyState v-if="!filtered.length" mascot="dol" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
         </UiSection>
       </template>
     </main>

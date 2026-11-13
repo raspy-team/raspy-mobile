@@ -1,6 +1,9 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="title" back />
+    <UiTopBar :title="title" back>
+      <!-- 끝난 판은 어디서든 공유 (11/13: 실시간·대전 결과에만 없었다) -->
+      <template #right><ShareResultButton v-if="state?.status === 'COMPLETED' && state.gameId" :game-id="state.gameId" /></template>
+    </UiTopBar>
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <UiSkeleton v-if="!state && !error" class="h-40 w-full" />
@@ -108,6 +111,7 @@ import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import { UiButton, UiCard, UiEmptyState, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'
 import { useToast } from '../../composables/useToast'
+import ShareResultButton from '../../components/share/ShareResultButton.vue'
 
 type State = components['schemas']['BattleStateResponse']
 // 퐁: b 공, p 라켓, s 점수. 흔들기: c 횟수, left 남은 초

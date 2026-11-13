@@ -562,7 +562,9 @@ let justSubmitted = false
 const votes = ref<Schemas['AppVoteCard'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))
-const finished = computed(() => duels.value.filter((d) => DONE.includes(d.status)))
+// 실시간 게임의 취소 판(보내기 취소·아무도 두기 전 시간 초과)은 일어나지 않은 판이라 목록에 두지 않는다.
+// 예전엔 '취소'가 쌓이고, 내가 취소한 판까지 '시간 안에 내지 않아 취소됐어요'라 했다 (11/13 실제 기기 한 바퀴)
+const finished = computed(() => duels.value.filter((d) => d.status === 'COMPLETED' || (d.status === 'CANCELED' && game.value?.playMode !== 'REALTIME')))
 // 하루 한 번 게임: 오늘 마감인 내 판을 이미 냈나 (내 판의 마감 시각으로 날짜를 본다. 남의 어제 판에 붙었어도 내 판은 오늘이다)
 const dailyDone = computed(() => {
   if (game.value?.dailyLimit !== 1) return false

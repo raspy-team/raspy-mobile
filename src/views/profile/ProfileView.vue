@@ -41,7 +41,11 @@
       <p v-if="user.isBot" class="t-caption mb-4 flex items-center gap-1.5"><UiAiBadge class="!ml-0" />AI 주민 · 매치가 만든 연습 상대예요</p>
       <!-- 누구인지 -->
       <div class="flex items-center gap-4">
-        <UiAvatar :src="user.avatar" :name="user.nickname" size="xl" class="!w-20 !h-20" />
+        <!-- 꾸민 캐릭터가 있으면 그 캐릭터가 얼굴이다 (11/13 실제 기기 한 바퀴: 꾸며도 광장 말고는 보이는 데가 없었다). 직접 꾸민 것이라 사진보다 앞 -->
+        <div v-if="user.character" class="w-20 h-20 shrink-0 rounded-full bg-surface-2 flex items-end justify-center overflow-hidden" role="img" :aria-label="`${user.nickname}의 캐릭터`">
+          <div class="profile-char" :style="{ backgroundImage: `url(${API_BASE_URL}/api/plaza/art/avatar/${user.character}.png)` }" />
+        </div>
+        <UiAvatar v-else :src="user.avatar" :name="user.nickname" size="xl" class="!w-20 !h-20" />
         <div class="flex-1 min-w-0">
           <h1 class="t-title flex items-center min-w-0"><span class="truncate">{{ user.nickname }}</span><UiAiBadge v-if="user.isBot" /></h1>
           <p class="t-caption truncate mt-0.5">@{{ user.username }}</p>
@@ -79,8 +83,10 @@
       <UiButton v-if="!user.isMe && !user.isBot" block class="mt-2" icon="fas fa-gamepad" @click="oneGameOpen = true">한 판 붙자</UiButton>
       <OneGameSheet v-if="!user.isMe && !user.isBot" v-model="oneGameOpen" :user-id="user.id" :name="user.nickname" :rules="user.top3Rules" />
       <!-- 내 규칙: 홈 첫 화면에서 옮겨 왔다 (목적 판정 11/11 4번). 동호회는 뺐다 (11/13 앱 기능 좁히기: 카톡이 더 잘한다) -->
-      <div v-if="user.isMe" class="mt-2">
+      <!-- 꾸미기도 여기서: 광장(밤 10~11시)으로만 갈 수 있어 하루 23시간은 해낸 일로 얻은 꾸미기를 쓸 길이 없었다 (11/13 실제 기기 한 바퀴) -->
+      <div v-if="user.isMe" class="mt-2 grid grid-cols-2 gap-2">
         <UiButton block variant="ghost" size="sm" icon="book-open" to="/rules/my-rules">내 규칙</UiButton>
+        <UiButton block variant="ghost" size="sm" icon="shirt" to="/plaza/avatar">꾸미기</UiButton>
       </div>
 
       <!-- 숫자 한 줄: 상자 없이, 승률은 경기가 있을 때만 -->
@@ -284,6 +290,7 @@
 </template>
 
 <script setup>
+import { API_BASE_URL } from '@/config/server'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import OneGameSheet from '../../components/game/OneGameSheet.vue'
 import TrustCard from '../../components/profile/TrustCard.vue'
@@ -527,3 +534,8 @@ async function load() {
   }
 }
 </script>
+
+<style scoped>
+/* 광장 캐릭터 한 칸(16×32)을 3배로, 앞을 보고 선 모습 (2줄 18칸) */
+.profile-char { width: 48px; height: 96px; margin-bottom: -18px; background-size: 2688px 288px; background-position: -864px -192px; image-rendering: pixelated; }
+</style>

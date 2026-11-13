@@ -7627,6 +7627,7 @@ export interface components {
             top3Rules: components["schemas"]["Top3RuleStatsDto"][];
             recentGames: components["schemas"]["RecentGameSummaryDto"][];
             recordsHidden: boolean;
+            character?: string;
             isBot: boolean;
             aiAppGames: string[];
         };

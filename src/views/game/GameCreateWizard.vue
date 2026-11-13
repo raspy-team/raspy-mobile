@@ -103,15 +103,6 @@
           <div class="mb-8"></div>
         </template>
 
-        <!-- 동호회 경기: 고르면 그 동호회 멤버 모두에게 알린다 (든 동호회가 있을 때만) -->
-        <template v-if="clubs.length">
-          <h2 class="t-heading">동호회에 알릴까요?</h2>
-          <div class="flex flex-wrap gap-2 mt-3 mb-8">
-            <UiChip :selected="!clubId" @click="clubId = null">알리지 않기</UiChip>
-            <UiChip v-for="c in clubs" :key="c.id" :selected="clubId === c.id" @click="clubId = c.id">{{ c.name }}</UiChip>
-          </div>
-        </template>
-
         <h2 class="t-heading">{{ format === 'DUEL' ? '누구와 겨룰까요?' : '어떻게 모을까요?' }}</h2>
         <p class="t-caption mt-1 mb-5">시간·장소는 나중에 내 경기에서 언제든 정하거나 바꿀 수 있어요.</p>
 
@@ -224,14 +215,6 @@ if (route.query.exact) exactTime.value = String(route.query.exact)
 
 const ruleId = ref(Number(route.query.ruleId) || 0)
 
-// 동호회 화면에서 '동호회 경기 열기'로 왔으면 그 동호회를 미리 고른다 (규칙을 고르러 다녀오는 동안 sessionStorage에 둔다)
-const CLUB_KEY = 'match_club_for_game'
-const clubs = ref([])
-const clubId = ref(Number(route.query.clubId || sessionStorage.getItem(CLUB_KEY)) || null)
-api.get('/api/clubs/mine').then(({ data }) => {
-  clubs.value = data
-  if (clubId.value && !data.some((c) => c.id === clubId.value)) clubId.value = null
-}).catch(() => {})
 const ruleFailed = ref(false)
 function loadRule() {
   ruleFailed.value = false
@@ -378,14 +361,12 @@ async function create(target) {
     const payload = {
       referencedRuleId: ruleId.value, friendId: target?.id ?? null, matchDate, format: format.value, maxPlayers: maxPlayers.value,
       venue: venue.value, placeDetail: isRemote(venue.value) ? venueDetail.value.trim() || null : null,
-      clubId: target ? null : clubId.value,
     }
     const { data } = await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
     createdId.value = data
     createdLine.value = [rule.value?.ruleTitle, matchDate ? matchTime(matchDate) : '시간은 나중에', isRemote(venue.value) ? null : dong.value?.name && `${dong.value.name} 근처`].filter(Boolean).join(' · ')
     friendsOpen.value = false
     created.value = true
-    sessionStorage.removeItem(CLUB_KEY)
     feel('success')
   } catch (e) {
     friend.value = null

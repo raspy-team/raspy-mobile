@@ -109,10 +109,10 @@ const routes = [
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },
   // 동호회 (club/): 목록·만들기, 한 곳, 초대 링크
-  { path: '/clubs', component: () => import('../views/club/ClubListView.vue') },
-  { path: '/clubs/matches/:matchId', component: () => import('../views/club/ClubMatchView.vue'), meta: { keepOnQuery: true } },
-  { path: '/clubs/:id', component: () => import('../views/club/ClubView.vue') },
-  { path: '/club/join/:code', component: () => import('../views/club/ClubJoinView.vue') },
+  // 11/13 앱 기능 좁히기로 뺐다. 예전 링크는 홈으로 (화면 파일은 되살릴 때를 위해 남긴다)
+  { path: '/clubs', redirect: '/' },
+  { path: '/clubs/:rest(.*)', redirect: '/' },
+  { path: '/club/join/:code', redirect: '/' },
   // 대회 (tournament/): 리그·토너먼트
   { path: '/tournaments', component: () => import('../views/tournament/TournamentListView.vue') },
   { path: '/tournaments/:id', component: () => import('../views/tournament/TournamentView.vue') },

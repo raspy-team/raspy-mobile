@@ -48,13 +48,6 @@
           class="mt-3"
           :to="{ path: '/neighborhood', query: { back: route.fullPath } }"
         >동네 인증</UiButton>
-        <!-- 상대가 정해진 남의 경기: 한쪽을 응원 (포인트) -->
-        <CheerBar
-          v-if="canCheer"
-          class="mt-6"
-          :game-id="game.id"
-          :closed="!['MATCHING', 'SCHEDULED'].includes(game.gameStatus)"
-        />
         <!-- 팀 경기 단톡방: 승인된 둘 이상이면 (11/5 C) -->
         <!-- 보조 행동은 글자 버튼으로 (애플식: 꽉 찬 버튼은 화면의 주된 행동 하나만, UX 버튼 크기) -->
         <div class="mt-4 flex flex-wrap justify-center gap-x-2">
@@ -80,7 +73,6 @@ import { getMyId } from '@/utils/me'
 import { feel } from '../../utils/feel'
 import { useToast } from '../../composables/useToast'
 import OpenGameCard from '../../components/game/OpenGameCard.vue'
-import CheerBar from '../../components/point/CheerBar.vue'
 import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
 import Comment from '../GameCommentView.vue'
@@ -98,12 +90,6 @@ const menuGame = ref(null)
 const challengersGame = ref(null)
 const commentId = ref(0)
 const myId = ref(null)
-const canCheer = computed(() => {
-  const g = game.value
-  return g && g.rule?.judge !== 'OUTCOME' && (g.players?.length || 0) >= 2 && !g.players.some((p) => p.id === myId.value)
-    && ['MATCHING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED'].includes(g.gameStatus)
-})
-
 // 신청 전 한 줄: 승인 뒤에 무엇이 남았나. 처음 만나는 1:1은 앱 게임 한 판이 먼저라는 것도 (신뢰 사다리, 서버 TrustLadder)
 const applyHint = computed(() => {
   const g = game.value

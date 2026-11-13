@@ -3,7 +3,8 @@
     <UiTopBar title="소속" back="/settings" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-32 space-y-8">
-      <p class="t-caption pt-3">인증하면 프로필에 ✓ 소속이 붙어요</p>
+      <!-- 고르기가 먼저다: 예전 첫 줄 '인증하면…'은 서류가 있어야 하는 것처럼 읽혔다 (11/13 실제 기기 한 바퀴) -->
+      <p v-if="mine?.memberships.length" class="t-caption pt-3">증명서를 내면 프로필에 ✓이 붙어요</p>
 
       <UiListSkeleton v-if="loading" :rows="3" />
       <UiEmptyState v-else-if="error" icon="fas fa-triangle-exclamation" title="소속을 불러오지 못했어요">
@@ -100,7 +101,9 @@
         </div>
 
         <!-- 2. 서류 (고를 때는 없어도 된다. '✓'을 붙이고 싶을 때만, 11/13) -->
-        <div>
+        <!-- 증명서는 접어 둔다: 고르기만 하러 온 사람에게 긴 서류 설명이 시트 절반이었다 (11/13 실제 기기 한 바퀴) -->
+        <button v-if="!docOpen && !file" type="button" class="t-caption underline underline-offset-2 text-left" @click="docOpen = true">✓도 붙이고 싶어요 (증명서 한 장, 선택)</button>
+        <div v-else>
           <p class="t-label text-fg mb-1">증명서 한 장 <span class="t-caption">(선택 · ✓을 붙이고 싶을 때)</span></p>
           <p class="t-caption mb-2">
             재학·재직·합격·졸업 증명서(3개월 안에 뗀 것), 학생증·사원증 사진. PDF나 사진, 10MB까지.
@@ -234,6 +237,7 @@ const formOpen = ref(false)
 const query = ref('')
 const results = ref<OrgSummary[]>([])
 const picked = ref<OrgSummary | null>(null)
+const docOpen = ref(false) // 증명서 칸 펼침
 const newType = ref<OrgType | null>(null)
 const file = ref<File | null>(null)
 const fileError = ref('')

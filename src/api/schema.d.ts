@@ -7536,6 +7536,16 @@ export interface components {
             region: string;
             ruleTitle: string;
         };
+        OrgBadge: {
+            /** Format: int64 */
+            orgId: number;
+            name: string;
+            /** @enum {string} */
+            type: "UNIVERSITY" | "HIGH_SCHOOL" | "COMPANY" | "OTHER";
+            /** @enum {string} */
+            visibility: "ALL" | "SAME_ORG" | "HIDDEN";
+            verified: boolean;
+        };
         PublicDong: {
             name: string;
             shortName: string;
@@ -7628,6 +7638,7 @@ export interface components {
             recentGames: components["schemas"]["RecentGameSummaryDto"][];
             recordsHidden: boolean;
             character?: string;
+            orgs: components["schemas"]["OrgBadge"][];
             isBot: boolean;
             aiAppGames: string[];
         };

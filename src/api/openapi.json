@@ -16636,6 +16636,45 @@
           }
         }
       },
+      "OrgBadge": {
+        "required": [
+          "name",
+          "orgId",
+          "type",
+          "verified",
+          "visibility"
+        ],
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITY",
+              "HIGH_SCHOOL",
+              "COMPANY",
+              "OTHER"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "SAME_ORG",
+              "HIDDEN"
+            ]
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        }
+      },
       "PublicDong": {
         "required": [
           "name",
@@ -16843,6 +16882,7 @@
           "mannerScore",
           "myChampions",
           "nickname",
+          "orgs",
           "playedRules",
           "recentGames",
           "recordsHidden",
@@ -16931,6 +16971,12 @@
           },
           "character": {
             "type": "string"
+          },
+          "orgs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgBadge"
+            }
           },
           "isBot": {
             "type": "boolean"

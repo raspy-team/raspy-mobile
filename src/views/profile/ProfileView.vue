@@ -53,6 +53,10 @@
           <p v-if="user.dong" class="t-caption truncate mt-0.5 flex items-center gap-1">
             <UiIcon name="location-dot" class="text-xs" aria-hidden="true" />{{ user.dong.name }}<span v-if="user.dong.verified && !user.isBot" class="text-fg-subtle">· 동네 인증</span>
           </p>
+          <!-- 소속: 공개 범위대로 서버가 골라 보낸다. 증명서로 인증한 곳만 ✓ (11/13: 골라도 어디에도 안 보였다) -->
+          <p v-if="user.orgs?.length" class="t-caption truncate mt-0.5 flex items-center gap-1">
+            <UiIcon name="building" class="text-xs" aria-hidden="true" />{{ user.orgs.map((o) => `${o.name}${o.verified ? ' ✓' : ''}`).join(' · ') }}
+          </p>
           <p v-if="subline" class="t-caption truncate mt-0.5">{{ subline }}</p>
           <!-- 예전에 직접 적은 소속 (인증 소속 ✓과 다르다): 흐리게 -->
           <p v-if="user.affiliation?.trim()" class="t-caption text-fg-subtle truncate mt-0.5">{{ user.affiliation }}</p>

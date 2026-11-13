@@ -345,7 +345,8 @@
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
             <!-- 준비 중인 게임에는 첫 판을 권하지 않는다 (바로 밑의 '준비 중인 게임이에요'와 어긋났다) -->
-            <div v-if="played" class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
+            <!-- 임기응변은 등급 하나로 말한다: 1500·0승 0패·49점이 '6등급 남았어요' 바로 밑에서 서로 어긋났다 (11/13 실제 기기 한 바퀴) -->
+            <div v-if="played && key !== 'improv'" class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
                 <span class="block t-micro">실력 점수</span>
@@ -370,6 +371,8 @@
           <p v-if="dailyDone" class="t-body text-center mt-5">오늘 몫을 냈어요. 새 문제는 내일 0시에 나와요</p>
           <UiButton v-else block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
+          <!-- 막 가입한 사람이 나갈 길이 뒤로 화살표뿐이었다: 앱의 나머지로 (11/13 실제 기기 한 바퀴) -->
+          <UiButton v-if="joinedFrom" block variant="ghost" class="mt-2" to="/">홈으로</UiButton>
           <p v-else class="t-caption text-center mt-2">
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
             <!-- 도전장이 없는 게임(공유 판·실시간 대전)으로 '○○님에게 도전'이 왔으면 처음부터 그렇다고 말하고 그냥 한 판 (목적 판정 11/11 부분 2: 누를 수 있는 버튼이 늘 거절했다) -->
@@ -412,7 +415,8 @@
                 </template>
               </UiListItem>
             </UiList>
-            <UiEmptyState v-else mascot="dol" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
+            <!-- 가입 전에 한 판을 하고 막 온 사람에게 '끝난 경기가 없다'는 틀린 말이다 (11/13 실제 기기 한 바퀴) -->
+            <UiEmptyState v-else-if="!joinedFrom" mascot="dol" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
           </section>
 
           <section v-else class="mt-4">

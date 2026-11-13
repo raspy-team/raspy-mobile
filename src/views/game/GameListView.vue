@@ -42,7 +42,7 @@
       <!-- 접혀 있어도 지도·경기 만들기는 바로 (앱 게임을 한 번 하면 홈이 계속 이 모양이라, 경기 만들기가 펼쳐야만 보였다 11/11) -->
       <div v-if="!showLocal" class="mt-6 flex items-center rounded-xl bg-surface pr-2">
         <button type="button" class="flex-1 min-w-0 flex items-center justify-between pl-4 pr-2 py-3.5 rounded-l-xl active:bg-surface-2" @click="showLocal = true">
-          <span class="t-heading">동네 경기</span>
+          <span class="t-heading">{{ areaTitle }}</span>
           <span class="t-caption flex items-center gap-1">{{ games.length ? `${games.length}개` : '' }}<UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" /></span>
         </button>
         <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
@@ -55,13 +55,13 @@
     <!-- 작게 한 줄 (11/13 고병연: 저렇게 클 필요 없다) -->
     <UiButton v-if="!appPlayer" size="sm" variant="secondary" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
 
-    <UiSection title="동네 경기" :class="appPlayer ? 'mt-6' : 'mt-6'">
+    <UiSection :title="areaTitle" class="mt-6">
       <template #action>
         <span v-if="games.length" class="t-micro mr-1">{{ games.length }}개</span>
         <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
         <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
       </template>
-      <NeighborhoodBar class="mb-3" @changed="fetchGames" />
+      <NeighborhoodBar class="mb-3" @changed="fetchGames(); loadDong()" />
       <!-- 불러오는 중 -->
       <div v-if="loading && !games.length" class="space-y-3">
         <UiCard v-for="n in 3" :key="n">
@@ -186,6 +186,14 @@ const showLocal = ref((() => { try { return localStorage.getItem('home_show_loca
 watch(showLocal, (v) => { try { localStorage.setItem('home_show_local', v ? '1' : '0') } catch { /* 다음에 접혀 있을 뿐 */ } })
 
 const route = useRoute()
+// 동네를 안 고른 사람에게 전국 경기를 '동네 경기'라고 불렀다 (11/13 실제 기기 한 바퀴)
+const hasDong = ref(true)
+const areaTitle = computed(() => (hasDong.value ? '동네 경기' : '전국 경기'))
+async function loadDong() {
+  const r = await GET('/api/neighborhoods/me').catch(() => null)
+  if (r) hasDong.value = (r.data?.neighborhoods ?? []).length > 0
+}
+onMounted(loadDong)
 const router = useRouter()
 const { showToast } = useToast()
 

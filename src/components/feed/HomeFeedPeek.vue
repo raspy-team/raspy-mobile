@@ -37,8 +37,15 @@ const router = useRouter()
 const items = ref<Item[]>([])
 
 const names = (p: Item) => (p.players ?? []).map((x) => x.name).filter(Boolean).join(' · ')
-const line = (p: Item) => p.story?.beats?.[0]?.text || [p.rule?.ruleTitle, names(p)].filter(Boolean).join(' · ')
-const sub = (p: Item) => [p.story?.beats?.[0]?.text ? p.rule?.ruleTitle : '', p.date ? timeAgo(p.date) : ''].filter(Boolean).join(' · ')
+// 이야기 첫 줄이 없으면 누가 이겼는지라도 (11/13 실제 기기 한 바퀴: '러닝 · A · B'만으로는 무슨 일인지 몰랐다)
+const outcome = (p: Item) => {
+  const w = p.result?.winner
+  if (w) return `${w}님이 이겼어요`
+  if (p.result && p.isCompleted) return `${names(p)} 비겼어요`
+  return names(p)
+}
+const line = (p: Item) => p.story?.beats?.[0]?.text || outcome(p)
+const sub = (p: Item) => [p.rule?.ruleTitle, p.story?.beats?.[0]?.text ? '' : (p.result?.winner ? names(p) : ''), p.date ? timeAgo(p.date) : ''].filter(Boolean).join(' · ')
 
 onMounted(async () => {
   try {

@@ -7,15 +7,12 @@
       <span v-if="active.nearbyCount" class="t-caption font-normal">근처 동네 {{ active.nearbyCount }}곳 경기까지</span>
       <UiIcon name="chevron-down" class="text-xs" aria-hidden="true" />
     </button>
-    <p v-if="active?.expired" class="t-caption text-danger-fg">
-      {{ active.name }} 인증이 지났어요.
-      <RouterLink to="/neighborhood" class="underline underline-offset-2">다시 인증하기</RouterLink>
-    </p>
+    <!-- '인증이 지났어요' 경고는 뺐다: 11/13부터 동네는 고르기만 해도 되고 인증이 지나도 막지 않는다 -->
 
     <!-- 동네가 없을 때의 '동네를 인증해 주세요' 카드는 뺐다: 경기를 보러 온 사람에게 위치 인증부터 권했다.
          동네가 필요한 순간(신청·열기)엔 서버가 묻고(428) 인증 뒤 하던 화면으로 돌려보낸다 (목적 판정 11/11 4번).
          대신 이 목록이 전국 경기라는 것만 한 줄로 (경로 4 리뷰 G2: 서울 사람이 부산 경기 카드를 봤다). 못 불러왔을 때는 말하지 않는다 -->
-    <p v-else-if="loaded && !failed && !active" class="t-caption">
+    <p v-if="loaded && !failed && !active" class="t-caption">
       <!-- '전국 경기예요'는 늘, 동네 인증 권유는 세 번까지 (11/11 쌓이는 피로 전수표) -->
       전국 경기예요<template v-if="nudgeLeft"> · <RouterLink to="/neighborhood" class="hit underline underline-offset-2">동네를 고르면</RouterLink> 가까운 경기만 보여요</template>
     </p>

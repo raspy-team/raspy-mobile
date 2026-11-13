@@ -83,7 +83,7 @@
               <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
               <UiButton v-if="!storyFailed" icon="instagram" :disabled="!storyReady" @click="shareStory">인스타 스토리</UiButton>
               <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
-              <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '결과 보내기' : '도전장 보내기' }}</UiButton>
+              <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">{{ result.challengerScore != null ? '결과 보내기' : '친구에게 한 판 붙자' }}</UiButton>
             </div>
             <!-- 링크 스티커 안내는 누르기 전에: 공유가 끝난 뒤 뜬 토스트는 인스타 편집기에 있는 동안 못 봤다 (경로 10 훑기) -->
             <!-- 한 번 올려 본 사람에게는 같은 말이라 뺀다 (11/11 쌓이는 피로: 판마다 같은 안내) -->
@@ -110,6 +110,16 @@
           </p>
         </UiCard>
 
+        <!-- 결과 바로 밑으로 올렸다: 상황 카드 셋 아래 맨 끝이라 결과를 본 사람이 거기까지 내리지 않았다 (11/13 실제 기기 한 바퀴) -->
+        <UiCard v-if="!improv?.empty" class="mt-4">
+          <!-- 가입하며 옮긴 판은 기록(최고 기록·기록 순위)에만 남고 승패는 없다(0승 0패). 지키지 못하는 말을 하지 않는다 (first10 검토) -->
+          <!-- 임기응변은 제목 없이: 제목과 버튼이 같은 '등급 남기기'였다 (11/13 실제 기기 한 바퀴) -->
+          <p v-if="!improv" class="t-title">점수 저장하고 사람과 붙기</p>
+          <!-- '시작'은 판 시작과 가입 두 뜻이었다: 가입은 '가입' (경로 3·10 훑기) -->
+          <p :class="improv ? 't-body' : 't-caption mt-1'">{{ improv ? `가입하면 ${improvKeepLine(improv.grade)}. 친구에게 한 판 붙자고 할 수 있어요` : '가입하면 이 점수가 내 기록에 남아요. 다음 판부터는 사람과 승패를 내요' }}</p>
+          <UiButton block size="lg" class="mt-4" @click="join('result_join')">{{ improv ? '등급 남기기' : '점수 남기기' }}</UiButton>
+        </UiCard>
+
         <!-- 임기응변 등급: 보내기가 등급 바로 밑 (걷기 C5: 카드 셋 아래라 "버튼이 어디 있어"), 그 아래 상황마다 내 대답과 인물 반응 -->
         <template v-if="improv">
           <UiCard v-for="(s, i) in improvShown" :key="s.id" class="mt-3">
@@ -125,15 +135,8 @@
 
         <!-- 다음 행동: 친구에게 도전 · 공유 -->
         <!-- 보내기는 하나: '결과 공유'로 받은 친구는 내 점수와 붙지 못했다 (경로 3 훑기, 목적 판정 3) -->
-        <UiButton v-if="key === 'nunchi'" block variant="secondary" icon="share" class="mt-4" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 도전</UiButton>
+        <UiButton v-if="key === 'nunchi'" block variant="secondary" icon="share" class="mt-4" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 한 판 붙자</UiButton>
 
-        <UiCard v-if="!improv?.empty" class="mt-4">
-          <!-- 가입하며 옮긴 판은 기록(최고 기록·기록 순위)에만 남고 승패는 없다(0승 0패). 지키지 못하는 말을 하지 않는다 (first10 검토) -->
-          <p class="t-title">{{ improv ? '등급 남기고 사람과 붙기' : '점수 저장하고 사람과 붙기' }}</p>
-          <!-- '시작'은 판 시작과 가입 두 뜻이었다: 가입은 '가입' (경로 3·10 훑기) -->
-          <p class="t-caption mt-1">{{ improv ? `가입하면 ${improvKeepLine(improv.grade)}. 다음 판부터는 같은 상황을 푼 모르는 사람과 1:1로 승패를 내요` : '가입하면 이 점수가 내 기록에 남아 기록 순위에 올라가요. 다음 판부터는 사람과 승패를 내요' }}</p>
-          <UiButton block size="lg" class="mt-4" @click="join('result_join')">{{ improv ? '등급 남기기' : '점수 남기기' }}</UiButton>
-        </UiCard>
         <UiButton v-if="key !== 'daily-chosung' && !improv && !startLimit" block variant="ghost" class="mt-2" :loading="starting" @click="again">한 판 더</UiButton>
         <!-- 하루 판 수를 넘기면 이유와 함께 가입 버튼 (가장 하고 싶은 사람이 '시작'만 되풀이하며 막혔다, 경로 3 리뷰 R5) -->
         <p v-if="startError" class="t-caption text-danger mt-2 text-center">{{ startError }}</p>
@@ -241,10 +244,10 @@
                이미 푼 도전장이면 그렇다고 말한다. '가입 없이 바로'는 가입 생각이 없는 사람에게 가입 얘기라 뺐다 (목적 판정 3·10) -->
           <template v-if="challenge && !challenge.answered">
             <p v-if="key === 'improv' && challengeGrade" class="t-heading mt-4 break-keep">친구가 <span class="hl">{{ challengeGrade }}</span> 받은 상황이에요. 이길 수 있어요?</p>
-            <p v-else class="t-heading mt-4">친구가 보낸 도전장이에요. 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 붙어요</p>
+            <p v-else class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 붙어요</p>
           </template>
-          <p v-else-if="fromDuel && !fromPlay" class="t-heading mt-4">친구가 보낸 도전장이에요. 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 붙어요</p>
-          <p v-else-if="challenge?.answered" class="t-caption mt-4 break-keep">이미 푼 도전장이에요. 새 {{ key === 'improv' ? '상황' : '문제' }}으로 한 판 해요</p>
+          <p v-else-if="fromDuel && !fromPlay" class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 붙어요</p>
+          <p v-else-if="challenge?.answered" class="t-caption mt-4 break-keep">이미 푼 한 판이에요. 새 {{ key === 'improv' ? '상황' : '문제' }}으로 한 판 해요</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">{{ key === 'improv' ? '시작하기' : '한 판 하기' }}</UiButton>
         <!-- 임기응변: 내가 보낸 도전장의 결과 (손님은 알림이 없어 다시 오면 여기서 본다, 걷기 C2) -->
@@ -617,10 +620,10 @@ async function challengeFriend() {
     const c = result.value?.challengerScore
     const text = improv.value && c != null
       ? (result.value!.score > c
-          ? `네 도전장 받았는데 내가 이김 ㅋㅋ 나 ${improv.value.grade}등급. 다시 붙을래?`
+          ? `네 한 판 받았는데 내가 이김 ㅋㅋ 나 ${improv.value.grade}등급. 다시 붙을래?`
           : result.value!.score < c
-            ? `네 도전장… 졌다. 나 ${improv.value.grade}등급. 이번엔 내 상황으로 붙자`
-            : `네 도전장 비김 ㅋ 둘 다 ${improv.value.grade}등급. 한 판 더?`)
+            ? `네 한 판… 졌다. 나 ${improv.value.grade}등급. 이번엔 내 상황으로 붙자`
+            : `네 한 판 비김 ㅋ 둘 다 ${improv.value.grade}등급. 한 판 더?`)
       : improv.value
       // 끊음이 없어 한 문장처럼 읽혔다 (경로 10 훑기): 앞 말이 끝나지 않았으면 마침표를 찍는다
       ? `${improvShareLine(improv.value.grade)}${/[.?!]$/.test(improvShareLine(improv.value.grade)) ? '' : '.'} 같은 상황으로 붙자`

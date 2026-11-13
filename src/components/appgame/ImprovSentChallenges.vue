@@ -2,7 +2,7 @@
   <!-- 내가 보낸 도전장의 결과 (임기응변 등급, 가입 전). 손님에게는 알림이 없어서, 다시 오면 여기서 친구들의 승패를 본다 (3-5 걷기 C2).
        친구는 누군지 모른다(가입 전). 그래서 '친구 1, 2…'로 부르고, 최근 것부터 -->
   <UiCard v-if="rows.length">
-    <p class="t-title">보낸 도전장</p>
+    <p class="t-title">보낸 한 판</p>
     <p class="t-caption mt-1">내 링크로 친구 {{ rows.length }}명이 붙었어요</p>
     <ul class="mt-3 space-y-2">
       <li v-for="(r, i) in rows" :key="i" class="flex items-center justify-between gap-3 t-body">

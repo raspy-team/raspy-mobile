@@ -52,11 +52,8 @@
 
     <template v-if="!appPlayer || showLocal">
     <!-- 앱 게임을 아직 안 한 사람에게 하나: 가입 없이도 되는 한 판 (예전 '갈 곳 셋' 중 이것만 남겼다) -->
-    <RouterLink v-if="!appPlayer" to="/games" class="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 active:bg-surface-2">
-      <UiIcon name="gamepad" class="text-fg-muted" aria-hidden="true" />
-      <span class="flex-1 t-heading">앱 게임 한 판</span>
-      <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
-    </RouterLink>
+    <!-- 작게 한 줄 (11/13 고병연: 저렇게 클 필요 없다) -->
+    <UiButton v-if="!appPlayer" size="sm" variant="secondary" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
 
     <UiSection title="동네 경기" :class="appPlayer ? 'mt-6' : 'mt-6'">
       <template #action>
@@ -90,12 +87,7 @@
 
       <UiCard v-else-if="!games.length">
         <UiEmptyState mascot="match" title="아직 모집 중인 경기가 없어요">
-          <UiButton to="/create-game">경기 만들기</UiButton>
-          <!-- 동네에 아직 사람이 없을 때 바로 할 수 있는 것: 범위 넓히기(동네 경기 화면이라 먼저), 전국 앱 게임 (11/4 밤샘, 제주에서 온 사람. 문구·모양 C) -->
-          <div class="flex flex-wrap justify-center gap-2 mt-2">
-            <UiButton size="sm" variant="secondary" to="/neighborhood">범위 넓히기</UiButton>
-            <UiButton size="sm" variant="ghost" to="/games">앱 게임</UiButton>
-          </div>
+          <!-- 버튼은 모두 뺐다: 경기 만들기는 위 '동네 경기'의 +, 범위는 동네 줄, 앱 게임은 맨 위와 겹쳤다 (11/13 고병연) -->
         </UiEmptyState>
       </UiCard>
 

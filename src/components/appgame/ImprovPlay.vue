@@ -96,8 +96,13 @@ const REACT_TIMEOUT_MS = 45_000
 // 키보드가 올라오면 판 머리(상황 번호·시계·인물)부터 보이게 끌어올린다. 줄을 접지 않아 화면이 흔들리지 않는다
 const root = ref<HTMLElement | null>(null)
 function onTypeStart() {
+  const align = () => root.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
   // 키보드가 다 올라온 뒤에 맞춘다
-  setTimeout(() => root.value?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 250)
+  setTimeout(align, 250)
+  // 아이폰은 키보드가 오른 뒤에 화면을 제멋대로 한 번 더 민다: 250ms에 맞춘 것이 도로 밀려 인물·사정 줄이 제목 바 밑에 숨었다
+  // (11/14 시뮬레이터: 첫 상황, 누가 한 말인지 모르고 답하게 된다). 키보드가 자리 잡은 신호(보이는 화면 크기 바뀜)와 조금 뒤에 다시 맞춘다
+  window.visualViewport?.addEventListener('resize', () => setTimeout(align, 60), { once: true })
+  setTimeout(align, 800)
 }
 // 낸 답의 채점이 막혔다(부모가 이 판을 그대로 두고 '다시 채점하기'를 보인다)
 const failed = ref(false)

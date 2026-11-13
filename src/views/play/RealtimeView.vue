@@ -352,7 +352,13 @@ watch(
 
 function apply(s: State) {
   offset.value = new Date(s.serverNow).getTime() - Date.now()
+  const was = state.value?.status
   state.value = s
+  // 둘 다 한 수도 두기 전에 끝난 판(나가기·첫 차례 시간 초과)은 무효: 빈 화면 대신 말하고 게임 첫 화면으로 (11/13)
+  if (was === 'PLAYING' && s.status === 'CANCELED') {
+    showToast('둘 다 두기 전이라 이 판은 없던 걸로 했어요')
+    router.replace(`/play/${key.value}`)
+  }
 }
 
 // 정한 사람과 한 판 (11/4): ?to=사람 이면 그 사람만 들어오는 방을 열고, ?invite=경기 면 받은 초대로 들어간다. 한 번만 쓴다 (다시 한 판은 보통 대기실)

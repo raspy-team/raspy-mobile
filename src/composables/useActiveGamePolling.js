@@ -17,7 +17,10 @@ const pendingReviews = ref([])
 // 상대가 나를 기다리는 경기 수 (결과 확인·신청 승인). 하단 '내 경기' 탭에 숫자로
 const waitingOnMeCount = ref(0)
 const isPolling = ref(false)
-const dismissedGameIds = ref(new Set()) // 사용자가 거부한 게임 ID들
+// 사용자가 X로 닫은 경기. 기기에 남긴다: 메모리에만 두면 앱을 다시 켤 때마다 끝내지 않은 경기의 띠가 또 떴다 (11/13 실제 기기 한 바퀴)
+const DISMISSED_KEY = 'active_game_dismissed'
+const dismissedGameIds = ref(new Set((() => { try { return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]') } catch { return [] } })()))
+const saveDismissed = () => { try { localStorage.setItem(DISMISSED_KEY, JSON.stringify([...dismissedGameIds.value].slice(-20))) } catch { /* 이번 실행 동안만 닫힌다 */ } }
 let stopWatching = null
 
 export function useActiveGamePolling() {
@@ -93,6 +96,7 @@ export function useActiveGamePolling() {
   const dismissActiveGame = () => {
     if (activeGame.value?.gameId) {
       dismissedGameIds.value.add(activeGame.value.gameId)
+      saveDismissed()
       activeGame.value = null
     }
   }

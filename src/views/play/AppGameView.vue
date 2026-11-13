@@ -369,7 +369,7 @@
           </UiCard>
           <!-- 하루 한 번 게임을 오늘 이미 냈으면 버튼 대신 한 줄 (누르면 '오늘은 다 했어요'만 떴다, 11/5 밤샘 C 검토) -->
           <p v-if="dailyDone" class="t-body text-center mt-5">오늘 몫을 냈어요. 새 문제는 내일 0시에 나와요</p>
-          <UiButton v-else block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">한 판 하기</UiButton>
+          <UiButton v-else block size="lg" class="mt-4" :loading="starting" :disabled="!game.available" @click="start">{{ ladderTo && !noLadder ? `${ladderName}님과 한 판` : '한 판 하기' }}</UiButton>
           <p v-if="!game.available" class="t-caption text-center mt-2">준비 중인 게임이에요</p>
           <!-- 막 가입한 사람이 나갈 길이 뒤로 화살표뿐이었다: 앱의 나머지로 (11/13 실제 기기 한 바퀴) -->
           <UiButton v-if="joinedFrom" block variant="ghost" class="mt-2" to="/">홈으로</UiButton>
@@ -377,7 +377,8 @@
             <!-- 하루 한 판 퍼즐은 상대를 기다리는 게 아니라 같은 문제를 푼 사람들과 견준다 -->
             <!-- 도전장이 없는 게임(공유 판·실시간 대전)으로 '○○님에게 도전'이 왔으면 처음부터 그렇다고 말하고 그냥 한 판 (목적 판정 11/11 부분 2: 누를 수 있는 버튼이 늘 거절했다) -->
             <template v-if="noLadder">이 게임은 보내기가 없어요 · 그냥 한 판 해요</template>
-            <template v-else-if="ladderTo && game.playMode === 'REALTIME'">{{ ladderName }}님에게 한 판 붙자고 해요</template>
+            <!-- 실시간은 버튼이 이미 '○○님과 한 판'이라 같은 말을 다시 쓰지 않는다 (11/13 실제 기기 한 바퀴: 프로필에서 상대를 골라 왔는데 버튼은 '한 판 하기'였다) -->
+            <template v-else-if="ladderTo && game.playMode === 'REALTIME'">누르면 {{ ladderName }}님에게 바로 알림이 가요</template>
             <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 한 판 붙자고 해요</template>
             <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
@@ -416,7 +417,7 @@
               </UiListItem>
             </UiList>
             <!-- 가입 전에 한 판을 하고 막 온 사람에게 '끝난 경기가 없다'는 틀린 말이다 (11/13 실제 기기 한 바퀴) -->
-            <UiEmptyState v-else-if="!joinedFrom" mascot="dol" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
+            <UiEmptyState v-else-if="!joinedFrom && !ladderTo" mascot="dol" title="아직 끝난 경기가 없어요" description="첫 판을 해 보세요" />
           </section>
 
           <section v-else class="mt-4">

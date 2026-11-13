@@ -30,6 +30,7 @@
     <!-- 앱 전체 알림 한 줄 (window.alert도 여기로 온다) -->
     <CustomToast />
     <UiConfirmHost />
+    <RealtimeInviteHost />
     <RouteProgress />
 
     <!-- 진행 중인 내 경기. 경기 화면에 있을 때는 숨긴다 -->
@@ -48,6 +49,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { socket } from './websocket'
 import api from './api/api'
 import FooterNav from './components/FooterNav.vue'
+import RealtimeInviteHost from './components/game/RealtimeInviteHost.vue'
 import CustomToast from './components/CustomToast.vue'
 import UiConfirmHost from './components/ui/UiConfirmHost.vue'
 import RouteProgress from './components/RouteProgress.vue'
@@ -155,7 +157,7 @@ onMounted(() => {
 
 // 진행 중 경기 띠: 경기·결과·내 경기 화면에서는 숨긴다
 // 내 경기 화면은 카드에 이미 '점수판 열기'가 있어서 띠를 띄우지 않는다
-const showActiveBanner = computed(() => route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path))
+const showActiveBanner = computed(() => route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path) && !/^\/play\/[^/]+\/live/.test(route.path)) // 앱 게임 한 판 중에도 띠가 판을 가렸다 (11/13)
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)
 }

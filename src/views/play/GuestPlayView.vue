@@ -244,10 +244,10 @@
                이미 푼 도전장이면 그렇다고 말한다. '가입 없이 바로'는 가입 생각이 없는 사람에게 가입 얘기라 뺐다 (목적 판정 3·10) -->
           <template v-if="challenge && !challenge.answered">
             <p v-if="key === 'improv' && challengeGrade" class="t-heading mt-4 break-keep">친구가 <span class="hl">{{ challengeGrade }}</span> 받은 상황이에요. 이길 수 있어요?</p>
-            <p v-else class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 붙어요</p>
+            <p v-else class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 붙어요</p>
           </template>
-          <p v-else-if="fromDuel && !fromPlay" class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 붙어요</p>
-          <p v-else-if="challenge?.answered" class="t-caption mt-4 break-keep">이미 푼 한 판이에요. 새 {{ key === 'improv' ? '상황' : '문제' }}으로 한 판 해요</p>
+          <p v-else-if="fromDuel && !fromPlay" class="t-heading mt-4">친구가 한 판 붙자고 했어요. 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 붙어요</p>
+          <p v-else-if="challenge?.answered" class="t-caption mt-4 break-keep">이미 푼 한 판이에요. 새 {{ key === 'improv' ? '상황으로' : '문제로' }} 한 판 해요</p>
         </UiCard>
         <UiButton block size="lg" class="mt-4" :loading="starting" @click="start('start')">{{ key === 'improv' ? '시작하기' : '한 판 하기' }}</UiButton>
         <!-- 임기응변: 내가 보낸 도전장의 결과 (손님은 알림이 없어 다시 오면 여기서 본다, 걷기 C2) -->

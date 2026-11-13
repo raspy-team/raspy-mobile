@@ -241,7 +241,7 @@
             <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
             <template v-if="ladderTo">
               <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
-              <p class="t-caption mt-1">메시지로 한 판 붙자고 했어요. {{ ladderName }}님이 하루 안에 같은 {{ key === 'improv' ? '상황' : '문제' }}을 풀면 승패가 나요</p>
+              <p class="t-caption mt-1">메시지로 한 판 붙자고 했어요. {{ ladderName }}님이 하루 안에 같은 {{ key === 'improv' ? '상황을' : '문제를' }} 풀면 승패가 나요</p>
             </template>
             <!-- 친구에게 도전장을 보냈으면 하루 동안은 그 친구만 기다린다: 'N분 안에 AI 주민이 풀어요'는 맞지 않았다 (11/11 다른 사람 전수표) -->
             <template v-else-if="challengeSentFor === result.gameId">
@@ -250,7 +250,7 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황' : '문제' }}을 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민${botExplained ? '' : '(앱이 만든 연습 상대)'}이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
+              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민${botExplained ? '' : '(앱이 만든 연습 상대)'}이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
             </template>
             <!-- 기다리지 않고 AI 주민과 바로 승패 (실시간 대기실과 같다, 11/11 귀찮음 재검토: 사람을 못 만나면 한 시간을 기다렸다) -->
             <UiButton v-if="!ladderTo && challengeSentFor !== result.gameId && (result.myScore ?? 0) > 0" size="sm" variant="secondary" class="mt-4" :loading="botNow" @click="playBotNow(result.gameId)">기다리지 않고 AI 주민과 하기</UiButton>
@@ -379,8 +379,8 @@
             <template v-if="noLadder">이 게임은 보내기가 없어요 · 그냥 한 판 해요</template>
             <!-- 실시간은 버튼이 이미 '○○님과 한 판'이라 같은 말을 다시 쓰지 않는다 (11/13 실제 기기 한 바퀴: 프로필에서 상대를 골라 왔는데 버튼은 '한 판 하기'였다) -->
             <template v-else-if="ladderTo && game.playMode === 'REALTIME'">누르면 {{ ladderName }}님에게 바로 알림이 가요</template>
-            <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 한 판 붙자고 해요</template>
-            <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황' : '문제' }}으로 도전장이 가요</template>
+            <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 한 판 붙자고 해요</template>
+            <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 도전장이 가요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
             <!-- '하루 20판'은 다 할 사람이 없는 수라 정보가 아니다. 한도에 닿으면 서버가 말한다 (목적 판정 11/11 부분 2) -->
           </p>
@@ -775,7 +775,7 @@ async function sendChallenge(gameId: number) {
     const line = g ? improvShareLine(g) : ''
     const msg = await shareLink(link, line ? `${line}${/[.?!]$/.test(line) ? '' : '.'} 같은 상황으로 붙자` : `${game.value?.title ?? '한 판'} 한 판 붙자. 나보다 잘할 수 있어?`)
     // '하루 동안 이 링크로만'은 뜻이 안 읽혔고, 복사가 실패해도 붙었다 (경로 2 리뷰 N4)
-    if (msg) showToast(/못/.test(msg) ? msg : `${msg}. 친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황' : '문제'}으로 붙어요`)
+    if (msg) showToast(/못/.test(msg) ? msg : `${msg}. 친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황으로' : '문제로'} 붙어요`)
     askPushPermission() // 친구가 받으면 알려 드릴 수 있게
   } catch (e) {
     showToast(errorMessage(e, '링크를 만들지 못했어요'))

@@ -43,7 +43,9 @@ export async function trackVisit() {
         visitorId: id,
         source: q.get('utm_source') ?? undefined,
         medium: q.get('utm_medium') ?? undefined,
-        campaign: q.get('utm_campaign') ?? undefined,
+        // 크리에이터마다 utm_content로 나눈다(README 3-6 플랜 B). 따로 받는 칸이 없어 캠페인 뒤에 붙인다: 'suneung/creatorA'.
+        // 예전엔 utm_content를 버려 크리에이터끼리 견줄 수 없었다 (11/14 숫자 끝까지 시험)
+        campaign: [q.get('utm_campaign'), q.get('utm_content')].filter(Boolean).join('/') || undefined,
         referrer,
         landingPath: landing.pathname,
         standalone: isStandalone(),

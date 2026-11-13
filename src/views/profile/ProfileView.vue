@@ -112,10 +112,9 @@
         </button>
       </div>
 
-      <!-- 신뢰 온도·포인트는 타일 둘로. 근거·설명은 눌러서 연다 (점진적 공개) -->
-      <div class="mt-3 grid grid-cols-2 gap-3">
-        <TrustCard v-if="user.trust && !user.isBot" :trust="user.trust" :user-id="user.id" :is-me="user.isMe" />
-        <PointCard v-if="!user.isBot" :key="user.id" :user-id="user.id" :is-me="user.isMe" />
+      <!-- 신뢰 온도. 근거·설명은 눌러서 연다 (점진적 공개). 포인트 타일은 뺐다 (11/13 앱 기능 좁히기: 포인트를 없앴다) -->
+      <div v-if="user.trust && !user.isBot" class="mt-3">
+        <TrustCard :trust="user.trust" :user-id="user.id" :is-me="user.isMe" />
       </div>
       <LiveRecordLine :key="`lr${user.id}`" class="mt-2" :user-id="user.id" />
 
@@ -282,7 +281,6 @@
 <script setup>
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import TrustCard from '../../components/profile/TrustCard.vue'
-import PointCard from '../../components/point/PointCard.vue'
 import LiveRecordLine from '../../components/live/LiveRecordLine.vue'
 // 프로필 (/profile/0 = 나, /profile/:id = 다른 사람)
 // 누구인지(동네) → 숫자 한 줄 → 주 행동(나: 편집 / 남: 친구·메시지) → 챔피언 → 많이 쓴 능력 → 많이 한 규칙 → 최근 경기

@@ -101,7 +101,7 @@
           "avatar-controller"
         ],
         "summary": "내 캐릭터와 꾸미기 상점",
-        "description": "exists=false면 아직 기본 꾸미기를 하지 않았다 (처음 광장에 들어올 때 꾸미기부터)",
+        "description": "exists=false면 아직 기본 꾸미기를 하지 않았다 (처음 광장에 들어올 때 꾸미기부터). 부품은 해낸 일로 열린다(unlock: 여는 일)",
         "operationId": "avatar",
         "responses": {
           "200": {
@@ -121,7 +121,7 @@
           "avatar-controller"
         ],
         "summary": "캐릭터 저장",
-        "description": "무료 부품, 산 부품, (챔피언이면) 챔피언 부품만 입는다",
+        "description": "무료 부품, 열린 부품, (챔피언이면) 챔피언 부품만 입는다",
         "operationId": "save",
         "requestBody": {
           "content": {
@@ -1739,38 +1739,6 @@
               "*/*": {
                 "schema": {
                   "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/plaza/avatar/items/{itemId}/buy": {
-      "post": {
-        "tags": [
-          "avatar-controller"
-        ],
-        "summary": "부품 사기",
-        "description": "포인트로 정해진 값에 산다. 한정 부품은 그 주 상점에 나온 주에만",
-        "operationId": "buy",
-        "parameters": [
-          {
-            "name": "itemId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AvatarState"
                 }
               }
             }
@@ -11276,7 +11244,6 @@
       },
       "AvatarState": {
         "required": [
-          "balance",
           "champion",
           "exists",
           "items",
@@ -11294,10 +11261,6 @@
           "sheet": {
             "type": "string"
           },
-          "balance": {
-            "type": "integer",
-            "format": "int64"
-          },
           "champion": {
             "type": "boolean"
           },
@@ -11311,15 +11274,11 @@
       },
       "ShopItem": {
         "required": [
-          "buyable",
           "champion",
           "id",
           "label",
           "layer",
-          "limited",
-          "onSale",
           "owned",
-          "price",
           "tier",
           "wearable"
         ],
@@ -11338,26 +11297,16 @@
             "type": "integer",
             "format": "int32"
           },
-          "price": {
-            "type": "integer",
-            "format": "int32"
-          },
           "owned": {
             "type": "boolean"
           },
           "wearable": {
             "type": "boolean"
           },
-          "buyable": {
-            "type": "boolean"
-          },
-          "limited": {
-            "type": "boolean"
+          "unlock": {
+            "type": "string"
           },
           "champion": {
-            "type": "boolean"
-          },
-          "onSale": {
             "type": "boolean"
           },
           "tier": {

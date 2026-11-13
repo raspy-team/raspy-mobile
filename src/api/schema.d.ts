@@ -13,12 +13,12 @@ export interface paths {
         };
         /**
          * 내 캐릭터와 꾸미기 상점
-         * @description exists=false면 아직 기본 꾸미기를 하지 않았다 (처음 광장에 들어올 때 꾸미기부터)
+         * @description exists=false면 아직 기본 꾸미기를 하지 않았다 (처음 광장에 들어올 때 꾸미기부터). 부품은 해낸 일로 열린다(unlock: 여는 일)
          */
         get: operations["avatar"];
         /**
          * 캐릭터 저장
-         * @description 무료 부품, 산 부품, (챔피언이면) 챔피언 부품만 입는다
+         * @description 무료 부품, 열린 부품, (챔피언이면) 챔피언 부품만 입는다
          */
         put: operations["save"];
         post?: never;
@@ -760,26 +760,6 @@ export interface paths {
          * @description 차단한 상대 화면에서도 나를 지운다 (서로 보이지 않게). 차단이 있어야 한다
          */
         post: operations["hide"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/plaza/avatar/items/{itemId}/buy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 부품 사기
-         * @description 포인트로 정해진 값에 산다. 한정 부품은 그 주 상점에 나온 주에만
-         */
-        post: operations["buy"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5889,8 +5869,6 @@ export interface components {
             exists: boolean;
             parts: components["schemas"]["Parts"];
             sheet: string;
-            /** Format: int64 */
-            balance: number;
             champion: boolean;
             items: components["schemas"]["ShopItem"][];
         };
@@ -5900,14 +5878,10 @@ export interface components {
             label: string;
             /** Format: int32 */
             variant?: number;
-            /** Format: int32 */
-            price: number;
             owned: boolean;
             wearable: boolean;
-            buyable: boolean;
-            limited: boolean;
+            unlock?: string;
             champion: boolean;
-            onSale: boolean;
             tier: string;
         };
         OrgVisibilityRequest: {
@@ -10386,28 +10360,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": boolean;
-                };
-            };
-        };
-    };
-    buy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                itemId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AvatarState"];
                 };
             };
         };

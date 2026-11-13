@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-// 캐릭터 꾸미기 (/plaza/avatar): 포인트로 하나씩 사서 입는다. 저장하면 광장으로 돌아간다
+// 캐릭터 꾸미기 (/plaza/avatar): 해낸 일로 열린 부품을 입는다(11/13). 저장하면 광장으로 돌아간다
 import { useRouter } from 'vue-router'
 import AvatarEditor from '../../components/plaza/AvatarEditor.vue'
 import { UiTopBar } from '../../components/ui'

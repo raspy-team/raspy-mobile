@@ -5,9 +5,7 @@
       <div class="relative rounded-3xl bg-surface-2 w-40 h-40 flex items-end justify-center overflow-hidden">
         <div v-if="previewKey" class="avatar-walk" :style="{ backgroundImage: `url(${sheetUrl(previewKey)})` }" role="img" :aria-label="'내 캐릭터 미리보기'" />
       </div>
-      <p v-if="state" class="t-caption mt-2">
-        포인트 <strong class="text-fg">{{ state.balance.toLocaleString() }}P</strong>
-      </p>
+      <p v-if="state && mode === 'edit'" class="t-caption mt-2">부품은 해낸 만큼 열려요</p>
     </div>
 
     <UiTabs v-model="layer" :options="tabs" class="px-4" />
@@ -37,7 +35,7 @@
             <img :src="partUrl(g.items[0].id)" alt="" class="part" />
             <span class="t-micro mt-1 truncate max-w-full px-1">{{ g.label }}</span>
             <span v-if="g.badge" class="absolute top-1 left-1 t-micro px-1 rounded font-semibold" :class="g.tierClass || 'bg-surface-3 text-fg'">{{ g.badge }}</span>
-            <span v-if="g.price" class="absolute top-1 right-1 t-micro text-fg-muted">{{ g.price }}P</span>
+            <UiIcon v-if="g.locked" name="lock" class="absolute top-1.5 right-1.5 text-[11px] text-fg-muted" aria-label="잠김" />
           </button>
         </div>
         <!-- 색 고르기: 같은 모양의 다른 색 -->
@@ -64,9 +62,8 @@
     <div class="px-4 py-3 border-t border-line space-y-2" :style="{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }">
       <p v-if="error" class="t-caption text-danger text-center">{{ error }}</p>
       <UiButton v-if="loadFailed" block size="lg" variant="secondary" @click="fetchAvatar">다시 시도</UiButton>
-      <UiButton v-if="locked" block size="lg" :loading="busy" :disabled="!locked.buyable || (state?.balance ?? 0) < locked.price" @click="buy(locked)">
-        {{ buyLabel(locked) }}
-      </UiButton>
+      <!-- 입혀 본 것이 아직 잠겨 있으면 무엇을 하면 열리는지 (11/13: 포인트로 사지 않고 해낸 일로 연다) -->
+      <p v-if="locked" class="t-body text-center rounded-xl bg-surface px-4 py-3"><UiIcon name="lock" class="mr-1 text-fg-muted" />{{ lockedLine(locked) }}</p>
       <UiButton block size="lg" :variant="locked ? 'secondary' : 'primary'" :loading="busy && !locked" :disabled="!!locked || !state" @click="save">
         {{ mode === 'start' ? '이 모습으로 시작하기' : '저장' }}
       </UiButton>
@@ -75,10 +72,11 @@
 </template>
 
 <script setup lang="ts">
-// 캐릭터 꾸미기 (광장, 11/5). mode='start': 처음 광장에 들어올 때 무료 부품만으로 기본 꾸미기. mode='edit': 포인트로 사서 꾸미기.
-// 그림은 서버가 겹쳐 준다(/api/plaza/art). 사지 않은 부품도 입혀 볼 수 있고, 저장은 입을 수 있는 것만
+// 캐릭터 꾸미기 (광장, 11/5). mode='start': 처음 광장에 들어올 때 무료 부품만으로 기본 꾸미기. mode='edit': 열린 부품으로 꾸미기.
+// 부품은 사지 않고 해낸 일로 열린다(11/13, 서버 AvatarUnlocks). 그림은 서버가 겹쳐 준다(/api/plaza/art).
+// 안 열린 부품도 입혀 볼 수 있고, 저장은 입을 수 있는 것만
 import { ref, computed, watch, onMounted, reactive } from 'vue'
-import { GET, POST, PUT } from '@/api/client'
+import { GET, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
 import { API_BASE_URL } from '@/config/server'
 import { UiButton, UiIcon, UiSkeleton, UiTabs } from '../ui'
@@ -108,13 +106,13 @@ const tabs = computed(() => {
     { value: 'eyes', label: '눈' },
     { value: 'acc', label: '소품' },
   ]
-  // 처음 꾸미기는 기본만: 소품은 포인트로 사는 것이라 뺀다
+  // 처음 꾸미기는 기본만: 소품은 해낸 일로 여는 것이라 뺀다
   return props.mode === 'start' ? all.filter((t) => t.value !== 'acc') : all
 })
 
 const byId = computed(() => new Map((state.value?.items ?? []).map((i) => [i.id, i])))
 
-// 등급 피라미드 (docs/plaza.md): 위로 갈수록 드물고 값지다. 전설은 살 수 없고 챔피언만 입는다
+// 등급 피라미드 (docs/plaza.md): 위로 갈수록 드물고 값지다. 전설은 챔피언만 입는다
 const TIER: Record<string, { label: string; cls: string }> = {
   common: { label: '일반', cls: 'bg-surface-3 text-fg' },
   rare: { label: '고급', cls: 'bg-[#2d6cdf] text-white' },
@@ -122,14 +120,9 @@ const TIER: Record<string, { label: string; cls: string }> = {
   legend: { label: '전설', cls: 'bg-[#d9a31a] text-[#121214]' },
 }
 
-/** 이 층에서 보여 줄 부품: 처음 꾸미기는 무료만, 꾸미기는 모두(이번 주에 안 파는 한정·챔피언 아닌 사람의 챔피언 부품은 가진 것만) */
+/** 이 층에서 보여 줄 부품: 처음 꾸미기는 무료(basic)만, 꾸미기는 모두 */
 const visible = computed(() =>
-  (state.value?.items ?? []).filter((i) => {
-    if (i.layer !== layer.value) return false
-    if (props.mode === 'start') return i.price === 0 && !i.champion
-    if (i.limited && !i.onSale && !i.owned) return false
-    return true
-  }),
+  (state.value?.items ?? []).filter((i) => i.layer === layer.value && (props.mode !== 'start' || i.tier === 'basic')),
 )
 
 const groups = computed(() => {
@@ -145,8 +138,8 @@ const groups = computed(() => {
       key,
       label: first.label,
       items,
-      price: any ? 0 : first.price,
-      badge: any && first.price > 0 ? '보유' : TIER[first.tier]?.label ?? '',
+      locked: !any,
+      badge: TIER[first.tier]?.label ?? '',
       tierClass: TIER[first.tier]?.cls ?? '',
     }
   })
@@ -159,7 +152,7 @@ const variants = computed(() => {
   return visible.value.filter((i) => i.label === item.label)
 })
 
-/** 입혀 본 것 중 아직 못 입는 것 (사거나 되돌려야 저장된다) */
+/** 입혀 본 것 중 아직 못 입는 것 (열리거나 되돌려야 저장된다) */
 const locked = computed(() => {
   for (const l of ['body', 'eyes', 'outfit', 'hair', 'acc'] as Layer[]) {
     const id = draft[l]
@@ -174,11 +167,9 @@ const previewKey = computed(() => {
   return [draft.body, draft.eyes, draft.outfit, draft.hair, draft.acc].filter(Boolean).join('_')
 })
 
-function buyLabel(i: Item) {
-  if (i.champion) return '챔피언이 되면 입을 수 있어요'
-  const have = state.value?.balance ?? 0
-  if (have < i.price) return `${i.label} ${i.price}P · ${i.price - have}P 모자라요`
-  return `${i.label} ${i.price}P에 사기`
+function lockedLine(i: Item) {
+  if (i.champion) return `${i.label}: 챔피언이 되면 입을 수 있어요`
+  return `${i.label}: ${i.unlock ?? '아직 열리지 않았어요'}`
 }
 
 function pick(i: Item) {
@@ -210,21 +201,6 @@ async function fetchAvatar() {
 onMounted(fetchAvatar)
 
 watch(layer, () => (error.value = ''))
-
-async function buy(i: Item) {
-  busy.value = true
-  error.value = ''
-  try {
-    const s = (await POST('/api/plaza/avatar/items/{itemId}/buy', { path: { itemId: i.id } })).data
-    const keep = { ...draft }
-    state.value = s
-    Object.assign(draft, keep)
-  } catch (e) {
-    error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '사지 못했어요'
-  } finally {
-    busy.value = false
-  }
-}
 
 async function save() {
   if (!draft.body || !draft.eyes || !draft.outfit || !draft.hair) return

@@ -7818,6 +7818,31 @@
         }
       }
     },
+    "/api/plaza/unlocks": {
+      "get": {
+        "tags": [
+          "avatar-controller"
+        ],
+        "summary": "해낸 일과 열린 부품 수",
+        "description": "화면이 지난번 본 목록과 견줘 새로 열린 꾸미기를 알린다 (11/13)",
+        "operationId": "unlocks",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Unlocked"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plaza/rooms": {
       "get": {
         "tags": [
@@ -18371,6 +18396,26 @@
             "format": "double"
           },
           "rank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Unlocked": {
+        "required": [
+          "doneLabel",
+          "goal",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "goal": {
+            "type": "string"
+          },
+          "doneLabel": {
+            "type": "string"
+          },
+          "items": {
             "type": "integer",
             "format": "int32"
           }

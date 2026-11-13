@@ -7,6 +7,7 @@
 import { ref } from 'vue'
 import api from '../api/api'
 import { openUserChannel, refreshOnChange } from '../websocket/userChannel'
+import { checkUnlocks } from '../utils/unlockNotice'
 
 
 // 전역 상태 (모든 컴포넌트가 공유)
@@ -37,6 +38,8 @@ export function useActiveGamePolling() {
       }
 
       waitingOnMeCount.value = data.waitingOnMeCount || 0
+      // 판이 끝나는 신호도 여기로 온다: 그때 새로 열린 꾸미기가 있으면 알린다 (11/13)
+      checkUnlocks()
       pendingReviews.value = data.pendingReviews || []
 
       const game = data.activeGame

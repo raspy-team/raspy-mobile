@@ -14,8 +14,9 @@
         <UiIconButton icon="arrow-left" label="뒤로" class="bg-canvas/80 backdrop-blur" @click="goBack" />
         <!-- 광장은 하나라 고르기가 없다 (11/13) -->
         <p class="min-w-0 flex-1 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur flex items-center t-body font-semibold text-fg"><span class="truncate">{{ room?.name ?? '광장' }}</span></p>
+        <!-- 나도 센다: 둘이 서 있는데 '1'이었다 (11/13 실제 기기 한 바퀴) -->
         <button v-if="phase === 'plaza'" type="button" class="shrink-0 h-10 px-3 rounded-full bg-canvas/80 backdrop-blur t-caption font-semibold text-fg flex items-center gap-1" aria-label="지금 여기 있는 사람" @click="peopleOpen = true">
-          <UiIcon name="users" /> {{ peopleHere.filter((p) => p.restingMinutes == null).length }}
+          <UiIcon name="users" /> {{ peopleHere.filter((p) => p.restingMinutes == null).length + 1 }}
         </button>
       </div>
 

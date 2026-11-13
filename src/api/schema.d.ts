@@ -3829,6 +3829,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plaza/unlocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 해낸 일과 열린 부품 수
+         * @description 화면이 지난번 본 목록과 견줘 새로 열린 꾸미기를 알린다 (11/13)
+         */
+        get: operations["unlocks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plaza/rooms": {
         parameters: {
             query?: never;
@@ -8070,6 +8090,12 @@ export interface components {
             units: number;
             /** Format: int32 */
             rank: number;
+        };
+        Unlocked: {
+            goal: string;
+            doneLabel: string;
+            /** Format: int32 */
+            items: number;
         };
         PlayWithMeTooResponse: {
             /** Format: int64 */
@@ -14374,6 +14400,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BetLeague"];
+                };
+            };
+        };
+    };
+    unlocks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unlocked"][];
                 };
             };
         };

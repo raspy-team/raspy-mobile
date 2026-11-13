@@ -42,7 +42,7 @@ const outcome = (p: Item) => {
   const w = p.result?.winner
   if (w) return `${w}님이 이겼어요`
   if (p.result && p.isCompleted) return `${names(p)} 비겼어요`
-  return names(p)
+  return p.isCompleted ? names(p) : `${names(p)} 하는 중` // 결과 없이 이름만 있으면 무슨 일인지 몰랐다
 }
 const line = (p: Item) => p.story?.beats?.[0]?.text || outcome(p)
 const sub = (p: Item) => [p.rule?.ruleTitle, p.story?.beats?.[0]?.text ? '' : (p.result?.winner ? names(p) : ''), p.date ? timeAgo(p.date) : ''].filter(Boolean).join(' · ')

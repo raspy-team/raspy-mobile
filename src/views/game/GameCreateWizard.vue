@@ -60,7 +60,7 @@
           <div class="flex-1 min-w-0">
             <p class="t-micro">{{ autoPicked ? '자동으로 골랐어요 · 가장 많이 쓰는 규칙' : '규칙' }}</p>
             <p class="t-heading truncate">{{ rule.ruleTitle }}</p>
-            <p v-if="winSummary(rule)" class="t-caption">{{ winSummary(rule) }}</p>
+            <p v-if="winSummaryUnder(rule)" class="t-caption">{{ winSummaryUnder(rule) }}</p>
           </div>
           <!-- 종목은 점점 늘어나고 예외도 있으니, 골라 준 규칙은 늘 바꿀 수 있게 (같은 종목 규칙부터 보여 준다) -->
           <UiButton variant="ghost" size="sm" @click="changeRule">바꾸기</UiButton>
@@ -166,7 +166,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { GET } from '@/api/client'
-import { categoryKey, winSummary } from '../../utils/rule'
+import { categoryKey, winSummaryUnder } from '../../utils/rule'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { useToast } from '../../composables/useToast'

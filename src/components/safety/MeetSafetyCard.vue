@@ -15,7 +15,7 @@
     </div>
 
     <!-- 도착 -->
-    <ul class="space-y-1.5 t-caption">
+    <ul v-if="!live" class="space-y-1.5 t-caption">
       <li class="flex items-center gap-2">
         <UiIcon :name="s.arrivedAt ? 'circle-check' : 'circle'" :class="s.arrivedAt ? 'text-signal-fg' : 'text-fg-subtle'" aria-hidden="true" />
         <span class="flex-1">나 {{ s.arrivedAt ? `${hm(s.arrivedAt)} 도착` : '아직 도착 전' }}{{ s.finishedAt ? ' · 잘 끝났어요' : '' }}</span>
@@ -86,7 +86,8 @@ const appealText = ref('')
 const friends = ref([])
 const friendId = ref(null)
 
-const visible = computed(() => s.value.inPerson && (s.value.canArrive || s.value.arrivedAt || s.value.canShare || s.value.noShowReportId || s.value.others.some((o) => o.canReportNoShow)))
+// 경기가 시작되면 둘 다 와 있다. 도착 줄은 거짓말이 되니(11/13 실제 기기 한 바퀴: 점수를 올리는 중에 '아직 도착 전') 위치 공유·노쇼 기록이 있을 때만 남긴다
+const visible = computed(() => s.value.inPerson && (props.live ? !!(s.value.shareUrl || s.value.noShowReportId) : (s.value.canArrive || s.value.arrivedAt || s.value.canShare || s.value.noShowReportId || s.value.others.some((o) => o.canReportNoShow))))
 const hm = (t) => new Date(t).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })
 
 async function load() {

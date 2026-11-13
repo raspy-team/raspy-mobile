@@ -121,9 +121,27 @@ async function openInApp(path) {
   }
 }
 
-/** 알림이 쓸모 있는 순간(상대를 기다릴 때, 도전장을 보낸 직후)에 부른다. 웹이면 아무 일도 없다 */
-export function askPushPermission() {
-  if (isCapacitorApp) registerCapacitorPush(true)
+/**
+ * 알림이 쓸모 있는 순간(상대를 기다릴 때, 한 판 붙자를 보낸 직후)에 부른다. 웹이면 아무 일도 없다.
+ * 시스템 창을 바로 띄우지 않고 앱 안에서 이유를 먼저 묻는다 (11/13 실제 기기 한 바퀴: "왜 알림을 달라는 거지?").
+ * '나중에'면 사흘 동안 다시 묻지 않는다
+ */
+const PUSH_LATER_KEY = 'push_ask_later_until'
+export async function askPushPermission(reason = '상대가 답하거나 결과가 나오면 바로 알려 드려요') {
+  if (!isCapacitorApp) return
+  try {
+    const { PushNotifications } = await import('@capacitor/push-notifications')
+    const perm = await PushNotifications.checkPermissions()
+    if (perm.receive !== 'prompt' && perm.receive !== 'prompt-with-rationale') return registerCapacitorPush(false)
+    if (Number(localStorage.getItem(PUSH_LATER_KEY) || 0) > Date.now()) return
+    const { confirmDialog } = await import('../composables/useConfirm')
+    const yes = await confirmDialog({ title: '알림을 받을까요?', message: reason, confirmText: '알림 받기', cancelText: '나중에' })
+    if (!yes) {
+      try { localStorage.setItem(PUSH_LATER_KEY, String(Date.now() + 3 * 24 * 3600 * 1000)) } catch { /* 다음에 또 물을 뿐 */ }
+      return
+    }
+  } catch { /* 플러그인을 못 불러도 아래에서 그대로 */ }
+  registerCapacitorPush(true)
 }
 
 async function registerCapacitorPush(ask) {

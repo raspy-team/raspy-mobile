@@ -62,6 +62,7 @@
 </template>
 
 <script setup>
+import { askPushPermission } from '@/utils/nativeBridge'
 // 공유 링크로 들어온 열린 경기 하나 (/games/:gameId). 피드는 끝난 경기만 보여 줘서 예전엔 링크를 받아도 신청할 곳이 없었다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { refreshOnChange } from '../../websocket/userChannel'
@@ -128,6 +129,7 @@ async function apply(team) {
   busy.value = true
   try {
     await api.post(`/api/games/${game.value.id}/apply`, null, { params: team === undefined ? {} : { team } })
+    askPushPermission('신청이 받아들여지면 바로 알려 드려요')
     feel('success')
     await load()
   } catch (e) {

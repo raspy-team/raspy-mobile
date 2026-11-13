@@ -96,12 +96,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
+import api from '../api/api'
 import type { components } from '@/api/schema'
 import NeighborhoodVerify from '../components/neighborhood/NeighborhoodVerify.vue'
 import NeighborhoodPick from '../components/neighborhood/NeighborhoodPick.vue'
 import { UiBadge, UiButton, UiCard, UiEmptyState, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
 import { useToast } from '../composables/useToast'
 import { confirmDialog } from '../composables/useConfirm'
+import { askPushPermission } from '@/utils/nativeBridge'
 
 type Mine = components['schemas']['MyNeighborhoods']
 
@@ -134,21 +136,35 @@ function openVerify(code: string) {
   verifyOpen.value = true
 }
 
-function onVerified(next: Mine) {
+async function onVerified(next: Mine) {
   data.value = next
   verifyOpen.value = false
-  showToast(`${next.neighborhoods.find((n) => n.active)?.name ?? '동네'} 인증을 마쳤어요`)
+  const name = next.neighborhoods.find((n) => n.active)?.name ?? '동네'
+  showToast(await continueApply() ? `${name} 인증을 마쳤고, 신청했어요` : `${name} 인증을 마쳤어요`)
   const back = route.query.back
   if (typeof back === 'string' && back.startsWith('/')) router.replace(back)
 }
 
-// 이름으로 골랐다: 돌아갈 곳이 있으면 바로 (11/13)
-function onPicked(next: Mine) {
+// 이름으로 골랐다: 막혔던 신청을 이어서 하고, 돌아갈 곳이 있으면 바로 (11/13)
+async function onPicked(next: Mine) {
   data.value = next
   pickOpen.value = false
-  showToast(`${next.neighborhoods.find((n) => n.active)?.name ?? '동네'}를 골랐어요`)
+  const name = next.neighborhoods.find((n) => n.active)?.name ?? '동네'
+  const eul = (w: string) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c <= 11171 && c % 28 ? '을' : '를' } // 합정동을 · 신촌로를
+  showToast(await continueApply() ? `${name}${eul(name)} 골랐고, 신청했어요` : `${name}${eul(name)} 골랐어요`)
   const back = route.query.back
   if (typeof back === 'string' && back.startsWith('/')) router.replace(back)
+}
+
+// 신청하다 동네가 없어 막혔으면 그 신청을 이어서 한다 (api.js가 남긴 pending_apply)
+async function continueApply() {
+  let pending = null
+  try { pending = JSON.parse(sessionStorage.getItem('pending_apply') || 'null'); sessionStorage.removeItem('pending_apply') } catch { pending = null }
+  if (!pending?.url) return false
+  const ok = await api.post(pending.url, null, pending.params ? { params: pending.params } : undefined).then(() => true).catch(() => false)
+  // 신청한 바로 그때가 알림을 물을 때다 (경기 목록에서 신청한 것과 같다)
+  if (ok) setTimeout(() => askPushPermission('신청이 받아들여지면 바로 알려 드려요'), 800)
+  return ok
 }
 
 async function select(n: Mine['neighborhoods'][number]) {

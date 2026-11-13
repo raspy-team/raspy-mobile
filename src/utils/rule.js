@@ -21,6 +21,13 @@ export function winSummary(rule) {
   return parts.join(' · ')
 }
 
+// 제목이 이미 말하는 요약은 다시 쓰지 않는다 (11/13 실제 기기 한 바퀴: '탁구 11점 3세트' 밑에 '11점 · 3세트')
+export function winSummaryUnder(rule) {
+  const sum = winSummary(rule)
+  const title = (rule.ruleTitle || '').replace(/\s/g, '')
+  return sum && !sum.split(' · ').every((p) => title.includes(p.replace(/\s/g, ''))) ? sum : ''
+}
+
 // 핵심 정보 (아이콘 + 제목 + 설명). 값이 없는 줄은 빼서 돌려준다
 export function ruleFacts(rule) {
   const sets = rule.setsToWin || 1

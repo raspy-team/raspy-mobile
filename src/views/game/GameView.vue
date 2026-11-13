@@ -346,6 +346,7 @@ const groups = computed(() =>
     .filter((g) => g.items.length || g.duels.length),
 )
 
+const isLive = (g) => g.type !== 'app-duel' && (g.status === 'IN_PROGRESS' || g.gameStatus === 'IN_PROGRESS')
 async function fetchGames() {
   try {
     const [applicantsRes, sentRes, myRes, duels] = await Promise.all([
@@ -357,8 +358,17 @@ async function fetchGames() {
     ])
     if (duels) appDuels.value = duels
     applicantsMap.value = Object.fromEntries(applicantsRes.data.map((g) => [g.gameId, g.applicants || []]))
+    const wasLive = new Set(allGames.value.filter(isLive).map((g) => g.id))
+    const hadList = !loading.value
     sentGames.value = sentRes.data
     myGames.value = myRes.data
+    // 이 화면을 보는 중에 상대가 경기를 시작하면 나도 점수판으로 (11/13 실제 기기 한 바퀴: 주최자는 점수를 올리는데 상대 폰은 '내 경기'에 그대로였다)
+    const started = hadList && allGames.value.find((g) => isLive(g) && !wasLive.has(g.id))
+    if (started && !busy.value) {
+      showToast('경기가 시작됐어요. 점수판으로 갈게요')
+      router.push(`/games/${started.id}/play`)
+      return
+    }
     // 열려 있는 신청자 시트도 새 값으로
     if (applicantsGame.value) applicantsGame.value = allGames.value.find((g) => g.type === 'my-game' && g.id === applicantsGame.value.id) || null
     loadFailed.value = false

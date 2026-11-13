@@ -154,7 +154,7 @@ onMounted(() => {
 // 끝난 경기 평가는 창을 띄워 묻지 않는다. 하던 일을 끊지 않게 '내 경기'의 할 일로 둔다 (애플 HIG, 11/3)
 
 // 진행 중 경기 띠: 경기·결과·내 경기 화면에서는 숨긴다
-// 내 경기 화면은 카드에 이미 '경기로 돌아가기'가 있어서 띠를 띄우지 않는다
+// 내 경기 화면은 카드에 이미 '점수판 열기'가 있어서 띠를 띄우지 않는다
 const showActiveBanner = computed(() => route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path))
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)

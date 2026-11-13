@@ -1,6 +1,6 @@
 <template>
   <UiSheet :model-value="true" :title="rule.ruleTitle" @update:model-value="emit('close')">
-    <p class="t-caption mb-6">{{ [rule.minorCategory, winSummary(rule)].filter(Boolean).join(' · ') }}</p>
+    <p class="t-caption mb-6">{{ [rule.minorCategory, winSummaryUnder(rule)].filter(Boolean).join(' · ') }}</p>
     <RuleBody :rule="rule" />
     <template v-if="rule.id" #footer>
       <UiButton block variant="secondary" @click="openDetail">규칙 자세히 보기</UiButton>
@@ -14,7 +14,7 @@ import { defineProps, defineEmits } from 'vue'
 import { useRouter } from 'vue-router'
 import RuleBody from './rule/RuleBody.vue'
 import { UiButton, UiSheet } from './ui'
-import { winSummary } from '../utils/rule'
+import { winSummaryUnder } from '../utils/rule'
 
 const props = defineProps({ rule: { type: Object, required: true } })
 const emit = defineEmits(['close'])

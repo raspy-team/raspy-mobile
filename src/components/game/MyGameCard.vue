@@ -159,7 +159,7 @@ const gathered = computed(() => `${players.value.length}/${props.game.maxPlayers
 const state = computed(() => {
   const g = props.game
   const live = g.status === 'IN_PROGRESS' || g.gameStatus === 'IN_PROGRESS'
-  if (live) return { label: '진행 중', tone: 'success', action: 'play', actionLabel: '경기로 돌아가기', actionVariant: 'primary' }
+  if (live) return { label: '진행 중', tone: 'success', action: 'play', actionLabel: '점수판 열기', actionVariant: 'primary' }
   if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
     return !canConfirm.value
       ? { label: '확인 대기', tone: 'neutral', hint: multi.value ? '상대 쪽에서 확인하면 기록돼요' : '상대가 확인하면 기록돼요', action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }

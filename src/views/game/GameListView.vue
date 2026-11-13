@@ -9,6 +9,7 @@
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
+    <HomeUpcoming />
 
     <template v-if="appPlayer">
       <UiSection title="내 판">
@@ -57,9 +58,12 @@
 
     <UiSection :title="areaTitle" class="mt-6">
       <template #action>
-        <span v-if="games.length" class="t-micro mr-1">{{ games.length }}개</span>
-        <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
-        <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
+        <!-- 한 묶음으로: 낱개로 두면 머리줄이 양끝 정렬이라 '1개'·지도·+가 줄 전체에 흩어졌다 (11/13 실제 기기 한 바퀴) -->
+        <div class="flex items-center -mr-2">
+          <span v-if="games.length" class="t-micro mr-1">{{ games.length }}개</span>
+          <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
+          <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
+        </div>
       </template>
       <NeighborhoodBar class="mb-3" @changed="fetchGames(); loadDong()" />
       <!-- 불러오는 중 -->
@@ -122,6 +126,7 @@
 </template>
 
 <script setup>
+import { askPushPermission } from '@/utils/nativeBridge'
 // 홈: 앱 게임을 한 사람은 '내 판'이 먼저, 동네 경기만 하는 사람은 동네 경기 목록 (목적 판정 11/11 4번)
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -146,6 +151,7 @@ import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
+import HomeUpcoming from '../../components/game/HomeUpcoming.vue'
 import { GET } from '@/api/client'
 import Comment from '../GameCommentView.vue'
 import {
@@ -236,6 +242,7 @@ async function apply(game, team) {
   busyId.value = game.id
   try {
     await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
+    askPushPermission('신청이 받아들여지면 바로 알려 드려요')
     game.isAppliedByMe = true
     feel('success')
     showToast('신청했어요. 주최자가 승인하면 알림에 떠요')

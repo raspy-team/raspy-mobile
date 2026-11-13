@@ -113,7 +113,7 @@ const emit = defineEmits(['profile', 'rule', 'like', 'comment', 'share', 'watch'
 
 const players = computed(() => props.post.players || [])
 const ranking = computed(() => props.post.result?.ranking || [])
-// AI 주민 표시 (docs/ai-residents.md): 선수 이름 옆에 AI
+// AI 표시 (docs/ai-residents.md): 선수 이름 옆에 AI
 const isBot = (id) => players.value.some((p) => p.id === id && p.isBot)
 // 칸의 첫 사람. 팀 경기의 선수 목록은 [앞 팀..., 뒤 팀...] 순서다
 const sideFirst = (i) => (props.post.result?.sideNames?.length === 2 && i === 1 ? players.value[players.value.length / 2] : players.value[i])

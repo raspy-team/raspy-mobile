@@ -30,7 +30,7 @@
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', side.id)"
         >
-          <span :class="side.won ? 'hl' : ''">{{ side.name }}</span><UiAiBadge v-if="side.isBot" />
+          <span :class="side.won ? 'hl' : ''">{{ side.name }}</span>
         </button>
         <span class="order-2 text-[1.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums">
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
@@ -48,7 +48,7 @@
       <div v-if="sides.some((s) => s.text)" class="mt-4 space-y-2">
         <!-- 그림으로 찍을 때(still)는 세 줄까지: 긴 대답이 카드를 늘려 스토리 그림의 꼬리(주소)가 밀려났다 (3-5 P6 나머지 F1) -->
         <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body" :class="still ? 'line-clamp-3' : ''">
-          <span class="t-micro block">{{ side.name }}<UiAiBadge v-if="side.isBot" /></span>{{ side.text }}
+          <span class="t-micro block">{{ side.name }}</span>{{ side.text }}
         </p>
       </div>
     </div>
@@ -72,7 +72,7 @@ import AppVisualFigure from './story/AppVisualFigure.vue'
 import FeedStoryLine from './FeedStoryLine.vue'
 import FeedVoice from './FeedVoice.vue'
 import FeedActions from './FeedActions.vue'
-import { UiAiBadge, UiIcon, UiSkeleton } from '../ui'
+import { UiIcon, UiSkeleton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 type Post = components['schemas']['FeedItemResponse']
@@ -90,7 +90,7 @@ const sides = computed(() =>
     const p = (props.post.players as unknown as Player[] | undefined)?.[i]
     return {
       id: p?.id,
-      name: p?.name ?? '',
+      name: p?.isBot ? 'AI' : p?.name ?? '',
       isBot: !!p?.isBot,
       // 임기응변은 큰 숫자도 등급으로: 점수(47 : 39)가 크고 등급은 아래 글에만 있었다 (경로 6 리뷰 P11)
       score: gradeOf(duel.value.texts?.[i]) ?? Math.round(duel.value.scores?.[i] ?? 0),

@@ -30,9 +30,9 @@
           </div>
           <UiButton size="sm" :disabled="joining" @click="joinLobby(l)">참여</UiButton>
         </UiCard>
-        <!-- 사람이 2명보다 적으면 AI 주민이 기다린다 (docs/ai-residents.md 6). 누르면 그 AI와 바로 한 판. 사람이 늘면 서버가 빼 준다 -->
+        <!-- 사람이 2명보다 적으면 AI가 기다린다 (docs/ai-residents.md 6). 누르면 그 AI와 바로 한 판. 사람이 늘면 서버가 빼 준다 -->
         <UiCard v-for="r in residents" :key="`ai-${r.userId}`" class="flex items-center gap-3 py-3">
-          <!-- AI 주민 자리는 게임 아이콘 대신 비비 (docs/mascots.md). 게임 이름은 오른쪽 글에 있다 -->
+          <!-- AI 자리는 게임 아이콘 대신 비비 (docs/mascots.md). 게임 이름은 오른쪽 글에 있다 -->
           <MatchMascot who="bibi" :size="24" class="-mx-0.5" />
           <div class="flex-1 min-w-0">
             <p class="t-label flex items-center min-w-0"><span class="truncate">{{ r.nickname }}</span><UiAiBadge /><span class="truncate">&nbsp;· {{ r.title }}</span></p>
@@ -41,7 +41,7 @@
           <UiButton size="sm" variant="secondary" :disabled="joining" @click="playAi(r)">한 판</UiButton>
         </UiCard>
       </div>
-      <!-- AI 주민만 기다릴 때 '기다리는 사람이 없어요'라고 하면 바로 위 목록과 어긋난다 (first10 검토) -->
+      <!-- AI만 기다릴 때 '기다리는 사람이 없어요'라고 하면 바로 위 목록과 어긋난다 (first10 검토) -->
       <p v-if="!list.lobbies.length && !residents.length" class="t-caption">지금 기다리는 사람이 없어요</p>
     </UiSection>
   </div>
@@ -65,7 +65,7 @@ import { useToast } from '../../composables/useToast'
 
 const { showToast } = useToast()
 
-// ai: 기다리는 AI 주민을 보일까. 내 대기실 안(RealtimeView)에서는 끈다: 거기서 AI와 붙으면 기다리던 내 방이 남는다
+// ai: 기다리는 AI를 보일까. 내 대기실 안(RealtimeView)에서는 끈다: 거기서 AI와 붙으면 기다리던 내 방이 남는다
 const props = withDefaults(defineProps<{ title?: string; showEmpty?: boolean; excludeGameId?: number; anyButton?: boolean; ai?: boolean }>(), { title: '지금 기다리는 사람', showEmpty: false, excludeGameId: 0, anyButton: false, ai: true })
 const emit = defineEmits<{ join: [key: string] }>()
 const router = useRouter()
@@ -78,7 +78,7 @@ const tick = setInterval(() => { since.value = Math.floor((Date.now() - loadedAt
 
 function show(data: components['schemas']['LobbyList']) {
   list.value = { ...data, lobbies: data.lobbies.filter((l) => l.gameId !== props.excludeGameId) }
-  // 대기실에 AI 주민을 보인 때는 원본 기록에 ai=true로 (docs/ai-residents.md '숫자는 따로'). 같은 화면에서 다시 불러와도 한 번
+  // 대기실에 AI를 보인 때는 원본 기록에 ai=true로 (docs/ai-residents.md '숫자는 따로'). 같은 화면에서 다시 불러와도 한 번
   if (props.ai && data.residents?.length && !aiShown) {
     aiShown = true
     track('lobby_ai_shown', { step: data.residents.length, value: 'ai=true' })
@@ -137,7 +137,7 @@ async function joinAny() {
   }
 }
 
-// AI 주민과 바로 한 판: 기다리는 사람에게 붙지 않고 그 AI가 바로 들어온 판으로 간다
+// AI와 바로 한 판: 기다리는 사람에게 붙지 않고 그 AI가 바로 들어온 판으로 간다
 async function playAi(r: Resident) {
   joining.value = true
   track('lobby_ai_play', { gameKey: r.key, value: 'ai=true' })

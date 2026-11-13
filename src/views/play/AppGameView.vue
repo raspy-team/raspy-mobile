@@ -14,7 +14,7 @@
 
       <!-- 플레이 중: 게임마다 다른 판 -->
       <template v-else-if="play">
-        <!-- 기다리던 사람과 짝이 지어졌으면 누구와 겨루는지 (AI 주민이면 이름 뒤에 AI, 9e) -->
+        <!-- 기다리던 사람과 짝이 지어졌으면 누구와 겨루는지 (AI면 이름 뒤에 AI, 9e) -->
         <p v-if="play.opponent" class="t-caption flex items-center min-w-0 mb-3"><span class="shrink-0">상대&nbsp;·&nbsp;</span><OpponentName :player="play.opponent" /><span class="shrink-0">&nbsp;· 먼저 풀었어요</span></p>
         <TypingPlay
           v-if="key === 'typing'"
@@ -245,7 +245,7 @@
               <p class="t-heading mt-6">{{ ladderName }}님을 기다려요</p>
               <p class="t-caption mt-1">메시지로 한 판 붙자고 했어요. {{ ladderName }}님이 하루 안에 같은 {{ key === 'improv' ? '상황을' : '문제를' }} 풀면 승패가 나요</p>
             </template>
-            <!-- 친구에게 도전장을 보냈으면 하루 동안은 그 친구만 기다린다: 'N분 안에 AI 주민이 풀어요'는 맞지 않았다 (11/11 다른 사람 전수표) -->
+            <!-- 친구에게 도전장을 보냈으면 하루 동안은 그 친구만 기다린다: 'N분 안에 AI가 풀어요'는 맞지 않았다 (11/11 다른 사람 전수표) -->
             <template v-else-if="challengeSentFor === result.gameId">
               <p class="t-heading mt-6">친구를 기다려요</p>
               <p class="t-caption mt-1">친구가 하루 안에 링크를 열어 풀면 승패가 나요. 하루가 지나면 다른 사람과 붙어요. 결과가 나오면 {{ NOTICE }}</p>
@@ -257,10 +257,9 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요.{{ game?.botAfterSeconds && (result.myScore ?? 0) > 0 ? ` ${waitText(game.botAfterSeconds)} 안에 아무도 안 풀면 AI 주민${botExplained ? '' : '(앱이 만든 연습 상대)'}이 풀어요.` : '' }} 결과가 나오면 {{ NOTICE }}</p>
+              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }}</p>
             </template>
-            <!-- 기다리지 않고 AI 주민과 바로 승패 (실시간 대기실과 같다, 11/11 귀찮음 재검토: 사람을 못 만나면 한 시간을 기다렸다) -->
-            <UiButton v-if="!ladderTo && challengeSentFor !== result.gameId && (result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" class="mt-4" :loading="botNow" @click="playBotNow(result.gameId)">기다리지 않고 AI 주민과 하기</UiButton>
+            <!-- AI가 대신 풀어 승패를 내던 것은 걷어 냈다 (11/14, 서버 bot/AiMode): 등급·점수가 결과고, 승패는 사람과 붙을 때만 뜻이 있다 -->
             <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
             <div v-if="!improvResult || improvResult.empty" class="flex flex-wrap justify-center gap-2 mt-4">
               <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
@@ -457,7 +456,7 @@
 <script setup lang="ts">
 import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
 import { GUEST_GAMES } from '@/utils/guestGames'
-import { waitText, who } from '@/utils/format'
+import { who } from '@/utils/format'
 import OpponentName from '../../components/appgame/OpponentName.vue'
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
@@ -541,14 +540,6 @@ const game = ref<Schemas['AppGameSummary'] | null>(null)
 // 이 게임을 몇 판 안 했으면 실력 점수가 크게 움직인다 (서버는 RD가 크면 잠정으로 본다)
 const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
-// 'AI 주민'이 무엇인지는 처음 세 번만 풀어 쓴다 (11/11 쌓이는 피로: 판마다 같은 괄호). 게임 화면을 열 때마다 센다
-const botExplained = (() => {
-  try {
-    const n = Number(localStorage.getItem('bot_explained') || 0)
-    localStorage.setItem('bot_explained', String(n + 1))
-    return n >= 3
-  } catch { return false }
-})()
 const play = ref<Play | null>(null)
 const counting = ref(false)
 let offset = 0 // 서버 시각 - 기기 시각
@@ -772,18 +763,6 @@ function until(at?: string) {
 
 /** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
 const challenging = ref(false)
-const botNow = ref(false)
-async function playBotNow(gameId: number) {
-  botNow.value = true
-  try {
-    await POST('/api/app-games/duels/{gameId}/bot', { path: { gameId } })
-    await load()
-  } catch (e) {
-    showToast(errorMessage(e, 'AI 주민을 부르지 못했어요. 잠시 뒤 다시 해 주세요'))
-  } finally {
-    botNow.value = false
-  }
-}
 // 친구에게 도전장을 보낸 판 (기다림 문구가 바뀐다)
 const challengeSentFor = ref<number | null>(null)
 async function sendChallenge(gameId: number) {

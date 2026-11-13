@@ -216,7 +216,7 @@
 
       <!-- 봇과 한 판은 사람 레이팅·순위와 따로 -->
       <section v-if="overview?.practice?.length">
-        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">AI 주민(앱이 만든 연습 상대)과 한 판으로만 매겨요</span></h2>
+        <h2 class="t-heading mb-1">연습 점수 <span class="t-caption">AI와 한 판으로만 매겨요</span></h2>
         <UiList>
           <UiListItem v-for="p in overview.practice" :key="p.ruleId" :title="p.ruleTitle" :subtitle="`${p.games}판`" chevron @click="router.push(`/rules/${p.ruleId}`)">
             <template #trailing><span class="t-heading tabular-nums">{{ p.rating }}</span></template>
@@ -277,7 +277,7 @@
         <li><strong>게임마다 따로</strong> 매겨요. 모두 <strong>1500점</strong>에서 시작해요.</li>
         <li>이기면 오르고 지면 내려가요. <strong>나보다 점수가 높은 사람을 이기면</strong> 더 많이 올라요.</li>
         <li><strong>200점 차이</strong>면 높은 쪽이 4판 중 3판쯤 이겨요. 400점 차이면 10판 중 9판이에요.</li>
-        <li>처음 몇 판은 점수가 크게 흔들려서, 판이 쌓인 뒤에 보여요. AI 주민과 한 판은 연습이라 따로 세요.</li>
+        <li>처음 몇 판은 점수가 크게 흔들려서, 판이 쌓인 뒤에 보여요. AI와 한 판은 연습이라 따로 세요.</li>
         <li>그 게임에서 가장 센 사람은 <strong>챔피언</strong>이에요. 챔피언을 이기면 자리를 가져와요.</li>
       </ul>
       <!-- 영어 사이트 이름·전문어 대신 (경로 6 리뷰: 'Glicko-2·lichess') -->
@@ -422,7 +422,7 @@ async function load() {
     const { data } = await GET('/api/user-profile/{userId}/stats', { path: { userId: Number(route.params.id) } })
     const [history, ov] = await Promise.all([
       GET('/api/rankings/history', { query: { userId: data.userId } }).catch(() => ({ data: [] })),
-      // 연습 점수(AI 주민과 한 판)만 쓴다. 종합·묶음·능력은 화면에서 뺐다 (11/13)
+      // 연습 점수(AI와 한 판)만 쓴다. 종합·묶음·능력은 화면에서 뺐다 (11/13)
       GET('/api/rankings/overview', { query: { userId: data.userId } }).catch(() => ({ data: null })),
     ])
     nickname.value = data.nickname

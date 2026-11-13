@@ -69,8 +69,8 @@ const props = defineProps<{
   unit?: string
 }>()
 
-// 이름만 따로 쓰는 줄이라 AI 주민이면 'AI 주민 ○○' (docs/ai-residents.md 'AI 표시')
-const firstName = computed(() => { const p = props.players.find((x) => x.id === props.visual?.firstUserId); return p ? (p.isBot ? `AI 주민 ${p.name}` : p.name) : '' })
+// 이름만 따로 쓰는 줄이라 AI면 'AI ○○' (docs/ai-residents.md 'AI 표시')
+const firstName = computed(() => { const p = props.players.find((x) => x.id === props.visual?.firstUserId); return p ? (p.isBot ? 'AI' : p.name) : '' })
 
 // 사슬은 길면 앞 셋 … 뒤 다섯만 (끝낸 낱말이 이야기)
 const shownWords = computed(() => {

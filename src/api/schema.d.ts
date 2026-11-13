@@ -6668,9 +6668,9 @@ export interface components {
                 [key: string]: Record<string, never>;
             };
             /** Format: int32 */
-            rows: number;
-            /** Format: int32 */
             cols: number;
+            /** Format: int32 */
+            rows: number;
         };
         Obj: {
             s: string;

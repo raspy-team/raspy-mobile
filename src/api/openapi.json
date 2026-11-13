@@ -13685,11 +13685,11 @@
               "type": "object"
             }
           },
-          "rows": {
+          "cols": {
             "type": "integer",
             "format": "int32"
           },
-          "cols": {
+          "rows": {
             "type": "integer",
             "format": "int32"
           }

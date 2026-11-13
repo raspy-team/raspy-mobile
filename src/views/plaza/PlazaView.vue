@@ -76,8 +76,8 @@
           <div class="avatar-front" :style="{ backgroundImage: `url(${ART}/avatar/${card.sheet}.png)` }" />
         </div>
         <div class="min-w-0 space-y-1">
-          <!-- 이름은 시트 제목에 있다 (두 번 쓰지 않는다). AI 주민은 아래 줄이 말한다 -->
-          <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="24" /> AI 주민</p>
+          <!-- 이름은 시트 제목에 있다 (두 번 쓰지 않는다). AI는 아래 줄이 말한다 -->
+          <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="24" /> AI</p>
           <p v-if="card.champion" class="t-caption text-fg">👑 {{ card.champion }}</p>
           <p v-if="card.area" class="t-caption">{{ card.area }}</p>
           <p v-if="restingText(card)" class="t-caption">{{ restingText(card) }}</p>
@@ -480,13 +480,13 @@ const placeOpen = ref(false)
 const place = ref<S['Place'] | null>(null)
 const PLACE_KIND: Record<string, string> = { station: '지하철역', school: '학교', hospital: '병원', mall: '마트', cafe: '카페', park: '공원·명소', store: '편의점', dong: '이웃 동네', gu: '구·군', city: '도시' }
 
-/** 한 판: 사람이면 그 사람만 들어오는 방을 열고(받는 사람 화면에 '받기'가 뜬다), AI면 그 AI 주민을 바로 부른다 */
+/** 한 판: 사람이면 그 사람만 들어오는 방을 열고(받는 사람 화면에 '받기'가 뜬다), AI면 그 AI를 바로 부른다 */
 function challenge(key: string) {
   const p = card.value
   if (!p) return
   pickerOpen.value = false
   cardOpen.value = false
-  if (p.bot) router.push({ path: `/play/${key}/live`, query: { ai: String(p.id) } }) // 그 AI 주민이 바로 들어온다 (ai-a)
+  if (p.bot) router.push({ path: `/play/${key}/live`, query: { ai: String(p.id) } }) // 그 AI가 바로 들어온다 (ai-a)
   else router.push({ path: `/play/${key}/live`, query: { to: String(p.id) } })
 }
 

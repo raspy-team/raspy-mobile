@@ -7,7 +7,7 @@
           <InboxButtons />
           <UiIconButton icon="fas fa-gear" label="설정" @click="router.push('/settings')" />
         </template>
-        <!-- AI 주민은 친구·신고·차단이 없다 (docs/ai-residents.md). 순위의 '(나)' 줄처럼 내 id로 들어와도 나를 신고·차단하는 메뉴는 두지 않는다 -->
+        <!-- AI는 친구·신고·차단이 없다 (docs/ai-residents.md). 순위의 '(나)' 줄처럼 내 id로 들어와도 나를 신고·차단하는 메뉴는 두지 않는다 -->
         <UiIconButton v-else-if="user && !user.isBot && !user.isMe" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
       </template>
     </UiTopBar>
@@ -37,8 +37,8 @@
     </main>
 
     <main v-else class="max-w-2xl mx-auto px-4 pt-6 pb-32 ui-appear">
-      <!-- AI 주민: 맨 위에 한 줄 (docs/ai-residents.md 'AI 표시') -->
-      <p v-if="user.isBot" class="t-caption mb-4 flex items-center gap-1.5"><UiAiBadge class="!ml-0" />AI 주민 · 매치가 만든 연습 상대예요</p>
+      <!-- AI: 맨 위에 한 줄 (docs/ai-residents.md 'AI 표시') -->
+      <p v-if="user.isBot" class="t-caption mb-4 flex items-center gap-1.5"><UiAiBadge class="!ml-0" />앱이 만든 연습 상대예요</p>
       <!-- 누구인지 -->
       <div class="flex items-center gap-4">
         <!-- 꾸민 캐릭터가 있으면 그 캐릭터가 얼굴이다 (11/13 실제 기기 한 바퀴: 꾸며도 광장 말고는 보이는 데가 없었다). 직접 꾸민 것이라 사진보다 앞 -->
@@ -49,7 +49,7 @@
         <div class="flex-1 min-w-0">
           <h1 class="t-title flex items-center min-w-0"><span class="truncate">{{ user.nickname }}</span><UiAiBadge v-if="user.isBot" /></h1>
           <p class="t-caption truncate mt-0.5">@{{ user.username }}</p>
-          <!-- 동네 (당근의 '합정동 · 동네 인증'). 인증이 지났으면 표시를 뺀다. AI 주민은 사람이 인증한 동네가 아니라 '동네 인증'을 달지 않는다 -->
+          <!-- 동네 (당근의 '합정동 · 동네 인증'). 인증이 지났으면 표시를 뺀다. AI는 사람이 인증한 동네가 아니라 '동네 인증'을 달지 않는다 -->
           <p v-if="user.dong" class="t-caption truncate mt-0.5 flex items-center gap-1">
             <UiIcon name="location-dot" class="text-xs" aria-hidden="true" />{{ user.dong.name }}<span v-if="user.dong.verified && !user.isBot" class="text-fg-subtle">· 동네 인증</span>
           </p>
@@ -69,7 +69,7 @@
         <template v-if="user.isMe">
           <UiButton block variant="secondary" icon="fas fa-pen" to="/set-profile">프로필 편집</UiButton>
         </template>
-        <!-- AI 주민: 친구·메시지 대신 주 앱 게임으로 바로 한 판 -->
+        <!-- AI: 친구·메시지 대신 주 앱 게임으로 바로 한 판 -->
         <template v-else-if="user.isBot">
           <UiButton v-if="aiGame" block icon="fas fa-gamepad" :to="aiGame">앱 게임 한 판</UiButton>
         </template>
@@ -119,7 +119,7 @@
           <p class="t-heading tabular-nums">{{ seatLines.length }}</p>
           <p class="t-micro mt-0.5">챔피언</p>
         </div>
-        <!-- AI 주민은 친구가 없다 (docs/ai-residents.md '채우지 않는 곳': 친구) -->
+        <!-- AI는 친구가 없다 (docs/ai-residents.md '채우지 않는 곳': 친구) -->
         <button v-if="!user.isBot" type="button" class="flex-1" @click="openFriends">
           <p class="t-heading tabular-nums">{{ stats.friends || 0 }}</p>
           <p class="t-micro mt-0.5">친구 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
@@ -373,7 +373,7 @@ function setGameRef(el, id) {
   if (el) gameRefs[id] = el.$el || el
 }
 
-// AI 주민의 '앱 게임 한 판': 주 앱 게임(첫째)의 실시간 화면으로, ?ai=로 그 주민을 바로 부른다
+// AI의 '앱 게임 한 판': 주 앱 게임(첫째)의 실시간 화면으로, ?ai=로 그 주민을 바로 부른다
 const aiGame = computed(() => {
   const key = user.value?.isBot && user.value.aiAppGames?.[0]
   return key ? `${liveRoute(key)}?ai=${user.value.id}` : ''

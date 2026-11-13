@@ -19,13 +19,13 @@
           <UiSpinner class="mx-auto" />
           <p class="t-heading mt-4">{{ state.fixture ? '대회 상대를 기다리고 있어요' : '상대를 찾고 있어요' }}</p>
           <p class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
-          <!-- 실시간 게임 대기실과 같은 말: 곧 AI 주민이 온다 -->
-          <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ waitText(state.botAfterSeconds) }} 안에 사람이 안 오면 AI 주민이 상대가 돼요</p>
+          <!-- 실시간 게임 대기실과 같은 말: 곧 AI가 온다 -->
+          <p v-if="!state.fixture && state.botAfterSeconds" class="t-micro mt-2">{{ waitText(state.botAfterSeconds) }} 안에 사람이 안 오면 AI가 상대가 돼요</p>
         </UiCard>
         <!-- 흔들기는 판이 시작되기 전에 허용해 둔다 (시작한 뒤에 누르면 그만큼 손해). '센서'라는 말은 쓰지 않는다 (경로 3 훑기) -->
         <UiButton v-if="key === 'shake' && sensor === 'ask'" block size="lg" class="mt-4" @click="askSensor">흔들기 미리 허용하기</UiButton>
-        <!-- 기다리지 않고 바로 AI 주민과 (실시간 대기실과 같다, 11/11 고병연) -->
-        <UiButton v-if="!state.fixture" block variant="secondary" class="mt-4" @click="callBotNow">기다리지 않고 AI 주민과 하기</UiButton>
+        <!-- 기다리지 않고 바로 AI와 (실시간 대기실과 같다, 11/11 고병연) -->
+        <UiButton v-if="!state.fixture" block variant="secondary" class="mt-4" @click="callBotNow">기다리지 않고 AI와 하기</UiButton>
         <UiButton block variant="ghost" class="mt-2" @click="leave">그만 찾기</UiButton>
       </template>
 
@@ -48,7 +48,7 @@
       <!-- 판: 내 라켓이 늘 아래. 판 위 어디든 손가락을 대고 좌우로 움직인다 -->
       <template v-else-if="state?.status === 'PLAYING'">
         <div class="flex items-center justify-between">
-          <!-- 점수판: 상대 이름은 좁은 화면(320)에서 줄인다. AI 주민이면 이름 뒤에 AI -->
+          <!-- 점수판: 상대 이름은 좁은 화면(320)에서 줄인다. AI면 이름 뒤에 AI -->
           <span class="t-heading tabular-nums flex items-center min-w-0"><span class="shrink-0">나 {{ score[0] }} : {{ score[1] }}&nbsp;</span><OpponentName :player="state.opponent" /></span>
           <span class="t-micro shrink-0 ml-2">{{ counting ? '곧 시작해요' : serving ? '서브' : '5점 먼저' }}</span>
         </div>
@@ -275,7 +275,7 @@ function message(e: unknown, fallback: string) {
   if (r?.status === 404) return '없거나 이미 끝난 경기예요'
   return r?.data?.message || fallback
 }
-// AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다. 한 번만.
+// AI 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다. 한 번만.
 // 주소의 ?ai는 들어간 뒤에 지운다. 화면은 주소마다 새로 그려져(App.vue의 key) 먼저 지우면 새 화면이 따로 방을 열고,
 // 지우는 순간 이 화면이 내려가며 나가기(leave)를 해 막 연 방이 취소됐다 (11/6 ff가 RealtimeView에서 찾은 것과 같다).
 // 주소만 지울 때는 방을 두고, 새로 그려진 화면이 join으로 그 방을 이어 받는다
@@ -333,7 +333,7 @@ function callBotNow() {
   botCalled = true
   POST('/api/app-games/battle/{gameId}/bot', { path: { gameId: s.gameId } })
     .then(({ data }) => apply(data))
-    .catch(() => { botCalled = false; showToast('AI 주민을 부르지 못했어요. 잠시 뒤 다시 해 주세요') })
+    .catch(() => { botCalled = false; showToast('AI를 부르지 못했어요. 잠시 뒤 다시 해 주세요') })
 }
 const timer = setInterval(() => {
   now.value = Date.now()

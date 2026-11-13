@@ -338,7 +338,7 @@
         </UiSection>
 
       <!-- 관중이 찍은 장면: 선수·관중 모두 본다. 관중은 끝나고 하루 안까지 올린다 -->
-      <!-- AI 주민의 경기에는 현장이 없다: 관중 사진을 받지 않는다 (docs/ai-residents.md 6, 사람이 찾아가지 않게) -->
+      <!-- AI의 경기에는 현장이 없다: 관중 사진을 받지 않는다 (docs/ai-residents.md 6, 사람이 찾아가지 않게) -->
       <LiveMediaStrip v-if="game?.venue === 'IN_PERSON' && !aiGame" :game-id="Number(gameId)" />
 
       <!-- 친구 (공유는 위 막대로 옮겼다) -->
@@ -617,13 +617,13 @@ const ranking = computed(() =>
 )
 const submitterSide = computed(() => resSides.value.findIndex((s) => s.members.some((m) => m.id === resultSubmittedById.value)))
 
-// AI 주민끼리 남긴 경기 (결과 생성기)
+// AI끼리 남긴 경기 (결과 생성기)
 const aiGame = computed(() => [user1.value, user2.value].some((u) => u?.isBot) || resSides.value.some((s) => s.members.some((m) => m.isBot)))
 const isParticipant = computed(() => !!currentUserId.value && (format.value === 'DUEL'
   ? user1.value.id === currentUserId.value || user2.value.id === currentUserId.value
   : mySide.value >= 0))
 const opponent = computed(() => (user1.value.id === currentUserId.value ? user2.value : user1.value))
-// 1:1 사람 상대면 '한 판 더'는 그 사람에게 (AI 주민·팀·여럿은 같은 규칙으로 새 경기)
+// 1:1 사람 상대면 '한 판 더'는 그 사람에게 (AI·팀·여럿은 같은 규칙으로 새 경기)
 const rematchTarget = computed(() => (format.value === 'DUEL' && isParticipant.value && opponent.value?.id && !opponent.value.isBot ? opponent.value : null))
 const rematching = ref(false)
 async function rematch() {

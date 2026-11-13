@@ -272,7 +272,7 @@
           v-for="u in filteredUsers"
           :key="u.id"
           :title="u.nickname"
-          :subtitle="(u.isBot ? 'AI 주민 · ' : '') + '@' + u.username"
+          :subtitle="(u.isBot ? 'AI · ' : '') + '@' + u.username"
           :to="`/profile/${u.id}`"
           chevron
         >
@@ -325,7 +325,7 @@ const ACQ_COLS = [
   { key: 'visitors', label: '방문' },
   { key: 'signups', label: '가입' },
   { key: 'played', label: '경기' },
-  // 본업 전환: 처음 온 날부터 7일 안에 진짜 사람과 끝낸 판 (봇·AI 주민 빼고, 11/10)
+  // 본업 전환: 처음 온 날부터 7일 안에 진짜 사람과 끝낸 판 (봇·AI 빼고, 11/10)
   { key: 'versusPeople', label: '사람과 한 판' },
   { key: 'returned', label: '재방문' },
   { key: 'homescreen', label: '홈 화면' },
@@ -461,10 +461,10 @@ function classifyLine(c) {
 const showUsers = ref(false)
 const loadingUsers = ref(false)
 const users = ref([])
-// 관리자 숫자는 사람만 센다. AI 주민은 따로 (docs/ai-residents.md '숫자는 따로')
+// 관리자 숫자는 사람만 센다. AI는 따로 (docs/ai-residents.md '숫자는 따로')
 const userCount = computed(() => {
   const ai = users.value.filter((u) => u.isBot).length
-  return `사람 ${users.value.length - ai}명${ai ? ` · AI 주민 ${ai}명` : ''}`
+  return `사람 ${users.value.length - ai}명${ai ? ` · AI ${ai}명` : ''}`
 })
 const userSearch = ref('')
 const filteredUsers = computed(() => {

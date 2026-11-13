@@ -14,7 +14,7 @@
           v-for="user in userSearchResult"
           :key="user.id"
           :title="user.nickname"
-          :subtitle="[user.isBot ? 'AI 주민' : '', '@' + user.username, user.intro].filter(Boolean).join(' · ')"
+          :subtitle="[user.isBot ? 'AI' : '', '@' + user.username, user.intro].filter(Boolean).join(' · ')"
           chevron
           @click="goToUser(user.id)"
         >

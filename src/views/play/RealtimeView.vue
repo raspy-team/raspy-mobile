@@ -34,7 +34,7 @@
           <p v-else class="t-caption mt-1 tabular-nums">{{ waited }}초</p>
           <!-- 처음 온 사람이 기다리다 나가지 않게: 곧 연습 상대가 온다고 말해 둔다 (세션 B 흐름 검토) -->
           <!-- 초는 서버가 정한다: 밤 9시대 오늘 밤의 게임은 사람끼리 만날 틈을 주려고 길게 기다린다 (AppRealtimeService.botAfterFor) -->
-          <p v-if="!longLobby && !state.fixture && !state.invitee && state.botAfterSeconds" class="t-micro mt-2">{{ waitText(state.botAfterSeconds) }} 안에 사람이 안 오면 AI 주민이 상대가 돼요</p>
+          <p v-if="!longLobby && !state.fixture && !state.invitee && state.botAfterSeconds" class="t-micro mt-2">{{ waitText(state.botAfterSeconds) }} 안에 사람이 안 오면 AI가 상대가 돼요</p>
         </UiCard>
         <!-- 기다리는 동안이 규칙을 읽기 가장 좋은 때다: 펼쳐 둔다 (B 사용자 흐름) -->
         <section v-if="state.howTo?.length" class="mt-3 rounded-xl bg-surface-2 px-4 py-3">
@@ -43,9 +43,9 @@
             <li v-for="(line, i) in state.howTo" :key="i" class="t-caption text-fg-muted break-keep">· {{ line }}</li>
           </ul>
         </section>
-        <!-- 기다리지 않고 바로 AI 주민과: 처음부터 누를 수 있다 (11/11 고병연: 'N초 뒤 할 수 있어요'로 막아 두던 것을 없앤다).
+        <!-- 기다리지 않고 바로 AI와: 처음부터 누를 수 있다 (11/11 고병연: 'N초 뒤 할 수 있어요'로 막아 두던 것을 없앤다).
              사람을 기다리는 사람에게는 보통 대기실이면 botAfter 뒤 저절로 들어온다 -->
-        <UiButton v-if="!state.fixture && !state.invitee" block variant="secondary" class="mt-4" @click="callBot">기다리지 않고 AI 주민과 하기</UiButton>
+        <UiButton v-if="!state.fixture && !state.invitee" block variant="secondary" class="mt-4" @click="callBot">기다리지 않고 AI와 하기</UiButton>
         <UiButton v-if="!called && !state.fixture && !state.invitee" block variant="ghost" class="mt-2" icon="user-group" :loading="calling" @click="callFriends">친구 부르기</UiButton>
         <p v-else class="t-caption text-center mt-2">{{ called }}</p>
         <UiButton block variant="ghost" class="mt-2" @click="leave">{{ state.invitee ? '보내기 취소' : '그만 찾기' }}</UiButton>
@@ -65,7 +65,7 @@
 
       <!-- 판 -->
       <template v-else-if="state?.status === 'PLAYING'">
-        <!-- 누구와 하는지: 이름과 AI 주민 표시 (처음 온 사람이 '상대'만 보고 사람인지 몰랐다, 9e) -->
+        <!-- 누구와 하는지: 이름과 AI 표시 (처음 온 사람이 '상대'만 보고 사람인지 몰랐다, 9e) -->
         <p class="t-caption flex items-center min-w-0 mb-1"><span class="shrink-0">상대&nbsp;·&nbsp;</span><OpponentName :player="state.opponent" /></p>
         <div class="flex items-center justify-between">
           <span class="t-heading">{{ turnLine }}</span>
@@ -332,7 +332,7 @@ async function callBot() {
   try {
     apply((await POST('/api/app-games/realtime/{gameId}/bot', { path: { gameId: s.gameId } })).data)
   } catch (e) {
-    showToast(message(e, 'AI 주민을 부르지 못했어요. 잠시 뒤 다시 해 주세요'))
+    showToast(message(e, 'AI를 부르지 못했어요. 잠시 뒤 다시 해 주세요'))
   }
 }
 
@@ -377,7 +377,7 @@ const inviteFrom = ['feed', 'ladder'].includes(String(route.query.from)) ? Strin
 let inviteId = Number(route.query.invite) || null
 // AI 보스 도전 (?boss=1, 챔피언 카드의 '도전하기'): 보스와 바로 붙는다. 한 번만 쓴다 (docs/ai-residents.md 3)
 let bossChallenge = route.query.boss === '1'
-// AI 주민 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다 (docs/ai-residents.md 1). 한 번만
+// AI 프로필의 '앱 게임 한 판' (?ai=주민): 방을 열자마자 그 주민을 부른다 (docs/ai-residents.md 1). 한 번만
 let aiId = Number(route.query.ai) || null
 // 알림('내 차례'·결과)은 ?game=판 으로 온다: 그 판을 연다. 예전엔 무시하고 보통 대기실로 들어가, 끝난 판의 알림을 누르면 새 상대를 찾기 시작했다
 let gameParam = Number(route.query.game) || null

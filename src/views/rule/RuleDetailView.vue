@@ -77,7 +77,7 @@
       <div class="max-w-2xl mx-auto px-4 py-3 flex items-center gap-4">
         <div class="flex-1 min-w-0">
           <p class="t-heading truncate">{{ winSummary(rule) }}</p>
-          <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : aiGames ? `AI 주민과 ${aiGames}판 했어요` : '첫 경기를 열어 보세요' }}</p>
+          <p class="t-micro truncate">{{ rule.playCount ? `${rule.playCount}번 겨뤘어요` : aiGames ? `AI와 ${aiGames}판 했어요` : '첫 경기를 열어 보세요' }}</p>
         </div>
         <UiButton v-if="rule.appGameKey" size="lg" :to="`/play/${rule.appGameKey}`">한 판 하기</UiButton>
         <UiButton v-else size="lg" :to="`/create-game?ruleId=${rule.id}`">경기 만들기</UiButton>
@@ -146,7 +146,7 @@ const { showToast } = useToast()
 const rule = ref(null)
 const loading = ref(true)
 const myId = ref(null)
-const aiGames = ref(0) // AI 주민과 둔 판 수 (앱 게임)
+const aiGames = ref(0) // AI와 둔 판 수 (앱 게임)
 const menuOpen = ref(false)
 const reportOpen = ref(false)
 const reportReason = ref('')
@@ -225,7 +225,7 @@ async function load() {
   else loadFailed.value = !ruleRes.reason?.response || ruleRes.reason.response.status >= 500
   if (meRes.status === 'fulfilled') myId.value = meRes.value
   if (rankRes.status === 'fulfilled') {
-    // 순위는 뺐다(11/13). AI 주민과 둔 판 수만 아래 줄에 쓴다
+    // 순위는 뺐다(11/13). AI와 둔 판 수만 아래 줄에 쓴다
     aiGames.value = rankRes.value.data.aiGames || 0
   }
   loading.value = false

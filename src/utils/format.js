@@ -53,12 +53,11 @@ export function record(stats) {
   return [`${w}승`, d ? `${d}무` : '', `${l}패`].filter(Boolean).join(' ')
 }
 
-// 문장·토스트에 넣는 이름. AI 주민이면 'AI 주민 ○○' (docs/ai-residents.md 'AI 표시': 알림은 문장에 넣는다).
-// 이름만 따로 보이는 칸은 이름 뒤에 <UiAiBadge v-if="p.isBot" />를 쓴다
+// 문장·토스트에 넣는 이름. AI면 이름 없이 'AI' (11/14: 사람인 척하는 이름을 걷어 냈다. 서버 bot/AiMode)
 export function who(p, fallback = '상대') {
   if (!p) return fallback
   const name = p.nickname ?? p.name ?? fallback
-  return p.isBot ? `AI 주민 ${name}` : name
+  return p.isBot ? 'AI' : name
 }
 
 // 받침에 따라 '으로/로' ('(으)로'처럼 괄호로 쓰지 않게, 11/5 밤샘 C). ㄹ 받침은 '로' (서울로)
@@ -75,7 +74,7 @@ export function withRo(word) {
   return s + (jong === 0 || jong === 8 ? '로' : '으로')
 }
 
-// AI 주민이 상대가 되기까지 기다리는 시간 (서버의 botAfterSeconds): '15초', '1분', '1시간'
+// AI가 상대가 되기까지 기다리는 시간 (서버의 botAfterSeconds): '15초', '1분', '1시간'
 export function waitText(seconds) {
   if (seconds < 60) return `${seconds}초`
   if (seconds < 3600) return `${Math.round(seconds / 60)}분`

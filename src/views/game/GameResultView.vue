@@ -144,7 +144,7 @@
         </span>
         <div class="min-w-0">
           <p class="t-heading">결과가 끝내 맞지 않았어요</p>
-          <p class="t-caption mt-0.5">세 번 돌려보내서 이 경기는 전적과 실력 점수에 남기지 않아요. 관리자가 확인할게요.</p>
+          <p class="t-caption mt-0.5">세 번 돌려보내서 이 경기는 전적과 실력 점수에 남기지 않아요. 운영진이 확인할게요.</p>
         </div>
       </UiCard>
 

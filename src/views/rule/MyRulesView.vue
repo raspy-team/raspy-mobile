@@ -32,7 +32,8 @@
           <!-- 수정 요청 상태: 있을 때만 -->
           <div v-if="rule.editRequestStatus === 'PENDING'" class="flex items-center gap-2 pb-4 -mt-1">
             <UiBadge>수정 요청 확인 중</UiBadge>
-            <div class="flex-1"></div>
+            <!-- 기다림의 끝을 말한다: 따로 알림은 가지 않고 여기 표시가 바뀐다 (quality-rules Y-1) -->
+            <span class="flex-1 min-w-0 t-micro">운영진이 확인하면 규칙이 바뀌고, 이 표시가 사라져요</span>
             <UiButton size="sm" variant="ghost" :loading="cancelingId === rule.id" @click="cancelEdit(rule)">요청 취소</UiButton>
           </div>
           <div v-else-if="rule.editRequestStatus === 'REJECTED'" class="pb-4 -mt-1">

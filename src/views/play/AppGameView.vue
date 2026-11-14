@@ -268,7 +268,7 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}</p>
+              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}. 그때까지 아무도 안 풀면 승패 없이 끝나고 내 점수는 남아요</p>
               <!-- 기다리기를 그만둘 길 (11/14: 7일 뒤 저절로 닫힐 때까지 거둘 수 없었다). 등급·점수는 남는다 -->
               <button type="button" class="hit t-micro underline underline-offset-2 mt-2 min-h-[36px]" :disabled="canceling" @click="cancelWaiting(result.gameId)">기다리기 그만두기</button>
             </template>
@@ -1055,6 +1055,8 @@ function closeResult() {
 
 function duelTitle(d: Duel) {
   if (d.opponent) return `${who(d.opponent)}님과`
+  // 풀다 만 판은 아직 낸 것이 없다: '상대를 찾는 중'이라고 하면 사실이 아니다 (quality-rules B-2)
+  if (canResume(d)) return '풀던 판'
   return d.status === 'CANCELED' ? '상대 없이 끝난 경기' : '상대를 찾는 중'
 }
 function duelSubtitle(d: Duel) {
@@ -1072,7 +1074,7 @@ function duelSubtitle(d: Duel) {
   if (isVote.value) return d.myAnswer ?? ''
   // 실시간 판은 '내기'가 없다: 하는 중인 판으로 돌아가게 (11/5 9e)
   if (d.playMode === 'REALTIME') return d.opponent ? '하는 중이에요 · 눌러서 돌아가기' : '상대를 기다리는 중이에요'
-  return d.myScore != null ? (key.value === 'improv' && d.myFeedback?.match(/\d등급/) ? `내 등급 ${d.myFeedback.match(/\d등급/)![0]}` : `내 기록 ${d.myScore}${unit}`) : canResume(d) ? '안 냈어요 · 눌러서 이어 하기' : '아직 내지 않았어요'
+  return d.myScore != null ? (key.value === 'improv' && d.myFeedback?.match(/\d등급/) ? `내 등급 ${d.myFeedback.match(/\d등급/)![0]}` : `내 기록 ${d.myScore}${unit}`) : '아직 내기 전이에요'
 }
 function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']
@@ -1082,6 +1084,7 @@ function duelBadge(d: Duel) {
   if (d.status === 'AWAITING_RESULT') return '경기 결과 기다림'
   if (d.myJudging) return isVote.value ? '확인 중' : '채점 중'
   if (d.playMode === 'REALTIME') return d.opponent ? '하는 중' : '상대 기다림'
+  if (canResume(d)) return '이어서 하기'
   return d.opponent ? '상대가 푸는 중' : '상대 찾는 중'
 }
 // 끝나지 않은 실시간 판은 결과 카드 대신 그 판으로 (대기실·대전 화면)

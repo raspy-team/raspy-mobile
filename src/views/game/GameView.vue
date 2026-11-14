@@ -455,7 +455,7 @@ async function cancelRequest(game) {
   try {
     await api.post('/api/games/cancel-request', { gameId: game.id })
     sentGames.value = sentGames.value.filter((g) => g.id !== game.id)
-    showToast('신청을 취소했어요')
+    showToast('신청을 취소했어요. 다시 신청할 수 있어요')
   } catch (e) {
     showToast(e.response?.data?.message || '신청을 취소하지 못했어요. 잠시 뒤 다시 해 주세요')
   }

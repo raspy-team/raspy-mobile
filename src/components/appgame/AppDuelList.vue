@@ -37,7 +37,7 @@ function view(d: Duel) {
   // 아직 상대가 없는 실시간 방(하루 기다리는 편지 오목 등)은 '상대님과 하는 중'이 아니라 기다리는 중
   if (d.playMode === 'REALTIME' && !d.opponent) return { badge: '기다리는 중', line: `상대가 오면 ${NOTICE}`, to: liveRoute(d.key), act: false }
   if (d.playMode === 'REALTIME') return { badge: '하는 중', line: `${who(d.opponent)}님과 하는 중`, to: liveRoute(d.key), act: true }
-  if (canResumeDuel(d)) return { badge: '이어서 하기', line: '아직 내지 않았어요', to: `/play/${d.key}?resume=1`, act: true }
+  if (canResumeDuel(d)) return { badge: '이어서 하기', line: '아직 내기 전이에요', to: `/play/${d.key}?resume=1`, act: true }
   if (d.myJudging) return { badge: '채점 중', line: `끝나면 ${NOTICE_LONG}`, to: result, act: false }
   if (d.status === 'VOTING') return { badge: '투표 중', line: `투표 마감 ${hhmm(d.votingEndsAt)}`, to: result, act: false }
   // 스코어 맞히기: 둘 다 냈고 실제 경기가 끝나길 기다린다

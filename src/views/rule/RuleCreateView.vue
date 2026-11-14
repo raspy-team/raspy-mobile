@@ -8,7 +8,7 @@
         mascot="match"
         mood="cheer"
         :title="editId ? '수정 요청을 보냈어요' : '규칙을 만들었어요'"
-        :description="editId ? '관리자가 확인하면 바뀌어요. 내 규칙에서 상태를 볼 수 있어요' : [done.ruleTitle, ...(done.category?.abilities ?? []).map((a) => a.label)].join(' · ')"
+        :description="editId ? '운영진이 확인하면 바뀌어요. 내 규칙에서 상태를 볼 수 있어요' : [done.ruleTitle, ...(done.category?.abilities ?? []).map((a) => a.label)].join(' · ')"
       >
         <div class="w-full space-y-2">
           <!-- 끝난 만들기 화면은 기록에서 바꿔 끼운다(replace): 다음 화면에서 뒤로를 누르면 빈 만들기 칸으로 돌아왔다 -->
@@ -56,7 +56,7 @@
 
     <!-- 한 화면에서 끝나는 규칙 만들기. 꼭 필요한 것만 위에, 나머지는 '더 자세히' 안에 -->
     <form v-else class="max-w-xl mx-auto px-4 pt-4 pb-32 space-y-8" novalidate @submit.prevent="editId ? submit() : next()">
-      <p v-if="editId" class="t-caption">바꿀 부분만 고치면 돼요. 관리자가 확인한 뒤 반영돼요.</p>
+      <p v-if="editId" class="t-caption">바꿀 부분만 고치면 돼요. 운영진이 확인한 뒤 반영돼요.</p>
 
       <UiInput v-if="editId" v-model="form.ruleTitle" label="규칙 이름" :maxlength="20" placeholder="예: 탁구 11점 3판 2선승" />
 

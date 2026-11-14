@@ -87,7 +87,7 @@
     <!-- 더보기 -->
     <UiSheet v-model="menuOpen">
       <UiList>
-        <UiListItem v-if="isMine" icon="fas fa-pen" title="내 규칙 고치기" subtitle="관리자가 확인한 뒤 바뀌어요" @click="goEdit" />
+        <UiListItem v-if="isMine" icon="fas fa-pen" title="내 규칙 고치기" subtitle="운영진이 확인한 뒤 바뀌어요" @click="goEdit" />
         <!-- '수정 제안'(남의 규칙)과 '수정 요청'(내 규칙)이 이름이 거의 같아 하는 일이 헷갈렸다 (경로 6 리뷰): 하는 일로 부른다 -->
         <UiListItem v-if="!isMine" icon="far fa-comment" title="만든 사람에게 고칠 점 보내기" subtitle="메시지로 가요" @click="openSuggest" />
         <UiListItem v-if="!isMine" icon="far fa-flag" title="신고" danger @click="openReport" />

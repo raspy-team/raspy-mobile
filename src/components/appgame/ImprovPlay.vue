@@ -28,6 +28,8 @@
           </p>
         </div>
         <div ref="action" class="mt-3"><UiButton block size="lg" :disabled="!text.trim()" @click="say">말하기</UiButton></div>
+        <!-- 쓰는 자리에서 누가 보는지 말한다 (quality-rules Y-4). 버튼 아래라 키보드 위 자리를 밀지 않는다. 첫 상황에만 -->
+        <p v-if="index === 0" class="t-micro text-center mt-2 break-keep">{{ visitorId ? '대답은 나와 붙는 상대만 볼 수 있어요' : '대답은 붙은 상대가 볼 수 있고, 이기면 소식에도 실려요' }}</p>
       </template>
 
       <!-- 내가 한 말과 인물의 반응 -->

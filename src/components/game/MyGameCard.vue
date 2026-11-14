@@ -166,7 +166,7 @@ const state = computed(() => {
   if (live) return { label: '진행 중', tone: 'success', action: 'play', actionLabel: '점수판 열기', actionVariant: 'primary' }
   if (g.status === 'RESULT_PENDING' || g.gameStatus === 'RESULT_PENDING') {
     return !canConfirm.value
-      ? { label: '확인 대기', tone: 'neutral', hint: multi.value ? '상대 쪽에서 확인하면 기록돼요' : '상대가 확인하면 기록돼요', action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }
+      ? { label: '확인 대기', tone: 'neutral', hint: `${multi.value ? '상대 쪽에서' : '상대가'} 확인하면 기록돼요. 답이 없으면 하루 뒤 저절로 확정돼요`, action: 'result', actionLabel: '낸 결과 보기', actionVariant: 'secondary' }
       : { label: '결과 확인', tone: 'primary', action: 'result', actionLabel: '결과 확인', actionVariant: 'signal' }
   }
   if (isMine.value) {

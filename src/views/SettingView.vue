@@ -158,7 +158,7 @@ function leave() {
 }
 
 async function logout() {
-  if (!(await confirmDialog({ title: '로그아웃할까요?', confirmText: '로그아웃' }))) return
+  if (!(await confirmDialog({ title: '로그아웃할까요?', message: '기록과 친구는 그대로 남아요. 다시 로그인하면 이어져요', confirmText: '로그아웃' }))) return
   loggingOut.value = true
   // 이 기기로 푸시가 더 오지 않게 (실패해도 로그아웃은 한다)
   // 이 기기 토큰만 지운다. 토큰을 모르면(옛 앱) 서버가 내 토큰을 모두 지운다

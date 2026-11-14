@@ -479,7 +479,7 @@ function knocked(mine: boolean) {
 
 async function leave() {
   if (!state.value) return
-  if (state.value.status === 'PLAYING' && !(await confirmDialog({ title: '그만둘까요?', message: '지금 나가면 이 판은 지게 돼요', confirmText: '그만두기' }))) return
+  if (state.value.status === 'PLAYING' && !(await confirmDialog({ title: '그만둘까요?', message: '지금 나가면 이 판은 지게 돼요', confirmText: '그만두기', danger: true }))) return
   try {
     apply((await POST('/api/app-games/realtime/{gameId}/leave', { path: { gameId: state.value.gameId } })).data)
   } catch (e) {

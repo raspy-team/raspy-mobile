@@ -22,6 +22,8 @@
     <UiButton block :variant="turnsLeft > 0 ? 'ghost' : 'primary'" :size="turnsLeft > 0 ? 'md' : 'lg'" class="mt-2" :loading="submitting" :disabled="saying" @click="finish">
       {{ turnsLeft > 0 ? '여기까지 하고 채점받기' : '채점받기' }}
     </UiButton>
+    <!-- 쓰는 자리에서 누가 보는지 말한다 (quality-rules Y-4) -->
+    <p class="t-micro text-center mt-2 break-keep">주고받은 말은 붙은 상대가 볼 수 있고, 소식에도 실려요</p>
   </div>
 </template>
 

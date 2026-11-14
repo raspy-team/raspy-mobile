@@ -17,6 +17,8 @@
     <div ref="action" class="mt-3"><UiButton block size="lg" :loading="submitting" :disabled="text.trim().length < 5" @click="finish">다 썼어요</UiButton></div>
     <!-- AI가 채점하는 글쓰기에는 투표가 없다: 투표 게임에만 (경로 2 리뷰) -->
     <p v-if="vote" class="t-caption text-center mt-2">두 사람의 글이 모이면 이름을 가리고 24시간 동안 투표를 받아요</p>
+    <!-- 쓰는 자리에서 누가 보는지 말한다 (quality-rules Y-4) -->
+    <p v-else class="t-micro text-center mt-2 break-keep">낸 글은 붙은 상대가 볼 수 있고, 소식에도 실려요</p>
   </div>
 </template>
 

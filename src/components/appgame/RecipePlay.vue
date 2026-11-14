@@ -20,6 +20,8 @@
     <UiButton block size="lg" class="mt-2" :loading="submitting" :disabled="!name.trim() || steps.trim().length < 10" @click="finish">
       다 만들었어요
     </UiButton>
+    <!-- 쓰는 자리에서 누가 보는지 말한다 (quality-rules Y-4) -->
+    <p class="t-micro text-center mt-2 break-keep">낸 요리는 붙은 상대가 볼 수 있고, 소식에도 실려요</p>
   </div>
 </template>
 

@@ -40,7 +40,7 @@
       </UiField>
       <!-- 나이: 다칠 수 있는 규칙은 만 19세 이상이라 확인한다 -->
       <div id="age">
-        <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세부터예요" :error="errors.age" />
+        <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세부터예요. 나이는 나만 보고, 설정 > 내 정보 공개에서 바꿀 수 있어요" :error="errors.age" />
       </div>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
       <!-- 예전에 직접 적은 소속: 새로 적을 수 없고 지우기만 된다. 학교·회사는 설정 > 소속에서 인증한다 (docs/organizations.md 2) -->

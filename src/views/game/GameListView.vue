@@ -306,7 +306,7 @@ async function cancelApply(game) {
   try {
     await api.post('/api/games/cancel-request', { gameId: game.id })
     game.isAppliedByMe = false
-    showToast('신청을 취소했어요')
+    showToast('신청을 취소했어요. 다시 신청할 수 있어요')
   } catch (e) {
     showToast(e.response?.data?.message || '취소하지 못했어요')
   } finally {

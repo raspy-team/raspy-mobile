@@ -429,6 +429,8 @@
                 <span class="block t-micro">무승부</span>
               </span>
             </div>
+            <!-- 앱 안에서만 통하는 말은 처음 몇 판 동안 풀어 준다 (quality-rules K-6) -->
+            <p v-if="played && key !== 'improv' && (game.myWins || 0) + (game.myLosses || 0) + (game.myDraws || 0) <= 3" class="t-micro text-center mt-3">실력 점수는 이기면 오르고 지면 내려요. 1500에서 시작해요</p>
             <!-- '전적·실력 점수는 사람과 한 판만 세요' 규칙 설명은 첫 화면에서 뺐다 (목적 판정 11/11 부분 2 다시 훑기) -->
           </UiCard>
           <!-- 하루 한 번 게임을 오늘 이미 냈으면 버튼 대신 한 줄 (누르면 '오늘은 다 했어요'만 떴다, 11/5 밤샘 C 검토) -->

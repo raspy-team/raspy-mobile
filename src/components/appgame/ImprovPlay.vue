@@ -155,7 +155,8 @@ async function say() {
   track('improv_say', { gameKey: 'improv', step: index.value + 1, value: `id=${current.value.id};len=${line.length};sec=${sec};timeout=${remaining.value === 0 ? 1 : 0}` })
   phase.value = 'reacting'
   if (!line) {
-    reactions.value[index.value] = '…'
+    // 점 셋만 있으면 고장처럼 보였다: 무슨 일이 있었는지 말한다 (quality-rules K-5)
+    reactions.value[index.value] = '시간이 다 돼서 대답 없이 넘어가요'
     phase.value = 'reacted'
     save()
     return
@@ -165,7 +166,7 @@ async function say() {
   try {
     // 45초를 넘기면 기다리지 않고 넘어간다. 점수는 끝에 다시 채점된다 (같은 답이면 저장한 채점을 쓴다)
     const { data } = await POST('/api/improv/react', { body: { situationId: current.value.id, text: line, playId: props.playId, visitorId: props.visitorId || undefined }, timeout: REACT_TIMEOUT_MS, quiet: true })
-    reactions.value[index.value] = data?.reaction || '…'
+    reactions.value[index.value] = data?.reaction || '(반응이 비어 있어요. 점수는 끝에 나와요)'
   } catch {
     reactions.value[index.value] = '(반응을 받지 못했어요. 점수는 끝에 나와요)'
     track('improv_react_failed', { gameKey: 'improv', step: index.value + 1 })

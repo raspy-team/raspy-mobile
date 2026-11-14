@@ -12,19 +12,22 @@
     </ol>
     <p class="t-caption mt-4 break-keep">친구가 그 링크로 풀면 같은 상황으로 1:1이 돼요. 친구가 뭐라고 답했는지도 볼 수 있어요</p>
     <template #footer>
-      <UiButton block size="lg" icon="instagram" @click="emit('go')">스토리 열기</UiButton>
+      <!-- 인스타·카톡 앱 안 브라우저는 스토리 편집기를 바로 못 연다: 그림을 저장하게 되니 그렇게 말한다 (11/14: 스토리 링크로 온 사람은 대부분 여기다) -->
+      <UiButton block size="lg" icon="instagram" @click="emit('go')">{{ inAppBrowser ? '그림 저장하기' : '스토리 열기' }}</UiButton>
     </template>
   </UiSheet>
 </template>
 
 <script setup lang="ts">
 import { UiButton, UiSheet } from '../ui'
+import { inAppBrowser } from '@/utils/nativeBridge'
 
 defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void; (e: 'go'): void }>()
 
 // 인스타 스토리 편집 화면의 실제 순서 (스티커 버튼은 위쪽 네모 웃는 얼굴)
 const STEPS = [
+  ...(inAppBrowser ? ['그림을 <b>길게 눌러 저장</b>하고, 인스타에서 <b>스토리 만들기</b>로 그 그림 고르기'] : []),
   '스토리 화면 위쪽 <b>스티커</b> 버튼(네모 웃는 얼굴) 누르기',
   '<b>링크</b> 스티커 고르기',
   '주소 칸을 길게 눌러 <b>붙여넣기</b> → 완료',

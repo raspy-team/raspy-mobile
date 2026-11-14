@@ -227,11 +227,11 @@
               <!-- 보내기는 등급 바로 밑 (손님 결과와 같은 순서, 11/11 목적 다시 보기: 등급을 막 본 순간이 자랑 동기가 가장 세다) -->
               <div class="flex flex-wrap justify-center gap-2 mt-4">
                 <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
-                <UiButton v-if="!storyFailed" size="sm" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
+                <UiButton v-if="!storyFailed" size="sm" icon="instagram" :disabled="!storyFile" @click="shareStory">스토리에 공유</UiButton>
                 <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
               </div>
               <!-- 올릴 이유 (11/14): 올리면 친구들이 같은 상황으로 들어오고, 풀 때마다 알림이 온다 -->
-              <p v-if="!storyFailed && !storyShownBefore" class="t-micro mt-2 break-keep">스토리에 올리면 친구들이 같은 상황으로 붙어요. 풀 때마다 알려 드려요</p>
+              <p v-if="!storyFailed && !storyShownBefore" class="t-micro mt-2 break-keep">링크는 복사해 뒀어요. 스토리의 '링크' 스티커에 붙이면 친구가 같은 상황으로 붙어요</p>
               <p v-if="improvResult.weak" class="t-body mt-4 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
               <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
               <p v-if="improvResult.next" class="t-label mt-3"><span class="hl">{{ improvResult.next }}</span></p>
@@ -459,7 +459,6 @@
         </template>
       </template>
     </main>
-    <StoryLinkGuide v-model="guideOpen" @go="guideGo" />
     <ShareSheet v-if="sharePost" :post="sharePost" :my-id="myId" @close="sharePost = null" />
   </div>
   <SaveImageSheet :src="saveView" @close="saveView = null" />
@@ -497,7 +496,6 @@ import { guestClaimResult, claimedDuels } from '@/utils/visit'
 import ImprovVersus from '../../components/appgame/ImprovVersus.vue'
 import ImprovSchools from '../../components/appgame/ImprovSchools.vue'
 import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
-import StoryLinkGuide, { storyGuideNeeded, storyGuideSeen } from '../../components/share/StoryLinkGuide.vue'
 // 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 임기응변 결과가 나올 때 받는다. 모든 게임 화면에 실려 첫 화면을 늦췄다 (11/11 몸과 시간)
 let story: typeof import('@/utils/storyShare') | null = null
 let storyCard: typeof import('../../components/share/ImprovStoryCard.vue').default | null = null
@@ -524,7 +522,7 @@ const WRITING: Record<string, { guide: string; placeholder: string }> = {
   excuse: { guide: '이 상황에서 빠져나갈 한 줄 변명', placeholder: '그럴듯하고 웃긴 변명' },
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
   trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
-  'power-level': { guide: '주제에 맞는 싸움꾼을 한 줄로 (뻔한 최강은 약해요)', placeholder: '예) 고무장갑 낀 할머니와 효자손' },
+  'power-level': { guide: '아래 주제에서 가장 셀 것 같은 싸움꾼을 한 줄로 지어내요. AI가 전투력(0~100)을 매겨요. 신·핵폭탄 같은 뻔한 최강은 약해요', placeholder: '예) 주제가 \'할머니 댁 물건\'이면 → 효자손 든 손주, 등 긁다 각성' },
   ghosted: { guide: '읽씹하는 이 사람에게 메시지 하나. 답장이 오게 써 보세요', placeholder: '매달리면 읽씹, 부담 없고 구체적이면 답장' },
   acrostic: { guide: '글자마다 한 줄씩, 그 글자로 시작해요. 줄을 바꿔 나눠요', placeholder: '고백하려고\n양말까지 새로 샀는데\n이미 여친이 있었다' },
 }
@@ -893,18 +891,7 @@ function storyLink() {
   return withShareRef(`${window.location.origin}/try/improv?${mine}utm_source=instagram&utm_medium=story`)
 }
 const storyShownBefore = (() => { try { return localStorage.getItem('story_shared') === '1' } catch { return false } })()
-// 처음 두 번은 인스타를 열기 전에 링크 스티커 붙이는 법을 보여 준다 (11/14)
-const guideOpen = ref(false)
-function onStory() {
-  if (!storyGuideNeeded()) return shareStory()
-  void copyText(storyLink())
-  guideOpen.value = true
-}
-function guideGo() {
-  storyGuideSeen()
-  guideOpen.value = false
-  shareStory()
-}
+// 안내 시트는 뺐다 (11/14 폰으로 한 바퀴: 아무도 읽지 않고 한 번 더 누르게만 했다). 링크는 누르는 순간 복사되고, 버튼 밑 한 줄이 붙일 곳을 말한다
 function shareStory() {
   const file = storyFile.value
   if (!file) return

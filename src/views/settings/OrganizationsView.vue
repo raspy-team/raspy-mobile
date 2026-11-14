@@ -137,6 +137,7 @@
 // 설정 > 소속 (docs/organizations.md 2절): 인증한 소속(공개 범위·떼기), 기다리는 신청, 인증하기.
 // 결과는 알림으로 오고, 열려 있으면 refreshOnChange로 바로 다시 불러온다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
 import { GET, PUT, DELETE } from '../../api/client'
 import type { components } from '../../api/schema'
@@ -168,6 +169,8 @@ const VISIBILITY_ORDER: Visibility[] = ['ALL', 'SAME_ORG', 'HIDDEN']
 const MAX_BYTES = 10 * 1024 * 1024
 
 const { showToast } = useToast()
+const route = useRoute()
+const router = useRouter()
 const mine = ref<Mine | null>(null)
 const loading = ref(true)
 const error = ref(false)
@@ -337,7 +340,15 @@ async function pickOnly() {
     const body = picked.value ? { orgId: picked.value.id } : { name: query.value.trim(), type: newType.value as string }
     await api.post('/api/organizations/pick', body)
     formOpen.value = false
-    showToast(`${picked.value?.name ?? query.value.trim()}를 골랐어요`)
+    const name = picked.value?.name ?? query.value.trim()
+    // 학교 대항에서 고르러 왔으면 끝났다고 말하고 온 화면으로 돌려보낸다 (11/14 폰으로 한 바퀴: 고른 뒤 끝난 느낌이 없고 직접 뒤로 가야 했다)
+    const back = typeof route.query.back === 'string' && route.query.back.startsWith('/') ? route.query.back : ''
+    if (back) {
+      showToast(`${name}로 참전했어요. 내 등급이 학교 평균에 들어갔어요`)
+      router.replace(back)
+      return
+    }
+    showToast(`${name}를 골랐어요`)
     await load()
   } catch (e: unknown) {
     const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message

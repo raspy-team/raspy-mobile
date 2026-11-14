@@ -47,7 +47,8 @@
       />
       <div v-if="sides.some((s) => s.text)" class="mt-4 space-y-2">
         <!-- 그림으로 찍을 때(still)는 세 줄까지: 긴 대답이 카드를 늘려 스토리 그림의 꼬리(주소)가 밀려났다 (3-5 P6 나머지 F1) -->
-        <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body" :class="still ? 'line-clamp-3' : ''">
+        <!-- 긴 글(요리 만드는 법·변론)은 네 줄로 접고, 누르면 다 보인다 (11/14: 소식에서 경기의 내용을 볼 길이 없었다) -->
+        <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body whitespace-pre-line break-keep" :class="still ? 'line-clamp-3' : opened[i] ? '' : 'line-clamp-4'" @click="opened[i] = !opened[i]">
           <span class="t-micro block">{{ side.name }}</span>{{ side.text }}
         </p>
       </div>
@@ -102,6 +103,7 @@ const sides = computed(() =>
 const when = computed(() => (props.post.date ? timeAgo(props.post.date) : ''))
 // 서버 feed_story가 붙인 이야기 (앱 대결은 수 기록 그림만 쓴다)
 const story = computed(() => (props.post as { story?: { appVisual?: any } | null }).story)
+const opened = ref<Record<number, boolean>>({})
 const feedPlayers = computed(() => (props.post.players as unknown as { id: number; name: string; isBot?: boolean }[] | undefined) || [])
 
 function gradeOf(text?: string): number | null {

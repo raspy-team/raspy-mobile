@@ -12,6 +12,9 @@
     <HomeUpcoming />
     <!-- 지금 사람이 있나: 실제 수가 넉넉할 때만 한 줄 (11/14 '빈 식당') -->
     <ImprovPulse variant="home" />
+    <!-- 학교 대항이 어떻게 돼 가는지, 가입 전 친구와의 승부(친구 답·점수)를 홈에서 바로 (11/14 폰으로 한 바퀴) -->
+    <ImprovSchools v-if="appPlayer" variant="home" />
+    <ImprovVersus v-if="appPlayer" class="mb-4" />
 
     <template v-if="appPlayer">
       <UiSection title="내 판">
@@ -58,16 +61,19 @@
     <!-- 작게 한 줄 (11/13 고병연: 저렇게 클 필요 없다) -->
     <UiButton v-if="!appPlayer" size="sm" variant="secondary" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
 
-    <UiSection :title="areaTitle" class="mt-6">
-      <template #action>
-        <!-- 한 묶음으로: 낱개로 두면 머리줄이 양끝 정렬이라 '1개'·지도·+가 줄 전체에 흩어졌다 (11/13 실제 기기 한 바퀴) -->
-        <div class="flex items-center -mr-2">
-          <span v-if="games.length" class="t-micro mr-1">{{ games.length }}개</span>
+    <!-- 머리줄은 동네 이름 하나로 (11/14 폰으로 한 바퀴): '동네 경기' 제목과 '합정동 근처 동네 14곳 경기까지' 줄이 같은 말을 두 번 했다.
+         접는 화살표도 여기: 펼친 뒤에는 접을 길이 없었다 -->
+    <section class="mt-6">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <NeighborhoodBar v-if="hasDong" class="min-w-0" @changed="fetchGames(); loadDong()" />
+        <h2 v-else class="t-heading">전국 경기</h2>
+        <div class="flex items-center -mr-2 shrink-0">
           <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
           <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
+          <UiIconButton v-if="appPlayer" icon="chevron-up" label="동네 경기 접기" @click="showLocal = false" />
         </div>
-      </template>
-      <NeighborhoodBar class="mb-3" @changed="fetchGames(); loadDong()" />
+      </div>
+      <NeighborhoodBar v-if="!hasDong" class="mb-3" @changed="fetchGames(); loadDong()" />
       <!-- 불러오는 중 -->
       <div v-if="loading && !games.length" class="space-y-3">
         <UiCard v-for="n in 3" :key="n">
@@ -113,7 +119,7 @@
           @more="menuGame = game"
         />
       </div>
-    </UiSection>
+    </section>
     </template>
     <HomeFeedPeek />
   </main>
@@ -154,6 +160,9 @@ import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
 import HomeUpcoming from '../../components/game/HomeUpcoming.vue'
 import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
+import ImprovSchools from '../../components/appgame/ImprovSchools.vue'
+import ImprovVersus from '../../components/appgame/ImprovVersus.vue'
+import { collapseWaitingDuels } from '@/utils/appGame'
 import { GET } from '@/api/client'
 import Comment from '../GameCommentView.vue'
 import {
@@ -218,7 +227,8 @@ const menuGame = ref(null)
 // 못 불러온 것과 비어 있는 것을 구분한다 (서버가 꺼졌는데 '열린 경기가 없어요'로 보이지 않게)
 const loadFailed = ref(false)
 async function fetchDuels() {
-  duels.value = (await GET('/api/app-games/duels/active').catch(() => ({ data: null }))).data ?? duels.value
+  const fresh = (await GET('/api/app-games/duels/active').catch(() => ({ data: null }))).data
+  duels.value = fresh ? collapseWaitingDuels(fresh) : duels.value
   fetchRecentResults()
 }
 async function fetchGames() {

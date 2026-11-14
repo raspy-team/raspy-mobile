@@ -33,3 +33,22 @@ export function canResumeDuel(
     new Date(d.deadlineAt).getTime() > now
   )
 }
+
+/**
+ * 사람을 기다리는 판(낸 뒤 상대가 없는 따로 푸는 대결)은 게임마다 한 줄로 접는다 (11/14 폰으로 한 바퀴:
+ * AI가 대신 풀어 닫아 주지 않게 된 뒤 '상대 찾는 중'이 판마다 한 줄씩 쌓여 내 경기가 끝없이 길어졌다).
+ * 가장 최근 판 하나를 남기고 몇 판이 기다리는지를 waitingCount로 단다. 할 일이 있는 판(이어서 하기·채점 중·상대 있음)은 그대로 둔다
+ */
+export function collapseWaitingDuels<T extends { key: string; playMode?: string; status?: string; myScore?: number | null; myJudging?: boolean; opponent?: unknown }>(duels: T[]): (T & { waitingCount?: number })[] {
+  const idle = (d: T) => d.playMode !== 'REALTIME' && d.status === 'WAITING' && d.myScore != null && !d.myJudging && !d.opponent
+  const first = new Map<string, T & { waitingCount?: number }>()
+  const out: (T & { waitingCount?: number })[] = []
+  for (const d of duels) {
+    if (!idle(d)) { out.push(d); continue }
+    const kept = first.get(d.key)
+    if (kept) { kept.waitingCount = (kept.waitingCount ?? 1) + 1; continue }
+    const row = { ...d, waitingCount: 1 }
+    first.set(d.key, row); out.push(row)
+  }
+  return out
+}

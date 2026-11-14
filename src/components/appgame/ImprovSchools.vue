@@ -1,7 +1,15 @@
 <template>
   <!-- 학교 대항 순위 (11/14, README 3-6 ②): 학교를 고른 사람들의 임기응변 최고 등급 평균.
        결과 바로 밑에 "○○대 평균 4.2등급 · 전체 7위". 학교를 고르려면 가입한다(손님에게는 가입의 이유, 가입한 사람에게는 다시 올 이유) -->
-  <UiCard v-if="data">
+  <!-- 홈의 한 줄 (11/14 폰으로 한 바퀴: 학교를 고른 뒤 대항전이 어떻게 돼 가는지 다시 볼 길이 없었다). 누르면 전체 순위 -->
+  <button v-if="data && variant === 'home' && (data.mine || data.total > 0)" type="button" class="w-full flex items-center gap-3 rounded-xl bg-surface px-4 py-3 mb-4 text-left active:bg-surface-2" @click="open = true">
+    <span class="flex-1 min-w-0">
+      <span class="block t-body text-fg truncate">학교 대항 · <template v-if="data.mine">{{ data.mine.name }} <b>{{ data.mine.rank }}위</b></template><template v-else>{{ data.total }}곳이 겨루는 중</template></span>
+      <span class="block t-micro truncate">{{ data.mine ? `평균 ${data.mine.avgGrade.toFixed(1)}등급 · ${data.mine.members}명 · ${data.total}곳 중` : data.hasSchool ? '임기응변 한 판을 끝내면 우리 학교 평균에 들어가요' : '학교를 고르면 내 등급이 우리 학교 평균에 들어가요' }}</span>
+    </span>
+    <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
+  </button>
+  <UiCard v-else-if="data && variant !== 'home'">
     <div class="flex items-center justify-between">
       <p class="t-label">학교 대항</p>
       <UiButton v-if="data.total > 3" size="sm" variant="ghost" class="-mr-2 -my-2" @click="open = true">전체 {{ data.total }}곳</UiButton>
@@ -32,33 +40,36 @@
     <p v-else class="t-caption mt-3 break-keep">아직 순위에 오른 학교가 없어요. 지금 고르면 우리 학교가 1위로 시작해요</p>
 
     <UiButton v-if="guest && !noCta" block class="mt-4" @click="emit('join')">우리 학교로 참전하기</UiButton>
-    <UiButton v-else-if="!guest && !data.hasSchool" block variant="secondary" class="mt-4" to="/settings/organizations">학교 고르기</UiButton>
+    <UiButton v-else-if="!guest && !data.hasSchool" block variant="secondary" class="mt-4" :to="{ path: '/settings/organizations', query: { back: route.fullPath } }">학교 고르기</UiButton>
 
-    <UiSheet v-model="open" title="학교 대항 순위">
-      <p class="t-caption mb-3 break-keep">학교를 고른 사람들의 임기응변 최고 등급 평균이에요. 낮을수록 높은 순위</p>
-      <ol class="space-y-2">
-        <li v-for="s in data.schools" :key="s.orgId" class="flex items-center gap-2 t-body" :class="s.orgId === data.mine?.orgId ? 'text-fg font-semibold' : ''">
-          <span class="w-6 tabular-nums">{{ s.rank }}</span>
-          <span class="flex-1 min-w-0 truncate">{{ s.name }}</span>
-          <span class="tabular-nums shrink-0 text-fg-muted">{{ s.avgGrade.toFixed(1) }}등급 · {{ s.members }}명</span>
-        </li>
-      </ol>
-      <p v-if="data.mine && data.mine.rank > data.schools.length" class="t-body mt-3">{{ data.mine.rank }}위 {{ data.mine.name }} · {{ data.mine.avgGrade.toFixed(1) }}등급</p>
-    </UiSheet>
   </UiCard>
+  <UiSheet v-model="open" title="학교 대항 순위">
+    <p class="t-caption mb-3 break-keep">학교를 고른 사람들의 임기응변 최고 등급 평균이에요. 낮을수록 높은 순위</p>
+    <ol class="space-y-2">
+      <li v-for="s in data?.schools ?? []" :key="s.orgId" class="flex items-center gap-2 t-body" :class="s.orgId === data?.mine?.orgId ? 'text-fg font-semibold' : ''">
+        <span class="w-6 tabular-nums">{{ s.rank }}</span>
+        <span class="flex-1 min-w-0 truncate">{{ s.name }}</span>
+        <span class="tabular-nums shrink-0 text-fg-muted">{{ s.avgGrade.toFixed(1) }}등급 · {{ s.members }}명</span>
+      </li>
+    </ol>
+    <p v-if="data && data.mine && data.mine.rank > data.schools.length" class="t-body mt-3">{{ data.mine.rank }}위 {{ data.mine.name }} · {{ data.mine.avgGrade.toFixed(1) }}등급</p>
+    <UiButton v-if="data && !data.hasSchool && !guest" block variant="secondary" class="mt-4" :to="{ path: '/settings/organizations', query: { back: route.fullPath } }">학교 고르기</UiButton>
+  </UiSheet>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
-import { UiButton, UiCard, UiSheet } from '../ui'
+import { UiButton, UiCard, UiIcon, UiSheet } from '../ui'
 
 type Standings = components['schemas']['Standings']
 // guest: 가입 전(학교를 고르려면 가입). grade: 방금 받은 등급(있으면 문구에 쓴다)
 // noCta: 같은 화면에 가입 버튼이 이미 있으면 여기 버튼은 뺀다
-const props = defineProps<{ guest?: boolean; grade?: number; noCta?: boolean }>()
+const props = defineProps<{ guest?: boolean; grade?: number; noCta?: boolean; variant?: 'card' | 'home' }>()
 const emit = defineEmits<{ (e: 'join'): void; (e: 'ready', shown: boolean): void }>()
+const route = useRoute()
 const data = ref<Standings | null>(null)
 const open = ref(false)
 

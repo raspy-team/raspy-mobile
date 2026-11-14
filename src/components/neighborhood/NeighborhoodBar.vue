@@ -1,11 +1,11 @@
 <template>
   <div>
     <!-- 동네가 있으면: 이름을 눌러 다른 동네로 바꾼다 (당근의 왼쪽 위 동네 이름) -->
-    <button v-if="active" type="button" class="flex items-center gap-1.5 h-10 -ml-1 px-1 t-heading" :aria-label="`지금 동네 ${active.name}, 바꾸기`" @click="open = true">
-      {{ active.name }}
+    <button v-if="active" type="button" class="flex items-center gap-1.5 h-10 -ml-1 px-1 t-heading max-w-full min-w-0" :aria-label="`지금 동네 ${active.name}, 바꾸기`" @click="open = true">
+      <span class="whitespace-nowrap shrink-0">{{ active.name }}</span>
       <!-- '근처 N개 동까지'는 무슨 범위인지 몰랐다: 보이는 경기의 범위라고 말한다 (경로 전부 훑기 4) -->
-      <span v-if="active.nearbyCount" class="t-caption font-normal">근처 동네 {{ active.nearbyCount }}곳 경기까지</span>
-      <UiIcon name="chevron-down" class="text-xs" aria-hidden="true" />
+      <span v-if="active.nearbyCount" class="t-caption font-normal truncate min-w-0">근처 {{ active.nearbyCount }}곳까지</span>
+      <UiIcon name="chevron-down" class="text-xs shrink-0" aria-hidden="true" />
     </button>
     <!-- '인증이 지났어요' 경고는 뺐다: 11/13부터 동네는 고르기만 해도 되고 인증이 지나도 막지 않는다 -->
 

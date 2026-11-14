@@ -194,8 +194,15 @@
           <span class="t-micro underline underline-offset-2 flex-shrink-0">다시 찾기</span>
         </button>
         <template v-else>
-          <UiButton v-if="placeSearchOn" block variant="secondary" icon="magnifying-glass" class="mb-2" @click="pickerOpen = true">공공장소 찾기</UiButton>
-          <p v-if="placeSearchOn" class="t-micro mb-2">처음 만나는 상대와는 찾아서 고른 공공장소에서만 정할 수 있어요</p>
+          <!-- 장소는 찾아서 고르는 것이 먼저다 (11/14 폰으로 한 바퀴: 찾기 버튼·'처음 만나는 상대' 안내·지역 고르기·이름 칸이 한꺼번에 나와 무엇이 필수인지 몰랐다).
+               처음 만나는 상대면 찾기만, 아는 사이면 '직접 적기'를 펼칠 수 있다 -->
+          <template v-if="placeSearchOn">
+            <UiButton block variant="secondary" icon="magnifying-glass" @click="pickerOpen = true">장소 찾기</UiButton>
+            <p v-if="scheduleGame?.firstMeeting" class="t-micro mt-2 break-keep">처음 만나는 상대라, 찾아서 고른 공공장소로 정해요</p>
+            <button v-else-if="!typePlace" type="button" class="t-caption underline underline-offset-2 mt-3 py-1" @click="typePlace = true">찾아도 없으면 직접 적기</button>
+          </template>
+          <template v-if="!placeSearchOn || (typePlace && !scheduleGame?.firstMeeting)">
+          <div :class="placeSearchOn ? 'mt-3' : ''">
           <button v-if="placeMode === 'mine'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = 'other'">
             <UiIcon name="location-dot" aria-hidden="true" />
             <span class="flex-1 t-body">{{ myArea.shortName }}</span>
@@ -206,6 +213,8 @@
             <UiSelect v-model="schedRegion2" :options="schedRegion2Options" placeholder="구·시·군" :disabled="!schedRegion1" />
           </div>
           <UiInput v-model="schedPlace" class="mt-2" :placeholder="`장소 이름 (예: ${myArea?.name || '동네'} 주민센터 체육관)`" />
+          </div>
+          </template>
         </template>
       </div>
       <PlacePickerSheet v-model="pickerOpen" :near="myArea?.lat ? { lat: myArea.lat, lon: myArea.lon } : null" @picked="(p) => { pickedPlace = p; placeMode = 'picked' }" />
@@ -266,7 +275,7 @@ import SafetyTipsSheet from '../../components/game/SafetyTipsSheet.vue'
 import MeetSafetyCard from '../../components/safety/MeetSafetyCard.vue'
 import PlacePickerSheet from '../../components/map/PlacePickerSheet.vue'
 import { GET } from '@/api/client'
-import { canResumeDuel } from '@/utils/appGame'
+import { canResumeDuel, collapseWaitingDuels } from '@/utils/appGame'
 import {
   UiAvatar, UiButton, UiCard, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem,
   UiPullIndicator, UiSection, UiSelect, UiSheet, UiSkeleton, UiTopBar
@@ -356,7 +365,7 @@ async function fetchGames() {
       // 앱 대결은 못 불러와도 오프라인 경기 목록은 보여 준다
       GET('/api/app-games/duels/active').then(({ data }) => data).catch(() => null),
     ])
-    if (duels) appDuels.value = duels
+    if (duels) appDuels.value = collapseWaitingDuels(duels)
     applicantsMap.value = Object.fromEntries(applicantsRes.data.map((g) => [g.gameId, g.applicants || []]))
     const wasLive = new Set(allGames.value.filter(isLive).map((g) => g.id))
     const hadList = !loading.value
@@ -629,6 +638,7 @@ async function loadMyArea() {
 // 공공장소 찾기 (안전·신뢰 G): 서버에 장소 검색이 켜져 있을 때만 버튼을 보인다
 const pickerOpen = ref(false)
 const pickedPlace = ref(null)
+const typePlace = ref(false) // 아는 사이일 때 '직접 적기'를 펼쳤나
 const placeSearchOn = ref(false)
 GET('/api/places/available').then((r) => (placeSearchOn.value = !!r.data)).catch(() => {})
 const canSubmitSchedule = computed(() => {
@@ -637,6 +647,7 @@ const canSubmitSchedule = computed(() => {
   if (placeMode.value === 'picked') return !!pickedPlace.value
   if (isRemote(g.venue)) return !!schedTime.value || !!schedPlace.value.trim()
   if (placeMode.value === 'keep') return !!schedTime.value
+  if (placeSearchOn.value && !typePlace.value) return !!schedTime.value
   return !!schedTime.value || (placeMode.value === 'mine' && !!myArea.value) || (schedRegion1.value && schedRegion2.value)
 })
 
@@ -644,6 +655,7 @@ function openSchedule(g) {
   // 시트를 먼저 연다 (동네를 불러오는 사이 다른 시트가 끼어들지 않게). 동네가 오면 기본 장소를 채운다
   scheduleGame.value = g
   pickedPlace.value = null
+  typePlace.value = false
   placeMode.value = g.matchLocation && !isRemote(g.venue) ? 'keep' : myArea.value ? 'mine' : 'other'
   if (!myArea.value) loadMyArea().then(() => { if (scheduleGame.value?.id === g.id && placeMode.value === 'other' && myArea.value) placeMode.value = 'mine' })
   schedTime.value = g.matchDate ? String(g.matchDate).slice(0, 16) : ''
@@ -679,7 +691,9 @@ async function submitSchedule() {
     const remote = isRemote(scheduleGame.value.venue)
     // 내 동네를 쓰면 주소는 '서울특별시 동대문구 회기동'(서버 지역 판정용), 화면에는 장소 이름이 먼저 보인다
     const mode = placeMode.value
-    const area = remote || mode === 'keep' || mode === 'picked' ? null : mode === 'mine' ? myArea.value.fullName : schedRegion1.value && schedRegion2.value ? `${schedRegion1.value} ${schedRegion2.value}` : null
+    // 찾기가 켜져 있고 '직접 적기'를 펼치지 않았으면 장소는 보내지 않는다: 보이지 않는 내 동네가 장소로 들어가지 않게 (시간만 정한다)
+    const typed = !placeSearchOn.value || typePlace.value
+    const area = remote || mode === 'keep' || mode === 'picked' || !typed ? null : mode === 'mine' ? myArea.value.fullName : schedRegion1.value && schedRegion2.value ? `${schedRegion1.value} ${schedRegion2.value}` : null
     const hasPlace = !!area
     await api.post(`/api/games/${scheduleGame.value.id}/schedule`, {
       matchDate: schedTime.value ? (schedTime.value.length === 16 ? `${schedTime.value}:00` : schedTime.value) : null,

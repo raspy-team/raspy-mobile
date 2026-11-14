@@ -25,6 +25,15 @@
           </UiListItem>
         </UiList>
       </template>
+      <!-- 여기 없는 종목으로도 (11/14 폰으로 한 바퀴): 상대가 많이 한 규칙 셋만 나와, 다른 종목으로 붙자고 할 길이 없었다 -->
+      <p class="t-label mt-6 mb-2">다른 종목으로</p>
+      <UiInput v-model="q" placeholder="종목·규칙 이름 (예: 탁구)" />
+      <UiList v-if="found.length" class="mt-2">
+        <UiListItem v-for="r in found" :key="r.id" :title="r.ruleTitle" chevron :disabled="sending" @click="sendOffline(r.id)">
+          <template #leading><RuleThumb :rule="r" :size="36" bare /></template>
+        </UiListItem>
+      </UiList>
+      <p v-else-if="q.trim().length >= 1 && searched" class="t-caption mt-2">그런 규칙이 없어요. 규칙은 홈의 +에서 만들 수 있어요</p>
     </template>
   </UiSheet>
 </template>
@@ -33,9 +42,9 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET } from '@/api/client'
-import { playWithMeTooAPI } from '../../api/api'
+import api, { playWithMeTooAPI } from '../../api/api'
 import RuleThumb from '../rule/RuleThumb.vue'
-import { UiList, UiListItem, UiListSkeleton, UiSheet } from '../ui'
+import { UiInput, UiList, UiListItem, UiListSkeleton, UiSheet } from '../ui'
 import { useToast } from '../../composables/useToast'
 
 const props = defineProps<{ modelValue: boolean; userId: number; name: string; rules?: { ruleId: number; ruleTitle: string; minorCategory?: string }[] }>()
@@ -46,6 +55,24 @@ const { showToast } = useToast()
 const games = ref<{ key: string; title: string; summary: string }[]>([])
 const rules = ref<{ ruleId: number; ruleTitle: string; minorCategory?: string }[]>([])
 const loading = ref(false)
+// 다른 종목 찾기: 만나서 하는 규칙만 (앱 게임은 위 '폰으로')
+const q = ref('')
+const found = ref<{ id: number; ruleTitle: string; minorCategory?: string }[]>([])
+const searched = ref(false)
+let seq = 0
+watch(q, (v) => {
+  const mine = ++seq
+  searched.value = false
+  if (!v.trim()) { found.value = []; return }
+  setTimeout(async () => {
+    if (mine !== seq) return
+    try {
+      const { data } = await api.get('/api/rules/list', { params: { withApp: false, search: v.trim() } })
+      if (mine === seq) found.value = (data || []).slice(0, 6)
+    } catch { if (mine === seq) found.value = [] }
+    if (mine === seq) searched.value = true
+  }, 250)
+})
 const sending = ref(false)
 
 watch(() => props.modelValue, async (open) => {

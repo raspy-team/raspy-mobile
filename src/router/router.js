@@ -169,7 +169,13 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  // 새 화면은 맨 위에서, 뒤로 가면 보던 자리로 (quality-rules E-1). 정해 두지 않아 앞 화면의 스크롤 자리가 그대로 남았다:
+  // 소식이 탭 줄이 가려진 채 열리고, 뒤로 가면 보던 자리가 아니었다. 뒤로 갈 때는 화면이 자료를 받아 길어질 틈을 준다
+  scrollBehavior(to, from, saved) {
+    if (saved) return new Promise((resolve) => setTimeout(() => resolve(saved), 350))
+    return to.path === from.path ? undefined : { top: 0 }
+  },
 })
 
 installOnboardingGuard(router)

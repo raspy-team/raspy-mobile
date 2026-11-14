@@ -82,7 +82,9 @@
     <p v-if="error" class="text-sm text-danger-fg mt-3" role="alert">{{ error }}</p>
 
     <template #footer>
-      <UiButton block size="lg" :loading="submitting" @click="submit">{{ amend ? '이 점수로 다시 내기' : counter ? '이 점수로 돌려보내기' : isGroup && groupMode === 'vote' ? '투표 열기' : '결과 내기' }}</UiButton>
+      <!-- 빈 칸인데 켜진 버튼은 눌러야 안 된다는 것을 안다: 넣을 것이 있을 때만 켠다 (quality-rules E-4) -->
+      <p v-if="!canSend" class="t-micro text-center mb-2">{{ isGroup ? '모든 사람의 결과를 넣으면 낼 수 있어요' : '한 세트 이상 점수를 넣으면 낼 수 있어요' }}</p>
+      <UiButton block size="lg" :loading="submitting" :disabled="!canSend" @click="submit">{{ amend ? '이 점수로 다시 내기' : counter ? '이 점수로 돌려보내기' : isGroup && groupMode === 'vote' ? '투표 열기' : '결과 내기' }}</UiButton>
     </template>
   </UiSheet>
 </template>
@@ -226,6 +228,16 @@ function submitGroup() {
   if (!ps.every((p) => Number.isInteger(p.score) && p.score >= 0 && p.score <= 999)) return (error.value = '모든 사람의 점수를 0~999 사이로 넣어 주세요')
   return send({ sideSets: [ps.map((p) => p.score)] })
 }
+
+// 낼 수 있나: 1:1·팀은 점수가 든 세트가 하나 이상, 여럿이면 모두의 등수·점수(투표는 늘 열 수 있다)
+const canSend = computed(() => {
+  if (isGroup.value) {
+    if (groupMode.value === 'vote') return true
+    return groupMode.value === 'place' ? people.value.every((p) => p.place) : people.value.every((p) => Number.isInteger(p.score))
+  }
+  const filled = (n) => n !== null && n !== '' && n !== undefined
+  return sets.value.some((s) => filled(s.my) && filled(s.opponent))
+})
 
 async function submit() {
   if (isGroup.value) return submitGroup()

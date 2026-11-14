@@ -52,7 +52,7 @@
         </div>
       </UiField>
 
-      <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+      <div class="bottom-bar fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
         <div class="max-w-md mx-auto px-4 py-3">
           <UiButton type="submit" block size="lg" :disabled="!dirty" :loading="saving">저장</UiButton>
         </div>

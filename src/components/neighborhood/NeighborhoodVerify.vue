@@ -25,11 +25,11 @@
         </div>
       </div>
 
-      <p v-if="wrongPlace" class="t-caption text-danger-fg mt-4" role="alert">{{ expected!.name }}을 다시 인증하려면 {{ expected!.name }} 안에서 해 주세요</p>
+      <p v-if="wrongPlace" class="t-caption text-danger-fg mt-4" role="alert">{{ josa(expected!.name, '을/를') }} 다시 인증하려면 {{ expected!.name }} 안에서 해 주세요</p>
       <p v-if="error" class="t-caption text-danger-fg mt-4" role="alert">{{ error }}</p>
       <div class="flex gap-2 mt-6">
         <UiButton variant="secondary" :disabled="saving" @click="reset">다시 찾기</UiButton>
-        <UiButton class="flex-1" :loading="saving" :disabled="wrongPlace || (needReplace && !replaceCode)" @click="verify">{{ found.name }}으로 인증하기</UiButton>
+        <UiButton class="flex-1" :loading="saving" :disabled="wrongPlace || (needReplace && !replaceCode)" @click="verify">{{ withRo(found.name) }} 인증하기</UiButton>
       </div>
       <p class="t-micro mt-3">인증하면 위치를 동네 확인에만 쓰는 데 동의하는 거예요. 좌표는 저장하지 않고 동네 이름만 남겨요.</p>
     </div>
@@ -41,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import { josa, withRo } from '@/utils/format'
 // 동네 인증: GPS → 서버가 행정동을 찾아 보여 줌 → 맞으면 인증. 가입·내 동네·경기 열기 전에 같이 쓴다
 import { ref, computed } from 'vue'
 import { GET, POST } from '@/api/client'

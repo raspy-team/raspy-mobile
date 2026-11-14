@@ -21,7 +21,7 @@
           <span class="block t-caption mt-0.5 break-keep">{{ bossHint(s) }}</span>
         </button>
         <!-- 앱 게임이 아닌 자리의 보스는 붙을 판이 없다: 눌러도 아무 일 없던 버튼을 뺀다 (경로 8 2절) -->
-        <UiButton v-if="appGameKey" variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI 보스 ${s.champion.nickname}와 한 판`" @click="challengeBoss">AI 보스와 한 판</UiButton>
+        <UiButton v-if="appGameKey" variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI 보스 ${josa(s.champion.nickname, '과/와')} 한 판`" @click="challengeBoss">AI 보스와 한 판</UiButton>
       </template>
       <template v-else>
         <button
@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { josa } from '@/utils/format'
 // 챔피언 카드 (규칙 상세·앱 게임 화면). '도전'은 앱 게임이면 그 사람에게만 가는 도전장(?to=), 만나서 하는 경기면 그 챔피언에게 '나랑도해'
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'

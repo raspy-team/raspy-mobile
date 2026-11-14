@@ -296,7 +296,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiRollNumber, UiSheet, UiSkeleton, UiTabs, UiTopBar } from '../../components/ui'
-import { timeAgo } from '../../utils/format'
+import { timeAgo, josa } from '../../utils/format'
 
 const RESULT = {
   win: { label: '승', word: '이김', class: 'bg-fg text-canvas' },
@@ -342,7 +342,7 @@ const compare = computed(() => {
   if (!prev && !diff) return ''
   if (!prev) return `${name}엔 안 했어요`
   if (diff > 0) return `${name}보다 ${diff}판 더 했어요 (${name} ${prev}판)`
-  return diff < 0 ? `${name}엔 ${prev}판 했어요` : `${name}와 같아요 (${prev}판)`
+  return diff < 0 ? `${name}엔 ${prev}판 했어요` : `${josa(name, '과/와')} 같아요 (${prev}판)`
 })
 const periodCards = computed(() => [
   { label: '만난 사람', value: `${period.value.opponents}명` },

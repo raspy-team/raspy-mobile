@@ -72,7 +72,7 @@
             </button>
           </div>
           <p class="t-body mt-4">
-            <template v-if="active.nearbyCount">{{ active.name }}과 근처 동네 <b>{{ active.nearbyCount }}곳</b></template>
+            <template v-if="active.nearbyCount">{{ josa(active.name, '과/와') }} 근처 동네 <b>{{ active.nearbyCount }}곳</b></template>
             <template v-else><b>{{ active.name }}</b>만</template>
           </p>
           <p v-if="active.nearbyNames.length" class="t-caption mt-1">{{ active.nearbyNames.join(', ') }}{{ active.nearbyCount > active.nearbyNames.length ? ' …' : '' }}</p>
@@ -91,6 +91,7 @@
 </template>
 
 <script setup lang="ts">
+import { josa, withRo } from '@/utils/format'
 // 내 동네 (/neighborhood): 동네 2개까지(이름으로 고르기, 원하면 위치로 인증해 '✓'), 지금 동네 고르기, 범위(당근의 '동네 범위'), 지우기.
 // 경기를 열거나 신청하다 동네가 필요해 막히면 api.js가 ?back=&reason=을 붙여 이리로 보낸다. 인증하면 돌아간다
 import { ref, computed, onMounted } from 'vue'
@@ -174,7 +175,7 @@ async function select(n: Mine['neighborhoods'][number]) {
   if (n.active) return
   try {
     data.value = (await POST('/api/neighborhoods/select', { body: { code: n.code } })).data
-    showToast(`지금 동네를 ${n.name}으로 바꿨어요`)
+    showToast(`지금 동네를 ${withRo(n.name)} 바꿨어요`)
   } catch (e) {
     showToast(errMessage(e, '바꾸지 못했어요. 다시 해 주세요'))
   }
@@ -195,7 +196,7 @@ async function setRange(level: number) {
 async function confirmRemove(n: Mine['neighborhoods'][number]) {
   const last = list.value.length === 1
   const ok = await confirmDialog({
-    title: `${n.name}을 지울까요?`,
+    title: `${josa(n.name, '을/를')} 지울까요?`,
     message: last ? '동네가 없으면 경기를 열거나 신청할 수 없어요' : n.active ? '남은 동네가 지금 동네가 돼요' : '다시 쓰려면 그 동네에서 인증해야 해요',
     confirmText: '삭제',
     danger: true,

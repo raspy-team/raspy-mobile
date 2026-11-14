@@ -25,12 +25,12 @@
     <div v-if="game.proposedMatchDate" class="mx-4 mb-3 rounded-xl bg-surface px-4 py-3">
       <template v-if="game.proposedById === me?.id">
         <div class="flex items-center gap-2">
-          <p class="flex-1 min-w-0 t-caption">{{ matchTime(game.proposedMatchDate) }}로 바꾸자고 했어요</p>
+          <p class="flex-1 min-w-0 t-caption">{{ withRo(matchTime(game.proposedMatchDate)) }} 바꾸자고 했어요</p>
           <UiButton size="sm" variant="ghost" @click="emit('answer-time', false)">거두기</UiButton>
         </div>
       </template>
       <div v-else class="flex items-center gap-2">
-        <p class="flex-1 min-w-0 t-caption">{{ opponent?.name }}님: {{ matchTime(game.proposedMatchDate) }}로 바꿀까요?</p>
+        <p class="flex-1 min-w-0 t-caption">{{ opponent?.name }}님: {{ withRo(matchTime(game.proposedMatchDate)) }} 바꿀까요?</p>
         <UiButton size="sm" variant="secondary" @click="emit('answer-time', false)">그대로</UiButton>
         <UiButton size="sm" @click="emit('answer-time', true)">좋아요</UiButton>
       </div>
@@ -89,7 +89,7 @@
 import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
-import { matchTime, place } from '../../utils/format'
+import { matchTime, place, withRo } from '../../utils/format'
 import { TEAM_NAMES, venuePlace, isRemote, teamChatOpen } from '../../utils/gameFormat'
 import { placeMapLink } from '../../utils/kakaoMap'
 

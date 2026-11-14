@@ -8,6 +8,9 @@
       <div
         v-show="showModal"
         ref="sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label="댓글"
         class="w-full raspy-bot max-w-xl flex flex-col rounded-t-2xl bg-surface"
         :style="{
           height: `${sheetHeight}px`,

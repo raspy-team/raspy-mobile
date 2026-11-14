@@ -41,7 +41,7 @@
         </UiCard>
         <CategoryEditor v-else v-model="category" />
         <p v-if="error" class="text-sm text-danger" role="alert">{{ error }}</p>
-        <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+        <div class="bottom-bar fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
           <div class="max-w-xl mx-auto px-4 py-3 flex gap-2">
             <UiButton variant="secondary" size="lg" @click="step = 'write'">이전</UiButton>
             <UiButton type="submit" class="flex-1" size="lg" :loading="submitting">규칙 만들기</UiButton>
@@ -103,7 +103,7 @@
 
       <p v-if="error" class="text-sm text-danger" role="alert">{{ error }}</p>
 
-      <div class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+      <div class="bottom-bar fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
         <div class="max-w-xl mx-auto px-4 py-3">
           <UiButton type="submit" block size="lg" :loading="submitting">{{ editId ? '수정 요청 보내기' : '다음' }}</UiButton>
         </div>

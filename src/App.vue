@@ -65,6 +65,17 @@ import { serverDown, offline } from './stores/server'
 import { registerFcmToken, setupPushListeners } from './utils/nativeBridge'
 
 const route = useRoute()
+// 키보드가 올라와 있는 동안, 화면 틀의 아래 끝에서 보이는 화면의 아래 끝까지를 --kb-inset에 적는다 (아래 고정 버튼 줄 .bottom-bar가 쓴다)
+if (window.visualViewport) {
+  const vv = window.visualViewport
+  const syncKeyboard = () => {
+    const up = vv.height < window.screen.height * 0.75
+    document.documentElement.classList.toggle('kb-open', up)
+    document.documentElement.style.setProperty('--kb-inset', up ? `${Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height))}px` : '0px')
+  }
+  vv.addEventListener('resize', syncKeyboard)
+  vv.addEventListener('scroll', syncKeyboard)
+}
 // 서버가 다시 답하면 띠를 거둔다. 보던 화면은 다음 요청에서 저절로 이어진다
 async function recheck() {
   try {
@@ -162,6 +173,8 @@ onMounted(() => {
 // 내 경기 화면은 카드에 이미 '점수판 열기'가 있어서 띠를 띄우지 않는다
 // 띠는 아래 탭이 있는 화면에만 띄운다: 탭이 없는 화면(대화·결과 확인·꾸미기·글 쓰는 판)은 아래에 입력 줄·주 버튼이 있어 띠가 그것을 덮었다 (정돈됨 바퀴에서 대화 입력 줄이 가려진 것을 봄)
 const showActiveBanner = computed(() => footerTab.value !== null && route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path) && !/^\/play\/[^/]+\/live/.test(route.path)) // 앱 게임 한 판 중에도 띠가 판을 가렸다 (11/13)
+// 진행 중 띠가 떠 있으면 화면 맨 아래에 그 높이만큼 자리를 더 둔다 (tailwind.css의 html.has-banner): 맨 아래 줄이 띠 밑에 가려진 채 더 내려가지 않았다 (quality-rules P-3)
+watch(() => showActiveBanner.value && !!activeGame.value, (on) => document.documentElement.classList.toggle('has-banner', on), { immediate: true })
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)
 }

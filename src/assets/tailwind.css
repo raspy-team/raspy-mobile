@@ -73,7 +73,7 @@
 @layer utilities {
   .text-body { font-size: 0.9375rem; }
   .text-heading { font-size: 1.0625rem; }
-  .text-badge { font-size: 11px; }
+  .text-badge { font-size: 12px; }
 }
 /* 여러 화면에서 쓰는 스크롤 유틸리티 */
 @layer utilities {
@@ -149,6 +149,18 @@
   input.ui-control.ui-date { color: transparent; }
   input.ui-control.ui-date::-webkit-date-and-time-value { opacity: 0; }
 }
+
+/* 화면 아래에 고정된 버튼 줄. 키보드가 오르면 키보드 바로 위로 올라온다 (--kb-inset은 App.vue가 보이는 화면에 맞춰 적는다).
+   아이폰은 화면 틀이 키보드에 줄지 않아, 아래 고정 줄(가입의 '시작하기', 프로필 '저장', 규칙 '다음')이 키보드 밑에 깔려 있었다 (quality-rules P-3) */
+.bottom-bar { bottom: var(--kb-inset, 0px); }
+html.kb-open .bottom-bar { padding-bottom: 0; box-shadow: 0 160px 0 0 rgb(var(--c-canvas)); }
+
+/* 키보드가 올라와 있는 동안 접는 것·좁히는 것 (가입 화면처럼 한 화면에 입력·동의·버튼이 다 보여야 하는 곳) */
+html.kb-open .kb-hide { display: none; }
+html.kb-open .kb-tight { margin-top: 0.5rem; }
+
+/* 진행 중인 경기 띠가 떠 있는 동안: 화면 끝에 띠 높이만큼 자리 */
+html.has-banner main::after { content: ''; display: block; height: 5rem; }
 
 /* 아이폰 노치·홈 바 영역 */
 @layer utilities {

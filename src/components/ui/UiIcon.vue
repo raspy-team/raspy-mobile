@@ -53,7 +53,7 @@ import {
   CircleDot, Spade, Type, CalendarDays, MessagesSquare, Grid2x2, MessageCircleQuestion, RefreshCw, Map, Gem, Calculator, Hash, Bomb,
   Goal, Lightbulb, Feather, Vibrate, Dumbbell, Link, Volume2,
   Flame, Crosshair, Blocks, Mountain, Percent, BicepsFlexed, Brain, Grab, SquareDashed, Radar, PiggyBank, Building2, Shield,
-  Shirt, Smile, Lock, QrCode, MessageSquareText,
+  Shirt, Smile, Lock, QrCode, MessageSquareText, WifiOff, SlidersHorizontal,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -75,6 +75,9 @@ const ICONS = {
   'exclamation-circle': CircleAlert, eye: Eye, 'eye-slash': EyeOff, 'file-lines': FileText,
   flag: Flag, 'flag-checkered': FlagTriangleRight, folder: Folder, 'folder-open': FolderOpen,
   gavel: Gavel, gear: Settings, hand: Hand, heading: Heading, heart: Heart, 'hourglass-half': Hourglass,
+  // 못 불러왔을 때의 빈 상태 그림. 표에 없어 물음표 동그라미가 떴다 (quality-rules P-2)
+  wifi: WifiOff,
+  sliders: SlidersHorizontal,
   home: House, images: Images, keyboard: Keyboard, inbox: Inbox, 'info-circle': Info, instagram: Instagram,
   'layer-group': Layers, list: List, 'list-ol': ListOrdered, 'location-dot': MapPin,
   gamepad: Gamepad2, minus: Minus, shield: Shield,

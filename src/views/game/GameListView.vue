@@ -144,6 +144,7 @@
 </template>
 
 <script setup>
+import { josa } from '@/utils/format'
 // 홈: 앱 게임을 한 사람은 '내 판'이 먼저, 동네 경기만 하는 사람은 동네 경기 목록 (목적 판정 11/11 4번)
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -213,7 +214,7 @@ async function fetchRecentResults() {
 }
 function resultLine(d) {
   const name = d.opponent?.nickname ? `${d.opponent.nickname}님` : '상대'
-  return d.result === 'WIN' ? `${name}에게 이겼어요` : d.result === 'LOSE' ? `${name}에게 졌어요` : `${name}와 비겼어요`
+  return d.result === 'WIN' ? `${name}에게 이겼어요` : d.result === 'LOSE' ? `${name}에게 졌어요` : `${josa(name, '과/와')} 비겼어요`
 }
 // 임기응변은 점수 대신 등급이 이 사람의 말이다
 function gradeOf(d) {

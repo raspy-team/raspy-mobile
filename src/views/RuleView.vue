@@ -31,28 +31,10 @@
       <!-- 거르기는 한 줄 (quality-rules R-4: 상황 넷·능력·종류 세 줄이 화면 위 1/4을 차지했다).
            종류(전체·오프라인·앱 게임 …)가 앞, 그 뒤로 상황과 능력을 창에서 고르는 칩 (docs/direction.md '찾기') -->
       <div class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-3 pb-3 overflow-x-auto no-scrollbar">
-        <UiChip
-          v-for="k in kinds"
-          :key="k.value"
-          role="radio"
-          :aria-checked="kind === k.value"
-          class="flex-shrink-0 whitespace-nowrap"
-          :selected="kind === k.value"
-          @click="setQuery({ kind: k.value === 'ALL' ? '' : k.value })"
-        >
-          {{ k.label }}
-        </UiChip>
+        <!-- '조건'을 맨 앞에: 상황·능력 칩 다섯은 옆으로 밀어야 보여서 있는 줄 몰랐다 (11/15 고병연: 능력 칩이 안 보인다). 고른 수를 함께 보인다 -->
+        <UiChip class="flex-shrink-0 whitespace-nowrap" icon="sliders" :selected="picked > 0" @click="sheet = 'all'">조건<template v-if="picked"> {{ picked }}</template></UiChip>
         <span class="flex-shrink-0 w-px h-5 bg-line-strong" aria-hidden="true"></span>
-        <UiChip
-          v-for="f in filters"
-          :key="f.key"
-          class="flex-shrink-0 whitespace-nowrap"
-          :selected="!!qs[f.key]"
-          @click="sheet = f.key"
-        >
-          {{ labelOf(f.key) || f.question }}
-          <UiIcon name="fas fa-chevron-down" class="text-[10px]" aria-hidden="true" />
-        </UiChip>
+        <UiChip v-for="k in kinds" :key="k.value" role="radio" :aria-checked="kind === k.value" class="flex-shrink-0 whitespace-nowrap" :selected="kind === k.value" @click="setQuery({ kind: k.value === 'ALL' ? '' : k.value })">{{ k.label }}</UiChip>
       </div>
     </div>
 
@@ -113,12 +95,23 @@
       </div>
     </main>
 
-    <!-- 상황 하나 고르기 -->
-    <UiSheet :model-value="!!sheet" :title="current?.question" @update:model-value="(v) => !v && (sheet = '')">
-      <div v-if="current" class="flex flex-wrap gap-2">
-        <UiChip :selected="!qs[current.key]" @click="pick('')">상관없음</UiChip>
-        <UiChip v-for="o in choices(current.key)" :key="o.key" :selected="qs[current.key] === o.key" @click="pick(o.key)">{{ o.label }}</UiChip>
+    <!-- 조건 고르기: 상황 넷과 능력을 한 장에서. 고르는 대로 뒤의 목록이 바뀌고, 아래 버튼으로 닫는다 -->
+    <UiSheet :model-value="sheet === 'all'" title="조건" @update:model-value="(v) => !v && (sheet = '')">
+      <div class="space-y-6">
+        <section v-for="f in filters" :key="f.key">
+          <h3 class="t-label mb-2">{{ f.question }}</h3>
+          <div class="flex flex-wrap gap-2">
+            <UiChip :selected="!qs[f.key]" @click="setQuery({ [f.key]: '' })">상관없음</UiChip>
+            <UiChip v-for="o in choices(f.key)" :key="o.key" :selected="qs[f.key] === o.key" @click="setQuery({ [f.key]: qs[f.key] === o.key ? '' : o.key })">{{ o.label }}</UiChip>
+          </div>
+        </section>
       </div>
+      <template #footer>
+        <div class="flex gap-2">
+          <UiButton v-if="picked" variant="secondary" @click="setQuery(Object.fromEntries(FILTER_KEYS.map((k) => [k, ''])))">모두 지우기</UiButton>
+          <UiButton class="flex-1" @click="sheet = ''">{{ loading ? '찾는 중' : `규칙 ${rules.length}개 보기` }}</UiButton>
+        </div>
+      </template>
     </UiSheet>
   </div>
 </template>
@@ -156,12 +149,12 @@ const PICK_KINDS = [
 ]
 // 주소 이름 → 질문, category-options의 목록 이름
 const SITUATIONS = [
-  { key: 'place', question: '어디서?', list: 'places' },
-  { key: 'party', question: '몇 명?', list: 'parties' },
-  { key: 'length', question: '얼마나?', list: 'lengths' },
-  { key: 'gear', question: '준비물?', list: 'gears' },
+  { key: 'place', question: '어디서', list: 'places' },
+  { key: 'party', question: '몇 명', list: 'parties' },
+  { key: 'length', question: '얼마나', list: 'lengths' },
+  { key: 'gear', question: '준비물', list: 'gears' },
   // 필요한 능력도 같은 칩·같은 창으로 (예전엔 칩 한 줄을 따로 차지했다)
-  { key: 'ability', question: '능력?', list: 'abilities' },
+  { key: 'ability', question: '필요한 능력', list: 'abilities' },
 ]
 const FILTER_KEYS = SITUATIONS.map((f) => f.key)
 
@@ -194,7 +187,8 @@ const kinds = computed(() => (picking.value ? PICK_KINDS : KINDS))
 const q = ref(qs.value.q || '')
 // 경기에 쓸 규칙을 고르는 중이면 능력은 숨긴다: 종목·인원이 이미 정해져 능력으로 찾지 않는다 (목적 판정 6)
 const filters = computed(() => SITUATIONS.filter((f) => f.key !== 'ability' || !picking.value))
-const current = computed(() => SITUATIONS.find((f) => f.key === sheet.value))
+// 고른 조건 수 ('조건 2')
+const picked = computed(() => filters.value.filter((f) => qs.value[f.key]).length)
 const filtered = computed(() => !!qs.value.q || FILTER_KEYS.some((k) => qs.value[k]))
 
 function choices(key) {

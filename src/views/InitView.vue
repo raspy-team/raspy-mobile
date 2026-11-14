@@ -272,5 +272,5 @@ function loginWith(provider) {
 .g-lead { background: #fff; color: #1f1f1f; }
 .g-quiet { background: #131314; color: #e3e3e3; border: 1px solid #8e918f; }
 html[data-theme='light'] .g-lead { background: #131314; color: #e3e3e3; }
-html[data-theme='light'] .g-quiet { background: #f2f2f2; color: #1f1f1f; border-color: transparent; }
+html[data-theme='light'] .g-quiet { background: #fff; color: #1f1f1f; border-color: #747775; }
 </style>

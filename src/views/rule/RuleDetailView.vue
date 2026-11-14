@@ -73,7 +73,7 @@
     </main>
 
     <!-- 아래 고정: 요약 + 경기 열기 -->
-    <div v-if="rule" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+    <div v-if="rule" class="bottom-bar fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
       <div class="max-w-2xl mx-auto px-4 py-3 flex items-center gap-4">
         <div class="flex-1 min-w-0">
           <p class="t-heading truncate">{{ winSummary(rule) }}</p>

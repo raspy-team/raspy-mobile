@@ -53,7 +53,7 @@
     <!-- 닉네임 + (처음이면) 약관 한 줄. 아이디는 자동으로 지어 접어 둔다 -->
     <main v-else class="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-40">
       <h1 class="t-title">어떻게 불러드릴까요?</h1>
-      <p class="t-body text-fg-muted mt-2">상대에게 보이는 이름이에요.</p>
+      <p class="t-body text-fg-muted mt-2">상대에게 보이는 이름이에요</p>
 
       <!-- 사진은 묻지 않는다. 등급을 남기러 온 사람이 이 순간 고를 이유가 없고, 큰 동그라미가 '해야 하나' 멈추게 했다. 내 정보 편집에 있다 (목적 판정 11/11 부분 1) -->
       <div class="mt-6 space-y-5">
@@ -68,7 +68,8 @@
         />
         <!-- 아이디는 접어 둔다: 가입 때 적은 아이디, 소셜 가입이면 서버가 지어 둔 아이디(u_…). 영문 아이디를 지어내야 '다음'이 눌리던 것을 없앴다 (목적 판정 11/11 부분 1) -->
         <!-- 서버가 지어 둔 아이디(u_…)는 보이지 않는다: "@u_k3j9x2ab"가 고장 난 아이디처럼 보였다 (경로 1 리뷰 N7) -->
-        <p v-if="username && !editingUsername && username.startsWith('u_')" class="t-caption">
+        <!-- 키보드가 올라와 있는 동안은 접는다(kb-hide): '시작하기'가 키보드 위로 올라오면 그 사이에 닉네임과 동의가 다 보여야 한다 (quality-rules P-3) -->
+        <p v-if="username && !editingUsername && username.startsWith('u_')" class="t-caption kb-hide">
           아이디는 나중에 정해도 돼요
           <button type="button" class="hit underline underline-offset-2 ml-1" @click="username = ''; editingUsername = true">지금 정하기</button>
         </p>
@@ -90,7 +91,7 @@
       </div>
 
       <!-- 처음 가입이면 약관을 같은 화면에 한 줄로. '동의하고 다음'을 한 번 더 누르지 않게 -->
-      <div v-if="needTerms" class="mt-8">
+      <div v-if="needTerms" class="mt-8 kb-tight">
         <button type="button" role="checkbox" :aria-checked="allAgreed" class="w-full flex items-center gap-3 min-h-[48px] text-left" @click="toggleAll">
           <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" :class="allAgreed ? 'bg-primary text-primary-on' : 'border-2 border-line-strong'">
             <UiIcon name="fas fa-check" class="text-xs" v-if="allAgreed" aria-hidden="true" />
@@ -104,12 +105,12 @@
     </main>
 
     <!-- 하단 버튼 -->
-    <div v-if="!loading" class="fixed bottom-0 inset-x-0 bg-canvas pb-safe">
+    <div v-if="!loading" class="bottom-bar fixed bottom-0 inset-x-0 bg-canvas pb-safe">
       <div class="max-w-md mx-auto px-4 py-3">
         <UiButton v-if="step === 'terms'" block size="lg" :disabled="!allAgreed" :loading="saving" @click="submitTerms">동의하고 계속하기</UiButton>
         <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">시작하기</UiButton>
         <!-- 잘못 들어온 계정이면 빠져나갈 길 (목적 판정 11/11 부분 1) -->
-        <button type="button" class="hit block mx-auto mt-1 t-micro underline underline-offset-2 min-h-[36px]" @click="otherAccount">다른 계정으로 시작</button>
+        <button type="button" class="hit block mx-auto mt-1 t-micro underline underline-offset-2 min-h-[36px] kb-hide" @click="otherAccount">다른 계정으로 시작</button>
       </div>
     </div>
 

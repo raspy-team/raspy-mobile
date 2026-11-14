@@ -93,6 +93,23 @@ export function withRo(word) {
   return s + (jong === 0 || jong === 8 ? '로' : '으로')
 }
 
+// 낱말 끝 받침에 맞는 조사: josa('민준', '이/가') → '민준이', josa('지호', '을/를') → '지호를'. '으로/로'는 withRo와 같다(ㄹ 받침은 '로').
+// 이름·학교·동네처럼 무엇이 올지 모르는 말 뒤에 조사를 그냥 붙이면 "지호이 이겼어요"가 된다 (quality-rules P-5)
+export function josa(word, pair) {
+  const s = String(word ?? '')
+  const [withJong, noJong] = pair.split('/')
+  if (withJong === '으로') return withRo(s)
+  const c = s.charCodeAt(s.length - 1) - 0xac00
+  let has
+  if (c >= 0 && c <= 11171) has = c % 28 !== 0
+  else {
+    // 숫자는 읽는 소리로(0 영·1 일·3 삼·6 육·7 칠·8 팔은 받침), 영문은 끝소리가 닫히는 글자면 받침으로 본다
+    const d = s.slice(-1).toLowerCase()
+    has = d !== '' && '013678bcdgklmnpqt'.includes(d)
+  }
+  return s + (has ? withJong : noJong)
+}
+
 // AI가 상대가 되기까지 기다리는 시간 (서버의 botAfterSeconds): '15초', '1분', '1시간'
 export function waitText(seconds) {
   if (seconds < 60) return `${seconds}초`

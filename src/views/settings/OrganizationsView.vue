@@ -134,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { dayOnly } from '@/utils/format'
+import { dayOnly, withRo, josa } from '@/utils/format'
 // 설정 > 소속 (docs/organizations.md 2절): 인증한 소속(공개 범위·떼기), 기다리는 신청, 인증하기.
 // 결과는 알림으로 오고, 열려 있으면 refreshOnChange로 바로 다시 불러온다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
@@ -345,11 +345,11 @@ async function pickOnly() {
     // 학교 대항에서 고르러 왔으면 끝났다고 말하고 온 화면으로 돌려보낸다 (11/14 폰으로 한 바퀴: 고른 뒤 끝난 느낌이 없고 직접 뒤로 가야 했다)
     const back = typeof route.query.back === 'string' && route.query.back.startsWith('/') ? route.query.back : ''
     if (back) {
-      showToast(`${name}로 참전했어요. 내 등급이 학교 평균에 들어갔어요`)
+      showToast(`${withRo(name)} 참전했어요. 내 등급이 학교 평균에 들어갔어요`)
       router.replace(back)
       return
     }
-    showToast(`${name}를 골랐어요`)
+    showToast(`${josa(name, '을/를')} 골랐어요`)
     await load()
   } catch (e: unknown) {
     const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message

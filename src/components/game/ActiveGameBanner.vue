@@ -8,8 +8,9 @@
       <div class="max-w-xl mx-auto flex items-center gap-3 bg-surface-2 border border-line-strong rounded-xl pl-4 pr-1 py-1">
         <span class="w-2 h-2 rounded-full bg-signal-fg animate-pulse flex-shrink-0" aria-hidden="true"></span>
         <div class="flex-1 min-w-0">
-          <p class="text-sm text-fg font-medium truncate">경기가 진행 중이에요</p>
-          <p class="t-micro truncate">{{ game.ruleTitle }} · {{ game.player1?.nickname }} vs {{ game.player2?.nickname }}</p>
+          <p class="text-sm text-fg font-medium">경기가 진행 중이에요</p>
+          <!-- 규칙 이름만, 넘치면 꺾는다: "탁구 11점 3세트 · 주말 스매셔 vs…"로 늘 잘렸다 (quality-rules P-1) -->
+          <p class="t-micro break-keep">{{ game.ruleTitle }}</p>
         </div>
         <UiButton size="sm" variant="tonal" @click="emit('open')">점수판 열기</UiButton>
         <UiIconButton icon="fas fa-xmark" label="닫기" @click="emit('dismiss')" />

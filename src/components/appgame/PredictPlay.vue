@@ -20,12 +20,13 @@
       <span class="t-title text-fg-subtle row-start-1 col-start-2">:</span>
     </div>
 
-    <UiButton block size="lg" class="mt-10" :loading="submitting" @click="finish">{{ goals[0] }} : {{ goals[1] }}로 낼게요</UiButton>
+    <UiButton block size="lg" class="mt-10" :loading="submitting" @click="finish">{{ goals[0] }} : {{ withRo(goals[1]) }} 낼게요</UiButton>
     <p class="t-caption text-center mt-2">경기가 끝나면 실제 스코어로 채점해요. 승패를 맞히면 5점, 골까지 맞힐수록 더 (최대 10점)</p>
   </div>
 </template>
 
 <script setup lang="ts">
+import { withRo } from '@/utils/format'
 // 스코어 맞히기 한 판 (2-8 경기 밖 결과). 문제는 서버가 준 실제 경기(JSON). 시간이 다 되면 고른 스코어로 낸다
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton, UiIconButton } from '../ui'

@@ -54,7 +54,7 @@ async function load() {
         sub: result ? '결과가 올라왔어요. 눌러서 확인해요' : g.matchDate ? matchTime(g.matchDate) : '시간을 정해야 해요',
       }))
   } catch {
-    items.value = [] // 못 불러와도 홈은 그대로 (내 경기 탭에서 다시 본다)
+    // 못 불러오면 보이던 것을 그대로 둔다: 잠깐의 실패에 잡힌 경기가 홈에서 사라졌다 (quality-rules P-8). 서버가 안 닿으면 위의 띠가 말한다
   }
 }
 

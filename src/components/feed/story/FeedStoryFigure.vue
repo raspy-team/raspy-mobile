@@ -8,7 +8,7 @@
       <span class="text-fg-subtle">{{ champ.fromName }}</span>
       <span class="text-fg-subtle" aria-hidden="true">→</span>
       <span class="font-semibold text-fg">{{ winnerName }}</span>
-      <span v-if="champ.heldDays" class="w-full t-micro">{{ champ.fromName }}은 {{ champ.heldDays }}일 동안 지켰어요</span>
+      <span v-if="champ.heldDays" class="w-full t-micro">{{ josa(champ.fromName, '은/는') }} {{ champ.heldDays }}일 동안 지켰어요</span>
     </div>
 
     <!-- 이변: 이긴 쪽의 경기 전 이길 확률. 진 쪽 확률은 적지 않는다 -->
@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { josa } from '@/utils/format'
 // story(서버 feed_story가 계산한 이야기)의 picked에 맞는 그림 하나. 그 그림에 쓸 기록이 없으면 흐름 → 세트 칸 → 없음 순으로 내려간다
 // 이름·점수는 카드가 이미 보여 주니 다시 쓰지 않는다. 진 쪽을 깎는 말·숫자는 넣지 않는다 (docs/feed-media.md)
 import { computed } from 'vue'

@@ -38,7 +38,7 @@
         <!-- 증인: 결과를 낸 순간 중계를 보던 관중 (docs/live-spectator-review.md C) -->
         <p v-if="witnesses" class="t-caption text-center mt-1">관중 {{ witnesses }}명이 지켜본 경기</p>
         <!-- 이 경기로 바뀐 내 실력 점수: 이긴 사람이 가장 먼저 궁금한 숫자라 결과 바로 밑에 -->
-        <p v-if="myRating && confirmed && !myRating.provisional" class="mt-3 flex items-baseline justify-center gap-2 feel-rise feel-rise-2" :aria-label="`실력 점수 ${myRating.before}에서 ${myRating.after}로`">
+        <p v-if="myRating && confirmed && !myRating.provisional" class="mt-3 flex items-baseline justify-center gap-2 feel-rise feel-rise-2" :aria-label="`실력 점수 ${myRating.before}에서 ${withRo(myRating.after)}`">
           <span class="t-caption">실력 점수</span>
           <span class="t-heading tabular-nums">{{ myRating.before }} → {{ myRating.after }}</span>
           <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta === 0 ? "±0" : ratingDelta }}</span>
@@ -353,14 +353,14 @@
   </main>
 
   <!-- 하단 고정: 확인할 사람은 확인, 확정된 뒤에는 참가자만 평가 제출 -->
-  <div v-if="pending.canAnswer && !isLoading" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+  <div v-if="pending.canAnswer && !isLoading" class="bottom-bar fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
     <div class="max-w-xl mx-auto px-4 py-3">
       <UiButton block size="lg" :loading="isAnswering === 'confirm'" @click="confirmResult">결과가 맞아요</UiButton>
     </div>
   </div>
   <!-- 평가 보내기는 별을 다 누른 순간 아래에서 올라온다. 그 전에는 꺼진 막대로 화면을 가리지 않는다 (11/3) -->
   <Transition name="ui-sheet">
-    <div v-if="canReview && !isLoading && !resultError && review.manner && review.performance" class="fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
+    <div v-if="canReview && !isLoading && !resultError && review.manner && review.performance" class="bottom-bar fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
       <div class="max-w-xl mx-auto px-4 py-3">
         <UiButton block size="lg" :loading="isSubmitting" @click="submitReviewAndGoHome">평가 보내기</UiButton>
       </div>
@@ -416,7 +416,7 @@ import { getMyId } from '@/utils/me'
 import { GET, POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { useActiveGamePolling } from '../../composables/useActiveGamePolling'
-import { matchTime, who } from '../../utils/format'
+import { matchTime, who, withRo } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { NEXT_ROUND } from '@/utils/verdict'

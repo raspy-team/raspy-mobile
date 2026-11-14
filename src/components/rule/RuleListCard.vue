@@ -18,7 +18,7 @@
           <span class="truncate">챔피언 {{ rule.currentChampion.nickname }}</span>
           <span aria-hidden="true">·</span>
         </template>
-        <span class="flex-shrink-0">{{ rule.playCount ? `경기 ${rule.playCount}번` : '아직 경기 없음' }}</span>
+        <span v-if="rule.playCount" class="flex-shrink-0">경기 {{ rule.playCount }}번</span>
       </span>
     </span>
   </RouterLink>

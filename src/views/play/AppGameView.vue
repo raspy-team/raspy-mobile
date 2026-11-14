@@ -279,10 +279,8 @@
         <!-- 하루 한 판 게임(오늘의 초성)은 '한 판 더'를 눌러도 할 수 없어 빼고, 공유가 다음 행동이 된다 -->
         <UiButton v-if="game?.dailyLimit !== 1" block size="lg" class="mt-4" :loading="starting" :disabled="!game?.available" @click="start">{{ improvResult?.empty ? '다시 하기' : '한 판 더' }}</UiButton>
         <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
-        <div class="grid grid-cols-2 gap-2 mt-2">
-          <UiButton block variant="ghost" @click="closeResult">돌아가기</UiButton>
-          <UiButton block variant="ghost" icon="home" to="/">홈으로</UiButton>
-        </div>
+        <!-- '돌아가기'는 왼쪽 위 뒤로와 같은 일이라 뺐다 (quality-rules R-1). 뒤로 = 이 게임의 첫 화면, 아래 = 홈 -->
+        <UiButton block variant="ghost" icon="home" class="mt-2" to="/">홈으로</UiButton>
         <!-- 학교 대항: 내 등급이 우리 학교 평균에 어떻게 들어갔나 (11/14, 다시 올 이유) -->
         <ImprovSchools v-if="key === 'improv' && improvResult && !improvResult.empty" class="mt-4" :grade="improvResult.grade" />
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
@@ -395,7 +393,7 @@
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
             <!-- 준비 중인 게임에는 첫 판을 권하지 않는다 (바로 밑의 '준비 중인 게임이에요'와 어긋났다) -->
             <!-- 임기응변은 등급 하나로 말한다: 1500·0승 0패·49점이 '6등급 남았어요' 바로 밑에서 서로 어긋났다 (11/13 실제 기기 한 바퀴) -->
-            <div v-if="played && key !== 'improv'" class="grid gap-2 mt-4 text-center" :class="game.recordable && game.myBest == null ? 'grid-cols-2' : 'grid-cols-3'">
+            <div v-if="played && key !== 'improv'" class="grid gap-2 mt-4 text-center" :class="(game.recordable ? game.myBest != null : game.myDraws > 0) ? 'grid-cols-3' : 'grid-cols-2'">
               <span>
                 <span class="block t-title tabular-nums">{{ game.myRating }}</span>
                 <span class="block t-micro">실력 점수</span>
@@ -409,7 +407,8 @@
                 <span class="block t-title tabular-nums">{{ game.myBest }}<span class="t-caption">{{ game.scoreUnit }}</span></span>
                 <span class="block t-micro">최고 기록</span>
               </span>
-              <span v-else-if="!game.recordable">
+              <!-- 0이면 칸을 두지 않는다 (quality-rules R-6) -->
+              <span v-else-if="!game.recordable && game.myDraws > 0">
                 <span class="block t-title tabular-nums">{{ game.myDraws }}</span>
                 <span class="block t-micro">무승부</span>
               </span>

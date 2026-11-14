@@ -95,7 +95,8 @@
       </div>
 
       <!-- 숫자 한 줄: 한 카드 안에 칸을 선으로 나눈다 (quality-rules A-5: 상자 없이 떠 있어 어디에 속한 숫자인지 흐렸다). 승률은 경기가 있을 때만 -->
-      <div class="mt-4 flex text-center rounded-xl bg-surface py-3 divide-x divide-line">
+      <!-- 남의 프로필에서 0인 칸은 보이지 않는다(내 것은 들어가는 길이라 둔다). 다 0이면 줄을 두지 않는다 (quality-rules R-6) -->
+      <div v-if="user.isMe || user.recordsHidden || stats.totalGames || bests.length || stats.friends || seatLines.length" class="mt-4 flex text-center rounded-xl bg-surface py-3 divide-x divide-line">
         <!-- 경기·승률은 누르면 기록 화면. 기록을 '나만'으로 둔 사람은 서버가 숫자를 비워 보낸다 -->
         <div v-if="user.recordsHidden" class="flex-1">
           <p class="t-heading text-fg-subtle">–</p>
@@ -107,7 +108,7 @@
           <p class="t-heading tabular-nums">{{ bests.length }}</p>
           <p class="t-micro mt-0.5">게임 기록 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
-        <RouterLink v-else :to="`/profile/${user.id}/stats`" class="flex-1">
+        <RouterLink v-else-if="user.isMe || stats.totalGames" :to="`/profile/${user.id}/stats`" class="flex-1">
           <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
           <p class="t-micro mt-0.5">경기 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
@@ -121,7 +122,7 @@
           <p class="t-micro mt-0.5">챔피언</p>
         </div>
         <!-- AI는 친구가 없다 (docs/ai-residents.md '채우지 않는 곳': 친구) -->
-        <button v-if="!user.isBot" type="button" class="flex-1" @click="openFriends">
+        <button v-if="!user.isBot && (user.isMe || stats.friends)" type="button" class="flex-1" @click="openFriends">
           <p class="t-heading tabular-nums">{{ stats.friends || 0 }}</p>
           <p class="t-micro mt-0.5">친구 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </button>

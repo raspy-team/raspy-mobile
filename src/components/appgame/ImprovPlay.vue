@@ -3,7 +3,6 @@
   <div ref="root" class="scroll-mt-[calc(env(safe-area-inset-top)+4.5rem)]" :class="typing && phase === 'answer' ? 'pb-[50vh]' : ''" @focusout="onTypeEnd">
     <div class="flex items-center justify-between">
       <span class="t-caption">상황 {{ index + 1 }}/{{ situations.length }} · {{ SLOT[current?.slot ?? ''] ?? '' }}</span>
-      <span v-if="phase === 'answer'" class="t-mono tabular-nums" :class="remaining <= 10 ? 'text-danger-fg' : 'text-fg-muted'">0:{{ String(remaining).padStart(2, '0') }}</span>
     </div>
 
     <template v-if="current">

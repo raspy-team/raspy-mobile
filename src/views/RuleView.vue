@@ -28,39 +28,9 @@
         </label>
       </div>
 
-      <!-- 찾기 상황 네 가지: 누르면 시트에서 고른다 (docs/direction.md '찾기') -->
-      <div class="max-w-2xl mx-auto flex gap-2 px-4 pt-3 overflow-x-auto no-scrollbar">
-        <UiChip
-          v-for="f in SITUATIONS"
-          :key="f.key"
-          class="flex-shrink-0 whitespace-nowrap"
-          :selected="!!qs[f.key]"
-          @click="sheet = f.key"
-        >
-          {{ labelOf(f.key) || f.question }}
-          <UiIcon name="fas fa-chevron-down" class="text-[10px]" aria-hidden="true" />
-        </UiChip>
-      </div>
-
-      <!-- 잘하려면: 능력 칩 (가로로 넘긴다). 경기에 쓸 규칙을 고르는 중이면 숨긴다: 종목·인원이 이미 정해져 능력으로 찾지 않는다 (목적 판정 6) -->
-      <div v-if="options && !picking" class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-2 pb-3 overflow-x-auto no-scrollbar" role="group" aria-label="필요한 능력">
-        <!-- '잘하려면'만으로는 무슨 줄인지 몰랐다 (경로 6 리뷰): 무엇으로 찾는 줄인지 말한다 -->
-        <span class="t-micro flex-shrink-0">필요한 능력</span>
-        <UiChip
-          v-for="a in options.abilities"
-          :key="a.key"
-          class="flex-shrink-0 whitespace-nowrap !h-8 !px-3"
-          :selected="ability === a.key"
-          @click="setQuery({ ability: ability === a.key ? '' : a.key })"
-        >
-          {{ a.label }}
-        </UiChip>
-      </div>
-    </div>
-
-    <main class="max-w-2xl mx-auto px-4 pb-16">
-      <!-- 종류: 모두 · 오프라인 · 앱 게임 · 인기 게임 (경기 열 규칙을 고를 때는 만나서 하는 것과 인기 게임만) -->
-      <div class="flex gap-2 pt-4 overflow-x-auto no-scrollbar -mx-4 px-4" role="radiogroup" aria-label="종류">
+      <!-- 거르기는 한 줄 (quality-rules R-4: 상황 넷·능력·종류 세 줄이 화면 위 1/4을 차지했다).
+           종류(전체·오프라인·앱 게임 …)가 앞, 그 뒤로 상황과 능력을 창에서 고르는 칩 (docs/direction.md '찾기') -->
+      <div class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-3 pb-3 overflow-x-auto no-scrollbar">
         <UiChip
           v-for="k in kinds"
           :key="k.value"
@@ -72,7 +42,21 @@
         >
           {{ k.label }}
         </UiChip>
+        <span class="flex-shrink-0 w-px h-5 bg-line-strong" aria-hidden="true"></span>
+        <UiChip
+          v-for="f in filters"
+          :key="f.key"
+          class="flex-shrink-0 whitespace-nowrap"
+          :selected="!!qs[f.key]"
+          @click="sheet = f.key"
+        >
+          {{ labelOf(f.key) || f.question }}
+          <UiIcon name="fas fa-chevron-down" class="text-[10px]" aria-hidden="true" />
+        </UiChip>
       </div>
+    </div>
+
+    <main class="max-w-2xl mx-auto px-4 pb-16">
 
       <!-- 개수 + 정렬 -->
       <div class="flex items-center justify-between gap-2 pt-4 pb-2">
@@ -176,8 +160,10 @@ const SITUATIONS = [
   { key: 'party', question: '몇 명?', list: 'parties' },
   { key: 'length', question: '얼마나?', list: 'lengths' },
   { key: 'gear', question: '준비물?', list: 'gears' },
+  // 필요한 능력도 같은 칩·같은 창으로 (예전엔 칩 한 줄을 따로 차지했다)
+  { key: 'ability', question: '능력?', list: 'abilities' },
 ]
-const FILTER_KEYS = [...SITUATIONS.map((f) => f.key), 'ability']
+const FILTER_KEYS = SITUATIONS.map((f) => f.key)
 
 const route = useRoute()
 const router = useRouter()
@@ -206,6 +192,8 @@ const sort = computed(() => (qs.value.sort === 'recent' ? 'recent' : 'rank'))
 const kind = computed(() => qs.value.kind || 'ALL')
 const kinds = computed(() => (picking.value ? PICK_KINDS : KINDS))
 const q = ref(qs.value.q || '')
+// 경기에 쓸 규칙을 고르는 중이면 능력은 숨긴다: 종목·인원이 이미 정해져 능력으로 찾지 않는다 (목적 판정 6)
+const filters = computed(() => SITUATIONS.filter((f) => f.key !== 'ability' || !picking.value))
 const current = computed(() => SITUATIONS.find((f) => f.key === sheet.value))
 const filtered = computed(() => !!qs.value.q || FILTER_KEYS.some((k) => qs.value[k]))
 

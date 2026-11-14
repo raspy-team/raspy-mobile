@@ -94,18 +94,31 @@
       </UiButton>
     </footer>
 
+    <!-- 중계에 딸린 것: 링크 보내기·끄기·관중 소리 -->
+    <UiSheet v-model="liveMenu" title="중계">
+      <UiList>
+        <!-- 점수판을 떠나지 않고 링크만 보낸다 (예전엔 중계 화면으로 가 경기 중 연결이 끊겼다) -->
+        <UiListItem icon="share" title="중계 링크 보내기" subtitle="보내면 친구가 점수를 보며 응원해요" @click="liveMenu = false; shareLive()" />
+        <UiListItem icon="eye-slash" :title="watchOff ? '중계 다시 켜기' : '중계 끄기'" :subtitle="watchOff ? '지금은 선수 말고는 이 경기를 볼 수 없어요' : '끄면 선수 말고는 이 경기를 볼 수 없어요'" @click="liveMenu = false; toggleWatchOff()" />
+        <UiListItem icon="volume" :title="soundOn ? '관중 소리 끄기' : '관중 소리 켜기'" subtitle="관중이 응원하면 이 휴대폰에서 박수 소리가 나요" @click="liveMenu = false; toggleSound()" />
+      </UiList>
+    </UiSheet>
+
     <!-- 더보기: 아이콘마다 이름을 붙여 고른다 -->
     <UiSheet v-model="showMenu">
       <UiList>
         <UiListItem icon="book-open" title="규칙 보기" @click="menuThen(() => (game.showRuleDetail = true))" />
-        <!-- 점수판을 떠나지 않고 링크만 보낸다 (예전엔 중계 화면으로 가 경기 중 연결이 끊겼다) -->
-        <UiListItem icon="eye" title="중계 링크 보내기" subtitle="보내면 친구가 점수를 보며 응원해요" @click="menu(shareLive)" />
-        <!-- 중계 끄기를 점수판에서: 예전엔 중계 화면에만 있어 끄려면 경기 중 점수판을 떠나야 했다 (11/11 감정과 체면 전수표, 원칙 2) -->
-        <UiListItem icon="eye-slash" :title="watchOff ? '중계 다시 켜기' : '중계 끄기'" :subtitle="watchOff ? '지금은 선수 말고는 이 경기를 볼 수 없어요' : '끄면 선수 말고는 이 경기를 볼 수 없어요'" @click="menu(toggleWatchOff)" />
-        <UiListItem icon="volume" :title="soundOn ? '관중 소리 끄기' : '관중 소리 켜기'" subtitle="관중이 응원하면 이 휴대폰에서 박수 소리가 나요" @click="menu(toggleSound)" />
+        <!-- 메뉴는 일곱 줄 이하 (quality-rules R-7: 열 줄이 한 화면을 다 채웠다). 중계에 딸린 셋은 한 줄 뒤로, 사진·영상은 한 줄에 -->
+        <UiListItem icon="eye" title="중계" :subtitle="watchOff ? '꺼 둠 · 선수 말고는 볼 수 없어요' : '링크 보내기 · 끄기 · 관중 소리'" chevron @click="menuThen(() => (liveMenu = true))" />
         <UiListItem icon="list" title="경기 기록" subtitle="누가 언제 점수를 냈는지" @click="menuThen(() => (showLogModal = true))" />
-        <UiListItem icon="camera" title="사진 찍기" @click="menu(triggerPhotoCapture)" />
-        <UiListItem icon="video" title="영상 찍기" @click="menu(triggerVideoCapture)" />
+        <UiListItem icon="camera" title="사진·영상 찍기">
+          <template #trailing>
+            <span class="flex gap-2">
+              <UiButton size="sm" variant="secondary" @click.stop="menu(triggerPhotoCapture)">사진</UiButton>
+              <UiButton size="sm" variant="secondary" @click.stop="menu(triggerVideoCapture)">영상</UiButton>
+            </span>
+          </template>
+        </UiListItem>
         <UiListItem icon="pen-to-square" title="점수만 적기" subtitle="점수판을 안 쓰고 끝난 점수를 적어요" @click="menuThen(() => (showResultEntry = true))" />
         <UiListItem v-if="!nothingScored" icon="rotate-left" title="처음부터 다시" danger @click="menuThen(() => openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터'))" />
         <UiListItem icon="xmark" title="경기 취소" danger @click="menuThen(() => openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소'))" />
@@ -313,6 +326,7 @@ async function openConfirm(title, cb, message = '', confirmText = '확인', dang
 
 // 더보기에서 고르면 시트를 닫고 바로 한다 (사진·영상은 누른 그 순간에 열어야 폰이 막지 않는다)
 const showMenu = ref(false)
+const liveMenu = ref(false)
 function menu(cb) {
   showMenu.value = false
   cb()

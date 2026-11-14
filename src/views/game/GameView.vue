@@ -184,7 +184,7 @@
       <div v-else>
         <p class="t-label mb-2">장소</p>
         <!-- 이미 정한 곳이면 그대로 두고(시간만 바꿀 때 장소가 바뀌지 않게), 처음이면 내 동네(시·군·구 + 동, 도는 뺀다), 다른 곳이면 직접 -->
-        <button v-if="placeMode === 'keep'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = myArea ? 'mine' : 'other'">
+        <button v-if="placeMode === 'keep'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeSearchOn ? (pickerOpen = true) : (placeMode = myArea ? 'mine' : 'other')">
           <UiIcon name="location-dot" aria-hidden="true" />
           <span class="flex-1 t-body truncate">{{ scheduleGame?.matchLocation }}</span>
           <span class="t-micro underline underline-offset-2 flex-shrink-0">장소 바꾸기</span>
@@ -199,7 +199,8 @@
         <template v-else>
           <!-- 장소는 지도에서 찾아 고른다. 글은 고른 뒤의 '세부 장소(선택)'뿐 (11/14 고병연: 처음 만나고 말고와 상관없이 찾기가 기본이다).
                장소 검색이 꺼진 서버에서만 예전처럼 지역과 이름을 적는다 -->
-          <UiButton v-if="placeSearchOn" block variant="secondary" icon="location-dot" @click="pickerOpen = true">지도에서 장소 고르기</UiButton>
+          <!-- 정해 둔 곳이 있으면 위 줄의 '장소 바꾸기'가 같은 일을 한다: 버튼을 둘 두지 않는다 (quality-rules R-1) -->
+          <UiButton v-if="placeSearchOn && placeMode !== 'keep'" block variant="secondary" icon="location-dot" @click="pickerOpen = true">지도에서 장소 고르기</UiButton>
           <template v-if="!placeSearchOn">
           <div>
           <button v-if="placeMode === 'mine'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = 'other'">

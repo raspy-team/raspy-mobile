@@ -102,7 +102,8 @@ const footerTab = computed(() => {
   return null
 })
 // 화면 전환 방향. 브라우저 기록의 위치(position)로 앞으로·뒤로를 가린다
-const TAB_ROOTS = ['/', '/feed', '/game', '/profile/0']
+// 소식은 11/13에 탭에서 내려왔다: 홈 → 소식은 들어가는 화면이라 움직인다 (quality-rules M-1)
+const TAB_ROOTS = ['/', '/game', '/profile/0']
 const pageTransition = ref('page-none')
 let lastPosition = window.history.state?.position ?? 0
 router.afterEach((to, from) => {

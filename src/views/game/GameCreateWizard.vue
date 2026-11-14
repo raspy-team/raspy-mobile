@@ -283,7 +283,10 @@ async function loadSports() {
     }
     // 종목은 그 종목 판 수가 많은 순, 같으면 만나서 하는 종목을 인기 게임(롤·피파 등)보다 먼저.
     // 판 수가 같은 규칙끼리 순서가 없어 체스·카트라이더가 맨 위, 배드민턴·탁구가 첫 화면 밖에 있었다
-    sports.value = [...bySport.values()].sort((a, b) => b.plays - a.plays || Number(a.ext) - Number(b.ext))
+    // 지난번에 고른 종목을 맨 앞에 (quality-rules Q-3: 아는 값은 채워 둔다). 나머지는 많이 쓰는 순
+    let last = ''
+    try { last = localStorage.getItem('last_sport') || '' } catch { /* 못 읽으면 많이 쓰는 순 그대로 */ }
+    sports.value = [...bySport.values()].sort((a, b) => Number(b.name === last) - Number(a.name === last) || b.plays - a.plays || Number(a.ext) - Number(b.ext))
     // 이웃 알림의 '먼저 경기를 열어 보세요'(?sport=배드민턴)로 왔으면 그 종목을 골라 둔다 (docs/ai-residents.md 4)
     if (wantSport && !ruleId.value) {
       const hit = sports.value.find((s) => s.name === wantSport) || sports.value.find((s) => s.name.includes(wantSport) || wantSport.includes(s.name))
@@ -313,6 +316,7 @@ function backToSports() {
   pickedSport.value = ''
 }
 function pickSport(s) {
+  try { localStorage.setItem('last_sport', s.name) } catch { /* 못 남기면 다음에도 많이 쓰는 순 */ }
   ruleId.value = s.top.id
   rule.value = s.top
   autoPicked.value = true

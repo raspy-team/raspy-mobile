@@ -6,7 +6,7 @@
         <span class="text-fg face-wobble inline-block w-fit"><MatchMascot who="match" mood="wow" :size="80" /></span>
         <p class="t-mono mt-8">404</p>
         <h1 class="t-display mt-2">이 페이지는<br />없어요</h1>
-        <p class="t-body text-fg-muted mt-4">주소가 바뀌었거나 지워졌어요.</p>
+        <p class="t-body text-fg-muted mt-4">주소가 바뀌었거나 지워졌어요</p>
       </div>
       <div class="pb-6">
         <UiButton block size="lg" to="/">처음으로</UiButton>

@@ -53,7 +53,7 @@ import {
   CircleDot, Spade, Type, CalendarDays, MessagesSquare, Grid2x2, MessageCircleQuestion, RefreshCw, Map, Gem, Calculator, Hash, Bomb,
   Goal, Lightbulb, Feather, Vibrate, Dumbbell, Link, Volume2,
   Flame, Crosshair, Blocks, Mountain, Percent, BicepsFlexed, Brain, Grab, SquareDashed, Radar, PiggyBank, Building2, Shield,
-  Shirt, Smile, Lock,
+  Shirt, Smile, Lock, QrCode, MessageSquareText,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -71,7 +71,7 @@ const ICONS = {
   'chart-bar': ChartBar, 'chart-line': ChartLine, 'chart-simple': ChartNoAxesColumn,
   check: Check, 'chef-hat': ChefHat, 'chevron-down': ChevronDown, 'chevron-left': ChevronLeft, 'chevron-right': ChevronRight, 'chevron-up': ChevronUp,
   'circle-question': CircleHelp, 'circle-xmark': CircleX, 'clipboard-check': ClipboardCheck, clock: Clock, coins: Coins,
-  comment: MessageCircle, crown: Crown, dice: Dices, download: Download, ellipsis: Ellipsis, envelope: Mail,
+  comment: MessageCircle, qrcode: QrCode, sms: MessageSquareText, crown: Crown, dice: Dices, download: Download, ellipsis: Ellipsis, envelope: Mail,
   'exclamation-circle': CircleAlert, eye: Eye, 'eye-slash': EyeOff, 'file-lines': FileText,
   flag: Flag, 'flag-checkered': FlagTriangleRight, folder: Folder, 'folder-open': FolderOpen,
   gavel: Gavel, gear: Settings, hand: Hand, heading: Heading, heart: Heart, 'hourglass-half': Hourglass,

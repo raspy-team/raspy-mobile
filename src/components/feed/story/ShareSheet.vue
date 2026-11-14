@@ -63,6 +63,7 @@ import { copyText } from '../../../utils/clipboard'
 import { useToast } from '../../../composables/useToast'
 import { copyStickerAndOpenInstagram, openInstagramStoryNative, shareFiles, storyFile, storyHomeLink, type ShareResult, type StoryVariant } from '../../../utils/storyShare'
 import { hasNativeInstagram } from '../../../utils/nativeBridge'
+import { kakaoShare, kakaoShareAvailable, warmKakaoShare } from '../../../utils/kakaoShare'
 import { storyLine } from '../../../utils/storyLine'
 import { newShareCode, registerShare } from '../../../utils/shareRef'
 
@@ -82,7 +83,7 @@ const VARIANTS: { key: StoryVariant; label: string }[] = [
 ]
 const DESTS = [
   { key: 'story', icon: 'instagram', label: '인스타 스토리' },
-  { key: 'message', icon: 'comment', label: '카톡·메시지' },
+  { key: 'message', icon: 'comment', label: kakaoShareAvailable ? '카카오톡' : '카톡·메시지' },
   { key: 'copy', icon: 'link', label: '링크 복사' },
   { key: 'more', icon: 'ellipsis', label: '더보기' },
 ] as const
@@ -121,6 +122,7 @@ watch(
     reset()
     if (!id) return
     shareCode.value = newShareCode()
+    warmKakaoShare()
     registered = false
     fetchLink(my, Number(id))
     // 지난번에 고른 모양으로 연다 (열 때마다 첫 모양으로 돌아가 다시 넘겼다, 11/11 쌓이는 피로 전수표)
@@ -249,6 +251,14 @@ function go(key: Dest) {
       return showToast('링크가 잘 안 만들어졌어요. 조금 있다가 다시 눌러 주세요')
     }
     if (!url) return showToast('링크 만드는 중이에요. 잠깐만요')
+    // 카카오톡으로 바로 (11/14): 공유 창이 없는 앱 안 브라우저에서는 복사뿐이었다. 못 열면 아래 예전 길로
+    if (key === 'message' && kakaoShareAvailable) {
+      return void kakaoShare({ title: line.value, description: 'matchapp.me', url, button: '경기 보기' }).then((ok) => {
+        if (ok) { markShared(); return close() }
+        if (!navigator.share) return copied(url, '링크 복사해 뒀어요. 붙여 넣어서 보내 주세요')
+        navigator.share({ text: line.value, url }).then(() => { markShared(); close() }, (e: any) => { if (e?.name !== 'AbortError') copied(url) })
+      })
+    }
     if (key === 'copy' || !navigator.share) return copied(url, key === 'copy' ? '링크 복사해 뒀어요' : '링크 복사해 뒀어요. 붙여 넣어서 보내 주세요')
     // 카톡·메시지: 링크만 보낸다. 카톡이 경기 그림을 펼쳐 보여 준다 (미리보기 그림 og.png)
     return void navigator.share({ text: line.value, url }).then(() => {

@@ -492,7 +492,7 @@ import DialogPlay from '../../components/appgame/DialogPlay.vue'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import { improvAnswers, improvFeedback, improvSituations, improvShareLine } from '@/utils/improv'
 import { track } from '@/utils/trackLog'
-import { shareLink } from '@/utils/share'
+import { shareLink, sendLink } from '@/utils/share'
 import { askPushPermission, isCapacitorApp, hasNativeInstagram } from '@/utils/nativeBridge'
 import { guestClaimResult, claimedDuels } from '@/utils/visit'
 import ImprovVersus from '../../components/appgame/ImprovVersus.vue'
@@ -794,9 +794,11 @@ async function sendChallenge(gameId: number) {
     // 임기응변은 손님 결과와 같은 등급대 한 줄: 9등급이 '나보다 잘할 수 있어요?'를 보내면 뜻하지 않게 우스웠다 (11/11 감정과 체면)
     const g = key.value === 'improv' ? improvResult.value?.grade : 0
     const line = g ? improvShareLine(g) : ''
-    const msg = await shareLink(link, line ? `${line}${/[.?!]$/.test(line) ? '' : '.'} 같은 상황으로 붙자` : `${game.value?.title ?? '한 판'} 한 판 붙자. 나보다 잘할 수 있어?`)
-    // '하루 동안 이 링크로만'은 뜻이 안 읽혔고, 복사가 실패해도 붙었다 (경로 2 리뷰 N4)
-    if (msg) showToast(/못/.test(msg) ? msg : `${msg}. 친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황으로' : '문제로'} 붙어요`)
+    const dest = await sendLink(link, line ? `${line}${/[.?!]$/.test(line) ? '' : '.'} 같은 상황으로 붙자` : `${game.value?.title ?? '한 판'} 한 판 붙자. 나보다 잘할 수 있어?`, {
+      title: '친구에게 한 판 붙자', file: storyFile.value, onStory: key.value === 'improv' && storyFile.value ? onStory : null, button: key.value === 'improv' ? '같은 상황으로 붙기' : '같은 문제로 붙기', place: `app_${key.value}`,
+    })
+    if (dest && dest !== 'story') track('result_challenge_shared', { gameKey: key.value, value: dest })
+    if (dest && dest !== 'story' && dest !== 'copy') showToast(`친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황으로' : '문제로'} 붙어요`)
     askPushPermission() // 친구가 받으면 알려 드릴 수 있게
   } catch (e) {
     showToast(errorMessage(e, '링크를 만들지 못했어요'))

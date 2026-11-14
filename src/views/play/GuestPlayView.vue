@@ -305,7 +305,7 @@ import { GUEST_GAMES } from '@/utils/guestGames'
 import { getVisitorId, markGuestPlayed, trackEvent } from '@/utils/visit'
 import { track } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
-import { shareLink } from '@/utils/share'
+import { shareLink, sendLink } from '@/utils/share'
 import { useToast } from '../../composables/useToast'
 import { feel } from '@/utils/feel'
 
@@ -661,11 +661,14 @@ async function challengeFriend() {
       ? `${improvShareLine(improv.value.grade)}${/[.?!]$/.test(improvShareLine(improv.value.grade)) ? '' : '.'} 같은 상황으로 붙자`
       : `눈치 한 판 ${result.value?.score ?? 0}점. 같은 문제로 붙어 볼래요? 문제당 3초예요`
     const ck = key.value === 'improv' && result.value?.challengeKey ? `&k=${result.value.challengeKey}` : ''
-    const msg = await shareLink(`${window.location.origin}/try/${key.value}?c=${playId.value}${ck}`, text)
-    track('result_challenge_shared', { gameKey: key.value, value: msg || 'share' })
+    // 보내기 시트 (11/14): 카카오톡·스토리·메시지·복사·QR. 그림이 있으면 함께 보인다
+    const dest = await sendLink(`${window.location.origin}/try/${key.value}?c=${playId.value}${ck}`, text, {
+      title: '친구에게 한 판 붙자', file: storyFile.value, onStory: key.value === 'improv' && storyFile.value ? onStory : null, button: '같은 상황으로 붙기', place: `guest_${key.value}`,
+    })
+    if (!dest || dest === 'story') return
+    track('result_challenge_shared', { gameKey: key.value, value: dest })
     // 보낸 사람에게 결과를 볼 곳을 알린다 (손님은 알림이 없어 이 링크(/try/improv)로 다시 와야 본다)
-    if (key.value === 'improv') showToast(msg ? `${msg}. 친구가 풀면 이 화면에 떠요` : '친구가 풀면 이 화면에 떠요')
-    else if (msg) showToast(msg)
+    if (key.value === 'improv' && dest !== 'copy') showToast('친구가 풀면 이 화면에 떠요')
   } finally {
     sharing.value = ''
   }

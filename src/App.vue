@@ -30,6 +30,8 @@
     <!-- 앱 전체 알림 한 줄 (window.alert도 여기로 온다) -->
     <CustomToast />
     <UiConfirmHost />
+    <!-- 보내기 시트: 어디서 공유를 누르든 이 한 장이 뜬다 (utils/share.ts) -->
+    <SendSheet />
     <RealtimeInviteHost />
     <RouteProgress />
 
@@ -52,6 +54,7 @@ import FooterNav from './components/FooterNav.vue'
 import RealtimeInviteHost from './components/game/RealtimeInviteHost.vue'
 import CustomToast from './components/CustomToast.vue'
 import UiConfirmHost from './components/ui/UiConfirmHost.vue'
+import SendSheet from './components/share/SendSheet.vue'
 import RouteProgress from './components/RouteProgress.vue'
 import SuspendedBanner from './components/safety/SuspendedBanner.vue'
 import { startInbox } from './stores/inbox'

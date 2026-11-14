@@ -5,14 +5,15 @@
       <span class="t-mono tabular-nums" :class="remaining <= 30 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 
-    <div class="flex flex-wrap gap-2 mt-3">
+    <!-- 키보드가 오르면 재료가 화면 밖으로 밀려, 다섯 재료를 외워서 써야 했다 (11/14): 쓰는 동안 재료 줄이 제목 바 바로 밑에 오게 맞춘다 -->
+    <div ref="chips" class="flex flex-wrap gap-2 mt-3 scroll-mt-[calc(env(safe-area-inset-top)+4.25rem)]">
       <UiChip v-for="i in ingredients" :key="i" :selected="used(i)">{{ i }}</UiChip>
     </div>
     <p class="t-micro mt-2">만드는 법에 쓴 재료는 칠해져요. 다 쓸수록 점수가 높아요</p>
 
     <div class="space-y-3 mt-5">
-      <UiInput v-model="name" label="요리 이름" :maxlength="30" placeholder="예: 김치 치즈 떡볶이" />
-      <UiInput v-model="steps" label="만드는 법" multiline :rows="7" :maxlength="500" placeholder="재료를 어떻게 손질하고 익히는지 적어 주세요" />
+      <UiInput v-model="name" label="요리 이름" :maxlength="30" placeholder="예: 김치 치즈 떡볶이" @focusin="onTypeStart" />
+      <UiInput v-model="steps" label="만드는 법" multiline :rows="6" @focusin="onTypeStart" :maxlength="500" placeholder="재료를 어떻게 손질하고 익히는지 적어 주세요" />
     </div>
     <UiButton block size="lg" class="mt-4" :loading="submitting" :disabled="!name.trim() || steps.trim().length < 10" @click="finish">
       다 만들었어요
@@ -30,6 +31,13 @@ const emit = defineEmits<{ submit: [answer: string] }>()
 
 const ingredients = computed(() => props.problem.split(', '))
 const name = ref('')
+const chips = ref<HTMLElement | null>(null)
+function onTypeStart() {
+  const align = () => chips.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  setTimeout(align, 250)
+  window.visualViewport?.addEventListener('resize', () => setTimeout(align, 60), { once: true })
+  setTimeout(align, 800)
+}
 const steps = ref('')
 const startedAt = Date.now()
 const remaining = ref(props.timeLimitSeconds)

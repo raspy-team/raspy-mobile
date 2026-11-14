@@ -328,6 +328,18 @@
             <p v-if="result.opponentFeedback" class="t-caption mt-2">AI 셰프: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
+        <!-- AI가 심사하는 글 게임(AI 재판·전투력 측정·AI 삼행시): 무엇에 대해 뭐라고 썼는지가 결과에 없었다 (11/14: 점수와 심사평만 있어 무엇이 웃겼는지 알 수 없었다) -->
+        <template v-else-if="WRITING[key] && !isVote">
+          <UiCard v-if="result.myAnswer" class="mt-3">
+            <p class="t-micro break-keep">{{ result.problem }}</p>
+            <p class="t-body mt-2 whitespace-pre-line break-keep">{{ result.myAnswer }}</p>
+          </UiCard>
+          <UiCard v-if="result.opponentAnswer" class="mt-3">
+            <p class="t-micro">{{ who(result.opponent) }}님 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-body mt-2 whitespace-pre-line break-keep">{{ result.opponentAnswer }}</p>
+            <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
+          </UiCard>
+        </template>
       </template>
 
       <!-- 게임 첫 화면 -->

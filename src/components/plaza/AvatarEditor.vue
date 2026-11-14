@@ -115,9 +115,10 @@ const byId = computed(() => new Map((state.value?.items ?? []).map((i) => [i.id,
 // 등급 피라미드 (docs/plaza.md): 위로 갈수록 드물고 값지다. 전설은 챔피언만 입는다
 const TIER: Record<string, { label: string; cls: string }> = {
   common: { label: '일반', cls: 'bg-surface-3 text-fg' },
-  rare: { label: '고급', cls: 'bg-[#2d6cdf] text-white' },
-  epic: { label: '희귀', cls: 'bg-[#8b3fd9] text-white' },
-  legend: { label: '전설', cls: 'bg-[#d9a31a] text-[#121214]' },
+  // 등급도 앱의 색(무채색 + 형광 하나)으로: 파랑·보라·금색 딱지가 다른 앱처럼 보였다 (quality-rules C-1). 밝기와 형광으로 세 단계
+  rare: { label: '고급', cls: 'bg-surface-3 text-fg' },
+  epic: { label: '희귀', cls: 'bg-fg text-canvas' },
+  legend: { label: '전설', cls: 'bg-signal text-signal-on' },
 }
 
 /** 이 층에서 보여 줄 부품: 처음 꾸미기는 무료(basic)만, 꾸미기는 모두 */

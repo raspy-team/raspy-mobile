@@ -141,7 +141,7 @@
         <!-- 이미지 확대 모달 -->
         <div
           v-if="previewImg"
-          class="fixed inset-0 z-dialog flex items-center justify-center bg-black/80"
+          class="fixed inset-0 z-dialog flex items-center justify-center bg-black/70"
           @click="previewImg = null"
         >
           <img :src="previewImg" alt="댓글 사진" class="max-h-[80vh] max-w-full rounded-xl shadow-lg" />

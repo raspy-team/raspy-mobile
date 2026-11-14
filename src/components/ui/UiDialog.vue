@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="ui-fade">
-      <div v-if="modelValue" class="fixed inset-0 z-dialog bg-black/60 flex items-center justify-center p-6" @click.self="dismissible && close()">
+      <div v-if="modelValue" class="fixed inset-0 z-dialog bg-black/70 flex items-center justify-center p-6" @click.self="dismissible && close()">
         <div role="alertdialog" aria-modal="true" :aria-label="title" class="w-full max-w-sm bg-surface border border-line rounded-2xl p-6">
           <h2 class="t-heading">{{ title }}</h2>
           <p v-if="message" class="t-caption mt-2 whitespace-pre-line">{{ message }}</p>

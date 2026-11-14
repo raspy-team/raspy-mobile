@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="ui-fade">
-      <div v-if="modelValue" class="fixed inset-0 z-dialog bg-black/60" aria-hidden="true" @click="close"></div>
+      <div v-if="modelValue" class="fixed inset-0 z-dialog bg-black/70" aria-hidden="true" @click="close"></div>
     </Transition>
     <Transition name="ui-sheet">
       <div v-if="modelValue" role="alertdialog" aria-modal="true" :aria-label="title" class="fixed inset-x-0 bottom-0 z-dialog max-w-xl mx-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] space-y-2">

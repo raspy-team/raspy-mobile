@@ -14,7 +14,7 @@
     <div class="relative mt-4 rounded-2xl overflow-hidden bg-surface-3 aspect-[3/4]">
       <video ref="preview" class="w-full h-full object-cover -scale-x-100" autoplay muted playsinline></video>
       <div v-if="recording" class="absolute top-3 left-3 flex items-center gap-2 px-3 h-8 rounded-full bg-black/60 text-white text-sm tabular-nums">
-        <span class="w-2 h-2 rounded-full bg-red-500"></span>{{ recordLeft }}초
+        <span class="w-2 h-2 rounded-full bg-danger"></span>{{ recordLeft }}초
       </div>
       <p v-if="cameraError" class="absolute inset-0 flex items-center justify-center p-6 text-center t-body">{{ cameraError }}</p>
     </div>

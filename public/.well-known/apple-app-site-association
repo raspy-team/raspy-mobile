@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["RXHT6R8P4K.com.songostudio.match"],
+        "components": [
+          { "/": "/app*", "exclude": true },
+          { "/": "/admin*", "exclude": true },
+          { "/": "/oauth/*", "exclude": true },
+          { "/": "/login/*", "exclude": true },
+          { "/": "/*.html", "exclude": true },
+          { "/": "/*" }
+        ]
+      }
+    ]
+  }
+}

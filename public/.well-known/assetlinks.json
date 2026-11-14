@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.songostudio.match",
+      "sha256_cert_fingerprints": [
+        "80:1D:67:82:80:8F:12:F2:80:65:EF:98:62:94:07:31:B2:B2:48:E9:42:6B:38:C1:85:03:B1:1D:7A:AE:B9:71",
+        "25:37:F3:1A:27:24:25:97:88:E5:35:85:E9:68:C8:F7:02:8F:A7:95:76:CA:D6:96:2D:58:1D:73:7E:5A:36:67"
+      ]
+    }
+  }
+]

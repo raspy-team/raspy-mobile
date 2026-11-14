@@ -3,17 +3,19 @@ import UiIcon from './components/ui/UiIcon.vue'
 // 설치 창 신호(beforeinstallprompt)는 앱이 뜨자마자 오므로 처음부터 듣는다
 import './utils/install'
 // 유입 측정: 첫 화면 주소(utm 꼬리표)를 라우터가 바꾸기 전에 잡는다
-import { trackVisit, claimGuestPlays } from './utils/visit'
+import { trackVisit, claimGuestPlays, adoptHandoff } from './utils/visit'
 import App from './App.vue'
 import './assets/tailwind.css'
 import { followIosTextSize } from './utils/textSize'
 import router from './router/router.js'
 import { setupPushListeners } from './utils/nativeBridge'
 import { setupAndroidBack } from './utils/androidBack'
+import { installAppLinks } from './utils/appLinks'
 // 알림을 눌러 앱이 켜졌을 때의 신호를 가장 먼저 받는다 (App이 뜨기 전, 11/6 b2). 앱이 아니면 아무것도 하지 않는다
 setupPushListeners()
 // 안드로이드 뒤로 버튼: 시트 닫기 → 앞 화면 → 홈 → 앱을 뒤로 (11/13)
 setupAndroidBack(router)
+installAppLinks(router) // matchapp.me 링크로 앱이 열리면 그 주소로
 import  { setRouter } from './api/api'
 import autocomplete from './utils/autocomplete'
 
@@ -92,5 +94,9 @@ router.isReady().then(() => requestAnimationFrame(() => {
   }
 }))
 
-trackVisit()
-claimGuestPlays() // 가입 전 한 판을 하고 앱 로그인(새로 열림)으로 들어온 사람
+// 다른 브라우저에서 넘어온 표(?h=)가 있으면 그 기기 번호를 먼저 이어받는다 (utils/visit.ts adoptHandoff)
+adoptHandoff().finally(() => {
+  trackVisit()
+  claimGuestPlays()
+})
+// // 가입 전 한 판을 하고 앱 로그인(새로 열림)으로 들어온 사람

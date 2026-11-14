@@ -129,7 +129,7 @@ import { TERMS } from '../content/legal'
 import { UiButton, UiCard, UiSheet } from '../components/ui'
 import { peekReturnTo } from '../utils/authRedirect'
 import { isAndroidApp, isIosApp, isCapacitorApp, nativeGoogleLogin, nativeAppleLogin, nativeKakaoLogin, hasNativeKakao, inAppBrowser, isAndroidUa, openInExternalBrowser } from '../utils/nativeBridge'
-import { trackEvent } from '../utils/visit'
+import { trackEvent, handoffCode } from '../utils/visit'
 
 const router = useRouter()
 const route = useRoute()
@@ -180,12 +180,24 @@ const canOpenOutside = isAndroidUa || /kakaotalk/i.test(navigator.userAgent)
 function openOutside() {
   // 다른 브라우저는 저장소가 달라 '어디로 가던 길인지'를 모른다 (11/14: /init?from=guest만 넘겨, 새 브라우저에서는 초대도 방금 판도 없는 첫 화면이었다).
   // 가던 곳이 가입 없이 되는 게임이면 그 주소로 넘긴다: 거기서 한 판 하고 가입하면 같은 브라우저 안에서 이어진다
+  // 방금 한 판이 있으면 표(?h=)를 실은 이 주소 그대로: 새 브라우저가 이 기기의 번호를 이어받아, 가입하면 방금 등급과 초대가 그대로 옮겨진다 (onMounted에서 주소에 붙여 둔다)
+  if (new URL(window.location.href).searchParams.get('h')) return openInExternalBrowser(window.location.href)
   const back = returnTo || ''
   const m = back.match(/^\/play\/([a-z0-9-]+)(\?.*)?$/)
   openInExternalBrowser(m ? `${window.location.origin}/try/${m[1]}${m[2] ?? ''}` : back ? `${window.location.origin}${back}` : window.location.href)
 }
 
 onMounted(async () => {
+  // 앱 안 브라우저에서 한 판 하고 가입하러 온 사람: 다른 브라우저로 넘어가도 이어지게 주소에 15분짜리 표를 붙여 둔다.
+  // '브라우저로 열기' 버튼뿐 아니라 인스타의 ··· → '외부 브라우저로 열기'도 이 주소를 그대로 가져간다 (11/14)
+  if (inAppBrowser && !isCapacitorApp) {
+    handoffCode().then((code) => {
+      if (!code) return
+      const u = new URL(window.location.href)
+      u.searchParams.set('h', code)
+      history.replaceState(history.state, '', u.pathname + u.search)
+    })
+  }
   if (returnTo) {
     GET('/api/landing', { query: { path: returnTo } })
       .then(({ data }) => (landing.value = data?.title ? data : null))

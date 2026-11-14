@@ -12,7 +12,7 @@
       "destination": "https://raspy-api.fly.dev/m/:id/:file"
     },
     {
-      "source": "/:path((?!m/|assets/).*)",
+      "source": "/:path((?!m/|assets/|\\.well-known/).*)",
       "has": [
         {
           "type": "header",
@@ -23,8 +23,19 @@
       "destination": "https://raspy-api.fly.dev/preview/:path"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!\\.well-known/).*)",
       "destination": "/index"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
+      ]
     }
   ]
 }

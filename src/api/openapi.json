@@ -2766,6 +2766,76 @@
         }
       }
     },
+    "/api/guest/plays/handoff": {
+      "post": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "다른 브라우저로 넘길 표 받기",
+        "description": "가입 전에 한 판 한 기기의 번호를 15분짜리 표로 바꿉니다. 앱 안 브라우저에서 사파리·크롬으로 넘어가 가입할 때 씁니다.",
+        "operationId": "handoff",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoffRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/plays/handoff/take": {
+      "post": {
+        "tags": [
+          "가입 전 한 판"
+        ],
+        "summary": "넘겨받은 표를 기기 번호로",
+        "description": "표가 맞고 15분 안이면 그 기기 번호를 돌려줍니다. 새 브라우저가 그 번호를 이어 씁니다.",
+        "operationId": "takeHandoff",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoffTake"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/guest/plays/claim": {
       "post": {
         "tags": [
@@ -14766,6 +14836,28 @@
           },
           "versus": {
             "type": "boolean"
+          }
+        }
+      },
+      "HandoffRequest": {
+        "required": [
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoffTake": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
           }
         }
       },

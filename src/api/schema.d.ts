@@ -1298,6 +1298,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/guest/plays/handoff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 다른 브라우저로 넘길 표 받기
+         * @description 가입 전에 한 판 한 기기의 번호를 15분짜리 표로 바꿉니다. 앱 안 브라우저에서 사파리·크롬으로 넘어가 가입할 때 씁니다.
+         */
+        post: operations["handoff"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/plays/handoff/take": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 넘겨받은 표를 기기 번호로
+         * @description 표가 맞고 15분 안이면 그 기기 번호를 돌려줍니다. 새 브라우저가 그 번호를 이어 씁니다.
+         */
+        post: operations["takeHandoff"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/guest/plays/claim": {
         parameters: {
             query?: never;
@@ -7028,6 +7068,12 @@ export interface components {
             challengerName?: string;
             versus: boolean;
         };
+        HandoffRequest: {
+            visitorId: string;
+        };
+        HandoffTake: {
+            code: string;
+        };
         GuestClaimResponse: {
             /** Format: int32 */
             claimed: number;
@@ -11318,6 +11364,58 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GuestResultResponse"];
+                };
+            };
+        };
+    };
+    handoff: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandoffRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    takeHandoff: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandoffTake"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
                 };
             };
         };

@@ -21,6 +21,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- matchapp.me 링크를 누르면 깔려 있는 앱이 열린다 (11/14). 웹의 /.well-known/assetlinks.json이 이 앱의 서명과 맞아야 한다 -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="matchapp.me" />
+            </intent-filter>
         </activity>
 
         <provider

@@ -3,6 +3,8 @@
 // 홍보 링크에는 ?utm_source=instagram&utm_campaign=1105 처럼 꼬리표를 단다
 import { NOTICE } from './notice'
 import { GET, POST } from '../api/client'
+import api from '../api/api'
+import { peekReturnTo, rememberReturnTo } from './authRedirect'
 import { isStandalone } from './install'
 import { useToast } from '../composables/useToast'
 
@@ -155,5 +157,43 @@ async function claimNow(): Promise<number> {
     return data.claimed
   } catch {
     return -1 // 다음에 열 때 다시
+  }
+}
+
+// ── 다른 브라우저로 넘어가기 (11/14) ──
+// 인스타·에타 앱 안 브라우저에서 한 판 하고 '브라우저로 열기'로 사파리·크롬에 가서 가입하면 저장소가 달라
+// 방금 등급도 친구의 초대도 사라졌다. 15분짜리 표(?h=)에 이 기기의 번호를 실어 넘기고, 새 브라우저가 그 번호를 이어 쓴다.
+// 그러면 가입할 때 방금 판이 내 기록으로 옮겨진다 (서버 ShareKey.handoff)
+
+/** 넘길 표를 받는다 (가입 전에 한 판 한 기기만). 못 받으면 빈 글 */
+export async function handoffCode(): Promise<string> {
+  try {
+    if (!localStorage.getItem(GUEST_KEY)) return ''
+    const id = visitorId()
+    if (!id) return ''
+    return (await api.post('/api/guest/plays/handoff', { visitorId: id })).data?.code ?? ''
+  } catch {
+    return ''
+  }
+}
+
+/** 주소에 표(?h=)가 있으면 그 기기 번호를 이어 쓴다. 앱이 뜰 때 방문 기록보다 먼저 부른다 */
+export async function adoptHandoff(): Promise<void> {
+  try {
+    const url = new URL(window.location.href)
+    const code = url.searchParams.get('h')
+    if (!code || !/^[0-9a-zA-Z-]{8,64}\.\d+\.[\w-]+$/.test(code)) return
+    url.searchParams.delete('h')
+    history.replaceState(history.state, '', url.pathname + url.search + url.hash)
+    // 이 브라우저에서 이미 한 판 했으면 그대로 둔다 (남의 표로 내 판을 잃지 않게)
+    if (localStorage.getItem(GUEST_KEY) || localStorage.getItem('raspy_access_token2')) return
+    const id = (await api.post('/api/guest/plays/handoff/take', { code })).data?.visitorId
+    if (!id) return
+    localStorage.setItem(ID_KEY, id)
+    localStorage.setItem(GUEST_KEY, '1')
+    // 가입하면 방금 판이 있는 게임 화면으로 (이 브라우저에는 가던 곳이 적혀 있지 않다)
+    if (!peekReturnTo()) rememberReturnTo('/play/improv')
+  } catch {
+    // 못 넘겨받으면 새 방문자로 시작할 뿐이다
   }
 }

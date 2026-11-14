@@ -260,7 +260,7 @@
         <ImprovSentChallenges v-if="key === 'improv'" :visitor-id="visitorIdNow" class="mt-6" @join="join('versus_join')" />
         <p v-if="startError" class="t-caption text-danger mt-3 text-center">{{ startError }}</p>
         <UiButton v-if="startLimit" block size="lg" class="mt-2" @click="join('limit_join')">가입하고 계속하기</UiButton>
-        <UiButton v-else block variant="ghost" class="mt-2" @click="join('intro_join')">이미 계정이 있어요</UiButton>
+        <UiButton v-else-if="!signedIn" block variant="ghost" class="mt-2" @click="join('intro_join')">이미 계정이 있어요</UiButton>
       </template>
     </main>
   </div>

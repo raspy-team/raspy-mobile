@@ -63,7 +63,7 @@
               type="button"
               role="radio"
               :aria-checked="active.rangeLevel === r.level"
-              class="flex-1 h-10 rounded-lg text-xs transition-colors"
+              class="flex-1 h-11 rounded-lg text-xs transition-colors"
               :class="active.rangeLevel === r.level ? 'bg-surface-3 text-fg font-semibold' : 'text-fg-muted'"
               :disabled="savingRange"
               @click="setRange(r.level)"

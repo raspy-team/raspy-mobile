@@ -6,7 +6,7 @@
       <span v-if="!still" class="flex -space-x-2 flex-shrink-0">
         <UiAvatar v-for="pl in players" :key="pl.id" :src="pl.avatar" :name="pl.name" :user-id="pl.id" size="sm" class="ring-2 ring-canvas" />
       </span>
-      <button type="button" class="flex-1 min-w-0 text-left" @click="emit('rule')">
+      <button type="button" class="hit flex-1 min-w-0 text-left" @click="emit('rule')">
         <span class="flex items-center gap-1.5 text-sm font-semibold text-fg truncate">
           <RuleThumb :rule="post.rule" :size="18" bare />{{ post.rule?.ruleTitle }}
         </span>
@@ -31,7 +31,7 @@
           v-for="(side, i) in sides"
           :key="i"
           type="button"
-          class="min-w-0 truncate text-body py-2.5 -my-2.5"
+          class="min-w-0 truncate text-body py-3 -my-3"
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', sideFirst(i)?.id)"
         >

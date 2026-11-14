@@ -510,6 +510,7 @@
 </template>
 
 <script setup lang="ts">
+import { confirmDialog } from '@/composables/useConfirm'
 import { useSettled } from '@/stores/net'
 const settled = useSettled()
 import { dayTime } from '@/utils/format'
@@ -847,6 +848,8 @@ const canChallenge = computed(() => {
 const challengeSentFor = ref<number | null>(null)
 const canceling = ref(false)
 async function cancelWaiting(gameId: number) {
+  // 그만두면 이 판은 상대 없이 끝나고 되돌릴 수 없다: 한 번 더 묻는다 (quality-rules O-2)
+  if (!(await confirmDialog({ title: '기다리기를 그만둘까요?', message: '이 판은 상대 없이 끝나요. 내 점수와 등급은 그대로예요', confirmText: '그만두기' }))) return
   canceling.value = true
   try {
     await POST('/api/app-games/duels/{gameId}/cancel', { path: { gameId } })

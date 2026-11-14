@@ -120,6 +120,9 @@
           </template>
         </UiListItem>
         <UiListItem icon="pen-to-square" title="점수만 적기" subtitle="점수판을 안 쓰고 끝난 점수를 적어요" @click="menuThen(() => (showResultEntry = true))" />
+      </UiList>
+      <!-- 위험한 줄은 자주 누르는 줄과 떨어뜨려 따로 묶는다 (quality-rules O-6) -->
+      <UiList class="mt-4">
         <UiListItem v-if="!nothingScored" icon="rotate-left" title="처음부터 다시" danger @click="menuThen(() => openConfirm('처음부터 다시 할까요?', socket_resetGame, '모든 점수와 세트가 지워져요.', '처음부터'))" />
         <UiListItem icon="xmark" title="경기 취소" danger @click="menuThen(() => openConfirm('경기를 취소할까요?', cancelGame, '상대가 안 왔거나 못 하게 됐을 때 써요. 기록에 남지 않아요.', '경기 취소'))" />
       </UiList>

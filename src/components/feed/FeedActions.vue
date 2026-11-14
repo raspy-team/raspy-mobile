@@ -2,17 +2,17 @@
   <!-- 반응 + 사람에게 잇는 행동: 또 보고 싶어요(그 선수를 따라간다) · 도전해요(나랑 한 판) -->
   <footer class="flex items-center mt-2 -ml-3">
     <template v-if="reactions">
-      <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm" :class="post.isLiked ? 'text-danger' : 'text-fg-muted'" :aria-pressed="post.isLiked" aria-label="좋아요" @click="emit('like')">
+      <button type="button" class="h-11 min-w-11 px-3 flex items-center justify-center gap-1.5 text-sm" :class="post.isLiked ? 'text-danger' : 'text-fg-muted'" :aria-pressed="post.isLiked" aria-label="좋아요" @click="emit('like')">
         <UiIcon :name="post.isLiked ? 'fas fa-heart' : 'far fa-heart'" class="text-lg" aria-hidden="true" />
         <span v-if="post.likeCount" class="tabular-nums">{{ post.likeCount }}</span>
       </button>
-      <button type="button" class="h-11 px-3 flex items-center gap-1.5 text-sm text-fg-muted" aria-label="댓글" @click="emit('comment')">
+      <button type="button" class="h-11 min-w-11 px-3 flex items-center justify-center gap-1.5 text-sm text-fg-muted" aria-label="댓글" @click="emit('comment')">
         <UiIcon name="far fa-comment" class="text-lg" aria-hidden="true" />
         <span v-if="post.commentCount" class="tabular-nums">{{ post.commentCount }}</span>
       </button>
       <!-- 공유: 인스타 스토리·카톡·링크 (Strava처럼 반응 옆에) -->
       <!-- 구경한 사람도 보낸다 (11/14 고병연: 관중으로서 공유하고 싶을 수 있다. 11/11에는 뛴 사람만으로 막았었다) -->
-      <button v-if="shareable && myId != null" type="button" class="h-11 px-3 flex items-center text-sm text-fg-muted" aria-label="공유" @click="emit('share')">
+      <button v-if="shareable && myId != null" type="button" class="h-11 min-w-11 px-3 flex items-center justify-center text-sm text-fg-muted" aria-label="공유" @click="emit('share')">
         <UiIcon name="share" class="text-lg" aria-hidden="true" />
       </button>
     </template>

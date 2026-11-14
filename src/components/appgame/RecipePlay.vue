@@ -7,7 +7,8 @@
 
     <!-- 키보드가 오르면 재료가 화면 밖으로 밀려, 다섯 재료를 외워서 써야 했다 (11/14): 쓰는 동안 재료 줄이 제목 바 바로 밑에 오게 맞춘다 -->
     <div ref="chips" class="flex flex-wrap gap-2 mt-3 scroll-mt-[calc(env(safe-area-inset-top)+4.25rem)]">
-      <UiChip v-for="i in ingredients" :key="i" :selected="used(i)">{{ i }}</UiChip>
+      <!-- 누르는 것이 아니라 보여 주는 것: 버튼(칩) 대신 표시로 (quality-rules N-2). 쓴 재료는 형광으로 칠해진다 -->
+      <span v-for="i in ingredients" :key="i" class="inline-flex items-center h-9 px-3.5 rounded-full text-sm transition-colors" :class="used(i) ? 'bg-signal text-signal-on font-semibold' : 'bg-surface-2 text-fg-muted'">{{ i }}</span>
     </div>
     <p class="t-micro mt-2">만드는 법에 쓴 재료는 칠해져요. 다 쓸수록 점수가 높아요</p>
 
@@ -25,7 +26,7 @@
 <script setup lang="ts">
 // 레시피 대결 한 판. 시간이 다 되면 적은 데까지 낸다. 채점은 서버의 AI 셰프가 뒤에서 하고, 끝나면 알림이 온다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { UiButton, UiChip, UiInput } from '../ui'
+import { UiButton, UiInput } from '../ui'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
 const emit = defineEmits<{ submit: [answer: string] }>()

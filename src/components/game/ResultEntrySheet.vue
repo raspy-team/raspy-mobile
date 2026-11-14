@@ -24,7 +24,7 @@
           </select>
           <input
             v-else
-            v-model.number="p.score"
+            v-model.number="p.score" placeholder="0"
             type="number"
             inputmode="numeric"
             min="0"
@@ -48,7 +48,7 @@
       <li v-for="(set, i) in sets" :key="set.key" class="grid grid-cols-[3rem_1fr_1fr_2.75rem] items-center gap-2">
         <span class="t-caption">{{ i + 1 }}세트</span>
         <input
-          v-model.number="set.my"
+          v-model.number="set.my" placeholder="0"
           type="number"
           inputmode="numeric"
           min="0"
@@ -57,7 +57,7 @@
           :aria-label="`${i + 1}세트 내 점수`"
         />
         <input
-          v-model.number="set.opponent"
+          v-model.number="set.opponent" placeholder="0"
           type="number"
           inputmode="numeric"
           min="0"

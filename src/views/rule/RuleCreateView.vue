@@ -81,9 +81,9 @@
           </button>
         </div>
         <div class="grid grid-cols-2 gap-3 mt-4">
-          <UiInput v-if="winMode === 'points'" v-model="points" label="세트 승리 점수" type="number" inputmode="numeric" />
-          <UiInput v-else v-model="minutes" label="세트 시간(분)" type="number" inputmode="numeric" />
-          <UiInput v-model="sets" label="세트 수" type="number" inputmode="numeric" />
+          <UiInput v-if="winMode === 'points'" v-model="points" label="세트 승리 점수" type="number" inputmode="numeric" placeholder="예: 11" />
+          <UiInput v-else v-model="minutes" label="세트 시간(분)" type="number" inputmode="numeric" placeholder="예: 10" />
+          <UiInput v-model="sets" label="세트 수" type="number" inputmode="numeric" placeholder="예: 3" />
         </div>
         <p class="t-caption mt-2">{{ sets > 1 ? `${sets}세트 중 ${Math.floor(sets / 2) + 1}세트를 먼저 이기면 경기 승리예요.` : '한 세트로 승부를 내요.' }}</p>
       </UiField>
@@ -97,7 +97,7 @@
           <UiInput v-model="form.ruleOrder" label="진행 순서" optional placeholder="예: 서브 2번씩 교대" />
           <UiInput v-model="form.ruleDecision" label="판정" optional placeholder="예: 애매하면 다시" />
           <UiInput v-model="form.ruleFoul" label="반칙" optional placeholder="예: 라인 밟으면 실점" />
-          <UiInput v-model="form.ruleExtraInfo" label="그 밖에" optional multiline :rows="2" />
+          <UiInput v-model="form.ruleExtraInfo" label="그 밖에" optional multiline :rows="2" placeholder="예: 비가 오면 실내에서 해요" />
         </div>
       </div>
 

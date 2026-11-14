@@ -27,9 +27,9 @@
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhoto" />
       </div>
 
-      <UiInput v-model="form.nickname" label="닉네임" :maxlength="NICKNAME_MAX" :error="errors.nickname" />
+      <UiInput v-model="form.nickname" label="닉네임" placeholder="예: 성수동 탁구왕" :maxlength="NICKNAME_MAX" :error="errors.nickname" />
       <!-- 같은 것을 화면마다 '아이디'·'친구가 찾는 아이디'·'친구 찾기 아이디'로 다르게 불렀다. '아이디' 하나로 (경로 전부 훑기 1절) -->
-      <UiInput v-model="form.username" label="아이디" icon="fas fa-at" :maxlength="12" hint="영문 소문자·숫자·밑줄(_). 친구가 나를 찾을 때 써요" :error="errors.username" />
+      <UiInput v-model="form.username" label="아이디" icon="fas fa-at" placeholder="영문 소문자·숫자·밑줄(_)" :maxlength="12" hint="영문 소문자·숫자·밑줄(_). 친구가 나를 찾을 때 써요" :error="errors.username" />
       <!-- 활동 지역은 고르지 않고 동네 인증으로 정한다 (GPS) -->
       <UiField label="동네">
         <RouterLink to="/neighborhood" class="flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line">

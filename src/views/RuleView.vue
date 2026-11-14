@@ -39,6 +39,8 @@
     </div>
 
     <main class="max-w-2xl mx-auto px-4 pb-16">
+      <!-- 목록은 당겨서 새로 고친다 (quality-rules N-3: 홈·내 경기·소식·알림에만 있었다) -->
+      <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
       <!-- 개수 + 정렬 -->
       <div class="flex items-center justify-between gap-2 pt-4 pb-2">
@@ -117,6 +119,7 @@
 </template>
 
 <script setup>
+import { usePullToRefresh } from '@/composables/usePullToRefresh'
 // 규칙 둘러보기: 검색 + 찾기 상황(어디서·몇 명·얼마나·준비물) + 능력 칩 + 목록 (docs/direction.md '카테고리').
 // 고른 조건은 주소(?place=&party=&length=&gear=&ability=&q=&sort=&kind=)에 남겨 상세에서 돌아와도, 링크로 공유해도 같은 목록이 나온다
 import { ref, computed, watch, onMounted } from 'vue'
@@ -124,7 +127,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../api/api'
 import { GET } from '@/api/client'
 import RuleListCard from '../components/rule/RuleListCard.vue'
-import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSheet, UiSkeleton, UiTopBar } from '../components/ui'
+import { UiButton, UiChip, UiEmptyState, UiIconButton, UiSheet, UiSkeleton, UiTopBar, UiPullIndicator } from '../components/ui'
 
 // 순위는 별점(평가가 적으면 전체 평균 쪽으로 당김)과 경기 수를 합친 것. 서버 RuleRanking
 // 정렬은 둘만: 고를 것을 찾는 사람에게 기준 넷은 많고, '순위순'이 경기 수와 별점을 이미 담는다 (목적 판정 6)
@@ -222,6 +225,7 @@ watch(q, (v) => {
 })
 
 let seq = 0
+const { pull, refreshing } = usePullToRefresh(() => load())
 async function load() {
   const mine = ++seq
   loading.value = true

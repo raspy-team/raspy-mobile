@@ -13,6 +13,8 @@
     </UiTopBar>
 
     <main class="max-w-xl mx-auto px-4 pt-3 pb-16">
+      <!-- 목록은 당겨서 새로 고친다 (quality-rules N-3: 홈·내 경기·소식·알림에만 있었다) -->
+      <UiPullIndicator :pull="pull" :refreshing="refreshing" />
       <UiInput v-if="searching" ref="searchInput" v-model="query" icon="search" placeholder="게임 찾기" />
 
       <div v-if="loading" class="space-y-2 mt-5">
@@ -57,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+import { usePullToRefresh } from '@/composables/usePullToRefresh'
 // 모든 앱 게임 (/games). 게임이 100개가 되어도: 검색 + 구조(지금 바로 붙기 / 편할 때 하기) + 최근에 한 게임 + 많이 하는 순
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
@@ -64,7 +67,7 @@ import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import AppGameTile from '../../components/appgame/AppGameTile.vue'
 import WaitingNow from '../../components/appgame/WaitingNow.vue'
-import { UiButton, UiEmptyState, UiIconButton, UiInput, UiSection, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiButton, UiEmptyState, UiIconButton, UiInput, UiSection, UiSkeleton, UiTopBar, UiPullIndicator } from '../../components/ui'
 
 type AppGameSummary = components['schemas']['AppGameSummary']
 const router = useRouter()
@@ -102,6 +105,7 @@ function toggleSearch() {
 }
 
 const loadFailed = ref(false)
+const { pull, refreshing } = usePullToRefresh(() => load())
 async function load() {
   loading.value = true
   loadFailed.value = false

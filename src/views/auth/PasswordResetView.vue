@@ -27,7 +27,7 @@
     <form v-else class="space-y-4" @submit.prevent="submit">
       <h1 class="t-title">새 비밀번호를 정해요</h1>
       <UiInput v-model="loginId" label="아이디" autocomplete="username" placeholder="로그인할 때 쓰던 아이디" />
-      <UiInput v-model="newPassword" label="새 비밀번호" type="password" autocomplete="new-password" hint="8~20자" :maxlength="20" />
+      <UiInput v-model="newPassword" label="새 비밀번호" type="password" placeholder="새로 쓸 비밀번호" autocomplete="new-password" hint="8~20자" :maxlength="20" />
       <p v-if="message" class="t-caption text-danger-fg" role="alert">{{ message }}</p>
       <UiButton type="submit" block size="lg" :loading="busy" :disabled="!loginId.trim() || newPassword.length < 8">바꾸기</UiButton>
     </form>

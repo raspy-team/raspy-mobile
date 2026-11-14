@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <!-- 키보드가 오르면 안내·남은 시간 줄이 제목 바 밑에 숨었다(아이폰 앱, 11/14): 임기응변처럼 판 머리부터 보이게 맞춘다 -->
+  <div ref="root" class="scroll-mt-[calc(env(safe-area-inset-top)+4.5rem)]">
     <div class="flex items-start justify-between gap-3">
       <span class="t-caption break-keep">{{ guide }}</span>
       <span class="t-mono tabular-nums shrink-0 whitespace-nowrap" :class="remaining <= 20 ? 'text-danger-fg' : 'text-fg-muted'">{{ clock }}</span>
@@ -8,7 +9,7 @@
     <p class="t-title mt-4 break-keep">{{ problem }}</p>
 
     <div class="mt-5">
-      <UiInput v-model="text" multiline :rows="4" :maxlength="120" :placeholder="placeholder" />
+      <UiInput v-model="text" multiline :rows="4" :maxlength="120" :placeholder="placeholder" @focusin="onTypeStart" />
       <p class="t-micro text-right mt-1">{{ text.length }}/120</p>
     </div>
     <UiButton block size="lg" class="mt-3" :loading="submitting" :disabled="text.trim().length < 5" @click="finish">다 썼어요</UiButton>
@@ -26,6 +27,13 @@ const props = defineProps<{ problem: string; timeLimitSeconds: number; submittin
 const emit = defineEmits<{ submit: [answer: string] }>()
 
 const text = ref('')
+const root = ref<HTMLElement | null>(null)
+function onTypeStart() {
+  const align = () => root.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  setTimeout(align, 250)
+  window.visualViewport?.addEventListener('resize', () => setTimeout(align, 60), { once: true })
+  setTimeout(align, 800)
+}
 const startedAt = Date.now()
 const remaining = ref(props.timeLimitSeconds)
 const clock = computed(() => `${Math.floor(remaining.value / 60)}:${String(remaining.value % 60).padStart(2, '0')}`)

@@ -13,7 +13,8 @@
     </UiTopBar>
 
     <!-- 불러오는 중: 실제 화면과 같은 모양 -->
-    <main v-if="loading" class="max-w-2xl mx-auto px-4 pt-6" role="status" aria-label="프로필 불러오는 중">
+    <!-- 프로필 뒤에 오는 것(챔피언·능력·기록)까지 받은 뒤 한 번에 그린다 (quality-rules T-4: 아래 묶음이 298px 밀렸다) -->
+    <main v-if="loading || !settled" class="max-w-2xl mx-auto px-4 pt-6" role="status" aria-label="프로필 불러오는 중">
       <div class="flex items-center gap-4">
         <UiSkeleton class="w-20 h-20 rounded-full flex-shrink-0" />
         <div class="flex-1 space-y-2">
@@ -36,7 +37,8 @@
       </UiEmptyState>
     </main>
 
-    <main v-else class="max-w-2xl mx-auto px-4 pt-6 pb-32 ui-appear">
+    <!-- 뼈대가 보이는 동안에도 안의 칸들은 미리 자료를 받는다(v-show): 화면이 뜬 뒤에야 받기 시작해 줄 하나가 늦게 끼어들었다 -->
+    <main v-if="!loading && !loadError" v-show="settled" class="max-w-2xl mx-auto px-4 pt-6 pb-32 ui-appear">
       <!-- AI: 맨 위에 한 줄 (docs/ai-residents.md 'AI 표시') -->
       <p v-if="user.isBot" class="t-caption mb-4 flex items-center gap-1.5"><UiAiBadge class="!ml-0" />앱이 만든 연습 상대예요</p>
       <!-- 누구인지 -->
@@ -296,6 +298,7 @@
 </template>
 
 <script setup>
+import { useSettled } from '@/stores/net'
 import { API_BASE_URL } from '@/config/server'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import OneGameSheet from '../../components/game/OneGameSheet.vue'
@@ -335,6 +338,7 @@ const { showToast } = useToast()
 const isMeRoute = route.params.id === '0'
 const user = ref(null)
 const loading = ref(true)
+const settled = useSettled()
 const loadError = ref('')
 const loadFailed = ref(false) // 서버가 이유를 말하지 않은 실패 (연결·서버 오류)
 // 다시 시도는 페이지를 통째로 새로 열지 않고 이 화면만 다시 불러온다 (경로 6 리뷰)

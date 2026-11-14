@@ -371,6 +371,12 @@
           <UiSkeleton class="h-14 w-full" />
         </div>
         <template v-else>
+          <!-- 위쪽 칸(친구와의 승부)이 도착한 뒤 한 번에 그린다: 늦게 끼어들어 '한 판 하기'가 손가락 밑에서 274px 밀렸다 (quality-rules T-2) -->
+          <div v-if="!settled" class="space-y-3" role="status" aria-label="불러오는 중">
+            <UiSkeleton class="h-32 w-full rounded-xl" />
+            <UiSkeleton class="h-[52px] w-full rounded-xl" />
+          </div>
+          <div v-show="settled">
           <!-- 가입 전 한 판을 하고 막 가입한 사람: 그 판이 어디 갔는지 먼저 (3-5 걷기 P5: "내 4등급은? 60은 뭐지") -->
           <UiCard v-if="joinedFrom" class="mb-3">
             <p class="t-title">방금 판 <span class="hl">{{ joinedFrom.grade }}등급</span>이 내 기록에 남았어요</p>
@@ -485,7 +491,8 @@
             </div>
             <UiEmptyState v-else mascot="dol" title="지금 투표할 경기가 없어요" description="다른 사람들의 문장이 모이면 여기에 올라와요" />
           </section>
-        </template>
+                  </div>
+</template>
       </template>
     </main>
     <StoryLinkGuide v-model="guideOpen" @go="guideGo" />
@@ -495,6 +502,8 @@
 </template>
 
 <script setup lang="ts">
+import { useSettled } from '@/stores/net'
+const settled = useSettled()
 import { dayTime } from '@/utils/format'
 import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
 import { GUEST_GAMES } from '@/utils/guestGames'

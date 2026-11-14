@@ -26,7 +26,8 @@
         <p class="t-caption mt-2">고르면 가장 많이 쓰는 규칙으로 시작해요. 다음 화면에서 바꿀 수 있어요.</p>
         <p v-if="sportMissing" class="t-caption mt-2">아직 {{ wantSport }} 규칙이 없어요. 비슷한 종목을 고르거나 규칙을 직접 골라 주세요.</p>
         <div v-if="!sports" class="grid grid-cols-3 gap-2 mt-6">
-          <UiSkeleton v-for="n in 9" :key="n" class="h-24 rounded-xl" />
+          <!-- 실제 칸 수(스물쯤)에 가깝게: 아홉 칸 뼈대 뒤에 스물한 칸이 와서 아래 버튼이 밀렸다 (quality-rules T-2) -->
+          <UiSkeleton v-for="n in 21" :key="n" class="h-24 rounded-xl" />
         </div>
         <!-- 실패하면 칸 없이 '직접 고를래요'만 남아 이유를 몰랐다 (목적 판정 11/11 4번) -->
         <div v-else-if="sportsFailed" class="mt-6 text-center">

@@ -11,6 +11,13 @@
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
+    <!-- 위쪽 칸들이 다 도착한 뒤 한 번에 그린다 (quality-rules T-1·T-4: 늦게 온 칸이 '내 판'과 버튼을 아래로 밀었다) -->
+    <div v-if="!settled" class="space-y-3" role="status" aria-label="불러오는 중">
+      <UiSkeleton class="h-24 w-full rounded-xl" />
+      <UiSkeleton class="h-40 w-full rounded-xl" />
+      <UiSkeleton class="h-14 w-full rounded-xl" />
+    </div>
+    <div v-show="settled">
     <HomeUpcoming />
     <!-- 받은 '한 판 붙자'는 홈에서 바로 받는다 (11/14 피터로 걷기: 종의 점 하나뿐이라 받은 줄 몰랐다) -->
     <OneGameRequests class="mb-6" />
@@ -132,6 +139,7 @@
     </section>
     </template>
     <HomeFeedPeek />
+    </div>
   </main>
 
   <!-- 친구와 둘이 신청 (팀 경기) -->
@@ -144,6 +152,8 @@
 </template>
 
 <script setup>
+import { useSettled } from '@/stores/net'
+const settled = useSettled()
 import { josa } from '@/utils/format'
 // 홈: 앱 게임을 한 사람은 '내 판'이 먼저, 동네 경기만 하는 사람은 동네 경기 목록 (목적 판정 11/11 4번)
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'

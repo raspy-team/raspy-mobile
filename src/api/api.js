@@ -1,4 +1,5 @@
 import { rememberReturnTo } from '../utils/authRedirect'
+import { netStart, netEnd } from '../stores/net'
 import axios from 'axios'
 import { markServer } from '../stores/server'
 import { API_BASE_URL } from '@/config/server'
@@ -21,6 +22,7 @@ const api = axios.create({
 
 // 요청 인터셉터: 토큰 자동 포함
 api.interceptors.request.use(config => {
+  netStart()
   const token = localStorage.getItem('raspy_access_token2')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -55,11 +57,13 @@ function maybeAskPush(config) {
 
 api.interceptors.response.use(
   response => {
+    netEnd()
     markServer(null)
     maybeAskPush(response.config)
     return response
   },
   async error => {
+    netEnd()
     // 오래 걸려도 되는 요청(임기응변 반응 등)은 시간 초과를 '서버가 안 된다' 띠로 알리지 않는다. 그 화면이 스스로 알린다
     if (!error.config?.quiet) markServer(error)
     const config = error.config

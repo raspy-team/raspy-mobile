@@ -11,7 +11,7 @@
            '말하기'를 누를 때 다시 펼쳐지며 버튼이 손가락 밑에서 밀렸다 (경로 10 리뷰 I1·I2). 대신 한 덩어리로 좁게 쓰고, 키보드가 오르면 판 머리부터 보이게 올린다 -->
       <p class="t-caption mt-3 break-keep">{{ current.who }} <span class="t-micro">· {{ current.context }}</span></p>
       <!-- 인물의 첫 마디 -->
-      <div class="mt-2 rounded-2xl rounded-tl-md bg-surface-2 px-4 py-3">
+      <div class="mt-2 rounded-2xl rounded-bl-md bg-surface-2 px-4 py-3">
         <p class="t-title break-keep">“{{ current.line }}”</p>
       </div>
 
@@ -32,11 +32,8 @@
 
       <!-- 내가 한 말과 인물의 반응 -->
       <template v-else>
-        <div class="mt-4 ml-auto max-w-[85%] rounded-2xl rounded-tr-md bg-signal px-4 py-3 text-signal-on">
-          <!-- t-body가 글자색을 정하므로 볼트 바탕의 글자색을 여기서 다시 준다 (흐리게 읽혔다) -->
-          <p class="t-body !text-signal-on break-keep whitespace-pre-line">{{ said[index] || '(대답 없음)' }}</p>
-        </div>
-        <div class="mt-3 max-w-[85%] rounded-2xl rounded-tl-md bg-surface-2 px-4 py-3">
+        <p class="bubble bubble-mine mt-4 ml-auto w-fit break-keep">{{ said[index] || '(대답 없음)' }}</p>
+        <div class="bubble bubble-theirs mt-3 w-fit">
           <!-- 반응을 기다리는 동안 인물이 '생각 중'이다. 도는 표시만 있으면 "멈췄나?" (걷기 P1-4: 첫 반응 10.9초) -->
           <p v-if="phase === 'reacting'" class="t-body text-fg-muted" aria-live="polite">
             <span class="thinking" aria-hidden="true"><i></i><i></i><i></i></span>

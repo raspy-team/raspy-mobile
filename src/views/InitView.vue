@@ -57,7 +57,7 @@
         <button
           v-if="show.kakao"
           type="button"
-          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[0.9375rem] font-semibold disabled:opacity-60"
+          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-body font-semibold disabled:opacity-60"
           style="background:#FEE500;color:rgba(0,0,0,.85)"
           :disabled="!!pending"
           @click="loginWith('kakao')"
@@ -70,7 +70,7 @@
         <button
           v-if="show.google"
           type="button"
-          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[0.9375rem] font-semibold bg-white text-[#1f1f1f] border border-[#dadce0] disabled:opacity-60"
+          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-body font-semibold bg-white text-[#1f1f1f] border border-[#dadce0] disabled:opacity-60"
           :disabled="!!pending"
           @click="loginWith('google')"
         >
@@ -88,7 +88,7 @@
         <button
           v-if="show.apple"
           type="button"
-          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-[0.9375rem] font-semibold bg-fg text-canvas disabled:opacity-60"
+          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-body font-semibold bg-fg text-canvas disabled:opacity-60"
           :disabled="!!pending"
           @click="loginWith('apple')"
         >

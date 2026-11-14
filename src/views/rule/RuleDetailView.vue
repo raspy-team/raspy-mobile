@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar back>
+    <UiTopBar back title="규칙">
       <!-- 규칙을 못 불러왔을 때는 공유·더보기를 숨긴다: 눌러도 아무 일이 없거나 '이미 신고한 규칙'이라는 거짓 문구가 떴다 (목적 판정 6) -->
       <template v-if="rule" #right>
         <UiIconButton icon="fas fa-arrow-up-from-bracket" label="공유" @click="share" />

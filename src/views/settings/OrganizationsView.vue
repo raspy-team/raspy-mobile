@@ -134,6 +134,7 @@
 </template>
 
 <script setup lang="ts">
+import { dayOnly } from '@/utils/format'
 // 설정 > 소속 (docs/organizations.md 2절): 인증한 소속(공개 범위·떼기), 기다리는 신청, 인증하기.
 // 결과는 알림으로 오고, 열려 있으면 refreshOnChange로 바로 다시 불러온다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
@@ -361,10 +362,7 @@ async function pickOnly() {
 function sizeText(n: number) {
   return n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(n / 1024))}KB`
 }
-function dateText(v: string) {
-  const d = new Date(v)
-  return `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`
-}
+const dateText = (v: string) => dayOnly(v)
 
 let off: (() => void) | undefined
 onMounted(() => {

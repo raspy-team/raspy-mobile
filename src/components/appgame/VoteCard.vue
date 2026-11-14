@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { dayTime } from '@/utils/format'
 // 투표 카드: 같은 제시어로 쓴 두 문장. 쓴 사람과 표 수는 마감 전까지 가린다 (순서도 보는 사람마다 서버가 섞는다)
 import { ref, computed } from 'vue'
 import { POST } from '@/api/client'
@@ -50,11 +51,7 @@ const voting = ref(false)
 const error = ref('')
 const canVote = computed(() => !props.card.isMine && !props.card.myVote && !props.card.closed)
 
-function until(at?: string) {
-  if (!at) return ''
-  const d = new Date(at)
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
+const until = (at?: string) => dayTime(at)
 
 async function vote(playId: number) {
   if (!canVote.value) return

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas flex flex-col pt-safe pb-safe">
-    <UiTopBar back />
+    <UiTopBar back title="없는 페이지" />
     <main class="flex-1 w-full max-w-md mx-auto px-6 flex flex-col">
       <div class="flex-1 flex flex-col justify-center">
         <span class="text-fg face-wobble inline-block w-fit"><MatchMascot who="match" mood="wow" :size="80" /></span>

@@ -2,7 +2,7 @@
   <div class="flex flex-col h-full">
     <!-- 미리보기: 걷는 모습 -->
     <div class="flex flex-col items-center pt-4 pb-3">
-      <div class="relative rounded-3xl bg-surface-2 w-40 h-40 flex items-end justify-center overflow-hidden">
+      <div class="relative rounded-2xl bg-surface-2 w-40 h-40 flex items-end justify-center overflow-hidden">
         <div v-if="previewKey" class="avatar-walk" :style="{ backgroundImage: `url(${sheetUrl(previewKey)})` }" role="img" :aria-label="'내 캐릭터 미리보기'" />
       </div>
       <p v-if="state && mode === 'edit'" class="t-caption mt-2">부품은 해낸 만큼 열려요</p>
@@ -34,7 +34,7 @@
           >
             <img :src="partUrl(g.items[0].id)" alt="" class="part" />
             <span class="t-micro mt-1 truncate max-w-full px-1">{{ g.label }}</span>
-            <span v-if="g.badge" class="absolute top-1 left-1 t-micro px-1 rounded font-semibold" :class="g.tierClass || 'bg-surface-3 text-fg'">{{ g.badge }}</span>
+            <span v-if="g.badge" class="absolute top-1 left-1 t-micro px-1 rounded-md font-semibold" :class="g.tierClass || 'bg-surface-3 text-fg'">{{ g.badge }}</span>
             <UiIcon v-if="g.locked" name="lock" class="absolute top-1.5 right-1.5 text-[11px] text-fg-muted" aria-label="잠김" />
           </button>
         </div>

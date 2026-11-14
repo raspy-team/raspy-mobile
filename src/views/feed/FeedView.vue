@@ -51,7 +51,7 @@
         </p>
         <!-- 지금 하는 경기: 중계로 -->
         <RouterLink v-if="p.live" :to="`/live/${p.id}`" class="flex items-center gap-3 py-4 border-b border-line" :data-game="p.id">
-          <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-signal text-signal-on text-xs font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-signal-on motion-safe:animate-pulse" aria-hidden="true"></span>LIVE</span>
+          <UiBadge tone="signal" class="flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-signal-on motion-safe:animate-pulse" aria-hidden="true"></span>LIVE</UiBadge>
           <span class="flex-1 min-w-0">
             <span class="block t-heading truncate">{{ p.players.map((x) => x.name).join(' vs ') }}</span>
             <span class="block t-caption truncate">{{ p.rule?.ruleTitle }}{{ p.meta?.place ? ` · ${p.meta.place}` : '' }}</span>
@@ -163,7 +163,7 @@ import AppDuelFeedCard from '../../components/feed/AppDuelFeedCard.vue'
 const ShareSheet = defineAsyncComponent(() => import('../../components/feed/story/ShareSheet.vue'))
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
-  UiAiBadge, UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
+  UiAiBadge, UiBadge, UiButton, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiPullIndicator, UiSheet, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
 import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'

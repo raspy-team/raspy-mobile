@@ -20,7 +20,7 @@
       <div class="flex items-center gap-2">
         <router-link
           :to="`/profile/${comment.author.id}`"
-         class="text-[0.9375rem] font-semibold text-fg hover:underline focus:underline focus:outline-none"
+         class="text-body font-semibold text-fg hover:underline focus:underline focus:outline-none"
         >
           {{ comment.author.nickname }}
         </router-link>

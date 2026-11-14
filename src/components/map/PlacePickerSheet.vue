@@ -5,9 +5,7 @@
     <div class="min-w-0 overflow-x-hidden">
       <div v-if="kakaoMapKey" class="relative">
         <KakaoMap :center="center" :pins="pins" :level="5" height="300px" fit :selected-id="picked?.kakaoId ?? null" @select="(p) => select(results.find((r) => r.kakaoId === p.id))" @moved="onMoved" />
-        <button v-if="movedAway && !busy" type="button" class="absolute top-3 left-1/2 -translate-x-1/2 h-9 px-4 rounded-full bg-fg text-canvas t-label shadow-lg whitespace-nowrap" @click="search(keyword, mapCenter)">
-          이 지역에서 다시 찾기
-        </button>
+        <div v-if="movedAway && !busy" class="absolute top-3 left-1/2 -translate-x-1/2 shadow-lg rounded-xl"><UiButton size="sm" @click="search(keyword, mapCenter)">이 지역에서 다시 찾기</UiButton></div>
       </div>
       <!-- 무엇을 찾나: 이 경기의 종목이 맨 앞 -->
       <div class="flex flex-wrap gap-2 mt-3">

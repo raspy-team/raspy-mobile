@@ -33,7 +33,7 @@
           <p v-if="newDay(i)" class="text-center t-micro py-2">{{ day(m.timestamp) }}</p>
           <div v-if="m.senderId === me" class="flex justify-end items-end gap-1.5 pl-12">
             <span class="t-micro pb-1 flex-shrink-0">{{ time(m.timestamp) }}</span>
-            <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words"><ChatText :text="m.content" /></p>
+            <p class="bubble bubble-mine"><ChatText :text="m.content" /></p>
           </div>
           <div v-else class="flex items-end gap-2 pr-12">
             <UiAvatar v-if="firstOfRun(i)" :src="avatarOf(m.senderId)" :name="m.sender" :user-id="m.senderId" size="xs" class="mb-0.5" />
@@ -41,7 +41,7 @@
             <div class="min-w-0">
               <p v-if="firstOfRun(i)" class="t-micro mb-0.5">{{ m.sender }}</p>
               <!-- 1:1 채팅처럼 앱 주소는 눌리는 링크로 (경로 5 리뷰 S22) -->
-              <p class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words"><ChatText :text="m.content" /></p>
+              <p class="bubble bubble-theirs"><ChatText :text="m.content" /></p>
             </div>
             <span class="t-micro pb-1 flex-shrink-0">{{ time(m.timestamp) }}</span>
           </div>

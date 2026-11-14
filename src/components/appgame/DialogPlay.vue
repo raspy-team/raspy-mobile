@@ -8,9 +8,9 @@
     <!-- 주고받은 말 -->
     <ol class="mt-4 space-y-2" aria-live="polite">
       <li v-for="(l, i) in lines" :key="i" class="flex" :class="l.mine ? 'justify-end' : 'justify-start'">
-        <p class="max-w-[80%] rounded-2xl px-4 py-2.5 t-body whitespace-pre-line" :class="l.mine ? 'bg-signal !text-signal-on' : 'bg-surface text-fg'">{{ l.text }}</p>
+        <p class="bubble" :class="l.mine ? 'bubble-mine' : 'bubble-theirs'">{{ l.text }}</p>
       </li>
-      <li v-if="saying" class="flex justify-start"><p class="rounded-2xl px-4 py-2.5 bg-surface t-caption">AI가 받아치는 중…</p></li>
+      <li v-if="saying" class="flex justify-start"><p class="bubble bubble-theirs !text-fg-muted">AI가 받아치는 중이에요</p></li>
     </ol>
 
     <!-- 키보드가 오르면 바로 앞 말과 내는 버튼이 함께 보이게 맞춘다 (11/14 전수 평가) -->

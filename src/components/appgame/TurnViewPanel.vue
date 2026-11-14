@@ -44,7 +44,7 @@
           <span v-else-if="kind(cell) === 'closed'" class="w-full h-full bg-surface-3" aria-hidden="true"></span>
           <span v-else-if="kind(cell) === 'open'" class="w-full h-full bg-canvas" aria-hidden="true"></span>
           <span v-else-if="kind(cell) === 'fill'" class="w-full h-full bg-fg" aria-hidden="true"></span>
-          <span v-else-if="kind(cell) === 'line'" class="w-full h-full bg-fg rounded-sm" :class="{ 'ring-2 ring-signal': last(cell) }" aria-hidden="true"></span>
+          <span v-else-if="kind(cell) === 'line'" class="w-full h-full bg-fg rounded-md" :class="{ 'ring-2 ring-signal': last(cell) }" aria-hidden="true"></span>
           <span v-else-if="/^n\d$/.test(kind(cell))" class="w-full h-full flex items-center justify-center bg-canvas t-heading tabular-nums">{{ kind(cell).slice(1) }}</span>
         </button>
       </div>

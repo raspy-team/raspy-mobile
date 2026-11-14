@@ -1,14 +1,14 @@
 <template>
   <div
     v-if="modalVisible"
-    class="fixed inset-0 z-sheet flex items-end justify-center bg-black/50 raspy-top"
+    class="fixed inset-0 z-sheet flex items-end justify-center bg-black/70 raspy-top"
     @click.self="closeModal"
   >
     <transition name="slide-up" @after-leave="afterLeave">
       <div
         v-show="showModal"
         ref="sheet"
-        class="w-full raspy-bot max-w-md flex flex-col rounded-t-2xl bg-surface shadow-xl"
+        class="w-full raspy-bot max-w-xl flex flex-col rounded-t-2xl bg-surface"
         :style="{
           height: `${sheetHeight}px`,
           marginBottom: `${keyboard}px`,
@@ -22,8 +22,14 @@
         @touchend="onTouchEnd"
         @mousedown="onMouseDown"
       >
-        <!-- 드래그바 -->
-        <div class="mx-auto mt-2 mb-2 w-10 h-1.5 rounded bg-line-strong" />
+        <!-- 손잡이·제목·닫기는 공통 창(UiSheet)과 같은 꼴 (quality-rules I-13) -->
+        <div class="pt-2.5 pb-1 flex justify-center"><span class="w-10 h-1 rounded-full bg-line-strong" aria-hidden="true"></span></div>
+        <div class="flex items-center justify-between px-5 pt-2 pb-3">
+          <h2 class="t-heading">댓글</h2>
+          <button type="button" class="hit w-9 h-9 -mr-2 flex items-center justify-center text-fg-muted" aria-label="닫기" @click="closeModal">
+            <UiIcon name="xmark" class="text-xl" />
+          </button>
+        </div>
 
         <!-- 댓글 리스트 영역 -->
         <div
@@ -31,7 +37,6 @@
           ref="scrollContainer"
           :style="{
             minHeight: '0px',
-            maxHeight: `${commentAreaHeight}px`,
             overscrollBehavior: 'contain',
             touchAction: 'pan-y',
             overflowY: 'auto',
@@ -109,14 +114,8 @@
           >
             <UiIcon name="fas fa-camera" class="text-lg" />
           </button>
-          <button
-            type="submit"
-            :disabled="!canSubmit || isLoading"
-           class="px-4 py-2 rounded-full text-primary-on bg-primary disabled:bg-line-strong font-bold text-base transition flex items-center justify-center"
-            style="height: 38px"
-          >
-            올리기
-          </button>
+          <!-- 공통 버튼으로 (일관성 I-5: 직접 칠한 알약이었다) -->
+          <UiButton type="submit" size="sm" :disabled="!canSubmit || isLoading">올리기</UiButton>
           <input
             ref="imageInputRef"
             type="file"
@@ -150,7 +149,7 @@
 </template>
 
 <script setup>
-import { UiListSkeleton } from '../components/ui'
+import { UiButton, UiListSkeleton } from '../components/ui'
 import {
   ref,
   watch,
@@ -181,7 +180,7 @@ const commentInputRef = ref(null)
 const imageInputRef = ref(null)
 const inputForm = ref(null)
 
-const inputAreaHeight = 56 // 입력창 높이(px)
+const inputAreaHeight = 56 + 62 // 입력창 + 손잡이·제목 줄 높이(px)
 const SHEET_MARGIN = 0 // 바텀시트 상하 여백
 
 const sheetHeight = ref(window.innerHeight * 0.9)

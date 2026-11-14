@@ -52,7 +52,7 @@ const VARIANTS = {
 // 높이는 손가락으로 누르기 쉬운 크기 이상 (sm도 36px)
 const SIZES = {
   sm: 'h-9 px-3.5 text-sm hit',
-  md: 'h-11 px-4 text-[0.9375rem]',
-  lg: 'h-[52px] px-5 text-[0.9375rem]',
+  md: 'h-11 px-4 text-body',
+  lg: 'h-[52px] px-5 text-body',
 }
 </script>

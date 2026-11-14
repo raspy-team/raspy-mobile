@@ -8,7 +8,7 @@
         <button v-if="canSchedule" type="button" class="flex items-center gap-1.5 max-w-full text-left mt-0.5 py-2.5 -my-2.5" @click="emit('schedule')">
           <span class="t-caption line-clamp-2 min-w-0">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</span>
           <!-- 정한 뒤에도 두 선수 모두 바꿀 수 있다는 게 보이게 (예전 밑줄 글씨는 너무 작아 못 바꾸는 줄 알았다) -->
-          <span class="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-surface-3 text-fg text-xs font-medium flex-shrink-0"><UiIcon name="pen" class="text-[10px]" aria-hidden="true" />{{ needsSchedule ? '정하기' : '바꾸기' }}</span>
+          <UiBadge icon="pen" class="flex-shrink-0 !text-fg">{{ needsSchedule ? '정하기' : '바꾸기' }}</UiBadge>
         </button>
         <p v-else class="t-caption line-clamp-2 mt-0.5">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</p>
         <!-- 만나러 갈 때 지도가 제일 필요하다: 장소를 카카오맵으로 (UX 리뷰 ⑦) -->

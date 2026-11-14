@@ -264,7 +264,7 @@ function scrollToBottom() {
   })
 }
 const formatTime = (ts) =>
-  new Date(ts).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+  new Date(ts).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })
 function shouldShowDate(idx, arr) {
   if (idx === 0) return true
   const prev = arr[idx - 1]
@@ -452,7 +452,7 @@ const closeErrorModal = () => {
         <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack()" />
         <button type="button" class="flex items-center gap-3 min-w-0" @click="goToProfile">
           <UiAvatar :src="targetUserProfileUrl" :name="targetUserNickname" size="sm" />
-          <span class="t-heading truncate">{{ targetUserNickname }}</span>
+          <span class="text-base font-semibold tracking-[-0.02em] text-fg truncate">{{ targetUserNickname }}</span>
         </button>
         <UiIconButton class="ml-auto" icon="fas fa-ellipsis" label="더보기" @click="menuOpen = true" />
       </header>
@@ -535,11 +535,11 @@ const closeErrorModal = () => {
           <template v-if="msg.messageType === 'TALK'">
             <div v-if="msg.senderId === currentUserId" class="flex justify-end items-end gap-1.5 pl-12">
               <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>
-              <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-signal text-signal-on text-sm whitespace-pre-line break-words"><ChatText :text="msg.content" /></p>
+              <p class="bubble bubble-mine"><ChatText :text="msg.content" /></p>
             </div>
             <div v-else class="flex justify-start items-end gap-1.5 pr-12">
               <p
-                class="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-surface-2 text-fg text-sm whitespace-pre-line break-words select-none"
+                class="bubble bubble-theirs select-none"
                 @touchstart.passive="pressStart(msg)" @touchend="pressEnd" @touchmove.passive="pressEnd" @contextmenu.prevent="reportMessage(msg)"
               ><ChatText :text="msg.content" /></p>
               <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>

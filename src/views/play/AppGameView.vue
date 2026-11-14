@@ -487,6 +487,7 @@
 </template>
 
 <script setup lang="ts">
+import { dayTime } from '@/utils/format'
 import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
 import { GUEST_GAMES } from '@/utils/guestGames'
 import { who } from '@/utils/format'
@@ -797,11 +798,7 @@ function secondsLeft(p: Play) {
   return Math.max(1, Math.min(p.timeLimitSeconds, left))
 }
 
-function until(at?: string) {
-  if (!at) return ''
-  const d = new Date(at)
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
+const until = (at?: string) => dayTime(at)
 
 /** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
 const challenging = ref(false)
@@ -888,7 +885,7 @@ async function openShare(gameId: number) {
 
 /** 투표 공유 링크: 친구에게 보내 표를 받는다 */
 async function shareVote(gameId: number) {
-  const msg = await shareLink(`${window.location.origin}/vote/${gameId}`, `${game.value?.title ?? '대결'} 투표 좀 해 줘요. 어느 쪽이 나아요?`)
+  const msg = await shareLink(`${window.location.origin}/vote/${gameId}`, `${game.value?.title ?? '경기'} 투표 좀 해 줘요. 어느 쪽이 나아요?`)
   if (msg) showToast(msg)
 }
 
@@ -1100,7 +1097,7 @@ onMounted(async () => {
       result.value = duels.value.find((d) => d.gameId === duelId)
         ?? (await GET('/api/app-games/duels/{gameId}', { path: { gameId: duelId } })).data
     } catch (e) {
-      showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '그 대결을 찾지 못했어요')
+      showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '그 경기를 찾지 못했어요')
       router.replace({ query: {} })
     }
   }

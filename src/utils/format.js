@@ -33,6 +33,25 @@ export function matchTime(value) {
   return d.getFullYear() === now.getFullYear() ? `${date} ${time}` : `${d.getFullYear()}년 ${date} ${time}`
 }
 
+/** 때 한 꼴 (quality-rules I-2): '오늘 오후 7:00' · '내일 오전 10:30' · '11월 2일 (일) 오후 7:00'. 값이 없으면 빈 글 */
+export function dayTime(value) {
+  return value && !isNaN(new Date(value)) ? matchTime(value) : ''
+}
+
+/** 날만: '오늘' · '내일' · '11월 2일' (올해가 아니면 '2025년 11월 2일') */
+export function dayOnly(value) {
+  if (!value) return ''
+  const d = new Date(value)
+  if (isNaN(d)) return ''
+  const now = new Date()
+  const tomorrow = new Date(now)
+  tomorrow.setDate(now.getDate() + 1)
+  if (sameDay(d, now)) return '오늘'
+  if (sameDay(d, tomorrow)) return '내일'
+  const date = `${d.getMonth() + 1}월 ${d.getDate()}일`
+  return d.getFullYear() === now.getFullYear() ? date : `${d.getFullYear()}년 ${date}`
+}
+
 /** 장소: 비었으면 '장소 미정' */
 export function place(value) {
   return value && String(value).trim() ? value : '장소 미정'

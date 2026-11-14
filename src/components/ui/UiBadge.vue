@@ -14,6 +14,8 @@ const TONES = {
   // 강조 상태. 예전엔 흰 칠이라 주 버튼과 무게가 같았다(내 경기 카드의 '확정' 옆에 흰 버튼). 칠 대신 또렷한 테두리 (11/14 전수 평가)
   primary: 'bg-surface-3 text-fg ring-1 ring-inset ring-fg/45',
   success: 'bg-success-soft text-success-fg',
+  // 지금 벌어지는 것(LIVE)·개수: 형광 칠
+  signal: 'bg-signal text-signal-on font-bold',
   danger: 'bg-danger-soft text-danger-fg',
 }
 </script>

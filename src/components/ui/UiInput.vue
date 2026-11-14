@@ -25,13 +25,14 @@
         :maxlength="maxlength"
         :autocomplete="autocomplete"
         class="ui-control h-12"
-        :class="{ 'pl-11': icon, 'border-danger': error }"
+        :class="{ 'pl-11': icon, 'border-danger': error, 'ui-date': DATE_TYPES.includes(type) }"
         @input="emit('update:modelValue', type === 'number' ? toNumber($event.target.value) : $event.target.value)"
         @keyup.enter="emit('enter')"
       />
-      <!-- 아이폰의 날짜·시간 칸은 비어 있으면 아무 글도 없는 빈 상자다: 무엇을 하는 칸인지 적어 둔다 (11/14 전수 평가) -->
-      <span v-if="!multiline && DATE_TYPES.includes(type) && !modelValue" class="absolute inset-y-0 left-4 right-4 flex items-center gap-2 text-fg-subtle pointer-events-none" aria-hidden="true">
-        <UiIcon name="calendar" /><span class="truncate">{{ placeholder || (type === 'date' ? '날짜 고르기' : type === 'time' ? '시간 고르기' : '날짜·시간 고르기') }}</span>
+      <!-- 날짜·시간 칸의 글은 우리가 쓴다. 아이폰은 빈 칸을 빈 상자로, 고른 값을 기기 언어 꼴("Nov 15, 2026 at 19:00")로 보여 줘서
+           앱의 때 표기(오늘 오후 7:00)와 어긋났다 (11/14 전수 평가·일관성 I-2). 누르면 기기의 고르는 창이 그대로 뜬다 -->
+      <span v-if="!multiline && DATE_TYPES.includes(type)" class="absolute inset-y-0 left-4 right-4 flex items-center gap-2 pointer-events-none" :class="modelValue ? 'text-fg' : 'text-fg-subtle'" aria-hidden="true">
+        <UiIcon name="calendar" class="text-fg-subtle" /><span class="truncate">{{ dateLabel }}</span>
       </span>
     </div>
   </UiField>
@@ -39,11 +40,12 @@
 
 <script setup>
 // 글자 입력칸 (한 줄 / 여러 줄). v-model로 쓴다
-import { ref, defineProps, defineEmits, defineExpose } from 'vue'
+import { ref, computed, defineProps, defineEmits, defineExpose } from 'vue'
+import { dayTime, dayOnly } from '../../utils/format'
 import UiField from './UiField.vue'
 const DATE_TYPES = ['datetime-local', 'date', 'time']
 
-defineProps({
+const props = defineProps({
   modelValue: { type: [String, Number], default: '' },
   label: { type: String, default: '' },
   placeholder: { type: String, default: '' },
@@ -61,6 +63,14 @@ defineProps({
   disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue', 'enter'])
+// 날짜·시간 칸에 보일 글: 고른 값은 앱의 때 표기로, 비었으면 무엇을 하는 칸인지
+const dateLabel = computed(() => {
+  const v = props.modelValue
+  if (!v) return props.placeholder || (props.type === 'date' ? '날짜 고르기' : props.type === 'time' ? '시간 고르기' : '날짜·시간 고르기')
+  if (props.type === 'date') return dayOnly(v)
+  if (props.type === 'time') return new Date(`2000-01-01T${v}`).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })
+  return dayTime(v)
+})
 // 숫자 칸을 비우면 빈 값('')으로 둔다. 예전엔 Number('') = 0이 칸에 다시 들어앉아, 선택 칸('만 나이')이 저장을 막고
 // 대회 '최대 인원'을 고쳐 쓰려 지우면 0이 남았다 (경로 8 P1, 가로 훑기 8절)
 const toNumber = (v) => (v === '' || v == null ? '' : Number(v))

@@ -88,6 +88,7 @@
 </template>
 
 <script setup>
+import { dayOnly } from '@/utils/format'
 // 규칙 랭킹: 자리 칩(소속·동네·전국) → 내 자리 → 순위. 처음에는 서버가 정한 자리(앱 게임은 첫 소속, 앱 밖 경기는 동네, 없으면 전국)
 import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -116,10 +117,7 @@ const showAi = ref(false)
 const folded = computed(() => rankings.value.length > FOLD_AT)
 const rows = computed(() => withBaselines(rankings.value, folded.value && !showAi.value ? [] : baselines.value))
 
-function day(s) {
-  const d = new Date(s)
-  return `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`
-}
+const day = (s) => dayOnly(s)
 function period(h) {
   return h.until ? `${day(h.since)} ~ ${day(h.until)}` : `${day(h.since)}부터 지금`
 }

@@ -69,6 +69,12 @@
   h1, h2, h3, .t-display, .t-title, .t-heading { text-wrap: balance; }
   p { text-wrap: pretty; }
 }
+/* 크기만 필요한 곳(버튼·이름·딱지)을 위한 이름 붙인 단계. 화면에서 text-[0.9375rem]처럼 숫자를 직접 적지 않는다 (quality-rules I-11) */
+@layer utilities {
+  .text-body { font-size: 0.9375rem; }
+  .text-heading { font-size: 1.0625rem; }
+  .text-badge { font-size: 11px; }
+}
 /* 여러 화면에서 쓰는 스크롤 유틸리티 */
 @layer utilities {
   .no-scrollbar {
@@ -98,6 +104,14 @@
   .t-micro { @apply text-[0.8125rem] leading-[1.4] text-fg-muted; }                                                /* 시간, 개수 */
   /* 기록·메타 숫자 (순번, 단위, 상태). 고정폭 대신 표 숫자로 자리만 맞춘다 */
   .t-mono { @apply font-mono text-[0.8125rem] text-fg-subtle tracking-normal tabular-nums; }
+}
+
+/* 말풍선 한 벌 (quality-rules I-7): 내 말은 형광, 상대 말은 옅은 면. 게임(임기응변·말싸움)과 대화(1:1·단톡)가 같은 꼴을 쓴다.
+   꼬리(덜 둥근 모서리)는 말한 사람 쪽 아래 */
+@layer components {
+  .bubble { @apply max-w-[85%] rounded-2xl px-4 py-2.5 text-body leading-[1.55] whitespace-pre-line break-words; }
+  .bubble-mine { @apply bg-signal rounded-br-md; color: rgb(var(--c-signal-on)); }
+  .bubble-theirs { @apply bg-surface-2 text-fg rounded-bl-md; }
 }
 
 /* 매치의 서명: 볼트 형광펜. 승자 이름, 큰 제목의 핵심 낱말에만 (한 화면에 한두 곳)
@@ -131,6 +145,9 @@
     -webkit-appearance: none; appearance: none; display: block; min-width: 0; max-width: 100%; text-align: left;
   }
   input.ui-control::-webkit-date-and-time-value { text-align: left; margin: 0; min-height: 1.5em; }
+  /* 기기가 쓰는 글(기기 언어 꼴)은 감추고 우리 글을 그 위에 쓴다 (UiInput) */
+  input.ui-control.ui-date { color: transparent; }
+  input.ui-control.ui-date::-webkit-date-and-time-value { opacity: 0; }
 }
 
 /* 아이폰 노치·홈 바 영역 */

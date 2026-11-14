@@ -47,7 +47,7 @@
     <div v-else-if="visual.kind === 'BARS' && bars.length === 2" class="rounded-xl bg-surface-2 p-3.5 flex flex-col gap-2.5">
       <div v-for="b in bars" :key="b.id" class="grid grid-cols-[3.25rem_minmax(0,1fr)_3.5rem] gap-2.5 items-center text-[0.8125rem] tabular-nums">
         <span class="truncate">{{ b.name }}</span>
-        <span class="h-3.5 rounded bg-line overflow-hidden"><i class="block h-full" :class="b.won ? 'bg-fg' : 'bg-fg-subtle'" :style="{ width: b.pct + '%' }"></i></span>
+        <span class="h-3.5 rounded-md bg-line overflow-hidden"><i class="block h-full" :class="b.won ? 'bg-fg' : 'bg-fg-subtle'" :style="{ width: b.pct + '%' }"></i></span>
         <span class="text-right">{{ b.text }}</span>
       </div>
       <p v-if="bestNames.length" class="t-micro">{{ bestNames.join(', ') }} 개인 최고 기록</p>

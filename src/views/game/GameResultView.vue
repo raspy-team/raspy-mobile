@@ -291,7 +291,7 @@
                   <img v-if="pic.type === 'image'" :src="pic.dataUrl" alt="" class="w-full h-full object-cover pointer-events-none" />
                   <video v-else :src="pic.dataUrl" class="w-full h-full object-cover pointer-events-none" />
                   <span class="absolute top-1 left-1 min-w-6 h-6 px-1.5 rounded-full bg-primary text-primary-on text-xs font-bold flex items-center justify-center">{{ index + 1 }}</span>
-                  <span v-if="pic.type === 'video'" class="absolute bottom-1 left-1 px-1.5 rounded bg-black/60 text-white text-xs">{{ formatDuration(pic.duration) }}</span>
+                  <span v-if="pic.type === 'video'" class="absolute bottom-1 left-1 px-1.5 rounded-md bg-black/60 text-white text-xs">{{ formatDuration(pic.duration) }}</span>
                   <button
                     type="button"
                     class="absolute top-0 right-0 w-11 h-11 flex items-start justify-end p-1.5"
@@ -317,7 +317,7 @@
                     <img v-if="pic.type === 'image'" :src="pic.dataUrl" alt="" class="w-full h-full object-cover" />
                     <video v-else :src="pic.dataUrl" class="w-full h-full object-cover" />
                   </button>
-                  <span v-if="pic.type === 'video'" class="absolute bottom-1 left-1 px-1.5 rounded bg-black/60 text-white text-xs pointer-events-none">{{ formatDuration(pic.duration) }}</span>
+                  <span v-if="pic.type === 'video'" class="absolute bottom-1 left-1 px-1.5 rounded-md bg-black/60 text-white text-xs pointer-events-none">{{ formatDuration(pic.duration) }}</span>
                   <button
                     type="button"
                     class="absolute top-0 right-0 w-11 h-11 flex items-start justify-end p-1.5"

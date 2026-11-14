@@ -1,12 +1,11 @@
 <template>
   <!-- 스크롤 없이 한 화면 (애플식) -->
   <div class="h-dvh overflow-hidden bg-canvas flex flex-col">
-    <UiTopBar back="/init" />
+    <!-- 머리줄은 앱 전체가 두 꼴: 뒤로 + 작은 제목 (quality-rules I-3). 큰 제목을 본문에 따로 두지 않는다 -->
+    <UiTopBar back="/init" :title="isSignup ? '가입' : '로그인'" />
 
     <main class="flex-1 min-h-0 w-full max-w-md mx-auto px-4 pt-4 pb-6">
-      <h1 class="t-title">{{ isSignup ? '가입' : '로그인' }}</h1>
-
-      <form class="mt-8 space-y-5" novalidate @submit.prevent="submit">
+      <form class="mt-2 space-y-5" novalidate @submit.prevent="submit">
         <UiInput
           v-model="email"
           placeholder="아이디"

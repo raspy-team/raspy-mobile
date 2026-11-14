@@ -20,7 +20,7 @@
         <UiIcon name="fas fa-plug-circle-exclamation" class="text-fg-muted" aria-hidden="true" />
         <span class="flex-1 text-fg">{{ offline ? '인터넷 연결이 끊겼어요. 연결되면 다시 해 주세요' : '서버에 연결하지 못했어요. 잠시 뒤 다시 해 주세요' }}</span>
         <!-- 다시 시도는 페이지를 새로 열지 않고 서버에 닿는지만 다시 묻는다. 새로 열면 판·글쓰기 중 쓴 것이 사라졌다 (목적 판정 11/11 부분 1) -->
-        <button v-if="!offline" type="button" class="text-primary font-bold flex-shrink-0 px-1 py-2" @click="recheck">다시 시도</button>
+        <UiButton v-if="!offline" size="sm" variant="ghost" class="flex-shrink-0 -mr-2" @click="recheck">다시 시도</UiButton>
       </div>
     </div>
 
@@ -54,6 +54,7 @@ import FooterNav from './components/FooterNav.vue'
 import RealtimeInviteHost from './components/game/RealtimeInviteHost.vue'
 import CustomToast from './components/CustomToast.vue'
 import UiConfirmHost from './components/ui/UiConfirmHost.vue'
+import UiButton from './components/ui/UiButton.vue'
 import SendSheet from './components/share/SendSheet.vue'
 import RouteProgress from './components/RouteProgress.vue'
 import SuspendedBanner from './components/safety/SuspendedBanner.vue'
@@ -84,10 +85,9 @@ const footerTab = computed(() => {
   if (p === '/feed') return route.query.userId ? null : 'home'
   if (p === '/game') return 'game'
   if (p === '/profile/0' || p === '/settings') return 'profile'
-  if (p.startsWith('/profile/')) return ''
+  // 남의 프로필·메시지 목록은 알림처럼 한 가지를 보는 화면: 탭을 숨긴다. 예전엔 탭은 보이는데 켜진 탭이 없었다 (quality-rules I-4)
   if (p === '/rules' && route.query.fromGameCreate) return null
   if (p === '/rules' || p === '/rules/my-rules' || p === '/games' || /^\/rules\/\d+\/ranking$/.test(p)) return 'home'
-  if (p === '/dm') return ''
   return null
 })
 // 화면 전환 방향. 브라우저 기록의 위치(position)로 앞으로·뒤로를 가린다

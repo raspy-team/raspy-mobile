@@ -21,7 +21,7 @@
       <ol v-if="ranking.length" class="space-y-1.5">
         <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3">
           <span class="t-mono w-8" :class="r.place === 1 ? 'text-fg font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
-          <button type="button" class="min-w-0 truncate text-[0.9375rem] text-left py-2.5 -my-2.5" :class="r.place === 1 ? 'text-fg font-semibold' : 'text-fg-muted'" @click="emit('profile', r.id)">
+          <button type="button" class="min-w-0 truncate text-body text-left py-2.5 -my-2.5" :class="r.place === 1 ? 'text-fg font-semibold' : 'text-fg-muted'" @click="emit('profile', r.id)">
             <span :class="r.place === 1 ? 'hl' : ''">{{ r.name }}</span><UiAiBadge v-if="isBot(r.id)" />
           </button>
         </li>
@@ -31,7 +31,7 @@
           v-for="(side, i) in sides"
           :key="i"
           type="button"
-          class="min-w-0 truncate text-[0.9375rem] py-2.5 -my-2.5"
+          class="min-w-0 truncate text-body py-2.5 -my-2.5"
           :class="[i === 0 ? 'text-left order-1' : 'text-right order-3', side.won ? 'text-fg font-semibold' : 'text-fg-muted']"
           @click="emit('profile', sideFirst(i)?.id)"
         >

@@ -144,6 +144,7 @@
 </template>
 
 <script setup lang="ts">
+import { dayOnly } from '@/utils/format'
 // 대회 한 곳 (/tournaments/:id): 신청·체크인 → (시작) 대진표·일정·순위 → 우승. 판 하나는 보통 경기, 교류전 또는 앱 대결
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -168,10 +169,7 @@ const v = ref<Schemas['TournamentView'] | null>(null)
 const error = ref('')
 const busy = ref(false)
 
-const day = (iso: string) => {
-  const d = new Date(iso)
-  return `${d.getMonth() + 1}/${d.getDate()}`
-}
+const day = (iso: string) => dayOnly(iso)
 const acceptedCount = computed(() => v.value?.summary.entryCount ?? 0)
 // 시작한 뒤에는 대진에 든 참가자(시드가 있는 사람)만. 체크인하지 않은 신청자는 대진에 없다
 const started = computed(() => !!v.value && v.value.summary.status !== 'RECRUITING' && v.value.summary.status !== 'CANCELED')

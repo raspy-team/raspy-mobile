@@ -1,7 +1,7 @@
 // 앱 게임을 사람 말로: 구조(docs/direction.md '게임 구조')와 판정
 export const STRUCTURES = [
   // '지금 바로 붙기'·'편할 때 하기'는 게임을 구조로 나눈 말이라 무슨 게임인지 읽히지 않았다. 하는 모양으로 (경로 전부 훑기 2절)
-  { value: 'REALTIME', label: '실시간 대결', hint: '상대와 같은 때 들어와 겨뤄요' },
+  { value: 'REALTIME', label: '실시간 경기', hint: '상대와 같은 때 들어와 겨뤄요' },
   { value: 'NON_REALTIME', label: '따로 풀고 비교', hint: '같은 문제를 각자 풀고 비교해요' },
 ] as const
 

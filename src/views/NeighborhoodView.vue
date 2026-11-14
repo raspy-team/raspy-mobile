@@ -42,7 +42,7 @@
               <UiBadge v-if="n.active" tone="primary">지금 동네</UiBadge>
             </button>
             <div class="flex items-center justify-between border-t border-line px-4 h-11">
-              <span class="t-micro">{{ n.gpsVerified ? `동네 인증 ✓ · ${dateText(n.expiresAt)}까지` : '위치로 인증하면 동네 인증 ✓이 붙어요' }}</span>
+              <span class="t-micro">{{ n.gpsVerified ? `동네 인증됨 · ${dateText(n.expiresAt)}까지` : '위치로 인증하면 동네 인증 ✓이 붙어요' }}</span>
               <span class="flex -mr-2">
                 <UiButton variant="ghost" size="sm" @click="openVerify(n.code)">{{ n.gpsVerified ? '다시 인증' : '위치로 인증' }}</UiButton>
                 <UiButton variant="ghost" size="sm" @click="confirmRemove(n)">삭제</UiButton>

@@ -192,7 +192,7 @@ async function send(body) {
     if ((props.counter || props.amend) && msg.includes('확인을 기다리는 결과가 없어요')) {
       emit('update:modelValue', false)
       emit('submitted')
-      window.alert('그 사이 결과가 이미 확정됐어요')
+      showToast('그 사이 결과가 이미 확정됐어요')
       return
     }
     error.value = msg || '결과를 내지 못했어요. 다시 해 주세요'

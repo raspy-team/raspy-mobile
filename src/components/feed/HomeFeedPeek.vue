@@ -3,7 +3,7 @@
   <section v-if="items.length" class="mt-10" aria-label="소식">
     <div class="flex items-center justify-between mb-1">
       <h2 class="t-heading">소식</h2>
-      <UiButton size="sm" variant="ghost" class="-mr-2" to="/feed">더 보기</UiButton>
+      <UiButton size="sm" variant="ghost" class="-mr-2" to="/feed">모두 보기</UiButton>
     </div>
     <UiList>
       <UiListItem

@@ -127,7 +127,7 @@ const route = useRoute()
 const router = useRouter()
 const { showToast } = useToast()
 const key = computed(() => String(route.params.key))
-const title = computed(() => ({ pong: '퐁', shake: '흔들기 대결' } as Record<string, string>)[key.value] ?? '실시간 대전')
+const title = computed(() => ({ pong: '퐁', shake: '흔들기 대결' } as Record<string, string>)[key.value] ?? '실시간 경기')
 const state = ref<State | null>(null)
 // 게임 중에 뒤로 가기(안드로이드 하드웨어 버튼 포함)로 나가면 한 번 묻는다 (11/6 b2 앱 껍데기 점검).
 // 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다

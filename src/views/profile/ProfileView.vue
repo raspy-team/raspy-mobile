@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="isMeRoute ? '내 정보' : ''" :back="!isMeRoute">
+    <UiTopBar :title="isMeRoute ? '내 정보' : '프로필'" :back="!isMeRoute">
       <template #right>
         <template v-if="isMeRoute">
           <!-- 탭마다 위 오른쪽은 메시지·알림으로 같게, 내 정보만 설정을 더한다. 돋보기는 '찾기' 탭이 쓰므로 사람 찾기는 친구 시트로 (11/3) -->
@@ -514,6 +514,8 @@ onMounted(() => load())
 async function load() {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data
+    // 내 번호로 들어온 내 프로필(/profile/12)은 탭의 '내 정보'와 같은 화면으로 (quality-rules I-18: 같은 내용이 들어온 길에 따라 머리줄이 달랐다)
+    if (user.value?.isMe && !isMeRoute) { router.replace('/profile/0'); return }
   } catch (e) {
     loadFailed.value = !e.response?.data?.message
     loadError.value = e.response?.data?.message || '프로필을 불러오지 못했어요'

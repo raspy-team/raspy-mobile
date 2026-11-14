@@ -3,7 +3,7 @@
   <div v-if="game && game.format === 'FREE_FOR_ALL'" class="min-h-dvh flex flex-col bg-canvas text-fg pt-safe pb-safe">
     <header class="flex items-center gap-1 px-2 h-14 flex-shrink-0">
       <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack" />
-      <h1 class="flex-1 min-w-0 truncate t-body font-bold">{{ game.rule?.ruleTitle }}</h1>
+      <h1 class="flex-1 min-w-0 truncate text-base font-semibold tracking-[-0.02em]">{{ game.rule?.ruleTitle }}</h1>
       <UiIconButton icon="fas fa-book-open" label="규칙 보기" @click="game.showRuleDetail = true" />
     </header>
     <main class="flex-1 px-4 pt-6 max-w-xl mx-auto w-full">
@@ -27,7 +27,7 @@
     <!-- 위: 뒤로 · 규칙 이름 · 더보기 하나. 이름 없는 아이콘을 늘어놓지 않고, 자주 안 쓰는 일은 이름을 단 목록으로 (11/3) -->
     <header class="flex items-center gap-1 px-2 h-14 flex-shrink-0">
       <UiIconButton icon="fas fa-chevron-left" label="뒤로" @click="goBack" />
-      <h1 class="flex-1 min-w-0 truncate t-body font-bold">{{ game.rule?.ruleTitle }}</h1>
+      <h1 class="flex-1 min-w-0 truncate text-base font-semibold tracking-[-0.02em]">{{ game.rule?.ruleTitle }}</h1>
       <UiIconButton icon="ellipsis" label="더보기" @click="showMenu = true" />
     </header>
     <!-- 관중: 지금 보는 사람 수 (누르면 중계). 응원은 소리로, 세트가 끝나면 한 장으로 (docs/live-spectator-review.md A·B) -->

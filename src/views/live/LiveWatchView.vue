@@ -57,7 +57,7 @@
 
         <!-- 세트 사이 한 장, 선수의 고마워요 -->
         <LiveBreakCard v-if="lastBreak" class="mt-5" :data="lastBreak" :game-id="gameId" :player="live.isPlayer" />
-        <p v-if="thanksFrom" class="t-body text-center mt-3">🙏 {{ thanksFrom }}님이 관중에게 고마워해요</p>
+        <p v-if="thanksFrom" class="t-body text-center mt-3">{{ thanksFrom }}님이 관중에게 고마워해요</p>
 
         <!-- 끝난 경기: 증인 -->
         <p v-if="live.witnesses" class="t-caption text-center mt-5">관중 {{ live.witnesses }}명이 이 경기의 끝을 지켜봤어요</p>

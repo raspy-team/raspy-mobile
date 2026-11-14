@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { dayTime } from '@/utils/format'
 import { NOTICE, NOTICE_LONG } from '@/utils/notice'
 import { gameIcon } from '@/utils/appGameIcon'
 import { who } from '@/utils/format'
@@ -29,11 +30,7 @@ type Duel = components['schemas']['AppDuelResponse'] & { waitingCount?: number }
 defineProps<{ duels: Duel[] }>()
 const router = useRouter()
 
-function hhmm(at?: string) {
-  if (!at) return ''
-  const d = new Date(at)
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
+const hhmm = (at?: string) => dayTime(at)
 
 function view(d: Duel) {
   const result = `/play/${d.key}?duel=${d.gameId}`

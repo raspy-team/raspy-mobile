@@ -27,7 +27,7 @@
           v-for="side in (['a', 'b'] as const)"
           :key="side"
           type="button"
-          class="rounded-2xl border px-3 py-8 text-[1.0625rem] font-semibold break-keep active:scale-[0.98] transition"
+          class="rounded-2xl border px-3 py-8 text-heading font-semibold break-keep active:scale-[0.98] transition"
           :class="picked === side ? 'border-fg bg-fg text-canvas' : picked ? 'border-line bg-surface text-fg opacity-40' : 'border-line bg-surface text-fg'"
           :disabled="locked"
           @click="pick(side)"

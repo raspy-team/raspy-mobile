@@ -78,7 +78,7 @@
         <div class="min-w-0 space-y-1">
           <!-- 이름은 시트 제목에 있다 (두 번 쓰지 않는다). AI는 아래 줄이 말한다 -->
           <p v-if="card.bot" class="t-caption flex items-center gap-1"><MatchMascot who="bibi" :size="24" /> AI</p>
-          <p v-if="card.champion" class="t-caption text-fg">👑 {{ card.champion }}</p>
+          <p v-if="card.champion" class="t-caption text-fg flex items-center gap-1"><UiIcon name="crown" class="text-signal-fg" aria-hidden="true" />{{ card.champion }}</p>
           <p v-if="card.area" class="t-caption">{{ card.area }}</p>
           <p v-if="restingText(card)" class="t-caption">{{ restingText(card) }}</p>
         </div>
@@ -142,8 +142,8 @@
           <button type="button" class="flex-1 min-w-0 flex items-center gap-3 rounded-2xl px-2 py-2 active:bg-surface-2 text-left" @click="peopleOpen = false; openCardFor(p)">
             <span class="w-9 h-12 rounded-xl bg-surface-2 overflow-hidden flex items-end justify-center shrink-0"><span class="avatar-mini" :style="{ backgroundImage: `url(${ART}/avatar/${p.sheet}.png)` }" /></span>
             <span class="min-w-0 flex-1">
-              <span class="t-body text-fg flex items-center gap-1.5"><span class="truncate">{{ p.name }}</span><span v-if="p.bot" class="t-micro px-1.5 rounded bg-[#9ad0ff] text-[#121214] font-semibold">AI</span></span>
-              <span class="block t-caption truncate">{{ p.champion ? `👑 ${p.champion}` : restingText(p) || p.area || '광장에 있어요' }}</span>
+              <span class="t-body text-fg flex items-center gap-1.5"><span class="truncate">{{ p.name }}</span><span v-if="p.bot" class="t-micro px-1.5 rounded-md bg-[#9ad0ff] text-[#121214] font-semibold">AI</span></span>
+              <span class="block t-caption truncate"><UiIcon v-if="p.champion" name="crown" class="text-signal-fg mr-1" aria-hidden="true" />{{ p.champion || restingText(p) || p.area || '광장에 있어요' }}</span>
             </span>
           </button>
           <!-- 걷지 않고 바로 게임 고르기 -->

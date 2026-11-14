@@ -181,7 +181,7 @@
           </template>
           <template v-else-if="result.myJudging">
             <UiSpinner class="mx-auto" />
-            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : `${judgeName}${josaIga(judgeName)} 채점하고 있어요` }}</p>
+            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : key === 'ghosted' ? '답장을 기다리고 있어요' : `${judgeName}${josaIga(judgeName)} 채점하고 있어요` }}</p>
             <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 {{ NOTICE }}</p>
           </template>
           <!-- 스코어 맞히기: 둘 다 냈고 실제 경기가 끝나길 기다린다 -->
@@ -279,7 +279,7 @@
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
         <!-- 임기응변은 한마디(등급·인물 반응)를 위 카드와 상황 카드에 나눠 보여 주므로 따로 두지 않는다 (등급이 두 번 보였다) -->
         <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT' && !improvResult" class="mt-3">
-          <p class="t-micro">{{ game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
+          <p class="t-micro">{{ key === 'ghosted' ? '그 사람의 답장' : game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
           <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
         </UiCard>
         <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
@@ -337,7 +337,7 @@
           <UiCard v-if="result.opponentAnswer" class="mt-3">
             <p class="t-micro">{{ who(result.opponent) }}님 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
             <p class="t-body mt-2 whitespace-pre-line break-keep">{{ result.opponentAnswer }}</p>
-            <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
+            <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ key === 'ghosted' ? '답장' : judgeName }}: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
       </template>
@@ -525,7 +525,7 @@ const WRITING: Record<string, { guide: string; placeholder: string }> = {
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
   trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
   'power-level': { guide: '주제에 맞는 싸움꾼을 한 줄로 (뻔한 최강은 약해요)', placeholder: '예) 고무장갑 낀 할머니와 효자손' },
-  samhaengsi: { guide: '글자마다 한 줄, 그 글자로 시작해요. 마지막 줄에 반전을', placeholder: '첫 글자로 한 줄\n둘째 글자로 한 줄\n셋째 글자로 반전 한 줄' },
+  ghosted: { guide: '읽씹하는 이 사람에게 메시지 하나. 답장이 오게 써 보세요', placeholder: '매달리면 읽씹, 부담 없고 구체적이면 답장' },
   acrostic: { guide: '글자마다 한 줄씩, 그 글자로 시작해요. 줄을 바꿔 나눠요', placeholder: '고백하려고\n양말까지 새로 샀는데\n이미 여친이 있었다' },
 }
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
@@ -980,7 +980,7 @@ function duelSubtitle(d: Duel) {
   if (d.status === 'CANCELED') return d.myFeedback || '시간 안에 내지 않아 취소됐어요'
   if (d.status === 'VOTING') return `투표 마감 ${until(d.votingEndsAt)}`
   if (d.status === 'AWAITING_RESULT' || (key.value === 'predict' && d.myAnswer)) return `내 예상 ${predictionLine(d.problem, d.myAnswer)}`
-  if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : `${judgeName.value}${josaIga(judgeName.value)} 채점하고 있어요`
+  if (d.myJudging) return isVote.value ? '문장을 확인하고 있어요' : key.value === 'ghosted' ? '답장을 기다리고 있어요' : `${judgeName.value}${josaIga(judgeName.value)} 채점하고 있어요`
   if (isVote.value) return d.myAnswer ?? ''
   // 실시간 판은 '내기'가 없다: 하는 중인 판으로 돌아가게 (11/5 9e)
   if (d.playMode === 'REALTIME') return d.opponent ? '하는 중이에요 · 눌러서 돌아가기' : '상대를 기다리는 중이에요'

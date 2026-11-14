@@ -6,7 +6,7 @@ const ICONS: Record<string, string> = {
   flip: 'refresh', 'land-grab': 'map', 'last-stone': 'gem', 'letter-gomoku': 'envelope', 'math-race': 'calculator',
   'number-baseball': 'hash', 'number-bomb': 'bomb', pong: 'activity', predict: 'goal', 'quiz-race': 'lightbulb',
   recipe: 'chef-hat', rps: 'hand', sentence: 'feather', shake: 'vibrate', squat: 'dumbbell',
-  'thirty-one': 'list-ol', trial: 'gavel', samhaengsi: 'feather', typing: 'keyboard', 'word-battle': 'swords', wordchain: 'link',
+  'thirty-one': 'list-ol', trial: 'gavel', ghosted: 'eye-slash', typing: 'keyboard', 'word-battle': 'swords', wordchain: 'link',
   'energy-duel': 'flame', 'pitch-duel': 'crosshair', 'block-duel': 'blocks', 'liar-dice': 'dice', 'three-hills': 'mountain', 'power-level': 'biceps', majority: 'percent', 'hidden-word': 'search', 'minus-one': 'grab', boxes: 'square-dashed', 'fading-three': 'hourglass-half', chicken: 'flag-checkered', 'mine-duel': 'radar', 'two-truths': 'eye-slash', proverb: 'book-open', 'chosung-endure': 'heading', 'which-first': 'calendar', acrostic: 'list', 'greed-dice': 'piggy-bank', 'giant-hunt': 'shield',
   'daily-literacy': 'pen-to-square', 'time-sense': 'stopwatch', 'number-spots': 'border-all', 'daily-number': 'bullseye', 'rhythm-copy': 'volume',
 }

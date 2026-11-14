@@ -59,7 +59,7 @@
       <!-- 끝난 판: 점수를 보여 주고, 저장하고 사람과 붙으려면 가입 -->
       <template v-else-if="result">
         <UiCard class="text-center py-8">
-          <MatchMascot :who="key === 'improv' ? 'match' : 'kok'" :mood="improv ? (improv.grade && improv.grade <= 4 ? 'cheer' : 'smile') : result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
+          <MatchMascot :who="key === 'improv' ? 'match' : 'kok'" :mood="improv ? (improv.grade && improv.grade <= 4 ? 'cheer' : improv.grade >= 7 ? 'sad' : 'smile') : result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
           <p v-if="key === 'nunchi'" class="t-micro">눈치 점수</p>
           <p v-if="improv?.empty" class="t-micro">임기응변 등급</p>
           <!-- 등급이 안 나온 판(셋 다 빈 답·마감 넘김)도 임기응변 틀 그대로, 할 일은 '다시 하기' 하나 -->

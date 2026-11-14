@@ -233,7 +233,7 @@
               <div class="flex flex-wrap justify-center gap-2 mt-4">
                 <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
                 <!-- 주 버튼은 친구에게 보내기 (11/14 피터 모델: 링크를 보내는 사람이 스토리 올리는 사람의 네 배). 기다리는 판일 때만 있어, 없으면 스토리가 주 버튼 -->
-                <UiButton v-if="canChallenge" size="sm" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
+                <UiButton v-if="canChallenge" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
                 <UiButton v-if="!storyFailed" size="sm" :variant="canChallenge ? 'secondary' : undefined" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
               </div>
               <!-- 올릴 이유 (11/14): 올리면 친구들이 같은 상황으로 들어오고, 풀 때마다 알림이 온다 -->

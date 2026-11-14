@@ -105,7 +105,7 @@
     </main>
 
     <!-- 하단 버튼 -->
-    <div v-if="!loading" class="bottom-bar fixed bottom-0 inset-x-0 bg-canvas pb-safe">
+    <div v-if="!loading" class="bottom-bar fixed bottom-0 inset-x-0 bg-canvas border-t border-line pb-safe">
       <div class="max-w-md mx-auto px-4 py-3">
         <UiButton v-if="step === 'terms'" block size="lg" :disabled="!allAgreed" :loading="saving" @click="submitTerms">동의하고 계속하기</UiButton>
         <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">시작하기</UiButton>

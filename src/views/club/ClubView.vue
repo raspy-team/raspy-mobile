@@ -65,7 +65,7 @@
               </div>
               <p v-if="r.answer" class="t-body break-words">“{{ r.answer }}”</p>
               <div class="flex gap-2">
-                <UiButton size="sm" class="flex-1" :disabled="busy" @click="decide(r.userId, true)">수락</UiButton>
+                <UiButton size="sm" variant="tonal" class="flex-1" :disabled="busy" @click="decide(r.userId, true)">수락</UiButton>
                 <UiButton size="sm" variant="secondary" class="flex-1" :disabled="busy" @click="decide(r.userId, false)">거절</UiButton>
               </div>
             </UiCard>

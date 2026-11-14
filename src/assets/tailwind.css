@@ -37,15 +37,16 @@
   }
   html[data-theme='light'] {
     color-scheme: light;
-    --c-canvas: 247 247 245;     /* 종이처럼 아주 조금 따뜻한 흰색 */
+    /* 11/15 무게감 바퀴: 바탕(247)과 흰 카드의 밝기 비가 1.075라 카드 가장자리가 흐렸다. 바탕을 241로 내려 1.13(애플 밝은 화면 1.11) */
+    --c-canvas: 241 241 239;     /* 종이처럼 아주 조금 따뜻한 옅은 회색 */
     --c-surface: 255 255 255;
-    --c-surface-2: 240 240 237;
-    --c-surface-3: 232 232 228;
-    --c-line: 228 228 223;
-    --c-line-strong: 208 208 202;
+    --c-surface-2: 235 235 232;
+    --c-surface-3: 226 226 222;
+    --c-line: 222 222 217;
+    --c-line-strong: 200 200 194;
     --c-fg: 17 17 19;
-    --c-fg-muted: 92 92 100;
-    --c-fg-subtle: 102 102 110;  /* 모든 바탕에서 4.5:1 이상 (surface-3에서 4.63). 112는 surface-3에서 4.0, 104는 4.495로 모자랐다 (11/5 밤샘 C·리뷰 D) */
+    --c-fg-muted: 88 88 96;
+    --c-fg-subtle: 98 98 106;  /* 모든 바탕에서 4.5:1 이상 (surface-3에서 4.63). 112는 surface-3에서 4.0, 104는 4.495로 모자랐다 (11/5 밤샘 C·리뷰 D) */
     --c-primary-press: 60 60 66;
     --c-signal: 210 255 77;      /* 볼트. 칠할 때 */
     --c-signal-fg: 77 107 0;     /* 흰 바탕에서 읽히는 볼트 (글자·아이콘) */
@@ -136,7 +137,8 @@
 /* 입력칸 공통 모양 (UiInput, UiSelect) */
 @layer components {
   .ui-control {
-    @apply w-full rounded-xl bg-surface border border-line px-4 text-base text-fg outline-none transition-colors;
+    /* 테두리는 한 단계 진하게: 빈 칸도 칸으로 보여야 한다 (quality-rules S-3: 면과의 밝기 비 1.29 → 1.70) */
+    @apply w-full rounded-xl bg-surface border border-line-strong px-4 text-base text-fg outline-none transition-colors;
   }
   .ui-control::placeholder { @apply text-fg-subtle; }
   .ui-control:focus { @apply border-primary; }

@@ -1,7 +1,8 @@
 <template>
   <!-- 아이폰은 키보드가 열리면 화면을 위로 밀어 올려, 고정 바가 시계·노치 밑으로 들어갔다 (11/13 실제 기기 한 바퀴).
        보이는 화면(visualViewport)의 맨 위를 따라가게 한다 -->
-  <header class="fixed top-0 inset-x-0 z-header bg-canvas pt-safe" :style="shift ? { transform: `translateY(${shift}px)` } : undefined">
+  <!-- 내용이 막대 밑으로 지나가는 동안은 아래에 선을 긋는다 (quality-rules S-2: 막대와 내용이 같은 색이라 경계가 없었다) -->
+  <header class="fixed top-0 inset-x-0 z-header bg-canvas pt-safe border-b transition-colors" :class="scrolled ? 'border-line' : 'border-transparent'" :style="shift ? { transform: `translateY(${shift}px)` } : undefined">
     <div class="max-w-xl mx-auto h-14 px-2 flex items-center gap-1">
       <button v-if="back" type="button" class="w-11 h-11 flex items-center justify-center text-fg" aria-label="뒤로" @click="goBack">
         <UiIcon name="chevron-left" class="text-[22px]" />
@@ -34,9 +35,11 @@ const router = useRouter()
 // 키보드가 화면을 밀어 올린 만큼 바를 내린다 (iOS: 고정 요소가 밀린 화면을 따라 위로 사라진다)
 const shift = ref(0)
 const vv = typeof window !== 'undefined' ? window.visualViewport : null
+const scrolled = ref(false)
+const onScroll = () => { scrolled.value = window.scrollY > 4 }
 const follow = () => { shift.value = vv && vv.offsetTop > 0 ? Math.round(vv.offsetTop) : 0 }
-onMounted(() => { vv?.addEventListener('scroll', follow); vv?.addEventListener('resize', follow) })
-onBeforeUnmount(() => { vv?.removeEventListener('scroll', follow); vv?.removeEventListener('resize', follow) })
+onMounted(() => { vv?.addEventListener('scroll', follow); vv?.addEventListener('resize', follow); window.addEventListener('scroll', onScroll, { passive: true }); onScroll() })
+onBeforeUnmount(() => { vv?.removeEventListener('scroll', follow); vv?.removeEventListener('resize', follow); window.removeEventListener('scroll', onScroll) })
 
 // 뒤로는 늘 온 곳으로 (목적 판정 11/11 8번). 예전엔 주소를 정해 둔 25곳이 그 주소로 '앞으로' 가서
 // 규칙 고르다 홈으로, 차단 뒤 내 프로필로, 교류전에서 동호회 목록으로 떨어졌다.

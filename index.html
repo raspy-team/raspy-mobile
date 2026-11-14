@@ -31,7 +31,7 @@
 
   <script>
     // 화면 모드(설정 > 화면). 첫 화면을 그리기 전에 적용해 깜빡이지 않게
-    try { if (localStorage.getItem('match_theme') === 'light') { document.documentElement.dataset.theme = 'light'; document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f7f5') } } catch (e) {}
+    try { if (localStorage.getItem('match_theme') === 'light') { document.documentElement.dataset.theme = 'light'; document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f1f1ef') } } catch (e) {}
     // 터치 기반 확대(핀치줌, 더블탭) 완전 차단
     document.addEventListener('gesturestart', function (e) {
       e.preventDefault();

@@ -130,7 +130,7 @@
             <UiListItem v-for="e in shownEntries" :key="e.id" :title="(e.seed ? `${e.seed}. ` : '') + e.name" :subtitle="entrySub(e)" :to="e.userId ? `/profile/${e.userId}` : e.clubId ? `/clubs/${e.clubId}` : undefined">
               <template v-if="v.isHost && e.status === 'APPLIED'" #trailing>
                 <span class="flex gap-1">
-                  <UiButton size="sm" :disabled="busy" @click.prevent.stop="decideEntry(e.id, true)">수락</UiButton>
+                  <UiButton size="sm" variant="tonal" :disabled="busy" @click.prevent.stop="decideEntry(e.id, true)">수락</UiButton>
                   <UiButton size="sm" variant="secondary" :disabled="busy" @click.prevent.stop="decideEntry(e.id, false)">거절</UiButton>
                 </span>
               </template>

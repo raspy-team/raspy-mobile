@@ -6,7 +6,7 @@
     :disabled="to ? undefined : disabled || loading"
     :aria-busy="loading || undefined"
     class="relative inline-flex items-center justify-center gap-2 rounded-xl select-none transition-[background-color,color,transform] motion-safe:active:scale-[0.97] disabled:pointer-events-none"
-    :class="[VARIANTS[variant], SIZES[size], block ? 'w-full' : '', disabled && !loading ? 'opacity-40' : '', to && (disabled || loading) ? 'pointer-events-none' : '']"
+    :class="[VARIANTS[variant], FILLED.has(variant) && size === 'sm' ? FILLED_SM : SIZES[size], block ? 'w-full' : '', disabled && !loading ? 'opacity-40' : '', to && (disabled || loading) ? 'pointer-events-none' : '']"
     :aria-disabled="to && (disabled || loading) ? 'true' : undefined"
     :tabindex="to && (disabled || loading) ? -1 : undefined"
   >
@@ -49,6 +49,9 @@ const VARIANTS = {
   // 볼트: '내 차례'에만 (결과 확인·신청 승인처럼 상대가 나를 기다릴 때). 한 화면에 하나 넘게 두지 않는다
   signal: 'bg-signal text-signal-on font-semibold active:opacity-90',
 }
+// 채운 버튼(주·볼트)은 작아도 높이 44다 (quality-rules S-5: 주 버튼은 단단해 보여야 한다). 글자만 한 단계 작다
+const FILLED = new Set(['primary', 'signal'])
+const FILLED_SM = 'h-11 px-4 text-sm'
 // 높이는 손가락으로 누르기 쉬운 크기 이상 (sm도 36px)
 const SIZES = {
   sm: 'h-9 px-3.5 text-sm hit',

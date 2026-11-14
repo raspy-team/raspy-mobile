@@ -109,7 +109,7 @@
                불안한 사람은 신뢰 온도를 보고, 원하면 먼저 앱 게임 한 판을 보낸다 -->
           <span v-else class="flex items-center gap-1">
             <UiButton v-if="a.needsAppGameFirst" size="sm" variant="ghost" icon="paper-plane" :aria-label="`${a.applicantNickname}님과 먼저 앱 게임 한 판`" @click.stop="ladderFor = a">먼저 한 판</UiButton>
-            <UiButton size="sm" :disabled="!canApprove(applicantsGame, a)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
+            <UiButton size="sm" variant="tonal" :disabled="!canApprove(applicantsGame, a)" :loading="busy" @click.stop="approve(applicantsGame, a)">승인</UiButton>
           </span>
         </template>
       </UiListItem>

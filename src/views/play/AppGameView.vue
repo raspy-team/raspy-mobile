@@ -971,6 +971,11 @@ function duelTitle(d: Duel) {
 }
 function duelSubtitle(d: Duel) {
   const unit = game.value?.scoreUnit ?? ''
+  // 임기응변은 등급으로: 목록만 '78 : 35점'이라 결과 화면(2등급 : 8등급)과 다른 말이었다 (11/14)
+  if (d.status === 'COMPLETED' && key.value === 'improv') {
+    const g = (f?: string | null, sc?: number | null) => f?.match(/\d등급/)?.[0] ?? `${sc ?? 0}점`
+    return `나 ${g(d.myFeedback, d.myScore)} · ${who(d.opponent)} ${g(d.opponentFeedback, d.opponentScore)}`
+  }
   if (d.status === 'COMPLETED') return `${d.myScore ?? 0} : ${d.opponentScore ?? 0}${unit}`
   if (d.status === 'CANCELED') return d.myFeedback || '시간 안에 내지 않아 취소됐어요'
   if (d.status === 'VOTING') return `투표 마감 ${until(d.votingEndsAt)}`
@@ -979,7 +984,7 @@ function duelSubtitle(d: Duel) {
   if (isVote.value) return d.myAnswer ?? ''
   // 실시간 판은 '내기'가 없다: 하는 중인 판으로 돌아가게 (11/5 9e)
   if (d.playMode === 'REALTIME') return d.opponent ? '하는 중이에요 · 눌러서 돌아가기' : '상대를 기다리는 중이에요'
-  return d.myScore != null ? `내 기록 ${d.myScore}${unit}` : canResume(d) ? '안 냈어요 · 눌러서 이어 하기' : '아직 내지 않았어요'
+  return d.myScore != null ? (key.value === 'improv' && d.myFeedback?.match(/\d등급/) ? `내 등급 ${d.myFeedback.match(/\d등급/)![0]}` : `내 기록 ${d.myScore}${unit}`) : canResume(d) ? '안 냈어요 · 눌러서 이어 하기' : '아직 내지 않았어요'
 }
 function duelBadge(d: Duel) {
   if (d.status === 'COMPLETED') return VERDICT[d.result || 'DRAW']

@@ -1,4 +1,5 @@
 <script setup>
+import { useKeyboardOpen } from '@/utils/keyboardFit'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { UiAvatar, UiBadge, UiButton, UiChip, UiDialog, UiEmptyState, UiIconButton, UiList, UiListItem, UiSheet, UiSkeleton } from '../../components/ui'
 import ReportSheet from '../../components/safety/ReportSheet.vue'
@@ -26,6 +27,7 @@ const headerTop = ref(0)
 // 위(상대·도전 카드)와 아래(입력칸) 높이. 도전 카드 유무·글자 크기에 따라 달라서 직접 잰다
 const topRef = ref(null)
 const bottomRef = ref(null)
+const keyboardOpen = useKeyboardOpen()
 const topHeight = ref(56)
 const bottomHeight = ref(64)
 const STATUS_TONE = { green: 'success', orange: 'primary', red: 'danger', gray: 'neutral', blue: 'neutral' }
@@ -517,7 +519,7 @@ const closeErrorModal = () => {
           <UiButton variant="secondary" @click="reloadPage">다시 시도</UiButton>
         </UiEmptyState>
       </div>
-      <div v-else-if="!visibleMessages.length" class="h-full flex flex-col items-center justify-center">
+      <div v-else-if="!visibleMessages.length" class="h-full overflow-auto flex flex-col items-center" :class="keyboardOpen ? 'justify-start' : 'justify-center'">
         <UiEmptyState mascot="match" mood="smile" :title="`${targetUserNickname || '상대'}님과 첫 대화예요`" description="첫마디가 어려우면 하나 골라 보내 보세요" />
         <!-- 빠른 첫마디: 누르면 바로 보낸다 -->
         <div class="flex flex-wrap justify-center gap-2 px-6 -mt-6">
@@ -533,7 +535,7 @@ const closeErrorModal = () => {
           <template v-if="msg.messageType === 'TALK'">
             <div v-if="msg.senderId === currentUserId" class="flex justify-end items-end gap-1.5 pl-12">
               <span class="t-micro pb-1 flex-shrink-0">{{ formatTime(msg.timestamp) }}</span>
-              <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-primary text-primary-on text-sm whitespace-pre-line break-words"><ChatText :text="msg.content" /></p>
+              <p class="px-3.5 py-2.5 rounded-2xl rounded-br-md bg-signal text-signal-on text-sm whitespace-pre-line break-words"><ChatText :text="msg.content" /></p>
             </div>
             <div v-else class="flex justify-start items-end gap-1.5 pr-12">
               <p
@@ -549,7 +551,8 @@ const closeErrorModal = () => {
     </div>
 
     <!-- 입력 -->
-    <div ref="bottomRef" class="fixed bottom-0 w-full z-header bg-canvas border-t border-line pb-safe">
+    <!-- 키보드가 올라와 있으면 홈 바 자리를 비우지 않는다: 입력 줄과 키보드 사이에 빈 띠가 생겼다 (11/14 전수 평가) -->
+    <div ref="bottomRef" class="fixed bottom-0 w-full z-header bg-canvas border-t border-line" :class="keyboardOpen ? '' : 'pb-safe'">
       <form class="px-3 py-2 flex items-end gap-2" @submit.prevent="sendMsg">
         <textarea
           v-model="newMsg"

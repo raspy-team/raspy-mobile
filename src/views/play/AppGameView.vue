@@ -204,7 +204,7 @@
           <template v-else-if="result.status === 'CANCELED'">
             <p class="t-title">{{ (result.myScore ?? 0) > 0 && !result.myFeedback?.includes('채점') ? '상대 없이 끝난 판이에요' : '취소된 경기예요' }}</p>
             <!-- 왜 취소됐는지 (경로 전부 훑기 2절): AI 채점이 막혔거나, 먼저 연 사람이 시간 안에 내지 않았다 -->
-            <p class="t-caption mt-1 break-keep">{{ result.myFeedback?.includes('채점') ? 'AI 채점이 막혀 이 판은 기록에 남지 않아요' : (result.myScore ?? 0) > 0 ? '상대 없이 끝났어요. 내 등급과 점수는 그대로예요' : '시간 안에 답이 나지 않아 이 판은 기록에 남지 않아요' }}</p>
+            <p class="t-caption mt-1 break-keep">{{ result.myFeedback?.includes('채점') ? 'AI 채점이 막혀 이 판은 기록에 남지 않아요' : (result.myScore ?? 0) > 0 ? `내가 받은 점수는 ${Math.round(result.myScore ?? 0)}${game?.scoreUnit ?? '점'}. 승패가 없어 등급과 실력 점수는 그대로예요` : '시간 안에 답이 나지 않아 이 판은 기록에 남지 않아요' }}</p>
           </template>
           <template v-else-if="key === 'predict' && result.status === 'WAITING'">
             <p class="t-heading">내 예상 {{ predictionLine(result.problem, result.myAnswer) }}</p>
@@ -265,7 +265,7 @@
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
               <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}</p>
               <!-- 기다리기를 그만둘 길 (11/14: 7일 뒤 저절로 닫힐 때까지 거둘 수 없었다). 등급·점수는 남는다 -->
-              <button type="button" class="t-micro underline underline-offset-2 mt-2 min-h-[36px]" :disabled="canceling" @click="cancelWaiting(result.gameId)">기다리기 그만두기</button>
+              <button type="button" class="hit t-micro underline underline-offset-2 mt-2 min-h-[36px]" :disabled="canceling" @click="cancelWaiting(result.gameId)">기다리기 그만두기</button>
             </template>
             <!-- AI가 대신 풀어 승패를 내던 것은 걷어 냈다 (11/14, 서버 bot/AiMode): 등급·점수가 결과고, 승패는 사람과 붙을 때만 뜻이 있다 -->
             <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
@@ -378,7 +378,19 @@
           </UiCard>
           <!-- 가입 전 도전장으로 붙은 친구(아직 손님)와의 승패·친구 답 (11/14 초대받은 1:1) -->
           <ImprovVersus v-if="key === 'improv'" ref="versusRef" class="mb-4" @loaded="(rows) => (versusCount = rows.length)" />
-          <UiCard>
+          <!-- 처음 해 보는 게임: 회색 한 줄 + 버튼뿐이라 화면의 80%가 비었다 (11/14 전수 평가). 임기응변 첫 화면처럼 얼굴·큰 한마디·어떻게 하나 -->
+          <UiCard v-if="!played && !joinedFrom && key !== 'improv'" class="py-8 text-center">
+            <MatchMascot who="match" mood="wow" :size="72" class="mx-auto mb-3" />
+            <p class="t-title break-keep">{{ PITCH[key]?.title ?? game.title }}</p>
+            <p class="t-body text-fg-muted mt-2 break-keep">{{ game.summary }}</p>
+            <ol v-if="PITCH[key]" class="mt-6 space-y-3 text-left">
+              <li v-for="(step, i) in PITCH[key].steps" :key="i" class="flex items-start gap-3">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-surface-2 t-micro !text-fg flex items-center justify-center tabular-nums">{{ i + 1 }}</span>
+                <span class="t-body break-keep">{{ step }}</span>
+              </li>
+            </ol>
+          </UiCard>
+          <UiCard v-else>
             <p class="t-caption">{{ game.summary }}</p>
             <!-- 안 해 본 게임의 1500·0승 0패는 정보가 아니다. 첫 판을 권한다 (11/3) -->
             <!-- 준비 중인 게임에는 첫 판을 권하지 않는다 (바로 밑의 '준비 중인 게임이에요'와 어긋났다) -->
@@ -490,6 +502,14 @@ import api from '../../api/api'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
+// 처음 해 보는 사람에게: 한마디와 세 걸음. 시간·글자 수는 판 화면이 말한다(여기 적으면 서버 값과 어긋난다)
+const PITCH: Record<string, { title: string; steps: string[] }> = {
+  debate: { title: '반대편 AI를 설득해 보세요', steps: ['주제와 내 편이 정해져요', '세 마디 안에 AI를 설득해요', '설득한 만큼 점수가 나고, 같은 주제를 한 사람과 승패가 나요'] },
+  recipe: { title: '같은 재료로 누가 더 맛있게?', steps: ['재료 다섯 개가 나와요', '요리 이름과 만드는 법을 지어내요', 'AI 셰프가 점수를 매기고, 같은 재료를 받은 사람과 승패가 나요'] },
+  trial: { title: '피고인, 변론하세요', steps: ['엉뚱한 사건의 피고가 돼요', '판사를 설득할 변론을 써요', 'AI 판사가 점수를 매기고, 같은 사건의 다른 피고와 승패가 나요'] },
+  'power-level': { title: '조건 셋으로 히어로 만들기', steps: ['능력·약점·본업, 조건 셋이 나와요', '셋을 모두 지키는 히어로를 써요', 'AI 심사위원이 강함을 매기고, 같은 조건을 받은 사람과 승패가 나요'] },
+  ghosted: { title: '읽씹, 뚫을 수 있을까요?', steps: ['읽고 답 없는 상대가 나와요', '답장이 오게 메시지 하나를 써요', 'AI가 답장 올 확률을 매기고, 같은 상황을 푼 사람과 승패가 나요'] },
+}
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'

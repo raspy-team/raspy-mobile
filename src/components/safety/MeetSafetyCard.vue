@@ -28,7 +28,8 @@
     </ul>
 
     <div class="flex gap-2 flex-wrap">
-      <UiButton v-if="s.canArrive && !s.arrivedAt" size="sm" class="flex-1" icon="location-dot" :loading="busy" @click="arrive">도착했어요</UiButton>
+      <!-- 이 화면의 주 버튼은 위 카드의 '경기 시작'이다: 여기는 보조 색으로 (11/14 전수 평가: 흰 버튼이 도착했어요였다) -->
+      <UiButton v-if="s.canArrive && !s.arrivedAt" size="sm" class="flex-1" variant="secondary" icon="location-dot" :loading="busy" @click="arrive">도착했어요</UiButton>
       <!-- 끝 확인은 경기가 시작된 뒤에만. 도착하자마자 '잘 끝났어요'가 떠서 시작할 차례를 가렸다 (11/11) -->
       <UiButton v-if="live && s.arrivedAt && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="circle-check" :loading="busy" @click="finish">잘 끝났어요</UiButton>
       <UiButton v-if="s.canShare && !s.shareUrl && !s.finishedAt" size="sm" class="flex-1" variant="secondary" icon="share" @click="shareOpen = true">위치 공유</UiButton>

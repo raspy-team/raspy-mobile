@@ -11,7 +11,8 @@ import { defineProps } from 'vue'
 defineProps({ tone: { type: String, default: 'neutral' }, icon: { type: String, default: '' } })
 const TONES = {
   neutral: 'bg-surface-3 text-fg-muted',
-  primary: 'bg-fg text-canvas',
+  // 강조 상태. 예전엔 흰 칠이라 주 버튼과 무게가 같았다(내 경기 카드의 '확정' 옆에 흰 버튼). 칠 대신 또렷한 테두리 (11/14 전수 평가)
+  primary: 'bg-surface-3 text-fg ring-1 ring-inset ring-fg/45',
   success: 'bg-success-soft text-success-fg',
   danger: 'bg-danger-soft text-danger-fg',
 }

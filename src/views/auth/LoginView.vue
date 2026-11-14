@@ -38,11 +38,11 @@
 
       <!-- 아이디 계정은 비밀번호를 되찾을 이메일이 없다. 막다른 길 대신 어떻게 하면 되는지 (11/4 밤샘, 일주일 만에 온 45세) -->
       <div v-if="!isSignup" class="mt-4 text-center">
-        <button v-if="!forgotOpen" type="button" class="t-caption underline underline-offset-2" @click="forgotOpen = true">비밀번호를 잊었나요?</button>
+        <button v-if="!forgotOpen" type="button" class="hit t-caption underline underline-offset-2" @click="forgotOpen = true">비밀번호를 잊었나요?</button>
         <p v-else class="t-caption text-left rounded-xl bg-surface px-4 py-3">
           <!-- 본인인증이 열려 있을 때만 그 길을 보인다. 준비 전에는 가 봐야 "준비 중"뿐이었다 (목적 판정 11/11 부분 1) -->
-          <template v-if="resetAvailable">본인인증을 했던 아이디 계정이면 <RouterLink class="underline underline-offset-2 text-fg" to="/password-reset">휴대폰 본인인증으로 찾아요</RouterLink>.
-          본인인증을 한 적이 없으면</template> <a class="underline underline-offset-2 text-fg" :href="forgotMail">{{ CONTACT_EMAIL }}</a>로 아이디를 적어 보내 주세요.
+          <template v-if="resetAvailable">본인인증을 했던 아이디 계정이면 <RouterLink class="hit underline underline-offset-2 text-fg" to="/password-reset">휴대폰 본인인증으로 찾아요</RouterLink>.
+          본인인증을 한 적이 없으면</template> <a class="hit underline underline-offset-2 text-fg" :href="forgotMail">{{ CONTACT_EMAIL }}</a>로 아이디를 적어 보내 주세요.
           카카오·구글로 시작했다면 그 버튼으로 다시 들어오면 돼요.
         </p>
       </div>

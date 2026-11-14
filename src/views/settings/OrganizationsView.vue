@@ -102,7 +102,7 @@
 
         <!-- 2. 서류 (고를 때는 없어도 된다. '✓'을 붙이고 싶을 때만, 11/13) -->
         <!-- 증명서는 접어 둔다: 고르기만 하러 온 사람에게 긴 서류 설명이 시트 절반이었다 (11/13 실제 기기 한 바퀴) -->
-        <button v-if="!docOpen && !file" type="button" class="t-caption underline underline-offset-2 text-left" @click="docOpen = true">✓도 붙이고 싶어요 (증명서 한 장, 선택)</button>
+        <button v-if="!docOpen && !file" type="button" class="hit t-caption underline underline-offset-2 text-left" @click="docOpen = true">✓도 붙이고 싶어요 (증명서 한 장, 선택)</button>
         <div v-else>
           <p class="t-label text-fg mb-1">증명서 한 장 <span class="t-caption">(선택 · ✓을 붙이고 싶을 때)</span></p>
           <p class="t-caption mb-2">

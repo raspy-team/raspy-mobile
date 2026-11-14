@@ -1,6 +1,6 @@
 <template>
   <!-- 끌어올릴 때 위 막대(상태 표시줄 + 제목 바)만큼 띄운다. 예전 4rem은 막대보다 작아 인물·사정 줄이 막대 밑에 숨었다 (11/13 실제 기기 한 바퀴) -->
-  <div ref="root" class="scroll-mt-[calc(env(safe-area-inset-top)+4.5rem)]">
+  <div ref="root" class="scroll-mt-[calc(env(safe-area-inset-top)+4.5rem)]" :class="typing && phase === 'answer' ? 'pb-[50vh]' : ''" @focusout="onTypeEnd">
     <div class="flex items-center justify-between">
       <span class="t-caption">상황 {{ index + 1 }}/{{ situations.length }} · {{ SLOT[current?.slot ?? ''] ?? '' }}</span>
       <span v-if="phase === 'answer'" class="t-mono tabular-nums" :class="remaining <= 10 ? 'text-danger-fg' : 'text-fg-muted'">0:{{ String(remaining).padStart(2, '0') }}</span>
@@ -22,13 +22,12 @@
           <!-- 한 번만 말한다는 걸 먼저 알린다 (걷기 P1-3: "고칠 수 있는 줄 알고 대충 눌렀는데 바로 넘어갔어") -->
           <!-- 남은 시간을 입력칸 바로 밑에도: 키보드가 열리면 화면이 밀려 위의 시간 줄이 제목 바 밑으로 숨었다 (11/13 실제 기기 한 바퀴) -->
           <p class="t-micro mt-1 tabular-nums flex justify-between">
-            <span :class="remaining <= 10 ? 'text-danger-fg' : ''">남은 시간 0:{{ String(remaining).padStart(2, '0') }}</span>
+            <!-- 첫 상황에만 '한 번만'을 같은 줄에: 따로 한 줄이면 키보드 위 자리가 모자라 인물 줄이 제목 바 밑으로 밀렸다 (11/14 전수 평가) -->
+            <span><span :class="remaining <= 10 ? 'text-danger-fg' : ''">남은 시간 0:{{ String(remaining).padStart(2, '0') }}</span><template v-if="index === 0"> · 한 번만 말할 수 있어요</template></span>
             <span>{{ text.length }}/120</span>
           </p>
-          <!-- 첫 상황에만: 판마다 세 번 같은 말이었다 (11/11 쌓이는 피로 전수표) -->
-          <p v-if="index === 0" class="t-caption mt-1 break-keep">한 번만 말할 수 있어요. 시간이 다 되면 쓴 데까지 보내요</p>
         </div>
-        <UiButton block size="lg" class="mt-3" :disabled="!text.trim()" @click="say">말하기</UiButton>
+        <div ref="action" class="mt-3"><UiButton block size="lg" :disabled="!text.trim()" @click="say">말하기</UiButton></div>
       </template>
 
       <!-- 내가 한 말과 인물의 반응 -->
@@ -55,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import { useKeyboardFit } from '@/utils/keyboardFit'
 // 임기응변 등급 한 판 (3단계 첫 게임, product/growth/game-plan.md ③): 상황 셋, 상황마다 45초 안에 한 번 대답한다.
 // 대답하면 인물이 한 줄로 반응하고(/api/improv/react, 가입 전에도), 되받아칠 수 없이 다음 상황으로. 셋이 끝나면 답 셋을 낸다.
 // 반응을 받으며 서버가 채점해 두므로 점수는 낼 때 바로 나온다. 반응을 못 받아도 판은 이어 간다
@@ -95,15 +95,8 @@ const REACT_TIMEOUT_MS = 45_000
 
 // 키보드가 올라오면 판 머리(상황 번호·시계·인물)부터 보이게 끌어올린다. 줄을 접지 않아 화면이 흔들리지 않는다
 const root = ref<HTMLElement | null>(null)
-function onTypeStart() {
-  const align = () => root.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-  // 키보드가 다 올라온 뒤에 맞춘다
-  setTimeout(align, 250)
-  // 아이폰은 키보드가 오른 뒤에 화면을 제멋대로 한 번 더 민다: 250ms에 맞춘 것이 도로 밀려 인물·사정 줄이 제목 바 밑에 숨었다
-  // (11/14 시뮬레이터: 첫 상황, 누가 한 말인지 모르고 답하게 된다). 키보드가 자리 잡은 신호(보이는 화면 크기 바뀜)와 조금 뒤에 다시 맞춘다
-  window.visualViewport?.addEventListener('resize', () => setTimeout(align, 60), { once: true })
-  setTimeout(align, 800)
-}
+const action = ref<HTMLElement | null>(null)
+const { typing, onTypeStart, onTypeEnd } = useKeyboardFit(root, action)
 // 낸 답의 채점이 막혔다(부모가 이 판을 그대로 두고 '다시 채점하기'를 보인다)
 const failed = ref(false)
 watch(() => props.submitting, (now, before) => {

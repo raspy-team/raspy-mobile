@@ -28,7 +28,8 @@
         <!-- 실시간 게임이 목록에 있을 때만: 목록이 따로 푸는 게임뿐이면 '아무거나 바로 붙기'·오늘 밤의 게임이 목록에 없는 게임으로 데려갔다 (11/14) -->
         <WaitingNow v-if="!query && games.some((g) => g.playMode === 'REALTIME')" class="mt-6" any-button />
         <!-- 최근에 한 게임: 찾지 않고 바로 다시 -->
-        <UiSection v-if="recent.length && !query" title="최근에 한 게임" class="mt-6">
+        <!-- 게임이 몇 안 될 때는 바로 아래 목록과 같은 칸이 두 번 보였다 (11/14 전수 평가): 목록이 길 때만 -->
+        <UiSection v-if="recent.length && !query && games.length > 8" title="최근에 한 게임" class="mt-6">
           <!-- 이어 하기 줄: 옆으로 밀어 고른다 -->
           <div class="flex gap-3 -mx-4 px-4 overflow-x-auto no-scrollbar">
             <AppGameTile v-for="g in recent" :key="g.key" :game="g" compact :again="g.available && g.playMode !== 'REALTIME' && g.dailyLimit !== 1" />
@@ -36,8 +37,12 @@
         </UiSection>
 
         <UiSection :title="query ? `찾은 게임 ${filtered.length}` : shown.length < filtered.length ? '많이 하는 게임' : '모든 게임'" class="mt-6">
-          <div v-if="filtered.length" class="grid grid-cols-2 gap-3">
-            <AppGameTile v-for="g in shown" :key="g.key" :game="g" />
+          <!-- 게임이 몇 안 되면 한 줄에 하나씩 소개를 다 보여 준다. 많아지면(9개부터) 두 칸으로 -->
+          <div v-if="filtered.length && shown.length <= 8" class="space-y-3">
+            <AppGameTile v-for="g in shown" :key="g.key" :game="g" wide :show-meta="metaDiffers" />
+          </div>
+          <div v-else-if="filtered.length" class="grid grid-cols-2 gap-3">
+            <AppGameTile v-for="g in shown" :key="g.key" :game="g" :show-meta="metaDiffers" />
           </div>
           <!-- 처음엔 많이 하는 8개만 (UX ⑤: 56개가 한 줄로 길었다). 찾거나 고르면 모두 -->
           <UiButton v-if="shown.length < filtered.length" block variant="secondary" class="mt-3" @click="all = true">모두 보기 {{ filtered.length }}</UiButton>
@@ -75,6 +80,8 @@ const recent = computed(() =>
     .slice(0, 3),
 )
 const all = ref(false)
+// 걸러 낼 것이 없으면(모두 같은 방식) 칸마다 같은 말을 되풀이하지 않는다
+const metaDiffers = computed(() => new Set(games.value.map((g) => `${g.playMode}|${g.judge}`)).size > 1)
 const shown = computed(() => (all.value || query.value.trim() ? filtered.value : filtered.value.slice(0, 8)))
 const filtered = computed(() => {
   const q = query.value.trim()

@@ -64,7 +64,7 @@
         }}</span>
         <button
           v-if="!isReply"
-          class="hover:underline focus:underline ml-1 px-1 py-2.5 -my-2.5"
+          class="hit hover:underline focus:underline ml-1 px-1 py-2.5 -my-2.5"
           @click="emitReply(comment.id, who(comment.author, comment.author.nickname))"
         >
           답글
@@ -113,7 +113,7 @@ function autoLink(text) {
   // 이스케이프한 뒤 http(s) 주소만 링크로. 주소 안의 따옴표·꺾쇠는 이미 바뀌어 속성을 깨지 못한다
   return escapeHtml(text).replace(
     /(https?:\/\/[^\s<]+)/g,
-    '<a href="$1" target="_blank" rel="noopener noreferrer nofollow" class="text-fg underline underline-offset-2 break-all">$1</a>',
+    '<a href="$1" target="_blank" rel="noopener noreferrer nofollow" class="hit text-fg underline underline-offset-2 break-all">$1</a>',
   )
 }
 function emitLike(commentId) {

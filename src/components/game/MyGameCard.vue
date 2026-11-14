@@ -12,7 +12,7 @@
         </button>
         <p v-else class="t-caption line-clamp-2 mt-0.5">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</p>
         <!-- 만나러 갈 때 지도가 제일 필요하다: 장소를 카카오맵으로 (UX 리뷰 ⑦) -->
-        <a v-if="mapLink" :href="mapLink" target="_blank" rel="noopener" class="inline-flex items-center gap-1 h-7 px-2.5 mt-2 rounded-md bg-surface-3 text-fg text-xs font-medium" @click.stop>
+        <a v-if="mapLink" :href="mapLink" target="_blank" rel="noopener" class="hit inline-flex items-center gap-1 h-7 px-2.5 mt-2 rounded-md bg-surface-3 text-fg text-xs font-medium" @click.stop>
           <UiIcon name="map" class="text-xs" aria-hidden="true" />지도에서 보기
         </a>
       </div>
@@ -40,7 +40,7 @@
       <div v-for="row in rows" :key="row.key" class="flex items-center gap-2 min-w-0">
         <span v-if="row.name" class="t-micro w-9 flex-shrink-0">{{ row.name }}</span>
         <div class="flex items-center gap-1.5 flex-wrap min-w-0">
-          <button v-for="p in row.players" :key="p.id" type="button" :aria-label="p.nickname" @click="emit('profile', p.id)">
+          <button v-for="p in row.players" :key="p.id" type="button" class="hit" :aria-label="p.nickname" @click="emit('profile', p.id)">
             <UiAvatar :src="p.profileUrl" :name="p.nickname" :user-id="p.id" size="sm" />
           </button>
           <span v-for="n in row.empty" :key="'e' + n" class="w-8 h-8 rounded-full border border-dashed border-line-strong" aria-hidden="true"></span>
@@ -50,7 +50,7 @@
 
     <!-- 나 vs 상대 -->
     <div v-else class="flex items-center gap-3 px-4 pb-4">
-      <button type="button" class="flex items-center gap-2 min-w-0 flex-1" @click="emit('profile', me.id)">
+      <button type="button" class="hit flex items-center gap-2 min-w-0 flex-1" @click="emit('profile', me.id)">
         <UiAvatar :src="me.avatar" :name="me.name" :user-id="me.id" size="sm" />
         <span class="text-sm text-fg truncate">{{ me.name }}</span>
       </button>
@@ -58,7 +58,7 @@
       <button
         v-if="opponent"
         type="button"
-        class="flex items-center justify-end gap-2 min-w-0 flex-1"
+        class="hit flex items-center justify-end gap-2 min-w-0 flex-1"
         @click="emit('profile', opponent.id)"
       >
         <span class="text-sm text-fg truncate">{{ opponent.name }}</span>
@@ -173,10 +173,10 @@ const state = computed(() => {
     if (g.status === 'COMPLETED') return { label: '끝남', tone: 'neutral', action: 'result', actionLabel: '결과 보기', actionVariant: 'secondary' }
     if (g.status === 'CANCELED') return { label: '취소됨', tone: 'neutral', hint: '취소된 경기예요' }
     if (g.status === 'SCHEDULED') {
-      if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
+      if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'primary' }
       // 경기 날에는 선수 누구나 시작한다 (11/14: 연 사람만 시작할 수 있어, 그 사람 폰이 없으면 기록할 길이 없었다). 그 전에는 메시지
       if (!multi.value && opponent.value && !matchDay.value) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${opponent.value.name}에게 메시지`, actionVariant: 'secondary' }
-      return { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
+      return { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'primary' }
     }
     if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청 보기', actionVariant: 'signal' }
     if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 공유', actionVariant: 'secondary' }
@@ -188,9 +188,9 @@ const state = computed(() => {
     return { label: '승인됨', tone: 'neutral', hint: `${gathered.value} 모였어요. 다 모이면 확정돼요` }
   }
   if (g.status === 'APPROVED') {
-    if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
+    if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'primary' }
     // 신청해서 들어온 사람도 경기 날에는 시작할 수 있다 (서버 GameService.startGame: 선수 누구나)
-    if (g.gameStatus === 'SCHEDULED' && matchDay.value) return { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
+    if (g.gameStatus === 'SCHEDULED' && matchDay.value) return { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'primary' }
     if (!multi.value) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${g.ownerNickname}에게 메시지`, actionVariant: 'secondary' }
     return { label: '확정', tone: 'primary', hint: '경기 날에 누구나 시작할 수 있어요' }
   }

@@ -9,7 +9,7 @@
         </span>
       </li>
     </ul>
-    <button v-if="!more" type="button" class="mt-4 t-caption underline underline-offset-2" @click="more = true">더 보기</button>
+    <button v-if="!more" type="button" class="hit mt-4 t-caption underline underline-offset-2" @click="more = true">더 보기</button>
     <template #footer>
       <div class="flex gap-2">
         <UiButton v-if="canTellFriend" class="flex-1" variant="secondary" icon="shield-halved" @click="emit('tell-friend')">친구에게 알리기</UiButton>

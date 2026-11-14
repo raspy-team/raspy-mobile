@@ -27,7 +27,7 @@
         </span>
       </button>
       <!-- 신청자 목록은 주최자만 연다. 다른 사람에게는 몇 명인지만 (뽑히지 않은 사람이 남들에게 보이지 않게, 11/11 감정과 체면) -->
-      <button v-if="applicants && isMine" type="button" class="t-micro underline underline-offset-2 flex-shrink-0 px-2 -mx-2 py-3 -my-3" @click="emit('challengers')">
+      <button v-if="applicants && isMine" type="button" class="hit t-micro underline underline-offset-2 flex-shrink-0 px-2 -mx-2 py-3 -my-3" @click="emit('challengers')">
         {{ applicants }}명 신청
       </button>
       <span v-else-if="applicants" class="t-micro flex-shrink-0">{{ applicants }}명 신청</span>

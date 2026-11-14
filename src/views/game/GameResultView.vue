@@ -223,7 +223,7 @@
                 <UiChip :selected="review.meetAgain === false" @click="review.meetAgain = review.meetAgain === false ? null : false">아니요</UiChip>
               </div>
             </div>
-            <button v-if="!reviewMore" type="button" class="t-caption underline underline-offset-2" @click="reviewMore = true">더 남기기</button>
+            <button v-if="!reviewMore" type="button" class="hit t-caption underline underline-offset-2" @click="reviewMore = true">더 남기기</button>
           </UiCard>
         </UiSection>
 

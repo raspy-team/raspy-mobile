@@ -5,13 +5,13 @@
       <UiIcon name="fas fa-ban" class="text-danger mt-0.5" aria-hidden="true" />
       <span v-if="message" class="flex-1 text-fg">{{ message }}. 보기는 되지만 신청·메시지·경기 열기는 할 수 없어요
         <!-- 나이 확인 정지는 휴대폰 본인인증으로 바로 풀 수 있다 (안전·신뢰 H). 본인인증이 열려 있을 때만: 준비 전엔 눌러 봐야 '준비 중'이었다 -->
-        <RouterLink v-if="message.includes('만 14세') && identityOpen" to="/verify" class="block mt-1 font-semibold underline underline-offset-2">휴대폰 본인인증으로 풀기</RouterLink>
+        <RouterLink v-if="message.includes('만 14세') && identityOpen" to="/verify" class="hit block mt-1 font-semibold underline underline-offset-2">휴대폰 본인인증으로 풀기</RouterLink>
         <!-- 잘못 신고받아 정지됐다면 물을 곳이 있어야 한다 (11/11 다른 사람 전수표) -->
-        <a v-else :href="contactMailto('이용 정지 문의')" class="block mt-1 underline underline-offset-2">잘못된 것 같으면 문의하기</a>
+        <a v-else :href="contactMailto('이용 정지 문의')" class="hit block mt-1 underline underline-offset-2">잘못된 것 같으면 문의하기</a>
       </span>
       <span v-else class="flex-1 text-fg">노쇼가 거듭 기록돼 {{ offlineBan }}까지 만나서 하는 경기를 열거나 신청할 수 없어요. 앱 게임은 그대로 돼요
         <!-- 노쇼 기록마다 이의는 그 경기 화면에서 낸다. 여기서는 물을 곳을 -->
-        <a :href="contactMailto('노쇼 기록 문의')" class="block mt-1 underline underline-offset-2">잘못된 것 같으면 문의하기</a>
+        <a :href="contactMailto('노쇼 기록 문의')" class="hit block mt-1 underline underline-offset-2">잘못된 것 같으면 문의하기</a>
       </span>
       <button type="button" class="-mr-1 -mt-1 w-8 h-8 flex items-center justify-center text-fg-muted flex-shrink-0" aria-label="닫기" @click="dismissed = true">
         <UiIcon name="xmark" aria-hidden="true" />

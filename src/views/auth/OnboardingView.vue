@@ -70,7 +70,7 @@
         <!-- 서버가 지어 둔 아이디(u_…)는 보이지 않는다: "@u_k3j9x2ab"가 고장 난 아이디처럼 보였다 (경로 1 리뷰 N7) -->
         <p v-if="username && !editingUsername && username.startsWith('u_')" class="t-caption">
           아이디는 나중에 정해도 돼요
-          <button type="button" class="underline underline-offset-2 ml-1" @click="username = ''; editingUsername = true">지금 정하기</button>
+          <button type="button" class="hit underline underline-offset-2 ml-1" @click="username = ''; editingUsername = true">지금 정하기</button>
         </p>
         <p v-else-if="username && !editingUsername" class="t-caption">
           아이디 <b class="text-fg">@{{ username }}</b>

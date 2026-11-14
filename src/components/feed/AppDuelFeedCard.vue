@@ -14,7 +14,7 @@
     <!-- 투표 중: 쓴 사람을 가린 채 그 자리에서 투표 -->
     <div v-if="voting" class="mt-3">
       <!-- 투표 카드를 못 받으면 회색 틀이 그대로 남았다 (경로 6 리뷰 P10) -->
-      <p v-if="cardFailed" class="t-caption py-6 text-center">투표를 불러오지 못했어요 · <button type="button" class="underline underline-offset-2" @click="loadCard">다시 시도</button></p>
+      <p v-if="cardFailed" class="t-caption py-6 text-center">투표를 불러오지 못했어요 · <button type="button" class="hit underline underline-offset-2" @click="loadCard">다시 시도</button></p>
       <UiSkeleton v-else-if="!card" class="h-40 w-full rounded-xl" />
       <VoteCard v-else :card="card" @voted="card = $event" />
     </div>

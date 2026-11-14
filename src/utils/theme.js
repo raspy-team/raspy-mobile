@@ -5,7 +5,7 @@ import { ref } from 'vue'
 
 const KEY = 'match_theme'
 // 상단 막대(브라우저·홈 화면 앱) 색. tailwind.css의 --c-canvas와 같게
-const BAR = { dark: '#121214', light: '#f7f7f5' }
+const BAR = { dark: '#09090b', light: '#f7f7f5' }
 
 const read = () => {
   try {

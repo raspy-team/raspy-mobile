@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="typing ? 'pb-[50vh]' : ''">
     <div class="flex items-center justify-between">
       <span class="t-caption">{{ topic }} · 나는 <b class="text-fg">{{ mine }}</b> 편</span>
       <span class="t-mono tabular-nums" :class="remaining <= 30 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
@@ -8,15 +8,16 @@
     <!-- 주고받은 말 -->
     <ol class="mt-4 space-y-2" aria-live="polite">
       <li v-for="(l, i) in lines" :key="i" class="flex" :class="l.mine ? 'justify-end' : 'justify-start'">
-        <p class="max-w-[80%] rounded-2xl px-4 py-2.5 t-body whitespace-pre-line" :class="l.mine ? 'bg-fg text-canvas' : 'bg-surface text-fg'">{{ l.text }}</p>
+        <p class="max-w-[80%] rounded-2xl px-4 py-2.5 t-body whitespace-pre-line" :class="l.mine ? 'bg-signal !text-signal-on' : 'bg-surface text-fg'">{{ l.text }}</p>
       </li>
       <li v-if="saying" class="flex justify-start"><p class="rounded-2xl px-4 py-2.5 bg-surface t-caption">AI가 받아치는 중…</p></li>
     </ol>
 
-    <form v-if="turnsLeft > 0" class="mt-4" @submit.prevent="say">
-      <UiInput v-model="text" multiline :rows="2" :maxlength="maxChars" :placeholder="`${mine} 편에서 한 마디 (${turnsLeft}번 남음)`" />
+    <!-- 키보드가 오르면 바로 앞 말과 내는 버튼이 함께 보이게 맞춘다 (11/14 전수 평가) -->
+    <form v-if="turnsLeft > 0" ref="root" class="mt-4 scroll-mt-[calc(env(safe-area-inset-top)+10rem)]" @submit.prevent="say" @focusout="onTypeEnd">
+      <UiInput v-model="text" multiline :rows="2" :maxlength="maxChars" :placeholder="`${mine} 편에서 한 마디 (${turnsLeft}번 남음)`" @focusin="onTypeStart" />
       <p v-if="error" class="t-caption text-danger mt-1">{{ error }}</p>
-      <UiButton block size="lg" class="mt-3" :loading="saying" :disabled="!text.trim() || submitting" @click="say">말하기</UiButton>
+      <div ref="action" class="mt-3"><UiButton block size="lg" :loading="saying" :disabled="!text.trim() || submitting" @click="say">말하기</UiButton></div>
     </form>
     <UiButton block :variant="turnsLeft > 0 ? 'ghost' : 'primary'" :size="turnsLeft > 0 ? 'md' : 'lg'" class="mt-2" :loading="submitting" :disabled="saying" @click="finish">
       {{ turnsLeft > 0 ? '여기까지 하고 채점받기' : '채점받기' }}
@@ -31,6 +32,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { UiButton, UiInput } from '../ui'
+import { useKeyboardFit } from '@/utils/keyboardFit'
 
 type Line = components['schemas']['DialogLine']
 
@@ -40,6 +42,9 @@ const emit = defineEmits<{ submit: [answer: string] }>()
 // 문제: "주제|내 편|AI 편"
 const [topic, mine] = props.problem.split('|')
 const lines = ref<Line[]>([])
+const root = ref<HTMLElement | null>(null)
+const action = ref<HTMLElement | null>(null)
+const { typing, onTypeStart, onTypeEnd } = useKeyboardFit(root, action)
 const turnsLeft = ref(0)
 const maxChars = ref(200)
 const text = ref('')

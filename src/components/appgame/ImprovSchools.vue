@@ -10,7 +10,8 @@
     </span>
     <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
   </button>
-  <UiCard v-else-if="data && variant !== 'home'">
+  <!-- 뿌리가 여럿이라 바깥에서 준 class(위 간격)가 어디에도 안 붙었다: 결과 카드와 틈 없이 붙어 보였다 (11/14 전수 평가) -->
+  <UiCard v-else-if="data && variant !== 'home'" :class="$attrs.class">
     <div class="flex items-center justify-between">
       <p class="t-label">학교 대항</p>
       <UiButton v-if="data.total > 3" size="sm" variant="ghost" class="-mr-2 -my-2" @click="open = true">전체 {{ data.total }}곳</UiButton>

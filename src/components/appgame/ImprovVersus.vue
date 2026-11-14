@@ -2,8 +2,15 @@
   <!-- 친구와의 승부 (11/14 초대받은 1:1): 도전장으로 붙었지만 친구가 아직 가입 전인 판들.
        손님에게는 가리던 승패와 친구의 답을, 가입한 사람에게 여기서 보인다. 친구도 가입하면 1:1 경기로 바뀌어 아래 대결 목록으로 간다 -->
   <UiSection v-if="rows.length" title="친구와의 승부">
-    <UiList>
-      <UiListItem v-for="r in rows" :key="r.id" :title="line(r)" :subtitle="r.role === 'SENT' ? '내 링크로 푼 친구' : '나를 초대한 친구'" chevron @click="open = r">
+    <!-- 가장 최근 승부는 크게: "누가 이겼는지 보기"를 눌러 가입한 사람이 받는 답이다 (11/14 전수 평가: 작은 칩 하나였다) -->
+    <UiCard class="text-center">
+      <p class="t-micro">{{ who(rows[0]) }}</p>
+      <p class="t-display mt-2"><span :class="rows[0].result === 'WIN' ? 'hl' : ''">{{ RESULT[rows[0].result] ?? rows[0].result }}</span></p>
+      <p class="t-heading mt-3">{{ line(rows[0]) }}</p>
+      <UiButton class="mt-4" variant="secondary" @click="open = rows[0]">친구 답 보기</UiButton>
+    </UiCard>
+    <UiList v-if="rows.length > 1" class="mt-3">
+      <UiListItem v-for="r in rows.slice(1)" :key="r.id" :title="line(r)" :subtitle="who(r)" chevron @click="open = r">
         <template #trailing>
           <UiBadge :tone="r.result === 'WIN' ? 'primary' : 'neutral'">{{ RESULT[r.result] ?? r.result }}</UiBadge>
         </template>
@@ -28,7 +35,7 @@
 import { onMounted, ref } from 'vue'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
-import { UiBadge, UiList, UiListItem, UiSection, UiSheet } from '../ui'
+import { UiBadge, UiButton, UiCard, UiList, UiListItem, UiSection, UiSheet } from '../ui'
 import { improvAnswers, improvSituations } from '@/utils/improv'
 
 type Versus = components['schemas']['Versus']
@@ -39,6 +46,7 @@ const RESULT: Record<string, string> = { WIN: '이겼어요', LOSE: '졌어요',
 
 // "N등급"만 (없으면 점수)
 const grade = (l?: string | null, score?: number) => l?.match(/\d등급/)?.[0] ?? `${Math.round(score ?? 0)}점`
+const who = (r: Versus) => (r.role === 'SENT' ? '내 링크로 푼 친구와의 승부' : '나를 초대한 친구와의 승부')
 const line = (r: Versus) => `나 ${grade(r.myLine, r.myScore)} · 친구 ${grade(r.theirLine, r.theirScore)}`
 
 async function load() {

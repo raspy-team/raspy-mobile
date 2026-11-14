@@ -12,6 +12,8 @@
         :style="{
           height: `${sheetHeight}px`,
           marginBottom: `${keyboard}px`,
+          // 키보드 위 유리 막대 밑으로 뒤 화면(소식 글자)이 비쳤다: 창 색을 아래로 이어 칠한다 (11/14 전수 평가)
+          boxShadow: keyboardUp ? '0 160px 0 0 rgb(var(--c-surface))' : undefined,
           display: 'flex',
           flexDirection: 'column',
         }"
@@ -55,7 +57,7 @@
           <!-- 못 불러온 것을 '댓글이 없어요'로 보였다 (목적 판정 11/11 4번) -->
           <div v-else-if="loadFailed" class="text-center mt-16 px-6">
             <p class="t-heading">댓글을 불러오지 못했어요</p>
-            <button type="button" class="t-label mt-3 underline underline-offset-2" @click="fetchComments">다시 시도</button>
+            <button type="button" class="hit t-label mt-3 underline underline-offset-2" @click="fetchComments">다시 시도</button>
           </div>
           <div v-else class="text-center mt-16 px-6">
             <p class="t-heading">아직 댓글이 없어요</p>
@@ -186,10 +188,13 @@ const sheetHeight = ref(window.innerHeight * 0.9)
 const commentAreaHeight = ref(0)
 // 키보드 높이만큼 창을 올린다 (11/14 아이폰 앱: 화면 틀은 키보드에 줄지 않아, 높이만 줄인 창이 키보드 밑에 깔려 입력칸이 안 보였다)
 const keyboard = ref(0)
+// 키보드가 올라와 있나 (화면 틀이 함께 줄어 keyboard가 0이어도 참)
+const keyboardUp = ref(false)
 function updateHeights() {
   const vv = window.visualViewport
   const vh = vv ? vv.height : window.innerHeight
   sheetHeight.value = vh * 0.9
+  keyboardUp.value = !!vv && vv.height < window.screen.height * 0.75
   keyboard.value = vv ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0
   commentAreaHeight.value = sheetHeight.value - inputAreaHeight - SHEET_MARGIN
 }

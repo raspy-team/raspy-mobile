@@ -4,7 +4,7 @@
 import {
   BicepsFlexed, Beer, Dumbbell, BookOpen, Brain, BrainCircuit, Dices, Drama, Footprints, Gauge, HeartHandshake, HeartPulse,
   Lightbulb, Medal, Megaphone, Mountain, PersonStanding, Puzzle, Rabbit, Route, Scale, Shapes, Snowflake, Spline,
-  Swords, Target, VenetianMask, Waves, Zap,
+  Swords, Target, VenetianMask, Waves, Zap, Gamepad2, Volleyball, Bike,
 } from 'lucide-vue-next'
 
 // 직접 그린 것: path의 d 목록 + 원
@@ -40,18 +40,40 @@ const DRAWN = {
   라크로스: p('M4.5 19.5l9-9', 'M13.5 10.5c-1-3 0-6.3 3-7.2 2.6-.8 4.6 1.2 3.8 3.8-.9 3-4.2 4.2-6.8 3.4', 'M15 6.5l3 3', 'M16.5 4.5l3 3') + c(6.5, 7, 1.6),
 }
 DRAWN.태권도 = DRAWN.유도
+// 11/14 전수 평가: 종목 고르기 21개 중 9개가 같은 세모·네모·동그라미였다. 고르는 화면에 나오는 종목은 모두 제 그림을 갖는다
+Object.assign(DRAWN, {
+  // 깃대와 홀
+  골프: p('M11 18V3l8 3.5-8 3.5', 'M5.5 18.5c0-1.4 2.9-2.5 6.5-2.5s6.5 1.1 6.5 2.5S15.6 21 12 21s-6.5-1.1-6.5-2.5z'),
+  // 철봉에 매달린 사람
+  턱걸이: p('M3 4.5h18', 'M8 4.5V8c0 2.6 1.6 4 4 4s4-1.4 4-4V4.5', 'M12 12v5', 'M12 17l-2.5 4', 'M12 17l2.5 4') + c(12, 8.2, 1.9),
+  // 네트 위로 넘어가는 공
+  족구: c(12, 6.5, 3.3) + p('M3 13.5h18', 'M3 13.5V21', 'M21 13.5V21', 'M7.5 13.5V21', 'M12 13.5V21', 'M16.5 13.5V21', 'M3 17.2h18'),
+  // 긴 손잡이 라켓과 작은 공
+  스쿼시: c(14.8, 8.2, 5.2) + p('M11 12L4 19', 'M11.2 6.2l5.6 5.6', 'M13.4 4.3l5.4 5.4') + c(19.5, 19.2, 1.5),
+  // 맞히는 공
+  피구: c(13.5, 12, 6) + p('M2.5 7l2.5 1.6', 'M2 12h3', 'M2.5 17l2.5-1.6', 'M13.5 6c2.2 2.2 2.2 9.8 0 12'),
+  // 받침대 위의 공
+  티볼: c(12, 7, 4) + p('M12 11v8', 'M9 19h6', 'M7.5 21.5h9'),
+})
+DRAWN.포켓볼 = DRAWN.당구
+DRAWN.풋살 = DRAWN.축구
+DRAWN.소프트볼 = DRAWN.야구
 
 const LUCIDE = {
   간단: Dices, 크로스핏: Dumbbell, 검도: Swords, 펜싱: Swords, 균형: Scale, 근력: BicepsFlexed, '기존 스포츠': Medal, 기타: Shapes,
   '논리·추리력': Puzzle, 두뇌: Brain, 런닝: Footprints, 상식: BookOpen, 속도: Gauge, '속도·반응': Zap, 수영: Waves,
   순발력: Rabbit, 술게임: Beer, 신체: PersonStanding, '심리·블러핑': VenetianMask, 심폐지구력: HeartPulse,
   아이스브레이킹: Snowflake, 암기력: BrainCircuit, 유연성: Spline, '전략·계획': Route, 정확성: Target,
+  자전거: Bike, 사이클: Bike, 다트: Target, 양궁: Target, 사격: Target, 요가: PersonStanding, 필라테스: PersonStanding, 줄넘기: Zap,
+  달리기: Footprints, 러닝: Footprints, 마라톤: Footprints, 팔씨름: BicepsFlexed, 배구: Volleyball, '헬스 PT': Dumbbell, 헬스: Dumbbell,
+  '로블록스 라이벌즈': Gamepad2, 브롤스타즈: Gamepad2, 'EA SPORTS FC': Gamepad2, '리그 오브 레전드': Gamepad2, 발로란트: Gamepad2, 오버워치: Gamepad2,
   '즉흥 공연': Drama, 창의성: Lightbulb, '커플 게임': HeartHandshake, 클라이밍: Mountain, 표현력: Megaphone,
 }
 
 export function sportIcon(name) {
   if (DRAWN[name]) return { svg: DRAWN[name] }
-  return { component: LUCIDE[name] || Shapes }
+  // 표에 없는 이름은 '대결' 그림으로. 세모·네모·동그라미는 덜 만든 자리처럼 보였다 (11/14 전수 평가)
+  return { component: LUCIDE[name] || Swords }
 }
 
 export const SPORT_NAMES = new Set([...Object.keys(DRAWN), ...Object.keys(LUCIDE)])

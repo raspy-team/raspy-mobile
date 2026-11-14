@@ -123,7 +123,7 @@
             <TournamentRow v-for="t in tournaments" :key="t.id" :t="t" @click="router.push(`/tournaments/${t.id}`)" />
           </div>
           <!-- 못 불러온 것을 '연 대회가 없어요'로 보이지 않게 (경로 7 리뷰) -->
-          <p v-else-if="tournamentsFailed" class="t-caption">대회를 불러오지 못했어요 · <button type="button" class="underline underline-offset-2" @click="loadTournaments">다시 시도</button></p>
+          <p v-else-if="tournamentsFailed" class="t-caption">대회를 불러오지 못했어요 · <button type="button" class="hit underline underline-offset-2" @click="loadTournaments">다시 시도</button></p>
           <p v-else class="t-caption">아직 연 대회가 없어요</p>
         </UiSection>
 

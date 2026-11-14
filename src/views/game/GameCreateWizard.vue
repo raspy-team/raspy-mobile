@@ -65,7 +65,7 @@
           <!-- 종목은 점점 늘어나고 예외도 있으니, 골라 준 규칙은 늘 바꿀 수 있게 (같은 종목 규칙부터 보여 준다) -->
           <UiButton variant="ghost" size="sm" @click="changeRule">바꾸기</UiButton>
         </UiCard>
-        <button v-if="autoPicked && pickedSport" type="button" class="t-caption underline underline-offset-2 -mt-6 mb-8 block" @click="backToSports">{{ pickedSport }} 말고 다른 종목</button>
+        <button v-if="autoPicked && pickedSport" type="button" class="hit t-caption underline underline-offset-2 -mt-6 mb-8 block" @click="backToSports">{{ pickedSport }} 말고 다른 종목</button>
         <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
         <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
 
@@ -262,13 +262,16 @@ watch(rule, (r) => {
 // 종목 고르기: 규칙을 많이 쓴 순으로 받아 종목마다 맨 위 규칙을 고른다. 종목 이름은 분류(category.sport) → 제목·분류에서 찾은 종목
 const createdLine = ref('')
 // 규칙 바꾸기: 고른 때·방식·인원을 실어 보내고, 규칙을 고르면 그대로 돌아온다 (예전엔 규칙 상세 → '경기 열기' → 처음부터 다시)
-function changeRule() {
+async function changeRule() {
   const keep = {
     when: when.value, venue: venue.value, format: format.value,
     ...(format.value !== 'DUEL' ? { size: String(size.value) } : {}),
     ...(when.value === EXACT && exactTime.value ? { exact: exactTime.value } : {}),
     ...(isRemote(venue.value) && venueDetail.value ? { venueDetail: venueDetail.value } : {}),
   }
+  // 규칙을 안 고르고 뒤로 와도 고른 것이 남게, 지금 주소에 적어 두고 간다 (11/14 전수 평가: 뒤로 오면 종목 고르기부터 다시였다)
+  // (history.replaceState로 주소만 바꾸면 라우터가 떠날 때 제 주소로 덮어쓴다: 라우터로 바꾼다)
+  await router.replace({ path: route.path, query: { ...route.query, ruleId: String(ruleId.value), ...keep } })
   router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked.value && pickedSport.value ? { q: pickedSport.value } : {}), ...keep } })
 }
 const sports = ref(null)

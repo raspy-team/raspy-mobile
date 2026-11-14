@@ -49,7 +49,7 @@
         <!-- 인스타·카톡 앱 안 브라우저: 구글은 막혀 버튼을 숨기고, 기기 브라우저로 여는 길을 준다 (경로 1 리뷰 N4) -->
         <p v-if="inAppBrowser && enabled.google && !isCapacitorApp" class="t-caption text-center pb-1 break-keep">
           구글 로그인은 Safari·Chrome에서 돼요.
-          <button v-if="canOpenOutside" type="button" class="underline underline-offset-2 min-h-[36px]" @click="openOutside">브라우저로 열기</button>
+          <button v-if="canOpenOutside" type="button" class="hit underline underline-offset-2 min-h-[36px]" @click="openOutside">브라우저로 열기</button>
           <template v-else>오른쪽 위 ··· 에서 '외부 브라우저로 열기'</template>
         </p>
 
@@ -104,9 +104,9 @@
           <UiButton block variant="ghost" to="/group/login" @click="tapId">이미 계정이 있어요</UiButton>
         </template>
         <p class="pt-2 text-center t-micro">
-          <button type="button" class="underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[0]">{{ TERMS[0].title }}</button>
+          <button type="button" class="hit underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[0]">{{ TERMS[0].title }}</button>
           ·
-          <button type="button" class="underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[1]">{{ TERMS[1].title }}</button>
+          <button type="button" class="hit underline underline-offset-2 px-1 min-h-[44px] inline-flex items-center" @click="openTerm = TERMS[1]">{{ TERMS[1].title }}</button>
         </p>
       </div>
     </main>

@@ -5,7 +5,7 @@
     <div v-if="chosen" class="flex items-center gap-2 rounded-xl bg-surface-2 px-4 py-3">
       <UiIcon name="check" class="text-primary" aria-hidden="true" />
       <span class="t-body text-fg flex-1 min-w-0 truncate">{{ chosen }}</span>
-      <button type="button" class="t-caption underline underline-offset-2" @click="chosen = ''">바꾸기</button>
+      <button type="button" class="hit t-caption underline underline-offset-2" @click="chosen = ''">바꾸기</button>
     </div>
     <template v-else>
       <UiInput v-model="q" placeholder="규칙 이름 (예: 탁구)" @update:model-value="search" />

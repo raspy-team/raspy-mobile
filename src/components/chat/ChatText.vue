@@ -1,7 +1,7 @@
 <template>
   <!-- 우리 앱 주소만 눌리게 (앱 안에서 그 화면으로). 다른 사이트 주소는 글자로 둔다: 처음 보는 사람끼리 쓰는 대화라 낯선 링크를 누르게 하지 않는다 -->
   <template v-for="(part, i) in parts" :key="i">
-    <RouterLink v-if="part.to" :to="part.to" class="underline underline-offset-2 break-all" @click.stop>{{ part.label }}</RouterLink>
+    <RouterLink v-if="part.to" :to="part.to" class="hit underline underline-offset-2 break-all" @click.stop>{{ part.label }}</RouterLink>
     <template v-else>{{ part.text }}</template>
   </template>
 </template>

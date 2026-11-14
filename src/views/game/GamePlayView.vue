@@ -74,7 +74,6 @@
         </button>
         <UiButton
           variant="secondary"
-          size="sm"
           class="mt-2"
           :disabled="scoreLocked || side.score <= 0"
           :aria-label="`${side.user.nickname} 1점 내리기`"

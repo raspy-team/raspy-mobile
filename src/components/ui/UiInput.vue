@@ -29,6 +29,10 @@
         @input="emit('update:modelValue', type === 'number' ? toNumber($event.target.value) : $event.target.value)"
         @keyup.enter="emit('enter')"
       />
+      <!-- 아이폰의 날짜·시간 칸은 비어 있으면 아무 글도 없는 빈 상자다: 무엇을 하는 칸인지 적어 둔다 (11/14 전수 평가) -->
+      <span v-if="!multiline && DATE_TYPES.includes(type) && !modelValue" class="absolute inset-y-0 left-4 right-4 flex items-center gap-2 text-fg-subtle pointer-events-none" aria-hidden="true">
+        <UiIcon name="calendar" /><span class="truncate">{{ placeholder || (type === 'date' ? '날짜 고르기' : type === 'time' ? '시간 고르기' : '날짜·시간 고르기') }}</span>
+      </span>
     </div>
   </UiField>
 </template>
@@ -37,6 +41,7 @@
 // 글자 입력칸 (한 줄 / 여러 줄). v-model로 쓴다
 import { ref, defineProps, defineEmits, defineExpose } from 'vue'
 import UiField from './UiField.vue'
+const DATE_TYPES = ['datetime-local', 'date', 'time']
 
 defineProps({
   modelValue: { type: [String, Number], default: '' },

@@ -101,7 +101,7 @@
         <div ref="sentinel" class="h-16 flex items-center justify-center">
           <UiSpinner v-if="loading" class="text-fg-subtle" />
           <!-- 둘째 장부터 실패하면 아무 말 없이 멈췄다: 끝인지 망가졌는지 몰랐다 (목적 판정 6) -->
-          <p v-else-if="error && posts.length" class="t-caption">더 불러오지 못했어요 · <button class="underline" @click="loadMore">다시 시도</button></p>
+          <p v-else-if="error && posts.length" class="t-caption">더 불러오지 못했어요 · <button class="hit underline" @click="loadMore">다시 시도</button></p>
           <p v-else-if="done" class="t-micro">모두 봤어요</p>
         </div>
       </div>

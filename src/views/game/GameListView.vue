@@ -65,9 +65,10 @@
     <template v-if="!appPlayer || showLocal">
     <!-- 앱 게임을 아직 안 한 사람에게 하나: 가입 없이도 되는 한 판 (예전 '갈 곳 셋' 중 이것만 남겼다) -->
     <!-- 작게 한 줄 (11/13 고병연: 저렇게 클 필요 없다) -->
-    <div v-if="!appPlayer" class="flex flex-wrap gap-2">
-      <UiButton size="sm" variant="secondary" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
-      <UiButton size="sm" variant="secondary" icon="user-plus" @click="inviteFriend('home')">친구 부르기</UiButton>
+    <!-- 한 줄은 그대로 두되 지금 할 것 하나는 주 버튼으로 (11/14 전수 평가: 홈에 흰 버튼이 하나도 없어 눈이 갈 곳이 없었다) -->
+    <div v-if="!appPlayer" class="flex gap-2">
+      <UiButton class="flex-1" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
+      <UiButton variant="secondary" icon="user-plus" @click="inviteFriend('home')">친구 부르기</UiButton>
     </div>
 
     <!-- 머리줄은 동네 이름 하나로 (11/14 폰으로 한 바퀴): '동네 경기' 제목과 '합정동 근처 동네 14곳 경기까지' 줄이 같은 말을 두 번 했다.

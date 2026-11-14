@@ -147,6 +147,11 @@
               class="mt-4"
               :to="{ path: '/play/improv', query: { to: result.opponent.userId, toName: result.opponent.nickname } }"
             >{{ result.opponent.nickname }}님과 다시 붙기</UiButton>
+            <!-- 승패가 난 판에서도 친구를 부른다 (11/14: 이 화면에는 오른쪽 위 작은 공유 아이콘뿐이었다. 가장 굵은 길이 여기서 끊겼다) -->
+            <div v-if="canChallenge" class="mt-3">
+              <UiButton icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
+              <p class="t-micro mt-2 break-keep">친구가 링크로 풀면 같은 상황으로 나와 1:1이 돼요</p>
+            </div>
             <!-- 임기응변: 승패도 등급으로 겨룬다. 큰 숫자가 점수라 기다릴 때(등급이 크게)와 잣대가 달랐다 (경로 10 리뷰 I5) -->
             <div v-if="improvResult && !improvResult.empty" class="flex items-center justify-center gap-6 mt-6">
               <span>
@@ -263,6 +268,7 @@
             <!-- AI가 대신 풀어 승패를 내던 것은 걷어 냈다 (11/14, 서버 bot/AiMode): 등급·점수가 결과고, 승패는 사람과 붙을 때만 뜻이 있다 -->
             <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
             <div v-if="!improvResult || improvResult.empty" class="flex flex-wrap justify-center gap-2 mt-4">
+              <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" size="sm" variant="secondary" icon="share" :disabled="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
               <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
             </div>
           </template>
@@ -778,15 +784,26 @@ function until(at?: string) {
 /** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
 const challenging = ref(false)
 // 친구에게 보낼 수 있는 판: 내가 풀었고 아직 상대가 없는 판 (사다리로 이미 보낸 판은 빼고)
-const canChallenge = computed(() => !ladderTo && (result.value?.myScore ?? 0) > 0 && result.value?.status === 'WAITING')
+// 승패가 이미 난 판도 보낸다 (11/14: 사람이 늘면 대부분의 판이 바로 승패가 나는데, 그 판에는 이 버튼이 없었다).
+// 가입 없이 되는 게임은 끝난 대결의 링크(?d=&u=&k=)로도 친구가 같은 문제를 풀고 나와의 경기가 따로 하나 생긴다 (서버 GuestPlayService)
+const canChallenge = computed(() => {
+  const r = result.value
+  if (!r || ladderTo || !((r.myScore ?? 0) > 0)) return false
+  if (r.status === 'WAITING') return true
+  return key.value in GUEST_GAMES && !!r.shareKey && !!r.myUserId && (r.status === 'COMPLETED' || r.status === 'PLAYING')
+})
 // 친구에게 도전장을 보낸 판 (기다림 문구가 바뀐다)
 const challengeSentFor = ref<number | null>(null)
 async function sendChallenge(gameId: number) {
   track('result_challenge', { gameKey: key.value, value: `duel=${gameId}${improvResult.value?.grade ? `;grade=${improvResult.value.grade}` : ''}` })
   challenging.value = true
   try {
-    await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
-    challengeSentFor.value = gameId
+    // 기다리는 판만 그 친구 몫으로 하루 잡아 둔다. 승패가 난 판은 링크만 보낸다(받은 친구와의 경기가 따로 생긴다)
+    const waiting = result.value?.gameId !== gameId || result.value?.status === 'WAITING'
+    if (waiting) {
+      await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
+      challengeSentFor.value = gameId
+    }
     // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
     // 가입 없이 할 수 있는 게임이면 받은 친구가 가입 없이 바로 같은 문제로 (경로 2 리뷰 N1: /challenge는 가입 벽이었다)
     const mine = result.value?.gameId === gameId && result.value.shareKey && result.value.myUserId ? `&u=${result.value.myUserId}&k=${result.value.shareKey}` : ''
@@ -798,7 +815,7 @@ async function sendChallenge(gameId: number) {
       title: '친구에게 한 판 붙자', file: storyFile.value, onStory: key.value === 'improv' && storyFile.value ? onStory : null, button: key.value === 'improv' ? '같은 상황으로 붙기' : '같은 문제로 붙기', place: `app_${key.value}`,
     })
     if (dest && dest !== 'story') track('result_challenge_shared', { gameKey: key.value, value: dest })
-    if (dest && dest !== 'story' && dest !== 'copy') showToast(`친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황으로' : '문제로'} 붙어요`)
+    if (dest && dest !== 'story' && dest !== 'copy') showToast(waiting ? `친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황으로' : '문제로'} 붙어요` : '친구가 풀면 같은 상황으로 나와 1:1이 돼요')
     askPushPermission() // 친구가 받으면 알려 드릴 수 있게
   } catch (e) {
     showToast(errorMessage(e, '링크를 만들지 못했어요'))

@@ -7161,6 +7161,7 @@ export interface components {
             placeDetail?: string;
             /** Format: int64 */
             friendId?: number;
+            linkOnly: boolean;
             /** @enum {string} */
             format: "DUEL" | "TEAMS" | "FREE_FOR_ALL";
             /** Format: int32 */
@@ -8003,10 +8004,10 @@ export interface components {
             draws: number;
             /** Format: int32 */
             ruleRating?: number;
-            /** Format: double */
-            rating: number;
             /** Format: int32 */
             totalGameCount: number;
+            /** Format: double */
+            rating: number;
         };
         UserRankingDto: {
             /** Format: int32 */

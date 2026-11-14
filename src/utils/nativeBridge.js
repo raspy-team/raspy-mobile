@@ -127,8 +127,11 @@ async function openInApp(path) {
  * '나중에'면 사흘 동안 다시 묻지 않는다
  */
 const PUSH_LATER_KEY = 'push_ask_later_until'
-export async function askPushPermission(reason = '상대가 답하거나 결과가 나오면 바로 알려 드려요') {
+// direct: 설정의 '휴대폰 알림 켜기'처럼 사람이 직접 켜려고 누른 때. 앱 안 물음과 '나중에' 사흘을 건너뛰고 바로 시스템 창을 띄운다
+// (11/14: 사흘 안에는 아무 일도 안 하면서 화면은 "켰어요"라고 했다)
+export async function askPushPermission(reason = '상대가 답하거나 결과가 나오면 바로 알려 드려요', direct = false) {
   if (!isCapacitorApp) return
+  if (direct) return registerCapacitorPush(true)
   try {
     const { PushNotifications } = await import('@capacitor/push-notifications')
     const perm = await PushNotifications.checkPermissions()

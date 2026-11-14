@@ -28,6 +28,8 @@
             <UiButton :to="`/play/${lastGame.key}?again=1`">한 판 더</UiButton>
             <UiButton variant="secondary" to="/games">다른 게임</UiButton>
           </div>
+          <!-- 결과 화면이 아니어도 친구를 부른다 (11/14: 홈·내 정보 어디에도 부르는 버튼이 없었다). 카카오톡·QR이 있는 보내기 창이 뜬다 -->
+          <UiButton block variant="ghost" size="sm" icon="user-plus" class="mt-2" @click="inviteFriend('home')">친구 부르기</UiButton>
         </UiCard>
         <!-- 막 끝난 결과: 이겼나 졌나. 대결이 끝나는 순간 아래 목록에서 빠져 홈에서 결과를 볼 길이 없었다 (경로 4 리뷰 G1, 시나리오 T7) -->
         <ul v-if="recentResults.length" class="mt-3 rounded-xl bg-surface divide-y divide-line">
@@ -61,7 +63,10 @@
     <template v-if="!appPlayer || showLocal">
     <!-- 앱 게임을 아직 안 한 사람에게 하나: 가입 없이도 되는 한 판 (예전 '갈 곳 셋' 중 이것만 남겼다) -->
     <!-- 작게 한 줄 (11/13 고병연: 저렇게 클 필요 없다) -->
-    <UiButton v-if="!appPlayer" size="sm" variant="secondary" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
+    <div v-if="!appPlayer" class="flex flex-wrap gap-2">
+      <UiButton size="sm" variant="secondary" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
+      <UiButton size="sm" variant="secondary" icon="user-plus" @click="inviteFriend('home')">친구 부르기</UiButton>
+    </div>
 
     <!-- 머리줄은 동네 이름 하나로 (11/14 폰으로 한 바퀴): '동네 경기' 제목과 '합정동 근처 동네 14곳 경기까지' 줄이 같은 말을 두 번 했다.
          접는 화살표도 여기: 펼친 뒤에는 접을 길이 없었다 -->
@@ -162,6 +167,7 @@ import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
 import HomeUpcoming from '../../components/game/HomeUpcoming.vue'
 import OneGameRequests from '../../components/game/OneGameRequests.vue'
+import { inviteFriend } from '@/utils/inviteFriend'
 import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
 import ImprovSchools from '../../components/appgame/ImprovSchools.vue'
 import ImprovVersus from '../../components/appgame/ImprovVersus.vue'

@@ -13,7 +13,7 @@
         <p v-if="createdLine" class="t-body mt-2">{{ createdLine }}</p>
         <p class="t-caption mt-2">
           <!-- 서버가 친구에게 알림을 보내지 않는데 '알렸어요'라고 했다. 링크로 직접 알리게 한다 (목적 판정 11/11 4번) -->
-          {{ friend ? `${friend.nickname}님에게 알림이 갔어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
+          {{ friend ? `${friend.nickname}님에게 알림이 갔어요. ${isRemote(venue) ? '시간은' : '장소와 시간은'} 내 경기에서 함께 정해요.` : createdLinkOnly ? '링크를 받은 사람만 신청할 수 있어요. 경기 목록에는 올라가지 않아요.' : '모집 중인 경기에 올라갔어요. 링크를 보내면 아는 사람이 바로 신청할 수 있어요.' }}
         </p>
         <!-- 아무나로 열었으면, 기다리기만 하기보다 아는 사람을 먼저 부르게 -->
         <UiButton v-if="createdId" block size="lg" class="mt-10" icon="share" :loading="sharing" @click="shareGame">{{ friend ? `${friend.nickname}님에게 링크 보내기` : format === 'DUEL' ? '링크 보내서 상대 부르기' : '링크 보내서 같이 할 사람 부르기' }}</UiButton>
@@ -131,6 +131,11 @@
 
     <!-- 친구 고르기 -->
     <UiSheet v-model="friendsOpen" title="누구와 할까요?">
+      <!-- 매치에 아직 없는 친구 (11/14): '아무나'로 열어야만 링크가 나왔고, 그러려면 동네 인증이 먼저였다.
+           링크로만 받는 경기를 연다(목록에 안 올라가고 동네를 묻지 않는다, 서버 CreateGameRequest.linkOnly) -->
+      <UiList class="mb-3">
+        <UiListItem icon="link" title="링크로 부르기" subtitle="매치에 없는 친구도 돼요. 링크를 받은 사람만 신청해요" chevron :disabled="creating" @click="create(null, true)" />
+      </UiList>
       <UiInput v-model="q" icon="fas fa-magnifying-glass" placeholder="닉네임이나 아이디" class="mb-3" />
       <UiListSkeleton v-if="friendsLoading" :rows="4" />
       <!-- 못 불러온 것을 '아직 친구가 없어요'로 보였다: 다시 불러오는 길 (가로 훑기 3) -->
@@ -139,7 +144,7 @@
       </UiEmptyState>
       <!-- 친구가 없어도 막다른 길이 아니게 (11/14 피터로 걷기: 방금 데려온 친구와 농구를 하려는데 '아직 친구가 없어요'에서 끝났다).
            이름을 치면 매치의 모든 사람에서 찾고, 친구가 아니면 '한 판 붙자'를 보낸다(받으면 경기가 된다) -->
-      <p v-if="!friends.length && !q.trim()" class="t-caption py-6 text-center break-keep">친구의 닉네임이나 아이디를 쳐서 찾아요.<br />매치에 없는 친구는 '아무나'로 열고 링크를 보내면 돼요</p>
+      <p v-if="!friends.length && !q.trim()" class="t-caption py-6 text-center break-keep">친구의 닉네임이나 아이디를 쳐서 찾아요.</p>
       <p v-else-if="!filteredFriends.length && !others.length" class="t-caption py-6 text-center">{{ searching ? '찾는 중' : '그런 이름이 없어요. 아이디로도 찾아 보세요' }}</p>
       <UiList v-if="filteredFriends.length">
         <UiListItem
@@ -325,6 +330,7 @@ function pickSport(s) {
 const friend = ref(null)
 const creating = ref(false)
 const created = ref(false)
+const createdLinkOnly = ref(false)
 
 const friendsOpen = ref(false)
 const friendsLoading = ref(false)
@@ -395,14 +401,14 @@ function createAnyone() {
   create(null)
 }
 
-async function create(target) {
+async function create(target, linkOnly = false) {
   if (creating.value) return
   creating.value = true
   friend.value = target
   try {
     const matchDate = WHEN.find((w) => w.label === when.value)?.date() ?? null
     const payload = {
-      referencedRuleId: ruleId.value, friendId: target?.id ?? null, matchDate, format: format.value, maxPlayers: maxPlayers.value,
+      referencedRuleId: ruleId.value, friendId: target?.id ?? null, linkOnly, matchDate, format: format.value, maxPlayers: maxPlayers.value,
       venue: venue.value, placeDetail: isRemote(venue.value) ? venueDetail.value.trim() || null : null,
     }
     const { data } = await api.post(target ? '/api/games/create-friend-game' : '/api/games/create', payload)
@@ -410,7 +416,10 @@ async function create(target) {
     createdLine.value = [rule.value?.ruleTitle, matchDate ? matchTime(matchDate) : '시간은 나중에', isRemote(venue.value) ? null : dong.value?.name && `${dong.value.name} 근처`].filter(Boolean).join(' · ')
     friendsOpen.value = false
     created.value = true
+    createdLinkOnly.value = linkOnly
     feel('success')
+    // 링크로 부르기는 링크를 보내려고 연 것: 보내기 창을 바로 띄운다
+    if (linkOnly) shareGame()
   } catch (e) {
     friend.value = null
     if (e.response?.status !== 428) showToast(e.response?.data?.message || '경기를 열지 못했어요. 다시 해 주세요') // 428은 내 동네 화면이 말한다

@@ -149,6 +149,7 @@
 </template>
 
 <script setup>
+import { inviteFriend } from '@/utils/inviteFriend'
 // 피드: 끝난 경기를 카드로 훑어본다 (예전의 한 장씩 넘기는 릴스 방식 대신)
 // - 동네(기본) / 친구 / 전국. 서버가 범위·순서를 정한다 (FeedService.getFeed). 동네 글이 적으면 아래에 '다른 동네' 줄
 // - ?gameId= 링크·알림으로 온 경기는 맨 위에 강조, ?userId= 는 그 사람의 경기만
@@ -356,9 +357,7 @@ function share(p) {
 }
 // 친구 초대: 첫 주소로 보내면 받은 친구가 무엇에 초대받았는지 모른 채 가입 화면을 만났다. 가입 없이 바로 되는 한 판으로 (경로 6 리뷰 P3)
 async function inviteFriends() {
-  const url = `${window.location.origin}/try/improv?utm_source=invite`
-  const msg = await shareLink(url, '나랑 임기응변 등급 붙어 볼래? 가입 없이 바로 돼', { title: '매치', copied: '초대 링크를 복사했어요' })
-  if (msg) showToast(msg)
+  await inviteFriend('feed_invite')
 }
 function openReport(p) {
   menuPost.value = null

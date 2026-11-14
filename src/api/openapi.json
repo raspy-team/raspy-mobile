@@ -7453,13 +7453,13 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "OFFLINE",
                 "APP",
                 "POPULAR"
-              ]
+              ],
+              "default": "ALL"
             }
           }
         ],
@@ -7796,11 +7796,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "FRIENDS",
               "enum": [
                 "FRIENDS",
                 "NEIGHBORHOOD"
-              ]
+              ],
+              "default": "FRIENDS"
             }
           }
         ],
@@ -10394,11 +10394,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "ALL",
               "enum": [
                 "ALL",
                 "WEEK"
-              ]
+              ],
+              "default": "ALL"
             }
           },
           {
@@ -11085,13 +11085,13 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "PENDING",
               "enum": [
                 "PENDING",
                 "APPROVED",
                 "REJECTED",
                 "CANCELED"
-              ]
+              ],
+              "default": "PENDING"
             }
           }
         ],
@@ -15230,6 +15230,7 @@
       "CreateGameRequest": {
         "required": [
           "format",
+          "linkOnly",
           "referencedRuleId",
           "venue"
         ],
@@ -15252,6 +15253,9 @@
           "friendId": {
             "type": "integer",
             "format": "int64"
+          },
+          "linkOnly": {
+            "type": "boolean"
           },
           "format": {
             "type": "string",
@@ -17962,13 +17966,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "rating": {
-            "type": "number",
-            "format": "double"
-          },
           "totalGameCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
           }
         }
       },

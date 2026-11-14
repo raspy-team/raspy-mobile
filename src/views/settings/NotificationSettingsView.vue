@@ -75,7 +75,7 @@ async function toggle(s, enabled) {
 }
 
 function turnOnPush() {
-  askPushPermission()
+  askPushPermission(undefined, true)
   showToast('켰어요. 알림이 안 오면 휴대폰 설정 > 매치 > 알림을 켜 주세요')
 }
 

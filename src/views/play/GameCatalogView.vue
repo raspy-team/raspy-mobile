@@ -25,7 +25,8 @@
 
       <template v-else>
         <!-- 지금 기다리는 사람: 한 번에 붙기 (사람이 적을 때 흩어지지 않게) -->
-        <WaitingNow v-if="!query" class="mt-6" any-button />
+        <!-- 실시간 게임이 목록에 있을 때만: 목록이 따로 푸는 게임뿐이면 '아무거나 바로 붙기'·오늘 밤의 게임이 목록에 없는 게임으로 데려갔다 (11/14) -->
+        <WaitingNow v-if="!query && games.some((g) => g.playMode === 'REALTIME')" class="mt-6" any-button />
         <!-- 최근에 한 게임: 찾지 않고 바로 다시 -->
         <UiSection v-if="recent.length && !query" title="최근에 한 게임" class="mt-6">
           <!-- 이어 하기 줄: 옆으로 밀어 고른다 -->

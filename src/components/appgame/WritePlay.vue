@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="flex items-center justify-between">
-      <span class="t-caption">{{ guide }}</span>
-      <span class="t-mono tabular-nums" :class="remaining <= 20 ? 'text-danger-fg' : 'text-fg-muted'">{{ clock }}</span>
+    <div class="flex items-start justify-between gap-3">
+      <span class="t-caption break-keep">{{ guide }}</span>
+      <span class="t-mono tabular-nums shrink-0 whitespace-nowrap" :class="remaining <= 20 ? 'text-danger-fg' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 
     <p class="t-title mt-4 break-keep">{{ problem }}</p>

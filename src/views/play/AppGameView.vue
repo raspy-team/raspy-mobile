@@ -513,6 +513,7 @@ const WRITING: Record<string, { guide: string; placeholder: string }> = {
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
   trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
   'power-level': { guide: '주제에 맞는 싸움꾼을 한 줄로 (뻔한 최강은 약해요)', placeholder: '예) 고무장갑 낀 할머니와 효자손' },
+  samhaengsi: { guide: '글자마다 한 줄, 그 글자로 시작해요. 마지막 줄에 반전을', placeholder: '첫 글자로 한 줄\n둘째 글자로 한 줄\n셋째 글자로 반전 한 줄' },
   acrostic: { guide: '글자마다 한 줄씩, 그 글자로 시작해요. 줄을 바꿔 나눠요', placeholder: '고백하려고\n양말까지 새로 샀는데\n이미 여친이 있었다' },
 }
 import PredictPlay from '../../components/appgame/PredictPlay.vue'

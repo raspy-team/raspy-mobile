@@ -122,9 +122,8 @@ async function enter() {
     fetchChallengeStatus = async () => {
       try {
         const statusData = await playWithMeTooAPI.getStatusWithUser(targetUserId)
-        if (statusData) {
-          challengeStatus.value = statusData
-        }
+        // 없으면 지운다 (11/14: 상대가 거두거나 사흘이 지나도 '받기'가 남아, 누르면 "받은 한 판이 없어요"였다)
+        challengeStatus.value = statusData || null
       } catch (error) {
         console.error('도전 상태 확인 중 오류:', error)
       }
@@ -340,7 +339,8 @@ const headerInfo = computed(() => {
       }
     }
 
-    // 게임이 진행 중인 경우
+    // 잡혀 있거나 하는 중일 때만 (11/14: 취소·삭제·다시 모집 중인 경기에도 '경기 진행 예정 · 경기로 가기'가 남았다)
+    if (gameStatus && !['SCHEDULED', 'IN_PROGRESS', 'RESULT_PENDING'].includes(gameStatus)) return { show: false }
     return {
       show: true,
       type: 'game_in_progress',

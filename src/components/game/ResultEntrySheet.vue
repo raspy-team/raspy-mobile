@@ -71,7 +71,7 @@
     <UiButton v-if="sets.length < 9" variant="ghost" icon="fas fa-plus" class="mt-2" @click="addSet">세트 추가</UiButton>
     </template>
     <!-- 다른 게임 안에서 한 경기: 결과 화면 스크린샷 (상대가 확인할 때 본다, 9번) -->
-    <div v-if="proof && !counter" class="mt-5">
+    <div v-if="proof && (!counter || amend)" class="mt-5">
       <label class="flex items-center gap-3 min-h-12 px-4 rounded-xl bg-surface-2 cursor-pointer">
         <UiIcon name="images" aria-hidden="true" />
         <span class="flex-1 min-w-0 text-sm truncate">{{ proofFile ? proofFile.name : '결과 화면 스크린샷 붙이기 (선택)' }}</span>
@@ -170,7 +170,7 @@ async function send(body) {
   error.value = ''
   try {
     // 스크린샷을 먼저 올린다 (결과를 내면 경기가 '확인 기다림'으로 바뀌어도 올릴 수 있지만, 상대가 볼 때 이미 있게)
-    if (props.proof && !props.counter && proofFile.value) {
+    if (props.proof && (!props.counter || props.amend) && proofFile.value) {
       const form = new FormData()
       form.append('file', proofFile.value)
       try {
@@ -187,7 +187,15 @@ async function send(body) {
     emit('update:modelValue', false)
     emit('submitted')
   } catch (e) {
-    error.value = e.response?.data?.message || '결과를 내지 못했어요. 다시 해 주세요'
+    const msg = e.response?.data?.message || ''
+    // 창을 열어 둔 사이 상대가 확인했거나 24시간이 지나 확정됐다: 오류로 두지 않고 닫고 새 상태를 보인다 (11/14)
+    if ((props.counter || props.amend) && msg.includes('확인을 기다리는 결과가 없어요')) {
+      emit('update:modelValue', false)
+      emit('submitted')
+      window.alert('그 사이 결과가 이미 확정됐어요')
+      return
+    }
+    error.value = msg || '결과를 내지 못했어요. 다시 해 주세요'
   } finally {
     submitting.value = false
   }

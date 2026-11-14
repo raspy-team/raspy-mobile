@@ -166,7 +166,8 @@ const guestLine = (() => {
   try {
     const last = JSON.parse(localStorage.getItem('improv_last_result') || 'null')
     const grade = last?.result?.feedback?.match(/(\d)등급/)?.[1]
-    if (grade && Date.now() - (last.at ?? 0) < 2 * 3600_000) return `방금 임기응변 ${grade}등급`
+    // 방금 그 판에서 넘어온 사람에게만 (11/14: 두 시간 안에 임기응변을 했으면 다른 링크로 와도 이 카드가 받은 링크를 가렸다)
+    if (grade && fromGuest && Date.now() - (last.at ?? 0) < 2 * 3600_000) return `방금 임기응변 ${grade}등급`
   } catch { /* 없으면 받은 링크 카드로 */ }
   return ''
 })()
@@ -177,7 +178,11 @@ const guestKeep = improvKeepLine(Number(guestLine.match(/(\d)등급/)?.[1] ?? 0)
 const returnTo = peekReturnTo()
 const canOpenOutside = isAndroidUa || /kakaotalk/i.test(navigator.userAgent)
 function openOutside() {
-  openInExternalBrowser()
+  // 다른 브라우저는 저장소가 달라 '어디로 가던 길인지'를 모른다 (11/14: /init?from=guest만 넘겨, 새 브라우저에서는 초대도 방금 판도 없는 첫 화면이었다).
+  // 가던 곳이 가입 없이 되는 게임이면 그 주소로 넘긴다: 거기서 한 판 하고 가입하면 같은 브라우저 안에서 이어진다
+  const back = returnTo || ''
+  const m = back.match(/^\/play\/([a-z0-9-]+)(\?.*)?$/)
+  openInExternalBrowser(m ? `${window.location.origin}/try/${m[1]}${m[2] ?? ''}` : back ? `${window.location.origin}${back}` : window.location.href)
 }
 
 onMounted(async () => {

@@ -44,7 +44,8 @@ async function load() {
       ...pending(sent).map((x) => ({ id: x.id, mine: true, other: x.toUserId, name: x.toUserNickname, ruleTitle: x.ruleTitle })),
     ]
   } catch {
-    rows.value = [] // 못 불러오면 칸째 숨긴다. 메시지 방에는 그대로 있다
+    // 못 불러오면 지금 보이는 것을 그대로 둔다: 0으로 세면 내 경기가 '첫 경기를 잡아 볼까요'가 됐다 (11/14 점검)
+    return
   }
   emit('count', rows.value.length)
 }

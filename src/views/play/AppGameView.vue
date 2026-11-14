@@ -202,9 +202,9 @@
             <UiButton size="sm" variant="secondary" icon="share" class="mt-4" @click="shareVote(result.gameId)">투표 링크 공유</UiButton>
           </template>
           <template v-else-if="result.status === 'CANCELED'">
-            <p class="t-title">취소된 경기예요</p>
+            <p class="t-title">{{ (result.myScore ?? 0) > 0 && !result.myFeedback?.includes('채점') ? '상대 없이 끝난 판이에요' : '취소된 경기예요' }}</p>
             <!-- 왜 취소됐는지 (경로 전부 훑기 2절): AI 채점이 막혔거나, 먼저 연 사람이 시간 안에 내지 않았다 -->
-            <p class="t-caption mt-1 break-keep">{{ result.myFeedback?.includes('채점') ? 'AI 채점이 막혀 이 판은 기록에 남지 않아요' : '시간 안에 답이 나지 않아 이 판은 기록에 남지 않아요' }}</p>
+            <p class="t-caption mt-1 break-keep">{{ result.myFeedback?.includes('채점') ? 'AI 채점이 막혀 이 판은 기록에 남지 않아요' : (result.myScore ?? 0) > 0 ? '상대 없이 끝났어요. 내 등급과 점수는 그대로예요' : '시간 안에 답이 나지 않아 이 판은 기록에 남지 않아요' }}</p>
           </template>
           <template v-else-if="key === 'predict' && result.status === 'WAITING'">
             <p class="t-heading">내 예상 {{ predictionLine(result.problem, result.myAnswer) }}</p>

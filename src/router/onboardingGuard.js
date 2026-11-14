@@ -3,6 +3,7 @@
 import api from '../api/api'
 import { rememberReturnTo } from '../utils/authRedirect'
 import { GUEST_GAMES } from '../utils/guestGames'
+import { tokenAlive } from '../utils/tokenAlive'
 
 // /live/·/watch/·/vote/: 중계·관전·투표 링크는 로그인 전에도 (경로 5 리뷰 S1, 경로 2 리뷰 N3)
 const OPEN = ['/init', '/group/login', '/password-reset', '/oauth/callback', '/welcome', '/dev', '/club/join', '/s/', '/try/', '/live/', '/watch/', '/vote/']
@@ -34,9 +35,14 @@ function toStart(to) {
 export function installOnboardingGuard(router) {
   router.beforeEach(async (to) => {
     if (OPEN.some((p) => to.path.startsWith(p))) return true
-    if (doneFor && doneFor === token()) return true
+    if (doneFor && doneFor === token() && tokenAlive()) return true
     // 로그인 전이면 화면을 그리기 전에 시작 화면으로 (보던 주소는 기억)
-    if (!localStorage.getItem('raspy_access_token2')) return toStart(to)
+    // 끝난 토큰도 로그인 전으로 본다 (11/14: 통과시킨 뒤 화면의 첫 요청이 401이 되어 가입 화면으로 튕겼다)
+    if (!tokenAlive()) {
+      // 끝난 토큰은 지운다: 남겨 두면 시작 화면이 로그인한 사람으로 보고 되돌려 보낸다
+      try { localStorage.removeItem('raspy_access_token2') } catch { /* 다음 요청의 401이 지운다 */ }
+      return toStart(to)
+    }
     try {
       // 첫 화면을 그리기 전에 묻는 것이라 짧게 기다린다. 답이 없으면 막지 않고 들여보낸다
       // 401이면 갈 곳은 여기서 정한다 (api.js가 따로 /init으로 보내지 않게)

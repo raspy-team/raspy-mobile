@@ -302,7 +302,8 @@ import { withShareRef } from '@/utils/shareRef'
 import { copyText } from '@/utils/clipboard'
 import { UiButton, UiCard, UiEmptyState, UiRollNumber, UiSection, UiTopBar } from '../../components/ui'
 import { GUEST_GAMES } from '@/utils/guestGames'
-import { getVisitorId, markGuestPlayed, trackEvent } from '@/utils/visit'
+import { claimGuestPlays, getVisitorId, markGuestPlayed, trackEvent } from '@/utils/visit'
+import { tokenAlive } from '@/utils/tokenAlive'
 import { track } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
 import { shareLink, sendLink } from '@/utils/share'
@@ -331,8 +332,13 @@ const fromUser = Number(route.query.u) || undefined
 // 도전장 열쇠 (?k=): 손님 판 번호는 차례로 늘어, 열쇠가 맞아야 친구 등급·친구 답을 보여 준다 (열쇠 없는 옛 링크도 같은 상황으로는 붙는다)
 const challengeK = typeof route.query.k === 'string' ? route.query.k : undefined
 
-// 이미 로그인했으면 원래 게임 화면으로
-if (localStorage.getItem('raspy_access_token2')) router.replace({ path: `/play/${key.value}`, query: route.query })
+// 이미 로그인했으면 원래 게임 화면으로. 단 친구의 초대 링크(?c= · ?d=)면 여기서 그대로 푼다 (11/14: 가입한 사람이 친구 링크를 누르면
+// 게임 화면으로 넘어가며 초대가 사라져, 아무 문제나 나오는 새 판이 됐고 보낸 친구는 결과를 못 받았다).
+// 다 풀면 그 판을 곧바로 내 기록으로 옮겨(claim) 친구와의 1:1이 된다. 끝난 토큰은 없는 것으로 친다
+const signedIn = tokenAlive()
+if (!signedIn) { try { localStorage.removeItem('raspy_access_token2') } catch { /* 그대로 손님으로 */ } }
+const memberOnInvite = signedIn && !!(fromPlay || fromDuel)
+if (signedIn && !memberOnInvite) router.replace({ path: `/play/${key.value}`, query: route.query })
 
 const play = ref<Play | null>(null)
 const playId = ref<number | null>(null)
@@ -459,6 +465,11 @@ async function submit(answer: string) {
     if (key.value === 'nunchi') loadReview()
     if (key.value === 'improv') prepareStory()
     saveLast()
+    // 가입한 사람이 푼 초대 판: 바로 내 기록으로 옮기고 게임 화면에서 친구와의 승패를 본다
+    if (memberOnInvite) {
+      await claimGuestPlays().catch(() => 0)
+      return void router.replace(`/play/${key.value}`)
+    }
   } catch (e) {
     // 인터넷이 끊긴 것이면 그렇다고 말한다: '채점이 막혔어요'는 서버 탓처럼 들렸다. 연결이 돌아오면 저절로 다시 낸다 (11/11 몸과 시간: 지하철)
     submitError.value = !navigator.onLine
@@ -504,7 +515,9 @@ const schoolsShown = ref(false)
 function join(name: 'result_join' | 'intro_join' | 'limit_join' | 'versus_join' | 'school_join') {
   track(name, { gameKey: key.value, step: rounds.value, value: gradeTag().slice(1) || undefined })
   // 학교로 참전하려고 가입하는 사람은 가입 뒤 곧바로 학교 고르기로 (11/14 피터로 걷기: 게임 첫 화면으로 돌아와 '학교 고르기'를 다시 찾아야 했다)
-  rememberReturnTo(name === 'school_join' ? `/settings/organizations?back=${encodeURIComponent(`/play/${key.value}`)}` : `/play/${key.value}`)
+  // 아직 풀기 전에 로그인하러 가는 초대받은 사람(이미 계정이 있어요): 돌아와서 이 초대를 그대로 풀게 주소를 통째로 (11/14: 초대가 떨어져 새 판이 됐다)
+  const invitedBefore = !result.value && (fromPlay || fromDuel)
+  rememberReturnTo(invitedBefore ? route.fullPath : name === 'school_join' ? `/settings/organizations?back=${encodeURIComponent(`/play/${key.value}`)}` : `/play/${key.value}`)
   router.push({ path: '/init', query: { from: result.value ? 'guest' : undefined } })
 }
 
@@ -526,7 +539,7 @@ function restoreLast(): boolean {
     const v = JSON.parse(localStorage.getItem(LAST_KEY) || 'null')
     if (!v?.result || Date.now() - v.at > LAST_MS) return false
     // 다른 도전장 링크로 왔으면 그 도전장을 풀게 한다 (같은 도전장이거나 도전장 없이 왔을 때만 되살린다)
-    if (fromPlay && v.from !== fromPlay) return false
+    if (fromPlay && v.from !== fromPlay && v.playId !== fromPlay) return false
     // 다른 광고(?q=다른 상황)를 보고 왔으면 그 상황부터 (옛 결과가 광고 상황을 가렸다, 경로 10 리뷰 I6)
     if (firstQuestion && v.q !== firstQuestion) return false
     playId.value = v.playId

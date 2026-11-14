@@ -131,7 +131,7 @@ const routes = [
   { path: '/try/partner', component: () => import('../views/play/PartnerTryView.vue') },
   { path: '/try/:key', component: () => import('../views/play/GuestPlayView.vue') },
   // 말로 듣고 치는 주소 (11/14): "matchapp.me/improv", "/try"는 없는 페이지였다
-  ...['/try', '/improv'].map((path) => ({ path, redirect: { path: '/try/improv', query: { utm_source: 'direct', utm_medium: 'alias' } } })),
+  ...['/try', '/improv'].map((path) => ({ path, redirect: (to) => ({ path: '/try/improv', query: { utm_source: 'direct', utm_medium: 'alias', ...to.query } }) })),
   { path: '/play/:key', component: () => import('../views/play/AppGameView.vue') },
   // 광장 (11/5): 앱 게임을 2D 로비로. 처음 들어오면 기본 꾸미기부터
   { path: '/plaza', component: () => import('../views/plaza/PlazaView.vue') },

@@ -330,10 +330,12 @@ function bucket(g) {
   if (canReschedule(g) && dmTarget(g) && (!g.matchDate || (!g.matchLocation && !isRemote(g.venue)))) return 'todo'
   if (g.type === 'my-game') {
     if (g.status === 'COMPLETED' || g.status === 'CANCELED') return 'done'
-    if (g.status === 'SCHEDULED' && g.isOwner !== false && isMatchDay(g)) return 'todo'
+    // 경기 날의 '경기 시작'은 선수 누구에게나 할 일이다 (서버가 연 사람만 받던 것을 풀었다, 11/14)
+    if (g.status === 'SCHEDULED' && isMatchDay(g)) return 'todo'
     if (g.status === 'MATCHING' && g.applicants.some((a) => !a.approved)) return 'todo'
     return 'waiting'
   }
+  if (g.status === 'APPROVED' && g.gameStatus === 'SCHEDULED' && isMatchDay(g)) return 'todo'
   return g.status === 'REJECTED' ? 'done' : 'waiting'
 }
 // 경기 날(그날 0시부터)인가. 그 전의 확정 경기는 '기다리는 중' (MyGameCard와 같은 기준)
@@ -481,7 +483,7 @@ function startLadder(key) {
 // 경기 시간이 잡힌 만나서 하는 경기 (앞뒤 하루). 카드 안에서 서버가 지금 할 일이 있는지 정한다
 // 결과를 낸 뒤(확인 기다림·끝·취소)에는 '도착했어요'·노쇼 안내를 거둔다 (11/4 밤샘: 결과 확인 카드 밑에 도착 칸이 남았다)
 const OVER = ['REQUESTED', 'REJECTED', 'RESULT_PENDING', 'COMPLETED', 'CANCELED']
-const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && Math.abs(Date.now() - new Date(g.matchDate).getTime()) < 86_400_000 && !OVER.includes(g.status) && !OVER.includes(g.gameStatus)
+const needsMeetCard = (g) => !!g && !isRemote(g.venue) && !!g.matchDate && !!dmTarget(g) && (() => { const d = Date.now() - new Date(g.matchDate).getTime(); return d > -86_400_000 && d < 2 * 86_400_000 })() && !OVER.includes(g.status) && !OVER.includes(g.gameStatus)
 const needsSafety = (g) => !!g && !isRemote(g.venue) && !!dmTarget(g) && canReschedule(g)
 const safetySeen = (() => {
   try { return JSON.parse(localStorage.getItem('safetyTipsSeen') || '[]') } catch { return [] }
@@ -561,7 +563,7 @@ async function removeGame(g) {
 
 // 승인된 뒤 시작 전이면 빠질 수 있다 (내가 연 경기는 삭제). 전에는 빠지는 길이 없어 노쇼가 되거나 주최자에게 부탁했다 (11/4 밤샘)
 const BEFORE_START = ['MATCHING', 'SCHEDULED']
-const canLeave = (g) => !!g && (g.type === 'sent'
+const canLeave = (g) => !!g && !(g.matchDate && !isRemote(g.venue) && new Date(g.matchDate).getTime() < Date.now()) && (g.type === 'sent'
   ? g.status === 'APPROVED' && BEFORE_START.includes(g.gameStatus)
   : g.type === 'my-game' && g.isOwner === false && BEFORE_START.includes(g.status))
 // 만나서 하는 경기 3시간 안 (서버 MeetService.LATE_LEAVE와 같게)
@@ -851,7 +853,10 @@ onMounted(async () => {
     history.replaceState(history.state, '', route.path)
     focusId.value = focus
     await nextTick()
-    document.querySelector(`[data-game="${focus}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    const card = document.querySelector(`[data-game="${focus}"]`)
+    // 취소됐거나 끝난 경기는 목록에 없다: 말없이 목록 맨 위에 두지 않는다 (11/14)
+    if (card) card.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    else showToast('그 경기는 취소됐거나 이미 끝났어요')
     setTimeout(() => (focusId.value = null), 2500)
   }
   // 신청·승인·시작·종료 신호가 오거나 앱으로 돌아왔을 때 다시 불러온다

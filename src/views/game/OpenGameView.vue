@@ -30,7 +30,9 @@
         <Comment v-if="commentId" :id="commentId" @close="commentId = 0" />
         <PairApplySheet :game="pairOpen ? game : null" @close="pairOpen = false" @done="() => { game.isAppliedByMe = true; pairOpen = false }" />
         <p class="t-caption mt-4">
-          <template v-if="game.gameStatus !== 'MATCHING'">{{ game.format && game.format !== 'DUEL' ? '이미 사람이 다 모인 경기예요.' : '이미 상대가 정해진 경기예요.' }}</template>
+          <template v-if="game.gameStatus === 'CANCELED' || game.gameStatus === 'DELETED'">취소된 경기예요.</template>
+          <template v-else-if="game.gameStatus === 'COMPLETED' || game.gameStatus === 'RESULT_PENDING'">이미 끝난 경기예요.</template>
+          <template v-else-if="game.gameStatus !== 'MATCHING'">{{ game.format && game.format !== 'DUEL' ? '이미 사람이 다 모인 경기예요.' : '이미 상대가 정해진 경기예요.' }}</template>
           <template v-else-if="game.ownerId === myId">신청이 오면 알림에 떠요. 내 경기에서 승인해요.</template>
           <template v-else-if="game.isAppliedByMe">신청했어요. {{ game.ownerNickname }}님이 승인하면 알림에 떠요.</template>
           <!-- 공유 링크로 다른 동네 경기에 들어온 경우: 누르기 전에 이유를 보여 준다 -->

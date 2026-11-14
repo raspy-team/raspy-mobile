@@ -6668,9 +6668,9 @@ export interface components {
                 [key: string]: Record<string, never>;
             };
             /** Format: int32 */
-            cols: number;
-            /** Format: int32 */
             rows: number;
+            /** Format: int32 */
+            cols: number;
         };
         Obj: {
             s: string;
@@ -8003,10 +8003,10 @@ export interface components {
             draws: number;
             /** Format: int32 */
             ruleRating?: number;
-            /** Format: int32 */
-            totalGameCount: number;
             /** Format: double */
             rating: number;
+            /** Format: int32 */
+            totalGameCount: number;
         };
         UserRankingDto: {
             /** Format: int32 */
@@ -8964,6 +8964,12 @@ export interface components {
             scores: number[];
             texts: string[];
             votingEndsAt?: string;
+            details: components["schemas"]["AppDuelSideDetail"][];
+        };
+        AppDuelSideDetail: {
+            problem?: string;
+            answer: string;
+            feedback?: string;
         };
         AppVisual: {
             kind: string;

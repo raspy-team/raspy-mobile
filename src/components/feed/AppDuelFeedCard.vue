@@ -45,14 +45,42 @@
         :winner-id="duel.winnerId"
         :unit="duel.scoreUnit"
       />
-      <div v-if="sides.some((s) => s.text)" class="mt-4 space-y-2">
+      <!-- 카드에는 짧게, 세부는 눌러서 창으로 (11/14 고병연: 글 전부를 카드에 펼치니 소식이 글로 뒤덮였다).
+           글이 있는 자리 전체가 누르는 곳이다. 세부가 없는 게임은 누를 수 없는 글 그대로 -->
+      <component
+        :is="hasDetail && !still ? 'button' : 'div'"
+        v-if="sides.some((s) => s.text)"
+        :type="hasDetail && !still ? 'button' : undefined"
+        class="mt-4 block w-full text-left space-y-2"
+        :class="hasDetail && !still ? 'rounded-xl bg-surface-2/60 px-3.5 py-3 active:bg-surface-2' : ''"
+        @click="hasDetail && !still && (detailOpen = true)"
+      >
         <!-- 그림으로 찍을 때(still)는 세 줄까지: 긴 대답이 카드를 늘려 스토리 그림의 꼬리(주소)가 밀려났다 (3-5 P6 나머지 F1) -->
-        <!-- 긴 글(요리 만드는 법·변론)은 네 줄로 접고, 누르면 다 보인다 (11/14: 소식에서 경기의 내용을 볼 길이 없었다) -->
-        <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body whitespace-pre-line break-keep" :class="still ? 'line-clamp-3' : opened[i] ? '' : 'line-clamp-4'" @click="opened[i] = !opened[i]">
+        <p v-for="(side, i) in sides.filter((s) => s.text)" :key="i" class="t-body line-clamp-3">
           <span class="t-micro block">{{ side.name }}</span>{{ side.text }}
         </p>
-      </div>
+        <span v-if="hasDetail && !still" class="flex items-center justify-end gap-1 t-micro">쓴 글과 AI 심사 보기 <UiIcon name="chevron-right" class="text-xs" /></span>
+      </component>
     </div>
+
+    <!-- 세부: 문제, 각자 쓴 글 전부, AI의 한마디 -->
+    <UiSheet v-if="hasDetail && !still" v-model="detailOpen" :title="duel.title">
+      <p v-if="sharedProblem" class="t-caption break-keep mb-4">{{ sharedProblem }}</p>
+      <div v-for="(side, i) in sides" :key="i" class="py-4 border-t border-line first:border-t-0 first:pt-0">
+        <div class="flex items-baseline justify-between gap-3">
+          <span class="t-label truncate" :class="side.won ? 'text-fg' : 'text-fg-muted'"><span :class="side.won ? 'hl' : ''">{{ side.name }}</span></span>
+          <span class="t-label tabular-nums flex-shrink-0">{{ graded ? `${side.score}등급` : `${side.score}${duel.scoreUnit.length > 1 ? " " : ""}${duel.scoreUnit}` }}</span>
+        </div>
+        <template v-if="details[i]">
+          <p class="t-body whitespace-pre-line break-words mt-2">{{ details[i]!.answer }}</p>
+          <p v-if="details[i]!.feedback && !graded" class="t-caption whitespace-pre-line break-keep mt-3"><span class="t-micro block">AI 심사</span>{{ details[i]!.feedback }}</p>
+        </template>
+        <p v-else class="t-caption mt-2">{{ side.text || '쓴 글은 공개하지 않아요' }}</p>
+      </div>
+      <template #footer>
+        <UiButton block @click="detailOpen = false; emit('play')">나도 한 판</UiButton>
+      </template>
+    </UiSheet>
 
     <!-- 투표 중에는 이름을 가린 동안이라 사람에게 잇는 행동(또 보고 싶어요·도전해요)을 두지 않는다 -->
     <template v-if="!voting">
@@ -73,7 +101,7 @@ import AppVisualFigure from './story/AppVisualFigure.vue'
 import FeedStoryLine from './FeedStoryLine.vue'
 import FeedVoice from './FeedVoice.vue'
 import FeedActions from './FeedActions.vue'
-import { UiIcon, UiSkeleton } from '../ui'
+import { UiButton, UiIcon, UiSheet, UiSkeleton } from '../ui'
 import { timeAgo } from '../../utils/format'
 
 type Post = components['schemas']['FeedItemResponse']
@@ -103,7 +131,11 @@ const sides = computed(() =>
 const when = computed(() => (props.post.date ? timeAgo(props.post.date) : ''))
 // 서버 feed_story가 붙인 이야기 (앱 대결은 수 기록 그림만 쓴다)
 const story = computed(() => (props.post as { story?: { appVisual?: any } | null }).story)
-const opened = ref<Record<number, boolean>>({})
+// 눌러서 보는 세부 (서버 AppDuelFeedItems.detail): 문제·쓴 글 전부·AI 한마디. 한쪽이라도 있으면 누를 수 있다
+const details = computed(() => duel.value.details ?? [])
+const hasDetail = computed(() => details.value.some((d) => !!d))
+const sharedProblem = computed(() => details.value.find((d) => d?.problem)?.problem ?? '')
+const detailOpen = ref(false)
 const feedPlayers = computed(() => (props.post.players as unknown as { id: number; name: string; isBot?: boolean }[] | undefined) || [])
 
 function gradeOf(text?: string): number | null {

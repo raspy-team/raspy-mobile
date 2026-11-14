@@ -13685,11 +13685,11 @@
               "type": "object"
             }
           },
-          "cols": {
+          "rows": {
             "type": "integer",
             "format": "int32"
           },
-          "rows": {
+          "cols": {
             "type": "integer",
             "format": "int32"
           }
@@ -17962,13 +17962,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "totalGameCount": {
-            "type": "integer",
-            "format": "int32"
-          },
           "rating": {
             "type": "number",
             "format": "double"
+          },
+          "totalGameCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -21140,6 +21140,7 @@
       },
       "AppDuelFeedDto": {
         "required": [
+          "details",
           "gameId",
           "icon",
           "judge",
@@ -21195,6 +21196,29 @@
             }
           },
           "votingEndsAt": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppDuelSideDetail"
+            }
+          }
+        }
+      },
+      "AppDuelSideDetail": {
+        "required": [
+          "answer"
+        ],
+        "type": "object",
+        "properties": {
+          "problem": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "feedback": {
             "type": "string"
           }
         }

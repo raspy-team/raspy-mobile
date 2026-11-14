@@ -47,7 +47,7 @@ function view(d: Duel) {
   if (d.status === 'AWAITING_RESULT') return { badge: '결과 기다림', line: `${kickoffLabel(fixtureOf(d.problem).kickoff)} 경기가 끝나면 채점해요`, to: result, act: false }
   if (d.opponent) return { badge: '상대 차례', line: `${who(d.opponent)}님이 푸는 중`, to: result, act: false }
   // 여러 판이 기다리면 한 줄로: 누르면 그 게임의 내 대결 목록 (collapseWaitingDuels)
-  if ((d.waitingCount ?? 1) > 1) return { badge: `${d.waitingCount}판 기다리는 중`, line: `다른 사람이 풀면 승패가 나요 · ${expiryLine(d.createdAt)}`, to: `/play/${d.key}`, act: false }
-  return { badge: '상대 찾는 중', line: `같은 ${d.key === 'improv' ? '상황을' : '문제를'} 풀 사람을 기다려요 · ${expiryLine(d.createdAt)}`, to: result, act: false }
+  if ((d.waitingCount ?? 1) > 1) return { badge: `${d.waitingCount}판 기다리는 중`, line: `누가 풀면 승패가 나요 · ${expiryLine(d.createdAt)}`, to: `/play/${d.key}`, act: false }
+  return { badge: '상대 찾는 중', line: `풀 사람을 기다려요 · ${expiryLine(d.createdAt)}`, to: result, act: false }
 }
 </script>

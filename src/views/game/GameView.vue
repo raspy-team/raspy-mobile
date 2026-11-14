@@ -191,13 +191,13 @@
         <button v-else-if="placeMode === 'picked'" type="button" class="w-full flex items-center gap-3 min-h-12 py-2 px-4 rounded-xl bg-surface border border-line text-left" @click="pickerOpen = true">
           <UiIcon name="location-dot" aria-hidden="true" />
           <span class="flex-1 min-w-0"><span class="block t-body truncate">{{ pickedPlace.name }}</span><span class="block t-micro truncate">{{ pickedPlace.roadAddress || pickedPlace.address }}</span></span>
-          <span class="t-micro underline underline-offset-2 flex-shrink-0">다시 찾기</span>
+          <span class="t-micro underline underline-offset-2 flex-shrink-0">다시 고르기</span>
         </button>
         <UiInput v-if="placeMode === 'picked'" v-model="schedPlace" class="mt-2" placeholder="세부 장소 (선택) 예: 2번 코트, 정문 앞" />
         <template v-else>
           <!-- 장소는 지도에서 찾아 고른다. 글은 고른 뒤의 '세부 장소(선택)'뿐 (11/14 고병연: 처음 만나고 말고와 상관없이 찾기가 기본이다).
                장소 검색이 꺼진 서버에서만 예전처럼 지역과 이름을 적는다 -->
-          <UiButton v-if="placeSearchOn" block variant="secondary" icon="magnifying-glass" @click="pickerOpen = true">장소 찾기</UiButton>
+          <UiButton v-if="placeSearchOn" block variant="secondary" icon="location-dot" @click="pickerOpen = true">지도에서 장소 고르기</UiButton>
           <template v-if="!placeSearchOn">
           <div>
           <button v-if="placeMode === 'mine'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = 'other'">
@@ -214,7 +214,7 @@
           </template>
         </template>
       </div>
-      <PlacePickerSheet v-model="pickerOpen" :near="myArea?.lat ? { lat: myArea.lat, lon: myArea.lon } : null" @picked="(p) => { pickedPlace = p; placeMode = 'picked' }" />
+      <PlacePickerSheet v-model="pickerOpen" :rule-title="scheduleGame?.rule?.ruleTitle ?? ''" :near="myArea?.lat ? { lat: myArea.lat, lon: myArea.lon } : null" @picked="(p) => { pickedPlace = p; placeMode = 'picked' }" />
     </div>
     <template #footer>
       <UiButton block :disabled="!canSubmitSchedule" :loading="busy" @click="submitSchedule">{{ scheduleDecided(scheduleGame) ? '바꾸기' : '정하기' }}</UiButton>

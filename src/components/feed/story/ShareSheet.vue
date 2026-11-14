@@ -253,7 +253,11 @@ function go(key: Dest) {
     if (!url) return showToast('링크 만드는 중이에요. 잠깐만요')
     // 카카오톡으로 바로 (11/14): 공유 창이 없는 앱 안 브라우저에서는 복사뿐이었다. 못 열면 아래 예전 길로
     if (key === 'message' && kakaoShareAvailable) {
-      return void kakaoShare({ title: line.value, description: 'matchapp.me', url, button: '경기 보기' }).then((ok) => {
+      // 카드: 제목은 보내는 사람의 한 줄("졌다. 누가 대신 이겨 줘"), 설명은 무슨 경기였는지, 그림은 그 경기의 결과 그림.
+      // 처음엔 설명이 주소뿐이고 그림이 공통 그림이라, 예전에 글로 가던 한 줄이 묻혔다 (11/14 고병연)
+      const su = new URL(shared.value!.url)
+      const what = [props.post?.appDuel?.title || props.post?.rule?.ruleTitle, (props.post?.players || []).map((p: any) => p.name).filter(Boolean).join(' vs ')].filter(Boolean).join(' · ')
+      return void kakaoShare({ title: line.value, description: what || 'matchapp.me', url, image: `https://matchapp.me${su.pathname}/og.png?k=${su.searchParams.get('k') ?? ''}`, button: '나도 한 판' }).then((ok) => {
         if (ok) { markShared(); return close() }
         if (!navigator.share) return copied(url, '링크 복사해 뒀어요. 붙여 넣어서 보내 주세요')
         navigator.share({ text: line.value, url }).then(() => { markShared(); close() }, (e: any) => { if (e?.name !== 'AbortError') copied(url) })

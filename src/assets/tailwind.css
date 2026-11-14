@@ -233,8 +233,15 @@ html.has-banner main::after { content: ''; display: block; height: 5rem; }
   background: rgb(var(--c-signal)); pointer-events: none;
   animation: win-spark 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
 }
+/* 이긴 얼굴이 통통 튀어 오른다 (만나서 한 경기·앱 게임의 결과가 함께 쓴다) */
+.win-bounce { animation: win-bounce 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both; }
+@keyframes win-bounce {
+  0% { transform: translateY(16px) scale(0.6); opacity: 0; }
+  60% { transform: translateY(-6px) scale(1.08); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .feel-pop, .feel-rise { animation: none; }
+  .feel-pop, .feel-rise, .win-bounce { animation: none; }
   .win-spark { display: none; }
 }
 

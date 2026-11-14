@@ -1115,12 +1115,3 @@ async function onShare() {
 }
 </script>
 
-<style>
-.win-bounce { animation: win-bounce 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both; }
-@keyframes win-bounce {
-  0% { transform: translateY(16px) scale(0.6); opacity: 0; }
-  60% { transform: translateY(-6px) scale(1.08); opacity: 1; }
-  100% { transform: translateY(0) scale(1); }
-}
-@media (prefers-reduced-motion: reduce) { .win-bounce { animation: none; } }
-</style>

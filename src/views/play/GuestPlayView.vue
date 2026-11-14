@@ -70,8 +70,9 @@
           </template>
           <template v-else-if="improv">
             <!-- 게임 이름은 위 막대에 있다. 점수는 '다음 등급까지'에서만 쓴다 (경로 10 훑기: 같은 말 둘, 숫자 넷) -->
-            <p class="t-display tabular-nums">{{ improv.grade }}<span class="t-title ml-1">등급</span></p>
-            <p class="t-caption mt-1">100명 중 {{ improv.rank }}등</p>
+            <!-- 등급이 나온 순간: 올라오고, 1~3등급은 형광이 그어진다 (quality-rules J-1) -->
+            <p class="t-display tabular-nums feel-rise"><span :class="improv.grade <= 3 ? 'hl hl-draw' : ''">{{ improv.grade }}<span class="t-title ml-1">등급</span></span></p>
+            <p class="t-caption mt-1 feel-rise feel-rise-2">100명 중 {{ improv.rank }}등</p>
             <!-- 초대받은 1:1 (11/14): 승패와 친구의 답은 가입하면 본다. 처음부터 가입을 걸면 안 누르니, 다 푼 지금 건다 -->
             <div v-if="result.versus" class="mt-5 rounded-xl bg-surface-2 px-4 py-4">
               <p class="t-heading break-keep">{{ friendName === '친구' ? '친구와' : `${friendName}님과` }}의 승부가 났어요</p>

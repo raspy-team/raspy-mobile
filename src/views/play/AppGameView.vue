@@ -134,8 +134,12 @@
         <UiCard class="text-center py-8">
           <template v-if="result.status === 'COMPLETED'">
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
-            <MatchMascot who="match" :mood="result.result === 'WIN' ? 'cheer' : result.result === 'DRAW' ? 'smile' : 'sad'" :size="72" class="mx-auto mb-3" />
-            <p class="t-display">{{ VERDICT[result.result || 'DRAW'] }}</p>
+            <!-- 이긴 순간은 이 앱에서 가장 큰 순간이다: 얼굴 둘레로 볼트 불꽃이 튀고, 글자가 올라오며 형광이 그어진다 (만나서 한 경기의 결과와 같은 틀, quality-rules J-1) -->
+            <span class="relative block w-fit mx-auto mb-3 text-fg" :class="result.result === 'WIN' ? 'win-bounce' : ''">
+              <MatchMascot who="match" :mood="result.result === 'WIN' ? 'cheer' : result.result === 'DRAW' ? 'smile' : 'sad'" :size="72" />
+              <template v-if="result.result === 'WIN'"><span v-for="n in 10" :key="n" class="win-spark" :style="{ '--a': n * 36 + 'deg' }" aria-hidden="true"></span></template>
+            </span>
+            <p class="t-display feel-rise"><span :class="result.result === 'WIN' ? 'hl hl-draw' : ''">{{ VERDICT[result.result || 'DRAW'] }}</span></p>
             <p class="t-caption mt-2">
               <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
             </p>
@@ -231,9 +235,12 @@
               <p class="t-caption mt-2 break-keep">상황마다 한마디만 써도 등급이 나와요</p>
             </template>
             <template v-else-if="improvResult">
-              <p class="t-display tabular-nums">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></p>
+              <!-- 가입 전 결과와 같은 얼굴: 표정이 등급을 따른다 (quality-rules J-2) -->
+              <MatchMascot who="match" :mood="improvResult.grade <= 4 ? 'cheer' : improvResult.grade >= 7 ? 'sad' : 'smile'" :size="72" class="mx-auto mb-3" />
+              <!-- 등급이 나온 순간: 올라오고, 1~3등급은 형광이 그어진다 (quality-rules J-1) -->
+              <p class="t-display tabular-nums feel-rise"><span :class="improvResult.grade <= 3 ? 'hl hl-draw' : ''">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></span></p>
               <!-- 손님 결과처럼 점수는 빼고 등수만 (경로 2 리뷰 N5) -->
-              <p class="t-caption mt-1">100명 중 {{ improvResult.rank }}등</p>
+              <p class="t-caption mt-1 feel-rise feel-rise-2">100명 중 {{ improvResult.rank }}등</p>
               <!-- 보내기는 등급 바로 밑 (손님 결과와 같은 순서, 11/11 목적 다시 보기: 등급을 막 본 순간이 자랑 동기가 가장 세다) -->
               <div class="flex flex-wrap justify-center gap-2 mt-4">
                 <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->

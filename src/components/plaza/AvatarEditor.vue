@@ -32,7 +32,8 @@
             :aria-label="g.label"
             @click="pick(g.items.find((i) => i.id === draft[layer]) ?? g.items[0])"
           >
-            <img :src="partUrl(g.items[0].id)" alt="" class="part" />
+            <!-- 부품끼리 달라 보이게 세 배로 키우고 빈 윗부분은 잘라 낸다: 두 배(32×64)일 때는 옷이 색 띠 한 줄로만 달랐다 (quality-rules J-5) -->
+            <span class="part-box"><img :src="partUrl(g.items[0].id)" alt="" class="part" /></span>
             <span class="t-micro mt-1 truncate max-w-full px-1">{{ g.label }}</span>
             <span v-if="g.badge" class="absolute top-1 left-1 t-micro px-1 rounded-md font-semibold" :class="g.tierClass || 'bg-surface-3 text-fg'">{{ g.badge }}</span>
             <UiIcon v-if="g.locked" name="lock" class="absolute top-1.5 right-1.5 text-[11px] text-fg-muted" aria-label="잠김" />
@@ -51,7 +52,7 @@
               :aria-label="`${v.label} ${v.variant}번 색`"
               @click="pick(v)"
             >
-              <img :src="partUrl(v.id)" alt="" class="part-sm" />
+              <span class="part-box-sm"><img :src="partUrl(v.id)" alt="" class="part-sm" /></span>
               <UiIcon v-if="!v.wearable" name="lock" class="absolute bottom-0.5 right-0.5 text-[10px] text-fg-muted" />
             </button>
           </div>
@@ -233,14 +234,9 @@ async function save() {
   from { background-position-x: -1440px; }
   to { background-position-x: -1920px; }
 }
-.part {
-  width: 32px;
-  height: 64px;
-  image-rendering: pixelated;
-}
-.part-sm {
-  width: 22px;
-  height: 44px;
-  image-rendering: pixelated;
-}
+/* 그림은 16×32 점. 정수 배로만 키운다(점이 뭉개지지 않게). 위쪽 빈 줄은 상자가 잘라 낸다 */
+.part-box { width: 48px; height: 72px; overflow: hidden; display: flex; align-items: flex-end; }
+.part { width: 48px; height: 96px; flex: none; image-rendering: pixelated; }
+.part-box-sm { width: 32px; height: 48px; overflow: hidden; display: flex; align-items: flex-end; }
+.part-sm { width: 32px; height: 64px; flex: none; image-rendering: pixelated; }
 </style>

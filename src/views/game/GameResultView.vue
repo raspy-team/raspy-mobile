@@ -1091,7 +1091,7 @@ async function onShare() {
     }
   }
   const opponentName = who(user1.value.id === currentUserId.value ? user2.value : user1.value)
-  const msg = await shareGameInvite(Number(gameId), `${opponentName}님과의 경기 결과`, { title: '매치' })
+  const msg = await shareGameInvite(Number(gameId), `${opponentName}님과의 경기 결과`, { title: '결과 보내기', button: '결과 보기', place: 'game_result' })
   if (msg) showToast(msg)
 }
 </script>

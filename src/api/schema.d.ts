@@ -1494,6 +1494,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/{id}/result/amend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 낸 결과 고치기
+         * @description 내가 낸 결과를 상대가 확인하기 전에 고쳐 다시 냅니다. 돌려보내기 횟수는 늘지 않고 확정까지의 24시간을 다시 셉니다.
+         */
+        post: operations["amendResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games/{id}/cancel": {
         parameters: {
             query?: never;
@@ -2879,6 +2899,26 @@ export interface paths {
          * @description 먼저 끝낸 대결을 친구에게 보낸다. 하루 동안은 링크로만 받을 수 있고, 지나면 아무나 붙는 대기로 간다.
          */
         post: operations["openChallenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/app-games/duels/{gameId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 기다리는 대결 그만두기
+         * @description 아직 상대가 없는 내 대결을 닫습니다. 내 점수·등급은 남습니다.
+         */
+        post: operations["cancelWaiting"];
         delete?: never;
         options?: never;
         head?: never;
@@ -11533,6 +11573,32 @@ export interface operations {
             };
         };
     };
+    amendResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnterResultRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Unit"];
+                };
+            };
+        };
+    };
     cancelLive: {
         parameters: {
             query?: never;
@@ -13373,6 +13439,26 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["AppChallenge"];
                 };
+            };
+        };
+    };
+    cancelWaiting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

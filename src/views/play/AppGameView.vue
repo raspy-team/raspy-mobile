@@ -264,6 +264,8 @@
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
               <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}</p>
+              <!-- 기다리기를 그만둘 길 (11/14: 7일 뒤 저절로 닫힐 때까지 거둘 수 없었다). 등급·점수는 남는다 -->
+              <button type="button" class="t-micro underline underline-offset-2 mt-2 min-h-[36px]" :disabled="canceling" @click="cancelWaiting(result.gameId)">기다리기 그만두기</button>
             </template>
             <!-- AI가 대신 풀어 승패를 내던 것은 걷어 냈다 (11/14, 서버 bot/AiMode): 등급·점수가 결과고, 승패는 사람과 붙을 때만 뜻이 있다 -->
             <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
@@ -338,7 +340,7 @@
         <!-- AI가 심사하는 글 게임(AI 재판·전투력 측정·AI 삼행시): 무엇에 대해 뭐라고 썼는지가 결과에 없었다 (11/14: 점수와 심사평만 있어 무엇이 웃겼는지 알 수 없었다) -->
         <template v-else-if="WRITING[key] && !isVote">
           <UiCard v-if="result.myAnswer" class="mt-3">
-            <p class="t-micro break-keep">{{ result.problem }}</p>
+            <p class="t-micro break-keep whitespace-pre-line">{{ result.problem }}</p>
             <p class="t-body mt-2 whitespace-pre-line break-keep">{{ result.myAnswer }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
@@ -531,7 +533,7 @@ const WRITING: Record<string, { guide: string; placeholder: string }> = {
   excuse: { guide: '이 상황에서 빠져나갈 한 줄 변명', placeholder: '그럴듯하고 웃긴 변명' },
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
   trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
-  'power-level': { guide: '여기서 싸울 내 캐릭터를 만들어요. 이름과 한 줄 설정이면 돼요. AI가 전투력을 매겨요', placeholder: '예) 옆집 민수: 층간소음을 3년 참았다. 오늘은 안 참는다' },
+  'power-level': { guide: '세 조건을 모두 지키는 히어로를 만들어요. 이름과 한두 줄이면 돼요. 조건을 빠뜨리면 크게 깎여요', placeholder: '예) 삼각김밥맨: 폐기 삼각김밥을 먹으면 3초간 무적. 월요일엔 폐기가 없어 쉰다' },
   ghosted: { guide: '읽씹하는 이 사람에게 메시지 하나. 답장이 오게 써 보세요', placeholder: '매달리면 읽씹, 부담 없고 구체적이면 답장' },
   acrostic: { guide: '글자마다 한 줄씩, 그 글자로 시작해요. 줄을 바꿔 나눠요', placeholder: '고백하려고\n양말까지 새로 샀는데\n이미 여친이 있었다' },
 }
@@ -794,6 +796,19 @@ const canChallenge = computed(() => {
 })
 // 친구에게 도전장을 보낸 판 (기다림 문구가 바뀐다)
 const challengeSentFor = ref<number | null>(null)
+const canceling = ref(false)
+async function cancelWaiting(gameId: number) {
+  canceling.value = true
+  try {
+    await POST('/api/app-games/duels/{gameId}/cancel', { path: { gameId } })
+    showToast('기다리기를 그만뒀어요. 등급과 점수는 그대로예요')
+    router.replace(`/play/${key.value}`)
+  } catch (e) {
+    showToast(errorMessage(e, '그만두지 못했어요'))
+  } finally {
+    canceling.value = false
+  }
+}
 async function sendChallenge(gameId: number) {
   track('result_challenge', { gameKey: key.value, value: `duel=${gameId}${improvResult.value?.grade ? `;grade=${improvResult.value.grade}` : ''}` })
   challenging.value = true

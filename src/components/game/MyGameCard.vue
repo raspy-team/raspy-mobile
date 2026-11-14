@@ -23,7 +23,10 @@
     <!-- 시간 바꾸기 제안 (확정된 1:1): 받는 사람은 좋아요·그대로, 낸 사람은 기다림 -->
     <div v-if="game.proposedMatchDate" class="mx-4 mb-3 rounded-xl bg-surface px-3 py-2.5">
       <template v-if="game.proposedById === me?.id">
-        <p class="t-caption">{{ matchTime(game.proposedMatchDate) }}로 바꾸자고 했어요</p>
+        <div class="flex items-center gap-2">
+          <p class="flex-1 min-w-0 t-caption">{{ matchTime(game.proposedMatchDate) }}로 바꾸자고 했어요</p>
+          <UiButton size="sm" variant="ghost" @click="emit('answer-time', false)">거두기</UiButton>
+        </div>
       </template>
       <div v-else class="flex items-center gap-2">
         <p class="flex-1 min-w-0 t-caption">{{ opponent?.name }}님: {{ matchTime(game.proposedMatchDate) }}로 바꿀까요?</p>
@@ -171,10 +174,9 @@ const state = computed(() => {
     if (g.status === 'CANCELED') return { label: '취소됨', tone: 'neutral', hint: '취소된 경기예요' }
     if (g.status === 'SCHEDULED') {
       if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
-      if (!multi.value && opponent.value && (!matchDay.value || g.isOwner === false)) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${opponent.value.name}에게 메시지`, actionVariant: 'secondary' }
-      return g.isOwner === false
-        ? { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알림에 떠요' }
-        : { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
+      // 경기 날에는 선수 누구나 시작한다 (11/14: 연 사람만 시작할 수 있어, 그 사람 폰이 없으면 기록할 길이 없었다). 그 전에는 메시지
+      if (!multi.value && opponent.value && !matchDay.value) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${opponent.value.name}에게 메시지`, actionVariant: 'secondary' }
+      return { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
     }
     if (n > 0) return { label: `신청 ${n}명`, tone: 'primary', action: 'applicants', actionLabel: '신청 보기', actionVariant: 'signal' }
     if (multi.value) return { label: `${gathered.value} 모임`, tone: 'neutral', action: 'share', actionLabel: '링크 공유', actionVariant: 'secondary' }
@@ -187,8 +189,10 @@ const state = computed(() => {
   }
   if (g.status === 'APPROVED') {
     if (needsSchedule.value) return { label: '확정', tone: 'primary', action: 'schedule', actionLabel: isRemote(g.venue) ? '시간 정하기' : '시간·장소 정하기', actionVariant: 'tonal' }
+    // 신청해서 들어온 사람도 경기 날에는 시작할 수 있다 (서버 GameService.startGame: 선수 누구나)
+    if (g.gameStatus === 'SCHEDULED' && matchDay.value) return { label: '확정', tone: 'primary', action: 'start', actionLabel: '경기 시작', actionVariant: 'tonal' }
     if (!multi.value) return { label: '확정', tone: 'primary', action: 'message', actionLabel: `${g.ownerNickname}에게 메시지`, actionVariant: 'secondary' }
-    return { label: '확정', tone: 'primary', hint: '주최자가 시작하면 알림에 떠요' }
+    return { label: '확정', tone: 'primary', hint: '경기 날에 누구나 시작할 수 있어요' }
   }
   if (g.status === 'REJECTED') return { label: '거절됨', tone: 'danger', hint: '다른 경기를 찾아보세요' }
   return { label: '대기', tone: 'neutral', hint: '' }

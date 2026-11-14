@@ -158,6 +158,8 @@
           </div>
         </div>
         <UiButton v-if="pending.canAnswer" variant="ghost" block @click="showCounter = true">점수 고쳐 보내기</UiButton>
+        <!-- 낸 사람도 상대가 확인하기 전에는 고친다 (11/14: 잘못 넣은 점수를 고칠 길이 없었다). 투표로 정하는 경기는 빼고 -->
+        <UiButton v-else-if="pending.canAmend" variant="ghost" block @click="showAmend = true">점수 고쳐 다시 내기</UiButton>
       </UiCard>
 
       <!-- 결과 화면 스크린샷 (다른 게임 안에서 한 경기, 9번). 누르면 크게 -->
@@ -365,6 +367,20 @@
     </div>
   </Transition>
 
+  <!-- 내가 낸 결과 고쳐 다시 내기 -->
+  <ResultEntrySheet
+    v-model="showAmend"
+    amend
+    counter
+    :game-id="gameId"
+    :opponent-name="format === 'TEAMS' ? '상대 팀' : opponent.nickname"
+    :initial="mySetScores"
+    :format="format"
+    :sides="resSides"
+    :my-side="mySide"
+    :my-name="format === 'TEAMS' ? '우리 팀' : '나'"
+    @submitted="onCountered"
+  />
   <!-- 돌려보내기: 내가 생각하는 점수를 낸다 -->
   <ResultEntrySheet
     v-model="showCounter"
@@ -536,6 +552,7 @@ const rejectsLeft = ref(3)
 const proofUrl = ref(null) // 결과 스크린샷 (9번)
 const disputed = ref(false)
 const showCounter = ref(false)
+const showAmend = ref(false)
 // 이 경기로 바뀐 내 실력 점수 { before, after } (확정 뒤 선수만)
 const myRating = ref(null)
 const ratingDelta = computed(() => (myRating.value ? myRating.value.after - myRating.value.before : 0))
@@ -688,7 +705,7 @@ const pending = computed(() => {
   const waitingFor = format.value === 'TEAMS' ? '상대 팀' : format.value === 'FREE_FOR_ALL' ? '다른 사람' : `${opponent.value.nickname}님`
   const sameTeam = format.value === 'TEAMS' && mySide.value === submitterSide.value
   if (resultSubmittedById.value === currentUserId.value || sameTeam) {
-    return { canAnswer: false, title: `${waitingFor}의 확인을 기다려요`, description: `답이 없으면 ${at} 확정돼요` }
+    return { canAnswer: false, canAmend: resultSubmittedById.value === currentUserId.value && !peerVoting.value, title: `${waitingFor}의 확인을 기다려요`, description: `답이 없으면 ${at} 확정돼요` }
   }
   return {
     canAnswer: true,

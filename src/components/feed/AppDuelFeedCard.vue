@@ -65,7 +65,7 @@
 
     <!-- 세부: 문제, 각자 쓴 글 전부, AI의 한마디 -->
     <UiSheet v-if="hasDetail && !still" v-model="detailOpen" :title="duel.title">
-      <p v-if="sharedProblem" class="t-caption break-keep mb-4">{{ sharedProblem }}</p>
+      <p v-if="sharedProblem" class="t-caption break-keep whitespace-pre-line mb-4">{{ sharedProblem }}</p>
       <div v-for="(side, i) in sides" :key="i" class="py-4 border-t border-line first:border-t-0 first:pt-0">
         <div class="flex items-baseline justify-between gap-3">
           <span class="t-label truncate" :class="side.won ? 'text-fg' : 'text-fg-muted'"><span :class="side.won ? 'hl' : ''">{{ side.name }}</span></span>

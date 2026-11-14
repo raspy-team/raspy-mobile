@@ -673,7 +673,7 @@ async function answerTime(g, ok) {
   try {
     await api.post(`/api/games/${g.id}/schedule/answer`, null, { params: { accept: ok } })
     feel('success')
-    showToast(ok ? '시간을 바꿨어요' : '원래 시간으로 둘게요')
+    showToast(ok ? '시간을 바꿨어요' : g.proposedById === me.value?.id ? '제안을 거뒀어요' : '원래 시간으로 둘게요')
     await fetchGames()
   } catch (e) {
     showToast(e.response?.data?.message || '답하지 못했어요')

@@ -6,7 +6,8 @@
       <span class="t-mono tabular-nums shrink-0 whitespace-nowrap" :class="remaining <= 20 ? 'text-danger-fg' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 
-    <p class="t-title mt-4 break-keep">{{ problem }}</p>
+    <!-- 조건이 여러 줄인 문제(히어로 대결)는 줄마다, 조금 작게 -->
+    <p class="mt-4 break-keep whitespace-pre-line" :class="problem.includes('\n') ? 't-heading' : 't-title'">{{ problem }}</p>
 
     <div class="mt-5">
       <UiInput v-model="text" multiline :rows="4" :maxlength="120" :placeholder="placeholder" @focusin="onTypeStart" />

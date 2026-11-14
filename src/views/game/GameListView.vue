@@ -4,8 +4,10 @@
        낸 적 없는 사람(동네 경기만): 지금처럼 동네 경기 목록. 지도·경기 만들기는 동네 경기 머리에,
        동호회·내 규칙은 내 정보로 옮겼다. 동네 인증은 필요한 순간에 묻는다 -->
   <UiTopBar title="홈">
-    <template #right><InboxButtons /></template>
+    <!-- 사람 찾기를 홈에서 한 번에 (11/14: 내 정보 → 친구 → 사람 찾기로 세 번 눌러야 했다) -->
+    <template #right><UiIconButton icon="magnifying-glass" label="사람 찾기" @click="findPeople = true" /><InboxButtons /></template>
   </UiTopBar>
+  <UserSearchModal v-if="findPeople" @close="findPeople = false" />
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
@@ -168,6 +170,8 @@ import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
 import HomeUpcoming from '../../components/game/HomeUpcoming.vue'
 import OneGameRequests from '../../components/game/OneGameRequests.vue'
 import { inviteFriend } from '@/utils/inviteFriend'
+import UserSearchModal from '../../components/profile/UserSearchModal.vue'
+const findPeople = ref(false)
 import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
 import ImprovSchools from '../../components/appgame/ImprovSchools.vue'
 import ImprovVersus from '../../components/appgame/ImprovVersus.vue'

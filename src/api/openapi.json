@@ -3166,6 +3166,49 @@
         }
       }
     },
+    "/api/games/{id}/result/amend": {
+      "post": {
+        "tags": [
+          "game-play-controller"
+        ],
+        "summary": "낸 결과 고치기",
+        "description": "내가 낸 결과를 상대가 확인하기 전에 고쳐 다시 냅니다. 돌려보내기 횟수는 늘지 않고 확정까지의 24시간을 다시 셉니다.",
+        "operationId": "amendResult",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnterResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/games/{id}/cancel": {
       "post": {
         "tags": [
@@ -5993,6 +6036,32 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/app-games/duels/{gameId}/cancel": {
+      "post": {
+        "tags": [
+          "app-game-controller"
+        ],
+        "summary": "기다리는 대결 그만두기",
+        "description": "아직 상대가 없는 내 대결을 닫습니다. 내 점수·등급은 남습니다.",
+        "operationId": "cancelWaiting",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

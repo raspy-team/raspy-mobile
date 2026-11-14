@@ -1,6 +1,7 @@
 <template>
-  <UiSheet :model-value="modelValue" :title="counter ? '내가 생각하는 점수' : '점수만 적기'" @update:model-value="emit('update:modelValue', $event)">
-    <p v-if="counter" class="t-caption mb-4">고친 결과가 새 결과가 되고, 이번엔 {{ isGroup ? '다른 사람' : opponentName + (format === 'TEAMS' ? '' : '님') }}이 확인해요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
+  <UiSheet :model-value="modelValue" :title="amend ? '점수 고쳐 다시 내기' : counter ? '내가 생각하는 점수' : '점수만 적기'" @update:model-value="emit('update:modelValue', $event)">
+    <p v-if="amend" class="t-caption mb-4">고친 점수가 새 결과가 돼요. 확정까지의 24시간은 다시 세요.</p>
+    <p v-else-if="counter" class="t-caption mb-4">고친 결과가 새 결과가 되고, 이번엔 {{ isGroup ? '다른 사람' : opponentName + (format === 'TEAMS' ? '' : '님') }}이 확인해요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
     <!-- 상대가 확인하지 않아도 24시간 뒤 확정된다는 것을 처음 낼 때도 (고쳐 낼 때만 말했다: 상대가 답하지 않으면 끝없이 기다리는 줄 알았다, 11/11 다른 사람 전수표) -->
     <p v-else-if="isGroup" class="t-caption mb-4">다른 사람 한 명이 확인하면 기록돼요. 24시간 안에 답이 없으면 그대로 확정돼요.</p>
     <p v-else class="t-caption mb-4">한 세트만 해도 돼요. 안 한 세트는 비워 두세요. {{ opponentName }}{{ format === 'TEAMS' ? '' : '님' }}이 확인하면 기록되고, 24시간 안에 답이 없으면 그대로 확정돼요.</p>
@@ -81,7 +82,7 @@
     <p v-if="error" class="text-sm text-danger-fg mt-3" role="alert">{{ error }}</p>
 
     <template #footer>
-      <UiButton block size="lg" :loading="submitting" @click="submit">{{ counter ? '이 점수로 돌려보내기' : isGroup && groupMode === 'vote' ? '투표 열기' : '결과 내기' }}</UiButton>
+      <UiButton block size="lg" :loading="submitting" @click="submit">{{ amend ? '이 점수로 다시 내기' : counter ? '이 점수로 돌려보내기' : isGroup && groupMode === 'vote' ? '투표 열기' : '결과 내기' }}</UiButton>
     </template>
   </UiSheet>
 </template>
@@ -100,6 +101,8 @@ const props = defineProps({
   opponentName: { type: String, default: '상대' },
   setCount: { type: Number, default: 1 }, // 규칙의 총 세트 수. 처음 칸 수로만 쓴다
   counter: { type: Boolean, default: false },
+  // amend: 내가 낸 결과를 상대가 확인하기 전에 고쳐 다시 낸다 (counter와 같은 칸을 쓴다)
+  amend: { type: Boolean, default: false },
   initial: { type: Array, default: () => [] },
   warning: { type: String, default: '' },
   // 팀·각자 경기: 서버 detail·result의 sides 순서 그대로 ({ members: [{ id, nickname }] }), 내 편의 자리
@@ -178,7 +181,8 @@ async function send(body) {
         return
       }
     }
-    if (props.counter) await POST('/api/games/{id}/result/reject', { path: { id: Number(props.gameId) }, body })
+    if (props.amend) await POST('/api/games/{id}/result/amend', { path: { id: Number(props.gameId) }, body })
+    else if (props.counter) await POST('/api/games/{id}/result/reject', { path: { id: Number(props.gameId) }, body })
     else await POST('/api/games/{id}/result', { path: { id: Number(props.gameId) }, body })
     emit('update:modelValue', false)
     emit('submitted')

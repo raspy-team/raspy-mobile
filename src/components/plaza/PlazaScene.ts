@@ -10,6 +10,8 @@ export type MapObj = S['Obj']
 type Enter = S['EnterResponse']
 
 export interface PlazaCallbacks {
+  /** 처음 온 사람에게 누를 수 있는 것을 짚어 준다 */
+  coach?: boolean
   onTapPerson(id: number): void
   onTapObject(obj: MapObj): void
   onMove(path: number[][]): void
@@ -250,6 +252,14 @@ export class PlazaScene extends Phaser.Scene {
     if (o.action) {
       img.setInteractive({ useHandCursor: true, pixelPerfect: false })
       img.on('pointerup', (ptr: Phaser.Input.Pointer) => ptr.getDistance() <= 12 && this.cb.onTapObject(o))
+      // 누를 수 있는 것 위에 까딱이는 화살표 (11/14 고병연: 처음 들어오면 무엇을 누를 수 있는지 몰랐다). 처음 몇 번만
+      if (this.cb.coach) {
+        const mark = this.add
+          .text(o.x + img.width / 2, o.y - (o.label ? 14 : 4), '▼', { fontFamily: FONT, fontSize: '9px', color: '#d2ff4d', stroke: '#1b1b1f', strokeThickness: 3, resolution: 4 })
+          .setOrigin(0.5, 1)
+          .setDepth(100001)
+        this.tweens.add({ targets: mark, y: mark.y - 5, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+      }
     }
   }
 

@@ -276,7 +276,12 @@ async function go(r: S['RoomInfo']) {
   phase.value = 'plaza'
   await nextTick()
   const { createPlaza } = await import('../../components/plaza/PlazaScene')
+  // 처음 세 번은 누를 수 있는 것 위에 화살표를 띄우고, 할 수 있는 일을 차례로 말해 준다 (11/14)
+  let visits = 0
+  try { visits = Number(localStorage.getItem('plazaVisits') || 0); localStorage.setItem('plazaVisits', String(visits + 1)) } catch { /* 이번만 */ }
+  const coach = visits < 3
   game = createPlaza(stage.value!, data, {
+    coach,
     onTapPerson: openCard,
     onTapObject: tapObject,
     onMove: (path) => publish(`/app/plaza/${data.instance}/move`, { path }),
@@ -288,11 +293,11 @@ async function go(r: S['RoomInfo']) {
   setTimeout(pinGames, 1500)
   pingTimer = setInterval(() => publish(`/app/plaza/${data.instance}/ping`), 25_000)
   // 걷는 법은 처음 한 번만 (UX ⑤: 들어올 때마다 같은 안내가 떴다)
-  let seen = false
-  try { seen = localStorage.getItem('plazaHintSeen') === '1'; localStorage.setItem('plazaHintSeen', '1') } catch { /* 이번만 */ }
-  if (!seen) {
-    hint.value = '땅을 누르면 걸어가요'
-    setTimeout(() => (hint.value = ''), 5000)
+  // 할 수 있는 일 셋을 차례로 (예전엔 '땅을 누르면 걸어가요' 한 줄, 처음 한 번뿐이었다)
+  if (coach) {
+    const tips = ['땅을 누르면 걸어가요', '▼가 뜬 곳을 눌러 보세요. 노점은 게임, 수레는 꾸미기예요', '사람을 누르면 한 판 붙자고 할 수 있어요']
+    tips.forEach((t, i) => setTimeout(() => { if (phase.value === 'plaza') hint.value = t }, i * 4200))
+    setTimeout(() => (hint.value = ''), tips.length * 4200)
   }
 }
 

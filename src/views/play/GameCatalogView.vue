@@ -7,7 +7,7 @@
         <!-- 게임이 몇 개 안 되면 찾을 일이 없다 (11/13 앱 기능 좁히기로 여섯) -->
         <UiIconButton v-if="games.length > 8" icon="search" label="게임 찾기" @click="toggleSearch" />
         <!-- 광장 입구 (UX ⑤: 홈의 '앱 게임'이 목록으로 바로 오고, 광장은 여기서). '지도' 모양은 다른 화면에서 동네 경기 지도라 사람들 모양으로 (경로 2 리뷰 N7) -->
-        <!-- 광장 입구는 닫아 둔다 (11/14 고병연: 지역 팻말·안내 없는 첫 화면이 아마추어 같다). 다시 다듬을 때까지 주소(/plaza)로만 -->
+        <UiIconButton icon="users" label="광장" @click="router.push('/plaza')" />
       </template>
     </UiTopBar>
 

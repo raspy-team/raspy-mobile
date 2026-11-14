@@ -193,16 +193,13 @@
           <span class="flex-1 min-w-0"><span class="block t-body truncate">{{ pickedPlace.name }}</span><span class="block t-micro truncate">{{ pickedPlace.roadAddress || pickedPlace.address }}</span></span>
           <span class="t-micro underline underline-offset-2 flex-shrink-0">다시 찾기</span>
         </button>
+        <UiInput v-if="placeMode === 'picked'" v-model="schedPlace" class="mt-2" placeholder="세부 장소 (선택) 예: 2번 코트, 정문 앞" />
         <template v-else>
-          <!-- 장소는 찾아서 고르는 것이 먼저다 (11/14 폰으로 한 바퀴: 찾기 버튼·'처음 만나는 상대' 안내·지역 고르기·이름 칸이 한꺼번에 나와 무엇이 필수인지 몰랐다).
-               처음 만나는 상대면 찾기만, 아는 사이면 '직접 적기'를 펼칠 수 있다 -->
-          <template v-if="placeSearchOn">
-            <UiButton block variant="secondary" icon="magnifying-glass" @click="pickerOpen = true">장소 찾기</UiButton>
-            <p v-if="scheduleGame?.firstMeeting" class="t-micro mt-2 break-keep">처음 만나는 상대라, 찾아서 고른 공공장소로 정해요</p>
-            <button v-else-if="!typePlace" type="button" class="t-caption underline underline-offset-2 mt-3 py-1" @click="typePlace = true">찾아도 없으면 직접 적기</button>
-          </template>
-          <template v-if="!placeSearchOn || (typePlace && !scheduleGame?.firstMeeting)">
-          <div :class="placeSearchOn ? 'mt-3' : ''">
+          <!-- 장소는 지도에서 찾아 고른다. 글은 고른 뒤의 '세부 장소(선택)'뿐 (11/14 고병연: 처음 만나고 말고와 상관없이 찾기가 기본이다).
+               장소 검색이 꺼진 서버에서만 예전처럼 지역과 이름을 적는다 -->
+          <UiButton v-if="placeSearchOn" block variant="secondary" icon="magnifying-glass" @click="pickerOpen = true">장소 찾기</UiButton>
+          <template v-if="!placeSearchOn">
+          <div>
           <button v-if="placeMode === 'mine'" type="button" class="w-full flex items-center gap-3 h-12 px-4 rounded-xl bg-surface border border-line text-left" @click="placeMode = 'other'">
             <UiIcon name="location-dot" aria-hidden="true" />
             <span class="flex-1 t-body">{{ myArea.shortName }}</span>
@@ -638,7 +635,6 @@ async function loadMyArea() {
 // 공공장소 찾기 (안전·신뢰 G): 서버에 장소 검색이 켜져 있을 때만 버튼을 보인다
 const pickerOpen = ref(false)
 const pickedPlace = ref(null)
-const typePlace = ref(false) // 아는 사이일 때 '직접 적기'를 펼쳤나
 const placeSearchOn = ref(false)
 GET('/api/places/available').then((r) => (placeSearchOn.value = !!r.data)).catch(() => {})
 const canSubmitSchedule = computed(() => {
@@ -647,7 +643,7 @@ const canSubmitSchedule = computed(() => {
   if (placeMode.value === 'picked') return !!pickedPlace.value
   if (isRemote(g.venue)) return !!schedTime.value || !!schedPlace.value.trim()
   if (placeMode.value === 'keep') return !!schedTime.value
-  if (placeSearchOn.value && !typePlace.value) return !!schedTime.value
+  if (placeSearchOn.value) return !!schedTime.value
   return !!schedTime.value || (placeMode.value === 'mine' && !!myArea.value) || (schedRegion1.value && schedRegion2.value)
 })
 
@@ -655,7 +651,6 @@ function openSchedule(g) {
   // 시트를 먼저 연다 (동네를 불러오는 사이 다른 시트가 끼어들지 않게). 동네가 오면 기본 장소를 채운다
   scheduleGame.value = g
   pickedPlace.value = null
-  typePlace.value = false
   placeMode.value = g.matchLocation && !isRemote(g.venue) ? 'keep' : myArea.value ? 'mine' : 'other'
   if (!myArea.value) loadMyArea().then(() => { if (scheduleGame.value?.id === g.id && placeMode.value === 'other' && myArea.value) placeMode.value = 'mine' })
   schedTime.value = g.matchDate ? String(g.matchDate).slice(0, 16) : ''
@@ -691,15 +686,15 @@ async function submitSchedule() {
     const remote = isRemote(scheduleGame.value.venue)
     // 내 동네를 쓰면 주소는 '서울특별시 동대문구 회기동'(서버 지역 판정용), 화면에는 장소 이름이 먼저 보인다
     const mode = placeMode.value
-    // 찾기가 켜져 있고 '직접 적기'를 펼치지 않았으면 장소는 보내지 않는다: 보이지 않는 내 동네가 장소로 들어가지 않게 (시간만 정한다)
-    const typed = !placeSearchOn.value || typePlace.value
+    // 장소 찾기가 켜져 있으면 장소는 찾아서 고른 것만 보낸다 (고르지 않았으면 시간만 정한다)
+    const typed = !placeSearchOn.value
     const area = remote || mode === 'keep' || mode === 'picked' || !typed ? null : mode === 'mine' ? myArea.value.fullName : schedRegion1.value && schedRegion2.value ? `${schedRegion1.value} ${schedRegion2.value}` : null
     const hasPlace = !!area
     await api.post(`/api/games/${scheduleGame.value.id}/schedule`, {
       matchDate: schedTime.value ? (schedTime.value.length === 16 ? `${schedTime.value}:00` : schedTime.value) : null,
       roadAddress: area,
       // 화상·다른 게임은 어디서인지만 보낸다 (서버가 주소 없이 받는다)
-      detailAddress: remote ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || (mode === 'mine' ? myArea.value.shortName : null) : null,
+      detailAddress: remote || mode === 'picked' ? schedPlace.value.trim() || null : hasPlace ? schedPlace.value.trim() || (mode === 'mine' ? myArea.value.shortName : null) : null,
       place: mode === 'picked' ? { kakaoId: pickedPlace.value.kakaoId, name: pickedPlace.value.name, lat: pickedPlace.value.lat, lon: pickedPlace.value.lon } : null,
     })
     const changed = scheduleDecided(scheduleGame.value)

@@ -83,7 +83,7 @@
             <!-- 320폭에서는 두 버튼의 글이 두 줄로 꺾였다: 좁으면 위아래로 쌓는다 (11/14) -->
             <div class="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 mt-5">
               <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
-              <UiButton v-if="!storyFailed" icon="instagram" :disabled="!storyReady" @click="shareStory">스토리에 공유</UiButton>
+              <UiButton v-if="!storyFailed" icon="instagram" :disabled="!storyReady" @click="onStory">인스타 스토리</UiButton>
               <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
               <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 한 판 붙자</UiButton>
             </div>
@@ -264,7 +264,8 @@
       </template>
     </main>
   </div>
-    <SaveImageSheet :src="saveView" @close="saveView = null" />
+    <StoryLinkGuide v-model="guideOpen" @go="guideGo" />
+  <SaveImageSheet :src="saveView" @close="saveView = null" />
 </template>
 
 <script setup lang="ts">
@@ -287,6 +288,7 @@ import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import ImprovSentChallenges from '../../components/appgame/ImprovSentChallenges.vue'
 import ImprovSchools from '../../components/appgame/ImprovSchools.vue'
 import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
+import StoryLinkGuide, { storyGuideNeeded, storyGuideSeen } from '../../components/share/StoryLinkGuide.vue'
 import { improvFeedback, improvShareLine, improvKeepLine, improvSituations, improvAnswers } from '@/utils/improv'
 // 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 결과가 나올 때 받는다. 광고로 온 첫 화면에 실려
 // 느린 폰에서 '시작하기'가 3.9초에야 보였다 (11/11 몸과 시간). 누른 순간 바로 공유해야 사파리가 막지 않으니, 누를 때가 아니라 결과가 뜰 때 미리 받는다
@@ -605,7 +607,19 @@ async function prepareStory() {
 // 그림을 넘기면서, 그림을 누른 사람이 같은 상황을 풀 링크(공유 번호 포함)를 클립보드에 (인스타 링크 스티커에 붙인다)
 // 스토리 링크: 누른 친구는 같은 상황으로 풀고, 가입하면 나와의 승부가 된다
 const storyLink = () => withShareRef(`${window.location.origin}/try/improv?c=${playId.value}&k=${result.value?.challengeKey ?? ''}&utm_source=instagram&utm_medium=story`)
-// 안내 시트는 뺐다 (11/14 폰으로 한 바퀴: 아무도 읽지 않고 한 번 더 누르게만 했다). 링크는 누르는 순간 복사되고, 버튼 밑 한 줄이 붙일 곳을 말한다
+// 처음 두 번은 올리기 전에 링크 스티커 붙이는 법을 보여 준다 (11/14: 뺐다가 고병연이 되돌렸다. 읽는 사람이 적어도, 읽은 사람은 링크를 붙인다)
+const guideOpen = ref(false)
+function onStory() {
+  if (!storyGuideNeeded()) return shareStory()
+  void copyText(storyLink())
+  track('story_guide', { gameKey: key.value, value: 'open' })
+  guideOpen.value = true
+}
+function guideGo() {
+  storyGuideSeen()
+  guideOpen.value = false
+  shareStory()
+}
 function shareStory() {
   const file = storyFile.value
   if (!file || !playId.value || !story) return  // 그림이 있으면 모듈도 이미 받았다

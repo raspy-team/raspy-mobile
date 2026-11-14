@@ -166,7 +166,7 @@
           </UiList>
         </UiSection>
 
-        <UiButton v-if="isMember" block variant="ghost" class="mt-8 text-danger" @click="leave">동호회 나가기</UiButton>
+        <UiButton v-if="isMember" block variant="ghost" class="mt-8 !text-danger-fg" @click="leave">동호회 나가기</UiButton>
       </template>
     </main>
 

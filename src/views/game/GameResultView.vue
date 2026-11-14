@@ -45,17 +45,6 @@
         </p>
         <!-- 첫 몇 판은 점수가 크게 움직인다. 숫자(첫 판에 -162)를 보여 주면 이긴 쪽은 착각하고 진 쪽은 상처받는다 (UX ④: 숫자 대신 한 줄) -->
         <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-3">실력 점수는 몇 판 더 하면 나와요</p>
-        <!-- 다음 판: 이기든 지든 같은 규칙으로 바로 -->
-        <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
-          <p v-if="headline.line" class="t-body text-center mt-4">{{ headline.line }}</p>
-          <div class="flex justify-center mt-4">
-            <!-- 1:1이면 이 상대와 다시: 예전엔 아무나 모집하는 새 경기를 열었다. 소식의 '도전'과 같은 '나랑도해'로 그 사람에게 (목적 판정 11/11 5번) -->
-            <UiButton v-if="rematchTarget" size="sm" variant="tonal" icon="rotate-right" :loading="rematching" @click="rematch">{{ rematchTarget.nickname }}님과 한 판 더</UiButton>
-            <UiButton v-else size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">한 판 더</UiButton>
-            <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
-            <UiButton size="sm" variant="ghost" icon="home" class="ml-2" to="/">홈으로</UiButton>
-          </div>
-        </template>
 
         <!-- 참가자 투표 중: 자기 말고 한 명 뽑기 -->
         <section v-if="peerVoting" class="mt-8">
@@ -132,6 +121,17 @@
           </div>
         </div>
         <p v-else-if="!setResults.length" class="t-caption text-center mt-6">세트 점수 없이 승패만 기록한 경기예요</p>
+        </template>
+        <!-- 다음 판: 이기든 지든 같은 규칙으로 바로. 점수(이 화면의 답) 바로 밑에 둔다: 예전엔 버튼이 점수보다 위였다 (quality-rules H-5) -->
+        <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
+          <p v-if="headline.line" class="t-body text-center mt-8">{{ headline.line }}</p>
+          <div class="flex justify-center mt-4">
+            <!-- 1:1이면 이 상대와 다시: 예전엔 아무나 모집하는 새 경기를 열었다. 소식의 '도전'과 같은 '나랑도해'로 그 사람에게 (목적 판정 11/11 5번) -->
+            <UiButton v-if="rematchTarget" size="sm" variant="tonal" icon="rotate-right" :loading="rematching" @click="rematch">{{ rematchTarget.nickname }}님과 한 판 더</UiButton>
+            <UiButton v-else size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">한 판 더</UiButton>
+            <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
+            <UiButton size="sm" variant="ghost" icon="home" class="ml-2" to="/">홈으로</UiButton>
+          </div>
         </template>
       </section>
 

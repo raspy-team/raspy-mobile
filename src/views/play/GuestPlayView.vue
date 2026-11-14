@@ -84,7 +84,8 @@
             <div class="grid grid-cols-1 gap-2 mt-5">
               <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
               <!-- 주 버튼은 친구에게 보내기 (11/14 피터 모델: 링크를 보내는 사람이 스토리 올리는 사람의 네 배) -->
-              <UiButton icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 한 판 붙자</UiButton>
+              <!-- 초대받은 판은 위의 '누가 이겼는지 보기'가 주 버튼이다: 흰 버튼이 위아래로 둘이었다 (quality-rules H-1) -->
+              <UiButton icon="share" :variant="result.versus ? 'secondary' : 'primary'" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 한 판 붙자</UiButton>
               <UiButton v-if="!storyFailed" variant="secondary" icon="instagram" :disabled="!storyReady" @click="onStory">인스타 스토리</UiButton>
             </div>
             <!-- 링크 스티커 안내는 누르기 전에: 공유가 끝난 뒤 뜬 토스트는 인스타 편집기에 있는 동안 못 봤다 (경로 10 훑기) -->

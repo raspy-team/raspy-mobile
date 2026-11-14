@@ -89,7 +89,7 @@
       <!-- 한 세트짜리 규칙은 세트를 끝내는 게 곧 경기를 끝내는 것이라 숨긴다 (UX ④) -->
       <UiButton v-if="(game.rule?.setsToWin || 1) > 1 && !isSetOver && !isGameOver && !isCountingDown" size="lg" variant="secondary" class="flex-1" @click="manualFinishSet">세트 끝내기</UiButton>
       <!-- 점수를 내는 동안 주 행동은 점수 칸이다. 경기 끝내기는 승부가 난 뒤에만 채운 버튼으로 (0:0에도 가장 눈에 띄어 잘못 누르기 쉬웠다, 11/5 밤샘 C) -->
-      <UiButton size="lg" :variant="isSetOver || isGameOver ? 'primary' : 'secondary'" class="flex-1" @click="isGameOver ? socket_finishGame() : openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기', false)">
+      <UiButton size="lg" :variant="isGameOver ? 'primary' : (game.rule?.setsToWin || 1) > 1 && !isSetOver ? 'ghost' : 'secondary'" class="flex-1" @click="isGameOver ? socket_finishGame() : openConfirm('경기를 끝낼까요?', socket_finishGame, `지금 점수로 결과를 내요. ${game.format === 'TEAMS' ? '상대 팀' : user2.nickname + '님'}이 확인하면 기록돼요.`, '경기 끝내기', false)">
         경기 끝내기
       </UiButton>
     </footer>

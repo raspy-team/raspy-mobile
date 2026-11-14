@@ -10,7 +10,8 @@
           <span class="block t-micro truncate">{{ r.ruleTitle }}{{ r.mine ? ' · 답을 기다리는 중' : '' }}</span>
         </RouterLink>
         <template v-if="!r.mine">
-          <UiButton size="sm" :loading="busy === r.id" @click="accept(r)">받기</UiButton>
+          <!-- 줄마다 되풀이되는 버튼은 테두리 급: 채운 버튼은 화면에 하나 (quality-rules H-1) -->
+          <UiButton size="sm" variant="tonal" :loading="busy === r.id" @click="accept(r)">받기</UiButton>
           <UiButton size="sm" variant="ghost" :disabled="busy === r.id" @click="reject(r)">거절</UiButton>
         </template>
         <UiButton v-else size="sm" variant="ghost" :loading="busy === r.id" @click="cancel(r)">취소</UiButton>

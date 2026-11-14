@@ -77,7 +77,7 @@
           </template>
           <template #trailing>
             <span class="flex gap-1.5">
-              <UiButton size="sm" :loading="busyId === r.id && busyKind === 'accept'" :disabled="busyId === r.id" @click="answer(r, 'accept')">수락</UiButton>
+              <UiButton size="sm" variant="tonal" :loading="busyId === r.id && busyKind === 'accept'" :disabled="busyId === r.id" @click="answer(r, 'accept')">수락</UiButton>
               <UiButton size="sm" variant="secondary" :loading="busyId === r.id && busyKind === 'reject'" :disabled="busyId === r.id" @click="answer(r, 'reject')">거절</UiButton>
             </span>
           </template>

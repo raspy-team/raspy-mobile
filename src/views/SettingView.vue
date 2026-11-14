@@ -57,7 +57,7 @@
 
       <div class="space-y-2">
         <UiButton block variant="secondary" :loading="loggingOut" @click="logout">로그아웃</UiButton>
-        <UiButton block variant="ghost" class="text-danger" @click="deleteAccount">계정 삭제</UiButton>
+        <UiButton block variant="ghost" class="!text-danger-fg" @click="deleteAccount">계정 삭제</UiButton>
         <p class="text-center t-micro pt-2">Match {{ version }}</p>
       </div>
     </main>

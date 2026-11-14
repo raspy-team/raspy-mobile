@@ -104,28 +104,16 @@
         </template>
 
         <h2 class="t-heading">{{ format === 'DUEL' ? '누구와 겨룰까요?' : '어떻게 모을까요?' }}</h2>
-        <p class="t-caption mt-1 mb-5">시간·장소는 나중에 내 경기에서 언제든 정하거나 바꿀 수 있어요.</p>
+        <p class="t-caption mt-1 mb-3">시간·장소는 나중에 내 경기에서 언제든 정하거나 바꿀 수 있어요.</p>
 
-        <div class="space-y-2">
-          <button
-            v-for="opt in options"
-            :key="opt.value"
-            type="button"
-            class="w-full flex items-center gap-4 p-4 rounded-xl bg-surface text-left active:bg-surface-2 disabled:opacity-50"
-            :disabled="creating"
-            @click="opt.value === 'anyone' ? createAnyone() : (friendsOpen = true)"
-          >
-            <span class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-fg-muted flex-shrink-0" aria-hidden="true">
-              <UiIcon :name="opt.icon" />
-            </span>
-            <span class="flex-1 min-w-0">
-              <span class="block t-heading">{{ opt.title }}</span>
-              <span class="block t-caption mt-0.5">{{ opt.value === 'anyone' ? anyoneLine : opt.description }}</span>
-            </span>
-            <UiSpinner v-if="creating && opt.value === 'anyone' && !friend" size="sm" label="여는 중" />
-            <UiIcon name="fas fa-chevron-right" class="text-fg-subtle" v-else  aria-hidden="true" />
-          </button>
+        <!-- 고르는 것은 칩, 이 화면의 할 일은 아래 주 버튼 하나 (quality-rules H-1·H-2: 회색 줄 둘이 주 행동이라 눈이 흰 칩으로 갔다) -->
+        <div class="flex flex-wrap gap-2">
+          <UiChip v-for="opt in options" :key="opt.value" :selected="who === opt.value" :icon="opt.icon" @click="who = opt.value">{{ opt.title }}</UiChip>
         </div>
+        <p class="t-caption mt-2 break-keep">{{ who === 'friend' && options.length > 1 ? OPTIONS[1].description : anyoneLine }}</p>
+        <UiButton block size="lg" class="mt-8" :loading="creating && !friend" :disabled="creating" @click="who === 'friend' && options.length > 1 ? (friendsOpen = true) : createAnyone()">
+          {{ who === 'friend' && options.length > 1 ? '친구 고르기' : '경기 열기' }}
+        </UiButton>
       </template>
     </main>
 
@@ -336,6 +324,8 @@ const created = ref(false)
 const createdLinkOnly = ref(false)
 
 const friendsOpen = ref(false)
+// 누구와: 아무나(목록에 올림) · 친구와(한 명을 골라 바로 잡음)
+const who = ref('anyone')
 const friendsLoading = ref(false)
 const friends = ref([])
 const q = ref('')

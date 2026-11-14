@@ -66,11 +66,13 @@
           카카오로 계속하기
         </button>
 
-        <!-- 구글: 흰 바탕 + 색 G (구글 버튼 규칙) -->
+        <!-- 구글 (구글 버튼 규칙의 세 가지 칠: 흰색·어두운색 #131314·중립 #F2F2F2).
+             화면의 주 버튼은 하나다 (quality-rules H-1): 애플이 함께 보이면 애플이 주 버튼이고 구글은 조용한 칠, 구글뿐이면 구글이 주 버튼 -->
         <button
           v-if="show.google"
           type="button"
-          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-body font-semibold bg-white text-[#1f1f1f] border border-[#dadce0] disabled:opacity-60"
+          class="w-full h-14 rounded-xl flex items-center justify-center gap-2 text-body font-semibold disabled:opacity-60"
+          :class="lead === 'google' ? 'g-lead' : 'g-quiet'"
           :disabled="!!pending"
           @click="loginWith('google')"
         >
@@ -139,6 +141,8 @@ const pending = ref('')
 // 서버에 키가 있는 소셜 로그인 (/api/auth/providers). 앱 안에서는 구글·애플·카카오를 앱이 직접 한다(구글은 앱 안 웹 화면 로그인을 막고,
 // 카카오는 웹 화면이면 카카오톡으로 못 넘어가 아이디·비밀번호를 쳐야 한다). 아이폰 앱은 카카오 플러그인이 든 빌드부터 구글을 보인다
 const enabled = ref({ google: false, kakao: false, apple: false })
+// 이 화면의 주 버튼: 가입 없이 한 판(웹) → 애플(보이면) → 구글. 애플 버튼은 애플 규칙상 어두운 화면에서 흰색뿐이라 늘 채운 버튼이다
+const lead = computed(() => (!isCapacitorApp && !route.query.from ? 'guest' : show.value.apple ? 'apple' : 'google'))
 const show = computed(() => ({
   google: isAndroidApp || (isIosApp && hasNativeKakao) || (!isIosApp && !inAppBrowser && enabled.value.google),
   kakao: enabled.value.kakao,
@@ -262,3 +266,11 @@ function loginWith(provider) {
 
 // 옛 앱 다리(옛 안드로이드 구글·옛 iOS 애플·onKakaoLoginSuccess)는 뺐다. 지금 앱은 Capacitor 플러그인 길만 쓴다 (목적 판정 11/11 부분 1)
 </script>
+
+<style>
+/* 구글 버튼: 주 버튼일 때는 화면 모드의 반대색(어두운 화면 → 흰색, 밝은 화면 → #131314), 조용할 때는 어두운 화면 → #131314 + 테두리, 밝은 화면 → 중립 #F2F2F2 */
+.g-lead { background: #fff; color: #1f1f1f; }
+.g-quiet { background: #131314; color: #e3e3e3; border: 1px solid #8e918f; }
+html[data-theme='light'] .g-lead { background: #131314; color: #e3e3e3; }
+html[data-theme='light'] .g-quiet { background: #f2f2f2; color: #1f1f1f; border-color: transparent; }
+</style>

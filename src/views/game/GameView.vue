@@ -149,7 +149,7 @@
     </div>
     <UiInput v-if="leaveReason === '기타'" v-model="leaveOther" class="mt-3" :maxlength="100" placeholder="이유를 짧게 적어 주세요" />
     <UiButton block size="lg" class="mt-5" :disabled="!lateReasonText" @click="confirmLateLeave(lateReasonText)">이유를 알리고 빠지기</UiButton>
-    <UiButton block variant="ghost" class="mt-2 text-danger" @click="leaveWithoutReason">이유 없이 빠지기 (노쇼로 기록)</UiButton>
+    <UiButton block variant="ghost" class="mt-2 !text-danger-fg" @click="leaveWithoutReason">이유 없이 빠지기 (노쇼로 기록)</UiButton>
   </UiSheet>
 
   <SafetyTipsSheet

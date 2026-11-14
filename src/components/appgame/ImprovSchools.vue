@@ -41,7 +41,8 @@
     </ol>
     <p v-else class="t-caption mt-3 break-keep">아직 순위에 오른 학교가 없어요. 지금 고르면 우리 학교가 1위로 시작해요</p>
 
-    <UiButton v-if="guest && !noCta" block class="mt-4" @click="emit('join')">우리 학교로 참전하기</UiButton>
+    <!-- 결과 화면의 주 버튼은 위의 '친구에게 한 판 붙자'다: 여기는 보조 (quality-rules H-1) -->
+    <UiButton v-if="guest && !noCta" block variant="secondary" class="mt-4" @click="emit('join')">우리 학교로 참전하기</UiButton>
     <UiButton v-else-if="!guest && !data.hasSchool" block variant="secondary" class="mt-4" :to="{ path: '/settings/organizations', query: { back: route.fullPath } }">학교 고르기</UiButton>
 
   </UiCard>

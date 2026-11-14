@@ -11,7 +11,7 @@
           <p class="text-sm text-fg font-medium truncate">경기가 진행 중이에요</p>
           <p class="t-micro truncate">{{ game.ruleTitle }} · {{ game.player1?.nickname }} vs {{ game.player2?.nickname }}</p>
         </div>
-        <UiButton size="sm" @click="emit('open')">점수판 열기</UiButton>
+        <UiButton size="sm" variant="tonal" @click="emit('open')">점수판 열기</UiButton>
         <UiIconButton icon="fas fa-xmark" label="닫기" @click="emit('dismiss')" />
       </div>
     </div>

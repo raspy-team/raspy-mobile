@@ -73,7 +73,7 @@
     <!-- 지금 이 경기에서 할 일 하나 + 더보기 -->
     <div class="flex items-center gap-2 px-4 pb-4">
       <!-- 카드 안의 할 일은 내용 크기만 한 캡슐 (애플식: 카드마다 꽉 찬 막대가 목록을 눌렀다) -->
-      <UiButton v-if="state.action" size="sm" :variant="quiet && state.actionVariant === 'signal' ? 'primary' : state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
+      <UiButton v-if="state.action" size="sm" :variant="quiet && ['signal', 'primary'].includes(state.actionVariant) ? 'tonal' : state.actionVariant" @click="emit(state.action)">{{ state.actionLabel }}</UiButton>
       <p v-if="!state.action" class="flex-1 t-caption">{{ state.hint }}</p>
       <span v-else class="flex-1" />
       <!-- 팀 경기 단톡방: 승인된 둘 이상이면 (11/5 C) -->

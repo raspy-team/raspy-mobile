@@ -176,6 +176,16 @@ onMounted(() => {
 const showActiveBanner = computed(() => footerTab.value !== null && route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path) && !/^\/play\/[^/]+\/live/.test(route.path)) // 앱 게임 한 판 중에도 띠가 판을 가렸다 (11/13)
 // 진행 중 띠가 떠 있으면 화면 맨 아래에 그 높이만큼 자리를 더 둔다 (tailwind.css의 html.has-banner): 맨 아래 줄이 띠 밑에 가려진 채 더 내려가지 않았다 (quality-rules P-3)
 watch(() => showActiveBanner.value && !!activeGame.value, (on) => document.documentElement.classList.toggle('has-banner', on), { immediate: true })
+// 자주 가는 화면의 코드를 한가할 때 미리 받아 둔다 (quality-rules V-1: 화면을 처음 누를 때 코드를 내려받느라 150~200ms 늦게 떴다)
+onMounted(() => {
+  const warm = () => {
+    import('./views/play/AppGameView.vue'); import('./views/play/GameCatalogView.vue'); import('./views/game/GameView.vue')
+    import('./views/feed/FeedView.vue'); import('./views/profile/ProfileView.vue'); import('./views/inbox/NotificationsView.vue')
+    import('./views/game/GameCreateWizard.vue'); import('./views/game/GameResultView.vue')
+  }
+  if ('requestIdleCallback' in window) window.requestIdleCallback(warm, { timeout: 4000 })
+  else setTimeout(warm, 2500)
+})
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)
 }

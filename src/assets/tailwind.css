@@ -161,6 +161,10 @@ html.kb-open .bottom-bar { padding-bottom: 0; box-shadow: 0 160px 0 0 rgb(var(--
 html.kb-open .kb-hide { display: none; }
 html.kb-open .kb-tight { margin-top: 0.5rem; }
 
+/* 뼈대가 오래(1.2초 넘게) 보이면 무엇을 기다리는지 한 줄을 띄운다 (quality-rules V-2). 빨리 끝나면 보이지 않는다 */
+.late-note { opacity: 0; animation: late-note 0.2s ease-out 1.2s forwards; }
+@keyframes late-note { to { opacity: 1; } }
+
 /* 진행 중인 경기 띠가 떠 있는 동안: 화면 끝에 띠 높이만큼 자리 */
 html.has-banner main::after { content: ''; display: block; height: 5rem; }
 

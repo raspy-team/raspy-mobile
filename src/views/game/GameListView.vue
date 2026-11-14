@@ -16,6 +16,7 @@
       <UiSkeleton class="h-24 w-full rounded-xl" />
       <UiSkeleton class="h-40 w-full rounded-xl" />
       <UiSkeleton class="h-14 w-full rounded-xl" />
+      <p class="late-note t-caption text-center pt-2">내 판과 동네 경기를 불러오는 중이에요</p>
     </div>
     <div v-show="settled">
     <HomeUpcoming />

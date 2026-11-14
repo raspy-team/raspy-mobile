@@ -375,6 +375,7 @@
           <div v-if="!settled" class="space-y-3" role="status" aria-label="불러오는 중">
             <UiSkeleton class="h-32 w-full rounded-xl" />
             <UiSkeleton class="h-[52px] w-full rounded-xl" />
+            <p class="late-note t-caption text-center pt-2">내 기록을 불러오는 중이에요</p>
           </div>
           <div v-show="settled">
           <!-- 가입 전 한 판을 하고 막 가입한 사람: 그 판이 어디 갔는지 먼저 (3-5 걷기 P5: "내 4등급은? 60은 뭐지") -->

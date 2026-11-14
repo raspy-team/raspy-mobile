@@ -11,6 +11,11 @@
       </li>
     </ol>
     <p class="t-caption mt-4 break-keep">친구가 그 링크로 풀면 같은 상황으로 1:1이 돼요. 친구가 뭐라고 답했는지도 볼 수 있어요</p>
+    <!-- 웹은 안내까지다. 앱은 버튼 한 번에 스토리 편집기가 열리고 그림이 붙는다: 스토어에 나와 있을 때만 알린다 (11/14 고병연, utils/appStore) -->
+    <a v-if="appDownloadable" :href="APP_PAGE" class="mt-4 flex items-center gap-3 rounded-xl bg-surface-2 px-4 py-3">
+      <span class="flex-1 t-caption text-fg break-keep">앱에서는 버튼 한 번에 스토리가 열려요</span>
+      <span class="t-label shrink-0">앱 받기</span>
+    </a>
     <template #footer>
       <!-- 인스타·카톡 앱 안 브라우저는 스토리 편집기를 바로 못 연다: 그림을 저장하게 되니 그렇게 말한다 (11/14: 스토리 링크로 온 사람은 대부분 여기다) -->
       <UiButton block size="lg" icon="instagram" @click="emit('go')">{{ inAppBrowser ? '그림 저장하기' : hasNativeInstagram ? '스토리 열기' : '공유 창 열기' }}</UiButton>
@@ -21,6 +26,7 @@
 <script setup lang="ts">
 import { UiButton, UiSheet } from '../ui'
 import { inAppBrowser, hasNativeInstagram } from '@/utils/nativeBridge'
+import { appDownloadable, APP_PAGE } from '@/utils/appStore'
 
 defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void; (e: 'go'): void }>()
@@ -35,9 +41,11 @@ const STEPS = [
 </script>
 
 <script lang="ts">
-// 안내를 몇 번 봤나 (이 기기). 두 번 본 뒤로는 바로 인스타를 연다: 판마다 같은 안내는 피로다 (11/11 쌓이는 피로)
+// 웹은 늘 안내한다: 스토리 편집기를 대신 열 수 없어 안내가 곧 기능이다 (11/14 고병연).
+// 앱은 두 번 본 뒤로 바로 인스타를 연다: 판마다 같은 안내는 피로다 (11/11 쌓이는 피로)
 const KEY = 'story_guide_seen'
 export function storyGuideNeeded(): boolean {
+  if (!hasNativeInstagram) return true
   try { return Number(localStorage.getItem(KEY) || 0) < 2 } catch { return false }
 }
 export function storyGuideSeen() {

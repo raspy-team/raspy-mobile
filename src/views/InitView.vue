@@ -42,7 +42,7 @@
       <div class="pb-6 space-y-2">
         <!-- 말로 듣고 온 사람("야 matchapp.me 가 봐")의 길 (11/14): 주소만 치고 오면 가입 버튼뿐이라 게임까지 갈 길이 없었다.
              가입 없이 한 판을 맨 위에. 가입하려고 넘어온 사람(?from=guest)에게는 보이지 않는다 -->
-        <UiButton v-if="!isCapacitorApp && !route.query.from" block size="lg" variant="secondary" to="/try/improv?utm_source=direct&utm_medium=init" class="mb-2">가입 없이 한 판 · 임기응변 등급</UiButton>
+        <UiButton v-if="!isCapacitorApp && !route.query.from" block size="lg" to="/try/improv?utm_source=direct&utm_medium=init" class="mb-2">가입 없이 한 판 · 임기응변 등급</UiButton>
         <p v-if="loginError" class="t-caption text-danger-fg text-center pb-2" role="alert">{{ loginError }}</p>
         <!-- '1초 만에'라고 했는데 다음 화면이 닉네임·약관이었다 (경로 1 리뷰 N10) -->
         <p v-if="anySocial" class="t-caption text-center pb-1">따로 가입 없이 <b class="text-fg">닉네임만 정하면</b> 시작해요</p>

@@ -52,3 +52,11 @@ export function collapseWaitingDuels<T extends { key: string; playMode?: string;
   }
   return out
 }
+
+// 사람을 기다리는 판은 연 지 7일 뒤 닫힌다 (서버 AppDuelService.WAITING_LIMIT). 남은 날을 말한다 (11/14 고병연: '7일 뒤 끝' 대신 '만료까지 n일')
+const WAITING_DAYS = 7
+export function expiryLine(createdAt?: string): string {
+  if (!createdAt) return ''
+  const left = Math.ceil((new Date(createdAt).getTime() + WAITING_DAYS * 86400_000 - Date.now()) / 86400_000)
+  return left <= 1 ? '오늘 만료' : `만료까지 ${left}일`
+}

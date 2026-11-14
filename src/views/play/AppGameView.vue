@@ -227,11 +227,12 @@
               <!-- 보내기는 등급 바로 밑 (손님 결과와 같은 순서, 11/11 목적 다시 보기: 등급을 막 본 순간이 자랑 동기가 가장 세다) -->
               <div class="flex flex-wrap justify-center gap-2 mt-4">
                 <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
-                <UiButton v-if="!storyFailed" size="sm" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
-                <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+                <!-- 주 버튼은 친구에게 보내기 (11/14 피터 모델: 링크를 보내는 사람이 스토리 올리는 사람의 네 배). 기다리는 판일 때만 있어, 없으면 스토리가 주 버튼 -->
+                <UiButton v-if="canChallenge" size="sm" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
+                <UiButton v-if="!storyFailed" size="sm" :variant="canChallenge ? 'secondary' : undefined" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
               </div>
               <!-- 올릴 이유 (11/14): 올리면 친구들이 같은 상황으로 들어오고, 풀 때마다 알림이 온다 -->
-              <p v-if="!storyFailed && !storyShownBefore" class="t-micro mt-2 break-keep">링크는 복사해 뒀어요. 스토리의 '링크' 스티커에 붙이면 친구가 같은 상황으로 붙어요</p>
+              <p v-if="canChallenge" class="t-micro mt-2 break-keep">친구가 링크로 풀면 같은 상황으로 승패가 나요</p>
               <p v-if="improvResult.weak" class="t-body mt-4 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
               <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
               <p v-if="improvResult.next" class="t-label mt-3"><span class="hl">{{ improvResult.next }}</span></p>
@@ -257,7 +258,7 @@
             </template>
             <template v-else>
               <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }}. 7일 동안 아무도 안 풀면 승패 없이 끝나요</p>
+              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}</p>
             </template>
             <!-- AI가 대신 풀어 승패를 내던 것은 걷어 냈다 (11/14, 서버 bot/AiMode): 등급·점수가 결과고, 승패는 사람과 붙을 때만 뜻이 있다 -->
             <!-- 임기응변은 등급 밑에 이미 있다. 다른 게임은 여기 -->
@@ -473,7 +474,7 @@ import OpponentName from '../../components/appgame/OpponentName.vue'
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
 import { liveRoute } from '@/utils/battle'
-import { canResumeDuel } from '@/utils/appGame'
+import { canResumeDuel, expiryLine } from '@/utils/appGame'
 import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
@@ -776,6 +777,8 @@ function until(at?: string) {
 
 /** 도전장: 먼저 한 판을 친구에게 보낸다. 하루 동안은 그 링크로만 받을 수 있다 */
 const challenging = ref(false)
+// 친구에게 보낼 수 있는 판: 내가 풀었고 아직 상대가 없는 판 (사다리로 이미 보낸 판은 빼고)
+const canChallenge = computed(() => !ladderTo && (result.value?.myScore ?? 0) > 0 && result.value?.status === 'WAITING')
 // 친구에게 도전장을 보낸 판 (기다림 문구가 바뀐다)
 const challengeSentFor = ref<number | null>(null)
 async function sendChallenge(gameId: number) {
@@ -892,7 +895,6 @@ function storyLink() {
   const mine = r?.shareKey && r.myUserId ? `d=${r.gameId}&u=${r.myUserId}&k=${r.shareKey}&` : ''
   return withShareRef(`${window.location.origin}/try/improv?${mine}utm_source=instagram&utm_medium=story`)
 }
-const storyShownBefore = (() => { try { return localStorage.getItem('story_shared') === '1' } catch { return false } })()
 // 처음 두 번은 올리기 전에 링크 스티커 붙이는 법을 보여 준다 (11/14: 뺐다가 고병연이 되돌렸다. 읽는 사람이 적어도, 읽은 사람은 링크를 붙인다)
 const guideOpen = ref(false)
 function onStory() {

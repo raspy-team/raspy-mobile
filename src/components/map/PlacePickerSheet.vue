@@ -1,6 +1,6 @@
 <template>
-  <UiSheet :model-value="modelValue" title="공공장소 찾기" @update:model-value="(v) => emit('update:modelValue', v)">
-    <p class="t-caption mb-3">처음 만나는 경기는 체육관·공원·탁구장처럼 사람이 오가는 곳에서 해요. 집·숙소는 고를 수 없어요</p>
+  <UiSheet :model-value="modelValue" title="장소 찾기" @update:model-value="(v) => emit('update:modelValue', v)">
+    <p class="t-caption mb-3">처음 만나는 상대라면 체육관·공원처럼 사람이 오가는 곳이 좋아요</p>
     <form class="flex gap-2" @submit.prevent="search">
       <UiInput v-model="q" class="flex-1" placeholder="예: 망원 탁구장, 체육공원" enterkeyhint="search" />
       <UiButton type="submit" :loading="busy" :disabled="!q.trim()">찾기</UiButton>
@@ -11,18 +11,18 @@
       <UiListItem
         v-for="r in results"
         :key="r.kakaoId"
-        :icon="r.public ? 'location-dot' : 'circle-xmark'"
+        icon="location-dot"
         :title="r.name"
-        :subtitle="`${r.public ? '' : '고를 수 없어요 · '}${shortCategory(r.category)} · ${r.roadAddress || r.address}${r.distanceM != null ? ` · ${km(r.distanceM)}` : ''}`"
-        :disabled="!r.public"
-        @click="r.public && pick(r)"
+        :subtitle="`${shortCategory(r.category)} · ${r.roadAddress || r.address}${r.distanceM != null ? ` · ${km(r.distanceM)}` : ''}`"
+        @click="pick(r)"
       />
     </UiList>
   </UiSheet>
 </template>
 
 <script setup>
-// 장소 고르기 (안전·신뢰 G). 카카오 장소 검색(서버가 대신 부른다)에서 공공장소만 고른다. 서버가 고른 곳을 다시 찾아 확인한다
+// 장소 고르기. 카카오 장소 검색(서버가 대신 부른다)에서 고른다. 서버가 고른 곳을 다시 찾아 확인한다.
+// 11/14: '처음 만나는 상대는 공공장소만'을 뺐다(고병연). 지도에서 고르는 것이 필수가 되면서 이름 있는 곳만 남고, 아파트 단지 코트 같은 곳이 막혔었다
 import { computed, ref, defineProps, defineEmits } from 'vue'
 import { UiButton, UiInput, UiList, UiListItem, UiSheet } from '../ui'
 import { GET } from '../../api/client'
@@ -39,7 +39,7 @@ const q = ref('')
 const busy = ref(false)
 const error = ref('')
 const results = ref([])
-const pins = computed(() => results.value.filter((r) => r.public).map((r) => ({ id: r.kakaoId, lat: r.lat, lon: r.lon, label: r.name })))
+const pins = computed(() => results.value.map((r) => ({ id: r.kakaoId, lat: r.lat, lon: r.lon, label: r.name })))
 const shortCategory = (c) => (c || '').split('>').pop().trim()
 const km = (m) => (m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`)
 
@@ -56,7 +56,7 @@ async function search() {
   }
 }
 function pick(r) {
-  if (!r?.public) return
+  if (!r) return
   emit('picked', r)
   emit('update:modelValue', false)
 }

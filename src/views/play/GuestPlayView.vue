@@ -81,16 +81,16 @@
             <!-- 보내기는 등급 바로 밑: 등급을 막 본 순간이 자랑하고 싶은 마음이 가장 센 때다. '한 판 더'를 다음 목표 옆으로 올리며
                  보내기가 그 아래로 밀려났었다 (11/11 목적 다시 보기: 자랑·교류 동기, 3단계가 재는 것이 공유율) -->
             <!-- 320폭에서는 두 버튼의 글이 두 줄로 꺾였다: 좁으면 위아래로 쌓는다 (11/14) -->
-            <div class="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 mt-5">
+            <div class="grid grid-cols-1 gap-2 mt-5">
               <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
-              <UiButton v-if="!storyFailed" icon="instagram" :disabled="!storyReady" @click="onStory">인스타 스토리</UiButton>
-              <!-- 도전장으로 온 판이면 '결과 보내기': 이긴 사람이 진 사람에게 알리는 말이 곧 보낸 친구를 다시 부르는 신호다 (손님에겐 알림이 없다) -->
-              <UiButton variant="secondary" icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 한 판 붙자</UiButton>
+              <!-- 주 버튼은 친구에게 보내기 (11/14 피터 모델: 링크를 보내는 사람이 스토리 올리는 사람의 네 배) -->
+              <UiButton icon="share" :loading="sharing === 'challenge'" @click="challengeFriend">친구에게 한 판 붙자</UiButton>
+              <UiButton v-if="!storyFailed" variant="secondary" icon="instagram" :disabled="!storyReady" @click="onStory">인스타 스토리</UiButton>
             </div>
             <!-- 링크 스티커 안내는 누르기 전에: 공유가 끝난 뒤 뜬 토스트는 인스타 편집기에 있는 동안 못 봤다 (경로 10 훑기) -->
             <!-- 한 번 올려 본 사람에게는 같은 말이라 뺀다 (11/11 쌓이는 피로: 판마다 같은 안내) -->
             <!-- 올릴 이유 (11/14): 등급 자랑만이 아니라, 올리면 친구들이 같은 상황으로 들어오고 그 답과 승패가 나에게 온다 -->
-            <p v-if="!storyShownBefore" class="t-micro mt-2 break-keep">링크는 복사해 뒀어요. 스토리의 '링크' 스티커에 붙이면 친구가 같은 상황으로 붙어요</p>
+            <p class="t-micro mt-2 break-keep">친구가 링크로 풀면 같은 상황으로 승패가 나요</p>
             <!-- 왜 이 등급인가, 다음엔 무엇을 (걷기 P1-7) -->
             <p v-if="improv.weak" class="t-body mt-4 break-keep"><template v-if="improv.strong">잘한 것 <b>{{ improv.strong }}</b> · </template>아쉬운 것 <b>{{ improv.weak }}</b></p>
             <p v-if="improv.tip" class="t-caption mt-1 break-keep">다음엔 {{ improv.tip }}</p>
@@ -646,8 +646,6 @@ function shareStory() {
   })
 }
 const saveView = ref<string | null>(null)
-// 스토리를 한 번이라도 올려 봤나 (링크 스티커 안내를 그때까지만)
-const storyShownBefore = (() => { try { return localStorage.getItem('story_shared') === '1' } catch { return false } })()
 
 // ── 눈치 한 판: 친구 도전·공유 ──
 async function challengeFriend() {

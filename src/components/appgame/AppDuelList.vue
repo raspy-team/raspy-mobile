@@ -20,7 +20,7 @@ import { who } from '@/utils/format'
 // 아직 안 끝난 앱 대결 목록 (내 경기 화면). 내가 할 일이 남은 판(이어서 하기·하는 중)은 배지를 칠한다
 import { fixtureOf, kickoffLabel } from '@/utils/predict'
 import { liveRoute } from '@/utils/battle'
-import { canResumeDuel } from '@/utils/appGame'
+import { canResumeDuel, expiryLine } from '@/utils/appGame'
 import { useRouter } from 'vue-router'
 import type { components } from '@/api/schema'
 import { UiBadge, UiIcon, UiList, UiListItem } from '../ui'
@@ -47,7 +47,7 @@ function view(d: Duel) {
   if (d.status === 'AWAITING_RESULT') return { badge: '결과 기다림', line: `${kickoffLabel(fixtureOf(d.problem).kickoff)} 경기가 끝나면 채점해요`, to: result, act: false }
   if (d.opponent) return { badge: '상대 차례', line: `${who(d.opponent)}님이 푸는 중`, to: result, act: false }
   // 여러 판이 기다리면 한 줄로: 누르면 그 게임의 내 대결 목록 (collapseWaitingDuels)
-  if ((d.waitingCount ?? 1) > 1) return { badge: `${d.waitingCount}판 기다리는 중`, line: '다른 사람이 같은 문제를 풀면 승패가 나요', to: `/play/${d.key}`, act: false }
-  return { badge: '상대 찾는 중', line: `같은 ${d.key === 'improv' ? '상황을' : '문제를'} 풀 사람을 기다려요`, to: result, act: false }
+  if ((d.waitingCount ?? 1) > 1) return { badge: `${d.waitingCount}판 기다리는 중`, line: `다른 사람이 풀면 승패가 나요 · ${expiryLine(d.createdAt)}`, to: `/play/${d.key}`, act: false }
+  return { badge: '상대 찾는 중', line: `같은 ${d.key === 'improv' ? '상황을' : '문제를'} 풀 사람을 기다려요 · ${expiryLine(d.createdAt)}`, to: result, act: false }
 }
 </script>

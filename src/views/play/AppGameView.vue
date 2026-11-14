@@ -149,8 +149,13 @@
             >{{ result.opponent.nickname }}님과 다시 붙기</UiButton>
             <!-- 승패가 난 판에서도 친구를 부른다 (11/14: 이 화면에는 오른쪽 위 작은 공유 아이콘뿐이었다. 가장 굵은 길이 여기서 끊겼다) -->
             <div v-if="canChallenge" class="mt-3">
-              <UiButton icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
+              <!-- 이 화면의 채운 버튼은 아래 '한 판 더' 하나 (quality-rules H-1) -->
+              <UiButton variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
               <p class="t-micro mt-2 break-keep">친구가 링크로 풀면 같은 상황으로 나와 1:1이 돼요</p>
+            </div>
+            <!-- 이긴 순간이 자랑하고 싶은 때다: 오른쪽 위 작은 아이콘 말고 이름 붙은 버튼으로 (quality-rules D-1) -->
+            <div v-else-if="result.result === 'WIN' && game?.dailyLimit !== 1" class="mt-3">
+              <UiButton variant="secondary" icon="share" :disabled="sharingResult" @click="openShare(result.gameId)">이긴 판 자랑하기</UiButton>
             </div>
             <!-- 임기응변: 승패도 등급으로 겨룬다. 큰 숫자가 점수라 기다릴 때(등급이 크게)와 잣대가 달랐다 (경로 10 리뷰 I5) -->
             <div v-if="improvResult && !improvResult.empty" class="flex items-center justify-center gap-6 mt-6">
@@ -234,7 +239,7 @@
                 <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
                 <!-- 주 버튼은 친구에게 보내기 (11/14 피터 모델: 링크를 보내는 사람이 스토리 올리는 사람의 네 배). 기다리는 판일 때만 있어, 없으면 스토리가 주 버튼 -->
                 <UiButton v-if="canChallenge" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
-                <UiButton v-if="!storyFailed" size="sm" :variant="canChallenge ? 'secondary' : undefined" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
+                <UiButton v-if="!storyFailed" size="sm" variant="secondary" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
               </div>
               <!-- 올릴 이유 (11/14): 올리면 친구들이 같은 상황으로 들어오고, 풀 때마다 알림이 온다 -->
               <p v-if="canChallenge" class="t-micro mt-2 break-keep">친구가 링크로 풀면 같은 상황으로 승패가 나요</p>

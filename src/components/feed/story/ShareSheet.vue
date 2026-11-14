@@ -34,7 +34,7 @@
         :disabled="(d.key === 'story' || d.key === 'more') && !ready && !currentFailed"
         @click="go(d.key)"
       >
-        <span class="w-14 h-14 rounded-full flex items-center justify-center" :class="d.key === 'story' ? 'bg-signal text-signal-on' : 'bg-surface-2 text-fg'">
+        <span class="w-14 h-14 rounded-full flex items-center justify-center" :class="d.key === 'story' ? 'bg-signal text-signal-on' : 'bg-surface-2 text-fg'" :style="d.key === 'message' && kakaoShareAvailable ? 'background:#FEE500;color:rgba(0,0,0,.85)' : ''">
           <UiSpinner v-if="d.key === 'story' && !ready && !currentFailed" />
           <UiIcon v-else :name="d.icon" class="text-xl" aria-hidden="true" />
         </span>

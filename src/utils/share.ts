@@ -52,5 +52,6 @@ export async function shareGameInvite(gameId: number, text: string, opts: ShareO
     // 아래에서 같이 알린다
   }
   if (!url) return '링크를 만들지 못했어요'
-  return shareLink(url, text, opts)
+  // 경기 초대: 받은 사람이 할 일은 '신청'이다 (카카오톡 카드의 버튼 글)
+  return shareLink(url, text, { title: '경기에 부르기', button: '신청하기', place: 'game_invite', ...opts })
 }

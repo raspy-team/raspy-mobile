@@ -35,6 +35,8 @@ function toStart(to) {
 export function installOnboardingGuard(router) {
   router.beforeEach(async (to) => {
     if (OPEN.some((p) => to.path.startsWith(p))) return true
+    // 없는 주소는 누구에게나 '이 페이지는 없어요'를 보인다 (quality-rules G-4: 로그인 전이면 말없이 시작 화면으로 보내 무슨 일인지 몰랐다)
+    if (to.matched.some((r) => r.path.includes(':pathMatch'))) return true
     if (doneFor && doneFor === token() && tokenAlive()) return true
     // 로그인 전이면 화면을 그리기 전에 시작 화면으로 (보던 주소는 기억)
     // 끝난 토큰도 로그인 전으로 본다 (11/14: 통과시킨 뒤 화면의 첫 요청이 401이 되어 가입 화면으로 튕겼다)

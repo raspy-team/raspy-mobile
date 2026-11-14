@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div v-if="title || $slots.action" class="flex items-center justify-between mb-3">
+    <div v-if="title || $slots.action" class="flex items-center justify-between mb-4">
       <h2 class="t-heading">{{ title }}</h2>
       <slot name="action" />
     </div>

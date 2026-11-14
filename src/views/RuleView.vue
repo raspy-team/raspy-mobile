@@ -75,9 +75,9 @@
       </div>
 
       <!-- 개수 + 정렬 -->
-      <div class="flex items-center justify-between gap-2 pt-4">
+      <div class="flex items-center justify-between gap-2 pt-4 pb-2">
         <p class="t-caption flex-shrink-0">{{ loading ? '찾는 중…' : `규칙 ${rules.length}개` }}</p>
-        <div class="flex -mr-2" role="radiogroup" aria-label="정렬">
+        <div class="flex gap-2 -mr-2" role="radiogroup" aria-label="정렬">
           <button
             v-for="o in SORTS"
             :key="o.value"

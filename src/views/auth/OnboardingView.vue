@@ -97,7 +97,7 @@
           </span>
           <span class="text-sm text-fg">모두 동의 <span class="text-fg-subtle">(이용약관·개인정보·만 14세 이상)</span></span>
         </button>
-        <p class="t-micro mt-1 pl-9">
+        <p class="t-micro mt-2 pl-9">
           <template v-for="(t, i) in CHECKS.filter((c) => c.body)" :key="t.id"><span v-if="i"> · </span><button type="button" class="hit underline underline-offset-2 min-h-[32px]" @click="openTerm = t">{{ t.title }} 보기</button></template>
         </p>
       </div>

@@ -1,7 +1,7 @@
 <template>
   <!-- 홈 아래 소식 몇 줄 (11/13 앱 기능 좁히기: 소식 탭을 홈에 합쳤다). 소식이 없으면 칸째 숨긴다 -->
   <section v-if="items.length" class="mt-10" aria-label="소식">
-    <div class="flex items-center justify-between mb-1">
+    <div class="flex items-center justify-between mb-2">
       <h2 class="t-heading">소식</h2>
       <UiButton size="sm" variant="ghost" class="-mr-2" to="/feed">모두 보기</UiButton>
     </div>

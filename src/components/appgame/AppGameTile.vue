@@ -2,7 +2,7 @@
   <!-- 놀이방의 게임 한 칸: 게임마다 다른 그림을 크게, 이름, 두 줄 소개. 모서리에 해 본 게임만 내 점수 -->
   <!-- again: 바로 한 판 (최근에 한 게임: 첫 화면을 거쳐 '한 판 하기'를 또 눌렀다, 11/11 귀찮음 재검토) -->
   <!-- wide: 한 줄에 하나, 소개를 자르지 않는다 (11/14 전수 평가: 두 칸짜리에서 여섯 게임의 소개가 모두 '…'로 잘렸다) -->
-  <RouterLink v-if="wide" :to="`/play/${game.key}`" class="flex items-start gap-4 rounded-2xl bg-surface p-4 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]">
+  <RouterLink v-if="wide" :to="`/play/${game.key}`" class="flex items-start gap-4 p-4 active:bg-surface-2 transition-colors">
     <span class="w-12 h-12 flex-shrink-0 rounded-2xl bg-surface-2 flex items-center justify-center text-[26px] text-fg" aria-hidden="true">
       <UiIcon :name="gameIcon(game.key, game.icon)" />
     </span>

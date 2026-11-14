@@ -24,7 +24,7 @@
             :error="passwordError"
             :autocomplete="isSignup ? 'new-password' : 'current-password'"
           />
-          <UiButton variant="ghost" size="sm" class="-ml-2 mt-1" @click="showPassword = !showPassword">
+          <UiButton variant="ghost" size="sm" class="-ml-2 mt-2" @click="showPassword = !showPassword">
             <UiIcon :name="showPassword ? 'far fa-eye-slash' : 'far fa-eye'" aria-hidden="true" />
             {{ showPassword ? '비밀번호 숨기기' : '비밀번호 보기' }}
           </UiButton>

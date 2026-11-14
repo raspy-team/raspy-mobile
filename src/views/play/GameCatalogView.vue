@@ -38,7 +38,8 @@
 
         <UiSection :title="query ? `찾은 게임 ${filtered.length}` : shown.length < filtered.length ? '많이 하는 게임' : '모든 게임'" class="mt-6">
           <!-- 게임이 몇 안 되면 한 줄에 하나씩 소개를 다 보여 준다. 많아지면(9개부터) 두 칸으로 -->
-          <div v-if="filtered.length && shown.length <= 8" class="space-y-3">
+          <!-- 한 묶음 목록 (quality-rules W-2: 카드가 한 화면에 넷을 넘지 않는다) -->
+          <div v-if="filtered.length && shown.length <= 8" class="rounded-2xl bg-surface divide-y divide-line overflow-hidden">
             <AppGameTile v-for="g in shown" :key="g.key" :game="g" wide :show-meta="metaDiffers" />
           </div>
           <div v-else-if="filtered.length" class="grid grid-cols-2 gap-3">

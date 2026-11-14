@@ -8,7 +8,7 @@
     <main class="max-w-xl mx-auto px-4 pb-32">
       <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 
-      <UiTabs v-if="!userId" v-model="tab" :options="TABS" class="mt-3" />
+      <UiTabs v-if="!userId" v-model="tab" :options="TABS" class="mt-3 mb-2" />
 
       <!-- 처음 불러오는 중: 카드 모양 그대로 -->
       <div v-if="loading && !posts.length" role="status" aria-label="소식 불러오는 중">

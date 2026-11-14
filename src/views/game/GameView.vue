@@ -28,13 +28,14 @@
     </UiCard>
 
     <!-- 아직 경기가 없을 때: 버튼 둘만 (할 일 3단계 설명은 길었다) -->
-    <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length && !requestCount" class="pt-6">
-      <h2 class="t-title">첫 경기를 잡아 볼까요</h2>
-      <p class="t-caption mt-2">확정된 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
-      <div class="flex gap-2 mt-6">
-        <UiButton class="flex-1" to="/">경기 찾기</UiButton>
-        <UiButton class="flex-1" variant="secondary" to="/create-game">경기 만들기</UiButton>
-      </div>
+    <!-- 가운데 덩어리로 모은다 (quality-rules W-1: 위에 글 두 줄 + 버튼, 아래 2/3이 텅 비어 있었다) -->
+    <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length && !requestCount" class="min-h-[60dvh] flex flex-col justify-center">
+      <UiEmptyState mascot="match" mood="smile" title="첫 경기를 잡아 볼까요" description="확정된 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요">
+        <div class="flex gap-2">
+          <UiButton to="/">경기 찾기</UiButton>
+          <UiButton variant="secondary" to="/create-game">경기 만들기</UiButton>
+        </div>
+      </UiEmptyState>
     </section>
 
     <template v-else>

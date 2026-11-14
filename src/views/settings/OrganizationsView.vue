@@ -25,8 +25,8 @@
               @click="openMember = m"
             />
           </UiList>
-          <UiCard v-else>
-            <UiEmptyState mascot="kok" title="아직 소속이 없어요" description="학교를 고르면 학교 대항과 학교 챔피언에 들어가요" />
+          <UiCard v-else class="py-10">
+            <UiEmptyState mascot="match" title="아직 소속이 없어요" description="학교를 고르면 학교 대항과 학교 챔피언에 들어가요" />
           </UiCard>
         </UiSection>
 

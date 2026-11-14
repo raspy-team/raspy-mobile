@@ -137,14 +137,11 @@
       <UiEmptyState v-else-if="friendsFailed" icon="fas fa-rotate-right" title="친구 목록을 불러오지 못했어요">
         <UiButton variant="secondary" @click="loadFriends">다시 시도</UiButton>
       </UiEmptyState>
-      <UiEmptyState
-        v-else-if="!friends.length"
-        mascot="match"
-        title="아직 친구가 없어요"
-        description="'아무나'로 열거나, 경기를 한 상대에게 친구 요청을 보내 보세요"
-      />
-      <UiEmptyState v-else-if="!filteredFriends.length" mascot="match" title="찾는 친구가 없어요" />
-      <UiList v-else>
+      <!-- 친구가 없어도 막다른 길이 아니게 (11/14 피터로 걷기: 방금 데려온 친구와 농구를 하려는데 '아직 친구가 없어요'에서 끝났다).
+           이름을 치면 매치의 모든 사람에서 찾고, 친구가 아니면 '한 판 붙자'를 보낸다(받으면 경기가 된다) -->
+      <p v-if="!friends.length && !q.trim()" class="t-caption py-6 text-center break-keep">친구의 닉네임이나 아이디를 쳐서 찾아요.<br />매치에 없는 친구는 '아무나'로 열고 링크를 보내면 돼요</p>
+      <p v-else-if="!filteredFriends.length && !others.length" class="t-caption py-6 text-center">{{ searching ? '찾는 중' : '그런 이름이 없어요. 아이디로도 찾아 보세요' }}</p>
+      <UiList v-if="filteredFriends.length">
         <UiListItem
           v-for="f in filteredFriends"
           :key="f.id"
@@ -156,6 +153,14 @@
           <template #leading><UiAvatar :src="f.avatar" :name="f.nickname" :user-id="f.id" size="sm" /></template>
         </UiListItem>
       </UiList>
+      <template v-if="others.length">
+        <p class="t-label mt-5 mb-2">아직 친구가 아닌 사람</p>
+        <UiList>
+          <UiListItem v-for="u in others" :key="u.id" :title="u.nickname" :subtitle="`@${u.username} · 한 판 붙자고 보내기`" :disabled="creating" @click="ask(u)">
+            <template #leading><UiAvatar :src="u.avatar" :name="u.nickname" :user-id="u.id" size="sm" /></template>
+          </UiListItem>
+        </UiList>
+      </template>
     </UiSheet>
   </div>
 </template>
@@ -168,7 +173,8 @@ import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { GET } from '@/api/client'
 import { categoryKey, winSummaryUnder } from '../../utils/rule'
 import { useRoute, useRouter } from 'vue-router'
-import api from '../../api/api'
+import api, { playWithMeTooAPI } from '../../api/api'
+import { getMyId } from '@/utils/me'
 import { useToast } from '../../composables/useToast'
 import { feel } from '../../utils/feel'
 import { shareGameInvite } from '../../utils/share'
@@ -185,7 +191,7 @@ const { showToast } = useToast()
 
 const OPTIONS = [
   { value: 'anyone', icon: 'globe', title: '아무나', description: '경기 목록에 올려서 신청을 받아요' },
-  { value: 'friend', icon: 'user-check', title: '친구와', description: '친구 한 명과 바로 경기를 잡아요' },
+  { value: 'friend', icon: 'user-check', title: '친구와', description: '닉네임으로 찾아 한 명과 경기를 잡아요' },
 ]
 
 // 친구와 바로 잡는 경기는 1:1만 된다 (여럿은 열어서 신청을 받는다)
@@ -329,6 +335,43 @@ const filteredFriends = computed(() => {
   if (!k) return friends.value
   return friends.value.filter((f) => f.nickname?.toLowerCase().includes(k) || f.username?.toLowerCase().includes(k))
 })
+
+// 친구가 아닌 사람도 이름으로 찾는다 (서버 /api/user-profile/search, 최대 20명). 나·친구·AI는 뺀다
+const others = ref([])
+const searching = ref(false)
+let searchSeq = 0
+watch(q, async (v) => {
+  const k = v.trim()
+  const my = ++searchSeq
+  if (!k) { others.value = []; return }
+  searching.value = true
+  try {
+    const [{ data }, me] = await Promise.all([GET('/api/user-profile/search', { query: { keyword: k }, quiet: true }), getMyId().catch(() => null)])
+    if (my !== searchSeq) return
+    const known = new Set(friends.value.map((f) => f.id))
+    others.value = (data ?? []).filter((u) => u.id !== me && !u.isBot && !known.has(u.id))
+  } catch {
+    if (my === searchSeq) others.value = []
+  } finally {
+    if (my === searchSeq) searching.value = false
+  }
+})
+// 친구가 아닌 사람에게는 바로 경기를 잡지 않고 '한 판 붙자'를 보낸다. 받으면 경기가 되고 메시지로 이어진다
+async function ask(u) {
+  if (creating.value) return
+  creating.value = true
+  try {
+    await playWithMeTooAPI.sendRequest(u.id, ruleId.value)
+    friendsOpen.value = false
+    feel('success')
+    showToast(`${u.nickname}님에게 ${rule.value?.ruleTitle ?? '한 판'} 붙자고 했어요. 받으면 알려 드릴게요`)
+    router.replace('/game')
+  } catch (e) {
+    showToast(e.response?.data?.message || '보내지 못했어요')
+  } finally {
+    creating.value = false
+  }
+}
 
 // '아무나'는 내 동네 경기 목록에 올라간다. 동네가 없거나 인증이 지났으면 고르기 전에 알려 주고 인증으로 보낸다
 // ('친구와'는 아는 사람과 바로 잡는 경기라 동네와 상관없다)

@@ -13,6 +13,8 @@ export function loadKakaoMap() {
     s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapKey}&autoload=false`
     s.onload = () => window.kakao.maps.load(() => resolve(window.kakao))
     s.onerror = () => { loading = null; resolve(null) }
+    // 받다가 멈추면 '지도를 불러오는 중'이 끝없이 남았다 (11/14 시뮬레이터): 8초를 넘기면 못 그린 것으로 치고 목록으로 고르게 한다
+    setTimeout(() => { if (!window.kakao?.maps?.LatLng) { loading = null; resolve(null) } }, 8000)
     document.head.appendChild(s)
   })
   return loading

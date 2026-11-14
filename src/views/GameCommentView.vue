@@ -11,6 +11,7 @@
         class="w-full raspy-bot max-w-md flex flex-col rounded-t-2xl bg-surface shadow-xl"
         :style="{
           height: `${sheetHeight}px`,
+          marginBottom: `${keyboard}px`,
           display: 'flex',
           flexDirection: 'column',
         }"
@@ -183,10 +184,13 @@ const SHEET_MARGIN = 0 // 바텀시트 상하 여백
 
 const sheetHeight = ref(window.innerHeight * 0.9)
 const commentAreaHeight = ref(0)
+// 키보드 높이만큼 창을 올린다 (11/14 아이폰 앱: 화면 틀은 키보드에 줄지 않아, 높이만 줄인 창이 키보드 밑에 깔려 입력칸이 안 보였다)
+const keyboard = ref(0)
 function updateHeights() {
   const vv = window.visualViewport
   const vh = vv ? vv.height : window.innerHeight
   sheetHeight.value = vh * 0.9
+  keyboard.value = vv ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0
   commentAreaHeight.value = sheetHeight.value - inputAreaHeight - SHEET_MARGIN
 }
 onMounted(() => {

@@ -5,6 +5,7 @@
 
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto space-y-8">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
+    <OneGameRequests @count="(n) => (requestCount = n)" @changed="fetchGames" />
 
     <div v-if="loading" class="space-y-3">
       <UiCard v-for="n in 2" :key="n">
@@ -27,7 +28,7 @@
     </UiCard>
 
     <!-- 아직 경기가 없을 때: 버튼 둘만 (할 일 3단계 설명은 길었다) -->
-    <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length" class="pt-6">
+    <section v-else-if="!allGames.length && !appDuels.length && !pendingReviews.length && !requestCount" class="pt-6">
       <h2 class="t-title">첫 경기를 잡아 볼까요</h2>
       <p class="t-caption mt-2">확정된 경기는 여기에 모여요. 할 일이 생기면 맨 위에 보여요.</p>
       <div class="flex gap-2 mt-6">
@@ -282,6 +283,7 @@ import { useToast } from '../../composables/useToast'
 import { usePullToRefresh } from '../../composables/usePullToRefresh'
 import { confirmDialog } from '../../composables/useConfirm'
 import { refreshOnChange } from '../../websocket/userChannel'
+import OneGameRequests from '../../components/game/OneGameRequests.vue'
 import { feel } from '../../utils/feel'
 import { useActiveGamePolling } from '../../composables/useActiveGamePolling'
 import { parseRegion } from '../../utils/regionParser'
@@ -297,6 +299,7 @@ const route = useRoute()
 const { showToast } = useToast()
 
 const loading = ref(true)
+const requestCount = ref(0) // 주고받은 한 판 붙자 (있으면 "첫 경기를 잡아 볼까요"를 보이지 않는다)
 const busy = ref(false)
 const sentGames = ref([])
 const myGames = ref([])

@@ -10,6 +10,8 @@
   <main class="px-4 pt-4 pb-32 max-w-xl mx-auto">
     <UiPullIndicator :pull="pull" :refreshing="refreshing" />
     <HomeUpcoming />
+    <!-- 받은 '한 판 붙자'는 홈에서 바로 받는다 (11/14 피터로 걷기: 종의 점 하나뿐이라 받은 줄 몰랐다) -->
+    <OneGameRequests class="mb-6" />
     <!-- 지금 사람이 있나: 실제 수가 넉넉할 때만 한 줄 (11/14 '빈 식당') -->
     <ImprovPulse variant="home" />
     <!-- 학교 대항이 어떻게 돼 가는지, 가입 전 친구와의 승부(친구 답·점수)를 홈에서 바로 (11/14 폰으로 한 바퀴) -->
@@ -159,6 +161,7 @@ import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
 import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
 import HomeUpcoming from '../../components/game/HomeUpcoming.vue'
+import OneGameRequests from '../../components/game/OneGameRequests.vue'
 import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
 import ImprovSchools from '../../components/appgame/ImprovSchools.vue'
 import ImprovVersus from '../../components/appgame/ImprovVersus.vue'
@@ -176,7 +179,15 @@ import { feel } from '../../utils/feel'
 // 아직 안 끝난 앱 대결 (내 경기 화면과 같은 자료)
 const duels = ref([])
 const myIdNow = ref(null)
-const lastGame = computed(() => (savedLast && (!savedLast.uid || savedLast.uid === myIdNow.value) ? savedLast : null))
+// 이 기기에 남은 마지막 판이 없으면 서버에 묻는다 (11/14 피터로 걷기: 인스타 안 브라우저에서 한 판 하고 가입한 사람이
+// 앱이나 사파리로 다시 오면 기기가 달라 홈이 '모르는 사람들의 경기 목록'이었다). 들어오는 길이 임기응변이라 그 등급이 있으면 그것을 마지막 판으로
+const serverLast = ref(null)
+const lastGame = computed(() => (savedLast && (!savedLast.uid || savedLast.uid === myIdNow.value) ? savedLast : serverLast.value))
+onMounted(async () => {
+  if (savedLast) return
+  const g = (await GET('/api/improv/schools', { quiet: true }).catch(() => null))?.data?.myGrade
+  if (g) serverLast.value = { key: 'improv', title: '임기응변 등급', line: `${g}등급` }
+})
 const appPlayer = computed(() => !!lastGame.value || duels.value.length > 0)
 
 // 막 끝난 대결 (하루 안). 마지막 판 게임의 내 대결에서 결과가 난 것

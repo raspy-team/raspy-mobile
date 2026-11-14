@@ -503,7 +503,8 @@ function gradeTag() {
 const schoolsShown = ref(false)
 function join(name: 'result_join' | 'intro_join' | 'limit_join' | 'versus_join' | 'school_join') {
   track(name, { gameKey: key.value, step: rounds.value, value: gradeTag().slice(1) || undefined })
-  rememberReturnTo(`/play/${key.value}`)
+  // 학교로 참전하려고 가입하는 사람은 가입 뒤 곧바로 학교 고르기로 (11/14 피터로 걷기: 게임 첫 화면으로 돌아와 '학교 고르기'를 다시 찾아야 했다)
+  rememberReturnTo(name === 'school_join' ? `/settings/organizations?back=${encodeURIComponent(`/play/${key.value}`)}` : `/play/${key.value}`)
   router.push({ path: '/init', query: { from: result.value ? 'guest' : undefined } })
 }
 

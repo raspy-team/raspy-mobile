@@ -35,22 +35,23 @@ async function load() {
     const rows = [
       // 내가 연 경기: 확정(상대가 정해짐). 하는 중인 경기는 아래 '경기가 진행 중이에요' 띠가 이미 말한다 (같은 말 두 번)
       ...(mine.data || [])
-        .filter((g) => g.status === 'SCHEDULED')
-        .map((g) => ({ g, who: g.opponentNickname })),
+        .filter((g) => g.status === 'SCHEDULED' || g.status === 'RESULT_PENDING')
+        .map((g) => ({ g, who: g.opponentNickname, result: g.status === 'RESULT_PENDING' })),
       // 신청한 경기: 받아들여진 것만
       ...(sent.data || [])
-        .filter((g) => g.status === 'APPROVED' && g.gameStatus === 'SCHEDULED')
-        .map((g) => ({ g, who: g.ownerNickname })),
+        // 결과가 올라온 경기도: 상대가 낸 결과를 확인하는 일이 내 경기 탭의 숫자 하나뿐이었다 (11/14 피터로 걷기)
+        .filter((g) => g.status === 'APPROVED' && (g.gameStatus === 'SCHEDULED' || g.gameStatus === 'RESULT_PENDING'))
+        .map((g) => ({ g, who: g.ownerNickname, result: g.gameStatus === 'RESULT_PENDING' })),
     ]
     items.value = rows
       // 가까운 시간 순 (시간 없는 것은 맨 뒤)
       .sort((a, b) => new Date(a.g.matchDate || 8e15) - new Date(b.g.matchDate || 8e15))
       .slice(0, 3)
-      .map(({ g, who }) => ({
+      .map(({ g, who, result }) => ({
         id: g.id,
         rule: g.rule || {},
         title: `${who ? `${who}님과 ` : ''}${g.rule?.ruleTitle || '경기'}`,
-        sub: g.matchDate ? matchTime(g.matchDate) : '시간을 정해야 해요',
+        sub: result ? '결과가 올라왔어요. 눌러서 확인해요' : g.matchDate ? matchTime(g.matchDate) : '시간을 정해야 해요',
       }))
   } catch {
     items.value = [] // 못 불러와도 홈은 그대로 (내 경기 탭에서 다시 본다)

@@ -314,12 +314,21 @@
         <template v-else-if="key === 'debate'">
           <UiCard v-if="result.myAnswer" class="mt-3">
             <p class="t-micro">내 말싸움</p>
-            <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ result.myAnswer }}</p>
+            <!-- 줄글 덩어리("AI: … 나: …" 열 줄) 대신 판에서 본 말풍선 그대로 (quality-rules L-6) -->
+            <ol class="mt-2 space-y-2">
+              <li v-for="(l, i) in talkLines(result.myAnswer)" :key="i" class="flex" :class="l.self ? 'justify-end' : 'justify-start'">
+                <p class="bubble" :class="l.self ? 'bubble-mine' : 'bubble-theirs'">{{ l.text }}</p>
+              </li>
+            </ol>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
             <p class="t-micro">{{ who(result.opponent) }}님의 말싸움 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
-            <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ result.opponentAnswer }}</p>
-            <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
+            <ol class="mt-2 space-y-2">
+              <li v-for="(l, i) in talkLines(result.opponentAnswer)" :key="i" class="flex" :class="l.self ? 'justify-end' : 'justify-start'">
+                <p class="bubble" :class="l.self ? '!bg-surface-3 text-fg rounded-br-md' : 'bubble-theirs'">{{ l.text }}</p>
+              </li>
+            </ol>
+            <p v-if="result.opponentFeedback" class="t-caption mt-3">{{ judgeName }}: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
         <template v-else-if="key === 'recipe'">
@@ -502,6 +511,13 @@ import api from '../../api/api'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
+// 말싸움 기록("AI: …\n나: …")을 말풍선 줄로. self = 그 판을 한 사람의 말
+function talkLines(text?: string | null) {
+  return String(text ?? '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+    const m = l.match(/^(AI|나)\s*:\s*(.*)$/)
+    return m ? { self: m[1] === '나', text: m[2] } : { self: false, text: l }
+  })
+}
 // 처음 해 보는 사람에게: 한마디와 세 걸음. 시간·글자 수는 판 화면이 말한다(여기 적으면 서버 값과 어긋난다)
 const PITCH: Record<string, { title: string; steps: string[] }> = {
   debate: { title: '반대편 AI를 설득해 보세요', steps: ['주제와 내 편이 정해져요', '세 마디 안에 AI를 설득해요', '설득한 만큼 점수가 나고, 같은 주제를 한 사람과 승패가 나요'] },

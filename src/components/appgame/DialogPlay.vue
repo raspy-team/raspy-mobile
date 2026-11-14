@@ -1,7 +1,7 @@
 <template>
   <div :class="typing ? 'pb-[50vh]' : ''">
     <div class="flex items-center justify-between">
-      <span class="t-caption">{{ topic }} · 나는 <b class="text-fg">{{ mine }}</b> 편</span>
+      <span class="t-body">{{ topic }} · 나는 <b>{{ mine }}</b> 편</span>
       <span class="t-mono tabular-nums" :class="remaining <= 30 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 

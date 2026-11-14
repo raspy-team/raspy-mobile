@@ -8,7 +8,8 @@
     <template v-if="current">
       <!-- 인물·사정은 늘 보인다. 쓰는 동안 접었더니 자동 초점과 겹쳐 누가 어떤 자리에서 한 말인지 읽기도 전에 접혔고,
            '말하기'를 누를 때 다시 펼쳐지며 버튼이 손가락 밑에서 밀렸다 (경로 10 리뷰 I1·I2). 대신 한 덩어리로 좁게 쓰고, 키보드가 오르면 판 머리부터 보이게 올린다 -->
-      <p class="t-caption mt-3 break-keep">{{ current.who }} <span class="t-micro">· {{ current.context }}</span></p>
+      <!-- 누가 어떤 자리에서 한 말인지는 답을 정하는 정보다: 본문 크기로, 인물은 또렷하게 (quality-rules L-3) -->
+      <p class="t-body mt-3 break-keep">{{ current.who }} <span class="text-fg-muted">· {{ current.context }}</span></p>
       <!-- 인물의 첫 마디 -->
       <div class="mt-2 rounded-2xl rounded-bl-md bg-surface-2 px-4 py-3">
         <p class="t-title break-keep">“{{ current.line }}”</p>

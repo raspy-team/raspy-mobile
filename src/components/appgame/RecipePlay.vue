@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex items-center justify-between">
-      <span class="t-caption">이 재료로 요리를 지어내 주세요</span>
+      <span class="t-body">이 재료로 요리를 지어내 주세요</span>
       <span class="t-mono tabular-nums" :class="remaining <= 30 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 

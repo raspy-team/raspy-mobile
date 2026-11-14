@@ -2,7 +2,8 @@
   <!-- 키보드가 오르면 안내·남은 시간 줄이 제목 바 밑에 숨었다(아이폰 앱, 11/14): 임기응변처럼 판 머리부터 보이게 맞춘다 -->
   <div ref="root" class="scroll-mt-[calc(env(safe-area-inset-top)+4.5rem)]" :class="typing ? 'pb-[50vh]' : ''" @focusout="onTypeEnd">
     <div class="flex items-start justify-between gap-3">
-      <span class="t-caption break-keep">{{ guide }}</span>
+      <!-- 무엇을 하라는 안내는 본문 크기로 또렷하게 (quality-rules L-3: 작은 회색 두 줄이었다) -->
+      <span class="t-body break-keep">{{ guide }}</span>
       <span class="t-mono tabular-nums shrink-0 whitespace-nowrap" :class="remaining <= 20 ? 'text-danger-fg' : 'text-fg-muted'">{{ clock }}</span>
     </div>
 

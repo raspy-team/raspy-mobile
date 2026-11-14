@@ -73,7 +73,7 @@
 @layer utilities {
   .text-body { font-size: 0.9375rem; }
   .text-heading { font-size: 1.0625rem; }
-  .text-badge { font-size: 12px; }
+  .text-badge { font-size: 13px; }
 }
 /* 여러 화면에서 쓰는 스크롤 유틸리티 */
 @layer utilities {

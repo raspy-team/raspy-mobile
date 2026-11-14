@@ -53,7 +53,7 @@
           <button v-for="p in enter?.presets ?? []" :key="p" type="button" class="shrink-0 h-9 px-3 rounded-full bg-canvas/85 t-caption text-fg" @click="say(p)">{{ p }}</button>
         </div>
         <!-- 그림 크레딧 (LimeZu 라이선스: 크레딧 필수) -->
-        <a href="https://limezu.itch.io" target="_blank" rel="noopener" class="block text-right text-[10px] text-white/60 pr-1">Pixel art by LimeZu</a>
+        <a href="https://limezu.itch.io" target="_blank" rel="noopener" class="block text-right text-xs text-white/70 pr-1">Pixel art by LimeZu</a>
         <form class="flex items-center gap-2" @submit.prevent="say(text)">
           <UiIconButton icon="smile" :label="quickOpen ? '빠른 말 닫기' : '빠른 말·이모티콘'" class="bg-canvas/85" @click="quickOpen = !quickOpen" />
           <input

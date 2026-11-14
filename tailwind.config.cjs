@@ -46,6 +46,8 @@ module.exports = {
       black: '700',
     },
     extend: {
+      // 글자 크기 단계를 줄인다 (quality-rules L-5): 12와 13이 따로라 한 화면에 여덟 단계가 섞였다. 가장 작은 글자는 13 하나
+      fontSize: { xs: ['0.8125rem', { lineHeight: '1.125rem' }] },
       borderColor: { DEFAULT: v('line') },
       zIndex: {
         header: '30',

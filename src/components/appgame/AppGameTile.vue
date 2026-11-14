@@ -13,7 +13,7 @@
         <span v-else-if="played" class="t-micro tabular-nums flex-shrink-0">실력 {{ game.myRating }}</span>
       </span>
       <span class="block mt-1 t-caption break-keep">{{ game.summary }}</span>
-      <span v-if="showMeta && meta" class="block mt-1.5 t-micro">{{ meta }}</span>
+      <span v-if="showMeta && meta" class="block mt-2 t-micro">{{ meta }}</span>
     </span>
   </RouterLink>
   <RouterLink v-else :to="again ? `/play/${game.key}?again=1` : `/play/${game.key}`" class="flex flex-col rounded-2xl bg-surface p-4 active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-[0.98]" :class="compact ? 'w-36 flex-shrink-0' : ''">

@@ -1,7 +1,7 @@
 <template>
   <!-- 한 화면에 다 들어가게, 스크롤 없이 (애플식 시작 화면, 마스코트 없이) -->
   <div class="h-dvh overflow-hidden bg-canvas flex flex-col pt-safe pb-safe">
-    <main class="flex-1 min-h-0 w-full max-w-md mx-auto px-6 flex flex-col">
+    <main class="flex-1 min-h-0 w-full max-w-md mx-auto px-4 flex flex-col">
       <!-- 무슨 앱인지 -->
       <div class="flex-1 min-h-0 flex flex-col justify-center py-6">
         <span class="text-[22px] font-semibold leading-none tracking-[-0.055em] text-fg">match</span>

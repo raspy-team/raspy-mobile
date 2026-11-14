@@ -64,7 +64,7 @@
         <ol v-else-if="format === 'FREE_FOR_ALL'" class="mt-10 rounded-xl bg-surface divide-y divide-line">
           <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3 px-4 h-14">
             <span class="t-mono w-8 text-fg" :class="r.place === 1 ? 'font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
-            <button type="button" class="flex items-center gap-2.5 min-w-0 flex-1 text-left" @click="router.push('/profile/' + r.id)">
+            <button type="button" class="flex items-center gap-3 min-w-0 flex-1 text-left" @click="router.push('/profile/' + r.id)">
               <UiAvatar :src="r.profileUrl" :name="r.nickname" :user-id="r.id" size="sm" />
               <span class="text-sm truncate" :class="r.place === 1 ? 'text-fg font-medium' : 'text-fg-muted'">{{ r.nickname }}<UiAiBadge v-if="r.isBot" /><span v-if="r.id === currentUserId" class="text-fg-subtle"> (나)</span></span>
             </button>
@@ -78,7 +78,7 @@
             v-for="(side, i) in sides"
             :key="side.user.id || i"
             type="button"
-            class="flex flex-col items-center gap-2.5 min-w-0"
+            class="flex flex-col items-center gap-3 min-w-0"
             :class="i === 1 ? 'order-3' : 'order-1'"
             @click="router.push('/profile/' + side.user.id)"
           >
@@ -210,7 +210,7 @@
             <UiInput v-if="reviewMore" v-model="review.text" multiline :rows="3" label="한마디" optional hint="상대 프로필과 소식에 내 이름과 함께 보여요" placeholder="같이 해서 좋았던 점" />
             <!-- 기록에서 뽑은 사실 한 줄 (소식 이야기 줄). 누르면 한마디에 넣는다. 고르지 않아도 된다 -->
             <div v-if="reviewMore && beatChoices.length" class="-mt-2">
-              <p class="t-micro mb-1.5">기록에서 한 줄 고르기</p>
+              <p class="t-micro mb-2">기록에서 한 줄 고르기</p>
               <div class="flex flex-wrap gap-2">
                 <UiChip v-for="b in beatChoices" :key="b" :selected="review.text === b" @click="review.text = review.text === b ? '' : b">{{ b }}</UiChip>
               </div>

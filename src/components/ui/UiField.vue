@@ -4,8 +4,8 @@
       {{ label }}<span v-if="optional" class="text-fg-subtle font-normal"> (선택)</span>
     </span>
     <slot />
-    <span v-if="error" class="block mt-1.5 text-sm text-danger-fg">{{ error }}</span>
-    <span v-else-if="hint" class="block mt-1.5 t-micro">{{ hint }}</span>
+    <span v-if="error" class="block mt-2 text-sm text-danger-fg">{{ error }}</span>
+    <span v-else-if="hint" class="block mt-2 t-micro">{{ hint }}</span>
   </label>
 </template>
 

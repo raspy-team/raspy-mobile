@@ -51,10 +51,10 @@
 
     <!-- 쓰기: 닫힌 방이면 숨긴다 -->
     <div v-if="info?.writable" class="fixed bottom-0 inset-x-0 z-header bg-canvas border-t border-line pb-safe">
-      <div v-if="talks.length" class="flex gap-2 px-3 pt-2 overflow-x-auto no-scrollbar">
+      <div v-if="talks.length" class="flex gap-2 px-4 pt-2 overflow-x-auto no-scrollbar">
         <UiChip v-for="q in QUICK" :key="q" @click="send(q)">{{ q }}</UiChip>
       </div>
-      <form class="px-3 py-2 flex items-end gap-2" @submit.prevent="send()">
+      <form class="px-4 py-2 flex items-end gap-2" @submit.prevent="send()">
         <textarea v-model="draft" rows="1" class="ui-control py-3 resize-none flex-1" placeholder="메시지 보내기" enterkeyhint="send" aria-label="메시지" maxlength="1000" @keydown.enter.exact="onEnter" />
         <button type="submit" aria-label="보내기" :disabled="!draft.trim()" class="w-12 h-12 flex-shrink-0 rounded-full bg-primary text-primary-on flex items-center justify-center active:bg-primary-press disabled:bg-surface-2 disabled:text-fg-subtle transition-colors">
           <UiIcon name="fas fa-paper-plane" aria-hidden="true" />

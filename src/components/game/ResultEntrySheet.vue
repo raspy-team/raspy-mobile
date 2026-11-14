@@ -77,7 +77,7 @@
         <span class="flex-1 min-w-0 text-sm truncate">{{ proofFile ? proofFile.name : '결과 화면 스크린샷 붙이기 (선택)' }}</span>
         <input type="file" accept="image/*" class="sr-only" @change="onProof" />
       </label>
-      <p class="t-caption mt-1.5">붙이면 상대가 결과를 확인할 때 같이 봐요.</p>
+      <p class="t-caption mt-2">붙이면 상대가 결과를 확인할 때 같이 봐요.</p>
     </div>
     <p v-if="error" class="text-sm text-danger-fg mt-3" role="alert">{{ error }}</p>
 

@@ -5,7 +5,7 @@
       <div class="flex-1 min-w-0">
         <p class="t-heading truncate">{{ game.rule?.ruleTitle }}</p>
         <!-- 때·장소는 두 줄까지 (한 줄로 자르면 '장…'처럼 장소 미정도 안 보였다). 줄이 모자라면 장소가 잘리게 때를 앞에 ('11월 …'로 날짜가 잘렸다, 11/5 밤샘 C) -->
-        <button v-if="canSchedule" type="button" class="flex items-center gap-1.5 max-w-full text-left mt-0.5 py-2.5 -my-2.5" @click="emit('schedule')">
+        <button v-if="canSchedule" type="button" class="flex items-start gap-1.5 max-w-full text-left mt-0.5 py-2.5 -my-2.5" @click="emit('schedule')">
           <span class="t-caption line-clamp-2 min-w-0">{{ matchTime(game.matchDate) }} · {{ venuePlace(game, place) }}</span>
           <!-- 정한 뒤에도 두 선수 모두 바꿀 수 있다는 게 보이게 (예전 밑줄 글씨는 너무 작아 못 바꾸는 줄 알았다) -->
           <UiBadge icon="pen" class="flex-shrink-0 !text-fg">{{ needsSchedule ? '정하기' : '바꾸기' }}</UiBadge>
@@ -21,7 +21,7 @@
     </div>
 
     <!-- 시간 바꾸기 제안 (확정된 1:1): 받는 사람은 좋아요·그대로, 낸 사람은 기다림 -->
-    <div v-if="game.proposedMatchDate" class="mx-4 mb-3 rounded-xl bg-surface px-3 py-2.5">
+    <div v-if="game.proposedMatchDate" class="mx-4 mb-3 rounded-xl bg-surface px-4 py-3">
       <template v-if="game.proposedById === me?.id">
         <div class="flex items-center gap-2">
           <p class="flex-1 min-w-0 t-caption">{{ matchTime(game.proposedMatchDate) }}로 바꾸자고 했어요</p>

@@ -45,7 +45,7 @@
           <img :src="comment.imageUrl" alt="" loading="lazy" class="max-w-[140px] max-h-[140px] rounded-xl hover:brightness-95 transition" />
         </button>
       </div>
-      <div class="flex items-center gap-2 mt-1.5 t-micro">
+      <div class="flex items-center gap-2 mt-2 t-micro">
         <button
           class="-m-2.5 w-11 h-11 transition flex items-center justify-center"
           :aria-label="comment.myLikeType === 'LIKE' ? '좋아요 취소' : '좋아요'"

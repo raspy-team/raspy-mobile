@@ -18,7 +18,7 @@
     <!-- 결과: 이 카드의 주인공. 승자 이름에 형광펜. 카드 안에 상자를 또 두지 않는다 (11/3) -->
     <div class="mt-4 mb-1">
       <!-- 셋 이상이 각자: 등수 줄 -->
-      <ol v-if="ranking.length" class="space-y-1.5">
+      <ol v-if="ranking.length" class="space-y-2">
         <li v-for="r in ranking" :key="r.id" class="flex items-center gap-3">
           <span class="t-mono w-8" :class="r.place === 1 ? 'text-fg font-bold' : 'text-fg-subtle'">{{ r.place }}등</span>
           <button type="button" class="min-w-0 truncate text-body text-left py-2.5 -my-2.5" :class="r.place === 1 ? 'text-fg font-semibold' : 'text-fg-muted'" @click="emit('profile', r.id)">

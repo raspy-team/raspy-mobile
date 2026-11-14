@@ -89,12 +89,13 @@
       <!-- 내 규칙: 홈 첫 화면에서 옮겨 왔다 (목적 판정 11/11 4번). 동호회는 뺐다 (11/13 앱 기능 좁히기: 카톡이 더 잘한다) -->
       <!-- 꾸미기도 여기서: 광장(밤 10~11시)으로만 갈 수 있어 하루 23시간은 해낸 일로 얻은 꾸미기를 쓸 길이 없었다 (11/13 실제 기기 한 바퀴) -->
       <div v-if="user.isMe" class="mt-2 grid grid-cols-2 gap-2">
-        <UiButton block variant="ghost" size="sm" icon="book-open" to="/rules/my-rules">내 규칙</UiButton>
-        <UiButton block variant="ghost" size="sm" icon="shirt" to="/plaza/avatar">꾸미기</UiButton>
+        <!-- 틀 없는 글자 둘이 떠 있었다: 위의 '프로필 편집'과 같은 면 버튼으로 (quality-rules A-5) -->
+        <UiButton block variant="secondary" icon="book-open" to="/rules/my-rules">내 규칙</UiButton>
+        <UiButton block variant="secondary" icon="shirt" to="/plaza/avatar">꾸미기</UiButton>
       </div>
 
-      <!-- 숫자 한 줄: 상자 없이, 승률은 경기가 있을 때만 -->
-      <div class="mt-5 flex text-center">
+      <!-- 숫자 한 줄: 한 카드 안에 칸을 선으로 나눈다 (quality-rules A-5: 상자 없이 떠 있어 어디에 속한 숫자인지 흐렸다). 승률은 경기가 있을 때만 -->
+      <div class="mt-4 flex text-center rounded-xl bg-surface py-3 divide-x divide-line">
         <!-- 경기·승률은 누르면 기록 화면. 기록을 '나만'으로 둔 사람은 서버가 숫자를 비워 보낸다 -->
         <div v-if="user.recordsHidden" class="flex-1">
           <p class="t-heading text-fg-subtle">–</p>

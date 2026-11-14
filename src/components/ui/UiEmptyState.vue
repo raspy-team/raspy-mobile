@@ -6,7 +6,7 @@
     </span>
     <span v-else class="mb-4" aria-hidden="true"><MatchMascot :who="mascot || 'match'" :size="72" :mood="mood || ($slots.default ? 'smile' : 'sad')" /></span>
     <p class="t-heading">{{ title }}</p>
-    <p v-if="description" class="t-caption mt-1.5 max-w-[30ch]">{{ description }}</p>
+    <p v-if="description" class="t-caption mt-2 max-w-[30ch]">{{ description }}</p>
     <div v-if="$slots.default" class="mt-6"><slot /></div>
   </div>
 </template>

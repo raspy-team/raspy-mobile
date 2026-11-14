@@ -458,7 +458,7 @@ const closeErrorModal = () => {
       </header>
 
       <!-- 도전 상태 -->
-      <div v-if="headerInfo.show" class="px-3 py-2 border-b border-line">
+      <div v-if="headerInfo.show" class="px-4 py-2 border-b border-line">
         <div class="flex items-start gap-3">
           <RuleThumb :rule="{ minorCategory: challengeStatus?.minorCategory, ruleTitle: challengeStatus?.ruleTitle }" :size="44" class="!rounded-lg" />
           <div class="flex-1 min-w-0">
@@ -481,7 +481,7 @@ const closeErrorModal = () => {
         </div>
       </div>
       <!-- 지금 이 사람과 무슨 경기 이야기인지 (당근 채팅의 물건 칸처럼). 도전 카드가 없을 때 -->
-      <div v-if="!headerInfo.show && between" class="px-3 py-2 border-b border-line">
+      <div v-if="!headerInfo.show && between" class="px-4 py-2 border-b border-line">
         <div class="flex items-start gap-3">
           <RuleThumb :rule="{ minorCategory: between.minorCategory, ruleTitle: between.ruleTitle }" :size="44" class="!rounded-lg" />
           <button type="button" class="flex-1 min-w-0 text-left" @click="router.push({ path: '/game', query: { id: between.gameId } })">
@@ -500,7 +500,7 @@ const closeErrorModal = () => {
 
     <!-- 대화 -->
     <div
-      class="fixed top-0 left-0 w-full h-full px-3 bg-canvas"
+      class="fixed top-0 left-0 w-full h-full px-4 bg-canvas"
       :style="{ paddingTop: `${headerTop + topHeight}px`, paddingBottom: `${bottomHeight}px` }"
     >
       <!-- 말풍선 모양 자리 표시 (주고받는 모양 그대로) -->
@@ -553,7 +553,7 @@ const closeErrorModal = () => {
     <!-- 입력 -->
     <!-- 키보드가 올라와 있으면 홈 바 자리를 비우지 않는다: 입력 줄과 키보드 사이에 빈 띠가 생겼다 (11/14 전수 평가) -->
     <div ref="bottomRef" class="fixed bottom-0 w-full z-header bg-canvas border-t border-line" :class="keyboardOpen ? '' : 'pb-safe'">
-      <form class="px-3 py-2 flex items-end gap-2" @submit.prevent="sendMsg">
+      <form class="px-4 py-2 flex items-end gap-2" @submit.prevent="sendMsg">
         <textarea
           v-model="newMsg"
           rows="1"

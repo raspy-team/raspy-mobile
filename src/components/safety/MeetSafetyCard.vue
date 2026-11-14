@@ -15,7 +15,7 @@
     </div>
 
     <!-- 도착 -->
-    <ul v-if="!live" class="space-y-1.5 t-caption">
+    <ul v-if="!live" class="space-y-2 t-caption">
       <li class="flex items-center gap-2">
         <UiIcon :name="s.arrivedAt ? 'circle-check' : 'circle'" :class="s.arrivedAt ? 'text-signal-fg' : 'text-fg-subtle'" aria-hidden="true" />
         <span class="flex-1">나 {{ s.arrivedAt ? `${hm(s.arrivedAt)} 도착` : '아직 도착 전' }}{{ s.finishedAt ? ' · 잘 끝났어요' : '' }}</span>

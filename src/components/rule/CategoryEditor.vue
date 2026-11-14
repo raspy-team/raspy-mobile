@@ -20,7 +20,7 @@
 
     <UiField :label="`무엇이 어려운가요? (${options.maxAbilities}개까지)`">
       <div v-for="g in options.abilityGroups" :key="g.key" class="mb-3 last:mb-0">
-        <p class="t-micro mb-1.5">{{ g.label }}</p>
+        <p class="t-micro mb-2">{{ g.label }}</p>
         <div class="flex flex-wrap gap-2">
           <UiChip
             v-for="a in options.abilities.filter((x) => x.group === g.key)"
@@ -57,7 +57,7 @@
       <div class="flex flex-wrap gap-2">
         <UiChip v-for="p in options.parties" :key="p.key" :selected="model.parties.includes(p.key)" @click="toggle('parties', p.key)">{{ p.label }}</UiChip>
       </div>
-      <p class="t-caption mt-1.5">상대가 앱 안에 있거나 각자 기록하면 '혼자'예요</p>
+      <p class="t-caption mt-2">상대가 앱 안에 있거나 각자 기록하면 '혼자'예요</p>
     </UiField>
 
     <UiField label="한 판에 얼마나 걸리나요?">

@@ -33,7 +33,7 @@
 
         <!-- 댓글 리스트 영역 -->
         <div
-          class="flex-1 overflow-y-auto px-4 pt-2 pb-4"
+          class="flex-1 overflow-y-auto px-5 pt-2 pb-4"
           ref="scrollContainer"
           :style="{
             minHeight: '0px',
@@ -73,7 +73,7 @@
         <!-- 입력창 (항상 바텀) -->
         <form
           @submit.prevent="submitInput"
-          class="flex gap-2 items-center border-t border-line pt-2 pb-2 px-3 bg-surface"
+          class="flex gap-2 items-center border-t border-line pt-2 pb-2 px-5 bg-surface"
           ref="inputForm"
           :style="{
             minHeight: `${inputAreaHeight}px`,

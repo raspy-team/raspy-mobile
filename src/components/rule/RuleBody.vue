@@ -15,7 +15,7 @@
     <div v-if="sections.length" class="border-t border-line pt-8 space-y-6">
       <section v-for="s in sections" :key="s.key">
         <h3 class="t-label text-fg">{{ s.title }}</h3>
-        <p class="t-body text-fg-muted mt-1.5 whitespace-pre-line break-words">{{ s.body }}</p>
+        <p class="t-body text-fg-muted mt-2 whitespace-pre-line break-words">{{ s.body }}</p>
       </section>
     </div>
   </div>

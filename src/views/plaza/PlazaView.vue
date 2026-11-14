@@ -113,7 +113,7 @@
           v-for="g in games"
           :key="g.key"
           type="button"
-          class="h-14 rounded-2xl bg-surface px-3 text-left t-body text-fg active:bg-surface-2"
+          class="h-14 rounded-2xl bg-surface px-4 text-left t-body text-fg active:bg-surface-2"
           @click="challenge(g.key)"
         >
           {{ g.title }}

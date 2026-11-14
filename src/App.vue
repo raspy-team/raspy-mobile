@@ -160,7 +160,8 @@ onMounted(() => {
 
 // 진행 중 경기 띠: 경기·결과·내 경기 화면에서는 숨긴다
 // 내 경기 화면은 카드에 이미 '점수판 열기'가 있어서 띠를 띄우지 않는다
-const showActiveBanner = computed(() => route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path) && !/^\/play\/[^/]+\/live/.test(route.path)) // 앱 게임 한 판 중에도 띠가 판을 가렸다 (11/13)
+// 띠는 아래 탭이 있는 화면에만 띄운다: 탭이 없는 화면(대화·결과 확인·꾸미기·글 쓰는 판)은 아래에 입력 줄·주 버튼이 있어 띠가 그것을 덮었다 (정돈됨 바퀴에서 대화 입력 줄이 가려진 것을 봄)
+const showActiveBanner = computed(() => footerTab.value !== null && route.path !== '/game' && !/^\/games\/\d+\/(play|result)/.test(route.path) && !/^\/play\/[^/]+\/live/.test(route.path)) // 앱 게임 한 판 중에도 띠가 판을 가렸다 (11/13)
 const openActiveGame = () => {
   if (activeGame.value?.gameId) router.push(`/games/${activeGame.value.gameId}/play`)
 }

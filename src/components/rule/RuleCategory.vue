@@ -11,7 +11,7 @@
     </div>
 
     <!-- 찾기 상황 네 가지 + 운 -->
-    <dl class="mt-5 grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5">
+    <dl class="mt-5 grid grid-cols-[auto_1fr] gap-x-5 gap-y-3">
       <template v-for="row in rows" :key="row.label">
         <dt class="t-caption">{{ row.label }}</dt>
         <dd class="t-body">{{ row.value }}</dd>

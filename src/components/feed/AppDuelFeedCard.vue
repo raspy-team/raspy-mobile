@@ -52,7 +52,7 @@
         v-if="sides.some((s) => s.text)"
         :type="hasDetail && !still ? 'button' : undefined"
         class="mt-4 block w-full text-left space-y-2"
-        :class="hasDetail && !still ? 'rounded-xl bg-surface-2/60 px-3.5 py-3 active:bg-surface-2' : ''"
+        :class="hasDetail && !still ? 'rounded-xl bg-surface-2/60 px-4 py-3 active:bg-surface-2' : ''"
         @click="hasDetail && !still && (detailOpen = true)"
       >
         <!-- 그림으로 찍을 때(still)는 세 줄까지: 긴 대답이 카드를 늘려 스토리 그림의 꼬리(주소)가 밀려났다 (3-5 P6 나머지 F1) -->

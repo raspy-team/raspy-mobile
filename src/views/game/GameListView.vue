@@ -94,7 +94,7 @@
               <UiSkeleton class="h-3 w-1/2" />
             </div>
           </div>
-          <div class="flex items-center gap-2.5 mt-4">
+          <div class="flex items-center gap-3 mt-4">
             <UiSkeleton class="w-8 h-8 rounded-full" />
             <UiSkeleton class="h-3 w-24" />
           </div>

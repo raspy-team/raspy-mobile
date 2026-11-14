@@ -32,7 +32,7 @@
     </template>
 
     <!-- 위 셋 (내 학교가 그 안에 있으면 표시) -->
-    <ol v-if="data.schools.length" class="mt-3 space-y-1.5">
+    <ol v-if="data.schools.length" class="mt-3 space-y-2">
       <li v-for="s in data.schools.slice(0, 3)" :key="s.orgId" class="flex items-center gap-2 t-body" :class="s.orgId === data.mine?.orgId ? 'text-fg font-semibold' : 'text-fg-muted'">
         <span class="w-5 tabular-nums">{{ s.rank }}</span>
         <span class="flex-1 min-w-0 truncate">{{ s.name }}</span>

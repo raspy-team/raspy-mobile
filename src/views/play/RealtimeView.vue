@@ -111,7 +111,7 @@
         <!-- 끝말잇기: 이은 낱말과 입력칸 -->
         <template v-else>
         <UiCard class="mt-4">
-          <ol class="space-y-1.5">
+          <ol class="space-y-2">
             <li class="t-caption">시작: {{ state.startWord }}</li>
             <li
               v-for="(m, i) in state.moves"

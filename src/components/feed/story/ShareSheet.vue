@@ -260,13 +260,13 @@ function go(key: Dest) {
       return void kakaoShare({ title: line.value, description: what || 'matchapp.me', url, image: `https://matchapp.me${su.pathname}/og.png?k=${su.searchParams.get('k') ?? ''}`, button: '나도 한 판' }).then((ok) => {
         if (ok) { markShared(); return close() }
         if (!navigator.share) return copied(url, '링크 복사해 뒀어요. 붙여 넣어서 보내 주세요')
-        navigator.share({ url }).then(() => { markShared(); close() }, (e: any) => { if (e?.name !== 'AbortError') copied(url) })
+        navigator.share({ text: line.value, url }).then(() => { markShared(); close() }, (e: any) => { if (e?.name !== 'AbortError') copied(url) })
       })
     }
     if (key === 'copy' || !navigator.share) return copied(url, key === 'copy' ? '링크 복사해 뒀어요' : '링크 복사해 뒀어요. 붙여 넣어서 보내 주세요')
     // 카톡·메시지: 링크만 보낸다. 카톡이 경기 그림을 펼쳐 보여 준다 (미리보기 그림 og.png)
-    // 글은 넣지 않고 링크만 (11/14 고병연: 보내는 사람의 말까지 우리가 대신 쓰지 않는다. 한 줄은 그림과 카드 안에만 있다)
-    return void navigator.share({ url }).then(() => {
+    // 한 줄과 링크를 함께 보낸다 (11/14: 링크만으로 바꿨다가 고병연이 되돌렸다)
+    return void navigator.share({ text: line.value, url }).then(() => {
       markShared()
       close()
     }, (e: any) => {
@@ -310,7 +310,7 @@ function go(key: Dest) {
   }
   // 더보기: 그림과 한 줄·링크를 함께 (폰이 아는 모든 곳)
   const url = link('link')
-  void shareFiles([file], url || undefined).then((r) => after(r, file))
+  void shareFiles([file], url ? `${line.value}\n${url}` : line.value).then((r) => after(r, file))
 }
 </script>
 

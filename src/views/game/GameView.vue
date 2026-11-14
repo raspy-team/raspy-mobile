@@ -220,6 +220,7 @@
       <PlacePickerSheet v-model="pickerOpen" :rule-title="scheduleGame?.rule?.ruleTitle ?? ''" :near="myArea?.lat ? { lat: myArea.lat, lon: myArea.lon } : null" @picked="(p) => { pickedPlace = p; placeMode = 'picked' }" />
     </div>
     <template #footer>
+      <p v-if="!canSubmitSchedule && !busy" class="t-micro text-center mb-2">시간이나 장소를 고르면 정할 수 있어요</p>
       <UiButton block :disabled="!canSubmitSchedule" :loading="busy" @click="submitSchedule">{{ scheduleDecided(scheduleGame) ? '바꾸기' : '정하기' }}</UiButton>
     </template>
   </UiSheet>

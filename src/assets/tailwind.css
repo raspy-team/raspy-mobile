@@ -247,6 +247,9 @@ html.has-banner main::after { content: ''; display: block; height: 5rem; }
   .page-back-enter-active { transition: none; }
 }
 
+/* 눌린 모양의 기본값: 제 눌림 모양(active:…)이 없는 버튼·링크도 누르는 순간 흐려진다 (quality-rules F-1). :where라 제 모양이 있으면 그것이 이긴다 */
+:where(button, a, [role='button'], [role='tab'], [role='radio'], [role='checkbox'], [role='link']):active:not(:disabled) { opacity: 0.7; }
+
 /* 키보드로 옮겨 다닐 때 지금 어디에 있는지 보이게 (손가락으로 누를 때는 안 보인다) */
 :where(a, button, [role='button'], [role='tab'], [role='radio'], summary):focus-visible {
   outline: 2px solid theme('colors.primary.DEFAULT');

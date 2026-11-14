@@ -108,7 +108,9 @@
     <div v-if="!loading" class="bottom-bar fixed bottom-0 inset-x-0 bg-canvas border-t border-line pb-safe">
       <div class="max-w-md mx-auto px-4 py-3">
         <UiButton v-if="step === 'terms'" block size="lg" :disabled="!allAgreed" :loading="saving" @click="submitTerms">동의하고 계속하기</UiButton>
-        <UiButton v-else block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">시작하기</UiButton>
+        <!-- 꺼진 까닭을 버튼 위에 (quality-rules F-3: 눌러도 왜 안 되는지 말이 없었다) -->
+        <p v-if="step !== 'terms' && !canFinish" class="t-micro text-center mb-2" aria-live="polite">{{ !nickname.trim() ? '닉네임을 넣으면 시작할 수 있어요' : !username.trim() ? '아이디를 넣어 주세요' : '약관에 동의하면 시작할 수 있어요' }}</p>
+        <UiButton v-if="step !== 'terms'" block size="lg" :disabled="!canFinish" :loading="saving" @click="submitProfile">시작하기</UiButton>
         <!-- 잘못 들어온 계정이면 빠져나갈 길 (목적 판정 11/11 부분 1) -->
         <button type="button" class="hit block mx-auto mt-1 t-micro underline underline-offset-2 min-h-[36px] kb-hide" @click="otherAccount">다른 계정으로 시작</button>
       </div>

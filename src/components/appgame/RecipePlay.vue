@@ -15,7 +15,8 @@
       <UiInput v-model="name" label="요리 이름" :maxlength="30" placeholder="예: 김치 치즈 떡볶이" @focusin="onTypeStart" />
       <UiInput v-model="steps" label="만드는 법" multiline :rows="6" @focusin="onTypeStart" :maxlength="500" placeholder="재료를 어떻게 손질하고 익히는지 적어 주세요" />
     </div>
-    <UiButton block size="lg" class="mt-4" :loading="submitting" :disabled="!name.trim() || steps.trim().length < 10" @click="finish">
+    <p v-if="!name.trim() || steps.trim().length < 10" class="t-micro text-center mt-3">요리 이름과 만드는 법(열 글자부터)을 쓰면 낼 수 있어요</p>
+    <UiButton block size="lg" class="mt-2" :loading="submitting" :disabled="!name.trim() || steps.trim().length < 10" @click="finish">
       다 만들었어요
     </UiButton>
   </div>

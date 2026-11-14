@@ -54,6 +54,7 @@
 
       <div class="bottom-bar fixed bottom-0 inset-x-0 z-nav bg-canvas border-t border-line pb-safe">
         <div class="max-w-md mx-auto px-4 py-3">
+          <p v-if="!dirty" class="t-micro text-center mb-2">바꾼 것이 있으면 저장할 수 있어요</p>
           <UiButton type="submit" block size="lg" :disabled="!dirty" :loading="saving">저장</UiButton>
         </div>
       </div>

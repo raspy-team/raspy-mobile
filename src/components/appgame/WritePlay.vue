@@ -12,7 +12,7 @@
 
     <div class="mt-5">
       <UiInput v-model="text" multiline :rows="4" :maxlength="120" :placeholder="placeholder" @focusin="onTypeStart" />
-      <p class="t-micro text-right mt-1">{{ text.length }}/120</p>
+      <p class="t-micro mt-1 flex justify-between"><span>{{ text.trim().length < 5 ? '다섯 글자부터 낼 수 있어요' : '' }}</span><span>{{ text.length }}/120</span></p>
     </div>
     <div ref="action" class="mt-3"><UiButton block size="lg" :loading="submitting" :disabled="text.trim().length < 5" @click="finish">다 썼어요</UiButton></div>
     <!-- AI가 채점하는 글쓰기에는 투표가 없다: 투표 게임에만 (경로 2 리뷰) -->

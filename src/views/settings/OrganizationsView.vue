@@ -146,6 +146,7 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { timeAgo } from '../../utils/format'
 import { photoFromFile } from '../../utils/image'
 import { useToast } from '../../composables/useToast'
+import { why } from '../../utils/why'
 import { confirmDialog } from '../../composables/useConfirm'
 import {
   UiBadge, UiButton, UiCard, UiChip, UiEmptyState, UiIcon, UiInput, UiList, UiListItem, UiListSkeleton,
@@ -199,8 +200,8 @@ async function setVisibility(m: Membership, v: Visibility) {
   try {
     await PUT('/api/organizations/{orgId}/visibility', { path: { orgId: m.orgId }, body: { visibility: v } })
     m.visibility = v
-  } catch {
-    showToast('바꾸지 못했어요. 잠시 뒤 다시 해 주세요')
+  } catch (e) {
+    showToast(why(e, '바꾸지 못했어요. 잠시 뒤 다시 해 주세요'))
   } finally {
     savingVisibility.value = ''
   }
@@ -213,8 +214,8 @@ async function leave(m: Membership) {
     await DELETE('/api/organizations/{orgId}/membership', { path: { orgId: m.orgId } })
     openMember.value = null
     await load()
-  } catch {
-    showToast('떼지 못했어요. 잠시 뒤 다시 해 주세요')
+  } catch (e) {
+    showToast(why(e, '떼지 못했어요. 잠시 뒤 다시 해 주세요'))
   } finally {
     leaving.value = false
   }
@@ -229,8 +230,8 @@ async function cancel() {
   try {
     await DELETE('/api/organizations/requests/{id}', { path: { id: p.id } })
     await load()
-  } catch {
-    showToast('취소하지 못했어요')
+  } catch (e) {
+    showToast(why(e, '취소하지 못했어요. 잠시 뒤 다시 해 주세요'))
   } finally {
     canceling.value = false
   }

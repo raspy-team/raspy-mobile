@@ -138,6 +138,7 @@ import { AGREEMENTS as TERMS } from '../../content/legal'
 import { UiButton, UiCard, UiInput, UiSheet, UiSkeleton } from '../../components/ui'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { useToast } from '../../composables/useToast'
+import { why } from '../../utils/why'
 import { containsProfanity } from '../../utils/profanity'
 import { takeReturnTo } from '../../utils/authRedirect'
 import { markOnboarded } from '../../router/onboardingGuard'
@@ -191,8 +192,8 @@ async function submitTerms() {
     await api.post('/api/auth/terms')
     needTerms.value = false
     finish()
-  } catch {
-    showToast('저장하지 못했어요. 잠시 뒤 다시 해 주세요')
+  } catch (e) {
+    showToast(why(e, '저장하지 못했어요. 잠시 뒤 다시 해 주세요'))
   } finally {
     saving.value = false
   }

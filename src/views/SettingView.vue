@@ -122,6 +122,7 @@ import { soundOn, hapticsOn, setSound, setHaptics } from '../utils/feel'
 import { isIOS, isStandalone, promptInstall } from '../utils/install'
 import { confirmDialog } from '../composables/useConfirm'
 import { useToast } from '../composables/useToast'
+import { why } from '../utils/why'
 import { stopInbox } from '../stores/inbox'
 import { closeUserChannel } from '../websocket/userChannel'
 import pkg from '../../package.json'
@@ -177,8 +178,8 @@ async function deleteAccount() {
   try {
     await api.post('/api/user/remove')
     leave()
-  } catch {
-    showToast('삭제하지 못했어요. 잠시 뒤 다시 해 주세요')
+  } catch (e) {
+    showToast(why(e, '삭제하지 못했어요. 잠시 뒤 다시 해 주세요'))
   }
 }
 
@@ -201,8 +202,8 @@ async function unblock(u) {
     await api.delete(`/api/block/${u.id}`)
     blocked.value = blocked.value.filter((x) => x.id !== u.id)
     showToast(`${u.nickname}님 차단을 풀었어요`)
-  } catch {
-    showToast('풀지 못했어요. 잠시 뒤 다시 해 주세요')
+  } catch (e) {
+    showToast(why(e, '풀지 못했어요. 잠시 뒤 다시 해 주세요'))
   } finally {
     unblockingId.value = null
   }

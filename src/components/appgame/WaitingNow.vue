@@ -62,6 +62,7 @@ import { UiAiBadge, UiButton, UiCard, UiIcon, UiSection, UiSwitch } from '../ui'
 import { liveRoute } from '@/utils/battle'
 import { waitText } from '@/utils/format'
 import { useToast } from '../../composables/useToast'
+import { why } from '../../utils/why'
 
 const { showToast } = useToast()
 
@@ -114,9 +115,9 @@ async function setAlarm(on: boolean) {
   saving.value = true
   try {
     show((await POST('/api/app-games/realtime/night-alarm', { body: { on } })).data)
-  } catch {
+  } catch (e) {
     // 스위치는 서버 값(list)을 따르니 그대로 돌아간다. 아무 말 없이 안 바뀐 것처럼 보이지 않게 알린다
-    showToast('알림을 바꾸지 못했어요. 잠시 뒤 다시 해 주세요')
+    showToast(why(e, '알림을 바꾸지 못했어요. 잠시 뒤 다시 해 주세요'))
   } finally {
     saving.value = false
   }

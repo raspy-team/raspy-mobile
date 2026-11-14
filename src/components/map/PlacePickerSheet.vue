@@ -94,7 +94,8 @@ async function search(word, at = null) {
     settle = Date.now() + 1500
     searchedAt.value = from
   } catch (e) {
-    error.value = e?.response?.data?.message || '찾지 못했어요'
+    // 지도 회사가 안 될 때도 길이 막히지 않는다: 시간만 먼저 정할 수 있다고 말한다 (quality-rules B-6)
+    error.value = `${e?.response?.data?.message || '지금은 장소를 찾을 수 없어요'}. 창을 닫고 시간만 먼저 정해도 돼요`.replace('..', '.')
   } finally {
     busy.value = false
   }

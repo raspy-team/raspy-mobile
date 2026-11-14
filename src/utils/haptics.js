@@ -36,6 +36,8 @@ const isIosWeb = !isIosApp && /iphone|ipad|ipod/i.test(navigator.userAgent)
 
 export function haptic(kind = 'tap') {
   try {
+    // 설정에서 진동을 껐으면 어디서 불러도 울리지 않는다: 게임 화면 여럿이 feel()을 거치지 않고 바로 불러 스위치를 꺼도 울렸다 (quality-rules U-3)
+    if (localStorage.getItem('match_haptics') === 'off') return
     if (isIosApp) return window.webkit?.messageHandlers?.iosBridge?.postMessage({ action: 'haptic', style: IOS_STYLE[kind] ?? 'light' })
     if (navigator.vibrate) return navigator.vibrate(PATTERNS[kind] ?? PATTERNS.tap)
     if (isIosWeb) iosWebHaptic()

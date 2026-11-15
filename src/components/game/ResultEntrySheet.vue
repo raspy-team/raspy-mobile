@@ -83,7 +83,7 @@
 
     <template #footer>
       <!-- 빈 칸인데 켜진 버튼은 눌러야 안 된다는 것을 안다: 넣을 것이 있을 때만 켠다 (quality-rules E-4) -->
-      <p v-if="!canSend" class="t-micro text-center mb-2">{{ isGroup ? '모든 사람의 결과를 넣으면 낼 수 있어요' : '한 세트 이상 점수를 넣으면 낼 수 있어요' }}</p>
+      <p v-if="!canSend" class="t-micro text-center mb-2">{{ unchanged ? '점수를 고치면 다시 낼 수 있어요' : isGroup ? '모든 사람의 결과를 넣으면 낼 수 있어요' : '한 세트 이상 점수를 넣으면 낼 수 있어요' }}</p>
       <UiButton block size="lg" :loading="submitting" :disabled="!canSend" @click="submit">{{ amend ? '이 점수로 다시 내기' : counter ? '이 점수로 돌려보내기' : isGroup && groupMode === 'vote' ? '투표 열기' : '결과 내기' }}</UiButton>
     </template>
   </UiSheet>
@@ -236,7 +236,14 @@ const canSend = computed(() => {
     return groupMode.value === 'place' ? people.value.every((p) => p.place) : people.value.every((p) => Number.isInteger(p.score))
   }
   const filled = (n) => n !== null && n !== '' && n !== undefined
+  if (unchanged.value) return false
   return sets.value.some((s) => filled(s.my) && filled(s.opponent))
+})
+// 고쳐 다시 내기: 아무것도 안 고쳤으면 낼 것이 없다 (11/15 고병연: 그대로 다시 내면 확정까지의 24시간만 다시 셌다)
+const unchanged = computed(() => {
+  if (!props.amend || isGroup.value || !props.initial.length || proofFile.value) return false
+  const now = sets.value.filter((s) => s.my !== null && s.my !== '' && s.opponent !== null && s.opponent !== '').map((s) => `${Number(s.my)}:${Number(s.opponent)}`).join(',')
+  return now === props.initial.map(([my, opponent]) => `${Number(my)}:${Number(opponent)}`).join(',')
 })
 
 async function submit() {

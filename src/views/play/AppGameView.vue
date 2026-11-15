@@ -9,6 +9,8 @@
     </UiTopBar>
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
+      <!-- 게임 첫 화면·결과도 당겨서 새로 고친다 (11/15 고병연). 푸는 중에는 당겨지지 않는다 -->
+      <UiPullIndicator v-if="!play" :pull="pull" :refreshing="refreshing" />
       <!-- 시작 전 3·2·1: 끝날 때까지 문제를 가린다 -->
       <AppCountdown v-if="play && counting" :until="new Date(play.startedAt).getTime()" :offset="offset" :opponent="play.opponent ? who(play.opponent) : undefined" @done="counting = false" />
 
@@ -562,6 +564,7 @@ import { canResumeDuel, expiryLine } from '@/utils/appGame'
 import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { confirmLeave } from '@/utils/backNav'
+import { usePullToRefresh } from '@/composables/usePullToRefresh'
 import { GET, POST } from '@/api/client'
 import api from '../../api/api'
 import type { components } from '@/api/schema'
@@ -636,7 +639,7 @@ import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import { useToast } from '../../composables/useToast'
 import {
-  UiAvatar, UiBadge, UiButton, UiCard, UiCountTo, UiEmptyState, UiIconButton, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
+  UiAvatar, UiBadge, UiButton, UiCard, UiCountTo, UiEmptyState, UiPullIndicator, UiIconButton, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
 
 type Schemas = components['schemas']
@@ -737,6 +740,7 @@ const submitError = ref('')
 // 없는 게임 주소이거나 불러오지 못했으면 뼈대만 계속 보이지 않게 (11/5 UX)
 const missing = ref(false)
 const loadFailed = ref(false)
+const { pull, refreshing } = usePullToRefresh(() => (play.value ? Promise.resolve() : load().catch(() => {})))
 async function load() {
   const games = await GET('/api/app-games')
   const first = !game.value

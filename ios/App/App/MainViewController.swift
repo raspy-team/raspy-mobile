@@ -5,5 +5,7 @@ import Capacitor
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(MatchLiveActivityPlugin())
+        // 화면 왼쪽 끝에서 밀어 뒤로 가기 (아이폰의 버릇). 웹 화면의 기록을 그대로 따라간다 (11/15 고병연: 앱에서 안 됐다. 빌드 8부터)
+        webView?.allowsBackForwardNavigationGestures = true
     }
 }

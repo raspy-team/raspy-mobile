@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-dvh bg-canvas">
     <!-- 앱 안에서 왔으면 뒤로 (광고·카톡 링크로 바로 열었으면 갈 곳이 없어 두지 않는다, 경로 3 훑기 '나가는 길 없음') -->
-    <UiTopBar :title="meta?.title || '한 판'" :back="hasHistory" />
+    <!-- 앱에서 링크로 바로 열렸으면 시작 화면으로 가는 뒤로를 둔다 (11/15 고병연). 웹에서 광고·카톡 링크로 열었을 때는 갈 곳이 없어 두지 않는다 -->
+    <UiTopBar :title="meta?.title || '한 판'" :back="hasHistory || (isCapacitorApp ? '/init' : false)" />
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <!-- '시작하면'이 가입을 뜻하는 줄 몰랐다. 대안은 지금 미는 손님 게임 (경로 3 훑기, 목적 판정 3) -->
@@ -287,6 +288,7 @@ import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
 import NunchiPlay from '../../components/appgame/NunchiPlay.vue'
+import { isCapacitorApp } from '../../utils/nativeBridge'
 import ImprovPlay from '../../components/appgame/ImprovPlay.vue'
 import ImprovSentChallenges from '../../components/appgame/ImprovSentChallenges.vue'
 import ImprovSchools from '../../components/appgame/ImprovSchools.vue'

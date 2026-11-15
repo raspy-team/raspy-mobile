@@ -45,12 +45,24 @@ const outcome = (p: Item) => {
   return p.isCompleted ? names(p) : `${names(p)} 하는 중` // 결과 없이 이름만 있으면 무슨 일인지 몰랐다
 }
 const line = (p: Item) => p.story?.beats?.[0]?.text || outcome(p)
-const sub = (p: Item) => [p.rule?.ruleTitle, p.story?.beats?.[0]?.text ? '' : (p.result?.winner ? names(p) : ''), p.date ? timeAgo(p.date) : ''].filter(Boolean).join(' · ')
+// 같은 말이 줄마다 되풀이되면 한 줄로 합친다 (11/15 고병연: "○○님이 전국 첫 챔피언이 됐어요"가 게임마다 한 줄씩 나왔다). 합친 줄은 어느 게임들인지 적는다
+const merged = new Map<string, string[]>()
+const sub = (p: Item) => {
+  const titles = merged.get(String(p.id))
+  const what = titles && titles.length > 1 ? `${titles.slice(0, 2).join(' · ')}${titles.length > 2 ? ` 외 ${titles.length - 2}` : ''}` : p.rule?.ruleTitle
+  return [what, p.story?.beats?.[0]?.text ? '' : (p.result?.winner ? names(p) : ''), p.date ? timeAgo(p.date) : ''].filter(Boolean).join(' · ')
+}
 
 onMounted(async () => {
   try {
-    const { data } = await api.get('/api/feed', { params: { page: 0, size: 3, scope: 'near' } })
-    items.value = (data?.items ?? []).slice(0, 3)
+    const { data } = await api.get('/api/feed', { params: { page: 0, size: 8, scope: 'near' } })
+    const firstOf = new Map<string, Item>()
+    for (const p of (data?.items ?? []) as Item[]) {
+      const head = firstOf.get(line(p))
+      if (!head) { firstOf.set(line(p), p); merged.set(String(p.id), [p.rule?.ruleTitle ?? '']) }
+      else { const t = merged.get(String(head.id))!; if (p.rule?.ruleTitle && !t.includes(p.rule.ruleTitle)) t.push(p.rule.ruleTitle) }
+    }
+    items.value = [...firstOf.values()].slice(0, 3)
   } catch {
     items.value = [] // 소식을 못 받아도 홈은 그대로
   }

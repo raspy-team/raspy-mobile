@@ -1,7 +1,7 @@
 <template>
   <!-- 순위의 자리 칩: [소속1] [소속2] [동네] [전국]. 서버가 고를 수 있는 자리만 준다 (docs/organizations.md 4) -->
   <div v-if="seats.length > 1 || noOrg">
-    <div v-if="seats.length > 1" class="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1" role="group" aria-label="순위 범위">
+    <div v-if="seats.length > 1" class="flex gap-2 chip-row -mx-4 px-4 pb-1" role="group" aria-label="순위 범위">
       <UiChip v-for="s in seats" :key="s.key" :selected="s.key === modelValue" @click="$emit('update:modelValue', s.key)">{{ s.label }}</UiChip>
     </div>
     <!-- 안내만 하지 않고 인증하는 곳으로 바로 갈 수 있게 -->

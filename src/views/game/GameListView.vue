@@ -102,7 +102,7 @@
         />
         </template>
         <!-- 소식에 '모두 보기'가 있듯 경기도 (11/15 고병연): 전국의 모집 중인 경기를 종목·순서로 골라 본다 -->
-        <UiButton block variant="secondary" to="/open-games">{{ games.length > HOME_GAMES ? `경기 모두 보기 ${games.length}` : '전국 경기 모두 보기' }}</UiButton>
+        <UiButton block variant="secondary" to="/open-games">모두 보기</UiButton>
       </div>
     </section>
     <HomeFeedPeek />

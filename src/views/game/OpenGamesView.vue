@@ -4,11 +4,11 @@
     <main class="max-w-xl mx-auto px-4 pt-3 pb-16">
       <UiPullIndicator :pull="pull" :refreshing="refreshing" />
       <!-- 순서 -->
-      <div class="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4" role="radiogroup" aria-label="순서">
+      <div class="flex gap-2 chip-row no-scrollbar -mx-4 px-4" role="radiogroup" aria-label="순서">
         <UiChip v-for="s in SORTS" :key="s.key" class="flex-shrink-0 whitespace-nowrap" :selected="sort === s.key" role="radio" :aria-checked="sort === s.key" @click="sort = s.key">{{ s.label }}</UiChip>
       </div>
       <!-- 종목: 지금 모집 중인 경기에 있는 것만 -->
-      <div v-if="kinds.length > 1" class="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 mt-2" role="radiogroup" aria-label="종목">
+      <div v-if="kinds.length > 1" class="flex gap-2 chip-row no-scrollbar -mx-4 px-4 mt-2" role="radiogroup" aria-label="종목">
         <UiChip class="flex-shrink-0 whitespace-nowrap" :selected="!kind" role="radio" :aria-checked="!kind" @click="kind = ''">모든 종목</UiChip>
         <UiChip v-for="k in kinds" :key="k" class="flex-shrink-0 whitespace-nowrap" :selected="kind === k" role="radio" :aria-checked="kind === k" @click="kind = k">{{ k }}</UiChip>
       </div>

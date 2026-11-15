@@ -140,7 +140,7 @@
 
         <!-- 게임마다: 점수 · 흐름 -->
         <div v-if="ratedRules.length" class="mt-3">
-          <div v-if="ratedRules.length > 1" class="flex gap-2 -mx-4 px-4 mb-3 overflow-x-auto no-scrollbar" role="tablist" aria-label="게임 고르기">
+          <div v-if="ratedRules.length > 1" class="flex gap-2 -mx-4 px-4 mb-3 chip-row no-scrollbar" role="tablist" aria-label="게임 고르기">
             <UiChip v-for="r in ratedRules" :key="r.ruleId" class="flex-shrink-0 whitespace-nowrap" :selected="picked?.ruleId === r.ruleId" @click="pickedId = r.ruleId">{{ r.ruleTitle }}</UiChip>
           </div>
           <div v-if="picked?.provisional" class="rounded-xl bg-surface p-4">

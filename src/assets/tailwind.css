@@ -305,6 +305,9 @@ html.has-banner main::after { content: ''; display: block; height: 5rem; }
 
 /* 누르는 범위만 44pt로 넓힌다(보이는 크기는 그대로). 작은 버튼·칩·탭·글자 링크가 36·32·20pt라 손가락이 자주 빗나갔다.
    애플 HIG 44pt (11/11 몸과 시간). 부모가 overflow로 자르면 그만큼만 넓어진다 */
+/* 옆으로 미는 칩 줄: 위아래로는 움직이지 않는다 (11/15 고병연: 순서·종목 줄이 상하로도 밀렸다. 칩의 넓힌 누르는 범위가 줄 높이를 넘겨 생긴 것).
+   넘친 누르는 범위만큼 위아래 여백을 주고 같은 만큼 당겨, 줄의 자리는 그대로 둔다 */
+.chip-row { overflow-x: auto; overflow-y: hidden; padding-block: 6px; margin-block: -6px; }
 .hit { position: relative; }
 .hit::after {
   content: '';

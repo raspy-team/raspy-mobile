@@ -30,7 +30,7 @@
 
       <!-- 거르기는 한 줄 (quality-rules R-4: 상황 넷·능력·종류 세 줄이 화면 위 1/4을 차지했다).
            종류(전체·오프라인·앱 게임 …)가 앞, 그 뒤로 상황과 능력을 창에서 고르는 칩 (docs/direction.md '찾기') -->
-      <div class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-3 pb-3 overflow-x-auto no-scrollbar">
+      <div class="max-w-2xl mx-auto flex items-center gap-2 px-4 pt-3 pb-3 chip-row no-scrollbar">
         <!-- '조건'을 맨 앞에: 상황·능력 칩 다섯은 옆으로 밀어야 보여서 있는 줄 몰랐다 (11/15 고병연: 능력 칩이 안 보인다). 고른 수를 함께 보인다 -->
         <UiChip class="flex-shrink-0 whitespace-nowrap" icon="sliders" :selected="picked > 0" @click="sheet = 'all'">조건<template v-if="picked"> {{ picked }}</template></UiChip>
         <span class="flex-shrink-0 w-px h-5 bg-line-strong" aria-hidden="true"></span>

@@ -1078,9 +1078,8 @@ function shareStory() {
 }
 const saveView = ref<string | null>(null)
 
-// 등급으로 끝나는 게임: 임기응변, 그리고 AI가 매기는 넷(요리·재판·말싸움·읽씹, 11/15 고병연: 끝난 화면을 임기응변과 같게).
-// 서버가 한마디 첫 줄에 "7등급 · 100명 중 86등"을 붙여 준다 (improv/ImprovGrades.withGrade). 등급 줄이 없는 옛 판은 예전 점수 화면 그대로다
-const GRADED = ['improv', 'recipe', 'trial', 'debate', 'ghosted']
+// 등급으로 끝나는 게임은 임기응변 하나다 (11/15 저녁 고병연: 다른 게임에 등급을 붙이라는 말이 아니었다. 넓혔던 것을 되돌렸다)
+const GRADED = ['improv']
 const improvResult = computed(() => (GRADED.includes(key.value) ? improvFeedback(result.value?.myFeedback) : null))
 const opponentImprov = computed(() => (GRADED.includes(key.value) ? improvFeedback(result.value?.opponentFeedback) : null))
 const improvGrade = computed(() => (GRADED.includes(key.value) && !improvResult.value?.empty && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))

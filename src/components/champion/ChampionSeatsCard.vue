@@ -21,7 +21,7 @@
           <span class="block t-caption mt-0.5 break-keep">{{ bossHint(s) }}</span>
         </button>
         <!-- 앱 게임이 아닌 자리의 보스는 붙을 판이 없다: 눌러도 아무 일 없던 버튼을 뺀다 (경로 8 2절) -->
-        <UiButton v-if="appGameKey" variant="tonal" :disabled="s.bossTriesLeft === 0" :aria-label="`AI 보스 ${josa(s.champion.nickname, '과/와')} 한 판`" @click="challengeBoss">AI 보스와 한 판</UiButton>
+        <UiButton v-if="appGameKey" variant="special" size="sm" :disabled="s.bossTriesLeft === 0" :aria-label="`AI 보스 ${josa(s.champion.nickname, '과/와')} 한 판`" @click="challengeBoss">AI 보스와 한 판</UiButton>
       </template>
       <template v-else>
         <button
@@ -38,7 +38,7 @@
           </span>
         </button>
         <!-- 기록을 숨긴 챔피언은 지목할 수 없어 '도전'이 아니라 그냥 한 판·경기 만들기다. 이름이 하는 일과 같게 (경로 8 2절) -->
-        <UiButton v-if="s.champion && !s.mine" variant="tonal" :aria-label="s.champion.id ? `${s.champion.nickname}님에게 한 판 붙자` : undefined" :loading="sending" @click="challenge(s.champion)">{{ s.champion.id ? '도전' : appGameKey ? '한 판 하기' : '경기 만들기' }}</UiButton>
+        <UiButton v-if="s.champion && !s.mine" :variant="s.champion.id ? 'special' : 'tonal'" :size="s.champion.id ? 'sm' : 'md'" :aria-label="s.champion.id ? `${s.champion.nickname}님에게 한 판 붙자` : undefined" :loading="sending" @click="challenge(s.champion)">{{ s.champion.id ? '도전' : appGameKey ? '한 판 하기' : '경기 만들기' }}</UiButton>
       </template>
     </div>
   </div>

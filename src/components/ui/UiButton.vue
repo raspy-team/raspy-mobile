@@ -27,6 +27,7 @@ import UiSpinner from './UiSpinner.vue'
 // - primary: 화면의 주 행동 (한 화면에 하나)
 // - secondary: 나란히 놓이는 보조 행동
 // - ghost: 글자만 있는 가벼운 행동 (취소, 더 보기)
+// - special: 특별한 판 (민트). 챔피언 도전·AI 보스
 // - tonal: 목록 안에서 반복되는 행동 (카드마다 있는 '신청'). 테두리만 있는 버튼이라 주 행동과 다투지 않는다
 // - danger: 되돌릴 수 없는 행동 (삭제, 탈퇴)
 import { defineProps, defineOptions, useAttrs, computed, ref } from 'vue'
@@ -70,9 +71,11 @@ const VARIANTS = {
   danger: 'bg-danger-soft text-danger-fg font-medium active:bg-danger/25',
   // 볼트: '내 차례'에만 (결과 확인·신청 승인처럼 상대가 나를 기다릴 때). 한 화면에 하나 넘게 두지 않는다
   signal: 'bg-signal text-signal-on font-semibold active:opacity-90',
+  // 민트: 특별한 판에만 (챔피언에게 도전·AI 보스와 한 판). 볼트 버튼과 같은 꼴에 색만 다르다. 평소 화면에는 쓰지 않는다
+  special: 'bg-mint text-mint-on font-semibold active:opacity-90',
 }
 // 채운 버튼(주·볼트)은 작아도 높이 44다 (quality-rules S-5: 주 버튼은 단단해 보여야 한다). 글자만 한 단계 작다
-const FILLED = new Set(['primary', 'signal'])
+const FILLED = new Set(['primary', 'signal', 'special'])
 const FILLED_SM = 'h-11 px-4 text-sm'
 // 높이는 손가락으로 누르기 쉬운 크기 이상 (sm도 36px)
 const SIZES = {

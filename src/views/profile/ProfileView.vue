@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar :title="isMeRoute ? '내 정보' : '프로필'" :back="!isMeRoute">
+    <UiTopBar :title="'프로필'" :back="!isMeRoute">
       <template #right>
         <template v-if="isMeRoute">
           <!-- 탭마다 위 오른쪽은 메시지·알림으로 같게, 내 정보만 설정을 더한다. 돋보기는 '찾기' 탭이 쓰므로 사람 찾기는 친구 시트로 (11/3) -->
@@ -43,8 +43,8 @@
       <p v-if="user.isBot" class="t-caption mb-4 flex items-center gap-1.5"><UiAiBadge class="!ml-0" />앱이 만든 연습 상대예요</p>
       <!-- 누구인지 -->
       <div class="flex items-center gap-4">
-        <!-- 꾸민 캐릭터가 있으면 그 캐릭터가 얼굴이다 (11/13 실제 기기 한 바퀴: 꾸며도 광장 말고는 보이는 데가 없었다). 직접 꾸민 것이라 사진보다 앞 -->
-        <div v-if="user.character" class="w-20 h-20 shrink-0 rounded-full bg-surface-2 flex items-end justify-center overflow-hidden" role="img" :aria-label="`${user.nickname}의 캐릭터`">
+        <!-- 사진을 정했으면 사진이 얼굴이고, 사진이 없을 때 꾸민 캐릭터가 얼굴이다 (11/15 고병연: 사진을 정해도 캐릭터가 나왔다. UiAvatar와 같은 순서) -->
+        <div v-if="user.character && !(user.avatar && !user.avatar.includes('/service/default-profile'))" class="w-20 h-20 shrink-0 rounded-full bg-surface-2 flex items-end justify-center overflow-hidden" role="img" :aria-label="`${user.nickname}의 캐릭터`">
           <div class="profile-char" :style="{ backgroundImage: `url(${API_BASE_URL}/api/plaza/art/avatar/${user.character}.png)` }" />
         </div>
         <UiAvatar v-else :src="user.avatar" :name="user.nickname" size="xl" class="!w-20 !h-20" />
@@ -100,7 +100,7 @@
 
       <!-- 숫자 한 줄: 한 카드 안에 칸을 선으로 나눈다 (quality-rules A-5: 상자 없이 떠 있어 어디에 속한 숫자인지 흐렸다). 승률은 경기가 있을 때만 -->
       <!-- 남의 프로필에서 0인 칸은 보이지 않는다(내 것은 들어가는 길이라 둔다). 다 0이면 줄을 두지 않는다 (quality-rules R-6) -->
-      <div v-if="user.isMe || user.recordsHidden || stats.totalGames || bests.length || stats.friends || seatLines.length" class="mt-4 flex text-center rounded-xl bg-surface py-3 divide-x divide-line">
+      <div v-if="user.isMe || user.recordsHidden || stats.totalGames || bests.length || stats.friends" class="mt-4 flex text-center rounded-xl bg-surface py-3 divide-x divide-line">
         <!-- 경기·승률은 누르면 기록 화면. 기록을 '나만'으로 둔 사람은 서버가 숫자를 비워 보낸다 -->
         <div v-if="user.recordsHidden" class="flex-1">
           <p class="t-heading text-fg-subtle">–</p>
@@ -110,18 +110,13 @@
              겨룬 경기가 없고 게임 기록이 있으면 그 수를 보인다 (11/11 목적 다시 보기) -->
         <RouterLink v-else-if="!stats.totalGames && bests.length" :to="`/profile/${user.id}/stats`" class="hit flex-1">
           <p class="t-heading tabular-nums">{{ bests.length }}</p>
-          <p class="t-micro mt-0.5">게임 기록 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
+          <p class="t-micro mt-0.5">앱 게임 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
         <!-- 전적은 선수의 말로: '4전 1승 3패' (quality-rules S1-2·S2-1). 예전엔 '경기 4'와 '승률 25%'가 따로 있어 몇 승 몇 패인지는 기록 화면에 들어가야 나왔다 -->
         <RouterLink v-else-if="user.isMe || stats.totalGames" :to="`/profile/${user.id}/stats`" class="hit" :class="stats.totalGames ? 'flex-[2]' : 'flex-1'">
           <p class="t-heading tabular-nums">{{ stats.totalGames ? `${stats.wins}승 ${stats.draws ? `${stats.draws}무 ` : ''}${stats.losses}패` : '0전' }}</p>
           <p class="t-micro mt-0.5">{{ stats.totalGames ? `${stats.totalGames}전 · 승률 ${stats.winRate}%` : '전적' }} <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
-        <!-- 0이면 숨긴다 (가진 자리가 있을 때만 숫자) -->
-        <div v-if="seatLines.length" class="flex-1">
-          <p class="t-heading tabular-nums">{{ seatLines.length }}</p>
-          <p class="t-micro mt-0.5">챔피언</p>
-        </div>
         <!-- AI는 친구가 없다 (docs/ai-residents.md '채우지 않는 곳': 친구) -->
         <button v-if="!user.isBot && (user.isMe || stats.friends)" type="button" class="hit flex-1" @click="openFriends">
           <p class="t-heading tabular-nums">{{ stats.friends || 0 }}</p>
@@ -129,27 +124,25 @@
         </button>
       </div>
 
+      <!-- 가진 자리: 규칙 챔피언(벨트)과 능력·종합·기록 1위. 동네·소속을 가린 사람은 '동네'·'소속'으로 온다 (docs/organizations.md 3-4).
+           숫자 줄의 '챔피언 1'과 아래 '챔피언' 섹션이 같은 것을 두 번 말했다: 숫자 줄 바로 밑에 자리 이름만 둔다 (11/15 고병연) -->
+      <div v-if="seatLines.length" class="mt-3 flex flex-wrap gap-2" aria-label="챔피언 자리">
+        <component
+          :is="l.to ? 'RouterLink' : 'span'"
+          v-for="l in seatLines"
+          :key="l.key"
+          :to="l.to"
+          class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-line-strong text-fg text-sm"
+        >
+          <UiIcon name="crown" class="text-signal-fg" />{{ l.title }}
+        </component>
+      </div>
+
       <!-- 신뢰 온도. 근거·설명은 눌러서 연다 (점진적 공개). 포인트 타일은 뺐다 (11/13 앱 기능 좁히기: 포인트를 없앴다) -->
       <div v-if="user.trust && !user.isBot" class="mt-3">
         <TrustCard :trust="user.trust" :user-id="user.id" :is-me="user.isMe" />
       </div>
       <LiveRecordLine :key="`lr${user.id}`" class="mt-2" :user-id="user.id" />
-
-      <!-- 가진 자리: 규칙 챔피언(벨트)과 능력·종합·기록 1위. 동네·소속을 가린 사람은 '동네'·'소속'으로 온다 (docs/organizations.md 3-4) -->
-      <section v-if="seatLines.length" class="mt-10">
-        <h2 class="t-heading mb-3">챔피언</h2>
-        <div class="flex flex-wrap gap-2">
-          <component
-            :is="l.to ? 'RouterLink' : 'span'"
-            v-for="l in seatLines"
-            :key="l.key"
-            :to="l.to"
-            class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-line-strong text-fg text-sm"
-          >
-            <UiIcon name="crown" class="text-gold-fg" />{{ l.title }}
-          </component>
-        </div>
-      </section>
 
       <!-- 많이 한 능력 (규칙의 '잘하려면'을 판 수로 센다). 그 사람을 보여 주는 글이라 누르지 않는다:
            남의 '순발력'을 보다 그 능력 규칙 목록으로 갈 사람이 없다 (목적 판정 6, 경로 제거) -->
@@ -175,7 +168,8 @@
       <!-- 앱 게임 기록 (가입하며 옮긴 손님 판 포함): "시작하면 이 등급이 내 기록에 남아요"의 그 기록. 예전엔 막 가입한 사람이 '아직 한 경기가 없어요'를 봤다 (목적 판정 11/11) -->
       <section v-if="bests.length" class="mt-10">
         <!-- 남의 프로필엔 '내'가 붙지 않게 (경로 6 리뷰 P1) -->
-        <h2 class="t-heading mb-1">{{ user.isMe ? '내 게임 기록' : '게임 기록' }}</h2>
+        <!-- 무엇의 기록인지 몰랐다 (11/15 고병연): 앱 게임마다 지금까지의 가장 좋은 판이다 -->
+        <h2 class="t-heading mb-1">앱 게임 최고 기록</h2>
         <UiList>
           <UiListItem v-for="b in bests" :key="b.key" :title="b.title" chevron @click="router.push(`/play/${b.key}`)">
             <template #leading><RuleThumb :rule="{ ruleTitle: b.title, appGameKey: b.key }" :size="36" bare /></template>
@@ -205,7 +199,8 @@
             </template>
             <template #trailing>
               <!-- 그 게임의 실력 점수. 순위는 뺐다: 견주고 싶으면 남의 프로필에서 점수를 본다 (11/13 숫자 정리) -->
-              <span class="t-heading tabular-nums">{{ r.rating }}점</span>
+              <span v-if="r.rating != null" class="t-heading tabular-nums">{{ r.rating }}점</span>
+              <span v-else class="t-caption">{{ ratingSoon(r.ratingGamesLeft || 1) }}</span>
             </template>
           </UiListItem>
         </UiList>
@@ -318,7 +313,7 @@ import {
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composables/useToast'
-import { matchTime } from '../../utils/format'
+import { matchTime, ratingSoon } from '../../utils/format'
 import { liveRoute } from '@/utils/battle'
 
 // 사람 신고: 처음 보는 사람을 만나는 앱이라 성희롱·불쾌한 요구가 맨 위 가까이에 있어야 한다 (11/4 밤샘, ReportSheet 기본 목록과 맞춤)

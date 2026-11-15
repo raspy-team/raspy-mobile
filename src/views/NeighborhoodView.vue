@@ -136,7 +136,9 @@ function openVerify(code: string) {
   verifyOpen.value = true
 }
 
+let firstPick = false // 동네가 하나도 없던 사람이 방금 처음 정했나
 async function onVerified(next: Mine) {
+  firstPick = !data.value?.neighborhoods?.length
   data.value = next
   verifyOpen.value = false
   const name = next.neighborhoods.find((n) => n.active)?.name ?? '동네'
@@ -147,6 +149,7 @@ async function onVerified(next: Mine) {
 
 // 이름으로 골랐다: 막혔던 신청을 이어서 하고, 돌아갈 곳이 있으면 바로 (11/13)
 async function onPicked(next: Mine) {
+  firstPick = !data.value?.neighborhoods?.length
   data.value = next
   pickOpen.value = false
   const name = next.neighborhoods.find((n) => n.active)?.name ?? '동네'
@@ -159,7 +162,11 @@ async function onPicked(next: Mine) {
 // 돌아갈 곳으로 (알림은 신청이 성공한 응답에서 api.js가 묻는다)
 async function goBack() {
   const back = route.query.back
-  if (typeof back === 'string' && back.startsWith('/')) await router.replace(back).catch(() => {})
+  // 온 곳이 바로 앞 화면이면 뒤로 간다: 그 주소로 갈아 끼우면 같은 화면이 기록에 두 번 남아 뒤로를 두 번 눌러야 했다 (11/15 고병연)
+  if (typeof back === 'string' && back.startsWith('/')) {
+    if (window.history.state?.back === back) router.back()
+    else await router.replace(back).catch(() => {})
+  } else if (firstPick && window.history.state?.back) router.back() // 처음 동네를 정한 사람은 온 곳(홈·지도)으로 돌려보낸다
 }
 
 // 신청하다 동네가 없어 막혔으면 그 신청을 이어서 한다 (api.js가 남긴 pending_apply)

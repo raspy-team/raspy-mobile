@@ -61,7 +61,19 @@ export function place(value) {
 // 레이팅과 전적 한 줄. 아직 안 해 본 사람은 빈 문자열 (기본값 '1500점 · 첫 경기 전'은 정보가 아니다)
 export function ratingLine(stats) {
   const played = (stats?.wins || 0) + (stats?.draws || 0) + (stats?.losses || 0)
-  return played ? `${stats.ruleRating || 1500}점 · ${record(stats)}` : ''
+  // 실력 점수는 다섯 판 뒤에 공개된다: 그 전에는 서버가 숫자를 싣지 않는다 (ruleRating null)
+  return played ? [stats.ruleRating ? `${stats.ruleRating}점` : '', record(stats)].filter(Boolean).join(' · ') : ''
+}
+
+/** 실력 점수가 아직 공개 전일 때의 한마디. 어느 화면이든 이 말 하나다 (quality-rules B-1) */
+export const ratingSoon = (gamesLeft) => `${gamesLeft}판 후 점수 공개`
+
+/** 전적 한 줄: '4전 1승 3패' (quality-rules S2-1). 한 판도 안 했으면 none */
+export function tallyLine(r, none = '') {
+  const w = r?.wins || 0
+  const d = r?.draws || 0
+  const l = r?.losses || 0
+  return w + d + l ? `${w + d + l}전 ${w}승 ${d ? `${d}무 ` : ''}${l}패` : none
 }
 
 export function record(stats) {

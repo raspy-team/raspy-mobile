@@ -52,7 +52,8 @@
           @submit="submit"
         />
         <DialogPlay
-          v-else-if="key === 'debate'"
+          v-else-if="key === 'debate' || key === 'ghosted' || key === 'trial'"
+          :game-key="key"
           :play-id="play.playId"
           :problem="play.problem"
           :time-limit-seconds="secondsLeft(play)"
@@ -124,6 +125,8 @@
           :guide="WRITING[key].guide"
           :placeholder="WRITING[key].placeholder"
           :vote="isVote"
+          :max="key === 'power-level' ? 200 : 120"
+          :label="key === 'power-level' ? '싸움터' : ''"
           @submit="submit"
         />
         <p v-if="submitError" class="t-caption text-danger mt-3">{{ submitError }}</p>
@@ -141,7 +144,7 @@
               <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
             </p>
             <!-- 이겨서 든 자리는 그 자리에서 말한다 (quality-rules G4-3: 만나서 한 경기의 '새 챔피언이 됐어요'가 앱 게임 결과에는 없었다) -->
-            <p v-if="result.result === 'WIN' && wonSeats.length" class="t-label !text-gold-fg mt-3 flex items-center justify-center gap-1.5 feel-rise feel-rise-2">
+            <p v-if="result.result === 'WIN' && wonSeats.length" class="t-label !text-signal-fg mt-3 flex items-center justify-center gap-1.5 feel-rise feel-rise-2">
               <UiIcon name="crown" aria-hidden="true" />{{ wonSeats.join(' · ') }} 챔피언이에요
             </p>
             <p v-if="NEXT_ROUND[result.result || '']" class="t-body mt-3">{{ NEXT_ROUND[result.result || ''] }}</p>
@@ -174,7 +177,8 @@
                 <span class="flex items-center justify-center t-micro max-w-[8rem]"><OpponentName :player="result.opponent" /><span v-if="opponentImprov" class="shrink-0">&nbsp;· {{ result.opponentScore ?? 0 }}점</span></span>
               </span>
             </div>
-            <div v-else class="flex items-center justify-center gap-6 mt-6 feel-rise feel-rise-2">
+            <!-- 히어로 대결은 점수가 없다: 승패와 아래 싸움 중계가 전부다 -->
+            <div v-else-if="!isHero" class="flex items-center justify-center gap-6 mt-6 feel-rise feel-rise-2">
               <span>
                 <UiRollNumber class="t-title tabular-nums" :value="result.myScore ?? 0" />
                 <span class="block t-micro">나{{ isVote ? ' (표)' : '' }}</span>
@@ -190,7 +194,8 @@
             <!-- 끝난 판에도 왜 그 등급인지 (3-5 UI) -->
             <p v-if="improvResult?.weak" class="t-body mt-2 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
             <!-- 오른 것은 형광으로 또렷하게, 내린 것은 담담하게 (quality-rules G4-1). 소식 카드와 같은 꼴: 점수 + 변화 -->
-            <p v-if="result.ratingChange != null" class="t-mono mt-4 feel-rise feel-rise-3">
+            <p v-if="result.ratingGamesLeft" class="t-caption mt-4 feel-rise feel-rise-3">{{ ratingSoon(result.ratingGamesLeft) }}</p>
+            <p v-else-if="result.ratingChange != null" class="t-mono mt-4 feel-rise feel-rise-3">
               실력 점수 {{ result.ratingAfter }} <span :class="result.ratingChange > 0 ? 'text-signal-fg font-semibold' : ''">{{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }}</span>
             </p>
             <!-- '처음 몇 판은 크게 움직여요' 숫자 설명은 뺐다 (목적 판정 11/11 부분 2 다시 훑기) -->
@@ -199,7 +204,7 @@
             <!-- 기다리는 동안 화면이 움직인다: AI가 채점하면 AI 캐릭터(비비)가 까딱인다. 사람이 확인하는 판(투표)은 도는 표시 (quality-rules G3-3·G7-2) -->
             <UiSpinner v-if="isVote" class="mx-auto" />
             <MatchMascot v-else who="bibi" mood="wow" :size="72" class="mx-auto wait-bob" aria-hidden="true" />
-            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : key === 'ghosted' ? '답장을 기다리고 있어요' : `${judgeName}${josaIga(judgeName)} 채점하고 있어요` }}</p>
+            <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : key === 'ghosted' ? '답장을 기다리고 있어요' : key === 'power-level' ? '히어로를 확인하고 있어요' : `${judgeName}${josaIga(judgeName)} 채점하고 있어요` }}</p>
             <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 {{ NOTICE }}</p>
           </template>
           <!-- 스코어 맞히기: 둘 다 냈고 실제 경기가 끝나길 기다린다 -->
@@ -252,13 +257,19 @@
                 <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
                 <!-- 주 버튼은 친구에게 보내기 (11/14 피터 모델: 링크를 보내는 사람이 스토리 올리는 사람의 네 배). 기다리는 판일 때만 있어, 없으면 스토리가 주 버튼 -->
                 <UiButton v-if="canChallenge" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 한 판 붙자</UiButton>
-                <UiButton v-if="!storyFailed" size="sm" variant="secondary" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
+                <UiButton v-if="key === 'improv' && !storyFailed" size="sm" variant="secondary" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
               </div>
               <!-- 올릴 이유 (11/14): 올리면 친구들이 같은 상황으로 들어오고, 풀 때마다 알림이 온다 -->
               <p v-if="canChallenge" class="t-micro mt-2 break-keep">친구가 링크로 풀면 같은 상황으로 승패가 나요</p>
               <p v-if="improvResult.weak" class="t-body mt-4 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
               <p v-if="improvResult.tip" class="t-caption mt-1 break-keep">다음엔 {{ improvResult.tip }}</p>
               <p v-if="improvResult.next" class="t-label mt-3"><span class="hl">{{ improvResult.next }}</span></p>
+            </template>
+            <!-- 히어로 대결: 상대가 오기 전에는 점수도 판정도 없다. 출전했다는 것만 말한다 -->
+            <template v-else-if="isHero">
+              <MatchMascot who="match" :mood="(result.myScore ?? 0) > 0 ? 'cheer' : 'sad'" :size="72" class="mx-auto" aria-hidden="true" />
+              <p class="t-title mt-3">{{ (result.myScore ?? 0) > 0 ? '히어로가 출전했어요' : '출전하지 못했어요' }}</p>
+              <p v-if="!((result.myScore ?? 0) > 0)" class="t-caption mt-1 break-keep">{{ result.myFeedback?.split('\n')[0] || '글이 너무 짧거나 쓸 수 없는 말이 들어 있었어요' }}</p>
             </template>
             <template v-else>
               <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
@@ -276,12 +287,13 @@
             </template>
             <!-- 상대가 정해져 같은 문제를 푸는 중 (11/14: 함께 시작한 둘을 붙인다. 예전엔 이때도 '상대를 찾고 있어요'였다) -->
             <template v-else-if="result.status === 'PLAYING' && result.opponent">
-              <p class="t-heading mt-6">{{ who(result.opponent) }}님이 풀고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 풀고 있어요. 다 풀면 바로 승패가 나요. 결과가 나오면 {{ NOTICE }}</p>
+              <p class="t-heading mt-6">{{ isHero ? `${who(result.opponent)}님의 히어로와 붙어요` : `${who(result.opponent)}님이 풀고 있어요` }}</p>
+              <p class="t-caption mt-1">{{ isHero ? '두 히어로가 다 나오면 바로 싸움을 붙여요.' : `같은 ${key === 'improv' ? '상황을' : '문제를'} 풀고 있어요. 다 풀면 바로 승패가 나요.` }} 결과가 나오면 {{ NOTICE }}</p>
             </template>
             <template v-else>
-              <p class="t-heading mt-6">상대를 찾고 있어요</p>
-              <p class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}. 그때까지 아무도 안 풀면 승패 없이 끝나고 내 점수는 남아요</p>
+              <p class="t-heading mt-6">{{ isHero ? '상대 히어로를 기다려요' : '상대를 찾고 있어요' }}</p>
+              <p v-if="isHero" class="t-caption mt-1">같은 싸움터로 다른 사람이 히어로를 만들면 둘을 싸움 붙여요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}</p>
+              <p v-else class="t-caption mt-1">같은 {{ key === 'improv' ? '상황을' : '문제를' }} 다른 사람이 풀면 승패가 나요. 결과가 나오면 {{ NOTICE }} · {{ expiryLine(result.createdAt) }}. 그때까지 아무도 안 풀면 승패 없이 끝나고 내 점수는 남아요</p>
               <!-- 기다리기를 그만둘 길 (11/14: 7일 뒤 저절로 닫힐 때까지 거둘 수 없었다). 등급·점수는 남는다 -->
               <button type="button" class="hit t-micro underline underline-offset-2 mt-2 min-h-[36px]" :disabled="canceling" @click="cancelWaiting(result.gameId)">기다리기 그만두기</button>
             </template>
@@ -303,9 +315,9 @@
         <ImprovSchools v-if="key === 'improv' && improvResult && !improvResult.empty" class="mt-4" :grade="improvResult.grade" />
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
         <!-- 임기응변은 한마디(등급·인물 반응)를 위 카드와 상황 카드에 나눠 보여 주므로 따로 두지 않는다 (등급이 두 번 보였다) -->
-        <UiCard v-if="result.myFeedback && result.status !== 'AWAITING_RESULT' && !improvResult" class="mt-3">
-          <p class="t-micro">{{ key === 'ghosted' ? '그 사람의 답장' : game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
-          <p class="t-body mt-1 whitespace-pre-line">{{ result.myFeedback }}</p>
+        <UiCard v-if="sayOnly(result.myFeedback) && result.status !== 'AWAITING_RESULT' && key !== 'improv'" class="mt-3">
+          <p class="t-micro">{{ isHero ? '싸움 중계' : key === 'ghosted' ? '그 사람의 답장' : key === 'trial' ? '판결' : game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
+          <p class="t-body mt-1 whitespace-pre-line break-keep">{{ sayOnly(result.myFeedback) }}</p>
         </UiCard>
         <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
@@ -329,24 +341,31 @@
           </UiCard>
         </template>
         <!-- 말싸움: 주고받은 말 -->
-        <template v-else-if="key === 'debate'">
+        <template v-else-if="key === 'debate' || key === 'ghosted' || key === 'trial'">
+          <!-- 읽씹 탈출·재판: 무엇을 보고 한 말인지 먼저 (그 전 대화 · 법정 기록) -->
+          <UiCard v-if="key !== 'debate' && result.problem" class="mt-3">
+            <p class="t-micro">{{ key === 'trial' ? '법정 기록' : '그 전 대화' }}</p>
+            <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ result.problem }}</p>
+          </UiCard>
           <UiCard v-if="result.myAnswer" class="mt-3">
-            <p class="t-micro">내 말싸움</p>
+            <p class="t-micro">내 {{ TALK_NAME[key] }}</p>
             <!-- 줄글 덩어리("AI: … 나: …" 열 줄) 대신 판에서 본 말풍선 그대로 (quality-rules L-6) -->
             <ol class="mt-2 space-y-2">
               <li v-for="(l, i) in talkLines(result.myAnswer)" :key="i" class="flex" :class="l.self ? 'justify-end' : 'justify-start'">
-                <p class="bubble" :class="l.self ? 'bubble-mine' : 'bubble-theirs'">{{ l.text }}</p>
+                <p v-if="l.text === '(읽음)'" class="t-micro w-full text-right pr-1">읽음</p>
+                <p v-else class="bubble" :class="l.self ? 'bubble-mine' : 'bubble-theirs'">{{ l.text }}</p>
               </li>
             </ol>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
-            <p class="t-micro">{{ who(result.opponent) }}님의 말싸움 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-micro">{{ who(result.opponent) }}님의 {{ TALK_NAME[key] || '말싸움' }} · {{ opponentImprov ? `${opponentImprov.grade}등급` : `${result.opponentScore}${game?.scoreUnit}` }}</p>
             <ol class="mt-2 space-y-2">
               <li v-for="(l, i) in talkLines(result.opponentAnswer)" :key="i" class="flex" :class="l.self ? 'justify-end' : 'justify-start'">
-                <p class="bubble" :class="l.self ? '!bg-surface-3 text-fg rounded-br-md' : 'bubble-theirs'">{{ l.text }}</p>
+                <p v-if="l.text === '(읽음)'" class="t-micro w-full text-right pr-1">읽음</p>
+                <p v-else class="bubble" :class="l.self ? '!bg-surface-3 text-fg rounded-br-md' : 'bubble-theirs'">{{ l.text }}</p>
               </li>
             </ol>
-            <p v-if="result.opponentFeedback" class="t-caption mt-3">{{ judgeName }}: {{ result.opponentFeedback }}</p>
+            <p v-if="sayOnly(result.opponentFeedback)" class="t-caption mt-3">{{ judgeName }}: {{ sayOnly(result.opponentFeedback) }}</p>
           </UiCard>
         </template>
         <template v-else-if="key === 'recipe'">
@@ -356,22 +375,22 @@
             <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ dish(result.myAnswer).steps }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
-            <p class="t-micro">{{ who(result.opponent) }}님의 요리 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-micro">{{ who(result.opponent) }}님의 요리 · {{ opponentImprov ? `${opponentImprov.grade}등급` : `${result.opponentScore}${game?.scoreUnit}` }}</p>
             <p class="t-heading mt-1">{{ dish(result.opponentAnswer).name }}</p>
             <p class="t-caption mt-1 whitespace-pre-line break-keep">{{ dish(result.opponentAnswer).steps }}</p>
-            <p v-if="result.opponentFeedback" class="t-caption mt-2">AI 셰프: {{ result.opponentFeedback }}</p>
+            <p v-if="sayOnly(result.opponentFeedback)" class="t-caption mt-2">AI 셰프: {{ sayOnly(result.opponentFeedback) }}</p>
           </UiCard>
         </template>
         <!-- AI가 심사하는 글 게임(AI 재판·전투력 측정·AI 삼행시): 무엇에 대해 뭐라고 썼는지가 결과에 없었다 (11/14: 점수와 심사평만 있어 무엇이 웃겼는지 알 수 없었다) -->
         <template v-else-if="WRITING[key] && !isVote">
           <UiCard v-if="result.myAnswer" class="mt-3">
-            <p class="t-micro break-keep whitespace-pre-line">{{ result.problem }}</p>
+            <p class="t-micro break-keep whitespace-pre-line">{{ isHero ? `내 히어로 · 싸움터 ${result.problem}` : result.problem }}</p>
             <p class="t-body mt-2 whitespace-pre-line break-keep">{{ result.myAnswer }}</p>
           </UiCard>
           <UiCard v-if="result.opponentAnswer" class="mt-3">
-            <p class="t-micro">{{ who(result.opponent) }}님 · {{ result.opponentScore }}{{ game?.scoreUnit }}</p>
+            <p class="t-micro">{{ isHero ? `${who(result.opponent)}님의 히어로` : `${who(result.opponent)}님 · ${result.opponentScore}${game?.scoreUnit}` }}</p>
             <p class="t-body mt-2 whitespace-pre-line break-keep">{{ result.opponentAnswer }}</p>
-            <p v-if="result.opponentFeedback" class="t-caption mt-2">{{ key === 'ghosted' ? '답장' : judgeName }}: {{ result.opponentFeedback }}</p>
+            <p v-if="!isHero && result.opponentFeedback" class="t-caption mt-2">{{ judgeName }}: {{ result.opponentFeedback }}</p>
           </UiCard>
         </template>
       </template>
@@ -429,8 +448,8 @@
             <!-- 임기응변은 등급 하나로 말한다: 1500·0승 0패·49점이 '6등급 남았어요' 바로 밑에서 서로 어긋났다 (11/13 실제 기기 한 바퀴) -->
             <div v-if="played && key !== 'improv'" class="grid gap-2 mt-4 text-center" :class="(game.recordable ? game.myBest != null : game.myDraws > 0) ? 'grid-cols-3' : 'grid-cols-2'">
               <span>
-                <span class="block t-title tabular-nums">{{ game.myRating }}</span>
-                <span class="block t-micro">실력 점수</span>
+                <span class="block t-title tabular-nums">{{ game.myRatingGamesLeft ? `${game.myRatingGamesLeft}판 후` : game.myRating }}</span>
+                <span class="block t-micro">{{ game.myRatingGamesLeft ? '실력 점수 공개' : '실력 점수' }}</span>
               </span>
               <span>
                 <span class="block t-title tabular-nums">{{ game.myWins }}<span class="t-caption">승</span> {{ game.myLosses }}<span class="t-caption">패</span></span>
@@ -531,7 +550,7 @@ const settled = useSettled()
 import { dayTime } from '@/utils/format'
 import SaveImageSheet from '../../components/share/SaveImageSheet.vue'
 import { GUEST_GAMES } from '@/utils/guestGames'
-import { who } from '@/utils/format'
+import { ratingSoon, who } from '@/utils/format'
 import OpponentName from '../../components/appgame/OpponentName.vue'
 // 앱 게임 한 개 (/play/:key): 대결 시작 → 3·2·1 → 플레이 → 결과. 아래에 내 대결과 기록 순위
 // 대결 결과 알림을 누르면 ?duel={id}로 들어와 그 결과를 바로 보여준다
@@ -548,17 +567,18 @@ import VerdictFace from '../../components/mascot/VerdictFace.vue'
 // 말싸움 기록("AI: …\n나: …")을 말풍선 줄로. self = 그 판을 한 사람의 말
 function talkLines(text?: string | null) {
   return String(text ?? '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
-    const m = l.match(/^(AI|나)\s*:\s*(.*)$/)
+    const m = l.match(/^(AI|상대|판사|나)\s*:\s*(.*)$/)
     return m ? { self: m[1] === '나', text: m[2] } : { self: false, text: l }
   })
 }
+const TALK_NAME: Record<string, string> = { debate: '말싸움', ghosted: '메시지', trial: '변론' }
 // 처음 해 보는 사람에게: 한마디와 세 걸음. 시간·글자 수는 판 화면이 말한다(여기 적으면 서버 값과 어긋난다)
 const PITCH: Record<string, { title: string; steps: string[] }> = {
   debate: { title: '반대편 AI를 설득해 보세요', steps: ['주제와 내 편이 정해져요', '세 마디 안에 AI를 설득해요', '설득한 만큼 점수가 나고, 같은 주제를 한 사람과 승패가 나요'] },
   recipe: { title: '같은 재료로 누가 더 맛있게?', steps: ['재료 다섯 개가 나와요', '요리 이름과 만드는 법을 지어내요', 'AI 셰프가 점수를 매기고, 같은 재료를 받은 사람과 승패가 나요'] },
-  trial: { title: '피고인, 변론하세요', steps: ['엉뚱한 사건의 피고가 돼요', '판사를 설득할 변론을 써요', 'AI 판사가 점수를 매기고, 같은 사건의 다른 피고와 승패가 나요'] },
-  'power-level': { title: '조건 셋으로 히어로 만들기', steps: ['능력·약점·본업, 조건 셋이 나와요', '셋을 모두 지키는 히어로를 써요', 'AI 심사위원이 강함을 매기고, 같은 조건을 받은 사람과 승패가 나요'] },
-  ghosted: { title: '읽씹, 뚫을 수 있을까요?', steps: ['읽고 답 없는 상대가 나와요', '답장이 오게 메시지 하나를 써요', 'AI가 답장 올 확률을 매기고, 같은 상황을 푼 사람과 승패가 나요'] },
+  trial: { title: '기록의 빈틈을 찾아 판사를 설득하세요', steps: ['법정 기록을 읽어요. 나는 변호사거나 검사예요', '판사에게 말하면 판사가 한 번 되물어요. 두 번 말할 수 있어요', 'AI 판사가 판결하고, 같은 사건·같은 역할을 맡은 사람과 승패가 나요'] },
+  'power-level': { title: '내 히어로 대 상대 히어로', steps: ['싸움터 하나만 정해져 있어요', '히어로는 마음대로 만들어요', '같은 싸움터를 받은 상대가 히어로를 내면 둘을 싸움 붙여요. AI가 힘과 싸움의 논리로 승패를 가려요'] },
+  ghosted: { title: '읽씹, 뚫을 수 있을까요?', steps: ['그 사람과 나눈 마지막 대화에서 시작해요', '세 번까지 보낼 수 있어요. 보낼 때마다 답하거나 읽고 넘겨요', '답장 올 확률이 나오고, 같은 대화를 받은 사람과 승패가 나요'] },
 }
 import ChampionSeatsCard from '../../components/champion/ChampionSeatsCard.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
@@ -602,9 +622,7 @@ import RhythmCopyPlay from '../../components/appgame/RhythmCopyPlay.vue'
 const WRITING: Record<string, { guide: string; placeholder: string }> = {
   excuse: { guide: '이 상황에서 빠져나갈 한 줄 변명', placeholder: '그럴듯하고 웃긴 변명' },
   balance: { guide: '둘 중 하나를 골라 이유로 설득해 주세요', placeholder: '예) 여름: 수박이 있으니까요' },
-  trial: { guide: '피고가 되어 AI 판사를 설득하는 변론', placeholder: '존경하는 재판장님, 사실은…' },
-  'power-level': { guide: '세 조건을 모두 지키는 히어로를 만들어요. 이름과 한두 줄이면 돼요. 조건을 빠뜨리면 크게 깎여요', placeholder: '예) 삼각김밥맨: 폐기 삼각김밥을 먹으면 3초간 무적. 월요일엔 폐기가 없어 쉰다' },
-  ghosted: { guide: '읽씹하는 이 사람에게 메시지 하나. 답장이 오게 써 보세요', placeholder: '매달리면 읽씹, 부담 없고 구체적이면 답장' },
+  'power-level': { guide: '이 싸움터에서 싸울 히어로를 마음대로 만들어요. 상대의 히어로와 싸움 붙여요. 능력이 구체적일수록 세요', placeholder: '이름과 능력. "무조건 이긴다" 같은 말은 능력으로 쳐 주지 않아요' },
   acrostic: { guide: '글자마다 한 줄씩, 그 글자로 시작해요. 줄을 바꿔 나눠요', placeholder: '고백하려고\n양말까지 새로 샀는데\n이미 여친이 있었다' },
 }
 import PredictPlay from '../../components/appgame/PredictPlay.vue'
@@ -1057,9 +1075,15 @@ function shareStory() {
 }
 const saveView = ref<string | null>(null)
 
-const improvResult = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.myFeedback) : null))
-const opponentImprov = computed(() => (key.value === 'improv' ? improvFeedback(result.value?.opponentFeedback) : null))
-const improvGrade = computed(() => (key.value === 'improv' && !improvResult.value?.empty && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))
+// 등급으로 끝나는 게임: 임기응변, 그리고 AI가 매기는 넷(요리·재판·말싸움·읽씹, 11/15 고병연: 끝난 화면을 임기응변과 같게).
+// 서버가 한마디 첫 줄에 "7등급 · 100명 중 86등"을 붙여 준다 (improv/ImprovGrades.withGrade). 등급 줄이 없는 옛 판은 예전 점수 화면 그대로다
+const GRADED = ['improv', 'recipe', 'trial', 'debate', 'ghosted']
+const improvResult = computed(() => (GRADED.includes(key.value) ? improvFeedback(result.value?.myFeedback) : null))
+const opponentImprov = computed(() => (GRADED.includes(key.value) ? improvFeedback(result.value?.opponentFeedback) : null))
+const improvGrade = computed(() => (GRADED.includes(key.value) && !improvResult.value?.empty && result.value?.myFeedback?.includes('등급') ? result.value.myFeedback.split('\n')[0] : ''))
+// 한마디에서 등급 줄·다음 등급 줄을 뺀 나머지 (AI의 말). 임기응변은 상황 카드가 따로 보여 준다
+const sayOnly = (f?: string | null) => String(f ?? '').split('\n').filter((l) => !/^\d등급 · /.test(l) && !l.startsWith('다음 등급: ')).join('\n').trim()
+const isHero = computed(() => key.value === 'power-level')
 
 // 이름 뒤 조사 이/가 (AI 심판이, AI 셰프가). 받침이 없는 글자·한글이 아니면 '가'
 function josaIga(name: string) {

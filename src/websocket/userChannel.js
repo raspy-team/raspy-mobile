@@ -3,6 +3,7 @@
 import { Client } from '@stomp/stompjs'
 import { WS_URL } from '@/config/server'
 import { getMyId } from '@/utils/me'
+import { forgetResponses } from '../api/api'
 
 let client = null
 const listeners = new Set()
@@ -34,12 +35,14 @@ export async function openUserChannel() {
     onConnect: () => {
       client.subscribe(`/topic/user/${myId}`, ({ body }) => {
         const event = JSON.parse(body)
+        forgetResponses() // 바뀐 것이 있다: 뒤로 갈 때 쓰려고 받아 둔 답을 버린다 (api/api.js)
         listeners.forEach((cb) => cb(event))
       })
       // 지금 기다리는 사람 목록이 바뀌었다 (모두에게 같은 신호). 목록을 보는 화면만 다시 불러온다
       client.subscribe('/topic/lobbies', () => lobbyListeners.forEach((cb) => cb()))
       topics.forEach((t, destination) => { t.sub = client.subscribe(destination, ({ body }) => t.cb(JSON.parse(body)), t.headers) })
       // 끊겨 있던 사이 놓친 신호가 있을 수 있으니 다시 붙으면 한 번 새로고침하게 알린다
+      forgetResponses()
       listeners.forEach((cb) => cb({ type: 'RECONNECTED' }))
     },
   })

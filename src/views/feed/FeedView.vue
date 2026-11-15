@@ -60,7 +60,7 @@
         </RouterLink>
         <!-- AI 보스가 앱 게임 전국 자리를 되찾았다 (docs/ai-residents.md 3). 누르면 그 게임 (챔피언 카드에서 다시 도전) -->
         <RouterLink v-else-if="p.type === 'boss_back'" :to="p.rule?.appGameKey ? `/play/${p.rule.appGameKey}` : `/rules/${p.rule?.id}`" class="flex items-center gap-3 py-4 border-b border-line" :data-game="p.id">
-          <span class="w-10 h-10 rounded-full bg-gold-soft text-gold-fg flex items-center justify-center flex-shrink-0" aria-hidden="true"><UiIcon name="crown" /></span>
+          <span class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true"><UiIcon name="crown" /></span>
           <span class="flex-1 min-w-0">
             <span class="flex items-center t-heading min-w-0"><span class="truncate">{{ p.players[0]?.name }}</span><UiAiBadge /></span>
             <span class="block t-caption mt-0.5 break-keep">{{ p.caption }}</span>

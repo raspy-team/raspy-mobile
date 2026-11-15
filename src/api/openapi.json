@@ -9628,6 +9628,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "description": "all이면 동네와 상관없이 전부 ('모두 보기'). 비우면 내 동네 범위, 적으면 다른 동네를 가까운 순으로 채운다(elsewhere)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -13859,11 +13868,11 @@
               "type": "object"
             }
           },
-          "rows": {
+          "cols": {
             "type": "integer",
             "format": "int32"
           },
-          "cols": {
+          "rows": {
             "type": "integer",
             "format": "int32"
           }
@@ -16545,6 +16554,7 @@
           "myJudging",
           "playMode",
           "problem",
+          "ratingGamesLeft",
           "status",
           "title"
         ],
@@ -16620,6 +16630,10 @@
             "format": "int32"
           },
           "ratingChange": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ratingGamesLeft": {
             "type": "integer",
             "format": "int32"
           },
@@ -17172,7 +17186,7 @@
           "majorCategory",
           "minorCategory",
           "playCount",
-          "rating",
+          "ratingGamesLeft",
           "ruleId",
           "ruleTitle",
           "totalPlayers"
@@ -17187,6 +17201,10 @@
             "type": "string"
           },
           "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ratingGamesLeft": {
             "type": "integer",
             "format": "int32"
           },
@@ -18140,6 +18158,7 @@
           "draws",
           "losses",
           "rating",
+          "ratingGamesLeft",
           "totalGameCount",
           "wins"
         ],
@@ -18165,6 +18184,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "ratingGamesLeft": {
+            "type": "integer",
+            "format": "int32"
+          },
           "totalGameCount": {
             "type": "integer",
             "format": "int32"
@@ -18177,12 +18200,15 @@
       },
       "UserRankingDto": {
         "required": [
+          "draws",
           "isCurrentUser",
+          "losses",
           "playCount",
           "rank",
           "rating",
           "userId",
-          "userName"
+          "userName",
+          "wins"
         ],
         "type": "object",
         "properties": {
@@ -18210,6 +18236,18 @@
           },
           "isCurrentUser": {
             "type": "boolean"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "draws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -18344,6 +18382,28 @@
           }
         }
       },
+      "RuleRecord": {
+        "required": [
+          "draws",
+          "losses",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "draws": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "ScopeRankEntry": {
         "required": [
           "crown",
@@ -18378,6 +18438,9 @@
           },
           "isCurrentUser": {
             "type": "boolean"
+          },
+          "record": {
+            "$ref": "#/components/schemas/RuleRecord"
           }
         }
       },
@@ -19700,6 +19763,9 @@
           },
           "isBot": {
             "type": "boolean"
+          },
+          "record": {
+            "$ref": "#/components/schemas/RuleRecord"
           }
         }
       },
@@ -20114,6 +20180,7 @@
           "challengers",
           "createdAt",
           "currentParticipantCounts",
+          "elsewhere",
           "format",
           "gameStatus",
           "id",
@@ -20270,6 +20337,9 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          "elsewhere": {
+            "type": "boolean"
           }
         }
       },
@@ -20277,6 +20347,7 @@
         "required": [
           "after",
           "before",
+          "gamesLeft",
           "provisional"
         ],
         "type": "object",
@@ -20291,6 +20362,10 @@
           },
           "provisional": {
             "type": "boolean"
+          },
+          "gamesLeft": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -20808,6 +20883,9 @@
           "team": {
             "type": "integer",
             "format": "int32"
+          },
+          "record": {
+            "$ref": "#/components/schemas/RuleRecord"
           }
         }
       },
@@ -22315,6 +22393,7 @@
           "myDraws",
           "myLosses",
           "myRating",
+          "myRatingGamesLeft",
           "myWins",
           "playCount",
           "playMode",
@@ -22381,6 +22460,10 @@
             "format": "int64"
           },
           "myRating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "myRatingGamesLeft": {
             "type": "integer",
             "format": "int32"
           },

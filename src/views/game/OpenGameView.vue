@@ -13,6 +13,7 @@
           :game="game"
           :is-mine="game.ownerId === myId"
           :busy="busy"
+          detail
           @rule="router.push(`/rules/${game.rule.id}`)"
           @profile="router.push('/profile/' + game.ownerId)"
           @apply="apply"

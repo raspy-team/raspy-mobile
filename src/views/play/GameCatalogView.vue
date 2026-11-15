@@ -12,7 +12,8 @@
       </template>
     </UiTopBar>
 
-    <main class="max-w-xl mx-auto px-4 pt-3 pb-16">
+    <!-- 아래 탭(64 + 홈 막대)에 가리지 않게 넉넉히 띄운다 (11/15 고병연: 맨 아래 'AI 재판'이 탭에 잘렸고, 내용이 화면 높이와 같아 밀리지도 않았다) -->
+    <main class="max-w-xl mx-auto px-4 pt-3 pb-32">
       <!-- 목록은 당겨서 새로 고친다 (quality-rules N-3: 홈·내 경기·소식·알림에만 있었다) -->
       <UiPullIndicator :pull="pull" :refreshing="refreshing" />
       <UiInput v-if="searching" ref="searchInput" v-model="query" icon="search" placeholder="게임 찾기" />

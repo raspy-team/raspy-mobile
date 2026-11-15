@@ -42,6 +42,12 @@
       <div id="age">
         <UiInput v-model="form.age" label="만 나이" optional type="number" inputmode="numeric" :maxlength="3" placeholder="예: 27" hint="다칠 수 있는 규칙은 만 19세부터예요. 나이는 나만 보고, 설정 > 내 정보 공개에서 바꿀 수 있어요" :error="errors.age" />
       </div>
+      <!-- 성별: 고를 수 있고, 고르지 않아도 된다 (11/15 고병연). 공개는 나이처럼 설정 > 내 정보 공개에서 -->
+      <UiField label="성별" optional hint="성별은 나만 보고, 설정 > 내 정보 공개에서 바꿀 수 있어요">
+        <div class="flex gap-2" role="radiogroup" aria-label="성별">
+          <UiChip v-for="g in GENDERS" :key="g.value" :selected="form.gender === g.value" role="radio" :aria-checked="form.gender === g.value" @click="form.gender = g.value">{{ g.label }}</UiChip>
+        </div>
+      </UiField>
       <UiInput v-model="form.bio" label="한 줄 소개" optional multiline :rows="3" :maxlength="100" placeholder="예: 주말마다 한강에서 배드민턴 쳐요" />
       <!-- 예전에 직접 적은 소속: 새로 적을 수 없고 지우기만 된다. 학교·회사는 설정 > 소속에서 인증한다 (docs/organizations.md 2) -->
       <UiField v-if="original?.affiliation" label="예전에 적은 소속" :hint="form.affiliation ? '학교·회사는 설정 > 소속에서 붙여요. 예전 글은 지울 수만 있어요' : '저장하면 지워져요'">
@@ -63,11 +69,11 @@
 </template>
 
 <script setup>
-// 프로필 편집: 사진·닉네임·아이디·동네·나이(만 19세 확인용, 공개는 설정 > 내 정보 공개)·소개·예전 소속(지우기만). 성별은 받지 않는다 (예전 값은 그대로 둔다)
+// 프로필 편집: 사진·닉네임·아이디·동네·나이(만 19세 확인용)·성별(고르지 않아도 된다)·소개·예전 소속(지우기만). 나이·성별을 남에게 보일지는 설정 > 내 정보 공개
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/api'
-import { UiAvatar, UiButton, UiEmptyState, UiField, UiInput, UiSkeleton, UiTopBar } from '../../components/ui'
+import { UiAvatar, UiButton, UiChip, UiEmptyState, UiField, UiInput, UiSkeleton, UiTopBar } from '../../components/ui'
 import { useToast } from '../../composables/useToast'
 import { photoFromFile } from '../../utils/image'
 import { containsProfanity } from '../../utils/profanity'
@@ -83,7 +89,8 @@ const loading = ref(true)
 const loadError = ref(false)
 const saving = ref(false)
 // region은 보여 주기만 한다 (동네 인증이 채운다)
-const form = reactive({ nickname: '', username: '', bio: '', affiliation: '', region: '', age: '' })
+const form = reactive({ nickname: '', username: '', bio: '', affiliation: '', region: '', age: '', gender: '' })
+const GENDERS = [{ value: 'M', label: '남성' }, { value: 'F', label: '여성' }, { value: '', label: '선택 안 함' }]
 const errors = reactive({ nickname: '', username: '', age: '' })
 const fileInput = ref(null)
 const preview = ref('')
@@ -99,7 +106,8 @@ const dirty = computed(() => {
     form.username !== original.username ||
     form.bio !== (original.bio || '') ||
     form.affiliation !== (original.affiliation || '') ||
-    String(form.age ?? '') !== String(original.age ?? '')
+    String(form.age ?? '') !== String(original.age ?? '') ||
+    form.gender !== (original.gender || '')
   )
 })
 
@@ -159,10 +167,10 @@ async function save() {
     fd.append('nickname', nick)
     fd.append('bio', form.bio.trim())
     fd.append('affiliation', form.affiliation.trim())
-    // 나이는 비우면 예전 값 그대로, 성별은 화면에서 받지 않으니 예전 값 그대로 보낸다 (지워지지 않게)
+    // 나이는 비우면 예전 값 그대로. 성별은 고른 값(선택 안 함이면 보내지 않아 지워진다)
     if (ageText) fd.append('age', Number(ageText))
     else if (original.age != null) fd.append('age', original.age)
-    if (original.gender) fd.append('gender', original.gender)
+    if (form.gender) fd.append('gender', form.gender)
     if (photoState.value === 'updated' && photo.value) fd.append('profile_picture', photo.value)
     else if (photoState.value === 'deleted') fd.append('profile_picture', 'null')
     await api.patch('/api/user-profile/save', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -189,6 +197,7 @@ async function load() {
     form.bio = data.bio || ''
     form.affiliation = data.affiliation || ''
     form.age = data.age ?? ''
+    form.gender = data.gender || ''
     // 동네는 인증한 지금 동네를 보여 준다 (예전 '지역' 칸이 비어 있으면 인증했어도 '동네 인증하기'로 보였다)
     const mine = await api.get('/api/neighborhoods/me').then((r) => r.data).catch(() => null)
     form.region = mine?.neighborhoods?.find((n) => n.active)?.name || data.region || ''

@@ -19,62 +19,15 @@
       <p class="late-note t-caption text-center pt-2">내 판과 동네 경기를 불러오는 중이에요</p>
     </div>
     <div v-show="settled">
-    <HomeUpcoming />
+    <!-- 홈은 누구에게나 같은 모양이다 (11/15 고병연): 한 판이라도 한 사람의 홈은 잡힌 경기·학교 대항·내 판·접힌 동네 경기가 차례로 쌓여
+         막 가입한 사람의 홈과 다른 앱 같았다. 하던 판·잡힌 경기·결과는 '내 경기' 탭에 있고(탭의 숫자가 할 일을 알린다), 홈은 새 판을 찾는 곳이다 -->
     <!-- 받은 '한 판 붙자'는 홈에서 바로 받는다 (11/14 피터로 걷기: 종의 점 하나뿐이라 받은 줄 몰랐다) -->
     <OneGameRequests class="mb-6" />
     <!-- 지금 사람이 있나: 실제 수가 넉넉할 때만 한 줄 (11/14 '빈 식당') -->
     <ImprovPulse variant="home" />
-    <!-- 학교 대항이 어떻게 돼 가는지, 가입 전 친구와의 승부(친구 답·점수)를 홈에서 바로 (11/14 폰으로 한 바퀴) -->
-    <ImprovSchools v-if="appPlayer" variant="home" />
-    <ImprovVersus v-if="appPlayer" class="mb-4" />
 
-    <template v-if="appPlayer">
-      <UiSection title="내 판">
-        <UiCard v-if="lastGame">
-          <p class="t-micro">마지막 판</p>
-          <p class="t-heading mt-0.5 truncate">{{ lastGame.title }}<span v-if="lastGame.line" class="t-body text-fg-muted ml-2">{{ lastGame.line }}</span></p>
-          <div class="grid grid-cols-2 gap-2 mt-4">
-            <!-- '한 판 더'는 게임 첫 화면을 거치지 않고 바로 판으로 (경로 4 리뷰 G3, again=1은 게임 화면이 받아 바로 시작) -->
-            <UiButton :to="`/play/${lastGame.key}?again=1`">한 판 더</UiButton>
-            <UiButton variant="secondary" to="/games">다른 게임</UiButton>
-          </div>
-          <!-- 결과 화면이 아니어도 친구를 부른다 (11/14: 홈·내 정보 어디에도 부르는 버튼이 없었다). 카카오톡·QR이 있는 보내기 창이 뜬다 -->
-          <UiButton block variant="ghost" size="sm" icon="user-plus" class="mt-2" @click="inviteFriend('home')">친구 부르기</UiButton>
-        </UiCard>
-        <!-- 막 끝난 결과: 이겼나 졌나. 대결이 끝나는 순간 아래 목록에서 빠져 홈에서 결과를 볼 길이 없었다 (경로 4 리뷰 G1, 시나리오 T7) -->
-        <ul v-if="recentResults.length" class="mt-3 rounded-xl bg-surface divide-y divide-line">
-          <li v-for="d in recentResults" :key="d.gameId">
-            <RouterLink :to="`/play/${d.key}?duel=${d.gameId}`" class="flex items-center gap-3 px-4 py-3 active:bg-surface-2">
-              <span class="flex-1 min-w-0">
-                <span class="block t-body text-fg truncate">{{ resultLine(d) }}</span>
-                <span class="block t-micro truncate">{{ d.title }}<template v-if="gradeOf(d)"> · {{ gradeOf(d) }}</template></span>
-              </span>
-              <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
-            </RouterLink>
-          </li>
-        </ul>
-        <!-- 결과가 나왔나·내 차례인가·상대를 기다리나: 다시 연 이유 그 자체 -->
-        <AppDuelList v-if="duels.length" :duels="duels.slice(0, 3)" :class="lastGame ? 'mt-3' : ''" />
-        <RouterLink v-if="duels.length > 3" to="/game" class="block t-caption text-center mt-2 py-2">{{ duels.length - 3 }}개 더 보기</RouterLink>
-        <UiButton v-if="!lastGame" block variant="secondary" class="mt-3" to="/games">다른 게임</UiButton>
-      </UiSection>
-
-      <!-- 접혀 있어도 지도·경기 만들기는 바로 (앱 게임을 한 번 하면 홈이 계속 이 모양이라, 경기 만들기가 펼쳐야만 보였다 11/11) -->
-      <div v-if="!showLocal" class="mt-6 flex items-center rounded-xl bg-surface pr-2">
-        <button type="button" class="flex-1 min-w-0 flex items-center justify-between pl-4 pr-2 py-3.5 rounded-l-xl active:bg-surface-2" @click="showLocal = true">
-          <span class="t-heading">{{ areaTitle }}</span>
-          <span class="t-caption flex items-center gap-1">{{ games.length ? `${games.length}개` : '' }}<UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" /></span>
-        </button>
-        <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
-        <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
-      </div>
-    </template>
-
-    <template v-if="!appPlayer || showLocal">
-    <!-- 앱 게임을 아직 안 한 사람에게 하나: 가입 없이도 되는 한 판 (예전 '갈 곳 셋' 중 이것만 남겼다) -->
-    <!-- 작게 한 줄 (11/13 고병연: 저렇게 클 필요 없다) -->
-    <!-- 한 줄은 그대로 두되 지금 할 것 하나는 주 버튼으로 (11/14 전수 평가: 홈에 흰 버튼이 하나도 없어 눈이 갈 곳이 없었다) -->
-    <div v-if="!appPlayer" class="flex gap-2">
+    <!-- 지금 할 것 하나는 주 버튼으로 (11/14 전수 평가: 홈에 흰 버튼이 하나도 없어 눈이 갈 곳이 없었다) -->
+    <div class="flex gap-2">
       <UiButton class="flex-1" icon="gamepad" to="/games">앱 게임 한 판</UiButton>
       <UiButton variant="secondary" icon="user-plus" @click="inviteFriend('home')">친구 부르기</UiButton>
     </div>
@@ -88,10 +41,18 @@
         <div class="flex items-center -mr-2 shrink-0">
           <UiIconButton icon="map" label="지도로 보기" @click="router.push('/map')" />
           <UiIconButton icon="plus" label="경기 만들기" @click="router.push('/create-game')" />
-          <UiIconButton v-if="appPlayer" icon="chevron-up" label="동네 경기 접기" @click="showLocal = false" />
         </div>
       </div>
-      <NeighborhoodBar v-if="!hasDong" class="mb-3" @changed="fetchGames(); loadDong()" />
+      <!-- 동네를 안 정한 사람에게: 작은 밑줄 글 한 줄(동네 줄의 '동네를 고르면…')뿐이라 정하라는 말이 없는 것과 같았다 (11/15 고병연).
+           누를 수 있는 한 줄로 바꿨다. 정하고 나면 이 화면으로 돌아온다 -->
+      <RouterLink v-if="!hasDong" :to="{ path: '/neighborhood', query: { back: '/' } }" class="mb-3 flex items-center gap-3 rounded-xl bg-surface px-4 py-3 active:bg-surface-2">
+        <UiIcon name="location-dot" class="text-signal-fg" aria-hidden="true" />
+        <span class="flex-1 min-w-0">
+          <span class="block t-label">내 동네를 정해 주세요</span>
+          <span class="block t-micro mt-0.5">가까운 경기와 동네 소식이 먼저 보여요</span>
+        </span>
+        <UiIcon name="chevron-right" class="text-fg-subtle" aria-hidden="true" />
+      </RouterLink>
       <!-- 불러오는 중 -->
       <div v-if="loading && !games.length" class="space-y-3">
         <UiCard v-for="n in 3" :key="n">
@@ -116,15 +77,18 @@
       </UiCard>
 
       <UiCard v-else-if="!games.length">
-        <UiEmptyState mascot="match" title="아직 모집 중인 경기가 없어요">
+        <UiEmptyState mascot="match" title="아직 모집 중인 경기가 없어요" description="위의 +로 첫 경기를 열 수 있어요">
           <!-- 버튼은 모두 뺐다: 경기 만들기는 위 '동네 경기'의 +, 범위는 동네 줄, 앱 게임은 맨 위와 겹쳤다 (11/13 고병연) -->
         </UiEmptyState>
       </UiCard>
 
       <div v-else class="space-y-3 ui-appear">
+        <template v-for="(game, i) in games.slice(0, HOME_GAMES)" :key="game.id">
+        <!-- 우리 동네 경기가 적으면 서버가 다른 동네 경기를 가까운 순으로 채워 준다: 어디부터인지 한 줄로 (소식과 같은 말) -->
+        <p v-if="game.elsewhere && !games[i - 1]?.elsewhere" class="t-caption flex items-center gap-1.5 pt-1">
+          <UiIcon name="location-dot" aria-hidden="true" />{{ i === 0 ? '우리 동네 경기가 아직 없어서 가까운 순으로 다른 동네 경기를 보여요' : '우리 동네 경기가 아직 적어서 가까운 순으로 다른 동네 경기도 보여요' }}
+        </p>
         <OpenGameCard
-          v-for="game in games"
-          :key="game.id"
           :game="game"
           :is-mine="game.ownerId === myId"
           :busy="busyId === game.id"
@@ -136,9 +100,11 @@
           @challengers="challengersGame = game"
           @more="menuGame = game"
         />
+        </template>
+        <!-- 소식에 '모두 보기'가 있듯 경기도 (11/15 고병연): 전국의 모집 중인 경기를 종목·순서로 골라 본다 -->
+        <UiButton block variant="secondary" to="/open-games">{{ games.length > HOME_GAMES ? `경기 모두 보기 ${games.length}` : '전국 경기 모두 보기' }}</UiButton>
       </div>
     </section>
-    </template>
     <HomeFeedPeek />
     </div>
   </main>
@@ -178,16 +144,12 @@ import OpenGameCard from '../../components/game/OpenGameCard.vue'
 import PairApplySheet from '../../components/game/PairApplySheet.vue'
 import GameMenuSheets from '../../components/game/GameMenuSheets.vue'
 import NeighborhoodBar from '../../components/neighborhood/NeighborhoodBar.vue'
-import AppDuelList from '../../components/appgame/AppDuelList.vue'
 import HomeFeedPeek from '../../components/feed/HomeFeedPeek.vue'
-import HomeUpcoming from '../../components/game/HomeUpcoming.vue'
 import OneGameRequests from '../../components/game/OneGameRequests.vue'
 import { inviteFriend } from '@/utils/inviteFriend'
 import UserSearchModal from '../../components/profile/UserSearchModal.vue'
 const findPeople = ref(false)
 import ImprovPulse from '../../components/appgame/ImprovPulse.vue'
-import ImprovSchools from '../../components/appgame/ImprovSchools.vue'
-import ImprovVersus from '../../components/appgame/ImprovVersus.vue'
 import { collapseWaitingDuels } from '@/utils/appGame'
 import { GET } from '@/api/client'
 import Comment from '../GameCommentView.vue'
@@ -200,6 +162,7 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { feel } from '../../utils/feel'
 
 // 아직 안 끝난 앱 대결 (내 경기 화면과 같은 자료)
+const HOME_GAMES = 5 // 홈에는 몇 개만, 나머지는 '모두 보기'
 const duels = ref([])
 const myIdNow = ref(null)
 // 이 기기에 남은 마지막 판이 없으면 서버에 묻는다 (11/14 피터로 걷기: 인스타 안 브라우저에서 한 판 하고 가입한 사람이
@@ -230,6 +193,7 @@ function resultLine(d) {
 // 임기응변은 점수 대신 등급이 이 사람의 말이다
 function gradeOf(d) {
   const m = d.myFeedback?.match(/^(\d)등급/)
+  if (d.key === 'power-level') return '' // 히어로 대결은 점수가 없다
   return m ? `${m[1]}등급` : d.myScore != null ? `${Math.round(d.myScore)}점` : ''
 }
 // 동네 경기를 펼쳤는지 기억한다 (올 때마다 접혀 다시 눌렀다, 11/11 쌓이는 피로 전수표)

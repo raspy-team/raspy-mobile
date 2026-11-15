@@ -1,6 +1,5 @@
 <script setup>
 import { defineProps } from 'vue'
-import { feel } from '../utils/feel'
 import { useActiveGamePolling } from '../composables/useActiveGamePolling'
 defineProps({ tab: String })
 
@@ -12,7 +11,7 @@ const { waitingOnMeCount } = useActiveGamePolling()
 const tabs = [
   { key: 'home', to: '/', icon: 'home', label: '홈' },
   { key: 'game', to: '/game', icon: 'calendar-check', label: '내 경기' },
-  { key: 'profile', to: '/profile/0', icon: 'user', label: '내 정보' },
+  { key: 'profile', to: '/profile/0', icon: 'user', label: '프로필' },
 ]
 </script>
 
@@ -26,7 +25,6 @@ const tabs = [
         :aria-label="t.key === 'game' && waitingOnMeCount ? `${t.label}, 할 일 ${waitingOnMeCount}개` : t.label"
         :aria-current="tab === t.key ? 'page' : undefined"
         class="flex flex-col items-center justify-center gap-1 transition-colors"
-        @click="tab !== t.key && feel('select')"
         :class="tab === t.key ? 'text-fg' : 'text-fg-subtle'"
       >
         <span class="relative">

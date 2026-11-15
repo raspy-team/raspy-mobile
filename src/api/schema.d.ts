@@ -6768,9 +6768,9 @@ export interface components {
                 [key: string]: Record<string, never>;
             };
             /** Format: int32 */
-            rows: number;
-            /** Format: int32 */
             cols: number;
+            /** Format: int32 */
+            rows: number;
         };
         Obj: {
             s: string;
@@ -7634,6 +7634,8 @@ export interface components {
             ratingAfter?: number;
             /** Format: int32 */
             ratingChange?: number;
+            /** Format: int32 */
+            ratingGamesLeft: number;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -7802,7 +7804,9 @@ export interface components {
             ruleId: number;
             ruleTitle: string;
             /** Format: int32 */
-            rating: number;
+            rating?: number;
+            /** Format: int32 */
+            ratingGamesLeft: number;
             /** Format: int64 */
             playCount: number;
             majorCategory: string;
@@ -8112,6 +8116,8 @@ export interface components {
             /** Format: int32 */
             ruleRating?: number;
             /** Format: int32 */
+            ratingGamesLeft: number;
+            /** Format: int32 */
             totalGameCount: number;
             /** Format: double */
             rating: number;
@@ -8128,6 +8134,12 @@ export interface components {
             /** Format: int64 */
             playCount: number;
             isCurrentUser: boolean;
+            /** Format: int32 */
+            wins: number;
+            /** Format: int32 */
+            draws: number;
+            /** Format: int32 */
+            losses: number;
         };
         PlayedAbility: {
             key: string;
@@ -8159,6 +8171,14 @@ export interface components {
             key: string;
             label: string;
         };
+        RuleRecord: {
+            /** Format: int32 */
+            wins: number;
+            /** Format: int32 */
+            draws: number;
+            /** Format: int32 */
+            losses: number;
+        };
         ScopeRankEntry: {
             /** Format: int32 */
             rank: number;
@@ -8170,6 +8190,7 @@ export interface components {
             rating: number;
             crown: boolean;
             isCurrentUser: boolean;
+            record?: components["schemas"]["RuleRecord"];
         };
         ScopeRankingResponse: {
             /** @enum {string} */
@@ -8557,6 +8578,7 @@ export interface components {
             nickname: string;
             profileUrl?: string;
             isBot: boolean;
+            record?: components["schemas"]["RuleRecord"];
         };
         GameDetailResponse: {
             /** Format: int64 */
@@ -8735,6 +8757,7 @@ export interface components {
             /** @enum {string} */
             venue: "IN_PERSON" | "VIDEO" | "ONLINE";
             teamSeatsLeft?: number[];
+            elsewhere: boolean;
         };
         MyRatingChange: {
             /** Format: int32 */
@@ -8742,6 +8765,8 @@ export interface components {
             /** Format: int32 */
             after: number;
             provisional: boolean;
+            /** Format: int32 */
+            gamesLeft: number;
         };
         SetResult: {
             /** Format: int32 */
@@ -8900,6 +8925,7 @@ export interface components {
             profileUrl?: string;
             /** Format: int32 */
             team?: number;
+            record?: components["schemas"]["RuleRecord"];
         };
         RequestedGameResponse: {
             /** Format: int64 */
@@ -9353,6 +9379,8 @@ export interface components {
             ruleId: number;
             /** Format: int32 */
             myRating: number;
+            /** Format: int32 */
+            myRatingGamesLeft: number;
             /** Format: int32 */
             myWins: number;
             /** Format: int32 */
@@ -15880,6 +15908,8 @@ export interface operations {
             query?: {
                 region?: string;
                 sort?: string;
+                /** @description all이면 동네와 상관없이 전부 ('모두 보기'). 비우면 내 동네 범위, 적으면 다른 동네를 가까운 순으로 채운다(elsewhere) */
+                scope?: string;
             };
             header?: never;
             path?: never;

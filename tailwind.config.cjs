@@ -69,7 +69,6 @@ module.exports = {
         'fg-subtle': v('fg-subtle'),
         primary: { DEFAULT: v('fg'), press: v('primary-press'), soft: 'rgb(var(--c-fg) / 0.08)', fg: v('fg'), on: v('canvas') },
         signal: { DEFAULT: v('signal'), soft: 'rgb(var(--c-signal) / var(--signal-soft))', fg: v('signal-fg'), on: v('signal-on') },
-        gold: { DEFAULT: v('gold'), soft: 'rgb(var(--c-gold) / var(--gold-soft))', fg: v('gold-fg'), on: 'rgb(30 22 0)' },
         danger: { DEFAULT: v('danger'), soft: 'rgb(var(--c-danger) / 0.12)', fg: v('danger-fg') },
         success: { DEFAULT: v('signal'), soft: 'rgb(var(--c-signal) / var(--signal-soft))', fg: v('signal-fg') },
 

@@ -79,13 +79,15 @@ const STATUS_LABEL = { SCHEDULED: '상대 정해짐', IN_PROGRESS: '경기 중',
 import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton, UiList, UiListItem, UiSheet } from '../ui'
-import { distance, matchTime, place } from '../../utils/format'
+import { distance, matchTime, place, tallyLine } from '../../utils/format'
 import { formatLabel, TEAM_NAMES, venuePlace } from '../../utils/gameFormat'
 
 const props = defineProps({
   game: { type: Object, required: true },
   isMine: { type: Boolean, default: false },
   busy: { type: Boolean, default: false },
+  /** 경기 하나를 보는 화면인가. 목록에서는 주최자 줄을 짧게 두고, 여기서만 이 규칙 전적을 붙인다 (quality-rules S1-3) */
+  detail: { type: Boolean, default: false },
 })
 const emit = defineEmits(['rule', 'profile', 'apply', 'pair', 'cancel', 'challengers', 'more'])
 
@@ -129,6 +131,7 @@ const ownerLine = computed(() => {
     props.game.ownerTemperature != null && `매너 ${props.game.ownerTemperature.toFixed(1)}°`,
     // 이길 확률이 없으면(레이팅이 없으면) 롤·피파 같은 다른 게임 티어가 그 자리를 대신한다
     chance ?? props.game.ownerExtTier,
+    props.detail && props.game.ruleStatisticsOfOwner && tallyLine(props.game.ruleStatisticsOfOwner, '첫 경기'),
   ].filter(Boolean).join(' · ')
 })
 </script>

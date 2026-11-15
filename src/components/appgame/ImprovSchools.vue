@@ -28,7 +28,7 @@
     <!-- 학교를 안 골랐다(가입한 사람) · 손님 -->
     <template v-else>
       <p class="t-title mt-2 break-keep">{{ grade ? `내 ${grade}등급, 우리 학교 평균에 넣을까요?` : '우리 학교는 몇 위일까요?' }}</p>
-      <p class="t-caption mt-1 break-keep">{{ guest ? '가입하고 학교를 고르면 내 등급이 우리 학교 평균에 들어가요' : '학교를 고르면 내 등급이 우리 학교 평균에 들어가요' }}</p>
+      <p class="mt-1 break-keep" :class="guest ? 't-label !text-fg' : 't-caption'">{{ guest ? '내 학교에서의 점수·등수 확인하고 참전하려면 1초 회원가입!' : '학교를 고르면 내 등급이 우리 학교 평균에 들어가요' }}</p>
     </template>
 
     <!-- 위 셋 (내 학교가 그 안에 있으면 표시) -->

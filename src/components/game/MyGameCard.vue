@@ -53,7 +53,10 @@
     <div v-else class="flex items-center gap-3 px-4 pb-4">
       <button type="button" class="hit flex items-center gap-2 min-w-0 flex-1" @click="emit('profile', me.id)">
         <UiAvatar :src="me.avatar" :name="me.name" :user-id="me.id" size="sm" />
-        <span class="text-sm text-fg truncate">{{ me.name }}</span>
+        <span class="min-w-0 text-left">
+          <span class="block text-sm text-fg truncate">{{ me.name }}</span>
+          <span v-if="recordOf(me.id)" class="block t-micro tabular-nums truncate">{{ recordOf(me.id) }}</span>
+        </span>
       </button>
       <span class="t-micro">vs</span>
       <button
@@ -62,7 +65,10 @@
         class="hit flex items-center justify-end gap-2 min-w-0 flex-1"
         @click="emit('profile', opponent.id)"
       >
-        <span class="text-sm text-fg truncate">{{ opponent.name }}</span>
+        <span class="min-w-0 text-right">
+          <span class="block text-sm text-fg truncate">{{ opponent.name }}</span>
+          <span v-if="recordOf(opponent.id)" class="block t-micro tabular-nums truncate">{{ recordOf(opponent.id) }}</span>
+        </span>
         <UiAvatar :src="opponent.avatar" :name="opponent.name" :user-id="opponent.id" size="sm" />
       </button>
       <span v-else class="flex-1 flex items-center justify-end gap-2 min-w-0">
@@ -89,7 +95,7 @@
 import RuleThumb from '../rule/RuleThumb.vue'
 import { computed, defineProps, defineEmits } from 'vue'
 import { UiAvatar, UiBadge, UiButton, UiCard, UiIconButton } from '../ui'
-import { matchTime, place, withRo } from '../../utils/format'
+import { matchTime, place, tallyLine, withRo } from '../../utils/format'
 import { TEAM_NAMES, venuePlace, isRemote, teamChatOpen } from '../../utils/gameFormat'
 import { placeMapLink } from '../../utils/kakaoMap'
 
@@ -126,6 +132,12 @@ const approved = computed(() => (props.game.applicants || []).find((a) => a.appr
 const me = computed(() =>
   isMine.value ? { id: props.game.myId, name: props.game.myNickname, avatar: props.game.myProfileUrl } : props.me,
 )
+
+// 두 선수의 이 규칙 전적이 이름 밑에 마주 선다 (quality-rules S1-3). 서버가 실어 준 선수만 (기록을 숨긴 사람은 없다). 한 판도 안 했으면 '첫 경기'
+const recordOf = (id) => {
+  const p = (props.game.players || []).find((x) => x.id === id)
+  return p?.record ? tallyLine(p.record, '첫 경기') : ''
+}
 
 const opponent = computed(() => {
   const g = props.game

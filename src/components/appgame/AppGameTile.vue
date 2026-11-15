@@ -10,7 +10,7 @@
       <span class="flex items-center justify-between gap-2">
         <span class="t-heading leading-snug">{{ game.title }}</span>
         <UiBadge v-if="!game.available">준비 중</UiBadge>
-        <span v-else-if="played" class="t-micro tabular-nums flex-shrink-0">실력 {{ game.myRating }}</span>
+        <span v-else-if="played" class="t-micro tabular-nums flex-shrink-0">{{ game.myRatingGamesLeft ? ratingSoon(game.myRatingGamesLeft) : `실력 ${game.myRating}` }}</span>
       </span>
       <span class="block mt-1 t-caption break-keep">{{ game.summary }}</span>
       <span v-if="showMeta && meta" class="block mt-2 t-micro">{{ meta }}</span>
@@ -23,7 +23,7 @@
       </span>
       <UiBadge v-if="!game.available">준비 중</UiBadge>
       <!-- 해 본 적 없는 게임의 1500은 뜻 없는 숫자라 비워 둔다. 숫자만 있으면 무엇인지 몰랐다: '실력'을 붙인다 (11/14) -->
-      <span v-else-if="played" class="t-micro tabular-nums text-right">실력<br /><b class="text-fg">{{ game.myRating }}</b></span>
+      <span v-else-if="played && !game.myRatingGamesLeft" class="t-micro tabular-nums text-right">실력<br /><b class="text-fg">{{ game.myRating }}</b></span>
     </span>
     <span class="mt-3 t-heading leading-snug line-clamp-2">{{ game.title }}</span>
     <span v-if="!compact" class="mt-1 t-caption line-clamp-2">{{ game.summary }}</span>
@@ -37,6 +37,7 @@
 import { computed } from 'vue'
 import type { components } from '@/api/schema'
 import { judgeLabel, structureLabel } from '@/utils/appGame'
+import { ratingSoon } from '@/utils/format'
 import { gameIcon } from '@/utils/appGameIcon'
 import { UiBadge, UiIcon } from '../ui'
 

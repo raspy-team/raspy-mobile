@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <main class="max-w-2xl mx-auto px-4 pb-16">
+    <main class="max-w-2xl mx-auto px-4 pb-32">
       <!-- 목록은 당겨서 새로 고친다 (quality-rules N-3: 홈·내 경기·소식·알림에만 있었다) -->
       <UiPullIndicator :pull="pull" :refreshing="refreshing" />
 

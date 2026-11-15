@@ -107,6 +107,8 @@ const routes = [
   { path: '/settings/game-accounts', component: () => import('../views/settings/GameAccountsView.vue') },
   { path: '/notifications', component: () => import('../views/inbox/NotificationsView.vue') },
   { path: '/games', component: () => import('../views/play/GameCatalogView.vue') },
+  // 모집 중인 경기 모두 보기 (홈의 '경기 모두 보기')
+  { path: '/open-games', component: () => import('../views/game/OpenGamesView.vue') },
   // 동호회 (club/): 목록·만들기, 한 곳, 초대 링크
   // 11/13 앱 기능 좁히기로 뺐다. 예전 링크는 홈으로 (화면 파일은 되살릴 때를 위해 남긴다)
   { path: '/clubs', redirect: '/' },

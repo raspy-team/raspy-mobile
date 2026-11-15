@@ -68,7 +68,7 @@
         </UiCard>
         <button v-if="autoPicked && pickedSport" type="button" class="hit t-caption underline underline-offset-2 -mt-6 mb-8 block" @click="backToSports">{{ pickedSport }} 말고 다른 종목</button>
         <!-- 다칠 수 있는 규칙은 서버가 만 19세 이상만 받는다 (내 정보의 나이) -->
-        <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 내 정보에 나이를 넣어 두세요.</p>
+        <p v-if="dangerous" class="t-caption text-danger -mt-6 mb-8">다칠 수 있는 규칙이라 만 19세 이상만 할 수 있어요. 프로필 편집에서 나이를 넣어 두세요.</p>
 
         <!-- 언제쯤: 열린 경기를 보는 사람이 신청할지 정하는 데 가장 필요한 정보. 정확한 시간은 상대와 함께 -->
         <h2 class="t-heading">언제쯤 할까요?</h2>

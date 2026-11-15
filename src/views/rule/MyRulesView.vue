@@ -6,7 +6,7 @@
       </template>
     </UiTopBar>
 
-    <main class="max-w-2xl mx-auto px-4 pb-16">
+    <main class="max-w-2xl mx-auto px-4 pb-32">
       <div v-if="loading" class="divide-y divide-line">
         <div v-for="n in 3" :key="n" class="flex gap-4 py-4">
           <UiSkeleton class="w-16 h-16 rounded-xl" />

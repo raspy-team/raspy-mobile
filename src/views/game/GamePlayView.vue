@@ -64,6 +64,8 @@
         >
           <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" :user-id="side.user.id" size="md" />
           <span class="text-sm text-fg-muted truncate max-w-full px-2">{{ side.user.nickname }}</span>
+          <!-- 이 규칙 전적: 두 선수가 같은 무게로 마주 선다 (quality-rules S1-3). 팀·기록을 숨긴 사람은 없다 -->
+          <span v-if="side.user.record" class="t-micro tabular-nums -mt-1">{{ tallyLine(side.user.record, '첫 경기') }}</span>
           <!-- 점수가 바뀌면 숫자가 톡 튄다 (key가 바뀌어 다시 그려진다) -->
           <span :key="side.score" class="font-bold tabular-nums leading-none text-fg feel-pop" style="font-size: clamp(4rem, 14vh, 8rem)">{{ side.score }}</span>
           <!-- 칸 전체가 버튼이라는 걸 첫 점수 전까지만 알린다 -->
@@ -214,6 +216,7 @@
 </template>
 
 <script setup>
+import { tallyLine } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { liveEnd, liveSync } from '../../utils/liveActivity'

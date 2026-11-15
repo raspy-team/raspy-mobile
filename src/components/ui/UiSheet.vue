@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="ui-fade">
-      <div v-if="modelValue" class="fixed inset-0 z-sheet bg-black/70" @click="close" aria-hidden="true"></div>
+      <div v-if="modelValue" class="fixed inset-0 z-sheet bg-black/70" @click="close" @touchmove.prevent aria-hidden="true"></div>
     </Transition>
     <Transition name="ui-sheet">
       <div
@@ -12,14 +12,12 @@
         class="fixed inset-x-0 bottom-0 z-sheet max-w-xl mx-auto bg-surface rounded-t-2xl flex flex-col max-h-[88dvh]"
         :class="kb.height ? '' : 'pb-safe'"
         :style="[kbStyle, dragY ? { transform: `translateY(${dragY}px)`, transition: dropping ? 'transform 0.2s ease-out' : 'none' } : null]"
+        @touchmove="holdPage"
       >
         <!-- 손잡이·제목 줄을 아래로 끌면 닫힌다. 손잡이를 보면 사람은 끌어 내린다(아이폰·인스타 습관). 예전엔 모양만 있었다 (목적 판정 11/11 8번) -->
-        <div class="relative pt-2.5 pb-1 flex justify-center touch-none cursor-grab" :class="!title ? 'min-h-10' : ''" @pointerdown="dragStart">
+        <!-- 제목 없는 창(더보기 같은 고르는 목록)에는 닫기 X를 두지 않는다: 손잡이 옆 구석에 떠 있어 자리가 어색했고, 고르거나 바깥을 누르거나 끌어 내리면 닫힌다 (11/15 고병연) -->
+        <div class="relative pt-2.5 pb-1 flex justify-center touch-none cursor-grab" :class="!title ? 'min-h-8' : ''" @pointerdown="dragStart">
           <span class="w-10 h-1 rounded-full bg-line-strong" aria-hidden="true"></span>
-          <!-- 제목 없는 시트에도 닫기 X (예전엔 바깥을 눌러야만 닫혔다, 경로 8 2절) -->
-          <button v-if="!title" type="button" class="hit absolute right-2 top-1 w-9 h-9 flex items-center justify-center text-fg-muted" aria-label="닫기" @click="close">
-            <UiIcon name="xmark" class="text-xl" />
-          </button>
         </div>
         <div v-if="title" class="flex items-center justify-between px-5 pt-2 pb-3 touch-none" @pointerdown="dragStart">
           <h2 class="t-heading">{{ title }}</h2>
@@ -27,7 +25,7 @@
             <UiIcon name="xmark" class="text-xl" />
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto overscroll-contain px-5 pb-5"><slot /></div>
+        <div ref="scroller" class="flex-1 overflow-y-auto overscroll-contain px-5 pb-5"><slot /></div>
         <div v-if="$slots.footer" class="px-5 py-4 border-t border-line"><slot name="footer" /></div>
       </div>
     </Transition>
@@ -68,6 +66,16 @@ watch(() => props.modelValue, (open) => {
   else { vv.removeEventListener('resize', trackKeyboard); vv.removeEventListener('scroll', trackKeyboard); kb.height = 0 }
 }, { immediate: true })
 onBeforeUnmount(() => { vv?.removeEventListener('resize', trackKeyboard); vv?.removeEventListener('scroll', trackKeyboard) })
+
+// 창을 밀어도 뒤 화면은 움직이지 않는다 (11/15 고병연: 더보기 창을 밀면 뒤의 내 경기 목록이 움직였다).
+// 내용이 짧아 창 안에서 움직일 것이 없으면 그 손짓이 뒤 화면으로 넘어갔다. 창 안의 긴 내용과 옆으로 미는 줄(칩)만 움직이게 둔다
+const scroller = ref(null)
+function holdPage(e) {
+  const box = scroller.value
+  const inside = box && box.contains(e.target)
+  if (inside && (box.scrollHeight > box.clientHeight + 1 || e.target.closest?.('.overflow-x-auto, input[type="range"], textarea'))) return
+  if (e.cancelable) e.preventDefault()
+}
 
 // 끌어 내려 닫기: 손을 뗄 때 90px 넘게 내렸거나 빠르게 튕겼으면 닫고, 아니면 제자리로
 const dragY = ref(0)

@@ -11,12 +11,9 @@
     @keydown.enter="go"
     :style="{ width: px + 'px', height: px + 'px', fontSize: Math.round(px * 0.38) + 'px', background: (photo && !failed) ? 'rgb(var(--c-surface-2))' : tint }"
   >
-    <!-- 꾸민 캐릭터가 있으면 그것이 얼굴이다. 직접 꾸민 것이라 사진보다 앞 (프로필 화면과 같은 순서) -->
-    <span v-if="character" class="block w-full h-full rounded-full overflow-hidden bg-surface-2" aria-hidden="true">
-      <span class="block mx-auto" :style="charStyle"></span>
-    </span>
+    <!-- 사진을 정했으면 사진이 얼굴이다. 사진이 없을 때만 꾸민 캐릭터 (11/15 고병연: 사진을 정해도 캐릭터가 나왔다) -->
     <img
-      v-else-if="photo && !failed"
+      v-if="photo && !failed"
       :src="photo"
       :alt="name ? `${name}의 프로필 사진` : ''"
       data-fallback="1"
@@ -24,6 +21,9 @@
       class="w-full h-full object-cover rounded-full"
       @error="failed = true"
     />
+    <span v-else-if="character" class="block w-full h-full rounded-full overflow-hidden bg-surface-2" aria-hidden="true">
+      <span class="block mx-auto" :style="charStyle"></span>
+    </span>
     <span v-else aria-hidden="true">{{ initial }}</span>
   </span>
 </template>

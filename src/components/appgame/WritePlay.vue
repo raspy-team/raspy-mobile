@@ -8,11 +8,12 @@
     </div>
 
     <!-- 조건이 여러 줄인 문제(히어로 대결)는 줄마다, 조금 작게 -->
-    <p class="mt-4 break-keep whitespace-pre-line" :class="problem.includes('\n') ? 't-heading' : 't-title'">{{ problem }}</p>
+    <p v-if="label" class="t-micro mt-4">{{ label }}</p>
+    <p class="break-keep whitespace-pre-line" :class="[problem.includes('\n') ? 't-heading' : 't-title', label ? 'mt-1' : 'mt-4']">{{ problem }}</p>
 
     <div class="mt-5">
-      <UiInput v-model="text" multiline :rows="4" :maxlength="120" :placeholder="placeholder" @focusin="onTypeStart" />
-      <p class="t-micro mt-1 flex justify-between"><span>{{ text.trim().length < 5 ? '다섯 글자부터 낼 수 있어요' : '' }}</span><span>{{ text.length }}/120</span></p>
+      <UiInput v-model="text" multiline :rows="4" :maxlength="max" :placeholder="placeholder" @focusin="onTypeStart" />
+      <p class="t-micro mt-1 flex justify-between"><span>{{ text.trim().length < 5 ? '다섯 글자부터 낼 수 있어요' : '' }}</span><span>{{ text.length }}/{{ max }}</span></p>
     </div>
     <div ref="action" class="mt-3"><UiButton block size="lg" :loading="submitting" :disabled="text.trim().length < 5" @click="finish">다 썼어요</UiButton></div>
     <!-- AI가 채점하는 글쓰기에는 투표가 없다: 투표 게임에만 (경로 2 리뷰) -->
@@ -29,7 +30,8 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton, UiInput } from '../ui'
 import { useKeyboardFit } from '@/utils/keyboardFit'
 
-const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean; guide: string; placeholder: string; vote?: boolean }>()
+const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean; guide: string; placeholder: string; vote?: boolean; max?: number; label?: string }>()
+const max = props.max ?? 120
 const emit = defineEmits<{ submit: [answer: string] }>()
 
 const text = ref('')

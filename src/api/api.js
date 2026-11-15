@@ -20,6 +20,38 @@ const api = axios.create({
   timeout: 15000,
 })
 
+// 뒤로 가면 보던 그대로 (11/15 고병연: 뒤로 갔더니 보던 곳이 아니라 새로 불러와 뼈대부터 다시 그렸다).
+// 화면은 뒤로 갈 때마다 새로 만들어지고 자료를 다시 묻는다. 뒤로 가는 순간(BACK_MS)의 GET은 방금 받아 둔 답을 그대로 돌려줘서
+// 뼈대 없이 곧바로 그려지고, 보던 자리(스크롤)도 맞는다. 다시 불러와야 하는 때에는 받아 둔 것을 버린다:
+// - 무엇이든 바꾸는 요청(POST·PATCH·PUT·DELETE)을 보냈을 때: 신청·승인·저장 뒤에 뒤로 가면 새로 받는다
+// - 서버가 바뀜 신호를 보냈을 때(websocket/userChannel): 자리를 비운 사이 결과가 났으면 새로 받는다
+// - 받은 지 3분이 지났을 때. 당겨서 새로 고침·탭 이동·앞으로 가기는 늘 새로 받는다
+const BACK_MS = 1200
+const KEEP_MS = 3 * 60_000
+// 판·점수판·대화처럼 순간마다 바뀌는 것은 받아 두지 않는다
+const LIVE_URL = /\/(detail|live|game-logs|dialog|chat|realtime|battle|rooms|lobby|waiting)(\/|\?|$)/
+const kept = new Map() // 주소 → { at, body, headers }
+let backUntil = 0
+if (typeof window !== 'undefined') window.addEventListener('popstate', () => { backUntil = Date.now() + BACK_MS }, true)
+export const forgetResponses = () => kept.clear()
+const send = axios.getAdapter(axios.defaults.adapter)
+api.defaults.adapter = async (config) => {
+  const method = String(config.method || 'get').toLowerCase()
+  if (method !== 'get') { kept.clear(); return send(config) }
+  const key = `${localStorage.getItem('raspy_access_token2')?.slice(-12) || ''} ${axios.getUri(config)}`
+  const plain = (!config.responseType || config.responseType === 'json') && !LIVE_URL.test(String(config.url || ''))
+  if (plain && Date.now() < backUntil) {
+    const hit = kept.get(key)
+    if (hit && Date.now() - hit.at < KEEP_MS) return { data: hit.body, status: 200, statusText: 'OK', headers: hit.headers, config, request: null }
+  }
+  const res = await send(config)
+  if (plain && res.status === 200 && typeof res.data === 'string') {
+    if (kept.size > 80) kept.delete(kept.keys().next().value)
+    kept.set(key, { at: Date.now(), body: res.data, headers: res.headers })
+  }
+  return res
+}
+
 // 요청 인터셉터: 토큰 자동 포함
 api.interceptors.request.use(config => {
   netStart()

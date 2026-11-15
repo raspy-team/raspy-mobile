@@ -39,12 +39,12 @@
             v-for="r in data.rankings"
             :key="r.userId"
             :title="r.isCurrentUser ? `${r.userName} (나)` : r.userName"
-            :subtitle="r.crown ? `${seatName} ${data.label} 1위` : undefined"
+            :subtitle="[r.crown ? `${seatName} ${data.label} 1위` : '', tallyLine(r.record)].filter(Boolean).join(' · ') || undefined"
             chevron
             @click="router.push('/profile/' + r.userId)"
           >
             <template #leading>
-              <span class="w-7 text-center tabular-nums" :class="r.rank === 1 ? 't-heading text-gold-fg' : r.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ r.rank }}</span>
+              <span class="w-7 text-center tabular-nums" :class="r.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ r.rank }}</span>
               <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
             </template>
             <template #trailing>
@@ -64,6 +64,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import type { components } from '@/api/schema'
 import { UiAvatar, UiButton, UiCard, UiEmptyState, UiList, UiListItem, UiSkeleton, UiTopBar } from '../../components/ui'
+import { tallyLine } from '@/utils/format'
 import SeatChips from '../../components/champion/SeatChips.vue'
 
 type Kind = components['schemas']['ScopeRankingResponse']['kind']

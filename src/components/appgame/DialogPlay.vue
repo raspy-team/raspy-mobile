@@ -1,26 +1,47 @@
 <template>
   <div :class="typing ? 'pb-[50vh]' : ''">
-    <div class="flex items-center justify-between">
-      <span class="t-body">{{ topic }} · 나는 <b>{{ mine }}</b> 편</span>
-      <GameClock class="t-mono" muted :remaining="remaining" :warn="30" />
+    <div class="flex items-start justify-between gap-3">
+      <span v-if="kind === 'debate'" class="t-body">{{ topic }} · 나는 <b>{{ mine }}</b> 편</span>
+      <!-- 읽씹 탈출: 누구와의 대화인가 -->
+      <span v-else-if="kind === 'ghosted'" class="min-w-0">
+        <span class="block t-heading break-keep">{{ head }}</span>
+        <span class="block t-caption mt-0.5">읽고 답이 없어요. 세 번 안에 답장을 받아 보세요</span>
+      </span>
+      <!-- 재판: 사건 이름과 내 역할 -->
+      <span v-else class="min-w-0">
+        <span class="block t-heading break-keep">{{ head }}</span>
+        <span class="block t-label !text-signal-fg mt-0.5">{{ role }}</span>
+      </span>
+      <GameClock class="t-mono shrink-0" muted :remaining="remaining" :warn="30" />
     </div>
+
+    <!-- 재판: 먼저 읽는 법정 기록 (배경 + 오간 말). 빈틈은 여기 있다 -->
+    <section v-if="kind === 'trial'" class="mt-4 rounded-2xl bg-surface p-4" aria-label="법정 기록">
+      <p class="t-body break-keep">{{ background }}</p>
+      <ol class="mt-3 space-y-2 border-t border-line pt-3">
+        <li v-for="(r, i) in record" :key="i" class="t-body break-keep"><b class="text-fg">{{ r.who }}</b> <span class="text-fg-muted">{{ r.said }}</span></li>
+      </ol>
+    </section>
 
     <!-- 주고받은 말 -->
     <ol class="mt-4 space-y-2" aria-live="polite">
       <li v-for="(l, i) in lines" :key="i" class="flex" :class="l.mine ? 'justify-end' : 'justify-start'">
-        <p class="bubble" :class="l.mine ? 'bubble-mine' : 'bubble-theirs'">{{ l.text }}</p>
+        <!-- 읽고 넘긴 것은 말풍선이 아니라 메신저의 '읽음'으로 -->
+        <p v-if="isRead(l)" class="t-micro w-full text-right pr-1">읽음</p>
+        <p v-else class="bubble" :class="l.mine ? 'bubble-mine' : 'bubble-theirs'">{{ l.text }}</p>
       </li>
-      <li v-if="saying" class="flex justify-start"><p class="bubble bubble-theirs !text-fg-muted">AI가 받아치는 중이에요</p></li>
+      <li v-if="saying" class="flex justify-start"><p class="bubble bubble-theirs !text-fg-muted">{{ T.waiting }}</p></li>
     </ol>
 
     <!-- 키보드가 오르면 바로 앞 말과 내는 버튼이 함께 보이게 맞춘다 (11/14 전수 평가) -->
     <form v-if="turnsLeft > 0" ref="root" class="mt-4 scroll-mt-[calc(env(safe-area-inset-top)+10rem)]" @submit.prevent="say" @focusout="onTypeEnd">
-      <UiInput v-model="text" multiline :rows="2" :maxlength="maxChars" :placeholder="`${mine} 편에서 한 마디 (${turnsLeft}번 남음)`" @focusin="onTypeStart" />
+      <UiInput v-model="text" multiline :rows="2" :maxlength="maxChars" :placeholder="`${T.placeholder} (${turnsLeft}번 남음)`" @focusin="onTypeStart" />
       <p v-if="error" class="t-caption text-danger mt-1">{{ error }}</p>
-      <div ref="action" class="mt-3"><UiButton block size="lg" :loading="saying" :disabled="!text.trim() || submitting" @click="say">말하기</UiButton></div>
+      <div ref="action" class="mt-3"><UiButton block size="lg" :loading="saying" :disabled="!text.trim() || submitting" @click="say">{{ T.say }}</UiButton></div>
     </form>
-    <UiButton block :variant="turnsLeft > 0 ? 'ghost' : 'primary'" :size="turnsLeft > 0 ? 'md' : 'lg'" class="mt-2" :loading="submitting" :disabled="saying" @click="finish">
-      {{ turnsLeft > 0 ? '여기까지 하고 채점받기' : '채점받기' }}
+    <!-- 한 마디도 안 했으면 끝낼 것이 없다: 끝내기는 한 번 말한 뒤에 -->
+    <UiButton v-if="spoken || turnsLeft === 0" block :variant="turnsLeft > 0 ? 'ghost' : 'primary'" :size="turnsLeft > 0 ? 'md' : 'lg'" class="mt-2" :loading="submitting" :disabled="saying" @click="finish">
+      {{ turnsLeft > 0 ? T.finishEarly : T.finish }}
     </UiButton>
     <!-- 쓰는 자리에서 누가 보는지 말한다 (quality-rules Y-4) -->
     <p class="t-micro text-center mt-2 break-keep">주고받은 말은 붙은 상대가 볼 수 있고, 소식에도 실려요</p>
@@ -39,7 +60,26 @@ import { useKeyboardFit } from '@/utils/keyboardFit'
 
 type Line = components['schemas']['DialogLine']
 
-const props = defineProps<{ playId: number; problem: string; timeLimitSeconds: number; submitting: boolean }>()
+const props = defineProps<{ playId: number; problem: string; timeLimitSeconds: number; submitting: boolean; gameKey?: string }>()
+
+// 대화하는 게임 셋이 이 화면을 같이 쓴다: 말싸움(AI와 세 마디) · 읽씹 탈출(그 사람에게 세 번) · AI 재판(판사에게 두 번)
+const kind = props.gameKey === 'ghosted' || props.gameKey === 'trial' ? props.gameKey : 'debate'
+const TEXT = {
+  debate: { waiting: 'AI가 받아치는 중이에요', placeholder: '한 마디', say: '말하기', finishEarly: '여기까지 하고 채점받기', finish: '채점받기' },
+  ghosted: { waiting: '읽는 중이에요', placeholder: '보낼 메시지', say: '보내기', finishEarly: '여기까지 하고 결과 보기', finish: '결과 보기' },
+  trial: { waiting: '판사가 기록을 살피는 중이에요', placeholder: '판사에게 할 말', say: '말하기', finishEarly: '여기서 변론을 마치고 판결받기', finish: '판결받기' },
+}
+const T = TEXT[kind]
+// 읽씹 탈출·재판의 문제는 줄마다 뜻이 있다. 읽씹: 누구 / 그 전 대화…  재판: 사건 이름 / 내 역할 / 배경 / 법정 기록…
+const rows = props.problem.split('\n')
+const head = rows[0]
+const role = rows[1]
+const background = rows[2]
+const record = rows.slice(3).map((r) => ({ who: r.slice(0, r.indexOf(':')), said: r.slice(r.indexOf(':') + 1).trim() }))
+const isRead = (l: Line) => kind === 'ghosted' && !l.mine && l.text.trim() === '(읽음)'
+// 한 번이라도 말했나 (말할 수 있는 횟수: 읽씹 셋, 재판 둘). 말싸움은 예전대로 늘 끝낼 수 있다
+const MAX_TURNS = { debate: 0, ghosted: 3, trial: 2 }
+const spoken = computed(() => kind === 'debate' || turnsLeft.value < MAX_TURNS[kind])
 const emit = defineEmits<{ submit: [answer: string] }>()
 
 // 문제: "주제|내 편|AI 편"

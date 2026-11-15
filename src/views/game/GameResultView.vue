@@ -40,7 +40,7 @@
           <span class="t-label tabular-nums" :class="ratingDelta > 0 ? 'text-signal-fg' : ''">{{ ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta === 0 ? "±0" : ratingDelta }}</span>
         </p>
         <!-- 첫 몇 판은 점수가 크게 움직인다. 숫자(첫 판에 -162)를 보여 주면 이긴 쪽은 착각하고 진 쪽은 상처받는다 (UX ④: 숫자 대신 한 줄) -->
-        <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-3">실력 점수는 몇 판 더 하면 나와요</p>
+        <p v-if="myRating && confirmed && myRating.provisional" class="t-caption text-center mt-3">{{ ratingSoon(myRating.gamesLeft || 1) }}</p>
 
         <!-- 참가자 투표 중: 자기 말고 한 명 뽑기 -->
         <section v-if="peerVoting" class="mt-8">
@@ -82,7 +82,7 @@
               <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" :user-id="side.user.id" size="lg" />
               <span
                 v-if="side.champion"
-                class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gold text-gold-on flex items-center justify-center text-sm"
+                class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-signal text-signal-on flex items-center justify-center text-sm"
                 aria-label="새 챔피언"
               >
                 <UiIcon name="crown" />
@@ -172,7 +172,7 @@
       <UiCard v-if="championUser" class="flex items-center gap-3">
         <!-- 내가 챔피언 자리를 차지한 순간은 매치가 신나게 (docs/mascots.md 이긴 순간). 남이 차지했으면 왕관만 -->
         <MatchMascot v-if="championUser.id === currentUserId" who="match" mood="cheer" :size="40" aria-hidden="true" />
-        <span v-else class="w-10 h-10 rounded-full bg-gold-soft text-gold-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span v-else class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
           <UiIcon name="crown" />
         </span>
         <div class="min-w-0">
@@ -416,7 +416,7 @@ import { getMyId } from '@/utils/me'
 import { GET, POST } from '../../api/client'
 import { refreshOnChange } from '../../websocket/userChannel'
 import { useActiveGamePolling } from '../../composables/useActiveGamePolling'
-import { matchTime, who, withRo } from '../../utils/format'
+import { matchTime, ratingSoon, who, withRo } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import VerdictFace from '../../components/mascot/VerdictFace.vue'

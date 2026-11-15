@@ -144,13 +144,12 @@
             <UiChip v-for="r in ratedRules" :key="r.ruleId" class="flex-shrink-0 whitespace-nowrap" :selected="picked?.ruleId === r.ruleId" @click="pickedId = r.ruleId">{{ r.ruleTitle }}</UiChip>
           </div>
           <div v-if="picked?.provisional" class="rounded-xl bg-surface p-4">
-            <p class="t-body">실력 점수는 몇 판 더 하면 나와요</p>
+            <p class="t-body">{{ ratingSoon(picked.needGames || 1) }}</p>
           </div>
           <div v-else-if="picked" class="rounded-xl bg-surface p-4">
             <div class="flex items-baseline gap-2">
               <p class="t-title tabular-nums">{{ picked.rating }}점</p>
-              <UiBadge v-if="picked.provisional" class="ml-auto">잠정</UiBadge>
-              <p v-else-if="trend" class="t-caption tabular-nums ml-auto" :class="trend > 0 ? 'text-signal-fg' : ''">최근 5판 {{ trend > 0 ? '+' : '' }}{{ trend }}</p>
+              <p v-if="trend" class="t-caption tabular-nums ml-auto" :class="trend > 0 ? 'text-signal-fg' : ''">최근 5판 {{ trend > 0 ? '+' : '' }}{{ trend }}</p>
             </div>
             <svg v-if="chart" viewBox="0 0 300 72" class="w-full h-[72px] mt-3 text-fg" role="img" :aria-label="`${picked.ruleTitle} 실력 점수 흐름, 처음 ${chart.first}점에서 지금 ${picked.rating}점`">
               <polyline :points="chart.points" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
@@ -296,7 +295,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET } from '@/api/client'
 import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { UiAvatar, UiBadge, UiButton, UiChip, UiEmptyState, UiList, UiListItem, UiListSkeleton, UiRollNumber, UiSheet, UiSkeleton, UiTabs, UiTopBar } from '../../components/ui'
-import { timeAgo, josa } from '../../utils/format'
+import { timeAgo, josa, ratingSoon } from '../../utils/format'
 
 const RESULT = {
   win: { label: '승', word: '이김', class: 'bg-fg text-canvas' },
@@ -387,7 +386,8 @@ const openMatch = (m) => router.push(m.appGameKey ? `/play/${m.appGameKey}?duel=
 const score = (v) => (Number.isInteger(v) ? v : v.toFixed(1))
 
 // 실력 점수가 있는 게임 (게임별 줄 + 흐름). 흐름은 /api/rankings/history
-const ratedRules = computed(() => s.value.rules.filter((r) => r.rating != null))
+// 다섯 판 전인 게임은 점수 없이 온다(provisional): 칩에는 남기고 "N판 후 점수 공개"라고 말한다
+const ratedRules = computed(() => s.value.rules.filter((r) => r.rating != null || r.provisional))
 const picked = computed(() => ratedRules.value.find((r) => r.ruleId === pickedId.value) || ratedRules.value[0])
 const points = computed(() => ratings.value.find((h) => h.ruleId === picked.value?.ruleId)?.points || [])
 const trend = computed(() => {

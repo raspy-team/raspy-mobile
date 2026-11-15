@@ -126,7 +126,7 @@ const KINDS = {
   APP: { icon: 'gamepad', bg: 'bg-primary-soft text-primary' },
   SAFETY: { icon: 'shield-halved', bg: 'bg-surface-2 text-fg' },
   ORG: { icon: 'building', bg: 'bg-surface-2 text-fg' },
-  CHAMPION: { icon: 'crown', bg: 'bg-gold-soft text-gold-fg' },
+  CHAMPION: { icon: 'crown', bg: 'bg-signal-soft text-signal-fg' },
   // 동호회 가입·대회 참가: 예전엔 친구 알림 모양이었다 (경로 7 리뷰 K8)
   CLUB: { icon: 'users', bg: 'bg-surface-2 text-fg' },
   OTHER: { icon: 'far fa-bell', bg: 'bg-surface-2 text-fg' },

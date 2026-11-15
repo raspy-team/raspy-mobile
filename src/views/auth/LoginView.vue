@@ -46,10 +46,11 @@
         </p>
       </div>
 
-      <p class="mt-6 text-center t-caption">
-        {{ isSignup ? '이미 계정이 있나요?' : '처음이신가요?' }}
-        <UiButton variant="ghost" size="sm" @click="toggleMode">{{ isSignup ? '로그인' : '가입' }}</UiButton>
-      </p>
+      <!-- 가입으로 가는 길이 작은 회색 글 옆의 글자 버튼이라 눈에 안 들어왔다 (11/15 고병연): 한 줄을 통째로 버튼으로 -->
+      <div class="mt-8 pt-6 border-t border-line text-center">
+        <p class="t-body">{{ isSignup ? '이미 계정이 있나요?' : '처음이신가요?' }}</p>
+        <UiButton block variant="secondary" size="lg" class="mt-3" @click="toggleMode">{{ isSignup ? '로그인하기' : '가입하기' }}</UiButton>
+      </div>
     </main>
   </div>
 </template>

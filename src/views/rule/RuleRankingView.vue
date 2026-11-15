@@ -2,7 +2,7 @@
   <div class="min-h-dvh bg-canvas">
     <UiTopBar :title="ruleName ? `${ruleName} 순위` : '순위'" back />
 
-    <main class="max-w-2xl mx-auto px-4 pt-2 pb-16">
+    <main class="max-w-2xl mx-auto px-4 pt-2 pb-32">
       <div v-if="loading && !rankings.length" class="space-y-3">
         <UiSkeleton class="h-20 w-full" />
         <UiSkeleton v-for="n in 5" :key="n" class="h-14 w-full" />
@@ -22,7 +22,7 @@
             <span class="t-display tabular-nums">{{ me.rank }}<span class="t-heading">위</span></span>
             <span class="flex-1 min-w-0">
               <span class="block t-heading">{{ me.rating }}점</span>
-              <span class="block t-caption mt-0.5">경기 {{ me.playCount }}번</span>
+              <span class="block t-caption mt-0.5 tabular-nums">{{ tallyLine(me, `${me.playCount}경기`) }}</span>
             </span>
           </template>
           <template v-else>
@@ -49,12 +49,12 @@
             <UiListItem
               v-else
               :title="x.row.isCurrentUser ? `${x.row.userName} (나)` : x.row.userName"
-              :subtitle="`${x.row.playCount}경기`"
+              :subtitle="tallyLine(x.row, `${x.row.playCount}경기`)"
               chevron
               @click="router.push('/profile/' + x.row.userId)"
             >
               <template #leading>
-                <span class="w-7 text-center tabular-nums" :class="x.row.rank === 1 ? 't-heading text-gold-fg' : x.row.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ x.row.rank }}</span>
+                <span class="w-7 text-center tabular-nums" :class="x.row.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ x.row.rank }}</span>
                 <UiAvatar :src="x.row.userAvatar" :name="x.row.userName" :user-id="x.row.userId" size="sm" />
               </template>
               <template #trailing>
@@ -74,7 +74,7 @@
           <h2 class="t-heading mb-3">역대 전국 챔피언</h2>
           <UiList>
             <div v-for="(h, i) in [...history].reverse()" :key="i" class="flex items-center gap-3 px-4 min-h-[56px] py-3">
-              <UiIcon name="crown" :class="h.until ? 'text-fg-subtle' : 'text-gold-fg'" aria-hidden="true" />
+              <UiIcon name="crown" :class="h.until ? 'text-fg-subtle' : 'text-signal-fg'" aria-hidden="true" />
               <span class="flex-1 min-w-0">
                 <span class="flex items-center min-w-0"><span class="truncate">{{ h.nickname }}</span><UiAiBadge v-if="h.ai" /></span>
                 <span class="block t-micro mt-0.5">{{ period(h) }}</span>
@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { dayOnly } from '@/utils/format'
+import { dayOnly, tallyLine } from '@/utils/format'
 // 규칙 랭킹: 자리 칩(소속·동네·전국) → 내 자리 → 순위. 처음에는 서버가 정한 자리(앱 게임은 첫 소속, 앱 밖 경기는 동네, 없으면 전국)
 import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

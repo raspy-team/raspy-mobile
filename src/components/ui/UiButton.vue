@@ -29,10 +29,8 @@ import UiSpinner from './UiSpinner.vue'
 // - ghost: 글자만 있는 가벼운 행동 (취소, 더 보기)
 // - tonal: 목록 안에서 반복되는 행동 (카드마다 있는 '신청'). 테두리만 있는 버튼이라 주 행동과 다투지 않는다
 // - danger: 되돌릴 수 없는 행동 (삭제, 탈퇴)
-// - gold: 챔피언 도전 (특별한 판)
 import { defineProps, defineOptions, useAttrs, computed, ref } from 'vue'
 import { sendSheet } from '../../stores/sendSheet'
-import { feel } from '../../utils/feel'
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps({
@@ -52,8 +50,7 @@ const attrs = useAttrs()
 const rest = computed(() => { const { onClick, ...r } = attrs; return r })
 const auto = ref(false)
 function onClick(e) {
-  // 누르는 순간 손에 답한다 (quality-rules G1-1). 일이 이루어진 때의 success·win은 화면이 따로 낸다
-  feel('tap')
+  // 버튼은 눌린 모양으로만 답한다. 누를 때마다 진동·소리를 냈더니 과했다 (11/15 고병연). 진동·소리는 게임의 순간에만 (quality-rules G1-1)
   const h = attrs.onClick
   if (!h) return
   const pending = (Array.isArray(h) ? h : [h]).map((fn) => fn(e)).filter((r) => r && typeof r.then === 'function')
@@ -73,8 +70,6 @@ const VARIANTS = {
   danger: 'bg-danger-soft text-danger-fg font-medium active:bg-danger/25',
   // 볼트: '내 차례'에만 (결과 확인·신청 승인처럼 상대가 나를 기다릴 때). 한 화면에 하나 넘게 두지 않는다
   signal: 'bg-signal text-signal-on font-semibold active:opacity-90',
-  // 금색: 챔피언에게 도전하는 버튼에만 (quality-rules G5-3). 테두리 급이라 주 버튼과 다투지 않는다
-  gold: 'bg-gold-soft text-gold-fg font-semibold border border-gold/50 active:opacity-80',
 }
 // 채운 버튼(주·볼트)은 작아도 높이 44다 (quality-rules S-5: 주 버튼은 단단해 보여야 한다). 글자만 한 단계 작다
 const FILLED = new Set(['primary', 'signal'])

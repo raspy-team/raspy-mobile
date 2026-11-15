@@ -124,6 +124,15 @@
         </button>
       </div>
 
+      <!-- 요즘 폼: 최근 다섯 경기의 승·패가 한 줄로 (스포츠 기사의 'W W L W W'). 선수는 통산보다 요즘이 궁금하다 (quality-rules S1) -->
+      <RouterLink v-if="form.length >= 2" :to="`/profile/${user.id}/stats`" class="hit mt-3 flex items-center gap-3 rounded-xl bg-surface px-4 py-3">
+        <span class="t-micro w-16 shrink-0">최근 {{ form.length }}경기</span>
+        <span class="flex items-center gap-1.5" :aria-label="form.map((f) => RESULT[f].label).join(' ')">
+          <span v-for="(f, i) in form" :key="i" class="w-7 h-7 rounded-md flex items-center justify-center t-micro font-semibold" :class="f === 'win' ? 'bg-signal text-signal-on' : RESULT[f].class" aria-hidden="true">{{ RESULT[f].label }}</span>
+        </span>
+        <span v-if="streak >= 2" class="ml-auto t-label !text-signal-fg whitespace-nowrap">{{ streak }}연승 중</span>
+      </RouterLink>
+
       <!-- 가진 자리: 규칙 챔피언(벨트)과 능력·종합·기록 1위. 동네·소속을 가린 사람은 '동네'·'소속'으로 온다 (docs/organizations.md 3-4).
            숫자 줄의 '챔피언 1'과 아래 '챔피언' 섹션이 같은 것을 두 번 말했다: 숫자 줄 바로 밑에 자리 이름만 둔다 (11/15 고병연) -->
       <div v-if="seatLines.length" class="mt-3 flex flex-wrap gap-2" aria-label="챔피언 자리">
@@ -324,6 +333,9 @@ const RESULT = {
   draw: { label: '무', class: 'bg-surface-2 text-fg-muted' },
 }
 const resultKey = (r) => (r === 'win' ? 'win' : r === 'lose' || r === 'loss' ? 'lose' : 'draw')
+// 요즘 폼: 최근 경기(새 것이 앞) 다섯 판의 결과. 화면에는 옛 것 → 새 것 순으로 놓는다. 연승은 가장 최근부터 이어진 승
+const form = computed(() => (user.value?.recentGames || []).slice(0, 5).map((g) => resultKey(g.result)).reverse())
+const streak = computed(() => { let n = 0; for (const g of user.value?.recentGames || []) { if (resultKey(g.result) !== 'win') break; n += 1 } return n })
 
 const route = useRoute()
 const router = useRouter()

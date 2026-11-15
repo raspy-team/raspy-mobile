@@ -68,6 +68,7 @@ module.exports = {
         'fg-muted': v('fg-muted'),
         'fg-subtle': v('fg-subtle'),
         primary: { DEFAULT: v('fg'), press: v('primary-press'), soft: 'rgb(var(--c-fg) / 0.08)', fg: v('fg'), on: v('canvas') },
+        ultra: { DEFAULT: v('ultra'), fg: v('ultra-fg') },
         signal: { DEFAULT: v('signal'), soft: 'rgb(var(--c-signal) / var(--signal-soft))', fg: v('signal-fg'), on: v('signal-on') },
         danger: { DEFAULT: v('danger'), soft: 'rgb(var(--c-danger) / 0.12)', fg: v('danger-fg') },
         success: { DEFAULT: v('signal'), soft: 'rgb(var(--c-signal) / var(--signal-soft))', fg: v('signal-fg') },

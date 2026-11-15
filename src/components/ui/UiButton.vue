@@ -6,8 +6,8 @@
     :type="to ? undefined : type"
     :disabled="to ? undefined : disabled || busy"
     :aria-busy="busy || undefined"
-    class="relative inline-flex items-center justify-center gap-2 rounded-xl select-none transition-[background-color,color,transform] motion-safe:active:scale-[0.97] disabled:pointer-events-none"
-    :class="[VARIANTS[variant], FILLED.has(variant) && size === 'sm' ? FILLED_SM : SIZES[size], block ? 'w-full' : '', disabled && !busy ? 'opacity-40' : '', to && (disabled || busy) ? 'pointer-events-none' : '']"
+    class="relative inline-flex items-center justify-center gap-2 rounded-xl select-none ui-press disabled:pointer-events-none"
+    :class="[VARIANTS[variant], variant === 'primary' || variant === 'signal' ? 'ui-press-glow' : '', FILLED.has(variant) && size === 'sm' ? FILLED_SM : SIZES[size], block ? 'w-full' : '', disabled && !busy ? 'opacity-40' : '', to && (disabled || busy) ? 'pointer-events-none' : '']"
     :aria-disabled="to && (disabled || busy) ? 'true' : undefined"
     :tabindex="to && (disabled || busy) ? -1 : undefined"
     @click="onClick"
@@ -70,9 +70,11 @@ const VARIANTS = {
   danger: 'bg-danger-soft text-danger-fg font-medium active:bg-danger/25',
   // 볼트: '내 차례'에만 (결과 확인·신청 승인처럼 상대가 나를 기다릴 때). 한 화면에 하나 넘게 두지 않는다
   signal: 'bg-signal text-signal-on font-semibold active:opacity-90',
+  // 특별한 판에만: 챔피언에게 도전·AI 보스와 한 판 (quality-rules G5-3). 울트라 색 면에 빛이 한 번씩 지나간다. 평소 화면에는 쓰지 않는다
+  special: 'fx-special font-semibold active:opacity-90',
 }
 // 채운 버튼(주·볼트)은 작아도 높이 44다 (quality-rules S-5: 주 버튼은 단단해 보여야 한다). 글자만 한 단계 작다
-const FILLED = new Set(['primary', 'signal'])
+const FILLED = new Set(['primary', 'signal', 'special'])
 const FILLED_SM = 'h-11 px-4 text-sm'
 // 높이는 손가락으로 누르기 쉬운 크기 이상 (sm도 36px)
 const SIZES = {

@@ -7,7 +7,7 @@
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <!-- AI 보스 도전 판 (docs/ai-residents.md 3): 보통 판과 같은 화면, 위에 띠 하나 -->
-      <p v-if="state?.bossChallenge" class="mb-3 flex items-center gap-2 rounded-lg bg-signal-soft text-signal-fg px-3 py-2 t-label">
+      <p v-if="state?.bossChallenge" class="mb-3 flex items-center gap-2 rounded-lg fx-special-soft px-3 py-2 t-label">
         <UiIcon name="fas fa-crown" aria-hidden="true" />
         <span class="min-w-0">AI 보스와 한 판 · {{ state.status === 'COMPLETED' ? '보스와 한 판' : '이기면 전국 챔피언' }}</span>
       </p>

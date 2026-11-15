@@ -138,11 +138,20 @@
           <template v-if="result.status === 'COMPLETED'">
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
             <!-- 이긴 순간은 이 앱에서 가장 큰 순간이다: 얼굴 둘레로 볼트 불꽃이 튀고, 글자가 올라오며 형광이 그어진다 (만나서 한 경기의 결과와 같은 틀, quality-rules J-1) -->
-            <VerdictFace :win="result.result === 'WIN'" :mood="result.result === 'DRAW' ? 'smile' : ''" class="mb-3" />
+            <VerdictFace :win="result.result === 'WIN'" :mood="result.result === 'DRAW' ? 'smile' : ''" :tier="wonSeats.length ? 3 : 1" class="mb-3" />
             <p class="t-display feel-rise"><span :class="result.result === 'WIN' ? 'hl hl-draw' : ''">{{ VERDICT[result.result || 'DRAW'] }}</span></p>
-            <p class="t-caption mt-2">
-              <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
-            </p>
+            <!-- 붙은 두 사람이 좌우에서 들어와 마주 선다. 이긴 쪽 얼굴에 형광 고리 (글 한 줄 '○○님과 경기'였다) -->
+            <div v-if="result.opponent" class="mt-4 flex items-center justify-center gap-4" :aria-label="`나와 ${who(result.opponent)}님의 경기`">
+              <span class="vs-left flex flex-col items-center gap-1 w-24 min-w-0">
+                <span class="rounded-full p-0.5" :class="result.result === 'WIN' ? 'ring-2 ring-signal' : ''"><UiAvatar :src="myFace" name="나" :user-id="0" size="lg" /></span>
+                <span class="t-micro truncate max-w-full">나</span>
+              </span>
+              <span class="vs-mark t-heading italic text-fg-subtle" aria-hidden="true">VS</span>
+              <span class="vs-right flex flex-col items-center gap-1 w-24 min-w-0">
+                <span class="rounded-full p-0.5" :class="result.result === 'LOSE' ? 'ring-2 ring-signal' : ''"><UiAvatar :src="result.opponent.profilePicture" :name="who(result.opponent)" :user-id="result.opponent.isBot ? undefined : result.opponent.userId" size="lg" /></span>
+                <span class="flex items-center justify-center t-micro max-w-full"><OpponentName :player="result.opponent" /></span>
+              </span>
+            </div>
             <!-- 이겨서 든 자리는 그 자리에서 말한다 (quality-rules G4-3: 만나서 한 경기의 '새 챔피언이 됐어요'가 앱 게임 결과에는 없었다) -->
             <p v-if="result.result === 'WIN' && wonSeats.length" class="t-label !text-signal-fg mt-3 flex items-center justify-center gap-1.5 feel-rise feel-rise-2">
               <UiIcon name="crown" aria-hidden="true" />{{ wonSeats.join(' · ') }} 챔피언이에요
@@ -163,7 +172,7 @@
             </div>
             <!-- 이긴 순간이 자랑하고 싶은 때다: 오른쪽 위 작은 아이콘 말고 이름 붙은 버튼으로 (quality-rules D-1) -->
             <div v-else-if="result.result === 'WIN' && game?.dailyLimit !== 1" class="mt-3">
-              <UiButton variant="secondary" icon="share" :disabled="sharingResult" @click="openShare(result.gameId)">이긴 판 자랑하기</UiButton>
+              <UiButton variant="secondary" icon="share" :disabled="sharingResult" @click="openShare(result.gameId)">공유하기</UiButton>
             </div>
             <!-- 임기응변: 승패도 등급으로 겨룬다. 큰 숫자가 점수라 기다릴 때(등급이 크게)와 잣대가 달랐다 (경로 10 리뷰 I5) -->
             <div v-if="improvResult && !improvResult.empty" class="flex items-center justify-center gap-6 mt-6 feel-rise feel-rise-2">
@@ -196,7 +205,7 @@
             <!-- 오른 것은 형광으로 또렷하게, 내린 것은 담담하게 (quality-rules G4-1). 소식 카드와 같은 꼴: 점수 + 변화 -->
             <p v-if="result.ratingGamesLeft" class="t-caption mt-4 feel-rise feel-rise-3">{{ ratingSoon(result.ratingGamesLeft) }}</p>
             <p v-else-if="result.ratingChange != null" class="t-mono mt-4 feel-rise feel-rise-3">
-              실력 점수 {{ result.ratingAfter }} <span :class="result.ratingChange > 0 ? 'text-signal-fg font-semibold' : ''">{{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }}</span>
+              실력 점수 <UiCountTo :from="(result.ratingAfter ?? 0) - result.ratingChange" :to="result.ratingAfter ?? 0" :delay="500" /> <span :class="result.ratingChange > 0 ? 'text-signal-fg font-semibold' : ''">{{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }}</span>
             </p>
             <!-- '처음 몇 판은 크게 움직여요' 숫자 설명은 뺐다 (목적 판정 11/11 부분 2 다시 훑기) -->
           </template>
@@ -247,7 +256,8 @@
               <!-- 가입 전 결과와 같은 얼굴: 표정이 등급을 따른다 (quality-rules J-2) -->
               <VerdictFace :win="improvResult.grade <= 3" :mood="improvResult.grade <= 4 ? 'cheer' : improvResult.grade >= 7 ? 'sad' : 'smile'" class="mb-3" />
               <!-- 등급이 나온 순간: 올라오고, 1~3등급은 형광이 그어진다 (quality-rules J-1) -->
-              <p class="t-display tabular-nums feel-rise"><span :class="improvResult.grade <= 3 ? 'hl hl-draw' : ''">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></span></p>
+              <!-- 9에서 내려오다 내 등급에서 멈춘다: 숫자가 '나오는' 순간을 만든다 -->
+              <p class="t-display tabular-nums feel-rise"><span :class="improvResult.grade <= 3 ? 'hl hl-draw' : ''"><UiCountTo :from="9" :to="improvResult.grade" :duration="800" /><span class="t-title ml-1">등급</span></span></p>
               <!-- 손님 결과처럼 점수는 빼고 등수만 (경로 2 리뷰 N5) -->
               <p class="t-caption mt-1 feel-rise feel-rise-2">100명 중 {{ improvResult.rank }}등</p>
               <!-- 전보다 좋은 등급이면 그 자리에서 말한다 (quality-rules G4-2) -->
@@ -317,7 +327,9 @@
         <!-- 임기응변은 한마디(등급·인물 반응)를 위 카드와 상황 카드에 나눠 보여 주므로 따로 두지 않는다 (등급이 두 번 보였다) -->
         <UiCard v-if="sayOnly(result.myFeedback) && result.status !== 'AWAITING_RESULT' && key !== 'improv'" class="mt-3">
           <p class="t-micro">{{ isHero ? '싸움 중계' : key === 'ghosted' ? '그 사람의 답장' : key === 'trial' ? '판결' : game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
-          <p class="t-body mt-1 whitespace-pre-line break-keep">{{ sayOnly(result.myFeedback) }}</p>
+          <!-- 싸움 중계는 한 문장씩 차례로 나온다 -->
+          <p v-if="isHero" class="t-body mt-1 break-keep"><span v-for="(line, i) in fightLines(result.myFeedback)" :key="i" class="block feel-rise" :class="i ? 'mt-1.5' : ''" :style="{ animationDelay: `${0.3 + i * 0.7}s` }">{{ line }}</span></p>
+          <p v-else class="t-body mt-1 whitespace-pre-line break-keep">{{ sayOnly(result.myFeedback) }}</p>
         </UiCard>
         <!-- 하루 퍼즐은 결과를 칸으로 공유한다 (답은 가리고) -->
         <template v-if="isVote && (result.myAnswer || result.opponentAnswer)">
@@ -632,7 +644,7 @@ import VoteCard from '../../components/appgame/VoteCard.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import { useToast } from '../../composables/useToast'
 import {
-  UiAvatar, UiBadge, UiButton, UiCard, UiEmptyState, UiIconButton, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
+  UiAvatar, UiBadge, UiButton, UiCard, UiCountTo, UiEmptyState, UiIconButton, UiList, UiListItem, UiRollNumber, UiSection, UiSkeleton, UiSpinner, UiTabs, UiTopBar,
 } from '../../components/ui'
 
 type Schemas = components['schemas']
@@ -1084,6 +1096,11 @@ const improvGrade = computed(() => (GRADED.includes(key.value) && !improvResult.
 // 한마디에서 등급 줄·다음 등급 줄을 뺀 나머지 (AI의 말). 임기응변은 상황 카드가 따로 보여 준다
 const sayOnly = (f?: string | null) => String(f ?? '').split('\n').filter((l) => !/^\d등급 · /.test(l) && !l.startsWith('다음 등급: ')).join('\n').trim()
 const isHero = computed(() => key.value === 'power-level')
+// 결과의 '나 VS 상대'에 놓을 내 사진 (없으면 꾸민 캐릭터나 글자)
+const myFace = ref('')
+api.get('/api/user-profile/my/profile', { quiet: true } as never).then(({ data }) => { myFace.value = data?.profilePicture || '' }).catch(() => {})
+// 싸움 중계를 문장으로 나눈다
+const fightLines = (f?: string | null) => String(f ?? '').split(/(?<=[.!?。])\s+/).map((l) => l.trim()).filter(Boolean)
 
 // 이름 뒤 조사 이/가 (AI 심판이, AI 셰프가). 받침이 없는 글자·한글이 아니면 '가'
 function josaIga(name: string) {
@@ -1122,7 +1139,10 @@ function duelTitle(d: Duel) {
 function duelSubtitle(d: Duel) {
   const unit = game.value?.scoreUnit ?? ''
   // 임기응변은 등급으로: 목록만 '78 : 35점'이라 결과 화면(2등급 : 8등급)과 다른 말이었다 (11/14)
-  if (d.status === 'COMPLETED' && key.value === 'improv') {
+  // 히어로 대결은 점수가 없다: 어디서 싸웠는지를 적는다
+  if (key.value === 'power-level') return d.status === 'COMPLETED' ? `싸움터 ${d.problem}` : d.status === 'CANCELED' ? '상대 없이 끝났어요' : `싸움터 ${d.problem} · 상대 히어로를 기다려요`
+  // 등급으로 끝나는 게임은 등급으로: 목록만 '78 : 35점'이라 결과 화면(2등급 : 8등급)과 다른 말이었다 (11/14 임기응변, 11/15 나머지)
+  if (d.status === 'COMPLETED' && GRADED.includes(key.value) && /^\d등급/.test(d.myFeedback || '')) {
     const g = (f?: string | null, sc?: number | null) => f?.match(/\d등급/)?.[0] ?? `${sc ?? 0}점`
     return `나 ${g(d.myFeedback, d.myScore)} · ${who(d.opponent)} ${g(d.opponentFeedback, d.opponentScore)}`
   }

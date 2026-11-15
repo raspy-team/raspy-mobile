@@ -26,7 +26,7 @@
       <!-- 결과 한 줄 + 점수판: 이 앱에서 감정이 가장 실리는 순간이라 글자와 숫자로 크게 -->
       <section>
         <!-- 이긴 순간: 매치 얼굴이 통통 튀어 오른다 -->
-        <VerdictFace v-if="headline.mark && isParticipant" win :live="celebrate" :size="64" class="mb-4" />
+        <VerdictFace v-if="headline.mark && isParticipant" win :live="celebrate" :tier="championUser?.id === currentUserId ? 3 : 1" :size="64" class="mb-4" />
         <!-- 진 순간에도 같은 얼굴이 곁에 있다. 표정만 담담하게 (11/3, essence: 진 판도 기록, 다음 판) -->
         <VerdictFace v-else-if="headline.line && isParticipant" :size="64" class="mb-4" />
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<template v-if="playedOn"> · {{ playedOn }}</template></p>
@@ -172,7 +172,7 @@
       <UiCard v-if="championUser" class="flex items-center gap-3">
         <!-- 내가 챔피언 자리를 차지한 순간은 매치가 신나게 (docs/mascots.md 이긴 순간). 남이 차지했으면 왕관만 -->
         <MatchMascot v-if="championUser.id === currentUserId" who="match" mood="cheer" :size="40" aria-hidden="true" />
-        <span v-else class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span v-else class="w-10 h-10 rounded-full bg-signal text-signal-on flex items-center justify-center flex-shrink-0" aria-hidden="true">
           <UiIcon name="crown" />
         </span>
         <div class="min-w-0">

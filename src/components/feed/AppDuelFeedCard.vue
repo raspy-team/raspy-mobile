@@ -32,11 +32,13 @@
         >
           <span :class="side.won ? 'hl' : ''">{{ side.name }}</span>
         </button>
-        <span class="order-2 text-[1.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums">
+        <!-- 히어로 대결은 점수가 없다: 숫자 대신 VS -->
+        <span v-if="versus" class="order-2 t-heading italic text-fg-subtle">VS</span>
+        <span v-else class="order-2 text-[1.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums">
           <span :class="sides[0].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[0].score }}</span><span class="text-fg-subtle mx-1">:</span><span :class="sides[1].won || isDraw ? 'text-fg' : 'text-fg-subtle'">{{ sides[1].score }}</span>
         </span>
       </div>
-      <p class="text-center t-micro mt-2">{{ isDraw ? '무승부' : graded ? '등급' : duel.scoreUnit }}</p>
+      <p v-if="!versus" class="text-center t-micro mt-2">{{ isDraw ? '무승부' : graded ? '등급' : duel.scoreUnit }}</p>
       <!-- 수 기록으로 그린 그림 (낱말 사슬·마지막 판·막대) -->
       <AppVisualFigure
         :visual="story?.appVisual"
@@ -69,11 +71,11 @@
       <div v-for="(side, i) in sides" :key="i" class="py-4 border-t border-line first:border-t-0 first:pt-0">
         <div class="flex items-baseline justify-between gap-3">
           <span class="t-label truncate" :class="side.won ? 'text-fg' : 'text-fg-muted'"><span :class="side.won ? 'hl' : ''">{{ side.name }}</span></span>
-          <span class="t-label tabular-nums flex-shrink-0">{{ graded ? `${side.score}등급` : `${side.score}${duel.scoreUnit.length > 1 ? " " : ""}${duel.scoreUnit}` }}</span>
+          <span v-if="!versus" class="t-label tabular-nums flex-shrink-0">{{ graded ? `${side.score}등급` : `${side.score}${duel.scoreUnit.length > 1 ? " " : ""}${duel.scoreUnit}` }}</span>
         </div>
         <template v-if="details[i]">
           <p class="t-body whitespace-pre-line break-words mt-2">{{ details[i]!.answer }}</p>
-          <p v-if="details[i]!.feedback && !graded" class="t-caption whitespace-pre-line break-keep mt-3"><span class="t-micro block">AI 심사</span>{{ details[i]!.feedback }}</p>
+          <p v-if="details[i]!.feedback && !graded" class="t-caption whitespace-pre-line break-keep mt-3"><span class="t-micro block">{{ versus ? '싸움 중계' : 'AI 심사' }}</span>{{ details[i]!.feedback }}</p>
         </template>
         <p v-else class="t-caption mt-2">{{ side.text || '쓴 글은 공개하지 않아요' }}</p>
       </div>
@@ -113,6 +115,8 @@ const duel = computed(() => props.post.appDuel!)
 const voting = computed(() => props.post.type === 'app_vote')
 const card = ref<components['schemas']['AppVoteCard'] | null>(null)
 const isDraw = computed(() => duel.value.winnerId == null)
+// 맞붙이는 게임(히어로 대결): 점수 없이 승패와 싸움 중계만 있다
+const versus = computed(() => duel.value.key === 'power-level')
 const sides = computed(() =>
   [0, 1].map((i) => {
     // OpenAPI 문서에 이름이 같은 PlayerDto가 둘이라 타입이 다른 쪽으로 잡힌다. 피드의 선수는 { id, name, avatar }

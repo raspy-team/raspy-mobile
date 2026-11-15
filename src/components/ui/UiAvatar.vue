@@ -35,6 +35,7 @@
 import { ref, computed, watch, defineProps } from 'vue'
 import { useRouter } from 'vue-router'
 import { characterOf, knownCharacter } from '../../utils/characters'
+import { getMyId } from '../../utils/me'
 import { API_BASE_URL } from '@/config/server'
 
 const props = defineProps({
@@ -74,10 +75,16 @@ const tint = computed(() => {
 watch(() => props.src, () => (failed.value = false))
 
 // 캐릭터 그림: 896×96 장의 앞을 본 칸(16×32). 칸이 고르게 찍히도록 정수 배로만 키우고 머리 쪽을 보인다
-const character = ref(props.userId ? knownCharacter(Number(props.userId)) ?? null : null)
-watch(() => props.userId, (id) => {
-  character.value = id ? knownCharacter(Number(id)) ?? null : null
-  if (id && knownCharacter(Number(id)) === undefined) characterOf(Number(id)).then((key) => { if (String(props.userId) === String(id)) character.value = key })
+const character = ref(null)
+// 사용자 번호 0은 '나'다 (/profile/0처럼): 내 번호로 바꿔 묻는다
+watch(() => props.userId, async (given) => {
+  character.value = null
+  if (given == null || given === '') return
+  const id = Number(given) === 0 ? await getMyId().catch(() => null) : Number(given)
+  if (!id || String(props.userId) !== String(given)) return
+  const known = knownCharacter(id)
+  const key = known !== undefined ? known : await characterOf(id)
+  if (String(props.userId) === String(given)) character.value = key
 }, { immediate: true })
 const charStyle = computed(() => {
   const k = Math.max(1, Math.floor(px.value / 16))

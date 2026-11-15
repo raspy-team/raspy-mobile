@@ -24,17 +24,18 @@
       </UiEmptyState>
       <div v-else class="space-y-3 mt-4 ui-appear">
         <p class="t-caption">{{ shown.length }}개</p>
-        <!-- 신청·신청자·더보기는 경기 화면에서: 여기는 고르는 곳이다 -->
+        <!-- 신청·취소는 여기서 바로 (눌렀는데 경기 화면으로만 넘어가 한 번 더 눌러야 했다). 둘이 신청·신청자·더보기는 경기 화면에서 -->
         <OpenGameCard
           v-for="game in shown"
           :key="game.id"
           :game="game"
           :is-mine="game.ownerId === myId"
+          :busy="busyId === game.id"
           @rule="open(game)"
           @profile="router.push('/profile/' + game.ownerId)"
-          @apply="open(game)"
+          @apply="(team) => apply(game, team)"
           @pair="open(game)"
-          @cancel="open(game)"
+          @cancel="cancel(game)"
           @challengers="open(game)"
           @more="open(game)"
         />
@@ -46,9 +47,12 @@
 <script setup lang="ts">
 // 모집 중인 경기 모두 보기 (11/15 고병연: 소식에 '모두 보기'가 있듯 경기에도). 동네와 상관없이 전국의 모집 중인 경기를 순서·종목으로 골라 본다.
 // 서버는 한 번에 다 준다(scope=all). 순서와 종목은 받은 것 안에서 고른다
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { GET } from '@/api/client'
+import api from '@/api/api'
+import { feel } from '@/utils/feel'
+import { useToast } from '@/composables/useToast'
 import type { components } from '@/api/schema'
 import { getMyId } from '@/utils/me'
 import { usePullToRefresh } from '@/composables/usePullToRefresh'
@@ -67,8 +71,11 @@ const SORTS = [
   { key: 'soon', label: '경기 시간순' },
   { key: 'new', label: '새로 올라온 순' },
 ] as const
-const sort = ref<(typeof SORTS)[number]['key']>('near')
-const kind = ref('')
+// 고른 순서·종목은 이 화면을 떠났다 와도 그대로다 (경기 하나를 보고 뒤로 오면 '가까운 순·모든 종목'으로 돌아가 다시 골라야 했다)
+const kept = (() => { try { return JSON.parse(sessionStorage.getItem('open_games_filter') || '{}') } catch { return {} } })()
+const sort = ref<(typeof SORTS)[number]['key']>(SORTS.some((s) => s.key === kept.sort) ? kept.sort : 'near')
+const kind = ref<string>(typeof kept.kind === 'string' ? kept.kind : '')
+watch([sort, kind], () => { try { sessionStorage.setItem('open_games_filter', JSON.stringify({ sort: sort.value, kind: kind.value })) } catch { /* 못 남기면 다음에 처음부터 */ } })
 const kindOf = (g: Game) => g.rule?.ruleTitle || '' // 종목 = 규칙 이름 (러닝·탁구…). 분류(실내·실외)는 고르는 말이 아니다
 const kinds = computed(() => [...new Set(games.value.map(kindOf).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko')))
 
@@ -82,11 +89,42 @@ const shown = computed(() => {
 })
 
 const open = (g: Game) => router.push(`/games/${g.id}`)
+const busyId = ref<number | null>(null)
+const { showToast } = useToast()
+async function apply(game: Game, team?: number) {
+  busyId.value = game.id
+  try {
+    await api.post(`/api/games/${game.id}/apply`, null, { params: team === undefined ? {} : { team } })
+    game.isAppliedByMe = true
+    feel('success')
+    showToast('신청했어요. 주최자가 승인하면 알림에 떠요')
+  } catch (e) {
+    // 동네·본인인증이 필요하면 api.js가 그 화면으로 보낸다 (홈과 같다)
+    const err = e as { response?: { status?: number; data?: { message?: string } } }
+    const identity = String(err.response?.data?.message || '').includes('휴대폰 본인인증')
+    if (err.response?.status !== 428 && !identity) showToast(err.response?.data?.message || '신청하지 못했어요. 잠시 뒤 다시 해 주세요')
+  } finally {
+    busyId.value = null
+  }
+}
+async function cancel(game: Game) {
+  busyId.value = game.id
+  try {
+    await api.post('/api/games/cancel-request', { gameId: game.id })
+    game.isAppliedByMe = false
+    showToast('신청을 취소했어요')
+  } catch (e) {
+    showToast((e as { response?: { data?: { message?: string } } }).response?.data?.message || '취소하지 못했어요. 잠시 뒤 다시 해 주세요')
+  } finally {
+    busyId.value = null
+  }
+}
 
 async function load() {
   loadFailed.value = false
   try {
     games.value = (await GET('/api/games/list', { query: { sort: 'latest', scope: 'all' } })).data
+    if (kind.value && !kinds.value.includes(kind.value)) kind.value = '' // 기억해 둔 종목의 경기가 이제 없으면 모든 종목으로
   } catch {
     loadFailed.value = true
   } finally {

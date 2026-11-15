@@ -325,7 +325,7 @@ watch(
       showModal.value = true
       await fetchComments()
       resetInput()
-      nextTick(() => commentInputRef.value && commentInputRef.value.focus())
+      // 열자마자 입력칸을 잡지 않는다: 읽으러 연 사람에게 키보드가 올라와 댓글을 가렸다 (11/15 고병연). 쓸 사람은 칸을 누른다. 답글을 누르면 그때 잡는다
     } else {
       showModal.value = false
     }

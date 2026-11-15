@@ -16,7 +16,7 @@
       <UiSkeleton class="h-24 w-full rounded-xl" />
       <UiSkeleton class="h-40 w-full rounded-xl" />
       <UiSkeleton class="h-14 w-full rounded-xl" />
-      <p class="late-note t-caption text-center pt-2">내 판과 동네 경기를 불러오는 중이에요</p>
+      <p class="late-note t-caption text-center pt-2">동네 경기와 소식을 불러오는 중이에요</p>
     </div>
     <div v-show="settled">
     <!-- 홈은 누구에게나 같은 모양이다 (11/15 고병연): 한 판이라도 한 사람의 홈은 잡힌 경기·학교 대항·내 판·접힌 동네 경기가 차례로 쌓여

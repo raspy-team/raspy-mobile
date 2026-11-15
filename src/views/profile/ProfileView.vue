@@ -39,6 +39,8 @@
 
     <!-- 뼈대가 보이는 동안에도 안의 칸들은 미리 자료를 받는다(v-show): 화면이 뜬 뒤에야 받기 시작해 줄 하나가 늦게 끼어들었다 -->
     <main v-if="!loading && !loadError" v-show="settled" class="max-w-2xl mx-auto px-4 pt-6 pb-32 ui-appear">
+      <!-- 프로필도 당겨서 새로 고친다 (방금 끝난 판·받은 친구 요청이 안 보이면 나갔다 들어와야 했다) -->
+      <UiPullIndicator :pull="pull" :refreshing="refreshing" />
       <!-- AI: 맨 위에 한 줄 (docs/ai-residents.md 'AI 표시') -->
       <p v-if="user.isBot" class="t-caption mb-4 flex items-center gap-1.5"><UiAiBadge class="!ml-0" />앱이 만든 연습 상대예요</p>
       <!-- 누구인지 -->
@@ -312,13 +314,14 @@ import LiveRecordLine from '../../components/live/LiveRecordLine.vue'
 // 신고·차단·친구 끊기는 더보기 안에. 빈 값(나이·성별·지역 없음)은 보여주지 않는다
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { usePullToRefresh } from '@/composables/usePullToRefresh'
 import { GET } from '@/api/client'
 import api from '../../api/api'
 import UserSearchModal from '../../components/profile/UserSearchModal.vue'
 import InboxButtons from '../../components/inbox/InboxButtons.vue'
 import {
   UiAiBadge, UiAvatar, UiButton, UiChip, UiEmptyState, UiIconButton, UiInput, UiList, UiListItem, UiListSkeleton,
-  UiSheet, UiSkeleton, UiTopBar,
+  UiPullIndicator, UiSheet, UiSkeleton, UiTopBar,
 } from '../../components/ui'
 import { confirmDialog } from '../../composables/useConfirm'
 import { useToast } from '../../composables/useToast'
@@ -526,6 +529,7 @@ const seatLines = computed(() =>
 )
 
 onMounted(() => load())
+const { pull, refreshing } = usePullToRefresh(() => load())
 async function load() {
   try {
     user.value = (await api.get(`/api/user-profile/${route.params.id}`)).data

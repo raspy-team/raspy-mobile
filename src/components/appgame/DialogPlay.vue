@@ -16,7 +16,8 @@
     </div>
 
     <!-- 재판: 먼저 읽는 법정 기록 (배경 + 오간 말). 빈틈은 여기 있다 -->
-    <section v-if="kind === 'trial'" class="mt-4 rounded-2xl bg-surface p-4" aria-label="법정 기록">
+    <!-- 쓰는 동안에도 기록이 보여야 빈틈을 짚는다: 키보드가 오르면 기록을 머리줄 밑에 붙여 두고 그 안에서 밀어 본다 (11/15: 쓰기 시작하면 기록이 화면 밖으로 밀려났다) -->
+    <section v-if="kind === 'trial'" class="mt-4 rounded-2xl bg-surface p-4" :class="typing ? 'sticky z-10 top-[calc(env(safe-area-inset-top)+3.75rem)] max-h-[26vh] overflow-y-auto overscroll-contain shadow-lg' : ''" aria-label="법정 기록">
       <p class="t-body break-keep">{{ background }}</p>
       <ol class="mt-3 space-y-2 border-t border-line pt-3">
         <li v-for="(r, i) in record" :key="i" class="t-body break-keep"><b class="text-fg">{{ r.who }}</b> <span class="text-fg-muted">{{ r.said }}</span></li>
@@ -36,15 +37,16 @@
     <!-- 키보드가 오르면 바로 앞 말과 내는 버튼이 함께 보이게 맞춘다 (11/14 전수 평가) -->
     <form v-if="turnsLeft > 0" ref="root" class="mt-4 scroll-mt-[calc(env(safe-area-inset-top)+10rem)]" @submit.prevent="say" @focusout="onTypeEnd">
       <UiInput v-model="text" multiline :rows="2" :maxlength="maxChars" :placeholder="`${T.placeholder} (${turnsLeft}번 남음)`" @focusin="onTypeStart" />
-      <p v-if="error" class="t-caption text-danger mt-1">{{ error }}</p>
+      <!-- 글자 수: 칸이 다 차면 말없이 더 안 써졌다 -->
+      <p class="t-micro mt-1 flex justify-between gap-3"><span class="text-danger">{{ error }}</span><span class="tabular-nums shrink-0" :class="text.length >= maxChars ? 'text-danger' : ''">{{ text.length }}/{{ maxChars }}</span></p>
       <div ref="action" class="mt-3"><UiButton block size="lg" :loading="saying" :disabled="!text.trim() || submitting" @click="say">{{ T.say }}</UiButton></div>
     </form>
     <!-- 한 마디도 안 했으면 끝낼 것이 없다: 끝내기는 한 번 말한 뒤에 -->
-    <UiButton v-if="spoken || turnsLeft === 0" block :variant="turnsLeft > 0 ? 'ghost' : 'primary'" :size="turnsLeft > 0 ? 'md' : 'lg'" class="mt-2" :loading="submitting" :disabled="saying" @click="finish">
+    <UiButton v-if="spoken || turnsLeft === 0" block :variant="turnsLeft > 0 ? 'ghost' : 'primary'" :size="turnsLeft > 0 ? 'md' : 'lg'" class="mt-2" :loading="submitting" :disabled="saying" @click="finishAsked">
       {{ turnsLeft > 0 ? T.finishEarly : T.finish }}
     </UiButton>
     <!-- 쓰는 자리에서 누가 보는지 말한다 (quality-rules Y-4) -->
-    <p class="t-micro text-center mt-2 break-keep">주고받은 말은 붙은 상대가 볼 수 있고, 소식에도 실려요</p>
+    <p ref="tail" class="t-micro text-center mt-2 pb-2 break-keep">주고받은 말은 붙은 상대가 볼 수 있고, 소식에도 실려요</p>
   </div>
 </template>
 
@@ -52,7 +54,8 @@
 import GameClock from './GameClock.vue'
 // 따로 풀기 대화형 한 판 (AI랑 말싸움). AI 첫마디 → 내가 한 마디 → AI가 받아친다를 몇 번. 끝내면 주고받은 말 전부를 AI 심판이 채점한다.
 // 판을 열면 서버에서 지금까지의 말을 받아 와 이어서 한다. 시간이 다 되면 한 데까지 낸다
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { confirmDialog } from '@/composables/useConfirm'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { UiButton, UiInput } from '../ui'
@@ -106,10 +109,12 @@ async function say() {
   // 보낸 말은 바로 보이고, AI의 받아침은 오면 붙는다
   lines.value = [...lines.value, { mine: true, text: said }]
   text.value = ''
+  follow()
   try {
     const { data } = await POST('/api/app-games/plays/{playId}/say', { path: { playId: props.playId }, body: { text: said } })
     lines.value = data.lines
     turnsLeft.value = data.turnsLeft
+    follow()
   } catch (e) {
     lines.value = lines.value.slice(0, -1)
     text.value = said
@@ -119,6 +124,16 @@ async function say() {
   }
 }
 
+// 새 말이 붙으면 입력칸과 버튼이 화면 아래로 밀려났다: 붙을 때마다 맨 아래(다음에 누를 것)가 보이게 따라 내려간다
+const tail = ref<HTMLElement | null>(null)
+function follow() {
+  nextTick(() => tail.value?.scrollIntoView({ block: 'end', behavior: 'smooth' }))
+}
+// 말할 기회가 남았는데 끝내는 버튼은 보내기 바로 밑이라 잘못 누르기 쉽다: 남았으면 한 번 묻는다
+async function finishAsked() {
+  if (turnsLeft.value > 0 && !(await confirmDialog({ title: `아직 ${turnsLeft.value}번 더 말할 수 있어요`, message: text.value.trim() ? '쓰던 말은 보내지 않고 여기서 끝나요' : '여기서 끝낼까요?', confirmText: '끝내기', cancelText: '계속하기' }))) return
+  finish()
+}
 let done = false
 function finish() {
   if (done || props.submitting) return
@@ -127,6 +142,7 @@ function finish() {
   emit('submit', '')
 }
 
+let lastCall = false
 const startedAt = Date.now()
 const remaining = ref(props.timeLimitSeconds)
 let timer: ReturnType<typeof setInterval> | undefined
@@ -142,6 +158,8 @@ onMounted(async () => {
   }
   timer = setInterval(() => {
     remaining.value = Math.max(0, props.timeLimitSeconds - Math.floor((Date.now() - startedAt) / 1000))
+    // 시간이 끝나 갈 때 쓰던 말이 있으면 그 말까지 보내고 끝낸다 (예전엔 쓰던 말이 사라진 채 끝났다. 글쓰기 판은 쓴 데까지 낸다)
+    if (remaining.value <= 3 && remaining.value > 0 && text.value.trim() && turnsLeft.value > 0 && !saying.value && !lastCall) { lastCall = true; say() }
     if (remaining.value === 0 && !saying.value) finish()
   }, 500)
 })

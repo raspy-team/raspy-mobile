@@ -147,7 +147,7 @@
             :to="l.to"
             class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-line-strong text-fg text-sm"
           >
-            <UiIcon name="crown" class="text-signal-fg" />{{ l.title }}
+            <UiIcon name="crown" class="text-gold-fg" />{{ l.title }}
           </component>
         </div>
       </section>

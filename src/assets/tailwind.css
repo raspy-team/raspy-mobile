@@ -30,6 +30,10 @@
     --c-signal-fg: 210 255 77;
     --c-signal-on: 18 18 20;
     --signal-soft: 0.12;
+    /* 금색: 챔피언·1위에만 (quality-rules G5-1). 형광이 이김·지금·내 차례를 다 맡아, 가장 귀한 자리가 따로 보이지 않았다 */
+    --c-gold: 255 201 60;
+    --c-gold-fg: 255 208 82;
+    --gold-soft: 0.16;
     --c-danger: 255 92 92;
     --c-danger-fg: 255 122 122;
     /* 캐릭터 픽셀판(MatchMascot)의 바깥 한 칸. 짙은 외곽선이 다크 바탕에 묻히지 않게 옅게 밝힌다 */
@@ -52,6 +56,9 @@
     --c-signal-fg: 77 107 0;     /* 흰 바탕에서 읽히는 볼트 (글자·아이콘) */
     --c-signal-on: 17 17 19;
     --signal-soft: 0.35;
+    --c-gold: 245 190 40;
+    --c-gold-fg: 138 94 0;       /* 흰 바탕에서 읽히는 금색 (글자·아이콘) */
+    --gold-soft: 0.3;
     --c-danger: 220 38 38;
     --c-danger-fg: 200 30 30;
     --mascot-halo: transparent;

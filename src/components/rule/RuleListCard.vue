@@ -14,7 +14,7 @@
       <!-- 챔피언은 남긴다: 고르는 사람에겐 "누가 잘하나"(정보), 챔피언에겐 이름이 목록에 걸리는 자랑(정체성). 목적을 '고르기' 하나로만 보고 뺐던 것을 되살림 (11/11 목적 다시 보기) -->
       <span class="flex items-center gap-1.5 mt-2 t-micro">
         <template v-if="rule.currentChampion">
-          <UiIcon name="crown" class="text-signal-fg" aria-hidden="true" />
+          <UiIcon name="crown" class="text-gold-fg" aria-hidden="true" />
           <span class="truncate">챔피언 {{ rule.currentChampion.nickname }}</span>
           <span aria-hidden="true">·</span>
         </template>

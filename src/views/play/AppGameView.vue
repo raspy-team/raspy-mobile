@@ -140,6 +140,10 @@
             <p class="t-caption mt-2">
               <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
             </p>
+            <!-- 이겨서 든 자리는 그 자리에서 말한다 (quality-rules G4-3: 만나서 한 경기의 '새 챔피언이 됐어요'가 앱 게임 결과에는 없었다) -->
+            <p v-if="result.result === 'WIN' && wonSeats.length" class="t-label !text-gold-fg mt-3 flex items-center justify-center gap-1.5 feel-rise feel-rise-2">
+              <UiIcon name="crown" aria-hidden="true" />{{ wonSeats.join(' · ') }} 챔피언이에요
+            </p>
             <p v-if="NEXT_ROUND[result.result || '']" class="t-body mt-3">{{ NEXT_ROUND[result.result || ''] }}</p>
             <!-- 임기응변: '다음 판에서 갚아요'의 그 사람과 다시 붙는 길 (신뢰 사다리 ?to=: 한 판 하면 그 사람에게 같은 상황으로 도전장이 간다, 3-5 걷기 P6) -->
             <UiButton
@@ -241,6 +245,8 @@
               <p class="t-display tabular-nums feel-rise"><span :class="improvResult.grade <= 3 ? 'hl hl-draw' : ''">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></span></p>
               <!-- 손님 결과처럼 점수는 빼고 등수만 (경로 2 리뷰 N5) -->
               <p class="t-caption mt-1 feel-rise feel-rise-2">100명 중 {{ improvResult.rank }}등</p>
+              <!-- 전보다 좋은 등급이면 그 자리에서 말한다 (quality-rules G4-2) -->
+              <p v-if="improvBestBefore && improvResult.grade < improvBestBefore" class="t-label !text-signal-fg mt-2 feel-rise feel-rise-3">개인 최고 등급이에요 · 전에는 {{ improvBestBefore }}등급</p>
               <!-- 보내기는 등급 바로 밑 (손님 결과와 같은 순서, 11/11 목적 다시 보기: 등급을 막 본 순간이 자랑 동기가 가장 세다) -->
               <div class="flex flex-wrap justify-center gap-2 mt-4">
                 <!-- 그림을 못 찍었으면 눌리지 않는 버튼만 남기지 않고 거둔다 (11/11) -->
@@ -461,6 +467,8 @@
             <template v-else-if="ladderTo && fromFeed">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 한 판 붙자고 해요</template>
             <template v-else-if="ladderTo">한 판 하면 {{ ladderName }}님에게 같은 {{ key === 'improv' ? '상황으로' : '문제로' }} 도전장이 가요</template>
             <template v-else-if="game.dailyLimit === 1">하루 한 번</template>
+            <!-- 처음 하는 사람에게는 한 번뿐인 것을 시작 전에 말한다: 시간 제한과 고칠 수 없음 (quality-rules G6-5). 해 본 사람에게는 되풀이하지 않는다 -->
+            <template v-else-if="!played && game.playMode === 'NON_REALTIME' && game.timeLimitSeconds && key !== 'improv'">제한 시간 {{ limitText }} · 한 번 내면 고칠 수 없어요</template>
             <!-- '하루 20판'은 다 할 사람이 없는 수라 정보가 아니다. 한도에 닿으면 서버가 말한다 (목적 판정 11/11 부분 2) -->
           </p>
           <p v-if="startError" class="t-caption text-danger text-center mt-2">{{ startError }}</p>
@@ -658,6 +666,23 @@ watch(result, (now, before) => {
   feel(r === 'WIN' ? 'win' : r === 'DRAW' ? 'success' : 'lose')
 })
 let justSubmitted = false
+const limitText = computed(() => { const t = game.value?.timeLimitSeconds ?? 0; return [Math.floor(t / 60) ? `${Math.floor(t / 60)}분` : '', t % 60 ? `${t % 60}초` : ''].filter(Boolean).join(' ') })
+// 이긴 판 뒤 내가 든 챔피언 자리 (동네·소속·전국). 결과가 '이김'이 된 때 한 번 묻는다
+const wonSeats = ref<string[]>([])
+watch(() => (result.value?.status === 'COMPLETED' && result.value.result === 'WIN' ? result.value.gameId : null), async (gameId) => {
+  wonSeats.value = []
+  if (!gameId || !game.value?.ruleId) return
+  try {
+    const seats = ((await GET('/api/champions/rules/{ruleId}/seats', { path: { ruleId: game.value.ruleId } })).data ?? []) as { seatName: string; mine?: boolean; champion?: unknown }[]
+    wonSeats.value = seats.filter((s) => s.mine && s.champion).map((s) => s.seatName)
+  } catch { /* 못 받아도 결과는 그대로 */ }
+}, { immediate: true })
+// 임기응변: 이 판 전까지의 내 최고 등급. 지난 판을 서른 개까지만 받으므로, 서른 개가 다 차면 '전부'가 아니라 말하지 않는다
+const improvBestBefore = computed(() => {
+  if (key.value !== 'improv' || duels.value.length >= 30) return null
+  const grades = duels.value.filter((d) => d.gameId !== result.value?.gameId).map((d) => Number(d.myFeedback?.match(/(\d)등급/)?.[1])).filter((g) => g > 0)
+  return grades.length ? Math.min(...grades) : null
+})
 const votes = ref<Schemas['AppVoteCard'][]>([])
 const isVote = computed(() => game.value?.judge === 'VOTE')
 const unfinished = computed(() => duels.value.filter((d) => !DONE.includes(d.status)))

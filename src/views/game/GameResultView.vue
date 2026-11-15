@@ -82,7 +82,7 @@
               <UiAvatar :src="side.user.profileUrl" :name="side.user.nickname" :user-id="side.user.id" size="lg" />
               <span
                 v-if="side.champion"
-                class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-signal text-signal-on flex items-center justify-center text-sm"
+                class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gold text-gold-on flex items-center justify-center text-sm"
                 aria-label="새 챔피언"
               >
                 <UiIcon name="crown" />
@@ -170,7 +170,7 @@
       <UiCard v-if="championUser" class="flex items-center gap-3">
         <!-- 내가 챔피언 자리를 차지한 순간은 매치가 신나게 (docs/mascots.md 이긴 순간). 남이 차지했으면 왕관만 -->
         <MatchMascot v-if="championUser.id === currentUserId" who="match" mood="cheer" :size="40" aria-hidden="true" />
-        <span v-else class="w-10 h-10 rounded-full bg-signal-soft text-signal-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span v-else class="w-10 h-10 rounded-full bg-gold-soft text-gold-fg flex items-center justify-center flex-shrink-0" aria-hidden="true">
           <UiIcon name="crown" />
         </span>
         <div class="min-w-0">

@@ -54,7 +54,7 @@
               @click="router.push('/profile/' + x.row.userId)"
             >
               <template #leading>
-                <span class="w-7 text-center tabular-nums" :class="x.row.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ x.row.rank }}</span>
+                <span class="w-7 text-center tabular-nums" :class="x.row.rank === 1 ? 't-heading text-gold-fg' : x.row.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ x.row.rank }}</span>
                 <UiAvatar :src="x.row.userAvatar" :name="x.row.userName" :user-id="x.row.userId" size="sm" />
               </template>
               <template #trailing>
@@ -74,7 +74,7 @@
           <h2 class="t-heading mb-3">역대 전국 챔피언</h2>
           <UiList>
             <div v-for="(h, i) in [...history].reverse()" :key="i" class="flex items-center gap-3 px-4 min-h-[56px] py-3">
-              <UiIcon name="crown" :class="h.until ? 'text-fg-subtle' : 'text-signal-fg'" aria-hidden="true" />
+              <UiIcon name="crown" :class="h.until ? 'text-fg-subtle' : 'text-gold-fg'" aria-hidden="true" />
               <span class="flex-1 min-w-0">
                 <span class="flex items-center min-w-0"><span class="truncate">{{ h.nickname }}</span><UiAiBadge v-if="h.ai" /></span>
                 <span class="block t-micro mt-0.5">{{ period(h) }}</span>

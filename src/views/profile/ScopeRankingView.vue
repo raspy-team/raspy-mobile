@@ -44,7 +44,7 @@
             @click="router.push('/profile/' + r.userId)"
           >
             <template #leading>
-              <span class="w-7 text-center tabular-nums" :class="r.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ r.rank }}</span>
+              <span class="w-7 text-center tabular-nums" :class="r.rank === 1 ? 't-heading text-gold-fg' : r.rank <= 3 ? 't-heading text-fg' : 't-label text-fg-subtle'">{{ r.rank }}</span>
               <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
             </template>
             <template #trailing>

@@ -1,7 +1,7 @@
 <template>
   <!-- 이야기 줄: 기록에서 뽑은 사실 하나 (서버 feed_story가 중요한 순으로 준다). 그림은 결과 칸이 맡는다 -->
   <p v-if="beat" class="flex items-center gap-1.5 t-caption text-fg mb-2">
-    <UiIcon :name="ICON[beat.kind] || 'bolt'" class="flex-shrink-0 text-fg-muted" aria-hidden="true" />
+    <UiIcon :name="ICON[beat.kind] || 'bolt'" class="flex-shrink-0" :class="beat.kind === 'CHAMPION' ? 'text-gold-fg' : 'text-fg-muted'" aria-hidden="true" />
     <span class="truncate">{{ beat.text }}</span>
   </p>
 </template>

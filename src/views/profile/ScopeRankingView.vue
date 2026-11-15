@@ -48,7 +48,7 @@
               <UiAvatar :src="r.userAvatar" :name="r.userName" :user-id="r.userId" size="sm" />
             </template>
             <template #trailing>
-              <span class="t-heading tabular-nums">{{ r.rating }}</span>
+              <span class="t-heading tabular-nums">{{ r.rating }}<span class="t-caption ml-0.5">점</span></span>
             </template>
           </UiListItem>
         </UiList>

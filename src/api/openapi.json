@@ -8007,6 +8007,41 @@
         }
       }
     },
+    "/api/plaza/characters": {
+      "get": {
+        "tags": [
+          "avatar-controller"
+        ],
+        "summary": "여러 사람의 꾸민 캐릭터",
+        "description": "ids(쉼표, 100명까지)에서 직접 꾸민 사람만 { 사용자 번호: 그림 열쇠 }로. 프로필이 이미 누구에게나 보이는 그림이라 로그인 없이. 얼굴 자리(소식·순위·결과)가 한 번에 묻는다",
+        "operationId": "characters",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plaza/art/part/{itemId}.png": {
       "get": {
         "tags": [
@@ -17848,6 +17883,9 @@
               "$ref": "#/components/schemas/RivalLine"
             }
           },
+          "vsViewer": {
+            "$ref": "#/components/schemas/StatsTally"
+          },
           "bests": {
             "type": "array",
             "items": {
@@ -20009,6 +20047,10 @@
           },
           "confirmed": {
             "type": "boolean"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "resultSubmittedById": {
             "type": "integer",

@@ -3949,6 +3949,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plaza/characters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 여러 사람의 꾸민 캐릭터
+         * @description ids(쉼표, 100명까지)에서 직접 꾸민 사람만 { 사용자 번호: 그림 열쇠 }로. 프로필이 이미 누구에게나 보이는 그림이라 로그인 없이. 얼굴 자리(소식·순위·결과)가 한 번에 묻는다
+         */
+        get: operations["characters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plaza/art/part/{itemId}.png": {
         parameters: {
             query?: never;
@@ -8004,6 +8024,7 @@ export interface components {
             matches: components["schemas"]["MatchLine"][];
             rules: components["schemas"]["RuleStatsLine"][];
             rivals: components["schemas"]["RivalLine"][];
+            vsViewer?: components["schemas"]["StatsTally"];
             bests: components["schemas"]["BestLine"][];
             reviews: components["schemas"]["ReviewLine"][];
             manner?: components["schemas"]["StarAverage"];
@@ -8643,6 +8664,8 @@ export interface components {
             newChampionIdx: number;
             resultProofUrl?: string;
             confirmed: boolean;
+            /** Format: date-time */
+            confirmedAt?: string;
             /** Format: int64 */
             resultSubmittedById?: number;
             /** Format: date-time */
@@ -14781,6 +14804,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RoomInfo"][];
+                };
+            };
+        };
+    };
+    characters: {
+        parameters: {
+            query: {
+                ids: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
                 };
             };
         };

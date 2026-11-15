@@ -86,6 +86,8 @@
         </template>
       </div>
       <!-- 한 판 붙자 (11/13 도전 하나로): 사람에게 보내는 길은 링크와 여기 프로필 -->
+      <!-- 붙었던 상대면 나와의 전적을 '한 판 붙자' 바로 위에 (quality-rules S4-1: 맞수인지 아닌지가 상대 프로필에 없었다). 내 쪽에서 본 승패다 -->
+      <p v-if="h2h && !user.isMe" class="t-label !text-fg text-center mt-4 tabular-nums">나와의 맞대결 {{ h2h.games }}전 {{ h2h.wins }}승 {{ h2h.draws ? `${h2h.draws}무 ` : '' }}{{ h2h.losses }}패</p>
       <UiButton v-if="!user.isMe && !user.isBot" block class="mt-2" icon="fas fa-gamepad" @click="oneGameOpen = true">한 판 붙자</UiButton>
       <OneGameSheet v-if="!user.isMe && !user.isBot" v-model="oneGameOpen" :user-id="user.id" :name="user.nickname" :rules="user.top3Rules" />
       <!-- 내 규칙: 홈 첫 화면에서 옮겨 왔다 (목적 판정 11/11 4번). 동호회는 뺐다 (11/13 앱 기능 좁히기: 카톡이 더 잘한다) -->
@@ -110,13 +112,10 @@
           <p class="t-heading tabular-nums">{{ bests.length }}</p>
           <p class="t-micro mt-0.5">게임 기록 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
-        <RouterLink v-else-if="user.isMe || stats.totalGames" :to="`/profile/${user.id}/stats`" class="hit flex-1">
-          <p class="t-heading tabular-nums">{{ stats.totalGames || 0 }}</p>
-          <p class="t-micro mt-0.5">경기 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
-        </RouterLink>
-        <RouterLink v-if="stats.totalGames" :to="`/profile/${user.id}/stats`" class="hit flex-1">
-          <p class="t-heading tabular-nums">{{ stats.winRate }}%</p>
-          <p class="t-micro mt-0.5">승률 <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
+        <!-- 전적은 선수의 말로: '4전 1승 3패' (quality-rules S1-2·S2-1). 예전엔 '경기 4'와 '승률 25%'가 따로 있어 몇 승 몇 패인지는 기록 화면에 들어가야 나왔다 -->
+        <RouterLink v-else-if="user.isMe || stats.totalGames" :to="`/profile/${user.id}/stats`" class="hit" :class="stats.totalGames ? 'flex-[2]' : 'flex-1'">
+          <p class="t-heading tabular-nums">{{ stats.totalGames ? `${stats.wins}승 ${stats.draws ? `${stats.draws}무 ` : ''}${stats.losses}패` : '0전' }}</p>
+          <p class="t-micro mt-0.5">{{ stats.totalGames ? `${stats.totalGames}전 · 승률 ${stats.winRate}%` : '전적' }} <UiIcon name="fas fa-chevron-right" class="text-[10px]" aria-hidden="true" /></p>
         </RouterLink>
         <!-- 0이면 숨긴다 (가진 자리가 있을 때만 숫자) -->
         <div v-if="seatLines.length" class="flex-1">
@@ -197,7 +196,7 @@
             v-for="r in user.top3Rules"
             :key="r.ruleId"
             :title="r.ruleTitle"
-            :subtitle="`경기 ${r.playCount}번`"
+            :subtitle="`${r.playCount}경기`"
             chevron
             @click="router.push(`/rules/${r.ruleId}`)"
           >
@@ -505,8 +504,11 @@ const gameTiers = ref([])
 
 // 앱 게임 최고 기록 (기록 화면과 같은 자료). 임기응변은 서버가 준 등급으로 (경로 6 리뷰 P2)
 const bests = ref([])
+const h2h = ref(null)
 async function loadBests(id) {
   const { data } = await GET('/api/user-profile/{userId}/stats', { path: { userId: id } }).catch(() => ({ data: null }))
+  // 나와의 맞대결: 서버가 내 쪽 승패로 센다
+  h2h.value = data?.vsViewer ?? null
   bests.value = (data?.bests ?? []).slice(0, 3).map((b) => ({ key: b.key, title: b.title, line: b.grade ? `${b.grade}등급` : `${Math.round(b.score)}${b.scoreUnit || '점'}` }))
 }
 

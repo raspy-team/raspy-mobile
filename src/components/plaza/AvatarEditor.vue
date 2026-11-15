@@ -80,6 +80,8 @@ import { ref, computed, watch, onMounted, reactive } from 'vue'
 import { GET, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
 import { API_BASE_URL } from '@/config/server'
+import { getMyId } from '@/utils/me'
+import { forgetCharacter } from '@/utils/characters'
 import { UiButton, UiIcon, UiSkeleton, UiTabs } from '../ui'
 
 type S = components['schemas']
@@ -211,6 +213,8 @@ async function save() {
   try {
     const s = (await PUT('/api/plaza/avatar', { body: { body: draft.body, eyes: draft.eyes, outfit: draft.outfit, hair: draft.hair, acc: draft.acc } })).data
     load(s)
+    // 바꾼 얼굴이 소식·순위에도 바로 보이게: 기억해 둔 내 캐릭터를 잊는다
+    getMyId().then((id) => id && forgetCharacter(id)).catch(() => {})
     emit('saved', s)
   } catch (e) {
     error.value = (e as { response?: { data?: { message?: string } } }).response?.data?.message || '저장하지 못했어요'

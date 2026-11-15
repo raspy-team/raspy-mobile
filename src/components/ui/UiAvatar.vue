@@ -11,8 +11,12 @@
     @keydown.enter="go"
     :style="{ width: px + 'px', height: px + 'px', fontSize: Math.round(px * 0.38) + 'px', background: (photo && !failed) ? 'rgb(var(--c-surface-2))' : tint }"
   >
+    <!-- 꾸민 캐릭터가 있으면 그것이 얼굴이다. 직접 꾸민 것이라 사진보다 앞 (프로필 화면과 같은 순서) -->
+    <span v-if="character" class="block w-full h-full rounded-full overflow-hidden bg-surface-2" aria-hidden="true">
+      <span class="block mx-auto" :style="charStyle"></span>
+    </span>
     <img
-      v-if="photo && !failed"
+      v-else-if="photo && !failed"
       :src="photo"
       :alt="name ? `${name}의 프로필 사진` : ''"
       data-fallback="1"
@@ -30,6 +34,8 @@
 // 색을 넣으면 흑백 화면에서 탁해 보여서 밝기·방향만 바꾼다. 라이트·다크 모두 바탕색에서 섞어 만든다
 import { ref, computed, watch, defineProps } from 'vue'
 import { useRouter } from 'vue-router'
+import { characterOf, knownCharacter } from '../../utils/characters'
+import { API_BASE_URL } from '@/config/server'
 
 const props = defineProps({
   src: { type: String, default: '' },
@@ -66,4 +72,19 @@ const tint = computed(() => {
   return `linear-gradient(${angle}deg, ${mix(a)}, ${mix(b)})`
 })
 watch(() => props.src, () => (failed.value = false))
+
+// 캐릭터 그림: 896×96 장의 앞을 본 칸(16×32). 칸이 고르게 찍히도록 정수 배로만 키우고 머리 쪽을 보인다
+const character = ref(props.userId ? knownCharacter(Number(props.userId)) ?? null : null)
+watch(() => props.userId, (id) => {
+  character.value = id ? knownCharacter(Number(id)) ?? null : null
+  if (id && knownCharacter(Number(id)) === undefined) characterOf(Number(id)).then((key) => { if (String(props.userId) === String(id)) character.value = key })
+}, { immediate: true })
+const charStyle = computed(() => {
+  const k = Math.max(1, Math.floor(px.value / 16))
+  return {
+    width: 16 * k + 'px', height: 32 * k + 'px', marginTop: Math.round(px.value / 2 - 15.5 * k) + 'px', // 머리 가운데(칸의 15~16째 줄)를 원 가운데에
+    backgroundImage: `url(${API_BASE_URL}/api/plaza/art/avatar/${character.value}.png)`,
+    backgroundSize: `${896 * k}px ${96 * k}px`, backgroundPosition: `-${288 * k}px -${64 * k}px`, imageRendering: 'pixelated',
+  }
+})
 </script>

@@ -118,6 +118,8 @@
         </div>
         <p v-else-if="!setResults.length" class="t-caption text-center mt-6">세트 점수 없이 승패만 기록한 경기예요</p>
         </template>
+        <!-- 확정된 결과에는 그렇다고 적는다: 기록에 남은 정식 결과다 (quality-rules S7-2). 아직 아닌 결과는 아래 '확인을 기다려요' 카드가 말한다 -->
+        <p v-if="confirmed && !disputed && !peerVoting" class="t-micro text-center mt-6 flex items-center justify-center gap-1"><UiIcon name="circle-check" aria-hidden="true" />확정된 결과{{ confirmedAt ? ` · ${matchTime(confirmedAt)}` : '' }}</p>
         <!-- 다음 판: 이기든 지든 같은 규칙으로 바로. 점수(이 화면의 답) 바로 밑에 둔다: 예전엔 버튼이 점수보다 위였다 (quality-rules H-5) -->
         <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
           <p v-if="headline.line" class="t-body text-center mt-8">{{ headline.line }}</p>
@@ -544,6 +546,7 @@ const championIdx = ref(0)
 const idxCorrect = ref(true)
 // 상대 확인 전 결과 (확인 전에는 전적·레이팅·챔피언에 반영되지 않는다)
 const confirmed = ref(true)
+const confirmedAt = ref(null)
 const resultSubmittedById = ref(null)
 const autoConfirmAt = ref(null)
 const isAnswering = ref('')
@@ -690,7 +693,9 @@ const headline = computed(() => {
   const winner = winnerIdx.value === 1 ? user1.value : user2.value
   if (!isParticipant.value) return { text: `${format.value === 'TEAMS' ? winner.nickname : who(winner)}${format.value === 'TEAMS' ? '' : '님'} 승리`, tone: 'text-fg', mark: true }
   // 진 쪽도 회색으로 깎지 않는다. 같은 크기의 말로 다음 판을 권한다 (essence: 지면 낙오가 아니라 다음 판)
-  return isMine(winner) ? { text: '이겼어요', tone: 'text-fg', mark: true } : { text: '졌어요', tone: 'text-fg', line: NEXT_ROUND.LOSE }
+  // 팀 경기의 결과는 팀의 것으로 말한다 (quality-rules S5-2)
+  const us = format.value === 'TEAMS' ? '우리 팀이 ' : ''
+  return isMine(winner) ? { text: `${us}이겼어요`, tone: 'text-fg', mark: true } : { text: `${us}졌어요`, tone: 'text-fg', line: NEXT_ROUND.LOSE }
 })
 const pending = computed(() => {
   if (confirmed.value || disputed.value) return { canAnswer: false }
@@ -752,6 +757,7 @@ async function load() {
     confirmed.value = res.data.confirmed !== false
     resultSubmittedById.value = res.data.resultSubmittedById
     autoConfirmAt.value = res.data.autoConfirmAt
+    confirmedAt.value = res.data.confirmedAt || null
     proofUrl.value = res.data.resultProofUrl || null
     rejectsLeft.value = res.data.rejectsLeft ?? 3
     disputed.value = !!res.data.disputed

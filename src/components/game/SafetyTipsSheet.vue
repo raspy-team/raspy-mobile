@@ -40,7 +40,7 @@ const TIPS = [
   { icon: 'shield-halved', title: '위치 공유', body: "경기 3시간 전부터 '내 위치 공유'를 켤 수 있어요" },
   { icon: 'triangle-exclamation', title: '불편하면 그만두기', body: '언제든 멈추고, 메시지나 프로필에서 신고할 수 있어요' },
   { icon: 'comment', title: '이야기는 앱 메시지로', body: '전화번호를 주지 않아도 돼요' },
-  { icon: 'location-dot', title: "도착하면 '도착했어요'", body: '상대가 안 오면 노쇼로 알릴 수 있어요' },
+  { icon: 'location-dot', title: "도착하면 '도착했어요'", body: '약속에 안 나오면 노쇼로 기록되고 신뢰 온도가 내려가요. 상대가 안 오면 내가 알릴 수 있어요' },
   { icon: 'user', title: '상대가 미성년자라면', body: '보호자에게 알리고 동의를 받아요. 만 14세 미만은 매치를 쓸 수 없어요' },
   { icon: 'star', title: '신뢰 온도 보기', body: '만나서 한 경기, 매너, 노쇼가 프로필에 있어요' },
 ]

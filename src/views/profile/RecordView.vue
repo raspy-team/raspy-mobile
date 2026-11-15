@@ -60,8 +60,8 @@
         <UiTabs v-model="periodKey" :options="PERIODS" />
         <div class="mt-6 flex items-end justify-between gap-4">
           <div>
-            <p class="t-caption">{{ periodLabel }} 사람과 한 판</p>
-            <p class="t-display text-[56px] tracking-[-0.06em] leading-none mt-2 tabular-nums"><UiRollNumber :value="period.tally.games" /><span class="text-2xl text-fg-muted ml-1">판</span></p>
+            <p class="t-caption">{{ periodLabel }} 전적</p>
+            <p class="t-display text-[56px] tracking-[-0.06em] leading-none mt-2 tabular-nums"><UiRollNumber :value="period.tally.games" /><span class="text-2xl text-fg-muted ml-1">전</span></p>
           </div>
           <div v-if="period.tally.games" class="text-right">
             <p class="t-title tabular-nums">{{ period.tally.winRate }}%</p>
@@ -172,7 +172,7 @@
             v-for="r in allRules ? s.rules : s.rules.slice(0, 5)"
             :key="r.ruleId"
             :title="r.ruleTitle"
-            :subtitle="`${r.tally.games}판 · ${r.tally.wins}승 ${r.tally.draws ? r.tally.draws + '무 ' : ''}${r.tally.losses}패`"
+            :subtitle="`${r.tally.games}전 ${r.tally.wins}승 ${r.tally.draws ? r.tally.draws + '무 ' : ''}${r.tally.losses}패`"
             chevron
             @click="router.push(r.appGameKey ? `/play/${r.appGameKey}` : `/rules/${r.ruleId}`)"
           >
@@ -226,13 +226,13 @@
 
       <!-- 자주 만난 상대: 맞대결은 두 사람의 등수를 비교한다 -->
       <section v-if="s.rivals.length">
-        <h2 class="t-heading mb-1">자주 만난 상대</h2>
+        <h2 class="t-heading mb-1">맞대결</h2>
         <UiList>
           <UiListItem
             v-for="o in s.rivals"
             :key="o.player.id"
             :title="o.player.nickname"
-            :subtitle="`${o.tally.games}번 만남 · ${o.tally.wins}승 ${o.tally.draws ? o.tally.draws + '무 ' : ''}${o.tally.losses}패`"
+            :subtitle="`${o.tally.games}전 ${o.tally.wins}승 ${o.tally.draws ? o.tally.draws + '무 ' : ''}${o.tally.losses}패`"
             chevron
             @click="router.push('/profile/' + o.player.id)"
           >

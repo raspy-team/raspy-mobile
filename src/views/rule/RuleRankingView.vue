@@ -49,7 +49,7 @@
             <UiListItem
               v-else
               :title="x.row.isCurrentUser ? `${x.row.userName} (나)` : x.row.userName"
-              :subtitle="`경기 ${x.row.playCount}번`"
+              :subtitle="`${x.row.playCount}경기`"
               chevron
               @click="router.push('/profile/' + x.row.userId)"
             >
@@ -58,7 +58,7 @@
                 <UiAvatar :src="x.row.userAvatar" :name="x.row.userName" :user-id="x.row.userId" size="sm" />
               </template>
               <template #trailing>
-                <span class="t-heading tabular-nums">{{ x.row.rating }}</span>
+                <span class="t-heading tabular-nums">{{ x.row.rating }}<span class="t-caption ml-0.5">점</span></span>
               </template>
             </UiListItem>
           </template>

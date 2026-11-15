@@ -40,7 +40,26 @@ export function setHaptics(on: boolean) {
   if (on) haptic('select')
 }
 
-export function feel(kind: Feel) {
+/** 그 결과를 처음 보는가. 연출(소리·진동·불꽃)은 처음 한 번만이다 (quality-rules G2-4). 기기에 최근 200개를 기억한다 */
+export function firstSight(key: string): boolean {
+  try {
+    const seen: string[] = JSON.parse(localStorage.getItem('match_seen') || '[]')
+    if (seen.includes(key)) return false
+    seen.push(key)
+    localStorage.setItem('match_seen', JSON.stringify(seen.slice(-200)))
+  } catch {
+    // 저장소를 못 쓰면 매번 처음으로 본다
+  }
+  return true
+}
+
+// quiet: 진동만. 제 소리가 있는 판(리듬·시간 감각)에서 손끝 답만 줄 때
+let last: { kind: Feel; at: number } = { kind: 'tap', at: 0 }
+export function feel(kind: Feel, quiet = false) {
+  // 같은 답이 겹치지 않게: 화면이 success를 내고 알림 글도 success를 내면 한 번만 울린다
+  const now = Date.now()
+  if (kind !== 'tap' && kind !== 'select' && kind !== 'score' && last.kind === kind && now - last.at < 400) return
+  last = { kind, at: now }
   if (hapticsOn.value) haptic(HAPTIC[kind])
-  if (soundOn.value) playSound(kind)
+  if (soundOn.value && !quiet) playSound(kind)
 }

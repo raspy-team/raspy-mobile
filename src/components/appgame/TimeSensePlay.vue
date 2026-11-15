@@ -50,7 +50,7 @@
 // 감 잡기 (서버 TimeSenseGame): 문제는 목표 초 셋 "7.5,3.0,11.5", 답은 잰 밀리초 셋 "7512,2987,11630".
 // 시간은 화면이 잰다(누른 순간의 event.timeStamp). 서버는 세 값의 합이 자기가 잰 시간 안인지만 본다
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 import { UiButton } from '../ui'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
@@ -86,7 +86,7 @@ function press(e: Event) {
     cancelAnimationFrame(raf)
     const error = Math.abs(measured - Math.round(targets.value[round.value] * 1000))
     records.value.push({ measured, error })
-    haptic(error <= 50 ? 'success' : 'tap')
+    feel(error <= 50 ? 'success' : 'tap', true)
     round.value++
     if (round.value >= targets.value.length) {
       state.value = 'done'
@@ -101,7 +101,7 @@ function press(e: Event) {
   }
   startStamp = e.timeStamp
   state.value = 'running'
-  haptic('tap')
+  feel('tap', true)
   tick()
 }
 

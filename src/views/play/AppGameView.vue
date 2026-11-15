@@ -135,10 +135,7 @@
           <template v-if="result.status === 'COMPLETED'">
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
             <!-- 이긴 순간은 이 앱에서 가장 큰 순간이다: 얼굴 둘레로 볼트 불꽃이 튀고, 글자가 올라오며 형광이 그어진다 (만나서 한 경기의 결과와 같은 틀, quality-rules J-1) -->
-            <span class="relative block w-fit mx-auto mb-3 text-fg" :class="result.result === 'WIN' ? 'win-bounce' : ''">
-              <MatchMascot who="match" :mood="result.result === 'WIN' ? 'cheer' : result.result === 'DRAW' ? 'smile' : 'sad'" :size="72" />
-              <template v-if="result.result === 'WIN'"><span v-for="n in 10" :key="n" class="win-spark" :style="{ '--a': n * 36 + 'deg' }" aria-hidden="true"></span></template>
-            </span>
+            <VerdictFace :win="result.result === 'WIN'" :mood="result.result === 'DRAW' ? 'smile' : ''" class="mb-3" />
             <p class="t-display feel-rise"><span :class="result.result === 'WIN' ? 'hl hl-draw' : ''">{{ VERDICT[result.result || 'DRAW'] }}</span></p>
             <p class="t-caption mt-2">
               <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
@@ -162,7 +159,7 @@
               <UiButton variant="secondary" icon="share" :disabled="sharingResult" @click="openShare(result.gameId)">이긴 판 자랑하기</UiButton>
             </div>
             <!-- 임기응변: 승패도 등급으로 겨룬다. 큰 숫자가 점수라 기다릴 때(등급이 크게)와 잣대가 달랐다 (경로 10 리뷰 I5) -->
-            <div v-if="improvResult && !improvResult.empty" class="flex items-center justify-center gap-6 mt-6">
+            <div v-if="improvResult && !improvResult.empty" class="flex items-center justify-center gap-6 mt-6 feel-rise feel-rise-2">
               <span>
                 <span class="block t-title tabular-nums">{{ improvResult.grade }}등급</span>
                 <span class="block t-micro">나 · {{ result.myScore ?? 0 }}점</span>
@@ -173,7 +170,7 @@
                 <span class="flex items-center justify-center t-micro max-w-[8rem]"><OpponentName :player="result.opponent" /><span v-if="opponentImprov" class="shrink-0">&nbsp;· {{ result.opponentScore ?? 0 }}점</span></span>
               </span>
             </div>
-            <div v-else class="flex items-center justify-center gap-6 mt-6">
+            <div v-else class="flex items-center justify-center gap-6 mt-6 feel-rise feel-rise-2">
               <span>
                 <UiRollNumber class="t-title tabular-nums" :value="result.myScore ?? 0" />
                 <span class="block t-micro">나{{ isVote ? ' (표)' : '' }}</span>
@@ -188,13 +185,16 @@
             <p v-else-if="improvResult && !improvResult.empty" class="t-caption mt-3">100명 중 {{ improvResult.rank }}등</p>
             <!-- 끝난 판에도 왜 그 등급인지 (3-5 UI) -->
             <p v-if="improvResult?.weak" class="t-body mt-2 break-keep"><template v-if="improvResult.strong">잘한 것 <b>{{ improvResult.strong }}</b> · </template>아쉬운 것 <b>{{ improvResult.weak }}</b></p>
-            <p v-if="result.ratingChange != null" class="t-mono mt-4">
-              실력 점수 {{ result.ratingAfter }} ({{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }})
+            <!-- 오른 것은 형광으로 또렷하게, 내린 것은 담담하게 (quality-rules G4-1). 소식 카드와 같은 꼴: 점수 + 변화 -->
+            <p v-if="result.ratingChange != null" class="t-mono mt-4 feel-rise feel-rise-3">
+              실력 점수 {{ result.ratingAfter }} <span :class="result.ratingChange > 0 ? 'text-signal-fg font-semibold' : ''">{{ result.ratingChange >= 0 ? '+' : '' }}{{ result.ratingChange }}</span>
             </p>
             <!-- '처음 몇 판은 크게 움직여요' 숫자 설명은 뺐다 (목적 판정 11/11 부분 2 다시 훑기) -->
           </template>
           <template v-else-if="result.myJudging">
-            <UiSpinner class="mx-auto" />
+            <!-- 기다리는 동안 화면이 움직인다: AI가 채점하면 AI 캐릭터(비비)가 까딱인다. 사람이 확인하는 판(투표)은 도는 표시 (quality-rules G3-3·G7-2) -->
+            <UiSpinner v-if="isVote" class="mx-auto" />
+            <MatchMascot v-else who="bibi" mood="wow" :size="72" class="mx-auto wait-bob" aria-hidden="true" />
             <p class="t-heading mt-4">{{ isVote ? '문장을 확인하고 있어요' : key === 'ghosted' ? '답장을 기다리고 있어요' : `${judgeName}${josaIga(judgeName)} 채점하고 있어요` }}</p>
             <p class="t-caption mt-1">몇 초면 끝나요. 다른 화면으로 가도 끝나면 {{ NOTICE }}</p>
           </template>
@@ -236,7 +236,7 @@
             </template>
             <template v-else-if="improvResult">
               <!-- 가입 전 결과와 같은 얼굴: 표정이 등급을 따른다 (quality-rules J-2) -->
-              <MatchMascot who="match" :mood="improvResult.grade <= 4 ? 'cheer' : improvResult.grade >= 7 ? 'sad' : 'smile'" :size="72" class="mx-auto mb-3" />
+              <VerdictFace :win="improvResult.grade <= 3" :mood="improvResult.grade <= 4 ? 'cheer' : improvResult.grade >= 7 ? 'sad' : 'smile'" class="mb-3" />
               <!-- 등급이 나온 순간: 올라오고, 1~3등급은 형광이 그어진다 (quality-rules J-1) -->
               <p class="t-display tabular-nums feel-rise"><span :class="improvResult.grade <= 3 ? 'hl hl-draw' : ''">{{ improvResult.grade }}<span class="t-title ml-1">등급</span></span></p>
               <!-- 손님 결과처럼 점수는 빼고 등수만 (경로 2 리뷰 N5) -->
@@ -536,6 +536,7 @@ import api from '../../api/api'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
+import VerdictFace from '../../components/mascot/VerdictFace.vue'
 // 말싸움 기록("AI: …\n나: …")을 말풍선 줄로. self = 그 판을 한 사람의 말
 function talkLines(text?: string | null) {
   return String(text ?? '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
@@ -771,6 +772,8 @@ async function submit(answer: string) {
     justSubmitted = true
     result.value = (await POST('/api/app-games/plays/{playId}/submit', { path: { playId }, body: { answer } })).data
     rememberLastGame()
+    // 답이 받아들여진 순간 (quality-rules G1-3). 승패가 바로 난 판은 아래 watch가 win·lose로 답한다
+    if (!(result.value?.status === 'COMPLETED' && result.value?.result)) { const g = key.value === 'improv' ? improvFeedback(result.value?.myFeedback)?.grade : null; feel(g && g <= 3 ? 'win' : 'success') }
     // 낸 판의 임기응변 저장은 성공한 뒤에 지운다 (실패하면 다시 열어 이어 낼 수 있게 남겨 둔다, 가로 훑기 4)
     try { sessionStorage.removeItem(`improv_play_${play.value.playId}`) } catch { /* 없음 */ }
     play.value = null
@@ -780,6 +783,7 @@ async function submit(answer: string) {
     // 판이 닫히면 첫 화면으로 돌아가니 오류는 시작 버튼 밑 칸에 남긴다 (판 아래 칸은 판과 함께 사라져 아무 말 없이 돌아갔다)
     pendingSubmit.value = { playId, answer }
     // 끊김이면 그렇다고 말하고, 연결이 돌아오면 저절로 다시 낸다 (11/11 몸과 시간: 지하철)
+    feel('error')
     submitError.value = startError.value = !navigator.onLine ? '인터넷이 끊겨 내지 못했어요. 쓴 답은 남아 있고, 연결되면 바로 다시 내요' : errorMessage(e, '내지 못했어요. 쓴 답은 남아 있어요')
     play.value = null
     load().catch(() => {})

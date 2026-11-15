@@ -59,7 +59,7 @@
       <!-- 끝난 판: 점수를 보여 주고, 저장하고 사람과 붙으려면 가입 -->
       <template v-else-if="result">
         <UiCard class="text-center py-8">
-          <MatchMascot :who="key === 'improv' ? 'match' : 'kok'" :mood="improv ? (improv.grade && improv.grade <= 4 ? 'cheer' : improv.grade >= 7 ? 'sad' : 'smile') : result.score > 0 ? 'cheer' : 'smile'" :size="72" class="mx-auto mb-3" />
+          <VerdictFace :who="key === 'improv' ? 'match' : 'kok'" :win="!!improv?.grade && improv.grade <= 3" :mood="improv ? (improv.grade && improv.grade <= 4 ? 'cheer' : improv.grade >= 7 ? 'sad' : 'smile') : result.score > 0 ? 'cheer' : 'smile'" class="mb-3" />
           <p v-if="key === 'nunchi'" class="t-micro">눈치 점수</p>
           <p v-if="improv?.empty" class="t-micro">임기응변 등급</p>
           <!-- 등급이 안 나온 판(셋 다 빈 답·마감 넘김)도 임기응변 틀 그대로, 할 일은 '다시 하기' 하나 -->
@@ -282,6 +282,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
+import VerdictFace from '../../components/mascot/VerdictFace.vue'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'
 import QuizSetPlay from '../../components/appgame/QuizSetPlay.vue'
 import TimeSensePlay from '../../components/appgame/TimeSensePlay.vue'
@@ -461,7 +462,8 @@ async function submit(answer: string) {
     markGuestPlayed()
     try { sessionStorage.removeItem(`improv_play_${play.value.playId}`) } catch { /* 없음 */ } // 성공한 뒤에만 지운다 (가로 훑기 4)
     rememberOpen(null)
-    feel(result.value.score > 0 ? 'success' : 'lose')
+    // 임기응변 1~3등급은 이긴 순간과 같은 답 (quality-rules G2-1)
+    { const g = key.value === 'improv' ? improvFeedback(result.value.feedback)?.grade : null; feel(g && g <= 3 ? 'win' : result.value.score > 0 ? 'success' : 'lose') }
     track('guest_play_result', { gameKey: key.value, step: rounds.value, value: `score=${result.value.score};rank=${result.value.rank ?? ''}/${result.value.rankOf ?? ''}` })
     play.value = null
     if (key.value === 'nunchi') loadReview()

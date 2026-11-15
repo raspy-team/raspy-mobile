@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center justify-between">
       <span class="t-body">이 재료로 요리를 지어내 주세요</span>
-      <span class="t-mono tabular-nums" :class="remaining <= 30 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
+      <GameClock class="t-mono" muted :remaining="remaining" :warn="30" />
     </div>
 
     <!-- 키보드가 오르면 재료가 화면 밖으로 밀려, 다섯 재료를 외워서 써야 했다 (11/14): 쓰는 동안 재료 줄이 제목 바 바로 밑에 오게 맞춘다 -->
@@ -26,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+import GameClock from './GameClock.vue'
 // 레시피 대결 한 판. 시간이 다 되면 적은 데까지 낸다. 채점은 서버의 AI 셰프가 뒤에서 하고, 끝나면 알림이 온다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton, UiInput } from '../ui'
@@ -45,7 +46,6 @@ function onTypeStart() {
 const steps = ref('')
 const startedAt = Date.now()
 const remaining = ref(props.timeLimitSeconds)
-const clock = computed(() => `${Math.floor(remaining.value / 60)}:${String(remaining.value % 60).padStart(2, '0')}`)
 let timer: ReturnType<typeof setInterval> | undefined
 
 const used = (i: string) => steps.value.includes(i) || name.value.includes(i)

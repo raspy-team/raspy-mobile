@@ -26,15 +26,11 @@
       <!-- 결과 한 줄 + 점수판: 이 앱에서 감정이 가장 실리는 순간이라 글자와 숫자로 크게 -->
       <section>
         <!-- 이긴 순간: 매치 얼굴이 통통 튀어 오른다 -->
-        <span v-if="headline.mark && isParticipant" class="relative block w-fit mx-auto mb-4 text-fg win-bounce">
-          <MatchMascot who="match" mood="cheer" :size="64" />
-          <!-- 이긴 순간 얼굴 둘레로 볼트 불꽃 -->
-          <span v-for="n in 10" :key="n" class="win-spark" :style="{ '--a': n * 36 + 'deg' }" aria-hidden="true"></span>
-        </span>
+        <VerdictFace v-if="headline.mark && isParticipant" win :live="celebrate" :size="64" class="mb-4" />
         <!-- 진 순간에도 같은 얼굴이 곁에 있다. 표정만 담담하게 (11/3, essence: 진 판도 기록, 다음 판) -->
-        <span v-else-if="headline.line && isParticipant" class="block w-fit mx-auto mb-4 text-fg"><MatchMascot who="match" mood="sad" :size="64" /></span>
+        <VerdictFace v-else-if="headline.line && isParticipant" :size="64" class="mb-4" />
         <p class="text-center t-caption">{{ game.rule?.ruleTitle }}<template v-if="playedOn"> · {{ playedOn }}</template></p>
-        <h1 class="t-display text-center mt-3 feel-rise" :class="headline.tone"><span :class="headline.mark ? 'hl hl-draw' : ''">{{ headline.text }}</span></h1>
+        <h1 class="t-display text-center mt-3 feel-rise" :class="headline.tone"><span :class="headline.mark ? (celebrate ? 'hl hl-draw' : 'hl') : ''">{{ headline.text }}</span></h1>
         <!-- 증인: 결과를 낸 순간 중계를 보던 관중 (docs/live-spectator-review.md C) -->
         <p v-if="witnesses" class="t-caption text-center mt-1">관중 {{ witnesses }}명이 지켜본 경기</p>
         <!-- 이 경기로 바뀐 내 실력 점수: 이긴 사람이 가장 먼저 궁금한 숫자라 결과 바로 밑에 -->
@@ -411,7 +407,7 @@
 // 경기 결과: 누가 이겼나 → 사진 고르기 → 상대·규칙 평가 → 보내기. 평가는 경기에 뛴 사람에게만 보인다
 
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { feel } from '../../utils/feel'
+import { feel, firstSight } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
 import api, { playWithMeTooAPI } from '../../api/api'
 import { getMyId } from '@/utils/me'
@@ -421,6 +417,7 @@ import { useActiveGamePolling } from '../../composables/useActiveGamePolling'
 import { matchTime, who, withRo } from '../../utils/format'
 import { TEAM_NAMES } from '../../utils/gameFormat'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
+import VerdictFace from '../../components/mascot/VerdictFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import ResultEntrySheet from '../../components/game/ResultEntrySheet.vue'
 import LiveMediaStrip from '../../components/live/LiveMediaStrip.vue'
@@ -809,15 +806,12 @@ async function load() {
 }
 
 // 결과가 확정된 걸 처음 보는 순간 한 번만: 이기면 짧은 화음, 지면 부드럽게 내려가는 소리 (같은 화면을 다시 열면 조용히)
+const celebrate = ref(false)
 function feelResult() {
   if (!isParticipant.value || !confirmed.value || disputed.value || peerVoting.value) return
-  const key = `felt_result_${gameId}`
-  try {
-    if (sessionStorage.getItem(key)) return
-    sessionStorage.setItem(key, '1')
-  } catch {
-    // 저장소를 못 쓰면 매번 난다
-  }
+  // 불꽃·형광 긋기·소리 모두 이때 한 번 (quality-rules G2-4: 지난 결과를 다시 열면 얼굴과 글자만 가만히)
+  if (!firstSight(`result_${gameId}`)) return
+  celebrate.value = true
   feel(headline.value.mark ? 'win' : headline.value.line ? 'lose' : 'success')
 }
 

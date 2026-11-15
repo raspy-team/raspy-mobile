@@ -31,7 +31,7 @@
 // 숫자 자리 (서버 NumberSpotsGame). 문제는 씨앗 수, 답은 시도마다 "단계:누른 칸,..."를 '|'로.
 // 판은 서버와 똑같이 그린다: layout()을 고치면 NumberSpotsGame.layout도 함께 고친다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
 const emit = defineEmits<{ submit: [answer: string] }>()
@@ -99,7 +99,7 @@ function tap(cell: number) {
   const want = board.value[tapped.value.length]
   tapped.value = [...tapped.value, cell]
   if (cell !== want) return miss(cell)
-  haptic('tap')
+  feel('tap', true)
   if (tapped.value.length === level.value) clear()
 }
 
@@ -120,7 +120,7 @@ function nextBoard(delay: number) {
 
 function clear() {
   record()
-  haptic('success')
+  feel('success', true)
   if (level.value >= MAX_LEVEL) return finish()
   level.value++
   nextBoard(350)
@@ -128,7 +128,7 @@ function clear() {
 
 function miss(cell: number) {
   record()
-  haptic('error')
+  feel('error', true)
   missedAt.value = cell
   tapped.value = tapped.value.slice(0, -1)
   strikes.value++

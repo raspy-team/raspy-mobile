@@ -142,11 +142,11 @@
         <UiCard class="text-center py-8">
           <template v-if="state.status === 'COMPLETED'">
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
-            <MatchMascot who="match" :mood="state.result === 'WIN' ? 'cheer' : state.result === 'DRAW' ? 'smile' : 'sad'" :size="72" class="mx-auto mb-3" />
-            <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
-            <p v-if="state.view" class="t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ resultNote(state.view.note) }}</p>
-            <p v-else-if="state.stones" class="t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
-            <p v-else class="t-caption mt-2">{{ resultCount }}</p>
+            <VerdictFace :win="state.result === 'WIN'" :mood="state.result === 'DRAW' ? 'smile' : ''" class="mb-3" />
+            <p class="t-display feel-rise"><span :class="state.result === 'WIN' ? 'hl hl-draw' : ''">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</span></p>
+            <p v-if="state.view" class="feel-rise feel-rise-2 t-caption mt-2 whitespace-pre-line">{{ who(state.opponent) }}님과 · {{ resultNote(state.view.note) }}</p>
+            <p v-else-if="state.stones" class="feel-rise feel-rise-2 t-caption mt-2">{{ who(state.opponent) }}님과 · 쳐낸 돌 {{ knocked(false) }} : {{ knocked(true) }}</p>
+            <p v-else class="feel-rise feel-rise-2 t-caption mt-2">{{ resultCount }}</p>
             <p v-if="timedOut" class="t-body mt-3">{{ timedOut === 'me' ? '시간이 지나서 졌어요' : '상대가 시간을 넘겼어요' }}</p>
             <p v-if="state.bossChallenge" class="t-body mt-4">{{ state.result === 'WIN' ? 'AI 보스를 꺾고 전국 챔피언이 됐어요' : 'AI 보스와는 하루 3번까지예요' }}</p>
             <p v-else-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
@@ -182,7 +182,7 @@ import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
-import MatchMascot from '../../components/mascot/MatchMascot.vue'
+import VerdictFace from '../../components/mascot/VerdictFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import AppCountdown from '../../components/appgame/AppCountdown.vue'

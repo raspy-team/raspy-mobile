@@ -55,7 +55,7 @@
 // 오늘의 셈 (서버 DailyNumberGame): 문제 "2,3,7,9,25;98", 답은 식 하나 "(25+7)*3+2"
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton } from '../ui'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
 const emit = defineEmits<{ submit: [answer: string] }>()
@@ -89,7 +89,7 @@ function canOp(v: string) {
 
 function push(t: Token) {
   tokens.value.push(t)
-  haptic('select')
+  feel('select', true)
 }
 
 const expr = computed(() => tokens.value.map((t) => (t.kind === 'num' ? nums.value[t.i] : t.v)).join(''))

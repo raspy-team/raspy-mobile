@@ -31,7 +31,7 @@
 // 오늘의 낱말: 문제는 줄마다 "번호\t질문\t보기1..보기4", 답은 줄마다 고른 보기 글자 (서버 DailyWordGame)
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton } from '../ui'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
 const emit = defineEmits<{ submit: [answer: string] }>()
@@ -48,7 +48,7 @@ const current = computed(() => questions.value[index.value])
 
 function pick(c: string) {
   answers.value[index.value] = c
-  haptic('select')
+  feel('select', true)
   // 마지막이 아니면 잠깐 고른 것을 보여 준 뒤 다음 문제로. 빨리 두 번 눌러도 한 칸만 간다
   const from = index.value
   if (from < questions.value.length - 1) setTimeout(() => { if (index.value === from) index.value = from + 1 }, 180)

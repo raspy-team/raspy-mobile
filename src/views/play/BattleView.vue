@@ -75,9 +75,9 @@
         <UiCard class="text-center py-8">
           <template v-if="state.status === 'COMPLETED'">
             <!-- 진 순간에도 얼굴이 곁에 있다. 표정만 담담하게 -->
-            <MatchMascot who="match" :mood="state.result === 'WIN' ? 'cheer' : state.result === 'DRAW' ? 'smile' : 'sad'" :size="72" class="mx-auto mb-3" />
-            <p class="t-display">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</p>
-            <p class="t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
+            <VerdictFace :win="state.result === 'WIN'" :mood="state.result === 'DRAW' ? 'smile' : ''" class="mb-3" />
+            <p class="t-display feel-rise"><span :class="state.result === 'WIN' ? 'hl hl-draw' : ''">{{ state.result === 'WIN' ? '이겼어요' : state.result === 'DRAW' ? '비겼어요' : '졌어요' }}</span></p>
+            <p class="feel-rise feel-rise-2 t-caption mt-2">{{ who(state.opponent) }}님과 {{ state.myScore ?? 0 }} : {{ state.opponentScore ?? 0 }}{{ key === 'shake' ? '번' : '' }}</p>
             <p v-if="NEXT_ROUND[state.result || '']" class="t-body mt-4">{{ NEXT_ROUND[state.result || ''] }}</p>
           </template>
           <p v-else class="t-title">경기가 끝났어요</p>
@@ -106,7 +106,7 @@ import type { components } from '@/api/schema'
 import { WS_URL } from '@/config/server'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { confirmDialog } from '../../composables/useConfirm'
-import MatchMascot from '../../components/mascot/MatchMascot.vue'
+import VerdictFace from '../../components/mascot/VerdictFace.vue'
 import { NEXT_ROUND } from '@/utils/verdict'
 import { feel } from '@/utils/feel'
 import { UiButton, UiCard, UiEmptyState, UiSkeleton, UiSpinner, UiTopBar } from '../../components/ui'

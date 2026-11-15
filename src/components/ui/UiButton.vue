@@ -31,6 +31,7 @@ import UiSpinner from './UiSpinner.vue'
 // - danger: 되돌릴 수 없는 행동 (삭제, 탈퇴)
 import { defineProps, defineOptions, useAttrs, computed, ref } from 'vue'
 import { sendSheet } from '../../stores/sendSheet'
+import { feel } from '../../utils/feel'
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps({
@@ -50,6 +51,8 @@ const attrs = useAttrs()
 const rest = computed(() => { const { onClick, ...r } = attrs; return r })
 const auto = ref(false)
 function onClick(e) {
+  // 누르는 순간 손에 답한다 (quality-rules G1-1). 일이 이루어진 때의 success·win은 화면이 따로 낸다
+  feel('tap')
   const h = attrs.onClick
   if (!h) return
   const pending = (Array.isArray(h) ? h : [h]).map((fn) => fn(e)).filter((r) => r && typeof r.then === 'function')

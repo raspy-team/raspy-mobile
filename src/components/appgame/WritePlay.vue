@@ -4,7 +4,7 @@
     <div class="flex items-start justify-between gap-3">
       <!-- 무엇을 하라는 안내는 본문 크기로 또렷하게 (quality-rules L-3: 작은 회색 두 줄이었다) -->
       <span class="t-body break-keep">{{ guide }}</span>
-      <span class="t-mono tabular-nums shrink-0 whitespace-nowrap" :class="remaining <= 20 ? 'text-danger-fg' : 'text-fg-muted'">{{ clock }}</span>
+      <GameClock class="t-mono shrink-0" muted :remaining="remaining" :warn="30" />
     </div>
 
     <!-- 조건이 여러 줄인 문제(히어로 대결)는 줄마다, 조금 작게 -->
@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import GameClock from './GameClock.vue'
 // 글로 겨루는 게임 한 판 (한 줄 변명·밸런스 설득): 문제 한 줄을 보고 쓴다. 시간이 다 되면 쓴 데까지 낸다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { UiButton, UiInput } from '../ui'
@@ -37,7 +38,6 @@ const action = ref<HTMLElement | null>(null)
 const { typing, onTypeStart, onTypeEnd } = useKeyboardFit(root, action)
 const startedAt = Date.now()
 const remaining = ref(props.timeLimitSeconds)
-const clock = computed(() => `${Math.floor(remaining.value / 60)}:${String(remaining.value % 60).padStart(2, '0')}`)
 let timer: ReturnType<typeof setInterval> | undefined
 
 let done = false

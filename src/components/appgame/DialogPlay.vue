@@ -2,7 +2,7 @@
   <div :class="typing ? 'pb-[50vh]' : ''">
     <div class="flex items-center justify-between">
       <span class="t-body">{{ topic }} · 나는 <b>{{ mine }}</b> 편</span>
-      <span class="t-mono tabular-nums" :class="remaining <= 30 ? 'text-danger' : 'text-fg-muted'">{{ clock }}</span>
+      <GameClock class="t-mono" muted :remaining="remaining" :warn="30" />
     </div>
 
     <!-- 주고받은 말 -->
@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+import GameClock from './GameClock.vue'
 // 따로 풀기 대화형 한 판 (AI랑 말싸움). AI 첫마디 → 내가 한 마디 → AI가 받아친다를 몇 번. 끝내면 주고받은 말 전부를 AI 심판이 채점한다.
 // 판을 열면 서버에서 지금까지의 말을 받아 와 이어서 한다. 시간이 다 되면 한 데까지 낸다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
@@ -88,7 +89,6 @@ function finish() {
 
 const startedAt = Date.now()
 const remaining = ref(props.timeLimitSeconds)
-const clock = computed(() => `${Math.floor(remaining.value / 60)}:${String(remaining.value % 60).padStart(2, '0')}`)
 let timer: ReturnType<typeof setInterval> | undefined
 
 onMounted(async () => {

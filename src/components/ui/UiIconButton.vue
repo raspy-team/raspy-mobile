@@ -4,7 +4,8 @@
     :to="to"
     :type="to ? undefined : 'button'"
     :aria-label="label"
-    class="relative w-11 h-11 inline-flex items-center justify-center rounded-full text-fg active:bg-surface-2 transition-colors"
+    class="relative w-11 h-11 inline-flex items-center justify-center rounded-full text-fg active:bg-surface-2 transition-[background-color,transform] motion-safe:active:scale-90"
+    @click="feel('tap')"
   >
     <UiIcon :name="icon" class="text-[22px]" />
     <span
@@ -19,6 +20,7 @@
 <script setup>
 // 아이콘만 있는 버튼. label은 화면 읽기 프로그램용이라 꼭 넣는다
 import { defineProps } from 'vue'
+import { feel } from '../../utils/feel'
 defineProps({
   icon: { type: String, required: true },
   label: { type: String, required: true },

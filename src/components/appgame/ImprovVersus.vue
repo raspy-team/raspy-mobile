@@ -5,7 +5,7 @@
     <!-- 가장 최근 승부는 크게: "누가 이겼는지 보기"를 눌러 가입한 사람이 받는 답이다 (11/14 전수 평가: 작은 칩 하나였다) -->
     <UiCard class="text-center">
       <p class="t-micro">{{ who(rows[0]) }}</p>
-      <p class="t-display mt-2"><span :class="rows[0].result === 'WIN' ? 'hl' : ''">{{ RESULT[rows[0].result] ?? rows[0].result }}</span></p>
+      <p class="t-display mt-2"><span :class="rows[0].result === 'WIN' ? 'hl hl-draw' : ''">{{ RESULT[rows[0].result] ?? rows[0].result }}</span></p>
       <p class="t-heading mt-3">{{ line(rows[0]) }}</p>
       <UiButton class="mt-4" variant="secondary" @click="open = rows[0]">친구 답 보기</UiButton>
     </UiCard>

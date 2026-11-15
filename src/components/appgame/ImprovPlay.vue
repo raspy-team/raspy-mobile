@@ -23,7 +23,7 @@
           <!-- 남은 시간을 입력칸 바로 밑에도: 키보드가 열리면 화면이 밀려 위의 시간 줄이 제목 바 밑으로 숨었다 (11/13 실제 기기 한 바퀴) -->
           <p class="t-micro mt-1 tabular-nums flex justify-between">
             <!-- 첫 상황에만 '한 번만'을 같은 줄에: 따로 한 줄이면 키보드 위 자리가 모자라 인물 줄이 제목 바 밑으로 밀렸다 (11/14 전수 평가) -->
-            <span><span :class="remaining <= 10 ? 'text-danger-fg' : ''">남은 시간 0:{{ String(remaining).padStart(2, '0') }}</span><template v-if="index === 0"> · 한 번만 말할 수 있어요</template></span>
+            <span><GameClock v-slot="{ clock }" :remaining="remaining">남은 시간 {{ clock }}</GameClock><template v-if="index === 0"> · 한 번만 말할 수 있어요</template></span>
             <span>{{ text.length }}/120</span>
           </p>
         </div>
@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import GameClock from './GameClock.vue'
 import { useKeyboardFit } from '@/utils/keyboardFit'
 // 임기응변 등급 한 판 (3단계 첫 게임, product/growth/game-plan.md ③): 상황 셋, 상황마다 45초 안에 한 번 대답한다.
 // 대답하면 인물이 한 줄로 반응하고(/api/improv/react, 가입 전에도), 되받아칠 수 없이 다음 상황으로. 셋이 끝나면 답 셋을 낸다.

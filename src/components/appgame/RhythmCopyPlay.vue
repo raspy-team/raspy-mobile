@@ -32,7 +32,7 @@
 // 박자 따라 하기 (서버 RhythmCopyGame): 문제는 판마다 박자 시각(첫 박 0, ms)을 ','로, 판은 '|'로. 답도 같은 꼴(첫 두드림 0).
 // 점수 식은 서버와 같다 (30ms 안 = 맞음, 300ms = 0). 화면은 판마다 미리 보여 주기만 하고, 점수는 서버가 다시 낸다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { haptic } from '../../utils/haptics'
+import { feel } from '../../utils/feel'
 
 const props = defineProps<{ problem: string; timeLimitSeconds: number; submitting: boolean }>()
 const emit = defineEmits<{ submit: [answer: string] }>()
@@ -105,7 +105,7 @@ function listen() {
     setTimeout(() => {
       lit.value = true
       beep()
-      haptic('tap')
+      feel('tap', true)
       setTimeout(() => (lit.value = false), 120)
     }, LEAD + t),
   )
@@ -130,7 +130,7 @@ function endRound() {
   clearTimeout(idle)
   answers.push(taps.value.slice(0, 16))
   scores.value.push(roundScore(current.value, taps.value))
-  haptic(scores.value[scores.value.length - 1] >= 95 ? 'success' : 'select')
+  feel(scores.value[scores.value.length - 1] >= 95 ? 'success' : 'select', true)
   round.value++
   if (round.value >= rounds.value.length) {
     state.value = 'done'

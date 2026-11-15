@@ -140,18 +140,9 @@
             <!-- 이긴 순간은 이 앱에서 가장 큰 순간이다: 얼굴 둘레로 볼트 불꽃이 튀고, 글자가 올라오며 형광이 그어진다 (만나서 한 경기의 결과와 같은 틀, quality-rules J-1) -->
             <VerdictFace :win="result.result === 'WIN'" :mood="result.result === 'DRAW' ? 'smile' : ''" :tier="wonSeats.length ? 3 : 1" class="mb-3" />
             <p class="t-display feel-rise"><span :class="result.result === 'WIN' ? 'hl hl-draw' : ''">{{ VERDICT[result.result || 'DRAW'] }}</span></p>
-            <!-- 붙은 두 사람이 좌우에서 들어와 마주 선다. 이긴 쪽 얼굴에 형광 고리 (글 한 줄 '○○님과 경기'였다) -->
-            <div v-if="result.opponent" class="mt-4 flex items-center justify-center gap-4" :aria-label="`나와 ${who(result.opponent)}님의 경기`">
-              <span class="vs-left flex flex-col items-center gap-1 w-24 min-w-0">
-                <span class="rounded-full p-0.5" :class="result.result === 'WIN' ? 'ring-2 ring-signal' : ''"><UiAvatar :src="myFace" name="나" :user-id="0" size="lg" /></span>
-                <span class="t-micro truncate max-w-full">나</span>
-              </span>
-              <span class="vs-mark t-heading italic text-fg-subtle" aria-hidden="true">VS</span>
-              <span class="vs-right flex flex-col items-center gap-1 w-24 min-w-0">
-                <span class="rounded-full p-0.5" :class="result.result === 'LOSE' ? 'ring-2 ring-signal' : ''"><UiAvatar :src="result.opponent.profilePicture" :name="who(result.opponent)" :user-id="result.opponent.isBot ? undefined : result.opponent.userId" size="lg" /></span>
-                <span class="flex items-center justify-center t-micro max-w-full"><OpponentName :player="result.opponent" /></span>
-              </span>
-            </div>
+            <p class="t-caption mt-2">
+              <router-link v-if="result.opponent" :to="`/profile/${result.opponent.userId}`" class="underline underline-offset-2">{{ who(result.opponent) }}</router-link>님과 경기
+            </p>
             <!-- 이겨서 든 자리는 그 자리에서 말한다 (quality-rules G4-3: 만나서 한 경기의 '새 챔피언이 됐어요'가 앱 게임 결과에는 없었다) -->
             <p v-if="result.result === 'WIN' && wonSeats.length" class="t-label !text-signal-fg mt-3 flex items-center justify-center gap-1.5 feel-rise feel-rise-2">
               <UiIcon name="crown" aria-hidden="true" />{{ wonSeats.join(' · ') }} 챔피언이에요
@@ -1096,9 +1087,6 @@ const improvGrade = computed(() => (GRADED.includes(key.value) && !improvResult.
 // 한마디에서 등급 줄·다음 등급 줄을 뺀 나머지 (AI의 말). 임기응변은 상황 카드가 따로 보여 준다
 const sayOnly = (f?: string | null) => String(f ?? '').split('\n').filter((l) => !/^\d등급 · /.test(l) && !l.startsWith('다음 등급: ')).join('\n').trim()
 const isHero = computed(() => key.value === 'power-level')
-// 결과의 '나 VS 상대'에 놓을 내 사진 (없으면 꾸민 캐릭터나 글자)
-const myFace = ref('')
-api.get('/api/user-profile/my/profile', { quiet: true } as never).then(({ data }) => { myFace.value = data?.profilePicture || '' }).catch(() => {})
 // 싸움 중계를 문장으로 나눈다
 const fightLines = (f?: string | null) => String(f ?? '').split(/(?<=[.!?。])\s+/).map((l) => l.trim()).filter(Boolean)
 

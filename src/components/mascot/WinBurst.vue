@@ -1,11 +1,11 @@
 <template>
   <!-- 이긴 순간이 화면 전체로 번진다: 번쩍 → 아래에서 치솟는 형광 불길 → 날아오르는 불티. 한 번 치르고 스스로 사라진다.
-       tier 1 보통 승 · 2 연승·개인 최고 · 3 챔피언(불티가 많고 울트라 색이 섞인다). 움직임 줄이기면 그리지 않는다 (tailwind.css) -->
+       tier 1 보통 승 · 2 연승·개인 최고 · 3 챔피언(불티가 많다). 움직임 줄이기면 그리지 않는다 (tailwind.css) -->
   <Teleport to="body">
     <div v-if="on" class="win-burst" aria-hidden="true">
       <span class="win-burst-flash"></span>
       <span class="win-burst-sweep"></span>
-      <span v-for="(e, i) in embers" :key="i" class="win-ember" :class="e.ultra ? 'is-ultra' : ''" :style="e.style"></span>
+      <span v-for="(e, i) in embers" :key="i" class="win-ember" :style="e.style"></span>
     </div>
   </Teleport>
 </template>
@@ -20,7 +20,6 @@ const count = props.tier >= 3 ? 34 : props.tier === 2 ? 24 : 16
 const embers = Array.from({ length: count }, (_, i) => {
   const r = (n: number) => { const v = Math.sin(i * 12.9898 + n * 78.233) * 43758.5453; return v - Math.floor(v) }
   return {
-    ultra: props.tier >= 3 && i % 4 === 0,
     style: {
       left: `${4 + r(1) * 92}%`,
       '--s': `${5 + Math.round(r(2) * 7)}px`,

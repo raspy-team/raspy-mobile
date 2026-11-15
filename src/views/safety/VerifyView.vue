@@ -15,11 +15,11 @@
       </div>
       <p v-if="message" class="t-caption text-danger-fg mt-4">{{ message }}</p>
 
-      <UiButton v-if="cfg.verified" block size="lg" class="mt-8" @click="router.replace(back)">돌아가기</UiButton>
+      <UiButton v-if="cfg.verified" block size="lg" class="mt-8" @click="returnBack(router, back)">돌아가기</UiButton>
       <UiButton v-else-if="cfg.available" block size="lg" class="mt-8" icon="shield-halved" :loading="busy" @click="start">휴대폰으로 본인인증</UiButton>
       <template v-else>
         <p class="t-caption mt-8 rounded-xl bg-surface px-4 py-3">본인인증은 아직 준비 중이에요. 지금은 인증 없이 만나서 하는 경기를 할 수 있어요</p>
-        <UiButton block variant="secondary" class="mt-4" @click="router.replace(back)">돌아가기</UiButton>
+        <UiButton block variant="secondary" class="mt-4" @click="returnBack(router, back)">돌아가기</UiButton>
       </template>
     </template>
   </main>
@@ -30,6 +30,7 @@
 // 휴대폰 브라우저는 인증 뒤 이 주소로 돌아온다 (?identityVerificationId=...). PC는 창이 끝나면 바로 결과가 온다
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { returnBack } from '@/utils/backNav'
 import { GET, POST } from '../../api/client'
 import { UiButton, UiEmptyState, UiListSkeleton, UiTopBar } from '../../components/ui'
 
@@ -59,7 +60,7 @@ async function confirm(id) {
     const { data } = await POST('/api/identity/verify', { body: { identityVerificationId: id } })
     if (!data.verified) { message.value = data.message || '인증하지 못했어요'; return }
     cfg.value = { ...cfg.value, verified: true }
-    router.replace(back)
+    returnBack(router, back)
   } catch (e) {
     message.value = e?.response?.data?.message || '인증하지 못했어요. 다시 해 주세요'
   } finally {

@@ -139,6 +139,7 @@ import { dayOnly, withRo, josa } from '@/utils/format'
 // 결과는 알림으로 오고, 열려 있으면 refreshOnChange로 바로 다시 불러온다
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { returnBack } from '@/utils/backNav'
 import api from '../../api/api'
 import { GET, PUT, DELETE } from '../../api/client'
 import type { components } from '../../api/schema'
@@ -347,7 +348,7 @@ async function pickOnly() {
     const back = typeof route.query.back === 'string' && route.query.back.startsWith('/') ? route.query.back : ''
     if (back) {
       showToast(`${withRo(name)} 참전했어요. 내 등급이 학교 평균에 들어갔어요`)
-      router.replace(back)
+      returnBack(router, back)
       return
     }
     showToast(`${josa(name, '을/를')} 골랐어요`)

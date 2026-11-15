@@ -99,7 +99,8 @@ import OpponentName from '../../components/appgame/OpponentName.vue'
 // 실시간 대전 (/play/:key/battle, 퐁). 서버가 1초에 20번 판을 계산해 웹소켓으로 보내고, 화면은 그대로 그린다.
 // 손가락 위치만 보낸다 (라켓을 두고 싶은 x). 라켓이 얼마나 빨리 가는지는 서버가 정한다. 내 쪽(0번이 아니면 판을 뒤집어)이 늘 아래
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { confirmLeave } from '@/utils/backNav'
 import { Client } from '@stomp/stompjs'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
@@ -133,17 +134,8 @@ const state = ref<State | null>(null)
 // 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다
 // 판 중에 나가려 하면 앱의 확인 창으로 묻는다 (브라우저 기본 창은 모양이 달랐다, 경로 3 훑기).
 // 이동은 일단 멈추고(뒤로 버튼이면 라우터가 기록을 되돌린다), 그 뒤에 창을 띄워 '나가기'면 다시 간다
-let leaveOk = false
-onBeforeRouteLeave((to) => {
-  if (leaveOk || state.value?.status !== 'PLAYING') return true
-  setTimeout(async () => {
-    if (await confirmDialog({ title: '게임이 진행 중이에요', message: '나가면 이 판은 진 것으로 남을 수 있어요.', confirmText: '나가기', cancelText: '계속하기', danger: true })) {
-      leaveOk = true
-      router.push(to.fullPath)
-    }
-  }, 80)
-  return false
-})
+// 뒤로 가다 물었으면 '나가기' 뒤에도 뒤로 간다 (utils/backNav: 앞으로 가는 이동으로 나가면 나온 화면의 뒤로가 이 판으로 다시 들어왔다)
+confirmLeave(router, () => state.value?.status === 'PLAYING', () => confirmDialog({ title: '게임이 진행 중이에요', message: '나가면 이 판은 진 것으로 남을 수 있어요.', confirmText: '나가기', cancelText: '계속하기', danger: true }))
 const error = ref('')
 const snap = ref<Snapshot | null>(null)
 const connected = ref(false)

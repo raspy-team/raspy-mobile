@@ -9,6 +9,7 @@ import { refreshOnChange } from '../../websocket/userChannel'
 import { refreshInbox } from '../../stores/inbox'
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { returnBack } from '@/utils/backNav'
 import { matchTime } from '../../utils/format'
 import api, { playWithMeTooAPI } from '../../api/api'
 import { getMyId } from '@/utils/me'
@@ -236,7 +237,7 @@ async function blockUserConfirmed() {
   try {
     await api.post(`/api/block/${targetUserId}`)
     showToast('차단했어요')
-    router.replace('/dm')
+    returnBack(router, '/dm') // 메시지 목록에서 왔으면 뒤로: 갈아 끼우면 목록이 기록에 두 번 남는다
   } catch (e) {
     showToast(e.response?.data?.message || '차단하지 못했어요')
   }

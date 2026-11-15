@@ -96,6 +96,7 @@ import { josa, withRo } from '@/utils/format'
 // 경기를 열거나 신청하다 동네가 필요해 막히면 api.js가 ?back=&reason=을 붙여 이리로 보낸다. 인증하면 돌아간다
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { returnBack } from '@/utils/backNav'
 import { GET, POST } from '@/api/client'
 import api from '../api/api'
 import type { components } from '@/api/schema'
@@ -164,8 +165,7 @@ async function goBack() {
   const back = route.query.back
   // 온 곳이 바로 앞 화면이면 뒤로 간다: 그 주소로 갈아 끼우면 같은 화면이 기록에 두 번 남아 뒤로를 두 번 눌러야 했다 (11/15 고병연)
   if (typeof back === 'string' && back.startsWith('/')) {
-    if (window.history.state?.back === back) router.back()
-    else await router.replace(back).catch(() => {})
+    returnBack(router, back)
   } else if (firstPick && window.history.state?.back) router.back() // 처음 동네를 정한 사람은 온 곳(홈·지도)으로 돌려보낸다
 }
 

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { landDetour } from '../utils/backNav'
 
 // 첫 화면(경기 목록)만 바로 싣고, 나머지 화면은 들어갈 때 받는다
 
@@ -181,6 +182,8 @@ const router = createRouter({
 })
 
 installOnboardingGuard(router)
+// 경기 만들기에서 규칙을 고르러 다녀오면, 다녀온 화면들을 기록에서 걷는다 (utils/backNav)
+router.beforeEach((to, from) => landDetour(router, 'create-game', '/create-game', to, from))
 
 // 화면 파일(나눠 받는 조각)을 못 받으면 누른 탭이 아무 반응 없이 멈췄다 (11/4 밤샘).
 // 끊겼으면 연결을 확인하라고 알리고, 연결돼 있는데 못 받으면 새로 배포돼 옛 조각이 사라진 것이라 그 화면으로 한 번 새로 연다

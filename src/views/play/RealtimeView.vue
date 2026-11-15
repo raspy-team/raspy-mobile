@@ -7,7 +7,7 @@
 
     <main class="max-w-xl mx-auto px-4 pt-4 pb-16">
       <!-- AI 보스 도전 판 (docs/ai-residents.md 3): 보통 판과 같은 화면, 위에 띠 하나 -->
-      <p v-if="state?.bossChallenge" class="mb-3 flex items-center gap-2 rounded-lg bg-mint-soft text-mint-fg px-3 py-2 t-label">
+      <p v-if="state?.bossChallenge" class="mb-3 flex items-center gap-2 rounded-lg bg-signal-soft text-signal-fg px-3 py-2 t-label">
         <UiIcon name="fas fa-crown" aria-hidden="true" />
         <span class="min-w-0">AI 보스와 한 판 · {{ state.status === 'COMPLETED' ? '보스와 한 판' : '이기면 전국 챔피언' }}</span>
       </p>
@@ -177,7 +177,8 @@ import { waitText, who, withRo } from '@/utils/format'
 // 실시간 대결 (/play/:key/live). 대기실 → 3·2·1 → 판 → 결과가 한 화면에서 바뀐다.
 // 상태는 서버가 '바뀜' 신호를 보낼 때만 다시 불러온다 (폴링하지 않는다). 남은 시간은 서버 시각 기준으로 센다
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { confirmLeave } from '@/utils/backNav'
 import { GET, POST } from '@/api/client'
 import type { components } from '@/api/schema'
 import { refreshOnChange } from '@/websocket/userChannel'
@@ -208,17 +209,8 @@ const state = ref<State | null>(null)
 // 시트 확인창 대신 기본 창: 뒤로 가기 도중에 시트가 기록을 쌓으면 화면 이동이 꼬인다
 // 판 중에 나가려 하면 앱의 확인 창으로 묻는다 (브라우저 기본 창은 모양이 달랐다, 경로 3 훑기).
 // 이동은 일단 멈추고(뒤로 버튼이면 라우터가 기록을 되돌린다), 그 뒤에 창을 띄워 '나가기'면 다시 간다
-let leaveOk = false
-onBeforeRouteLeave((to) => {
-  if (leaveOk || state.value?.status !== 'PLAYING') return true
-  setTimeout(async () => {
-    if (await confirmDialog({ title: '게임이 진행 중이에요', message: '나가도 판은 계속되고, 차례 시간이 지나면 질 수 있어요.', confirmText: '나가기', cancelText: '계속하기', danger: true })) {
-      leaveOk = true
-      router.push(to.fullPath)
-    }
-  }, 80)
-  return false
-})
+// 뒤로 가다 물었으면 '나가기' 뒤에도 뒤로 간다 (utils/backNav: 앞으로 가는 이동으로 나가면 나온 화면의 뒤로가 이 판으로 다시 들어왔다)
+confirmLeave(router, () => state.value?.status === 'PLAYING', () => confirmDialog({ title: '게임이 진행 중이에요', message: '나가도 판은 계속되고, 차례 시간이 지나면 질 수 있어요.', confirmText: '나가기', cancelText: '계속하기', danger: true }))
 const error = ref('')
 const word = ref('')
 const moveError = ref('')

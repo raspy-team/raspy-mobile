@@ -561,6 +561,7 @@ import { liveRoute } from '@/utils/battle'
 import { canResumeDuel, expiryLine } from '@/utils/appGame'
 import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { confirmLeave } from '@/utils/backNav'
 import { GET, POST } from '@/api/client'
 import api from '../../api/api'
 import type { components } from '@/api/schema'
@@ -654,6 +655,8 @@ const game = ref<Schemas['AppGameSummary'] | null>(null)
 const played = computed(() => !!game.value && (!!game.value.myLastPlayedAt || (game.value.myWins || 0) + (game.value.myLosses || 0) + (game.value.myDraws || 0) > 0))
 const duels = ref<Duel[]>([])
 const play = ref<Play | null>(null)
+// 푸는 중에 뒤로를 잘못 누르면 쓰던 답이 말없이 사라졌다: 한 번 묻는다 (11/15 뒤로 가기 훑기). 판의 시간은 서버가 재므로 나가도 계속 간다
+confirmLeave(useRouter(), () => !!play.value && !submitting.value, () => confirmDialog({ title: '푸는 중인 판을 나갈까요?', message: '쓰던 답은 사라지고 시간은 계속 가요. 시간 안에 돌아오면 이어서 할 수 있어요', confirmText: '나가기', cancelText: '계속하기', danger: true }))
 const counting = ref(false)
 let offset = 0 // 서버 시각 - 기기 시각
 const result = ref<Duel | null>(null)

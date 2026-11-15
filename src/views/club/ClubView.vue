@@ -268,6 +268,7 @@ import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { refreshOnChange } from '@/websocket/userChannel'
 import { matchTime } from '@/utils/format'
 import { useRoute, useRouter } from 'vue-router'
+import { returnBack } from '@/utils/backNav'
 import { GET, POST, PUT } from '@/api/client'
 import type { components } from '@/api/schema'
 import { shareLink } from '@/utils/share'
@@ -506,7 +507,7 @@ async function leave() {
       ? '혼자 남은 동호회라 나가면 동호회가 없어져요'
       : '회장은 운영진이나 먼저 든 멤버에게 넘어가요. 정해서 넘기려면 멤버 이름을 눌러 회장 넘기기를 해 주세요'
   if (!(await confirmDialog({ title: '동호회를 나갈까요?', message, confirmText: '나가기', danger: true }))) return
-  if (await run(() => POST('/api/clubs/{id}/leave', { path: { id } }), '나가지 못했어요. 다시 해 주세요')) router.replace('/clubs')
+  if (await run(() => POST('/api/clubs/{id}/leave', { path: { id } }), '나가지 못했어요. 다시 해 주세요')) returnBack(router, '/clubs')
 }
 
 // 다른 사람이 신청·참석·답을 바꾸면 서버 신호로 다시 불러온다 (예전엔 다시 들어오기 전엔 그대로였다, 경로 7 리뷰)

@@ -222,6 +222,7 @@ import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { liveEnd, liveSync } from '../../utils/liveActivity'
 import { feel } from '../../utils/feel'
 import { useRoute, useRouter } from 'vue-router'
+import { returnBack } from '@/utils/backNav'
 import api from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { socket } from '../../websocket'
@@ -550,7 +551,7 @@ function goToResult() {
 // 알림으로 바로 들어와 앱 안 기록이 없으면 갈 곳이 없었다 (경로 전부 훑기 5)
 function goBack() {
   if (window.history.state?.back) router.back()
-  else router.replace('/game')
+  else returnBack(router, '/game')
 }
 
 function handleVisibilityChange() {
@@ -785,7 +786,7 @@ function connectSocket() {
       addLog(payload)
     } else if (payload.type === 'CANCELED') {
       showToast(`${payload.nickname}님이 경기를 취소했어요`)
-      router.replace('/game')
+      returnBack(router, '/game')
     } else if (payload.type === 'RESET') {
       // 처음부터 다시: 화면을 새로 그리지 않고 서버 기록(0:0, 1세트)으로 맞춘다
       startedSetIndex = 0
@@ -816,7 +817,7 @@ async function cancelGame() {
   try {
     await api.post(`/api/games/${gameId}/cancel`)
     showToast('경기를 취소했어요')
-    router.replace('/game')
+    returnBack(router, '/game')
   } catch (e) {
     showToast(e.response?.data?.message || '취소하지 못했어요')
   }

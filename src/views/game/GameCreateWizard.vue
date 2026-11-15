@@ -46,7 +46,7 @@
             <span class="t-label text-fg">{{ s.name }}</span>
           </button>
         </div>
-        <UiButton block variant="ghost" class="mt-6" @click="router.push('/rules?fromGameCreate=true')">규칙을 직접 고를래요</UiButton>
+        <UiButton block variant="ghost" class="mt-6" @click="markDetour('create-game'); router.push('/rules?fromGameCreate=true')">규칙을 직접 고를래요</UiButton>
       </section>
 
       <!-- 누구와 -->
@@ -167,6 +167,7 @@ import RuleThumb from '../../components/rule/RuleThumb.vue'
 import { GET } from '@/api/client'
 import { categoryKey, winSummaryUnder } from '../../utils/rule'
 import { useRoute, useRouter } from 'vue-router'
+import { markDetour } from '@/utils/backNav'
 import api, { playWithMeTooAPI } from '../../api/api'
 import { getMyId } from '@/utils/me'
 import { useToast } from '../../composables/useToast'
@@ -261,6 +262,7 @@ async function changeRule() {
   // 규칙을 안 고르고 뒤로 와도 고른 것이 남게, 지금 주소에 적어 두고 간다 (11/14 전수 평가: 뒤로 오면 종목 고르기부터 다시였다)
   // (history.replaceState로 주소만 바꾸면 라우터가 떠날 때 제 주소로 덮어쓴다: 라우터로 바꾼다)
   await router.replace({ path: route.path, query: { ...route.query, ruleId: String(ruleId.value), ...keep } })
+  markDetour('create-game')
   router.push({ path: '/rules', query: { fromGameCreate: 'true', ...(autoPicked.value && pickedSport.value ? { q: pickedSport.value } : {}), ...keep } })
 }
 const sports = ref(null)

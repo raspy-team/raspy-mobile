@@ -234,6 +234,8 @@ function tapId() {
 }
 
 function loginWith(provider) {
+  // 이 브라우저에서 로그인을 시작했다는 표시. 돌아오는 화면(OauthCallBack)이 주소의 토큰을 믿을지 정할 때 쓴다 (11/17)
+  try { localStorage.setItem('login_started', String(Date.now())) } catch { /* 못 남겨도 로그인은 된다 */ }
   pending.value = provider
   trackEvent(`tap_${provider}`, tapPlace)
   if (provider === 'apple' && isIosApp && isCapacitorApp) {

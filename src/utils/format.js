@@ -133,6 +133,7 @@ export function waitText(seconds) {
 export function distance(m) {
   // 같은 동(가운데끼리 0m)은 동 이름으로 충분하다
   if (m == null || m < 50) return ''
-  if (m < 1000) return `${Math.max(100, Math.round(m / 100) * 100)}m`
-  return m < 10000 ? `${(m / 1000).toFixed(1)}km` : `${Math.round(m / 1000)}km`
+  // 950m부터는 100m 단위로 올리면 '1000m'가 된다: km로 넘긴다 (11/16)
+  if (m < 950) return `${Math.max(100, Math.round(m / 100) * 100)}m`
+  return m < 9950 ? `${(Math.round(m / 100) / 10).toFixed(1)}km` : `${Math.round(m / 1000)}km`
 }

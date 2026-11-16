@@ -97,6 +97,10 @@ import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { POST } from '../../api/client'
 import api from '../../api/api'
 import { UiButton, UiChip, UiIcon, UiIconButton, UiSheet } from '../ui'
+import { useToast } from '../../composables/useToast'
+
+// 11/16: showToast를 들여오지 않고 불러, 그 사이 확정된 결과를 다시 내면 알림 대신 오류가 났다
+const { showToast } = useToast()
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },

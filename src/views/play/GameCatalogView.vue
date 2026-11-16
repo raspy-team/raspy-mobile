@@ -52,7 +52,8 @@
           <!-- 처음엔 많이 하는 8개만 (UX ⑤: 56개가 한 줄로 길었다). 찾거나 고르면 모두 -->
           <UiButton v-if="shown.length < filtered.length" block variant="secondary" class="mt-3" @click="all = true">모두 보기 {{ filtered.length }}</UiButton>
           <!-- 예전엔 '모두 보기'의 v-else라 게임이 다 보일 때마다 '찾는 게임이 없어요'가 붙었다 (11/13 실제 기기 한 바퀴) -->
-          <UiEmptyState v-if="!filtered.length" mascot="dol" title="찾는 게임이 없어요" description="다른 말로 찾아보세요" />
+          <!-- 찾지 않았는데 비었으면(AI 심사가 꺼진 서버) '다른 말로 찾아보세요'가 틀린 말이다 -->
+          <UiEmptyState v-if="!filtered.length" mascot="dol" :title="query.trim() ? '찾는 게임이 없어요' : '지금 열린 게임이 없어요'" :description="query.trim() ? '다른 말로 찾아보세요' : '잠시 뒤 다시 와 주세요'" />
         </UiSection>
       </template>
     </main>

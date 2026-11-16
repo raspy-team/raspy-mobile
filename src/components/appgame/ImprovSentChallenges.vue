@@ -23,7 +23,7 @@ const rows = ref<Sent[]>([])
 onMounted(async () => {
   if (!props.visitorId) return
   try {
-    rows.value = (await GET('/api/guest/plays/challenges', { query: { visitorId: props.visitorId, key: 'improv' } })).data ?? []
+    rows.value = (await GET('/api/guest/plays/challenges', { query: { visitorId: props.visitorId, key: 'improv' }, quiet: true })).data ?? []
   } catch {
     // 못 불러와도 판은 그대로 한다
   }

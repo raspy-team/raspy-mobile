@@ -17,7 +17,7 @@ export function newShareCode(): string {
 export function registerShare(code: string, path: string) {
   const visitorId = getVisitorId()
   if (!visitorId) return
-  POST('/api/track/share', { body: { visitorId, code, path: path.slice(0, 200) } }).catch(() => {})
+  POST('/api/track/share', { body: { visitorId, code, path: path.slice(0, 200) }, quiet: true }).catch(() => {})
 }
 
 /** 우리 주소면 ?r=번호를 달아 돌려준다. code를 주면 그 번호를(한 시트에서 여러 곳으로 보낼 때), 없으면 새로 만든다 */

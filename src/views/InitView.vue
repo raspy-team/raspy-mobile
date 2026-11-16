@@ -214,7 +214,7 @@ onMounted(async () => {
     })
   }
   if (returnTo) {
-    GET('/api/landing', { query: { path: returnTo } })
+    GET('/api/landing', { query: { path: returnTo }, quiet: true })
       .then(({ data }) => (landing.value = data?.title ? data : null))
       .catch(() => {})
   }

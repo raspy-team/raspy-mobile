@@ -55,6 +55,8 @@ export async function trackVisit() {
         standalone: isStandalone(),
         share: q.get('r') ?? undefined, // 공유 링크로 왔으면 그 번호 (utils/shareRef.ts)
       },
+      // 측정이 실패했다고 '서버에 연결하지 못했어요' 띠를 띄우지 않는다: 서버가 바쁠 때 들어온 사람의 첫 화면에 그 띠부터 떴다 (11/17)
+      quiet: true,
     })
     localStorage.setItem(SENT_KEY, mark)
   } catch {
@@ -80,7 +82,7 @@ export function getVisitorId() {
 export function trackEvent(event: 'tap_kakao' | 'tap_google' | 'tap_apple' | 'tap_id' | 'challenge', place: 'init' | 'guest' | 'partner' | 'nunchi' | 'improv') {
   const id = visitorId()
   if (!id) return
-  POST('/api/track/event', { body: { visitorId: id, event, place } }).catch(() => {})
+  POST('/api/track/event', { body: { visitorId: id, event, place }, quiet: true }).catch(() => {})
 }
 
 const GUEST_KEY = 'guest_played' // 가입 전에 한 판 했다 (로그인하면 기록으로 옮긴다)

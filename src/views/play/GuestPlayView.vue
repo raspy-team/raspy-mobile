@@ -379,7 +379,7 @@ if (key.value === 'nunchi' && firstQuestion) {
 // 임기응변: 광고·글이 보여 준 상황 (?q=)
 const adSituation = ref<{ who: string; line: string } | null>(null)
 if (key.value === 'improv' && firstQuestion) {
-  GET('/api/improv/situations/{id}', { path: { id: firstQuestion } }).then(({ data }) => { adSituation.value = data ?? null }).catch(() => {})
+  GET('/api/improv/situations/{id}', { path: { id: firstQuestion }, quiet: true }).then(({ data }) => { adSituation.value = data ?? null }).catch(() => {})
 }
 const visitorIdNow = getVisitorId() ?? ''
 const aiCount = computed(() => review.value?.items.filter((it) => it.byFirst).length ?? 0)

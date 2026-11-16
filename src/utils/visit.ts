@@ -28,6 +28,8 @@ function visitorId() {
 }
 
 export async function trackVisit() {
+  // 저장소가 막혀 메모리 저장소로 도는 브라우저는 세지 않는다 (예전에도 세지 않았다: 열 때마다 새 기기로 보인다)
+  if ((window as { __memoryStorage?: boolean }).__memoryStorage) return
   const id = visitorId()
   if (!id) return
   const today = new Date().toLocaleDateString('sv') // YYYY-MM-DD (현지 날짜)

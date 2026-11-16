@@ -25,11 +25,17 @@ for (const name of ['localStorage', 'sessionStorage']) {
     s.removeItem('__probe')
     works = true
   } catch {
-    // 막혔거나 없다
+    // 막혔거나 없다. 다만 읽히고 내용이 있으면 꽉 찬 것일 뿐이다(쓰기만 실패): 진짜 저장소를 그대로 둔다
+    try {
+      if (window[name].length > 0) works = true
+    } catch {
+      // 읽지도 못한다
+    }
   }
   if (!works) {
     try {
       Object.defineProperty(window, name, { value: memoryStorage(), configurable: true, writable: true })
+      window.__memoryStorage = true // 방문 세기가 이 브라우저를 세지 않게 (visit.ts)
     } catch {
       // 바꿔 끼우지도 못하면 예전처럼 둔다
     }

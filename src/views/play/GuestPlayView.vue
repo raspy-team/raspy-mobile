@@ -417,7 +417,10 @@ function rememberOpen(p: Play | null) {
   } catch { /* 저장이 막히면 시작 화면부터 */ }
 }
 const PENDING_KEY = `guest_submitting_${key.value}`
-let waitTries = 0 // '채점하고 있어요'에 다시 낸 횟수
+let waitTries = 0 // '채점하고 있어요'에 다시 낸 횟수 (판마다 다시 센다)
+let waitTimer: ReturnType<typeof setTimeout> | null = null
+const stopWaiting = () => { if (waitTimer) clearTimeout(waitTimer); waitTimer = null; waitTries = 0 }
+onBeforeUnmount(stopWaiting)
 function pendingSubmit(): { play: Play; answer: string } | null {
   try {
     const v = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null')
@@ -474,6 +477,7 @@ async function start(from: 'start' | 'again' | 'resume') {
 }
 
 function again() {
+  stopWaiting()
   try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ }
   track('result_again', { gameKey: key.value, step: rounds.value })
   start('again')
@@ -492,6 +496,7 @@ async function submit(answer: string) {
     const slow = key.value === 'improv' ? { timeout: 60_000, quiet: true } : {}
     result.value = (await POST('/api/guest/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { visitorId, answer, k: challengeK }, ...slow })).data
     markGuestPlayed()
+    stopWaiting()
     try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ }
     try { sessionStorage.removeItem(`improv_play_${play.value.playId}`) } catch { /* 없음 */ } // 성공한 뒤에만 지운다 (가로 훑기 4)
     rememberOpen(null)
@@ -520,7 +525,10 @@ async function submit(answer: string) {
     if (res?.status === 400 && /채점하고 있어요/.test(res.data?.message ?? '') && waitTries < 6) {
       waitTries++
       const sameAnswer = answer
-      setTimeout(() => { if (play.value && !submitting.value && !result.value) submit(sameAnswer) }, 2500)
+      const pid = play.value?.playId
+      // 그 판이 아직 화면에 있을 때만 (그 사이 '처음부터 새 판'을 눌렀거나 화면을 떠났으면 내지 않는다, 11/17 검토)
+      if (waitTimer) clearTimeout(waitTimer)
+      waitTimer = setTimeout(() => { waitTimer = null; if (play.value?.playId === pid && !submitting.value && !result.value) submit(sameAnswer) }, 2500)
     }
     // 판을 닫지 않는다: 쓴 답을 그대로 두고 같은 답으로 다시 낸다 (예전엔 임기응변 밖의 게임은 판이 닫히고 시작 화면으로 가 하던 판이 사라진 것 같았다, 경로 3 훑기)
   } finally {

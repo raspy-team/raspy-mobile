@@ -63,9 +63,15 @@ export async function trackVisit() {
 // ── 가입 전 한 판·로그인 버튼 누름 (3단계 수요 조사 '로그인을 미룰까' C + B, 11/5) ──
 // 개인정보 없이 위의 무작위 기기 번호만 쓴다. 측정이 실패해도 화면은 막지 않는다
 
-/** 이 기기의 무작위 번호 (가입 전 한 판도 이 번호로 남는다). 저장소를 못 쓰면 null */
+let memoryId: string | null = null
+
+/**
+ * 이 기기의 무작위 번호 (가입 전 한 판도 이 번호로 남는다).
+ * 저장소를 못 쓰는 브라우저(사파리 '모든 쿠키 차단' 등)는 이 화면이 떠 있는 동안만 쓰는 번호를 준다 (11/17):
+ * 예전엔 null이라 가입 없는 한 판이 "가입하고 해 주세요"로 막혔다. 방문 세기(trackVisit)는 예전대로 세지 않는다
+ */
 export function getVisitorId() {
-  return visitorId()
+  return visitorId() ?? (memoryId ??= crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`)
 }
 
 /** 로그인 버튼 누름 등 행동 하나. place: init(시작 화면), guest(가입 전 한 판 끝 화면) */

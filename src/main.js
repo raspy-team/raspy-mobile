@@ -1,3 +1,4 @@
+import './utils/storageShim' // 맨 먼저: 저장소가 막힌 브라우저에서도 뜨게
 import { createApp } from 'vue'
 import UiIcon from './components/ui/UiIcon.vue'
 // 설치 창 신호(beforeinstallprompt)는 앱이 뜨자마자 오므로 처음부터 듣는다

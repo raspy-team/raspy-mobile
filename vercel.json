@@ -17,7 +17,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(kakaotalk-scrap|facebookexternalhit|Facebot|meta-externalagent|Twitterbot|Slackbot|Discordbot|TelegramBot|WhatsApp|LinkedInBot|Yeti|Daumoa).*"
+          "value": ".*(kakaotalk-scrap|facebookexternalhit|Facebot|meta-externalagent|Twitterbot|Slackbot|Discordbot|TelegramBot|WhatsApp|LinkedInBot|Yeti|Daumoa|line-poker|BandBot|redditbot|Pinterestbot|SkypeUriPreview|Snap URL Preview|Mastodon|Bluesky|Iframely|Embedly).*"
         }
       ],
       "destination": "https://raspy-api.fly.dev/preview/:path"

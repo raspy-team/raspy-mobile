@@ -318,7 +318,7 @@ import { UiButton, UiCard, UiEmptyState, UiRollNumber, UiSection, UiTopBar } fro
 import { GUEST_GAMES } from '@/utils/guestGames'
 import { claimGuestPlays, getVisitorId, markGuestPlayed, trackEvent } from '@/utils/visit'
 import { tokenAlive } from '@/utils/tokenAlive'
-import { track } from '@/utils/trackLog'
+import { track, queryForTrack } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
 import { shareLink, sendLink } from '@/utils/share'
 import { useToast } from '../../composables/useToast'
@@ -400,7 +400,7 @@ onMounted(() => {
   else if (openSaved()) start('resume')
   else restoreLast()
   // 들어온 곳: 꼬리표(utm)·첫 질문·도전장. 방문(visit)과 같은 기기 번호로 잇는다
-  track('try_open', { gameKey: key.value, value: window.location.search.slice(1, 400) || undefined })
+  track('try_open', { gameKey: key.value, value: queryForTrack() })
 })
 
 function errorMessage(e: unknown, fallback: string) {

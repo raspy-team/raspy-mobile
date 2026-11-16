@@ -40,3 +40,14 @@ if (typeof window !== 'undefined') {
     if (document.visibilityState === 'hidden') flush(true)
   })
 }
+
+/** 측정에 남길 주소 꼬리표: 도전장 열쇠(k)·넘겨받기(h)·보낸 사람(u)은 뺀다 (열쇠는 친구 답을 여는 값이다, 11/17) */
+export function queryForTrack(): string | undefined {
+  try {
+    const q = new URLSearchParams(window.location.search)
+    for (const k of ['k', 'h', 'u', 'token']) q.delete(k)
+    return q.toString().slice(0, 400) || undefined
+  } catch {
+    return undefined
+  }
+}

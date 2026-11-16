@@ -116,7 +116,7 @@ import type { components } from '@/api/schema'
 import MatchMascot from '../../components/mascot/MatchMascot.vue'
 import { UiButton, UiCard, UiInput, UiSection, UiTopBar } from '../../components/ui'
 import { claimGuestPlays, getVisitorId, markPartnerRegistered, readPartnerInfo, forgetPartnerInfo } from '@/utils/visit'
-import { track, flush } from '@/utils/trackLog'
+import { track, flush, queryForTrack } from '@/utils/trackLog'
 import { rememberReturnTo } from '@/utils/authRedirect'
 
 type Schemas = components['schemas']
@@ -174,7 +174,7 @@ async function loadOptions() {
   }
 }
 onMounted(() => {
-  track('partner_open', { value: window.location.search.slice(1, 400) || undefined })
+  track('partner_open', { value: queryForTrack() })
   loadOptions()
 })
 

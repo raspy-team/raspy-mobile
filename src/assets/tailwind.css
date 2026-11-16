@@ -129,6 +129,8 @@
     padding: 0 0.12em;
     margin: 0 -0.04em;
   }
+  /* 띠 안의 글자는 모두 어둡게: 안쪽 span이 제 글자색(.t-title의 흰색)을 쓰면 다크에서 형광 위 흰 글자가 된다 ("1등급"의 '등급') */
+  .hl span, .hl b { color: inherit; }
   .hl-draw { animation: hl-draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
   @keyframes hl-draw { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
   @media (prefers-reduced-motion: reduce) { .hl-draw { animation: none; } }

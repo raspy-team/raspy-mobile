@@ -123,14 +123,15 @@
         <!-- 다음 판: 이기든 지든 같은 규칙으로 바로. 점수(이 화면의 답) 바로 밑에 둔다: 예전엔 버튼이 점수보다 위였다 (quality-rules H-5) -->
         <template v-if="isParticipant && confirmed && !disputed && !peerVoting">
           <p v-if="headline.line" class="t-body text-center mt-8">{{ headline.line }}</p>
-          <div class="flex justify-center mt-4">
+          <!-- 이긴 판에는 버튼이 셋이라 390폭에서 한 줄에 다 들어가지 않는다: 글자를 꺾지 않고 줄을 넘긴다 ("홈으/로"로 꺾였다) -->
+          <div class="flex flex-wrap justify-center gap-2 mt-4 [&>*]:whitespace-nowrap">
             <!-- 1:1이면 이 상대와 다시: 예전엔 아무나 모집하는 새 경기를 열었다. 소식의 '도전'과 같은 '나랑도해'로 그 사람에게 (목적 판정 11/11 5번) -->
             <UiButton v-if="rematchTarget" size="sm" variant="tonal" icon="rotate-right" :loading="rematching" @click="rematch">{{ rematchTarget.nickname }}님과 한 판 더</UiButton>
             <UiButton v-else size="sm" variant="tonal" icon="rotate-right" :to="`/create-game?ruleId=${game.rule?.id}`">한 판 더</UiButton>
             <!-- 이긴 순간이 자랑하고 싶은 때다: 오른쪽 위 아이콘 말고 이름 붙은 버튼으로 (quality-rules D-1) -->
-            <UiButton v-if="headline.mark" size="sm" variant="secondary" icon="share" class="ml-2" @click="onShare">결과 자랑하기</UiButton>
+            <UiButton v-if="headline.mark" size="sm" variant="secondary" icon="share" @click="onShare">결과 자랑하기</UiButton>
             <!-- 다 끝났으면 홈으로 한 번에 (탭이 없는 화면이라 뒤로를 여러 번 눌렀다, 11/11) -->
-            <UiButton size="sm" variant="ghost" icon="home" class="ml-2" to="/">홈으로</UiButton>
+            <UiButton size="sm" variant="ghost" icon="home" to="/">홈으로</UiButton>
           </div>
         </template>
       </section>

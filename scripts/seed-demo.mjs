@@ -65,8 +65,10 @@ const PLACES = [
 ]
 
 async function createGame(owner, ruleId, place, daysFromNow = 0) {
-  const d = new Date(Date.now() + daysFromNow * 86400000)
-  d.setHours(19, 0, 0, 0)
+  // 끝난 경기로 채울 판은 한 시간 뒤로 연다: 날짜가 지난 경기에는 신청할 수 없다
+  const d = new Date(Date.now() + Math.max(daysFromNow, 0) * 86400000)
+  if (daysFromNow > 0) d.setHours(19, 0, 0, 0)
+  else d.setTime(d.getTime() + 3600000)
   const matchDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 19)
   return call(owner, 'POST', '/api/games/create', { referencedRuleId: ruleId, matchDate, placeRoad: place[0], placeDetail: place[1] })
 }

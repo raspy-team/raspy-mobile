@@ -28,6 +28,8 @@ export const socket = {
     this.disconnect({ clearRoomId: false })
     currentRoomId = roomId
     const token = localStorage.getItem('raspy_access_token2')
+    // 로그인이 풀렸으면 붙지 않는다: 토큰 없이("null") 붙으면 서버가 끊고, 끊길 때마다 2초 뒤 다시 붙어 끝없이 되풀이했다 (11/16)
+    if (!token) { currentRoomId = null; return }
 
     if (_onConnecting) _onConnecting()
 

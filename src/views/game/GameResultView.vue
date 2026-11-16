@@ -88,8 +88,9 @@
                 <UiIcon name="crown" />
               </span>
             </span>
-            <span class="text-sm truncate max-w-full" :class="side.won || !winnerIdx ? 'text-fg font-medium' : 'text-fg-muted'">
-              {{ side.user.nickname }}<UiAiBadge v-if="side.user.isBot" /><span v-if="side.isMe" class="text-fg-subtle"> (나)</span>
+            <!-- 좁은 폰(320)에서 이름이 길면 '(나)'가 잘려 나갔다: 자르지 않고 두 줄로 넘긴다 (11/16) -->
+            <span class="text-sm max-w-full text-center break-keep leading-tight" :class="side.won || !winnerIdx ? 'text-fg font-medium' : 'text-fg-muted'">
+              {{ side.user.nickname }}<UiAiBadge v-if="side.user.isBot" /><span v-if="side.isMe" class="text-fg-subtle whitespace-nowrap"> (나)</span>
             </span>
           </button>
           <!-- 세트 점수 없이 결과만 남긴 경기는 숫자 대신 vs -->

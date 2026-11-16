@@ -37,6 +37,13 @@ export function warmKakaoShare() {
 }
 
 /** 카카오톡 친구 고르기를 연다. 못 열면 false (부르는 쪽이 다른 길로) */
+/** 링크에 맞는 미리보기 그림: 임기응변 링크는 제 그림 (서버 share/PreviewController.imageFor와 같은 규칙) */
+export function previewImage(url: string): string {
+  let path = ''
+  try { path = new URL(url, 'https://matchapp.me').pathname } catch { /* 기본 그림 */ }
+  return /^\/(try|play)\/improv(\/|$)/.test(path) ? 'https://matchapp.me/og-improv.png' : 'https://matchapp.me/og-image.png'
+}
+
 export async function kakaoShare(o: { title: string; description?: string; url: string; image?: string; button?: string }): Promise<boolean> {
   if (!kakaoShareAvailable) return false
   const Kakao = await load()
@@ -45,7 +52,7 @@ export async function kakaoShare(o: { title: string; description?: string; url: 
     const link = { mobileWebUrl: o.url, webUrl: o.url }
     Kakao.Share.sendDefault({
       objectType: 'feed',
-      content: { title: o.title, description: o.description ?? '', imageUrl: o.image || 'https://matchapp.me/og-image.png', link },
+      content: { title: o.title, description: o.description ?? '', imageUrl: o.image || previewImage(o.url), link },
       buttons: [{ title: o.button ?? '한 판 붙기', link }],
     })
     return true

@@ -11,7 +11,8 @@ export const isAndroidApp = ua.includes('raspy-android')
 // 에타 앱의 표기를 확인하지 못해 이름 목록만으로는 구글 로그인(웹뷰에서 구글이 막는다)이 그대로 보일 수 있었다
 // 홈 화면에 추가한 웹앱(아이폰)도 Safari/ 표시가 없다: 그건 앱 안 브라우저가 아니다
 const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-const genericWebView = /; wv\)/.test(ua) || (/iphone|ipad|ipod/.test(ua) && ua.includes('applewebkit') && !ua.includes('safari/') && !standalone)
+// 우리 앱(Capacitor)은 표시(raspy-)가 없더라도 뺀다: 앱도 웹뷰라 같은 모양이다
+const genericWebView = !Capacitor.isNativePlatform() && (/; wv\)/.test(ua) || (/iphone|ipad|ipod/.test(ua) && ua.includes('applewebkit') && !ua.includes('safari/') && !standalone))
 export const inAppBrowser = (/instagram|fban|fbav|kakaotalk|naver\(inapp|line\/|everytime|daumapps|whale.*inapp/.test(ua) || genericWebView) && !ua.includes('raspy-')
 export const isAndroidUa = ua.includes('android')
 

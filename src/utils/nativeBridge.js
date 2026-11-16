@@ -7,7 +7,12 @@ export const isIosApp = ua.includes('raspy-ios')
 export const isAndroidApp = ua.includes('raspy-android')
 
 // 인스타·페이스북·카톡·네이버·라인·에타 같은 앱 안 브라우저인지. 구글은 앱 안 웹 화면 로그인을 막는다(403 disallowed_useragent) (경로 1 리뷰 N4)
-export const inAppBrowser = /instagram|fban|fbav|kakaotalk|naver\(inapp|line\/|everytime|daumapps|whale.*inapp/.test(ua) && !ua.includes('raspy-')
+// 이름을 모르는 앱의 웹뷰도 잡는다 (11/17): 안드로이드 웹뷰는 '; wv)', 아이폰 웹뷰는 Safari/ 표시가 없다.
+// 에타 앱의 표기를 확인하지 못해 이름 목록만으로는 구글 로그인(웹뷰에서 구글이 막는다)이 그대로 보일 수 있었다
+// 홈 화면에 추가한 웹앱(아이폰)도 Safari/ 표시가 없다: 그건 앱 안 브라우저가 아니다
+const standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+const genericWebView = /; wv\)/.test(ua) || (/iphone|ipad|ipod/.test(ua) && ua.includes('applewebkit') && !ua.includes('safari/') && !standalone)
+export const inAppBrowser = (/instagram|fban|fbav|kakaotalk|naver\(inapp|line\/|everytime|daumapps|whale.*inapp/.test(ua) || genericWebView) && !ua.includes('raspy-')
 export const isAndroidUa = ua.includes('android')
 
 /** 앱 안 브라우저에서 같은 주소를 기기 브라우저로 연다. 안드로이드는 크롬으로 바로, 카톡은 카톡의 '외부 브라우저' 길로. 아이폰 인스타는 열 수 없어 false */

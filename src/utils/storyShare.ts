@@ -6,7 +6,7 @@ import { createApp, h, nextTick } from 'vue'
 import { snapdom } from '@zumer/snapdom'
 import StoryCard from '../components/share/StoryCard.vue'
 import UiIcon from '../components/ui/UiIcon.vue'
-import { isCapacitorApp, MatchInstagram } from './nativeBridge'
+import { isCapacitorApp, MatchInstagram, inAppBrowser as webViewBrowser } from './nativeBridge'
 
 /** dark·volt: 스토리 한 장(1080×1920) · sticker: 투명 바탕 카드, 내 사진 위에 붙인다 */
 export type StoryVariant = 'dark' | 'volt' | 'sticker'
@@ -138,7 +138,7 @@ function download(file: File): ShareResult {
 /** 인스타·카톡 같은 앱 안 브라우저: 내려받기가 실제로 저장되지 않는다 */
 // 에타·네이버·다음 앱도 넣었다 (11/16 검토): 로그인 쪽 판별(nativeBridge.inAppBrowser)에는 있는데 여기엔 없어,
 // 에타 앱 안에서 그림이 저장되지 않아도 "저장했어요"라고 하고 길게 눌러 저장하는 창을 띄우지 않았다
-export const inAppBrowser = /Instagram|KAKAOTALK|FBAN|FBAV|Line\/|everytime|NAVER\(inapp|DaumApps/i.test(navigator.userAgent)
+export const inAppBrowser = /Instagram|KAKAOTALK|FBAN|FBAV|Line\/|everytime|NAVER\(inapp|DaumApps/i.test(navigator.userAgent) || webViewBrowser
 
 /** 폰인지 (인스타 앱을 열 수 있는 곳) */
 export const isPhone = /iphone|ipad|android/i.test(navigator.userAgent)

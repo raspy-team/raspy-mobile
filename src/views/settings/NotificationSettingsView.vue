@@ -44,6 +44,7 @@ import { useToast } from '../../composables/useToast'
 import { askPushPermission, isCapacitorApp } from '../../utils/nativeBridge'
 
 const { showToast } = useToast()
+const RETIRED = ['CLUB', 'DAILY']
 const settings = ref([])
 const loading = ref(true)
 const error = ref(false)
@@ -53,7 +54,8 @@ async function load() {
   loading.value = true
   error.value = false
   try {
-    settings.value = (await api.get('/api/notification-settings')).data
+    // 앱에서 내린 기능의 알림은 켜고 끌 것이 없다: 동호회·대회(11/13), 하루 퍼즐(목록에서 내림)
+    settings.value = (await api.get('/api/notification-settings')).data.filter((s) => !RETIRED.includes(s.category))
   } catch {
     error.value = true
   } finally {

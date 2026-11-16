@@ -23,6 +23,7 @@ npm ci
 npm run serve:dev            # http://localhost:8081, 백엔드는 http://localhost:8080
 npm run build                # API 주소 검사 → 타입 검사 → 운영 빌드
 npm run api:sync             # 로컬 백엔드에서 API 문서·타입을 다시 받는다 (API가 바뀌면)
+npm run check:names          # JS 화면(타입 검사를 안 받는 파일)에서 정의 안 한 이름을 찾는다. 1분쯤. 빌드에는 없다
 ```
 
 - 화면 부품 모음: http://localhost:8081/dev/ui (개발 서버에서만)
@@ -68,7 +69,7 @@ npx capacitor-assets generate --android --ios # 아이콘·시작 화면 다시 
 | `src/websocket/` | 내 채널(변경 신호)과 경기·채팅 소켓 |
 | `src/utils/` | 진동, 내 id(`me.ts`), 포맷 등 |
 | `src/content/` | 약관·개인정보처리방침 문구 |
-| `scripts/` | API 주소 검사(`check-api.mjs`), 문서 받기(`sync-api.mjs`) |
+| `scripts/` | API 주소 검사(`check-api.mjs`), 문서 받기(`sync-api.mjs`), 정의 안 한 이름 찾기(`check-names.mjs`) |
 
 ## 규칙
 

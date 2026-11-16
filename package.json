@@ -12,6 +12,7 @@
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint --ext .js,.ts,.vue src",
     "api:check": "node scripts/check-api.mjs",
+    "check:names": "node scripts/check-names.mjs",
     "api:sync": "node scripts/sync-api.mjs"
   },
   "dependencies": {

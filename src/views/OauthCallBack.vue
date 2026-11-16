@@ -35,7 +35,8 @@ onMounted(() => {
     window.history.replaceState(null, '', window.location.pathname) // 주소창에서 토큰을 지운다
   }
   const token = localStorage.getItem('raspy_access_token2')
-  if (!token) return router.replace('/init')
+  // 주소로 온 토큰을 받지 않았으면 그렇다고 말한다 (말없이 시작 화면으로 돌아가면 로그인이 안 된 까닭을 모른다). 한 번 더 누르면 된다
+  if (!token) return router.replace(fromUrl ? '/init?loginError=failed' : '/init')
   registerFcmToken(token)
   trackVisit() // 로그인 전에 남긴 방문에 이 사람을 붙인다
   claimGuestPlays() // 가입 전 한 판을 내 기록으로

@@ -417,11 +417,16 @@ function rememberOpen(p: Play | null) {
   } catch { /* 저장이 막히면 시작 화면부터 */ }
 }
 const PENDING_KEY = `guest_submitting_${key.value}`
+let waitTries = 0 // '채점하고 있어요'에 다시 낸 횟수
 function pendingSubmit(): { play: Play; answer: string } | null {
   try {
     const v = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null')
     // 낸 지 10분이 넘은 것은 버린다 (오래된 탭을 다시 열었을 때 옛 판을 내지 않게)
-    return v?.play?.playId && typeof v.answer === 'string' && Date.now() - v.at < 600_000 ? v : null
+    if (!(v?.play?.playId && typeof v.answer === 'string' && Date.now() - v.at < 600_000)) return null
+    // 같은 링크에서 낸 것만 다시 낸다: 다른 도전장 링크를 같은 탭에서 열었는데 옛 판을 내면 안 된다. 로그인한 사람은 초대 판일 때만 손님 판을 낸다
+    if ((v.from ?? null) !== (fromPlay ?? null) || (v.duel ?? null) !== (fromDuel ?? null)) return null
+    if (signedIn && !memberOnInvite) return null
+    return v
   } catch {
     return null
   }
@@ -481,7 +486,7 @@ async function submit(answer: string) {
   lastAnswer.value = answer
   submitting.value = true
   submitError.value = ''
-  try { sessionStorage.setItem(PENDING_KEY, JSON.stringify({ at: Date.now(), play: play.value, answer })) } catch { /* 못 남기면 새로 고침 때 새 판 */ }
+  try { sessionStorage.setItem(PENDING_KEY, JSON.stringify({ at: Date.now(), play: play.value, answer, from: fromPlay ?? null, duel: fromDuel ?? null })) } catch { /* 못 남기면 새로 고침 때 새 판 */ }
   try {
     // 임기응변은 반응을 못 받은 답을 여기서 다시 채점해 15초를 넘을 수 있다: 60초까지 기다리고, 막히면 이 화면이 '다시 채점하기'로 알린다
     const slow = key.value === 'improv' ? { timeout: 60_000, quiet: true } : {}
@@ -508,9 +513,15 @@ async function submit(answer: string) {
       ? '인터넷이 끊겨 내지 못했어요. 쓴 답은 그대로 있고, 연결되면 바로 다시 내요'
       : key.value === 'improv' ? '채점이 잠깐 막혔어요. 쓴 답은 그대로 있어요' : errorMessage(e, '답을 내지 못했어요. 쓴 답은 그대로 있어요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
-    // 서버가 받지 않은(400·403·404) 답은 새로 고침 때 다시 내지 않는다. 연결·채점 막힘은 남겨 두어 새로 고쳐도 이어 낸다
-    const status = (e as { response?: { status?: number } }).response?.status
-    if (status && status >= 400 && status < 500 && status !== 409) { try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ } }
+    // 내 판이 아니거나 없는 판(403·404)만 지운다. 채점 막힘·'채점하고 있어요'는 서버가 400으로 답하므로 남겨 두어 새로 고쳐도 이어 낸다 (11/17 검토)
+    const res = (e as { response?: { status?: number; data?: { message?: string } } }).response
+    if (res?.status === 403 || res?.status === 404) { try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ } }
+    // 앞서 낸 요청을 서버가 아직 채점하는 중(새로 고친 직후): 끝나면 그 결과를 받도록 잠시 뒤 다시 낸다 (여섯 번까지)
+    if (res?.status === 400 && /채점하고 있어요/.test(res.data?.message ?? '') && waitTries < 6) {
+      waitTries++
+      const sameAnswer = answer
+      setTimeout(() => { if (play.value && !submitting.value && !result.value) submit(sameAnswer) }, 2500)
+    }
     // 판을 닫지 않는다: 쓴 답을 그대로 두고 같은 답으로 다시 낸다 (예전엔 임기응변 밖의 게임은 판이 닫히고 시작 화면으로 가 하던 판이 사라진 것 같았다, 경로 3 훑기)
   } finally {
     submitting.value = false

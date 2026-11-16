@@ -22,7 +22,9 @@ onMounted(() => {
   const hash = new URLSearchParams(window.location.hash.slice(1))
   const fromUrl = hash.get('token') || route.query.token
   if (fromUrl) {
-    localStorage.setItem('raspy_access_token2', fromUrl)
+    // 이미 로그인한 브라우저에서는 주소로 온 토큰으로 바꾸지 않는다 (11/16 보안 검토 2차): 남이 제 토큰을 넣은 링크를 보내면
+    // 누른 사람이 그 사람 계정으로 바뀌어 로그인됐다. 로그인하러 온 사람은 토큰이 없다(로그아웃·만료 때 지운다)
+    if (!localStorage.getItem('raspy_access_token2')) localStorage.setItem('raspy_access_token2', fromUrl)
     window.history.replaceState(null, '', window.location.pathname) // 주소창에서 토큰을 지운다
   }
   const token = localStorage.getItem('raspy_access_token2')

@@ -937,10 +937,14 @@ async function sendChallenge(gameId: number) {
   try {
     // 기다리는 판만 그 친구 몫으로 하루 잡아 둔다. 승패가 난 판은 링크만 보낸다(받은 친구와의 경기가 따로 생긴다)
     const waiting = result.value?.gameId !== gameId || result.value?.status === 'WAITING'
-    if (waiting) {
+    // 내 열쇠(u·k)가 붙는 링크는 그 판을 잡아 두지 않아도 열린다: 그때는 실제로 보낸 뒤에 잡는다.
+    // 예전엔 보내기 창을 열기 전에 잡아서, 창만 닫아도 그 판이 하루 동안 '친구 몫'으로 묶여 다른 사람과 붙지 못했다 (11/16 검토)
+    const keyed = result.value?.gameId === gameId && !!result.value.shareKey && !!result.value.myUserId
+    const hold = async () => {
       await POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } })
       challengeSentFor.value = gameId
     }
+    if (waiting && !keyed) await hold()
     // 폰에서는 공유 시트(카톡으로 바로), 안 되면 복사 (11/4 밤샘: 복사만 하면 카톡을 따로 열어 붙여 넣어야 했다)
     // 가입 없이 할 수 있는 게임이면 받은 친구가 가입 없이 바로 같은 문제로 (경로 2 리뷰 N1: /challenge는 가입 벽이었다)
     const mine = result.value?.gameId === gameId && result.value.shareKey && result.value.myUserId ? `&u=${result.value.myUserId}&k=${result.value.shareKey}` : ''
@@ -951,6 +955,7 @@ async function sendChallenge(gameId: number) {
     const dest = await sendLink(link, line ? `${line}${/[.?!]$/.test(line) ? '' : '.'} 같은 상황으로 붙자` : `${game.value?.title ?? '한 판'} 한 판 붙자. 나보다 잘할 수 있어?`, {
       title: '친구에게 한 판 붙자', file: storyFile.value, onStory: key.value === 'improv' && storyFile.value ? onStory : null, button: key.value === 'improv' ? '같은 상황으로 붙기' : '같은 문제로 붙기', place: `app_${key.value}`,
     })
+    if (dest && waiting && keyed) await hold().catch(() => {})
     if (dest && dest !== 'story') track('result_challenge_shared', { gameKey: key.value, value: dest })
     if (dest && dest !== 'story' && dest !== 'copy') showToast(waiting ? `친구가 하루 안에 열면 같은 ${key.value === 'improv' ? '상황으로' : '문제로'} 붙어요` : '친구가 풀면 같은 상황으로 나와 1:1이 돼요')
     askPushPermission() // 친구가 받으면 알려 드릴 수 있게

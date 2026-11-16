@@ -136,7 +136,9 @@ function download(file: File): ShareResult {
 }
 
 /** 인스타·카톡 같은 앱 안 브라우저: 내려받기가 실제로 저장되지 않는다 */
-export const inAppBrowser = /Instagram|KAKAOTALK|FBAN|FBAV|Line\//i.test(navigator.userAgent)
+// 에타·네이버·다음 앱도 넣었다 (11/16 검토): 로그인 쪽 판별(nativeBridge.inAppBrowser)에는 있는데 여기엔 없어,
+// 에타 앱 안에서 그림이 저장되지 않아도 "저장했어요"라고 하고 길게 눌러 저장하는 창을 띄우지 않았다
+export const inAppBrowser = /Instagram|KAKAOTALK|FBAN|FBAV|Line\/|everytime|NAVER\(inapp|DaumApps/i.test(navigator.userAgent)
 
 /** 폰인지 (인스타 앱을 열 수 있는 곳) */
 export const isPhone = /iphone|ipad|android/i.test(navigator.userAgent)

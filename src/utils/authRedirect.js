@@ -7,7 +7,7 @@ const KEEP_MS = 24 * 3600_000
 const SKIP = ['/init', '/group/login', '/oauth/callback', '/welcome']
 
 // 앱 안 주소만 ('/'로 시작하고 '//'·'/\\'가 아닌 것). '//evil.com'은 브라우저가 다른 사이트로 본다 (11/4 밤샘 리뷰 D)
-const isAppPath = (p) => typeof p === 'string' && p.startsWith('/') && !p.startsWith('//') && !p.startsWith('/\\')
+export const isAppPath = (p) => typeof p === 'string' && p.startsWith('/') && !p.startsWith('//') && !p.startsWith('/\\')
 
 export function rememberReturnTo(fullPath) {
   if (!isAppPath(fullPath) || fullPath === '/' || SKIP.some((p) => fullPath.startsWith(p))) return

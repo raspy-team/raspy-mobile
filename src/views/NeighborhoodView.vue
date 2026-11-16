@@ -91,6 +91,7 @@
 </template>
 
 <script setup lang="ts">
+import { isAppPath } from '@/utils/authRedirect'
 import { josa, withRo } from '@/utils/format'
 // 내 동네 (/neighborhood): 동네 2개까지(이름으로 고르기, 원하면 위치로 인증해 '✓'), 지금 동네 고르기, 범위(당근의 '동네 범위'), 지우기.
 // 경기를 열거나 신청하다 동네가 필요해 막히면 api.js가 ?back=&reason=을 붙여 이리로 보낸다. 인증하면 돌아간다
@@ -164,7 +165,7 @@ async function onPicked(next: Mine) {
 async function goBack() {
   const back = route.query.back
   // 온 곳이 바로 앞 화면이면 뒤로 간다: 그 주소로 갈아 끼우면 같은 화면이 기록에 두 번 남아 뒤로를 두 번 눌러야 했다 (11/15 고병연)
-  if (typeof back === 'string' && back.startsWith('/')) {
+  if (typeof back === 'string' && isAppPath(back)) {
     returnBack(router, back)
   } else if (firstPick && window.history.state?.back) router.back() // 처음 동네를 정한 사람은 온 곳(홈·지도)으로 돌려보낸다
 }

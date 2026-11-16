@@ -64,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import { isAppPath } from '@/utils/authRedirect'
 // 설정 > 게임 계정 (9번, 11/6): 인기 게임마다 내 아이디를 적고, 되는 게임은 공식 정보로 티어를 가져온다
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -77,8 +78,8 @@ type Account = components['schemas']['AccountView']
 const route = useRoute()
 const { showToast } = useToast()
 // 규칙·경기 화면에서 왔으면 거기로 돌아간다
-const backTo = computed(() => (typeof route.query.from === 'string' && route.query.from.startsWith('/') ? route.query.from : '/settings'))
-const fromPage = computed(() => typeof route.query.from === 'string' && route.query.from.startsWith('/') && !!route.query.game)
+const backTo = computed(() => (typeof route.query.from === 'string' && isAppPath(route.query.from) ? route.query.from : '/settings'))
+const fromPage = computed(() => typeof route.query.from === 'string' && isAppPath(route.query.from) && !!route.query.game)
 const router = useRouter()
 
 const accounts = ref<Account[]>([])

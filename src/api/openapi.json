@@ -8434,7 +8434,7 @@
           "Organization"
         ],
         "summary": "조직 이름 찾기",
-        "description": "인증하기에서 조직을 고를 때. 이름에 q가 들어간 조직 최대 20개 (회원 수는 주지 않는다)",
+        "description": "인증하기에서 조직을 고를 때. 이름에 q가 들어간 조직 최대 20개 (회원 수는 주지 않는다). 줄임말(연대·서울여대)은 정식 이름의 조직으로 찾아 준다",
         "operationId": "search_2",
         "parameters": [
           {
@@ -13868,11 +13868,11 @@
               "type": "object"
             }
           },
-          "cols": {
+          "rows": {
             "type": "integer",
             "format": "int32"
           },
-          "rows": {
+          "cols": {
             "type": "integer",
             "format": "int32"
           }

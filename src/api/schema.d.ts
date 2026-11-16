@@ -4211,7 +4211,7 @@ export interface paths {
         };
         /**
          * 조직 이름 찾기
-         * @description 인증하기에서 조직을 고를 때. 이름에 q가 들어간 조직 최대 20개 (회원 수는 주지 않는다)
+         * @description 인증하기에서 조직을 고를 때. 이름에 q가 들어간 조직 최대 20개 (회원 수는 주지 않는다). 줄임말(연대·서울여대)은 정식 이름의 조직으로 찾아 준다
          */
         get: operations["search_2"];
         put?: never;
@@ -6768,9 +6768,9 @@ export interface components {
                 [key: string]: Record<string, never>;
             };
             /** Format: int32 */
-            cols: number;
-            /** Format: int32 */
             rows: number;
+            /** Format: int32 */
+            cols: number;
         };
         Obj: {
             s: string;

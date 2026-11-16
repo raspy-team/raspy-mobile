@@ -276,7 +276,8 @@
             </template>
             <template v-else>
               <UiRollNumber class="t-display tabular-nums" :value="result.myScore ?? 0" />
-              <p class="t-caption">{{ game?.scoreUnit }}</p>
+              <!-- 읽씹 탈출은 숫자 밑에 '%'만 있어 무엇의 90%인지 몰랐다 (11/16) -->
+              <p class="t-caption">{{ SCORE_NAME[key] ?? game?.scoreUnit }}</p>
             </template>
             <!-- 신뢰 사다리·소식 도전: 아무나가 아니라 그 사람을 기다린다 (11/4 밤샘) -->
             <template v-if="ladderTo">
@@ -319,7 +320,7 @@
         <!-- 끝난 판은 소식 카드와 같은 그림·링크로 보낸다 (11/4 밤샘: 이기고 스토리에 올릴 길이 소식 탭에만 있었다) -->
         <!-- 임기응변은 한마디(등급·인물 반응)를 위 카드와 상황 카드에 나눠 보여 주므로 따로 두지 않는다 (등급이 두 번 보였다) -->
         <UiCard v-if="sayOnly(result.myFeedback) && result.status !== 'AWAITING_RESULT' && key !== 'improv'" class="mt-3">
-          <p class="t-micro">{{ isHero ? '싸움 중계' : key === 'ghosted' ? '그 사람의 답장' : key === 'trial' ? '판결' : game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
+          <p class="t-micro">{{ isHero ? '싸움 중계' : key === 'ghosted' ? (sayOnly(result.myFeedback).startsWith('(') ? '그 사람의 반응' : '그 사람의 답장') : key === 'trial' ? '판결' : game?.judge === 'AI' ? `${judgeName} 한마디` : key === 'daily-literacy' ? '오늘의 답' : '한마디' }}</p>
           <!-- 싸움 중계는 한 문장씩 차례로 나온다 -->
           <p v-if="isHero" class="t-body mt-1 break-keep"><span v-for="(line, i) in fightLines(result.myFeedback)" :key="i" class="block feel-rise" :class="i ? 'mt-1.5' : ''" :style="{ animationDelay: `${0.3 + i * 0.7}s` }">{{ line }}</span></p>
           <p v-else class="t-body mt-1 whitespace-pre-line break-keep">{{ sayOnly(result.myFeedback) }}</p>
@@ -579,6 +580,8 @@ function talkLines(text?: string | null) {
   })
 }
 const TALK_NAME: Record<string, string> = { debate: '말싸움', ghosted: '메시지', trial: '변론' }
+// 점수가 무엇인지 단위만으로 모르는 게임의 이름표 (기다리는 결과의 큰 숫자 밑)
+const SCORE_NAME: Record<string, string> = { ghosted: '% · 답장 올 확률' }
 // 처음 해 보는 사람에게: 한마디와 세 걸음. 시간·글자 수는 판 화면이 말한다(여기 적으면 서버 값과 어긋난다)
 const PITCH: Record<string, { title: string; steps: string[] }> = {
   debate: { title: '반대편 AI를 설득해 보세요', steps: ['주제와 내 편이 정해져요', '세 마디 안에 AI를 설득해요', '설득한 만큼 점수가 나고, 같은 주제를 한 사람과 승패가 나요'] },
@@ -666,6 +669,8 @@ const result = ref<Duel | null>(null)
 // 알림 권한은 쓸모가 보일 때 묻는다: 상대를 기다리는 결과가 떴을 때 (앱을 켤 때 묻지 않는다, 목적 판정 11/11 부분 1)
 // 결과를 기다리게 되는 순간 알림 권한을 묻는다. 보통 게임이 상대를 기다리는 상태는 WAITING이다 (경로 2 리뷰 W1)
 watch(() => result.value?.status, (st) => { if (st === 'AWAITING_RESULT' || st === 'WAITING' || st === 'VOTING') askPushPermission() })
+// 결과가 뜨면 맨 위(점수·승패)부터 보인다: 긴 판(재판 기록·대화)은 맨 아래 '판결받기'를 누른 자리 그대로 결과가 열려 점수가 화면 위로 밀려나 있었다 (11/16)
+watch(() => !!result.value && !play.value, (shown) => { if (shown) requestAnimationFrame(() => window.scrollTo(0, 0)) }, { flush: 'post' })
 // 신뢰 사다리 (안전·신뢰 D): 경기 신청자와 만나기 전에 한 판. ?to=사람&toName=이름으로 오면 새 판을 열고, 끝나면 그 사람에게 도전장을 메시지로 보낸다
 const ladderTo = Number(route.query.to) || null
 const ladderName = String(route.query.toName || '상대')

@@ -5,7 +5,8 @@
       <!-- 읽씹 탈출: 누구와의 대화인가 -->
       <span v-else-if="kind === 'ghosted'" class="min-w-0">
         <span class="block t-heading break-keep">{{ head }}</span>
-        <span class="block t-caption mt-0.5">읽고 답이 없어요. 세 번 안에 답장을 받아 보세요</span>
+        <!-- 답장이 온 뒤에도 "읽고 답이 없어요"라고 했다 (11/16): 온 뒤에는 온 것을 말한다 -->
+        <span class="block t-caption mt-0.5">{{ replied ? (turnsLeft > 0 ? '답장이 왔어요. 더 보내거나 여기서 끝내요' : '답장이 왔어요') : '읽고 답이 없어요. 세 번 안에 답장을 받아 보세요' }}</span>
       </span>
       <!-- 재판: 사건 이름과 내 역할 -->
       <span v-else class="min-w-0">
@@ -84,6 +85,11 @@ const isRead = (l: Line) => kind === 'ghosted' && !l.mine && l.text.trim() === '
 const MAX_TURNS = { debate: 0, ghosted: 3, trial: 2 }
 const spoken = computed(() => kind === 'debate' || turnsLeft.value < MAX_TURNS[kind])
 const emit = defineEmits<{ submit: [answer: string] }>()
+// 읽씹 탈출: 내가 보낸 뒤 마지막으로 온 것이 '읽음'이 아니라 답장인가
+const replied = computed(() => {
+  const last = lines.value[lines.value.length - 1]
+  return kind === 'ghosted' && spoken.value && !!last && !last.mine && !isRead(last)
+})
 
 // 문제: "주제|내 편|AI 편"
 const [topic, mine] = props.problem.split('|')

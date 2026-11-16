@@ -516,19 +516,25 @@ async function submit(answer: string) {
     // 인터넷이 끊긴 것이면 그렇다고 말한다: '채점이 막혔어요'는 서버 탓처럼 들렸다. 연결이 돌아오면 저절로 다시 낸다 (11/11 몸과 시간: 지하철)
     submitError.value = !navigator.onLine
       ? '인터넷이 끊겨 내지 못했어요. 쓴 답은 그대로 있고, 연결되면 바로 다시 내요'
-      : key.value === 'improv' ? '채점이 잠깐 막혔어요. 쓴 답은 그대로 있어요' : errorMessage(e, '답을 내지 못했어요. 쓴 답은 그대로 있어요')
+      : key.value === 'improv' ? '채점이 잠깐 막혔어요. 쓴 답은 그대로 있고, 잠시 뒤 저절로 다시 채점해요' : errorMessage(e, '답을 내지 못했어요. 쓴 답은 그대로 있어요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
     // 내 판이 아니거나 없는 판(403·404)만 지운다. 채점 막힘·'채점하고 있어요'는 서버가 400으로 답하므로 남겨 두어 새로 고쳐도 이어 낸다 (11/17 검토)
     const res = (e as { response?: { status?: number; data?: { message?: string } } }).response
     if (res?.status === 403 || res?.status === 404) { try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ } }
-    // 앞서 낸 요청을 서버가 아직 채점하는 중(새로 고친 직후): 끝나면 그 결과를 받도록 잠시 뒤 다시 낸다 (여섯 번까지)
-    if (res?.status === 400 && /채점하고 있어요/.test(res.data?.message ?? '') && waitTries < 6) {
+    // 저절로 다시 낸다 (여섯 번까지). 사람이 '다시 채점하기'를 누르지 않아도 되게:
+    // ① 앞서 낸 요청을 서버가 아직 채점하는 중(새로 고친 직후)이면 2.5초 뒤
+    // ② 임기응변 채점이 막혔으면(AI가 잠깐 끊김: 11/17 05:23에 1분쯤 모든 채점이 실패했다가 돌아왔다) 8초·15초·30초… 뒤
+    const stillScoring = res?.status === 400 && /채점하고 있어요/.test(res.data?.message ?? '')
+    // 채점이 막혔다는 서버의 답(400 '채점이 잠깐 막혔어요')·서버 오류·응답 없음일 때만. 잘못된 답(다른 400)은 다시 내도 같다
+    const blocked = key.value === 'improv' && navigator.onLine && (!res || (res.status ?? 0) >= 500 || (res.status === 400 && /채점이 잠깐 막혔어요/.test(res.data?.message ?? '')))
+    if ((stillScoring || blocked) && waitTries < 6) {
+      const delay = stillScoring ? 2500 : [8000, 15000, 30000, 45000, 60000, 60000][waitTries]
       waitTries++
       const sameAnswer = answer
       const pid = play.value?.playId
       // 그 판이 아직 화면에 있을 때만 (그 사이 '처음부터 새 판'을 눌렀거나 화면을 떠났으면 내지 않는다, 11/17 검토)
       if (waitTimer) clearTimeout(waitTimer)
-      waitTimer = setTimeout(() => { waitTimer = null; if (play.value?.playId === pid && !submitting.value && !result.value) submit(sameAnswer) }, 2500)
+      waitTimer = setTimeout(() => { waitTimer = null; if (play.value?.playId === pid && !submitting.value && !result.value) submit(sameAnswer) }, delay)
     }
     // 판을 닫지 않는다: 쓴 답을 그대로 두고 같은 답으로 다시 낸다 (예전엔 임기응변 밖의 게임은 판이 닫히고 시작 화면으로 가 하던 판이 사라진 것 같았다, 경로 3 훑기)
   } finally {

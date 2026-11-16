@@ -7,6 +7,13 @@
       <p class="t-body mt-2">새 비밀번호로 로그인해 주세요.</p>
       <UiButton block size="lg" class="mt-8" to="/group/login">로그인</UiButton>
     </template>
+    <!-- 본인인증이 준비 전이면 할 수 있는 것 하나만 말한다: 예전엔 쓸 수 없는 본인인증을 설명하고, 같은 메일 안내를 두 번 했다 (11/16) -->
+    <template v-else-if="!verifiedId && !cfg.available && !cfgFailed">
+      <h1 class="t-title">메일로 도와드려요</h1>
+      <p class="t-body mt-4"><a class="hit underline underline-offset-2" :href="mail">{{ CONTACT_EMAIL }}</a>로 아이디를 적어 보내 주세요.</p>
+      <p class="t-caption mt-2">카카오·구글로 시작했다면 그 버튼으로 들어오면 돼요.</p>
+      <UiButton block size="lg" class="mt-8" to="/init">로그인 화면으로</UiButton>
+    </template>
     <template v-else-if="!verifiedId">
       <h1 class="t-title">휴대폰 본인인증으로 찾아요</h1>
       <div class="mt-4 space-y-2 t-body">
@@ -20,8 +27,6 @@
         <p class="t-caption">본인인증 정보를 불러오지 못했어요</p>
         <UiButton class="mt-3" size="sm" variant="secondary" @click="loadCfg">다시 시도</UiButton>
       </div>
-      <!-- 본인인증이 준비 전이면 막다른 길 대신 문의 메일로 (고병연 11/11) -->
-      <p v-else class="t-caption mt-8 rounded-xl bg-surface px-4 py-3">본인인증은 아직 준비 중이에요. <a class="hit underline underline-offset-2" :href="mail">{{ CONTACT_EMAIL }}</a>로 아이디를 적어 보내 주세요</p>
     </template>
     <!-- 인증을 먼저 하고 그다음에 적는다: 휴대폰은 인증 창이 이 주소로 돌아오며 적던 것이 사라진다 (비밀번호는 주소에 싣지 않는다) -->
     <form v-else class="space-y-4" @submit.prevent="submit">

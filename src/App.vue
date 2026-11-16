@@ -177,7 +177,12 @@ const showActiveBanner = computed(() => footerTab.value !== null && route.path !
 // 진행 중 띠가 떠 있으면 화면 맨 아래에 그 높이만큼 자리를 더 둔다 (tailwind.css의 html.has-banner): 맨 아래 줄이 띠 밑에 가려진 채 더 내려가지 않았다 (quality-rules P-3)
 watch(() => showActiveBanner.value && !!activeGame.value, (on) => document.documentElement.classList.toggle('has-banner', on), { immediate: true })
 // 자주 가는 화면의 코드를 한가할 때 미리 받아 둔다 (quality-rules V-1: 화면을 처음 누를 때 코드를 내려받느라 150~200ms 늦게 떴다)
+// 로그인한 사람에게만: 에타에서 가입 없이 한 판 하러 온 사람은 이 화면들에 갈 일이 없는데 조각 서른 개를 더 받았다.
+// 첫 방문 하나에 우리 도메인 요청이 44개였고, Vercel 무료 요금제는 한 달 100만 요청까지다(넘으면 30일 멈춘다) (11/17)
 onMounted(() => {
+  let signedIn = false
+  try { signedIn = !!localStorage.getItem('raspy_access_token2') } catch { /* 저장이 막힌 브라우저: 미리 받지 않는다 */ }
+  if (!signedIn) return
   const warm = () => {
     import('./views/play/AppGameView.vue'); import('./views/play/GameCatalogView.vue'); import('./views/game/GameView.vue')
     import('./views/feed/FeedView.vue'); import('./views/profile/ProfileView.vue'); import('./views/inbox/NotificationsView.vue')

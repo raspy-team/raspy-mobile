@@ -393,7 +393,11 @@ const topPercent = computed(() => {
 onMounted(() => {
   // 도전장으로 온 친구도 같은 도전장 링크로 돌아오면 자기 결과를 본다 (걷기 2: 카톡 갔다 오면 결과가 없고 같은 상황을 또 풀 수 있었다)
   // 결과가 남아 있으면 결과, 하던 판이 이 탭에 있으면 그 판으로 바로
-  if (openSaved()) start('resume')
+  // 채점을 기다리다 새로 고친 사람: 낸 답으로 그 판의 결과를 다시 받는다 (서버는 이미 낸 판이면 그 결과를 준다).
+  // 예전엔 서버에 '내지 않은 판'이 없어 새 판이 시작되고, 방금 낸 판의 결과는 볼 길이 없었다 (11/17)
+  const pending = pendingSubmit()
+  if (pending) { play.value = pending.play; playId.value = pending.play.playId; rounds.value = Math.max(1, rounds.value); submit(pending.answer) }
+  else if (openSaved()) start('resume')
   else restoreLast()
   // 들어온 곳: 꼬리표(utm)·첫 질문·도전장. 방문(visit)과 같은 기기 번호로 잇는다
   track('try_open', { gameKey: key.value, value: window.location.search.slice(1, 400) || undefined })
@@ -411,6 +415,16 @@ function rememberOpen(p: Play | null) {
     if (p) sessionStorage.setItem(OPEN_KEY, JSON.stringify({ playId: p.playId, deadlineAt: p.deadlineAt }))
     else sessionStorage.removeItem(OPEN_KEY)
   } catch { /* 저장이 막히면 시작 화면부터 */ }
+}
+const PENDING_KEY = `guest_submitting_${key.value}`
+function pendingSubmit(): { play: Play; answer: string } | null {
+  try {
+    const v = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null')
+    // 낸 지 10분이 넘은 것은 버린다 (오래된 탭을 다시 열었을 때 옛 판을 내지 않게)
+    return v?.play?.playId && typeof v.answer === 'string' && Date.now() - v.at < 600_000 ? v : null
+  } catch {
+    return null
+  }
 }
 function openSaved(): boolean {
   try {
@@ -455,6 +469,7 @@ async function start(from: 'start' | 'again' | 'resume') {
 }
 
 function again() {
+  try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ }
   track('result_again', { gameKey: key.value, step: rounds.value })
   start('again')
 }
@@ -466,11 +481,13 @@ async function submit(answer: string) {
   lastAnswer.value = answer
   submitting.value = true
   submitError.value = ''
+  try { sessionStorage.setItem(PENDING_KEY, JSON.stringify({ at: Date.now(), play: play.value, answer })) } catch { /* 못 남기면 새로 고침 때 새 판 */ }
   try {
     // 임기응변은 반응을 못 받은 답을 여기서 다시 채점해 15초를 넘을 수 있다: 60초까지 기다리고, 막히면 이 화면이 '다시 채점하기'로 알린다
     const slow = key.value === 'improv' ? { timeout: 60_000, quiet: true } : {}
     result.value = (await POST('/api/guest/plays/{playId}/submit', { path: { playId: play.value.playId }, body: { visitorId, answer, k: challengeK }, ...slow })).data
     markGuestPlayed()
+    try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ }
     try { sessionStorage.removeItem(`improv_play_${play.value.playId}`) } catch { /* 없음 */ } // 성공한 뒤에만 지운다 (가로 훑기 4)
     rememberOpen(null)
     // 임기응변 1~3등급은 이긴 순간과 같은 답 (quality-rules G2-1)
@@ -491,6 +508,9 @@ async function submit(answer: string) {
       ? '인터넷이 끊겨 내지 못했어요. 쓴 답은 그대로 있고, 연결되면 바로 다시 내요'
       : key.value === 'improv' ? '채점이 잠깐 막혔어요. 쓴 답은 그대로 있어요' : errorMessage(e, '답을 내지 못했어요. 쓴 답은 그대로 있어요')
     track('guest_play_submit_failed', { gameKey: key.value, value: submitError.value })
+    // 서버가 받지 않은(400·403·404) 답은 새로 고침 때 다시 내지 않는다. 연결·채점 막힘은 남겨 두어 새로 고쳐도 이어 낸다
+    const status = (e as { response?: { status?: number } }).response?.status
+    if (status && status >= 400 && status < 500 && status !== 409) { try { sessionStorage.removeItem(PENDING_KEY) } catch { /* 없음 */ } }
     // 판을 닫지 않는다: 쓴 답을 그대로 두고 같은 답으로 다시 낸다 (예전엔 임기응변 밖의 게임은 판이 닫히고 시작 화면으로 가 하던 판이 사라진 것 같았다, 경로 3 훑기)
   } finally {
     submitting.value = false

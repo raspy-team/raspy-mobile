@@ -126,7 +126,8 @@ function restore() {
     said.value = Array.isArray(s.said) ? s.said : []
     reactions.value = Array.isArray(s.reactions) ? s.reactions : []
     shownAt = Number(s.shownAt) || Date.now()
-    startedAt = Number(s.startedAt) || Date.now()
+    // 판 전체 시계(startedAt)는 되살리지 않는다: 부모가 주는 timeLimitSeconds가 이미 '지금부터 남은 초'라, 되살리면 지난 시간이 두 번 빠져
+    // 2~3분 다른 앱에 다녀온 사람의 판이 시간이 남았는데 곧바로 제출됐다 (11/16 검토). 상황마다의 45초(shownAt)는 그대로 잇는다
     if (said.value[index.value] !== undefined) {
       // 이 상황엔 이미 말했다. 반응을 기다리다 끊겼으면 다시 부르지 않고 넘어갈 수 있게 한다 (점수는 끝에 채점된다)
       if (reactions.value[index.value] === undefined) reactions.value[index.value] = '(반응을 받지 못했어요. 점수는 끝에 나와요)'

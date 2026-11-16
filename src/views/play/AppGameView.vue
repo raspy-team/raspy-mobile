@@ -64,6 +64,7 @@
         />
         <ImprovPlay
           v-else-if="key === 'improv'"
+          :key="play.playId"
           :play-id="play.playId"
           :problem="play.problem"
           :time-limit-seconds="secondsLeft(play)"
@@ -243,7 +244,7 @@
             <template v-if="improvResult?.empty">
               <p class="t-micro">임기응변 등급</p>
               <p class="t-title mt-2 break-keep">{{ improvResult.empty }}</p>
-              <p class="t-caption mt-2 break-keep">상황마다 한마디만 써도 등급이 나와요</p>
+              <p v-if="improvResult.empty !== '시간 안에 내지 않았어요'" class="t-caption mt-2 break-keep">상황마다 한마디만 써도 등급이 나와요</p>
             </template>
             <template v-else-if="improvResult">
               <!-- 가입 전 결과와 같은 얼굴: 표정이 등급을 따른다 (quality-rules J-2) -->

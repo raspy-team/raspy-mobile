@@ -25,8 +25,10 @@
           :submitting="submitting"
           @submit="submit"
         />
+        <!-- 판이 바뀌면 새로 그린다(:key): 채점이 막힌 뒤 '처음부터 새 판'을 누르면 옛 판의 상태(셋째 상황·끝남)가 남아 버튼 없는 화면이 됐다 (11/16 검토) -->
         <ImprovPlay
           v-else-if="key === 'improv'"
+          :key="play.playId"
           :play-id="play.playId"
           :visitor-id="visitorIdNow"
           :problem="play.problem"
@@ -66,7 +68,8 @@
           <!-- 등급이 안 나온 판(셋 다 빈 답·마감 넘김)도 임기응변 틀 그대로, 할 일은 '다시 하기' 하나 -->
           <template v-if="improv?.empty">
             <p class="t-title mt-2 break-keep">{{ improv.empty }}</p>
-            <p class="t-caption mt-2 break-keep">상황마다 한마디만 써도 등급이 나와요</p>
+            <!-- 시간을 넘긴 사람은 이미 썼을 수 있다: '한마디만 써도'는 그 사람에게 틀린 말이라, 그때는 위 한 줄만 둔다 (11/16 검토) -->
+            <p v-if="improv.empty !== '시간 안에 내지 않았어요'" class="t-caption mt-2 break-keep">상황마다 한마디만 써도 등급이 나와요</p>
             <UiButton block size="lg" class="mt-5" :loading="starting" @click="again">다시 하기</UiButton>
           </template>
           <template v-else-if="improv">
@@ -101,6 +104,11 @@
             <p v-if="improv.next" class="t-label mt-3"><span class="hl">{{ improv.next }}</span></p>
             <!-- 한 판 더는 다음 목표 바로 밑 (네 화면 아래 회색 글자였다, 경로 10 훑기) -->
             <UiButton v-if="!startLimit" class="mt-4" size="sm" variant="secondary" :loading="starting" @click="again">한 판 더</UiButton>
+            <!-- 하루 판 수를 넘기면 버튼만 사라졌다: 까닭과 가입 버튼은 카드 여럿 아래, 화면 밖에 있었다. 누른 그 자리에 둔다 (11/16 검토) -->
+            <template v-else>
+              <p v-if="startError" class="t-caption text-danger mt-4 break-keep">{{ startError }}</p>
+              <UiButton class="mt-2" size="sm" @click="join('limit_join')">가입하고 계속하기</UiButton>
+            </template>
           </template>
           <template v-if="!improv">
           <UiRollNumber class="t-display tabular-nums" :value="result.score" />
@@ -147,8 +155,9 @@
 
         <UiButton v-if="key !== 'daily-chosung' && !improv && !startLimit" block variant="ghost" class="mt-2" :loading="starting" @click="again">한 판 더</UiButton>
         <!-- 하루 판 수를 넘기면 이유와 함께 가입 버튼 (가장 하고 싶은 사람이 '시작'만 되풀이하며 막혔다, 경로 3 리뷰 R5) -->
-        <p v-if="startError" class="t-caption text-danger mt-2 text-center">{{ startError }}</p>
-        <UiButton v-if="startLimit" block size="lg" class="mt-2" @click="join('limit_join')">가입하고 계속하기</UiButton>
+        <!-- 임기응변은 위 등급 카드 안('한 판 더' 자리)에 같은 안내가 있다 -->
+        <p v-if="startError && !(improv && startLimit && !improv.empty)" class="t-caption text-danger mt-2 text-center">{{ startError }}</p>
+        <UiButton v-if="startLimit && !(improv && !improv.empty)" block size="lg" class="mt-2" @click="join('limit_join')">가입하고 계속하기</UiButton>
 
         <!-- 눈치 한 판: 문제마다 정답과 몇 명 기준 -->
         <UiSection v-if="key === 'nunchi' && review" title="문제마다" class="mt-6">
@@ -535,7 +544,7 @@ const LAST_KEY = key.value === 'improv' ? 'improv_last_result' : `guest_last_${k
 const LAST_MS = 2 * 3600_000
 function saveLast() {
   try {
-    localStorage.setItem(LAST_KEY, JSON.stringify({ at: Date.now(), playId: playId.value, from: fromPlay ?? null, q: firstQuestion ?? null, result: result.value, problem: lastProblem.value, answer: lastAnswer.value }))
+    localStorage.setItem(LAST_KEY, JSON.stringify({ at: Date.now(), playId: playId.value, from: fromPlay ?? null, duel: fromDuel ?? null, q: firstQuestion ?? null, result: result.value, problem: lastProblem.value, answer: lastAnswer.value }))
   } catch {
     // 못 남기면 돌아왔을 때 처음 화면일 뿐이다
   }
@@ -546,6 +555,8 @@ function restoreLast(): boolean {
     if (!v?.result || Date.now() - v.at > LAST_MS) return false
     // 다른 도전장 링크로 왔으면 그 도전장을 풀게 한다 (같은 도전장이거나 도전장 없이 왔을 때만 되살린다)
     if (fromPlay && v.from !== fromPlay && v.playId !== fromPlay) return false
+    // 가입한 친구의 초대(?d=)도 같다: 최근에 한 판 한 사람이 친구의 링크를 누르면 제 옛 결과가 초대를 가려, 두 시간 동안 그 초대를 풀 길이 없었다 (11/16 검토)
+    if (fromDuel && v.duel !== fromDuel) return false
     // 다른 광고(?q=다른 상황)를 보고 왔으면 그 상황부터 (옛 결과가 광고 상황을 가렸다, 경로 10 리뷰 I6)
     if (firstQuestion && v.q !== firstQuestion) return false
     playId.value = v.playId

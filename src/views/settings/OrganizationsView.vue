@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-dvh bg-canvas">
-    <UiTopBar title="소속" back="/settings" />
+    <!-- 학교 대항에서 가입하며 온 사람(?back=)의 뒤로는 온 곳으로: 예전엔 설정이나 홈으로 가 방금 등급이 있는 화면에 닿지 못했다 (11/16 검토) -->
+    <UiTopBar title="소속" :back="backTo" />
 
     <main class="max-w-2xl mx-auto px-4 pt-2 pb-32 space-y-8">
       <!-- 고르기가 먼저다: 예전 첫 줄 '인증하면…'은 서류가 있어야 하는 것처럼 읽혔다 (11/13 실제 기기 한 바퀴) -->
@@ -173,6 +174,8 @@ const MAX_BYTES = 10 * 1024 * 1024
 
 const { showToast } = useToast()
 const route = useRoute()
+// 뒤로 갈 곳: 학교 대항에서 온 사람(?back=/play/improv)은 그 화면, 아니면 설정
+const backTo = typeof route.query.back === 'string' && route.query.back.startsWith('/') && !route.query.back.startsWith('//') ? route.query.back : '/settings'
 const router = useRouter()
 const mine = ref<Mine | null>(null)
 const loading = ref(true)

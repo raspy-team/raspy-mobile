@@ -176,6 +176,7 @@ const MAX_BYTES = 10 * 1024 * 1024
 const { showToast } = useToast()
 const route = useRoute()
 // 뒤로 갈 곳: 학교 대항에서 온 사람(?back=/play/improv)은 그 화면, 아니면 설정
+const cameToPick = typeof route.query.back === 'string' && isAppPath(route.query.back)
 const backTo = typeof route.query.back === 'string' && route.query.back.startsWith('/') && !route.query.back.startsWith('//') ? route.query.back : '/settings'
 const router = useRouter()
 const mine = ref<Mine | null>(null)
@@ -371,9 +372,11 @@ function sizeText(n: number) {
 const dateText = (v: string) => dayOnly(v)
 
 let off: (() => void) | undefined
-onMounted(() => {
-  load()
+onMounted(async () => {
   off = refreshOnChange(load)
+  await load()
+  // 학교를 고르러 온 사람(학교 대항에서 가입하며 옴, ?back=)은 고르는 창부터: '아직 소속이 없어요' 화면에서 '소속 고르기'를 한 번 더 눌러야 했다 (11/17)
+  if (cameToPick && mine.value && !mine.value.memberships.length && !mine.value.pending && mine.value.canRequest) openForm()
 })
 onBeforeUnmount(() => off?.())
 </script>

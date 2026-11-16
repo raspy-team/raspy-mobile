@@ -10,6 +10,8 @@
         <UiCard v-if="guestLine" class="mt-8">
           <p class="t-title">{{ guestLine }}</p>
           <p class="t-caption mt-1">시작하면 {{ guestKeep }}</p>
+          <!-- 무엇을 하려고 눌렀는지 이어서 말한다: '누가 이겼는지 보기'·'우리 학교로 참전하기'를 눌렀는데 등급 이야기만 했다 (11/16) -->
+          <p v-if="guestNext" class="t-caption text-fg mt-2">{{ guestNext }}</p>
         </UiCard>
         <UiCard v-else-if="landing" class="mt-8">
           <!-- '방금 한 판'은 손님 결과에서 바로 왔을 때만. 어제 한 판의 표시(guest_played)로 새 링크를 '방금 한 판'이라 불렀다 -->
@@ -180,6 +182,15 @@ const guestLine = (() => {
 const guestKeep = improvKeepLine(Number(guestLine.match(/(\d)등급/)?.[1] ?? 0))
 
 const returnTo = peekReturnTo()
+// 손님 결과에서 어느 버튼으로 왔나: 학교 참전(가입 뒤 학교 고르기로 간다), 초대받은 판의 승부
+const guestNext = (() => {
+  if (!guestLine) return ''
+  if (returnTo?.startsWith('/settings/organizations')) return '가입하면 바로 학교를 골라 참전해요'
+  try {
+    if (JSON.parse(localStorage.getItem('improv_last_result') || 'null')?.result?.versus) return '가입하면 누가 이겼는지 바로 보여요'
+  } catch { /* 없으면 등급 한 줄만 */ }
+  return ''
+})()
 const canOpenOutside = isAndroidUa || /kakaotalk/i.test(navigator.userAgent)
 function openOutside() {
   // 다른 브라우저는 저장소가 달라 '어디로 가던 길인지'를 모른다 (11/14: /init?from=guest만 넘겨, 새 브라우저에서는 초대도 방금 판도 없는 첫 화면이었다).

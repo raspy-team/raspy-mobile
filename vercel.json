@@ -23,7 +23,7 @@
       "destination": "https://raspy-api.fly.dev/preview/:path"
     },
     {
-      "source": "/((?!\\.well-known/).*)",
+      "source": "/((?!\\.well-known/|assets/).*)",
       "destination": "/index"
     }
   ],

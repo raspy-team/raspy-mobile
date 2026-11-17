@@ -10,7 +10,7 @@
         <span class="flex-1 t-body text-fg break-keep" v-html="s" />
       </li>
     </ol>
-    <p class="t-caption mt-4 break-keep">친구가 그 링크로 풀면 같은 상황으로 1:1이 돼요. 친구가 뭐라고 답했는지도 볼 수 있어요</p>
+    <p class="t-caption mt-4 break-keep">{{ line || '친구가 그 링크로 풀면 같은 상황으로 1:1이 돼요. 친구가 뭐라고 답했는지도 볼 수 있어요' }}</p>
     <!-- 웹은 안내까지다. 앱은 버튼 한 번에 스토리 편집기가 열리고 그림이 붙는다: 스토어에 나와 있을 때만 알린다 (11/14 고병연, utils/appStore) -->
     <a v-if="appDownloadable" :href="APP_PAGE" class="mt-4 flex items-center gap-3 rounded-xl bg-surface-2 px-4 py-3">
       <span class="flex-1 t-caption text-fg break-keep">앱에서는 버튼 한 번에 스토리가 열려요</span>
@@ -28,7 +28,8 @@ import { UiButton, UiSheet } from '../ui'
 import { inAppBrowser, hasNativeInstagram } from '@/utils/nativeBridge'
 import { appDownloadable, APP_PAGE } from '@/utils/appStore'
 
-defineProps<{ modelValue: boolean }>()
+/** line: 맨 아래 한 줄 (임기응변이 아닌 게임은 '같은 상황'이 아니다, 11/17) */
+defineProps<{ modelValue: boolean; line?: string }>()
 const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void; (e: 'go'): void }>()
 
 // 인스타 스토리 편집 화면의 실제 순서 (스티커 버튼은 위쪽 네모 웃는 얼굴)

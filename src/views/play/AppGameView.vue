@@ -236,7 +236,10 @@
             <p class="t-heading">{{ (result.myScore ?? 0) > 0 ? '문장이 올라갔어요' : '투표에 올리지 못했어요' }}</p>
             <!-- 못 올린 이유를 말한다 (경로 전부 훑기 2절): 서버 한마디 첫 줄, 없으면 흔한 이유 -->
             <p class="t-caption mt-1 break-keep">{{ (result.myScore ?? 0) > 0 ? '같은 제시어로 다른 사람이 쓰면 24시간 투표가 시작돼요' : (result.myFeedback?.split('\n')[0] || '글이 너무 짧거나 쓸 수 없는 말이 들어 있었어요') }}</p>
-            <UiButton v-if="(result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" class="mt-4" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+            <div v-if="(result.myScore ?? 0) > 0 && result.status === 'WAITING'" class="flex flex-wrap justify-center gap-2 mt-4">
+              <UiButton size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+              <UiButton v-if="waitStory && !storyFailed" size="sm" variant="secondary" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
+            </div>
           </template>
           <template v-else>
             <!-- 임기응변: 손님 결과와 같은 모양. 등급이 크게, 점수는 작게 (3-5 걷기 P6: "가입하니 점수가 커졌네") -->
@@ -307,6 +310,8 @@
             <div v-if="!improvResult || improvResult.empty" class="flex flex-wrap justify-center gap-2 mt-4">
               <UiButton v-if="result.status === 'COMPLETED' && game?.dailyLimit !== 1" size="sm" variant="secondary" icon="share" :disabled="sharingResult" @click="openShare(result.gameId)">결과 보내기</UiButton>
               <UiButton v-if="!ladderTo && (result.myScore ?? 0) > 0 && result.status === 'WAITING'" size="sm" variant="secondary" icon="share" :loading="challenging" @click="sendChallenge(result.gameId)">친구에게 도전장 보내기</UiButton>
+              <!-- 기다리는 판을 스토리로 (11/17 고병연: 임기응변만 이 순간에 스토리가 있었다). 그림을 못 찍었으면 거둔다 -->
+              <UiButton v-if="waitStory && !storyFailed" size="sm" variant="secondary" icon="instagram" :disabled="!storyFile" @click="onStory">인스타 스토리</UiButton>
             </div>
           </template>
         </UiCard>
@@ -544,7 +549,7 @@
 </template>
       </template>
     </main>
-    <StoryLinkGuide v-model="guideOpen" @go="guideGo" />
+    <StoryLinkGuide v-model="guideOpen" :line="waitStory ? '친구가 그 링크로 풀면 나와 승패가 나요' : undefined" @go="guideGo" />
     <ShareSheet v-if="sharePost" :post="sharePost" :my-id="myId" @close="sharePost = null" />
   </div>
   <SaveImageSheet :src="saveView" @close="saveView = null" />
@@ -611,8 +616,13 @@ import StoryLinkGuide, { storyGuideNeeded, storyGuideSeen } from '../../componen
 // 스토리 그림 찍기(snapdom, 압축 100KB 넘음)는 임기응변 결과가 나올 때 받는다. 모든 게임 화면에 실려 첫 화면을 늦췄다 (11/11 몸과 시간)
 let story: typeof import('@/utils/storyShare') | null = null
 let storyCard: typeof import('../../components/share/ImprovStoryCard.vue').default | null = null
+let waitCard: typeof import('../../components/share/WaitingStoryCard.vue').default | null = null
 async function loadStory() {
-  if (!story) [story, storyCard] = await Promise.all([import('@/utils/storyShare'), import('../../components/share/ImprovStoryCard.vue').then((m) => m.default)])
+  if (!story) [story, storyCard, waitCard] = await Promise.all([
+    import('@/utils/storyShare'),
+    import('../../components/share/ImprovStoryCard.vue').then((m) => m.default),
+    import('../../components/share/WaitingStoryCard.vue').then((m) => m.default),
+  ])
   return story
 }
 import { withShareRef } from '@/utils/shareRef'
@@ -1031,11 +1041,33 @@ const NOTICE = isCapacitorApp ? '알림으로 알려 드릴게요' : '알림함(
 // 로그인한 임기응변 결과의 스토리 그림 (손님 결과와 같은 그림). 누른 순간 바로 넘겨야 사파리가 공유를 막지 않아 미리 찍어 둔다
 const storyFile = ref<File | null>(null)
 const storyFailed = ref(false)
-watch(() => [result.value?.gameId, result.value?.myFeedback], async () => {
+watch(() => [result.value?.gameId, result.value?.myFeedback, result.value?.status, game.value?.title], async () => {
   storyFile.value = null
   storyFailed.value = false
   const r = improvResult.value
   const res = result.value
+  // 다른 게임: 상대를 기다리는 판 한 장 (11/17)
+  if (waitStory.value && res) {
+    const plain = isVote.value || isHero.value // 상대가 와야 판정이 나는 게임은 숫자를 싣지 않는다
+    const n = res.myScore ?? 0
+    const [unit, label] = (SCORE_NAME[key.value] ?? game.value?.scoreUnit ?? '점').split(' · ')
+    const props = {
+      title: game.value?.title ?? '한 판',
+      score: plain ? '' : String(Math.round(n * 10) / 10),
+      unit: plain ? '' : unit,
+      label: plain ? (isHero.value ? '히어로가 출전했어요' : '문장이 올라갔어요') : (label ?? ''),
+      how: isHero.value ? '같은 싸움터에 히어로를 만들면 둘이 싸워요' : isVote.value ? '같은 제시어로 쓰면 투표가 시작돼요' : '같은 문제를 풀면 승패가 나요',
+      address: key.value in GUEST_GAMES ? `matchapp.me/try/${key.value}` : 'matchapp.me',
+    }
+    try {
+      await loadStory()
+      storyFile.value = await story!.componentFile(waitCard!, props, 'dark', `match-${key.value}-${res.gameId}.png`)
+    } catch {
+      storyFile.value = null
+      storyFailed.value = true
+    }
+    return
+  }
   if (!r || r.empty || !res || res.status === 'COMPLETED') return
   const shown = improvSituations(res.problem)
   const said = improvAnswers(res.myAnswer)
@@ -1054,8 +1086,16 @@ watch(() => [result.value?.gameId, result.value?.myFeedback], async () => {
 function storyLink() {
   const r = result.value
   const mine = r?.shareKey && r.myUserId ? `d=${r.gameId}&u=${r.myUserId}&k=${r.shareKey}&` : ''
-  return withShareRef(`${window.location.origin}/try/improv?${mine}utm_source=instagram&utm_medium=story`)
+  // 가입 없이 되는 게임은 같은 문제로 바로, 아니면 도전장 화면으로 (sendChallenge의 링크와 같다)
+  if (key.value !== 'improv' && !(key.value in GUEST_GAMES) && r) return withShareRef(`${window.location.origin}/challenge/${r.gameId}?utm_source=instagram&utm_medium=story`)
+  const path = key.value in GUEST_GAMES ? key.value : 'improv'
+  return withShareRef(`${window.location.origin}/try/${path}?${mine || (key.value !== 'improv' && r ? `d=${r.gameId}&` : '')}utm_source=instagram&utm_medium=story`)
 }
+// 임기응변 말고 다른 게임의 '상대를 기다리는 판': 스토리로 올릴 수 있다
+const waitStory = computed(() => {
+  const r = result.value
+  return key.value !== 'improv' && !ladderTo && !!r && r.status === 'WAITING' && (r.myScore ?? 0) > 0
+})
 // 처음 두 번은 올리기 전에 링크 스티커 붙이는 법을 보여 준다 (11/14: 뺐다가 고병연이 되돌렸다. 읽는 사람이 적어도, 읽은 사람은 링크를 붙인다)
 const guideOpen = ref(false)
 function onStory() {
@@ -1078,6 +1118,13 @@ function shareStory() {
   const link = storyLink()
   void copyText(link)
   if (!story) return // 그림이 있으면 모듈도 이미 받았다
+  // 도전장 화면(/challenge)으로 가는 링크와 내 열쇠(u·k)가 없는 링크는 그 판을 친구 몫으로 잡아 둬야 열린다 (sendChallenge와 같다).
+  // 기다림 문구도 '친구를 기다려요'로 바뀐다
+  const res = result.value
+  if (waitStory.value && res && !(key.value in GUEST_GAMES && res.shareKey && res.myUserId)) {
+    const gameId = res.gameId
+    void POST('/api/app-games/duels/{gameId}/challenge', { path: { gameId } }).then(() => { challengeSentFor.value = gameId }, () => {})
+  }
   // 앱: 소식 공유와 같이 인스타 스토리 편집기를 바로 열고 결과 카드를 붙인다 (11/11: 임기응변 결과만 일반 공유 창이라 그림 저장으로 끝났다)
   if (hasNativeInstagram) {
     void story.openInstagramStoryNative(file, 'dark', link).then((r) => {
